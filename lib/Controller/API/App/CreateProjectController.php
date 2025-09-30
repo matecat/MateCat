@@ -2,16 +2,16 @@
 
 namespace Controller\API\App;
 
-use Controller\Traits\ScanDirectoryForConvertedFiles;
-use Utils\Tools\CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
 use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
@@ -35,6 +35,7 @@ use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -64,17 +65,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->featureSet->loadFromUserEmail( $this->user->email );
         $this->data = $this->validateTheRequest();
 
-        $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
-        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
-
-        if ( count( $arFiles ) > 1 ) {
-            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-        }
-
-        if ( empty( $this->data[ 'project_name' ] ) ) {
-            $this->data[ 'project_name' ] = $default_project_name;
-        }
-
         // SET SOURCE COOKIE
         CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->data[ 'source_lang' ],
                 [
@@ -102,7 +92,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
         $uploadDir  = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-        $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
+        $filesFound = $this->getFilesList( $fs, $this->data[ 'file_names_list' ], $uploadDir );
 
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
@@ -213,7 +203,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $project_name                  = $this->validateProjectName( $this->request->param( 'project_name' ) );
         $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -248,6 +237,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $array_keys = json_decode( $private_keys_list, true );
         $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
+        $arFiles      = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
+        $project_name = $this->validateProjectName( $this->request->param( 'project_name' ) ?? '', $arFiles );
+
         if ( !empty( $array_keys ) ) {
 
             //remove duplicates
@@ -276,7 +268,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
-                'file_name'                        => $file_name,
+                'file_names_list'                  => $arFiles,
                 'project_name'                     => $project_name,
                 'source_lang'                      => $source_lang,
                 'target_lang'                      => $target_lang,
@@ -438,17 +430,27 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
     /**
      * @param string|null $name
+     * @param array       $arrFiles
      *
      * @return string|null
      */
-    private function validateProjectName( ?string $name = null ): ?string {
+    private function validateProjectName( string $name, array $arrFiles ): ?string {
 
-        if ( empty( $name ) ) {
-            return null;
+        // treat only the actual empty string as "missing"; keep '0' as valid
+        if ( $name === '' ) {
+
+            if ( count( $arrFiles ) > 1 ) {
+                return 'MATECAT_PROJ-' . date( 'YmdHi' );
+            }
+
+            if ( count( $arrFiles ) === 1 ) {
+                return Utils::sanitizeName( AbstractFilesStorage::pathinfo_fix( $arrFiles[ 0 ], PATHINFO_FILENAME ) );
+            }
+
         }
 
-        if ( CatUtils::validateProjectName( $name ) === false ) {
-            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
+        if ( !CatUtils::validateProjectName( $name ) ) {
+            throw new InvalidArgumentException( 'Invalid project name. Symbols are not allowed in project names', -3 );
         }
 
         return $name;

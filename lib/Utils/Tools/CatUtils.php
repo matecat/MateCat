@@ -1032,7 +1032,7 @@ class CatUtils {
     }
 
     /**
-     * This functions check if the name contains any symbol
+     * This function check if the name contains any symbol
      *
      * @param $name
      *
