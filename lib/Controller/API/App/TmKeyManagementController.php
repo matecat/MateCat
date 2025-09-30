@@ -117,6 +117,14 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
         }
 
+        if(!empty($sortedKeys)){
+            $sortedKeys = array_map( function ( ClientTmKeyStruct $jobKey ) {
+                $jobKey->name = html_entity_decode( $jobKey->name );
+
+                return $jobKey;
+            }, $sortedKeys );
+        }
+
         return $sortedKeys;
     }
 

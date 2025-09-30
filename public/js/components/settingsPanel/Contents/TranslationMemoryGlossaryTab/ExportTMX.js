@@ -22,8 +22,8 @@ export const ExportTMX = ({row, onClose}) => {
   useEffect(() => {
     if (status && status.successfull) {
       const notification = {
-        title: 'Get submitted',
-        text: `You should receive the link at ${email}`,
+        title: 'Request submitted',
+        text: `You will receive the link at ${email}`,
         type: 'success',
         position: 'br',
         allowHtml: true,
