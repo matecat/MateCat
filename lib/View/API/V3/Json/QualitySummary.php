@@ -168,7 +168,7 @@ class QualitySummary {
                 'revise_issues'              => $reviseIssues,
                 'score'                      => $score,
                 'categories'                 => $categories,
-                'total_issues_weight'        => round( $total_issues_weight ),
+                'total_issues_weight'        => $total_issues_weight,
                 'total_reviewed_words_count' => $total_reviewed_words_count,
                 'passfail'                   => $passfail,
                 'total_time_to_edit'         => (int)$total_tte,

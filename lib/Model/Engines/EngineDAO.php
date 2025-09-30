@@ -396,7 +396,7 @@ class EngineDAO extends AbstractDao {
      */
     protected function _validatePrimaryKey( IDaoStruct $obj ): void {
         if ( $obj->id === null ) {
-            throw new Exception( "EnginesFactory ID required" );
+            throw new Exception( "Engine ID required" );
         }
 
         if ( $obj->uid === null ) {

@@ -58,19 +58,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
     protected $queueElement;
 
     /**
-     * @var StompFrame
-     */
-    protected $message;
-
-    /**
      * @var ContextList
      */
     protected $contextList;
-
-    /**
-     * @var AMQHandler
-     */
-    protected $amq;
 
     /**
      * @return void
@@ -88,6 +78,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
 
         //Reference Queue object
         $this->contributionStruct                       = new SetContributionRequest();
+        $this->contributionStruct->jobStruct            = new JobStruct();
         $this->contributionStruct->fromRevision         = true;
         $this->contributionStruct->id_job               = 1999999;
         $this->contributionStruct->id_file              = 1999999;
@@ -214,7 +205,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
 
         //create a stub EnginesFactory Match
         $stubEngine = @$this
-                ->getMockBuilder( '\Utils\Engines\MyMemory' )
+                ->getMockBuilder( MyMemory::class )
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
                 ->disableOriginalConstructor()
                 ->getMock();
@@ -374,6 +365,12 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
                 ->disableOriginalConstructor()
                 ->onlyMethods( [ 'getProp', 'getJobStruct' ] )
                 ->getMock();
+
+        // "Typed property Utils\Contribution\SetContributionRequest::$id_job must not be accessed before initialization"
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+
+        // "Typed property Utils\Contribution\SetContributionRequest::$id_segment must not be accessed before initialization"
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
 
         $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
         $contributionMockQueueObject->expects( $this->once() )

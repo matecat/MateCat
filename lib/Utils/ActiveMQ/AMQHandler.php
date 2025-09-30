@@ -19,11 +19,12 @@ use Stomp\StatefulStomp;
 use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
-use Utils\Logger\Log;
+use Utils\Logger\MatecatLogger;
 use Utils\Network\MultiCurlHandler;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Context;
+use Utils\TaskRunner\Commons\QueueElement;
 use Utils\Tools\Utils;
 
 class AMQHandler {
@@ -261,13 +262,9 @@ class AMQHandler {
     /**
      * @throws Exception
      */
-    public function reQueue( $failed_segment, Context $queueInfo ) {
-
-        if ( !empty( $failed_segment ) ) {
-            Log::doJsonLog( "Failed " . var_export( $failed_segment, true ) );
-            $this->publishToQueues( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
-        }
-
+    public function reQueue( QueueElement $failed_segment, Context $queueInfo, MatecatLogger $logger ) {
+        $logger->debug( "Message ReQueue. Failed.", $failed_segment->toArray() );
+        $this->publishToQueues( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
     }
 
     /**

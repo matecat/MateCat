@@ -7,7 +7,7 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class OwnerFeatureDao extends AbstractDao {
 
@@ -37,7 +37,7 @@ class OwnerFeatureDao extends AbstractDao {
                 " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
         );
 
-        Log::doJsonLog( $obj->toArray() );
+        LoggerFactory::doJsonLog( $obj->toArray() );
 
         $values = array_diff_key( $obj->toArray(), [ 'id' => null ] );
 
@@ -114,16 +114,16 @@ class OwnerFeatureDao extends AbstractDao {
      *
      * @param int $id
      *
-     * @return OwnerFeatureStruct
+     * @return ?OwnerFeatureStruct
      */
-    public static function getById( int $id ): OwnerFeatureStruct {
+    public static function getById( int $id ): ?OwnerFeatureStruct {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( " SELECT * FROM owner_features WHERE id = ? " );
         $stmt->execute( [ $id ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, OwnerFeatureStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
 }

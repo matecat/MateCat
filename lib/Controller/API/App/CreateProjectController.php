@@ -118,6 +118,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ] ?? 1;
         $projectStructure[ 'status' ]                                = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'public_tm_penalty' ]                     = $this->data[ 'public_tm_penalty' ];
         $projectStructure[ 'pretranslate_100' ]                      = $this->data[ 'pretranslate_100' ];
         $projectStructure[ 'pretranslate_101' ]                      = $this->data[ 'pretranslate_101' ];
         $projectStructure[ 'dialect_strict' ]                        = $this->data[ 'dialect_strict' ];
@@ -222,7 +223,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $due_date                      = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
         $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
         $disable_tms_engine_flag       = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
-        $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $pretranslate_100              = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_101              = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_SANITIZE_NUMBER_INT );
         $tm_prioritization             = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
@@ -233,6 +233,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $deepl_formality               = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $project_completion            = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $get_public_matches            = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
+        $public_tm_penalty             = filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_SANITIZE_NUMBER_INT );
         $character_counter_count_tags  = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode        = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $dialect_strict                = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
@@ -244,48 +245,28 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $payable_rate_template_id      = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $mt_quality_value_in_editor    = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 85, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
         $payable_rate_template         = filter_var( $this->request->param( 'payable_rate_template' ), FILTER_SANITIZE_STRING );
+        $private_keys_list             = filter_var( $this->request->param( 'private_keys_list' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
 
+        $array_keys = json_decode( $private_keys_list, true );
+        $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
-        $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
-        $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
-
-        // if a string is sent by the client, transform it into a valid array
-        if ( !empty( $private_tm_key ) ) {
-            $private_tm_key = [
-                    [
-                            'key'  => trim( $private_tm_key ),
-                            'name' => null,
-                            'r'    => true,
-                            'w'    => true
-                    ]
-            ];
-        } else {
-            $private_tm_key = [];
-        }
-
-        if ( $array_keys ) { // some keys are selected from the panel
+        if ( !empty( $array_keys ) ) {
 
             //remove duplicates
-            foreach ( $array_keys as $value ) {
-                if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
-                        && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
-                ) {
-                    //the same key was get from keyring, remove
-                    $private_tm_key = [];
-                }
-            }
+            $_array_unique = array_map( function ( $v ) {
+                return $v[ 'key' ];
+            }, $array_keys );
 
-            //merge the arrays
-            $private_keyList = array_merge( $private_tm_key, $array_keys );
-        } else {
-            $private_keyList = $private_tm_key;
+            $_array_unique = array_unique( $_array_unique );
+
+            $array_keys = array_values( array_intersect_key( $array_keys, $_array_unique ) );
+
         }
 
-        $postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
-        $mt_engine        = ( $mt_engine != null ? $mt_engine : 0 );
-        $private_tm_key   = $postPrivateTmKey;
-        $only_private     = ( !is_null( $get_public_matches ) && !$get_public_matches );
-        $due_date         = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
+        $private_tm_key = array_filter( $array_keys, [ "self", "sanitizeTmKeyArr" ] );
+        $mt_engine      = ( $mt_engine != null ? $mt_engine : 0 );
+        $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
+        $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
         $data = [
                 'file_name'                     => $file_name,
@@ -303,6 +284,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,
                 'get_public_matches'            => $get_public_matches,
+                'public_tm_penalty'             => $public_tm_penalty,
                 'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
                 'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
                 'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
@@ -314,7 +296,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
                 'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
                 'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'postPrivateTmKey'              => $postPrivateTmKey,
                 'mt_engine'                     => $mt_engine,
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
                 'private_tm_key'                => $private_tm_key,
@@ -345,6 +326,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             throw new InvalidArgumentException( "Invalid pretranslate_101 value", -6 );
         }
 
+        $data[ 'public_tm_penalty' ]                     = ( !empty( $public_tm_penalty ) ) ? $this->validatePublicTMPenalty( (int)$public_tm_penalty ) : null;
         $data[ 'source_lang' ]                           = $this->validateSourceLang( Languages::getInstance(), $data[ 'source_lang' ] );
         $data[ 'target_lang' ]                           = $this->validateTargetLangs( Languages::getInstance(), $data[ 'target_lang' ] );
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
@@ -418,6 +400,19 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return $name;
+    }
+
+    /**
+     * @param int|null $public_tm_penalty
+     *
+     * @return int|null
+     */
+    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ): ?int {
+        if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
+            throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
+        }
+
+        return $public_tm_penalty;
     }
 
     /**

@@ -594,13 +594,15 @@ class SegmentSource extends React.Component {
           onBlur: onBlurEvent,
           onDragStart: dragFragment,
           onMouseUp: () => {
-            this.setState({
-              isShowingOptionsToolbar: !this.editor._latestEditorState
-                .getSelection()
-                .isCollapsed(),
-            })
+            setTimeout(() => {
+              this.setState({
+                isShowingOptionsToolbar: !this.editor._latestEditorState
+                  .getSelection()
+                  .isCollapsed(),
+              })
 
-            this.helpAiAssistant()
+              this.helpAiAssistant()
+            })
           },
           onKeyUp: (event) => {
             if (

@@ -22,7 +22,7 @@ class ApertiumStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $description = "Apertium EnginesFactory";
+    public ?string $description = "Apertium Engine";
 
     /**
      * @var ?string

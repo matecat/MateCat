@@ -4,15 +4,20 @@ namespace Utils\AsyncTasks\Workers;
 
 use Exception;
 use Model\FeaturesBase\FeatureSet;
-use Model\Users\UserStruct;
 use Stomp\Exception\StompException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
+/**
+ * Class GlossaryWorker
+ * @package Utils\AsyncTasks\Workers
+ *
+ */
 class GlossaryWorker extends AbstractWorker {
 
     const CHECK_ACTION   = 'check';
@@ -32,30 +37,46 @@ class GlossaryWorker extends AbstractWorker {
      */
     public function process( AbstractElement $queueElement ) {
 
+        /**
+         * @var $queueElement QueueElement
+         */
         $params  = $queueElement->params->toArray();
         $action  = $params[ 'action' ];
         $payload = $params[ 'payload' ];
 
-        $allowedActions = [
-                self::CHECK_ACTION,
-                self::DELETE_ACTION,
-                self::DOMAINS_ACTION,
-                self::GET_ACTION,
-                self::SEARCH_ACTION,
-                self::SET_ACTION,
-                self::KEYS_ACTION,
-                self::UPDATE_ACTION,
-        ];
-
-        if ( false === in_array( $action, $allowedActions ) ) {
-            throw new EndQueueException( $action . ' is not an allowed action. ' );
-        }
-
         $this->_checkDatabaseConnection();
 
-        $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
+        $this->_doLog( 'GLOSSARY: ' . $action . ' action invoked with payload ' . json_encode( $payload ) );
 
-        $this->{$action}( $payload );
+        switch ( $action ) {
+            case self::CHECK_ACTION:
+                $this->check( $payload );
+                break;
+            case self::DELETE_ACTION:
+                $this->delete( $payload );
+                break;
+            case self::DOMAINS_ACTION:
+                $this->domains( $payload );
+                break;
+            case self::GET_ACTION:
+                $this->get( $payload );
+                break;
+            case self::KEYS_ACTION:
+                $this->keys( $payload );
+                break;
+            case self::SEARCH_ACTION:
+                $this->search( $payload );
+                break;
+            case self::SET_ACTION:
+                $this->set( $payload );
+                break;
+            case self::UPDATE_ACTION:
+                $this->update( $payload );
+                break;
+            default:
+                throw new EndQueueException( $action . ' is not an allowed action. ' );
+        }
+
     }
 
     /**
@@ -245,6 +266,7 @@ class GlossaryWorker extends AbstractWorker {
      * @param $payload
      *
      * @throws EndQueueException
+     * @throws Exception
      */
     private function search( $payload ) {
         $keys = [];
@@ -410,8 +432,8 @@ class GlossaryWorker extends AbstractWorker {
             }
 
             $payload[ 'term' ][ 'matching_words' ] = $matchingWordsAsArray;
-            $payload[ 'request_id' ] = $response->responseData['uuid'];
-            $message[ 'payload' ] = $payload;
+            $payload[ 'request_id' ]               = $response->responseDetails;
+            $message[ 'payload' ]                  = $payload;
         }
 
         $this->publishToNodeJsClients(
@@ -446,25 +468,12 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * @param $featuresString
-     *
-     * @return FeatureSet
-     * @throws Exception
-     */
-    private function getFeatureSetFromString( $featuresString ) {
-        $featureSet = new FeatureSet();
-        $featureSet->loadFromString( $featuresString );
-
-        return $featureSet;
-    }
-
-    /**
      * @param FeatureSet $featureSet
      *
      * @return MyMemory
      * @throws Exception
      */
-    private function getEngine( FeatureSet $featureSet ) {
+    private function getEngine( FeatureSet $featureSet ): MyMemory {
         $_TMS = EnginesFactory::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 
@@ -473,24 +482,10 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * @param $array
-     *
-     * @return UserStruct
-     */
-    private function getUser( $array ) {
-        return new UserStruct( [
-                'uid'         => $array[ 'uid' ],
-                'email'       => $array[ 'email' ],
-                '$first_name' => $array[ 'first_name' ],
-                'last_name'   => $array[ 'last_name' ],
-        ] );
-    }
-
-    /**
      * @return MyMemory
      * @throws Exception
      */
     private function getMyMemoryClient(): MyMemory {
-       return $this->getEngine( new FeatureSet() );
+        return $this->getEngine( new FeatureSet() );
     }
 }

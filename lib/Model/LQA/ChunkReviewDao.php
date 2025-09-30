@@ -102,9 +102,9 @@ class ChunkReviewDao extends AbstractDao {
     /**
      * @param int $id
      *
-     * @return ChunkReviewStruct
+     * @return ?ChunkReviewStruct
      */
-    public static function findById( int $id ): ChunkReviewStruct {
+    public static function findById( int $id ): ?ChunkReviewStruct {
         $sql  = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE id = :id ";
         $conn = Database::obtain()->getConnection();
@@ -112,7 +112,7 @@ class ChunkReviewDao extends AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
         $stmt->execute( [ 'id' => $id ] );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
 
     }
 
@@ -146,9 +146,9 @@ class ChunkReviewDao extends AbstractDao {
                 'source_page' => $source_page
         ] );
 
-        $count = $stmt->fetch();
+        $count = $stmt->fetch() ?: [];
 
-        return $count[ 0 ] == null ? 0 : $count[ 0 ];
+        return $count[ 0 ] ?? 0;
     }
 
     public function countTimeToEdit( JobStruct $chunk, $source_page ) {
@@ -383,7 +383,7 @@ class ChunkReviewDao extends AbstractDao {
                 ]
         );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**
@@ -391,9 +391,9 @@ class ChunkReviewDao extends AbstractDao {
      * @param $password
      * @param $source_page
      *
-     * @return ChunkReviewStruct
+     * @return ?ChunkReviewStruct
      */
-    public function findLastReviewByJobIdPasswordAndSourcePage( $id_job, $password, $source_page ): ChunkReviewStruct {
+    public function findLastReviewByJobIdPasswordAndSourcePage( $id_job, $password, $source_page ): ?ChunkReviewStruct {
         $sql = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE password = :password " .
                 " AND id_job = :id_job " .
@@ -410,7 +410,7 @@ class ChunkReviewDao extends AbstractDao {
                 ]
         );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**

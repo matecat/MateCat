@@ -21,7 +21,7 @@ class CategoryDao extends AbstractDao {
         $stmt->execute( [ 'id' => $id ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**

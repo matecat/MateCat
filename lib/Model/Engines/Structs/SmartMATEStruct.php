@@ -14,7 +14,7 @@ use Utils\Engines\SmartMATE;
 /**
  * Class Engine_MicrosoftHubStruct
  *
- * This class contains the default parameters for a Moses EnginesFactory CREATION
+ * This class contains the default parameters for a Moses Engine CREATION
  *
  */
 class SmartMATEStruct extends EngineStruct {
@@ -22,7 +22,7 @@ class SmartMATEStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $description = "SmartMATE EnginesFactory by Capita";
+    public ?string $description = "SmartMATE Engine by Capita";
 
     /**
      * @var ?string

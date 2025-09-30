@@ -24,6 +24,7 @@ class GetProjectsController extends KleinController {
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function fetch(): void {
 
@@ -107,7 +108,7 @@ class GetProjectsController extends KleinController {
 
         $search_status = ( !empty( $status ) and JobStatus::isAllowedStatus( $status ) ) ? $status : JobStatus::STATUS_ACTIVE;
         $page          = ( !empty( $page ) ) ? (int)$page : 1;
-        $step          = ( !empty( $step ) ) ? (int)$step : 10;
+        $step          = ( !empty( $step ) ) ? ( (int)$step <= 20 ? (int)$step : 10 ) : 10;
         $start         = ( $page - 1 ) * $step;
 
         if ( empty( $id_team ) ) {

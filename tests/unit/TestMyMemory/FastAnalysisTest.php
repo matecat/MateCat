@@ -325,7 +325,7 @@ Z;
                         'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
                         'response' => "",
                 ],
-                'responseStatus' => 0
+                'responseStatus' => 401
         ];
 
 
@@ -347,7 +347,7 @@ Z;
          * general check of the result object structure
          */
         $this->assertTrue( $result instanceof AnalyzeResponse );
-        $this->assertEquals( 0, $result->responseStatus );
+        $this->assertEquals( 401, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
         $this->assertEquals( "", $result->responseData );
         $this->assertTrue( $result->error instanceof ErrorResponse );

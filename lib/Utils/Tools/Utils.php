@@ -17,7 +17,7 @@ use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
 use Utils\Constants\Constants;
 use Utils\Constants\SourcePages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -409,7 +409,7 @@ class Utils {
 
         WorkerClient::enqueue( 'MAIL', ErrMailWorker::class, $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
-        Log::doJsonLog( 'Message has been sent' );
+        LoggerFactory::doJsonLog( 'Message has been sent' );
 
     }
 
@@ -573,7 +573,7 @@ class Utils {
                     }
                     $outcome = unlink( $fileInfo->getPathname() );
                     if ( !$outcome ) {
-                        Log::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
+                        LoggerFactory::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
                     }
                 }
             }
@@ -911,5 +911,22 @@ class Utils {
 
         return $nameString;
 
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return int|mixed
+     */
+    public static function formatStringValue( string $value = "" ) {
+        if ( is_numeric( $value ) ) {
+            return (int)$value;
+        }
+
+        if ( Utils::isJson( $value ) ) {
+            return json_decode($value);
+        }
+
+        return $value;
     }
 }

@@ -29,7 +29,7 @@ use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
@@ -102,9 +102,6 @@ class FastAnalysis extends AbstractDaemon {
 
     }
 
-    /**
-     * @throws Exception
-     */
     protected function __construct( string $configFile, ?string $contextIndex = null ) {
 
         parent::__construct();
@@ -112,8 +109,8 @@ class FastAnalysis extends AbstractDaemon {
         $this->_configFile   = $configFile;
         $this->_contextIndex = $contextIndex;
 
-        Log::resetLogger();
-        Log::setLogFileName( 'fastAnalysis.log' );
+        $this->logger = LoggerFactory::getLogger( 'fast_analysis', 'fastAnalysis.log' );
+        LoggerFactory::setAliases( [ 'engines' ], $this->logger );
 
         try {
             $this->queueHandler = new AMQHandler();
@@ -158,12 +155,12 @@ class FastAnalysis extends AbstractDaemon {
             }
 
             if ( empty( $projects_list ) ) {
-                $this->_logTimeStampedMsg( "No projects: wait 3 seconds." );
+//                $this->_logTimeStampedMsg( "No projects: wait 3 seconds." );
                 sleep( 3 );
                 continue;
             }
 
-            $this->_logTimeStampedMsg( "Projects found: " . var_export( $projects_list, true ) . "." );
+            $this->_logTimeStampedMsg( "Projects found",  $projects_list );
 
             $featureSet = new FeatureSet();
 
@@ -475,14 +472,14 @@ class FastAnalysis extends AbstractDaemon {
      */
     protected function _insertFastAnalysis(
             ProjectStruct $projectStruct,
-            string        $projectFeaturesString,
-            array         $equivalentWordMapping,
-            FeatureSet    $featureSet,
-            bool          $perform_Tms_Analysis = true,
-            ?bool         $mt_evaluation = false,
-            ?bool         $mt_qe_workflow_enabled = false,
-            ?string       $mt_qe_workflow_parameters = "",
-            ?int          $mt_quality_value_in_editor = 85
+            string $projectFeaturesString,
+            array $equivalentWordMapping,
+            FeatureSet $featureSet,
+            bool $perform_Tms_Analysis = true,
+            ?bool $mt_evaluation = false,
+            ?bool $mt_qe_workflow_enabled = false,
+            ?string $mt_qe_workflow_parameters = "",
+            ?int $mt_quality_value_in_editor = 85
     ): int {
 
         $pid               = $projectStruct->id;
@@ -543,7 +540,7 @@ class FastAnalysis extends AbstractDaemon {
 
                 } elseif ( $perform_Tms_Analysis ) {
 
-                    Log::doJsonLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
+                    LoggerFactory::doJsonLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
                     // this segment must not be sent to the TM analysis queue
                     unset( $this->segments[ $k ] );
 
@@ -707,6 +704,11 @@ class FastAnalysis extends AbstractDaemon {
                         $jobsMetadataDao   = new MetadataDao();
                         $tm_prioritization = $jobsMetadataDao->get( $id_job, $password, 'tm_prioritization', 10 * 60 );
                         $dialect_strict    = $jobsMetadataDao->get( $id_job, $password, 'dialect_strict', 10 * 60 );
+                        $public_tm_penalty = $jobsMetadataDao->get( $id_job, $password, 'public_tm_penalty', 10 * 60 );
+
+                        if ( !empty( $public_tm_penalty ) ) {
+                            $queue_element[ 'public_tm_penalty' ] = (int)$public_tm_penalty->value;
+                        }
 
                         if ( $tm_prioritization !== null ) {
                             $queue_element[ 'tm_prioritization' ] = $tm_prioritization->value == 1;
@@ -818,7 +820,7 @@ HD;
             $stmt->execute( [ $pid ] );
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
             throw $e;
         }
 

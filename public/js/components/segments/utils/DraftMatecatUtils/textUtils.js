@@ -3,7 +3,8 @@ import {
   getDefaultCharsSize,
 } from '../../../../utils/charsSizeCounterUtil'
 import TEXT_UTILS from '../../../../utils/textUtils'
-import {decodeHtmlEntities, unescapeHTMLinTags} from './tagUtils'
+import {tagSignatures} from './tagModel'
+import {decodeHtmlEntities} from './tagUtils'
 
 // export const decodeTagsToPlainText = (text) => {
 //   let decoded = ''
@@ -71,9 +72,24 @@ export const regexWordDelimiter =
   /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/
 
 export const getCharactersCounter = (value) => {
-  const cleanedContent = TEXT_UTILS.removeHiddenCharacters(
+  let cleanedContent = TEXT_UTILS.removeHiddenCharacters(
     decodeHtmlEntities(value),
   )
+  const tagToReplaceWithPlaceholder = [
+    'nbsp',
+    'tab',
+    'carriageReturn',
+    'lineFeed',
+    'splitPoint',
+  ]
+  cleanedContent = tagToReplaceWithPlaceholder.reduce((acc, cur) => {
+    const {encodedPlaceholder, placeholder} = tagSignatures[cur]
+    return acc.replace(
+      new RegExp(TEXT_UTILS.escapeRegExp(encodedPlaceholder), 'g'),
+      placeholder,
+    )
+  }, cleanedContent)
+
   const defaultCounter = charsSizeCounter.map.default ?? getDefaultCharsSize
 
   const matches = Array.isArray(charsSizeCounter.map.custom)

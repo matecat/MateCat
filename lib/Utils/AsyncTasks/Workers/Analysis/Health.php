@@ -11,7 +11,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
 use Predis\Client;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
@@ -58,7 +58,7 @@ class Health {
             return ( AppConfig::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning( $redisHandler ) && !self::tmAnalysisIsRunning( $redisHandler ) );
         } catch ( Exception $ex ) {
             $msg = "****** No REDIS instances found. ******";
-            Log::doJsonLog( $msg );
+            LoggerFactory::doJsonLog( $msg );
 
             return false;
         }

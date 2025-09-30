@@ -69,7 +69,7 @@ class EnginesFactory {
         $className = 'Utils\Engines\\' . $_className; // guess for backward compatibility
         if ( !class_exists( $className ) ) {
             if ( !class_exists( $_className ) ) {
-                throw new Exception( "EnginesFactory Class $className not Found" );
+                throw new Exception( "Engine Class $className not Found" );
             }
             $className = $_className; // use the class name as is
         }

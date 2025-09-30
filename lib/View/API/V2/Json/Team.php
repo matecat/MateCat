@@ -9,28 +9,35 @@
 namespace View\API\V2\Json;
 
 
+use Exception;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamStruct;
+use ReflectionException;
+use Utils\Redis\RedisHandler;
+use Utils\Tools\Utils;
 
 class Team {
 
-    private $data;
+    private ?array $data;
 
-    public function __construct( $data = null ) {
+    public function __construct( ?array $data = null ) {
         $this->data = $data;
     }
 
-    public function renderItem( TeamStruct $team ) {
+    /**
+     * @throws Exception
+     */
+    public function renderItem( TeamStruct $team ): array {
         $row = [
                 'id'         => (int)$team->id,
                 'name'       => $team->name,
                 'type'       => $team->type,
-                'created_at' => \Utils\Tools\Utils::api_timestamp( $team->created_at ),
-                'created_by' => (int)$team->created_by
+                'created_at' => Utils::api_timestamp( $team->created_at ),
+                'created_by' => $team->created_by
         ];
 
         $members     = $team->getMembers();
-        $invitations = ( new PendingInvitations( ( new \Utils\Redis\RedisHandler() )->getConnection(), [] ) )->hasPengingInvitation( (int)$team->id );
+        $invitations = ( new PendingInvitations( ( new RedisHandler() )->getConnection(), [] ) )->hasPengingInvitation( (int)$team->id );
 
         if ( !empty( $members ) ) {
             $memberShipFormatter = new Membership( $members );
@@ -42,7 +49,14 @@ class Team {
         return $row;
     }
 
-    public function render( $data = null ) {
+    /**
+     * @param TeamStruct[]|null $data
+     *
+     * @return array
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function render( ?array $data = null ): array {
         $out = [];
 
         if ( empty( $data ) ) {

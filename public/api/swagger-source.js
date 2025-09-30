@@ -203,6 +203,15 @@ var spec = {
             example: '{"it-IT": true, "en-US": false, "fr-FR": false}',
           },
           {
+            name: 'lara_glossaries',
+            in: 'formData',
+            description:
+              'Lara glossaries to be used for the project. Only works if a Lara engine is used.',
+            required: false,
+            type: 'string',
+            example: '["gls_xyz123"]',
+          },
+          {
             name: 'mmt_glossaries',
             in: 'formData',
             description: 'Load specific MMT glossaries',
@@ -378,7 +387,7 @@ var spec = {
           name: 'new_password',
           in: 'formData',
           description:
-            'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
+            'Use this to define the new password of the resource whose password you are changing. Ignored if "undo" is not set or set to "false", mandatory if undo is set to "true".',
           required: false,
           type: 'string',
         },
@@ -738,8 +747,8 @@ var spec = {
     '/api/v3/jobs/{id_job}/{password}/active': {
       post: {
         tags: ['Job'],
-        summary: 'Active API',
-        description: 'API to active a Job',
+        summary: 'Activate API',
+        description: 'API to activate a Job',
         parameters: [
           {
             name: 'id_job',
@@ -796,7 +805,7 @@ var spec = {
             in: 'formData',
             description:
               'The id of the job you intend to generate the Revise 2 step for',
-            required: false,
+            required: true,
             type: 'string',
           },
           {
@@ -804,7 +813,7 @@ var spec = {
             in: 'formData',
             description:
               'The password of the job you intend to generate the Revise 2 step for',
-            required: false,
+            required: true,
             type: 'string',
           },
         ],
@@ -1082,8 +1091,8 @@ var spec = {
     '/api/v3/projects/{id_project}/{password}/active': {
       post: {
         tags: ['Project'],
-        summary: 'Active API',
-        description: 'API to active a Project',
+        summary: 'Activate API',
+        description: 'API to activate a Project',
         parameters: [
           {
             name: 'id_project',
@@ -1121,21 +1130,21 @@ var spec = {
         parameters: [
           {
             name: 'id_project',
-            in: 'formData',
+            in: 'path',
             description: 'The id of the project',
             required: true,
             type: 'string',
           },
           {
             name: 'password',
-            in: 'formData',
+            in: 'path',
             description: 'The password of the project',
             required: true,
             type: 'string',
           },
           {
             name: 'id_job',
-            in: 'formData',
+            in: 'path',
             required: true,
             type: 'string',
           },
@@ -1196,7 +1205,7 @@ var spec = {
               name: 'split_values',
               in: 'formData',
               description:
-                'Number of word count values of each chunk returned in split check API',
+                'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
               type: 'array',
               items: {type: 'double'},
             },
@@ -1267,7 +1276,7 @@ var spec = {
               name: 'split_values',
               in: 'formData',
               description:
-                'Number of word count values of each chunk returned in split check API',
+                'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
               type: 'array',
               items: {type: 'double'},
             },
@@ -1483,7 +1492,7 @@ var spec = {
         description: 'Download the quality report',
         parameters: [
           {
-            name: 'idJob',
+            name: 'jid',
             in: 'formData',
             description: 'The id of the job',
             required: true,
@@ -1499,19 +1508,19 @@ var spec = {
           {
             name: 'format',
             in: 'formData',
-            description: 'The QR format (csv or json)',
-            required: true,
+            description: 'The QR format: xml, csv or json. Default value: csv',
+            required: false,
             type: 'string',
           },
           {
             name: 'segmentsPerFile',
             in: 'formData',
             description: 'The number of segments per file (max 100)',
-            required: true,
+            required: false,
             type: 'integer',
           },
         ],
-        produces: ['text/csv', 'application/json'],
+        produces: ['text/csv', 'application/json', 'application/xml'],
         responses: {
           200: {
             description: 'ok',
@@ -1617,26 +1626,27 @@ var spec = {
           {
             name: 'type',
             type: 'string',
-            in: 'fromData',
+            in: 'formData',
+            description: 'Allowed values: [general, personal]',
             required: true,
           },
           {
             name: 'name',
             type: 'string',
-            in: 'fromData',
+            in: 'formData',
             required: true,
           },
           {
             name: 'members',
             type: 'array',
-            in: 'fromData',
+            in: 'formData',
             items: {
               type: 'string',
               format: 'email',
               collectionFormat: 'multi',
             },
             description:
-              'Array of email addresses of people to invite in a project',
+              'Array of email addresses of people to invite in a project. Example: members[0][email]="john_doe@acme.com", members[1][email]="jane_smith@acme.com"',
             required: true,
           },
         ],
@@ -1730,7 +1740,7 @@ var spec = {
           {
             name: 'members',
             type: 'array',
-            in: 'fromData',
+            in: 'formData',
             items: {
               type: 'string',
               format: 'email',
@@ -1754,8 +1764,8 @@ var spec = {
     '/api/v3/teams/{id_team}/members/{id_member}': {
       delete: {
         tags: ['Teams'],
-        summary: 'List team members',
-        description: 'List team members.',
+        summary: 'Remove a specific member from a team',
+        description: 'Remove a specific member from a team.',
         parameters: [
           {
             name: 'id_team',
@@ -1768,7 +1778,7 @@ var spec = {
             type: 'integer',
             in: 'path',
             required: true,
-            description: 'Id of the user to remove from team',
+            description: 'Id of the user (uid) to remove from team',
           },
         ],
         responses: {
@@ -1795,6 +1805,25 @@ var spec = {
             type: 'integer',
             in: 'path',
             required: true,
+          },
+          {
+            in: 'query',
+            name: 'page',
+            type: 'integer',
+            required: false,
+            default: 1,
+            description:
+              'page (integer, optional) — The page number to retrieve. Defaults to 1. Use in combination with `step`  to navigate through paginated results.',
+          },
+          {
+            in: 'query',
+            name: 'step',
+            type: 'integer',
+            required: false,
+            default: 20,
+            maximum: 50,
+            description:
+              'step (integer, optional) — Number of items to include in each page of results. Defaults to 20. Maximum 50. Use in combination with `page` to navigate through paginated results.',
           },
         ],
         responses: {
@@ -2257,7 +2286,8 @@ var spec = {
             {
               name: 'password',
               in: 'formData',
-              description: 'The password of the job (Translate password)',
+              description:
+                'The password of the job (second pass review password)',
               required: true,
               type: 'string',
             },
@@ -2542,6 +2572,45 @@ var spec = {
         },
       },
     },
+    '/api/v3/xliff/{id_job}/{password}/{id_job}.zip': {
+      get: {
+        tags: ['Job', 'Files'],
+        summary: 'Download the xliff file(s)',
+        description: 'Download the xliff file(s) for a specific job',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_file',
+            in: 'path',
+            description: 'The ID of the job file',
+            required: true,
+            type: 'string',
+          },
+        ],
+        produces: ['application/zip'],
+        responses: {
+          200: {
+            description: 'OK',
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v3/jobs/{id_job}/{password}/file/{id_file}/instructions': {
       get: {
         tags: ['Job', 'Files'],
@@ -2716,7 +2785,7 @@ var spec = {
           {
             name: 'name',
             in: 'formData',
-            description: 'The file name.',
+            description: "The glossary's name",
             type: 'string',
             required: false,
           },
@@ -2730,10 +2799,44 @@ var spec = {
         ],
         responses: {
           200: {
-            description: 'Check Glossary',
+            type: 'object',
+            properties: {
+              data: {
+                type: 'object',
+                properties: {
+                  uuids: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        uuid: {
+                          type: 'string',
+                          example: '1234-5678-90ab-cdef',
+                        },
+                        name: {
+                          type: 'string',
+                          example: 'This is a glossary name',
+                        },
+                        numberOfLanguages: {
+                          type: 'integer',
+                          example: 3,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              success: {
+                type: 'boolean',
+              },
+            },
+            description: 'Upload and check a glossary file',
           },
-          default: {
+          400: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            },
           },
         },
       },
@@ -2757,7 +2860,7 @@ var spec = {
           {
             name: 'name',
             in: 'formData',
-            description: 'The file name.',
+            description: "The glossary's name.",
             type: 'string',
             required: false,
           },
@@ -2765,36 +2868,65 @@ var spec = {
             name: 'tm_key',
             in: 'formData',
             description: 'The tm key.',
-            required: false,
+            required: true,
             type: 'string',
           },
         ],
         responses: {
           200: {
-            description: 'Import Glossary',
+            type: 'object',
+            properties: {
+              data: {
+                type: 'object',
+                properties: {
+                  uuids: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        uuid: {
+                          type: 'string',
+                          example: '1234-5678-90ab-cdef',
+                        },
+                        name: {
+                          type: 'string',
+                          example: 'This is a glossary name',
+                        },
+                        numberOfLanguages: {
+                          type: 'integer',
+                          example: 3,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              success: {
+                type: 'boolean',
+              },
+            },
+            description: 'Check and import a glossary file',
           },
-          default: {
+          400: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            },
           },
         },
       },
     },
-    '/api/v3/glossaries/import/status/{tm_key}': {
+    '/api/v3/glossaries/import/status/{uuid}': {
       get: {
         summary: 'Glossary Upload status.',
         description: 'Glossary Upload status.',
         parameters: [
           {
-            name: 'tm_key',
+            name: 'uuid',
             in: 'path',
-            description: 'The tm key.',
+            description:
+              'The UUID token received from `/api/v3/glossaries/import/` api.',
             required: true,
-            type: 'string',
-          },
-          {
-            name: 'name',
-            in: 'query',
-            description: 'The file name.',
             type: 'string',
           },
         ],
@@ -2803,11 +2935,14 @@ var spec = {
           200: {
             description: 'Glossary Upload status',
             schema: {
-              $ref: '#/definitions/UploadGlossaryStatusObject',
+              $ref: '#/definitions/UploadGlossaryStatus',
             },
           },
           default: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            },
           },
         },
       },
@@ -2839,9 +2974,9 @@ var spec = {
     '/api/v3/engines/list': {
       get: {
         tags: ['Engines'],
-        summary: 'Retrieve personal engine list.',
+        summary: 'Retrieve personal MT engine list.',
         description:
-          'Retrieve personal engine list ( Google, Microsoft, etc. ).',
+          'Retrieve personal MT engine list (ModernMT, Google, Microsoft, etc.). A machine translation (MT) engine is a software tool that uses artificial intelligence, such as neural networks and natural language processing (NLP), to automatically translate text from a source language to a target language without human involvement.',
         parameters: [],
         responses: {
           200: {
@@ -2859,8 +2994,8 @@ var spec = {
     '/api/v3/create-key': {
       post: {
         tags: ['TM keys'],
-        summary: 'Create a TM key.',
-        description: 'Create a TM key.',
+        summary: 'Create (or update) a TM key.',
+        description: 'Create (or update) a TM key.',
         consumes: ['application/json'],
         parameters: [
           {
@@ -2871,6 +3006,8 @@ var spec = {
                 key: {
                   type: 'string',
                   example: '1234_xxxx',
+                  description:
+                    'In case of already existent TM key, it will be updated.',
                 },
                 name: {
                   type: 'string',
@@ -3536,7 +3673,7 @@ var spec = {
     },
     '/api/v3/filters-config-template': {
       get: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary:
           'Shows the list of filters analysis configuration models available for the currents user',
         description:
@@ -3557,7 +3694,7 @@ var spec = {
         },
       },
       post: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Creates a new filters analysis configuration model',
         description: 'Creates a new filters analysis configuration model',
         parameters: [
@@ -3586,7 +3723,7 @@ var spec = {
     },
     '/api/v3/filters-config-template/{id}': {
       get: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Shows a particular filters analysis configuration model',
         description: 'Shows a particular filters analysis configuration model',
         parameters: [
@@ -3611,7 +3748,7 @@ var spec = {
         },
       },
       delete: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Deletes a particular filters analysis configuration model',
         description:
           'Deletes a particular filters analysis configuration model',
@@ -3639,7 +3776,7 @@ var spec = {
         },
       },
       put: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Updates a particular filters analysis configuration model',
         description:
           'Updates a particular filters analysis configuration model',
@@ -3674,39 +3811,9 @@ var spec = {
         },
       },
     },
-    '/api/v3/filters-config-template/validate': {
-      post: {
-        tags: ['Filters analysis configuration'],
-        summary:
-          'Validates a filters analysis configuration model before creation',
-        description:
-          'Validates a filters analysis configuration model before creation',
-        parameters: [
-          {
-            in: 'body',
-            schema: {
-              $ref: '#/definitions/FiltersConfigSchema',
-            },
-          },
-        ],
-        responses: {
-          200: {
-            description: 'validate',
-            examples: {
-              'application/json': {
-                errors: [],
-              },
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v3/filters-config-template/schema': {
       get: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary:
           'Shows the filters analysis configuration model creation schema',
         description:
@@ -3727,7 +3834,7 @@ var spec = {
     },
     '/api/v3/xliff-config-template': {
       get: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary:
           'Shows the list of xliff analysis configuration models available for the currents user',
         description:
@@ -3748,7 +3855,7 @@ var spec = {
         },
       },
       post: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Creates a new xliff analysis configuration model',
         description: 'Creates a new xliff analysis configuration model',
         parameters: [
@@ -3777,7 +3884,7 @@ var spec = {
     },
     '/api/v3/xliff-config-template/{id}': {
       get: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Shows a particular xliff analysis configuration model',
         description: 'Shows a particular xliff analysis configuration model',
         parameters: [
@@ -3802,7 +3909,7 @@ var spec = {
         },
       },
       delete: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Deletes a particular xliff analysis configuration model',
         description: 'Deletes a particular xliff analysis configuration model',
         parameters: [
@@ -3829,7 +3936,7 @@ var spec = {
         },
       },
       put: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Updates a particular xliff analysis configuration model',
         description: 'Updates a particular xliff analysis configuration model',
         parameters: [
@@ -3863,39 +3970,9 @@ var spec = {
         },
       },
     },
-    '/api/v3/xliff-config-template/validate': {
-      post: {
-        tags: ['Xliff analysis configuration'],
-        summary:
-          'Validates a xliff analysis configuration model before creation',
-        description:
-          'Validates a xliff analysis configuration model before creation',
-        parameters: [
-          {
-            in: 'body',
-            schema: {
-              $ref: '#/definitions/XliffConfigSchema',
-            },
-          },
-        ],
-        responses: {
-          200: {
-            description: 'validate',
-            examples: {
-              'application/json': {
-                errors: [],
-              },
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v3/xliff-config-template/schema': {
       get: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Shows the xliff analysis configuration model creation schema',
         description:
           'Shows the xliff analysis configuration model creation schema',
@@ -6403,23 +6480,6 @@ var spec = {
         },
       },
     },
-    UploadGlossaryStatusObject: {
-      type: 'object',
-      properties: {
-        error: {
-          type: 'array',
-          items: {
-            type: 'object',
-          },
-        },
-        data: {
-          $ref: '#/definitions/UploadGlossaryStatus',
-        },
-        success: {
-          type: 'boolean',
-        },
-      },
-    },
     UploadGlossaryStatus: {
       type: 'object',
       properties: {
@@ -6440,7 +6500,6 @@ var spec = {
         },
       },
     },
-
     Languages: {
       type: 'array',
       items: {
@@ -6710,6 +6769,43 @@ var spec = {
     ProjectList: {
       type: 'object',
       properties: {
+        _links: {
+          type: 'object',
+          properties: {
+            base: {
+              type: 'string',
+              description: 'Base URL for the API',
+            },
+            self: {
+              type: 'string',
+              description: 'Link to the current page of projects',
+            },
+            next: {
+              type: 'string',
+              description: 'Link to the next page of projects if available',
+            },
+            prev: {
+              type: 'string',
+              description: 'Link to the previous page of projects if available',
+            },
+            page: {
+              type: 'integer',
+              description: 'The current page number',
+            },
+            step: {
+              type: 'integer',
+              description: 'Number of projects per page',
+            },
+            totals: {
+              type: 'integer',
+              description: 'Total number of projects available',
+            },
+            total_pages: {
+              type: 'integer',
+              description: 'Total number of pages of projects available',
+            },
+          },
+        },
         projects: {
           type: 'array',
           items: {
@@ -7017,27 +7113,21 @@ var spec = {
 
     Error: {
       type: 'object',
+      description:
+        'This property contains any debug data that can serve for better understanding of the error',
       properties: {
         errors: {
           type: 'array',
           items: {
             type: 'object',
             properties: {
-              code: 'integer',
-              message: 'string',
+              code: {type: 'integer'},
+              message: {type: 'string'},
             },
           },
         },
-        data: {
-          type: 'array',
-          items: {type: 'object'},
-          description:
-            'This property contains any debug data that can ' +
-            'serve for better understanding of the error',
-        },
       },
     },
-
     Split: {
       type: 'object',
       properties: {
@@ -7055,11 +7145,11 @@ var spec = {
               items: {
                 type: 'object',
                 properties: {
-                  eq_word_count: 'integer',
-                  raw_word_count: 'integer',
-                  segment_start: 'integer',
-                  segment_end: 'integer',
-                  last_opened_segment: 'integer',
+                  eq_word_count: {type: 'integer'},
+                  raw_word_count: {type: 'integer'},
+                  segment_start: {type: 'integer'},
+                  segment_end: {type: 'integer'},
+                  last_opened_segment: {type: 'integer'},
                 },
               },
             },

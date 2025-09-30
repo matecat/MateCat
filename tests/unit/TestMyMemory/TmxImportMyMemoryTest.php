@@ -23,7 +23,7 @@ use Model\Engines\Structs\EngineStruct;
 use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
-use Utils\Engines\Results\MyMemory\TmxResponse;
+use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Langs\Languages;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
@@ -45,7 +45,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
     /**
      * @covers MyMemory::importMemory
-     * @covers MyMemory::getStatus
+     * @covers MyMemory::getImportStatus
      * @covers MyMemory::createExport
      * @covers MyMemory::checkExport
      * @covers MyMemory::downloadExport
@@ -89,7 +89,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
         $result = $engine_MyMemory->importMemory( $file_param, $key_param, new UserStruct() );
 
 
-        $this->assertTrue( $result instanceof TmxResponse );
+        $this->assertTrue( $result instanceof FileImportAndStatusResponse );
         $this->assertTrue( Utils::isTokenValid( $result->id ) );
         $this->assertEquals( 202, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
@@ -110,13 +110,13 @@ class TmxImportMyMemoryTest extends AbstractTest {
         while ( ( !$ready ) && ( $time < 100 ) ) {
             usleep( 500000 );//0.5 sec
             $time++;
-            $importResult = $engine_MyMemory->getStatus( $result->id );
+            $importResult = $engine_MyMemory->getImportStatus( $result->id );
             if ( $importResult->responseData[ 'status' ] == 1 ) {
                 $ready = true;
             }
         }
 
-        $this->assertTrue( $importResult instanceof TmxResponse );
+        $this->assertTrue( $importResult instanceof FileImportAndStatusResponse );
         $this->assertTrue( Utils::isTokenValid( $importResult->id ) );
         $this->assertEquals( $importResult->id, $importResult->id );
         $this->assertEquals( 200, $importResult->responseStatus );

@@ -1,6 +1,7 @@
 <?php
 
 namespace Utils\TmKeyManagement;
+
 use DomainException;
 use JsonSerializable;
 use stdClass;
@@ -129,11 +130,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
      * @return bool
      */
     public function isEncryptedKey(): bool {
-
-        $keyLength = strlen( $this->key );
-
-        return substr( $this->key, 0, $keyLength - $this->readable_chars ) == str_repeat( "*", $keyLength - $this->readable_chars );
-
+        return strrpos( $this->key, '*' ) !== false;
     }
 
     public function isShared(): bool {

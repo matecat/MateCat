@@ -13,6 +13,7 @@ use Exception;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FilesStorage\AbstractFilesStorage;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 trait ScanDirectoryForConvertedFiles {
@@ -65,6 +66,7 @@ trait ScanDirectoryForConvertedFiles {
      * @param string $filename
      *
      * @return array
+     * @throws \ReflectionException
      */
     private function getFileMetadata( string $filename ): array {
 
@@ -76,6 +78,10 @@ trait ScanDirectoryForConvertedFiles {
 
         $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, AppConfig::$FORCE_XLIFF_CONVERSION, AppConfig::$FILTERS_ADDRESS );
 
+        $redisKey = md5($filename . "__pdfAnalysis.json");
+        $pdfAnalysis = ( new RedisHandler() )->getConnection()->get( $redisKey);
+        $pdfAnalysis = (!empty($pdfAnalysis)) ? unserialize($pdfAnalysis) : [];
+
         $metadata                      = [];
         $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
         $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
@@ -86,6 +92,7 @@ trait ScanDirectoryForConvertedFiles {
         $metadata[ 'isXliff' ]         = $isXliff;
         $metadata[ 'isGlossary' ]      = $isGlossary;
         $metadata[ 'isTMX' ]           = $isTMX;
+        $metadata[ 'pdfAnalysis' ]     = $pdfAnalysis;
         $metadata[ 'proprietary' ]     = [
                 'proprietary'            => $info[ 'proprietary' ],
                 'proprietary_name'       => $info[ 'proprietary_name' ],
