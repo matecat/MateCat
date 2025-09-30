@@ -252,16 +252,13 @@ class UpdateJobKeysController extends KleinController {
     /**
      * @param $tm_keys
      *
-     * @throws \Swaggest\JsonSchema\Exception
-     * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
     private function validateTMKeysArray( $tm_keys ) {
-        $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/job_keys.json' );
 
         $validatorObject = new JSONValidatorObject( $tm_keys );
-        $validator       = new JSONValidator( $schema );
+        $validator       = new JSONValidator( 'job_keys.json', true );;
         $validator->validate( $validatorObject );
     }
 }

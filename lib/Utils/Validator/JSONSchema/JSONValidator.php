@@ -36,10 +36,10 @@ class JSONValidator extends AbstractValidator {
      */
     public function __construct( string $jsonSchema, bool $throwExceptions = false ) {
 
-        if ( is_file( $jsonSchema ) ) {
-            $jsonSchema = file_get_contents( $jsonSchema );
-        } elseif ( is_file( AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema ) ) {
+        if ( is_file( AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema ) ) {
             $jsonSchema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema );
+        } elseif ( is_file( $jsonSchema ) ) {
+            $jsonSchema = file_get_contents( $jsonSchema );
         }
 
         $this->schemaContract  = Schema::import( static::getValidJSONSchema( $jsonSchema ), new Context( new class implements RemoteRefProvider {

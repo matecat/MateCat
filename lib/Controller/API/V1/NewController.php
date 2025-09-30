@@ -1195,10 +1195,8 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "mt_qe_workflow_template_raw_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
-
             $validatorObject = new JSONValidatorObject( $mt_qe_workflow_template_raw_parameters );
-            $validator       = new JSONValidator( $schema, true );
+            $validator       = new JSONValidator( 'mt_qe_workflow_params.json', true );
             $jsonObject      = $validator->validate( $validatorObject );
 
             /** @var JSONValidatorObject $jsonObject */

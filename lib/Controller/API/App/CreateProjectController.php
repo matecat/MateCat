@@ -600,10 +600,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
             ];
             $json  = json_encode( $json );
 
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
-
             $validatorObject = new JSONValidatorObject( $json );
-            $validator       = new JSONValidator( $schema, true );
+            $validator       = new JSONValidator( 'qa_model.json', true );
             $validator->validate( $validatorObject );
 
             $QAModelTemplateStruct = new QAModelTemplateStruct();
@@ -641,10 +639,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( !empty( $payable_rate_template ) ) {
             $json   = html_entity_decode( $payable_rate_template );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
-
             $validatorObject = new JSONValidatorObject( $json );
-            $validator       = new JSONValidator( $schema, true );
+            $validator       = new JSONValidator( 'payable_rate.json', true );
             $validator->validate( $validatorObject );
 
             $payableRateModelTemplate = new CustomPayableRateStruct();
@@ -706,13 +702,11 @@ class CreateProjectController extends AbstractStatefulKleinController {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             $json   = html_entity_decode( $filters_extraction_parameters );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-
             $validatorObject = new JSONValidatorObject( $json );
-            $validator       = new JSONValidator( $schema );
+            $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
             $validator->validate( $validatorObject );
 
-            $filters_extraction_parameters = $validatorObject->object_expected;
+            $filters_extraction_parameters = $validatorObject->getValue();
         }
 
         return $filters_extraction_parameters;
@@ -728,10 +722,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
             $json   = html_entity_decode( $xliff_parameters );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
 
             $validatorObject = new JSONValidatorObject( $json );
-            $validator       = new JSONValidator( $schema, true );
+            $validator       = new JSONValidator( 'xliff_parameters_rules_wrapper.json', true );
             $validator->validate( $validatorObject );
 
             $xliffConfigTemplate = new XliffConfigTemplateStruct();
