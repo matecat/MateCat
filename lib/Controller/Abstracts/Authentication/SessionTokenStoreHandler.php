@@ -14,7 +14,7 @@ namespace Controller\Abstracts\Authentication;
 
 use Model\DataAccess\DaoCacheTrait;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class SessionTokenStoreHandler {
 
@@ -45,12 +45,12 @@ class SessionTokenStoreHandler {
      * @return void
      */
     protected function _logCache( $type, $key, $value, $sqlQuery ) {
-        Log::doJsonLog( [
-                "type" => $type,
-                "key"  => $key,
-                "sql"  => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
+        LoggerFactory::getLogger( "login_cookie_cache" )->debug( [
+                "type"  => $type,
+                "key"   => $key,
+                "value" => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
             //"result_set" => $value,
-        ], "login_cookie_cache.log" );
+        ] );
     }
 
     /**

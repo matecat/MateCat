@@ -5,9 +5,12 @@ namespace Model\Jobs;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\TransactionalTrait;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao {
+
+    use TransactionalTrait;
 
     const TABLE = 'job_metadata';
 
@@ -108,16 +111,17 @@ class MetadataDao extends AbstractDao {
      * @param string $key
      * @param string $value
      *
-     * @return MetadataStruct
+     * @return ?MetadataStruct
      * @throws ReflectionException
      */
-    public function set( int $id_job, string $password, string $key, string $value ): MetadataStruct {
+    public function set( int $id_job, string $password, string $key, string $value ): ?MetadataStruct {
         $sql = "INSERT INTO job_metadata " .
                 " ( `id_job`, `password`, `key`, `value` ) " .
                 " VALUES " .
                 " ( :id_job, :password, :key, :value ) " .
                 " ON DUPLICATE KEY UPDATE `value` = :value ";
 
+        $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
@@ -131,7 +135,11 @@ class MetadataDao extends AbstractDao {
         $this->destroyCacheByJobAndPassword( $id_job, $password );
         $this->destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key );
 
-        return $this->get( $id_job, $password, $key );
+        $result = $this->get( $id_job, $password, $key );
+        $this->commitTransaction(); // commit only if everything went fine
+
+        return $result;
+
     }
 
     public function delete( $id_job, $password, $key ) {

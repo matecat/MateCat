@@ -95,7 +95,7 @@ class RemoteFileDao extends AbstractDao {
      *
      * @return RemoteFileStruct
      */
-    public static function getByFileAndJob( int $id_file, int $id_job ): RemoteFileStruct {
+    public static function getByFileAndJob( int $id_file, int $id_job ): ?RemoteFileStruct {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM remote_files " .
@@ -107,7 +107,7 @@ class RemoteFileDao extends AbstractDao {
         $stmt->execute( [ 'id_file' => $id_file, 'id_job' => $id_job ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, RemoteFileStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**

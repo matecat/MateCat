@@ -72,12 +72,9 @@ class WarningDao extends AbstractDao {
                 'status'   => TranslationStatus::STATUS_NEW
         ] );
 
-        $result = $stmt->fetch();
-        if ( $result ) {
-            return $result[ 'count' ];
-        } else {
-            return 0;
-        }
+        $result = $stmt->fetch() ?: [];
+        return  $result[ 'count' ] ?? 0;
+
     }
 
     protected function _buildResult( array $array_result ) {

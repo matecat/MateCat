@@ -9,7 +9,7 @@ class SegmentOriginalDataStruct extends AbstractDaoSilentStruct implements IDaoS
 
     public ?int      $id          = null;
     public int       $id_segment;
-    protected string $map;
+    protected string $map = '';
     protected array  $decoded_map = [];
     
 

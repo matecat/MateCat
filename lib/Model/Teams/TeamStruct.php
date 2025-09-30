@@ -23,7 +23,7 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @var MembershipStruct[]
      */
-    protected array $members;
+    protected array $members = [];
 
     /**
      * @param MembershipStruct[] $list

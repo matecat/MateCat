@@ -104,7 +104,7 @@ test('Render Analysis Tab', async () => {
   fireEvent.blur(mtValue)
   expect(
     contextProps.analysisTemplates.modifyingCurrentTemplate,
-  ).toBeCalledTimes(1)
+  ).toHaveBeenCalledTimes(1)
   expect(mtValue).not.toHaveClass('analysis-value-not-saved')
 })
 
@@ -129,7 +129,7 @@ test('Modify template breakdowns', async () => {
   fireEvent.blur(mtValue)
   expect(
     contextProps.analysisTemplates.modifyingCurrentTemplate,
-  ).toBeCalledTimes(1)
+  ).toHaveBeenCalledTimes(1)
 })
 
 test('Change template', async () => {

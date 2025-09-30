@@ -353,7 +353,7 @@ TAB;
                         'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
                         'response' => "",
                 ],
-                'responseStatus' => 0
+                'responseStatus' => 401
         ];
 
         $curl_params = [
@@ -391,7 +391,7 @@ TAB;
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
         $this->assertTrue( $result_object instanceof SetContributionResponse );
-        $this->assertEquals( 0, $result_object->responseStatus );
+        $this->assertEquals( 401, $result_object->responseStatus );
         $this->assertEquals( "", $result_object->responseDetails );
         $this->assertEquals( "", $result_object->responseData );
         $this->assertTrue( $result_object->error instanceof ErrorResponse );

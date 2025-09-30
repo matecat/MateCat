@@ -329,10 +329,10 @@ const executeMswServer = () => {
           ],
         })
       }),
-      http.post('/api/app/glossary/_keys', () => {
+      http.post('/api/app/mymemory/glossary/_keys', () => {
         return HttpResponse.json({})
       }),
-      http.post('/api/app/glossary/_domains', () => {
+      http.post('/api/app/mymemory/glossary/_domains', () => {
         return HttpResponse.json({})
       }),
     ],

@@ -3,12 +3,12 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessTokenValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -94,6 +94,7 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function cancel() {
         $this->changeStatus( JobStatus::STATUS_CANCELLED );
@@ -101,6 +102,7 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function archive() {
         $this->changeStatus( JobStatus::STATUS_ARCHIVED );
@@ -108,6 +110,7 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function active() {
         $this->changeStatus( JobStatus::STATUS_ACTIVE );
@@ -115,6 +118,7 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function delete() {
         $this->changeStatus( JobStatus::STATUS_DELETED );
@@ -122,6 +126,7 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     protected function changeStatus( $status ) {
 
@@ -172,7 +177,7 @@ class ProjectsController extends KleinController {
         } )
                 // Define the failure callback for the password validator.
                 ->onFailure( function ( Throwable $exception ) {
-                    if ( $exception instanceof NotFoundException ) {
+                    if ( $exception instanceof NotFoundException && !empty( $this->request->param( 'project_access_token' ) ) ) {
                         // If the project is not found, attempt validation using an access token.
                         $projectByTokenValidator = new ProjectAccessTokenValidator( $this );
                         $projectByTokenValidator->onSuccess( function () use ( $projectByTokenValidator ) {

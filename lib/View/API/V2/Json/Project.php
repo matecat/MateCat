@@ -43,12 +43,12 @@ class Project {
     protected bool $called_from_api = false;
 
     /**
-     * @var UserStruct
+     * @var ?UserStruct
      */
-    protected UserStruct $user;
+    protected ?UserStruct $user = null;
 
     /**
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct $user
      *
      * @return $this
      */

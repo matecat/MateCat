@@ -12,7 +12,7 @@ namespace Utils\TaskRunner;
 use Exception;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
@@ -56,6 +56,8 @@ class TaskManager extends AbstractDaemon {
      *
      * @param ?string $configFile
      * @param ?string $contextIndex
+     *
+     * @throws Exception
      */
     protected function __construct( string $configFile = null, string $contextIndex = null ) {
 
@@ -79,7 +81,7 @@ class TaskManager extends AbstractDaemon {
     }
 
     /**
-     * Start execution method
+     * Start the execution method
      *
      * @param array|null $args
      *
@@ -281,12 +283,12 @@ class TaskManager extends AbstractDaemon {
      * Process deletion/killing
      *
      * <ul>
-     *     <li>Kill a specific Process ID from a specific Queue when $pid and $queueInfo are passed</li>
-     *     <li>Kill a specific Process ID un unknown Queue when only $pid is passed</li>
-     *     <li>Kill a certain number of processes from a queue when $num and $queueInfo are passed</li>
-     *     <li>Kill all processes from a queue when only the $queueInfo is passed</li>
-     *     <li>Kill a number of elements equally from all queues when only $num is passed</li>
-     *     <li>Kill ALL processes when no parameters are sent</li>
+     *     <li>Kill a specific Process ID from a specific Queue when $pid and $queueInfo are passed.</li>
+     *     <li>Kill a specific Process ID un unknown Queue when only $pid is passed.</li>
+     *     <li>Kill a certain number of processes from a queue when $num and $queueInfo are passed.</li>
+     *     <li>Kill all processes from a queue when only the $queueInfo is passed.</li>
+     *     <li>Kill a number of elements equally from all queues when only $num is passed.</li>
+     *     <li>Kill ALL processes when no parameters are sent.</li>
      * </ul>
      *
      * @param ?Context $queueInfo
@@ -446,7 +448,7 @@ class TaskManager extends AbstractDaemon {
     protected function _updateConfiguration(): void {
 
         $configuration = $this->getConfiguration();
-        Log::setLogFileName( $configuration->getLoggerName() );
+        $this->logger  = LoggerFactory::getLogger( 'task_manager', $configuration->getLoggerName() );
 
         if ( empty( $this->_queueContextList->list ) ) {
 

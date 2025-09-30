@@ -18,9 +18,9 @@ use SplFileObject;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT\MMTServiceApi;
 use Utils\Engines\MMT\MMTServiceApiException;
+use Utils\Engines\MMT\MMTServiceApiRequestException;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 
@@ -68,7 +68,7 @@ class MMT extends AbstractEngine {
         parent::__construct( $engineRecord );
 
         if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
-            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
         if ( isset( $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) && $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) {
@@ -213,7 +213,7 @@ class MMT extends AbstractEngine {
             $client->addToMemoryContent( $_keys, $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $_config[ 'translation' ], $_config[ 'session' ] );
         } catch ( MMTServiceApiRequestException $e ) {
             // MMT license expired/changed (401) or account deleted (403) or whatever HTTP exception
-            Log::doJsonLog( $e->getMessage() );
+            $this->logger->debug( $e->getMessage() );
 
             return true;
         } catch ( Exception $e ) {
@@ -356,8 +356,8 @@ class MMT extends AbstractEngine {
                 Database::obtain()->commit();
 
             } catch ( Exception $e ) {
-                Log::doJsonLog( $e->getMessage() );
-                Log::doJsonLog( $e->getTraceAsString() );
+                $this->logger->debug( $e->getMessage() );
+                $this->logger->debug( $e->getTraceAsString() );
             } finally {
                 unset( $tmpFileObject );
                 @unlink( $tmp_name );
@@ -402,8 +402,8 @@ class MMT extends AbstractEngine {
 
             }
         } catch ( Exception $e ) {
-            Log::doJsonLog( $e->getMessage() );
-            Log::doJsonLog( $e->getTraceAsString() );
+            $this->logger->debug( $e->getMessage() );
+            $this->logger->debug( $e->getTraceAsString() );
         }
 
     }

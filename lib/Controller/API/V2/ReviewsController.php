@@ -30,9 +30,9 @@ class ReviewsController extends KleinController {
     protected int $nextSourcePage;
 
     /**
-     * @var ChunkReviewStruct
+     * @var ChunkReviewStruct|null
      */
-    protected ChunkReviewStruct $latestChunkReview;
+    protected ?ChunkReviewStruct $latestChunkReview = null;
 
     /**
      * @throws Exception
@@ -122,7 +122,7 @@ class ReviewsController extends KleinController {
         $this->nextSourcePage    = $revision_number + 1;
         $this->latestChunkReview = $chunkReviewDao->findLastReviewByJobIdPasswordAndSourcePage( $id_job, $password, $revision_number );
 
-        if ( $this->latestChunkReview->id_project != $this->project->id ) {
+        if ( $this->latestChunkReview && $this->latestChunkReview->id_project != $this->project->id ) {
             throw new ValidationError( "Job id / password combination is not in projects list" );
         }
 

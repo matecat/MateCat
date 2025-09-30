@@ -9,7 +9,7 @@ use Model\FeaturesBase\FeatureSet;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 
-class MyMemoryController extends KleinController {
+class MyMemoryEntryStatusController extends KleinController {
 
     /**
      * @return void

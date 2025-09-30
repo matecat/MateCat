@@ -3,20 +3,22 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
+use Exception;
 use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
-use Swaggest\JsonSchema\Exception;
+use Swaggest\JsonSchema\Exception as JsonSchemaException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\Tools\CatUtils;
-use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -39,12 +41,12 @@ class GlossaryController extends KleinController {
     /**
      * Glossary check action
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function check() {
         $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/check.json';
@@ -74,12 +76,12 @@ class GlossaryController extends KleinController {
     /**
      * Delete action on Match
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/delete.json';
@@ -100,12 +102,12 @@ class GlossaryController extends KleinController {
     /**
      * Get the domains from Match
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function domains() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/domains.json';
@@ -124,12 +126,12 @@ class GlossaryController extends KleinController {
     /**
      * Get action on Match
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function get() {
         $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/get.json';
@@ -149,12 +151,12 @@ class GlossaryController extends KleinController {
     /**
      * Retrieve from Match the information if keys have at least one glossary associated
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function keys() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/keys.json';
@@ -180,12 +182,12 @@ class GlossaryController extends KleinController {
     /**
      * Search for a specific sentence in Match
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function search() {
         $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/search.json';
@@ -205,12 +207,12 @@ class GlossaryController extends KleinController {
     /**
      * Set action on Match
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function set() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/set.json';
@@ -236,12 +238,12 @@ class GlossaryController extends KleinController {
     /**
      * Update action on Match
      *
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     public function update() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/update.json';
@@ -268,7 +270,7 @@ class GlossaryController extends KleinController {
      * @return array
      * @throws InvalidValue
      * @throws ReflectionException
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
@@ -362,6 +364,8 @@ class GlossaryController extends KleinController {
     /**
      * @param array               $keys
      * @param ClientTmKeyStruct[] $userKeys
+     *
+     * @throws Exception
      */
     private function checkWritePermissions( array $keys, array $userKeys ) {
         $allowedKeys = [];
@@ -375,34 +379,24 @@ class GlossaryController extends KleinController {
 
             // check if $key is allowed
             if ( !in_array( $key, $allowedKeys ) ) {
-                $this->response->code( 500 );
-                $this->response->json( [
-                        'error' => "Key " . $key . " does not belong to this job"
-                ] );
-                die();
+                throw new NotFoundException( "Key " . $key . " does not belong to this job" );
             }
 
             // check key permissions
-            $keyIsUse = array_filter( $userKeys, function ( ClientTmKeyStruct $userKey ) use ( $key ) {
-                return $userKey->key === $key;
-            } )[ 0 ];
+            $keyIsUse = array_values(
+                    array_filter( $userKeys, function ( ClientTmKeyStruct $userKey ) use ( $key ) {
+                        return $userKey->key === $key;
+                    } )
+            )[ 0 ];
 
             // is a glossary key?
             if ( $keyIsUse->glos === false ) {
-                $this->response->code( 500 );
-                $this->response->json( [
-                        'error' => "Key " . $key . " is not a glossary key"
-                ] );
-                die();
+                throw new NotFoundException( "Key " . $key . " is not a glossary key" );
             }
 
             // write permissions?
             if ( $keyIsUse->edit === false || empty( $keyIsUse->w ) ) {
-                $this->response->code( 500 );
-                $this->response->json( [
-                        'error' => "Key " . $key . " has not write permissions"
-                ] );
-                die();
+                throw new AuthorizationError( "Key " . $key . " has not write permissions" );
             }
         }
     }
@@ -412,7 +406,7 @@ class GlossaryController extends KleinController {
      * @param $jsonSchema
      *
      * @throws InvalidValue
-     * @throws Exception
+     * @throws JsonSchemaException
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
@@ -424,28 +418,20 @@ class GlossaryController extends KleinController {
         $validator->validate( $validatorObject );
 
         if ( !$validator->isValid() ) {
-
             $error = $validator->getExceptions()[ 0 ]->error;
-
-            $this->response->code( 400 );
-            $this->response->json( [
-                    'error' => $error->getMessage()
-            ] );
-            die();
+            throw new JSONValidatorException( $error->getMessage() );
         }
     }
 
     /**
      * @param $language
+     *
+     * @throws ValidationError
      */
     private function validateLanguage( $language ) {
         $languages = Languages::getInstance();
         if ( !$languages->isValidLanguage( $language ) ) {
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => $language . ' is not an allowed language'
-            ] );
-            die();
+            throw new ValidationError( $language . ' is not a valid language' );
         }
     }
 
@@ -455,18 +441,9 @@ class GlossaryController extends KleinController {
      * @param $queue
      * @param $params
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function enqueueWorker( $queue, $params ) {
-        try {
-            WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( \Exception $e ) {
-            # Handle the error, logging, ...
-            $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
-            $output .= "{$e->getMessage()}";
-            $output .= var_export( $params, true );
-            Log::doJsonLog( $output );
-            Utils::sendErrMailReport( $output );
-        }
+        WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
     }
 }

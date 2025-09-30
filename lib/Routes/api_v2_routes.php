@@ -79,7 +79,7 @@ $klein->with( '/api/v2/glossaries', function () {
 
     route( '/check/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'check' ] );
     route( '/import/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'import' ] );
-    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'uploadStatus' ] );
+    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'importStatus' ] );
     route( '/export/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'download' ] );
 
 } );
@@ -103,7 +103,6 @@ $klein->with( '/api/v2/teams', function () {
     route( '/[i:id_team]/projects/[i:id_project]', 'PUT', [ 'Controller\API\V2\TeamsProjectsController', 'update' ] );
     route( '/[i:id_team]/projects/[i:id_project]', 'GET', [ 'Controller\API\V2\TeamsProjectsController', 'get' ] );
     route( '/[i:id_team]/projects/[:project_name]', 'GET', [ 'Controller\API\V2\TeamsProjectsController', 'getByName' ] );
-    route( '/[i:id_team]/projects', 'GET', [ '\Controller\API\V2\TeamsProjectsController', 'getAll' ] );
 
 } );
 

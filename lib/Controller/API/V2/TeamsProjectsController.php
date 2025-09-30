@@ -20,9 +20,9 @@ use Exception;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ManageModel;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectModel;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
-use Projects\ProjectModel;
 use ReflectionException;
 use View\API\V2\Json\Project;
 
@@ -124,22 +124,6 @@ class TeamsProjectsController extends KleinController {
         }
 
         $this->response->json( [ 'projects' => $projects ] );
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function getAll() {
-
-        $this->featureSet->loadFromUserEmail( $this->user->email );
-
-        /** @var ProjectStruct[] $projectsList */
-        $projectsList = ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
-
-        $projectsList = ( new Project( $projectsList ) )->render();
-        $this->response->json( [ 'projects' => $projectsList ] );
-
     }
 
     public function setTeam( $team ) {

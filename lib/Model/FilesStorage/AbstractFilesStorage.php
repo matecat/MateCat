@@ -6,7 +6,8 @@ use DirectoryIterator;
 use Exception;
 use Model\DataAccess\Database;
 use PDO;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
@@ -31,26 +32,13 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     protected string $cacheDir;
     protected string $zipDir;
 
+    protected ?MatecatLogger $logger;
+
     /**
-     * @param string|null $files
-     * @param string|null $cache
      * @param string|null $zip
      */
-    public function __construct( ?string $files = null, ?string $cache = null, ?string $zip = null ) {
-
-        //override default config
-        if ( $files ) {
-            $this->filesDir = $files;
-        } else {
-            $this->filesDir = AppConfig::$FILES_REPOSITORY;
-        }
-
-        if ( $cache ) {
-            $this->cacheDir = $cache;
-        } else {
-            $this->cacheDir = AppConfig::$CACHE_REPOSITORY;
-        }
-
+    public function __construct( ?string $zip = null ) {
+        $this->logger = LoggerFactory::getLogger( 'files' );
         if ( $zip ) {
             $this->zipDir = $zip;
         } else {
@@ -148,7 +136,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             $files = new DirectoryIterator( $path );
         } catch ( Exception $e ) {
             //directory does not exist
-            Log::doJsonLog( "Directory $path does not exists. If you are creating a project check the source language." );
+            LoggerFactory::doJsonLog( "Directory $path does not exists. If you are creating a project check the source language." );
         }
 
         foreach ( $files as $file ) {
@@ -203,7 +191,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
                     stripos( $fileInfo->getFilename(), $shaSum ) !== false ) {
 
                 unlink( $fileInfo->getPathname() );
-                Log::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
+                LoggerFactory::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
 
                 return true;
             }

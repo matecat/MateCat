@@ -7,8 +7,6 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
-use Engines\MMT\MMTServiceApi;
-use Engines\MMT\MMTServiceApiException;
 use Exception;
 use InvalidArgumentException;
 use Lara\LaraException;
@@ -32,6 +30,8 @@ use RuntimeException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
+use Utils\Engines\MMT\MMTServiceApi;
+use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -60,15 +60,15 @@ class EngineController extends KleinController {
         $provider   = $request[ 'provider' ];
 
         if ( empty( $name ) ) {
-            throw new InvalidArgumentException( "EnginesFactory name required", -6 );
+            throw new InvalidArgumentException( "Engine name required", -6 );
         }
 
         if ( empty( $engineData ) ) {
-            throw new InvalidArgumentException( "EnginesFactory data required", -7 );
+            throw new InvalidArgumentException( "Engine data required", -7 );
         }
 
         if ( empty( $provider ) ) {
-            throw new InvalidArgumentException( "EnginesFactory provider required", -8 );
+            throw new InvalidArgumentException( "Engine provider required", -8 );
         }
 
         $validEngine = true;
@@ -214,7 +214,7 @@ class EngineController extends KleinController {
         }
 
         if ( !$validEngine ) {
-            throw new DomainException( "EnginesFactory not allowed", -4 );
+            throw new DomainException( "Engine not allowed", -4 );
         }
 
         $engineList      = EngineConstants::getAvailableEnginesList();
@@ -394,7 +394,7 @@ class EngineController extends KleinController {
         $id      = $request[ 'id' ];
 
         if ( empty( $id ) ) {
-            throw new InvalidArgumentException( "EnginesFactory id required", -5 );
+            throw new InvalidArgumentException( "Engine id required", -5 );
         }
 
         $engineToBeDeleted      = EngineStruct::getStruct();

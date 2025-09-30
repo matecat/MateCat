@@ -19,7 +19,6 @@ use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Predis\PredisException;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
@@ -149,6 +148,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
      * @param SignupModel $signupModel
      *
      * @return array
+     * @throws Exception
      */
     private function doForgotPassword( SignupModel $signupModel ): array {
 
@@ -180,16 +180,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
         }
 
         if ( empty( $errors ) ) {
-            try {
-
-                if ( !$signupModel->forgotPassword() ) {
-                    Log::doJsonLog( 'Failed attempt to recover password with email ' . $email );
-                }
-
-            } catch ( Exception $exception ) {
-                $errors[] = 'Error updating database.';
-                $code     = $exception->getCode() > 0 ? $exception->getCode() : 500;
-            }
+            $signupModel->forgotPassword();
         }
 
         return [

@@ -11,7 +11,7 @@ namespace Utils\Email;
 use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\MailWorker;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 
 abstract class AbstractEmail {
@@ -61,7 +61,7 @@ abstract class AbstractEmail {
                 [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
         );
 
-        Log::doJsonLog( 'Message has been sent' );
+        LoggerFactory::doJsonLog( 'Message has been sent' );
     }
 
     /**

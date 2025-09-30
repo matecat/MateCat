@@ -14,7 +14,7 @@ use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 class GetTagProjectionController extends KleinController {
@@ -29,8 +29,6 @@ class GetTagProjectionController extends KleinController {
      * @throws Exception
      */
     public function call(): void {
-
-        Log::setLogFileName( 'tagProjection.log' );
 
         $request   = $this->validateTheRequest();
         $jobStruct = ChunkDao::getByIdAndPassword( $request[ 'id_job' ], $request[ 'password' ] );
@@ -58,7 +56,7 @@ class GetTagProjectionController extends KleinController {
 
         if ( !empty( $result->error ) ) {
 
-            $this->logTagProjection(
+            LoggerFactory::getLogger( 'tag_projection' )->debug(
                     [
                             'request' => $config,
                             'error'   => $result->error
@@ -119,7 +117,7 @@ class GetTagProjectionController extends KleinController {
 
         if ( empty( $id_job ) ) {
             $msg = "\n\n Critical. Quit. \n\n " . var_export( $_POST, true );
-            $this->log( $msg );
+            $this->logger->debug( $msg );
             Utils::sendErrMailReport( $msg );
 
             throw new InvalidArgumentException( "id_job not valid", -4 );
@@ -137,16 +135,4 @@ class GetTagProjectionController extends KleinController {
         ];
     }
 
-
-    /**
-     * @param      $data
-     * @param null $msg
-     */
-    private function logTagProjection( $data, $msg = null ) {
-        if ( !$msg ) {
-            Log::doJsonLog( $data );
-        } else {
-            Log::doJsonLog( $msg );
-        }
-    }
 }
