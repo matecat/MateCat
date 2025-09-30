@@ -126,11 +126,13 @@
     }
 
     .confirm-button {
+      height: 26px;
       font-size: 14px !important;
       min-width: unset;
       gap: 5px !important;
-      margin: 0 !important;
+      border-radius: unset;
       padding: 0 8px;
+      display: flex;
     }
 
     .close-button {

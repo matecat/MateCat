@@ -18,7 +18,7 @@ use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
 use Plugins\Features\RevisionFactory;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class BatchReviewProcessor {
 
@@ -92,7 +92,7 @@ class BatchReviewProcessor {
             ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $project );
             $chunkReviews[] = $chunkReview;
 
-            Log::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id );
+            LoggerFactory::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id );
 
             $alertEmail = new BatchReviewProcessorAlertEmail( $this->chunk, $chunkReview );
             $alertEmail->send();

@@ -204,8 +204,8 @@ export const ModifyTeam = ({team}) => {
   const saveTeamName = () => {
     if (teamName && teamName != teamState.get('name')) {
       ManageActions.changeTeamName(teamState.toJS(), teamName)
-      setIsModifyingName(false)
     }
+    setIsModifyingName(false)
   }
 
   const onChangeSearchMember = (event) => {

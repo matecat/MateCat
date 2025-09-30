@@ -31,9 +31,9 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     public ?int    $id_engine_tm         = null;
     public ?int    $id_engine_mt         = null;
     public string  $status_analysis;
-    public ?int    $fast_analysis_wc     = 0;
-    public ?int    $standard_analysis_wc = 0;
-    public ?int    $tm_analysis_wc       = 0;
+    public ?float  $fast_analysis_wc     = 0;
+    public ?float  $standard_analysis_wc = 0;
+    public ?float  $tm_analysis_wc       = 0;
     public string  $remote_ip_address;
     public ?int    $instance_id          = 0;
     public ?int    $pretranslate_100     = 0;

@@ -23,7 +23,6 @@ use Utils\ActiveMQ\AMQHandler;
 use Utils\Email\CommentEmail;
 use Utils\Email\CommentMentionEmail;
 use Utils\Email\CommentResolveEmail;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\JobUrlBuilder;
@@ -523,7 +522,6 @@ class CommentController extends KleinController {
             ] );
         }
 
-        Log::doJsonLog( $url );
         $project_data = $this->projectData( $job->id_project );
 
         foreach ( $users_mentioned as $user_mentioned ) {

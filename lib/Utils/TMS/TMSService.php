@@ -17,6 +17,7 @@ use Model\TMSService\TMSServiceDao;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use SplFileInfo;
 use SplTempFileObject;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
@@ -24,7 +25,8 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -45,7 +47,8 @@ class TMSService {
      */
     protected MyMemory $mymemory_engine;
 
-    private string $output_type;
+    private string          $output_type;
+    protected MatecatLogger $logger;
 
     /**
      *
@@ -53,7 +56,7 @@ class TMSService {
      *
      * @throws Exception
      */
-    public function __construct( FeatureSet $featureSet = null ) {
+    public function __construct( ?FeatureSet $featureSet = null ) {
 
         //get Match service
         /** @var $mymemory_engine MyMemory */
@@ -66,6 +69,13 @@ class TMSService {
             $featureSet = new FeatureSet();
         }
         $this->featureSet = $featureSet;
+
+        /**
+         * Set the initial value to a specific log file, if not already initialized by the Executor.
+         * This is useful when engines are used outside the TaskRunner context
+         * @see \Utils\TaskRunner\Executor::__construct()
+         */
+        $this->logger = LoggerFactory::getLogger( 'engines' );
 
     }
 
@@ -92,7 +102,7 @@ class TMSService {
         } catch ( Exception $e ) {
 
             /* PROVIDED KEY IS NOT VALID OR WRONG, Key IS NOT SET */
-            Log::doJsonLog( $e->getMessage() );
+            $this->logger->debug( $e->getMessage() );
             throw $e;
 
         }
@@ -142,7 +152,7 @@ class TMSService {
 
             $this->checkCorrectKey( $file->getTmKey() );
 
-            Log::doJsonLog( $file );
+            $this->logger->debug( $file );
 
             $importStatus = $this->mymemory_engine->importMemory(
                     $file->getFilePath(),
@@ -182,7 +192,7 @@ class TMSService {
                         if ( !empty( $ownerMmtEngineMetaData ) ) {
                             $engine = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
 
-                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
+                            $this->logger->debug( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
                             $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
 
                         }
@@ -191,7 +201,7 @@ class TMSService {
                 } catch ( Exception $e ) {
                     if ( $engineName != EngineConstants::MY_MEMORY ) {
                         //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
-                        Log::doJsonLog( $e->getMessage() );
+                        $this->logger->debug( $e->getMessage() );
                         $engineName = explode( "\\", $engineName );
                         $engineName = end( $engineName );
                         $warnings[] = [ 'engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName() ];
@@ -220,7 +230,7 @@ class TMSService {
 
         $this->checkCorrectKey( $file->getTmKey() );
 
-        Log::doJsonLog( $file );
+        $this->logger->debug( $file );
 
         $importStatus = $this->mymemory_engine->glossaryImport(
                 $file->getFilePath(),
@@ -261,8 +271,8 @@ class TMSService {
         $allMemories = $this->mymemory_engine->getImportStatus( $uuid );
 
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
-            Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
-            //what the hell? No memories although I've just loaded some? Eject!
+            $this->logger->debug( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
+            //what the hell? No memories, although I've just loaded some? Eject!
             throw new Exception( "Error response from TMX status check", -15 );
         }
 
@@ -271,13 +281,13 @@ class TMSService {
             case "-1":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
+                $this->logger->debug( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
+                $this->logger->debug( "\"" . $this->name . "\" has been loaded into MyMemory" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = true;
                 break;
@@ -346,7 +356,7 @@ class TMSService {
     }
 
     /**
-     * Send a mail with link for direct prepared download
+     * Send mail with a link for direct prepared download
      *
      * @param string $userMail
      * @param string $userName
@@ -384,7 +394,7 @@ class TMSService {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function exportJobAsTMX( int $jid, string $jPassword, string $sourceLang, string $targetLang, int $uid = null ): SplTempFileObject {
+    public function exportJobAsTMX( int $jid, string $jPassword, string $sourceLang, string $targetLang, int $uid = null ): SplFileInfo {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
@@ -406,7 +416,7 @@ class TMSService {
 
         /*
          * This is a feature for Xbench compatibility
-         * in case of mt and tm ( OmegaT set this flg to false )
+         * in the case of mt and tm (OmegaT set this flg to false)
          */
         $hideUnconfirmedRows = true;
 
@@ -431,8 +441,8 @@ class TMSService {
         foreach ( $result as $k => $row ) {
 
             /**
-             * evaluate the incremental chunk index.
-             * If there's more than 1 chunk, add a 'id_chunk' prop to the segment
+             * Evaluate the incremental chunk index.
+             * If there's more than 1 chunk, add an 'id_chunk' prop to the segment
              */
             $idChunk         = 1;
             $chunkPropString = '';
@@ -476,7 +486,7 @@ class TMSService {
             <seg>' . $Filter->fromLayer0ToRawXliff( $row[ 'segment' ] ) . '</seg>
         </tuv>';
 
-            //if segment is confirmed or we want show all segments
+            //if the segment is confirmed, or we want to show all the segments
             if ( in_array( $row[ 'status' ],
                             [
                                     TranslationStatus::STATUS_TRANSLATED,

@@ -121,7 +121,8 @@ class GetSegmentsController extends KleinController {
             );
 
             $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] )
+            // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
+                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] ) ?? ''  // use the null coalescing operator
             );
 
             $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
@@ -185,9 +186,22 @@ class GetSegmentsController extends KleinController {
     /**
      * @param SegmentUIStruct $segment
      * @param array           $segment_notes
+     *
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws \Model\Exceptions\NotFoundException
      */
     private function attachNotes( SegmentUIStruct &$segment, array $segment_notes ) {
-        $segment[ 'notes' ] = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
+
+        $notes = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
+
+        if ( is_array( $notes ) ) {
+            $notes = $this->featureSet->filter( 'prepareNotesForRendering', $notes );
+        }
+
+        $segment[ 'notes' ] = $notes;
     }
 
     /**

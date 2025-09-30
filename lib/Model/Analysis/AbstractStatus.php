@@ -8,6 +8,7 @@ use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
@@ -186,7 +187,7 @@ abstract class AbstractStatus {
         foreach ( $this->_resultSet as $segInfo ) {
 
             if ( $project->getSummary()->getTotalFastAnalysis() == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
-                $project->getSummary()->setTotalFastAnalysis( $segInfo[ 'fast_analysis_wc' ] );
+                $project->getSummary()->setTotalFastAnalysis( (int)$segInfo[ 'fast_analysis_wc' ] );
             }
 
             /*
@@ -215,7 +216,8 @@ abstract class AbstractStatus {
             if ( !isset( $file ) || $file->getId() != $segInfo[ 'id_file' ] || !$chunk->hasFile( $segInfo[ 'id_file' ] ) ) {
                 $originalFile = ( !empty( $segInfo[ 'tag_key' ] ) and $segInfo[ 'tag_key' ] === 'original' ) ? $segInfo[ 'tag_value' ] : $segInfo[ 'filename' ];
                 $id_file_part = ( !empty( $segInfo[ 'id_file_part' ] ) ) ? (int)$segInfo[ 'id_file_part' ] : null;
-                $file         = new AnalysisFile( $segInfo[ 'id_file' ], $id_file_part, $segInfo[ 'filename' ], $originalFile, $matchConstantsClass );
+                $metadata     = ( new FileMetadataDao() )->getByJobIdProjectAndIdFile( (int)$this->_project_data[ 0 ][ 'pid' ], $segInfo[ 'id_file' ], 60 * 5 );
+                $file         = new AnalysisFile( $segInfo[ 'id_file' ], $id_file_part, $segInfo[ 'filename' ], $originalFile, $matchConstantsClass, $metadata );
                 $chunk->setFile( $file );
             }
             // Runtime Initialization Completed

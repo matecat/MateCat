@@ -16,7 +16,6 @@ use InvalidArgumentException;
 use Klein\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
-use Utils\Logger\Log;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
 use Utils\Validator\Contracts\ValidatorObject;
@@ -251,7 +250,6 @@ class GlossaryFilesController extends KleinController {
 
                 $oldPath             = $fileInfo->file_path;
                 $fileInfo->file_path = $tmpFileName;
-                Log::doJsonLog( "Originally uploaded File path: " . $oldPath . " - Override: " . $fileInfo->file_path );
 
                 unlink( $oldPath );
 

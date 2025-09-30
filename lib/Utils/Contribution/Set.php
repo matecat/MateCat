@@ -14,7 +14,7 @@ use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\SetContributionMTWorker;
 use Utils\AsyncTasks\Workers\SetContributionWorker;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Class Set
@@ -38,7 +38,7 @@ class Set {
             $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $contribution, true );
-            Log::doJsonLog( $output );
+            LoggerFactory::doJsonLog( $output );
             throw $e;
 
         }
@@ -62,7 +62,7 @@ class Set {
             $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $contribution, true );
-            Log::doJsonLog( $output );
+            LoggerFactory::doJsonLog( $output );
             throw $e;
 
         }

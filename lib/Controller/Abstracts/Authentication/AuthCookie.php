@@ -6,7 +6,7 @@ use DomainException;
 use Model\Users\UserStruct;
 use ReflectionException;
 use UnexpectedValueException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 
@@ -55,42 +55,36 @@ class AuthCookie {
      * @param bool|null                $isALoginCookieRevamp     Indicates if this is a login cookie revamp.
      *
      * @return void
+     * @throws ReflectionException
      */
     public static function setCredentials( UserStruct $user, SessionTokenStoreHandler $sessionTokenStoreHandler, ?bool $isALoginCookieRevamp = false ): void {
 
         // Generate a new signed authentication cookie and its expiration date.
         [ $new_cookie_data, $new_expire_date ] = static::generateSignedAuthCookie( $user );
 
-        try {
+        if ( $isALoginCookieRevamp ) {
 
-            if ( $isALoginCookieRevamp ) {
+            // If this is a login cookie revamp, this ensures that the session is valid and still active.
+            // This prevents the cookie from expiring while the session is still valid.
 
-                // If this is a login cookie revamp, this ensures that the session is valid and still active.
-                // This prevents the cookie from expiring while the session is still valid.
+            // Retrieve the current credentials from the JWT token to check validity.
+            $payload = self::getCredentials();
 
-                // Retrieve the current credentials from the JWT token to check validity.
-                $payload = self::getCredentials();
-
-                // If the payload is invalid (expired), generate a new token and set the new cookie.
-                if ( empty( $payload ) || empty( $payload[ 'user' ][ 'uid' ] ) ) {
-                    // Activate the new token in the user token store (e.g., Redis).
-                    $sessionTokenStoreHandler->setCookieLoginTokenActive( $user->uid, $new_cookie_data );
-                    // Remove the previous token from the token store if applicable.
-                    $sessionTokenStoreHandler->removeLoginCookieFromStore( $user->uid, $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ?? '' );
-                    // Set the new cookie in the browser.
-                    self::setCookie( $new_cookie_data, $new_expire_date );
-                }
-
-            } else {
-                // For a new login, activate the token in the user token store.
+            // If the payload is invalid (expired), generate a new token and set the new cookie.
+            if ( empty( $payload ) || empty( $payload[ 'user' ][ 'uid' ] ) ) {
+                // Activate the new token in the user token store (e.g., Redis).
                 $sessionTokenStoreHandler->setCookieLoginTokenActive( $user->uid, $new_cookie_data );
+                // Remove the previous token from the token store if applicable.
+                $sessionTokenStoreHandler->removeLoginCookieFromStore( $user->uid, $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ?? '' );
                 // Set the new cookie in the browser.
                 self::setCookie( $new_cookie_data, $new_expire_date );
             }
 
-        } catch ( ReflectionException $e ) {
-            // Log any errors encountered while setting the login token as active.
-            Log::doJsonLog( "Error setting login token active: " . $e->getMessage() );
+        } else {
+            // For a new login, activate the token in the user token store.
+            $sessionTokenStoreHandler->setCookieLoginTokenActive( $user->uid, $new_cookie_data );
+            // Set the new cookie in the browser.
+            self::setCookie( $new_cookie_data, $new_expire_date );
         }
 
     }
@@ -202,8 +196,8 @@ class AuthCookie {
 
             try {
                 return SimpleJWT::getValidPayload( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
-            } catch ( DomainException | UnexpectedValueException $e ) {
-                Log::doJsonLog( $e->getMessage() . " " . $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
+            } catch ( DomainException|UnexpectedValueException $e ) {
+                LoggerFactory::getLogger( 'login_exceptions' )->debug( $e->getMessage() . " " . $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
                 self::destroyAuthentication();
             }
 

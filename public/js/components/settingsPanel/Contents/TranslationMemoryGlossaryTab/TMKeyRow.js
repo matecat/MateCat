@@ -68,6 +68,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
   const getPublicMatches = currentProjectTemplate.get_public_matches
+  const publicTmPenalty = currentProjectTemplate.public_tm_penalty
 
   useEffect(() => {
     setIsLookup(row.r ?? false)
@@ -143,10 +144,17 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                 ...specialRow,
                 r: isLookup,
                 w: isUpdating,
+                penalty:
+                  typeof penalty === 'number' ? penalty : specialRow.penalty,
               }
             : specialRow,
         ),
       )
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        publicTmPenalty:
+          typeof penalty === 'number' ? penalty : prevTemplate.publicTmPenalty,
+      }))
     }
   }
 
@@ -220,6 +228,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         if (config.is_cattool) {
           updateJobKeys({
             getPublicMatches,
+            publicTmPenalty,
             dataTm: getTmDataStructureToSendServer({tmKeys}),
           }).then(() => CatToolActions.onTMKeysChangeStatus())
         }
@@ -529,9 +538,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
-      {!isMMSharedKey && isOwner && row.isActive && (
-        <div className="align-center tm-row-penalty">{renderPenalty}</div>
-      )}
+      {isOwner &&
+        row.isActive &&
+        isLookup &&
+        ((isMMSharedKey && config.ownerIsMe) || !isMMSharedKey) && (
+          <div className="align-center tm-row-penalty">{renderPenalty}</div>
+        )}
       {!isMMSharedKey && isOwner && !row.isTmFromFile ? (
         <div className="align-center">
           <MenuButton
@@ -599,7 +611,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             Import TMX
           </button>
         </div>
-      ) : undefined}
+      ) : (
+        <div />
+      )}
     </Fragment>
   )
 }

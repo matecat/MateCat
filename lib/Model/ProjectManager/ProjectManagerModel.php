@@ -19,7 +19,7 @@ use PDOException;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 class ProjectManagerModel {
@@ -84,7 +84,7 @@ class ProjectManagerModel {
         try {
             $idFile = $db->insert( 'files', $data );
         } catch ( PDOException $e ) {
-            Log::doJsonLog( "Database insert error: {$e->getMessage()} " );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Database insert error: {$e->getMessage()} " );
             throw new Exception( "Database insert file error: {$e->getMessage()} ", -$e->getCode() );
         }
 
@@ -122,12 +122,12 @@ class ProjectManagerModel {
 
         $tuple_marks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
-        Log::doJsonLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
+        LoggerFactory::getLogger( 'project_manager' )->debug( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
 
         //split the query in to chunks if there are too many segments
         $query_translations_values = array_chunk( $query_translations_values, 100 );
 
-        Log::doJsonLog( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
+        LoggerFactory::getLogger( 'project_manager' )->debug( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
 
         foreach ( $query_translations_values as $i => $chunk ) {
 
@@ -137,9 +137,9 @@ class ProjectManagerModel {
                 $stmt  = $dbHandler->getConnection()->prepare( $query );
                 $stmt->execute( iterator_to_array( new RecursiveIteratorIterator( new RecursiveArrayIterator( $chunk ) ), false ) );
 
-                Log::doJsonLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
+                LoggerFactory::getLogger( 'project_manager' )->debug( "Pre-Translations: Executed Query " . ( $i + 1 ) );
             } catch ( PDOException $e ) {
-                Log::doJsonLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
+                LoggerFactory::getLogger( 'project_manager' )->debug( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
                 throw new PDOException( "Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
             }
 
@@ -208,7 +208,7 @@ class ProjectManagerModel {
         }
 
         $chunked = array_chunk( $insert_values, $chunk_size );
-        Log::doJsonLog( "Notes: Total Rows to insert: " . count( $chunked ) );
+        LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Total Rows to insert: " . count( $chunked ) );
 
         $conn = Database::obtain()->getConnection();
 
@@ -219,14 +219,14 @@ class ProjectManagerModel {
                 $stmt             = $conn->prepare( $template . implode( ', ', $values_sql_array ) );
                 $flattened_values = array_reduce( $chunk, 'array_merge', [] );
                 $stmt->execute( $flattened_values );
-                Log::doJsonLog( "Notes: Executed Query " . ( $i + 1 ) );
+                LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Executed Query " . ( $i + 1 ) );
             }
 
         } catch ( Exception $e ) {
-            Log::doJsonLog( "Notes import - DB Error: " . $e->getMessage() );
-            Log::doJsonLog( "Notes import - Statement: " . $stmt->queryString );
-            Log::doJsonLog( "Notes Chunk Dump: " . var_export( $chunk, true ) );
-            Log::doJsonLog( "Notes Flattened Values Dump: " . var_export( $flattened_values, true ) );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes import - DB Error: " . $e->getMessage() );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes import - Statement: " . $stmt->queryString );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes Chunk Dump: " . var_export( $chunk, true ) );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0, $e );
         }
 
@@ -283,7 +283,7 @@ class ProjectManagerModel {
         }
 
         $chunked = array_chunk( $insert_values, $chunk_size );
-        Log::doJsonLog( "Notes attributes: Total Rows to insert: " . count( $chunked ) );
+        LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes: Total Rows to insert: " . count( $chunked ) );
 
         $conn = Database::obtain()->getConnection();
 
@@ -294,14 +294,14 @@ class ProjectManagerModel {
                 $stmt             = $conn->prepare( $template . implode( ', ', $values_sql_array ) );
                 $flattened_values = array_reduce( $chunk, 'array_merge', [] );
                 $stmt->execute( $flattened_values );
-                Log::doJsonLog( "Notes attributes: Executed Query " . ( $i + 1 ) );
+                LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes: Executed Query " . ( $i + 1 ) );
             }
 
         } catch ( Exception $e ) {
-            Log::doJsonLog( "Notes attributes import - DB Error: " . $e->getMessage() );
-            Log::doJsonLog( "Notes attributes import - Statement: " . $stmt->queryString );
-            Log::doJsonLog( "Notes attributes Chunk Dump: " . var_export( $chunk, true ) );
-            Log::doJsonLog( "Notes attributes Flattened Values Dump: " . var_export( $flattened_values, true ) );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes import - DB Error: " . $e->getMessage() );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes import - Statement: " . $stmt->queryString );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes Chunk Dump: " . var_export( $chunk, true ) );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes attributes import - DB Error: " . $e->getMessage(), 0, $e );
         }
     }
@@ -349,7 +349,7 @@ class ProjectManagerModel {
         }
 
         $chunked = array_chunk( $insert_values, $chunk_size );
-        Log::doJsonLog( "Notes: Total Rows to insert: " . count( $chunked ) );
+        LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Total Rows to insert: " . count( $chunked ) );
 
         $conn = Database::obtain()->getConnection();
 
@@ -360,14 +360,14 @@ class ProjectManagerModel {
                 $stmt             = $conn->prepare( $template . implode( ', ', $values_sql_array ) );
                 $flattened_values = array_reduce( $chunk, 'array_merge', [] );
                 $stmt->execute( $flattened_values );
-                Log::doJsonLog( "Notes: Executed Query " . ( $i + 1 ) );
+                LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Executed Query " . ( $i + 1 ) );
             }
 
         } catch ( Exception $e ) {
-            Log::doJsonLog( "Trans-Unit Context Groups import - DB Error: " . $e->getMessage() );
-            Log::doJsonLog( "Trans-Unit Context Groups import - Statement: " . $stmt->queryString );
-            Log::doJsonLog( "Trans-Unit Context Groups Chunk Dump: " . var_export( $chunk, true ) );
-            Log::doJsonLog( "Trans-Unit Context Groups Flattened Values Dump: " . var_export( $flattened_values, true ) );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups import - DB Error: " . $e->getMessage() );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups import - Statement: " . $stmt->queryString );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups Chunk Dump: " . var_export( $chunk, true ) );
+            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0, $e );
         }
 

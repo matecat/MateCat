@@ -12,7 +12,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Throwable;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use View\API\App\Json\UserProfile;
 
 /**
@@ -60,8 +60,8 @@ class AuthenticationHelper {
      * If authentication is successful, the user object is populated, and the session is updated.
      * If authentication fails, the user remains unauthenticated.
      *
-     * @param array       $session   Reference to the session array, used to store user data.
-     * @param string|null $api_key   Optional API key for authentication.
+     * @param array       $session    Reference to the session array, used to store user data.
+     * @param string|null $api_key    Optional API key for authentication.
      * @param string|null $api_secret Optional API secret for authentication.
      */
     protected function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
@@ -93,9 +93,17 @@ class AuthenticationHelper {
             }
         } catch ( Throwable $ignore ) {
             // Log any exceptions encountered during the authentication process.
-            Log::setLogFileName( 'login_exceptions.txt' );
             try {
-                Log::doJsonLog( [ $ignore, $ignore->getTraceAsString(), 'session' => $this->session, 'api_key' => $api_key, 'api_secret' => $api_secret, 'cookie' => AuthCookie::getCredentials()[ 'user' ] ?? null ] );
+                LoggerFactory::getLogger( 'login_exceptions' )->debug(
+                        [
+                                $ignore,
+                                $ignore->getTraceAsString(),
+                                'session'    => $this->session,
+                                'api_key'    => $api_key,
+                                'api_secret' => $api_secret,
+                                'cookie'     => AuthCookie::getCredentials()[ 'user' ] ?? null
+                        ]
+                );
             } catch ( ReflectionException $ignore ) {
             }
         } finally {
