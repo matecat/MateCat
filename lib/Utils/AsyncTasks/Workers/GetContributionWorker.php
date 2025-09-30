@@ -155,8 +155,8 @@ class GetContributionWorker extends AbstractWorker {
 
             // Convert &#10; to layer2 placeholder for the UI
             // Those strings are on layer 1, force the transition to layer 2.
-            $match[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $match[ 'segment' ] );
-            $match[ 'translation' ] = $Filter->fromLayer1ToLayer2( $match[ 'translation' ] );
+            $match[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $match[ 'segment' ] ?? '' );
+            $match[ 'translation' ] = $Filter->fromLayer1ToLayer2( $match[ 'translation' ] ?? '' );
         }
 
         $_object = [

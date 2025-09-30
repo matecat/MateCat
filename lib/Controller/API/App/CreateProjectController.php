@@ -238,7 +238,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
         $arFiles      = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
-        $project_name = $this->validateProjectName( $this->request->param( 'project_name' ) ?? '', $arFiles );
+        $project_name = $this->validateProjectName( $this->request->param( 'project_name', '' ), $arFiles );
 
         if ( !empty( $array_keys ) ) {
 

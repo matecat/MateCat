@@ -2,7 +2,6 @@
 
 namespace Controller\API\V1;
 
-use Utils\Tools\CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -53,6 +52,7 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -92,8 +92,8 @@ class NewController extends KleinController {
             $arFiles[] = $input_value->name;
         }
 
-        if(empty($arFiles)){
-            throw new InvalidArgumentException("No files were uploaded.");
+        if ( empty( $arFiles ) ) {
+            throw new InvalidArgumentException( "No files were uploaded." );
         }
 
         $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
@@ -289,7 +289,6 @@ class NewController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $project_name                              = $this->validateProjectName( $this->request->param( 'project_name' ) );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
@@ -357,9 +356,9 @@ class NewController extends KleinController {
             $public_tm_penalty = $this->validatePublicTMPenalty( (int)$public_tm_penalty );
         }
 
-        $project_name = $this->validateProjectName( $project_name );
-        $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
-        $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
+        $project_name = $this->validateProjectName( $this->request->param( 'project_name', '' ) );
+        $source_lang  = $this->validateSourceLang( $lang_handler, $source_lang );
+        $target_lang  = $this->validateTargetLangs( $lang_handler, $target_lang );
         [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
@@ -599,7 +598,7 @@ class NewController extends KleinController {
     private function validateProjectName( ?string $name = null ): ?string {
 
         if ( empty( $name ) ) {
-            return null;
+            return 'MATECAT_PROJ-' . date( 'YmdHi' );
         }
 
         if ( CatUtils::validateProjectName( $name ) === false ) {
