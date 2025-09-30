@@ -26,19 +26,7 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
 
   render() {
     const issuesCount = this.getIssueCount()
-    let openClass = this.props.open ? 'open-issues' : ''
-    if (issuesCount > 0) {
-      return (
-        <div
-          className="revise-button has-object"
-          title="Add Issues"
-          onClick={this.handleClick.bind(this)}
-        >
-          <ReviseIssuesIcon />
-          <div className="badge-icon badge-red ">{issuesCount}</div>
-        </div>
-      )
-    } else if (
+    if (
       config.isReview &&
       !(
         SegmentUtils.isIceSegment(this.props.segment) &&
@@ -47,18 +35,20 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
     ) {
       return (
         <div
-          className="revise-button"
+          className={`revise-button ${issuesCount === 0 && 'no-object'}`}
           title={
-            'Show Issues (' +
-            Shortcuts.cattol.events.openIssuesPanel.keystrokes[
-              Shortcuts.shortCutsKeyType
-            ].toUpperCase() +
-            ')'
+            issuesCount > 0
+              ? `Show Issues ( ${Shortcuts.cattol.events.openIssuesPanel.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ].toUpperCase()}     )`
+              : 'Add Issues'
           }
           onClick={this.handleClick.bind(this)}
         >
           <ReviseIssuesIcon />
-          <div className="badge-icon badge-red ">+</div>
+          <div className="badge-icon badge-red ">
+            {issuesCount > 0 ? issuesCount : '+'}
+          </div>
         </div>
       )
     } else {
