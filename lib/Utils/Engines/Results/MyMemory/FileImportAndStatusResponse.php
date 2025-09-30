@@ -34,7 +34,7 @@ class FileImportAndStatusResponse extends TMSAbstractResponse {
     public function __construct( $response ) {
 
         $this->responseData    = $response[ 'responseData' ] ?? '';
-        $this->responseStatus  = $response[ 'responseStatus' ] ?? '';
+        $this->responseStatus  = (int)( $response[ 'responseStatus' ] ?? 200 );
         $this->responseDetails = $response[ 'responseDetails' ] ?? '';
 
         if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
