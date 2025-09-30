@@ -188,9 +188,22 @@ class GetSegmentsController extends KleinController {
     /**
      * @param SegmentUIStruct $segment
      * @param array           $segment_notes
+     *
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws \Model\Exceptions\NotFoundException
      */
     private function attachNotes( SegmentUIStruct &$segment, array $segment_notes ) {
-        $segment[ 'notes' ] = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
+
+        $notes = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
+
+        if ( is_array( $notes ) ) {
+            $notes = $this->featureSet->filter( 'prepareNotesForRendering', $notes );
+        }
+
+        $segment[ 'notes' ] = $notes;
     }
 
     /**

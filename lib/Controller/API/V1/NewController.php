@@ -2,6 +2,7 @@
 
 namespace Controller\API\V1;
 
+use Utils\Tools\CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -91,8 +92,12 @@ class NewController extends KleinController {
             $arFiles[] = $input_value->name;
         }
 
-        // if fileupload was failed, this index (0 = does not exist)
-        $default_project_name = @$arFiles[ 0 ];
+        if(empty($arFiles)){
+            throw new InvalidArgumentException("No files were uploaded.");
+        }
+
+        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
+
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
         }
@@ -284,6 +289,7 @@ class NewController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
+        $project_name                              = $this->validateProjectName( $this->request->param( 'project_name' ) );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
@@ -310,7 +316,6 @@ class NewController extends KleinController {
         $payable_rate_template_id                  = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $payable_rate_template_name                = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_STRING );
         $project_info                              = filter_var( $this->request->param( 'project_info' ), FILTER_SANITIZE_STRING );
-        $project_name                              = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $public_tm_penalty                         = filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_100                          = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_101                          = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_VALIDATE_BOOLEAN );
@@ -352,6 +357,7 @@ class NewController extends KleinController {
             $public_tm_penalty = $this->validatePublicTMPenalty( (int)$public_tm_penalty );
         }
 
+        $project_name = $this->validateProjectName( $project_name );
         $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
         $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
         [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
@@ -583,6 +589,24 @@ class NewController extends KleinController {
         }
 
         return $subject;
+    }
+
+    /**
+     * @param string|null $name
+     *
+     * @return string|null
+     */
+    private function validateProjectName( ?string $name = null ): ?string {
+
+        if ( empty( $name ) ) {
+            return null;
+        }
+
+        if ( CatUtils::validateProjectName( $name ) === false ) {
+            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
+        }
+
+        return $name;
     }
 
     /**

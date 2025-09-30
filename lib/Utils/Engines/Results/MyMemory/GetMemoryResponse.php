@@ -15,7 +15,7 @@ class GetMemoryResponse extends TMSAbstractResponse {
 
         $this->responseData    = $result[ 'responseData' ] ?? '';
         $this->responseDetails = $result[ 'responseDetails' ] ?? '';
-        $this->responseStatus  = $result[ 'responseStatus' ] ?? '';
+        $this->responseStatus  = (int)( $result[ 'responseStatus' ] ?? 200 );
         $this->mtLangSupported = $result[ 'mtLangSupported' ] ?? true;
 
         if ( is_array( $result ) and !empty( $result ) and array_key_exists( 'matches', $result ) ) {
