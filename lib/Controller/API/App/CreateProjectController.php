@@ -2,10 +2,11 @@
 
 namespace Controller\API\App;
 
+use Controller\Traits\ScanDirectoryForConvertedFiles;
+use Utils\Tools\CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
 use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
@@ -64,7 +65,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->data = $this->validateTheRequest();
 
         $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
-        $default_project_name = $arFiles[ 0 ];
+        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
 
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
@@ -214,15 +215,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $file_name               = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $project_name            = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source_lang             = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $target_lang             = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $job_subject             = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $due_date                = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
-        $mt_engine               = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
-        $disable_tms_engine_flag = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
-//        $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $project_name                  = $this->validateProjectName( $this->request->param( 'project_name' ) );
+        $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $job_subject                   = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $due_date                      = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
+        $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
+        $disable_tms_engine_flag       = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_100              = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_101              = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_SANITIZE_NUMBER_INT );
         $tm_prioritization             = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
@@ -382,6 +382,24 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         $this->metadata = $options;
 
+    }
+
+    /**
+     * @param string|null $name
+     *
+     * @return string|null
+     */
+    private function validateProjectName( ?string $name = null ): ?string {
+
+        if ( empty( $name ) ) {
+            return null;
+        }
+
+        if ( CatUtils::validateProjectName( $name ) === false ) {
+            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
+        }
+
+        return $name;
     }
 
     /**

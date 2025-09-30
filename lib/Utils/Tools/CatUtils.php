@@ -1021,6 +1021,42 @@ class CatUtils {
     }
 
     /**
+     * This functions removes symbols from a string
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    public static function sanitizeProjectName( string $name ): string {
+        return preg_replace( '/[^\p{L}\p{N}\s]/u', '', $name );
+    }
+
+    /**
+     * This functions check if the name contains any symbol
+     *
+     * @param $name
+     *
+     * @return bool
+     */
+    public static function validateProjectName( string $name ): bool {
+        return self::sanitizeProjectName( $name ) === $name;
+    }
+
+    /**
+     * This method can be use as polyfill of FILTER_SANITIZE_STRING,
+     * which is DEPRECATED in PHP >= 8.1
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function filter_string_polyfill( string $string ): string {
+        $str = preg_replace( '/\x00|<[^>]*>?/', '', $string );
+
+        return str_replace( [ "'", '"' ], [ '&#39;', '&#34;' ], $str );
+    }
+
+    /**
      * @param $filename
      *
      * @return string

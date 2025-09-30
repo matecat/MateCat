@@ -206,7 +206,7 @@ var spec = {
             name: 'lara_glossaries',
             in: 'formData',
             description:
-                'Lara glossaries to be used for the project. Only works if a Lara engine is used.',
+              'Lara glossaries to be used for the project. Only works if a Lara engine is used.',
             required: false,
             type: 'string',
             example: '["gls_xyz123"]',
@@ -1627,8 +1627,7 @@ var spec = {
             name: 'type',
             type: 'string',
             in: 'formData',
-            description:
-                'Allowed values: [general, personal]',
+            description: 'Allowed values: [general, personal]',
             required: true,
           },
           {
@@ -1808,21 +1807,23 @@ var spec = {
             required: true,
           },
           {
-            in: "query",
+            in: 'query',
             name: 'page',
             type: 'integer',
             required: false,
             default: 1,
-            description: "page (integer, optional) — The page number to retrieve. Defaults to 1. Use in combination with `step`  to navigate through paginated results."
+            description:
+              'page (integer, optional) — The page number to retrieve. Defaults to 1. Use in combination with `step`  to navigate through paginated results.',
           },
           {
-            in: "query",
+            in: 'query',
             name: 'step',
             type: 'integer',
             required: false,
             default: 20,
             maximum: 50,
-            description: "step (integer, optional) — Number of items to include in each page of results. Defaults to 20. Maximum 50. Use in combination with `page` to navigate through paginated results."
+            description:
+              'step (integer, optional) — Number of items to include in each page of results. Defaults to 20. Maximum 50. Use in combination with `page` to navigate through paginated results.',
           },
         ],
         responses: {
@@ -2285,7 +2286,8 @@ var spec = {
             {
               name: 'password',
               in: 'formData',
-              description: 'The password of the job (second pass review password)',
+              description:
+                'The password of the job (second pass review password)',
               required: true,
               type: 'string',
             },
@@ -2598,9 +2600,7 @@ var spec = {
             type: 'string',
           },
         ],
-        produces: [
-          'application/zip'
-        ],
+        produces: ['application/zip'],
         responses: {
           200: {
             description: 'OK',
@@ -2608,8 +2608,8 @@ var spec = {
           default: {
             description: 'Unexpected error',
           },
-        }
-      }
+        },
+      },
     },
     '/api/v3/jobs/{id_job}/{password}/file/{id_file}/instructions': {
       get: {
@@ -2785,7 +2785,7 @@ var spec = {
           {
             name: 'name',
             in: 'formData',
-            description: 'The glossary\'s name',
+            description: "The glossary's name",
             type: 'string',
             required: false,
           },
@@ -2820,15 +2820,15 @@ var spec = {
                         numberOfLanguages: {
                           type: 'integer',
                           example: 3,
-                        }
+                        },
                       },
                     },
                   },
-                }
+                },
               },
               success: {
                 type: 'boolean',
-              }
+              },
             },
             description: 'Upload and check a glossary file',
           },
@@ -2836,7 +2836,7 @@ var spec = {
             description: 'Unexpected error',
             schema: {
               $ref: '#/definitions/Error',
-            }
+            },
           },
         },
       },
@@ -2860,7 +2860,7 @@ var spec = {
           {
             name: 'name',
             in: 'formData',
-            description: 'The glossary\'s name.',
+            description: "The glossary's name.",
             type: 'string',
             required: false,
           },
@@ -2895,15 +2895,15 @@ var spec = {
                         numberOfLanguages: {
                           type: 'integer',
                           example: 3,
-                        }
+                        },
                       },
                     },
                   },
-                }
+                },
               },
               success: {
                 type: 'boolean',
-              }
+              },
             },
             description: 'Check and import a glossary file',
           },
@@ -2911,7 +2911,7 @@ var spec = {
             description: 'Unexpected error',
             schema: {
               $ref: '#/definitions/Error',
-            }
+            },
           },
         },
       },
@@ -2924,10 +2924,11 @@ var spec = {
           {
             name: 'uuid',
             in: 'path',
-            description: 'The UUID token received from `/api/v3/glossaries/import/` api.',
+            description:
+              'The UUID token received from `/api/v3/glossaries/import/` api.',
             required: true,
             type: 'string',
-          }
+          },
         ],
         tags: ['Glossary'],
         responses: {
@@ -2941,7 +2942,7 @@ var spec = {
             description: 'Unexpected error',
             schema: {
               $ref: '#/definitions/Error',
-            }
+            },
           },
         },
       },
@@ -3005,11 +3006,12 @@ var spec = {
                 key: {
                   type: 'string',
                   example: '1234_xxxx',
-                  description: 'In case of already existent TM key, it will be updated.',
+                  description:
+                    'In case of already existent TM key, it will be updated.',
                 },
                 name: {
                   type: 'string',
-                  example: 'My new key'
+                  example: 'My new key',
                 },
               },
             },
@@ -6802,7 +6804,7 @@ var spec = {
               type: 'integer',
               description: 'Total number of pages of projects available',
             },
-          }
+          },
         },
         projects: {
           type: 'array',
@@ -7111,7 +7113,8 @@ var spec = {
 
     Error: {
       type: 'object',
-      description: 'This property contains any debug data that can serve for better understanding of the error',
+      description:
+        'This property contains any debug data that can serve for better understanding of the error',
       properties: {
         errors: {
           type: 'array',
