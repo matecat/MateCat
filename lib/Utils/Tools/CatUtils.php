@@ -1080,7 +1080,7 @@ class CatUtils {
 
         // Throw an exception if the sanitized name contains invalid symbols.
         if ( $s_name != $name ) {
-            throw new InvalidArgumentException( "Invalid file name: symbols (e.g. & ') are not allowed.", -3 );
+            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
         }
 
         // Return the sanitized name or the fallback if the name is still empty.
