@@ -1,8 +1,12 @@
 <?php
 
+namespace unit\Model\TmKeyManagement;
+
+use Exception;
 use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use TestHelpers\Utils;
 use Utils\TmKeyManagement\Filter;

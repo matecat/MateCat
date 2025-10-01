@@ -321,27 +321,6 @@ class ProjectManager {
     }
 
     /**
-     * Project name is required to build the analysis URL.
-     * The project name is memoized in an instance variable
-     * so to perform the check only the first time on $projectStructure['project_name'].
-     *
-     * @throws Exception
-     */
-    protected function _sanitizeProjectName() {
-        $newName = Utils::sanitizeName( $this->projectStructure[ 'project_name' ] );
-
-        if ( !$newName ) {
-            $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -5,
-                    "message" => "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!"
-            ];
-            throw new Exception( "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!", -5 );
-        }
-
-        $this->projectStructure[ 'project_name' ] = $newName;
-    }
-
-    /**
      * @throws Exception
      */
     protected function _validateUploadToken() {
@@ -560,7 +539,6 @@ class ProjectManager {
 
         $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
 
-        $this->_sanitizeProjectName();
         $this->_validateUploadToken();
         $this->_validateXliffParameters();
 

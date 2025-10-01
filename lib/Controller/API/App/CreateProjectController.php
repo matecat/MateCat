@@ -199,8 +199,15 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @return array
-     * @throws Exception
+     * Validates and processes the incoming request parameters to build a structured data array.
+     *
+     * This method retrieves and sanitizes input parameters from the request object,
+     * ensuring data integrity and security. It organizes the extracted parameters
+     * into a comprehensive array of values required for further processing. It also performs
+     * additional transformations, such as decoding JSON, merging and filtering arrays, as well as
+     * applying default values where necessary.
+     *
+     * @return array An associative array containing sanitized and processed request data.
      */
     private function validateTheRequest(): array {
         $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -238,7 +245,11 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
         $arFiles      = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
-        $project_name = $this->validateProjectName( $this->request->param( 'project_name', '' ), $arFiles );
+
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), array_map( fn ( $v ): array => [ 'name' => $v ], $arFiles  ) );
 
         if ( !empty( $array_keys ) ) {
 
@@ -429,34 +440,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param string|null $name
-     * @param array       $arrFiles
-     *
-     * @return string|null
-     */
-    private function validateProjectName( string $name, array $arrFiles ): ?string {
-
-        // treat only the actual empty string as "missing"; keep '0' as valid
-        if ( $name === '' ) {
-
-            if ( count( $arrFiles ) > 1 ) {
-                return 'MATECAT_PROJ-' . date( 'YmdHi' );
-            }
-
-            if ( count( $arrFiles ) === 1 ) {
-                return Utils::sanitizeName( AbstractFilesStorage::pathinfo_fix( $arrFiles[ 0 ], PATHINFO_FILENAME ) );
-            }
-
-        }
-
-        if ( !CatUtils::validateProjectName( $name ) ) {
-            throw new InvalidArgumentException( 'Invalid project name. Symbols are not allowed in project names', -3 );
-        }
-
-        return $name;
-    }
-
-    /**
      * @param int|null $public_tm_penalty
      *
      * @return int|null
@@ -638,7 +621,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $userId                   = $this->getUser()->uid;
 
         if ( !empty( $payable_rate_template ) ) {
-            $json   = html_entity_decode( $payable_rate_template );
+            $json            = html_entity_decode( $payable_rate_template );
             $validatorObject = new JSONValidatorObject( $json );
             $validator       = new JSONValidator( 'payable_rate.json', true );
             $validator->validate( $validatorObject );
@@ -701,7 +684,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateFiltersExtractionParameters( $filters_extraction_parameters = null ) {
         if ( !empty( $filters_extraction_parameters ) ) {
 
-            $json   = html_entity_decode( $filters_extraction_parameters );
+            $json            = html_entity_decode( $filters_extraction_parameters );
             $validatorObject = new JSONValidatorObject( $json );
             $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
             $validator->validate( $validatorObject );
@@ -721,7 +704,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
-            $json   = html_entity_decode( $xliff_parameters );
+            $json = html_entity_decode( $xliff_parameters );
 
             $validatorObject = new JSONValidatorObject( $json );
             $validator       = new JSONValidator( 'xliff_parameters_rules_wrapper.json', true );

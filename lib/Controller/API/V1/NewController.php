@@ -356,9 +356,13 @@ class NewController extends KleinController {
             $public_tm_penalty = $this->validatePublicTMPenalty( (int)$public_tm_penalty );
         }
 
-        $project_name = $this->validateProjectName( $this->request->param( 'project_name', '' ) );
-        $source_lang  = $this->validateSourceLang( $lang_handler, $source_lang );
-        $target_lang  = $this->validateTargetLangs( $lang_handler, $target_lang );
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), Upload::getUniformGlobalFilesStructure( $this->request->files()->all() )->toArray() );
+
+        $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
+        $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
         [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
@@ -588,24 +592,6 @@ class NewController extends KleinController {
         }
 
         return $subject;
-    }
-
-    /**
-     * @param string|null $name
-     *
-     * @return string|null
-     */
-    private function validateProjectName( ?string $name = null ): ?string {
-
-        if ( empty( $name ) ) {
-            return 'MATECAT_PROJ-' . date( 'YmdHi' );
-        }
-
-        if ( CatUtils::validateProjectName( $name ) === false ) {
-            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
-        }
-
-        return $name;
     }
 
     /**

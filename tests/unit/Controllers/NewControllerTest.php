@@ -1,11 +1,19 @@
 <?php
 
+namespace unit\Controllers;
+
 use Controller\API\V1\NewController;
+use Exception;
+use InvalidArgumentException;
 use Klein\DataCollection\DataCollection;
 use Klein\Request;
 use Klein\Response;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
+use ReflectionProperty;
 use TestHelpers\AbstractTest;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
@@ -61,7 +69,7 @@ class NewControllerTest extends AbstractTest {
                 ],
                 [],
                 [],
-                [ 'file[]' => 'test.txt' ]
+                [ 'file[]' => [ 'name' => 'foo.docx' ] ]
         ] )->getMock();
 
         $this->requestMock->expects( $this->any() )
@@ -79,6 +87,7 @@ class NewControllerTest extends AbstractTest {
         $this->assertIsArray( $validateParameters );
         $this->assertArrayHasKey( 'source_lang', $validateParameters );
         $this->assertEquals( 'en-US', $validateParameters[ 'source_lang' ] );
+        $this->assertEquals( 'foo', $validateParameters[ 'project_name' ] );
     }
 
     /**
@@ -125,7 +134,7 @@ class NewControllerTest extends AbstractTest {
                 ],
                 [],
                 [],
-                [ 'file[]' => 'test.txt' ]
+                [ 'file[]' => [ 'name' => 'foo.docx' ] ]
         ] )->getMock();
         $this->createMocks();
 
@@ -153,7 +162,7 @@ class NewControllerTest extends AbstractTest {
                 ],
                 [],
                 [],
-                [ 'file[]' => 'test.txt' ]
+                [ 'file[]' => [ 'name' => 'foo.docx' ] ]
         ] )->getMock();
         $this->createMocks();
 
