@@ -1075,15 +1075,12 @@ class CatUtils {
             return $name != '' ? $name : $fallback;
         }
 
-        // Sanitize the provided name.
-        $s_name = CatUtils::sanitizeProjectName( $name );
-
         // Throw an exception if the sanitized name contains invalid symbols.
-        if ( $s_name != $name ) {
+        if ( !CatUtils::validateProjectName( $name ) ) {
             throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
         }
 
-        // Return the sanitized name or the fallback if the name is still empty.
+        // Return the name if it is valid.
         return $name;
     }
 
