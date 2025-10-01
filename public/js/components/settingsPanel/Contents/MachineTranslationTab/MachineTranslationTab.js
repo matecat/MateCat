@@ -29,9 +29,9 @@ import {ApplicationThreshold} from './ApplicationThreshold'
 import defaultMTOptions from '../../Contents/defaultTemplates/mtOptions.json'
 import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
 
-let engineIdFromFromQueryString = new URLSearchParams(
-  window.location.search,
-).get('engineId')
+let engineIdFromQueryString = new URLSearchParams(window.location.search).get(
+  'engineId',
+)
 
 export const MachineTranslationTab = () => {
   const {
@@ -72,9 +72,13 @@ export const MachineTranslationTab = () => {
   ]
 
   const activeMTEngine = currentProjectTemplate.mt?.id
-  const setActiveMTEngine = ({id, engine_type} = {}) => {
+  const setActiveMTEngine = useRef()
+  setActiveMTEngine.current = ({id, engine_type} = {}) => {
     const defaultExtra = defaultMTOptions[engine_type]
-    const mt = mtEngines.find((mt) => mt.id === id)
+
+    const originalProjectTemplate = projectTemplates.find(
+      ({isSelected, isTemporary}) => isSelected && !isTemporary,
+    )
 
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
@@ -82,30 +86,34 @@ export const MachineTranslationTab = () => {
         typeof id === 'number'
           ? {
               id,
-              ...(mt &&
-                defaultExtra && {
-                  extra: {
-                    ...normalizeTemplatesWithNullProps(
-                      [mt.extra],
-                      defaultExtra,
-                    )[0],
-                  },
-                }),
+              ...(defaultExtra && {
+                extra: {
+                  ...normalizeTemplatesWithNullProps(
+                    [
+                      id === originalProjectTemplate.mt.id &&
+                      typeof originalProjectTemplate.mt.extra !== 'undefined'
+                        ? originalProjectTemplate.mt.extra
+                        : {},
+                    ],
+                    defaultExtra,
+                  )[0],
+                },
+              }),
             }
           : {},
     }))
   }
 
   const [addMTVisible, setAddMTVisible] = useState(
-    typeof engineIdFromFromQueryString === 'string',
+    typeof engineIdFromQueryString === 'string',
   )
   const [activeAddEngine, setActiveAddEngine] = useState(() => {
     const initialState =
-      typeof engineIdFromFromQueryString === 'string'
-        ? enginesList.find((mt) => mt.id === engineIdFromFromQueryString)
+      typeof engineIdFromQueryString === 'string'
+        ? enginesList.find((mt) => mt.id === engineIdFromQueryString)
         : enginesList.find(({id}) => id === 'mmt')
 
-    engineIdFromFromQueryString = false
+    engineIdFromQueryString = false
     return initialState
   })
   const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
@@ -168,7 +176,7 @@ export const MachineTranslationTab = () => {
         })
         setDeleteMTRequest()
         if (activeMTEngine === deleteId) {
-          setActiveMTEngine(DEFAULT_ENGINE_MEMORY)
+          setActiveMTEngine.current(DEFAULT_ENGINE_MEMORY)
         }
 
         const templatesInvolved = projectTemplates
@@ -237,7 +245,7 @@ export const MachineTranslationTab = () => {
                   key={index}
                   {...{row}}
                   deleteMT={() => showConfirmDelete.current(row.id)}
-                  onCheckboxClick={(row) => setActiveMTEngine(row)}
+                  onCheckboxClick={(row) => setActiveMTEngine.current(row)}
                 />
               ),
               isDraggable: false,
@@ -258,7 +266,7 @@ export const MachineTranslationTab = () => {
     }
   }, [activeMTEngine, mtEngines, deleteMTRequest])
 
-  const disableMT = () => setActiveMTEngine()
+  const disableMT = () => setActiveMTEngine.current()
 
   const activeMTEngineData =
     !config.is_cattool || (config.is_cattool && config.ownerIsMe)

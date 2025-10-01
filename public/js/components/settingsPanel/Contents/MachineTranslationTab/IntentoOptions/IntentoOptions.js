@@ -1,33 +1,51 @@
-import React from 'react'
+import React, {useContext, useEffect, useMemo, useState} from 'react'
+import PropTypes from 'prop-types'
 import useOptions from '../useOptions'
 import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {Select} from '../../../../common/Select'
+import {getIntentoRouting} from '../../../../../api/getIntentoRouting'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
 
 const PROVIDERS = config.intento_providers
   ? Object.values(config.intento_providers)
   : []
 
-const ROUTING = [
-  {id: '1', name: 'routing 1'},
-  {id: '2', name: 'routing 2'},
-  {id: '3', name: 'routing 3'},
-  {id: '4', name: 'routing 4'},
-  {id: '5', name: 'routing 5'},
-]
+export const IntentoOptions = ({id}) => {
+  const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
-const ALL_OPTIONS = [...ROUTING, ...PROVIDERS]
-
-export const IntentoOptions = () => {
   const {control, watch} = useOptions()
 
-  const activeOption = watch('intento_routing')
+  const [routing, setRouting] = useState([])
+
+  const allOptions = useMemo(() => {
+    return [...routing, ...PROVIDERS]
+  }, [routing])
+
+  useEffect(() => {
+    let cleanup = false
+
+    getIntentoRouting(id).then((data) => {
+      if (!cleanup) {
+        const items = Object.values(data)
+        setRouting(items.map((item) => ({...item, id: item.id.toString()})))
+      }
+    })
+
+    return () => (cleanup = true)
+  }, [id])
+  const routingOrProviderKey = currentProjectTemplate.mt?.extra
+    ?.intento_provider
+    ? 'intento_provider'
+    : 'intento_routing'
+
+  const activeOption = watch(routingOrProviderKey)
 
   const getOptionsChildren = ({id}) => {
     const isFirstRouting =
-      ROUTING.filter((item) => item.id !== activeOption).findIndex(
-        (item) => item.id === id,
-      ) === 0
+      routing
+        .filter((item) => item.id !== activeOption)
+        .findIndex((item) => item.id === id) === 0
     const isFirstProviders =
       PROVIDERS.filter((item) => item.id !== activeOption).findIndex(
         (item) => item.id === id,
@@ -42,6 +60,7 @@ export const IntentoOptions = () => {
       }),
     }
   }
+
   return (
     <div className="options-container-content">
       <div className="mt-params-option">
@@ -72,13 +91,13 @@ export const IntentoOptions = () => {
         </div>
         <Controller
           control={control}
-          name="intento_routing"
+          name={routingOrProviderKey}
           render={({field: {onChange, value, name}}) => (
             <Select
               name={name}
               placeholder="Select provider"
-              options={ALL_OPTIONS}
-              activeOption={ALL_OPTIONS.find(({id}) => id === value)}
+              options={allOptions}
+              activeOption={allOptions.find(({id}) => id === value)}
               onSelect={(option) => onChange(option.id)}
               isPortalDropdown={true}
               dropdownClassName="select-intento-routing-providers"
@@ -91,4 +110,8 @@ export const IntentoOptions = () => {
       </div>
     </div>
   )
+}
+
+IntentoOptions.propTypes = {
+  id: PropTypes.number.isRequired,
 }

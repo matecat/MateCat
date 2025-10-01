@@ -35,7 +35,9 @@ export const OptionsContainer = ({activeMTEngineData, isCattoolPage}) => {
           Options
         </button>
       </div>
-      {isExpanded && OptionsContent && <OptionsContent />}
+      {isExpanded && OptionsContent && (
+        <OptionsContent id={activeMTEngineData.id} />
+      )}
     </div>
   )
 }

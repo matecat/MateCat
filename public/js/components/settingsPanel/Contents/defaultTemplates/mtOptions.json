@@ -17,7 +17,7 @@
   },
   "Intento": {
     "pre_translate_files": false,
-    "intento_routing": "ai.text.translate.aisa.neural_machine_translation"
+    "intento_provider": "ai.text.translate.aisa.neural_machine_translation"
   },
   "Altlang": {
     "pre_translate_files": false
