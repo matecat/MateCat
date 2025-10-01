@@ -467,7 +467,7 @@ class ConversionHandler {
         $decoded_filename = html_entity_decode( $file_name, ENT_QUOTES );
 
         if($decoded_filename !== $file_name){
-            throw new Exception("Invalid file name: escaped entities (e.g. &amp;) are not allowed.");
+            throw new Exception("Invalid file name: symbols (e.g. & ') are not allowed.");
         }
 
         $this->file_name = $decoded_filename;
