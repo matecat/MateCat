@@ -1028,7 +1028,7 @@ class CatUtils {
      * @return string
      */
     public static function sanitizeProjectName( string $name ): string {
-        return preg_replace( '/[^\p{L}\p{N}\s]/u', '', $name );
+        return preg_replace( '/[^_\p{L}\p{N}\s]/u', '', $name );
     }
 
     /**
