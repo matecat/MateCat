@@ -141,6 +141,20 @@ const NewProject = () => {
     [modifyingCurrentTemplate],
   )
 
+  const tagging = useMemo(
+    () =>
+      currentProjectTemplate && currentProjectTemplate.subfiltering_handlers,
+    [currentProjectTemplate],
+  )
+  const setTagging = useCallback(
+    ({options}) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        subfiltering_handlers: options,
+      })),
+    [modifyingCurrentTemplate],
+  )
+
   const sourceLang = useMemo(
     () =>
       supportedLanguages?.length && currentProjectTemplate
@@ -495,6 +509,7 @@ const NewProject = () => {
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
+      subfiltering_handlers: JSON.stringify(tagging),
       mt_engine: mt.id,
       private_keys_list: JSON.stringify({
         ownergroup: [],
@@ -873,6 +888,8 @@ const NewProject = () => {
         setSelectedTeam,
         subject,
         setSubject,
+        tagging,
+        setTagging,
         openGDrive,
         setOpenGDrive,
         setIsGDriveEnabled,
