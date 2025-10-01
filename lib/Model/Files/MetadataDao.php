@@ -14,7 +14,8 @@ use ReflectionException;
 
 class MetadataDao extends AbstractDao {
 
-    const TABLE = 'file_metadata';
+    const TABLE                              = 'file_metadata';
+    const _query_metadata_by_project_id_file = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file ";
 
     /**
      * @param int $id_project
@@ -25,16 +26,21 @@ class MetadataDao extends AbstractDao {
      * @throws ReflectionException
      */
     public function getByJobIdProjectAndIdFile( int $id_project, int $id_file, int $ttl = 0 ): ?array {
-        $stmt = $this->_getStatementForQuery(
-                "SELECT * FROM " . self::TABLE . " WHERE " .
-                " id_project = :id_project " .
-                " AND id_file = :id_file "
-        );
+        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_project_id_file );
 
         return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, MetadataStruct::class, [
                 'id_project' => $id_project,
                 'id_file'    => $id_file,
         ] );
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function destroyCacheByJobIdProjectAndIdFile( int $id_project, int $id_file ): bool {
+        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_project_id_file );
+
+        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'id_project' => $id_project, 'id_file' => $id_file, ] );
     }
 
     /**

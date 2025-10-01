@@ -53,6 +53,7 @@ class FilesInfoUtility {
             foreach ( $fileInfo as $file ) {
 
                 $filePartsIdArray = [];
+                $metadata         = [];
 
                 foreach ( $fileMetadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file, 60 * 5 ) as $metadatum ) {
 
@@ -147,6 +148,8 @@ class FilesInfoUtility {
             } else {
                 $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );
             }
+
+            $metadataDao->destroyCacheByJobIdProjectAndIdFile( (int)$this->project->id, (int)$id_file );
 
             return true;
         }
