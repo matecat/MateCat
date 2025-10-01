@@ -96,16 +96,6 @@ class NewController extends KleinController {
             throw new InvalidArgumentException( "No files were uploaded." );
         }
 
-        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
-
-        if ( count( $arFiles ) > 1 ) {
-            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-        }
-
-        if ( empty( $request[ 'project_name' ] ) ) {
-            $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
-        }
-
         $uploadTokenValue = $uploadFile->getDirUploadToken();
         $uploadDir        = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
         $errDir           = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;

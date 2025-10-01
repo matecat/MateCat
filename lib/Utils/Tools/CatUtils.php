@@ -1028,13 +1028,13 @@ class CatUtils {
      * @return string
      */
     public static function sanitizeProjectName( string $name ): string {
-        return preg_replace( '/[^_\p{L}\p{N}\s]/u', '', $name );
+        return preg_replace( '/[^-_\p{L}\p{N}\s]/u', '', $name );
     }
 
     /**
      * This function check if the name contains any symbol
      *
-     * @param $name
+     * @param string $name
      *
      * @return bool
      */
@@ -1045,9 +1045,12 @@ class CatUtils {
     /**
      * Validates the provided project name or generates a fallback name if the provided name is invalid or missing.
      *
-     * This method ensures that the project name is sanitized and valid. If the provided name is empty or invalid,
-     * it generates a fallback name based on the current date and time. If only one file is provided in the `$arrFiles` array,
-     * the fallback name is derived from the file name.
+     * This method ensures that the project name is sanitized and valid.
+     *
+     * If the provided name is empty or invalid:
+     * - It uses a fallback name based on the current date and time as the project name when there are more than one file.
+     * - If only one file is provided in the `$arrFiles` array, the fallback name is derived from the file name.
+     *   The file name is sanitized to ensure it meets the project name criteria.
      *
      * @param string $name     The project name to validate. An empty string is treated as missing.
      * @param array  $arrFiles An array of file paths used to determine a fallback name if the project name is invalid.
@@ -1060,37 +1063,32 @@ class CatUtils {
         // Generate a fallback name using the current date and time.
         $fallback = 'MATECAT_PROJ-' . date( 'YmdHi' );
 
-        // Check if the provided name is an empty string.
+        // Check if the provided name is empty.
         if ( $name == '' ) {
-
-            // If multiple files are provided, return the fallback name.
-            if ( count( $arrFiles ) > 1 ) {
-                return $fallback;
-            }
-
-            // If exactly one file is provided, sanitize and return its name as the fallback.
+            // If exactly one file is provided, sanitize and use its name as the fallback.
             if ( count( $arrFiles ) === 1 ) {
                 $file = end( $arrFiles );
-
-                return CatUtils::sanitizeProjectName( AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME ) );
+                $name = CatUtils::sanitizeProjectName( AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME ) );
             }
 
+            // Return the sanitized name or the fallback if the name is still empty.
+            return $name != '' ? $name : $fallback;
         }
 
-        // Sanitize the provided name to remove invalid characters.
-        $name = CatUtils::sanitizeProjectName( $name );
+        // Sanitize the provided name.
+        $s_name = CatUtils::sanitizeProjectName( $name );
 
-        // If the sanitized name is still empty, return the fallback name.
-        if ( $name == '' ) {
-            return $fallback;
+        // Throw an exception if the sanitized name contains invalid symbols.
+        if ( $s_name != $name ) {
+            throw new InvalidArgumentException( "Invalid file name: symbols (e.g. & ') are not allowed.", -3 );
         }
 
-        // Return the validated and sanitized project name.
+        // Return the sanitized name or the fallback if the name is still empty.
         return $name;
     }
 
     /**
-     * This method can be use as polyfill of FILTER_SANITIZE_STRING,
+     * This method can be used as polyfill of FILTER_SANITIZE_STRING,
      * which is DEPRECATED in PHP >= 8.1
      *
      * @param string $string
