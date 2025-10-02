@@ -67,7 +67,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->character_counter_count_tags = $decodedObject->character_counter_count_tags;
         $this->character_counter_mode       = $decodedObject->character_counter_mode;
         $this->subject                      = $decodedObject->subject;
-        $this->subfiltering_handlers        = json_encode( $decodedObject->subfiltering_handlers ?? null );
+        $this->subfiltering_handlers        = json_encode( $decodedObject->subfiltering_handlers );
         $this->source_language              = $decodedObject->source_language;
         $this->target_language              = ( !empty( $decodedObject->target_language ) ) ? serialize( $decodedObject->target_language ) : null;
         $this->mt_quality_value_in_editor   = ( !empty( $decodedObject->mt_quality_value_in_editor ) ) ? (int)$decodedObject->mt_quality_value_in_editor : null;
@@ -120,6 +120,14 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         return unserialize( $this->target_language );
     }
 
+    public function getSubfilteringHandlers(): array {
+        if ( !empty( $this->subfiltering_handlers ) ) {
+            return json_decode( $this->subfiltering_handlers, true );
+        }
+
+        return [];
+    }
+
     /**
      * @inheritDoc
      */
@@ -147,7 +155,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
                 'character_counter_count_tags'     => $this->character_counter_count_tags,
                 'character_counter_mode'           => $this->character_counter_mode,
                 'subject'                          => $this->subject,
-                MetadataDao::SUBFILTERING_HANDLERS => json_decode( $this->subfiltering_handlers, true ),
+                MetadataDao::SUBFILTERING_HANDLERS => $this->getSubfilteringHandlers(),
                 'source_language'                  => $this->source_language,
                 'target_language'                  => $this->getTargetLanguage(),
                 'created_at'                       => date_create( $this->created_at )->format( DATE_RFC822 ),

@@ -24,8 +24,6 @@ use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
-use Utils\Validator\JSONSchema\JSONValidator;
-use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
@@ -129,16 +127,16 @@ class ProjectTemplateDao extends AbstractDao {
 
     /**
      * @param ProjectTemplateStruct $projectTemplateStruct
-     * @param string                $json
+     * @param object                $json
      * @param int                   $id
      * @param UserStruct            $user
      *
      * @return ProjectTemplateStruct
+     * @throws ReflectionException
      * @throws Exception
      */
-    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, UserStruct $user ): ProjectTemplateStruct {
+    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, object $json, int $id, UserStruct $user ): ProjectTemplateStruct {
 
-        $json = json_decode( $json );
         $projectTemplateStruct->hydrateFromJSON( $json, $user->uid, $id );
 
         self::checkValues( $projectTemplateStruct, $user );
@@ -166,11 +164,11 @@ class ProjectTemplateDao extends AbstractDao {
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, UserStruct $user ) {
 
         // check subfiltering string
-        if ( $projectTemplateStruct->subfiltering_handlers !== null ) {
-            $validatorObject = new JSONValidatorObject( $projectTemplateStruct->subfiltering_handlers );
-            $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
-            $validator->validate( $validatorObject );
-        }
+//        if ( $projectTemplateStruct->subfiltering_handlers !== null ) {
+//            $validatorObject = new JSONValidatorObject( $projectTemplateStruct->subfiltering_handlers );
+//            $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
+//            $validator->validate( $validatorObject );
+//        }
 
         // check id_team
         $team = ( new MembershipDao() )->setCacheTTL( 60 * 5 )->findTeamByIdAndUser(
@@ -402,7 +400,7 @@ class ProjectTemplateDao extends AbstractDao {
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
                 "name"                         => $projectTemplateStruct->name,
-                "subfiltering"                 => $projectTemplateStruct->subfiltering_handlers,
+                "subfiltering_handlers"        => $projectTemplateStruct->subfiltering_handlers,
                 "is_default"                   => $projectTemplateStruct->is_default,
                 "uid"                          => $projectTemplateStruct->uid,
                 "id_team"                      => $projectTemplateStruct->id_team,
@@ -456,7 +454,7 @@ class ProjectTemplateDao extends AbstractDao {
             `is_default` = :is_default, 
             `uid` = :uid, 
             `id_team` = :id_team, 
-            `subfiltering` = :subfiltering, 
+            `subfiltering_handlers` = :subfiltering_handlers, 
             `segmentation_rule` = :segmentation_rule, 
             `tm` = :tm, 
             `mt` = :mt, 
@@ -484,7 +482,7 @@ class ProjectTemplateDao extends AbstractDao {
         $stmt->execute( [
                 "id"                           => $projectTemplateStruct->id,
                 "name"                         => $projectTemplateStruct->name,
-                "subfiltering"                 => $projectTemplateStruct->subfiltering_handlers,
+                "subfiltering_handlers"        => $projectTemplateStruct->subfiltering_handlers,
                 "is_default"                   => $projectTemplateStruct->is_default,
                 "uid"                          => $projectTemplateStruct->uid,
                 "id_team"                      => $projectTemplateStruct->id_team,
