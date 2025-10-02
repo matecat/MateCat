@@ -77,7 +77,7 @@ export const SCHEMA_KEYS = {
   characterCounterMode: 'character_counter_mode',
   dialectStrict: 'dialect_strict',
   mtQualityValueInEditor: 'mt_quality_value_in_editor',
-  subfiltering_handlers: 'subfiltering_handlers',
+  subfilteringHandlers: 'subfiltering_handlers',
 }
 
 export class UseProjectTemplateInterface extends ComponentExtendInterface {

@@ -1,51 +1,70 @@
-import React, {useContext, useMemo} from 'react'
+import React, {useCallback, useContext, useEffect, useMemo, useRef} from 'react'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
+
+export const taggingTypes = [
+  {id: 'markup', name: 'Markup', default: true},
+  {id: 'percent_double_curly', name: 'Percent Double Curly', default: true},
+  {id: 'twig', name: 'Twig Double Curly', default: true},
+  {id: 'ruby_on_rails', name: 'Ruby on Rails', default: true},
+  {id: 'double_snail', name: 'Double Snail', default: true},
+  {id: 'double_square', name: 'Double Square', default: true},
+  {id: 'dollar_curly', name: 'Dollar Curly', default: true},
+  {id: 'single_curly', name: 'Single Curly', default: false},
+  {id: 'objective_c_ns', name: 'Objective CNS', default: true},
+  {id: 'double_percent', name: 'Double Percent', default: true},
+  {id: 'square_sprintf', name: 'Square Sprintf', default: true},
+  {id: 'sprintf', name: 'Sprintf', default: true},
+]
 
 export const Tagging = () => {
-  const {SELECT_HEIGHT, tagging, setTagging} = useContext(CreateProjectContext)
-  const types = useMemo(
-    () => [
-      {id: 'markup', name: 'Markup'},
-      {id: 'percent_double_curly', name: 'Percent Double Curly'},
-      {id: 'twig', name: 'Twig Double Curly'},
-      {id: 'ruby_on_rails', name: 'Ruby on Rails'},
-      {id: 'double_snail', name: 'Double Snail'},
-      {id: 'double_square', name: 'Double Square'},
-      {id: 'dollar_curly', name: 'Dollar Curly'},
-      {id: 'single_curly', name: 'Single Curly'},
-      {id: 'objective_c_ns', name: 'Objective CNS'},
-      {id: 'double_percent', name: 'Double Percent'},
-      {id: 'square_sprintf', name: 'Square Sprintf'},
-      {id: 'sprintf', name: 'Sprintf'},
-    ],
-    [],
+  const {SELECT_HEIGHT} = useContext(CreateProjectContext)
+  const {currentProjectTemplate, modifyingCurrentTemplate} =
+    useContext(SettingsPanelContext)
+
+  const setTagging = useCallback(
+    ({options}) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        subfiltering_handlers: options,
+      })),
+    [modifyingCurrentTemplate],
   )
-  const taggingArray = [
-    {id: 'all', name: 'All'},
-    {id: 'none', name: 'None'},
-  ].concat(types)
 
   const activeOptions = useMemo(() => {
-    if (tagging?.length === 0) return [{id: 'all', name: 'All'}]
+    const tagging = currentProjectTemplate?.subfilteringHandlers
+    if (tagging?.length === 0)
+      return taggingTypes.filter((type) => type.default)
     else if (tagging?.length > 0) {
-      return tagging.map((item) => types.find((type) => type.id === item))
+      return tagging.map((item) =>
+        taggingTypes.find((type) => type.id === item),
+      )
     } else {
-      return [{id: 'none', name: 'None'}]
+      return []
     }
-  }, [tagging, types])
+  }, [currentProjectTemplate?.subfilteringHandlers])
 
   const toggleOption = (option) => {
-    if (option.id === 'none') {
+    const optionsIds = activeOptions.map((option) => option.id)
+    if (optionsIds.includes(option.id)) {
+      optionsIds.splice(optionsIds.indexOf(option.id), 1)
+    } else {
+      optionsIds.push(option.id)
+    }
+    const defaultTaggingIds = taggingTypes
+      .filter((type) => type.default)
+      .map((type) => type.id)
+
+    if (optionsIds.length === 0) {
       setTagging({options: null})
-    } else if (option.id === 'all') {
+    } else if (
+      defaultTaggingIds.every((id) => optionsIds.includes(id)) &&
+      optionsIds.length === defaultTaggingIds.length
+    ) {
       setTagging({options: []})
     } else {
-      activeOptions.includes(option)
-        ? setTagging({
-            options: tagging.filter((item) => item !== option.id),
-          })
-        : setTagging({options: [...(tagging || []), option.id]})
+      setTagging({options: optionsIds})
     }
   }
 
@@ -64,7 +83,7 @@ export const Tagging = () => {
           dropdownClassName="select-dropdown__wrapper-portal"
           maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
-          options={taggingArray}
+          options={taggingTypes}
           activeOptions={activeOptions}
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}

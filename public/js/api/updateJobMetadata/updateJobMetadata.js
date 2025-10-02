@@ -17,6 +17,7 @@ export const updateJobMetadata = async ({
   tmPrioritization,
   characterCounterCountTags,
   characterCounterMode,
+  subfilteringHandlers,
 }) => {
   const paramsData = Object.entries({
     tm_prioritization:
@@ -32,6 +33,7 @@ export const updateJobMetadata = async ({
           ? '0'
           : undefined,
     character_counter_mode: characterCounterMode,
+    subfiltering_handlers: subfilteringHandlers,
   })
     .filter(([, value]) => typeof value !== 'undefined')
     .map(([key, value]) => ({key, value}))
