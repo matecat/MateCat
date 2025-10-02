@@ -70,10 +70,10 @@ class MetaDataController extends KleinController {
 
         foreach ( $project->getMetadata() as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = Utils::formatStringValue( $metadatum->getValue() );
+            $metadata->$key = Utils::formatStringValue( $metadatum->value );
 
             if ( in_array( $key, $myExtraKeys ) ) {
-                $metadata->mt_extra->$key = Utils::formatStringValue( $metadatum->getValue() );
+                $metadata->mt_extra->$key = Utils::formatStringValue( $metadatum->value );
             }
         }
 
