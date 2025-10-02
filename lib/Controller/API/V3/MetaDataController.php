@@ -52,7 +52,7 @@ class MetaDataController extends KleinController {
     private function getProjectInfo( ProjectStruct $project ): stdClass {
 
         $metadata = new stdClass();
-        $mtExtra  = new stdClass();
+        $metadata->mt_extra = new stdClass();
 
         $myExtraKeys = [
                 'pre_translate_files',
@@ -76,8 +76,6 @@ class MetaDataController extends KleinController {
                 $metadata->mt_extra->$key = Utils::formatStringValue( $metadatum->value );
             }
         }
-
-        $metadata->mt_extra = $mtExtra;
 
         return $metadata;
     }

@@ -116,16 +116,19 @@ class GetSegmentsController extends KleinController {
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance( $featureSet, $job->source, $job->target, null !== $data_ref_map ? $data_ref_map : [] );
 
-            $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
-            );
+            if ($seg[ 'segment' ] !== null and $seg[ 'translation' ] !== null ) {
 
-            $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] )
-            );
+                $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
+                        CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
+                );
 
-            $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
-            $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
+                $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
+                        CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] )
+                );
+
+                $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
+                $seg[ 'segment' ] = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
+            }
 
             $seg[ 'metadata' ] = SegmentMetadataDao::getAll( $seg[ 'sid' ] );
 
