@@ -114,6 +114,7 @@ class ProjectTemplateDao extends AbstractDao {
      *
      * @return ProjectTemplateStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function createFromJSON( object $decodedObject, UserStruct $user ): ProjectTemplateStruct {
 
@@ -147,7 +148,7 @@ class ProjectTemplateDao extends AbstractDao {
     /**
      * Check if the template values are valid.
      *
-     * The checks includes:
+     * The check includes:
      *
      * - id_team
      * - qa_model_template_id
@@ -164,11 +165,7 @@ class ProjectTemplateDao extends AbstractDao {
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, UserStruct $user ) {
 
         // check subfiltering string
-//        if ( $projectTemplateStruct->subfiltering_handlers !== null ) {
-//            $validatorObject = new JSONValidatorObject( $projectTemplateStruct->subfiltering_handlers );
-//            $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
-//            $validator->validate( $validatorObject );
-//        }
+        // we don't need to check the subfiltering_handlers because it's already checked in the validation schema
 
         // check id_team
         $team = ( new MembershipDao() )->setCacheTTL( 60 * 5 )->findTeamByIdAndUser(
@@ -390,7 +387,7 @@ class ProjectTemplateDao extends AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `public_tm_penalty`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `subfiltering`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `public_tm_penalty`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `subfiltering_handlers`, `created_at` ) " .
                 " VALUES " .
                 " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :public_tm_penalty, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :subfiltering, :now ); ";
 
