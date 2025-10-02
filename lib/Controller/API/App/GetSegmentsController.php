@@ -116,19 +116,17 @@ class GetSegmentsController extends KleinController {
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance( $featureSet, $job->source, $job->target, null !== $data_ref_map ? $data_ref_map : [] );
 
-            if ($seg[ 'segment' ] !== null and $seg[ 'translation' ] !== null ) {
+            $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
+                    CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
+            );
 
-                $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
-                        CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
-                );
+            $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
+            // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
+                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] ) ?? ''  // use the null coalescing operator
+            );
 
-                $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
-                        CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] )
-                );
-
-                $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
-                $seg[ 'segment' ] = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
-            }
+            $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
+            $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
 
             $seg[ 'metadata' ] = SegmentMetadataDao::getAll( $seg[ 'sid' ] );
 
@@ -188,9 +186,22 @@ class GetSegmentsController extends KleinController {
     /**
      * @param SegmentUIStruct $segment
      * @param array           $segment_notes
+     *
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws \Model\Exceptions\NotFoundException
      */
     private function attachNotes( SegmentUIStruct &$segment, array $segment_notes ) {
-        $segment[ 'notes' ] = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
+
+        $notes = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
+
+        if ( is_array( $notes ) ) {
+            $notes = $this->featureSet->filter( 'prepareNotesForRendering', $notes );
+        }
+
+        $segment[ 'notes' ] = $notes;
     }
 
     /**
