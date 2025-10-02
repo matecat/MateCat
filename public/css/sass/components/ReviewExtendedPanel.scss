@@ -15,7 +15,7 @@ input {
 .review-balloon-container {
   padding-right: 15px;
   position: absolute;
-  top: 80px;
+  top: 65px;
   width: 100%;
   .re-wrapper {
     height: 100%;
@@ -320,51 +320,41 @@ section {
     background-color: #ffeb3b;
   }
 
-  .segment-side-buttons .revise-button {
-    text-decoration: none !important;
-    font-size: 28px;
-    color: colors.$grey1;
-    font-weight: bold;
-  }
+
 
   .translation-issues-button {
     cursor: pointer;
-    padding: 5px 7px 5px;
-    width: 50px;
-    position: absolute;
-    top: 50px;
+    position: relative;
+  }
+
+  .revise-button {
+    position: relative;
+    background-color: colors.$black100;
+    display: flex;
+    padding: 3px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    align-self: stretch;
+    cursor: pointer;
+    border-radius: 8px;
+    width: 18px;
+    height: 18px;
+    margin-left: 8px;
   }
 
   .translation-issues-button .revise-button {
-    visibility: hidden;
     display: block;
-    &.has-object {
-      visibility: visible;
+    position: relative;
+    &.no-object {
+      display: none;
     }
   }
 
   &:hover .translation-issues-button .revise-button,
   .translation-issues-button:hover .revise-button,
-  .segment-side-buttons:hover .translation-issues-button .revise-button {
-    visibility: visible;
-  }
-
-  .revise-button-counter {
-    left: 35px;
-    position: absolute;
-    top: 2px;
-    background: colors.$redDefault;
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 14px;
-    display: block;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 0 7px;
-    text-align: center;
-    width: 8px;
-    height: 15px;
-    line-height: 1.5;
+  .segment-side-buttons:hover .translation-issues-button .revise-button.no-object {
+    display: block !important;
   }
 
   .revise-button-2 {

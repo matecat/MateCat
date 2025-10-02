@@ -3,6 +3,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import $ from 'jquery'
 import {Shortcuts} from '../../utils/shortcuts'
 import SegmentUtils from '../../utils/segmentUtils'
+import ReviseIssuesIcon from '../../../img/icons/ReviseIssuesIcon'
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component {
   getIssueCount() {
@@ -20,29 +21,12 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
   handleClick(e) {
     e.preventDefault()
     e.stopPropagation()
-    $(this.button).addClass('open')
     SegmentActions.openIssuesPanel({sid: this.props.sid}, true)
   }
 
   render() {
     const issuesCount = this.getIssueCount()
-    let openClass = this.props.open ? 'open-issues' : ''
-    let plus = config.isReview ? (
-      <span className="revise-button-counter">+</span>
-    ) : null
-    if (issuesCount > 0) {
-      return (
-        <div title="Add Issues" onClick={this.handleClick.bind(this)}>
-          <a
-            ref={(button) => (this.button = button)}
-            className={'revise-button has-object ' + openClass}
-          >
-            <span className="icon-error_outline" />
-            <span className="revise-button-counter">{issuesCount}</span>
-          </a>
-        </div>
-      )
-    } else if (
+    if (
       config.isReview &&
       !(
         SegmentUtils.isIceSegment(this.props.segment) &&
@@ -51,22 +35,20 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
     ) {
       return (
         <div
+          className={`revise-button ${issuesCount === 0 && 'no-object'}`}
           title={
-            'Show Issues (' +
-            Shortcuts.cattol.events.openIssuesPanel.keystrokes[
-              Shortcuts.shortCutsKeyType
-            ].toUpperCase() +
-            ')'
+            issuesCount > 0
+              ? `Show Issues ( ${Shortcuts.cattol.events.openIssuesPanel.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ].toUpperCase()}     )`
+              : 'Add Issues'
           }
           onClick={this.handleClick.bind(this)}
         >
-          <a
-            ref={(button) => (this.button = button)}
-            className={'revise-button ' + openClass}
-          >
-            <span className="icon-error_outline" />
-            {plus}
-          </a>
+          <ReviseIssuesIcon />
+          <div className="badge-icon badge-red ">
+            {issuesCount > 0 ? issuesCount : '+'}
+          </div>
         </div>
       )
     } else {
