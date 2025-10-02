@@ -453,6 +453,12 @@ function CatTool() {
               ? cattoolInterface.getCharacterCounterMode()
               : undefined,
         mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,
+        mt: {
+          ...prevTemplate.mt,
+          extra: {
+            ...(jobMetadata.project.mt_extra ?? {}),
+          },
+        },
       }))
     }
   }, [
