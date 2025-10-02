@@ -88,7 +88,7 @@ function useProjectTemplates({
   tmKeys,
   mtEngines,
   isCattool = config.is_cattool,
-}) {
+} = {}) {
   const {
     templates: projectTemplates,
     setTemplates: setProjectTemplates,
