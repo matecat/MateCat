@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
@@ -10,6 +11,7 @@ use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
 use stdClass;
+use Utils\Tools\Utils;
 
 class MetaDataController extends KleinController {
     use ChunkNotFoundHandlerTrait;
@@ -50,28 +52,28 @@ class MetaDataController extends KleinController {
     private function getProjectInfo( ProjectStruct $project ): stdClass {
 
         $metadata = new stdClass();
-        $mtExtra = new stdClass();
+        $mtExtra  = new stdClass();
 
         $myExtraKeys = [
-            'pre_translate_files',
-            'mmt_glossaries',
-            'mmt_pre_import_tm',
-            'mmt_activate_context_analyzer',
-            'mmt_glossaries_case_sensitive_matching',
-            'lara_glossaries',
-            'deepl_formality',
-            'deepl_id_glossary',
-            'deepl_engine_type',
-            'intento_routing',
-            'intento_provider',
+                'pre_translate_files',
+                'mmt_glossaries',
+                'mmt_pre_import_tm',
+                'mmt_activate_context_analyzer',
+                'mmt_glossaries_case_sensitive_matching',
+                'lara_glossaries',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+                'intento_routing',
+                'intento_provider',
         ];
 
         foreach ( $project->getMetadata() as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = is_numeric( $metadatum->getValue() ) ? (int)$metadatum->getValue() : $metadatum->getValue();
+            $metadata->$key = Utils::formatStringValue( $metadatum->getValue() );
 
-            if(in_array($key, $myExtraKeys)){
-                $metadata->mt_extra->$key = is_numeric( $metadatum->getValue() ) ? (int)$metadatum->getValue() : $metadatum->getValue();
+            if ( in_array( $key, $myExtraKeys ) ) {
+                $metadata->mt_extra->$key = Utils::formatStringValue( $metadatum->getValue() );
             }
         }
 
@@ -93,7 +95,7 @@ class MetaDataController extends KleinController {
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = is_numeric( $metadatum->value ) ? (int)$metadatum->value : $metadatum->value;
+            $metadata->$key = Utils::formatStringValue( $metadatum->value );
         }
 
         return $metadata;
@@ -114,7 +116,7 @@ class MetaDataController extends KleinController {
             $metadatum = new stdClass();
             foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id, 60 * 5 ) as $meta ) {
                 $key             = $meta->key;
-                $metadatum->$key = is_numeric( $meta->value ) ? (int)$meta->value : $meta->value;
+                $metadatum->$key = Utils::formatStringValue( $meta->value );
             }
 
             $metadataObject           = new stdClass();
