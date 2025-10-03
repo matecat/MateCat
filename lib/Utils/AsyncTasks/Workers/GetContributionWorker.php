@@ -13,8 +13,8 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
-use Model\Projects\MetadataDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -381,9 +381,9 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        $_config[ 'dialect_strict' ]                   = $contributionStruct->dialect_strict;
-        $_config[ 'priority_key' ]                     = $contributionStruct->tm_prioritization;
-        $_config[ MetadataDao::SUBFILTERING_HANDLERS ] = $contributionStruct->subfiltering_handlers;
+        $_config[ 'dialect_strict' ]                       = $contributionStruct->dialect_strict;
+        $_config[ 'priority_key' ]                         = $contributionStruct->tm_prioritization;
+        $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] = $contributionStruct->subfiltering_handlers;
 
         // penalty_key
         $penalty_key = TmKeyManager::getPenaltyMap( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole );

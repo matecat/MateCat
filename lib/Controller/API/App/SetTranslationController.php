@@ -18,6 +18,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -358,13 +359,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $redisHandler = new RedisHandler();
             $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->data[ 'id_job' ] );
             if (
-            (
                     (
-                            $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
-                            $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
+                            (
+                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
+                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
+                            )
+                            and empty( $job_status )
                     )
-                    and empty( $job_status )
-            )
             ) {
                 $redisHandler->getConnection()->setex( 'job_completeness:' . $this->data[ 'id_job' ], 60 * 60 * 24 * 15, true ); //15 days
 
@@ -522,8 +523,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $featureSet->loadForProject( $this->data[ 'project' ] );
 
         /** @var MateCatFilter $filter */
-        $metadata     = new MetadataDao();
-        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ), $metadata->getSubfilteringCustomHandlers( (int)$this->data[ 'id_project' ] ) );
+        $metadata     = new JobsMetadataDao();
+        $filter       = MateCatFilter::getInstance(
+                $featureSet,
+                $this->data[ 'chunk' ]->source,
+                $this->data[ 'chunk' ]->target,
+                SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ),
+                $metadata->getSubfilteringCustomHandlers( $this->id_job, $this->password )
+        );
         $this->filter = $filter;
 
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
@@ -665,7 +672,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
     private function canUpdateSuggestion(
             SegmentTranslationStruct $new_translation,
             SegmentTranslationStruct $old_translation,
-            $old_suggestion = null ): bool {
+                                     $old_suggestion = null ): bool {
         if ( $old_suggestion === null ) {
             return false;
         }

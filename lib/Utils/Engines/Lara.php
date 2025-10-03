@@ -10,6 +10,7 @@ use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -319,7 +320,7 @@ class Lara extends AbstractEngine {
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
                 'score'           => $score ?? null
-        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ MetadataDao::SUBFILTERING_HANDLERS ] );
+        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] );
     }
 
     /**

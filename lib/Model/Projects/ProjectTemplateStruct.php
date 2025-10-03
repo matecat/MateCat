@@ -5,6 +5,7 @@ namespace Model\Projects;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Jobs\MetadataDao;
 use stdClass;
 
 class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {

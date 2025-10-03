@@ -8,7 +8,8 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Model\FeaturesBase\FeatureSet;
-use Model\Projects\MetadataDao;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 use Utils\LQA\QA;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
@@ -40,15 +41,15 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      *
      * @param int|null   $idProject
      */
-    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, ?int $idProject = null ) {
+    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, JobStruct $jobStruct = null ) {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
 
         $subfilteringCustomHandlers = [];
-        if ( $idProject !== null ) {
+        if ( $jobStruct !== null ) {
             $metadataDao                = new MetadataDao();
-            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers( $idProject );
+            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers( $jobStruct->id, $jobStruct->password );
         }
 
         $this->filter = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [], $subfilteringCustomHandlers );

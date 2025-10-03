@@ -36,7 +36,7 @@ class SegmentAnalysisController extends KleinController {
     private ProjectStruct $project;
 
     /**
-     * @var \Model\Projects\ProjectDao
+     * @var ProjectDao
      */
     private ProjectDao $projectDao;
 
@@ -320,9 +320,15 @@ class SegmentAnalysisController extends KleinController {
         }
 
         /** @var MateCatFilter $filter */
-        $jobStruct   = JobDao::getByIdAndPassword( (int)$segmentForAnalysis->id_job, $segmentForAnalysis->job_password );
+        $jobStruct = JobDao::getByIdAndPassword( (int)$segmentForAnalysis->id_job, $segmentForAnalysis->job_password );
+
+        /**
+         * Here we need to get the custom handlers from projects metadata for subfiltering,
+         * because we want the static behaviour for word count in analysis, not the dynamic one
+         * (that can be changed by the user in the job settings panel)
+         */
         $metadataDao = new MetadataDao();
-        $filter      = MateCatFilter::getInstance( $this->featureSet, $segmentForAnalysis->source, $segmentForAnalysis->target, [], $metadataDao->getSubfilteringCustomHandlers( (int)$jobStruct->id_project ) );
+        $filter      = MateCatFilter::getInstance( $this->featureSet, $segmentForAnalysis->source, $segmentForAnalysis->target, [], $metadataDao->getProjectStaticSubfilteringCustomHandlers( $jobStruct->id_project ) );
 
         return [
                 'id_segment'            => (int)$segmentForAnalysis->id,

@@ -162,7 +162,7 @@ class MMT extends AbstractEngine {
                     'created-by'      => $this->getMTName(),
                     'create-date'     => date( "Y-m-d" ),
                     'score'           => $translation[ 'score' ] ?? null
-            ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ ProjectsMetadataDao::SUBFILTERING_HANDLERS ] );
+            ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ MetadataDao::SUBFILTERING_HANDLERS ] );
 
         } catch ( Exception $e ) {
             return $this->GoogleTranslateFallback( $_config );

@@ -12,7 +12,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
-use Model\Projects\MetadataDao;
+use Model\Jobs\MetadataDao;
 use Model\Segments\ContextGroupDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
@@ -116,7 +116,7 @@ class GetSegmentsController extends KleinController {
 
             /** @var MateCatFilter $Filter */
             $metadata = new MetadataDao();
-            $Filter   = MateCatFilter::getInstance( $featureSet, $job->source, $job->target, null !== $data_ref_map ? $data_ref_map : [], $metadata->getSubfilteringCustomHandlers( (int)$job->id_project ) );
+            $Filter   = MateCatFilter::getInstance( $featureSet, $job->source, $job->target, null !== $data_ref_map ? $data_ref_map : [], $metadata->getSubfilteringCustomHandlers( $job->id, $job->password ) );
 
             $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
                     CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )

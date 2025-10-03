@@ -57,7 +57,7 @@ class GetTranslationMismatchesController extends KleinController {
         $this->response->json( [
                 'errors' => [],
                 'code'   => 1,
-                'data'   => ( new SegmentTranslationMismatches( $Translation_mismatches, $this->chunk->id_project, count( $Translation_mismatches ), $this->featureSet ) )->render()
+                'data'   => ( new SegmentTranslationMismatches( $Translation_mismatches, $this->chunk, count( $Translation_mismatches ), $this->featureSet ) )->render()
         ] );
 
     }

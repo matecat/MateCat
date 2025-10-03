@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\Jobs\ChunkDao;
-use Model\Projects\MetadataDao;
+use Model\Jobs\MetadataDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
@@ -37,7 +37,13 @@ class SplitSegmentController extends KleinController {
 
         /** @var MateCatFilter $Filter */
         $metadata = new MetadataDao();
-        $Filter = MateCatFilter::getInstance( $featureSet, $request[ 'jobStruct' ]->source, $request[ 'jobStruct' ]->target, [], $metadata->getSubfilteringCustomHandlers((int)$request[ 'jobStruct' ]->id_project) );
+        $Filter   = MateCatFilter::getInstance(
+                $featureSet,
+                $request[ 'jobStruct' ]->source,
+                $request[ 'jobStruct' ]->target,
+                [],
+                $metadata->getSubfilteringCustomHandlers( $request[ 'jobStruct' ]->id, $request[ 'jobStruct' ]->password )
+        );
         [ , $translationStruct->source_chunk_lengths ] = CatUtils::parseSegmentSplit( $request[ 'segment' ], '', $Filter );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */

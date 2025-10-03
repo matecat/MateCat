@@ -9,42 +9,43 @@
 
 namespace View\API\V2\Json;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Projects\MetadataDao;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 
 class SegmentTranslationMismatches {
 
-    protected $data;
-    protected $thereArePropagations;
-    protected $featureSet;
-    private   $idProject;
+    protected array       $data;
+    protected int         $thereArePropagations;
+    protected ?FeatureSet $featureSet;
+    private JobStruct     $jobStruct;
 
     /**
      * SegmentTranslationMismatches constructor.
-     * from query: getWarning( id_job, password )
+     * from query: getWarning(id_job, password)
      *
-     * @param                                     $Translation_mismatches
-     * @param                                     $idProject
-     * @param                                     $thereArePropagations
-     * @param \Model\FeaturesBase\FeatureSet|null $featureSet
-     *
-     * @throws \Exception
+     * @param array           $Translation_mismatches
+     * @param JobStruct       $jobStruct
+     * @param int             $thereArePropagations
+     * @param FeatureSet|null $featureSet
      */
-    public function __construct( $Translation_mismatches, $idProject, $thereArePropagations, \Model\FeaturesBase\FeatureSet $featureSet = null ) {
+    public function __construct( array $Translation_mismatches, JobStruct $jobStruct, int $thereArePropagations, FeatureSet $featureSet = null ) {
         $this->data                 = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
         if ( $featureSet == null ) {
-            $featureSet = new \Model\FeaturesBase\FeatureSet();
+            $featureSet = new FeatureSet();
         }
         $this->featureSet = $featureSet;
-        $this->idProject = $idProject;
+        $this->jobStruct  = $jobStruct;
     }
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function render() {
+    public function render(): array {
 
         $result = [
                 'editable'       => [],
@@ -52,12 +53,18 @@ class SegmentTranslationMismatches {
                 'prop_available' => $this->thereArePropagations
         ];
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \Model\FeaturesBase\FeatureSet();
+        $featureSet  = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         $metadataDao = new MetadataDao();
 
-        foreach ( $this->data as $position => $row ) {
+        foreach ( $this->data as $row ) {
 
-            $Filter = MateCatFilter::getInstance( $featureSet, $row[ 'source' ], $row[ 'target' ], [], $metadataDao->getSubfilteringCustomHandlers((int)$this->idProject) );
+            $Filter = MateCatFilter::getInstance(
+                    $featureSet,
+                    $row[ 'source' ],
+                    $row[ 'target' ],
+                    [],
+                    $metadataDao->getSubfilteringCustomHandlers( $this->jobStruct->id, $this->jobStruct->password )
+            );
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [

@@ -19,6 +19,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -163,7 +164,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $metadataDao = new MetadataDao();
 
         /** @var MatecatFilter $filter */
-        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target, [], $metadataDao->getSubfilteringCustomHandlers( (int)$queueElement->params->pid ) );
+        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target, [], $metadataDao->getProjectStaticSubfilteringCustomHandlers( (int)$queueElement->params->pid ) );
         $suggestion = $bestMatch[ 'translation' ] ?? ''; //No layering needed, whe use Layer 1 here
 
         $equivalentWordMapping = array_change_key_case( json_decode( $queueElement->params->payable_rates, true ), CASE_UPPER );
@@ -551,12 +552,12 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'target' ]     = $queueElement->params->target;
         $_config[ 'email' ]      = AppConfig::$MYMEMORY_TM_API_KEY;
 
-        $_config[ 'context_before' ]                   = $queueElement->params->context_before;
-        $_config[ 'context_after' ]                    = $queueElement->params->context_after;
-        $_config[ 'additional_params' ]                = $queueElement->params->additional_params ?? null;
-        $_config[ 'priority_key' ]                     = $queueElement->params->tm_prioritization ?? null;
-        $_config[ 'job_id' ]                           = $queueElement->params->id_job ?? null;
-        $_config[ MetadataDao::SUBFILTERING_HANDLERS ] = isset( $queueElement->params->subfiltering_handlers ) ? $queueElement->params->subfiltering_handlers->toArray() : null;
+        $_config[ 'context_before' ]                       = $queueElement->params->context_before;
+        $_config[ 'context_after' ]                        = $queueElement->params->context_after;
+        $_config[ 'additional_params' ]                    = $queueElement->params->additional_params ?? null;
+        $_config[ 'priority_key' ]                         = $queueElement->params->tm_prioritization ?? null;
+        $_config[ 'job_id' ]                               = $queueElement->params->id_job ?? null;
+        $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] = isset( $queueElement->params->subfiltering_handlers ) ? $queueElement->params->subfiltering_handlers->toArray() : null;
 
         if ( $queueElement->params->dialect_strict ?? false ) { //null coalesce operator when dialect_strict is not set
             $_config[ 'dialect_strict' ] = $queueElement->params->dialect_strict;

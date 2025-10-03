@@ -18,6 +18,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -172,6 +173,8 @@ class NewController extends KleinController {
 
         $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
+
+        $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ] = $request[ JobsMetadataDao::SUBFILTERING_HANDLERS ];
 
         // Lara glossaries
         if ( $request[ 'lara_glossaries' ] ) {
@@ -382,7 +385,7 @@ class NewController extends KleinController {
          * Note:
          * - The values above are expected as strings (e.g., "[]"), not native PHP types.
          */
-        $subfiltering_handlers = $this->validateSubfilteringOptions( $this->request->param( MetadataDao::SUBFILTERING_HANDLERS, '[]' ) ); // string value or default '[]'
+        $subfiltering_handlers = $this->validateSubfilteringOptions( $this->request->param( JobsMetadataDao::SUBFILTERING_HANDLERS, '[]' ) ); // string value or default '[]'
 
         if ( $mt_qe_workflow_enable ) {
 
@@ -423,8 +426,6 @@ class NewController extends KleinController {
         if ( $mt_evaluation ) {
             $metadata[ MetadataDao::MT_EVALUATION ] = true;
         }
-
-        $metadata[ MetadataDao::SUBFILTERING_HANDLERS ] = json_encode( $subfiltering_handlers );
 
         return [
                 'project_info'                              => $project_info,
@@ -473,6 +474,7 @@ class NewController extends KleinController {
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
                 'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null,
                 'legacy_icu'                                => $legacy_icu,
+                JobsMetadataDao::SUBFILTERING_HANDLERS      => json_encode( $subfiltering_handlers )
         ];
     }
 

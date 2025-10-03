@@ -7,7 +7,7 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\Projects\MetadataDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Users\UserStruct;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
@@ -200,13 +200,13 @@ class MyMemory extends AbstractEngine {
      */
     public function get( array $_config ): GetMemoryResponse {
 
-        $parameters                 = [];
-        $parameters[ 'q' ]          = $_config[ 'segment' ];
-        $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]         = $_config[ 'email' ];
-        $parameters[ 'mt' ]         = $_config[ 'get_mt' ];
-        $parameters[ 'numres' ]     = $_config[ 'num_result' ];
-        $parameters[ 'client_id' ]  = $_config[ 'uid' ] ?? 0;
+        $parameters                = [];
+        $parameters[ 'q' ]         = $_config[ 'segment' ];
+        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]        = $_config[ 'email' ];
+        $parameters[ 'mt' ]        = $_config[ 'get_mt' ];
+        $parameters[ 'numres' ]    = $_config[ 'num_result' ];
+        $parameters[ 'client_id' ] = $_config[ 'uid' ] ?? 0;
 
         // TM prioritization
         $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) && $_config[ 'priority_key' ] ) ? 1 : 0;
@@ -247,7 +247,7 @@ class MyMemory extends AbstractEngine {
         // Here we pass the subfiltering configuration to the API.
         // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
         // We use the JSON to pass a nullable value.
-        $parameters[ MetadataDao::SUBFILTERING_HANDLERS ] = json_encode( $_config[ MetadataDao::SUBFILTERING_HANDLERS ] ?? null ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
+        $parameters[ JobsMetadataDao::SUBFILTERING_HANDLERS ] = json_encode( $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] ?? null ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
 
         $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
 

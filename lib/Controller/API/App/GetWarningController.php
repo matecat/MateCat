@@ -12,7 +12,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
+use Model\Jobs\MetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Translations\WarningDao;
 use Utils\LQA\QA;
@@ -105,14 +105,14 @@ class GetWarningController extends KleinController {
         $src_content        = $request[ 'src_content' ];
         $trg_content        = $request[ 'trg_content' ];
         $password           = $request[ 'password' ];
-        $logs               = $request[ 'logs' ];
-        $segment_status     = $request[ 'segment_status' ];
+//        $logs               = $request[ 'logs' ];
+//        $segment_status     = $request[ 'segment_status' ];
         $characters_counter = $request[ 'characters_counter' ];
 
         $chunk      = $this->getChunk( $id_job, $password );
         $featureSet = $this->getFeatureSet();
         $metadata   = new MetadataDao();
-        $Filter     = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, [], $metadata->getSubfilteringCustomHandlers( (int)$chunk->id_project ) );
+        $Filter     = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, [], $metadata->getSubfilteringCustomHandlers( $chunk->id, $password ) );
 
         $src_content = $Filter->fromLayer0ToLayer2( $src_content );
         $trg_content = $Filter->fromLayer0ToLayer2( $trg_content );
@@ -194,7 +194,7 @@ class GetWarningController extends KleinController {
      * @param $id_job
      * @param $password
      *
-     * @return \Model\Jobs\JobStruct|null
+     * @return JobStruct|null
      * @throws Exception
      */
     private function getChunk( $id_job, $password ): ?JobStruct {

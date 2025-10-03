@@ -65,7 +65,7 @@ class GetContributionController extends KleinController {
 
         $contributionRequest   = new GetContributionRequest();
         $featureSet            = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
-        $subfiltering_handlers = ( new ProjectsMetadataDao )->getSubfilteringCustomHandlers( $projectStruct->id );
+        $subfiltering_handlers = ( new MetadataDao() )->getSubfilteringCustomHandlers( $jobStruct->id, $jobStruct->password );
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers );
 

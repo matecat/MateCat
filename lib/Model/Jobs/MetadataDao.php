@@ -2,6 +2,7 @@
 
 namespace Model\Jobs;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
@@ -17,6 +18,7 @@ class MetadataDao extends AbstractDao {
     const _query_metadata_by_job_id_key       = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
     const _query_metadata_by_job_password     = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
     const _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
+    const SUBFILTERING_HANDLERS               = 'subfiltering_handlers';
 
     /**
      * @param int    $id_job
@@ -157,7 +159,23 @@ class MetadataDao extends AbstractDao {
     }
 
     protected function _buildResult( array $array_result ) {
-        // TODO: Implement _buildResult() method.
+
+    }
+
+    /**
+     * @param int    $id_job
+     * @param string $password
+     *
+     * @return array
+     */
+    public function getSubfilteringCustomHandlers( int $id_job, string $password ): ?array {
+        try {
+            $subfiltering = $this->get( $id_job, $password, self::SUBFILTERING_HANDLERS, 86400 );
+
+            return json_decode( $subfiltering->value ?? '[]' ); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+        } catch ( Exception $exception ) {
+            return [];
+        }
     }
 
 }

@@ -11,8 +11,8 @@ use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
-use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
@@ -120,6 +120,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
+        $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]  = $this->data[ JobsMetadataDao::SUBFILTERING_HANDLERS ];
 
         // GDrive session instance
         if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
@@ -208,6 +209,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * applying default values where necessary.
      *
      * @return array An associative array containing sanitized and processed request data.
+     * @throws Exception
      */
     private function validateTheRequest(): array {
         $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -244,12 +246,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $array_keys = json_decode( $private_keys_list, true );
         $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
-        $arFiles      = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
+        $arFiles = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
 
         // Build project name from input or fallback:
         // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
         // - Accepts an array of ['name' => <filePath>] items.
-        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), array_map( fn ( $v ): array => [ 'name' => $v ], $arFiles  ) );
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), array_map( fn( $v ): array => [ 'name' => $v ], $arFiles ) );
 
         if ( !empty( $array_keys ) ) {
 
@@ -279,39 +281,39 @@ class CreateProjectController extends AbstractStatefulKleinController {
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
-                'file_names_list'                  => $arFiles,
-                'project_name'                     => $project_name,
-                'source_lang'                      => $source_lang,
-                'target_lang'                      => $target_lang,
-                'job_subject'                      => $job_subject,
-                'pretranslate_100'                 => $pretranslate_100,
-                'pretranslate_101'                 => $pretranslate_101,
-                'tm_prioritization'                => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
-                'id_team'                          => $id_team,
-                'mmt_glossaries'                   => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
-                'lara_glossaries'                  => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
-                'deepl_id_glossary'                => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
-                'deepl_formality'                  => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
-                'project_completion'               => $project_completion,
-                'get_public_matches'               => $get_public_matches,
-                'public_tm_penalty'                => $public_tm_penalty,
-                'character_counter_count_tags'     => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
-                'character_counter_mode'           => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
-                'dialect_strict'                   => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
-                'filters_extraction_parameters'    => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
-                'xliff_parameters'                 => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
-                'xliff_parameters_template_id'     => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
-                'qa_model_template'                => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
-                'qa_model_template_id'             => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
-                'payable_rate_template'            => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
-                'payable_rate_template_id'         => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
-                'array_keys'                       => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'mt_engine'                        => $mt_engine,
-                'disable_tms_engine_flag'          => $disable_tms_engine_flag,
-                'private_tm_key'                   => $private_tm_key,
-                'only_private'                     => $only_private,
-                'mt_quality_value_in_editor'       => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
-                'due_date'                         => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
+                'file_names_list'                      => $arFiles,
+                'project_name'                         => $project_name,
+                'source_lang'                          => $source_lang,
+                'target_lang'                          => $target_lang,
+                'job_subject'                          => $job_subject,
+                'pretranslate_100'                     => $pretranslate_100,
+                'pretranslate_101'                     => $pretranslate_101,
+                'tm_prioritization'                    => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
+                'id_team'                              => $id_team,
+                'mmt_glossaries'                       => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
+                'lara_glossaries'                      => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
+                'deepl_id_glossary'                    => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
+                'deepl_formality'                      => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
+                'project_completion'                   => $project_completion,
+                'get_public_matches'                   => $get_public_matches,
+                'public_tm_penalty'                    => $public_tm_penalty,
+                'character_counter_count_tags'         => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
+                'character_counter_mode'               => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
+                'dialect_strict'                       => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
+                'filters_extraction_parameters'        => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
+                'xliff_parameters'                     => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
+                'xliff_parameters_template_id'         => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+                'qa_model_template'                    => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
+                'qa_model_template_id'                 => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+                'payable_rate_template'                => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
+                'payable_rate_template_id'             => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
+                'array_keys'                           => ( !empty( $array_keys ) ) ? $array_keys : [],
+                'mt_engine'                            => $mt_engine,
+                'disable_tms_engine_flag'              => $disable_tms_engine_flag,
+                'private_tm_key'                       => $private_tm_key,
+                'only_private'                         => $only_private,
+                'mt_quality_value_in_editor'           => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
+                'due_date'                             => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
 
             /**
              * Subfiltering configuration (as string input):
@@ -323,7 +325,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
              * Note:
              * - The values above are expected as strings (e.g., "[]"), not native PHP types.
              */
-                MetadataDao::SUBFILTERING_HANDLERS => $this->validateSubfilteringOptions( $this->request->param( MetadataDao::SUBFILTERING_HANDLERS, '[]' ) ),
+                JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode( $this->validateSubfilteringOptions( $this->request->param( JobsMetadataDao::SUBFILTERING_HANDLERS, '[]' ) ) ),
         ];
 
         if ( $disable_tms_engine_flag ) {
@@ -420,8 +422,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function setMetadataFromPostInput( array $data = [] ) {
         // new raw counter model
         $options = [ MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW ];
-
-        $options[ MetadataDao::SUBFILTERING_HANDLERS ] = json_encode( $data[ MetadataDao::SUBFILTERING_HANDLERS ] );
 
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
