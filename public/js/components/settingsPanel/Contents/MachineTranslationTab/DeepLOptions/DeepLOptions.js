@@ -1,4 +1,5 @@
 import React, {useCallback, useContext} from 'react'
+import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import useOptions from '../useOptions'
 import {Controller} from 'react-hook-form'
@@ -17,7 +18,7 @@ const TYPE_ENGINES = [
   {name: 'Old generation', id: 'latency_optimized'},
 ]
 
-export const DeepLOptions = () => {
+export const DeepLOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
   const {control, setValue} = useOptions()
@@ -41,8 +42,14 @@ export const DeepLOptions = () => {
         <Controller
           control={control}
           name="pre_translate_files"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Switch
+              name={name}
+              active={value}
+              onChange={onChange}
+              disabled={disabled}
+            />
           )}
         />
       </div>
@@ -58,7 +65,8 @@ export const DeepLOptions = () => {
         <Controller
           control={control}
           name="deepl_formality"
-          render={({field: {onChange, value, name}}) => (
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
             <Select
               name={name}
               placeholder="Select formality"
@@ -67,6 +75,7 @@ export const DeepLOptions = () => {
               onSelect={(option) => onChange(option.id)}
               isPortalDropdown={true}
               maxHeightDroplist={260}
+              isDisabled={disabled}
             />
           )}
         />
@@ -83,7 +92,8 @@ export const DeepLOptions = () => {
         <Controller
           control={control}
           name="deepl_engine_type"
-          render={({field: {onChange, value, name}}) => (
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
             <Select
               name={name}
               placeholder="Select type engine to use"
@@ -92,15 +102,19 @@ export const DeepLOptions = () => {
               onSelect={(option) => onChange(option.id)}
               isPortalDropdown={true}
               maxHeightDroplist={260}
+              isDisabled={disabled}
             />
           )}
         />
       </div>
       <DeepLGlossary
         id={currentProjectTemplate.mt.id}
-        setGlossaries={setGlossaries}
-        isCattoolPage={config.is_cattool}
+        {...{setGlossaries, isCattoolPage}}
       />
     </div>
   )
+}
+
+DeepLOptions.propTypes = {
+  isCattoolPage: PropTypes.bool,
 }

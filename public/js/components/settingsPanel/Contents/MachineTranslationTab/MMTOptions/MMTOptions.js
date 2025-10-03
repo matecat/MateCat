@@ -1,11 +1,12 @@
 import React, {useCallback, useContext} from 'react'
+import PropTypes from 'prop-types'
 import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import {MTGlossary} from '../MTGlossary/MTGlossary'
 import useOptions from '../useOptions'
 
-export const MMTOptions = () => {
+export const MMTOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
   const {control, setValue} = useOptions()
@@ -29,8 +30,14 @@ export const MMTOptions = () => {
         <Controller
           control={control}
           name="mmt_activate_context_analyzer"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Switch
+              name={name}
+              active={value}
+              onChange={onChange}
+              disabled={disabled}
+            />
           )}
         />
       </div>
@@ -46,8 +53,14 @@ export const MMTOptions = () => {
         <Controller
           control={control}
           name="pre_translate_files"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Switch
+              name={name}
+              active={value}
+              onChange={onChange}
+              disabled={disabled}
+            />
           )}
         />
       </div>
@@ -64,16 +77,25 @@ export const MMTOptions = () => {
         <Controller
           control={control}
           name="mmt_glossaries_case_sensitive_matching"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Switch
+              name={name}
+              active={value}
+              onChange={onChange}
+              disabled={disabled}
+            />
           )}
         />
       </div>
       <MTGlossary
         id={currentProjectTemplate.mt.id}
-        setGlossaries={setGlossaries}
-        isCattoolPage={config.is_cattool}
+        {...{setGlossaries, isCattoolPage}}
       />
     </div>
   )
+}
+
+MMTOptions.propTypes = {
+  isCattoolPage: PropTypes.bool,
 }

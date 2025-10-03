@@ -1,11 +1,12 @@
 import React, {useCallback, useContext} from 'react'
+import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import useOptions from '../useOptions'
 import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {LaraGlossary} from '../LaraGlossary/LaraGlossary'
 
-export const LaraOptions = () => {
+export const LaraOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
   const {control, setValue} = useOptions()
@@ -29,16 +30,25 @@ export const LaraOptions = () => {
         <Controller
           control={control}
           name="pre_translate_files"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Switch
+              name={name}
+              active={value}
+              onChange={onChange}
+              disabled={disabled}
+            />
           )}
         />
       </div>
       <LaraGlossary
         id={currentProjectTemplate.mt.id}
-        setGlossaries={setGlossaries}
-        isCattoolPage={config.is_cattool}
+        {...{setGlossaries, isCattoolPage}}
       />
     </div>
   )
+}
+
+LaraOptions.propTypes = {
+  isCattoolPage: PropTypes.bool,
 }

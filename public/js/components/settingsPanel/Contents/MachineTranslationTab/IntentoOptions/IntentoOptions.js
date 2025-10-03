@@ -11,7 +11,7 @@ const PROVIDERS = config.intento_providers
   ? Object.values(config.intento_providers)
   : []
 
-export const IntentoOptions = ({id}) => {
+export const IntentoOptions = ({id, isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
   const {control, watch} = useOptions()
@@ -75,8 +75,14 @@ export const IntentoOptions = ({id}) => {
         <Controller
           control={control}
           name="pre_translate_files"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Switch
+              name={name}
+              active={value}
+              onChange={onChange}
+              disabled={disabled}
+            />
           )}
         />
       </div>
@@ -92,7 +98,8 @@ export const IntentoOptions = ({id}) => {
         <Controller
           control={control}
           name={routingOrProviderKey}
-          render={({field: {onChange, value, name}}) => (
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
             <Select
               name={name}
               placeholder="Select provider"
@@ -102,6 +109,7 @@ export const IntentoOptions = ({id}) => {
               isPortalDropdown={true}
               dropdownClassName="select-intento-routing-providers"
               maxHeightDroplist={260}
+              isDisabled={disabled}
             >
               {getOptionsChildren}
             </Select>
@@ -114,4 +122,5 @@ export const IntentoOptions = ({id}) => {
 
 IntentoOptions.propTypes = {
   id: PropTypes.number.isRequired,
+  isCattoolPage: PropTypes.bool,
 }

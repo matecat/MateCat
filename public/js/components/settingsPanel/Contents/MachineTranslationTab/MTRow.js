@@ -10,18 +10,17 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
 
   return (
     <>
-      {!config.is_cattool && (
-        <div className="settings-panel-cell-center">
-          <input
-            type="checkbox"
-            title="Use in this project"
-            data-testid={`checkbox-mt-active-${row.name}`}
-            checked={row.id === activeMTEngine ? true : false}
-            onChange={() => onCheckboxClick(row)}
-            disabled={config.is_cattool && row.id === activeMTEngine}
-          ></input>
-        </div>
-      )}
+      <div className="settings-panel-cell-center">
+        <input
+          type="checkbox"
+          title="Use in this project"
+          data-testid={`checkbox-mt-active-${row.name}`}
+          checked={row.id === activeMTEngine ? true : false}
+          onChange={() => onCheckboxClick(row)}
+          disabled={config.is_cattool && row.id === activeMTEngine}
+        ></input>
+      </div>
+
       <div className="settings-panel-mt-row">
         {row.name}
         {row.engine_type === 'MMTLite' && (

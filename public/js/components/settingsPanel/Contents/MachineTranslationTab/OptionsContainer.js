@@ -36,7 +36,7 @@ export const OptionsContainer = ({activeMTEngineData, isCattoolPage}) => {
         </button>
       </div>
       {isExpanded && OptionsContent && (
-        <OptionsContent id={activeMTEngineData.id} />
+        <OptionsContent id={activeMTEngineData.id} {...{isCattoolPage}} />
       )}
     </div>
   )
