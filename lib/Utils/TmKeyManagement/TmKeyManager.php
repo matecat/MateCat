@@ -11,7 +11,6 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
 use Utils\Logger\LoggerFactory;
-use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.
@@ -77,9 +76,7 @@ class TmKeyManager {
      */
     public static function getJobTmKeys( string $jsonTmKeys, string $grant_level = 'rw', string $type = "tm", ?int $uid = null, string $user_role = Filter::ROLE_TRANSLATOR ): array {
 
-        $tmKeys = json_decode( $jsonTmKeys, true );
-        Utils::raiseJsonExceptionError();
-
+        $tmKeys = json_decode( $jsonTmKeys, true, 512, JSON_THROW_ON_ERROR );
         $filter = new Filter( $uid );
         $filter->setGrants( $grant_level )
                 ->setTmType( $type );
@@ -300,10 +297,8 @@ class TmKeyManager {
 
         //we put the already present job keys so they can be checked against the client keys when cycle advances
         //( jobs has more elements than the client objects )
-        $clientDecodedJson = json_decode( $Json_clientKeys, true );
-        Utils::raiseJsonExceptionError();
-        $serverDecodedJson = json_decode( $Json_jobKeys, true );
-        Utils::raiseJsonExceptionError();
+        $clientDecodedJson = json_decode( $Json_clientKeys, true, 512, JSON_THROW_ON_ERROR );
+        $serverDecodedJson = json_decode( $Json_jobKeys, true, 512, JSON_THROW_ON_ERROR );
 
         if ( !array_key_exists( $userRole, Filter::$GRANTS_MAP ) ) {
             throw new Exception ( "Invalid Role Type string.", 4 );

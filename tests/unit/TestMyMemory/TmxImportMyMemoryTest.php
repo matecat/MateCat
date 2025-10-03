@@ -67,10 +67,39 @@ class TmxImportMyMemoryTest extends AbstractTest {
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new MyMemory( $engine_struct_param );
+        $uuid = Utils::uuid4();
+
+        $engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ 'getImportStatus', 'importMemory' ] )->getMock();
+        $engine_MyMemory->expects( $this->any() )->method( 'importMemory' )->willReturn( new FileImportAndStatusResponse( [
+                        'responseStatus'  => '202',
+                        'responseDetails' => '',
+                        'responseData'    =>
+                                [
+                                        'UUID' => $uuid,
+                                ],
+                ] )
+        );
+
+        $engine_MyMemory->expects( $this->any() )->method( 'getImportStatus' )->willReturn( new FileImportAndStatusResponse( [
+                        'messageType'    => 'tms-import',
+                        'responseData'   =>
+                                [
+                                        'uuid'          => $uuid,
+                                        'id'            => 2094143,
+                                        'creation_date' => '2025-10-01 15:31:49',
+                                        'totals'        => 2,
+                                        'completed'     => 2,
+                                        'skipped'       => 0,
+                                        'status'        => 1,
+                                        'log'           => null,
+                                        'download_url'  => null,
+                                ],
+                        'responseStatus' => 200,
+                ] )
+        );
+//        $engine_MyMemory = new MyMemory( $engine_struct_param ); // real call
 
         Languages::getInstance();
-
 
         /**
          * Path File initialization
@@ -80,7 +109,6 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
         $file_param = $path_of_the_original_file;
         $key_param  = "a6043e606ac9b5d7ff24";
-        $name_param = "exampleForTestOriginal.tmx";
 
 
         /**
@@ -118,7 +146,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
         $this->assertTrue( $importResult instanceof FileImportAndStatusResponse );
         $this->assertTrue( Utils::isTokenValid( $importResult->id ) );
-        $this->assertEquals( $importResult->id, $importResult->id );
+        $this->assertEquals( $importResult->id, $result->id );
         $this->assertEquals( 200, $importResult->responseStatus );
         $this->assertEquals( "", $importResult->responseDetails );
         $this->assertCount( 9, $importResult->responseData );

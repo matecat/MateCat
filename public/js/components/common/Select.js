@@ -13,6 +13,7 @@ import ChevronDown from '../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
 import IconClose from '../icons/IconClose'
+import qaCheckGlossaryHighlightComponent from '../segments/GlossaryComponents/QaCheckGlossaryHighlight.component'
 
 const mergeClassNames = (...args) => {
   return (
@@ -332,7 +333,7 @@ export const Select = ({
       >
         <div ref={selectedItemRef} className="select-with-icon__wrapper">
           <div className={inputClassName} onClick={toggleDropdown}>
-            {showResetButton && activeOption ? (
+            {showResetButton && (activeOption || activeOptions) ? (
               <div
                 className="icon-reset"
                 onClick={(e) => {

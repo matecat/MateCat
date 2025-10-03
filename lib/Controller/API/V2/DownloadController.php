@@ -267,7 +267,7 @@ class DownloadController extends AbstractDownloadController {
                     $xsp = new XliffParser();
 
                     // instantiateXliffReplacerCallback
-                    $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $jobData[ 'target' ] );
+                    $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $jobData[ 'target' ], (int)$this->project->id );
 
                     // run xliff replacer
                     $this->logger->debug( "work on " . $fileID . " " . $current_filename );

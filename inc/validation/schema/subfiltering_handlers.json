@@ -1,0 +1,32 @@
+{
+  "oneOf": [
+    {
+      "const": ""
+    },
+    {
+      "const": "none"
+    },
+    {
+      "type": "null"
+    },
+    {
+      "type": "array",
+      "items": {
+        "enum": [
+          "markup",
+          "percent_double_curly",
+          "twig",
+          "ruby_on_rails",
+          "double_snail",
+          "double_square",
+          "dollar_curly",
+          "single_curly",
+          "objective_c_ns",
+          "double_percent",
+          "square_sprintf",
+          "sprintf"
+        ]
+      }
+    }
+  ]
+}

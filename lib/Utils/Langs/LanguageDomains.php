@@ -37,8 +37,7 @@ class LanguageDomains {
 
         $string = file_get_contents( $file );
         //parse to an associative array
-        $subjects = json_decode( $string, true );
-        Utils::raiseJsonExceptionError();
+        $subjects = json_decode( $string, true, 512, JSON_THROW_ON_ERROR );
 
         self::$subjectMap = $subjects;
 

@@ -13,6 +13,7 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
@@ -21,6 +22,7 @@ use Utils\AsyncTasks\Workers\Traits\MatchesComparator;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\LQA\PostProcess;
 use Utils\Registry\AppConfig;
@@ -135,10 +137,12 @@ class GetContributionWorker extends AbstractWorker {
             $type = 'cross_language_matches';
         }
 
+        $jobStruct = $contributionStruct->getJobStruct();
+
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
                 $featureSet,
-                $contributionStruct->getJobStruct()->source,
+                $jobStruct->source,
                 $targetLang,
                 $contributionStruct->dataRefMap
         );
@@ -151,8 +155,8 @@ class GetContributionWorker extends AbstractWorker {
 
             // Convert &#10; to layer2 placeholder for the UI
             // Those strings are on layer 1, force the transition to layer 2.
-            $match[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $match[ 'segment' ] );
-            $match[ 'translation' ] = $Filter->fromLayer1ToLayer2( $match[ 'translation' ] );
+            $match[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $match[ 'segment' ] ?? '' );
+            $match[ 'translation' ] = $Filter->fromLayer1ToLayer2( $match[ 'translation' ] ?? '' );
         }
 
         $_object = [
@@ -377,8 +381,9 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
-        $_config[ 'priority_key' ]   = $contributionStruct->tm_prioritization;
+        $_config[ 'dialect_strict' ]                       = $contributionStruct->dialect_strict;
+        $_config[ 'priority_key' ]                         = $contributionStruct->tm_prioritization;
+        $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] = $contributionStruct->subfiltering_handlers;
 
         // penalty_key
         $penalty_key = TmKeyManager::getPenaltyMap( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole );
@@ -445,6 +450,7 @@ class GetContributionWorker extends AbstractWorker {
 
         if ( isset( $_TMS ) ) {
 
+            /** @var MyMemory $tmEngine */
             $tmEngine = $contributionStruct->getTMEngine( $featureSet );
             $config   = array_merge( $tmEngine->getConfigStruct(), $_config );
 
@@ -459,7 +465,7 @@ class GetContributionWorker extends AbstractWorker {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
                 /** @var GetMemoryResponse $temp_matches */
-                $tms_match = $temp_matches->get_matches_as_array( 1, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
+                $tms_match = $temp_matches->get_matches_as_array( 1 );
             }
         }
 

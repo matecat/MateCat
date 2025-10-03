@@ -290,9 +290,7 @@ class AMQHandler {
         $mHandler->multiExec();
         $result = $mHandler->getSingleContent( $resource );
         $mHandler->multiCurlCloseAll();
-        $result = json_decode( $result, true );
-
-        Utils::raiseJsonExceptionError();
+        $result = json_decode( $result, true, 512, JSON_THROW_ON_ERROR );
 
         return $result[ 'value' ];
     }

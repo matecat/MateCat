@@ -5,6 +5,7 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\DataAccess\IDaoStruct;
@@ -35,7 +36,7 @@ class SegmentAnalysisController extends KleinController {
     private ProjectStruct $project;
 
     /**
-     * @var \Model\Projects\ProjectDao
+     * @var ProjectDao
      */
     private ProjectDao $projectDao;
 
@@ -318,6 +319,17 @@ class SegmentAnalysisController extends KleinController {
             $issues = $issuesAggregate[ $segmentForAnalysis->id_job ][ $segmentForAnalysis->id ];
         }
 
+        /** @var MateCatFilter $filter */
+        $jobStruct = JobDao::getByIdAndPassword( (int)$segmentForAnalysis->id_job, $segmentForAnalysis->job_password );
+
+        /**
+         * Here we need to get the custom handlers from projects metadata for subfiltering,
+         * because we want the static behaviour for word count in analysis, not the dynamic one
+         * (that can be changed by the user in the job settings panel)
+         */
+        $metadataDao = new MetadataDao();
+        $filter      = MateCatFilter::getInstance( $this->featureSet, $segmentForAnalysis->source, $segmentForAnalysis->target, [], $metadataDao->getProjectStaticSubfilteringCustomHandlers( $jobStruct->id_project ) );
+
         return [
                 'id_segment'            => (int)$segmentForAnalysis->id,
                 'id_chunk'              => (int)$segmentForAnalysis->id_job,
@@ -330,8 +342,8 @@ class SegmentAnalysisController extends KleinController {
                 'target'                => $segmentForAnalysis->translation,
                 'source_lang'           => $segmentForAnalysis->source,
                 'target_lang'           => $segmentForAnalysis->target,
-                'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
-                'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
+                'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source, $filter ),
+                'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target, $filter ),
                 'match_type'            => $matchConstants::toExternalMatchTypeName( $segmentForAnalysis->match_type ?? 'default' ),
                 'revision_number'       => ( $segmentForAnalysis->source_page ) ? ReviewUtils::sourcePageToRevisionNumber( $segmentForAnalysis->source_page ) : null,
                 'issues'                => $issues,

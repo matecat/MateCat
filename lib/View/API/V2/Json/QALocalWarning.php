@@ -13,6 +13,7 @@ namespace View\API\V2\Json;
 use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Projects\MetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Utils\LQA\QA;
 
@@ -20,16 +21,19 @@ class QALocalWarning extends QAWarning {
 
     protected QA  $QA;
     protected int $id_segment;
+    protected int $idProject;
 
     /**
      * QALocalWarning constructor.
      *
      * @param QA  $QA
      * @param int $idSegment
+     * @param int $idProject
      */
-    public function __construct( QA $QA, int $idSegment ) {
+    public function __construct( QA $QA, int $idSegment, int $idProject ) {
         $this->QA         = $QA;
         $this->id_segment = $idSegment;
+        $this->idProject  = $idProject;
     }
 
     /**
@@ -76,10 +80,14 @@ class QALocalWarning extends QAWarning {
             }
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
-            
+
             /** * @var MateCatFilter $Filter */
-            $Filter           = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), SegmentOriginalDataDao::getSegmentDataRefMap
-            ( $this->id_segment ) );
+            $Filter      = MateCatFilter::getInstance(
+                    $this->QA->getFeatureSet(),
+                    $this->QA->getSourceSegLang(),
+                    $this->QA->getTargetSegLang(),
+                    SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment )
+            );
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
                 $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawSource );

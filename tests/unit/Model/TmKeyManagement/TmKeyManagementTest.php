@@ -1,8 +1,12 @@
 <?php
 
+namespace unit\Model\TmKeyManagement;
+
+use Exception;
 use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use TestHelpers\Utils;
 use Utils\TmKeyManagement\Filter;
@@ -1065,7 +1069,7 @@ class TmKeyManagementTest extends AbstractTest {
         try {
             TmKeyManager::getJobTmKeys( self::$invalidJsonStringTmKeyList );
         } catch ( Exception $e ) {
-            $invalidJSON_position = strpos( $e->getMessage(), "Syntax error, malformed JSON" );
+            $invalidJSON_position = strpos( $e->getMessage(), "Syntax error" );
 
             $this->assertTrue( $invalidJSON_position > -1 );
         }

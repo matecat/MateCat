@@ -2,17 +2,17 @@
 
 namespace Controller\API\App;
 
-use Controller\Traits\ScanDirectoryForConvertedFiles;
-use Utils\Tools\CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
 use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
@@ -35,6 +35,7 @@ use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -64,17 +65,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->featureSet->loadFromUserEmail( $this->user->email );
         $this->data = $this->validateTheRequest();
 
-        $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
-        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
-
-        if ( count( $arFiles ) > 1 ) {
-            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-        }
-
-        if ( empty( $this->data[ 'project_name' ] ) ) {
-            $this->data[ 'project_name' ] = $default_project_name;
-        }
-
         // SET SOURCE COOKIE
         CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->data[ 'source_lang' ],
                 [
@@ -102,7 +92,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
         $uploadDir  = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-        $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
+        $filesFound = $this->getFilesList( $fs, $this->data[ 'file_names_list' ], $uploadDir );
 
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
@@ -130,6 +120,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
+        $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]  = $this->data[ JobsMetadataDao::SUBFILTERING_HANDLERS ];
 
         // GDrive session instance
         if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
@@ -176,9 +167,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
         }
 
-        //TODO enable from CONFIG
-        $projectStructure[ 'metadata' ] = $this->metadata;
-
+        $projectStructure[ 'metadata' ]     = $this->metadata;
         $projectStructure[ 'userIsLogged' ] = true;
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
@@ -211,11 +200,18 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @return array
+     * Validates and processes the incoming request parameters to build a structured data array.
+     *
+     * This method retrieves and sanitizes input parameters from the request object,
+     * ensuring data integrity and security. It organizes the extracted parameters
+     * into a comprehensive array of values required for further processing. It also performs
+     * additional transformations, such as decoding JSON, merging and filtering arrays, as well as
+     * applying default values where necessary.
+     *
+     * @return array An associative array containing sanitized and processed request data.
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $project_name                  = $this->validateProjectName( $this->request->param( 'project_name' ) );
         $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -250,6 +246,13 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $array_keys = json_decode( $private_keys_list, true );
         $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
+        $arFiles = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
+
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), array_map( fn( $v ): array => [ 'name' => $v ], $arFiles ) );
+
         if ( !empty( $array_keys ) ) {
 
             //remove duplicates
@@ -268,43 +271,62 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
         $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
+        /**
+         * Represents a generic data variable that can hold a variety of information.
+         *
+         * This variable can be used to store different types of data, such as strings,
+         * integers, arrays, or objects, depending on the context where it is applied.
+         * Its value and type are dynamic and determined during runtime based on usage.
+         *
+         * @var mixed $data The data container allowing for versatile usage scenarios.
+         */
         $data = [
-                'file_name'                     => $file_name,
-                'project_name'                  => $project_name,
-                'source_lang'                   => $source_lang,
-                'target_lang'                   => $target_lang,
-                'job_subject'                   => $job_subject,
-                'pretranslate_100'              => $pretranslate_100,
-                'pretranslate_101'              => $pretranslate_101,
-                'tm_prioritization'             => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
-                'id_team'                       => $id_team,
-                'mmt_glossaries'                => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
-                'lara_glossaries'               => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
-                'deepl_id_glossary'             => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
-                'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
-                'project_completion'            => $project_completion,
-                'get_public_matches'            => $get_public_matches,
-                'public_tm_penalty'             => $public_tm_penalty,
-                'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
-                'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
-                'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
-                'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
-                'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
-                'xliff_parameters_template_id'  => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
-                'qa_model_template'             => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
-                'qa_model_template_id'          => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
-                'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
-                'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
-                'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'mt_engine'                     => $mt_engine,
-                'disable_tms_engine_flag'       => $disable_tms_engine_flag,
-                'private_tm_key'                => $private_tm_key,
-                'only_private'                  => $only_private,
-                'mt_quality_value_in_editor'    => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
-                'due_date'                      => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
-        ];
+                'file_names_list'                      => $arFiles,
+                'project_name'                         => $project_name,
+                'source_lang'                          => $source_lang,
+                'target_lang'                          => $target_lang,
+                'job_subject'                          => $job_subject,
+                'pretranslate_100'                     => $pretranslate_100,
+                'pretranslate_101'                     => $pretranslate_101,
+                'tm_prioritization'                    => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
+                'id_team'                              => $id_team,
+                'mmt_glossaries'                       => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
+                'lara_glossaries'                      => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
+                'deepl_id_glossary'                    => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
+                'deepl_formality'                      => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
+                'project_completion'                   => $project_completion,
+                'get_public_matches'                   => $get_public_matches,
+                'public_tm_penalty'                    => $public_tm_penalty,
+                'character_counter_count_tags'         => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
+                'character_counter_mode'               => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
+                'dialect_strict'                       => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
+                'filters_extraction_parameters'        => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
+                'xliff_parameters'                     => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
+                'xliff_parameters_template_id'         => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+                'qa_model_template'                    => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
+                'qa_model_template_id'                 => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+                'payable_rate_template'                => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
+                'payable_rate_template_id'             => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
+                'array_keys'                           => ( !empty( $array_keys ) ) ? $array_keys : [],
+                'mt_engine'                            => $mt_engine,
+                'disable_tms_engine_flag'              => $disable_tms_engine_flag,
+                'private_tm_key'                       => $private_tm_key,
+                'only_private'                         => $only_private,
+                'mt_quality_value_in_editor'           => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
+                'due_date'                             => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
 
-        $this->setMetadataFromPostInput( $data );
+            /**
+             * Subfiltering configuration (as string input):
+             *
+             * 1. String "null" or "" (empty string): subfiltering is disabled
+             * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
+             * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
+             *
+             * Note:
+             * - The values above are expected as strings (e.g., "[]"), not native PHP types.
+             */
+                JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode( $this->validateSubfilteringOptions( $this->request->param( JobsMetadataDao::SUBFILTERING_HANDLERS, '[]' ) ) ),
+        ];
 
         if ( $disable_tms_engine_flag ) {
             $data[ 'tms_engine' ] = 0; //remove default Match
@@ -341,8 +363,41 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'target_language_mt_engine_association' ] = $this->generateTargetEngineAssociation( $data[ 'target_lang' ], $data[ 'mt_engine' ] );
         $data[ 'team' ]                                  = $this->setTeam( $id_team );
 
+        $this->setMetadataFromPostInput( $data );
+
         return $data;
     }
+
+    /**
+     * Validates the provided subfiltering options by attempting to decode them as JSON.
+     *
+     * This method ensures that the input string is a valid JSON-encoded structure.
+     * If the decoding process encounters an error, it returns an empty array to enforce
+     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
+     *
+     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
+     *
+     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @throws Exception
+     */
+    private function validateSubfilteringOptions( string $subfiltering_handlers ): ?array {
+
+        if ( $subfiltering_handlers == 'none' ) {
+            // subfiltering is disabled
+            $subfiltering_handlers = 'null';
+        }
+
+        $validatorObject = new JSONValidatorObject( $subfiltering_handlers );
+        $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
+        $validator->validate( $validatorObject );
+
+        if ( is_null( $validatorObject->getValue() ) ) {
+            return null;
+        }
+
+        return $validatorObject->getValue();
+    }
+
 
     /**
      * @param $elem
@@ -382,24 +437,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         $this->metadata = $options;
 
-    }
-
-    /**
-     * @param string|null $name
-     *
-     * @return string|null
-     */
-    private function validateProjectName( ?string $name = null ): ?string {
-
-        if ( empty( $name ) ) {
-            return null;
-        }
-
-        if ( CatUtils::validateProjectName( $name ) === false ) {
-            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
-        }
-
-        return $name;
     }
 
     /**
@@ -546,12 +583,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
             ];
             $json  = json_encode( $json );
 
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'qa_model.json', true );
             $validator->validate( $validatorObject );
 
             $QAModelTemplateStruct = new QAModelTemplateStruct();
@@ -588,13 +621,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $userId                   = $this->getUser()->uid;
 
         if ( !empty( $payable_rate_template ) ) {
-            $json   = html_entity_decode( $payable_rate_template );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $json            = html_entity_decode( $payable_rate_template );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'payable_rate.json', true );
             $validator->validate( $validatorObject );
 
             $payableRateModelTemplate = new CustomPayableRateStruct();
@@ -655,16 +684,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateFiltersExtractionParameters( $filters_extraction_parameters = null ) {
         if ( !empty( $filters_extraction_parameters ) ) {
 
-            $json   = html_entity_decode( $filters_extraction_parameters );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema );
+            $json            = html_entity_decode( $filters_extraction_parameters );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
             $validator->validate( $validatorObject );
 
-            $filters_extraction_parameters = $validatorObject->decoded;
+            $filters_extraction_parameters = $validatorObject->getValue();
         }
 
         return $filters_extraction_parameters;
@@ -679,13 +704,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
-            $json   = html_entity_decode( $xliff_parameters );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
+            $json = html_entity_decode( $xliff_parameters );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'xliff_parameters_rules_wrapper.json', true );
             $validator->validate( $validatorObject );
 
             $xliffConfigTemplate = new XliffConfigTemplateStruct();
