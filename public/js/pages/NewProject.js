@@ -589,7 +589,18 @@ const NewProject = () => {
         const languages = data.map((lang) => {
           return {...lang, id: lang.code}
         })
-        setSupportedLanguages(languages)
+
+        setSupportedLanguages(
+          languages.map((language) => {
+            const cleaned = language.name
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+            return {
+              ...language,
+              ...(cleaned !== language.name && {cleanedName: cleaned}),
+            }
+          }),
+        )
         ApplicationActions.setLanguages(data)
       })
       .catch((error) =>
