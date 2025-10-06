@@ -2,7 +2,6 @@
 
 namespace Controller\API\V1;
 
-use Utils\Tools\CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -53,6 +52,7 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -84,7 +84,7 @@ class NewController extends KleinController {
         $fs         = FilesStorageFactory::create();
         $uploadFile = new Upload();
 
-        $stdResult = $uploadFile->uploadFiles( $_FILES );
+        $stdResult = $uploadFile->uploadFiles( $this->request->files()->all() );
 
         $arFiles = [];
 
@@ -92,18 +92,8 @@ class NewController extends KleinController {
             $arFiles[] = $input_value->name;
         }
 
-        if(empty($arFiles)){
-            throw new InvalidArgumentException("No files were uploaded.");
-        }
-
-        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
-
-        if ( count( $arFiles ) > 1 ) {
-            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-        }
-
-        if ( empty( $request[ 'project_name' ] ) ) {
-            $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
+        if ( empty( $arFiles ) ) {
+            throw new InvalidArgumentException( "No files were uploaded." );
         }
 
         $uploadTokenValue = $uploadFile->getDirUploadToken();
@@ -289,7 +279,6 @@ class NewController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $project_name                              = $this->validateProjectName( $this->request->param( 'project_name' ) );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
@@ -347,7 +336,7 @@ class NewController extends KleinController {
             $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
         }
 
-        if ( empty( $_FILES ) ) {
+        if ( $this->request->files()->isEmpty() ) {
             throw new InvalidArgumentException( "Missing file. Not Sent." );
         }
 
@@ -357,7 +346,11 @@ class NewController extends KleinController {
             $public_tm_penalty = $this->validatePublicTMPenalty( (int)$public_tm_penalty );
         }
 
-        $project_name = $this->validateProjectName( $project_name );
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), Upload::getUniformGlobalFilesStructure( $this->request->files()->all() )->toArray() );
+
         $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
         $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
         [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
@@ -575,24 +568,6 @@ class NewController extends KleinController {
         }
 
         return $subject;
-    }
-
-    /**
-     * @param string|null $name
-     *
-     * @return string|null
-     */
-    private function validateProjectName( ?string $name = null ): ?string {
-
-        if ( empty( $name ) ) {
-            return null;
-        }
-
-        if ( CatUtils::validateProjectName( $name ) === false ) {
-            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
-        }
-
-        return $name;
     }
 
     /**

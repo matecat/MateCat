@@ -2,17 +2,17 @@
 
 namespace Controller\API\V2;
 
-use Utils\Tools\CatUtils;
-use InvalidArgumentException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
+use InvalidArgumentException;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
 use Model\Users\UserStruct;
-use Utils\Tools\Utils;
+use Throwable;
+use Utils\Tools\CatUtils;
 
 class ChangeProjectNameController extends JobsController {
     /**
@@ -25,62 +25,38 @@ class ChangeProjectNameController extends JobsController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function changeName()
-    {
-        try {
-            $id       = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT );
-            $password = filter_var($this->request->param('password'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-            $name     = filter_var($this->request->param('name'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+    /**
+     * @throws Throwable
+     */
+    public function changeName() {
 
-            if(CatUtils::validateProjectName($this->request->param('name') ) === false){
-                throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
-            }
+        $id       = filter_var( $this->request->param( 'id_project' ), FILTER_SANITIZE_NUMBER_INT );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $name     = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
-            if(
-                empty($id) or
-                empty($password)
-            ){
-                $code = 400;
-                $this->response->status()->setCode( $code );
-                $this->response->json( [
-                        'error' => 'Missing required parameters [`id `, `password`]'
-                ] );
-                exit();
-            }
-
-            $name = Utils::sanitizeName($name);
-
-            if ( empty($name) ) {
-                $code = 400;
-                $this->response->status()->setCode( $code );
-                $this->response->json( [
-                        'error' => 'Missing required parameters [`name`]'
-                ] );
-                exit();
-            }
-
-            $this->validator->validate();
-
-            ( new ProjectAccessValidator( $this, $this->validator->getProject() ) )->validate();
-            $ownerEmail = $this->validator->getProject()->id_customer;
-
-            $this->changeProjectName( $id, $password, $name );
-            $this->featureSet->filter( 'filterProjectNameModified', $id, $name, $password, $ownerEmail );
-
-            $this->response->status()->setCode( 200 );
-            $this->response->json( [
-                    'id'   => $id,
-                    'name' => $name,
-            ] );
-            exit();
-
-        } catch ( Exception $exception ) {
-            $this->response->status()->setCode( 500 );
-            $this->response->json( [
-                    'error' => $exception->getMessage()
-            ] );
-            exit();
+        if (
+                empty( $id ) or
+                empty( $password )
+        ) {
+            throw new InvalidArgumentException( 'Missing required parameters [`id `, `password`]' );
         }
+
+        $name = CatUtils::sanitizeOrFallbackProjectName( $name );
+
+        $this->validator->validate();
+
+        ( new ProjectAccessValidator( $this, $this->validator->getProject() ) )->validate();
+        $ownerEmail = $this->validator->getProject()->id_customer;
+
+        $this->changeProjectName( $id, $password, $name );
+        $this->featureSet->filter( 'filterProjectNameModified', $id, $name, $password, $ownerEmail );
+
+        $this->response->status()->setCode( 200 );
+        $this->response->json( [
+                'id'   => $id,
+                'name' => $name,
+        ] );
+
     }
 
     /**
