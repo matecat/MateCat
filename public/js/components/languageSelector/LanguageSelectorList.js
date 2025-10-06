@@ -123,11 +123,13 @@ class LanguageSelectorList extends React.Component {
 
     const langs =
       languagesList && languagesList.length
-        ? languagesList.filter(({name, cleanedName, id}) =>
+        ? languagesList.filter(({name, nameWithoutDiacriticalMarks, id}) =>
             wordsFromQuery.every((word) => {
               const regex = new RegExp(word, 'i')
               return (
-                regex.test(name) || regex.test(id) || regex.test(cleanedName)
+                regex.test(name) ||
+                regex.test(id) ||
+                regex.test(nameWithoutDiacriticalMarks)
               )
             }),
           )
@@ -138,7 +140,9 @@ class LanguageSelectorList extends React.Component {
       for (let i = 0; i < data.length; i++) {
         if (
           data[i].name.toLowerCase().indexOf(input.toLowerCase()) === 0 ||
-          data[i].cleanedName?.toLowerCase().indexOf(input.toLowerCase()) === 0
+          data[i].nameWithoutDiacriticalMarks
+            ?.toLowerCase()
+            .indexOf(input.toLowerCase()) === 0
         ) {
           first.push(data[i])
         } else {

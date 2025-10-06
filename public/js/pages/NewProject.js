@@ -592,12 +592,14 @@ const NewProject = () => {
 
         setSupportedLanguages(
           languages.map((language) => {
-            const cleaned = language.name
+            const nameWithoutDiacriticalMarks = language.name
               .normalize('NFD')
               .replace(/[\u0300-\u036f]/g, '')
             return {
               ...language,
-              ...(cleaned !== language.name && {cleanedName: cleaned}),
+              ...(nameWithoutDiacriticalMarks !== language.name && {
+                nameWithoutDiacriticalMarks,
+              }),
             }
           }),
         )
