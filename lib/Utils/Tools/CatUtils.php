@@ -1034,28 +1034,24 @@ class CatUtils {
      * @return string Returns the validated project name or a fallback name if the provided name is invalid or missing.
      */
     public static function sanitizeOrFallbackProjectName( string $name, array $arrFiles = [] ): string {
-
-        // Generate a fallback name using the current date and time.
+        // Default fallback name if we can't derive a valid project name:
+        // "MATECAT_PROJ-" followed by the current date /time in YYYYMMDDHHMM format.
         $fallback = 'MATECAT_PROJ-' . date( 'YmdHi' );
 
-        // Check if the provided name is empty.
-        if ( $name == '' ) {
-            // If exactly one file is provided, sanitize and use its name as the fallback.
-            if ( count( $arrFiles ) === 1 ) {
-                $file = end( $arrFiles );
-                // Sanitize the file name to ensure it meets the project name criteria.
-                $name = self::sanitizeProjectName( AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME ) );
-            }
-
-            // Return the sanitized name or the fallback if the name is still empty.
-            return $name != '' ? $name : $fallback;
+        // If no name was provided and exactly one file was uploaded,
+        // derive the project name from that file's base name (without extension).
+        if ( $name == '' && count( $arrFiles ) === 1 ) {
+            $file = end( $arrFiles ); // Get the only file entry
+            // Extract the filename (without extension) in a cross-platform safe way.
+            // Equivalent to pathinfo($file['name'], PATHINFO_FILENAME) but using a helper with fixes.
+            $name = AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME );
         }
 
-        // Sanitize the provided name.
+        // Sanitize the candidate project name (e.g., strip invalid chars, trim, etc.).
         $name = self::sanitizeProjectName( $name );
 
-        // Return the sanitized name or the fallback if sanitization results in an empty string.
-        return $name != '' ? $name : $fallback;
+        // Return the sanitized name if not empty; otherwise, use the fallback.
+        return $name !== '' ? $name : $fallback;
     }
 
     /**

@@ -21,8 +21,9 @@ class CatUtilsTest extends TestCase {
      */
     public function testSanitizeOrFallbackProjectNameWithInvalidName() {
         $invalidName = "Invalid@Project#Name!";
-        $this->expectException( InvalidArgumentException::class );
-        CatUtils::sanitizeOrFallbackProjectName( $invalidName, [] );
+        $expected_name = "InvalidProjectName";
+        $sanitizedName = CatUtils::sanitizeOrFallbackProjectName( $invalidName );
+        $this->assertEquals( $expected_name, $sanitizedName );
     }
 
     /**
@@ -56,7 +57,7 @@ class CatUtilsTest extends TestCase {
      * a generated fallback project name.
      */
     public function testFallbackNameGeneratedWhenNameIsEmptyAndNoFilesProvided() {
-        $result = CatUtils::sanitizeOrFallbackProjectName( "", [] );
+        $result = CatUtils::sanitizeOrFallbackProjectName( "" );
         $this->assertStringStartsWith( 'MATECAT_PROJ-', $result );
     }
 }
