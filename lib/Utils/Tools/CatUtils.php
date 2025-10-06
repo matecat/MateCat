@@ -1018,17 +1018,6 @@ class CatUtils {
     }
 
     /**
-     * This function check if the name contains any symbol
-     *
-     * @param string $name
-     *
-     * @return bool
-     */
-    public static function validateProjectName( string $name ): bool {
-        return self::sanitizeProjectName( $name ) === $name;
-    }
-
-    /**
      * Validates the provided project name or generates a fallback name if the provided name is invalid or missing.
      *
      * This method ensures that the project name is sanitized and valid.
@@ -1044,7 +1033,7 @@ class CatUtils {
      *
      * @return string Returns the validated project name or a fallback name if the provided name is invalid or missing.
      */
-    public static function sanitizeOrFallbackProjectName( string $name, array $arrFiles ): string {
+    public static function sanitizeOrFallbackProjectName( string $name, array $arrFiles = [] ): string {
 
         // Generate a fallback name using the current date and time.
         $fallback = 'MATECAT_PROJ-' . date( 'YmdHi' );
@@ -1054,20 +1043,19 @@ class CatUtils {
             // If exactly one file is provided, sanitize and use its name as the fallback.
             if ( count( $arrFiles ) === 1 ) {
                 $file = end( $arrFiles );
-                $name = CatUtils::sanitizeProjectName( AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME ) );
+                // Sanitize the file name to ensure it meets the project name criteria.
+                $name = self::sanitizeProjectName( AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME ) );
             }
 
             // Return the sanitized name or the fallback if the name is still empty.
             return $name != '' ? $name : $fallback;
         }
 
-        // Throw an exception if the sanitized name contains invalid symbols.
-        if ( !CatUtils::validateProjectName( $name ) ) {
-            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
-        }
+        // Sanitize the provided name.
+        $name = self::sanitizeProjectName( $name );
 
-        // Return the name if it is valid.
-        return $name;
+        // Return the sanitized name or the fallback if sanitization results in an empty string.
+        return $name != '' ? $name : $fallback;
     }
 
     /**
@@ -1084,12 +1072,4 @@ class CatUtils {
         return str_replace( [ "'", '"' ], [ '&#39;', '&#34;' ], $str );
     }
 
-    /**
-     * @param $filename
-     *
-     * @return string
-     */
-    public static function encodeFileName( $filename ) {
-        return sha1( $filename );
-    }
 }

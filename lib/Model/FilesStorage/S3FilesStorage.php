@@ -792,7 +792,7 @@ class S3FilesStorage extends AbstractFilesStorage {
             $extension = $file_info[ 'extension' ];
 
             if ( strlen( urlencode( $prefix . $filename ) ) > 221 ) {
-                return CatUtils::encodeFileName( $filename ) . "." . $extension;
+                return sha1( $filename ) . "." . $extension;
             }
 
             return $filename . "." . $extension;
