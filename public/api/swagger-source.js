@@ -2287,7 +2287,7 @@ var spec = {
               name: 'password',
               in: 'formData',
               description:
-                'The password of the job (second pass review password)',
+                'The password of the revision phase that the issue pertains to. If the issue pertains to r1, use the "revise" link password, otherwise use the "revise2" link password',
               required: true,
               type: 'string',
             },
