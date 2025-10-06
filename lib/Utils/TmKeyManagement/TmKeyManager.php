@@ -219,6 +219,7 @@ class TmKeyManager {
         }
 
         if ( !is_null( $obj->name ) ) {
+            $obj->name = preg_replace( '/[^.\-_\p{L}\p{N}\s]+/u', '', $obj->name );
             $obj->name = filter_var( $obj->name, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         }
 

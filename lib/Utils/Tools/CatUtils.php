@@ -844,20 +844,6 @@ class CatUtils {
     }
 
     /**
-     * @param $json
-     *
-     * @return false|string
-     */
-    public static function sanitizeJSON( $json ): string {
-        $json = json_decode( $json, true );
-        array_walk_recursive( $json, function ( &$item ) {
-            $item = filter_var( $item, FILTER_SANITIZE_STRING );
-        } );
-
-        return json_encode( $json );
-    }
-
-    /**
      * This function is used to strip malicious content from
      * user's first_name and last_name
      *

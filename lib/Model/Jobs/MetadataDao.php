@@ -133,7 +133,6 @@ class MetadataDao extends AbstractDao {
                 'value'    => $value
         ] );
 
-        $this->destroyCacheByJobId( $id_job, $key );
         $this->destroyCacheByJobAndPassword( $id_job, $password );
         $this->destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key );
 
@@ -144,6 +143,9 @@ class MetadataDao extends AbstractDao {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function delete( $id_job, $password, $key ) {
         $sql = "DELETE FROM job_metadata " .
                 " WHERE id_job = :id_job AND password = :password " .
@@ -156,6 +158,10 @@ class MetadataDao extends AbstractDao {
                 'password' => $password,
                 'key'      => $key,
         ] );
+
+        $this->destroyCacheByJobAndPassword( $id_job, $password );
+        $this->destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key );
+
     }
 
     protected function _buildResult( array $array_result ) {

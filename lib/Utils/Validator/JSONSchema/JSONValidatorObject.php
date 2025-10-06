@@ -94,7 +94,7 @@ class JSONValidatorObject extends ValidatorObject {
         }
 
         if ( $associative ) {
-            return $this->toArray( $val );
+            return $this->toArray( (object)$val );
         }
 
         return $val;
