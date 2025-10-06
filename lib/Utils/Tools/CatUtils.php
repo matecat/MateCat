@@ -1028,22 +1028,52 @@ class CatUtils {
      * @return string
      */
     public static function sanitizeProjectName( string $name ): string {
-        return preg_replace( '/[^-_\p{L}\p{N}\s]/u', '', $name );
+        return preg_replace( '/[^.\-_\p{L}\p{N}\s]/u', '', $name );
     }
 
     /**
-     * This functions check if the name contains any symbol
+     * Validates the provided project name or generates a fallback name if the provided name is invalid or missing.
      *
-     * @param $name
+     * This method ensures that the project name is sanitized and valid.
      *
-     * @return bool
+     * If the provided name is empty or invalid:
+     * - It uses a fallback name based on the current date and time as the project name when there are more than one file.
+     * - If only one file is provided in the `$arrFiles` array, the fallback name is derived from the file name.
+     *   The file name is sanitized to ensure it meets the project name criteria.
+     *
+     * @param string $name     The project name to validate. An empty string is treated as missing.
+     * @param array  $arrFiles An array of file paths used to determine a fallback name if the project name is invalid.
+     *                         If the array contains exactly one file, its name is used as the fallback.
+     *
+     * @return string Returns the validated project name or a fallback name if the provided name is invalid or missing.
      */
-    public static function validateProjectName( string $name ): bool {
-        return self::sanitizeProjectName( $name ) === $name;
+    public static function sanitizeOrFallbackProjectName( string $name, array $arrFiles = [] ): string {
+
+        // Generate a fallback name using the current date and time.
+        $fallback = 'MATECAT_PROJ-' . date( 'YmdHi' );
+
+        // Check if the provided name is empty.
+        if ( $name == '' ) {
+            // If exactly one file is provided, sanitize and use its name as the fallback.
+            if ( count( $arrFiles ) === 1 ) {
+                $file = end( $arrFiles );
+                // Sanitize the file name to ensure it meets the project name criteria.
+                $name = self::sanitizeProjectName( AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME ) );
+            }
+
+            // Return the sanitized name or the fallback if the name is still empty.
+            return $name != '' ? $name : $fallback;
+        }
+
+        // Sanitize the provided name.
+        $name = self::sanitizeProjectName( $name );
+
+        // Return the sanitized name or the fallback if sanitization results in an empty string.
+        return $name != '' ? $name : $fallback;
     }
 
     /**
-     * This method can be use as polyfill of FILTER_SANITIZE_STRING,
+     * This method can be used as polyfill of FILTER_SANITIZE_STRING,
      * which is DEPRECATED in PHP >= 8.1
      *
      * @param string $string
@@ -1056,13 +1086,4 @@ class CatUtils {
         return str_replace( [ "'", '"' ], [ '&#39;', '&#34;' ], $str );
     }
 
-    /**
-     * @param $filename
-     *
-     * @return string
-     */
-    public static function encodeFileName($filename)
-    {
-        return sha1($filename);
-    }
 }
