@@ -1,12 +1,12 @@
 {
   "MMT": {
-    "mmt_activate_context_analyzer": true,
+    "mmt_activate_context_analyzer": false,
     "pre_translate_files": false,
     "mmt_glossaries_case_sensitive_matching": false,
     "mmt_glossaries": []
   },
   "Lara": {
-    "pre_translate_files": false,
+    "pre_translate_files": true,
     "lara_glossaries": []
   },
   "DeepL": {
