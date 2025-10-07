@@ -68,7 +68,8 @@ body.cattool {
 .segment-side-buttons {
   /* styles based on .sid line 376 style.css */
   cursor: default;
-  display: block;
+  display: flex;
+  flex-direction: column;
   font-size: 12px;
   padding-bottom: 1px;
   position: absolute;
@@ -78,6 +79,48 @@ body.cattool {
   width: 7%;
   top: 0;
   height: 100%;
+  gap: 6px;
+  .icon-warning-sign.qa-icon {
+    background-color: colors.$red800;
+    display: flex;
+    padding: 3px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    align-self: stretch;
+    cursor: pointer;
+    border-radius: 8px;
+    width: 18px;
+    height: 18px;
+    margin-left: 8px;
+  }
+  .badge-icon {
+    display: flex;
+    padding: 2px 5px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    color: colors.$white;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 12px;
+    &.badge-red {
+        color: colors.$white;
+        background-color: colors.$red800;
+    }
+    &.badge-orange {
+        color: colors.$black;
+        background-color: colors.$orange600;
+    }
+    &.badge-blue {
+        color: colors.$white;
+        background-color: colors.$blue800;
+    }
+  }
 }
 
 //ICE MATCH
