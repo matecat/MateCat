@@ -202,7 +202,7 @@ class CommentDao extends AbstractDao {
 
             $this->destroySegmentIdSegmentCache( $obj->id_segment );
 
-        } finally {
+        } catch (Exception $exception) {
             $this->database->rollback();
         }
 

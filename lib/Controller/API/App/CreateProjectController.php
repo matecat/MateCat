@@ -34,6 +34,7 @@ use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -63,17 +64,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->featureSet->loadFromUserEmail( $this->user->email );
         $this->data = $this->validateTheRequest();
 
-        $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
-        $default_project_name = $arFiles[ 0 ];
-
-        if ( count( $arFiles ) > 1 ) {
-            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-        }
-
-        if ( empty( $this->data[ 'project_name' ] ) ) {
-            $this->data[ 'project_name' ] = $default_project_name;
-        }
-
         // SET SOURCE COOKIE
         CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->data[ 'source_lang' ],
                 [
@@ -101,7 +91,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
         $uploadDir  = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-        $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
+        $filesFound = $this->getFilesList( $fs, $this->data[ 'file_names_list' ], $uploadDir );
 
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
@@ -175,9 +165,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
         }
 
-        //TODO enable from CONFIG
-        $projectStructure[ 'metadata' ] = $this->metadata;
-
+        $projectStructure[ 'metadata' ]     = $this->metadata;
         $projectStructure[ 'userIsLogged' ] = true;
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
@@ -210,19 +198,25 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @return array
+     * Validates and processes the incoming request parameters to build a structured data array.
+     *
+     * This method retrieves and sanitizes input parameters from the request object,
+     * ensuring data integrity and security. It organizes the extracted parameters
+     * into a comprehensive array of values required for further processing. It also performs
+     * additional transformations, such as decoding JSON, merging and filtering arrays, as well as
+     * applying default values where necessary.
+     *
+     * @return array An associative array containing sanitized and processed request data.
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $file_name               = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $project_name            = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source_lang             = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $target_lang             = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $job_subject             = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $due_date                = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
-        $mt_engine               = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
-        $disable_tms_engine_flag = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
-//        $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $job_subject                   = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $due_date                      = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
+        $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
+        $disable_tms_engine_flag       = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_100              = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_101              = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_SANITIZE_NUMBER_INT );
         $tm_prioritization             = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
@@ -250,6 +244,13 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $array_keys = json_decode( $private_keys_list, true );
         $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
+        $arFiles = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
+
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), array_map( fn( $v ): array => [ 'name' => $v ], $arFiles ) );
+
         if ( !empty( $array_keys ) ) {
 
             //remove duplicates
@@ -268,8 +269,17 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
         $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
+        /**
+         * Represents a generic data variable that can hold a variety of information.
+         *
+         * This variable can be used to store different types of data, such as strings,
+         * integers, arrays, or objects, depending on the context where it is applied.
+         * Its value and type are dynamic and determined during runtime based on usage.
+         *
+         * @var mixed $data The data container allowing for versatile usage scenarios.
+         */
         $data = [
-                'file_name'                     => $file_name,
+                'file_names_list'               => $arFiles,
                 'project_name'                  => $project_name,
                 'source_lang'                   => $source_lang,
                 'target_lang'                   => $target_lang,
@@ -340,6 +350,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'project_features' ]                      = $this->appendFeaturesToProject( $data[ 'project_completion' ], $data[ 'mt_engine' ] );
         $data[ 'target_language_mt_engine_association' ] = $this->generateTargetEngineAssociation( $data[ 'target_lang' ], $data[ 'mt_engine' ] );
         $data[ 'team' ]                                  = $this->setTeam( $id_team );
+
+        $this->setMetadataFromPostInput( $data );
 
         return $data;
     }

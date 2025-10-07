@@ -9,7 +9,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const loadTMX = async ({key, name, uuid}) => {
-
   const response = await fetch(
     `${getMatecatApiDomain()}api/app/mymemory/tmx/import/status/${uuid}`,
     {
