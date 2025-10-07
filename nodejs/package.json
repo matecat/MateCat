@@ -20,7 +20,7 @@
     "ioredis": "^5.4.2",
     "@socket.io/redis-adapter": "^8.3.0",
     "stompit": "1.0.0",
-    "uuid": "^10.0.0",
+    "uuid": "^13.0.0",
     "websocket": "1.0.34",
     "winston": "^3",
     "winston-daily-rotate-file": "^5.0.0"
