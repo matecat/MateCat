@@ -94,9 +94,16 @@ export const Dropdown = forwardRef(
           const lowerQueryFilter = currentFilter.toLowerCase()
           return filteredOptions
             .filter((option) => {
+              const nameWithoutDiacriticalMarks = option.name
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+
               return (
                 option.name.toLowerCase().indexOf(lowerQueryFilter) != -1 ||
-                option.id.toLowerCase().indexOf(lowerQueryFilter) != -1
+                option.id.toLowerCase().indexOf(lowerQueryFilter) != -1 ||
+                nameWithoutDiacriticalMarks
+                  .toLowerCase()
+                  .indexOf(lowerQueryFilter) != -1
               )
             })
             .sort((optionA, optionB) => {

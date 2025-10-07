@@ -34,6 +34,7 @@ export const SubTemplateSelect = () => {
         <Select
           placeholder="Select template"
           className={`settings-panel-subtemplates-select${isModifyingTemplate ? ' settings-panel-subtemplates-select-unsaved' : ''}`}
+          label="Applied configuration"
           id="project-template"
           tooltipPosition="right"
           checkSpaceToReverse={false}
@@ -41,6 +42,7 @@ export const SubTemplateSelect = () => {
           activeOption={activeOption}
           onSelect={onSelect}
           maxHeightDroplist={300}
+          {...(isModifyingTemplate && {tooltipContent: 'Lorem ipsum bla bla'})}
         />
       )}
     </>

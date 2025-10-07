@@ -7,6 +7,7 @@ import CommentsConstants from '../../constants/CommentsConstants'
 import {Shortcuts} from '../../utils/shortcuts'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
+import CommentsIcon from '../../../img/icons/CommentsIcon'
 
 class SegmentsCommentsIcon extends React.Component {
   static contextType = SegmentContext
@@ -75,17 +76,13 @@ class SegmentsCommentsIcon extends React.Component {
         this.state.comments.total === 0 ||
         (this.state.comments.total > 0 && this.state.comments.active === 0)
       ) {
-        html = (
-          <span className="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">
-            +
-          </span>
-        )
+        html = <div className="badge-icon badge-blue">+</div>
       } else if (this.state.comments.active > 0) {
         rootClasses.push('has-object')
         html = (
-          <span className="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment">
+          <div className="badge-icon badge-blue ">
             {this.state.comments.active}
-          </span>
+          </div>
         )
       }
 
@@ -101,8 +98,10 @@ class SegmentsCommentsIcon extends React.Component {
           }
           onClick={(e) => this.openComments(e)}
         >
-          <span className="mbc-comment-icon icon-bubble2" />
-          <div className="mbc-comment-notifications-container">{html}</div>
+          <div className="mbc-comment-icon">
+            <CommentsIcon />
+            {html}
+          </div>
         </div>
       )
     } else {

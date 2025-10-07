@@ -53,16 +53,18 @@ const activateSearch = (
     let lastElement = occurrences.findIndex((item) => item.key === key)
     let index = lastElement > -1 ? lastElement : 0
     while ((matchArr = regex.exec(text)) !== null) {
+      console.log('iteration', matchArr, index, cloneDeep(occurrences), key)
       start = matchArr.index
       end = start + matchArr[0].length
       if (occurrences[index]) {
         if (occurrences[index].key !== key) {
-          if (!occurrences[index].start) {
+          if (typeof occurrences[index].start === 'undefined') {
             occurrences[index].start = start
             occurrences[index].end = end
             occurrences[index].key = key
           } else {
             let elementToUpdate = occurrences.findIndex((item) => !item.key)
+            if (elementToUpdate === -1) return
             occurrences[elementToUpdate].start = start
             occurrences[elementToUpdate].end = end
             occurrences[elementToUpdate].key = key
