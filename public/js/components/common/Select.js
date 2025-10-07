@@ -58,6 +58,7 @@ export const Select = ({
   dropdownClassName,
   showResetButton = false,
   resetFunction = () => {},
+  tooltipContent,
   children,
 }) => {
   const dropDownRef = useRef()
@@ -327,7 +328,9 @@ export const Select = ({
         content={
           TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current?.firstChild)
             ? selectedLabel
-            : ''
+            : tooltipContent
+              ? tooltipContent
+              : ''
         }
       >
         <div ref={selectedItemRef} className="select-with-icon__wrapper">
@@ -404,5 +407,6 @@ Select.propTypes = {
   dropdownClassName: PropTypes.string,
   showResetButton: PropTypes.bool,
   resetFunction: PropTypes.func,
+  tooltipContent: PropTypes.string,
   children: PropTypes.func,
 }
