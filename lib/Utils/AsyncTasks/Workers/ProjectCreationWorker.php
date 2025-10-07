@@ -20,12 +20,11 @@ use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\Tools\Utils;
 
 class ProjectCreationWorker extends AbstractWorker {
 
-    protected $projectStructure;
-
-    const PROJECT_HASH = 'project_queue:%u';
+    protected RecursiveArrayObject $projectStructure;
 
     /**
      * @param AbstractElement $queueElement
@@ -52,6 +51,10 @@ class ProjectCreationWorker extends AbstractWorker {
 
     }
 
+    /**
+     * @throws EndQueueException
+     * @throws Exception
+     */
     protected function _checkForReQueueEnd( QueueElement $queueElement ) {
 
         /**
@@ -61,7 +64,7 @@ class ProjectCreationWorker extends AbstractWorker {
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
 
             $msg = "\n\n Error Project Creation  \n\n " . var_export( $queueElement, true );
-            \Utils\Tools\Utils::sendErrMailReport( $msg );
+            Utils::sendErrMailReport( $msg );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
 
@@ -74,13 +77,13 @@ class ProjectCreationWorker extends AbstractWorker {
     /**
      * @param QueueElement $queueElement
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _createProject( QueueElement $queueElement ) {
 
         if ( empty( $queueElement->params ) ) {
             $msg = "\n\n Error Project Creation  \n\n " . var_export( $queueElement, true );
-            \Utils\Tools\Utils::sendErrMailReport( $msg );
+            Utils::sendErrMailReport( $msg );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  empty params found." );
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  empty params found.", self::ERR_REQUEUE_END );
         }

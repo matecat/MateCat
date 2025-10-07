@@ -69,6 +69,7 @@ class MetaDataController extends KleinController {
         ];
 
         foreach ( $project->getMetadata() as $metadatum ) {
+
             $key = $metadatum->key;
 
             if ( in_array( $key, $myExtraKeys ) ) {

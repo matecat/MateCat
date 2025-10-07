@@ -14,7 +14,9 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\ConversionHandlerStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -41,13 +43,20 @@ class ConversionHandler {
     /**
      * @var FeatureSet
      */
-    public FeatureSet $features;
+    public FeatureSet     $features;
+    private MatecatLogger $logger;
+
+    /**
+     * @var bool|null
+     */
+    protected ?bool $legacy_icu;
 
     /**
      * ConversionHandler constructor.
      */
     public function __construct() {
         $this->result = new ConvertedFileModel();
+        $this->logger = LoggerFactory::getLogger( "conversion" );
     }
 
     public function fileMustBeConverted() {
@@ -146,7 +155,8 @@ class ConversionHandler {
                 $this->source_lang,
                 $single_language,
                 $this->segmentation_rule,
-                $extraction_parameters
+                $extraction_parameters,
+                $this->legacy_icu
         );
         Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters );
 
@@ -180,7 +190,7 @@ class ConversionHandler {
 
             } catch ( FileSystemException $e ) {
 
-                Log::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
+                $this->logger->error( "FileSystem Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                 $this->result->setErrorMessage( $e->getMessage() );
@@ -189,7 +199,7 @@ class ConversionHandler {
 
             } catch ( Exception $e ) {
 
-                Log::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
+                $this->logger->error( "S3 Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
                 $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
@@ -220,7 +230,7 @@ class ConversionHandler {
                         AbstractFilesStorage::basename_fix( $file_path )
                 );
             } else {
-                Log::doJsonLog( "File not found in path. linkSessionToCacheForOriginalFiles Skipped." );
+                $this->logger->debug( "File not found in path. linkSessionToCacheForOriginalFiles Skipped." );
             }
 
         }
@@ -233,6 +243,14 @@ class ConversionHandler {
         );
 
         $this->result->setSize( filesize( $file_path ) );
+
+        if(isset($convertResult["pdfAnalysis"]) and !empty($convertResult["pdfAnalysis"])){
+            $this->result->setPdfAnalysis($convertResult["pdfAnalysis"]);
+
+            // save pdfAnalysis.json
+            $redisKey = md5($file_path . "__pdfAnalysis.json");
+            ( new RedisHandler() )->getConnection()->set( $redisKey, serialize( $convertResult["pdfAnalysis"] ), 'ex', 60 );
+        }
 
     }
 
@@ -384,7 +402,7 @@ class ConversionHandler {
 
         } catch ( Exception $e ) {
 
-            Log::doJsonLog( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
+            $this->logger->debug( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
 
             $this->result->setErrorCode( $e->getCode() );
             $this->result->setErrorMessage( "Zip error: " . $e->getMessage() );
@@ -449,7 +467,7 @@ class ConversionHandler {
         $decoded_filename = html_entity_decode( $file_name, ENT_QUOTES );
 
         if($decoded_filename !== $file_name){
-            throw new Exception("Invalid file name: file names cannot contain XML escape sequences. <a href='#'>More details</a>.");
+            throw new Exception("Invalid file name: symbols (e.g. & ') are not allowed.");
         }
 
         $this->file_name = $decoded_filename;
@@ -522,4 +540,10 @@ class ConversionHandler {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 
+    /**
+     * @param bool|null $legacy_icu
+     */
+    public function setFiltersLegacyIcu( ?bool $legacy_icu = false ) {
+        $this->legacy_icu = $legacy_icu;
+    }
 }

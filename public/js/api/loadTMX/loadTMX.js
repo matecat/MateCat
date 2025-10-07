@@ -9,21 +9,10 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const loadTMX = async ({key, name, uuid}) => {
-  const paramsData = {
-    tm_key: key,
-    name,
-    uuid,
-  }
-  const formData = new FormData()
-
-  Object.keys(paramsData).forEach((key) => {
-    formData.append(key, paramsData[key])
-  })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/upload-tmx-status`,
+    `${getMatecatApiDomain()}api/app/mymemory/tmx/import/status/${uuid}`,
     {
-      method: 'POST',
-      body: formData,
+      method: 'GET',
       credentials: 'include',
     },
   )

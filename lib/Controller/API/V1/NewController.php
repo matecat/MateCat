@@ -49,13 +49,13 @@ use Utils\Engines\Lara;
 use Utils\Engines\MMT;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -87,7 +87,7 @@ class NewController extends KleinController {
         $fs         = FilesStorageFactory::create();
         $uploadFile = new Upload();
 
-        $stdResult = $uploadFile->uploadFiles( $_FILES );
+        $stdResult = $uploadFile->uploadFiles( $this->request->files()->all() );
 
         $arFiles = [];
 
@@ -95,14 +95,8 @@ class NewController extends KleinController {
             $arFiles[] = $input_value->name;
         }
 
-        // if fileupload was failed, this index (0 = does not exist)
-        $default_project_name = @$arFiles[ 0 ];
-        if ( count( $arFiles ) > 1 ) {
-            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-        }
-
-        if ( empty( $request[ 'project_name' ] ) ) {
-            $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
+        if ( empty( $arFiles ) ) {
+            throw new InvalidArgumentException( "No files were uploaded." );
         }
 
         $uploadTokenValue = $uploadFile->getDirUploadToken();
@@ -119,6 +113,7 @@ class NewController extends KleinController {
                 $request[ 'segmentation_rule' ],
                 $this->featureSet,
                 $request[ 'filters_extraction_parameters' ],
+                $request[ 'legacy_icu' ],
         );
 
         $converter->convertFiles();
@@ -160,6 +155,7 @@ class NewController extends KleinController {
         $projectStructure[ 'status' ]                   = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'owner' ]                    = $this->user->email;
         $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
+        $projectStructure[ 'public_tm_penalty' ]        = $request[ 'public_tm_penalty' ];
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
         $projectStructure[ 'pretranslate_101' ]         = isset( $request[ 'pretranslate_101' ] ) ? (int)$request[ 'pretranslate_101' ] : 1;
 
@@ -290,6 +286,7 @@ class NewController extends KleinController {
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
+        $legacy_icu                                = filter_var( $this->request->param( 'legacy_icu' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_enable                     = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
@@ -297,7 +294,7 @@ class NewController extends KleinController {
         $payable_rate_template_id                  = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $payable_rate_template_name                = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_STRING );
         $project_info                              = filter_var( $this->request->param( 'project_info' ), FILTER_SANITIZE_STRING );
-        $project_name                              = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $public_tm_penalty                         = filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_100                          = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_101                          = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_VALIDATE_BOOLEAN );
         $private_tm_key                            = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -341,11 +338,20 @@ class NewController extends KleinController {
             $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
         }
 
-        if ( empty( $_FILES ) ) {
+        if ( $this->request->files()->isEmpty() ) {
             throw new InvalidArgumentException( "Missing file. Not Sent." );
         }
 
         $lang_handler = Languages::getInstance();
+
+        if ( !empty( $public_tm_penalty ) ) {
+            $public_tm_penalty = $this->validatePublicTMPenalty( (int)$public_tm_penalty );
+        }
+
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), Upload::getUniformGlobalFilesStructure( $this->request->files()->all() )->toArray() );
 
         $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
         $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
@@ -414,6 +420,7 @@ class NewController extends KleinController {
                 'source_lang'                               => $source_lang,
                 'target_lang'                               => $target_lang,
                 'subject'                                   => $subject,
+                'public_tm_penalty'                         => $public_tm_penalty,
                 'pretranslate_100'                          => $pretranslate_100,
                 'pretranslate_101'                          => $pretranslate_101,
                 'id_team'                                   => $id_team,
@@ -459,7 +466,8 @@ class NewController extends KleinController {
                 'character_counter_count_tags'              => $character_counter_count_tags,
                 'character_counter_mode'                    => $character_counter_mode,
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
-                'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null
+                'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null,
+                'legacy_icu'                                => $legacy_icu,
         ];
     }
 
@@ -487,7 +495,6 @@ class NewController extends KleinController {
                 $metadata = $parsedMetadata;
             }
 
-            Log::doJsonLog( "Passed parameter metadata as json string." );
         } else {
             $metadata = [];
         }
@@ -570,6 +577,19 @@ class NewController extends KleinController {
         }
 
         return $subject;
+    }
+
+    /**
+     * @param int|null $public_tm_penalty
+     *
+     * @return int|null
+     */
+    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ): ?int {
+        if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
+            throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
+        }
+
+        return $public_tm_penalty;
     }
 
     /**
@@ -694,7 +714,7 @@ class NewController extends KleinController {
                 $validatorObject       = new JSONValidatorObject();
                 $validatorObject->json = $private_tm_key_json;
 
-                $validator = new JSONValidator( $schema );
+                $validator = new JSONValidator( $schema, true );
                 /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 
@@ -706,7 +726,7 @@ class NewController extends KleinController {
                                     'key'     => $item->key,
                                     'r'       => $item->read,
                                     'w'       => $item->write,
-                                    'penalty' => $item->penalty,
+                                    'penalty' => $item->penalty ?? 0,
                             ];
                         },
                         $jsonObject->decoded->keys

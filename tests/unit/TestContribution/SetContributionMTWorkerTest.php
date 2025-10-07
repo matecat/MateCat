@@ -90,6 +90,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
         //Reference Queue object
         $this->contributionStruct                       = new SetContributionRequest();
+        $this->contributionStruct->jobStruct            = new JobStruct();
         $this->contributionStruct->fromRevision         = true;
         $this->contributionStruct->id_file              = 1888888;
         $this->contributionStruct->id_job               = 1999999;

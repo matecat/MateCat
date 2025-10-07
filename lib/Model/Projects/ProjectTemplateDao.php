@@ -57,6 +57,7 @@ class ProjectTemplateDao extends AbstractDao {
         $default->get_public_matches           = true;
         $default->character_counter_count_tags = false;
         $default->character_counter_mode       = "google_ads";
+        $default->public_tm_penalty            = 0;
         $default->payable_rate_template_id     = 0;
         $default->qa_model_template_id         = 0;
         $default->xliff_config_template_id     = 0;
@@ -384,9 +385,9 @@ class ProjectTemplateDao extends AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `public_tm_penalty`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :public_tm_penalty, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -405,6 +406,7 @@ class ProjectTemplateDao extends AbstractDao {
                 "tm_prioritization"            => $projectTemplateStruct->tm_prioritization,
                 "dialect_strict"               => $projectTemplateStruct->dialect_strict,
                 "get_public_matches"           => $projectTemplateStruct->get_public_matches,
+                "public_tm_penalty"            => $projectTemplateStruct->public_tm_penalty,
                 "payable_rate_template_id"     => $projectTemplateStruct->payable_rate_template_id,
                 "qa_model_template_id"         => $projectTemplateStruct->qa_model_template_id,
                 "filters_template_id"          => $projectTemplateStruct->filters_template_id,
@@ -454,6 +456,7 @@ class ProjectTemplateDao extends AbstractDao {
             `tm_prioritization` = :tm_prioritization,
             `dialect_strict` = :dialect_strict,
             `get_public_matches` = :get_public_matches,
+            `public_tm_penalty` = :public_tm_penalty,
             `payable_rate_template_id` = :payable_rate_template_id, 
             `qa_model_template_id` = :qa_model_template_id, 
             `filters_template_id` = :filters_template_id, 
@@ -483,6 +486,7 @@ class ProjectTemplateDao extends AbstractDao {
                 "tm_prioritization"            => $projectTemplateStruct->tm_prioritization,
                 "dialect_strict"               => $projectTemplateStruct->dialect_strict,
                 "get_public_matches"           => $projectTemplateStruct->get_public_matches,
+                "public_tm_penalty"            => $projectTemplateStruct->public_tm_penalty,
                 "payable_rate_template_id"     => $projectTemplateStruct->payable_rate_template_id,
                 "qa_model_template_id"         => $projectTemplateStruct->qa_model_template_id,
                 "xliff_config_template_id"     => $projectTemplateStruct->xliff_config_template_id,

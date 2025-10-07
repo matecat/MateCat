@@ -35,7 +35,7 @@ use Model\RemoteFiles\RemoteFileDao;
 use Model\Segments\SegmentDao;
 use ReflectionException;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -187,11 +187,7 @@ class DownloadController extends AbstractDownloadController {
 
         // check for Password correctness
         if ( empty( $jobData ) ) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            Log::doJsonLog( $msg );
-            Utils::sendErrMailReport( $msg );
-
-            return;
+            throw new NotFoundException( "Not found." );
         }
 
         $this->project = $this->job->getProject();
@@ -233,7 +229,7 @@ class DownloadController extends AbstractDownloadController {
 
                 //make dir if it doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {
-                    Log::doJsonLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) );
+                    $this->logger->debug( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) );
                     mkdir( dirname( $outputPath ), 0775, true );
                 }
 
@@ -274,7 +270,7 @@ class DownloadController extends AbstractDownloadController {
                     $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $jobData[ 'target' ] );
 
                     // run xliff replacer
-                    Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
+                    $this->logger->debug( "work on " . $fileID . " " . $current_filename );
                     $setSourceInTarget = $this->download_type === 'omegat';
                     $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $jobData[ 'target' ], $outputPath, $setSourceInTarget, $xliffReplacerCallback );
 
@@ -329,9 +325,9 @@ class DownloadController extends AbstractDownloadController {
 
                 if ( empty( AppConfig::$FILTERS_ADDRESS ) || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
                     $convertBackToOriginal = false;
-                    Log::doJsonLog( "SDLXLIFF: {$file['filename']} --- FALSE" );
+                    $this->logger->debug( "SDLXLIFF: {$file['filename']} --- FALSE" );
                 } else {
-                    Log::doJsonLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- TRUE" );
+                    $this->logger->debug( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- TRUE" );
                 }
 
                 if ( $convertBackToOriginal ) {
@@ -349,9 +345,8 @@ class DownloadController extends AbstractDownloadController {
 
             // check for errors and log them on fatal_errors.txt
             foreach ( $convertResult as $result ) {
-                if ( $result[ 'isSuccess' ] === false and isset( $result[ 'errorMessage' ] ) ) {
-                    Log::setLogFileName( 'fatal_errors.txt' );
-                    Log::doJsonLog( "FILE CONVERSION ERROR: " . $result[ 'errorMessage' ] );
+                if ( $result[ 'successful' ] === false and isset( $result[ 'errorMessage' ] ) ) {
+                    $this->logger->debug( "FILE CONVERSION ERROR: " . $result[ 'errorMessage' ] );
                 }
             }
 
@@ -475,9 +470,7 @@ class DownloadController extends AbstractDownloadController {
 
                 $msg = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
                 $msg .= "\n\n Get: " . var_export( $_REQUEST, true );
-                Log::setLogFileName( 'fatal_errors.txt' );
-                Log::doJsonLog( $msg );
-                Utils::sendErrMailReport( $msg );
+                LoggerFactory::getLogger( 'conversion' )->debug( $msg );
                 $this->unlockToken(
                         [
                                 "code"    => -110,
@@ -486,12 +479,12 @@ class DownloadController extends AbstractDownloadController {
                 );
 
                 throw $e; // avoid sent Headers and empty file content with finalize method
-            }
-
-            try {
-                Utils::deleteDir( AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
-            } catch ( Exception $e ) {
-                Log::doJsonLog( 'Failed to delete dir:' . $e->getMessage() );
+            } finally {
+                try {
+                    Utils::deleteDir( AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+                } catch ( Exception $e ) {
+                    LoggerFactory::getLogger( 'conversion' )->debug( 'Failed to delete temporary directory ' . AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+                }
             }
 
         }
@@ -962,7 +955,7 @@ class DownloadController extends AbstractDownloadController {
      */
     public function transferZipFromS3ToTmpDir( string $zipPath, string $tmpDir ) {
 
-        Log::doJsonLog( "Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir );
+        $this->logger->debug( "Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir );
 
         $s3Client            = S3FilesStorage::getStaticS3Client();
         $params[ 'bucket' ]  = AppConfig::$AWS_STORAGE_BASE_BUCKET;

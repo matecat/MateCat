@@ -14,7 +14,7 @@ use Model\Users\MetadataDao;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -117,30 +117,35 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
         }
 
+        if(!empty($sortedKeys)){
+            $sortedKeys = array_map( function ( ClientTmKeyStruct $jobKey ) {
+                $jobKey->name = html_entity_decode( $jobKey->name );
+
+                return $jobKey;
+            }, $sortedKeys );
+        }
+
         return $sortedKeys;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getByUserAndKey() {
 
-        try {
+        $_keyDao = new MemoryKeyDao( Database::obtain() );
+        $dh      = new MemoryKeyStruct( [
+                'uid'    => $this->getUser()->uid,
+                'tm_key' => new TmKeyStruct( [
+                                'key' => $this->request->param( 'key' )
+                        ]
+                )
+        ] );
 
-            $_keyDao = new MemoryKeyDao( Database::obtain() );
-            $dh      = new MemoryKeyStruct( [
-                    'uid'    => $this->getUser()->uid,
-                    'tm_key' => new TmKeyStruct( [
-                                    'key' => $this->request->param( 'key' )
-                            ]
-                    )
-            ] );
+        if ( !empty( $_keyDao->read( $dh )[ 0 ] ) ) {
+            $this->response->json( $this->_checkForAdaptiveEngines( $dh ) );
 
-            if ( !empty( $_keyDao->read( $dh )[ 0 ] ) ) {
-                $this->response->json( $this->_checkForAdaptiveEngines( $dh ) );
-
-                return;
-            }
-
-        } catch ( Exception $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            return;
         }
 
         $this->response->code( 404 );
@@ -183,7 +188,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
             } catch ( Exception $e ) {
                 if ( $engineName != EngineConstants::MY_MEMORY ) {
-                    Log::doJsonLog( $e->getMessage() );
+                    LoggerFactory::getLogger( 'engines' )->debug( $e->getMessage() );
                 }
             }
 

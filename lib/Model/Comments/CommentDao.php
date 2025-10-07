@@ -9,7 +9,6 @@ use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;
 use ReflectionException;
-use Utils\Logger\Log;
 
 class CommentDao extends AbstractDao {
 
@@ -171,6 +170,10 @@ class CommentDao extends AbstractDao {
         return $obj;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function resolveThread( CommentStruct $obj ): CommentStruct {
 
         $obj->message_type = self::TYPE_RESOLVE;
@@ -199,9 +202,7 @@ class CommentDao extends AbstractDao {
 
             $this->destroySegmentIdSegmentCache( $obj->id_segment );
 
-        } catch ( Exception $e ) {
-            $err = $e->getMessage();
-            Log::doJsonLog( "Error: " . var_export( $err, true ) );
+        } catch (Exception $exception) {
             $this->database->rollback();
         }
 

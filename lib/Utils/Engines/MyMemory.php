@@ -16,6 +16,7 @@ use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
 use Utils\Engines\Results\MyMemory\DomainsResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
+use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Engines\Results\MyMemory\GetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
@@ -24,10 +25,8 @@ use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
 use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\TagProjectionResponse;
-use Utils\Engines\Results\MyMemory\TmxResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -144,11 +143,10 @@ class MyMemory extends AbstractEngine {
                 $result_object = CreateUserResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
 
-            case 'glossary_import_status_relative_url':
             case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
-                $result_object = TmxResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = FileImportAndStatusResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'tmx_export_email_url' :
             case 'glossary_export_relative_url' :
@@ -177,39 +175,11 @@ class MyMemory extends AbstractEngine {
         return $result_object;
     }
 
-    /**
-     * This method is used for help to rebuild result from Match.
-     * Because when in CURL you send something using method POST and value's param start with "@"
-     * he assumes you are sending a file.
-     *
-     * Passing prefix you left before, this method, rebuild result putting prefix at start of translated phrase.
-     *
-     * @param $prefix
-     *
-     * @return void
-     */
-    private function rebuildResults( $prefix ): void {
-
-        if ( !empty( $this->result->responseData[ 'translatedText' ] ) ) {
-            $this->result->responseData[ 'translatedText' ] = $prefix . $this->result->responseData[ 'translatedText' ];
-        }
-
-        if ( !empty( $this->result->matches ) ) {
-            $matches_keys = [ 'raw_segment', 'segment', 'translation', 'raw_translation' ];
-            foreach ( $this->result->matches as $match ) {
-                foreach ( $matches_keys as $match_key ) {
-                    $match->$match_key = $prefix . $match->$match_key;
-                }
-            }
-        }
-
-    }
-
     private function possiblyOverrideMtPenalty(): void {
         if ( !empty( $this->result->matches ) ) {
             /** @var $match Matches */
             foreach ( $this->result->matches as $match ) {
-                if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
+                if ( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false ) {
                     $match->match = $this->getStandardMtPenaltyString();
                 }
             }
@@ -238,20 +208,18 @@ class MyMemory extends AbstractEngine {
         $parameters[ 'client_id' ] = $_config[ 'uid' ] ?? 0;
 
         // TM prioritization
-        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] ) ? 1 : 0;
+        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) && $_config[ 'priority_key' ] ) ? 1 : 0;
 
-        if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
-            $penalties = [];
+        // public_tm_penalty
+        if ( isset( $_config[ 'public_tm_penalty' ] ) && is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
+            $_config[ 'penalty_key' ][] = [
+                    'key'     => 'public',
+                    'penalty' => $_config[ 'public_tm_penalty' ] / 100,
+            ];
+        }
 
-            foreach ( $_config[ 'penalty_key' ] as $penalty ) {
-                if ( is_numeric( $penalty ) ) {
-                    $penalties[] = $penalty / 100;
-                }
-            }
-
-            if ( !empty( $penalties ) ) {
-                $parameters[ 'penalty_key' ] = implode( ",", $penalties );
-            }
+        if ( !empty( $_config[ 'penalty_key' ] ) ) {
+            $parameters[ 'penalty_key' ] = json_encode( $_config[ 'penalty_key' ] );
         }
 
         if ( isset( $_config[ 'dialect_strict' ] ) ) {
@@ -401,7 +369,7 @@ class MyMemory extends AbstractEngine {
      *
      * @param string $uuid
      *
-     * @return TmxResponse
+     * @return FileImportAndStatusResponse
      */
     public function entryStatus( string $uuid ): TMSAbstractResponse {
 
@@ -412,7 +380,7 @@ class MyMemory extends AbstractEngine {
         );
 
         $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
-        
+
         return $this->result;
     }
 
@@ -426,9 +394,9 @@ class MyMemory extends AbstractEngine {
      * @param string $key
      * @param string $name
      *
-     * @return TmxResponse
+     * @return FileImportAndStatusResponse
      */
-    public function glossaryImport( string $file, string $key, string $name = '' ): TmxResponse {
+    public function glossaryImport( string $file, string $key, string $name = '' ): FileImportAndStatusResponse {
 
         $postFields = [
                 'glossary' => $this->getCurlFile( $file ),
@@ -443,21 +411,8 @@ class MyMemory extends AbstractEngine {
         $this->call( "glossary_import_relative_url", $postFields, true );
 
         /**
-         * @var TmxResponse
+         * @var FileImportAndStatusResponse
          */
-        return $this->result;
-    }
-
-    /**
-     * @param string $uuid
-     *
-     * @return TmxResponse
-     */
-    public function getGlossaryImportStatus( string $uuid ): TmxResponse {
-        $this->call( 'glossary_import_status_relative_url', [
-                'uuid' => $uuid
-        ] );
-
         return $this->result;
     }
 
@@ -478,32 +433,6 @@ class MyMemory extends AbstractEngine {
         ], true );
 
         return $this->result;
-    }
-
-    /**
-     * Poll MM for obtain the status of a write operation
-     * using a cyclic barrier
-     * (import, update, set, delete)
-     *
-     * @param string $uuid
-     * @param string $relativeUrl
-     */
-    private function pollForStatus( string $uuid, string $relativeUrl ) {
-        $limit     = 10;
-        $sleep     = 1;
-        $startTime = time();
-
-        do {
-
-            $this->call( $relativeUrl, [
-                    'uuid' => $uuid
-            ] );
-
-            if ( $this->result->responseStatus === 202 ) {
-                sleep( $sleep );
-            }
-
-        } while ( $this->result->responseStatus === 202 and ( time() - $startTime ) <= $limit );
     }
 
     /**
@@ -548,11 +477,11 @@ class MyMemory extends AbstractEngine {
      * @param string $idSegment
      * @param string $idJob
      * @param string $password
-     * @param string $term
+     * @param array  $term
      *
      * @return DeleteGlossaryResponse
      */
-    public function glossaryDelete( string $idSegment, string $idJob, string $password, string $term ): DeleteGlossaryResponse {
+    public function glossaryDelete( string $idSegment, string $idJob, string $password, array $term ): DeleteGlossaryResponse {
         $payload = [
                 'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
@@ -561,11 +490,6 @@ class MyMemory extends AbstractEngine {
                 "term"       => $term,
         ];
         $this->call( "glossary_delete_relative_url", $payload, true, true );
-
-        if ( $this->result->responseData === 'OK' and isset( $this->result->responseDetails ) ) {
-            $uuid = $this->result->responseDetails;
-            $this->pollForStatus( $uuid, 'glossary_entry_status_relative_url' );
-        }
 
         return $this->result;
     }
@@ -677,11 +601,6 @@ class MyMemory extends AbstractEngine {
         ];
         $this->call( "glossary_update_relative_url", $payload, true, true );
 
-        if ( $this->result->responseData === 'OK' and isset( $this->result->responseDetails ) ) {
-            $uuid = $this->result->responseDetails;
-            $this->pollForStatus( $uuid, 'glossary_entry_status_relative_url' );
-        }
-
         return $this->result;
     }
 
@@ -705,7 +624,7 @@ class MyMemory extends AbstractEngine {
         return $this->result;
     }
 
-    public function getStatus( $uuid ) {
+    public function getImportStatus( $uuid ) {
 
         $parameters = [ 'uuid' => trim( $uuid ) ];
         $this->call( 'tmx_status_relative_url', $parameters );
@@ -748,7 +667,7 @@ class MyMemory extends AbstractEngine {
             throw new Exception( $this->result->error->message, $this->result->responseStatus );
         }
 
-        Log::doJsonLog( 'TMX exported to E-mail.' );
+        $this->logger->debug( 'TMX exported to E-mail.' );
 
         return $this->result;
     }
@@ -792,12 +711,10 @@ class MyMemory extends AbstractEngine {
                 'key' => trim( $apiKey )
         ];
 
-        //query db
-//        $this->doQuery( 'api_key_check_auth', $postFields );
         $this->call( 'api_key_check_auth_url', $postFields );
 
         if ( !$this->result->responseStatus == 200 ) {
-            Log::doJsonLog( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
+            $this->logger->debug( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
             throw new Exception( "Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2 );
         }
 
@@ -851,21 +768,6 @@ class MyMemory extends AbstractEngine {
         //tag replace
         $source_string = $config[ 'source' ];
         $target_string = $config[ 'target' ];
-//        $re2 = '<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([0-9a-zA-Z\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>';
-//        preg_match_all("/" . $re2 .'/siU', $source_string, $source_matches_tag,PREG_OFFSET_CAPTURE, 0);
-//        preg_match_all("/" . $re2 .'/siU', $target_string, $target_matches_tag,PREG_OFFSET_CAPTURE, 0);
-//
-//        $map=[];
-//        foreach ($source_matches_tag[0] as $source_key=>$source_tag){
-//            foreach ($target_matches_tag[0] as $target_tag){
-//                if($source_tag[0] == $target_tag[0]){
-//                    $replace = md5($source_matches_tag[2][$source_key][0]);
-//                    $source_string = str_replace($source_tag[0], $replace, $source_string);
-//                    $target_string = str_replace($source_tag[0], $replace, $target_string);
-//                    $map[$replace] = $source_tag[0];
-//                }
-//            }
-//        }
 
         //formatting strip
         $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\xc2\xa0|\xE2|\x81|\xA0)+';
@@ -891,12 +793,7 @@ class MyMemory extends AbstractEngine {
         $this->call( 'tags_projection', $parameters );
 
         if ( !empty( $this->result->responseData ) ) {
-            //formatting replace
             $this->result->responseData = $l_matches . $this->result->responseData . $r_matches;
-            //tag replace
-//            foreach ($map as $key=>$value){
-//                $this->result->responseData = str_replace($key, $value, $this->result->responseData);
-//            }
         }
 
         return $this->result;

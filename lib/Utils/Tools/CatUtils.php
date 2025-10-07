@@ -24,7 +24,7 @@ use ReflectionException;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\IsJobRevisionValidator;
 
@@ -390,11 +390,12 @@ class CatUtils {
             $ctype = str_replace( '"', '', $ctype );
             $ctype = str_replace( 'ctype=', '', $ctype );
 
-            if ( $ctype !== CTypeEnum::HTML ) {
-                $string = str_replace( $match[ 0 ], $variables_placeholder, $string ); // count variables as one word
-            } else {
+            if ( in_array( $ctype, [ CTypeEnum::HTML, CTypeEnum::XML ] ) ) {
                 $string = str_replace( $match[ 0 ], '', $string ); // count html snippets as zero words
+            } else {
+                $string = str_replace( $match[ 0 ], $variables_placeholder, $string ); // count variables as one word
             }
+
         }
 
         // remove all residual xliff tags
@@ -465,7 +466,7 @@ class CatUtils {
         file_put_contents( $tmpOrigFName, $documentContent );
 
         $cmd = "file -i $tmpOrigFName";
-        Log::doJsonLog( $cmd );
+        LoggerFactory::doJsonLog( $cmd );
 
         $file_info = shell_exec( $cmd );
         [ , $charset ] = explode( "=", $file_info );
@@ -594,7 +595,7 @@ class CatUtils {
         if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
             $wCounter = new CounterModel();
             $wStruct  = $wCounter->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
-            Log::doJsonLog( "BackWard compatibility set Counter." );
+            LoggerFactory::doJsonLog( "BackWard compatibility set Counter." );
 
             return $wStruct;
         }
@@ -1020,23 +1021,69 @@ class CatUtils {
     }
 
     /**
-     * @param $filename
+     * This functions removes symbols from a string
+     *
+     * @param string $name
      *
      * @return string
      */
-    public static function encodeFileName($filename)
-    {
-        return rtrim(strtr(base64_encode(gzdeflate($filename, 9)), '+/', '-_'), '=');
+    public static function sanitizeProjectName( string $name ): string {
+        return preg_replace( '/[^.\-_\p{L}\p{N}\s]/u', '', $name );
     }
 
     /**
-     * @param $filename
+     * Validates the provided project name or generates a fallback name if the provided name is invalid or missing.
      *
-     * @return false|string
+     * This method ensures that the project name is sanitized and valid.
+     *
+     * If the provided name is empty or invalid:
+     * - It uses a fallback name based on the current date and time as the project name when there are more than one file.
+     * - If only one file is provided in the `$arrFiles` array, the fallback name is derived from the file name.
+     *   The file name is sanitized to ensure it meets the project name criteria.
+     *
+     * @param string $name     The project name to validate. An empty string is treated as missing.
+     * @param array  $arrFiles An array of file paths used to determine a fallback name if the project name is invalid.
+     *                         If the array contains exactly one file, its name is used as the fallback.
+     *
+     * @return string Returns the validated project name or a fallback name if the provided name is invalid or missing.
      */
-    public static function decodeFileName($filename)
-    {
-        return gzinflate(base64_decode(strtr($filename, '-_', '+/')));
-    }
-}
+    public static function sanitizeOrFallbackProjectName( string $name, array $arrFiles = [] ): string {
 
+        // Generate a fallback name using the current date and time.
+        $fallback = 'MATECAT_PROJ-' . date( 'YmdHi' );
+
+        // Check if the provided name is empty.
+        if ( $name == '' ) {
+            // If exactly one file is provided, sanitize and use its name as the fallback.
+            if ( count( $arrFiles ) === 1 ) {
+                $file = end( $arrFiles );
+                // Sanitize the file name to ensure it meets the project name criteria.
+                $name = self::sanitizeProjectName( AbstractFilesStorage::pathinfo_fix( $file[ 'name' ], PATHINFO_FILENAME ) );
+            }
+
+            // Return the sanitized name or the fallback if the name is still empty.
+            return $name != '' ? $name : $fallback;
+        }
+
+        // Sanitize the provided name.
+        $name = self::sanitizeProjectName( $name );
+
+        // Return the sanitized name or the fallback if sanitization results in an empty string.
+        return $name != '' ? $name : $fallback;
+    }
+
+    /**
+     * This method can be used as polyfill of FILTER_SANITIZE_STRING,
+     * which is DEPRECATED in PHP >= 8.1
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function filter_string_polyfill( string $string ): string {
+        $str = preg_replace( '/\x00|<[^>]*>?/', '', $string );
+
+        return str_replace( [ "'", '"' ], [ '&#39;', '&#34;' ], $str );
+    }
+
+}

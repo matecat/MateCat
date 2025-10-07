@@ -71,7 +71,8 @@ use Utils\Constants\ProjectStatus;
 use Utils\Constants\XliffTranslationStatus;
 use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\LQA\QA;
 use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
@@ -152,6 +153,7 @@ class ProjectManager {
      * @var MetadataDao
      */
     protected MetadataDao $filesMetadataDao;
+    private MatecatLogger $logger;
 
     /**
      * ProjectManager constructor.
@@ -164,6 +166,8 @@ class ProjectManager {
      * @throws ValidationError
      */
     public function __construct( ArrayObject $projectStructure = null ) {
+
+        $this->logger = LoggerFactory::getLogger( 'project_manager' );
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
@@ -269,8 +273,6 @@ class ProjectManager {
             $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure[ 'id_customer' ] );
         }
 
-        $this->_log( $this->features->getCodes() );
-
         /** @var MateCatFilter $filter */
         $filter       = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
         $this->filter = $filter;
@@ -295,9 +297,9 @@ class ProjectManager {
     }
 
     protected function _log( $_msg, ?Throwable $exception = null ) {
-        Log::doJsonLog( $_msg );
+        $this->logger->debug( $_msg );
         if ( $exception ) {
-            Log::doJsonLog( ( new Error( $exception ) )->render( true ) );
+            $this->logger->debug( ( new Error( $exception ) )->render( true ) );
         }
     }
 
@@ -678,12 +680,12 @@ class ProjectManager {
 
         $uploadDir = $this->uploadDir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
-        Log::doJsonLog( $uploadDir );
+        $this->_log( $uploadDir );
 
         //we are going to access the storage, get a model object to manipulate it
         $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
 
-        Log::doJsonLog( $linkFiles );
+        $this->_log( $linkFiles );
 
         /*
             loop through all input files to
@@ -736,7 +738,8 @@ class ProjectManager {
 
                 // make a cache package (with work/ only, empty orig/)
                 try {
-                    $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                    $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], null, $filePathName );
+                    $this->logger->debug( "File $fileName converted to cache" );
                 } catch ( Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
                             "code"    => -230,
@@ -779,6 +782,7 @@ class ProjectManager {
         $totalFilesStructure = [];
         if ( isset( $linkFiles[ 'conversionHashes' ] ) and isset( $linkFiles[ 'conversionHashes' ][ 'sha' ] ) ) {
             foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
+
                 //converted file is inside cache directory
                 //get hash from file name inside UUID dir
                 $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
@@ -823,10 +827,21 @@ class ProjectManager {
                         throw new Exception( "Failed to find converted Xliff", -3 );
                     }
 
+
                     $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
 
                     if ( count( $filesStructure ) === 0 ) {
                         throw new Exception( 'Files could not be saved in database.', -6 );
+                    }
+
+                    // pdfAnalysis
+                    foreach ($filesStructure as $fid => $fileStructure){
+                        $pos  = array_search($fileStructure['original_filename'], $this->projectStructure[ 'array_files' ]);
+                        $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+
+                        if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
+                            $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'pdfAnalysis', json_encode( $meta[ 'pdfAnalysis' ] ) );
+                        }
                     }
 
                 } catch ( Exception $e ) {
@@ -1055,11 +1070,11 @@ class ProjectManager {
         try {
 
             if ( AbstractFilesStorage::isOnS3() ) {
-                Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
+                $this->_log( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
             } else {
-                Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
+                $this->_log( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
                 Utils::deleteDir( $this->uploadDir );
                 if ( is_dir( $this->uploadDir . '_converted' ) ) {
                     Utils::deleteDir( $this->uploadDir . '_converted' );
@@ -1436,6 +1451,11 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             $jobsMetadataDao = new \Model\Jobs\MetadataDao();
+
+            // public_tm_penalty
+            if ( isset ( $projectStructure[ 'public_tm_penalty' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure[ 'public_tm_penalty' ] );
+            }
 
             // character_counter_count_tags
             if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
@@ -1916,7 +1936,7 @@ class ProjectManager {
             // save external-file attribute
             if ( isset( $xliff_file[ 'attr' ][ 'external-file' ] ) ) {
                 $externalFile = $xliff_file[ 'attr' ][ 'external-file' ];
-                $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'mtc:references', $externalFile );
+                $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'mtc:references', $externalFile );
             }
 
             // save x-jsont* datatype
@@ -2364,13 +2384,12 @@ class ProjectManager {
         //return structure
         $fileStructures = [];
 
-        foreach ( $_originalFileNames as $pos => $originalFileName ) {
+        foreach ( $_originalFileNames as $originalFileName ) {
 
             // avoid blank filenames
             if ( !empty( $originalFileName ) ) {
 
                 // get metadata
-                $meta     = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
@@ -2462,7 +2481,7 @@ class ProjectManager {
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             /** @var ?SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? null;
+            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? new SegmentOriginalDataStruct(); // If not set, create an empty struct to be safe. Avoid 'Call to a member function getMap() on null'
 
             if ( !empty( $segmentOriginalDataStruct->getMap() ) ) {
 
@@ -2750,6 +2769,13 @@ class ProjectManager {
 
                 $position = ( isset( $translation_row[ 6 ] ) ) ? $translation_row[ 6 ] : null;
                 $segment  = ( new SegmentDao() )->getById( $translation_row [ 0 ] );
+
+                //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
+                // SegmentDao::getById returns false if the id is not found in the database
+                // Skip the segment and lose the translation if the segment id is not found in the database
+                if( !$segment ) {
+                    continue;
+                }
 
                 if ( is_string( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ] ) ) {
                     $payable_rates = json_decode( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ], true );

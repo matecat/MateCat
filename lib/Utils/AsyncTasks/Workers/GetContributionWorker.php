@@ -380,8 +380,14 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
         $_config[ 'priority_key' ]   = $contributionStruct->tm_prioritization;
 
-        if ( !empty( $contributionStruct->penalty_key ) ) {
-            $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
+        // penalty_key
+        $penalty_key = TmKeyManager::getPenaltyMap( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole );
+        if ( !empty( $penalty_key ) ) {
+            $_config[ 'penalty_key' ] = $penalty_key;
+        }
+
+        if ( !empty( $contributionStruct->public_tm_penalty ) ) {
+            $_config[ 'public_tm_penalty' ] = $contributionStruct->public_tm_penalty;
         }
 
         if ( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ) {
@@ -495,6 +501,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
+                $config[ 'tuid' ]                = $jobStruct->id . ":" . $contributionStruct->segmentId;
 
                 if ( $contributionStruct->mt_evaluation ) {
                     $config[ 'include_score' ] = $contributionStruct->mt_evaluation;
@@ -537,6 +544,7 @@ class GetContributionWorker extends AbstractWorker {
      * @param GetContributionRequest $contributionStruct
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private function updateAnalysisSuggestion( array $matches, GetContributionRequest $contributionStruct ) {
 
@@ -556,7 +564,7 @@ class GetContributionWorker extends AbstractWorker {
 
                     // normalize data for saving `suggestions_array`
 
-                    if ( $m[ 'created_by' ] == 'MT!'  ) {
+                    if ( $m[ 'created_by' ] == 'MT!' ) {
                         $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //Match returns MT!
                     } else {
                         $user = new UserStruct();

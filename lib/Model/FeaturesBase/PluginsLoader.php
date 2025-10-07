@@ -7,7 +7,7 @@ use Klein\Klein;
 use Klein\Request;
 use Plugins\Features\BaseFeature;
 use Plugins\Features\UnknownFeature;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -138,11 +138,14 @@ class PluginsLoader {
         $cls = "$baseClass\\Decorator\\$decoratorName";
 
         // if this line is missing, it won't log load errors.
-        Log::doJsonLog( 'Loading Decorator ' . $cls );
+        LoggerFactory::getLogger( 'decorators' )->debug( 'Loading Decorator ' . $cls );
 
         if ( class_exists( $cls ) ) {
             return $cls;
         }
+
+        // if this line is missing, it won't log load errors.
+        LoggerFactory::getLogger( 'decorators' )->debug( 'Failed Loading Decorator ' . $cls );
 
         return false;
 

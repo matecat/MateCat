@@ -9,7 +9,6 @@ use Model\FilesStorage\Exceptions\FileSystemException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use UnexpectedValueException;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -29,6 +28,27 @@ use Utils\Tools\Utils;
  */
 class FsFilesStorage extends AbstractFilesStorage {
 
+    /**
+     * @param string|null $files
+     * @param string|null $cache
+     * @param string|null $zip
+     */
+    public function __construct( ?string $files = null, ?string $cache = null, ?string $zip = null ) {
+        parent::__construct( $zip );
+        //override default config
+        if ( $files ) {
+            $this->filesDir = $files;
+        } else {
+            $this->filesDir = AppConfig::$FILES_REPOSITORY;
+        }
+
+        if ( $cache ) {
+            $this->cacheDir = $cache;
+        } else {
+            $this->cacheDir = AppConfig::$CACHE_REPOSITORY;
+        }
+    }
+
     protected static function ensureDirectoryExists( string $path ): bool {
         if ( !file_exists( $path ) ) {
             return mkdir( $path, 0755, true );
@@ -46,13 +66,13 @@ class FsFilesStorage extends AbstractFilesStorage {
     /**
      * @param      $hash
      * @param      $lang
-     * @param bool $originalPath
+     * @param string|null $originalPath
      * @param      $xliffPath
      *
      * @return bool
      * @throws FileSystemException
      */
-    public function makeCachePackage( $hash, $lang, $originalPath, $xliffPath ): bool {
+    public function makeCachePackage( $hash, $lang, ?string $originalPath, $xliffPath ): bool {
 
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
@@ -206,8 +226,8 @@ class FsFilesStorage extends AbstractFilesStorage {
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package";
 
-        Log::doJsonLog( $fileDir );
-        Log::doJsonLog( $cacheDir );
+        $this->logger->debug( $fileDir );
+        $this->logger->debug( $cacheDir );
 
         $res = true;
         //check if it doesn't exist
@@ -225,7 +245,7 @@ class FsFilesStorage extends AbstractFilesStorage {
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
         $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
-        Log::doJsonLog( $origDir );
+        $this->logger->debug( $origDir );
 
         $origFilePath    = $this->getSingleFileInPath( $origDir );
         $tmpOrigFileName = $origFilePath;
@@ -246,10 +266,10 @@ class FsFilesStorage extends AbstractFilesStorage {
          * Force the new filename if it is provided
          */
         $d = $cacheDir . DIRECTORY_SEPARATOR . "work";
-        Log::doJsonLog( $d );
+        $this->logger->debug( $d );
         $convertedFilePath = $this->getSingleFileInPath( $d );
 
-        Log::doJsonLog( $convertedFilePath );
+        $this->logger->debug( $convertedFilePath );
 
         $tmpConvertedFilePath = $convertedFilePath;
         if ( !empty( $newFileName ) ) {
@@ -259,11 +279,11 @@ class FsFilesStorage extends AbstractFilesStorage {
             }
         }
 
-        Log::doJsonLog( $convertedFilePath );  // <--------- TODO: this is empty!
+        $this->logger->debug( $convertedFilePath );  // <--------- TODO: this is empty!
 
         $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . static::basename_fix( $tmpConvertedFilePath );
 
-        Log::doJsonLog( $dest );
+        $this->logger->debug( $dest );
 
         $res &= $this->link( $convertedFilePath, $dest );
 
@@ -464,7 +484,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      *
      * @return bool
      */
-    public function cacheZipArchive( $hash, $zipPath ) {
+    public function cacheZipArchive( string $hash, string $zipPath ): bool {
 
         $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER;
 

@@ -96,9 +96,29 @@ $klein->with( '/api/app/intento', function () {
     route( '/routing/[:engineId]', 'GET', [ '\Controller\API\App\IntentoController', 'routingList' ] );
 } );
 
-// Match
+// MyMemory
 $klein->with( '/api/app/mymemory', function () {
-    route( '/status/[:uuid]', 'GET', [ '\Controller\API\App\MyMemoryController', 'status' ] );
+
+    // Glossary entries
+    route( '/glossary/_check', 'POST', [ '\Controller\API\App\GlossaryController', 'check' ] );
+    route( '/glossary/_delete', 'POST', [ '\Controller\API\App\GlossaryController', 'delete' ] );
+    route( '/glossary/_domains', 'POST', [ '\Controller\API\App\GlossaryController', 'domains' ] );
+    route( '/glossary/_get', 'POST', [ '\Controller\API\App\GlossaryController', 'get' ] );
+    route( '/glossary/_keys', 'POST', [ '\Controller\API\App\GlossaryController', 'keys' ] );
+    route( '/glossary/_search', 'POST', [ '\Controller\API\App\GlossaryController', 'search' ] );
+    route( '/glossary/_set', 'POST', [ '\Controller\API\App\GlossaryController', 'set' ] );
+    route( '/glossary/_update', 'POST', [ '\Controller\API\App\GlossaryController', 'update' ] );
+
+    # Glossary file import
+    route( '/glossary/import/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'import' ] );
+    route( '/glossary/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'importStatus' ] );
+
+    # single entry (ex: glossary or memory)
+    route( '/entry/status/[:uuid]', 'GET', [ '\Controller\API\App\MyMemoryEntryStatusController', 'status' ] );
+
+    # TMX Files
+    route( '/tmx/import/status/[:uuid]', 'GET', [ 'Controller\API\App\TMXFileController', 'importStatus' ] );
+    route( '/tmx/import', 'POST', [ 'Controller\API\App\TMXFileController', 'import' ] );
 } );
 
 // AI Assistant
@@ -174,8 +194,6 @@ route( '/api/app/undo-replace-all', 'POST', [ 'Controller\API\App\GetSearchContr
 route( '/api/app/update-job-keys', 'POST', [ 'Controller\API\App\UpdateJobKeysController', 'update' ] );
 route( '/api/app/set-translation', 'POST', [ 'Controller\API\App\SetTranslationController', 'translate' ] );
 route( '/api/app/split-segment', 'POST', ['Controller\API\App\SplitSegmentController', 'split' ] );
-route( '/api/app/new-tmx', 'POST', ['Controller\API\App\LoadTMXController', 'newTM' ] );
-route( '/api/app/upload-tmx-status', 'POST', ['Controller\API\App\LoadTMXController', 'uploadStatus' ] );
 route( '/api/app/change-job-status', 'POST', ['Controller\API\App\ChangeJobsStatusController', 'changeStatus' ] );
 route( '/api/app/download-tmx', 'POST', [ 'Controller\API\App\RequestExportTMXController', 'download' ] );
 route( '/api/app/new-project', 'POST', ['Controller\API\App\CreateProjectController', 'create' ] );

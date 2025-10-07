@@ -20,6 +20,7 @@ use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
@@ -42,6 +43,7 @@ use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 class CattoolController extends BaseKleinViewController {
 
@@ -111,6 +113,9 @@ class CattoolController extends BaseKleinViewController {
      */
     public function renderView() {
 
+
+        $rul = CanonicalRoutes::inviteToTeamConfirm( [                         'invited_by_uid' => 1,                         'email'          => "mauro@translated.net",                         'team_id'        => 1                 ] );
+
         $chunkAndPasswords = new stdClass();
         $request           = $this->validateTheRequest();
         $isRevision        = CatUtils::getIsRevisionFromRequestUri();
@@ -148,6 +153,8 @@ class CattoolController extends BaseKleinViewController {
         }
 
         $model = $chunkStruct->getProject()->getLqaModel();
+        $jobsMetadataDao = new MetadataDao();
+        $public_tm_penalty = $jobsMetadataDao->get($chunkStruct->id, $chunkStruct->password, 'public_tm_penalty');
 
         $this->setView( "index.html", [
                 'active_engine'                         => new PHPTalMap( $this->getActiveEngine( $chunkStruct->id_mt_engine ) ),
@@ -183,6 +190,7 @@ class CattoolController extends BaseKleinViewController {
                 'review_extended'                       => new PHPTalBoolean( true ),
                 'review_password'                       => $isRevision ? $chunkReviewStruct->review_password : ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $chunkStruct, Utils::getSourcePage() + 1 )[ 0 ]->review_password,
                 'revisionNumber'                        => $revisionNumber,
+                'public_tm_penalty'                     => $public_tm_penalty->value ?? '',
                 'searchable_statuses'                   => new PHPTalMap( $this->searchableStatuses() ),
                 'secondRevisionsCount'                  => count(
                         array_filter(

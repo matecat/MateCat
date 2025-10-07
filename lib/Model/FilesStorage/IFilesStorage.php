@@ -38,15 +38,15 @@ interface IFilesStorage {
      *          |_work
      *          |_xliff file
      *
-     * @param      $hash
-     * @param      $lang
-     * @param bool $originalPath
-     * @param      $xliffPath
+     * @param         $hash
+     * @param         $lang
+     * @param ?string $originalPath
+     * @param         $xliffPath
      *
      * @return mixed
      * @throws FileSystemException
      */
-    public function makeCachePackage( $hash, $lang, $originalPath, $xliffPath );
+    public function makeCachePackage( $hash, $lang, ?string $originalPath, $xliffPath );
 
     /**
      * Rebuild the filename that will be taken from disk in the cache directory
@@ -175,12 +175,12 @@ interface IFilesStorage {
     /**
      * Make a temporary cache copy for the original zip file
      *
-     * @param $hash
-     * @param $zipPath
+     * @param string $hash
+     * @param string $zipPath
      *
      * @return bool
      */
-    public function cacheZipArchive( $hash, $zipPath );
+    public function cacheZipArchive( string $hash, string $zipPath ): bool;
 
     /**
      * @param $create_date

@@ -33,7 +33,7 @@ export const getDomainsList = async ({
   }
 
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/glossary/_domains`,
+    `${getMatecatApiDomain()}api/app/mymemory/glossary/_domains`,
     {
       method: 'POST',
       credentials: 'include',
