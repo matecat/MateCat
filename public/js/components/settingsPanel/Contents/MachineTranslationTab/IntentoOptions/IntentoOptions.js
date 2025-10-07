@@ -8,7 +8,11 @@ import {getIntentoRouting} from '../../../../../api/getIntentoRouting'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 
 const PROVIDERS = config.intento_providers
-  ? Object.values(config.intento_providers)
+  ? Object.values(config.intento_providers).reduce(
+      (acc, cur) =>
+        cur.id === 'smart_routing' ? [cur, ...acc] : [...acc, cur],
+      [],
+    )
   : []
 
 export const IntentoOptions = ({id, isCattoolPage}) => {
