@@ -589,7 +589,20 @@ const NewProject = () => {
         const languages = data.map((lang) => {
           return {...lang, id: lang.code}
         })
-        setSupportedLanguages(languages)
+
+        setSupportedLanguages(
+          languages.map((language) => {
+            const nameWithoutDiacriticalMarks = language.name
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+            return {
+              ...language,
+              ...(nameWithoutDiacriticalMarks !== language.name && {
+                nameWithoutDiacriticalMarks,
+              }),
+            }
+          }),
+        )
         ApplicationActions.setLanguages(data)
       })
       .catch((error) =>
