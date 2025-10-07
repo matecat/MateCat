@@ -10,15 +10,16 @@ export const TemplateSelect = ({
   setProjectTemplates,
   currentProjectTemplate,
   label,
+  subtemplatesNotSaved,
   maxHeightDroplist,
 }) => {
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
 
-  const isModifyingTemplate = projectTemplates.some(
-    ({isTemporary}) => isTemporary,
-  )
+  const isModifyingTemplate =
+    projectTemplates.some(({isTemporary}) => isTemporary) ||
+    subtemplatesNotSaved.length
 
   const options = projectTemplates
     .filter(({isTemporary}) => !isTemporary)
@@ -65,6 +66,7 @@ export const TemplateSelect = ({
         activeOption={activeOption}
         onSelect={onSelect}
         isDisabled={isLoadingTemplates || !isUserLogged}
+        {...(isModifyingTemplate && {tooltipContent: 'Lorem ipsum bla bla'})}
       >
         {({id, name, showActiveOptionIcon}) => {
           const {isDefault} =
@@ -105,5 +107,6 @@ TemplateSelect.propTypes = {
   setProjectTemplates: PropTypes.func,
   currentProjectTemplate: PropTypes.any,
   label: PropTypes.string,
+  subtemplatesNotSaved: PropTypes.array,
   maxHeightDroplist: PropTypes.number,
 }

@@ -138,10 +138,6 @@ export const engineListMock = [
     id: 'googletranslate',
   },
   {name: 'Intento', id: 'intento'},
-  {
-    name: 'Microsoft Translator Hub',
-    id: 'microsofthub',
-  },
   {name: 'SmartMATE', id: 'smartmate'},
   {name: 'Yandex.Translate', id: 'yandextranslate'},
 ]
