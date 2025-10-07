@@ -202,9 +202,8 @@ class PayableRateController extends KleinController {
         try {
             $json = $this->request->body();
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-            $validator             = new JSONValidator( $this->getPayableRateModelSchema() );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( $this->getPayableRateModelSchema() );
             $validator->validate( $validatorObject );
 
             $errors = $validator->getExceptions();
@@ -253,16 +252,12 @@ class PayableRateController extends KleinController {
     /**
      * @param string $json
      *
-     * @throws InvalidValue
      * @throws JSONValidatorException
-     * @throws \Swaggest\JsonSchema\Exception
      * @throws JsonValidatorGenericException
      */
     private static function validateJSON( string $json ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
-        $validator             = new JSONValidator( $jsonSchema, true );
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( 'payable_rate.json', true );
         $validator->validate( $validatorObject );
     }
 

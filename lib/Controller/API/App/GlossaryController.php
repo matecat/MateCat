@@ -19,6 +19,7 @@ use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\Tools\CatUtils;
+use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -273,12 +274,12 @@ class GlossaryController extends KleinController {
      * @throws JsonSchemaException
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
+     * @throws ValidationError
+     * @throws Exception
      */
     private function createThePayloadForWorker( $jsonSchemaPath ): array {
-        $jsonSchema = file_get_contents( $jsonSchemaPath );
-        $this->validateJson( $this->request->body(), $jsonSchema );
 
-        $json = json_decode( $this->request->body(), true );
+        $json = $this->validateJson( $this->request->body(), $jsonSchemaPath )->getValue( true );
 
         if ( isset( $json[ 'target_language' ] ) and isset( $json[ 'source_language' ] ) ) {
             $this->validateLanguage( $json[ 'target_language' ] );
@@ -405,22 +406,17 @@ class GlossaryController extends KleinController {
      * @param $json
      * @param $jsonSchema
      *
+     * @return JSONValidatorObject|null
      * @throws InvalidValue
-     * @throws JsonSchemaException
      * @throws JSONValidatorException
+     * @throws JsonSchemaException
      * @throws JsonValidatorGenericException
      */
-    private function validateJson( $json, $jsonSchema ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
+    private function validateJson( $json, $jsonSchema ): ?ValidatorObject {
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( $jsonSchema, true );
 
-        $validator = new JSONValidator( $jsonSchema );
-        $validator->validate( $validatorObject );
-
-        if ( !$validator->isValid() ) {
-            $error = $validator->getExceptions()[ 0 ]->error;
-            throw new JSONValidatorException( $error->getMessage() );
-        }
+        return $validator->validate( $validatorObject );
     }
 
     /**

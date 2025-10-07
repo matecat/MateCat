@@ -18,6 +18,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -481,7 +482,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 'status'                  => $status,
                 'split_statuses'          => $split_statuses,
                 'chunk'                   => $chunk,
-                'project'                 => $chunk->getProject()
+                'project'                 => $chunk->getProject(),
+                'id_project'              => $chunk->id_project
         ];
 
         $this->logger->debug( $data );
@@ -521,7 +523,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $featureSet->loadForProject( $this->data[ 'project' ] );
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ) );
+        $metadata     = new JobsMetadataDao();
+        $filter       = MateCatFilter::getInstance(
+                $featureSet,
+                $this->data[ 'chunk' ]->source,
+                $this->data[ 'chunk' ]->target,
+                SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ),
+                $metadata->getSubfilteringCustomHandlers( $this->id_job, $this->password )
+        );
         $this->filter = $filter;
 
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );

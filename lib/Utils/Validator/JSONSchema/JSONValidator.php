@@ -35,9 +35,22 @@ class JSONValidator extends AbstractValidator {
      * @throws \Swaggest\JsonSchema\Exception
      */
     public function __construct( string $jsonSchema, bool $throwExceptions = false ) {
+
+        if ( is_file( AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema ) ) {
+            $jsonSchema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/' . $jsonSchema );
+        } elseif ( is_file( $jsonSchema ) ) {
+            $jsonSchema = file_get_contents( $jsonSchema );
+        }
+
         $this->schemaContract  = Schema::import( static::getValidJSONSchema( $jsonSchema ), new Context( new class implements RemoteRefProvider {
             public function getSchemaData( $url ): object {
-                return JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/' . $url ) );
+                if ( is_file( $url ) ) {
+                    $url = file_get_contents( $url );
+                } elseif ( is_file( AppConfig::$ROOT . '/inc/validation/schema/' . $url ) ) {
+                    $url = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/' . $url );
+                }
+
+                return JSONValidator::getValidJSONSchema( $url );
             }
 
         } ) );
@@ -62,17 +75,15 @@ class JSONValidator extends AbstractValidator {
     /**
      * @param ValidatorObject $object
      *
-     * @return ValidatorObject|null
+     * @return JSONValidatorObject|null
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
-    public function validate( ValidatorObject $object ): ?ValidatorObject {
-
-        /** @var JSONValidatorObject $object */
-        $object->decoded = json_decode( $object->json );
+    public function validate( ValidatorObject $object ): ?JSONValidatorObject {
 
         try {
-            $this->schemaContract->in( $object->decoded );
+            /** @var JSONValidatorObject $object */
+            $this->schemaContract->in( $object->decode() );
         } catch ( InvalidValue $invalidValue ) {
             if ( !$this->throwExceptions ) {
                 $this->addException( new JSONValidatorException( $invalidValue->inspect() ) );

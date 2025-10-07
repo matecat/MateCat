@@ -160,12 +160,8 @@ class ConvertFileController extends KleinController {
 
         if ( !empty( $filters_extraction_parameters_template ) ) {
             $json   = html_entity_decode( $filters_extraction_parameters_template );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
             $validator->validate( $validatorObject );
 
             $filtersTemplate = new FiltersConfigTemplateStruct();

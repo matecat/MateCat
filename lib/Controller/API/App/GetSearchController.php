@@ -9,8 +9,10 @@ use InvalidArgumentException;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Search\ReplaceEventStruct;
 use Model\Search\SearchModel;
@@ -51,6 +53,7 @@ class GetSearchController extends AbstractStatefulKleinController {
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function replaceAll(): void {
 
@@ -88,6 +91,10 @@ class GetSearchController extends AbstractStatefulKleinController {
     }
 
     // not is use
+
+    /**
+     * @throws Exception
+     */
     public function redoReplaceAll(): void {
 
         $request        = $this->validateTheRequest();
@@ -103,6 +110,10 @@ class GetSearchController extends AbstractStatefulKleinController {
     }
 
     // not is use
+
+    /**
+     * @throws Exception
+     */
     public function undoReplaceAll(): void {
 
         $request        = $this->validateTheRequest();
@@ -131,7 +142,7 @@ class GetSearchController extends AbstractStatefulKleinController {
         $isMatchCaseRequested  = filter_var( $this->request->param( 'matchcase' ), FILTER_VALIDATE_BOOLEAN );
         $isExactMatchRequested = filter_var( $this->request->param( 'exactmatch' ), FILTER_VALIDATE_BOOLEAN );
         $inCurrentChunkOnly    = filter_var( $this->request->param( 'inCurrentChunkOnly' ), FILTER_VALIDATE_BOOLEAN );
-        $revision_number       = filter_var( $this->request->param( 'revision_number' ), FILTER_VALIDATE_INT );
+        $revision_number       = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => null ] ] );
 
         if ( empty( $job ) ) {
             throw new InvalidArgumentException( "missing id job", -2 );
@@ -199,7 +210,7 @@ class GetSearchController extends AbstractStatefulKleinController {
     /**
      * @param $job_id
      *
-     * @return \Utils\Search\ReplaceHistory
+     * @return ReplaceHistory
      */
     private function getReplaceHistory( $job_id ): ReplaceHistory {
         // ReplaceHistory init
@@ -218,7 +229,8 @@ class GetSearchController extends AbstractStatefulKleinController {
      */
     private function getSearchModel( SearchQueryParamsStruct $queryParams, JobStruct $jobStruct ): SearchModel {
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $jobStruct->source, $jobStruct->target );
+        $metadata = new MetadataDao();
+        $filter   = MateCatFilter::getInstance( $this->getFeatureSet(), $jobStruct->source, $jobStruct->target, [], $metadata->getSubfilteringCustomHandlers( $jobStruct->id, $jobStruct->password ) );
 
         return new SearchModel( $queryParams, $filter );
     }
@@ -247,7 +259,7 @@ class GetSearchController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param \Utils\Search\ReplaceHistory $srh
+     * @param ReplaceHistory $srh
      *
      * @return array
      */
@@ -312,23 +324,25 @@ class GetSearchController extends AbstractStatefulKleinController {
 
     /**
      * @param                         $search_results
-     * @param                         $id_job
-     * @param                         $password
-     * @param                         $id_segment
+     * @param int                     $id_job
+     * @param string                  $password
+     * @param string                  $id_segment
      * @param SearchQueryParamsStruct $queryParams
-     * @param bool                    $revisionNumber
+     * @param int|null                $revisionNumber
      *
+     * @throws NotFoundException
+     * @throws ReflectionException
      * @throws Exception
      */
-    private function updateSegments( $search_results, $id_job, $password, $id_segment, SearchQueryParamsStruct $queryParams, $revisionNumber = false ): void {
+    private function updateSegments( $search_results, int $id_job, string $password, string $id_segment, SearchQueryParamsStruct $queryParams, ?int $revisionNumber = null ): void {
         $db = Database::obtain();
 
-        $chunk           = ChunkDao::getByIdAndPassword( (int)$id_job, $password );
-        $project         = ProjectDao::findByJobId( (int)$id_job );
+        $chunk           = ChunkDao::getByIdAndPassword( $id_job, $password );
+        $project         = ProjectDao::findByJobId( $id_job );
         $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->user, $project, $id_segment );
 
         // loop all segments to replace
-        foreach ( $search_results as $key => $tRow ) {
+        foreach ( $search_results as $tRow ) {
 
             // start the transaction
             $db->begin();
@@ -375,7 +389,7 @@ class GetSearchController extends AbstractStatefulKleinController {
                 }
             }
 
-            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $chunk->source, $chunk->target, [] );
+            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $chunk->source, $chunk->target );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->getReplacedSegmentTranslation( $tRow[ 'translation' ], $queryParams ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 
@@ -446,13 +460,13 @@ class GetSearchController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param \Model\Translations\SegmentTranslationStruct $translationStruct
-     * @param bool                                         $revisionNumber
+     * @param SegmentTranslationStruct $translationStruct
+     * @param int|null                 $revisionNumber
      *
      * @return string
      */
-    private function getNewStatus( SegmentTranslationStruct $translationStruct, $revisionNumber = false ): string {
-        if ( false === $revisionNumber ) {
+    private function getNewStatus( SegmentTranslationStruct $translationStruct, ?int $revisionNumber = null ): string {
+        if ( !isset( $revisionNumber ) ) {
             return TranslationStatus::STATUS_TRANSLATED;
         }
 

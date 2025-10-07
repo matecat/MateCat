@@ -162,7 +162,7 @@ class MMT extends AbstractEngine {
                     'created-by'      => $this->getMTName(),
                     'create-date'     => date( "Y-m-d" ),
                     'score'           => $translation[ 'score' ] ?? null
-            ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+            ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ MetadataDao::SUBFILTERING_HANDLERS ] );
 
         } catch ( Exception $e ) {
             return $this->GoogleTranslateFallback( $_config );
@@ -593,7 +593,7 @@ class MMT extends AbstractEngine {
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
-    public function updateGlossary( string $id, array $data  ) {
+    public function updateGlossary( string $id, array $data ) {
         $client = $this->_getClient();
 
         return $client->updateGlossary( $id, $data );

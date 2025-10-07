@@ -93,10 +93,12 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
 
     public ?int $public_tm_penalty = null;
 
+    public ?array $subfiltering_handlers = [];
+
     ### NOT SERIALIZABLE Private members ###
 
     /**
-     * @var ?\Utils\Engines\AbstractEngine
+     * @var ?AbstractEngine
      */
     private ?AbstractEngine $tmEngine = null;
 
@@ -171,7 +173,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     /**
      * @param FeatureSet $featureSet
      *
-     * @return \Utils\Engines\AbstractEngine
+     * @return AbstractEngine
      * @throws Exception
      */
     public function getMTEngine( FeatureSet $featureSet ): AbstractEngine {
