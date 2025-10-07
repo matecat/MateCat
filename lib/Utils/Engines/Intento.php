@@ -174,7 +174,7 @@ class Intento extends AbstractEngine {
             // custom provider
             $customProvider = $metadataDao->get( $_config[ 'pid' ], 'intento_provider', 86400 );
 
-            if ( $customProvider !== null ) {
+            if ( $customProvider !== null and $customProvider !== "smart_routing" ) {
                 $parameters[ 'service' ][ 'async' ]    = true;
                 $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
             }
