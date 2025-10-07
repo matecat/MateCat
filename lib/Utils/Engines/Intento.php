@@ -347,6 +347,15 @@ class Intento extends AbstractEngine {
         $result   = json_decode( $response );
         curl_close( $curl );
         $_providers = [];
+
+        // needed by the UI
+        $_providers['smart_routing'] = [
+            'id' => 'smart_routing',
+            'name' => 'Smart_routing',
+            'vendor' => "",
+            'auth_example' => ""
+        ];
+
         if ( $result ) {
             foreach ( $result as $value ) {
                 $example                  = (array)$value->auth;
