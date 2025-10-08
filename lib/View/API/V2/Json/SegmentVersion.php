@@ -153,11 +153,13 @@ class SegmentVersion {
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target );
 
+        $translation = ( !empty( $version->translation ) ) ? $Filter->fromLayer0ToLayer2( $version->translation ) : null;
+
         return [
                 'id'              => (int)$version->id,
                 'id_segment'      => (int)$version->id_segment,
                 'id_job'          => (int)$version->id_job,
-                'translation'     => $Filter->fromLayer0ToLayer2( $version->translation ),
+                'translation'     => $translation,
                 'version_number'  => (int)$version->version_number,
                 'propagated_from' => (int)$version->propagated_from,
                 'created_at'      => $version->creation_date,
