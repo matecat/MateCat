@@ -107,7 +107,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $this->data[ 'segment' ] = $this->segment;
 
             $segment     = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); // this segment comes from the database when getting contexts
-            $translation = $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] );
+            $translation = (!empty($this->data[ 'translation' ])) ? $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] ) : null;
 
             $check = new QA( $segment, $translation ); // Layer 1 here
             $check->setChunk( $this->data[ 'chunk' ] );
@@ -817,12 +817,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->job_password         = $this->data[ 'password' ];
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
-        $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
+        $contributionStruct->translation          = (!empty($_Translation[ 'translation' ])) ? $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] ) : null;
         $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
-        $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
+        $contributionStruct->oldTranslation       = (!empty($old_translation[ 'translation' ])) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : null;
         $contributionStruct->translation_origin   = $this->getOriginalSuggestionProvider( $_Translation, $old_translation );
 
         /*
