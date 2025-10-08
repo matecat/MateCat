@@ -817,12 +817,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->job_password         = $this->data[ 'password' ];
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
-        $contributionStruct->translation          = (!empty($_Translation[ 'translation' ])) ? $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] ) : null;
+        $contributionStruct->translation          = (!empty($_Translation[ 'translation' ])) ? $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] ) : "";
         $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
-        $contributionStruct->oldTranslation       = (!empty($old_translation[ 'translation' ])) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : null;
+        $contributionStruct->oldTranslation       = (!empty($old_translation[ 'translation' ])) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : "";
         $contributionStruct->translation_origin   = $this->getOriginalSuggestionProvider( $_Translation, $old_translation );
 
         /*
