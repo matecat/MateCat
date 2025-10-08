@@ -840,8 +840,8 @@ class ProjectManager {
                     }
 
                     // pdfAnalysis
-                    foreach ($filesStructure as $fid => $fileStructure){
-                        $pos  = array_search($fileStructure['original_filename'], $this->projectStructure[ 'array_files' ]);
+                    foreach ( $filesStructure as $fid => $fileStructure ) {
+                        $pos  = array_search( $fileStructure[ 'original_filename' ], $this->projectStructure[ 'array_files' ] );
                         $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
                         if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
@@ -1229,6 +1229,18 @@ class ProjectManager {
 
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
+
+            if ( empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
+                continue;
+            }
+
+            if ( !isset( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+                continue;
+            }
+
+            if ( empty( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+                continue;
+            }
 
             // get corresponding meta
             $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
@@ -2778,7 +2790,7 @@ class ProjectManager {
                 //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
                 // SegmentDao::getById returns false if the id is not found in the database
                 // Skip the segment and lose the translation if the segment id is not found in the database
-                if( !$segment ) {
+                if ( !$segment ) {
                     continue;
                 }
 

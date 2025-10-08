@@ -118,6 +118,10 @@ class Matches {
      */
     protected function getLayer( $string, $layerNum, array $dataRefMap = [] ) {
 
+        if(empty($string)){
+            return $string;
+        }
+
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $filter */
         $filter = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
