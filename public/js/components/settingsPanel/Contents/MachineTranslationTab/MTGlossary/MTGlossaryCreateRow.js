@@ -138,7 +138,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
       onSubmit={onSubmit}
     >
       <div
-        className={`align-center${
+        className={`${
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >

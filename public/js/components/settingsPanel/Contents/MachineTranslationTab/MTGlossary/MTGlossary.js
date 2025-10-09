@@ -10,7 +10,6 @@ import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../../stores/CatToolStore'
-import ArrowDown from '../../../../../../img/icons/ArrowDown'
 import IconAdd from '../../../../icons/IconAdd'
 import {DeleteResource} from '../DeleteResource'
 import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary'
@@ -20,7 +19,7 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmD
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 
 const COLUMNS_TABLE = [
-  {name: 'Activate'},
+  {name: 'Active'},
   {name: 'Glossary'},
   {name: ''},
   {name: ''},
@@ -64,21 +63,17 @@ export class MTGlossaryStatus {
   }
 }
 
-export const MTGlossary = ({id, isCattoolPage = false}) => {
+export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
   const {currentProjectTemplate, modifyingCurrentTemplate, projectTemplates} =
     useContext(SettingsPanelContext)
 
-  const {mt: {extra: mtGlossaryProps} = {}} = currentProjectTemplate ?? {}
+  const {mt: {extra} = {}} = currentProjectTemplate ?? {}
 
-  const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
-  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
-    mtGlossaryProps?.ignore_glossary_case ?? false,
-  )
   const [deleteGlossaryRequest, setDeleteGlossaryRequest] = useState()
 
   const activeGlossariesRef = useRef()
-  activeGlossariesRef.current = mtGlossaryProps?.glossaries
+  activeGlossariesRef.current = extra?.mmt_glossaries
 
   const deleteGlossary = useRef()
   deleteGlossary.current = (glossary = deleteGlossaryRequest) => {
@@ -89,14 +84,14 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
           const templatesInvolved = projectTemplates
             .filter((template) =>
-              template.mt?.extra?.glossaries?.some(
+              template.mt?.extra?.mmt_glossaries?.some(
                 (value) => value === glossary.id,
               ),
             )
             .map((template) => {
               const mtObject = template.mt
               const {glossaries, ...extra} = mtObject.extra // eslint-disable-line
-              const glossariesFiltered = mtObject.extra.glossaries.filter(
+              const glossariesFiltered = mtObject.extra.mmt_glossaries.filter(
                 (value) => value !== glossary.id,
               )
 
@@ -147,7 +142,9 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     const templatesInvolved = projectTemplates
       .filter(({isTemporary}) => !isTemporary)
       .filter((template) =>
-        template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
+        template.mt?.extra?.mmt_glossaries?.some(
+          (value) => value === glossary.id,
+        ),
       )
 
     if (templatesInvolved.length) {
@@ -222,10 +219,6 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     },
     [id, isCattoolPage, deleteGlossaryRequest],
   )
-
-  useEffect(() => {
-    setIsGlossaryCaseSensitive(mtGlossaryProps?.ignore_glossary_case ?? false)
-  }, [mtGlossaryProps?.ignore_glossary_case])
 
   useEffect(() => {
     let wasCleanup = false
@@ -314,21 +307,8 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
     const rowsActive = rows.filter(({isActive}) => isActive).map(({id}) => id)
 
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      mt: {
-        ...prevTemplate.mt,
-        extra: {
-          ...(rowsActive.length && {
-            glossaries: rowsActive,
-          }),
-          ...(isGlossaryCaseSensitive && {
-            ignore_glossary_case: isGlossaryCaseSensitive,
-          }),
-        },
-      },
-    }))
-  }, [rows, isGlossaryCaseSensitive, isCattoolPage, modifyingCurrentTemplate])
+    setGlossaries(rowsActive)
+  }, [rows, isCattoolPage, modifyingCurrentTemplate, setGlossaries])
 
   const addGlossary = () => {
     const row = {
@@ -343,101 +323,55 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     ])
   }
 
-  const onShowingRows = () => {
-    setIsShowingRows((prevState) => !prevState)
-    if (!isCattoolPage) {
-      // modifyingCurrentTemplate((prevTemplate) => ({
-      //   ...prevTemplate,
-      //   mt: {
-      //     ...prevTemplate.mt,
-      //     extra: {
-      //       ...(prevTemplate.mt?.extra ?? {}),
-      //       isOpened: !isShowingRows,
-      //     },
-      //   },
-      // }))
-    }
-  }
-
-  const onChangeCaseSensitive = (e) =>
-    setIsGlossaryCaseSensitive(e.currentTarget.checked)
-
   const haveRecords = rows?.length > 0
-  const isVisibleGlossaryOptions =
-    !isCattoolPage || (isCattoolPage && haveRecords)
   const shouldHideNewButton = rows?.some(
     ({id}) => id === MT_GLOSSARY_CREATE_ROW_ID,
   )
 
   return (
     <div className="mt-glossary">
-      {isVisibleGlossaryOptions && (
-        <div className="expand-button">
-          <button
-            className={`${isShowingRows ? 'rotate' : ''}`}
-            onClick={onShowingRows}
-            title="Glossary options"
-          >
-            <ArrowDown />
-            Glossary options
-          </button>
-        </div>
+      {haveRecords && (
+        <SettingsPanelTable
+          columns={COLUMNS_TABLE}
+          rows={rows}
+          className="mt-glossary-table"
+        />
       )}
 
-      {isShowingRows && (
-        <>
-          {haveRecords && (
-            <SettingsPanelTable
-              columns={COLUMNS_TABLE}
-              rows={rows}
-              className="mt-glossary-table"
-            />
-          )}
-
-          {!isCattoolPage &&
-            (haveRecords ? (
-              <div className="main-buttons-container">
-                <button
-                  className={`grey-button create-glossary-button${shouldHideNewButton ? ' create-glossary-button-disabled' : ''}`}
-                  onClick={addGlossary}
-                  title="Add glossary"
-                >
-                  <IconAdd size={18} />
-                  New
-                </button>
-                <div
-                  className="mt-glossary-case-sensitive"
-                  title='Activating this option makes glossary matching case-sensitive: if your glossary includes a translation for "Cat", it will only be applied when "Cat" is found with an initial capital letter'
-                >
-                  <input
-                    checked={isGlossaryCaseSensitive}
-                    onChange={onChangeCaseSensitive}
-                    type="checkbox"
-                  />
-                  <label>Enable case-sensitive matching</label>
-                </div>
-              </div>
-            ) : Array.isArray(rows) ? (
-              <div className="empty-list-mode">
-                <p>Start using ModernMT’s glossary feature</p>
-                <button
-                  className="grey-button create-glossary-button"
-                  onClick={addGlossary}
-                >
-                  <IconAdd size={18} />
-                  New glossary
-                </button>
-              </div>
-            ) : (
-              <p className="loading-list-mode">Loading...</p>
-            ))}
-        </>
-      )}
+      {!isCattoolPage &&
+        (haveRecords ? (
+          <div className="main-buttons-container">
+            {!shouldHideNewButton && (
+              <button
+                className="ui primary button settings-panel-button-icon confirm-button create-glossary-button"
+                onClick={addGlossary}
+                title="Add glossary"
+              >
+                <IconAdd size={18} />
+                New glossary
+              </button>
+            )}
+          </div>
+        ) : Array.isArray(rows) ? (
+          <div className="empty-list-mode">
+            <p>Start using ModernMT’s glossary feature</p>
+            <button
+              className="grey-button create-glossary-button"
+              onClick={addGlossary}
+            >
+              <IconAdd size={18} />
+              New glossary
+            </button>
+          </div>
+        ) : (
+          <p className="loading-list-mode">Loading...</p>
+        ))}
     </div>
   )
 }
 
 MTGlossary.propTypes = {
   id: PropTypes.number.isRequired,
+  setGlossaries: PropTypes.func.isRequired,
   isCattoolPage: PropTypes.bool,
 }

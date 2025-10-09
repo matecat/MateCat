@@ -177,7 +177,7 @@ export const MTGlossaryRow = ({
 
   return (
     <Fragment>
-      <div className="align-center">
+      <div>
         <input
           checked={isActive}
           onChange={onChangeIsActive}

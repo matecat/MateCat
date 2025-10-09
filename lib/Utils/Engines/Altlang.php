@@ -200,4 +200,12 @@ class Altlang extends AbstractEngine {
         return in_array( $combination, $supportedCombinations );
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+        ];
+    }
 }

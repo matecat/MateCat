@@ -182,9 +182,6 @@ class EngineController extends KleinController {
                 $newEngineStruct->uid                                    = $this->user->uid;
                 $newEngineStruct->type                                   = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'apikey' ]           = $engineData[ 'secret' ];
-                $newEngineStruct->extra_parameters[ 'provider' ]         = $engineData[ 'provider' ];
-                $newEngineStruct->extra_parameters[ 'providerkey' ]      = $engineData[ 'providerkey' ];
-                $newEngineStruct->extra_parameters[ 'providercategory' ] = $engineData[ 'providercategory' ];
                 break;
 
             case strtolower( EngineConstants::LARA ):
@@ -234,11 +231,10 @@ class EngineController extends KleinController {
             $this->destroyUserEnginesCache();
         }
 
+        $engine_type = explode( "\\", $newEngineStruct->class_load );
+        $engine_type = array_pop( $engine_type );
+
         if ( !$newCreatedDbRowStruct instanceof EngineStruct ) {
-
-            $engine_type = explode( "\\", $newEngineStruct->class_load );
-            $engine_type = array_pop( $engine_type );
-
             throw new AuthorizationError( "Creation failed. Only one $engine_type engine is allowed.", 403 );
         }
 
@@ -370,14 +366,13 @@ class EngineController extends KleinController {
             }
         }
 
-        $engine_type = explode( "\\", $newCreatedDbRowStruct->class_load );
-
         $this->response->json( [
                 'data'   => [
                         'id'          => $newCreatedDbRowStruct->id,
                         'name'        => $newCreatedDbRowStruct->name,
                         'description' => $newCreatedDbRowStruct->description,
                         'type'        => $newCreatedDbRowStruct->type,
+                        'extra'       => $newEngineStruct->extra_parameters,
                         'engine_type' => $engine_type,
                 ],
                 'errors' => [],

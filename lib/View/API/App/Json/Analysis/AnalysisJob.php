@@ -100,8 +100,8 @@ class AnalysisJob implements JsonSerializable {
         $this->source        = $source;
         $this->target        = $target;
         $lang_handler        = Languages::getInstance();
-        $this->sourceName    = $lang_handler->getLocalizedName( $source );
-        $this->targetName    = $lang_handler->getLocalizedName( $target );
+        $this->sourceName    = $lang_handler->getLocalizedName( $source ) ?? '';
+        $this->targetName    = $lang_handler->getLocalizedName( $target ) ?? '';
         $this->payable_rates = new stdClass();
     }
 
