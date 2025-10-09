@@ -191,6 +191,7 @@ export const SettingsPanel = ({
   useSyncTemplateWithConvertFile({
     ...fileImportFiltersParamsTemplates,
     defaultTemplate: defaultFiltersParams,
+    idProjectTemplate: currentProjectTemplate?.id,
     idTemplate: currentProjectTemplate?.filtersTemplateId,
     getTemplates: getFiltersParamsTemplates,
     checkIfUpdate: (filtersTemplate) => {

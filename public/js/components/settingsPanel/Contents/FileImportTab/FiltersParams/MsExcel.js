@@ -6,8 +6,11 @@ import {isEqual} from 'lodash'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 
 export const MsExcel = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
-    useContext(FiltersParamsContext)
+  const {
+    currentTemplate,
+    currentProjectTemplateChanged,
+    modifyingCurrentTemplate,
+  } = useContext(FiltersParamsContext)
 
   const {control, watch, setValue} = useForm()
 
@@ -42,7 +45,7 @@ export const MsExcel = () => {
     Object.entries(msExcel.current).forEach(([key, value]) =>
       setValue(key, value),
     )
-  }, [currentTemplate.id, setValue])
+  }, [currentTemplate.id, currentProjectTemplateChanged, setValue])
 
   return (
     <div className="filters-params-accordion-content">

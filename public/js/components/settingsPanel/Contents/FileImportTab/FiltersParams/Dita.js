@@ -5,8 +5,11 @@ import {isEqual} from 'lodash'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 
 export const Dita = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
-    useContext(FiltersParamsContext)
+  const {
+    currentTemplate,
+    currentProjectTemplateChanged,
+    modifyingCurrentTemplate,
+  } = useContext(FiltersParamsContext)
 
   const {control, watch, setValue} = useForm()
 
@@ -47,7 +50,7 @@ export const Dita = () => {
 
     if (typeof dita.current.do_not_translate_elements === 'undefined')
       setValue('do_not_translate_elements', [])
-  }, [currentTemplate.id, setValue])
+  }, [currentTemplate.id, currentProjectTemplateChanged, setValue])
 
   return (
     <div className="filters-params-accordion-content">

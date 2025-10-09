@@ -21,8 +21,11 @@ const INNER_CONTENT_TYPE_OPTIONS = [
 ]
 
 export const Yaml = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
-    useContext(FiltersParamsContext)
+  const {
+    currentTemplate,
+    currentProjectTemplateChanged,
+    modifyingCurrentTemplate,
+  } = useContext(FiltersParamsContext)
 
   const {control, watch, setValue} = useForm()
 
@@ -79,7 +82,7 @@ export const Yaml = () => {
         ({id}) => typeof yaml.current[id] !== 'undefined',
       )?.id,
     )
-  }, [currentTemplate.id, setValue])
+  }, [currentTemplate.id, currentProjectTemplateChanged, setValue])
 
   const {segmentedControl} = formData ?? {}
 
