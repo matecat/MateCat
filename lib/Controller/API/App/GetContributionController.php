@@ -211,7 +211,8 @@ class GetContributionController extends KleinController {
             }
         }
 
-        if ( empty( $text ) ) {
+        // Allowing "0" as text
+        if ( empty( $text ) and $text != "0" ) {
             throw new InvalidArgumentException( "missing text", -2 );
         }
 
