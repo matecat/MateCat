@@ -25,6 +25,6 @@ export const downloadFile = async ({
   let filename = parts[1].split('=')[1]
   filename = filename.replace(/"/g, '')
   const blob = await response.blob()
-  saveAs(blob, filename)
+  saveAs(blob, Base64.decode(filename))
   return Promise.resolve()
 }

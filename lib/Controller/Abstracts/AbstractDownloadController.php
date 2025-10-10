@@ -30,6 +30,8 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     protected ?string $_user_provided_filename = null;
 
+    protected ?string $encoding = null;
+
     /**
      * @var JobStruct
      */
@@ -169,8 +171,13 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 ob_start( "ob_gzhandler" );  // compress page before sending
                 $this->nocache();
 
+                $filename = $this->_filename;
+                if($this->encoding === "base64"){
+                    $filename = base64_encode($filename);
+                }
+
                 header( "Content-Type: $this->mimeType" );
-                header( "Content-Disposition: attachment; filename=\"$this->_filename\"" ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
+                header( "Content-Disposition: attachment; filename=\"$filename\"" ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
                 header( "Expires: 0" );
                 header( "Connection: close" );
                 header( "Content-Length: " . strlen( $this->outputContent ) );
