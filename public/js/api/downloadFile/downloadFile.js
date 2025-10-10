@@ -1,5 +1,5 @@
 import {saveAs} from 'file-saver'
-// import {Base64} from 'js-base64'
+import {Base64} from 'js-base64'
 
 /**
  * Export TMX
