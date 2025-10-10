@@ -122,6 +122,9 @@ class DownloadController extends AbstractDownloadController {
                 'download_type' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
+                'encoding' => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
                 'password'      => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -139,6 +142,7 @@ class DownloadController extends AbstractDownloadController {
         $this->download_type = $__postInput[ 'download_type' ];
         $this->password      = $__postInput[ 'password' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
+        $this->encoding      = $__postInput[ 'encoding' ];
 
         $this->forceXliff        = ( !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
         $this->openOriginalFiles = ( !empty( $__postInput[ 'original' ] ) && $__postInput[ 'original' ] == 1 );
