@@ -134,10 +134,10 @@ export const XliffSettings = () => {
 
       return prevState.map((template) => ({
         ...template,
-        isSelected: template.id === selectedTemplateId,
+        isSelected: template.id === selectedTemplateId && !template.isTemporary,
       }))
     })
-  }, [currentProjectTemplateXliffId, setTemplates])
+  }, [currentProjectTemplate?.id, currentProjectTemplateXliffId, setTemplates])
 
   // Modify current project template xliff settings template id when template id change
   useEffect(() => {

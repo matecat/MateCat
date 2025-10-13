@@ -85,6 +85,7 @@ function useTemplates(schema) {
   const templatesRef = useRef()
   templatesRef.current = templates
   const prevCurrentTemplateId = useRef()
+  const prevCurrentTemplateIsTemporary = useRef()
 
   const setTemplates = useCallback(
     (value) => {
@@ -190,17 +191,22 @@ function useTemplates(schema) {
     setCurrentTemplate(createTemplateProxy({template: current, schema}))
   }
 
-  const {id: currentTemplateId} =
+  const {id: currentTemplateId, isTemporary: currentTemplateIsTemporary} =
     templates.find(({isSelected}) => isSelected) ?? {}
 
   // set current template
   if (
-    typeof currentTemplateId === 'number' &&
-    currentTemplateId !== prevCurrentTemplateId.current
+    (typeof currentTemplateId === 'number' &&
+      currentTemplateId !== prevCurrentTemplateId.current) ||
+    (typeof currentTemplateId === 'number' &&
+      currentTemplateId === prevCurrentTemplateId.current &&
+      !currentTemplateIsTemporary &&
+      prevCurrentTemplateIsTemporary.current)
   ) {
     onChangeCurrentTemplate(templates.find(({isSelected}) => isSelected))
   }
   prevCurrentTemplateId.current = currentTemplateId
+  prevCurrentTemplateIsTemporary.current = currentTemplateIsTemporary
 
   return {
     templates,

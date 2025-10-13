@@ -92,7 +92,16 @@ export const Xliff20 = () => {
   return (
     <Accordion
       id="xliff20"
-      title={<span className={isModified ? 'unsaved' : ''}>XLIFF 2.0</span>}
+      title={
+        isModified ? (
+          <div>
+            <span className="settings-panel-tab-modifyng-icon">●</span>
+            XLIFF 2.0
+          </div>
+        ) : (
+          'XLIFF 2.0'
+        )
+      }
       expanded={isExpanded}
       onShow={() => setIsExpanded((prevState) => !prevState)}
     >
