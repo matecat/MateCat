@@ -2,19 +2,23 @@
 
 namespace Controller\API\V2;
 
-use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Plugins\Features\RevisionFactory;
 use Utils\Constants\JobStatus;
 use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
-class JobsBulkActionsController extends KleinController {
+class JobsBulkActionsController extends ChangePasswordController {
 
     const ACTIVE_ACTION               = 'active';
     const CANCEL_ACTION               = 'cancel';
@@ -54,31 +58,58 @@ class JobsBulkActionsController extends KleinController {
                 throw new InvalidArgumentException( "Job not found" );
             }
 
+            $jDao = new JobDao();
+
             switch ( $action ) {
-                case self::ACTIVE_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ACTIVE );
-                    $outcome = true;
-                    break;
-
-                case self::CANCEL_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_CANCELLED );
-                    $outcome = true;
-                    break;
-
-                case self::DELETE_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_DELETED );
-                    $outcome = true;
-                    break;
-
-                case self::ARCHIVE_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ARCHIVED );
-                    $outcome = true;
-                    break;
 
                 case self::UNARCHIVE_ACTION:
                 case self::RESUME_ACTION:
+                case self::ACTIVE_ACTION:
+                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ACTIVE );
+                    $outcome = [ 'status' => JobStatus::STATUS_ACTIVE ];
+                    break;
+
+                case self::CANCEL_ACTION:
+                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_CANCELLED );
+                    $outcome = [ 'status' => JobStatus::STATUS_CANCELLED ];
+                    break;
+
+                case self::DELETE_ACTION:
+                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_DELETED );
+                    $outcome = [ 'status' => JobStatus::STATUS_DELETED ];
+                    break;
+
+                case self::ARCHIVE_ACTION:
+                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ARCHIVED );
+                    $outcome = [ 'status' => JobStatus::STATUS_ARCHIVED ];
+                    break;
+
                 case self::CHANGE_PASSWORD_ACTION:
+                    $newPassword = Utils::randomString();
+                    $revisionNumber = filter_var( $json( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT ) ?? null;
+                    $this->changeThePassword( $this->user, 'job', $id, $password, $newPassword, $revisionNumber );
+                    $outcome = [ 'newPassword' => $newPassword ];
+                    break;
+
                 case self::GENERATE_SECOND_PASS_ACTION:
+                    $records = RevisionFactory::initFromProject( $jobStruct->project )->getRevisionFeature()->createQaChunkReviewRecords(
+                            [ $jobStruct ],
+                            $jobStruct->project,
+                            [
+                                    'source_page' => 3
+                            ]
+                    );
+
+                    // destroy project data cache
+                    ( new ProjectDao() )->destroyCacheForProjectData( $jobStruct->project->id, $jobStruct->project->password );
+
+                    // destroy the 5 minutes chunk review cache
+                    $chunk = ( new ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
+                    ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk );
+                    ChunkReviewDao::destroyCacheByProjectId( $jobStruct->project->id );
+                    $outcome = [ 'secondPassPassword' => $chunk->password ];
+                    break;
+
                 case self::ASSIGN_TO_MEMBER_ACTION:
                 case self::MOVE_TO_MEMBER_ACTION:
             }

@@ -108,7 +108,7 @@ class ChangePasswordController extends JobsController {
      *
      * @throws Exception
      */
-    private function changeThePassword( UserStruct $user, $res, $id, $actual_pwd, $new_password, $revision_number = null ) {
+    protected function changeThePassword( UserStruct $user, $res, $id, $actual_pwd, $new_password, $revision_number = null ) {
         // change project password
         if ( $res == "prj" ) {
 
