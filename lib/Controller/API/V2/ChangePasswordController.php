@@ -104,7 +104,7 @@ class ChangePasswordController extends JobsController {
      * @param                  $id
      * @param                  $actual_pwd
      * @param                  $new_password
-     * @param null                    $revision_number
+     * @param null             $revision_number
      *
      * @throws Exception
      */
@@ -184,7 +184,7 @@ class ChangePasswordController extends JobsController {
      *
      * @throws Exception
      */
-    private function checkUserPermissions( ProjectStruct $project, UserStruct $user ) {
+    protected function checkUserPermissions( ProjectStruct $project, UserStruct $user ) {
         // check if user is belongs to the project team
         $team  = $project->getTeam();
         $check = ( new MembershipDao() )->findTeamByIdAndUser( $team->id, $user );

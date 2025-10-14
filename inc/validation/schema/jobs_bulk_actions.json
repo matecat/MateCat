@@ -23,6 +23,12 @@
         "assign_to_member",
         "assign_to_team"
       ]
+    },
+    "revision_number": {
+      "type": [
+        "integer",
+        "null"
+      ]
     }
   },
   "required": [
@@ -35,7 +41,7 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "type": "number"
+          "type": "integer"
         },
         "password": {
           "type": "string"
