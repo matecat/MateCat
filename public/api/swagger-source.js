@@ -1982,48 +1982,6 @@ var spec = {
         },
       },
     },
-    '/api/v3/jobs/{id_job}/{password}/{source_page}/issue-report/segments': {
-      get: {
-        tags: ['Job', 'Segment issues'],
-        summary: 'Segment issues',
-        description: 'Segment issues',
-        parameters: [
-          {
-            name: 'id_job',
-            in: 'path',
-            description: 'The id of the job',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'password',
-            in: 'path',
-            description: 'The password of the job (Translate password)',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'source_page',
-            in: 'path',
-            description:
-              'The source page (possible values: 2 for R1, 3 for R2)',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'Segment issues report',
-            schema: {
-              $ref: '#/definitions/SegmentIssueReport',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v3/jobs/{id_job}/{password}/translation-versions': {
       get: {
         tags: ['Job', 'Translation Versions'],
