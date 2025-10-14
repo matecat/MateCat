@@ -52,17 +52,10 @@ class JobsBulkActionsController extends ChangePasswordController {
             $password = $job[ 'password' ];
             $outcome  = null;
 
-            $jobStruct = JobDao::getByIdAndPassword( (int)$id, $password );
-
-            if ( $jobStruct === null ) {
-                throw new InvalidArgumentException( "Job {$id} not found" );
-            }
-
+            $jobStruct     = ChunkDao::getByIdAndPassword( (int)$id, $password );
             $projectStruct = $jobStruct->getProject();
             $user          = $this->getUser();
             $this->checkUserPermissions( $projectStruct, $user );
-
-            $jDao = new JobDao();
 
             switch ( $action ) {
 
@@ -70,25 +63,25 @@ class JobsBulkActionsController extends ChangePasswordController {
                 case self::UNARCHIVE_ACTION:
                 case self::RESUME_ACTION:
                 case self::ACTIVE_ACTION:
-                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ACTIVE );
+                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ACTIVE );
                     $outcome = [ 'status' => JobStatus::STATUS_ACTIVE ];
                     break;
 
                 // Cancel the job
                 case self::CANCEL_ACTION:
-                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_CANCELLED );
+                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_CANCELLED );
                     $outcome = [ 'status' => JobStatus::STATUS_CANCELLED ];
                     break;
 
                 // Delete the job
                 case self::DELETE_ACTION:
-                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_DELETED );
+                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_DELETED );
                     $outcome = [ 'status' => JobStatus::STATUS_DELETED ];
                     break;
 
                 // Archive the job
                 case self::ARCHIVE_ACTION:
-                    $jDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ARCHIVED );
+                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ARCHIVED );
                     $outcome = [ 'status' => JobStatus::STATUS_ARCHIVED ];
                     break;
 
