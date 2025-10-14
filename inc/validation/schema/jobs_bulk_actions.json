@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "jobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/job"
+      }
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancel",
+        "delete",
+        "archive",
+        "unarchive",
+        "resume",
+        "change_password",
+        "generate_second_pass",
+        "assign_to_member",
+        "move_to_member"
+      ]
+    }
+  },
+  "required": [
+    "jobs",
+    "action"
+  ],
+  "definitions": {
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

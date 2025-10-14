@@ -259,3 +259,6 @@ route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'Controller\API\V2\Download
 // User
 route( '/api/v3/user', 'PUT', [ 'Controller\API\V2\UserController', 'edit' ] );
 route( '/api/v3/user/metadata', 'PUT', [ 'Controller\API\V2\UserController', 'setMetadata' ] );
+
+// Job bulk actions
+route( '/api/v3/jobs/bulk-actions', 'POST', [ '\Controller\API\V2\JobsBulkActionsController', 'index' ] );
