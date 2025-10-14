@@ -21,7 +21,7 @@
         "change_password",
         "generate_second_pass",
         "assign_to_member",
-        "move_to_member"
+        "assign_to_team"
       ]
     }
   },

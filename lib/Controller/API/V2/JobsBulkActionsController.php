@@ -29,7 +29,7 @@ class JobsBulkActionsController extends ChangePasswordController {
     const CHANGE_PASSWORD_ACTION      = 'change_password';
     const GENERATE_SECOND_PASS_ACTION = 'generate_second_pass';
     const ASSIGN_TO_MEMBER_ACTION     = 'assign_to_member';
-    const MOVE_TO_MEMBER_ACTION       = 'move_to_member';
+    const ASSIGN_TO_TEAM_ACTION       = 'assign_to_team';
 
     /**
      * @throws Exception
@@ -111,7 +111,9 @@ class JobsBulkActionsController extends ChangePasswordController {
                     break;
 
                 case self::ASSIGN_TO_MEMBER_ACTION:
-                case self::MOVE_TO_MEMBER_ACTION:
+                case self::ASSIGN_TO_TEAM_ACTION:
+                    // do something
+                    break;
             }
 
             $response[] = [
