@@ -1,4 +1,10 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
 import $ from 'jquery'
@@ -31,6 +37,7 @@ import {Input} from '../common/Input/Input'
 import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
 import IconClose from '../icons/IconClose'
+import {ProjectBulkActionsContext} from './ProjectBulkActionsContext'
 
 const ProjectContainer = ({
   project,
@@ -40,6 +47,8 @@ const ProjectContainer = ({
   changeStatusFn,
   downloadTranslationFn,
 }) => {
+  const {jobsBulk, onCheckedJob} = useContext(ProjectBulkActionsContext)
+
   const [lastAction, setLastAction] = useState()
   const [jobsActions, setJobsActions] = useState()
   const [idTeamSelected, setIdTeamSelected] = useState(project.get('id_team'))
@@ -331,6 +340,8 @@ const ProjectContainer = ({
           lastAction={lastAction}
           isChunkOutsourced={isChunkOutsourced}
           activityLogUrl={getActivityLogUrl()}
+          isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
+          onCheckedJob={onCheckedJob}
         />
       )
       chunks.push(item)

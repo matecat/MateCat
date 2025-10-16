@@ -13,9 +13,10 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import TranslatedIconSmall from '../../../img/icons/TranslatedIconSmall'
 import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
-import {Popup} from 'semantic-ui-react'
+import {Checkbox, Popup} from 'semantic-ui-react'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_SIZE} from '../common/Button/Button'
+import {CHECKBOX_STATE} from '../common/Checkbox'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -887,7 +888,8 @@ class JobContainer extends React.Component {
       nextProps.lastAction !== this.props.lastAction ||
       nextState.showDownloadProgress !== this.state.showDownloadProgress ||
       nextState.openOutsource !== this.state.openOutsource ||
-      nextState.showTranslatorBox !== this.state.showTranslatorBox
+      nextState.showTranslatorBox !== this.state.showTranslatorBox ||
+      nextProps.isChecked !== this.props.isChecked
     )
   }
 
@@ -959,6 +961,16 @@ class JobContainer extends React.Component {
               className="chunk wide column pad-right-10 shadow-1"
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
             >
+              <Checkbox
+                onChange={() =>
+                  this.props.onCheckedJob(this.props.job.get('id'))
+                }
+                value={
+                  this.props.isChecked
+                    ? CHECKBOX_STATE.CHECKED
+                    : CHECKBOX_STATE.UNCHECKED
+                }
+              />
               <div className="job-id" title="Job Id">
                 ID: {idJobLabel}
               </div>
@@ -1015,8 +1027,7 @@ class JobContainer extends React.Component {
                   )}
                 </div>
               </div>
-
-              {jobMenu}
+              {outsourceButton}
               <a
                 className="open-translate ui primary button open"
                 target="_blank"
@@ -1025,7 +1036,7 @@ class JobContainer extends React.Component {
               >
                 Open
               </a>
-              {outsourceButton}
+              {jobMenu}
 
               {this.state.showDownloadProgress ? (
                 <div className="chunk-download-progress" />
