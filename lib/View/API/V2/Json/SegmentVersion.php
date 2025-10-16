@@ -7,6 +7,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 use Model\LQA\EntryStruct;
 
 class SegmentVersion {
@@ -151,7 +152,14 @@ class SegmentVersion {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target );
+        $metadataDao = new MetadataDao();
+        $Filter      = MateCatFilter::getInstance(
+                $featureSet,
+                $this->chunk->source,
+                $this->chunk->target,
+                [],
+                $metadataDao->getSubfilteringCustomHandlers( $this->chunk->id, $this->chunk->password )
+        );
 
         $translation = ( !empty( $version->translation ) ) ? $Filter->fromLayer0ToLayer2( $version->translation ) : null;
 

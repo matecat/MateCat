@@ -351,7 +351,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
         //create a stub EnginesFactory Match
         $stubEngine = @$this
-                ->getMockBuilder( '\Utils\Engines\MMT' )
+                ->getMockBuilder( MMT::class )
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
                 ->disableOriginalConstructor()
                 ->getMock();
