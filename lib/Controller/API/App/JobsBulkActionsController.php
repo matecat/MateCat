@@ -1,9 +1,10 @@
 <?php
 
-namespace Controller\API\V2;
+namespace Controller\API\App;
 
 use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\V2\ChangePasswordController;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
