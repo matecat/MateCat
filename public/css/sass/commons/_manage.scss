@@ -420,25 +420,24 @@ div#manage-container {
             .chunk-container {
             }
             .chunk {
+              display: grid;
+              grid-template-columns:
+                auto
+                minmax(50px, 70px)
+                150px 120px 106px auto auto 1fr auto auto auto;
+              align-items: center;
+              gap: 10px;
               transition: 0.3s ease;
               background-color: #ffffff;
               padding: 8px 15px;
               .job-id {
-                float: left;
-                min-width: 70px;
                 color: #969696;
                 font-size: 12px;
                 position: relative;
-                line-height: 28px;
-                top: 2px;
-                margin-right: 5px;
               }
               .source-target {
-                min-width: 140px;
-                float: left;
                 font-weight: bold;
                 position: relative;
-                top: 1px;
                 .source-box {
                   float: left;
                   max-width: 60px;
@@ -469,18 +468,20 @@ div#manage-container {
                 }
               }
               .progress-bar {
+                height: auto !important;
+                top: unset !important;
+                padding: unset !important;
+                margin: unset !important;
+                min-width: unset !important;
               }
               .tm-job,
               .activity-icon-single {
-                float: left;
                 width: 30px;
                 height: 30px;
               }
               .job-activity-icons {
-                float: left;
                 width: 30px;
                 height: 30px;
-                margin-left: 5px;
                 button.group-activity-icon {
                   height: 30px;
                   width: 30px;
@@ -521,8 +522,6 @@ div#manage-container {
               }
               .outsource-job {
                 display: inline-block;
-                min-width: 30%;
-                padding-left: 5px;
                 .translated-outsourced {
                   top: 1px;
                   bottom: 6px;
@@ -549,16 +548,12 @@ div#manage-container {
                 }
                 .job-to-translator {
                   display: inline-block;
-                  margin-right: 5px;
-                  margin-left: 5px;
                   vertical-align: text-bottom;
                   color: #969696;
                   max-width: 150px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
-                  line-height: 20px;
-                  margin-top: 5px;
                   transition: 0.3s ease;
 
                   @media only screen and (max-width: 1199px) and (min-width: 992px) {
@@ -656,14 +651,9 @@ div#manage-container {
                 }
               }
               .job-payable {
-                padding: 0 5px 0 5px !important;
-                float: left;
                 text-decoration: underline;
-                min-width: 106px;
-                line-height: 30px;
                 font-weight: 700;
                 position: relative;
-                top: 1px;
                 &:hover {
                   text-decoration: none;
                 }
@@ -679,12 +669,9 @@ div#manage-container {
               }
               .open-vendor {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                padding: 6px 7px;
-                vertical-align: top;
                 font-size: 16px;
                 //border: 1px solid #7eaf3e;
                 border-radius: 2px;
-                float: right;
                 font-weight: bold;
                 box-shadow: none !important;
                 color: #7eaf3e !important;
@@ -719,7 +706,6 @@ div#manage-container {
                   background: #fff;
                   color: colors.$black;
                   font-weight: normal;
-                  padding: 5px 8px;
                   border: none; // border: 1px solid #979797;
                   font-size: 14px;
                   .buy-translation-span:hover {
@@ -764,7 +750,6 @@ div#manage-container {
                 }
               }
               .job-menu {
-                float: right;
                 width: 28px !important;
                 height: 28px !important;
                 &:hover {
