@@ -29,6 +29,18 @@
         "integer",
         "null"
       ]
+    },
+    "id_assignee": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "id_team": {
+      "type": [
+        "integer",
+        "null"
+      ]
     }
   },
   "required": [

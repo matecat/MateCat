@@ -10,8 +10,13 @@ use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Teams\TeamDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use Plugins\Features\RevisionFactory;
 use Utils\Constants\JobStatus;
 use Utils\Registry\AppConfig;
@@ -44,9 +49,11 @@ class JobsBulkActionsController extends ChangePasswordController {
         $jobs   = filter_var( $json[ 'jobs' ], FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FORCE_ARRAY ] );
         $action = filter_var( $json[ 'action' ], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
 
+        $projectsArray = [];
+
         $response = [];
 
-        // loop job ids
+        // Actions on Jobs
         foreach ( $jobs as $job ) {
 
             $id       = $job[ 'id' ];
@@ -58,76 +65,47 @@ class JobsBulkActionsController extends ChangePasswordController {
             $user          = $this->getUser();
             $this->checkUserPermissions( $projectStruct, $user );
 
+            // update selected jobs count
+            $actualCount = isset( $projectsArray[ $projectStruct->id ][ 'jobsSelected' ] ) ? $projectsArray[ $projectStruct->id ][ 'jobsSelected' ]++ : 1;
+
+            $projectsArray[ $projectStruct->id ] = [
+                    'jobsCount'    => $projectStruct->getJobsCount(),
+                    'jobsSelected' => $actualCount,
+            ];
+
             switch ( $action ) {
 
                 // Active the job
                 case self::UNARCHIVE_ACTION:
                 case self::RESUME_ACTION:
                 case self::ACTIVE_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ACTIVE );
-                    $outcome = [ 'status' => JobStatus::STATUS_ACTIVE ];
+                    $outcome = $this->changeJobStatus( $jobStruct, JobStatus::STATUS_ACTIVE );
                     break;
 
                 // Cancel the job
                 case self::CANCEL_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_CANCELLED );
-                    $outcome = [ 'status' => JobStatus::STATUS_CANCELLED ];
+                    $outcome = $this->changeJobStatus( $jobStruct, JobStatus::STATUS_CANCELLED );
                     break;
 
                 // Delete the job
                 case self::DELETE_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_DELETED );
-                    $outcome = [ 'status' => JobStatus::STATUS_DELETED ];
+                    $outcome = $this->changeJobStatus( $jobStruct, JobStatus::STATUS_DELETED );
                     break;
 
                 // Archive the job
                 case self::ARCHIVE_ACTION:
-                    JobDao::updateJobStatus( $jobStruct, JobStatus::STATUS_ARCHIVED );
-                    $outcome = [ 'status' => JobStatus::STATUS_ARCHIVED ];
+                    $outcome = $this->changeJobStatus( $jobStruct, JobStatus::STATUS_ARCHIVED );
                     break;
 
                 // Change the job password
                 case self::CHANGE_PASSWORD_ACTION:
-                    $newPassword    = Utils::randomString();
                     $revisionNumber = filter_var( $json[ 'revision_number' ], FILTER_SANITIZE_NUMBER_INT ) ?? null;
-
-                    if ( !empty( $revisionNumber ) and !in_array( $revisionNumber, [ 1, 2 ] ) ) {
-                        throw new InvalidArgumentException( '`revision_number` not valid. Allowed values [1, 2]' );
-                    }
-
-                    if ( $revisionNumber !== null ) {
-                        $chunkReviewDao    = new ChunkReviewDao();
-                        $chunkReviewStruct = $chunkReviewDao::findByIdJobAndPasswordAndSourcePage( $id, $password, $revisionNumber + 1 );
-                        $password          = $chunkReviewStruct->review_password;
-                    }
-
-                    $this->changeThePassword( $user, 'job', $id, $password, $newPassword, $revisionNumber );
-                    $outcome = [ 'newPassword' => $newPassword ];
+                    $outcome        = $this->changeJobPassword( $user, (int)$id, $password, $revisionNumber );
                     break;
 
                 // Generate second pass review
                 case self::GENERATE_SECOND_PASS_ACTION:
-                    $records = RevisionFactory::initFromProject( $projectStruct )->getRevisionFeature()->createQaChunkReviewRecords(
-                            [ $jobStruct ],
-                            $projectStruct,
-                            [
-                                    'source_page' => 3
-                            ]
-                    );
-
-                    // destroy project data cache
-                    ( new ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
-
-                    // destroy the 5 minutes chunk review cache
-                    $chunk = ( new ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
-                    ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk );
-                    ChunkReviewDao::destroyCacheByProjectId( $projectStruct->id );
-                    $outcome = [ 'secondPassPassword' => $records[ 0 ]->review_password ];
-                    break;
-
-                case self::ASSIGN_TO_MEMBER_ACTION:
-                case self::ASSIGN_TO_TEAM_ACTION:
-                    // do something
+                    $outcome = $this->createSecondPassReview( $projectStruct, $jobStruct );
                     break;
             }
 
@@ -138,9 +116,113 @@ class JobsBulkActionsController extends ChangePasswordController {
             ];
         }
 
+        // Actions on entire Projects
+        foreach ( $projectsArray as $pid => $counts ) {
+
+            // Check if all jobs are selected
+            if ( $counts[ 'jobsCount' ] === $counts[ 'jobsSelected' ] ) {
+                switch ( $action ) {
+
+                    // Assign the project to another member
+                    case self::ASSIGN_TO_MEMBER_ACTION:
+
+                        $idAssignee = filter_var( $json[ 'id_assignee' ], FILTER_SANITIZE_NUMBER_INT ) ?? null;
+
+                        if ( empty( $idAssignee ) ) {
+                            throw new InvalidArgumentException( "Missing `id_assignee` param." );
+                        }
+
+                        $this->assignProjectToAssignee((int)$pid, (int)$idAssignee, $response);
+
+                        break;
+
+                    // Assign the project to another team
+                    case self::ASSIGN_TO_TEAM_ACTION:
+
+                        $idTeam = filter_var( $json[ 'id_team' ], FILTER_SANITIZE_NUMBER_INT ) ?? null;
+
+                        if ( empty( $idTeam ) ) {
+                            throw new InvalidArgumentException( "Missing `id_assignee` param." );
+                        }
+
+                        $this->assignProjectToTeam((int)$pid, (int)$idTeam, $response);
+
+                        break;
+                }
+            }
+        }
+
         $this->response->json( [
                 'jobs' => $response
         ] );
+    }
+
+    /**
+     * @param JobStruct $jobStruct
+     * @param           $status
+     *
+     * @return array
+     * @throws \ReflectionException
+     */
+    protected function changeJobStatus( JobStruct $jobStruct, $status ) {
+        JobDao::updateJobStatus( $jobStruct, $status );
+
+        return [ 'status' => $status ];
+    }
+
+    /**
+     * @param UserStruct $user
+     * @param int        $id
+     * @param string     $password
+     * @param int|null   $revisionNumber
+     *
+     * @return array
+     * @throws Exception
+     */
+    protected function changeJobPassword( UserStruct $user, int $id, string $password, ?int $revisionNumber = null ) {
+        $newPassword = Utils::randomString();
+
+        if ( !empty( $revisionNumber ) and !in_array( $revisionNumber, [ 1, 2 ] ) ) {
+            throw new InvalidArgumentException( '`revision_number` not valid. Allowed values [1, 2]' );
+        }
+
+        if ( $revisionNumber !== null ) {
+            $chunkReviewDao    = new ChunkReviewDao();
+            $chunkReviewStruct = $chunkReviewDao::findByIdJobAndPasswordAndSourcePage( $id, $password, $revisionNumber + 1 );
+            $password          = $chunkReviewStruct->review_password;
+        }
+
+        $this->changeThePassword( $user, 'job', $id, $password, $newPassword, $revisionNumber );
+
+        return [ 'newPassword' => $newPassword ];
+    }
+
+
+    /**
+     * @param ProjectStruct $projectStruct
+     * @param JobStruct     $jobStruct
+     *
+     * @return array
+     * @throws Exception
+     */
+    protected function createSecondPassReview( ProjectStruct $projectStruct, JobStruct $jobStruct ) {
+        $records = RevisionFactory::initFromProject( $projectStruct )->getRevisionFeature()->createQaChunkReviewRecords(
+                [ $jobStruct ],
+                $projectStruct,
+                [
+                        'source_page' => 3
+                ]
+        );
+
+        // destroy project data cache
+        ( new ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
+
+        // destroy the 5 minutes chunk review cache
+        $chunk = ( new ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
+        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk );
+        ChunkReviewDao::destroyCacheByProjectId( $projectStruct->id );
+
+        return [ 'secondPassPassword' => $records[ 0 ]->review_password ];
     }
 
     /**
@@ -150,11 +232,55 @@ class JobsBulkActionsController extends ChangePasswordController {
         $json   = $this->request->body();
         $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/jobs_bulk_actions.json' );
 
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-
-        $validator = new JSONValidator( $schema, true );
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( $schema, true );
         $validator->validate( $validatorObject );
+    }
+
+    /**
+     * @param int $pid
+     * @param int $idTeam
+     * @param array $response
+     *
+     * @throws \ReflectionException
+     */
+    protected function assignProjectToTeam( int $pid, int $idTeam, array &$response ) {
+        $team = ( new TeamDao() )->findById( $idTeam );
+
+        if ( empty( $team ) ) {
+            throw new InvalidArgumentException( "Team not found." );
+        }
+
+        ( new ProjectDao() )->assignToTeam( $pid, (int)$idTeam );
+
+        for($i = 0; $i < count($response); $i++ ){
+            $response[$i][ 'outcome'] = [
+                'idTeam' => $idTeam,
+            ];
+        }
+    }
+
+    /**
+     * @param int $pid
+     * @param int $idAssignee
+     * @param array $response
+     *
+     * @throws \ReflectionException
+     */
+    protected function assignProjectToAssignee( int $pid, int $idAssignee, array &$response  ) {
+        $assignee = ( new UserDao() )->getByUid( $idAssignee );
+
+        if ( empty( $assignee ) ) {
+            throw new InvalidArgumentException( "Assignee not found." );
+        }
+
+        ( new ProjectDao() )->assignToAssignee( $pid, $idAssignee );
+
+        for($i = 0; $i < count($response); $i++ ){
+            $response[$i][ 'outcome'] = [
+                'idAssignee' => $idAssignee,
+            ];
+        }
     }
 
     /**
