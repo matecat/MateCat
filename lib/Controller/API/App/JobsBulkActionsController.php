@@ -132,7 +132,7 @@ class JobsBulkActionsController extends ChangePasswordController {
                             throw new InvalidArgumentException( "Missing `id_assignee` param." );
                         }
 
-                        $this->assignProjectToAssignee((int)$pid, (int)$idAssignee, $response);
+                        $this->assignProjectToAssignee( (int)$pid, (int)$idAssignee, $response );
 
                         break;
 
@@ -142,10 +142,10 @@ class JobsBulkActionsController extends ChangePasswordController {
                         $idTeam = filter_var( $json[ 'id_team' ], FILTER_SANITIZE_NUMBER_INT ) ?? null;
 
                         if ( empty( $idTeam ) ) {
-                            throw new InvalidArgumentException( "Missing `id_assignee` param." );
+                            throw new InvalidArgumentException( "Missing `id_team` param." );
                         }
 
-                        $this->assignProjectToTeam((int)$pid, (int)$idTeam, $response);
+                        $this->assignProjectToTeam( (int)$pid, (int)$idTeam, $response );
 
                         break;
                 }
@@ -238,8 +238,8 @@ class JobsBulkActionsController extends ChangePasswordController {
     }
 
     /**
-     * @param int $pid
-     * @param int $idTeam
+     * @param int   $pid
+     * @param int   $idTeam
      * @param array $response
      *
      * @throws \ReflectionException
@@ -251,34 +251,46 @@ class JobsBulkActionsController extends ChangePasswordController {
             throw new InvalidArgumentException( "Team not found." );
         }
 
+        if ( !$team->hasUser( $this->user->uid ) ) {
+            throw new InvalidArgumentException( "Team not belonging to the logged user." );
+        }
+
         ( new ProjectDao() )->assignToTeam( $pid, (int)$idTeam );
 
-        for($i = 0; $i < count($response); $i++ ){
-            $response[$i][ 'outcome'] = [
-                'idTeam' => $idTeam,
+        for ( $i = 0; $i < count( $response ); $i++ ) {
+            $response[ $i ][ 'outcome' ] = [
+                    'idTeam' => $idTeam,
             ];
         }
     }
 
     /**
-     * @param int $pid
-     * @param int $idAssignee
+     * @param int   $pid
+     * @param int   $idAssignee
      * @param array $response
      *
      * @throws \ReflectionException
      */
-    protected function assignProjectToAssignee( int $pid, int $idAssignee, array &$response  ) {
+    protected function assignProjectToAssignee( int $pid, int $idAssignee, array &$response ) {
         $assignee = ( new UserDao() )->getByUid( $idAssignee );
 
         if ( empty( $assignee ) ) {
             throw new InvalidArgumentException( "Assignee not found." );
         }
 
+        $userTeams = $this->user->getUserTeams();
+
+        foreach ( $userTeams as $userTeam ) {
+            if ( !$assignee->belongsToTeam( $userTeam->id ) ) {
+                throw new InvalidArgumentException( "Assignee is not belonging to one of the logged user teams." );
+            }
+        };
+
         ( new ProjectDao() )->assignToAssignee( $pid, $idAssignee );
 
-        for($i = 0; $i < count($response); $i++ ){
-            $response[$i][ 'outcome'] = [
-                'idAssignee' => $idAssignee,
+        for ( $i = 0; $i < count( $response ); $i++ ) {
+            $response[ $i ][ 'outcome' ] = [
+                    'idAssignee' => $idAssignee,
             ];
         }
     }
