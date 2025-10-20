@@ -4,7 +4,7 @@ import {ProjectBulkActionsContext} from './ProjectBulkActionsContext'
 
 export const ProjectBulkActions = ({children}) => {
   const [jobsBulk, setJobsBulk] = useState([])
-  console.log('jobsBulk', jobsBulk)
+
   const onCheckedJob = useCallback(
     (jobId) =>
       setJobsBulk((prevState) =>
