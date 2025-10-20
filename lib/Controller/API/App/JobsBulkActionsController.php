@@ -26,6 +26,8 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class JobsBulkActionsController extends ChangePasswordController {
 
+    const JOBS_LIMIT = 100;
+
     const ACTIVE_ACTION               = 'active';
     const CANCEL_ACTION               = 'cancel';
     const DELETE_ACTION               = 'delete';
@@ -52,6 +54,10 @@ class JobsBulkActionsController extends ChangePasswordController {
         $projectsArray = [];
 
         $response = [];
+
+        if(count($jobs) > self::JOBS_LIMIT){
+            throw new InvalidArgumentException( "The maximum number of selectable jobs (".self::JOBS_LIMIT.") has been reached." );
+        }
 
         // Actions on Jobs
         foreach ( $jobs as $job ) {
