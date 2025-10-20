@@ -340,6 +340,25 @@
   }
 }
 
+.settings-panel-subtemplates-container-select {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  > :first-child {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .settings-panel-subtemplates-container-select-help {
+    display: block;
+    height: 18px;
+  }
+}
+
 .settings-panel-subtemplates-select {
   .select-item-default {
     display: flex;
