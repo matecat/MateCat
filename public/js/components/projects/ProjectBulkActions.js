@@ -73,10 +73,18 @@ export const ProjectBulkActions = ({projects, children}) => {
             {actions}
           </div>
           <div>
-            <Button {...buttonProps} onClick={selectAll}>
+            <Button
+              {...buttonProps}
+              onClick={selectAll}
+              disabled={!projects.length}
+            >
               Select all projects
             </Button>
-            <Button {...buttonProps} onClick={clearAll}>
+            <Button
+              {...buttonProps}
+              onClick={clearAll}
+              disabled={!projects.length}
+            >
               Clear all
             </Button>
           </div>
