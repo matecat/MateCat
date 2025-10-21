@@ -66,7 +66,6 @@ export const TemplateSelect = ({
         activeOption={activeOption}
         onSelect={onSelect}
         isDisabled={isLoadingTemplates || !isUserLogged}
-        {...(isModifyingTemplate && {tooltipContent: 'Lorem ipsum bla bla'})}
       >
         {({id, name, showActiveOptionIcon}) => {
           const {isDefault} =
