@@ -13,10 +13,10 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import TranslatedIconSmall from '../../../img/icons/TranslatedIconSmall'
 import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
-import {Checkbox, Popup} from 'semantic-ui-react'
+import {Popup} from 'semantic-ui-react'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_SIZE} from '../common/Button/Button'
-import {CHECKBOX_STATE} from '../common/Checkbox'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -950,6 +950,7 @@ class JobContainer extends React.Component {
       ? this.props.job.get('id')
       : this.props.job.get('id') + '-' + this.props.index
     const stats = this.props.job.get('stats').toJS()
+
     return (
       <div className="sixteen wide column chunk-container">
         <div

@@ -1,0 +1,68 @@
+@use '../commons/colors';
+
+.project-bulk-actions-background {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  width: calc(100% + 100px);
+  height: 76px;
+  padding-top: 22px;
+  margin-left: -50px;
+  margin-bottom: 16px;
+  background: colors.$grey5;
+  background: linear-gradient(
+    180deg,
+    rgba(colors.$grey5, 1) 0%,
+    rgba(colors.$grey5, 1) 84%,
+    rgba(colors.$grey5, 0) 100%
+  );
+}
+
+.project-bulk-actions-container {
+  display: flex;
+  width: calc(100% - 68px);
+  margin-left: 32px;
+  padding: 4px 24px;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  background-color: colors.$grey4;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 24px;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .project-bulk-actions-buttons {
+    > span {
+      margin-right: 10px;
+      color: colors.$grey7;
+
+      > :first-child {
+        margin-right: 2px;
+        color: black;
+      }
+    }
+
+    > div {
+      display: flex;
+      align-items: center;
+
+      &::before {
+        content: ' ';
+        border-left: 1px colors.$grey7 solid;
+        height: 18px;
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-right: 5px;
+      }
+    }
+  }
+
+  .button-component-container:disabled {
+    color: colors.$grey7 !important;
+  }
+}

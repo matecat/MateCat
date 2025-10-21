@@ -296,7 +296,7 @@ class ProjectsContainer extends React.Component {
     return (
       <div className="project-list">
         <div className="ui container">
-          <ProjectBulkActions>
+          <ProjectBulkActions projects={this.state.projects.toJS()}>
             {this.props.fetchingProjects ? (
               <div className="ui active inverted dimmer">
                 <div className="ui massive text loader">Loading Projects</div>

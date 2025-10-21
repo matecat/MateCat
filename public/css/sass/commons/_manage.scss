@@ -19,7 +19,6 @@ div#manage-container {
   overflow: auto;
   height: calc(100% - 60px);
   position: relative;
-  padding-top: 40px;
   scroll-behavior: smooth;
 }
 
@@ -137,7 +136,7 @@ div#manage-container {
       .project-id {
         font-size: 14px;
         font-weight: normal;
-        margin-left: 17px;
+        margin-left: 10px;
         display: inline-block;
         vertical-align: text-bottom;
         min-width: 72px;
@@ -389,6 +388,10 @@ div#manage-container {
           }
         }
       }
+
+      .project-checkbox {
+        float: left;
+      }
     }
 
     .project-body {
@@ -417,8 +420,6 @@ div#manage-container {
         }
         .job-body {
           .chunks {
-            .chunk-container {
-            }
             .chunk {
               display: grid;
               grid-template-columns:
