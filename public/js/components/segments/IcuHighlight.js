@@ -10,7 +10,7 @@ export const IcuHighlight = ({start, end, tokens, children, blockKey}) => {
     <div
       className={`icuItem ${token && token.type === 'error' ? 'icuItem-error' : ''}`}
     >
-      {token.type === 'error' ? (
+      {token && token.type === 'error' ? (
         <Tooltip
           content={
             <div className="icu-tooltip">
