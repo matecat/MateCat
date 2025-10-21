@@ -27,32 +27,54 @@ export const createICUDecorator = (tokens = []) => {
 }
 
 export const createIcuTokens = (text, editorState) => {
-  const tokens = []
-  let error
-  try {
-    parse(text, {tokens: tokens})
-  } catch (e) {
-    error = {
-      type: 'error',
-      text: e.found,
-      start: e.column,
-      end: e.column + e.found.length,
-      message: e.message,
+  const blockMap = editorState.getCurrentContent().getBlockMap()
+  const blocks = blockMap.toArray()
+  let updatedTokens = []
+  blocks.forEach((block) => {
+    const text = block.getText()
+    const tokens = []
+    let error
+    try {
+      parse(text, {tokens: tokens})
+    } catch (e) {
+      error = {
+        type: 'error',
+        text: e.found,
+        start: e.column,
+        end: e.column + e.found.length,
+        message: e.message,
+        key: block.getKey(),
+      }
+      console.log(e, error, text, tokens)
     }
-    console.log(e)
-  }
-  let index = 0
-  const updatedTokens = tokens.map((token) => {
-    const value = {
-      type: token[0],
-      text: token[1],
-      start: index,
-      end: index + token[1].length,
+    let index = 0
+    let blockTokens = tokens.map((token) => {
+      const value = {
+        type: token[0],
+        text: token[1],
+        start: index,
+        end: index + token[1].length,
+        key: block.getKey(),
+      }
+      index = index + token[1].length
+      return value
+    })
+    if (error) {
+      if (error.text === 'end of message pattern') {
+        blockTokens = blockTokens.map((token) => {
+          if (token.end === error.start) {
+            token.type = 'error'
+            token.message = error.message
+          }
+          return token
+        })
+      } else {
+        blockTokens.push(error)
+      }
     }
-    index = index + token[1].length
-    return value
+    updatedTokens = updatedTokens.concat(blockTokens)
   })
-  if (error) updatedTokens.push(error)
+  console.log('updatedTokens', updatedTokens)
   return updateOffsetBasedOnEditorState(editorState, updatedTokens)
 }
 

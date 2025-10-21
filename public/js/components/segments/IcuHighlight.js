@@ -1,8 +1,10 @@
 import React, {useRef} from 'react'
 import Tooltip from '../common/Tooltip'
 
-export const IcuHighlight = ({start, end, tokens, children}) => {
-  const token = tokens.find((item) => item.start === start && item.end === end)
+export const IcuHighlight = ({start, end, tokens, children, blockKey}) => {
+  const token = tokens.find(
+    (item) => item.start === start && item.end === end && item.key === blockKey,
+  )
   const refToken = useRef()
   return (
     <div

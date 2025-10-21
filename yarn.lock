@@ -4479,6 +4479,11 @@ foreground-child@^3.1.0, foreground-child@^3.3.1:
     cross-spawn "^7.0.6"
     signal-exit "^4.0.1"
 
+format-message-parse@^6.2.4:
+  version "6.2.4"
+  resolved "https://registry.yarnpkg.com/format-message-parse/-/format-message-parse-6.2.4.tgz#2c9b39a32665bd247cb1c31ba2723932d9edf3f9"
+  integrity sha512-k7WqXkEzgXkW4wkHdS6Cv2Ou0rIFtiDelZjgoe1saW4p7FT7zS8OeAUpAekhormqzpeecR97e4vBft1zMsfFOQ==
+
 fs-extra@^11.1.1:
   version "11.3.2"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-11.3.2.tgz#c838aeddc6f4a8c74dd15f85e11fe5511bfe02a4"
