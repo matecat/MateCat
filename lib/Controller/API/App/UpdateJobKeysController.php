@@ -1,34 +1,35 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use AjaxPasswordCheck;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
-use CatUtils;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use DomainException;
 use Exception;
-use INIT;
 use InvalidArgumentException;
-use Jobs\MetadataDao;
-use Jobs_JobDao;
+use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
-use TmKeyManagement_ClientTmKeyStruct;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Utils\Registry\AppConfig;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\CatUtils;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class UpdateJobKeysController extends KleinController {
 
-    protected $id_job;
-    protected $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -45,12 +46,13 @@ class UpdateJobKeysController extends KleinController {
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
+        $userRole = Filter::ROLE_TRANSLATOR;
         if ( $this->user->email == $request[ 'jobData' ][ 'owner' ] ) {
-            $userRole = TmKeyManagement_Filter::OWNER;
+            $userRole = Filter::OWNER;
         } elseif ( $this->isRevision() ) {
-            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            $userRole = Filter::ROLE_REVISOR;
         } else {
-            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $userRole = Filter::ROLE_TRANSLATOR;
         }
 
         /*
@@ -115,7 +117,7 @@ class UpdateJobKeysController extends KleinController {
         foreach ( $tm_keys[ 'mine' ] as $k => $val ) {
 
             // check if logged user is owner of $val['key']
-            $check = array_filter( $clientKeys[ 'job_keys' ], function ( TmKeyManagement_ClientTmKeyStruct $element ) use ( $val ) {
+            $check = array_filter( $clientKeys[ 'job_keys' ], function ( ClientTmKeyStruct $element ) use ( $val ) {
                 if ( $element->isEncryptedKey() ) {
                     return false;
                 }
@@ -130,16 +132,16 @@ class UpdateJobKeysController extends KleinController {
         $tm_keys = json_encode( $tm_keys );
 
 
-        $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid );
+        $totalTmKeys = TmKeyManager::mergeJsonKeys( $tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid );
 
-        $this->log( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
-        $this->log( 'After: ' . json_encode( $totalTmKeys ) );
+        $this->logger->debug( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
+        $this->logger->debug( 'After: ' . json_encode( $totalTmKeys ) );
 
         if ( $this->jobOwnerIsMe( $request[ 'jobData' ][ 'owner' ] ) ) {
             $request[ 'jobData' ][ 'only_private_tm' ] = $request[ 'only_private' ];
         }
 
-        /** @var TmKeyManagement_TmKeyStruct $totalTmKey */
+        /** @var TmKeyStruct $totalTmKey */
         foreach ( $totalTmKeys as $totalTmKey ) {
             $totalTmKey->complete_format = true;
         }
@@ -147,7 +149,7 @@ class UpdateJobKeysController extends KleinController {
         $request[ 'jobData' ]->tm_keys     = json_encode( $totalTmKeys );
         $request[ 'jobData' ]->last_update = date( "Y-m-d H:i:s" );
 
-        $jobDao = new Jobs_JobDao( Database::obtain() );
+        $jobDao = new JobDao( Database::obtain() );
         $jobDao->updateStruct( $request[ 'jobData' ], [ 'fields' => [ 'only_private_tm', 'tm_keys', 'last_update' ] ] );
         $jobDao->destroyCache( $request[ 'jobData' ] );
 
@@ -161,13 +163,18 @@ class UpdateJobKeysController extends KleinController {
 
         // update character_counter_count_tags job metadata
         if ( $request[ 'character_counter_count_tags' ] !== null ) {
-            $character_counter_count_tags = $request[ 'character_counter_count_tags' ] == true ? "1" : "0";
+            $character_counter_count_tags = $request[ 'character_counter_count_tags' ] ? "1" : "0";
             $jobsMetadataDao->set( $request[ 'job_id' ], $request[ 'job_pass' ], 'character_counter_count_tags', $character_counter_count_tags );
         }
 
         // update character_counter_mode job metadata
         if ( $request[ 'character_counter_mode' ] !== null ) {
             $jobsMetadataDao->set( $request[ 'job_id' ], $request[ 'job_pass' ], 'character_counter_mode', $request[ 'character_counter_mode' ] );
+        }
+
+        // update character_counter_mode job metadata
+        if ( $request[ 'public_tm_penalty' ] !== null ) {
+            $jobsMetadataDao->set( $request[ 'job_id' ], $request[ 'job_pass' ], 'public_tm_penalty', $request[ 'public_tm_penalty' ] );
         }
 
         $this->response->json( [
@@ -178,13 +185,14 @@ class UpdateJobKeysController extends KleinController {
 
     /**
      * @return array
-     * @throws AuthenticationError
      * @throws ReflectionException
+     * @throws NotFoundException
      */
     private function validateTheRequest(): array {
         $character_counter_mode       = ( $this->request->param( 'character_counter_mode' ) !== null ) ? filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) : null;
         $character_counter_count_tags = ( $this->request->param( 'character_counter_count_tags' ) !== null ) ? filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN ) : null;
         $tm_prioritization            = ( $this->request->param( 'tm_prioritization' ) !== null ) ? filter_var( $this->request->param( 'tm_prioritization' ), FILTER_VALIDATE_BOOLEAN ) : null;
+        $public_tm_penalty            = ( $this->request->param( 'public_tm_penalty' ) !== null ) ? filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_VALIDATE_INT ) : null;
         $job_id                       = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT );
         $job_pass                     = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $current_password             = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
@@ -200,16 +208,12 @@ class UpdateJobKeysController extends KleinController {
             throw new InvalidArgumentException( "Job password missing", -2 );
         }
 
-        // Get Job Info, we need only a row of job
-        $jobData = Jobs_JobDao::getByIdAndPassword( (int)$job_id, $job_pass );
-
-        // Check if user can access the job
-        $pCheck = new AjaxPasswordCheck();
-
-        // Check for Password correctness
-        if ( empty( $jobData ) or !$pCheck->grantJobAccessByJobData( $jobData, $job_pass ) ) {
-            throw new AuthenticationError( "Wrong password", -10 );
+        if($public_tm_penalty < 0 || $public_tm_penalty > 100){
+            throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
         }
+
+        // Get Job Info, we need only a row of job
+        $jobData = ChunkDao::getByIdAndPassword( (int)$job_id, $job_pass );
 
         // validate $tm_keys
         try {
@@ -218,14 +222,15 @@ class UpdateJobKeysController extends KleinController {
             throw new DomainException( $exception->getMessage() );
         }
 
-        $this->id_job            = $job_id;
-        $this->received_password = $current_password;
+        $this->id_job           = $job_id;
+        $this->request_password = $current_password;
 
         return [
                 'job_id'                       => $job_id,
                 'job_pass'                     => $job_pass,
                 'jobData'                      => $jobData,
                 'current_password'             => $current_password,
+                'public_tm_penalty'            => $public_tm_penalty,
                 'get_public_matches'           => $get_public_matches,
                 'tm_keys'                      => $tm_keys, // this will be filtered inside the TmKeyManagement class
                 'only_private'                 => !$get_public_matches,
@@ -253,7 +258,7 @@ class UpdateJobKeysController extends KleinController {
      * @throws JsonValidatorGenericException
      */
     private function validateTMKeysArray( $tm_keys ) {
-        $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/job_keys.json' );
+        $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/job_keys.json' );
 
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $tm_keys;

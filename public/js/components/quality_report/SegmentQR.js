@@ -10,6 +10,9 @@ import {
   SEGMENTS_STATUS,
 } from '../../constants/Constants'
 import DraftMatecatUtils from '../segments/utils/DraftMatecatUtils'
+import SegmentQA from '../../../img/icons/SegmentQA'
+import AlertIcon from '../../../img/icons/AlertIcon'
+import InfoIcon from '../../../img/icons/InfoIcon'
 
 class SegmentQR extends React.Component {
   constructor(props) {
@@ -87,9 +90,9 @@ class SegmentQR extends React.Component {
         },
       },
       icons: {
-        ERROR: 'icon-cancel-circle icon red',
-        WARNING: 'icon-warning2 icon orange',
-        INFO: 'icon-info icon',
+        ERROR: <SegmentQA size={16} />,
+        WARNING: <AlertIcon size={16} />,
+        INFO: <InfoIcon size={16} />,
       },
     }
   }
@@ -138,8 +141,8 @@ class SegmentQR extends React.Component {
     let fnMap = (key, obj, type) => {
       let item = (
         <div className="qr-issue automated" key={key + type}>
-          <div className="box-icon">
-            <i className={this.errorObj.icons[type]} />
+          <div className={`box-icon ${type.toLowerCase()}`}>
+            {this.errorObj.icons[type]}
           </div>
           <div className="qr-error">
             {this.errorObj.types[key].label} <b>({obj.size})</b>
@@ -494,7 +497,7 @@ class SegmentQR extends React.Component {
               tte={this.props.segment.get('time_to_edit_translation')}
               showIsPretranslated={
                 this.props.segment.get('is_pre_translated') &&
-                this.props.segment.get('ice_locked') !== '1'
+                !this.props.segment.get('ice_locked')
               }
               rev={0}
             />
@@ -513,7 +516,7 @@ class SegmentQR extends React.Component {
               tte={this.props.segment.get('time_to_edit_revise')}
               showIsPretranslated={
                 this.props.segment.get('is_pre_translated') &&
-                this.props.segment.get('ice_locked') !== '1'
+                !this.props.segment.get('ice_locked')
               }
               rev={1}
             />
@@ -532,7 +535,7 @@ class SegmentQR extends React.Component {
               tte={this.props.segment.get('time_to_edit_revise_2')}
               showIsPretranslated={
                 this.props.segment.get('is_pre_translated') &&
-                this.props.segment.get('ice_locked') !== '1'
+                !this.props.segment.get('ice_locked')
               }
               rev={2}
             />

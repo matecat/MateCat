@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateTableQaModelCategoryTemplates extends AbstractMatecatMigration {
 
     public $sql_up = [ '

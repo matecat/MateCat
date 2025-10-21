@@ -169,10 +169,6 @@ export const AnalysisTab = () => {
         getBillingModelTemplateDefault(),
         getBillingModelTemplates(),
       ]).then(([templateDefault, templates]) => {
-        // sort by name
-        templates.items.sort((a, b) =>
-          a.payable_rate_template_name > b.payable_rate_template_name ? 1 : -1,
-        )
         const items = [templateDefault, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =
@@ -199,10 +195,16 @@ export const AnalysisTab = () => {
     setTemplates((prevState) =>
       prevState.map((template) => ({
         ...template,
-        isSelected: template.id === currentProjectTemplateBillingId,
+        isSelected:
+          template.id === currentProjectTemplateBillingId &&
+          !template.isTemporary,
       })),
     )
-  }, [currentProjectTemplateBillingId, setTemplates])
+  }, [
+    currentProjectTemplate?.id,
+    currentProjectTemplateBillingId,
+    setTemplates,
+  ])
 
   // Modify current project template billing model id when analysis template id change
   useEffect(() => {

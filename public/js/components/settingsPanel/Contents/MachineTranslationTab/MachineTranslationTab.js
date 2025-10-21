@@ -5,7 +5,6 @@ import {AltLang} from './MtEngines/AltLang'
 import {Apertium} from './MtEngines/Apertium'
 import {GoogleTranslate} from './MtEngines/GoogleTranslate'
 import {Intento} from './MtEngines/Intento'
-import {MicrosoftHub} from './MtEngines/MicrosoftHub'
 import {SmartMate} from './MtEngines/SmartMate'
 import {Yandex} from './MtEngines/Yandex'
 import {addMTEngine} from '../../../../api/addMTEngine'
@@ -66,11 +65,6 @@ export const MachineTranslationTab = () => {
       component: GoogleTranslate,
     },
     {name: 'Intento', id: 'intento', component: Intento},
-    {
-      name: 'Microsoft Translator Hub',
-      id: 'microsofthub',
-      component: MicrosoftHub,
-    },
     {name: 'SmartMATE', id: 'smartmate', component: SmartMate},
     {name: 'Yandex.Translate', id: 'yandextranslate', component: Yandex},
   ]
@@ -122,9 +116,13 @@ export const MachineTranslationTab = () => {
 
   const CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE = {
     [enginesList.find(({name}) => name === 'DeepL').name]: config.is_cattool
-      ? [{name: 'Engine Name'}, {name: 'Description'}, {name: 'Formality'}]
+      ? [
+          {name: 'EnginesFactory Name'},
+          {name: 'Description'},
+          {name: 'Formality'},
+        ]
       : [
-          {name: 'Engine Name'},
+          {name: 'EnginesFactory Name'},
           {name: 'Description'},
           {name: 'Formality'},
           {name: 'Use in this project'},

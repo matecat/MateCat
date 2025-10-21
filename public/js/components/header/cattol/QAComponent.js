@@ -4,6 +4,8 @@ import SegmentActions from '../../../actions/SegmentActions'
 import LXQ from '../../../utils/lxq.main'
 import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
+import SegmentQA from '../../../../img/icons/SegmentQA'
+import AlertIcon from '../../../../img/icons/AlertIcon'
 
 class QAComponent extends React.Component {
   constructor(props) {
@@ -120,7 +122,7 @@ class QAComponent extends React.Component {
       warning = [],
       info = []
     if (this.state.warnings) {
-      if (this.state.warnings.ERROR.total > 0) {
+      if (this.state.warnings.ERROR?.total > 0) {
         Object.keys(this.state.warnings.ERROR.Categories).map((key, index) => {
           if (this.state.warnings.ERROR.Categories[key].length > 0) {
             if (key === 'TAGS') {
@@ -132,7 +134,7 @@ class QAComponent extends React.Component {
               error.push(
                 <button
                   key={index}
-                  className={'ui button qa-issue' + activeClass}
+                  className={'ui button qa-issue error' + activeClass}
                   onClick={this.setCurrentNavigationElements.bind(
                     this,
                     this.state.warnings.ERROR.Categories[key],
@@ -140,7 +142,7 @@ class QAComponent extends React.Component {
                     key,
                   )}
                 >
-                  <i className="icon-cancel-circle icon"></i>
+                  <SegmentQA />
                   {this.state.labels[key] ? this.state.labels[key] : key} errors
                   <b> ({this.state.warnings.ERROR.Categories[key].length})</b>
                 </button>,
@@ -154,7 +156,7 @@ class QAComponent extends React.Component {
               error.push(
                 <button
                   key={index}
-                  className={'ui button qa-issue' + activeClass}
+                  className={'ui button qa-issue error' + activeClass}
                   onClick={this.setCurrentNavigationElements.bind(
                     this,
                     this.state.warnings.ERROR.Categories[key],
@@ -162,7 +164,7 @@ class QAComponent extends React.Component {
                     key,
                   )}
                 >
-                  <i className="icon-cancel-circle icon"></i>
+                  <SegmentQA />
                   {this.state.labels[key] ? this.state.labels[key] : key}
                   <b> ({this.state.warnings.ERROR.Categories[key].length})</b>
                 </button>,
@@ -184,7 +186,7 @@ class QAComponent extends React.Component {
                 warning.push(
                   <button
                     key={index}
-                    className={'ui button qa-issue' + activeClass}
+                    className={'ui button qa-issue warning' + activeClass}
                     onClick={this.setCurrentNavigationElements.bind(
                       this,
                       this.state.warnings.WARNING.Categories[key],
@@ -192,7 +194,7 @@ class QAComponent extends React.Component {
                       key,
                     )}
                   >
-                    <i className="icon-warning2 icon"></i>
+                    <AlertIcon size={18} />
                     {this.state.labels[key] ? this.state.labels[key] : key}{' '}
                     warnings
                     <b>
@@ -206,7 +208,7 @@ class QAComponent extends React.Component {
                 warning.push(
                   <button
                     key={index}
-                    className={'ui button qa-issue' + activeClass}
+                    className={'ui button qa-issue warning' + activeClass}
                     onClick={this.setCurrentNavigationElements.bind(
                       this,
                       this.state.warnings.WARNING.Categories[key],
@@ -214,7 +216,7 @@ class QAComponent extends React.Component {
                       key,
                     )}
                   >
-                    <i className="icon-warning2 icon"></i>
+                    <AlertIcon size={18} />
                     {this.state.labels[key] ? this.state.labels[key] : key}
                     <b>
                       {' '}
@@ -227,7 +229,7 @@ class QAComponent extends React.Component {
                 mismatch = (
                   <button
                     key={index}
-                    className={'ui button qa-issue' + activeClass}
+                    className={'ui button qa-issue warning' + activeClass}
                     onClick={this.setCurrentNavigationElements.bind(
                       this,
                       this.state.warnings.WARNING.Categories[key],
@@ -235,7 +237,7 @@ class QAComponent extends React.Component {
                       key,
                     )}
                   >
-                    <i className="icon-warning2 icon"></i>
+                    <AlertIcon size={18} />
                     {this.state.labels[key] ? this.state.labels[key] : key}
                     <b>
                       {' '}

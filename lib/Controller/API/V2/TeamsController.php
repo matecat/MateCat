@@ -7,21 +7,22 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\TeamAccessValidator;
-use API\V2\Json\Team;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamModel;
+use Model\Teams\TeamStruct;
 use ReflectionException;
-use TeamModel;
-use Teams\MembershipDao;
-use Teams\TeamDao;
-use Teams\TeamStruct;
+use Utils\Constants\Teams;
+use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController {
 
@@ -54,6 +55,20 @@ class TeamsController extends KleinController {
                         'flags'  => FILTER_REQUIRE_ARRAY
                 ]
         ] );
+
+        $params[ 'name' ] = trim( $params[ 'name' ] );
+
+        if ( empty( $params[ 'name' ] ) ) {
+            throw new InvalidArgumentException( "Wrong parameter: name is empty", 400 );
+        }
+
+        if ( empty( $params[ 'type' ] ) ) {
+            throw new InvalidArgumentException( "Wrong parameter: type is empty", 400 );
+        }
+
+        if ( !in_array( $params[ 'type' ], [ Teams::GENERAL, Teams::PERSONAL ] ) ) {
+            throw new InvalidArgumentException( "Wrong parameter: type is not allowed [Allowed values: personal, general]", 400 );
+        }
 
         $teamStruct = new TeamStruct( [
                 'created_by' => $this->user->uid,
@@ -97,10 +112,10 @@ class TeamsController extends KleinController {
 
         $org       = new TeamStruct();
         $org->id   = $params[ 'id_team' ];
-        $org->name = $params[ 'name' ];
+        $org->name = trim( $params[ 'name' ] );
 
         if ( empty( $org->name ) ) {
-            throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
+            throw new InvalidArgumentException( "Wrong parameter: name is empty", 400 );
         }
 
         $membershipDao = new MembershipDao();
@@ -110,7 +125,7 @@ class TeamsController extends KleinController {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
 
-        $org->name = $params[ 'name' ];
+        $org->name = trim( $params[ 'name' ] );
 
         $teamDao = new TeamDao();
 

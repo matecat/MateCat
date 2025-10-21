@@ -1,13 +1,13 @@
 <?php
 
-namespace Langs;
+namespace Utils\Langs;
 /*
    this class manages supported languages in the CAT tool
  */
 
 use Exception;
-use INIT;
-use Utils;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 class LanguageDomains {
 
@@ -33,7 +33,7 @@ class LanguageDomains {
         // SDL supported language codes
         // http://kb.sdl.com/kb/?ArticleId=2993&source=Article&c=12&cid=23#tab:homeTab:crumb:7:artId:4878
 
-        $file = INIT::$UTILS_ROOT . '/Langs/languageDomains.json';
+        $file = AppConfig::$UTILS_ROOT . '/Langs/languageDomains.json';
 
         $string = file_get_contents( $file );
         //parse to an associative array

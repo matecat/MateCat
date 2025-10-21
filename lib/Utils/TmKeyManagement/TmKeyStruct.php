@@ -1,104 +1,103 @@
 <?php
 
+namespace Utils\TmKeyManagement;
+
+use DomainException;
+use JsonSerializable;
+use stdClass;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 02/09/14
  * Time: 13.35
  */
-class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
+class TmKeyStruct extends stdClass implements JsonSerializable {
 
     /**
-     * @var int This key is for tm. 0 or 1
+     * @var bool This key is for tm. 0 or 1
      */
-    public $tm;
+    public ?bool $tm = true;
 
     /**
-     * @var int This key is for glossary. 0 or 1
+     * @var bool This key is for glossary. 0 or 1
      */
-    public $glos;
+    public ?bool $glos = true;
 
     /**
      * A flag that indicates whether the key has been created by the owner or not
-     * @var int 0 or 1
+     * @var ?bool 0 or 1
      */
-    public $owner;
+    public ?bool $owner = null;
 
     /**
-     * @var int The uid of the translator that uses that key in the job.
+     * @var int|null The uid of the translator that uses that key in the job.
      */
-    public $uid_transl;
+    public ?int $uid_transl = null;
 
     /**
-     * @var int The uid of the revisor that uses that key in the job.
+     * @var int|null The uid of the revisor that uses that key in the job.
      */
-    public $uid_rev;
+    public ?int $uid_rev = null;
 
     /**
-     * @var string The key's name
+     * @var ?string The key's name
      */
-    public $name;
+    public ?string $name = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $key;
+    public ?string $key = null;
 
     /**
-     * @var int Read grant for owner. 0 or 1
+     * @var ?bool Read grant for owner. 0 or 1
      */
-    public $r;
+    public ?bool $r = null;
 
     /**
-     * @var int Write grant for owner. 0 or 1
+     * @var ?bool Write grant for owner. 0 or 1
      */
-    public $w;
+    public ?bool $w = null;
 
     /**
-     * @var int Read grant for translator. 0 or 1
+     * @var ?bool Read grant for translator. 0 or 1
      */
-    public $r_transl;
+    public ?bool $r_transl = null;
 
     /**
-     * @var int Write grant for translator. 0 or 1
+     * @var ?bool Write grant for translator. 0 or 1
      */
-    public $w_transl;
+    public ?bool $w_transl = null;
 
     /**
-     * @var int Read grant for revisor. 0 or 1
+     * @var ?bool Read grant for revisor. 0 or 1
      */
-    public $r_rev;
+    public ?bool $r_rev = null;
 
     /**
-     * @var int Write grant for revisor. 0 or 1
+     * @var ?bool Write grant for revisor. 0 or 1
      */
-    public $w_rev;
+    public ?bool $w_rev = null;
 
     /**
-     * @var string Source language string. It must be compliant to RFC3066.<br />
+     * @var ?string Source language string. It must be compliant to RFC3066.<br />
      *             <b>Example</b><br />en-US, fr-FR, en-GB
      * @link http://www.i18nguy.com/unicode/language-identifiers.html
      * @link https://tools.ietf.org/html/rfc3066
      *
      */
-    public $source;
+    public ?string $source = null;
 
 
     /**
-     * @var string Target language string. It must be compliant to RFC3066.<br />
+     * @var ?string Target language string. It must be compliant to RFC3066.<br />
      *             <b>Example</b><br />en-US, fr-FR, en-GB
      * @link http://www.i18nguy.com/unicode/language-identifiers.html
      * @link https://tools.ietf.org/html/rfc3066
      *
      */
-    public $target;
-
-    /**
-     * User Structs of key owners
-     *
-     * @var Users_UserStruct[]
-     */
-    protected $in_users;
+    public ?string $target = null;
 
     /**
      * Coupled with $in_users
@@ -106,66 +105,57 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
      *      $in_users > 1 and $is_shared == true
      * @var bool
      */
-    public $is_shared = false;
-
-    /**
-     * @var
-     */
-    public $is_private;
+    public bool $is_shared = false;
 
     /**
      * @var int How much readable chars for hashed keys
      */
-    protected $readable_chars = 5;
+    protected int $readable_chars = 5;
 
     /**
      * Used exclusively for JSON rendering purposes
      *
      * @var bool
      */
-    public $complete_format = false;
+    public bool $complete_format = false;
 
     /**
-     * @var null
+     * @var int
      */
-    public $penalty = null;
+    public int $penalty = 0;
 
     /**
      * When a key return back from the client we have to know if it is hashed
      *
      * @return bool
      */
-    public function isEncryptedKey(){
-
-        $keyLength = strlen($this->key);
-
-        return substr( $this->key, 0, $keyLength - $this->readable_chars ) ==  str_repeat("*", $keyLength - $this->readable_chars );
-
+    public function isEncryptedKey(): bool {
+        return strrpos( $this->key, '*' ) !== false;
     }
 
-    public function isShared(){
+    public function isShared(): bool {
         return $this->is_shared;
     }
 
     /**
-     * @param array|TmKeyManagement_TmKeyStruct|null $params An associative array with the following keys:<br/>
-     * <pre>
-     *    tm         : boolean - Tm key
-     *    glos       : boolean - Glossary key
-     *    owner      : boolean - The key is set by the Project creator
-     *    uid_transl : int     - User ID
-     *    uid_rev    : int     - User ID
-     *    name       : string
-     *    key        : string
-     *    r          : boolean - Read privilege
-     *    w          : boolean - Write privilege
-     *    r_transl   : boolean - Translator Read privilege
-     *    w_transl   : boolean - Translator Write privilege
-     *    r_rev      : boolean - Revisor Read privilege
-     *    w_rev      : boolean - Translator Write privilege
-     *    source     : string  - Source languages
-     *    target     : string  - Target languages
-     * </pre>
+     * @param array|TmKeyStruct|null $params                 An associative array with the following keys:<br/>
+     *                                                       <pre>
+     *                                                       tm         : boolean - Tm key
+     *                                                       glos       : boolean - Glossary key
+     *                                                       owner      : boolean - The key is set by the Project creator
+     *                                                       uid_transl : int     - User ID
+     *                                                       uid_rev    : int     - User ID
+     *                                                       name       : string
+     *                                                       key        : string
+     *                                                       r          : boolean - Read privilege
+     *                                                       w          : boolean - Write privilege
+     *                                                       r_transl   : boolean - Translator Read privilege
+     *                                                       w_transl   : boolean - Translator Write privilege
+     *                                                       r_rev      : boolean - Revisor Read privilege
+     *                                                       w_rev      : boolean - Translator Write privilege
+     *                                                       source     : string  - Source languages
+     *                                                       target     : string  - Target languages
+     *                                                       </pre>
      */
     public function __construct( $params = null ) {
         if ( $params != null ) {
@@ -187,45 +177,27 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
      * Converts the current object into an associative array
      * @return array
      */
-    public function toArray() {
+    public function toArray(): array {
         return json_decode( json_encode( $this ), true );
     }
 
     /**
-     * @param TmKeyManagement_TmKeyStruct $obj
+     * @param TmKeyStruct $obj
      *
      * @return bool
      */
-    public function equals( TmKeyManagement_TmKeyStruct $obj ) {
+    public function equals( TmKeyStruct $obj ): bool {
         return $this->key == $obj->key;
     }
 
 
-    public function getCrypt() {
+    public function getCrypt(): string {
 
         $keyLength   = strlen( $this->key );
         $last_digits = substr( $this->key, -$this->readable_chars );
-        $key         = str_repeat( "*", $keyLength - $this->readable_chars ) . $last_digits;
 
-        return $key;
+        return str_repeat( "*", $keyLength - $this->readable_chars ) . $last_digits;
 
-    }
-
-    /**
-     * @return array|Users_UserStruct[]
-     * @throws ReflectionException
-     */
-    public function getInUsers() {
-
-        if( is_string( $this->in_users ) ){
-            $userDao = new Users_UserDao( Database::obtain() );
-            $users = $userDao->getByUids( explode( ",", $this->in_users ) );
-            $this->in_users = $users;
-        } elseif( $this->in_users == null ){
-            throw new UnexpectedValueException( "Wrong DataType, you can not get the users to which the key belongs because this key comes from Job Table. Load the key from the KeyRing." );
-        }
-
-        return $this->in_users;
     }
 
     /**
@@ -233,35 +205,35 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
      */
     public function jsonSerialize() {
 
-        if($this->complete_format){
+        if ( $this->complete_format ) {
             return [
-                'tm' => $this->tm,
-                'glos' => $this->glos,
-                'owner' => $this->owner,
-                'uid_transl' => $this->uid_transl,
-                'uid_rev' => $this->uid_rev,
-                'name' => $this->name,
-                'key' => $this->key,
-                'r' => (int)$this->r,
-                'w' => (int)$this->w,
-                'r_transl' => $this->r_transl,
-                'w_transl' => $this->w_transl,
-                'r_rev' => $this->r_rev,
-                'w_rev' => $this->w_rev,
-                'penalty' => $this->penalty ?? 0,
-                'is_shared' => $this->is_shared,
-                'is_private' => $this->isEncryptedKey()
+                    'tm'         => $this->tm,
+                    'glos'       => $this->glos,
+                    'owner'      => $this->owner,
+                    'uid_transl' => $this->uid_transl,
+                    'uid_rev'    => $this->uid_rev,
+                    'name'       => $this->name,
+                    'key'        => $this->key,
+                    'r'          => (int)$this->r,
+                    'w'          => (int)$this->w,
+                    'r_transl'   => $this->r_transl,
+                    'w_transl'   => $this->w_transl,
+                    'r_rev'      => $this->r_rev,
+                    'w_rev'      => $this->w_rev,
+                    'penalty'    => $this->penalty ?? 0,
+                    'is_shared'  => $this->is_shared,
+                    'is_private' => $this->isEncryptedKey()
             ];
         }
 
         return [
-            'tm' => $this->tm,
-            'glos' => $this->glos,
-            'owner' => $this->owner,
-            'name' => $this->name,
-            'key' => $this->key,
-            'penalty' => $this->penalty ?? 0,
-            'is_shared' => $this->is_shared,
+                'tm'        => $this->tm,
+                'glos'      => $this->glos,
+                'owner'     => $this->owner,
+                'name'      => $this->name,
+                'key'       => $this->key,
+                'penalty'   => $this->penalty ?? 0,
+                'is_shared' => $this->is_shared,
         ];
     }
 }

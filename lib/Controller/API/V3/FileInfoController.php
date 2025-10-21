@@ -6,26 +6,27 @@
  * Time: 13:03
  */
 
-namespace API\V3;
+namespace Controller\API\V3;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use InvalidArgumentException;
+use Model\Exceptions\ValidationError;
+use Model\Files\FilesInfoUtility;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectAccessValidator;
-use API\V2\BaseChunkController;
-use Exceptions\ValidationError;
-use Files\FilesInfoUtility;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 
-
-class FileInfoController extends BaseChunkController {
-
+class FileInfoController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
 
@@ -34,7 +35,7 @@ class FileInfoController extends BaseChunkController {
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
             $this->setProject( $Validator->getChunk()->getProject() );
-            $this->appendValidator( new ProjectAccessValidator( $this,  $Validator->getChunk()->getProject() ) );
+            $this->appendValidator( new ProjectAccessValidator( $this, $Validator->getChunk()->getProject() ) );
             //those are not needed at moment, so avoid unnecessary queries
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
@@ -43,11 +44,11 @@ class FileInfoController extends BaseChunkController {
 
     }
 
-    private function setChunk( Jobs_JobStruct $chunk ) {
+    private function setChunk( JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
-    private function setProject( Projects_ProjectStruct $project ) {
+    private function setProject( ProjectStruct $project ) {
         $this->project = $project;
     }
 
@@ -105,7 +106,7 @@ class FileInfoController extends BaseChunkController {
      *
      * @throws NotFoundException
      * @throws AuthenticationError
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws ValidationError
      * @throws EndQueueException
      * @throws ReQueueException
@@ -120,8 +121,14 @@ class FileInfoController extends BaseChunkController {
 
         $instructions = $this->featureSet->filter( 'decodeInstructions', $instructions );
 
+        if(empty($instructions)){
+            throw new InvalidArgumentException("Empty instructions provided");
+        }
+
         if ( $filesInfoUtility->setInstructions( $id_file, $instructions ) ) {
-            $this->response->json( true );
+            $this->response->json( [
+                "success" => true,
+            ] );
         } else {
             throw new NotFoundException( 'File not found on this project' );
         }

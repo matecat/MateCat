@@ -10,11 +10,10 @@
 namespace API\Commons\Traits;
 
 use Exception;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use INIT;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\FilesStorage\AbstractFilesStorage;
+use Utils\Registry\AppConfig;
 
 trait ScanDirectoryForConvertedFiles {
 
@@ -75,7 +74,7 @@ trait ScanDirectoryForConvertedFiles {
         $isTMX         = XliffFiles::isTMXFile( $filename );
         $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, INIT::$FORCE_XLIFF_CONVERSION, INIT::$FILTERS_ADDRESS );
+        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, AppConfig::$FORCE_XLIFF_CONVERSION, AppConfig::$FILTERS_ADDRESS );
 
         $metadata                      = [];
         $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];

@@ -1,42 +1,32 @@
 <?php
 
-use DataAccess\AbstractDao;
-use Teams\TeamStruct;
+namespace Model\OwnerFeatures;
 
-class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
+use PDO;
+use ReflectionException;
+use Utils\Logger\LoggerFactory;
+
+class OwnerFeatureDao extends AbstractDao {
 
     const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
-
-    public function findFromUserOrTeam( Users_UserStruct $user, TeamStruct $team ) {
-        // TODO:
-    }
-
-    public function getByTeam( TeamStruct $team ) {
-        $conn = Database::obtain()->getConnection();
-
-        $stmt = $conn->prepare( "SELECT * FROM owner_features " .
-                " WHERE owner_features.id_team = :id_team " .
-                " AND owner_features.enabled "
-        );
-        $stmt->execute( [ 'id_team' => $team->id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct' );
-
-        return $stmt->fetchAll();
-    }
+    const query_user_id       = "SELECT * FROM owner_features WHERE uid = :uid ORDER BY id";
 
     /**
-     * @param \DataAccess\IDaoStruct|OwnerFeatures_OwnerFeatureStruct $obj
+     * @param IDaoStruct|OwnerFeatureStruct $obj
      *
-     * @return int
+     * @return OwnerFeatureStruct
      */
-    public function create( \DataAccess\IDaoStruct $obj ) {
+    public function create( IDaoStruct $obj ) {
 
         $conn = Database::obtain()->getConnection();
 
-        \Database::obtain()->begin();
+        Database::obtain()->begin();
 
         /**
-         * @var OwnerFeatures_OwnerFeatureStruct $obj
+         * @var OwnerFeatureStruct $obj
          */
         $obj->create_date = date( 'Y-m-d H:i:s' );
         $obj->last_update = date( 'Y-m-d H:i:s' );
@@ -47,7 +37,7 @@ class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
                 " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
         );
 
-        Log::doJsonLog( $obj->toArray() );
+        LoggerFactory::doJsonLog( $obj->toArray() );
 
         $values = array_diff_key( $obj->toArray(), [ 'id' => null ] );
 
@@ -63,7 +53,7 @@ class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
      *
      * @param int    $ttl
      *
-     * @return \DataAccess\IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
+     * @return IDaoStruct[]|OwnerFeatureStruct[]
      * @throws ReflectionException
      */
     public static function getByIdCustomer( string $id_customer, int $ttl = 3600 ): array {
@@ -71,7 +61,7 @@ class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
         $thisDao = new self();
         $stmt    = $conn->prepare( self::query_by_user_email );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new OwnerFeatures_OwnerFeatureStruct(), [
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, OwnerFeatureStruct::class, [
                 'id_customer' => $id_customer
         ] ) ?? [];
     }
@@ -81,23 +71,59 @@ class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
      *
      * @param $id_customer
      *
-     * @return bool|int
+     * @return bool
+     * @throws ReflectionException
      */
-    public static function destroyCacheByIdCustomer( $id_customer ) {
+    public static function destroyCacheByIdCustomer( $id_customer ): bool {
         $thisDao = new self();
         $stmt    = $thisDao->_getStatementForQuery( self::query_by_user_email );
 
-        return $thisDao->_destroyObjectCache( $stmt, OwnerFeatures_OwnerFeatureStruct::class, [ 'id_customer' => $id_customer ] );
+        return $thisDao->_destroyObjectCache( $stmt, OwnerFeatureStruct::class, [ 'id_customer' => $id_customer ] );
     }
 
-    public static function getById( $id ) {
+    /**
+     * @throws ReflectionException
+     */
+    public static function getByUserId( ?int $uid, int $ttl = 3600 ): array {
+
+        if ( empty( $uid ) ) {
+            return [];
+        }
+
+        $conn    = Database::obtain()->getConnection();
+        $thisDao = new self();
+        $stmt    = $conn->prepare( self::query_user_id );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, OwnerFeatureStruct::class, [
+                'uid' => $uid
+        ] ) ?? [];
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function destroyCacheByUserId( int $uid ): bool {
+        $thisDao = new self();
+        $stmt    = $thisDao->_getStatementForQuery( self::query_user_id );
+
+        return $thisDao->_destroyObjectCache( $stmt, OwnerFeatureStruct::class, [ 'uid' => $uid ] );
+    }
+
+    /**
+     * Get owner feature by ID
+     *
+     * @param int $id
+     *
+     * @return ?OwnerFeatureStruct
+     */
+    public static function getById( int $id ): ?OwnerFeatureStruct {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( " SELECT * FROM owner_features WHERE id = ? " );
         $stmt->execute( [ $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, OwnerFeatureStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
 }

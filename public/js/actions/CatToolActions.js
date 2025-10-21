@@ -12,9 +12,21 @@ import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
+import {getGlobalWarnings} from '../api/getGlobalWarnings'
+import SegmentActions from './SegmentActions'
+import OfflineUtils from '../utils/offlineUtils'
+import AlertModal from '../components/modals/AlertModal'
+import {isUndefined} from 'lodash'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
+  startWarningTimeout: undefined,
+  setFirstLoad: function (value) {
+    AppDispatcher.dispatch({
+      actionType: CatToolConstants.SET_FIRST_LOAD,
+      value,
+    })
+  },
   openSegmentFilter: function () {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.SHOW_CONTAINER,
@@ -221,22 +233,25 @@ let CatToolActions = {
 
     const segmentToOpen = props.segmentToOpen || false
 
-    props.openCurrentSegmentAfter = !!(!segmentToOpen && !UI.firstLoad)
+    props.openCurrentSegmentAfter = !!(
+      !segmentToOpen && !CatToolStore.getFirstLoad()
+    )
+    let startSegmentId
     if (props.segmentToOpen) {
-      UI.startSegmentId = props.segmentToOpen
+      startSegmentId = props.segmentToOpen
     } else {
       const hash = CommonUtils.parsedHash.segmentId
       config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage()
         ? CommonUtils.getLastSegmentFromLocalStorage()
         : config.first_job_segment
 
-      UI.startSegmentId = hash ? hash : config.last_opened_segment
+      startSegmentId = hash ? hash : config.last_opened_segment
     }
 
     AppDispatcher.dispatch({
       actionType: CatToolConstants.ON_RENDER,
       ...props,
-      ...(UI.startSegmentId && {startSegmentId: UI.startSegmentId}),
+      ...(startSegmentId && {startSegmentId: startSegmentId}),
       where: props.where ? props.where : 'center',
     })
   },
@@ -302,6 +317,98 @@ let CatToolActions = {
         props,
         'Lara Free Plan Limit Reached',
       )
+    }
+  },
+  startWarning: function () {
+    clearTimeout(CatToolActions.startWarningTimeout)
+    CatToolActions.startWarningTimeout = setTimeout(function () {
+      // If the tab is not active avoid to make the warnings call
+      if (document.visibilityState === 'hidden') {
+        CatToolActions.startWarning()
+      } else {
+        CatToolActions.checkWarnings(false)
+      }
+    }, config.warningPollingInterval)
+  },
+  checkWarnings: function () {
+    // var mock = {
+    //     ERRORS: {
+    //         categories: {
+    //             'TAG': ['23853','23854','23855','23856','23857'],
+    //         }
+    //     },
+    //     WARNINGS: {
+    //         categories: {
+    //             'TAG': ['23857','23858','23859'],
+    //             'GLOSSARY': ['23860','23863','23864','23866',],
+    //             'MISMATCH': ['23860','23863','23864','23866',]
+    //         }
+    //     },
+    //     INFO: {
+    //         categories: {
+    //         }
+    //     }
+    // };
+    getGlobalWarnings({id_job: config.id_job, password: config.password})
+      .then((data) => {
+        //console.log('check warnings success');
+        CatToolActions.startWarning()
+
+        //check for errors
+        if (data.details) {
+          SegmentActions.updateGlobalWarnings(data.details)
+        }
+        CommonUtils.dispatchCustomEvent('getWarning:global:success')
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection()
+      })
+  },
+  processErrors: function (errors, operation) {
+    if (Array.isArray(errors)) {
+      errors.forEach((error) => {
+        const codeInt = parseInt(error.code)
+
+        if (operation === 'setTranslation') {
+          if (codeInt !== -10) {
+            ModalsActions.showModalComponent(
+              AlertModal,
+              {
+                text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
+              },
+              'Error',
+            )
+          }
+        }
+
+        if (codeInt === -10 && operation !== 'getSegments') {
+          ModalsActions.showModalComponent(
+            AlertModal,
+            {
+              text: 'Job canceled or assigned to another translator',
+              successCallback: () => location.reload,
+            },
+            'Error',
+          )
+        }
+        if (codeInt === -1000 || codeInt === -101) {
+          console.log('ERROR ' + codeInt)
+          OfflineUtils.startOfflineMode()
+        }
+
+        if (codeInt === -2000 && !isUndefined(error.message)) {
+          ModalsActions.showModalComponent(
+            AlertModal,
+            {
+              /* text:
+                'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +
+                'Please edit the segment first if you want to change its status to "Translated".',*/
+              text: error.message,
+            },
+            'Error',
+          )
+        }
+      })
     }
   },
 }

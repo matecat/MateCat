@@ -1,11 +1,18 @@
 <?php
 //TODO:estendere
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Tools\Match;
 
 
 /**
  * @group   regression
- * @covers  Engines_AbstractEngine::call
+ * @covers  AbstractEngine::call
  * User: dinies
  * Date: 22/04/16
  * Time: 11.47
@@ -13,7 +20,7 @@ use TestHelpers\AbstractTest;
 class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject | Engines_MyMemory
+     * @var PHPUnit_Framework_MockObject_MockObject | Match
      */
     protected $engine_MyMemory;
 
@@ -47,13 +54,13 @@ class CallAbstractMyMemoryTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $engine_struct_MyMemory     = EnginesModel_EngineStruct::getStruct();
+        $engine_struct_MyMemory     = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = ( new EnginesModel_EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
+        $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
 
-        /** @var $engine_MyMemory PHPUnit_Framework_MockObject_MockObject | Engines_MyMemory */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_MyMemory ] )->setMethods( [ '_call' ] )->getMock();
+        /** @var $engine_MyMemory MyMemory */
+        $this->engine_MyMemory = @$this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $engine_struct_MyMemory ] )->onlyMethods( [ '_call' ] )->getMock();
 
         $reflector            = new ReflectionClass( $this->engine_MyMemory );
         $this->resultProperty = $reflector->getProperty( "result" );
@@ -77,7 +84,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::call
+     * @covers  AbstractEngine::call
      */
     public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_1() {
 
@@ -105,14 +112,14 @@ class CallAbstractMyMemoryTest extends AbstractTest {
         $this->engine_MyMemory->call( "contribute_relative_url", $params, true );
 
         /**
-         * @var $actual_result Engines_Results_MyMemory_SetContributionResponse
+         * @var $actual_result SetContributionResponse
          */
         $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
 
         /**
-         * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
+         * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $actual_result instanceof SetContributionResponse );
         $this->assertFalse( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -126,7 +133,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::call
+     * @covers  AbstractEngine::call
      */
     public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_stubbed__call_with_mock_1() {
 
@@ -155,11 +162,11 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         /**
          * Test that the _decode method returns an object of type:
-         * @var $returned_object Engines_Results_MyMemory_SetContributionResponse
+         * @var $returned_object SetContributionResponse
          */
         $returned_object = $this->resultProperty->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $returned_object instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $returned_object instanceof SetContributionResponse );
         $this->assertEquals( 200, $returned_object->responseStatus );
         $this->assertEquals( [ '0' => "0a64b364-f4f0-d301-66c4-5a6c04c2a2bf" ], $returned_object->responseDetails );
         $this->assertEquals( "OK", $returned_object->responseData );
@@ -178,7 +185,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::call
+     * @covers  AbstractEngine::call
      * @throws Exception
      */
     public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_2() {
@@ -208,14 +215,14 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         /**
          * Test that the _decode method returns an object of type:
-         * @var $actual_result Engines_Results_MyMemory_SetContributionResponse
+         * @var $actual_result SetContributionResponse
          */
         $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
 
         /**
-         * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
+         * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $actual_result instanceof SetContributionResponse );
         $this->assertFalse( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -232,7 +239,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::call
+     * @covers  AbstractEngine::call
      */
     public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_general_check() {
 
@@ -246,14 +253,14 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         $this->engine_MyMemory->call( "delete_relative_url", $params );
         /**
-         * @var $actual_result Engines_Results_MyMemory_TMS
+         * @var $actual_result GetMemoryResponse
          */
         $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
 
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -267,7 +274,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::call
+     * @covers  AbstractEngine::call
      */
     public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_stubbed__call_with_mock() {
 
@@ -295,13 +302,13 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
 
         /**
-         * @var $actual_result Engines_Results_MyMemory_TMS
+         * @var $actual_result GetMemoryResponse
          */
         $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
         /**
          * check on the values of TMS object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
         $this->assertEquals( [], $actual_result->matches );
         $this->assertEquals( 200, $actual_result->responseStatus );
         $this->assertEquals( "", $actual_result->responseDetails );
@@ -320,7 +327,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::call
+     * @covers  AbstractEngine::call
      */
     public function test_call_with_wrong_function_name_for_code_coverage_purpose() {
 
@@ -331,7 +338,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
         ] );
 
         /**
-         * @var $result_object Engines_Results_MyMemory_SetContributionResponse
+         * @var $result_object SetContributionResponse
          */
         $result_object = $this->resultProperty->getValue( $this->engine_MyMemory );
         $code          = $result_object[ 'error' ][ 'code' ];
@@ -343,7 +350,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::call
+     * @covers  AbstractEngine::call
      * @throws Exception
      */
     public function test_real_get() {
@@ -357,11 +364,11 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         $url_mock_param = 'https://api.mymemory.translated.net/get';
 
-        $engine_struct_MyMemory     = EnginesModel_EngineStruct::getStruct();
+        $engine_struct_MyMemory     = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = ( new EnginesModel_EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
-        $engine_MyMemory        = new Engines_MyMemory( $engine_struct_MyMemory );
+        $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
+        $engine_MyMemory        = new MyMemory( $engine_struct_MyMemory );
 
         $engine_MyMemory->call( "translate_relative_url", $params, true );
 
@@ -369,14 +376,14 @@ class CallAbstractMyMemoryTest extends AbstractTest {
         $resultProperty = $reflector->getProperty( "result" );
         $resultProperty->setAccessible( true );
         /**
-         * @var $actual_result Engines_Results_MyMemory_TMS
+         * @var $actual_result GetMemoryResponse
          */
         $actual_result = $resultProperty->getValue( $engine_MyMemory );
 
         /**
          * check on the values of TMS object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
         $this->assertCount( 3, $actual_result->matches );
         $this->assertEquals( 200, $actual_result->responseStatus );
         $this->assertEquals( "", $actual_result->responseDetails );

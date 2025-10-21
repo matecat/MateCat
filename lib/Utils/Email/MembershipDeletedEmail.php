@@ -6,39 +6,39 @@
  * Time: 15:35
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
 use Exception;
-use Teams\TeamStruct;
-use Users_UserStruct;
+use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 
 class MembershipDeletedEmail extends AbstractEmail {
 
-    protected $title;
+    protected ?string $title;
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected $sender;
+    protected UserStruct $sender;
 
     /**
      * @var TeamStruct
      */
-    protected $team;
+    protected TeamStruct $team;
 
     /**
      * MembershipDeletedEmail constructor.
      *
-     * @param Users_UserStruct $sender
-     * @param Users_UserStruct $removed_user
-     * @param TeamStruct       $team
+     * @param UserStruct $sender
+     * @param UserStruct $removed_user
+     * @param TeamStruct $team
      */
-    public function __construct( Users_UserStruct $sender, Users_UserStruct $removed_user, TeamStruct $team ) {
+    public function __construct( UserStruct $sender, UserStruct $removed_user, TeamStruct $team ) {
         $this->user   = $removed_user;
         $this->sender = $sender;
         $this->title  = "You've been removed from team " . $team->name;

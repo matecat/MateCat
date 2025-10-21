@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddDeleteAtToQaEntries extends AbstractMatecatMigration
 {
     public $sql_up = [ "ALTER TABLE qa_entries ADD COLUMN  deleted_at DATETIME DEFAULT NULL" ];

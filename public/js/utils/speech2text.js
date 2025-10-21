@@ -174,7 +174,7 @@ const Speech2Text = {
     return (
       segment &&
       !(
-        (segment.autopropagated_from && segment.autopropagated_from != '0') ||
+        (segment.autopropagated_from && segment.autopropagated_from != 0) ||
         segment.suggestion_match === '100' ||
         segment.status !== 'NEW'
       )
@@ -187,7 +187,7 @@ const Speech2Text = {
     Speech2Text.isToKeepRecognizing = false
   },
   showMatches: function () {
-    SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment, 'matches'))
+    SegmentActions.activateTab(SegmentStore.getCurrentSegmentId(), 'matches')
   },
   animateSpeechActive: function () {
     Speech2Text.microphone.removeClass('micSpeechReceiving')

@@ -6,11 +6,11 @@
  * Time: 14:53
  */
 
-namespace Email;
+namespace Utils\Email;
 
 class CommentResolveEmail extends BaseCommentEmail {
 
-    protected $title = "Thread resolved";
+    protected ?string $title = "Thread resolved";
 
     protected function _getTemplateVariables(): array {
         $vars                 = parent::_getTemplateVariables();

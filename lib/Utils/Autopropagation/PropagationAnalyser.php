@@ -1,70 +1,70 @@
 <?php
 
-namespace Autopropagation;
+namespace Utils\Autopropagation;
 
-use Propagation_PropagationTotalStruct;
-use Translations_SegmentTranslationStruct;
-use Utils;
+use Model\Propagation\PropagationTotalStruct;
+use Model\Translations\SegmentTranslationStruct;
+use Utils\Tools\Utils;
 
 class PropagationAnalyser {
 
     /**
      * @var int
      */
-    private $propagatedIceCount = 0;
+    private int $propagatedIceCount = 0;
 
     /**
      * @var int
      */
-    private $notPropagatedIceCount = 0;
+    private int $notPropagatedIceCount = 0;
 
     /**
      * @var int
      */
-    private $propagatedCount = 0;
+    private int $propagatedCount = 0;
 
     /**
      * @var int
      */
-    private $notPropagatedCount = 0;
+    private int $notPropagatedCount = 0;
 
     /**
      * @return int
      */
-    public function getPropagatedIceCount() {
+    public function getPropagatedIceCount(): int {
         return $this->propagatedIceCount;
     }
 
     /**
      * @return int
      */
-    public function getNotPropagatedIceCount() {
+    public function getNotPropagatedIceCount(): int {
         return $this->notPropagatedIceCount;
     }
 
     /**
      * @return int
      */
-    public function getPropagatedCount() {
+    public function getPropagatedCount(): int {
         return $this->propagatedCount;
     }
 
     /**
      * @return int
      */
-    public function getNotPropagatedCount() {
+    public function getNotPropagatedCount(): int {
         return $this->notPropagatedCount;
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct   $parentSegmentTranslation
-     * @param Translations_SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
+     * @param SegmentTranslationStruct   $parentSegmentTranslation
+     * @param SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
-     * @return Propagation_PropagationTotalStruct
+     * @return PropagationTotalStruct
      */
-    public function analyse( Translations_SegmentTranslationStruct $parentSegmentTranslation, $arrayOfSegmentTranslationToPropagate ) {
+    public function analyse( SegmentTranslationStruct $parentSegmentTranslation, array $arrayOfSegmentTranslationToPropagate ): PropagationTotalStruct {
 
-        $propagation = new Propagation_PropagationTotalStruct();
+        $propagation = new PropagationTotalStruct();
 
         if ( $parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1 ) { // check IF the parent segment is ICE
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
@@ -77,9 +77,9 @@ class PropagationAnalyser {
                     $propagation->addPropagatedId( $segmentTranslation->id_segment );
 
                     if ( false === Utils::stringsAreEqual(
-                            $parentSegmentTranslation->translation,
-                            $segmentTranslation->translation ?? ''
-                    ) ) {
+                                    $parentSegmentTranslation->translation,
+                                    $segmentTranslation->translation ?? ''
+                            ) ) {
                         $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
                     }
 
@@ -96,9 +96,9 @@ class PropagationAnalyser {
                     $propagation->addPropagatedId( $segmentTranslation->id_segment );
 
                     if ( false === Utils::stringsAreEqual(
-                            $parentSegmentTranslation->translation,
-                            $segmentTranslation->translation ?? ''
-                    ) ) {
+                                    $parentSegmentTranslation->translation,
+                                    $segmentTranslation->translation ?? ''
+                            ) ) {
                         $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
                     }
 
@@ -115,22 +115,21 @@ class PropagationAnalyser {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      *
      * @return bool
      */
-    private function detectIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
-        return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->id_segment !== null );
+    private function detectIce( SegmentTranslationStruct $segmentTranslation ): bool {
+        return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 );
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $parentSegmentTranslation
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $parentSegmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      *
      * @return bool
      */
-    private function detectMatchingIce( Translations_SegmentTranslationStruct $parentSegmentTranslation, Translations_SegmentTranslationStruct $segmentTranslation ) {
-        return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash and
-                $segmentTranslation->id_segment !== null );
+    private function detectMatchingIce( SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation ): bool {
+        return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash );
     }
 }

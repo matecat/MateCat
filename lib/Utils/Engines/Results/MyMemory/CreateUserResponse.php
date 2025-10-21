@@ -1,12 +1,17 @@
 <?php
 
+namespace Utils\Engines\Results\MyMemory;
+
+use Exception;
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 02/03/15
  * Time: 19.17
  */
-class Engines_Results_MyMemory_CreateUserResponse extends Engines_Results_AbstractResponse {
+class CreateUserResponse extends TMSAbstractResponse {
 
     public $key;
     public $id;
@@ -18,10 +23,10 @@ class Engines_Results_MyMemory_CreateUserResponse extends Engines_Results_Abstra
             throw new Exception( "Invalid Response", -1 );
         }
 
-        $this->responseStatus = isset( $response[ 'code' ] ) ? $response[ 'code' ] : '';
-        $this->key            = isset( $response[ 'key' ] ) ? $response[ 'key' ] : '';
-        $this->id             = isset( $response[ 'id' ] ) ? $response[ 'id' ] : '';
-        $this->pass           = isset( $response[ 'pass' ] ) ? $response[ 'pass' ] : '';
+        $this->responseStatus = (int)( $response[ 'code' ] ?? 200 );
+        $this->key            = $response[ 'key' ] ?? '';
+        $this->id             = $response[ 'id' ] ?? '';
+        $this->pass           = $response[ 'pass' ] ?? '';
 
     }
 

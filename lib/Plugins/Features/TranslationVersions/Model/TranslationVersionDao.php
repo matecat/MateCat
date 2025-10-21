@@ -1,16 +1,16 @@
 <?php
 
-namespace Features\TranslationVersions\Model;
+namespace Plugins\Features\TranslationVersions\Model;
 
-use Constants;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Database;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\QualityReport\SegmentEventsStruct;
+use Model\Translations\SegmentTranslationStruct;
 use PDO;
-use QualityReport\SegmentEventsStruct;
-use Translations_SegmentTranslationStruct;
-use Utils;
+use Utils\Constants\SourcePages;
+use Utils\Tools\Utils;
 
 class TranslationVersionDao extends AbstractDao {
 
@@ -26,7 +26,7 @@ class TranslationVersionDao extends AbstractDao {
      *
      * @return array
      */
-    public static function getVersionsForJob( $id_job ) {
+    public static function getVersionsForJob( int $id_job ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job " .
                 " ORDER BY creation_date DESC ";
@@ -46,7 +46,7 @@ class TranslationVersionDao extends AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function getVersionsForChunk( Jobs_JobStruct $chunk ) {
+    public static function getVersionsForChunk( JobStruct $chunk ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job " .
                 " ORDER BY creation_date DESC ";
@@ -73,7 +73,7 @@ class TranslationVersionDao extends AbstractDao {
      *
      * @return null|TranslationVersionStruct
      */
-    public function getVersionNumberForTranslation( $id_job, $id_segment, $version_number ) {
+    public function getVersionNumberForTranslation( int $id_job, int $id_segment, int $version_number ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job AND id_segment = :id_segment " .
                 " AND version_number = :version_number ;";
@@ -103,7 +103,7 @@ class TranslationVersionDao extends AbstractDao {
      *
      * @return TranslationVersionStruct[]
      */
-    public static function getVersionsForTranslation( $id_job, $id_segment, $version_number = null ) {
+    public static function getVersionsForTranslation( int $id_job, int $id_segment, ?int $version_number = null ) {
         $sql    = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job AND id_segment = :id_segment ";
         $params = [ 'id_job' => $id_job, 'id_segment' => $id_segment ];
@@ -133,7 +133,7 @@ class TranslationVersionDao extends AbstractDao {
      * @param $id_job
      * @param $id_segment
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return \Model\DataAccess\IDaoStruct[]
      */
     public function getVersionsForRevision( $id_job, $id_segment ) {
 
@@ -168,7 +168,6 @@ class TranslationVersionDao extends AbstractDao {
     qa.translation_version as qa_translation_version,
     qa.target_text as qa_target_text,
     qa.penalty_points as qa_penalty_points,
-    qa.rebutted_at as qa_rebutted_at,
     qa.source_page as qa_source_page
 
     FROM segment_translations st LEFT JOIN qa_entries qa
@@ -213,7 +212,6 @@ class TranslationVersionDao extends AbstractDao {
      qa.translation_version as qa_translation_version,
      qa.target_text as qa_target_text,
      qa.penalty_points as qa_penalty_points,
-     qa.rebutted_at as qa_rebutted_at,
      qa.source_page as qa_source_page
 
     FROM segment_translation_versions stv 
@@ -236,8 +234,8 @@ class TranslationVersionDao extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        return $this->_fetchObject( $stmt,
-                ( new ShapelessConcreteStruct() ),
+        return $this->_fetchObjectMap( $stmt,
+                ShapelessConcreteStruct::class,
                 [ 'id_job' => $id_job, 'id_segment' => $id_segment ]
         );
 
@@ -302,7 +300,7 @@ class TranslationVersionDao extends AbstractDao {
         $db = Database::obtain()->getConnection();
 
         $final_flag = "";
-        if ( $source_page > Constants::SOURCE_PAGE_TRANSLATE ) {
+        if ( $source_page > SourcePages::SOURCE_PAGE_TRANSLATE ) {
             // when searching for revision, search for the final revision flag
             $final_flag = " AND final_revision = 1 ";
         }
@@ -345,14 +343,14 @@ class TranslationVersionDao extends AbstractDao {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $propagatorSegment
-     * @param int                                   $id_segment
-     * @param Jobs_JobStruct                        $job_data
-     * @param Propagation_PropagationTotalStruct[]  $segmentsToUpdate
+     * @param \Model\Translations\SegmentTranslationStruct $propagatorSegment
+     * @param int                                          $id_segment
+     * @param JobStruct                                    $job_data
+     * @param Propagation_PropagationTotalStruct[]         $segmentsToUpdate
      *
      * @return void
      */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagatorSegment, int $id_segment, Jobs_JobStruct $job_data, array $segmentsToUpdate ) {
+    public function savePropagationVersions( SegmentTranslationStruct $propagatorSegment, int $id_segment, JobStruct $job_data, array $segmentsToUpdate ) {
 
         $chunked_segments_list = array_chunk( $segmentsToUpdate, 20, true );
 
@@ -399,7 +397,7 @@ class TranslationVersionDao extends AbstractDao {
                 WHERE id_job = :id_job AND id_segment = :id_segment
                 AND version_number = :version_number ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = \Model\DataAccess\Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( [

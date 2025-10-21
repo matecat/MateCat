@@ -1,18 +1,22 @@
 <?php
+
+namespace Utils\Engines\Results\MyMemory;
+
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 04/03/15
  * Time: 11.50
  */
-
-class Engines_Results_MyMemory_AnalyzeResponse extends Engines_Results_AbstractResponse {
+class AnalyzeResponse extends TMSAbstractResponse {
 
     public function __construct( $response ) {
 
-        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
-        $this->responseDetails = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
-        $this->responseData    = isset( $response[ 'data' ] ) ? $response[ 'data' ] : '';
+        $this->responseStatus  = (int)( $response[ 'responseStatus' ] ?? 200 );
+        $this->responseDetails = $response[ 'responseData' ] ?? '';
+        $this->responseData    = $response[ 'data' ] ?? '';
 
     }
 

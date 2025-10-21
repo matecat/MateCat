@@ -1,27 +1,27 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 class EntryCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id;
-    public $uid;
-    public $id_qa_entry;
-    public $create_date;
-    public $comment;
-    public $source_page;
+    public ?int    $id          = null;
+    public int     $uid;
+    public int     $id_qa_entry;
+    public ?string $create_date = null;
+    public string  $comment;
+    public int     $source_page;
 
     /**
-     * @param int $id
-     * @param int $ttl
+     * @param int  $id
+     * @param ?int $ttl
      *
      * @return mixed
      */
-    public function getEntriesById( $id, $ttl = 86400 ) {
-        return $this->cachable( __METHOD__, $this, function () use ( $id, $ttl ) {
+    public function getEntriesById( int $id, ?int $ttl = 86400 ) {
+        return $this->cachable( __METHOD__, function () use ( $id, $ttl ) {
             return ( new EntryCommentDao() )->findByIssueId( $id );
         } );
     }

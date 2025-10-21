@@ -18,6 +18,7 @@ import {
 
 let SearchUtils = {
   searchEnabled: true,
+  searchOpen: false,
   searchParams: {
     search: 0,
   },
@@ -105,7 +106,7 @@ let SearchUtils = {
     let target = p.target ? p.target : ''
     let replace = p.replace ? p.replace : ''
 
-    UI.body.addClass('searchActive')
+    this.searchOpen = true
     let makeSearchFn = () => {
       let dd = new Date()
 
@@ -123,19 +124,7 @@ let SearchUtils = {
         SearchUtils.execFind_success(data)
       })
     }
-    //Save the current segment to not lose the translation
-    try {
-      let segment = SegmentStore.getSegmentByIdToJS(UI.currentSegmentId)
-      if (UI.translationIsToSaveBeforeClose(segment)) {
-        UI.saveSegment(UI.currentSegment).then(() => {
-          makeSearchFn()
-        })
-      } else {
-        makeSearchFn()
-      }
-    } catch (e) {
-      makeSearchFn()
-    }
+    makeSearchFn()
   },
   /**
    * Call in response to request getSearch
@@ -165,6 +154,7 @@ let SearchUtils = {
         0,
         searchObject.searchParams,
       )
+      console.log('this.searchResultsDictionary', this.searchResultsDictionary)
     } else {
       SegmentActions.removeSearchResultToSegments()
       this.resetSearch()
@@ -203,6 +193,7 @@ let SearchUtils = {
       this.featuredSearchResult = this.featuredSearchResult + 1
     }
     searchObject.featuredSearchResult = this.featuredSearchResult
+    console.log('updateSearchObject', searchObject)
     return searchObject
   },
 
@@ -355,12 +346,11 @@ let SearchUtils = {
    */
   toggleSearch: function (e) {
     if (!this.searchEnabled) return
-    if (UI.body.hasClass('searchActive')) {
+    if (this.searchOpen) {
       CatToolActions.closeSearch()
     } else {
       e.preventDefault()
       CatToolActions.toggleSearch()
-      // this.fixHeaderHeightChange();
     }
   },
   /**
@@ -415,7 +405,6 @@ let SearchUtils = {
 
     if (params.selectStatus !== '' && params.selectStatus !== 'all') {
       this.searchParams.status = params.selectStatus
-      UI.body.attr('data-filter-status', params.selectStatus)
     } else {
       delete this.searchParams.status
     }

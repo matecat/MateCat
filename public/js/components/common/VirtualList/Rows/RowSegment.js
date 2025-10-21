@@ -69,7 +69,7 @@ function RowSegment({
 
     const {segment, files, sideOpen} = restProps
     const idFileSegment = SegmentUtils.getSegmentFileId(segment)
-    if (idFileSegment !== currentFileId) {
+    if (idFileSegment !== parseInt(currentFileId)) {
       const file = files
         ? files.find((file) => file.id == idFileSegment)
         : false

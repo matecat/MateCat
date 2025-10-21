@@ -1,11 +1,11 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
 use DomainException;
 use Exception;
 use JsonSerializable;
-use RecursiveArrayObject;
+use Utils\Collections\RecursiveArrayObject;
 
 class XliffRulesModel implements JsonSerializable {
 

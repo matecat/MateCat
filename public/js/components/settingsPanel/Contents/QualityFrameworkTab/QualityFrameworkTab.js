@@ -124,8 +124,6 @@ export const QualityFrameworkTab = () => {
         getQualityFrameworkTemplateDefault(),
         getQualityFrameworkTemplates(),
       ]).then(([templateDefault, templates]) => {
-        // sort by name
-        templates.items.sort((a, b) => (a.label > b.label ? 1 : -1))
         const items = [templateDefault, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =
@@ -151,10 +149,11 @@ export const QualityFrameworkTab = () => {
     setTemplates((prevState) =>
       prevState.map((template) => ({
         ...template,
-        isSelected: template.id === currentProjectTemplateQaId,
+        isSelected:
+          template.id === currentProjectTemplateQaId && !template.isTemporary,
       })),
     )
-  }, [currentProjectTemplateQaId, setTemplates])
+  }, [currentProjectTemplate?.id, currentProjectTemplateQaId, setTemplates])
 
   // Modify current project template qa model template id when qf template id change
   useEffect(() => {

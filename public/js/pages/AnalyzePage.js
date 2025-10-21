@@ -4,7 +4,7 @@ import Header from '../components/header/Header'
 import AnalyzeMain from '../components/analyze/AnalyzeMain'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {getJobVolumeAnalysis} from '../api/getJobVolumeAnalysis'
-import {getProject} from '../api/getProject'
+import {getProject, getProjectByToken} from '../api/getProject'
 import {getVolumeAnalysis} from '../api/getVolumeAnalysis'
 import {fromJS} from 'immutable'
 import {ANALYSIS_STATUS} from '../constants/Constants'
@@ -26,17 +26,19 @@ const AnalyzePage = () => {
       getJobVolumeAnalysis().then((response) => {
         //TODO Temp fix to filter only the requested job
         let filteredJob = response.jobs.find((job) =>
-          job.chunks.find((chunk) => chunk.password === config.jpassword),
+          job.chunks.find((chunk) => chunk.password === config.job_password),
         )
         filteredJob.chunks = filteredJob.chunks.filter(
-          (chunk) => chunk.password === config.jpassword,
+          (chunk) => chunk.password === config.job_password,
         )
         const volumeAnalysis = {...response, jobs: [filteredJob]}
-        getProject(config.id_project).then((response) => {
-          const project = response.project
-          setProject(project)
-          setVolumeAnalysis(volumeAnalysis)
-        })
+        getProjectByToken(config.id_project, config.project_access_token).then(
+          (response) => {
+            const project = response.project
+            setProject(project)
+            setVolumeAnalysis(volumeAnalysis)
+          },
+        )
         pollData(response)
       })
     } else {

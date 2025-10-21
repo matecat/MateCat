@@ -1,10 +1,11 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use AbstractControllers\KleinController;
+use Controller\Abstracts\KleinController;
 use Exception;
 use Klein\Request;
+use Throwable;
 
 abstract class Base {
 
@@ -37,21 +38,19 @@ abstract class Base {
     protected abstract function _validate(): void;
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function validate() {
-
-        if ( !empty( $this->_failureCallback ) ) {
-            set_exception_handler( $this->_failureCallback );
+        try {
+            $this->_validate();
+            $this->_executeCallbacks();
+        } catch ( Throwable $exception ) {
+            if ( !empty( $this->_failureCallback ) ) {
+                ( $this->_failureCallback )( $exception ); // PHP7 closure call syntax: support operations on arbitrary (...) expressions
+            } else {
+                throw $exception;
+            }
         }
-
-        $this->_validate();
-        $this->_executeCallbacks();
-
-        if ( !empty( $this->_failureCallback ) ) {
-            restore_exception_handler();
-        }
-
     }
 
     /**

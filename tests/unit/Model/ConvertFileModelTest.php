@@ -1,8 +1,8 @@
 <?php
 
-use Constants\ConversionHandlerStatus;
-use Conversion\ConvertedFileModel;
+use Model\Conversion\ConvertedFileModel;
 use TestHelpers\AbstractTest;
+use Utils\Constants\ConversionHandlerStatus;
 
 class ConvertFileModelTest extends AbstractTest {
 
@@ -34,7 +34,7 @@ class ConvertFileModelTest extends AbstractTest {
 
         $json = json_encode( $model->getResult() );
 
-        $this->assertEquals( '{"name":"set file name is mandatory","size":0}', $json );
+        $this->assertEquals( '{"name":"set file name is mandatory","size":0,"pdfAnalysis":[]}', $json );
 
         $this->assertEquals( '{"code":-3,"message":"Source not valid","name":"set file name is mandatory"}', json_encode( $model->asError() ) );
 

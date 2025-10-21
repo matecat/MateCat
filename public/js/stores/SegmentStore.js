@@ -44,6 +44,7 @@ import {
   JOB_WORD_CONT_TYPE,
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
+  splittedTranslationPlaceholder,
 } from '../constants/Constants'
 
 EventEmitter.prototype.setMaxListeners(0)
@@ -105,6 +106,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   isSearchingGlossaryInTarget: false,
   helpAiAssistantWords: undefined,
   _aiSuggestions: [],
+  currentSegmentId: undefined,
+  editStart: undefined,
   /**
    * Update all
    */
@@ -132,7 +135,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let newSegments = []
     $.each(segments, (i, segment) => {
       let splittedSourceAr = segment.segment.split(
-        UI.splittedTranslationPlaceholder,
+        splittedTranslationPlaceholder,
       )
       let inSearch = false
       let currentInSearch = false
@@ -152,16 +155,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
         $.each(splittedSourceAr, (i) => {
           let translation = segment.translation.split(
-            UI.splittedTranslationPlaceholder,
+            splittedTranslationPlaceholder,
           )[i]
           let status = segment.target_chunk_lengths.statuses[i]
           let segData = {
             saving: false,
             splitted: true,
-            autopropagated_from: '0',
+            autopropagated_from: 0,
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
-            readonly: 'false',
+            readonly: false,
             segment: splittedSourceAr[i],
             decodedSource: DraftMatecatUtils.transformTagsToText(
               segment.segment,
@@ -177,12 +180,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
               status.toUpperCase() === SEGMENTS_STATUS.APPROVED
                 ? SEGMENTS_STATUS.APPROVED2
                 : status,
-            time_to_edit: '0',
+            time_to_edit: 0,
             originalDecodedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
             decodedTranslation:
               DraftMatecatUtils.transformTagsToText(translation),
-            warning: '0',
+            warning: false,
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
             unlocked: false,
@@ -224,7 +227,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.modified = false
         segment.opened = false
         segment.selected = false
-        segment.propagable = segment.repetitions_in_chunk !== '1'
+        segment.propagable = segment.repetitions_in_chunk !== 1
         segment.inSearch = inSearch
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
@@ -342,7 +345,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         from,
       )
     } else {
-      this._segments = this._segments.setIn([index, 'autopropagated_from'], '0')
+      this._segments = this._segments.setIn([index, 'autopropagated_from'], 0)
     }
   },
   replaceTranslation(sid, translation) {
@@ -491,8 +494,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (
       index > -1 &&
       this._segments.get(index).get('readonly') == 'false' && //not readonly
-      (this._segments.get(index).get('ice_locked') === '0' || //not ice_locked
-        (this._segments.get(index).get('ice_locked') === '1' &&
+      (!this._segments.get(index).get('ice_locked') || //not ice_locked
+        (this._segments.get(index).get('ice_locked') &&
           this._segments.get(index).get('unlocked'))) //unlocked
     ) {
       this._segments = this._segments.setIn([index, 'inBulk'], true)
@@ -508,7 +511,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this.segmentsInBulk = segmentsArray
     this._segments = this._segments.map((segment) => {
       if (segmentsArray.indexOf(segment.get('sid')) > -1) {
-        if (segment.get('ice_locked') == '1' && !segment.get('unlocked')) {
+        if (segment.get('ice_locked') && !segment.get('unlocked')) {
           let index = segmentsArray.indexOf(segment.get('sid'))
           this.segmentsInBulk.splice(index, 1) // if is a locked segment remove it from bulk
         } else {
@@ -905,6 +908,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       this.removeLexiqaWarning()
     }
   },
+  hasGlobalErrors: function (sid) {
+    const categories = this._globalWarnings.matecat.ERROR.Categories
+    return Object.values(categories).some((sids) => sids.includes(sid))
+  },
   removeLexiqaWarning: function () {
     this._segments = this._segments.map((segment) => segment.delete('lexiqa'))
   },
@@ -1158,7 +1165,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     return this._segments?.first()?.get('sid')
   },
   getCurrentSegment: function () {
-    let current = null,
+    let current = SegmentStore.getSegmentById(
+        SegmentStore.currentSegmentId,
+      )?.toJS(),
       tmpCurrent = null
     tmpCurrent = this._segments.find((segment) => {
       return segment.get('opened') === true
@@ -1267,6 +1276,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       segmentCharacters,
     )
   },
+  getStartEditTime: function () {
+    return SegmentStore.editStart
+  },
 })
 
 // Register callback to handle all updates
@@ -1305,6 +1317,11 @@ AppDispatcher.register(function (action) {
       )
       // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
       break
+    case SegmentConstants.SET_CURRENT_SEGMENT_ID: {
+      SegmentStore.editStart = new Date()
+      SegmentStore.currentSegmentId = action.sid
+      break
+    }
     case SegmentConstants.SELECT_SEGMENT: {
       let idToScroll
       if (action.direction === 'next') {

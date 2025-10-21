@@ -22,7 +22,7 @@ export const ExportGlossary = ({row, onClose}) => {
     if (status && status.successfull) {
       const notification = {
         title: 'Request submitted',
-        text: `You should receive the link at ${email}`,
+        text: `You will receive the link at ${email}`,
         type: 'success',
         position: 'br',
         allowHtml: true,

@@ -28,6 +28,7 @@ const STANDARD_TEMPLATE = {
   payable_rate_template_id: null,
   qa_model_template_id: null,
   get_public_matches: true,
+  public_tm_penalty: 0,
   pretranslate_100: true,
   pretranslate_101: true,
   created_at: 'Fri, 02 Feb 24 16:48:34 +0100',
@@ -63,6 +64,7 @@ export const SCHEMA_KEYS = {
   payableRateTemplateId: 'payable_rate_template_id',
   qaModelTemplateId: 'qa_model_template_id',
   getPublicMatches: 'get_public_matches',
+  publicTmPenalty: 'public_tm_penalty',
   pretranslate100: 'pretranslate_100',
   pretranslate101: 'pretranslate_101',
   filtersTemplateId: 'filters_template_id',
@@ -106,8 +108,6 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
     if (!config.is_cattool) {
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
-          // sort by name
-          items.sort((a, b) => (a.name > b.name ? 1 : -1))
           if (!cleanup) {
             const shouldUsePresetCharacterMode = Object.values(
               CHARS_SIZE_COUNTER_TYPES,

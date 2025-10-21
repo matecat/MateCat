@@ -1,43 +1,45 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Traits\ScanDirectoryForConvertedFiles;
-use API\Commons\Validators\LoginValidator;
-use BasicFeatureStruct;
-use ConnectedServices\Google\GDrive\Session;
-use Constants;
-use Constants_ProjectStatus;
-use CookieManager;
-use Database;
-use Engine;
-use Engines_DeepL;
-use Engines_MMT;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\CookieManager;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
-use FilesStorage\FilesStorageFactory;
-use INIT;
 use InvalidArgumentException;
-use Langs\Languages;
-use PayableRates\CustomPayableRateDao;
-use PayableRates\CustomPayableRateStruct;
-use ProjectManager;
-use ProjectQueue\Queue;
-use Projects_MetadataDao;
-use QAModelTemplate\QAModelTemplateDao;
-use QAModelTemplate\QAModelTemplateStruct;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use Utils;
+use Model\ConnectedServices\GDrive\Session;
+use Model\DataAccess\Database;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
+use Model\ProjectManager\ProjectManager;
+use Model\Projects\MetadataDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamStruct;
+use Model\Xliff\XliffConfigTemplateDao;
+use Model\Xliff\XliffConfigTemplateStruct;
+use Plugins\Features\ProjectCompletion;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use Utils\Constants\Constants;
+use Utils\Constants\ProjectStatus;
+use Utils\Engines\DeepL;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
-use Validator\EngineValidator;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
-use Validator\MMTValidator;
-use Xliff\XliffConfigTemplateDao;
-use Xliff\XliffConfigTemplateStruct;
+use Utils\Engines\MMT;
+use Utils\Langs\Languages;
+use Utils\Registry\AppConfig;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\MMTValidator;
 
 class CreateProjectController extends AbstractStatefulKleinController {
 
@@ -62,23 +64,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->featureSet->loadFromUserEmail( $this->user->email );
         $this->data = $this->validateTheRequest();
 
-        $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
-        $default_project_name = $arFiles[ 0 ];
-
-        if ( count( $arFiles ) > 1 ) {
-            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-        }
-
-        if ( empty( $this->data[ 'project_name' ] ) ) {
-            $this->data[ 'project_name' ] = $default_project_name;
-        }
-
         // SET SOURCE COOKIE
         CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->data[ 'source_lang' ],
                 [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => true,
                         'samesite' => 'None',
@@ -90,7 +81,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => true,
                         'samesite' => 'None',
@@ -99,8 +90,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-        $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
+        $uploadDir  = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
+        $filesFound = $this->getFilesList( $fs, $this->data[ 'file_names_list' ], $uploadDir );
 
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
@@ -115,7 +106,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
         $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ] ?? 1;
-        $projectStructure[ 'status' ]                                = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'status' ]                                = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'public_tm_penalty' ]                     = $this->data[ 'public_tm_penalty' ];
         $projectStructure[ 'pretranslate_100' ]                      = $this->data[ 'pretranslate_100' ];
         $projectStructure[ 'pretranslate_101' ]                      = $this->data[ 'pretranslate_101' ];
         $projectStructure[ 'dialect_strict' ]                        = $this->data[ 'dialect_strict' ];
@@ -123,7 +115,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'due_date' ]                              = $this->data[ 'due_date' ];
         $projectStructure[ 'target_language_mt_engine_association' ] = $this->data[ 'target_language_mt_engine_association' ];
         $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
+        $projectStructure[ 'HTTP_HOST' ]                             = AppConfig::$HTTPHOST;
         $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
@@ -136,9 +128,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
-        $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
-
-        if ( $engine instanceof Engines_MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
+        $engine = EnginesFactory::getInstance( $this->data[ 'mt_engine' ] );
+        if ( $engine instanceof MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
             $projectStructure[ 'mmt_glossaries' ] = $this->data[ 'mmt_glossaries' ];
         }
 
@@ -148,11 +139,11 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         // DeepL
-        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_formality' ] !== null ) {
+        if ( $engine instanceof DeepL and $this->data[ 'deepl_formality' ] !== null ) {
             $projectStructure[ 'deepl_formality' ] = $this->data[ 'deepl_formality' ];
         }
 
-        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
+        if ( $engine instanceof DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
             $projectStructure[ 'deepl_id_glossary' ] = $this->data[ 'deepl_id_glossary' ];
         }
 
@@ -174,9 +165,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
         }
 
-        //TODO enable from CONFIG
-        $projectStructure[ 'metadata' ] = $this->metadata;
-
+        $projectStructure[ 'metadata' ]     = $this->metadata;
         $projectStructure[ 'userIsLogged' ] = true;
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
@@ -193,7 +182,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectManager->sanitizeProjectStructure();
         $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
 
-        Queue::sendProject( $projectStructure );
+        ProjectQueue::sendProject( $projectStructure );
 
         $this->clearSessionFiles();
         $this->assignLastCreatedPid( $projectStructure[ 'id_project' ] );
@@ -209,19 +198,25 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @return array
+     * Validates and processes the incoming request parameters to build a structured data array.
+     *
+     * This method retrieves and sanitizes input parameters from the request object,
+     * ensuring data integrity and security. It organizes the extracted parameters
+     * into a comprehensive array of values required for further processing. It also performs
+     * additional transformations, such as decoding JSON, merging and filtering arrays, as well as
+     * applying default values where necessary.
+     *
+     * @return array An associative array containing sanitized and processed request data.
      * @throws Exception
      */
     private function validateTheRequest(): array {
         $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $project_name                  = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $job_subject                   = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $due_date                      = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
         $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
         $disable_tms_engine_flag       = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
-        $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $pretranslate_100              = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_101              = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_SANITIZE_NUMBER_INT );
         $tm_prioritization             = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
@@ -232,6 +227,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $deepl_formality               = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $project_completion            = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $get_public_matches            = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
+        $public_tm_penalty             = filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_SANITIZE_NUMBER_INT );
         $character_counter_count_tags  = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode        = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $dialect_strict                = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
@@ -243,51 +239,47 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $payable_rate_template_id      = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $mt_quality_value_in_editor    = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 85, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
         $payable_rate_template         = filter_var( $this->request->param( 'payable_rate_template' ), FILTER_SANITIZE_STRING );
+        $private_keys_list             = filter_var( $this->request->param( 'private_keys_list' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
 
+        $array_keys = json_decode( $private_keys_list, true );
+        $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
-        $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
-        $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
+        $arFiles = explode( '@@SEP@@', html_entity_decode( $file_name, ENT_QUOTES, 'UTF-8' ) );
 
-        // if a string is sent by the client, transform it into a valid array
-        if ( !empty( $private_tm_key ) ) {
-            $private_tm_key = [
-                    [
-                            'key'  => trim( $private_tm_key ),
-                            'name' => null,
-                            'r'    => true,
-                            'w'    => true
-                    ]
-            ];
-        } else {
-            $private_tm_key = [];
-        }
+        // Build project name from input or fallback:
+        // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
+        // - Accepts an array of ['name' => <filePath>] items.
+        $project_name = CatUtils::sanitizeOrFallbackProjectName( $this->request->param( 'project_name', '' ), array_map( fn( $v ): array => [ 'name' => $v ], $arFiles ) );
 
-        if ( $array_keys ) { // some keys are selected from the panel
+        if ( !empty( $array_keys ) ) {
 
             //remove duplicates
-            foreach ( $array_keys as $value ) {
-                if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
-                        && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
-                ) {
-                    //the same key was get from keyring, remove
-                    $private_tm_key = [];
-                }
-            }
+            $_array_unique = array_map( function ( $v ) {
+                return $v[ 'key' ];
+            }, $array_keys );
 
-            //merge the arrays
-            $private_keyList = array_merge( $private_tm_key, $array_keys );
-        } else {
-            $private_keyList = $private_tm_key;
+            $_array_unique = array_unique( $_array_unique );
+
+            $array_keys = array_values( array_intersect_key( $array_keys, $_array_unique ) );
+
         }
 
-        $postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
-        $mt_engine        = ( $mt_engine != null ? $mt_engine : 0 );
-        $private_tm_key   = $postPrivateTmKey;
-        $only_private     = ( !is_null( $get_public_matches ) && !$get_public_matches );
-        $due_date         = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
+        $private_tm_key = array_filter( $array_keys, [ "self", "sanitizeTmKeyArr" ] );
+        $mt_engine      = ( $mt_engine != null ? $mt_engine : 0 );
+        $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
+        $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
+        /**
+         * Represents a generic data variable that can hold a variety of information.
+         *
+         * This variable can be used to store different types of data, such as strings,
+         * integers, arrays, or objects, depending on the context where it is applied.
+         * Its value and type are dynamic and determined during runtime based on usage.
+         *
+         * @var mixed $data The data container allowing for versatile usage scenarios.
+         */
         $data = [
-                'file_name'                     => $file_name,
+                'file_names_list'               => $arFiles,
                 'project_name'                  => $project_name,
                 'source_lang'                   => $source_lang,
                 'target_lang'                   => $target_lang,
@@ -302,6 +294,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,
                 'get_public_matches'            => $get_public_matches,
+                'public_tm_penalty'             => $public_tm_penalty,
                 'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
                 'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
                 'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
@@ -313,7 +306,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
                 'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
                 'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'postPrivateTmKey'              => $postPrivateTmKey,
                 'mt_engine'                     => $mt_engine,
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
                 'private_tm_key'                => $private_tm_key,
@@ -325,7 +317,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->setMetadataFromPostInput( $data );
 
         if ( $disable_tms_engine_flag ) {
-            $data[ 'tms_engine' ] = 0; //remove default MyMemory
+            $data[ 'tms_engine' ] = 0; //remove default Match
         }
 
         if ( empty( $file_name ) ) {
@@ -344,6 +336,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             throw new InvalidArgumentException( "Invalid pretranslate_101 value", -6 );
         }
 
+        $data[ 'public_tm_penalty' ]                     = ( !empty( $public_tm_penalty ) ) ? $this->validatePublicTMPenalty( (int)$public_tm_penalty ) : null;
         $data[ 'source_lang' ]                           = $this->validateSourceLang( Languages::getInstance(), $data[ 'source_lang' ] );
         $data[ 'target_lang' ]                           = $this->validateTargetLangs( Languages::getInstance(), $data[ 'target_lang' ] );
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
@@ -358,6 +351,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'target_language_mt_engine_association' ] = $this->generateTargetEngineAssociation( $data[ 'target_lang' ], $data[ 'mt_engine' ] );
         $data[ 'team' ]                                  = $this->setTeam( $id_team );
 
+        $this->setMetadataFromPostInput( $data );
+
         return $data;
     }
 
@@ -367,9 +362,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @return array
      */
     private static function sanitizeTmKeyArr( $elem ): array {
-        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
     }
@@ -383,7 +378,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function setMetadataFromPostInput( array $data = [] ) {
         // new raw counter model
-        $options = [ Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW ];
+        $options = [ MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW ];
 
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
@@ -394,11 +389,24 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         if ( isset( $data[ 'mt_quality_value_in_editor' ] ) ) {
-            $options[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $data[ 'mt_quality_value_in_editor' ];
+            $options[ MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $data[ 'mt_quality_value_in_editor' ];
         }
 
         $this->metadata = $options;
 
+    }
+
+    /**
+     * @param int|null $public_tm_penalty
+     *
+     * @return int|null
+     */
+    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ): ?int {
+        if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
+            throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
+        }
+
+        return $public_tm_penalty;
     }
 
     /**
@@ -444,7 +452,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
-     * Check if MT engine (except MyMemory) belongs to user
+     * Check if MT engine (except Match) belongs to user
      *
      * @param int $mt_engine
      *
@@ -453,7 +461,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateUserMTEngine( int $mt_engine ): int {
         if ( $mt_engine > 1 ) {
             try {
-                EngineValidator::engineBelongsToUser( $mt_engine, $this->user->uid );
+                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage(), -2 );
             }
@@ -473,7 +481,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
         if ( !empty( $mmt_glossaries ) ) {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
-                MMTValidator::validateGlossary( $mmtGlossaries );
+
+                ( new MMTValidator )->validate(
+                        ValidatorObject::fromArray( [
+                                'glossaryString' => $mmtGlossaries,
+                        ] )
+                );
 
                 return $mmtGlossaries;
 
@@ -527,7 +540,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             ];
             $json  = json_encode( $json );
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
@@ -570,7 +583,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( !empty( $payable_rate_template ) ) {
             $json   = html_entity_decode( $payable_rate_template );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
@@ -637,7 +650,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             $json   = html_entity_decode( $filters_extraction_parameters );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
@@ -661,7 +674,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
             $json   = html_entity_decode( $xliff_parameters );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
@@ -699,7 +712,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( $project_completion ) {
             $feature                                   = new BasicFeatureStruct();
-            $feature->feature_code                     = 'project_completion';
+            $feature->feature_code                     = ProjectCompletion::FEATURE_CODE;
             $projectFeatures[ $feature->feature_code ] = $feature;
         }
 

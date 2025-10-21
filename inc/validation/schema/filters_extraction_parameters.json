@@ -2,13 +2,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "id": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "nullable": true
-    },
     "uid": {
       "type": [
         "integer",
@@ -18,34 +11,6 @@
     },
     "name": {
       "type": "string"
-    },
-    "created_at": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true
-    },
-    "modified_at": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true
-    },
-    "isSelected": {
-      "type": [
-        "boolean",
-        "null"
-      ],
-      "nullable": true
-    },
-    "isTemporary": {
-      "type": [
-        "boolean",
-        "null"
-      ],
-      "nullable": true
     },
     "json": {
       "type": "object",
@@ -142,6 +107,28 @@
           "nullable": true
         },
         "do_not_translate_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "inner_content_type": {
+          "type": ["null", "string"],
+          "enum": [
+            null,
+            "text/html",
+            "text/xml",
+            "application/xml",
+            "text/csv",
+            "application/json",
+            "text/markdown",
+            "text/x-markdown"
+          ],
+          "nullable": true
+        },
+        "context_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "character_limit": {
           "type": "array",
           "nullable": true
         }

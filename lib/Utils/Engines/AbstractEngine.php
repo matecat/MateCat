@@ -1,5 +1,24 @@
 <?php
 
+namespace Utils\Engines;
+
+use CURLFile;
+use DomainException;
+use Exception;
+use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\GoogleTranslateStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MTResponse;
+use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
+use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -7,17 +26,20 @@
  * Time: 11.59
  *
  */
-abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
+abstract class AbstractEngine implements EngineInterface {
 
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
-    protected EnginesModel_EngineStruct $engineRecord;
+    protected EngineStruct $engineRecord;
 
     protected string $className;
     protected array  $_config = [];
-    protected        $result  = []; // this cannot be forced to be an array, engines may use different types
-    protected array  $error   = [];
+    /**
+     * @var mixed
+     */
+    protected       $result = []; // this cannot be forced to be an array, engines may use different types
+    protected array $error  = [];
 
     protected array $curl_additional_params = [];
 
@@ -39,6 +61,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     protected ?int        $mt_penalty = null;
 
     const GET_REQUEST_TIMEOUT = 10;
+    protected MatecatLogger $logger;
 
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
@@ -47,13 +70,19 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         $this->curl_additional_params = [
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         ];
 
         $this->featureSet = new FeatureSet();
+        /**
+         * Set the initial value to a specific log file, if not already initialized by the Executor.
+         * This is useful when engines are used outside the TaskRunner context
+         * @see \Utils\TaskRunner\Executor::__construct()
+         */
+        $this->logger = LoggerFactory::getLogger( 'engines' );
     }
 
     /**
@@ -61,7 +90,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return $this
      */
-    public function setMTPenalty( ?int $mt_penalty = null ): Engines_AbstractEngine {
+    public function setMTPenalty( ?int $mt_penalty = null ): AbstractEngine {
         $this->mt_penalty = $mt_penalty;
 
         return $this;
@@ -78,7 +107,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return $this
      */
-    public function setAnalysis( ?bool $bool = true ): Engines_AbstractEngine {
+    public function setAnalysis( ?bool $bool = true ): AbstractEngine {
         $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
 
         return $this;
@@ -89,7 +118,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return $this
      */
-    public function setSkipAnalysis( ?bool $bool = true ): Engines_AbstractEngine {
+    public function setSkipAnalysis( ?bool $bool = true ): AbstractEngine {
         $this->_skipAnalysis = $bool;
 
         return $this;
@@ -109,9 +138,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public function getEngineRecord(): EnginesModel_EngineStruct {
+    public function getEngineRecord(): EngineStruct {
         return $this->engineRecord;
     }
 
@@ -148,6 +177,13 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         }
     }
 
+    /**
+     * @param mixed $rawValue
+     * @param array $parameters
+     * @param       $function
+     *
+     * @return mixed
+     */
     abstract protected function _decode( $rawValue, array $parameters = [], $function = null );
 
     /**
@@ -177,14 +213,14 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         if ( $mh->hasError( $resourceHash ) ) {
             $curl_error       = $mh->getError( $resourceHash );
             $responseRawValue = $mh->getSingleContent( $resourceHash );
-            $rawValue         = [
+            $rawValue         = json_encode( [
                     'error'          => [
-                            'code'     => -$curl_error[ 'errno' ],
+                            'code'     => -(int)$curl_error[ 'errno' ],
                             'message'  => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error[ 'http_code' ] . ")",
                             'response' => $responseRawValue // Some useful info might still be contained in the response body
                     ],
-                    'responseStatus' => $curl_error[ 'http_code' ]
-            ]; //return a negative number
+                    'responseStatus' => (int)$curl_error[ 'http_code' ]
+            ] ); //return a negative number
         } else {
             $rawValue = $mh->getSingleContent( $resourceHash );
         }
@@ -193,12 +229,12 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
         if ( $this->logging ) {
             $log = $mh->getSingleLog( $resourceHash );
-            if ( $this->content_type == 'json' ) {
+            if ( $this->content_type == 'json' && !$mh->hasError( $resourceHash ) ) {
                 $log[ 'response' ] = json_decode( $rawValue, true );
             } else {
                 $log[ 'response' ] = $rawValue;
             }
-            Log::doJsonLog( $log );
+            $this->logger->debug( $log );
         }
 
         return $rawValue;
@@ -317,52 +353,48 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @param $file
      *
-     * @return CURLFile|string
+     * @return CURLFile
      */
-    protected function getCurlFile( $file ) {
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 and class_exists( '\\CURLFile' ) ) {
-            return new CURLFile( realpath( $file ) );
-        }
-
-        return "@" . realpath( $file );
+    protected function getCurlFile( $file ): CURLFile {
+        return new CURLFile( realpath( $file ) );
     }
 
     /**
-     * @param $_config
+     * @param array $_config
      *
-     * @return array|Engines_Results_AbstractResponse
+     * @return array|TMSAbstractResponse
      * @throws Exception
      */
-    protected function GoogleTranslateFallback( $_config ) {
+    protected function GoogleTranslateFallback( array $_config ) {
 
         /**
          * Create a record of type GoogleTranslate
          */
-        $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
+        $newEngineStruct = GoogleTranslateStruct::getStruct();
 
         $newEngineStruct->name                                = "Generic";
         $newEngineStruct->uid                                 = 0;
-        $newEngineStruct->type                                = Constants_Engines::MT;
+        $newEngineStruct->type                                = EngineConstants::MT;
         $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
         $newEngineStruct->others                              = [];
 
-        $gtEngine = Engine::createTempInstance( $newEngineStruct );
+        $gtEngine = EnginesFactory::createTempInstance( $newEngineStruct );
 
         /**
-         * @var $gtEngine Engines_GoogleTranslate
+         * @var $gtEngine GoogleTranslate
          */
         return $gtEngine->get( $_config );
 
     }
 
     /**
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user
      *
      * @return void
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
     }
 
@@ -377,12 +409,12 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     * @param MemoryKeyStruct $memoryKey The memory key structure to be checked.
      *
      * @return ?array Returns the memory, otherwise null.
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
         return null;
     }
 
@@ -400,11 +432,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      * Determines if the provided memory belongs to the caller.
      *
      *
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey *
+     * @param MemoryKeyStruct $memoryKey *
      *
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
         return null;
     }
 
@@ -423,15 +455,15 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
      * @param string $raw_segment
-     * @param        $decoded
+     * @param array  $decoded
      * @param int    $layerNum
      *
      * @return array
      * @throws Exception
      */
-    protected function _composeMTResponseAsMatch( string $raw_segment, $decoded, int $layerNum = 1 ): array {
+    protected function _composeMTResponseAsMatch( string $raw_segment, array $decoded, int $layerNum = 1 ): array {
 
-        $mt_result = new Engines_Results_MT( $decoded );
+        $mt_result = new MTResponse( $decoded );
 
         if ( $mt_result->error->code < 0 ) {
             $mt_result            = $mt_result->get_as_array();
@@ -440,7 +472,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
             return $mt_result;
         }
 
-        $mt_match_res = new Engines_Results_MyMemory_Matches( [
+        $mt_match_res = new Matches( [
                 'raw_segment'     => $raw_segment,
                 'raw_translation' => $mt_result->translatedText,
                 'match'           => $this->getStandardMtPenaltyString(),

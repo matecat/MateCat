@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class NewFiltersCommunication extends AbstractMatecatMigration {
     public $sql_up = <<<EOF
 DROP TABLE IF EXISTS `converters`;

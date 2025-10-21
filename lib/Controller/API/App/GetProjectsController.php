@@ -1,20 +1,20 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Constants_JobStatus;
-use Constants_Teams;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
-use ManageUtils;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ManageModel;
+use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
+use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Teams\MembershipDao;
-use Teams\MembershipStruct;
-use Teams\TeamStruct;
-use Users_UserStruct;
+use Utils\Constants\JobStatus;
+use Utils\Constants\Teams;
 
 class GetProjectsController extends KleinController {
 
@@ -24,6 +24,7 @@ class GetProjectsController extends KleinController {
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function fetch(): void {
 
@@ -46,14 +47,14 @@ class GetProjectsController extends KleinController {
 
         $team = $this->filterTeam( $id_team );
 
-        if ( $team->type == Constants_Teams::PERSONAL ) {
+        if ( $team->type == Teams::PERSONAL ) {
             $assignee = $this->user;
             $team     = null;
         } else {
             $assignee = $this->filterAssignee( $team, $id_assignee );
         }
 
-        $projects = ManageUtils::getProjects(
+        $projects = ManageModel::getProjects(
                 $this->user,
                 $start,
                 $step,
@@ -68,8 +69,7 @@ class GetProjectsController extends KleinController {
                 $no_assignee
         );
 
-        $projnum = ManageUtils::getProjectsNumber(
-                $this->user,
+        $projnum = ManageModel::getProjectsNumber(
                 $search_in_pname,
                 $source,
                 $target,
@@ -106,9 +106,9 @@ class GetProjectsController extends KleinController {
         $id_assignee     = filter_var( $this->request->param( 'id_assignee' ), FILTER_SANITIZE_NUMBER_INT );
         $no_assignee     = filter_var( $this->request->param( 'no_assignee' ), FILTER_VALIDATE_BOOLEAN );
 
-        $search_status = ( !empty( $status ) and Constants_JobStatus::isAllowedStatus( $status ) ) ? $status : Constants_JobStatus::STATUS_ACTIVE;
+        $search_status = ( !empty( $status ) and JobStatus::isAllowedStatus( $status ) ) ? $status : JobStatus::STATUS_ACTIVE;
         $page          = ( !empty( $page ) ) ? (int)$page : 1;
-        $step          = ( !empty( $step ) ) ? (int)$step : 10;
+        $step          = ( !empty( $step ) ) ? ( (int)$step <= 20 ? (int)$step : 10 ) : 10;
         $start         = ( $page - 1 ) * $step;
 
         if ( empty( $id_team ) ) {
@@ -136,10 +136,10 @@ class GetProjectsController extends KleinController {
      * @param TeamStruct $team
      * @param            $id_assignee
      *
-     * @return Users_UserStruct|null
+     * @return \Model\Users\UserStruct|null
      * @throws Exception
      */
-    private function filterAssignee( TeamStruct $team, $id_assignee ): ?Users_UserStruct {
+    private function filterAssignee( TeamStruct $team, $id_assignee ): ?UserStruct {
         if ( is_null( $id_assignee ) ) {
             return null;
         }

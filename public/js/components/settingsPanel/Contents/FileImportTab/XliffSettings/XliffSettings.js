@@ -106,8 +106,6 @@ export const XliffSettings = () => {
 
     if (!config.is_cattool) {
       getXliffSettingsTemplates().then((templates) => {
-        // sort by name
-        templates.items.sort((a, b) => (a.name > b.name ? 1 : -1))
         const items = [defaultXliffSettings, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =
@@ -136,10 +134,10 @@ export const XliffSettings = () => {
 
       return prevState.map((template) => ({
         ...template,
-        isSelected: template.id === selectedTemplateId,
+        isSelected: template.id === selectedTemplateId && !template.isTemporary,
       }))
     })
-  }, [currentProjectTemplateXliffId, setTemplates])
+  }, [currentProjectTemplate?.id, currentProjectTemplateXliffId, setTemplates])
 
   // Modify current project template xliff settings template id when template id change
   useEffect(() => {

@@ -1,34 +1,38 @@
 <?php
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
-use FeatureSet;
-use Jobs_JobStruct;
-use LQA\EntryStruct;
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\IDaoStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\LQA\EntryStruct;
 
 class SegmentVersion {
 
-    private $featureSet;
-    private $data;
-    private $with_issues;
+    private ?FeatureSet $featureSet;
+    /**
+     * @var IDaoStruct[]
+     */
+    private array $data;
+    private ?bool $with_issues;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private $chunk;
+    private JobStruct $chunk;
 
     /**
-     * SegmentVersion constructor.
+     * SegmentVersionController constructor.
      *
-     * @param Jobs_JobStruct $chunk
-     * @param                    $data
-     * @param bool               $with_issues
-     * @param FeatureSet|null    $featureSet
+     * @param JobStruct       $chunk
+     * @param IDaoStruct[]    $data
+     * @param bool            $with_issues
+     * @param FeatureSet|null $featureSet
      *
-     * @throws \Exception
      */
-    public function __construct( Jobs_JobStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
+    public function __construct( JobStruct $chunk, array $data, ?bool $with_issues = false, ?FeatureSet $featureSet = null ) {
         $this->data        = $data;
         $this->with_issues = $with_issues;
         $this->chunk       = $chunk;
@@ -43,10 +47,9 @@ class SegmentVersion {
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function render() {
-        $version = null;
+    public function render(): array {
 
         if ( $this->with_issues ) {
             return $this->renderItemsWithIssues();
@@ -55,10 +58,12 @@ class SegmentVersion {
         return $this->renderItemsNormal();
     }
 
-    protected function renderItemsWithIssues() {
-        $out            = [];
-        $issuesSubset   = [];
-        $commentsSubset = [];
+    /**
+     * @throws Exception
+     */
+    protected function renderItemsWithIssues(): array {
+        $out          = [];
+        $issuesSubset = [];
 
         $versionId = null;
         $version   = null;
@@ -105,7 +110,6 @@ class SegmentVersion {
                         'comment'             => $record->qa_comment,
                         'create_date'         => $record->qa_create_date,
                         'target_text'         => $record->qa_target_text,
-                        'rebutted_at'         => $record->qa_rebutted_at,
                         'source_page'         => $record->qa_source_page
                 ] ) )->setDiff( $version[ 'diff' ] );
             }
@@ -126,9 +130,9 @@ class SegmentVersion {
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function renderItemsNormal() {
+    protected function renderItemsNormal(): array {
         $out = [];
         foreach ( $this->data as $record ) {
             $out[] = $this->renderItem( $record );
@@ -141,18 +145,21 @@ class SegmentVersion {
      * @param $version
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function renderItem( $version ) {
+    public function renderItem( $version ): array {
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target );
+
+        $translation = ( !empty( $version->translation ) ) ? $Filter->fromLayer0ToLayer2( $version->translation ) : null;
 
         return [
                 'id'              => (int)$version->id,
                 'id_segment'      => (int)$version->id_segment,
                 'id_job'          => (int)$version->id_job,
-                'translation'     => $Filter->fromLayer0ToLayer2( $version->translation ),
+                'translation'     => $translation,
                 'version_number'  => (int)$version->version_number,
                 'propagated_from' => (int)$version->propagated_from,
                 'created_at'      => $version->creation_date,

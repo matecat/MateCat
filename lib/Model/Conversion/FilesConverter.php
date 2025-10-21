@@ -1,18 +1,18 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Constants;
-use Constants\ConversionHandlerStatus;
 use DomainException;
 use Exception;
-use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use Filters\FiltersConfigTemplateStruct;
 use InvalidArgumentException;
-use Langs\Languages;
+use Model\FeaturesBase\FeatureSet;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\Filters\FiltersConfigTemplateStruct;
 use RuntimeException;
-use Utils;
+use Utils\Constants\Constants;
+use Utils\Constants\ConversionHandlerStatus;
+use Utils\Langs\Languages;
+use Utils\Tools\Utils;
 
 class FilesConverter {
     private string  $source_lang;
@@ -38,7 +38,15 @@ class FilesConverter {
      */
     private FeatureSet $featureSet;
 
+    /**
+     * @var FiltersConfigTemplateStruct|null
+     */
     private ?FiltersConfigTemplateStruct $filters_extraction_parameters;
+
+    /**
+     * @var bool|null
+     */
+    private ?bool $legacy_icu;
 
     /**
      * FilesConverter constructor.
@@ -52,6 +60,7 @@ class FilesConverter {
      * @param string|null                      $segmentation_rule
      * @param FeatureSet                       $featureSet
      * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
+     * @param bool|null                        $legacy_icu
      */
     public function __construct(
             array                        $files,
@@ -62,7 +71,8 @@ class FilesConverter {
             string                       $uploadTokenValue,
             ?string                      $segmentation_rule,
             FeatureSet                   $featureSet,
-            ?FiltersConfigTemplateStruct $filters_extraction_parameters = null
+            ?FiltersConfigTemplateStruct $filters_extraction_parameters = null,
+            ?bool                        $legacy_icu = false
     ) {
         $this->lang_handler = Languages::getInstance();
         $this->files        = $files;
@@ -74,6 +84,7 @@ class FilesConverter {
         $this->segmentation_rule             = $segmentation_rule;
         $this->featureSet                    = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
+        $this->legacy_icu                    = $legacy_icu;
         $this->resultStack                   = new ConvertedFileList();
     }
 
@@ -160,6 +171,12 @@ class FilesConverter {
         return $this->resultStack;
     }
 
+    /**
+     * @param string $fileName
+     *
+     * @return ConversionHandler
+     * @throws Exception
+     */
     private function getConversionHandlerInstance( string $fileName ): ConversionHandler {
         $conversionHandler = new ConversionHandler();
         $conversionHandler->setFileName( $fileName );
@@ -171,6 +188,7 @@ class FilesConverter {
         $conversionHandler->setErrDir( $this->errDir );
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
+        $conversionHandler->setFiltersLegacyIcu( $this->legacy_icu );
 
         return $conversionHandler;
     }

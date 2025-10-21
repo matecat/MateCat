@@ -158,11 +158,9 @@ class Editarea extends React.Component {
         'x',
       ])
     } else {
-      const cleanTagsTranslation =
-        DraftMatecatUtils.decodePlaceholdersToPlainText(
-          DraftMatecatUtils.removeTagsFromText(translation),
-        )
-      return cleanTagsTranslation
+      return DraftMatecatUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.removeTagsFromText(translation),
+      )
     }
   }
 
@@ -204,6 +202,7 @@ class Editarea extends React.Component {
     let {tagRange} = this.state
     let {searchParams, occurrencesInSearch, currentInSearchIndex} =
       this.props.segment
+    console.log('occurrencesInSearch', occurrencesInSearch)
     const textToSearch = searchParams.target ? searchParams.target : ''
     const newDecorator = DraftMatecatUtils.activateSearch(
       textToSearch,
@@ -367,7 +366,7 @@ class Editarea extends React.Component {
         ),
       )
       // console.log('updatingTranslationInStore');
-      UI.registerQACheck()
+      SegmentActions.startSegmentQACheck()
     } else {
       this.props.updateCounter(0)
     }
@@ -943,6 +942,7 @@ class Editarea extends React.Component {
           : this.state.editorState,
         direction,
         isShiftPressed: true,
+        isBackspacePressed: e.key === 'Backspace',
       })
 
       if (updatedStateNearEntity) {
@@ -1157,9 +1157,15 @@ class Editarea extends React.Component {
       isCaretInsideEntity() ||
       this.compositionEventChecks.current?.startIsInsideEntity
     ) {
+      const updatedStateNearEntity = checkCaretIsNearEntity({
+        editorState,
+      })
+
       this.setState(
         () => ({
-          editorState: prevEditorState,
+          editorState: updatedStateNearEntity
+            ? updatedStateNearEntity
+            : prevEditorState,
         }),
         () => {
           this.onCompositionStopDebounced()

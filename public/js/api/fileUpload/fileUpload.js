@@ -26,7 +26,7 @@ export const fileUpload = (file, onProgress, onSuccess, onError) => {
   }
 
   xhr.onerror = () => {
-    onError('Errore di connessione')
+    onError('Connection error')
   }
 
   xhr.open('POST', '/fileupload/', true)

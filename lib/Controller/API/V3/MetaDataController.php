@@ -1,17 +1,25 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use API\Commons\Exceptions\NotFoundException;
-use API\V2\BaseChunkController;
-use Files\MetadataDao as FileMetadataDao;
-use Jobs\MetadataDao;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Model\Files\MetadataDao as FileMetadataDao;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
+use Model\Projects\ProjectStruct;
+use ReflectionException;
 use stdClass;
+use Utils\Tools\Utils;
 
-class MetaDataController extends BaseChunkController {
+class MetaDataController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function index() {
 
         // params
@@ -37,46 +45,48 @@ class MetaDataController extends BaseChunkController {
     }
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return stdClass
      */
-    private function getProjectInfo( Projects_ProjectStruct $project ) {
+    private function getProjectInfo( ProjectStruct $project ): stdClass {
 
         $metadata = new stdClass();
 
         foreach ( $project->getMetadata() as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = is_numeric($metadatum->getValue()) ? (int)$metadatum->getValue() : $metadatum->getValue();
+            $metadata->$key = Utils::formatStringValue( $metadatum->value );
         }
 
         return $metadata;
     }
 
     /**
-     * @param Jobs_JobStruct $job
+     * @param \Model\Jobs\JobStruct $job
      *
      * @return stdClass
+     * @throws ReflectionException
      */
-    private function getJobMetaData( Jobs_JobStruct $job ): object {
+    private function getJobMetaData( JobStruct $job ): object {
 
         $metadata       = new stdClass();
         $jobMetaDataDao = new MetadataDao();
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = is_numeric($metadatum->value) ? (int)$metadatum->value : $metadatum->value;
+            $metadata->$key = Utils::formatStringValue( $metadatum->value );
         }
 
         return $metadata;
     }
 
     /**
-     * @param Jobs_JobStruct $job
+     * @param \Model\Jobs\JobStruct $job
+     *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    private function getJobFilesMetaData( Jobs_JobStruct $job ) {
+    private function getJobFilesMetaData( JobStruct $job ): array {
 
         $metadata         = [];
         $filesMetaDataDao = new FileMetadataDao();
@@ -85,7 +95,7 @@ class MetaDataController extends BaseChunkController {
             $metadatum = new stdClass();
             foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id, 60 * 5 ) as $meta ) {
                 $key             = $meta->key;
-                $metadatum->$key = is_numeric($meta->value) ? (int)$meta->value : $meta->value;
+                $metadatum->$key = Utils::formatStringValue( $meta->value );
             }
 
             $metadataObject           = new stdClass();

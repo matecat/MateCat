@@ -1,35 +1,35 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
-use Contribution\ContributionRequestStruct;
-use Contribution\Request;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FeatureSet;
-use Files\FilesPartsDao;
-use INIT;
 use InvalidArgumentException;
-use Jobs\MetadataDao;
 use Matecat\SubFiltering\MateCatFilter;
-use Projects_MetadataDao;
+use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
+use Model\Files\FilesPartsDao;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentOriginalDataDao;
+use Model\Users\UserDao;
 use ReflectionException;
-use Segments_SegmentDao;
-use Segments_SegmentOriginalDataDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_Filter;
-use Users_UserDao;
+use Utils\Contribution\Get;
+use Utils\Contribution\GetContributionRequest;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class GetContributionController extends KleinController {
 
-    protected int    $id_job;
-    protected string $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -44,27 +44,28 @@ class GetContributionController extends KleinController {
 
         $request = $this->validateTheRequest();
 
-        $id_client           = $request[ 'id_client' ];
-        $id_job              = (int)$request[ 'id_job' ];
-        $id_segment          = $request[ 'id_segment' ];
-        $num_results         = $request[ 'num_results' ];
-        $password            = $request[ 'password' ];
-        $received_password   = $request[ 'received_password' ];
-        $concordance_search  = $request[ 'concordance_search' ];
-        $switch_languages    = $request[ 'switch_languages' ];
-        $cross_language      = $request[ 'cross_language' ];
+        $id_client          = $request[ 'id_client' ];
+        $id_job             = (int)$request[ 'id_job' ];
+        $id_segment         = $request[ 'id_segment' ];
+        $num_results        = $request[ 'num_results' ];
+        $password           = $request[ 'password' ];
+        $received_password  = $request[ 'received_password' ];
+        $concordance_search = $request[ 'concordance_search' ];
+        $switch_languages   = $request[ 'switch_languages' ];
+        $cross_language     = $request[ 'cross_language' ];
 
         if ( empty( $num_results ) ) {
-            $num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
+            $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
 
-        $jobStruct  = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
-        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
+        $jobStruct  = ChunkDao::getByIdAndPassword( $id_job, $password );
+        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
 
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $contributionRequest = new GetContributionRequest();
+        $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
 
@@ -76,22 +77,20 @@ class GetContributionController extends KleinController {
             return $Filter->fromLayer2ToLayer1( $context );
         }, $request[ 'context_list_after' ] );
 
-        $contributionRequest = new ContributionRequestStruct();
-
         if ( !$concordance_search ) {
 
             $this->rewriteContributionContexts( $request, $Filter );
 
             $contributionRequest->mt_evaluation =
-                    (bool)$projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION ) ??
+                    (bool)$projectStruct->getMetadataValue( ProjectsMetadataDao::MT_EVALUATION ) ??
                     //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                    (bool)( new MetadataDao() )->get( $id_job, $received_password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
+                    (bool)( new MetadataDao() )->get( $id_job, $received_password, ProjectsMetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                     false;
 
         }
 
         $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
-        $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
+        $owner = ( new UserDao() )->getProjectOwner( $id_job );
 
         $contributionRequest->id_file    = $file->id_file ?? null;
         $contributionRequest->id_job     = $id_job;
@@ -115,19 +114,24 @@ class GetContributionController extends KleinController {
         $contributionRequest->fromTarget                 = $switch_languages;
         $contributionRequest->resultNum                  = $num_results;
         $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
-        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
-        $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
-        $contributionRequest->mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS );
+        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
+        $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $contributionRequest->mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
 
         if ( $this->isRevision() ) {
-            $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            $contributionRequest->userRole = Filter::ROLE_REVISOR;
         } else {
-            $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $contributionRequest->userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $jobsMetadataDao = new MetadataDao();
-        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
-        $mt_evaluation   = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
+        $jobsMetadataDao   = new MetadataDao();
+        $dialect_strict    = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
+        $mt_evaluation     = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
+        $public_tm_penalty = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'public_tm_penalty', 10 * 60 );
+
+        if ( $public_tm_penalty !== null ) {
+            $contributionRequest->public_tm_penalty = (int)$public_tm_penalty->value;
+        }
 
         if ( $dialect_strict !== null ) {
             $contributionRequest->dialect_strict = $dialect_strict->value == 1;
@@ -147,23 +151,7 @@ class GetContributionController extends KleinController {
             $contributionRequest->resultNum = 10;
         }
 
-        // penalty_key
-        $penalty_key = [];
-        $tmKeys      = json_decode( $jobStruct->tm_keys, true );
-
-        foreach ( $tmKeys as $tmKey ) {
-            if ( isset( $tmKey[ 'penalty' ] ) and is_numeric( $tmKey[ 'penalty' ] ) ) {
-                $penalty_key[] = $tmKey[ 'penalty' ];
-            } else {
-                $penalty_key[] = 0;
-            }
-        }
-
-        if ( !empty( $penalty_key ) ) {
-            $contributionRequest->penalty_key = $penalty_key;
-        }
-
-        Request::contribution( $contributionRequest );
+        Get::contribution( $contributionRequest );
 
         $this->response->json( [
                 'errors' => [],
@@ -180,7 +168,6 @@ class GetContributionController extends KleinController {
                                 'userRole'          => $contributionRequest->userRole,
                                 'tm_prioritization' => $contributionRequest->tm_prioritization,
                                 'mt_evaluation'     => $contributionRequest->mt_evaluation,
-                                'penalty_key'       => $contributionRequest->penalty_key,
                                 'crossLangTargets'  => $contributionRequest->crossLangTargets,
                                 'fromTarget'        => $contributionRequest->fromTarget,
                                 'dialect_strict'    => $contributionRequest->dialect_strict,
@@ -218,13 +205,14 @@ class GetContributionController extends KleinController {
         if ( !$concordance_search ) {
             //execute these lines only in segment contribution search,
             //in case of user concordance search skip these lines
-            //because segment can be optional
+            //because the segment can be optional
             if ( empty( $id_segment ) ) {
                 throw new InvalidArgumentException( "missing id_segment", -1 );
             }
         }
 
-        if ( empty( $text ) ) {
+        // Allowing "0" as text
+        if ( empty( $text ) and $text != "0" ) {
             throw new InvalidArgumentException( "missing text", -2 );
         }
 
@@ -240,8 +228,8 @@ class GetContributionController extends KleinController {
             throw new InvalidArgumentException( "missing id_client", -5 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_client'           => $id_client,
@@ -267,17 +255,19 @@ class GetContributionController extends KleinController {
      * @param array         $request
      * @param MateCatFilter $Filter
      *
-     * @throws NotFoundException
      * @throws AuthenticationError
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws \Model\Exceptions\ValidationError
+     * @throws Exception
      */
     private function rewriteContributionContexts( array &$request, MateCatFilter $Filter ): void {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         //Get contexts
-        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
+        $segmentsList = ( new SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
                 [
                         'id_before'  => $request[ 'id_before' ],
                         'id_segment' => $request[ 'id_segment' ],

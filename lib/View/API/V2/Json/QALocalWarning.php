@@ -7,16 +7,19 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use LQA\QA;
+use ArrayObject;
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Segments\SegmentOriginalDataDao;
+use Utils\LQA\QA;
 
 class QALocalWarning extends QAWarning {
 
-    protected $QA;
-    protected $id_segment;
+    protected QA  $QA;
+    protected int $id_segment;
 
     /**
      * QALocalWarning constructor.
@@ -24,38 +27,33 @@ class QALocalWarning extends QAWarning {
      * @param QA  $QA
      * @param int $idSegment
      */
-    public function __construct( QA $QA, $idSegment ) {
+    public function __construct( QA $QA, int $idSegment ) {
         $this->QA         = $QA;
         $this->id_segment = $idSegment;
     }
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function render() {
+    public function render(): array {
 
         $out[ 'details' ] = null;
         $out[ 'total' ]   = 0;
 
         $this->structure = [
                 'ERROR'   => [
-                        'Categories' => new \ArrayObject()
+                        'Categories' => new ArrayObject()
                 ],
                 'WARNING' => [
-                        'Categories' => new \ArrayObject()
+                        'Categories' => new ArrayObject()
                 ],
                 'INFO'    => [
-                        'Categories' => new \ArrayObject()
+                        'Categories' => new ArrayObject()
                 ]
         ];
 
         $exceptionList = $this->QA->getExceptionList();
-
-        $issues_detail[ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
-        $issues_detail[ QA::WARNING ] = $exceptionList[ QA::WARNING ];
-        $issues_detail[ QA::INFO ]    = $exceptionList[ QA::INFO ];
-
 
         if ( $this->QA->thereAreNotices() ) {
 
@@ -78,7 +76,9 @@ class QALocalWarning extends QAWarning {
             }
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
-            $Filter           = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Segments_SegmentOriginalDataDao::getSegmentDataRefMap
+            
+            /** * @var MateCatFilter $Filter */
+            $Filter           = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), SegmentOriginalDataDao::getSegmentDataRefMap
             ( $this->id_segment ) );
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {

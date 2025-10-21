@@ -37,7 +37,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
           </a>
         )}
         {row.engine_type === 'Lara' && (
-          <a href="https://lara.translated.com/about-lara " target="_blank">
+          <a href="https://guides.matecat.com/lara" target="_blank">
             <InfoIcon />
           </a>
         )}

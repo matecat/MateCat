@@ -89,9 +89,9 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
   const cleanProjectTemplateAfterDelete = (id) => {
     if (
       id !==
-      projectTemplates.find(({isSelected}) => isSelected)[
-        propConnectProjectTemplate
-      ]
+      projectTemplates.find(
+        ({isSelected, isTemporary}) => isSelected && !isTemporary,
+      )[propConnectProjectTemplate]
     )
       return
 

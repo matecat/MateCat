@@ -81,15 +81,22 @@ export const TMCreateResourceRow = ({row}) => {
 
   const onSubmit = (e) => {
     e.preventDefault()
-    const isValid = validateForm()
-    if (!isValid) {
+    const formValidation = validateForm()
+    if (!formValidation || typeof formValidation === 'object') {
+      const message =
+        typeof formValidation === 'object'
+          ? formValidation
+          : {
+              title: 'Error adding resource',
+              type: 'error',
+              text:
+                !name || name.trim() === ''
+                  ? 'Resource name cannot be empty. Please provide a valid name.'
+                  : 'Invalid key',
+            }
+
       CatToolActions.addNotification({
-        title: 'Error adding resource',
-        type: 'error',
-        text:
-          !name || name.trim() === ''
-            ? 'Resource name cannot be empty. Please provide a valid name.'
-            : 'Invalid key',
+        ...message,
         position: 'br',
         allowHtml: true,
         timer: 5000,
@@ -111,6 +118,16 @@ export const TMCreateResourceRow = ({row}) => {
 
     if (row.id === SPECIAL_ROWS_ID.addSharedResource) {
       if (!checkSharedKey()) return false
+    }
+
+    const isAlreadyUsed = tmKeys.some((tm) => tm.name === name)
+
+    if (isAlreadyUsed) {
+      return {
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+      }
     }
 
     return true

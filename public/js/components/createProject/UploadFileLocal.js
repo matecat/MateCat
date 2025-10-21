@@ -58,10 +58,23 @@ function UploadFileLocal() {
     currentProjectTemplate?.filters_template_id
 
   const currentFiltersExtractionParameters = useMemo(() => {
-    const unsavedTemplate = fileImportFiltersParamsTemplates.templates.find(
-      (template) =>
-        template.id === extractionParameterTemplateId && template.isTemporary,
-    )
+    const unsavedTemplate = fileImportFiltersParamsTemplates.templates
+      .filter(
+        (template) =>
+          template.id === extractionParameterTemplateId && template.isTemporary,
+      )
+      .map(
+        ({
+          /* eslint-disable */
+          isSelected,
+          isTemporary,
+          id,
+          created_at,
+          modified_at,
+          /* eslint-enable */
+          ...result
+        }) => result,
+      )[0]
 
     return unsavedTemplate
   }, [
@@ -105,7 +118,7 @@ function UploadFileLocal() {
   }, [files])
 
   const handleFiles = (selectedFiles) => {
-    const fileList = Array.from(selectedFiles).map((file) => {
+    const fileList = selectedFiles.map((file) => {
       let name = file.name
       // Check if file with the same name already exists
       const filesSameName = files.filter((f) => f.originalName === name)
@@ -342,7 +355,7 @@ function UploadFileLocal() {
     )
 
     files.forEach((f) => {
-      if (f.uploaded && !f.error) {
+      if (f.uploaded && !f.error && !f.zipFolder) {
         const interval = startConvertFakeProgress(f.file)
         filesInterval.current.push(interval)
         convertFileRequest({
@@ -360,22 +373,54 @@ function UploadFileLocal() {
                 filters_extraction_parameters_template_id:
                   extractionParameterTemplateId,
               }),
-        }).then(({data, errors, warnings}) => {
-          clearInterval(interval)
-          setFiles((prevFiles) =>
-            prevFiles.map((file) =>
-              file.file === f.file
-                ? {
-                    ...file,
-                    convertedProgress: 100,
-                    converted: true,
-                    warning: warnings ? warnings[0].message : null,
-                  }
-                : file,
-            ),
-          )
-          CreateProjectActions.enableAnalyzeButton(true)
         })
+          .then(({data, warnings}) => {
+            clearInterval(interval)
+            setFiles((prevFiles) =>
+              prevFiles.map((file) =>
+                file.file === f.file
+                  ? {
+                      ...file,
+                      convertedProgress: 100,
+                      converted: true,
+                      warning: warnings ? warnings[0].message : null,
+                    }
+                  : file,
+              ),
+            )
+            if (data.data.zipFiles) {
+              data.data.zipFiles.forEach((zipFile) => {
+                setFiles((prevFiles) =>
+                  prevFiles.map((file) =>
+                    zipFile.name === file.name
+                      ? {
+                          ...file,
+                          convertedProgress: 100,
+                          converted: true,
+                        }
+                      : file,
+                  ),
+                )
+              })
+            }
+            CreateProjectActions.enableAnalyzeButton(true)
+          })
+          .catch((errors) => {
+            clearInterval(interval)
+            setFiles((prevFiles) =>
+              prevFiles.map((file) =>
+                file.file === f.file
+                  ? {
+                      ...file,
+                      uploaded: false,
+                      error: errors?.length
+                        ? errors[0].message
+                        : 'Server error, try again.',
+                    }
+                  : file,
+              ),
+            )
+          })
       }
     })
   }
@@ -466,9 +511,22 @@ function UploadFileLocal() {
   const handleDrop = useCallback(
     (e) => {
       e.preventDefault()
-      handleFiles(e.dataTransfer.files)
-      setIsDragging(false)
+      CreateProjectActions.hideErrors()
       dragCounter.current = 0
+      let files = Array.from(e.dataTransfer.files)
+
+      for (var i = 0; i < files.length; i++) {
+        // iterate in the files dropped
+        let f = files[i]
+        if (f.type === '' && f.size % 4096 === 0) {
+          CreateProjectActions.showError(
+            'Uploading unzipped folders is not allowed. Please upload individual files, or a zipped folder.',
+          )
+          files = files.filter((file) => file !== f)
+        }
+      }
+      handleFiles(files)
+      setIsDragging(false)
     },
     [handleFiles],
   )
@@ -490,7 +548,7 @@ function UploadFileLocal() {
   }, [])
 
   const handleChange = (e) => {
-    handleFiles(e.target.files)
+    handleFiles(Array.from(e.target.files))
     e.target.value = ''
   }
 
@@ -574,7 +632,11 @@ function UploadFileLocal() {
                   />
                   {f.name}
                 </div>
-                {f.error && <div className="file-item-error">{f.error}</div>}
+                {f.error && (
+                  <div className="file-item-error">
+                    <span dangerouslySetInnerHTML={{__html: f.error}} />
+                  </div>
+                )}
                 {f.warning && (
                   <div className="file-item-warning">{f.warning}</div>
                 )}

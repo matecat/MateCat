@@ -4,6 +4,7 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import CommonUtils from '../../../../utils/commonUtils'
 import {getFilteredSegments} from '../../../../api/getFilteredSegments'
+import {segmentTranslation} from '../../../../setTranslationUtil'
 
 let SegmentFilterUtils = {
   enabled: () => config.segmentFilterEnabled,
@@ -237,7 +238,7 @@ let SegmentFilterUtils = {
     })
     SegmentActions.removeAllMutedSegments()
     setTimeout(function () {
-      SegmentActions.scrollToSegment(UI.currentSegmentId)
+      SegmentActions.scrollToSegment(SegmentStore.getCurrentSegmentId())
     }, 600)
   },
   goToNextRepetition: function (status) {
@@ -245,7 +246,9 @@ let SegmentFilterUtils = {
     const hash = segment.segment_hash
     const segmentFilterData = SegmentFilterUtils.getStoredState()
     const groupArray = segmentFilterData.serverData.grouping[hash]
-    const index = groupArray ? groupArray.indexOf(UI.currentSegmentId) : -1
+    const index = groupArray
+      ? groupArray.indexOf(SegmentStore.getCurrentSegmentId())
+      : -1
     let nextItem
     if (index >= 0 && index < groupArray.length - 1) {
       nextItem = groupArray[index + 1]
@@ -254,9 +257,9 @@ let SegmentFilterUtils = {
     } else {
       return
     }
-    UI.changeStatus(segment, status, function () {
-      SegmentActions.openSegment(nextItem)
-    })
+    segmentTranslation(segment, status, () =>
+      SegmentActions.openSegment(nextItem),
+    )
   },
   goToNextRepetitionGroup: function (status) {
     const segment = SegmentStore.getCurrentSegment()
@@ -271,10 +274,9 @@ let SegmentFilterUtils = {
       nextGroupHash = groupsArray[0]
     }
     const nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0]
-
-    UI.changeStatus(segment, status, function () {
-      SegmentActions.openSegment(nextItem)
-    })
+    segmentTranslation(segment, status, () =>
+      SegmentActions.openSegment(nextItem),
+    )
   },
   gotoPreviousSegment: () => {
     var list = SegmentFilterUtils.getLastFilterData()['segment_ids']

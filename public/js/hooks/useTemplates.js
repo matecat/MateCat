@@ -66,6 +66,18 @@ const createTemplateProxy = ({template, schema}) => {
   }
 }
 
+const orderTemplates = (templates) => {
+  return [...templates]
+    .sort((a, b) =>
+      (a.name ?? a.label ?? a.payable_rate_template_name).toLowerCase() >
+      (b.name ?? b.label ?? b.payable_rate_template_name).toLowerCase()
+        ? 1
+        : -1,
+    )
+    .sort((a, b) => (a.id === b.id && !a.isTemporary ? -1 : 0))
+    .reduce((acc, cur) => (cur.id === 0 ? [cur, ...acc] : [...acc, cur]), [])
+}
+
 function useTemplates(schema) {
   const [templates, setTemplatesState] = useState([])
   const [currentTemplate, setCurrentTemplate] = useState()
@@ -73,12 +85,16 @@ function useTemplates(schema) {
   const templatesRef = useRef()
   templatesRef.current = templates
   const prevCurrentTemplateId = useRef()
+  const prevCurrentTemplateIsTemporary = useRef()
 
   const setTemplates = useCallback(
     (value) => {
       setTemplatesState((prevState) => {
         const result = typeof value === 'function' ? value(prevState) : value
-        return result.map((template) => createTemplateProxy({template, schema}))
+        const orderedResult = orderTemplates(result)
+        return orderedResult.map((template) =>
+          createTemplateProxy({template, schema}),
+        )
       })
     },
     [schema],
@@ -175,17 +191,22 @@ function useTemplates(schema) {
     setCurrentTemplate(createTemplateProxy({template: current, schema}))
   }
 
-  const {id: currentTemplateId} =
+  const {id: currentTemplateId, isTemporary: currentTemplateIsTemporary} =
     templates.find(({isSelected}) => isSelected) ?? {}
 
   // set current template
   if (
-    typeof currentTemplateId === 'number' &&
-    currentTemplateId !== prevCurrentTemplateId.current
+    (typeof currentTemplateId === 'number' &&
+      currentTemplateId !== prevCurrentTemplateId.current) ||
+    (typeof currentTemplateId === 'number' &&
+      currentTemplateId === prevCurrentTemplateId.current &&
+      !currentTemplateIsTemporary &&
+      prevCurrentTemplateIsTemporary.current)
   ) {
     onChangeCurrentTemplate(templates.find(({isSelected}) => isSelected))
   }
   prevCurrentTemplateId.current = currentTemplateId
+  prevCurrentTemplateIsTemporary.current = currentTemplateIsTemporary
 
   return {
     templates,

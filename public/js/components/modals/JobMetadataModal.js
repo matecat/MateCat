@@ -1,6 +1,7 @@
 import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
 import {Accordion} from '../common/Accordion/Accordion'
+import {filterXSS} from 'xss'
 
 class JobMetadataModal extends React.Component {
   constructor(props) {
@@ -9,6 +10,41 @@ class JobMetadataModal extends React.Component {
       currentFile: this.props.currentFile,
     }
   }
+
+  isMtcReferenceValued = ({metadata}) =>
+    typeof metadata?.['mtc:references'] === 'string'
+
+  getMTCReferences({metadata}) {
+    const removeNotAllowedLinksFromHtml = (html) => {
+      const div = document.createElement('div')
+      div.innerHTML = html
+      const links = div.getElementsByTagName('a')
+      const linksArray = Array.from(links)
+      for (var i = 0; i < linksArray.length; i++) {
+        const link = linksArray[i].getAttribute('href')
+        if (!CommonUtils.isAllowedLinkRedirect(link)) {
+          const text = '[' + linksArray[i].textContent + '](' + link + ')'
+          const linkElement = div.querySelector('[href="' + link + '"]')
+          linkElement.parentNode.replaceChild(
+            document.createTextNode(text),
+            linkElement,
+          )
+        }
+      }
+      return div.innerHTML
+    }
+
+    return (
+      this.isMtcReferenceValued({metadata}) && (
+        <p
+          dangerouslySetInnerHTML={{
+            __html: `<b>Reference:</b> ${removeNotAllowedLinksFromHtml(filterXSS(metadata['mtc:references']))}`,
+          }}
+        ></p>
+      )
+    )
+  }
+
   createFileList() {
     const {currentFile} = this.state
     return this.props.files.map((file) => {
@@ -32,7 +68,7 @@ class JobMetadataModal extends React.Component {
 
       return (
         file.metadata &&
-        file.metadata.instructions && (
+        (file.metadata.instructions || this.isMtcReferenceValued(file)) && (
           <Accordion
             key={file.id}
             id={file.id}
@@ -42,12 +78,16 @@ class JobMetadataModal extends React.Component {
             onShow={(id) => this.setState({currentFile: id})}
           >
             <div className="content">
-              <div
-                className="transition"
-                dangerouslySetInnerHTML={{
-                  __html: this.getHtml(file.metadata.instructions),
-                }}
-              />
+              <div className="transition">
+                {file.metadata.instructions && (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: this.getHtml(file.metadata.instructions),
+                    }}
+                  ></div>
+                )}
+                {this.getMTCReferences(file)}
+              </div>
             </div>
           </Accordion>
         )
@@ -70,6 +110,7 @@ class JobMetadataModal extends React.Component {
               __html: this.getHtml(file.metadata.instructions),
             }}
           />
+          {this.getMTCReferences(file)}
         </div>
       </div>
     )
@@ -107,7 +148,10 @@ class JobMetadataModal extends React.Component {
                 </div>
               )}
               {this.props.files &&
-                this.props.files.find((file) => file.metadata.instructions) && (
+                (this.props.files.find((file) => file.metadata.instructions) ||
+                  this.props.files.find((file) =>
+                    this.isMtcReferenceValued(file),
+                  )) && (
                   <div>
                     <h2>File instructions</h2>
                     <div className="ui styled fluid accordion">

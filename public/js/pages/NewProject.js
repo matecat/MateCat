@@ -119,6 +119,35 @@ const NewProject = () => {
     XLIFF_SETTINGS_SCHEMA_KEYS,
   )
 
+  const subtemplatesNotSaved = useMemo(
+    () => [
+      ...(qualityFrameworkTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.qaModelTemplateId]
+        : []),
+      ...(analysisTemplates.templates.some(({isTemporary}) => isTemporary)
+        ? [SCHEMA_KEYS.payableRateTemplateId]
+        : []),
+      ...(fileImportFiltersParamsTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.filtersTemplateId]
+        : []),
+      ...(fileImportXliffSettingsTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.XliffConfigTemplateId]
+        : []),
+    ],
+    [
+      analysisTemplates.templates,
+      fileImportFiltersParamsTemplates.templates,
+      fileImportXliffSettingsTemplates.templates,
+      qualityFrameworkTemplates.templates,
+    ],
+  )
+
   const isDeviceCompatible = useDeviceCompatibility()
 
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -435,6 +464,7 @@ const NewProject = () => {
       segmentationRule,
       idTeam,
       getPublicMatches,
+      publicTmPenalty,
       qaModelTemplateId,
       payableRateTemplateId,
       XliffConfigTemplateId,
@@ -446,9 +476,23 @@ const NewProject = () => {
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
-      const unsavedTemplate = templates.find(
-        (template) => template.id === id && template.isTemporary,
-      )
+      const unsavedTemplate = templates
+        .filter((template) => template.id === id && template.isTemporary)
+        .map(
+          ({
+            /* eslint-disable */
+            isSelected,
+            isTemporary,
+            id,
+            created_at,
+            modified_at,
+            createdAt,
+            deletedAt,
+            modifiedAt,
+            /* eslint-enable */
+            ...result
+          }) => result,
+        )[0]
 
       return unsavedTemplate
     }
@@ -498,6 +542,7 @@ const NewProject = () => {
         ? {payable_rate_template: payableRateTemplate}
         : {payable_rate_template_id: payableRateTemplateId}),
       get_public_matches: getPublicMatches,
+      public_tm_penalty: publicTmPenalty,
       ...(mt?.extra?.glossaries?.length && {
         mmt_glossaries: JSON.stringify({
           glossaries: mt.extra.glossaries,
@@ -541,7 +586,7 @@ const NewProject = () => {
         .then(({data}) => {
           handleCreationStatus(data.id_project, data.password)
         })
-        .catch((errors) => {
+        .catch(({errors}) => {
           let errorMsg
           if (errors && errors.length) {
             switch (errors[0].code) {
@@ -573,7 +618,20 @@ const NewProject = () => {
         const languages = data.map((lang) => {
           return {...lang, id: lang.code}
         })
-        setSupportedLanguages(languages)
+
+        setSupportedLanguages(
+          languages.map((language) => {
+            const nameWithoutDiacriticalMarks = language.name
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+            return {
+              ...language,
+              ...(nameWithoutDiacriticalMarks !== language.name && {
+                nameWithoutDiacriticalMarks,
+              }),
+            }
+          }),
+        )
         ApplicationActions.setLanguages(data)
       })
       .catch((error) =>
@@ -615,9 +673,6 @@ const NewProject = () => {
     if (!isUserLogged) return
 
     retrieveSupportedLanguages()
-
-    // UI.addEvents()
-
     const hideAllErrors = () => {
       setErrors()
       setWarnings()
@@ -913,6 +968,7 @@ const NewProject = () => {
                   projectTemplates,
                   setProjectTemplates,
                   currentProjectTemplate,
+                  subtemplatesNotSaved,
                 }}
               />
             </div>
@@ -1112,6 +1168,7 @@ const NewProject = () => {
             analysisTemplates,
             fileImportFiltersParamsTemplates,
             fileImportXliffSettingsTemplates,
+            subtemplatesNotSaved,
           }}
         />
       )}

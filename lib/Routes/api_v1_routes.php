@@ -7,12 +7,10 @@
  */
 global $klein;
 
-route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET', [ 'API\V1\StatsController', 'stats' ] );
+route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET', [ 'Controller\API\V2\StatsController', 'stats' ] );
 
 $klein->with( '/api/v1/projects/[:id_project]/[:password]', function () {
-    route( '/creation_status', 'GET', [ 'API\V2\ProjectCreationStatusController', 'get' ] );
+    route( '/creation_status', 'GET', [ 'Controller\API\V2\ProjectCreationStatusController', 'get' ] );
 } );
 
-route( '/api/v1/new', 'POST', [ 'API\V1\NewController', 'create' ] );
-
-route( '/api/new', 'POST', [ 'API\V1\NewController', 'create' ] ); //TODO remove after deprecation time elapsed
+route( '/api/v1/new', 'POST', [ 'Controller\API\V1\NewController', 'create' ] );
