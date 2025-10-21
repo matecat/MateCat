@@ -152,6 +152,7 @@ class SegmentVersion {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target );
+        $translation = ( !empty( $version->translation ) ) ? $Filter->fromLayer0ToLayer2( $version->translation ) : null;
 
         $translation = ( !empty( $version->translation ) ) ? $Filter->fromLayer0ToLayer2( $version->translation ) : null;
 
