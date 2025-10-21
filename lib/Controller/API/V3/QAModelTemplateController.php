@@ -25,16 +25,12 @@ class QAModelTemplateController extends KleinController {
     /**
      * @param $json
      *
-     * @throws InvalidValue
      * @throws JSONValidatorException
-     * @throws \Swaggest\JsonSchema\Exception
      * @throws JsonValidatorGenericException
      */
     private function validateJSON( $json ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
-        $validator             = new JSONValidator( $jsonSchema, true );
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( 'qa_model.json', true );
         $validator->validate( $validatorObject );
     }
 
@@ -237,9 +233,8 @@ class QAModelTemplateController extends KleinController {
         try {
             $json = $this->request->body();
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-            $validator             = new JSONValidator( $this->getQaModelSchema() );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( $this->getQaModelSchema() );
             $validator->validate( $validatorObject );
 
             $errors = $validator->getExceptions();

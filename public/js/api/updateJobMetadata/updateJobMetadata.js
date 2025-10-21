@@ -17,21 +17,13 @@ export const updateJobMetadata = async ({
   tmPrioritization,
   characterCounterCountTags,
   characterCounterMode,
+  subfilteringHandlers,
 }) => {
   const paramsData = Object.entries({
-    tm_prioritization:
-      tmPrioritization === true
-        ? '1'
-        : tmPrioritization === false
-          ? '0'
-          : undefined,
-    character_counter_count_tags:
-      characterCounterCountTags === true
-        ? '1'
-        : characterCounterCountTags === false
-          ? '0'
-          : undefined,
+    tm_prioritization: typeof tmPrioritization === 'boolean' ? tmPrioritization : undefined,
+    character_counter_count_tags: typeof characterCounterCountTags === 'boolean' ? characterCounterCountTags : undefined,
     character_counter_mode: characterCounterMode,
+    subfiltering_handlers: subfilteringHandlers,
   })
     .filter(([, value]) => typeof value !== 'undefined')
     .map(([key, value]) => ({key, value}))

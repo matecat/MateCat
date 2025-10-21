@@ -2,6 +2,7 @@
 
 namespace Model\Projects;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
@@ -26,6 +27,7 @@ class MetadataDao extends AbstractDao {
     const MT_EVALUATION              = 'mt_evaluation';
     const MT_QE_WORKFLOW_ENABLED     = 'mt_qe_workflow_enabled';
     const MT_QE_WORKFLOW_PARAMETERS  = 'mt_qe_workflow_parameters';
+    const SUBFILTERING_HANDLERS      = 'subfiltering_handlers';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 
@@ -86,12 +88,10 @@ class MetadataDao extends AbstractDao {
         /**
          * @var $result MetadataStruct[]
          */
-        $result = $this->_fetchObjectMap( $stmt, MetadataStruct::class, [
+        return $this->_fetchObjectMap( $stmt, MetadataStruct::class, [
                 'id_project' => $id_project,
                 'key'        => $key
-        ] );
-
-        return !empty( $result ) ? $result[ 0 ] : null;
+        ] )[ 0 ] ?? null;
 
     }
 
@@ -170,5 +170,21 @@ class MetadataDao extends AbstractDao {
     }
 
     protected function _buildResult( array $array_result ) {
+    }
+
+    /**
+     * @param int $id_project
+     *
+     * @return array
+     */
+    public function getProjectStaticSubfilteringCustomHandlers( int $id_project ): ?array {
+
+        try {
+            $subfiltering = $this->get( $id_project, MetadataDao::SUBFILTERING_HANDLERS, 86400 );
+
+            return json_decode( $subfiltering->value ?? '[]' ); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+        } catch ( Exception $exception ) {
+            return [];
+        }
     }
 }

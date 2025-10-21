@@ -113,7 +113,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
     protected int $readable_chars = 5;
 
     /**
-     * Used exclusively for JSON rendering purposes
+     * Used exclusively for JSON rendering
      *
      * @var bool
      */
@@ -178,7 +178,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
      * @return array
      */
     public function toArray(): array {
-        return json_decode( json_encode( $this ), true );
+        return $this->jsonSerialize();
     }
 
     /**

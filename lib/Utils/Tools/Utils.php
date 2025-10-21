@@ -586,46 +586,24 @@ class Utils {
      *
      * @param bool $raise
      *
-     * @return void|string
+     * @return string
      * @throws Exception
+     * @deprecated Use the JSON_THROW_ON_ERROR flag on json_decode() instead or json_last_error_msg() directly to get the error message.
+     * @see        https://www.php.net/manual/en/function.json-decode.php
+     * @see        https://www.php.net/manual/en/json.constants.php
+     *
      */
-    public static function raiseJsonExceptionError( bool $raise = true ) {
+    public static function raiseJsonExceptionError( bool $raise = true ): string {
 
         if ( function_exists( "json_last_error" ) ) {
-
             $error = json_last_error();
-
-            switch ( $error ) {
-                case JSON_ERROR_NONE:
-                    $msg = null; # - No errors
-                    break;
-                case JSON_ERROR_DEPTH:
-                    $msg = ' - Maximum stack depth exceeded';
-                    break;
-                case JSON_ERROR_STATE_MISMATCH:
-                    $msg = ' - Underflow or the modes mismatch';
-                    break;
-                case JSON_ERROR_CTRL_CHAR:
-                    $msg = ' - Unexpected control character found';
-                    break;
-                case JSON_ERROR_SYNTAX:
-                    $msg = ' - Syntax error, malformed JSON';
-                    break;
-                case JSON_ERROR_UTF8:
-                    $msg = ' - Malformed UTF-8 characters, possibly incorrectly encoded';
-                    break;
-                default:
-                    $msg = ' - Unknown error';
-                    break;
-            }
-
             if ( $raise && $error != JSON_ERROR_NONE ) {
-                throw new Exception( $msg, $error );
-            } elseif ( $error != JSON_ERROR_NONE ) {
-                return $msg;
+                throw new Exception( json_last_error_msg(), $error );
             }
-
+            return json_last_error_msg();
         }
+
+        throw new Exception( "json_last_error() function not found" );
 
     }
 
@@ -831,7 +809,7 @@ class Utils {
         foreach ( $links as $link ) {
             $linkLabel       = $link->nodeValue;
             $linkHref        = $link->getAttribute( 'href' );
-            $link->nodeValue = "[".$linkLabel."]" . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
+            $link->nodeValue = "[" . $linkLabel . "]" . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
         }
 
         // replace <img> with src
@@ -925,7 +903,7 @@ class Utils {
         }
 
         if ( Utils::isJson( $value ) ) {
-            return json_decode($value);
+            return json_decode( $value );
         }
 
         return $value;

@@ -41,13 +41,15 @@ abstract class TMSAbstractResponse {
 
     /**
      * @template T of TMSAbstractResponse
+     *
      * @param array|int       $result
      * @param FeatureSet|null $featureSet
      * @param array|null      $dataRefMap
+     * @param int|null        $id_project
      *
-     * @return T
+     * @return TMSAbstractResponse
      */
-    public static function getInstance( $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [] ): TMSAbstractResponse {
+    public static function getInstance( $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null ): TMSAbstractResponse {
 
         /**
          * @var class-string<T> $class
@@ -57,9 +59,7 @@ abstract class TMSAbstractResponse {
         /**
          * @var T $instance
          */
-        $instance = new $class( $result, $dataRefMap );
-
-
+        $instance = new $class( $result, $dataRefMap, $id_project );
 
         if ( is_array( $result ) && isset($result[ 'responseStatus' ]) && $result[ 'responseStatus' ] >= 400 ) {
             $instance->error = new ErrorResponse( $result[ 'error' ] ?? $result[ 'responseDetails' ] );

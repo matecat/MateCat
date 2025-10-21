@@ -159,6 +159,26 @@ class ProjectDao extends AbstractDao {
         return $stmt->rowCount();
     }
 
+    public function assignToAssignee( int $pid, int $idAssignee ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "UPDATE projects SET id_assignee = :id_assignee WHERE id = :id ;" );
+        $stmt->execute( [
+                'id'          => $pid,
+                'id_assignee' => $idAssignee
+        ] );
+
+        return $stmt->rowCount();
+    }
+
+    public function assignToTeam( int $pid, int $idTeam ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "UPDATE projects SET id_team = :id_team WHERE id = :id ;" );
+        $stmt->execute( [
+                'id'      => $pid,
+                'id_team' => $idTeam
+        ] );
+    }
+
     /**
      * @param TeamStruct $team
      * @param UserStruct $user
