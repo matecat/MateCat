@@ -624,19 +624,14 @@ header {
                                   padding: 5px 3px 5px 5px;
                                   background: colors.$grey5;
                                   margin-right: 6px;
+                                  &.error {
+                                    color: colors.$red800;
+                                  }
+                                  &.warning {
+                                    color:  colors.$orangeDefault;
+                                  }
                                 }
                               }
-                              /*&.human {
-                                                                    &.critical {
-                                                                        border-bottom: 2px solid #FB2A0D;
-                                                                    }
-                                                                    &.major {
-                                                                        border-bottom: 2px solid #FBAA0D;
-                                                                    }
-                                                                    &.enhacement {
-                                                                        border-bottom: 2px solid #FFE600;
-                                                                    }
-                                                                }*/
                               .qr-error {
                               }
                               .qr-severity {

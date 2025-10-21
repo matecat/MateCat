@@ -5,6 +5,9 @@
 import React from 'react'
 import {fromJS} from 'immutable'
 import {forOwn} from 'lodash'
+import SegmentQA from '../../../img/icons/SegmentQA'
+import InfoIcon from '../../../img/icons/InfoIcon'
+import AlertIcon from '../../../img/icons/AlertIcon'
 
 class SegmentWarnings extends React.Component {
   constructor(props) {
@@ -60,31 +63,29 @@ class SegmentWarnings extends React.Component {
     return (
       <div className="warnings-block">
         {warnings.map((el, index) => {
-          let classes_block, classes_icon
+          let classes_block, icon
           switch (el.type) {
             case 'ERROR':
               classes_block = 'error-alert alert-block'
-              classes_icon = 'icon-cancel-circle icon'
+              icon = <SegmentQA />
               break
             case 'WARNING':
               classes_block = 'warning-alert alert-block'
-              classes_icon = 'icon-warning2 icon'
+              icon = <AlertIcon size={18} />
               break
             case 'INFO':
               classes_block = 'info-alert alert-block'
-              classes_icon = 'icon-info icon'
+              icon = <InfoIcon size={18} />
               break
             default:
               classes_block = 'alert-block'
-              classes_icon = 'icon-cancel-circle icon'
+              icon = <SegmentQA />
               break
           }
           return (
             <div key={index} className={classes_block}>
               <ul>
-                <li className="icon-column">
-                  <i className={classes_icon}></i>
-                </li>
+                <li className="icon-column">{icon}</li>
                 <li className="content-column">
                   <p>
                     {el.debug}
