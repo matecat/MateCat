@@ -22,8 +22,8 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
      * @var string|array
      */
     public $breakdowns;
-    public string $created_at;
-    public string $modified_at;
+    public ?string $created_at = null;
+    public ?string $modified_at = null;
     public ?string $deleted_at = null;
 
     /**
@@ -150,8 +150,8 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
                 'version'                    => $this->version,
                 'payable_rate_template_name' => $this->name,
                 'breakdowns'                 => $this->getBreakdownsArray(),
-                'createdAt'                  => DateTimeUtil::formatIsoDate( $this->created_at ),
-                'modifiedAt'                 => DateTimeUtil::formatIsoDate( $this->modified_at ),
+                'createdAt'                  => $this->created_at !== null ? DateTimeUtil::formatIsoDate( $this->created_at ) : null,
+                'modifiedAt'                 => $this->modified_at !== null ? DateTimeUtil::formatIsoDate( $this->modified_at ) : null,
         ];
     }
 }
