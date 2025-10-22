@@ -25,7 +25,6 @@ use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyManager;
 
 class GetContributionController extends KleinController {
 
