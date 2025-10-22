@@ -107,7 +107,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $this->data[ 'segment' ] = $this->segment;
 
             $segment     = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); // this segment comes from the database when getting contexts
-            $translation = ( !empty( $this->data[ 'translation' ] ) and !is_numeric( $this->data[ 'translation' ] ) ) ? $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] ) : ""; // is_numeric check is needed to allow "0" strings
+            $translation = ( empty( $this->data[ 'translation' ] ) and !is_numeric( $this->data[ 'translation' ] ) ) ? "" : $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] ); // is_numeric check is needed to allow "0" strings
 
             $check = new QA( $segment, $translation ); // Layer 1 here
             $check->setChunk( $this->data[ 'chunk' ] );
