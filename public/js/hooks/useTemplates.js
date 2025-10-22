@@ -74,8 +74,8 @@ const orderTemplates = (templates) => {
         ? 1
         : -1,
     )
-    .sort((a, b) => (a.id === b.id && !a.isTemporary ? -1 : 0))
     .reduce((acc, cur) => (cur.id === 0 ? [cur, ...acc] : [...acc, cur]), [])
+    .sort((a, b) => (a.id === b.id && a.isTemporary ? -1 : 0))
 }
 
 function useTemplates(schema) {
