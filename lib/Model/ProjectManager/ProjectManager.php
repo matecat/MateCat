@@ -1227,59 +1227,61 @@ class ProjectManager {
 
         $memoryFiles = [];
 
+        if ( empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
+            return;
+        }
+
+        if ( !isset( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+            return;
+        }
+
+        if ( empty( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+            return;
+        }
+
         //TMX Management
-        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
+        if ( !empty( $this->projectStructure[ 'array_files' ] ) ) {
+            foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
-            if ( empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
-                continue;
-            }
+                // get corresponding meta
+                $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
 
-            if ( !isset( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
-                continue;
-            }
+                $ext = $meta[ 'extension' ];
 
-            if ( empty( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
-                continue;
-            }
+                try {
 
-            // get corresponding meta
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+                    if ( 'tmx' == $ext ) {
 
-            $ext = $meta[ 'extension' ];
+                        $file = new TMSFile(
+                                "$this->uploadDir/$fileName",
+                                $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
+                                $fileName,
+                                $pos
+                        );
 
-            try {
+                        $memoryFiles[] = $file;
 
-                if ( 'tmx' == $ext ) {
+                        if ( AppConfig::$FILE_STORAGE_METHOD == 's3' ) {
+                            $this->getSingleS3QueueFile( $fileName );
+                        }
 
-                    $file = new TMSFile(
-                            "$this->uploadDir/$fileName",
-                            $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
-                            $fileName,
-                            $pos
-                    );
+                        $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                        $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
 
-                    $memoryFiles[] = $file;
-
-                    if ( AppConfig::$FILE_STORAGE_METHOD == 's3' ) {
-                        $this->getSingleS3QueueFile( $fileName );
+                    } else {
+                        //don't call the postPushTMX for normal files
+                        continue;
                     }
 
-                    $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
-                    $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
+                } catch ( Exception $e ) {
 
-                } else {
-                    //don't call the postPushTMX for normal files
-                    continue;
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                            "code"    => $e->getCode(),
+                            "message" => $e->getMessage()
+                    ];
+
+                    throw new Exception( $e );
                 }
-
-            } catch ( Exception $e ) {
-
-                $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code"    => $e->getCode(),
-                        "message" => $e->getMessage()
-                ];
-
-                throw new Exception( $e );
             }
         }
 
