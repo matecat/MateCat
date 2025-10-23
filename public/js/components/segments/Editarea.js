@@ -438,9 +438,7 @@ class Editarea extends React.Component {
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
       }
-      const contentState = editorState.getCurrentContent()
-      const plainText = contentState.getPlainText()
-      const icuTokens = createIcuTokens(plainText, editorState)
+      const icuTokens = createIcuTokens(editorState)
       if (
         !prevProps ||
         !this.prevIcuTokens ||

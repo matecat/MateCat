@@ -242,9 +242,7 @@ class SegmentSource extends React.Component {
   }
   addIcuDecorator = () => {
     const {editorState} = this.state
-    const contentState = editorState.getCurrentContent()
-    const plainText = contentState.getPlainText()
-    const tokens = createIcuTokens(plainText, editorState)
+    const tokens = createIcuTokens(editorState)
     const newDecorator = createICUDecorator(tokens)
     remove(
       this.decoratorsStructure,
