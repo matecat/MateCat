@@ -48,7 +48,7 @@ const ProjectContainer = ({
   changeStatusFn,
   downloadTranslationFn,
 }) => {
-  const {jobsBulk, setJobsBulk, onCheckedJob} = useContext(
+  const {jobsBulk, onCheckedProject, onCheckedJob} = useContext(
     ProjectBulkActionsContext,
   )
 
@@ -539,9 +539,6 @@ const ProjectContainer = ({
     .toJS()
     .filter(({id}) => jobsBulk.some((value) => value === id))
 
-  const isCheckedAllJobs =
-    jobsBulkForCurrentProject.length === project.get('jobs').size
-
   return (
     <div
       className="project ui column grid shadow-1"
@@ -562,29 +559,7 @@ const ProjectContainer = ({
                 <div className="ui ribbon label">
                   <Checkbox
                     className="project-checkbox"
-                    onChange={() =>
-                      isCheckedAllJobs
-                        ? setJobsBulk((prevState) =>
-                            prevState.filter(
-                              (value) =>
-                                !jobsBulkForCurrentProject.some(
-                                  ({id}) => id === value,
-                                ),
-                            ),
-                          )
-                        : setJobsBulk((prevState) => [
-                            ...prevState.filter(
-                              (value) =>
-                                !jobsBulkForCurrentProject.some(
-                                  ({id}) => id === value,
-                                ),
-                            ),
-                            ...project
-                              .get('jobs')
-                              .toJS()
-                              .map(({id}) => id),
-                          ])
-                    }
+                    onChange={() => onCheckedProject(project.get('id'))}
                     value={
                       jobsBulkForCurrentProject.length === 0
                         ? CHECKBOX_STATE.UNCHECKED
