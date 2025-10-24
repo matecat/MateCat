@@ -1,23 +1,33 @@
 import React, {useRef} from 'react'
 import Tooltip from '../common/Tooltip'
 
-export const IcuHighlight = ({start, end, tokens, children, blockKey}) => {
+export const IcuHighlight = ({
+  start,
+  end,
+  tokens,
+  children,
+  blockKey,
+  isTarget,
+}) => {
   const token = tokens.find(
     (item) => item.start === start && item.end === end && item.key === blockKey,
   )
   const refToken = useRef()
   return (
     <div
-      className={`icuItem ${token && token.type === 'error' ? 'icuItem-error' : ''}`}
+      className={`icuItem ${token && token.type === 'error' && isTarget ? 'icuItem-error' : ''}`}
     >
-      {token && token.type === 'error' ? (
+      {token && token.type === 'error' && isTarget ? (
         <Tooltip
           content={
             <div className="icu-tooltip">
               <h3>ICU syntax error</h3>
-              <p>{token.message}</p>
+              {token.message.map((t) => (
+                <p key={t}>{t}</p>
+              ))}
             </div>
           }
+          isInteractiveContent={true}
         >
           <span ref={refToken}>{children}</span>
         </Tooltip>

@@ -242,8 +242,8 @@ class SegmentSource extends React.Component {
   }
   addIcuDecorator = () => {
     const {editorState} = this.state
-    const tokens = createIcuTokens(editorState)
-    const newDecorator = createICUDecorator(tokens)
+    const tokens = createIcuTokens(editorState, config.source_rfc)
+    const newDecorator = createICUDecorator(tokens, false)
     remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,

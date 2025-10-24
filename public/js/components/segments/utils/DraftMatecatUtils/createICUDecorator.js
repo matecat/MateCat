@@ -3,7 +3,7 @@ import parse from 'format-message-parse'
 import {IcuHighlight} from '../../IcuHighlight'
 import {isEqual} from 'lodash'
 import updateOffsetBasedOnEditorState from './updateOffsetBasedOnEditorState'
-export const createICUDecorator = (tokens = []) => {
+export const createICUDecorator = (tokens = [], isTarget = true) => {
   return {
     name: DraftMatecatConstants.ICU_DECORATOR,
     strategy: (contentBlock, callback) => {
@@ -22,6 +22,7 @@ export const createICUDecorator = (tokens = []) => {
     component: IcuHighlight,
     props: {
       tokens,
+      isTarget,
     },
   }
 }
@@ -43,7 +44,7 @@ function validateICUMessage(locale, text) {
   const nodes = Array.isArray(tree)
     ? tree.filter((n) => Array.isArray(n) && typeof n[1] === 'string')
     : []
-
+  console.log('nodes', nodes)
   nodes.forEach((node) => {
     const varName = node[0]
     const type = node[1]
@@ -83,7 +84,7 @@ function validateICUMessage(locale, text) {
       }
     }
 
-    /* ---- SELECT (semantic check) ---- */
+    /*/!* ---- SELECT (semantic check) ---- *!/
     if (type === 'select') {
       keys.forEach((k) => {
         if (['plural', 'select', 'selectordinal'].includes(k)) {
@@ -102,27 +103,13 @@ function validateICUMessage(locale, text) {
           message: `Each select block must include 'other'.`,
         })
       }
-    }
+    }*/
 
     if (blockIssues.length) {
-      // trova la prima occorrenza di "{varName," per stimare l'inizio
       const pattern = new RegExp(`\\{\\s*${varName}\\s*,\\s*${type}`)
       const match = pattern.exec(text)
       const start = match ? match.index + 1 : 0
       let end = start + varName.length
-
-      // prova a trovare la '}' corrispondente a partire dallo start
-      let open = 0
-      for (let i = start; i < text.length; i++) {
-        if (text[i] === '{') open++
-        if (text[i] === '}') {
-          open--
-          if (open === 0) {
-            end = i + 1
-            break
-          }
-        }
-      }
 
       results.push({
         node: {varName, type, start, end},
@@ -130,10 +117,10 @@ function validateICUMessage(locale, text) {
       })
     }
   })
-
+  console.log('results', results)
   return results
 }
-export const createIcuTokens = (editorState) => {
+export const createIcuTokens = (editorState, locale) => {
   const blockMap = editorState.getCurrentContent().getBlockMap()
   const blocks = blockMap.toArray()
   let updatedTokens = []
@@ -149,10 +136,9 @@ export const createIcuTokens = (editorState) => {
         text: e.found,
         start: e.column,
         end: e.column + e.found.length,
-        message: e.message,
+        message: [e.message],
         key: block.getKey(),
       }
-      console.log(e, error, text, tokens)
     }
     let index = 0
     let blockTokens = tokens.map((token) => {
@@ -171,31 +157,30 @@ export const createIcuTokens = (editorState) => {
         blockTokens = blockTokens.map((token) => {
           if (token.end === error.start) {
             token.type = 'error'
-            token.message = error.message
+            token.message = [error.message]
           }
           return token
         })
       } else {
         blockTokens.push(error)
       }
-    }
-    const warningIssues = validateICUMessage('lv', text)
-    console.log('warningIssues', warningIssues)
-    if (warningIssues.length > 0) {
-      warningIssues.forEach((issue) => {
-        const node = issue.node
-        blockTokens = blockTokens.map((token) => {
-          if (token.start === node.start && token.text === node.varName) {
-            token.type = 'error'
-            token.message = issue.issues.map((i) => i.message).join('/n')
-          }
-          return token
+    } else {
+      const warningIssues = validateICUMessage(locale, text)
+      if (warningIssues.length > 0) {
+        warningIssues.forEach((issue) => {
+          const node = issue.node
+          blockTokens = blockTokens.map((token) => {
+            if (token.start === node.start && token.text === node.varName) {
+              token.type = 'error'
+              token.message = issue.issues.map((i) => i.message)
+            }
+            return token
+          })
         })
-      })
+      }
     }
     updatedTokens = updatedTokens.concat(blockTokens)
   })
-  console.log('updatedTokens', updatedTokens)
   return updateOffsetBasedOnEditorState(editorState, updatedTokens)
 }
 
