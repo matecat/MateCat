@@ -1,0 +1,40 @@
+{
+  "MMT": {
+    "mmt_activate_context_analyzer": false,
+    "pre_translate_files": false,
+    "mmt_glossaries_case_sensitive_matching": false,
+    "mmt_glossaries": []
+  },
+  "Lara": {
+    "pre_translate_files": true,
+    "lara_glossaries": []
+  },
+  "DeepL": {
+    "pre_translate_files": false,
+    "deepl_formality": "default",
+    "deepl_id_glossary": "",
+    "deepl_engine_type": "prefer_quality_optimized"
+  },
+  "Intento": {
+    "pre_translate_files": false,
+    "intento_provider": "smart_routing"
+  },
+  "Altlang": {
+    "pre_translate_files": false
+  },
+  "Apertium": {
+    "pre_translate_files": false
+  },
+  "GoogleTranslate": {
+    "pre_translate_files": false
+  },
+  "MicrosoftHub": {
+    "pre_translate_files": false
+  },
+  "SmartMATE": {
+    "pre_translate_files": false
+  },
+  "YandexTranslate": {
+    "pre_translate_files": false
+  }
+}

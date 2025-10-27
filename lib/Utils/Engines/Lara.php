@@ -182,6 +182,10 @@ class Lara extends AbstractEngine {
      */
     public function get( array $_config ) {
 
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            return [];
+        }
+
         $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
@@ -601,4 +605,13 @@ class Lara extends AbstractEngine {
         return $glossaries->getAll();
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+                'lara_glossaries',
+        ];
+    }
 }

@@ -248,6 +248,14 @@ class ProjectManager {
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
                             'mt_qe_workflow_payable_rate'            => null,
+                            'pre_translate_files'                    => null,
+                            'mmt_pre_import_tm'                      => null,
+                            'mmt_activate_context_analyzer'          => null,
+                            'mmt_glossaries_case_sensitive_matching' => null,
+                            'lara_glossaries'                        => null,
+                            'deepl_engine_type'                      => null,
+                            'intento_routing'                        => null,
+                            'intento_provider'                       => null,
                     ] );
         }
 
@@ -406,6 +414,8 @@ class ProjectManager {
                     implode( ',', $featureCodes )
             );
         }
+
+
     }
 
     /**
@@ -511,6 +521,27 @@ class ProjectManager {
             $options = $this->sanitizeProjectOptions( $options );
         }
 
+        // MT extra config parameters
+        $extraKeys = [
+                'pre_translate_files',
+                'mmt_glossaries',
+                'mmt_pre_import_tm',
+                'mmt_activate_context_analyzer',
+                'mmt_glossaries_case_sensitive_matching',
+                'lara_glossaries',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+                'intento_provider',
+                'intento_routing',
+        ];
+
+        foreach ( $extraKeys as $extraKey ) {
+            if ( !empty( $this->projectStructure[ $extraKey ] ) && $this->projectStructure[ $extraKey ] ) {
+                $options[ $extraKey ] = $this->projectStructure[ $extraKey ];
+            }
+        }
+
         if ( !empty( $options ) ) {
             foreach ( $options as $key => $value ) {
                 $dao->set(
@@ -567,7 +598,6 @@ class ProjectManager {
                 JobsMetadataDao::SUBFILTERING_HANDLERS,
                 $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]
         );
-
     }
 
     /**

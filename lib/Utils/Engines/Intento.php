@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use Model\Projects\MetadataDao;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
@@ -69,7 +70,17 @@ class Intento extends AbstractEngine {
         if ( is_string( $rawValue ) ) {
             $result = json_decode( $rawValue, false );
 
-            if ( $result and isset( $result->id ) ) {
+            // sync calls
+            if ( isset( $result->results ) and !empty( $result->results[ 0 ] ) ) {
+                $decoded = [
+                        'data' => [
+                                'translations' => [
+                                        [ 'translatedText' => $result->results[ 0 ] ]
+                                ]
+                        ]
+                ];
+            } // async calls
+            elseif ( $result and isset( $result->id ) ) {
                 $id = $result->id;
 
                 if ( isset( $result->response ) and !empty( $result->response ) and isset( $result->done ) and $result->done ) {
@@ -141,6 +152,10 @@ class Intento extends AbstractEngine {
      */
     public function get( array $_config ) {
 
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            return [];
+        }
+
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
@@ -152,20 +167,24 @@ class Intento extends AbstractEngine {
         $parameters[ 'context' ][ 'from' ] = $_config[ 'source' ];
         $parameters[ 'context' ][ 'to' ]   = $_config[ 'target' ];
         $parameters[ 'context' ][ 'text' ] = $_config[ 'segment' ];
-        $provider                          = $this->provider;
-        $providerKey                       = $this->providerKey;
-        $providerCategory                  = $this->providerCategory;
 
-        if ( !empty( $provider ) ) {
-            $parameters[ 'service' ][ 'async' ]    = true;
-            $parameters[ 'service' ][ 'provider' ] = $provider[ 'id' ];
+        if ( isset( $_config[ 'pid' ] ) ) {
+            $metadataDao   = new MetadataDao();
 
-            if ( !empty( $providerKey ) ) {
-                $parameters[ 'service' ][ 'auth' ][ $provider[ 'id' ] ] = [ json_decode( $providerKey, true ) ];
+            // custom provider
+            $customProvider = $metadataDao->get( $_config[ 'pid' ], 'intento_provider', 86400 );
+
+            if ( $customProvider !== null and $customProvider !== "smart_routing" ) {
+                $parameters[ 'service' ][ 'async' ]    = true;
+                $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
             }
 
-            if ( !empty( $providerCategory ) ) {
-                $parameters[ 'context' ][ 'category' ] = $providerCategory;
+            // custom routing
+            $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
+
+            if ( $customRouting !== null ) {
+                $parameters[ 'service' ][ 'async' ]   = true;
+                $parameters[ 'service' ][ 'routing' ] = $customRouting->value;
             }
         }
 
@@ -241,6 +260,66 @@ class Intento extends AbstractEngine {
     }
 
     /**
+     * Get user's routing list
+     *
+     * @return array
+     */
+    public function getRoutingList() {
+
+        if ( empty( $this->apiKey ) ) {
+            return [];
+        }
+
+        try {
+            $redisHandler = new RedisHandler();
+            $conn         = $redisHandler->getConnection();
+            $cacheKey     = 'IntentoRoutings-' . $this->apiKey;
+            $result       = $conn->get( $cacheKey );
+
+            if ( $result ) {
+                return json_decode( $result, true );
+            }
+
+            $_api_url = self::INTENTO_API_URL . '/routing-designer';
+            $curl     = curl_init( $_api_url );
+            $_params  = [
+                    CURLOPT_HTTPHEADER     => [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ],
+                    CURLOPT_HEADER         => false,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+                    CURLOPT_CONNECTTIMEOUT => 10,
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2
+            ];
+
+            curl_setopt_array( $curl, $_params );
+            $response = curl_exec( $curl );
+            $result   = json_decode( $response );
+            curl_close( $curl );
+            $_routings = [];
+
+            if ( $result and $result->data ) {
+                foreach ( $result->data as $item ) {
+                    $_routings[ $item->name ] = [
+                            'id'          => $item->rt_id,
+                            'name'        => $item->name,
+                            'description' => $item->description,
+                    ];
+                }
+            }
+
+            ksort( $_routings, SORT_STRING | SORT_FLAG_CASE );
+
+            $conn->set( $cacheKey, json_encode( $_routings ) );
+            $conn->expire( $cacheKey, 60 * 60 ); // 1 hour
+
+            return $_routings;
+        } catch ( Exception $exception ) {
+            return [];
+        }
+    }
+
+    /**
      * Get provider list
      * @throws ReflectionException
      */
@@ -268,6 +347,15 @@ class Intento extends AbstractEngine {
         $result   = json_decode( $response );
         curl_close( $curl );
         $_providers = [];
+
+        // needed by the UI
+        $_providers['smart_routing'] = [
+            'id' => 'smart_routing',
+            'name' => 'Smart_routing',
+            'vendor' => "",
+            'auth_example' => ""
+        ];
+
         if ( $result ) {
             foreach ( $result as $value ) {
                 $example                  = (array)$value->auth;
@@ -280,5 +368,16 @@ class Intento extends AbstractEngine {
         $conn->expire( 'IntentoProviders', 60 * 60 * 24 );
 
         return $_providers;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+                'intento_routing',
+                'intento_provider',
+        ];
     }
 }

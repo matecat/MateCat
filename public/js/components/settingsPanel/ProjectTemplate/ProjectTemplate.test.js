@@ -53,7 +53,9 @@ beforeEach(() => {
 test('Render properly', async () => {
   const user = userEvent.setup()
 
-  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
+  const {result} = renderHook(() =>
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
+  )
 
   await waitFor(() => {
     expect(result.current.projectTemplates?.length).toBe(2)
@@ -105,7 +107,9 @@ test('Render properly', async () => {
 test('Create, update and delete template', async () => {
   const user = userEvent.setup()
 
-  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
+  const {result} = renderHook(() =>
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
+  )
   const {modifyingCurrentTemplate} = result.current
 
   await waitFor(() => {
@@ -290,7 +294,9 @@ test('Create, update and delete template', async () => {
 test('Set template as default', async () => {
   const user = userEvent.setup()
 
-  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
+  const {result} = renderHook(() =>
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
+  )
 
   await waitFor(() => {
     expect(result.current.projectTemplates?.length).toBe(2)
