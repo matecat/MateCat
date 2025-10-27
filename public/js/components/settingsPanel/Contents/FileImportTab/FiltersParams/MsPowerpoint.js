@@ -54,8 +54,11 @@ const convertTranslateSlidesToView = (value) =>
     .map((value) => (Array.isArray(value) ? value[0].toString() : value))
 
 export const MsPowerpoint = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
-    useContext(FiltersParamsContext)
+  const {
+    currentTemplate,
+    currentProjectTemplateChanged,
+    modifyingCurrentTemplate,
+  } = useContext(FiltersParamsContext)
 
   const {control, watch, setValue} = useForm()
 
@@ -129,7 +132,7 @@ export const MsPowerpoint = () => {
         typeof msPowerpoint.current.translate_slides === 'undefined')
     )
       setValue('translate_slides', [])
-  }, [currentTemplate.id, setValue])
+  }, [currentTemplate.id, currentProjectTemplateChanged, setValue])
 
   return (
     <div className="filters-params-accordion-content">

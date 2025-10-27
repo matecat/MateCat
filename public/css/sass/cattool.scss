@@ -80,8 +80,12 @@ body.cattool {
   top: 0;
   height: 100%;
   gap: 6px;
+  > div {
+    height: 24px;
+  }
   .icon-warning-sign.qa-icon {
     background-color: colors.$red800;
+    color: #fff;
     display: flex;
     padding: 3px;
     justify-content: center;

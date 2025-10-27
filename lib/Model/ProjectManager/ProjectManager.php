@@ -840,8 +840,8 @@ class ProjectManager {
                     }
 
                     // pdfAnalysis
-                    foreach ($filesStructure as $fid => $fileStructure){
-                        $pos  = array_search($fileStructure['original_filename'], $this->projectStructure[ 'array_files' ]);
+                    foreach ( $filesStructure as $fid => $fileStructure ) {
+                        $pos  = array_search( $fileStructure[ 'original_filename' ], $this->projectStructure[ 'array_files' ] );
                         $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
                         if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
@@ -1227,47 +1227,61 @@ class ProjectManager {
 
         $memoryFiles = [];
 
+        if ( empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
+            return;
+        }
+
+        if ( !isset( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+            return;
+        }
+
+        if ( empty( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+            return;
+        }
+
         //TMX Management
-        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
+        if ( !empty( $this->projectStructure[ 'array_files' ] ) ) {
+            foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
-            // get corresponding meta
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+                // get corresponding meta
+                $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
 
-            $ext = $meta[ 'extension' ];
+                $ext = $meta[ 'extension' ];
 
-            try {
+                try {
 
-                if ( 'tmx' == $ext ) {
+                    if ( 'tmx' == $ext ) {
 
-                    $file = new TMSFile(
-                            "$this->uploadDir/$fileName",
-                            $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
-                            $fileName,
-                            $pos
-                    );
+                        $file = new TMSFile(
+                                "$this->uploadDir/$fileName",
+                                $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
+                                $fileName,
+                                $pos
+                        );
 
-                    $memoryFiles[] = $file;
+                        $memoryFiles[] = $file;
 
-                    if ( AppConfig::$FILE_STORAGE_METHOD == 's3' ) {
-                        $this->getSingleS3QueueFile( $fileName );
+                        if ( AppConfig::$FILE_STORAGE_METHOD == 's3' ) {
+                            $this->getSingleS3QueueFile( $fileName );
+                        }
+
+                        $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                        $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
+
+                    } else {
+                        //don't call the postPushTMX for normal files
+                        continue;
                     }
 
-                    $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
-                    $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
+                } catch ( Exception $e ) {
 
-                } else {
-                    //don't call the postPushTMX for normal files
-                    continue;
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                            "code"    => $e->getCode(),
+                            "message" => $e->getMessage()
+                    ];
+
+                    throw new Exception( $e );
                 }
-
-            } catch ( Exception $e ) {
-
-                $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code"    => $e->getCode(),
-                        "message" => $e->getMessage()
-                ];
-
-                throw new Exception( $e );
             }
         }
 
@@ -2778,7 +2792,7 @@ class ProjectManager {
                 //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
                 // SegmentDao::getById returns false if the id is not found in the database
                 // Skip the segment and lose the translation if the segment id is not found in the database
-                if( !$segment ) {
+                if ( !$segment ) {
                     continue;
                 }
 

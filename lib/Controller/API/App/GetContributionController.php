@@ -25,7 +25,6 @@ use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyManager;
 
 class GetContributionController extends KleinController {
 
@@ -211,7 +210,8 @@ class GetContributionController extends KleinController {
             }
         }
 
-        if ( empty( $text ) ) {
+        // Allowing "0" as text
+        if ( empty( $text ) and $text != "0" ) {
             throw new InvalidArgumentException( "missing text", -2 );
         }
 

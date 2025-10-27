@@ -6,8 +6,11 @@ import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
 export const MsWord = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
-    useContext(FiltersParamsContext)
+  const {
+    currentTemplate,
+    currentProjectTemplateChanged,
+    modifyingCurrentTemplate,
+  } = useContext(FiltersParamsContext)
 
   const {control, watch, setValue} = useForm()
 
@@ -42,7 +45,7 @@ export const MsWord = () => {
     Object.entries(msWord.current).forEach(([key, value]) =>
       setValue(key, value),
     )
-  }, [currentTemplate.id, setValue])
+  }, [currentTemplate.id, currentProjectTemplateChanged, setValue])
 
   return (
     <div className="filters-params-accordion-content">
