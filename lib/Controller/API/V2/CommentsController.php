@@ -19,7 +19,7 @@ use Model\Jobs\JobStruct;
 class CommentsController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */

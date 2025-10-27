@@ -18,6 +18,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -107,7 +108,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $this->data[ 'segment' ] = $this->segment;
 
             $segment     = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); // this segment comes from the database when getting contexts
-            $translation = $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] );
+            $translation = ( empty( $this->data[ 'translation' ] ) and !is_numeric( $this->data[ 'translation' ] ) ) ? "" : $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] ); // is_numeric check is needed to allow "0" strings
 
             $check = new QA( $segment, $translation ); // Layer 1 here
             $check->setChunk( $this->data[ 'chunk' ] );
@@ -358,13 +359,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $redisHandler = new RedisHandler();
             $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->data[ 'id_job' ] );
             if (
+            (
                     (
-                            (
-                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
-                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
-                            )
-                            and empty( $job_status )
+                            $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
+                            $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
                     )
+                    and empty( $job_status )
+            )
             ) {
                 $redisHandler->getConnection()->setex( 'job_completeness:' . $this->data[ 'id_job' ], 60 * 60 * 24 * 15, true ); //15 days
 
@@ -481,7 +482,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 'status'                  => $status,
                 'split_statuses'          => $split_statuses,
                 'chunk'                   => $chunk,
-                'project'                 => $chunk->getProject()
+                'project'                 => $chunk->getProject(),
+                'id_project'              => $chunk->id_project
         ];
 
         $this->logger->debug( $data );
@@ -521,7 +523,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $featureSet->loadForProject( $this->data[ 'project' ] );
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ) );
+        $metadata     = new JobsMetadataDao();
+        $filter       = MateCatFilter::getInstance(
+                $featureSet,
+                $this->data[ 'chunk' ]->source,
+                $this->data[ 'chunk' ]->target,
+                SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ),
+                $metadata->getSubfilteringCustomHandlers( $this->id_job, $this->password )
+        );
         $this->filter = $filter;
 
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
@@ -800,12 +809,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->job_password         = $this->data[ 'password' ];
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
-        $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
+        $contributionStruct->translation          = ( $_Translation[ 'translation' ] !== null ) ? $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] ) : "";
         $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
-        $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
+        $contributionStruct->oldTranslation       = ( $_Translation[ 'translation' ] !== null ) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : "";
         $contributionStruct->translation_origin   = $this->getOriginalSuggestionProvider( $_Translation, $old_translation );
 
         /*

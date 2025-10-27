@@ -367,23 +367,27 @@ abstract class AbstractEngine implements EngineInterface {
      */
     protected function GoogleTranslateFallback( array $_config ) {
 
-        /**
-         * Create a record of type GoogleTranslate
-         */
-        $newEngineStruct = GoogleTranslateStruct::getStruct();
+        try {
+            /**
+             * Create a record of type GoogleTranslate
+             */
+            $newEngineStruct = GoogleTranslateStruct::getStruct();
 
-        $newEngineStruct->name                                = "Generic";
-        $newEngineStruct->uid                                 = 0;
-        $newEngineStruct->type                                = EngineConstants::MT;
-        $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
-        $newEngineStruct->others                              = [];
+            $newEngineStruct->name                                = "Generic";
+            $newEngineStruct->uid                                 = 0;
+            $newEngineStruct->type                                = EngineConstants::MT;
+            $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
+            $newEngineStruct->others                              = [];
 
-        $gtEngine = EnginesFactory::createTempInstance( $newEngineStruct );
+            $gtEngine = EnginesFactory::createTempInstance( $newEngineStruct );
 
-        /**
-         * @var $gtEngine GoogleTranslate
-         */
-        return $gtEngine->get( $_config );
+            /**
+             * @var $gtEngine GoogleTranslate
+             */
+            return $gtEngine->get( $_config );
+        } catch (Exception $exception){
+            return [];
+        }
 
     }
 

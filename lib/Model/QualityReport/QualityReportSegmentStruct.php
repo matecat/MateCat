@@ -188,7 +188,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
         $QA->setFeatureSet( $featureSet );
         $QA->performConsistencyCheck();
 
-        $local_warning = new QALocalWarning( $QA, $this->sid );
+        $local_warning = new QALocalWarning( $QA, $this->sid, $chunk->id_project );
 
         return $local_warning->render();
     }

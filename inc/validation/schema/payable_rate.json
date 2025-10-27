@@ -12,6 +12,10 @@
       ],
       "nullable": true
     },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
     "breakdowns": {
       "type": "object",
       "$ref": "#/definitions/breakdowns"
