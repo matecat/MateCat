@@ -87,8 +87,8 @@ class UserController extends AbstractStatefulKleinController {
         $json = $this->request->body();
 
         $filters = [
-                'key'   => FILTER_SANITIZE_STRING,
-                'value' => FILTER_SANITIZE_STRING,
+                'key'   => FILTER_SANITIZE_SPECIAL_CHARS,
+                'value' => FILTER_SANITIZE_SPECIAL_CHARS,
         ];
 
         $options = [

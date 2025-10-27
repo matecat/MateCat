@@ -67,8 +67,8 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected ?array $_matches = null;
 
-    const ERR_EMPTY_WORD_COUNT = 4;
-    const ERR_WRONG_PROJECT    = 5;
+    const int ERR_EMPTY_WORD_COUNT = 4;
+    const int ERR_WRONG_PROJECT    = 5;
 
     /**
      * @var FeatureSet
@@ -86,7 +86,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws Exception
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         $this->_checkDatabaseConnection();
 
@@ -466,7 +466,7 @@ class TMAnalysisWorker extends AbstractWorker {
             }
 
             /**
-             * Match never returns matches below 50%, it sends them as NO_MATCH,
+             * MyMemory never returns matches below 50%, it sends them as NO_MATCH,
              * So this block of code results unused
              */
             if ( $ind < 50 ) {
@@ -535,7 +535,7 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * Get matches from Match and other engines
+     * Get matches from MyMemory and other engines
      *
      * @param $queueElement QueueElement
      *
@@ -592,14 +592,14 @@ class TMAnalysisWorker extends AbstractWorker {
         if ( $mtEngine instanceof MyMemory ) {
 
             $_config[ 'get_mt' ] = true;
-            $mtEngine            = EnginesFactory::getInstance( 0 );  //Do Not Call Match with this instance, use $tmsEngine instance
+            $mtEngine            = EnginesFactory::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
 
         } else {
             $_config[ 'get_mt' ] = false;
         }
 
         if ( $queueElement->params->only_private ) {
-            $_config[ 'onlyprivate' ] = true; // Match configuration, get matches only from private memories
+            $_config[ 'onlyprivate' ] = true; // MyMemory configuration, get matches only from private memories
         }
 
         // if we want only private tm with no keys, mymemory should not be called
@@ -610,7 +610,7 @@ class TMAnalysisWorker extends AbstractWorker {
         /*
          * This will be ever executed without damages because
          * fastAnalysis set Project as DONE when
-         * Match is disabled and MT is Disabled Too
+         * MyMemory is disabled and MT is Disabled Too
          *
          * So don't worry, perform TMS Analysis
          *
@@ -700,7 +700,7 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * Call External MT engine if it is custom (mt not requested from Match)
+     * Call External MT engine if it is custom (mt not requested from MyMemory)
      *
      * @param AbstractEngine          $mtEngine
      * @param array                   $_config
@@ -799,22 +799,22 @@ class TMAnalysisWorker extends AbstractWorker {
         /**
          * If No results found. Re-Queue
          *
-         * Match can return null if an error occurs (e.g., http response code is 404, 410, 500, 503, etc...)
+         * MyMemory can return null if an error occurs (e.g., http response code is 404, 410, 500, 503, etc...)
          */
         if ( !empty( $tms_match->error ) ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Match. NULL received." );
-            throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from Match. NULL received.", self::ERR_REQUEUE );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Matches. NULL received." );
+            throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from Matches. NULL received.", self::ERR_REQUEUE );
         }
 
         if ( !$tms_match->mtLangSupported ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Match. MT not supported." );
-            throw new NotSupportedMTException( "--- (Worker " . $this->_workerPid . ") : Error from Match. MT not supported.", self::ERR_EMPTY_ELEMENT );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Matches. MT not supported." );
+            throw new NotSupportedMTException( "--- (Worker " . $this->_workerPid . ") : Error from Matches. MT not supported.", self::ERR_EMPTY_ELEMENT );
         }
 
-        // Strict check for MT engine == 1, this means we requested Match explicitly to get MT (the returned record cannot be empty). Try again
+        // Strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT (the returned record cannot be empty). Try again
         if ( empty( $tms_match ) && $_config[ 'get_mt' ] ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Match. Empty field received even if MT was requested." );
-            throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from Match. Empty field received even if MT was requested.", self::ERR_REQUEUE );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Matches. Empty field received even if MT was requested." );
+            throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from Matches. Empty field received even if MT was requested.", self::ERR_REQUEUE );
         }
 
         if ( !empty( $tms_match ) ) {

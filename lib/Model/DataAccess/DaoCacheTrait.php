@@ -35,7 +35,7 @@ trait DaoCacheTrait {
      * @return void
      * @throws ReflectionException
      */
-    protected function _cacheSetConnection() {
+    protected function _cacheSetConnection(): void {
         if ( !isset( self::$cache_con ) || empty( self::$cache_con ) ) {
 
             try {
@@ -50,7 +50,7 @@ trait DaoCacheTrait {
     }
 
 
-    protected function _logCache( $type, $key, $value, $sqlQuery ) {
+    protected function _logCache( string $type, string $key, mixed $value, string $sqlQuery ): void {
         LoggerFactory::getLogger( 'query_cache' )->debug(
                 [
                         "type" => $type,
@@ -79,7 +79,7 @@ trait DaoCacheTrait {
         $value = null;
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
             $key   = md5( $query );
-            $value = unserialize( self::$cache_con->hget( $keyMap, $key ) );
+            $value = unserialize( self::$cache_con->hget( $keyMap, $key ) ?? '' );
             $this->_logCache( "GETMAP: " . $keyMap, $key, $value, $query );
         }
 

@@ -1055,7 +1055,7 @@ class CatUtils {
     }
 
     /**
-     * This method can be used as polyfill of FILTER_SANITIZE_STRING,
+     * This method can be used as polyfill of FILTER_SANITIZE_SPECIAL_CHARS,
      * which is DEPRECATED in PHP >= 8.1
      *
      * @param string $string

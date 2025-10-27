@@ -68,8 +68,8 @@ class SignupController extends AbstractStatefulKleinController {
                 (array)$this->request->param( 'user' ),
                 [
                         'email'                 => [ 'filter' => FILTER_SANITIZE_EMAIL, 'options' => [] ],
-                        'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
-                        'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
+                        'password'              => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'options' => FILTER_FLAG_STRIP_LOW ],
+                        'password_confirmation' => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'first_name'            => [
                                 'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
                                     return CatUtils::stripMaliciousContentFromAName( $firstName );
@@ -113,7 +113,7 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function confirm() {
 
-        $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+        $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
 
         $signupModel = new SignupModel( [ 'token' => $token ], $_SESSION );
 

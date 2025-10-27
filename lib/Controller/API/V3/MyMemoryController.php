@@ -33,10 +33,10 @@ class MyMemoryController extends KleinController {
             }
 
             if ( isset( $json[ 'key' ] ) ) {
-                $key = filter_var( $json[ 'key' ], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+                $key = filter_var( $json[ 'key' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
             }
 
-            $name = filter_var( $json[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+            $name = filter_var( $json[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
 
             if ( $key !== null ) {
                 $newKey = $this->checkTheKeyAndAssignToUser( $key, $name );

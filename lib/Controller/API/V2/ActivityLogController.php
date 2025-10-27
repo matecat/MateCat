@@ -10,20 +10,46 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
-use Exception;
 use Model\ActivityLog\ActivityLogDao;
 use Model\ActivityLog\ActivityLogStruct;
 use ReflectionException;
+use Throwable;
 use View\API\V2\Json\Activity;
 
-class ActivityLogController extends KleinController {
+class ActivityLogController extends KleinController implements ChunkPasswordValidatorInterface {
+
+    protected int    $id_job;
+    protected string $jobPassword;
 
     /**
-     * @throws Exception
+     * @param int $id_job
+     *
+     * @return $this
      */
-    public function allOnProject() {
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function allOnProject(): void {
         $validator = new ProjectPasswordValidator( $this );
         $validator->validate();
 
@@ -35,9 +61,9 @@ class ActivityLogController extends KleinController {
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
-    public function lastOnProject() {
+    public function lastOnProject(): void {
 
         $validator = new ProjectPasswordValidator( $this );
         $validator->validate();
@@ -52,9 +78,9 @@ class ActivityLogController extends KleinController {
 
     /**
      * @throws ReflectionException
-     * @throws Exception
+     * @throws Throwable
      */
-    public function lastOnJob() {
+    public function lastOnJob(): void {
 
         $validator = new ChunkPasswordValidator( $this );
         $validator->validate();

@@ -102,7 +102,7 @@ class SetCurrentSegmentController extends KleinController {
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
         $id_segment      = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
         $id_job          = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $password        = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $password        = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         if ( empty( $id_job ) ) {
             throw new InvalidArgumentException( "No id job provided", -1 );

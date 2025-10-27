@@ -6,11 +6,11 @@ use Controller\Abstracts\KleinController;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DOMDocument;
 use Exception;
+use JetBrains\PhpStorm\NoReturn;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\QualityReportSegmentModel;
-use Model\QualityReport\QualityReportSegmentStruct;
 use ZipArchive;
 
 
@@ -35,7 +35,7 @@ class DownloadQRController extends KleinController {
     /**
      * Download QR to a file
      */
-    public function download() {
+    public function download(): void {
 
         $idJob                 = $this->request->param( 'jid' );
         $password              = $this->request->param( 'password' );
@@ -108,12 +108,12 @@ class DownloadQRController extends KleinController {
     }
 
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return bool|false|string
      * @throws Exception
      */
-    private function composeFileContent( JobStruct $chunk ) {
+    private function composeFileContent( JobStruct $chunk ): bool|string {
 
         $data = [];
 
@@ -195,7 +195,6 @@ class DownloadQRController extends KleinController {
 
         $data = [];
 
-        /** @var QualityReportSegmentStruct $segment */
         foreach ( $segments as $segment ) {
 
             $issues   = [];
@@ -211,7 +210,7 @@ class DownloadQRController extends KleinController {
 
                 $issues[ $label ] = $issues[ $label ] + 1;
 
-                foreach ( $issue->comments as $comment ) {
+                foreach ( $issue->comments ?? [] as $comment ) {
                     $comments[ $label ][] = $comment;
                 }
             }
@@ -261,7 +260,7 @@ class DownloadQRController extends KleinController {
      *
      * @return bool|false|string
      */
-    private function createCSVFile( array $data, array $categoryIssues = [] ) {
+    private function createCSVFile( array $data, array $categoryIssues = [] ): bool|string {
 
         $headings = [
                 "sid",
@@ -347,7 +346,7 @@ class DownloadQRController extends KleinController {
         return $fileContent;
     }
 
-    private function createXMLFile( array $data, array $categoryIssues = [] ) {
+    private function createXMLFile( array $data, array $categoryIssues = [] ): false|string {
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<segments>';
@@ -452,7 +451,7 @@ class DownloadQRController extends KleinController {
      *
      * @return false|string
      */
-    private function createJsonFile( array $data, array $categoryIssues = [] ) {
+    private function createJsonFile( array $data, array $categoryIssues = [] ): false|string {
 
         $jsonData = [];
 
@@ -516,7 +515,7 @@ class DownloadQRController extends KleinController {
      * @param string $filename
      * @param array  $files
      */
-    private function composeZipFile( string $filename, array $files ) {
+    private function composeZipFile( string $filename, array $files ): void {
         $zip = new ZipArchive;
 
         if ( $zip->open( $filename, ZipArchive::CREATE ) ) {
@@ -535,7 +534,8 @@ class DownloadQRController extends KleinController {
      * @param string $filename
      * @param string $filePath
      */
-    private function downloadFile( string $mimeType, string $filename, string $filePath ) {
+    #[NoReturn]
+    private function downloadFile( string $mimeType, string $filename, string $filePath ): void {
 
         $outputContent = file_get_contents( $filePath );
 

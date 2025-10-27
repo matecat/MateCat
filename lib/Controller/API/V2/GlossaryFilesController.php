@@ -52,13 +52,13 @@ class GlossaryFilesController extends KleinController {
 
         $filterArgs = [
                 'name'          => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW
                 ],
                 'tm_key'        => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'downloadToken' => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ]
         ];
 
@@ -134,7 +134,7 @@ class GlossaryFilesController extends KleinController {
 
                 $glossaryCsvValidator = $this->validateCSVFile( $fileInfo->file_path );
 
-                // load it into Match
+                // load it into MyMemory
 
                 $file = new TMSFile(
                         $fileInfo->file_path,

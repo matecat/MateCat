@@ -31,8 +31,8 @@ class ChangeProjectNameController extends JobsController {
     public function changeName() {
 
         $id       = filter_var( $this->request->param( 'id_project' ), FILTER_SANITIZE_NUMBER_INT );
-        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $name     = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $name     = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
         if (
                 empty( $id ) or

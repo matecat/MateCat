@@ -63,7 +63,7 @@ class Xml implements IDto, JsonSerializable {
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
 
         $format = [];
 

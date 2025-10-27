@@ -29,7 +29,7 @@ class JsonValidatorGenericException extends Exception implements JsonSerializabl
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): ?string {
         return $this->error;
     }
 

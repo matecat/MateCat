@@ -7,9 +7,11 @@
  */
 
 namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
@@ -19,18 +21,45 @@ use Model\Exceptions\ValidationError;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use ReflectionException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 
-class FileInfoController extends KleinController {
+class FileInfoController extends KleinController implements ChunkPasswordValidatorInterface {
     use ChunkNotFoundHandlerTrait;
+
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
     /**
      * @var ProjectStruct
      */
     protected $project;
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $Validator = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
@@ -44,15 +73,15 @@ class FileInfoController extends KleinController {
 
     }
 
-    private function setChunk( JobStruct $chunk ) {
+    private function setChunk( JobStruct $chunk ): void {
         $this->chunk = $chunk;
     }
 
-    private function setProject( ProjectStruct $project ) {
+    private function setProject( ProjectStruct $project ): void {
         $this->project = $project;
     }
 
-    public function getInfo() {
+    public function getInfo(): void {
 
         // those values where not used
 //        $page    = ( isset( $this->request->page ) ) ? $this->request->page : 1;
@@ -65,9 +94,9 @@ class FileInfoController extends KleinController {
     }
 
     /**
-     * @throws NotFoundException
+     * @throws NotFoundException|ReflectionException
      */
-    public function getInstructions() {
+    public function getInstructions(): void {
 
         $this->return404IfTheJobWasDeleted();
 
@@ -83,9 +112,9 @@ class FileInfoController extends KleinController {
     }
 
     /**
-     * @throws NotFoundException
+     * @throws NotFoundException|ReflectionException
      */
-    public function getInstructionsByFilePartsId() {
+    public function getInstructionsByFilePartsId(): void {
 
         $this->return404IfTheJobWasDeleted();
 
@@ -104,14 +133,15 @@ class FileInfoController extends KleinController {
     /**
      * save instructions
      *
-     * @throws NotFoundException
      * @throws AuthenticationError
-     * @throws \Model\Exceptions\NotFoundException
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
+     * @throws \Model\Exceptions\NotFoundException
      */
-    public function setInstructions() {
+    public function setInstructions(): void {
 
         $this->return404IfTheJobWasDeleted();
 
@@ -121,13 +151,13 @@ class FileInfoController extends KleinController {
 
         $instructions = $this->featureSet->filter( 'decodeInstructions', $instructions );
 
-        if(empty($instructions)){
-            throw new InvalidArgumentException("Empty instructions provided");
+        if ( empty( $instructions ) ) {
+            throw new InvalidArgumentException( "Empty instructions provided" );
         }
 
         if ( $filesInfoUtility->setInstructions( $id_file, $instructions ) ) {
             $this->response->json( [
-                "success" => true,
+                    "success" => true,
             ] );
         } else {
             throw new NotFoundException( 'File not found on this project' );

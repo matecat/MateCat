@@ -36,7 +36,7 @@ trait HotSwap {
      * @param int                   $newTM
      *
      */
-    protected function swapOn( Client $redisConn, JobStruct $jobStruct, int $newMT = 1, int $newTM = 1 ) { // 1 == Match
+    protected function swapOn( Client $redisConn, JobStruct $jobStruct, int $newMT = 1, int $newTM = 1 ) { // 1 == MyMemory
 
         if ( $redisConn->setnx( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, $jobStruct->id_mt_engine ) ) {
             $redisConn->expire( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, 60 * 60 * 24 );

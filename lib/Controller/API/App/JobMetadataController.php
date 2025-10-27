@@ -4,6 +4,7 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -12,9 +13,35 @@ use ReflectionException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
-class JobMetadataController extends KleinController {
+class JobMetadataController extends KleinController implements ChunkPasswordValidatorInterface {
 
-    protected function afterConstruct() {
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
+
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new ChunkPasswordValidator( $this ) );
     }
@@ -89,9 +116,9 @@ class JobMetadataController extends KleinController {
      */
     private function sanitizeRequestParams(): array {
         return filter_var_array( $this->request->params(), [
-                'id_job'   => FILTER_SANITIZE_STRING,
-                'password' => FILTER_SANITIZE_STRING,
-                'key'      => FILTER_SANITIZE_STRING,
+                'id_job'   => FILTER_SANITIZE_SPECIAL_CHARS,
+                'password' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'key'      => FILTER_SANITIZE_SPECIAL_CHARS,
         ] );
     }
 }

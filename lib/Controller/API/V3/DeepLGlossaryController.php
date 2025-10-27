@@ -55,7 +55,7 @@ class DeepLGlossaryController extends KleinController {
 
         $this->validateCreateGlossaryPayload();
 
-        $name = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH );
+        $name = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH );
 
         $uploadManager = new Upload();
         $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
@@ -112,7 +112,7 @@ class DeepLGlossaryController extends KleinController {
      */
     public function delete() {
 
-        $id          = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id          = filter_var( $this->request->id, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
         $engineId    = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
         $deepLClient = $this->getDeepLClient( $engineId );
 
@@ -133,7 +133,7 @@ class DeepLGlossaryController extends KleinController {
      */
     public function get() {
 
-        $id          = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id          = filter_var( $this->request->id, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
         $engineId    = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
         $deepLClient = $this->getDeepLClient( $engineId );
 
@@ -151,7 +151,7 @@ class DeepLGlossaryController extends KleinController {
      */
     public function getEntries() {
 
-        $id          = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id          = filter_var( $this->request->id, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
         $engineId    = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
         $deepLClient = $this->getDeepLClient( $engineId );
 

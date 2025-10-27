@@ -22,7 +22,7 @@ class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements I
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'          => (int)$this->id,
                 'id_template' => (int)$this->id_template,

@@ -22,9 +22,9 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
     public function confirm() {
 
         $params = filter_var_array( $this->request->params(), [
-                'id_job'   => FILTER_SANITIZE_STRING,
-                'password' => FILTER_SANITIZE_STRING,
-                'payload'  => FILTER_SANITIZE_STRING,
+                'id_job'   => FILTER_SANITIZE_SPECIAL_CHARS,
+                'password' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'payload'  => FILTER_SANITIZE_SPECIAL_CHARS,
         ] );
 
         $payload = \Utils\Tools\SimpleJWT::getValidPayload( $params[ 'payload' ] );

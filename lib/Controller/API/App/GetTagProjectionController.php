@@ -85,12 +85,12 @@ class GetTagProjectionController extends KleinController {
     private function validateTheRequest(): array {
         $id_segment  = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
         $id_job      = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $password    = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $password    = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $source      = filter_var( $this->request->param( 'source' ), FILTER_UNSAFE_RAW );
         $target      = filter_var( $this->request->param( 'target' ), FILTER_UNSAFE_RAW );
         $suggestion  = filter_var( $this->request->param( 'suggestion' ), FILTER_UNSAFE_RAW );
-        $source_lang = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $target_lang = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $source_lang = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $target_lang = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         if ( empty( $source ) ) {
             throw new InvalidArgumentException( "missing source segment", -1 );

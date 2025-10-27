@@ -14,7 +14,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Utils\LQA\QA;
-use Utils\Tools\Match;
+use Utils\Tools\Matches;
 use View\API\V2\Json\QALocalWarning;
 
 
@@ -147,7 +147,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     static function calculatePEE( $str_1, $str_2, $target ): int {
         $post_editing_effort = round(
-                ( 1 - Match::get(
+                ( 1 - Matches::get(
                                 self::cleanSegmentForPee( $str_1 ),
                                 self::cleanSegmentForPee( $str_2 ),
                                 $target

@@ -10,52 +10,82 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 
-class CompletionEventController extends KleinController {
+class CompletionEventController extends KleinController implements ChunkPasswordValidatorInterface {
+
+    protected int    $id_job;
+    protected string $jobPassword;
 
     /**
      * @var JobStruct
      */
-    protected $chunk;
+    protected JobStruct $chunk;
 
     /**
-     * @var \Model\Projects\ProjectStruct
+     * @var ProjectStruct
      */
-    protected $project;
+    protected ProjectStruct $project;
 
     /**
-     * @param \Model\Projects\ProjectStruct $project
+     * @param ProjectStruct $project
      */
-    public function setProject( \Model\Projects\ProjectStruct $project ){
+    public function setProject( ProjectStruct $project ): void {
         $this->project = $project;
     }
 
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( JobStruct $chunk ): static {
         $this->chunk = $chunk;
 
         return $this;
     }
 
     /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $password
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $password ): static {
+        $this->jobPassword = $password;
+
+        return $this;
+    }
+
+
+
+    /**
      * @var ChunkCompletionEventStruct
      */
-    protected $event;
+    protected ChunkCompletionEventStruct $event;
 
     /**
      * @param ChunkCompletionEventStruct $event
      */
-    public function setEvent( ChunkCompletionEventStruct $event ) {
+    public function setEvent( ChunkCompletionEventStruct $event ): void {
         $this->event = $event;
     }
 
@@ -64,22 +94,21 @@ class CompletionEventController extends KleinController {
      */
     protected function afterConstruct() {
 
-        $Controller = $this;
         $Validator  = new ChunkPasswordValidator( $this );
-        $Validator->onSuccess( function () use ( $Controller, $Validator ) {
+        $Validator->onSuccess( function () use ( $Validator ) {
 
-            $event = ( new ChunkCompletionEventDao() )->getByIdAndChunk( $Controller->getParams()[ 'id_event' ], $Validator->getChunk() );
+            $event = ( new ChunkCompletionEventDao() )->getByIdAndChunk( $this->getParams()[ 'id_event' ], $Validator->getChunk() );
 
             if ( !$event ) {
-                throw new \Model\Exceptions\NotFoundException( "Event Not Found.", 404 );
+                throw new NotFoundException( "Event Not Found.", 404 );
             }
 
-            $Controller->setChunk( $Validator->getChunk() );
+            $this->setChunk( $Validator->getChunk() );
 
             $project = $this->chunk->getProject( 60 * 60 );
-            $Controller->setProject( $project );
-            $Controller->setEvent( $event );
-            $Controller->featureSet->loadForProject( $project );
+            $this->setProject( $project );
+            $this->setEvent( $event );
+            $this->featureSet->loadForProject( $project );
 
         } );
 
@@ -90,7 +119,7 @@ class CompletionEventController extends KleinController {
     /**
      * @throws Exception
      */
-    public function delete() {
+    public function delete(): void {
 
         $undoable = true;
 
@@ -109,7 +138,7 @@ class CompletionEventController extends KleinController {
     /**
      * @throws Exception
      */
-    private function __performUndo() {
+    private function __performUndo(): void {
 
         Database::obtain()->begin();
 

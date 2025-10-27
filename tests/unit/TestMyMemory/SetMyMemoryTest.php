@@ -8,7 +8,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Match;
+use Utils\Tools\Matches;
 
 
 /**
@@ -26,7 +26,7 @@ class SetMyMemoryTest extends AbstractTest {
     protected $engine_struct_param;
 
     /**
-     * @var Match
+     * @var Matches
      */
     protected $engine_MyMemory;
 
@@ -170,7 +170,7 @@ TAB;
 
 
         /**
-         * @var Match
+         * @var Matches
          */
         $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $this->anything(), $curl_params )->willReturn( $mock_json_return );
@@ -287,7 +287,7 @@ TAB;
         ];
 
         /**
-         * @var Match
+         * @var Matches
          */
         $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(
@@ -374,7 +374,7 @@ TAB;
 
 
         /**
-         * @var Match
+         * @var Matches
          */
         $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_params )->willReturn( $rawValue_error );

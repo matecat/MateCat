@@ -54,8 +54,8 @@ class SetChunkCompletedController extends KleinController {
      */
     private function validateTheRequest(): array {
         $id_job            = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         if ( empty( $id_job ) ) {
             throw new InvalidArgumentException( "Missing id job", -1 );

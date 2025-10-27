@@ -44,13 +44,13 @@ class ErrMailWorker extends AbstractWorker {
      *
      * @param AbstractElement $queueElement
      *
-     * @return mixed|void
+     * @return void
      * @throws EmptyElementException
      * @throws EndQueueException
      * @throws Exception
      * @throws ReQueueException
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement

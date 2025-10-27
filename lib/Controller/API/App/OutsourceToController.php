@@ -76,13 +76,13 @@ class OutsourceToController extends KleinController {
      * @return array
      */
     private function validateTheRequest(): array {
-        $pid           = filter_var( $this->request->param( 'pid' ), FILTER_SANITIZE_STRING );
-        $ppassword     = filter_var( $this->request->param( 'ppassword' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $currency      = filter_var( $this->request->param( 'currency' ), FILTER_SANITIZE_STRING );
-        $timezone      = filter_var( $this->request->param( 'timezone' ), FILTER_SANITIZE_STRING );
+        $pid           = filter_var( $this->request->param( 'pid' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $ppassword     = filter_var( $this->request->param( 'ppassword' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $currency      = filter_var( $this->request->param( 'currency' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $timezone      = filter_var( $this->request->param( 'timezone' ), FILTER_SANITIZE_SPECIAL_CHARS );
         $fixedDelivery = filter_var( $this->request->param( 'fixedDelivery' ), FILTER_SANITIZE_NUMBER_INT );
-        $typeOfService = filter_var( $this->request->param( 'typeOfService' ), FILTER_SANITIZE_STRING );
-        $jobList       = filter_var( $this->request->param( 'jobs' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $typeOfService = filter_var( $this->request->param( 'typeOfService' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $jobList       = filter_var( $this->request->param( 'jobs' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_REQUIRE_ARRAY | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         if ( empty( $pid ) ) {
             throw new InvalidArgumentException( "No id project provided", -1 );

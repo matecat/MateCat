@@ -25,7 +25,7 @@ use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Langs\Languages;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Match;
+use Utils\Tools\Matches;
 use Utils\Tools\Utils;
 
 error_reporting( ~E_DEPRECATED );
@@ -33,7 +33,7 @@ error_reporting( ~E_DEPRECATED );
 class GlossaryImportTest extends AbstractTest {
     protected $engine_struct_param;
     /**
-     * @var Match
+     * @var Matches
      */
     protected $engine_MyMemory;
     protected $glossary_folder_path;
@@ -162,7 +162,7 @@ class GlossaryImportTest extends AbstractTest {
         ];
 
         /**
-         * @var $this ->engine_MyMemory Match
+         * @var $this ->engine_MyMemory MyMemory
          *            mocking _call
          */
         $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();

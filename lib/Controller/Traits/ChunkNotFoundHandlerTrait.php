@@ -38,7 +38,7 @@ trait ChunkNotFoundHandlerTrait {
     /**
      * Return 404 if chunk was deleted
      */
-    protected function return404IfTheJobWasDeleted() {
+    protected function return404IfTheJobWasDeleted(): void {
         if ( $this->chunk->isDeleted() ) {
             $this->response->status()->setCode( 404 );
             $this->response->json( [

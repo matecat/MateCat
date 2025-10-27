@@ -94,7 +94,7 @@ class CanonicalRoutes {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/api/v2/original/$id_job/$password?" . http_build_query( $params, null, '&', PHP_QUERY_RFC3986 );
+        return "$host/api/v2/original/$id_job/$password?" . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
     }
 
     /**
@@ -118,7 +118,7 @@ class CanonicalRoutes {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/api/v2/translation/$id_job/$password?" . http_build_query( $params, null, '&', PHP_QUERY_RFC3986 );
+        return "$host/api/v2/translation/$id_job/$password?" . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
     }
 
     /**

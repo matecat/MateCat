@@ -65,7 +65,7 @@ class ActivityLogController extends BaseKleinViewController implements IControll
         $filterArgs = [
                 'id_project' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password'   => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ]
         ];
 

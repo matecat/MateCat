@@ -14,6 +14,8 @@
 namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
+use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -38,6 +40,10 @@ class ChunkPasswordValidator extends Base {
 
     public function __construct( KleinController $controller ) {
 
+        if ( !$controller instanceof ChunkPasswordValidatorInterface ) {
+            throw new InvalidArgumentException( 'Controller must implement ChunkPasswordValidatorInterface' );
+        }
+
         parent::__construct( $controller );
 
         $filterArgs = [
@@ -45,7 +51,7 @@ class ChunkPasswordValidator extends Base {
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
                 'password'        => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'revision_number' => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
@@ -57,12 +63,11 @@ class ChunkPasswordValidator extends Base {
         $this->id_job   = $postInput->id_job;
         $this->password = $postInput->password;
 
-        $controller->id_job   = $this->id_job;
-        $controller->password = $this->password;
+        $controller->setIdJob( $this->id_job );
+        $controller->setJobPassword( $this->password );
 
         if ( false === empty( $postInput->revision_number ) ) {
-            $this->revision_number       = $postInput->revision_number;
-            $controller->revision_number = $this->revision_number;
+            $this->revision_number = $postInput->revision_number;
         }
 
     }
@@ -86,7 +91,7 @@ class ChunkPasswordValidator extends Base {
     /**
      * @throws NotFoundException
      */
-    protected function getChunkFromRevisePassword() {
+    protected function getChunkFromRevisePassword(): void {
         $this->chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $this->request->param( 'password' ), $this->request->param( 'id_job' ) );
         if ( empty( $this->chunkReview ) ) {
             throw new NotFoundException( 'Not found.' );
@@ -99,7 +104,7 @@ class ChunkPasswordValidator extends Base {
     /**
      * @throws ReflectionException
      */
-    protected function getChunkFromTranslatePassword() {
+    protected function getChunkFromTranslatePassword(): void {
         $this->chunk = JobDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
         if ( !empty( $this->chunk ) ) {
             $this->chunkReview = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk )[ 0 ] ?? null;

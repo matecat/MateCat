@@ -128,16 +128,16 @@ class DeleteContributionController extends KleinController {
      */
     private function validateTheRequest(): array {
 
-        $id_segment        = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source_lang       = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $target_lang       = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $id_segment        = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $source_lang       = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $target_lang       = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $source            = filter_var( $this->request->param( 'seg' ), FILTER_UNSAFE_RAW );
         $target            = filter_var( $this->request->param( 'tra' ), FILTER_UNSAFE_RAW );
         $id_job            = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $id_translator     = !empty( $this->request->param( 'id_translator' ) ) ? filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_NUMBER_INT ) : null;
         $id_match          = filter_var( $this->request->param( 'id_match' ), FILTER_SANITIZE_NUMBER_INT );
-        $password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
         $source            = trim( $source );
         $target            = trim( $target );

@@ -430,10 +430,10 @@ class EngineController extends KleinController {
      * @return array
      */
     private function validateTheRequest(): array {
-        $id       = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING );
-        $name     = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $data     = filter_var( $this->request->param( 'data' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
-        $provider = filter_var( $this->request->param( 'provider' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $id       = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $name     = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $data     = filter_var( $this->request->param( 'data' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $provider = filter_var( $this->request->param( 'provider' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
 
         return [
                 'id'       => $id,

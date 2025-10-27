@@ -75,7 +75,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Delete action on Match
+     * Delete action on MyMemory
      *
      * @throws JsonSchemaException
      * @throws InvalidValue
@@ -101,7 +101,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Get the domains from Match
+     * Get the domains from MyMemory
      *
      * @throws JsonSchemaException
      * @throws InvalidValue
@@ -125,7 +125,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Get action on Match
+     * Get action on MyMemory
      *
      * @throws JsonSchemaException
      * @throws InvalidValue
@@ -150,7 +150,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Retrieve from Match the information if keys have at least one glossary associated
+     * Retrieve from MyMemory the information if keys have at least one glossary associated
      *
      * @throws JsonSchemaException
      * @throws InvalidValue
@@ -181,7 +181,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Search for a specific sentence in Match
+     * Search for a specific sentence in MyMemory
      *
      * @throws JsonSchemaException
      * @throws InvalidValue
@@ -206,7 +206,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Set action on Match
+     * Set action on MyMemory
      *
      * @throws JsonSchemaException
      * @throws InvalidValue
@@ -237,7 +237,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Update action on Match
+     * Update action on MyMemory
      *
      * @throws JsonSchemaException
      * @throws InvalidValue

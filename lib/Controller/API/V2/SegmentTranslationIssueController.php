@@ -3,6 +3,7 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
@@ -17,14 +18,39 @@ use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use View\API\V2\Json\TranslationIssueComment;
 
-class SegmentTranslationIssueController extends AbstractStatefulKleinController {
+class SegmentTranslationIssueController extends AbstractStatefulKleinController implements ChunkPasswordValidatorInterface {
+
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
 
     /**
      * @var SegmentTranslationIssueValidator
      */
     private SegmentTranslationIssueValidator $validator;
 
-    public function index() {
+    public function index(): void {
         $result = EntryDao::findAllByTranslationVersion(
                 $this->validator->translation->id_segment,
                 $this->validator->translation->id_job,
@@ -40,7 +66,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     /**
      * @throws ValidationError
      */
-    public function create() {
+    public function create(): void {
         $data = [
                 'id_segment'          => $this->request->param( 'id_segment' ),
                 'id_job'              => $this->request->param( 'id_job' ),
@@ -86,14 +112,14 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * This method does nothing
      * @return void
      */
-    public function update() {
+    public function update(): void {
         $this->response->json( [ 'issue' => 'ok' ] );
     }
 
     /**
      * @throws Exception
      */
-    public function delete() {
+    public function delete(): void {
 
         Database::obtain()->begin();
         $model = $this->_getSegmentTranslationIssueModel(
@@ -107,7 +133,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $this->response->code( 200 );
     }
 
-    public function getComments() {
+    public function getComments(): void {
         $dao = new EntryCommentDao();
 
         $comments = $dao->findByIssueId(
@@ -121,7 +147,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     /**
      */
-    public function createComment() {
+    public function createComment(): void {
 
         $data = [
                 'comment'     => $this->request->param( 'message' ),
@@ -155,12 +181,12 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         return new TranslationIssueModel( $id_job, $password, $issue );
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
 
         $jobValidator = new ChunkPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
             //enable dynamic loading (Factory) by callback hook on revision features
-            $this->validator =  ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $jobValidator->getChunkReview() );
+            $this->validator = ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $jobValidator->getChunkReview() );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );

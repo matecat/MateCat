@@ -3,13 +3,13 @@
         "phpunit/phpunit": "^9"
     },
     "require": {
-        "php": ">=7.4",
-        "phptal/phptal": "^1.3.0",
+        "php": ">=8.3",
+        "phptal/phptal": "^1.10.0",
         "google/apiclient": "^2",
-        "klein/klein": "^2.1",
+        "matecat/klein": "^3.2",
         "stomp-php/stomp-php": "^5.0",
-        "predis/predis": "^v2.0",
-        "matecat/simple-s3": "^1.5",
+        "predis/predis": "^v3",
+        "matecat/simple-s3": "dev-php8.3",
         "matecat/whole-text-finder": "^1.0",
         "matecat/xliff-parser": "^2.2",
         "matecat/subfiltering": "~2.3",

@@ -2,6 +2,7 @@
 
 namespace Utils\AsyncTasks\Workers;
 
+use Exception;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Utils\TaskRunner\Commons\AbstractElement;
@@ -9,8 +10,6 @@ use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\Tools\Utils;
-
-//include_once AppConfig::$UTILS_ROOT . "/Match.copyrighted.php";
 
 /**
  * Created by PhpStorm.
@@ -23,7 +22,7 @@ class JobsWorker extends AbstractWorker {
     /**
      * @throws EndQueueException
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement
@@ -45,8 +44,9 @@ class JobsWorker extends AbstractWorker {
      * @param QueueElement $queueElement
      *
      * @throws EndQueueException
+     * @throws Exception
      */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ) {
+    protected function _checkForReQueueEnd( QueueElement $queueElement ): void {
 
         /**
          *

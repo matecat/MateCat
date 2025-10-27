@@ -166,7 +166,7 @@ abstract class KleinController implements IController {
      * @throws Exception
      * @throws Throwable
      */
-    protected function validateRequest() {
+    protected function validateRequest(): void {
         foreach ( $this->validators as $validator ) {
             $validator->validate();
         }

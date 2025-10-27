@@ -32,7 +32,7 @@ class ProjectModel {
     protected array $cacheTeamsToClean = [];
 
     /**
-     * @var \Model\Users\UserStruct
+     * @var UserStruct
      */
     protected UserStruct $user;
 
@@ -40,11 +40,11 @@ class ProjectModel {
         $this->project_struct = $project;
     }
 
-    public function prepareUpdate( string $field, $value ) {
+    public function prepareUpdate( string $field, $value ): void {
         $this->willChange[ $field ] = $value;
     }
 
-    public function setUser( UserStruct $user ) {
+    public function setUser( UserStruct $user ): void {
         $this->user = $user;
     }
 
@@ -105,9 +105,9 @@ class ProjectModel {
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function _sendNotificationEmails() {
+    protected function _sendNotificationEmails(): void {
         if (
-                $this->changedFields[ 'id_assignee' ] &&
+                ( $this->changedFields[ 'id_assignee' ] ?? false ) &&
                 !is_null( $this->changedFields[ 'id_assignee' ] ) &&
                 $this->user->uid != $this->changedFields[ 'id_assignee' ]
         ) {
@@ -120,7 +120,7 @@ class ProjectModel {
     /**
      * @throws ValidationError
      */
-    private function checkName() {
+    private function checkName(): void {
         if ( empty( $this->willChange[ 'name' ] ) ) {
             throw new ValidationError( 'Project name cannot be empty' );
         }
@@ -132,7 +132,7 @@ class ProjectModel {
      * @throws ReflectionException
      * @throws ValidationError
      */
-    private function checkAssigneeChangeInPersonalTeam( $id_team ) {
+    private function checkAssigneeChangeInPersonalTeam( $id_team ): void {
 
         $teamDao = new TeamDao();
         $team    = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $id_team );
@@ -148,7 +148,7 @@ class ProjectModel {
      * @throws ReflectionException
      * @throws ValidationError
      */
-    private function checkIdAssignee( $id_team ) {
+    private function checkIdAssignee( $id_team ): void {
 
         $membershipDao = new MembershipDao();
         $members       = $membershipDao->setCacheTTL( 60 )->getMemberListByTeamId( $id_team );
@@ -171,7 +171,7 @@ class ProjectModel {
      * @throws AuthorizationError
      * @throws ReflectionException
      */
-    private function checkIdTeam() {
+    private function checkIdTeam(): void {
 
         $memberShip = new MembershipDao();
 
@@ -222,7 +222,7 @@ class ProjectModel {
     /**
      * @throws ReflectionException
      */
-    private function cleanAssigneeCaches() {
+    private function cleanAssigneeCaches(): void {
 
         $teamDao                 = new TeamDao();
         $this->cacheTeamsToClean = array_unique( $this->cacheTeamsToClean );
@@ -236,7 +236,7 @@ class ProjectModel {
     /**
      * @throws ReflectionException
      */
-    private function cleanProjectCache() {
+    private function cleanProjectCache(): void {
         $projectDao = new ProjectDao();
         $projectDao->destroyCacheById( $this->project_struct->id );
     }

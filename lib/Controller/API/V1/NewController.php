@@ -283,45 +283,45 @@ class NewController extends KleinController {
      */
     private function validateTheRequest(): array {
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
-        $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
-        $deepl_formality                           = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING );
-        $deepl_id_glossary                         = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING );
-        $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
-        $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $deepl_formality                           = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $deepl_id_glossary                         = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $get_public_matches                        = (bool)filter_var( $this->request->param( 'get_public_matches' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0, 'max_range' => 1 ] ] ); // used to set the default value of get_public_matches to 1
         $id_qa_model                               = filter_var( $this->request->param( 'id_qa_model' ), FILTER_SANITIZE_NUMBER_INT );
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
-        $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
-        $lara_glossaries                           = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING );
+        $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $lara_glossaries                           = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_SPECIAL_CHARS );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
         $legacy_icu                                = filter_var( $this->request->param( 'legacy_icu' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_enable                     = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
-        $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
+        $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
         $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $payable_rate_template_id                  = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $payable_rate_template_name                = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_STRING );
-        $project_info                              = filter_var( $this->request->param( 'project_info' ), FILTER_SANITIZE_STRING );
+        $payable_rate_template_name                = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $project_info                              = filter_var( $this->request->param( 'project_info' ), FILTER_SANITIZE_SPECIAL_CHARS );
         $public_tm_penalty                         = filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_100                          = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_101                          = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_VALIDATE_BOOLEAN );
-        $private_tm_key                            = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $private_tm_key_json                       = filter_var( $this->request->param( 'private_tm_key_json' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $private_tm_key                            = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $private_tm_key_json                       = filter_var( $this->request->param( 'private_tm_key_json' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $project_completion                        = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $qa_model_template_id                      = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $speech2text                               = filter_var( $this->request->param( 'speech2text' ), FILTER_VALIDATE_BOOLEAN );
-        $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
-        $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
 
         // Strip tags from instructions
@@ -1016,7 +1016,7 @@ class NewController extends KleinController {
      * @throws Exception
      */
     private function validateUserMTEngine( $mt_engine = null ): ?string {
-        // any other engine than Match
+        // any other engine than MyMemory
         if ( $mt_engine !== null and $mt_engine > 1 ) {
             try {
                 EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );

@@ -18,7 +18,7 @@ use Utils\Constants\Teams;
 
 class GetProjectsController extends KleinController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
@@ -97,10 +97,10 @@ class GetProjectsController extends KleinController {
         $page            = filter_var( $this->request->param( 'page' ), FILTER_SANITIZE_NUMBER_INT );
         $step            = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
         $project_id      = filter_var( $this->request->param( 'project' ), FILTER_SANITIZE_NUMBER_INT );
-        $search_in_pname = filter_var( $this->request->param( 'pn' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source          = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $target          = filter_var( $this->request->param( 'target' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $status          = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $search_in_pname = filter_var( $this->request->param( 'pn' ), FILTER_UNSAFE_RAW, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $source          = filter_var( $this->request->param( 'source' ), FILTER_UNSAFE_RAW, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $target          = filter_var( $this->request->param( 'target' ), FILTER_UNSAFE_RAW, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $status          = filter_var( $this->request->param( 'status' ), FILTER_UNSAFE_RAW, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $only_completed  = filter_var( $this->request->param( 'onlycompleted' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
         $id_team         = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT );
         $id_assignee     = filter_var( $this->request->param( 'id_assignee' ), FILTER_SANITIZE_NUMBER_INT );
@@ -134,12 +134,13 @@ class GetProjectsController extends KleinController {
 
     /**
      * @param TeamStruct $team
-     * @param            $id_assignee
+     * @param int|null   $id_assignee
      *
-     * @return \Model\Users\UserStruct|null
-     * @throws Exception
+     * @return UserStruct|null
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    private function filterAssignee( TeamStruct $team, $id_assignee ): ?UserStruct {
+    private function filterAssignee( TeamStruct $team, ?int $id_assignee ): ?UserStruct {
         if ( is_null( $id_assignee ) ) {
             return null;
         }

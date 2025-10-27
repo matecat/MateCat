@@ -26,7 +26,7 @@ class EngineConstants {
     const TM   = "TM";
     const NONE = "NONE";
 
-    const MY_MEMORY        = 'Match';
+    const MY_MEMORY        = 'MyMemory';
     const MICROSOFT_HUB    = 'MicrosoftHub';
     const APERTIUM         = 'Apertium';
     const ALTLANG          = 'Altlang';

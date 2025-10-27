@@ -9,14 +9,23 @@
 
 namespace Model\Conversion;
 
+use AllowDynamicProperties;
 use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\RecursiveArrayCopy;
 
+#[AllowDynamicProperties]
 class UploadElement implements ArrayAccess {
 
     use ArrayAccessTrait;
     use RecursiveArrayCopy;
+
+    public string $name;
+    public string $type;
+    public string $tmp_name;
+    public int    $error;
+    public int    $size;
+    public string $file_path;
 
     public function __construct( array $array_params = [] ) {
         if ( $array_params != null ) {

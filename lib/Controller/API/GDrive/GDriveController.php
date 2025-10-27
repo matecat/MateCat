@@ -44,7 +44,7 @@ class GDriveController extends AbstractStatefulKleinController {
      */
     public function open() {
 
-        $filtersTemplateString = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $filtersTemplateString = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $filtersTemplateId     = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_VALIDATE_INT );
         $this->isAsyncReq      = filter_var( $this->request->param( 'isAsync' ), FILTER_VALIDATE_BOOLEAN );
 
@@ -348,9 +348,9 @@ class GDriveController extends AbstractStatefulKleinController {
      */
     public function changeConversionParameters() {
         $originalSourceLang             = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-        $newSourceLang                  = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $newSegmentationRule            = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $newFiltersExtractionTemplate   = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $newSourceLang                  = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $newSegmentationRule            = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $newFiltersExtractionTemplate   = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $newFiltersExtractionTemplateId = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_VALIDATE_INT );
 
         $filtersExtractionParameters = null;

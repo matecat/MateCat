@@ -61,7 +61,7 @@ class JSONValidatorException extends Exception implements JsonSerializable, Vali
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'error'          => $this->getError(),
                 'schemaPointers' => $this->getSchemaPointers(),

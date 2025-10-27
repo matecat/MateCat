@@ -58,7 +58,7 @@ class UrlsController extends KleinController {
 
     }
 
-    protected function validateRequest() {
+    protected function validateRequest(): void {
         $this->validator->validate();
     }
 

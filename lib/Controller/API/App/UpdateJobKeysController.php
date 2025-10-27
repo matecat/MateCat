@@ -170,8 +170,8 @@ class UpdateJobKeysController extends KleinController {
     private function validateTheRequest(): array {
         $public_tm_penalty            = ( $this->request->param( 'public_tm_penalty' ) !== null ) ? filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_VALIDATE_INT ) : null;
         $job_id                       = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $job_pass                     = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $current_password             = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $job_pass                     = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $current_password             = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $get_public_matches           = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
         $tm_keys                      = filter_var( $this->request->param( 'data' ), FILTER_UNSAFE_RAW, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 

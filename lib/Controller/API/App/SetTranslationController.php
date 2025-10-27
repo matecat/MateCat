@@ -147,7 +147,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             $old_translation = $this->getOldTranslation();
 
-            $client_suggestion_array  = json_decode( $this->data[ 'suggestion_array' ] );
+            $client_suggestion_array  = json_decode( $this->data[ 'suggestion_array' ] ?? '[]', true );
             $client_chosen_suggestion = $this->data[ 'chosen_suggestion_index' ] !== null ? $client_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
 
             $new_translation                         = new SegmentTranslationStruct();
@@ -397,19 +397,19 @@ class SetTranslationController extends AbstractStatefulKleinController {
     private function validateTheRequest(): array {
 
         $id_job                  = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $password                = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $received_password       = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $password                = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $received_password       = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $propagate               = filter_var( $this->request->param( 'propagate' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
         $id_segment              = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT ); // FILTER_SANITIZE_NUMBER_INT leaves untouched segments id with the split flag. Ex: 123-1
         $time_to_edit            = filter_var( $this->request->param( 'time_to_edit' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE ] ) ?? 0;
-        $id_translator           = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $id_translator           = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $translation             = filter_var( $this->request->param( 'translation' ), FILTER_UNSAFE_RAW );
         $segment                 = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
         $version                 = filter_var( $this->request->param( 'version' ), FILTER_SANITIZE_NUMBER_INT );
         $chosen_suggestion_index = filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE ] );
-        $suggestion_array        = filter_var( $this->request->param( 'suggestion_array' ), FILTER_SANITIZE_STRING, [ 'filter' => FILTER_UNSAFE_RAW, 'flags' => FILTER_FLAG_EMPTY_STRING_NULL | FILTER_NULL_ON_FAILURE ] );
-        $status                  = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $splitStatuses           = filter_var( $this->request->param( 'splitStatuses' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $suggestion_array        = filter_var( $this->request->param( 'suggestion_array' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'filter' => FILTER_UNSAFE_RAW, 'flags' => FILTER_FLAG_EMPTY_STRING_NULL | FILTER_NULL_ON_FAILURE ] );
+        $status                  = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $splitStatuses           = filter_var( $this->request->param( 'splitStatuses' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $context_before          = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
         $context_after           = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
         $id_before               = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );

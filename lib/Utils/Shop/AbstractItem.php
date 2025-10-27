@@ -4,6 +4,7 @@
  */
 
 namespace Utils\Shop;
+
 use ArrayObject;
 use DomainException;
 use LogicException;
@@ -104,7 +105,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface {
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
      *
      */
-    public function offsetSet( $key, $value ) {
+    public function offsetSet( mixed $key, mixed $value ): void {
 
         if ( empty( $key ) ) {
             throw new LogicException( "Can not assign a value to an EMPTY key." );
@@ -114,7 +115,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface {
             throw new DomainException( "Field $key does not exists in " . __CLASS__ . " structure." );
         }
 
-        $value = filter_var( $value, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES );
+        $value = filter_var( $value, FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES );
         parent::offsetSet( $key, $value );
 
     }
@@ -124,7 +125,7 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface {
      *
      * Only items defined in the concrete Item class will be accepted
      *
-     * @param mixed $offset <p>
+     * @param mixed $key    <p>
      *                      The offset to unset.
      *                      </p>
      *
@@ -136,11 +137,11 @@ abstract class AbstractItem extends ArrayObject implements ItemInterface {
      * @see  $__storage
      *
      */
-    public function offsetUnset( $offset ) {
-        if ( array_key_exists( $offset, $this->__storage ) ) {
-            parent::offsetUnset( $offset );
+    public function offsetUnset( mixed $key ): void {
+        if ( array_key_exists( $key, $this->__storage ) ) {
+            parent::offsetUnset( $key );
         } else {
-            throw new DomainException( "Field $offset does not exists in " . __CLASS__ . " structure." );
+            throw new DomainException( "Field $key does not exists in " . __CLASS__ . " structure." );
         }
     }
 

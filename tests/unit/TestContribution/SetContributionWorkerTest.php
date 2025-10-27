@@ -118,7 +118,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub EnginesFactory Match
+        //create a stub EnginesFactory Matches
         $stubEngine = @$this
                 ->getMockBuilder( MyMemory::class )
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
@@ -203,7 +203,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub EnginesFactory Match
+        //create a stub EnginesFactory Matches
         $stubEngine = @$this
                 ->getMockBuilder( MyMemory::class )
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
@@ -337,7 +337,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub EnginesFactory Match
+        //create a stub EnginesFactory Matches
         $stubEngine         = @$this
                 ->getMockBuilder( MyMemory::class )
                 ->disableOriginalConstructor()

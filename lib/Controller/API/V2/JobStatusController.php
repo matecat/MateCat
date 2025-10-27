@@ -7,7 +7,9 @@
  */
 
 namespace Controller\API\V2;
+
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
@@ -19,9 +21,35 @@ use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
 use Utils\Constants\TranslationStatus;
 
 
-class JobStatusController extends KleinController {
+class JobStatusController extends KleinController implements ChunkPasswordValidatorInterface {
     use ChunkNotFoundHandlerTrait;
-    protected function afterConstruct() {
+
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
+    protected function afterConstruct(): void {
 
         $chunkValidator = new ChunkPasswordValidator( $this );
         $chunkValidator->onSuccess( function () use ( $chunkValidator ) {
@@ -38,7 +66,7 @@ class JobStatusController extends KleinController {
      * @throws Exception
      * @see api_v2_routes.php
      */
-    public function changeSegmentsStatus() {
+    public function changeSegmentsStatus(): void {
 
         $this->return404IfTheJobWasDeleted();
 

@@ -46,7 +46,7 @@ class CopyAllSourceToTargetController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $pass            = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $pass            = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $id_job          = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
 

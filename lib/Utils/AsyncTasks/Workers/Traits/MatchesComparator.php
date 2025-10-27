@@ -24,7 +24,7 @@ trait MatchesComparator {
             $matches[] = $mt_result; // append the MT result to matches
         }
 
-        usort( $matches, [ "static", "__compareScoreDesc" ] );
+        usort( $matches, static::__compareScoreDesc( ... ) );
 
         return $matches;
     }

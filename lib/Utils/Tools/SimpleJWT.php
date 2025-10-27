@@ -63,12 +63,11 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
     }
 
     /**
-     * @param $_storage
+     * @param array|string $_storage
      *
      * @return bool
-     * @throws DomainException
      */
-    public static function isValid( $_storage ): bool {
+    public static function isValid( array|string $_storage ): bool {
 
         if ( is_string( $_storage ) ) {
             $_storage = static::parseJWTString( $_storage );
@@ -126,10 +125,10 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
     }
 
     /**
-     * @param mixed $secretKey
+     * @param string $secretKey
      *
      */
-    public static function setSecretKey( $secretKey ) {
+    public static function setSecretKey( string $secretKey ): void {
         self::$secretKey = $secretKey;
     }
 
@@ -157,11 +156,11 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
         return $this->now + $this->timeToLive;
     }
 
-    public function offsetExists( $offset ): bool {
+    public function offsetExists( mixed $offset ): bool {
         return isset( $this->storage[ 'payload' ][ 'context' ][ $offset ] );
     }
 
-    public function offsetGet( $offset ) {
+    public function offsetGet( mixed $offset ): mixed {
         if ( isset( $this->storage[ 'payload' ][ 'context' ][ $offset ] ) ) {
             return $this->storage[ 'payload' ][ 'context' ][ $offset ];
         }
@@ -169,11 +168,11 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
         return null;
     }
 
-    public function offsetSet( $offset, $value ) {
+    public function offsetSet( mixed $offset, mixed $value ): void {
         $this->storage[ 'payload' ][ 'context' ][ $offset ] = $value;
     }
 
-    public function offsetUnset( $offset ) {
+    public function offsetUnset( mixed $offset ): void {
         unset( $this->storage[ 'payload' ][ 'context' ][ $offset ] );
     }
 
@@ -191,7 +190,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
         return $this->__toString();
     }
 
-    private static function base64url_encode( $data ): string {
+    private static function base64url_encode( string $data ): string {
         return rtrim( strtr( base64_encode( $data ), '+/', '-_' ), '=' );
     }
 
@@ -200,7 +199,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      *
      * @return false|string
      */
-    private static function base64url_decode( $data ) {
+    private static function base64url_decode( $data ): false|string {
         return base64_decode( str_pad( strtr( $data, '-_', '+/' ), strlen( $data ) % 4, '=' ) );
     }
 

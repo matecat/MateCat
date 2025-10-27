@@ -65,7 +65,7 @@ class ModernMTController extends KleinController {
      */
     public function importStatus() {
         try {
-            $uuid      = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH );
+            $uuid      = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH );
             $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
@@ -138,9 +138,9 @@ class ModernMTController extends KleinController {
             $this->validateModifyGlossaryParams();
 
             $memoryId = filter_var( $this->params[ 'memoryId' ], FILTER_SANITIZE_NUMBER_INT );
-            $tuid     = ( isset( $this->params[ 'tuid' ] ) ) ? filter_var( $this->params[ 'tuid' ], FILTER_SANITIZE_STRING ) : null;
+            $tuid     = ( isset( $this->params[ 'tuid' ] ) ) ? filter_var( $this->params[ 'tuid' ], FILTER_SANITIZE_SPECIAL_CHARS ) : null;
             $terms    = $this->params[ 'terms' ];
-            $type     = filter_var( $this->params[ 'type' ], FILTER_SANITIZE_STRING );
+            $type     = filter_var( $this->params[ 'type' ], FILTER_SANITIZE_SPECIAL_CHARS );
 
             $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
@@ -177,9 +177,9 @@ class ModernMTController extends KleinController {
                 throw new Exception( 'Missing `name` param', 400 );
             }
 
-            $name        = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
-            $description = isset( $_POST[ 'description' ] ) ? filter_var( $_POST[ 'description' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW ) : null;
-            $externalId  = isset( $_POST[ 'external_id' ] ) ? filter_var( $_POST[ 'external_id' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW ) : null;
+            $name        = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW );
+            $description = isset( $_POST[ 'description' ] ) ? filter_var( $_POST[ 'description' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW ) : null;
+            $externalId  = isset( $_POST[ 'external_id' ] ) ? filter_var( $_POST[ 'external_id' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW ) : null;
 
             $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
@@ -209,7 +209,7 @@ class ModernMTController extends KleinController {
                 throw new Exception( 'Missing `name` param', 400 );
             }
 
-            $name = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
+            $name = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW );
 
             $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
@@ -262,7 +262,7 @@ class ModernMTController extends KleinController {
                 throw new Exception( 'Missing `name` param', 400 );
             }
 
-            $name      = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
+            $name      = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW );
             $memoryId  = filter_var( $this->request->param( 'memoryId' ), FILTER_SANITIZE_NUMBER_INT );
             $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
@@ -435,7 +435,7 @@ class ModernMTController extends KleinController {
      */
     private function filterResult( array $params, array $memory ): bool {
         if ( isset( $params[ 'q' ] ) ) {
-            $q = filter_var( $params[ 'q' ], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW );
+            $q = filter_var( $params[ 'q' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW );
             if ( false === strpos( strtolower( $memory[ 'name' ] ), strtolower( $q ) ) ) {
                 return false;
             }

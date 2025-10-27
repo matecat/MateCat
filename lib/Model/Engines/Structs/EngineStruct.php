@@ -123,7 +123,7 @@ class EngineStruct
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      */
-    public function offsetExists( $offset ): bool {
+    public function offsetExists( mixed $offset ): bool {
         return property_exists( $this, $offset );
     }
 
@@ -138,7 +138,7 @@ class EngineStruct
      *
      * @return mixed Can return all value types.
      */
-    public function offsetGet( $offset ) {
+    public function offsetGet( mixed $offset ): mixed {
         return $this->$offset;
     }
 
@@ -156,7 +156,7 @@ class EngineStruct
      *
      * @return void
      */
-    public function offsetSet( $offset, $value ) {
+    public function offsetSet( mixed $offset, mixed $value ): void {
         $this->$offset = $value;
     }
 
@@ -171,7 +171,7 @@ class EngineStruct
      *
      * @return void
      */
-    public function offsetUnset( $offset ) {
+    public function offsetUnset( mixed $offset ): void {
         $this->$offset = null;
     }
 
@@ -189,7 +189,7 @@ class EngineStruct
      *
      * @return array|mixed
      */
-    public function getExtraParamsAsArray() {
+    public function getExtraParamsAsArray(): mixed {
         if ( is_array( $this->extra_parameters ) ) {
             return $this->extra_parameters;
         }

@@ -26,7 +26,7 @@ class SegmentTranslationIssue {
 
         return [
                 'comment'             => $record->comment,
-                'created_at'          => date( 'c', strtotime( $record->create_date ) ),
+                'created_at'          => date( 'c', strtotime( $record->create_date ?? 'now' ) ),
                 'id'                  => $record->id,
                 'id_category'         => $record->id_category,
                 'id_job'              => $record->id_job,

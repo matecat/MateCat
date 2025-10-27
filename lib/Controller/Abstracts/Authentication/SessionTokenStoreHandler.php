@@ -44,7 +44,7 @@ class SessionTokenStoreHandler {
      *
      * @return void
      */
-    protected function _logCache( $type, $key, $value, $sqlQuery ) {
+    protected function _logCache( string $type, string $key, mixed $value, string $sqlQuery ): void {
         LoggerFactory::getLogger( "login_cookie_cache" )->debug( [
                 "type"  => $type,
                 "key"   => $key,

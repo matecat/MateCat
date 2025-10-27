@@ -69,15 +69,17 @@ class GetContributionController extends KleinController {
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers );
 
-        $context_list_before = array_map( function ( string $context ) use ( $Filter ) {
-            return $Filter->fromLayer2ToLayer1( $context );
-        }, $request[ 'context_list_before' ] );
-
-        $context_list_after = array_map( function ( string $context ) use ( $Filter ) {
-            return $Filter->fromLayer2ToLayer1( $context );
-        }, $request[ 'context_list_after' ] );
-
+        $context_list_before = [];
+        $context_list_after  = [];
         if ( !$concordance_search ) {
+
+            $context_list_before = array_map( function ( string $context ) use ( $Filter ) {
+                return $Filter->fromLayer2ToLayer1( $context );
+            }, $request[ 'context_list_before' ] );
+
+            $context_list_after = array_map( function ( string $context ) use ( $Filter ) {
+                return $Filter->fromLayer2ToLayer1( $context );
+            }, $request[ 'context_list_after' ] );
 
             $this->rewriteContributionContexts( $request, $Filter );
 
@@ -97,9 +99,9 @@ class GetContributionController extends KleinController {
         $contributionRequest->password   = $received_password;
         $contributionRequest->dataRefMap = $dataRefMap;
         $contributionRequest->contexts   = [
-                'context_before' => $request[ 'context_before' ],
+                'context_before' => $request[ 'context_before' ] ?? null,
                 'segment'        => $request[ 'text' ],
-                'context_after'  => $request[ 'context_after' ]
+                'context_after'  => $request[ 'context_after' ] ?? null
         ];
 
         $contributionRequest->context_list_before = $context_list_before;
@@ -185,13 +187,13 @@ class GetContributionController extends KleinController {
      * @return array
      */
     private function validateTheRequest(): array {
-        $id_client           = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $id_client           = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $id_job              = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ] );
         $id_segment          = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );  // FILTER_SANITIZE_NUMBER_INT leaves untouched segments id with the split flag. Ex: 123-1
         $num_results         = filter_var( $this->request->param( 'num_results' ), FILTER_SANITIZE_NUMBER_INT );
         $text                = filter_var( $this->request->param( 'text' ), FILTER_UNSAFE_RAW );
-        $password            = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $received_password   = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $password            = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $received_password   = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $concordance_search  = filter_var( $this->request->param( 'is_concordance' ), FILTER_VALIDATE_BOOLEAN );
         $switch_languages    = filter_var( $this->request->param( 'from_target' ), FILTER_VALIDATE_BOOLEAN );
         $context_before      = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
@@ -200,7 +202,7 @@ class GetContributionController extends KleinController {
         $context_list_after  = filter_var( $this->request->param( 'context_list_after' ), FILTER_UNSAFE_RAW );
         $id_before           = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
         $id_after            = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
-        $cross_language      = filter_var( $this->request->param( 'cross_language' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FORCE_ARRAY ] );
+        $cross_language      = filter_var( $this->request->param( 'cross_language' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FORCE_ARRAY ] );
         $text                = trim( $text );
 
         if ( !$concordance_search ) {

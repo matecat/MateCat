@@ -28,7 +28,7 @@ class Dita implements IDto, JsonSerializable {
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
             'do_not_translate_elements' => $this->do_not_translate_elements
         ];

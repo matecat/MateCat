@@ -272,7 +272,7 @@ class ProjectManager {
                 $this->projectStructure[ 'source_language' ],
                 $this->projectStructure[ 'target_language' ],
                 [],
-                json_decode( $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ] ?? null )
+                json_decode( $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ] ?? 'null' )
         );
         $this->filter = $filter;
 
@@ -295,10 +295,11 @@ class ProjectManager {
         $this->filesMetadataDao = new MetadataDao();
     }
 
-    protected function _log( $_msg, ?Throwable $exception = null ) {
-        $this->logger->debug( $_msg );
-        if ( $exception ) {
-            $this->logger->debug( ( new Error( $exception ) )->render( true ) );
+    protected function _log( $_msg, ?Throwable $exception = null ): void {
+        if ( !$exception ) {
+            $this->logger->debug( $_msg );
+        } else {
+            $this->logger->debug( $_msg, ( new Error( $exception ) )->render( true ) );
         }
     }
 
@@ -1346,14 +1347,14 @@ class ProjectManager {
 
                     if ( $result[ 'completed' ] || strtotime( 'now' ) > $time ) {
 
-                        //"$fileName" has been loaded into Match"
+                        //"$fileName" has been loaded into MyMemory"
                         // OR the indexer is down or stopped for maintenance
                         // exit the loop, the import will be executed at a later time
                         break;
 
                     }
 
-                    //waiting for "$fileName" to be loaded into Match
+                    //waiting for "$fileName" to be loaded into MyMemory
                     sleep( 3 );
 
                 } catch ( Exception $e ) {
@@ -2402,12 +2403,13 @@ class ProjectManager {
         //return structure
         $fileStructures = [];
 
-        foreach ( $_originalFileNames as $originalFileName ) {
+        foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // avoid blank filenames
             if ( !empty( $originalFileName ) ) {
 
                 // get metadata
+                $meta     = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
@@ -2432,6 +2434,11 @@ class ProjectManager {
                 }
 
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
+
+                // pdfAnalysis
+                if ( !empty( $meta[ 'pdfAnalysis' ] ) ) {
+                    $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'pdfAnalysis', json_encode( $meta[ 'pdfAnalysis' ] ) );
+                }
 
                 $fileStructures[ $fid ] = [
                         'fid'               => $fid,
@@ -3124,7 +3131,7 @@ class ProjectManager {
         }
 
 
-        //check if the Match keys provided by the user are already associated to him.
+        //check if the MyMemory keys provided by the user are already associated to him.
 
 
         $mkDao = new MemoryKeyDao( $this->dbHandler );

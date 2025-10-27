@@ -183,13 +183,13 @@ class AppConfig {
     public static string $BUILD_NUMBER = '';
 
     /**
-     * Match Developer email Key for the cattool
+     * MyMemory Developer email Key for the cattool
      * @var string
      */
     public static string $MYMEMORY_API_KEY = 'demo@matecat.com';
 
     /**
-     * Match Developer email Key for the analysis
+     * MyMemory Developer email Key for the analysis
      * @var string
      */
     public static string $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com';

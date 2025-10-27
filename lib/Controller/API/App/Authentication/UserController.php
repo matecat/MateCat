@@ -33,7 +33,7 @@ class UserController extends AbstractStatefulKleinController {
      * reached, the method returns without performing any password change.
      *
      * The old password, new password, and password confirmation are retrieved from the request parameters and
-     * then sanitized using FILTER_SANITIZE_STRING. The sanitized values are then passed to the `changePassword()`
+     * then sanitized using FILTER_SANITIZE_SPECIAL_CHARS. The sanitized values are then passed to the `changePassword()`
      * method of the `ChangePasswordModel` object.
      *
      * After changing the password, it increments the rate limit counter for the user's email
@@ -54,9 +54,9 @@ class UserController extends AbstractStatefulKleinController {
             return;
         }
 
-        $old_password              = filter_var( $this->request->param( 'old_password' ), FILTER_SANITIZE_STRING );
-        $new_password              = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
-        $new_password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
+        $old_password              = filter_var( $this->request->param( 'old_password' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $new_password              = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $new_password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_SPECIAL_CHARS );
 
         try {
 

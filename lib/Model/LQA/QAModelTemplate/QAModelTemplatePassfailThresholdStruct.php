@@ -15,7 +15,7 @@ class QAModelTemplatePassfailThresholdStruct extends AbstractDaoSilentStruct imp
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'          => (int)$this->id,
                 'id_passfail' => $this->id_passfail,

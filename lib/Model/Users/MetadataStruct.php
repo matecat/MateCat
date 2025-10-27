@@ -25,7 +25,7 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'    => (int)$this->id,
                 'uid'   => (int)$this->uid,

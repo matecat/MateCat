@@ -2,7 +2,7 @@
 
 namespace Utils\Tools;
 
-class Match {
+class Matches {
 
     public static function get( $seg1, $seg2, $language = false ) {
 
@@ -59,7 +59,7 @@ class Match {
         $seg1 = preg_replace( '/ +/u', ' ', $seg1 );
         $seg2 = preg_replace( '/ +/u', ' ', $seg2 );
 
-        if ( $language !== false && CatUtils::isCJK( $language ) ) {
+        if ( !empty( $language ) && CatUtils::isCJK( $language ) ) {
             $a = self::CJK_tokenizer( $seg1 );
             $b = self::CJK_tokenizer( $seg2 );
         } else {

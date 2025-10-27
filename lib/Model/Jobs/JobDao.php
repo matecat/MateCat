@@ -758,7 +758,7 @@ class JobDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    public static function updateJobStatus( JobStruct $jStruct, string $new_status ) {
+    public static function updateJobStatus( JobStruct $jStruct, string $new_status ): void {
         self::updateFields( [
                 'status_owner' => $new_status,
                 'last_update'  => date( "Y-m-d H:i:s" ),

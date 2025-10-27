@@ -41,7 +41,7 @@ class JobsTranslatorsController extends KleinController {
                 'timezone'      => [ 'filter' => FILTER_SANITIZE_NUMBER_FLOAT, 'flags' => FILTER_FLAG_ALLOW_FRACTION ],
                 'id_job'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password'      => [
-                        'filter' => FILTER_SANITIZE_STRING,
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK
                 ]
         ], true );
@@ -79,7 +79,7 @@ class JobsTranslatorsController extends KleinController {
         $this->params = filter_var_array( $this->params, [
                 'id_job'   => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password' => [
-                        'filter' => FILTER_SANITIZE_STRING,
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK
                 ]
         ], true );

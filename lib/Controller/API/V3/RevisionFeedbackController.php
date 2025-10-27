@@ -1,8 +1,10 @@
 <?php
 
 namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
@@ -11,8 +13,35 @@ use Model\ReviseFeedback\FeedbackDAO;
 use Model\ReviseFeedback\FeedbackStruct;
 use ReflectionException;
 
-class RevisionFeedbackController extends KleinController {
+class RevisionFeedbackController extends KleinController implements ChunkPasswordValidatorInterface {
     use ChunkNotFoundHandlerTrait;
+
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
+
     /**
      * @param JobStruct $chunk
      *
@@ -28,7 +57,7 @@ class RevisionFeedbackController extends KleinController {
      * @throws ReflectionException
      * @throws NotFoundException
      */
-    public function feedback() {
+    public function feedback(): void {
 
         // insert or update feedback
         $feedbackStruct                  = new FeedbackStruct();
@@ -55,7 +84,7 @@ class RevisionFeedbackController extends KleinController {
         ] );
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $validator  = new ChunkPasswordValidator( $this );
         $controller = $this;
         $validator->onSuccess( function () use ( $validator, $controller ) {

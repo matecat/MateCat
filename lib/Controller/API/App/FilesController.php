@@ -3,6 +3,7 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Model\Files\FilesPartsDao;
@@ -10,21 +11,47 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use ReflectionException;
 
-class FilesController extends AbstractStatefulKleinController {
+class FilesController extends AbstractStatefulKleinController implements ChunkPasswordValidatorInterface {
 
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
     protected JobStruct $chunk;
 
-    public function setChunk( JobStruct $chunk ) {
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
+
+    public function setChunk( JobStruct $chunk ): void {
         $this->chunk = $chunk;
     }
 
     /**
      * @throws ReflectionException
      */
-    public function segments() {
+    public function segments(): void {
         // `file_part_id` has the priority
         if ( isset( $_POST[ 'file_part_id' ] ) ) {
             $filePartId = $_POST[ 'file_part_id' ];
@@ -45,11 +72,11 @@ class FilesController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param $filePartId
+     * @param int $filePartId
      *
      * @throws ReflectionException
      */
-    private function getFirstAndLastSegmentFromFilePartId( $filePartId ) {
+    private function getFirstAndLastSegmentFromFilePartId( int $filePartId ): void {
         $filePartsDao        = new FilesPartsDao();
         $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment( $filePartId );
 
@@ -58,22 +85,20 @@ class FilesController extends AbstractStatefulKleinController {
             $this->response->json( [
                     'error' => 'File part id ' . $filePartId . ' was not found'
             ] );
-            exit();
         }
 
         $this->response->json( [
                 'first_segment' => (int)$firstAndLastSegment->first_segment,
                 'last_segment'  => (int)$firstAndLastSegment->last_segment,
         ] );
-        exit();
     }
 
     /**
-     * @param $fileId
+     * @param int $fileId
      *
      * @throws ReflectionException
      */
-    private function getFirstAndLastSegmentFromFileId( $fileId ) {
+    private function getFirstAndLastSegmentFromFileId( int $fileId ): void {
         $fileInfo = JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
 
         if ( empty( $fileInfo ) ) {
@@ -81,7 +106,6 @@ class FilesController extends AbstractStatefulKleinController {
             $this->response->json( [
                     'error' => 'File id ' . $fileId . ' was not found'
             ] );
-            exit();
         }
 
         $firstAndLastSegment = array_filter( $fileInfo, function ( $item ) use ( $fileId ) {
@@ -92,13 +116,12 @@ class FilesController extends AbstractStatefulKleinController {
                 'fist_segment' => (int)$firstAndLastSegment->first_segment,
                 'last_segment' => (int)$firstAndLastSegment->last_segment,
         ] );
-        exit();
     }
 
     /**
-     * @param $value
+     * @param mixed $value
      */
-    private function validateInteger( $value ) {
+    private function validateInteger( mixed $value ): void {
         if ( !filter_var( $value, FILTER_VALIDATE_INT ) ) {
 
             $this->response->status()->setCode( 500 );

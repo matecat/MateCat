@@ -223,8 +223,8 @@ class CommentController extends KleinController {
      * @throws ReflectionException
      */
     private function validateTheRequest(): array {
-        $id_client       = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING );
-        $username        = filter_var( $this->request->param( 'username' ), FILTER_SANITIZE_STRING );
+        $id_client       = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_SPECIAL_CHARS );
+        $username        = filter_var( $this->request->param( 'username' ), FILTER_SANITIZE_SPECIAL_CHARS );
         $id_job          = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $id_segment      = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
         $source_page     = filter_var( $this->request->param( 'source_page' ), FILTER_SANITIZE_NUMBER_INT );
@@ -233,7 +233,7 @@ class CommentController extends KleinController {
         $first_seg       = filter_var( $this->request->param( 'first_seg' ), FILTER_SANITIZE_NUMBER_INT );
         $last_seg        = filter_var( $this->request->param( 'last_seg' ), FILTER_SANITIZE_NUMBER_INT );
         $id_comment      = filter_var( $this->request->param( 'id_comment' ), FILTER_SANITIZE_NUMBER_INT );
-        $password        = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $password        = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $message         = filter_var( $this->request->param( 'message' ), FILTER_UNSAFE_RAW );
         $message         = htmlspecialchars( $message );
 

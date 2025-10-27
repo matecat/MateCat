@@ -35,7 +35,7 @@ class AjaxUtilsController extends KleinController {
      */
     public function checkTMKey(): void {
 
-        $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
         if ( empty( $tm_key ) ) {
             throw new InvalidArgumentException( "TM key not provided.", -9 );

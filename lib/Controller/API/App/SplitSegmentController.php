@@ -76,7 +76,7 @@ class SplitSegmentController extends KleinController {
     private function validateTheRequest(): array {
         $id_job     = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
-        $password   = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $password   = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $segment    = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
         $target     = filter_var( $this->request->param( 'target' ), FILTER_UNSAFE_RAW );
 
@@ -108,6 +108,7 @@ class SplitSegmentController extends KleinController {
                 'job_pass'   => $password,
                 'segment'    => $segment,
                 'target'     => $target,
+                'jobStruct'  => $jobStruct,
         ];
     }
 }

@@ -27,7 +27,7 @@ class MailWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws Exception
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement
@@ -73,8 +73,6 @@ class MailWorker extends AbstractWorker {
         }
 
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message has been sent." );
-
-        return true;
 
     }
 

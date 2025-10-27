@@ -53,7 +53,7 @@ class AnalyzeController extends BaseKleinViewController implements IController {
                 'pid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password' => [
-                        'filter' => FILTER_SANITIZE_STRING,
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ]
         ];

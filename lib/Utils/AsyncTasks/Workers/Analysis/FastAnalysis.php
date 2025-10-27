@@ -181,7 +181,7 @@ class FastAnalysis extends AbstractDaemon {
                 if ( $disable_Tms_Analysis ) {
 
                     /**
-                     * Match disabled and MT Disabled Too
+                     * MyMemory disabled and MT Disabled Too
                      * So don't perform TMS Analysis ( don't send segments in queue ), only fill segment_translation table
                      */
                     $perform_Tms_Analysis = false;
@@ -319,7 +319,7 @@ class FastAnalysis extends AbstractDaemon {
         /**
          * @var $myMemory MyMemory
          */
-        $myMemory = EnginesFactory::getInstance( 1 /* Match */ );
+        $myMemory = EnginesFactory::getInstance( 1 /* MyMemory */ );
 
         $fs = $this->files_storage;
 
@@ -372,16 +372,16 @@ class FastAnalysis extends AbstractDaemon {
 
         $this->_logTimeStampedMsg( "Done." );
         $this->_logTimeStampedMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
-        $this->_logTimeStampedMsg( "Sending query to Match analysis..." );
+        $this->_logTimeStampedMsg( "Sending query to Matches analysis..." );
 
         $result = $myMemory->fastAnalysis( $fastSegmentsRequest );
 
         if ( isset( $result->error->code ) && $result->error->code == -28 ) { //curl timed out
-            throw new Exception( "Match Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
+            throw new Exception( "Matches Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 504 ) { //Gateway time out
-            throw new Exception( "Match Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
+            throw new Exception( "Matches Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 500 || $result->responseStatus == 502 ) { // server error, could depend on request
-            throw new Exception( "Match Internal Server Error. Pid: " . $pid, self::ERR_500 );
+            throw new Exception( "Matches Internal Server Error. Pid: " . $pid, self::ERR_500 );
         }
 
         return $result;

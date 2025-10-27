@@ -8,6 +8,7 @@
 
 namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
@@ -19,8 +20,34 @@ use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use View\API\V3\Json\Chunk;
 
-class ChunkController extends KleinController {
+class ChunkController extends KleinController implements ChunkPasswordValidatorInterface {
     use ChunkNotFoundHandlerTrait;
+
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
     /**
      * @var ProjectStruct
      */
@@ -67,7 +94,7 @@ class ChunkController extends KleinController {
      * @throws Exception
      * @throws NotFoundException
      */
-    public function show() {
+    public function show(): void {
 
         $format = new Chunk();
         $format->setUser( $this->user );
@@ -80,7 +107,7 @@ class ChunkController extends KleinController {
 
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
 
         $Validator = new ChunkPasswordValidator( $this );

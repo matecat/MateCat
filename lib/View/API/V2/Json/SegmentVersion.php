@@ -91,7 +91,7 @@ class SegmentVersion {
             $version[ 'issues' ] = [];
 
             if ( !isset( $version[ 'diff' ] ) ) {
-                $version[ 'diff' ] = json_decode( $record->raw_diff, true );
+                $version[ 'diff' ] = json_decode( $record->raw_diff ?? 'null', true );
             }
 
             if ( !is_null( $record->qa_id_segment ) ) {

@@ -134,14 +134,14 @@ class SplitJobController extends KleinController {
         $project_id = filter_var( $this->request->param( 'project_id' ), FILTER_SANITIZE_NUMBER_INT ) ?:
                 filter_var( $this->request->param( 'id_project' ), FILTER_SANITIZE_NUMBER_INT );
 
-        $project_pass = filter_var( $this->request->param( 'project_pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?:
-                filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $project_pass = filter_var( $this->request->param( 'project_pass' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?:
+                filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         $job_id = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT ) ?:
                 filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
 
-        $job_pass = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?:
-                filter_var( $this->request->param( 'job_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $job_pass = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?:
+                filter_var( $this->request->param( 'job_password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         $split_raw_words = filter_var( $this->request->param( 'split_raw_words' ), FILTER_VALIDATE_BOOLEAN );
         $num_split       = filter_var( $this->request->param( 'num_split' ), FILTER_SANITIZE_NUMBER_INT );

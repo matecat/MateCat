@@ -11,6 +11,7 @@ namespace Utils\TaskRunner;
 
 use Bootstrap;
 use Exception;
+use JetBrains\PhpStorm\NoReturn;
 use Model\DataAccess\Database;
 use PDOException;
 use ReflectionException;
@@ -30,9 +31,9 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\FrameException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TaskRunner\Exceptions\WorkerClassException;
-use Utils\Tools\Utils;
 
 include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/lib/Bootstrap.php";
+/** @noinspection PhpUnhandledExceptionInspection */
 Bootstrap::start();
 
 /**
@@ -91,7 +92,7 @@ class Executor implements SplObserver {
      *
      * @param      $_msg
      */
-    protected function _logMsg( $_msg ) {
+    protected function _logMsg( $_msg ): void {
         if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $_msg ) . "\n";
             $this->logger->debug( $_msg );
@@ -175,7 +176,7 @@ class Executor implements SplObserver {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function main() {
+    public function main(): void {
 
         $this->_frameID = 1;
         do {
@@ -197,7 +198,7 @@ class Executor implements SplObserver {
                  */
                 [ $msgFrame, $queueElement ] = $this->_readAMQFrame();
 
-            } catch ( Exception $e ) {
+            } catch ( Exception ) {
 
 //                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in the next cycle." );
 //                $this->_logMsg( $e->getMessage() );
@@ -236,7 +237,7 @@ class Executor implements SplObserver {
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext, $this->logger );
                 $amqHandlerPublisher->getClient()->disconnect();
 
-            } catch ( EmptyElementException $e ) {
+            } catch ( EmptyElementException ) {
 
 //                $this->_logMsg( $e->getMessage() );
 
@@ -254,8 +255,7 @@ class Executor implements SplObserver {
             } catch ( Exception $e ) {
 
                 $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************" );
-                $this->_logMsg( "Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() );
-                $this->_logMsg( $e->getTraceAsString() );
+                $this->_logMsg( "Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() . " " . $e->getTraceAsString() );
 
             }
 
@@ -332,7 +332,8 @@ class Executor implements SplObserver {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function cleanShutDown() {
+    #[NoReturn]
+    public function cleanShutDown(): void {
 
         Database::obtain()->close();
 
@@ -373,15 +374,11 @@ class Executor implements SplObserver {
      *
      * @throws Exception
      */
-    public function update( SplSubject $subject ) {
+    public function update( SplSubject $subject ): void {
         /**
          * @var $subject AbstractWorker
          */
         $this->_logMsg( $subject->getLogMsg() );
-    }
-
-    public function forceAck( SplSubject $subject ) {
-        //TODO
     }
 
 }
@@ -404,4 +401,5 @@ class Executor implements SplObserver {
 
 
 /** @var array $argv */
+/** @noinspection PhpUnhandledExceptionInspection */
 Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();

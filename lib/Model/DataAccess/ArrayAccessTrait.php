@@ -18,16 +18,16 @@ trait ArrayAccessTrait {
      *
      * @return bool
      */
-    public function offsetExists( $offset ): bool {
+    public function offsetExists( mixed $offset ): bool {
         return property_exists( $this, $offset );
     }
 
     /**
      * @param mixed $offset
      *
-     * @returns mixed
+     * @return mixed
      */
-    public function offsetGet( $offset ) {
+    public function offsetGet( mixed $offset ): mixed {
         return $this->__get( $offset );
     }
 
@@ -35,14 +35,14 @@ trait ArrayAccessTrait {
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet( $offset, $value ) {
+    public function offsetSet( mixed $offset, mixed $value ): void {
         $this->__set( $offset, $value );
     }
 
     /**
      * @param mixed $offset
      */
-    public function offsetUnset( $offset ) {
+    public function offsetUnset( mixed $offset ): void {
         $this->__set( $offset, null );
     }
 

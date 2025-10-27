@@ -5,6 +5,7 @@ namespace Plugins\Features\SegmentFilter\Controller\API;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
@@ -13,8 +14,33 @@ use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
 
 
-class FilterController extends KleinController {
+class FilterController extends KleinController implements ChunkPasswordValidatorInterface {
     use ChunkNotFoundHandlerTrait;
+
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
 
     /**
      * @var ChunkPasswordValidator
@@ -40,7 +66,7 @@ class FilterController extends KleinController {
     /**
      * @throws Exception
      */
-    public function index() {
+    public function index(): void {
 
         $this->return404IfTheJobWasDeleted();
 
@@ -65,7 +91,7 @@ class FilterController extends KleinController {
 
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $Validator = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );

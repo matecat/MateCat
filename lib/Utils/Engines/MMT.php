@@ -112,7 +112,7 @@ class MMT extends AbstractEngine {
      */
     public function get( array $_config ) {
 
-        //This is not really needed because by default in analysis the Engine_MMT is accepted by Match
+        //This is not really needed because by default in analysis the Engine_MMT is accepted by MyMemory
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             return [];
         }

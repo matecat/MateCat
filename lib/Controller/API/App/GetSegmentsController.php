@@ -26,10 +26,10 @@ use Utils\Tools\CatUtils;
 
 class GetSegmentsController extends KleinController {
 
-    const DEFAULT_PER_PAGE = 40;
-    const MAX_PER_PAGE     = 200;
+    const int DEFAULT_PER_PAGE = 40;
+    const int MAX_PER_PAGE     = 200;
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
@@ -111,7 +111,7 @@ class GetSegmentsController extends KleinController {
             $seg[ 'target_chunk_lengths' ] = json_decode( $seg[ 'target_chunk_lengths' ], true );
 
             // inject original data ref map (FOR XLIFF 2.0)
-            $data_ref_map          = json_decode( $seg[ 'data_ref_map' ], true );
+            $data_ref_map          = json_decode( $seg[ 'data_ref_map' ] ?? '', true );
             $seg[ 'data_ref_map' ] = $data_ref_map;
 
             /** @var MateCatFilter $Filter */
@@ -157,8 +157,8 @@ class GetSegmentsController extends KleinController {
         $jid        = filter_var( $this->request->param( 'jid' ), FILTER_SANITIZE_NUMBER_INT );
         $step       = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
         $id_segment = filter_var( $this->request->param( 'segment' ), FILTER_SANITIZE_NUMBER_INT );
-        $password   = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $where      = filter_var( $this->request->param( 'where' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $password   = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $where      = filter_var( $this->request->param( 'where' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
 
         if ( empty( $jid ) ) {
             throw new InvalidArgumentException( "No id job provided", -1 );
@@ -195,7 +195,7 @@ class GetSegmentsController extends KleinController {
      * @throws ValidationError
      * @throws \Model\Exceptions\NotFoundException
      */
-    private function attachNotes( SegmentUIStruct &$segment, array $segment_notes ) {
+    private function attachNotes( SegmentUIStruct &$segment, array $segment_notes ): void {
 
         $notes = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
 
@@ -210,7 +210,7 @@ class GetSegmentsController extends KleinController {
      * @param SegmentUIStruct $segment
      * @param array           $contexts
      */
-    private function attachContexts( SegmentUIStruct &$segment, array $contexts ) {
+    private function attachContexts( SegmentUIStruct &$segment, array $contexts ): void {
         $segment[ 'context_groups' ] = $contexts[ (int)$segment[ 'sid' ] ] ?? null;
     }
 

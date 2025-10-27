@@ -36,7 +36,7 @@ class JSONValidatorObject extends ValidatorObject {
      *
      * @var ?mixed The decoded JSON value or NULL when the JSON is null or an empty string.
      */
-    protected $decoded;
+    protected mixed $decoded;
 
     /**
      * Whether getValid() has been called and $decoded is populated.
@@ -64,7 +64,7 @@ class JSONValidatorObject extends ValidatorObject {
      * @return mixed|null The decoded JSON value (array|object|scalar|null).
      * @throws Exception  If decoding fails or JSON is invalid.
      */
-    public function decode() {
+    public function decode(): mixed {
 
         /**
          * If already validated, return the decoded value
@@ -86,7 +86,7 @@ class JSONValidatorObject extends ValidatorObject {
      * @return mixed|null The decoded JSON value (array|object|scalar|null).
      * @throws Exception  If decoding fails or JSON is invalid.
      */
-    public function getValue( bool $associative = false ) {
+    public function getValue( bool $associative = false ): mixed {
         $val = $this->decode();
 
         if ( $val === null ) {

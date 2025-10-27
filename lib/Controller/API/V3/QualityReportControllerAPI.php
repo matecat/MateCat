@@ -9,6 +9,7 @@
 namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
@@ -24,11 +25,36 @@ use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Utils\Registry\AppConfig;
 
-class QualityReportControllerAPI extends KleinController {
+class QualityReportControllerAPI extends KleinController implements ChunkPasswordValidatorInterface {
     use ChunkNotFoundHandlerTrait;
 
-    const DEFAULT_PER_PAGE = 20;
-    const MAX_PER_PAGE     = 200;
+    protected int    $id_job;
+    protected string $jobPassword;
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): static {
+        $this->id_job = $id_job;
+
+        return $this;
+    }
+
+    /**
+     * @param string $jobPassword
+     *
+     * @return $this
+     */
+    public function setJobPassword( string $jobPassword ): static {
+        $this->jobPassword = $jobPassword;
+
+        return $this;
+    }
+
+    const int DEFAULT_PER_PAGE = 20;
+    const int MAX_PER_PAGE     = 200;
 
     /**
      * @var ProjectStruct
@@ -46,7 +72,7 @@ class QualityReportControllerAPI extends KleinController {
         return $this;
     }
 
-    public function show() {
+    public function show(): void {
 
         $this->return404IfTheJobWasDeleted();
         $model = new QualityReportModel( $this->chunk );
@@ -60,7 +86,7 @@ class QualityReportControllerAPI extends KleinController {
     /**
      * @throws Exception
      */
-    public function segments( $isForUI = false ) {
+    public function segments( bool $isForUI = false ): void {
         $this->return404IfTheJobWasDeleted();
         $this->renderSegments( $isForUI );
     }
@@ -70,7 +96,7 @@ class QualityReportControllerAPI extends KleinController {
      *
      * @throws Exception
      */
-    protected function renderSegments( bool $isForUI = false ) {
+    protected function renderSegments( bool $isForUI = false ): void {
 
         $this->project = $this->chunk->getProject();
 
@@ -294,11 +320,11 @@ class QualityReportControllerAPI extends KleinController {
     }
 
     /**
-     * @param $segment
+     * @param QualityReportSegmentStruct $segment
      *
      * @return float|int
      */
-    private function getSecsPerWord( $segment ) {
+    private function getSecsPerWord( QualityReportSegmentStruct $segment ): float|int {
         $tte            = ( $segment->time_to_edit ) / 1000;
         $raw_word_count = $segment->raw_word_count;
 
@@ -306,7 +332,7 @@ class QualityReportControllerAPI extends KleinController {
     }
 
 
-    public function general() {
+    public function general(): void {
         $project = $this->chunk->getProject();
         $this->response->json( [
                 'project' => $project,
@@ -314,7 +340,7 @@ class QualityReportControllerAPI extends KleinController {
         ] );
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $Validator  = new ChunkPasswordValidator( $this );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {

@@ -488,7 +488,7 @@ class Utils {
      * @return string The fixed file name.
      */
     public static function fixFileName( string $stringName, string $directory = null, bool $upCount = true ): string {
-        $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $string = filter_var( $stringName, FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
         while ( is_file( $directory . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
             $string = static::upCountName( $string );
         }
@@ -664,7 +664,7 @@ class Utils {
             $description = Constants::PUBLIC_TM;
 
         } elseif ( !empty( $sug_source ) && stripos( $sug_source, "Mymemory" ) === false ) {
-            // This case if for other sources from Match that are public, but we must
+            // This case if for other sources from MyMemory that are public, but we must
             // show the specific name of the source.
             $description = $sug_source;
 

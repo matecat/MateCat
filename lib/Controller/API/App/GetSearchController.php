@@ -100,7 +100,7 @@ class GetSearchController extends AbstractStatefulKleinController {
         $request        = $this->validateTheRequest();
         $shr            = $this->getReplaceHistory( $request[ 'job' ] );
         $search_results = $this->getSegmentForRedoReplaceAll( $shr );
-        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ], $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
+        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ] ?? null, $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
         $shr->redo();
 
         $this->response->json( [
@@ -119,7 +119,7 @@ class GetSearchController extends AbstractStatefulKleinController {
         $request        = $this->validateTheRequest();
         $shr            = $this->getReplaceHistory( $request[ 'job' ] );
         $search_results = $this->getSegmentForUndoReplaceAll( $shr );
-        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ], $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
+        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ] ?? null, $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
         $shr->undo();
 
         $this->response->json( [
@@ -133,10 +133,10 @@ class GetSearchController extends AbstractStatefulKleinController {
      */
     private function validateTheRequest(): array {
         $job                   = filter_var( $this->request->param( 'job' ), FILTER_SANITIZE_NUMBER_INT );
-        $token                 = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $token                 = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $source                = filter_var( $this->request->param( 'source' ), FILTER_UNSAFE_RAW );
         $target                = filter_var( $this->request->param( 'target' ), FILTER_UNSAFE_RAW );
-        $status                = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $status                = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $replace               = filter_var( $this->request->param( 'replace' ), FILTER_UNSAFE_RAW );
         $password              = filter_var( $this->request->param( 'password' ), FILTER_UNSAFE_RAW );
         $isMatchCaseRequested  = filter_var( $this->request->param( 'matchcase' ), FILTER_VALIDATE_BOOLEAN );
@@ -326,15 +326,14 @@ class GetSearchController extends AbstractStatefulKleinController {
      * @param                         $search_results
      * @param int                     $id_job
      * @param string                  $password
-     * @param string                  $id_segment
+     * @param string|null             $id_segment
      * @param SearchQueryParamsStruct $queryParams
      * @param int|null                $revisionNumber
      *
      * @throws NotFoundException
      * @throws ReflectionException
-     * @throws Exception
      */
-    private function updateSegments( $search_results, int $id_job, string $password, string $id_segment, SearchQueryParamsStruct $queryParams, ?int $revisionNumber = null ): void {
+    private function updateSegments( $search_results, int $id_job, string $password, ?string $id_segment, SearchQueryParamsStruct $queryParams, ?int $revisionNumber = null ): void {
         $db = Database::obtain();
 
         $chunk           = ChunkDao::getByIdAndPassword( $id_job, $password );

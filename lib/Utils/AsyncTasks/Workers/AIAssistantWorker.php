@@ -50,7 +50,7 @@ class AIAssistantWorker extends AbstractWorker {
      * @inheritDoc
      * @throws EndQueueException
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
         $params  = $queueElement->params->toArray();
         $action  = $params[ 'action' ];
         $payload = $params[ 'payload' ];

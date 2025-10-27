@@ -119,7 +119,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             throw new DomainException( "Wrong editor value", 400 );
         }
 
-        $this->editor = strtolower( $editor );
+        $this->editor = strtolower( $editor ?? '' );
     }
 
     /**

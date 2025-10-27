@@ -70,8 +70,8 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
      */
     private function validateTheRequest(): array {
         $id_project    = filter_var( $this->request->param( 'id_project' ), FILTER_SANITIZE_NUMBER_INT );
-        $password      = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $download_type = filter_var( $this->request->param( 'download_type' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $password      = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $download_type = filter_var( $this->request->param( 'download_type' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         if ( empty( $id_project ) ) {
             throw new InvalidArgumentException( "Id project not provided" );

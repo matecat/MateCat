@@ -54,7 +54,7 @@ class SmartMATE extends AbstractEngine {
         return $l[ 0 ];
     }
 
-    protected function _formatAuthenticateError( $objResponse ) {
+    protected function _formatAuthenticateError( array $objResponse ): array {
 
         //format as a normal Translate Response and send to decoder to output the data
         $objResponse[ 'error_description' ] = json_decode( $objResponse[ 'error' ][ 'response' ] )->error;

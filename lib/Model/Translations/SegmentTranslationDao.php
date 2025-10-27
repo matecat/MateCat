@@ -365,17 +365,21 @@ class SegmentTranslationDao extends AbstractDao {
         foreach ( $translation as $key => $val ) {
             $bind_keys[] = ':' . $key;
 
-            if (
-                    strtolower( $val ) == 'now()' ||
-                    strtolower( $val ) == 'current_timestamp()' ||
-                    strtolower( $val ) == 'sysdate()'
-            ) {
-                $bind_values[ $key ] = date( "Y-m-d H:i:s" );
-            } elseif ( strtolower( $val ) == 'null' ) {
-                $bind_values[ $key ] = null;
-            } else {
-                $bind_values[ $key ] = $val;
+            // Normalize strings to handle special keywords, leave non-strings untouched
+            if ( is_string( $val ) ) {
+                $lower = strtolower( $val );
+                if ( $lower === 'now()' || $lower === 'current_timestamp()' || $lower === 'sysdate()' ) {
+                    $bind_values[ $key ] = date( "Y-m-d H:i:s" );
+                    continue;
+                }
+                if ( $lower === 'null' ) {
+                    $bind_values[ $key ] = null;
+                    continue;
+                }
             }
+
+            // Keep the original value (includes nulls and non-strings)
+            $bind_values[ $key ] = $val;
         }
 
         $query = "INSERT INTO `segment_translations` (" . implode( ", ", $fields ) . ") 
@@ -570,10 +574,10 @@ class SegmentTranslationDao extends AbstractDao {
     public
     static function propagateTranslation(
             SegmentTranslationStruct $segmentTranslationStruct,
-            JobStruct $chunkStruct,
-            int $_idSegment,
-            ProjectStruct $project,
-            bool $execute_update = true
+            JobStruct                $chunkStruct,
+            int                      $_idSegment,
+            ProjectStruct            $project,
+            bool                     $execute_update = true
     ): array {
         $db = Database::obtain();
 

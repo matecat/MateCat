@@ -97,7 +97,7 @@ class QualityReportSegmentModel {
         $seg->warnings            = $seg->getLocalWarning( $featureSet, $chunk );
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
-        $seg->secs_per_word       = $seg->getSecsPerWord();
+        $seg->secs_per_word       = round( $seg->getSecsPerWord() );
         $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( min( $seg->time_to_edit, PHP_INT_MAX ) );
 
         if ( $isForUI ) {
@@ -147,7 +147,7 @@ class QualityReportSegmentModel {
      * @param array $segment_ids
      * @param bool  $isForUI
      *
-     * @return array
+     * @return QualityReportSegmentStruct[]
      * @throws Exception
      */
     public function getSegmentsForQR( array $segment_ids, $isForUI = false ) {

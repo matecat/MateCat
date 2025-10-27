@@ -97,7 +97,7 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
         $filterArgs = [
                 'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'password' => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
         ];
 
         return filter_var_array( $this->request->paramsNamed()->all(), $filterArgs );

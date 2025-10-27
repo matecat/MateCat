@@ -72,7 +72,7 @@ class Matches {
         $this->match            = array_key_exists( 'match', $data ) ? $data[ 'match' ] : 0;
         $this->memory_key       = array_key_exists( 'key', $data ) ? $data[ 'key' ] : '';
         $this->ICE              = array_key_exists( 'ICE', $data ) && $data[ 'ICE' ];
-        $this->tm_properties    = array_key_exists( 'tm_properties', $data ) ? json_decode( $data[ 'tm_properties' ], true ) : [];
+        $this->tm_properties    = array_key_exists( 'tm_properties', $data ) ? json_decode( $data[ 'tm_properties' ] ?? '[]', true ) : [];
         $this->target           = array_key_exists( 'target', $data ) ? $data[ 'target' ] : null;
         $this->source           = array_key_exists( 'source', $data ) ? $data[ 'source' ] : null;
         $this->penalty          = array_key_exists( 'penalty', $data ) ? $data[ 'penalty' ] : null;
@@ -85,11 +85,11 @@ class Matches {
     }
 
     /**
-     * @param int   $layerNum
-     * @param array $dataRefMap
-     * @param null  $source
-     * @param null  $target
-     * @param null  $id_project
+     * @param int        $layerNum
+     * @param array      $dataRefMap
+     * @param null       $source
+     * @param null       $target
+     * @param array|null $subfiltering_handlers
      *
      * @return array
      * @throws Exception
@@ -110,15 +110,16 @@ class Matches {
     }
 
     /**
-     * @param       $string
-     * @param       $layerNum
+     * @param            $string
+     * @param            $layerNum
      *
-     * @param array $dataRefMap
+     * @param array      $dataRefMap
+     * @param array|null $subfiltering_handlers
      *
      * @return mixed
      * @throws Exception
      */
-    protected function getLayer( $string, $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = [] ) {
+    protected function getLayer( $string, $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = [] ): mixed {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
@@ -128,6 +129,7 @@ class Matches {
             case 0:
                 return $filter->fromLayer1ToLayer0( $string ?? '' );
             case 1:
+            default:
                 return $string;
             case 2:
                 return $filter->fromLayer1ToLayer2( $string ?? '' );
