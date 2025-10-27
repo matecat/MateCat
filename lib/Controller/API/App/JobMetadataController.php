@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\Jobs\MetadataDao;
+use Model\Jobs\MetadataStruct;
 use ReflectionException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
@@ -41,16 +42,6 @@ class JobMetadataController extends KleinController {
     }
 
     /**
-     * Get all job metadata
-     * @throws ReflectionException
-     */
-    public function get() {
-        $params = $this->sanitizeRequestParams();
-        $dao    = new MetadataDao();
-        $this->response->json( $dao->getByJobIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
-    }
-
-    /**
      * Upsert metadata
      * @throws Exception
      */
@@ -75,7 +66,7 @@ class JobMetadataController extends KleinController {
                     $params[ 'id_job' ],
                     $params[ 'password' ],
                     $item[ 'key' ],
-                    is_array( $item[ 'value' ] ) ? json_encode( $item[ 'value' ] ) : $item[ 'value' ]
+                    is_array( $item[ 'value' ] ) ? json_encode( $item[ 'value' ] ) : $item[ 'value' ] ?? 'null'
             );
             $return[] = $struct;
         }
