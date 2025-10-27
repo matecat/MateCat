@@ -8,6 +8,7 @@ import ModalsConstants from '../constants/ModalsConstants'
 import PreferencesModal from '../components/modals/PreferencesModal'
 import SuccessModal from '../components/modals/SuccessModal'
 import OnBoarding, {ONBOARDING_STEP} from '../components/onBoarding/OnBoarding'
+import {ModalBulkActions} from '../components/projects/ProjectBulkActions/BulkChangePassword'
 
 let ModalsActions = {
   showModalComponent: (

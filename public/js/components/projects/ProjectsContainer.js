@@ -9,6 +9,7 @@ import UserStore from '../../stores/UserStore'
 import ManageActions from '../../actions/ManageActions'
 import {fromJS} from 'immutable'
 import {ProjectBulkActions} from './ProjectBulkActions'
+
 class ProjectsContainer extends React.Component {
   constructor(props) {
     super(props)

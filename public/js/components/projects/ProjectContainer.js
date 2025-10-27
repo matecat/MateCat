@@ -1,13 +1,6 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
-import $ from 'jquery'
 
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
@@ -37,7 +30,7 @@ import {Input} from '../common/Input/Input'
 import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
 import IconClose from '../icons/IconClose'
-import {ProjectBulkActionsContext} from './ProjectBulkActionsContext'
+import {ProjectBulkActionsContext} from './ProjectBulkActions/ProjectBulkActionsContext'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 const ProjectContainer = ({
