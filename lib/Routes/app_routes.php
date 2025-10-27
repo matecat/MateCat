@@ -203,7 +203,7 @@ route( '/api/app/download-analysis-report', 'POST', ['Controller\API\App\Downloa
 
 // Metadata
 $klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
-    route( '', 'GET', [ '\Controller\API\App\JobMetadataController', 'get' ] );
+    route( '', 'GET', [ '\Controller\API\V3\MetaDataController', 'index' ] );
     route( '', 'POST', [ '\Controller\API\App\JobMetadataController', 'save' ] );
     route( '/[:key]', 'DELETE', [ '\Controller\API\App\JobMetadataController', 'delete' ] );
 } );

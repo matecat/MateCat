@@ -475,6 +475,7 @@ const NewProject = () => {
       characterCounterMode,
       dialectStrict,
       mtQualityValueInEditor,
+      subfilteringHandlers,
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
@@ -529,6 +530,7 @@ const NewProject = () => {
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
+      subfiltering_handlers: JSON.stringify(subfilteringHandlers),
       mt_engine: mt.id,
       private_keys_list: JSON.stringify({
         ownergroup: [],

@@ -195,10 +195,16 @@ export const AnalysisTab = () => {
     setTemplates((prevState) =>
       prevState.map((template) => ({
         ...template,
-        isSelected: template.id === currentProjectTemplateBillingId,
+        isSelected:
+          template.id === currentProjectTemplateBillingId &&
+          !template.isTemporary,
       })),
     )
-  }, [currentProjectTemplateBillingId, setTemplates])
+  }, [
+    currentProjectTemplate?.id,
+    currentProjectTemplateBillingId,
+    setTemplates,
+  ])
 
   // Modify current project template billing model id when analysis template id change
   useEffect(() => {

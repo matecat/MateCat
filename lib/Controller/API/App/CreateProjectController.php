@@ -12,6 +12,7 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
@@ -120,6 +121,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
+        $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]  = $this->data[ JobsMetadataDao::SUBFILTERING_HANDLERS ];
 
         // GDrive session instance
         if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
@@ -278,82 +280,62 @@ class CreateProjectController extends AbstractStatefulKleinController {
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
-                'file_name'                              => $file_name,
-                'project_name'                           => $project_name,
-                'source_lang'                            => $source_lang,
-                'target_lang'                            => $target_lang,
-                'job_subject'                            => $job_subject,
-                'pretranslate_100'                       => $pretranslate_100,
-                'pretranslate_101'                       => $pretranslate_101,
-                'tm_prioritization'                      => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
-                'id_team'                                => $id_team,
-                'pre_translate_files'                    => ( !empty( $pre_translate_files ) ) ? $pre_translate_files : null,
-                'mmt_glossaries_case_sensitive_matching' => ( !empty( $mmt_glossaries_case_sensitive_matching ) ) ? $mmt_glossaries_case_sensitive_matching : null,
-                'mmt_pre_import_tm'                      => ( !empty( $mmt_pre_import_tm ) ) ? $mmt_pre_import_tm : null,
-                'mmt_glossaries'                         => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
-                'mmt_activate_context_analyzer'          => ( !empty( $mmt_activate_context_analyzer ) ) ? $mmt_activate_context_analyzer : null,
-                'intento_provider'                       => ( !empty( $intento_provider ) ) ? $intento_provider : null,
-                'intento_routing'                        => ( !empty( $intento_routing ) ) ? $intento_routing : null,
-                'lara_glossaries'                        => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
-                'deepl_id_glossary'                      => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
-                'deepl_formality'                        => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
-                'deepl_engine_type'                      => ( !empty( $deepl_engine_type ) ) ? $deepl_engine_type : null,
-                'project_completion'                     => $project_completion,
-                'get_public_matches'                     => $get_public_matches,
-                'character_counter_count_tags'           => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
-                'character_counter_mode'                 => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
-                'dialect_strict'                         => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
-                'filters_extraction_parameters'          => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
-                'xliff_parameters'                       => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
-                'xliff_parameters_template_id'           => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
-                'qa_model_template'                      => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
-                'qa_model_template_id'                   => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
-                'payable_rate_template'                  => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
-                'payable_rate_template_id'               => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
-                'array_keys'                             => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'postPrivateTmKey'                       => $postPrivateTmKey,
-                'mt_engine'                              => $mt_engine,
-                'disable_tms_engine_flag'                => $disable_tms_engine_flag,
-                'private_tm_key'                         => $private_tm_key,
-                'only_private'                           => $only_private,
-                'mt_quality_value_in_editor'             => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
-                'due_date'                               => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
-                'file_names_list'               => $arFiles,
-                'project_name'                  => $project_name,
-                'source_lang'                   => $source_lang,
-                'target_lang'                   => $target_lang,
-                'job_subject'                   => $job_subject,
-                'pretranslate_100'              => $pretranslate_100,
-                'pretranslate_101'              => $pretranslate_101,
-                'tm_prioritization'             => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
-                'id_team'                       => $id_team,
-                'mmt_glossaries'                => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
-                'lara_glossaries'               => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
-                'deepl_id_glossary'             => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
-                'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
-                'project_completion'            => $project_completion,
-                'get_public_matches'            => $get_public_matches,
-                'public_tm_penalty'             => $public_tm_penalty,
-                'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
-                'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
-                'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
-                'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
-                'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
-                'xliff_parameters_template_id'  => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
-                'qa_model_template'             => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
-                'qa_model_template_id'          => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
-                'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
-                'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
-                'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'mt_engine'                     => $mt_engine,
-                'disable_tms_engine_flag'       => $disable_tms_engine_flag,
-                'private_tm_key'                => $private_tm_key,
-                'only_private'                  => $only_private,
-                'mt_quality_value_in_editor'    => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
-                'due_date'                      => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
-        ];
+            
+            'file_name'                              => $file_name,
+            'project_name'                           => $project_name,
+            'source_lang'                            => $source_lang,
+            'target_lang'                            => $target_lang,
+            'job_subject'                            => $job_subject,
+            'pretranslate_100'                       => $pretranslate_100,
+            'pretranslate_101'                       => $pretranslate_101,
+            'tm_prioritization'                      => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
+            'id_team'                                => $id_team,
+            'pre_translate_files'                    => ( !empty( $pre_translate_files ) ) ? $pre_translate_files : null,
+            'mmt_glossaries_case_sensitive_matching' => ( !empty( $mmt_glossaries_case_sensitive_matching ) ) ? $mmt_glossaries_case_sensitive_matching : null,
+            'mmt_pre_import_tm'                      => ( !empty( $mmt_pre_import_tm ) ) ? $mmt_pre_import_tm : null,
+            'mmt_glossaries'                         => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
+            'mmt_activate_context_analyzer'          => ( !empty( $mmt_activate_context_analyzer ) ) ? $mmt_activate_context_analyzer : null,
+            'intento_provider'                       => ( !empty( $intento_provider ) ) ? $intento_provider : null,
+            'intento_routing'                        => ( !empty( $intento_routing ) ) ? $intento_routing : null,
+            'lara_glossaries'                        => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
+            'deepl_id_glossary'                      => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
+            'deepl_formality'                        => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
+            'deepl_engine_type'                      => ( !empty( $deepl_engine_type ) ) ? $deepl_engine_type : null,
+            'project_completion'                     => $project_completion,
+            'get_public_matches'                     => $get_public_matches,
+            'character_counter_count_tags'           => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
+            'character_counter_mode'                 => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
+            'dialect_strict'                         => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
+            'filters_extraction_parameters'          => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
+            'xliff_parameters'                       => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
+            'xliff_parameters_template_id'           => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+            'qa_model_template'                      => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
+            'qa_model_template_id'                   => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+            'payable_rate_template'                  => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
+            'payable_rate_template_id'               => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
+            'array_keys'                             => ( !empty( $array_keys ) ) ? $array_keys : [],
+            'mt_engine'                              => $mt_engine,
+            'disable_tms_engine_flag'                => $disable_tms_engine_flag,
+            'private_tm_key'                         => $private_tm_key,
+            'only_private'                           => $only_private,
+            'mt_quality_value_in_editor'             => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
+            'due_date'                               => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
+            'file_names_list'               => $arFiles,
+            'public_tm_penalty'             => $public_tm_penalty,
 
-        $this->setMetadataFromPostInput( $data );
+            /**
+             * Subfiltering configuration (as string input):
+             *
+             * 1. String "null" or "" (empty string): subfiltering is disabled
+             * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
+             * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
+             *
+             * Note:
+             * - The values above are expected as strings (e.g., "[]"), not native PHP types.
+             */
+              JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode( $this->validateSubfilteringOptions( $this->request->param( JobsMetadataDao::SUBFILTERING_HANDLERS, '[]' ) ) ),
+
+        ];
 
         if ( $disable_tms_engine_flag ) {
             $data[ 'tms_engine' ] = 0; //remove default Match
@@ -394,6 +376,37 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         return $data;
     }
+
+    /**
+     * Validates the provided subfiltering options by attempting to decode them as JSON.
+     *
+     * This method ensures that the input string is a valid JSON-encoded structure.
+     * If the decoding process encounters an error, it returns an empty array to enforce
+     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
+     *
+     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
+     *
+     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @throws Exception
+     */
+    private function validateSubfilteringOptions( string $subfiltering_handlers ): ?array {
+
+        if ( $subfiltering_handlers == 'none' ) {
+            // subfiltering is disabled
+            $subfiltering_handlers = 'null';
+        }
+
+        $validatorObject = new JSONValidatorObject( $subfiltering_handlers );
+        $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
+        $validator->validate( $validatorObject );
+
+        if ( is_null( $validatorObject->getValue() ) ) {
+            return null;
+        }
+
+        return $validatorObject->getValue();
+    }
+
 
     /**
      * @param $elem
@@ -579,12 +592,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
             ];
             $json  = json_encode( $json );
 
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'qa_model.json', true );
             $validator->validate( $validatorObject );
 
             $QAModelTemplateStruct = new QAModelTemplateStruct();
@@ -621,13 +630,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $userId                   = $this->getUser()->uid;
 
         if ( !empty( $payable_rate_template ) ) {
-            $json   = html_entity_decode( $payable_rate_template );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $json            = html_entity_decode( $payable_rate_template );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'payable_rate.json', true );
             $validator->validate( $validatorObject );
 
             $payableRateModelTemplate = new CustomPayableRateStruct();
@@ -688,16 +693,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateFiltersExtractionParameters( $filters_extraction_parameters = null ) {
         if ( !empty( $filters_extraction_parameters ) ) {
 
-            $json   = html_entity_decode( $filters_extraction_parameters );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema );
+            $json            = html_entity_decode( $filters_extraction_parameters );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
             $validator->validate( $validatorObject );
 
-            $filters_extraction_parameters = $validatorObject->decoded;
+            $filters_extraction_parameters = $validatorObject->getValue();
         }
 
         return $filters_extraction_parameters;
@@ -712,13 +713,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
-            $json   = html_entity_decode( $xliff_parameters );
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
+            $json = html_entity_decode( $xliff_parameters );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( 'xliff_parameters_rules_wrapper.json', true );
             $validator->validate( $validatorObject );
 
             $xliffConfigTemplate = new XliffConfigTemplateStruct();

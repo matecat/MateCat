@@ -98,6 +98,10 @@ class MetaDataController extends KleinController {
             $metadata->$key = Utils::formatStringValue( $metadatum->value );
         }
 
+        if( !property_exists($metadata,MetadataDao::SUBFILTERING_HANDLERS) ){
+            $metadata->{MetadataDao::SUBFILTERING_HANDLERS} = [];
+        }
+
         return $metadata;
     }
 

@@ -295,9 +295,8 @@ class Executor implements SplObserver {
                 if ( empty( $queueElement ) ) {
 
                     $this->_queueHandler->ack( $msgFrame );
-                    $msg = Utils::raiseJsonExceptionError( false );
-                    $this->_logMsg( [ 'ERROR' => "*** Failed to decode the json frame payload, reason: " . $msg, 'FRAME' => $msgFrame->body ] );
-                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1 );
+                    $this->_logMsg( [ 'ERROR' => "*** Failed to decode the json frame payload, reason: " . json_last_error_msg(), 'FRAME' => $msgFrame->body ] );
+                    throw new FrameException( "*** Failed to decode the json, reason: " . json_last_error_msg(), -1 );
 
                 }
 

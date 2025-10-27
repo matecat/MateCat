@@ -60,7 +60,7 @@ class DeepL extends AbstractEngine {
                 'match'           => "85%",
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
-        ] ) )->getMatches( 1, [], $source, $target );
+        ] ) )->getMatches( 1 );
     }
 
     /**

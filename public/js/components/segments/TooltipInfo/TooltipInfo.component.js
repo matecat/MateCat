@@ -24,11 +24,6 @@ class TooltipInfo extends Component {
             ) : (
               <span className="tooltip-error-category">{text}</span>
             )}
-
-            {/*<div className="tooltip-error-ignore">
-                        <span className="icon-cancel-circle"/>
-                        <span className="tooltip-error-ignore-text" onClick={()=>this.ignoreError(message)}>Ignore</span>
-                    </div>*/}
           </div>
         </div>
       </div>

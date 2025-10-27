@@ -26,14 +26,10 @@ class XliffConfigTemplateController extends KleinController {
      *
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
-     * @throws InvalidValue
-     * @throws \Swaggest\JsonSchema\Exception
      */
     private function validateJSON( $json ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
-        $validator             = new JSONValidator( $jsonSchema, true );
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( 'xliff_parameters_rules_wrapper.json', true );
         $validator->validate( $validatorObject );
     }
 

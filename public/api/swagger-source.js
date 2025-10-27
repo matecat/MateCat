@@ -593,7 +593,8 @@ var spec = {
           {
             name: 'password',
             in: 'path',
-            description: 'The password of the revision the issue pertains to. If the issue pertains to r1, use the "revise" link password, otherwise use the "revise2" link password.',
+            description:
+              'The password of the revision the issue pertains to. If the issue pertains to r1, use the "revise" link password, otherwise use the "revise2" link password.',
             required: true,
             type: 'string',
           },
@@ -2955,7 +2956,7 @@ var spec = {
         parameters: [
           {
             name: 'tm_key',
-            in: 'body',
+            in: 'formData',
             description: 'The tm key.',
             required: true,
             type: 'string',
@@ -2995,7 +2996,8 @@ var spec = {
       post: {
         tags: ['TM keys'],
         summary: 'Create (or update) a TM key.',
-        description: 'Create a new TM key or update its name. If the \'key\' parameter is not provided, a new key will be created; if a valid key is provided, the key\'s name will be updated.',
+        description:
+          "Create a new TM key or update its name. If the 'key' parameter is not provided, a new key will be created; if a valid key is provided, the key's name will be updated.",
         consumes: ['application/json'],
         parameters: [
           {

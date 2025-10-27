@@ -30,7 +30,7 @@ export const SegmentQAIcon = ({sid}) => {
     }
   }, [])
   return (
-    <>
+    <div>
       {hasGlobalWarnings && (
         <div
           className={`icon-warning-sign qa-icon ${config.isReview ? 'review' : ''}`}
@@ -42,6 +42,6 @@ export const SegmentQAIcon = ({sid}) => {
           <SegmentQA />
         </div>
       )}
-    </>
+    </div>
   )
 }
