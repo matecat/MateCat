@@ -120,6 +120,10 @@ class Matches {
      */
     protected function getLayer( $string, $layerNum, array $dataRefMap = [], ?array $subfiltering_handlers = [] ) {
 
+        if(empty($string)){
+            return $string;
+        }
+
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         /** @var MateCatFilter $filter */

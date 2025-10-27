@@ -29,6 +29,7 @@ import {SEGMENTS_STATUS} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
+import {SegmentQAIcon} from './SegmentQAIcon'
 
 class Segment extends React.Component {
   static contextType = ApplicationWrapperContext
@@ -841,6 +842,7 @@ class Segment extends React.Component {
             (!this.props.segment.openComments || !this.props.segment.opened) ? (
               <SegmentsCommentsIcon />
             ) : null}
+            <SegmentQAIcon sid={this.props.segment.sid} />
 
             {this.props.isReview && (
               <div

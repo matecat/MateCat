@@ -119,6 +119,35 @@ const NewProject = () => {
     XLIFF_SETTINGS_SCHEMA_KEYS,
   )
 
+  const subtemplatesNotSaved = useMemo(
+    () => [
+      ...(qualityFrameworkTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.qaModelTemplateId]
+        : []),
+      ...(analysisTemplates.templates.some(({isTemporary}) => isTemporary)
+        ? [SCHEMA_KEYS.payableRateTemplateId]
+        : []),
+      ...(fileImportFiltersParamsTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.filtersTemplateId]
+        : []),
+      ...(fileImportXliffSettingsTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.XliffConfigTemplateId]
+        : []),
+    ],
+    [
+      analysisTemplates.templates,
+      fileImportFiltersParamsTemplates.templates,
+      fileImportXliffSettingsTemplates.templates,
+      qualityFrameworkTemplates.templates,
+    ],
+  )
+
   const isDeviceCompatible = useDeviceCompatibility()
 
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -591,7 +620,20 @@ const NewProject = () => {
         const languages = data.map((lang) => {
           return {...lang, id: lang.code}
         })
-        setSupportedLanguages(languages)
+
+        setSupportedLanguages(
+          languages.map((language) => {
+            const nameWithoutDiacriticalMarks = language.name
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+            return {
+              ...language,
+              ...(nameWithoutDiacriticalMarks !== language.name && {
+                nameWithoutDiacriticalMarks,
+              }),
+            }
+          }),
+        )
         ApplicationActions.setLanguages(data)
       })
       .catch((error) =>
@@ -928,6 +970,7 @@ const NewProject = () => {
                   projectTemplates,
                   setProjectTemplates,
                   currentProjectTemplate,
+                  subtemplatesNotSaved,
                 }}
               />
             </div>
@@ -1127,6 +1170,7 @@ const NewProject = () => {
             analysisTemplates,
             fileImportFiltersParamsTemplates,
             fileImportXliffSettingsTemplates,
+            subtemplatesNotSaved,
           }}
         />
       )}

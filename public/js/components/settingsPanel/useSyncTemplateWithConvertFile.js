@@ -7,6 +7,7 @@ function useSyncTemplateWithConvertFile({
   currentTemplate,
   setTemplates,
   defaultTemplate,
+  idProjectTemplate,
   idTemplate,
   getTemplates,
   checkIfUpdate,
@@ -48,11 +49,12 @@ function useSyncTemplateWithConvertFile({
 
         return prevState.map((template) => ({
           ...template,
-          isSelected: template.id === selectedTemplateId,
+          isSelected:
+            template.id === selectedTemplateId && !template.isTemporary,
         }))
       })
     }
-  }, [idTemplate, setTemplates, isCattool])
+  }, [idProjectTemplate, idTemplate, setTemplates, isCattool])
 
   // check when current template change
   useEffect(() => {
@@ -75,6 +77,7 @@ function useSyncTemplateWithConvertFile({
 }
 
 useSyncTemplateWithConvertFile.propTypes = {
+  idProjectTemplate: PropTypes.number,
   idTemplate: PropTypes.number,
   currentTemplate: PropTypes.object,
   defaultTemplate: PropTypes.object,

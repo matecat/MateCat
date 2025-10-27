@@ -290,7 +290,7 @@ class NewController extends KleinController {
         $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
         $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $get_public_matches                        = (bool)filter_var( $this->request->param( 'get_public_matches' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0, 'max_range' => 1 ] ] ); // used to set the default value of get_public_matches to 1
+        $get_public_matches                        = ($this->request->param( 'get_public_matches' ) !== null) ? filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN ) : true; // used to set the default value of get_public_matches to 1
         $id_qa_model                               = filter_var( $this->request->param( 'id_qa_model' ), FILTER_SANITIZE_NUMBER_INT );
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );

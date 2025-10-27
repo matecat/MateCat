@@ -154,6 +154,7 @@ let SearchUtils = {
         0,
         searchObject.searchParams,
       )
+      console.log('this.searchResultsDictionary', this.searchResultsDictionary)
     } else {
       SegmentActions.removeSearchResultToSegments()
       this.resetSearch()
@@ -192,6 +193,7 @@ let SearchUtils = {
       this.featuredSearchResult = this.featuredSearchResult + 1
     }
     searchObject.featuredSearchResult = this.featuredSearchResult
+    console.log('updateSearchObject', searchObject)
     return searchObject
   },
 

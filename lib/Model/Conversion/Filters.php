@@ -173,17 +173,17 @@ class Filters {
         // The legacy_icu option overrides any other extractionParams
         if ( $legacy_icu === true ) {
             $extractionParams = [];
-            $extractionParams[ 'legacy_icu' ] = true;
+            $extractionParams[ 'escape_icu' ] = true;
         }
 
         if ( $extractionParams !== null ) {
             $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
 
+        // This is probably useless
         if ( $legacy_icu === true ) {
-            $data[ 'legacy_icu' ] = true;
+            $data[ 'escape_icu' ] = true;
         }
-
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
 
