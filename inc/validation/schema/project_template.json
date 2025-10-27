@@ -84,6 +84,9 @@
     },
     "dialect_strict": {
       "type":  ["null", "boolean"]
+    },
+    "subfiltering_handlers": {
+      "$ref": "subfiltering_handlers.json"
     }
   },
   "required": [

@@ -39,6 +39,7 @@ use Model\FilesStorage\S3FilesStorage;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -246,7 +247,7 @@ class ProjectManager {
                             'filters_extraction_parameters'          => new RecursiveArrayObject(),
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
-                            'mt_qe_workflow_payable_rate'            => null
+                            'mt_qe_workflow_payable_rate'            => null,
                     ] );
         }
 
@@ -266,7 +267,13 @@ class ProjectManager {
         }
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
+        $filter       = MateCatFilter::getInstance(
+                $this->features,
+                $this->projectStructure[ 'source_language' ],
+                $this->projectStructure[ 'target_language' ],
+                [],
+                json_decode( $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ] ?? null )
+        );
         $this->filter = $filter;
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
@@ -312,27 +319,6 @@ class ProjectManager {
         }
 
         return $features;
-    }
-
-    /**
-     * Project name is required to build the analysis URL.
-     * The project name is memoized in an instance variable
-     * so to perform the check only the first time on $projectStructure['project_name'].
-     *
-     * @throws Exception
-     */
-    protected function _sanitizeProjectName() {
-        $newName = Utils::sanitizeName( $this->projectStructure[ 'project_name' ] );
-
-        if ( !$newName ) {
-            $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -5,
-                    "message" => "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!"
-            ];
-            throw new Exception( "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!", -5 );
-        }
-
-        $this->projectStructure[ 'project_name' ] = $newName;
     }
 
     /**
@@ -420,6 +406,58 @@ class ProjectManager {
                     implode( ',', $featureCodes )
             );
         }
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function saveJobsMetadata( JobStruct $newJob, ArrayObject $projectStructure ) {
+
+        $jobsMetadataDao = new JobsMetadataDao();
+
+        // public_tm_penalty
+        if ( isset ( $projectStructure[ 'public_tm_penalty' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure[ 'public_tm_penalty' ] );
+        }
+
+        // character_counter_count_tags
+        if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] ? "1" : "0" ) );
+        }
+
+        // character_counter_mode
+        if ( isset( $projectStructure[ 'character_counter_mode' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_mode', $projectStructure[ 'character_counter_mode' ] );
+        }
+
+        // tm_prioritization
+        if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', $projectStructure[ 'tm_prioritization' ] ? 1 : 0 );
+        }
+
+        // dialect_strict
+        if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
+            $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
+
+            foreach ( $dialectStrictObj as $lang => $value ) {
+                if ( trim( $lang ) === trim( $newJob->target ) ) {
+                    $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
+                }
+            }
+        }
+
+        /**
+         * Save the subfiltering handlers in the JobsMetadataDao.
+         * Configuration about handlers can be changed later in the job settings.
+         * But the analysis must everytime be performed with the current configuration.
+         */
+        $jobsMetadataDao->set(
+                $newJob->id,
+                $newJob->password,
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]
+        );
+
     }
 
     /**
@@ -518,6 +556,18 @@ class ProjectManager {
             );
         }
 
+        /** Duplicate the JobsMetadataDao::SUBFILTERING_HANDLERS in project metadata for easier retrieval.
+         * During the analysis of the project, there is no need to query the JobsMetadataDao.
+         * Configuration about handlers can be changed later in the job settings.
+         * But the analysis must everytime be performed with the current configuration.
+         * @see ProjectManager::saveJobsMetadata()
+         */
+        $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]
+        );
+
     }
 
     /**
@@ -554,7 +604,6 @@ class ProjectManager {
 
         $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject();
 
-        $this->_sanitizeProjectName();
         $this->_validateUploadToken();
         $this->_validateXliffParameters();
 
@@ -820,10 +869,8 @@ class ProjectManager {
                         if ( null === $cachedXliffFilePathName ) {
                             throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode( ',', $_originalFileNames ) ), -6 );
                         }
-                    } else {
-                        if ( !file_exists( $cachedXliffFilePathName ) ) {
-                            throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
-                        }
+                    } elseif ( !file_exists( $cachedXliffFilePathName ) ) {
+                        throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
                     }
 
                     $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
@@ -889,18 +936,15 @@ class ProjectManager {
                                 "code"    => -200,
                                 "message" => $e->getMessage()
                         ];
-                    } else {
-                        if ( $e->getCode() == 0 ) {
+                    } elseif ( $e->getCode() == 0 ) {
+                        // check for 'Invalid copy source encoding' error
+                        $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
 
-                            // check for 'Invalid copy source encoding' error
-                            $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
-
-                            if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
-                                $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                        "code"    => -200,
-                                        "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
-                                ];
-                            }
+                        if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
+                            $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                    "code"    => -200,
+                                    "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
+                            ];
                         }
                     }
                     $this->__clearFailedProject( $e );
@@ -1469,38 +1513,7 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
-            $jobsMetadataDao = new \Model\Jobs\MetadataDao();
-
-            // public_tm_penalty
-            if ( isset ( $projectStructure[ 'public_tm_penalty' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure[ 'public_tm_penalty' ] );
-            }
-
-            // character_counter_count_tags
-            if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] ? "1" : "0" ) );
-            }
-
-            // character_counter_mode
-            if ( isset( $projectStructure[ 'character_counter_mode' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_mode', $projectStructure[ 'character_counter_mode' ] );
-            }
-
-            // tm_prioritization
-            if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', $projectStructure[ 'tm_prioritization' ] ? 1 : 0 );
-            }
-
-            // dialect_strict
-            if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
-                $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
-
-                foreach ( $dialectStrictObj as $lang => $value ) {
-                    if ( trim( $lang ) === trim( $newJob->target ) ) {
-                        $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
-                    }
-                }
-            }
+            $this->saveJobsMetadata( $newJob, $projectStructure );
 
             try {
                 if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) and $payableRatesTemplate !== null ) {
@@ -2823,10 +2836,8 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                /** @var $filter MateCatFilter filter */
-                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
-                $source = $filter->fromLayer0ToLayer1( $source );
-                $target = $filter->fromLayer0ToLayer1( $target );
+                $source = $this->filter->fromLayer0ToLayer1( $source );
+                $target = $this->filter->fromLayer0ToLayer1( $target );
 
                 $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
@@ -2847,8 +2858,8 @@ class ProjectManager {
                         'id_job'                 => $jid,
                         'segment_hash'           => $translation_row [ 3 ],
                         'status'                 => $rule->asEditorStatus(),
-                        'translation'            => $filter->fromLayer1ToLayer0( $translation ),
-                        'suggestion'             => $filter->fromLayer1ToLayer0( $translation ),
+                        'translation'            => $this->filter->fromLayer1ToLayer0( $translation ),
+                        'suggestion'             => $this->filter->fromLayer1ToLayer0( $translation ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $rule->asMatchType(),
                         'eq_word_count'          => $rule->asEquivalentWordCount( $segment->raw_word_count, $payable_rates ),

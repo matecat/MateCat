@@ -44,19 +44,19 @@
           "type": "string"
         },
         "glos": {
-          "type": ["boolean", "integer", "string"]
+          "type": ["boolean", "integer"]
         },
         "owner": {
-          "type": ["boolean", "integer", "string"]
+          "type": ["boolean", "integer"]
         },
         "tm": {
-          "type": ["boolean", "integer", "string"]
+          "type": ["boolean", "integer"]
         },
         "r": {
-          "type": ["boolean", "integer", "string"]
+          "type": ["boolean", "integer"]
         },
         "w": {
-          "type": ["boolean", "integer", "string"]
+          "type": ["boolean", "integer"]
         },
         "penalty": {
           "type": "integer",

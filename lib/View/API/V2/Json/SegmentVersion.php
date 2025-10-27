@@ -7,6 +7,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 use Model\LQA\EntryStruct;
 
 class SegmentVersion {
@@ -151,16 +152,20 @@ class SegmentVersion {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target );
-        $translation = ( !empty( $version->translation ) ) ? $Filter->fromLayer0ToLayer2( $version->translation ) : null;
-
-        $translation = ( !empty( $version->translation ) ) ? $Filter->fromLayer0ToLayer2( $version->translation ) : null;
+        $metadataDao = new MetadataDao();
+        $Filter      = MateCatFilter::getInstance(
+                $featureSet,
+                $this->chunk->source,
+                $this->chunk->target,
+                [],
+                $metadataDao->getSubfilteringCustomHandlers( $this->chunk->id, $this->chunk->password )
+        );
 
         return [
                 'id'              => (int)$version->id,
                 'id_segment'      => (int)$version->id_segment,
                 'id_job'          => (int)$version->id_job,
-                'translation'     => $translation,
+                'translation'     => $Filter->fromLayer0ToLayer2( $version->translation ?? '' ),
                 'version_number'  => (int)$version->version_number,
                 'propagated_from' => (int)$version->propagated_from,
                 'created_at'      => $version->creation_date,
