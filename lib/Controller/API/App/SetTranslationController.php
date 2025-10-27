@@ -166,7 +166,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
             // update suggestion
-            if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $client_chosen_suggestion ) ) {
+            if ( $this->canUpdateSuggestion( $new_translation, $client_chosen_suggestion ) ) {
 
                 $new_translation->suggestion = !empty( $client_chosen_suggestion ) ? $client_chosen_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
 
@@ -652,27 +652,17 @@ class SetTranslationController extends AbstractStatefulKleinController {
     }
 
     /**
-     * Update suggestion only if:
-     *
-     * 1) the new state is one of these:
+     * Update suggestion only if the new state is one of these:
      *      - NEW
      *      - DRAFT
      *      - TRANSLATED
      *
-     * 2) the old state is one of these:
-     *      - NEW
-     *      - DRAFT
-     *
      * @param SegmentTranslationStruct $new_translation
-     * @param SegmentTranslationStruct $old_translation
      * @param null                     $old_suggestion
      *
      * @return bool
      */
-    private function canUpdateSuggestion(
-            SegmentTranslationStruct $new_translation,
-            SegmentTranslationStruct $old_translation,
-            $old_suggestion = null ): bool {
+    private function canUpdateSuggestion( SegmentTranslationStruct $new_translation,  $old_suggestion = null ): bool {
         if ( $old_suggestion === null ) {
             return false;
         }
@@ -681,13 +671,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 TranslationStatus::STATUS_NEW,
                 TranslationStatus::STATUS_DRAFT,
                 TranslationStatus::STATUS_TRANSLATED,
-        ] ) ) {
-            return false;
-        }
-
-        if ( !in_array( $old_translation->status, [
-                TranslationStatus::STATUS_NEW,
-                TranslationStatus::STATUS_DRAFT,
         ] ) ) {
             return false;
         }
