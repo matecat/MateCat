@@ -16,6 +16,7 @@ import CatToolActions from './CatToolActions'
 import {changeProjectStatus} from '../api/changeProjectStatus'
 import {changeJobStatus} from '../api/changeJobStatus'
 import UserActions from './UserActions'
+import {fromJS} from 'immutable'
 
 let ManageActions = {
   /********* Projects *********/
@@ -106,6 +107,20 @@ let ManageActions = {
         actionType: ManageConstants.REMOVE_JOB,
         project: project,
         job: job,
+      })
+    })
+  },
+
+  changeJobsStatusBulk: function (projects, jobs) {
+    jobs.forEach((job) => {
+      const projectByJob = projects.find((project) =>
+        project.jobs.some((jobItem) => jobItem.id === job.id),
+      )
+
+      AppDispatcher.dispatch({
+        actionType: ManageConstants.REMOVE_JOB,
+        project: fromJS(projectByJob),
+        job: fromJS(job),
       })
     })
   },
@@ -364,6 +379,21 @@ let ManageActions = {
         secondPassPassword: data.chunk_review.review_password,
       })
     })
+  },
+
+  getSecondPassReviewBulk: function (collection) {
+    collection.forEach(
+      ({idProject, passwordProject, job, secondPassPassword}) => {
+        AppDispatcher.dispatch({
+          actionType: ManageConstants.ADD_SECOND_PASS,
+          idProject: idProject,
+          passwordProject: passwordProject,
+          idJob: job.id,
+          passwordJob: job.password,
+          secondPassPassword,
+        })
+      },
+    )
   },
 
   /********* Modals *********/

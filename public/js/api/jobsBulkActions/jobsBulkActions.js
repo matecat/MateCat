@@ -12,6 +12,9 @@ export const jobsBulkActions = async ({jobs, action, ...rest}) => {
     {
       credentials: 'include',
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(params),
     },
   )
