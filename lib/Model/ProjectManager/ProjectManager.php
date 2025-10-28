@@ -248,6 +248,14 @@ class ProjectManager {
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
                             'mt_qe_workflow_payable_rate'            => null,
+                            'pre_translate_files'                    => null,
+                            'mmt_pre_import_tm'                      => null,
+                            'mmt_activate_context_analyzer'          => null,
+                            'mmt_glossaries_case_sensitive_matching' => null,
+                            'lara_glossaries'                        => null,
+                            'deepl_engine_type'                      => null,
+                            'intento_routing'                        => null,
+                            'intento_provider'                       => null,
                     ] );
         }
 
@@ -407,6 +415,60 @@ class ProjectManager {
                     implode( ',', $featureCodes )
             );
         }
+
+
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function saveJobsMetadata( JobStruct $newJob, ArrayObject $projectStructure ) {
+
+        $jobsMetadataDao = new JobsMetadataDao();
+
+        // public_tm_penalty
+        if ( isset ( $projectStructure[ 'public_tm_penalty' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure[ 'public_tm_penalty' ] );
+        }
+
+        // character_counter_count_tags
+        if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] ? "1" : "0" ) );
+        }
+
+        // character_counter_mode
+        if ( isset( $projectStructure[ 'character_counter_mode' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_mode', $projectStructure[ 'character_counter_mode' ] );
+        }
+
+        // tm_prioritization
+        if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', $projectStructure[ 'tm_prioritization' ] ? 1 : 0 );
+        }
+
+        // dialect_strict
+        if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
+            $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
+
+            foreach ( $dialectStrictObj as $lang => $value ) {
+                if ( trim( $lang ) === trim( $newJob->target ) ) {
+                    $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
+                }
+            }
+        }
+
+        /**
+         * Save the subfiltering handlers in the JobsMetadataDao.
+         * Configuration about handlers can be changed later in the job settings.
+         * But the analysis must everytime be performed with the current configuration.
+         */
+        $jobsMetadataDao->set(
+                $newJob->id,
+                $newJob->password,
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]
+        );
+
     }
 
     /**
@@ -510,6 +572,27 @@ class ProjectManager {
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options );
+        }
+
+        // MT extra config parameters
+        $extraKeys = [
+                'pre_translate_files',
+                'mmt_glossaries',
+                'mmt_pre_import_tm',
+                'mmt_activate_context_analyzer',
+                'mmt_glossaries_case_sensitive_matching',
+                'lara_glossaries',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+                'intento_provider',
+                'intento_routing',
+        ];
+
+        foreach ( $extraKeys as $extraKey ) {
+            if ( !empty( $this->projectStructure[ $extraKey ] ) && $this->projectStructure[ $extraKey ] ) {
+                $options[ $extraKey ] = $this->projectStructure[ $extraKey ];
+            }
         }
 
         if ( !empty( $options ) ) {
@@ -1272,47 +1355,61 @@ class ProjectManager {
 
         $memoryFiles = [];
 
+        if ( empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
+            return;
+        }
+
+        if ( !isset( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+            return;
+        }
+
+        if ( empty( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] ) ) {
+            return;
+        }
+
         //TMX Management
-        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
+        if ( !empty( $this->projectStructure[ 'array_files' ] ) ) {
+            foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
-            // get corresponding meta
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+                // get corresponding meta
+                $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
 
-            $ext = $meta[ 'extension' ];
+                $ext = $meta[ 'extension' ];
 
-            try {
+                try {
 
-                if ( 'tmx' == $ext ) {
+                    if ( 'tmx' == $ext ) {
 
-                    $file = new TMSFile(
-                            "$this->uploadDir/$fileName",
-                            $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
-                            $fileName,
-                            $pos
-                    );
+                        $file = new TMSFile(
+                                "$this->uploadDir/$fileName",
+                                $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
+                                $fileName,
+                                $pos
+                        );
 
-                    $memoryFiles[] = $file;
+                        $memoryFiles[] = $file;
 
-                    if ( AppConfig::$FILE_STORAGE_METHOD == 's3' ) {
-                        $this->getSingleS3QueueFile( $fileName );
+                        if ( AppConfig::$FILE_STORAGE_METHOD == 's3' ) {
+                            $this->getSingleS3QueueFile( $fileName );
+                        }
+
+                        $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                        $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
+
+                    } else {
+                        //don't call the postPushTMX for normal files
+                        continue;
                     }
 
-                    $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
-                    $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
+                } catch ( Exception $e ) {
 
-                } else {
-                    //don't call the postPushTMX for normal files
-                    continue;
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                            "code"    => $e->getCode(),
+                            "message" => $e->getMessage()
+                    ];
+
+                    throw new Exception( $e );
                 }
-
-            } catch ( Exception $e ) {
-
-                $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code"    => $e->getCode(),
-                        "message" => $e->getMessage()
-                ];
-
-                throw new Exception( $e );
             }
         }
 

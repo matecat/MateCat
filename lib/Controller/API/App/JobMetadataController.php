@@ -65,6 +65,7 @@ class JobMetadataController extends KleinController implements ChunkPasswordVali
         $this->response->json( [
                 'id' => $struct->id
         ] );
+
     }
 
     /**
@@ -102,7 +103,7 @@ class JobMetadataController extends KleinController implements ChunkPasswordVali
                     $params[ 'id_job' ],
                     $params[ 'password' ],
                     $item[ 'key' ],
-                    is_array( $item[ 'value' ] ) ? json_encode( $item[ 'value' ] ) : $item[ 'value' ]
+                    is_array( $item[ 'value' ] ) ? json_encode( $item[ 'value' ] ) : $item[ 'value' ] ?? 'null'
             );
             $return[] = $struct;
         }

@@ -9,8 +9,8 @@ export const Tab = ({id, label}) => {
     setTabs,
     checkSpecificTemplatePropsAreModified,
     isEnabledProjectTemplateComponent,
+    subtemplatesNotSaved,
   } = useContext(SettingsPanelContext)
-
   const clickHandler = () =>
     setTabs((prevState) =>
       prevState.map((tab) => ({...tab, isOpened: tab.id === id})),
@@ -19,7 +19,10 @@ export const Tab = ({id, label}) => {
   const isActive = tabs.find((tab) => tab.id === id)?.isOpened ?? false
   const isModifyng =
     isEnabledProjectTemplateComponent &&
-    checkSpecificTemplatePropsAreModified(TEMPLATE_PROPS_BY_TAB[id] ?? [])
+    (checkSpecificTemplatePropsAreModified(TEMPLATE_PROPS_BY_TAB[id] ?? []) ||
+      subtemplatesNotSaved.some((value) =>
+        TEMPLATE_PROPS_BY_TAB[id].includes(value),
+      ))
 
   return (
     <li

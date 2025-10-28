@@ -108,7 +108,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $this->data[ 'segment' ] = $this->segment;
 
             $segment     = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); // this segment comes from the database when getting contexts
-            $translation = $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] );
+            $translation = ( empty( $this->data[ 'translation' ] ) and !is_numeric( $this->data[ 'translation' ] ) ) ? "" : $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] ); // is_numeric check is needed to allow "0" strings
 
             $check = new QA( $segment, $translation ); // Layer 1 here
             $check->setChunk( $this->data[ 'chunk' ] );
@@ -166,7 +166,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
             // update suggestion
-            if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $client_chosen_suggestion ) ) {
+            if ( $this->canUpdateSuggestion( $new_translation, $client_chosen_suggestion ) ) {
 
                 $new_translation->suggestion = !empty( $client_chosen_suggestion ) ? $client_chosen_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
 
@@ -359,13 +359,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $redisHandler = new RedisHandler();
             $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->data[ 'id_job' ] );
             if (
+            (
                     (
-                            (
-                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
-                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
-                            )
-                            and empty( $job_status )
+                            $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
+                            $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
                     )
+                    and empty( $job_status )
+            )
             ) {
                 $redisHandler->getConnection()->setex( 'job_completeness:' . $this->data[ 'id_job' ], 60 * 60 * 24 * 15, true ); //15 days
 
@@ -652,27 +652,17 @@ class SetTranslationController extends AbstractStatefulKleinController {
     }
 
     /**
-     * Update suggestion only if:
-     *
-     * 1) the new state is one of these:
+     * Update suggestion only if the new state is one of these:
      *      - NEW
      *      - DRAFT
      *      - TRANSLATED
      *
-     * 2) the old state is one of these:
-     *      - NEW
-     *      - DRAFT
-     *
      * @param SegmentTranslationStruct $new_translation
-     * @param SegmentTranslationStruct $old_translation
      * @param null                     $old_suggestion
      *
      * @return bool
      */
-    private function canUpdateSuggestion(
-            SegmentTranslationStruct $new_translation,
-            SegmentTranslationStruct $old_translation,
-                                     $old_suggestion = null ): bool {
+    private function canUpdateSuggestion( SegmentTranslationStruct $new_translation,  $old_suggestion = null ): bool {
         if ( $old_suggestion === null ) {
             return false;
         }
@@ -681,13 +671,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 TranslationStatus::STATUS_NEW,
                 TranslationStatus::STATUS_DRAFT,
                 TranslationStatus::STATUS_TRANSLATED,
-        ] ) ) {
-            return false;
-        }
-
-        if ( !in_array( $old_translation->status, [
-                TranslationStatus::STATUS_NEW,
-                TranslationStatus::STATUS_DRAFT,
         ] ) ) {
             return false;
         }
@@ -826,12 +809,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->job_password         = $this->data[ 'password' ];
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
-        $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
+        $contributionStruct->translation          = ( $_Translation[ 'translation' ] !== null ) ? $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] ) : "";
         $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
-        $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
+        $contributionStruct->oldTranslation       = ( $_Translation[ 'translation' ] !== null ) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : "";
         $contributionStruct->translation_origin   = $this->getOriginalSuggestionProvider( $_Translation, $old_translation );
 
         /*

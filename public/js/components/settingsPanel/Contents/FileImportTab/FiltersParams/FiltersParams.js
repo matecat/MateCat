@@ -1,4 +1,10 @@
-import React, {createContext, useContext, useEffect, useRef} from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
@@ -69,10 +75,15 @@ export const FiltersParams = () => {
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
     fileImportFiltersParamsTemplates
 
+  const [currentProjectTemplateChanged, setCurrentProjectTemplateChanged] =
+    useState(false)
+
   const currentTemplateId = currentTemplate?.id
   const currentProjectTemplateFiltersId =
     currentProjectTemplate.filtersTemplateId
   const prevCurrentProjectTemplateFiltersId = useRef()
+
+  const prevCurrentProjectTemplateId = useRef()
 
   const saveErrorCallback = (error) => {
     let message = 'There was an error saving your data. Please retry!'
@@ -122,9 +133,23 @@ export const FiltersParams = () => {
     modifyingCurrentProjectTemplate,
   ])
 
+  useEffect(() => {
+    if (typeof currentProjectTemplate?.id === 'undefined') return
+
+    if (currentProjectTemplate?.id !== prevCurrentProjectTemplateId.current)
+      setCurrentProjectTemplateChanged(Symbol())
+
+    prevCurrentProjectTemplateId.current = currentProjectTemplate.id
+  }, [currentProjectTemplate?.id])
+
   return (
     <FiltersParamsContext.Provider
-      value={{templates, currentTemplate, modifyingCurrentTemplate}}
+      value={{
+        templates,
+        currentTemplate,
+        currentProjectTemplateChanged,
+        modifyingCurrentTemplate,
+      }}
     >
       {templates.length > 0 && (
         <div className="settings-panel-box">

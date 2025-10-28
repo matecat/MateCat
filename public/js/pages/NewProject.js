@@ -38,7 +38,7 @@ import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {checkGDriveEvents, handleCreationStatus} from '../utils/newProjectUtils'
+import {handleCreationStatus} from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
@@ -62,6 +62,7 @@ import {QF_SCHEMA_KEYS} from '../components/settingsPanel/Contents/QualityFramew
 import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/AnalysisTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
+import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary/DeepLGlossary'
 
 const SELECT_HEIGHT = 324
 
@@ -82,7 +83,7 @@ const headerMountPoint = document.querySelector('header.upload-page-header')
 
 const NewProject = () => {
   const [tmKeys, setTmKeys] = useState()
-  const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
+  const [mtEngines, setMtEngines] = useState()
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
   const [warnings, setWarnings] = useState()
@@ -107,7 +108,7 @@ const NewProject = () => {
     setProjectTemplates,
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
-  } = useProjectTemplates(tmKeys)
+  } = useProjectTemplates({tmKeys, mtEngines})
 
   // templates quality framework
   const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
@@ -117,6 +118,35 @@ const NewProject = () => {
   )
   const fileImportXliffSettingsTemplates = useTemplates(
     XLIFF_SETTINGS_SCHEMA_KEYS,
+  )
+
+  const subtemplatesNotSaved = useMemo(
+    () => [
+      ...(qualityFrameworkTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.qaModelTemplateId]
+        : []),
+      ...(analysisTemplates.templates.some(({isTemporary}) => isTemporary)
+        ? [SCHEMA_KEYS.payableRateTemplateId]
+        : []),
+      ...(fileImportFiltersParamsTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.filtersTemplateId]
+        : []),
+      ...(fileImportXliffSettingsTemplates.templates.some(
+        ({isTemporary}) => isTemporary,
+      )
+        ? [SCHEMA_KEYS.XliffConfigTemplateId]
+        : []),
+    ],
+    [
+      analysisTemplates.templates,
+      fileImportFiltersParamsTemplates.templates,
+      fileImportXliffSettingsTemplates.templates,
+      qualityFrameworkTemplates.templates,
+    ],
   )
 
   const isDeviceCompatible = useDeviceCompatibility()
@@ -277,6 +307,7 @@ const NewProject = () => {
               ({mt}) =>
                 mt.id === engineId &&
                 typeof mt.extra?.deepl_id_glossary !== 'undefined' &&
+                mt.extra?.deepl_id_glossary !== DEEPL_GLOSSARY_ROW_NONE &&
                 !glossaries.some(
                   ({glossary_id}) =>
                     glossary_id === mt.extra?.deepl_id_glossary,
@@ -488,6 +519,9 @@ const NewProject = () => {
       ),
     )
 
+    const {mmt_glossaries, lara_glossaries, deepl_id_glossary, ...mtExtra} =
+      mt?.extra ?? {}
+
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
@@ -516,17 +550,15 @@ const NewProject = () => {
         : {payable_rate_template_id: payableRateTemplateId}),
       get_public_matches: getPublicMatches,
       public_tm_penalty: publicTmPenalty,
-      ...(mt?.extra?.glossaries?.length && {
-        mmt_glossaries: JSON.stringify({
-          glossaries: mt.extra.glossaries,
-          ignore_glossary_case: !mt.extra.ignore_glossary_case,
-        }),
+      ...mtExtra,
+      ...(mmt_glossaries?.length && {
+        mmt_glossaries: JSON.stringify(mmt_glossaries),
       }),
-      ...(mt?.extra?.deepl_id_glossary && {
-        deepl_id_glossary: mt.extra.deepl_id_glossary,
+      ...(deepl_id_glossary && {
+        deepl_id_glossary,
       }),
-      ...(mt?.extra?.deepl_formality && {
-        deepl_formality: mt.extra.deepl_formality,
+      ...(lara_glossaries?.length && {
+        lara_glossaries: JSON.stringify(lara_glossaries),
       }),
       ...(typeof xliffParametersTemplate !== 'undefined'
         ? {xliff_parameters: xliffParametersTemplate}
@@ -546,9 +578,6 @@ const NewProject = () => {
         ),
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
-      ...(mt?.extra?.lara_glossaries?.length && {
-        lara_glossaries: JSON.stringify(mt.extra.lara_glossaries),
-      }),
     })
 
     if (!projectSent) {
@@ -591,7 +620,20 @@ const NewProject = () => {
         const languages = data.map((lang) => {
           return {...lang, id: lang.code}
         })
-        setSupportedLanguages(languages)
+
+        setSupportedLanguages(
+          languages.map((language) => {
+            const nameWithoutDiacriticalMarks = language.name
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+            return {
+              ...language,
+              ...(nameWithoutDiacriticalMarks !== language.name && {
+                nameWithoutDiacriticalMarks,
+              }),
+            }
+          }),
+        )
         ApplicationActions.setLanguages(data)
       })
       .catch((error) =>
@@ -846,11 +888,11 @@ const NewProject = () => {
   const isLoadingTemplates = !projectTemplates.length
 
   checkMMTGlossariesWasCancelledIntoTemplates.current({
-    engineId: mtEngines.find(({engine_type}) => engine_type === 'MMT')?.id,
+    engineId: mtEngines?.find(({engine_type}) => engine_type === 'MMT')?.id,
     projectTemplates,
   })
   checkDeepLGlossaryWasCancelledIntoTemplates.current({
-    engineId: mtEngines.find(({engine_type}) => engine_type === 'DeepL')?.id,
+    engineId: mtEngines?.find(({engine_type}) => engine_type === 'DeepL')?.id,
     projectTemplates,
   })
 
@@ -928,6 +970,7 @@ const NewProject = () => {
                   projectTemplates,
                   setProjectTemplates,
                   currentProjectTemplate,
+                  subtemplatesNotSaved,
                 }}
               />
             </div>
@@ -1127,6 +1170,7 @@ const NewProject = () => {
             analysisTemplates,
             fileImportFiltersParamsTemplates,
             fileImportXliffSettingsTemplates,
+            subtemplatesNotSaved,
           }}
         />
       )}

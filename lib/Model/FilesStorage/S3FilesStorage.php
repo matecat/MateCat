@@ -285,6 +285,11 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws Exception
      */
     public function getOriginalFromCache( $hash, $lang ) {
+
+        if(empty($lang)){
+            return null;
+        }
+
         return $this->findAKeyInCachePackageBucket( $hash, $lang, 'orig' );
     }
 
@@ -301,6 +306,11 @@ class S3FilesStorage extends AbstractFilesStorage {
     // $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang ); cache-package/69/81/e08bc467f8af85fd686c54287ac755408e89__it-it/work/os.odt.sdlxliff
 
     public function getXliffFromCache( $hash, $lang ) {
+
+        if(empty($lang)){
+            return null;
+        }
+
         return $this->findAKeyInCachePackageBucket( $hash, $lang, 'work' );
     }
 

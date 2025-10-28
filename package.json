@@ -49,7 +49,7 @@
     "semantic-ui-react": "^2.1.5",
     "socket.io-client": "^4.8.1",
     "sprintf-js": "^1.1.2",
-    "uuid": "^11.0.2"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.27.7",
@@ -101,5 +101,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.4.7"
+  "version": "3.4.12"
 }

@@ -187,6 +187,7 @@ class Editarea extends React.Component {
     let {tagRange} = this.state
     let {searchParams, occurrencesInSearch, currentInSearchIndex} =
       this.props.segment
+    console.log('occurrencesInSearch', occurrencesInSearch)
     const textToSearch = searchParams.target ? searchParams.target : ''
     const newDecorator = DraftMatecatUtils.activateSearch(
       textToSearch,

@@ -113,6 +113,7 @@ const Tooltip = ({
     </div>
   ) : children ? (
     <div
+      onMouseDown={!isInteractiveContent ? hideToolTip : () => false}
       onPointerEnter={showToolTip}
       onPointerLeave={
         isInteractiveContent ? hideTooltipWithTimeout : hideToolTip

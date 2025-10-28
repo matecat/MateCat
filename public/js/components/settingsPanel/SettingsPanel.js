@@ -170,6 +170,7 @@ export const SettingsPanel = ({
   analysisTemplates = {},
   fileImportFiltersParamsTemplates = {},
   fileImportXliffSettingsTemplates = {},
+  subtemplatesNotSaved,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -190,6 +191,7 @@ export const SettingsPanel = ({
   useSyncTemplateWithConvertFile({
     ...fileImportFiltersParamsTemplates,
     defaultTemplate: defaultFiltersParams,
+    idProjectTemplate: currentProjectTemplate?.id,
     idTemplate: currentProjectTemplate?.filtersTemplateId,
     getTemplates: getFiltersParamsTemplates,
     checkIfUpdate: (filtersTemplate) => {
@@ -335,6 +337,7 @@ export const SettingsPanel = ({
         analysisTemplates,
         fileImportFiltersParamsTemplates,
         fileImportXliffSettingsTemplates,
+        subtemplatesNotSaved,
       }}
     >
       <div
@@ -395,4 +398,5 @@ SettingsPanel.propTypes = {
   analysisTemplates: PropTypes.object,
   fileImportFiltersParamsTemplates: PropTypes.object,
   fileImportXliffSettingsTemplates: PropTypes.object,
+  subtemplatesNotSaved: PropTypes.array,
 }
