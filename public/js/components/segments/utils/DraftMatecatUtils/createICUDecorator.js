@@ -44,8 +44,7 @@ function validateICUMessage(locale, text) {
   const nodes = Array.isArray(tree)
     ? tree.filter((n) => Array.isArray(n) && typeof n[1] === 'string')
     : []
-  console.log('nodes', nodes)
-  nodes.forEach((node) => {
+  const visitNode = (node) => {
     const varName = node[0]
     const type = node[1]
     const options = node[3] || {}
@@ -84,43 +83,26 @@ function validateICUMessage(locale, text) {
       }
     }
 
-    /*/!* ---- SELECT (semantic check) ---- *!/
-    if (type === 'select') {
-      keys.forEach((k) => {
-        if (['plural', 'select', 'selectordinal'].includes(k)) {
-          const value = options[k]
-          const maybeNode = Array.isArray(value[0]) ? value[0] : null
-          if (!maybeNode || typeof maybeNode[1] !== 'string') {
-            blockIssues.push({
-              message: `Key '${k}' in select block '${varName}' is used as a plain key, not as a nested block.`,
-            })
-          }
+    results.push({
+      node: {varName, type},
+      issues: blockIssues,
+    })
+    if (node[2]) {
+      Object.values(node[2]).forEach((childNode) => {
+        if (Array.isArray(childNode)) {
+          childNode.forEach((node) => {
+            if (Array.isArray(node)) {
+              visitNode(node)
+            }
+          })
         }
       })
-
-      if (!keys.includes('other')) {
-        blockIssues.push({
-          message: `Each select block must include 'other'.`,
-        })
-      }
-    }*/
-
-    if (blockIssues.length) {
-      const pattern = new RegExp(`\\{\\s*${varName}\\s*,\\s*${type}`)
-      const match = pattern.exec(text)
-      const start = match ? match.index + 1 : 0
-      let end = start + varName.length
-
-      results.push({
-        node: {varName, type, start, end},
-        issues: blockIssues,
-      })
     }
-  })
-  console.log('results', results)
+  }
+  nodes.forEach((node) => visitNode(node))
   return results
 }
-export const createIcuTokens = (editorState, locale) => {
+export const createIcuTokens = (text, editorState, locale) => {
   const blockMap = editorState.getCurrentContent().getBlockMap()
   const blocks = blockMap.toArray()
   let updatedTokens = []
@@ -143,7 +125,7 @@ export const createIcuTokens = (editorState, locale) => {
     let index = 0
     let blockTokens = tokens.map((token) => {
       const value = {
-        type: token[0],
+        type: token[0] === 'type' ? token[1] : token[0],
         text: token[1],
         start: index,
         end: index + token[1].length,
@@ -169,13 +151,17 @@ export const createIcuTokens = (editorState, locale) => {
       if (warningIssues.length > 0) {
         warningIssues.forEach((issue) => {
           const node = issue.node
-          blockTokens = blockTokens.map((token) => {
-            if (token.start === node.start && token.text === node.varName) {
-              token.type = 'error'
-              token.message = issue.issues.map((i) => i.message)
+          let tokenToUpdate = blockTokens.findIndex(
+            (token) => token.type === node.type && !token.warning,
+          )
+          if (tokenToUpdate >= 0 && issue.issues.length > 0) {
+            blockTokens[tokenToUpdate] = {
+              ...blockTokens[tokenToUpdate],
+              type: 'error',
+              warning: true,
+              message: issue.issues.map((i) => i.message),
             }
-            return token
-          })
+          }
         })
       }
     }
