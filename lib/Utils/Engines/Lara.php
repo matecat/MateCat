@@ -10,6 +10,7 @@ use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -181,6 +182,10 @@ class Lara extends AbstractEngine {
      */
     public function get( array $_config ) {
 
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            return [];
+        }
+
         $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
@@ -319,7 +324,7 @@ class Lara extends AbstractEngine {
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
                 'score'           => $score ?? null
-        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] );
     }
 
     /**
@@ -600,4 +605,13 @@ class Lara extends AbstractEngine {
         return $glossaries->getAll();
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+                'lara_glossaries',
+        ];
+    }
 }

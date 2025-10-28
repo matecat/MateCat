@@ -18,6 +18,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -44,6 +45,9 @@ use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
 use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Intento;
+use Utils\Engines\Lara;
+use Utils\Engines\MMT;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
@@ -173,6 +177,8 @@ class NewController extends KleinController {
         $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
 
+        $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ] = $request[ JobsMetadataDao::SUBFILTERING_HANDLERS ];
+
         // Lara glossaries
         if ( $request[ 'lara_glossaries' ] ) {
             $projectStructure[ 'lara_glossaries' ] = $request[ 'lara_glossaries' ];
@@ -183,14 +189,13 @@ class NewController extends KleinController {
             $projectStructure[ 'mmt_glossaries' ] = $request[ 'mmt_glossaries' ];
         }
 
-        // DeepL
+        // MT Extra params
         $engine = EnginesFactory::getInstance( $request[ 'mt_engine' ] );
-        if ( $engine instanceof DeepL and $request[ 'deepl_formality' ] !== null ) {
-            $projectStructure[ 'deepl_formality' ] = $request[ 'deepl_formality' ];
-        }
 
-        if ( $engine instanceof DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
-            $projectStructure[ 'deepl_id_glossary' ] = $request[ 'deepl_id_glossary' ];
+        foreach ( $engine->getExtraParams() as $param ) {
+            if ( $request[ $param ] !== null ) {
+                $projectStructure[ $param ] = $request[ $param ];
+            }
         }
 
         // with the qa template id
@@ -282,8 +287,6 @@ class NewController extends KleinController {
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
-        $deepl_formality                           = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING );
-        $deepl_id_glossary                         = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING );
         $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
         $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
@@ -292,8 +295,6 @@ class NewController extends KleinController {
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
         $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
-        $lara_glossaries                           = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
@@ -320,6 +321,19 @@ class NewController extends KleinController {
         $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+
+        // MT SETTINGS
+        $pre_translate_files                    = filter_var( $this->request->param( 'pre_translate_files' ), FILTER_VALIDATE_BOOLEAN );
+        $mmt_glossaries_case_sensitive_matching = filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
+        $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
+        $intento_routing                        = filter_var( $this->request->param( 'intento_routing' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $intento_provider                       = filter_var( $this->request->param( 'intento_provider' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $lara_glossaries                        = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_id_glossary                      = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_formality                        = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_engine_type                      = filter_var( $this->request->param( 'deepl_engine_type' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
         // Strip tags from instructions
         $instructions = [];
@@ -372,6 +386,18 @@ class NewController extends KleinController {
         $project_features                      = $this->appendFeaturesToProject( (bool)$project_completion, $mt_engine );
         $target_language_mt_engine_association = $this->generateTargetEngineAssociation( $target_lang, $mt_engine );
 
+        /**
+         * Subfiltering configuration (as string input):
+         *
+         * 1. String "none" or "" (empty string) string or String "null": subfiltering is disabled
+         * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
+         * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
+         *
+         * Note:
+         * - The values above are expected as strings (e.g., "[]"), not native PHP types.
+         */
+        $subfiltering_handlers = $this->validateSubfilteringOptions( $this->request->param( JobsMetadataDao::SUBFILTERING_HANDLERS, '[]' ) ); // string value or default '[]'
+
         if ( $mt_qe_workflow_enable ) {
 
             // engines restrictions
@@ -423,10 +449,17 @@ class NewController extends KleinController {
                 'pretranslate_101'                          => $pretranslate_101,
                 'id_team'                                   => $id_team,
                 'team'                                      => $team,
+                'pre_translate_files'                       => $pre_translate_files,
+                'mmt_glossaries_case_sensitive_matching'    => $mmt_glossaries_case_sensitive_matching,
+                'mmt_pre_import_tm'                         => $mmt_pre_import_tm,
                 'mmt_glossaries'                            => $mmt_glossaries,
+                'mmt_activate_context_analyzer'             => $mmt_activate_context_analyzer,
+                'intento_routing'                           => $intento_routing,
+                'intento_provider'                          => $intento_provider,
                 'lara_glossaries'                           => $lara_glossaries,
                 'deepl_id_glossary'                         => $deepl_id_glossary,
                 'deepl_formality'                           => $deepl_formality,
+                'deepl_engine_type'                         => $deepl_engine_type,
                 'project_completion'                        => $project_completion,
                 'get_public_matches'                        => $get_public_matches,
                 'dialect_strict'                            => $dialect_strict,
@@ -459,6 +492,7 @@ class NewController extends KleinController {
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
                 'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null,
                 'legacy_icu'                                => $legacy_icu,
+                JobsMetadataDao::SUBFILTERING_HANDLERS      => json_encode( $subfiltering_handlers )
         ];
     }
 
@@ -679,6 +713,36 @@ class NewController extends KleinController {
     }
 
     /**
+     * Validates the provided subfiltering options by attempting to decode them as JSON.
+     *
+     * This method ensures that the input string is a valid JSON-encoded structure.
+     * If the decoding process encounters an error, it returns an empty array to enforce
+     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
+     *
+     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
+     *
+     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @throws Exception
+     */
+    private function validateSubfilteringOptions( string $subfiltering_handlers ): ?array {
+
+        if ( $subfiltering_handlers == 'none' ) {
+            // subfiltering is disabled
+            $subfiltering_handlers = 'null';
+        }
+
+        $validatorObject = new JSONValidatorObject( $subfiltering_handlers );
+        $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
+        $validator->validate( $validatorObject );
+
+        if ( is_null( $validatorObject->getValue() ) ) {
+            return null;
+        }
+
+        return $validatorObject->getValue();
+    }
+
+    /**
      * @param string $private_tm_key
      * @param string $private_tm_key_json
      *
@@ -700,16 +764,12 @@ class NewController extends KleinController {
                     throw new Exception( "private_tm_key_json is not a valid JSON" );
                 }
 
-                $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
-
-                $validatorObject       = new JSONValidatorObject();
-                $validatorObject->json = $private_tm_key_json;
-
-                $validator = new JSONValidator( $schema, true );
+                $validatorObject = new JSONValidatorObject( $private_tm_key_json );
+                $validator       = new JSONValidator( 'private_tm_key_json.json', true );
                 /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 
-                $tm_prioritization = $jsonObject->decoded->tm_prioritization;
+                $tm_prioritization = $jsonObject->decode()->tm_prioritization;
 
                 $private_tm_key = array_map(
                         function ( $item ) {
@@ -720,7 +780,7 @@ class NewController extends KleinController {
                                     'penalty' => $item->penalty ?? 0,
                             ];
                         },
-                        $jsonObject->decoded->keys
+                        $jsonObject->decode()->keys
                 );
 
             } else {
@@ -1088,21 +1148,12 @@ class NewController extends KleinController {
     private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
         if ( !empty( $filters_extraction_parameters ) ) {
 
-            // first check if `filters_extraction_parameters` is a valid JSON
-            if ( !Utils::isJson( $filters_extraction_parameters ) ) {
-                throw new InvalidArgumentException( "filters_extraction_parameters is not a valid JSON" );
-            }
-
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $filters_extraction_parameters;
-
-            $validator = new JSONValidator( $schema );
+            $validatorObject = new JSONValidatorObject( $filters_extraction_parameters );
+            $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
             $validator->validate( $validatorObject );
 
             $config = new FiltersConfigTemplateStruct();
-            $config->hydrateAllDto( json_decode( $filters_extraction_parameters, true ) );
+            $config->hydrateAllDto( $validatorObject->getValue( true ) );
 
             return $config;
 
@@ -1140,16 +1191,12 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "mt_qe_workflow_template_raw_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $mt_qe_workflow_template_raw_parameters;
-
-            $validator  = new JSONValidator( $schema, true );
-            $jsonObject = $validator->validate( $validatorObject );
+            $validatorObject = new JSONValidatorObject( $mt_qe_workflow_template_raw_parameters );
+            $validator       = new JSONValidator( 'mt_qe_workflow_params.json', true );
+            $jsonObject      = $validator->validate( $validatorObject );
 
             /** @var JSONValidatorObject $jsonObject */
-            return new MTQEWorkflowParams( (array)( $jsonObject->decoded ) );
+            return new MTQEWorkflowParams( (array)( $jsonObject->decode() ) );
 
         } elseif ( !empty( $mt_qe_workflow_template_id ) ) {
 
@@ -1206,15 +1253,11 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "xliff_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
-
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $xliff_parameters;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $xliff_parameters );
+            $validator       = new JSONValidator( 'xliff_parameters_rules_content.json', true );
             $validator->validate( $validatorObject );
 
-            return json_decode( $xliff_parameters, true ); // decode again because we need an associative array and not stdClass
+            return $validatorObject->getValue( true );
         }
 
         if ( !empty( $xliff_parameters_template_id ) ) {

@@ -52,10 +52,31 @@ class MetaDataController extends KleinController {
     private function getProjectInfo( ProjectStruct $project ): stdClass {
 
         $metadata = new stdClass();
+        $metadata->mt_extra = new stdClass();
+
+        $myExtraKeys = [
+                'pre_translate_files',
+                'mmt_glossaries',
+                'mmt_pre_import_tm',
+                'mmt_activate_context_analyzer',
+                'mmt_glossaries_case_sensitive_matching',
+                'lara_glossaries',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+                'intento_routing',
+                'intento_provider',
+        ];
 
         foreach ( $project->getMetadata() as $metadatum ) {
-            $key            = $metadatum->key;
-            $metadata->$key = Utils::formatStringValue( $metadatum->value );
+
+            $key = $metadatum->key;
+
+            if ( in_array( $key, $myExtraKeys ) ) {
+                $metadata->mt_extra->$key = Utils::formatStringValue( $metadatum->value );
+            } else {
+                $metadata->$key = Utils::formatStringValue( $metadatum->value );
+            }
         }
 
         return $metadata;
@@ -75,6 +96,10 @@ class MetaDataController extends KleinController {
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
             $key            = $metadatum->key;
             $metadata->$key = Utils::formatStringValue( $metadatum->value );
+        }
+
+        if( !property_exists($metadata,MetadataDao::SUBFILTERING_HANDLERS) ){
+            $metadata->{MetadataDao::SUBFILTERING_HANDLERS} = [];
         }
 
         return $metadata;

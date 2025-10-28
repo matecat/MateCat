@@ -10,6 +10,7 @@ use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use stdClass;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
@@ -176,6 +177,11 @@ abstract class AbstractEngine implements EngineInterface {
             throw new DomainException( "Property $key does not exists in " . get_class( $this ) );
         }
     }
+
+    /**
+     * @return array
+     */
+    abstract public function getExtraParams(): array;
 
     /**
      * @param mixed $rawValue
@@ -367,23 +373,27 @@ abstract class AbstractEngine implements EngineInterface {
      */
     protected function GoogleTranslateFallback( array $_config ) {
 
-        /**
-         * Create a record of type GoogleTranslate
-         */
-        $newEngineStruct = GoogleTranslateStruct::getStruct();
+        try {
+            /**
+             * Create a record of type GoogleTranslate
+             */
+            $newEngineStruct = GoogleTranslateStruct::getStruct();
 
-        $newEngineStruct->name                                = "Generic";
-        $newEngineStruct->uid                                 = 0;
-        $newEngineStruct->type                                = EngineConstants::MT;
-        $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
-        $newEngineStruct->others                              = [];
+            $newEngineStruct->name                                = "Generic";
+            $newEngineStruct->uid                                 = 0;
+            $newEngineStruct->type                                = EngineConstants::MT;
+            $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
+            $newEngineStruct->others                              = [];
 
-        $gtEngine = EnginesFactory::createTempInstance( $newEngineStruct );
+            $gtEngine = EnginesFactory::createTempInstance( $newEngineStruct );
 
-        /**
-         * @var $gtEngine GoogleTranslate
-         */
-        return $gtEngine->get( $_config );
+            /**
+             * @var $gtEngine GoogleTranslate
+             */
+            return $gtEngine->get( $_config );
+        } catch (Exception $exception){
+            return [];
+        }
 
     }
 
@@ -481,5 +491,23 @@ abstract class AbstractEngine implements EngineInterface {
         ] );
 
         return $mt_match_res->getMatches( $layerNum );
+    }
+
+    /**
+     * Validate extra params
+     *
+     * @param stdClass $extra
+     *
+     * @return bool
+     */
+    public function validateExtraParams(stdClass $extra): bool
+    {
+        foreach (array_keys(get_object_vars($extra)) as $key){
+            if(!in_array($key, $this->getExtraParams())){
+                return false;
+            }
+        }
+
+        return true;
     }
 }

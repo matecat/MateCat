@@ -2956,7 +2956,7 @@ var spec = {
         parameters: [
           {
             name: 'tm_key',
-            in: 'body',
+            in: 'formData',
             description: 'The tm key.',
             required: true,
             type: 'string',

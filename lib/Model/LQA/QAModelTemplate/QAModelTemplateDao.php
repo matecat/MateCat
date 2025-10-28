@@ -53,10 +53,8 @@ class QAModelTemplateDao extends AbstractDao {
      * @throws Exception
      */
     private static function validateJSON( $json ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
-        $validator             = new JSONValidator( $jsonSchema );
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( 'qa_model.json' );
         $validator->validate( $validatorObject );
 
         if ( !$validator->isValid() ) {

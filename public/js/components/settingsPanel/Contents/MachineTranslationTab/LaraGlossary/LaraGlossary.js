@@ -12,23 +12,22 @@ import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolActions from '../../../../../actions/CatToolActions'
 
 const COLUMNS_TABLE = [
-  {name: 'Activate'},
+  {name: 'Active'},
   {name: 'Glossary'},
   {name: ''},
   {name: ''},
 ]
 
-export const LaraGlossary = ({id, isCattoolPage = false}) => {
+export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
 
-  const {mt: {extra: laraGlossaryProps} = {}} = currentProjectTemplate ?? {}
+  const {mt: {extra} = {}} = currentProjectTemplate ?? {}
 
-  const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
 
   const activeGlossariesRef = useRef()
-  activeGlossariesRef.current = laraGlossaryProps?.lara_glossaries
+  activeGlossariesRef.current = extra?.lara_glossaries
 
   const updateRowsState = useCallback(
     (value) => {
@@ -136,87 +135,55 @@ export const LaraGlossary = ({id, isCattoolPage = false}) => {
 
     const rowsActive = rows.filter(({isActive}) => isActive).map(({id}) => id)
 
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      mt: {
-        ...prevTemplate.mt,
-        extra: {
-          ...(rowsActive.length && {
-            lara_glossaries: rowsActive,
-          }),
-        },
-      },
-    }))
-  }, [rows, isCattoolPage, modifyingCurrentTemplate])
-
-  const onShowingRows = () => {
-    setIsShowingRows((prevState) => !prevState)
-  }
+    setGlossaries(rowsActive)
+  }, [rows, isCattoolPage, modifyingCurrentTemplate, setGlossaries])
 
   const openGlossaryPage = () => {
     window.open('https://app.laratranslate.com/account/glossaries', '_blank')
   }
 
   const haveRecords = rows?.length > 0
-  const isVisibleGlossaryOptions =
-    !isCattoolPage || (isCattoolPage && haveRecords)
 
   return (
     <div className="mt-glossary">
-      {isVisibleGlossaryOptions && (
-        <div className="expand-button">
-          <button
-            className={`${isShowingRows ? 'rotate' : ''}`}
-            onClick={onShowingRows}
-            title="Glossary options"
-          >
-            <ArrowDown />
-            Glossary options
-          </button>
-        </div>
+      {haveRecords && (
+        <SettingsPanelTable
+          columns={COLUMNS_TABLE}
+          rows={rows}
+          className="mt-glossary-table"
+        />
       )}
 
-      {isShowingRows && (
-        <>
-          {haveRecords && (
-            <SettingsPanelTable
-              columns={COLUMNS_TABLE}
-              rows={rows}
-              className="mt-glossary-table"
-            />
-          )}
-
-          {!isCattoolPage &&
-            (haveRecords ? (
-              <div className="main-buttons-container">
-                <button
-                  className="grey-button manage-lara-glossary-button"
-                  onClick={openGlossaryPage}
-                >
-                  Manage your Lara glossaries
-                </button>
-              </div>
-            ) : Array.isArray(rows) ? (
-              <div className="empty-list-mode">
-                <p>Start using Lara's glossary feature</p>
-                <button
-                  className="grey-button create-glossary-button"
-                  onClick={openGlossaryPage}
-                >
-                  <IconAdd size={18} />
-                  Create a glossary on Lara
-                </button>
-              </div>
-            ) : (
-              <p className="loading-list-mode">Loading...</p>
-            ))}
-        </>
-      )}
+      {!isCattoolPage &&
+        (haveRecords ? (
+          <div className="main-buttons-container">
+            <button
+              className="ui primary button settings-panel-button-icon confirm-button manage-lara-glossary-button"
+              onClick={openGlossaryPage}
+            >
+              Manage your Lara glossaries
+            </button>
+          </div>
+        ) : Array.isArray(rows) ? (
+          <div className="empty-list-mode">
+            <p>Start using Lara's glossary feature</p>
+            <button
+              className="grey-button create-glossary-button"
+              onClick={openGlossaryPage}
+            >
+              <IconAdd size={18} />
+              Create a glossary on Lara
+            </button>
+          </div>
+        ) : (
+          <p className="loading-list-mode">Loading...</p>
+        ))}
     </div>
   )
 }
 
 LaraGlossary.propTypes = {
   id: PropTypes.number.isRequired,
+  setGlossaries: PropTypes.func.isRequired,
   isCattoolPage: PropTypes.bool,
 }

@@ -78,6 +78,24 @@ $klein->with( '/api/app/tm-keys', function () {
     route( '/engines/info/[:key]', 'GET', [ '\Controller\API\App\TmKeyManagementController', 'getByUserAndKey' ] );
 } );
 
+// Glossary
+$klein->with( '/api/app/glossary', function () {
+    route( '/_check', 'POST', [ '\Controller\API\App\GlossaryController', 'check' ] );
+    route( '/_delete', 'POST', [ '\Controller\API\App\GlossaryController', 'delete' ] );
+    route( '/_domains', 'POST', [ '\Controller\API\App\GlossaryController', 'domains' ] );
+    route( '/_get', 'POST', [ '\Controller\API\App\GlossaryController', 'get' ] );
+    route( '/_keys', 'POST', [ '\Controller\API\App\GlossaryController', 'keys' ] );
+    route( '/_search', 'POST', [ '\Controller\API\App\GlossaryController', 'search' ] );
+    route( '/_set', 'POST', [ '\Controller\API\App\GlossaryController', 'set' ] );
+    route( '/_status', 'POST', [ '\Controller\API\App\GlossaryController', 'status' ] );
+    route( '/_update', 'POST', [ '\Controller\API\App\GlossaryController', 'update' ] );
+} );
+
+// Intento
+$klein->with( '/api/app/intento', function () {
+    route( '/routing/[:engineId]', 'GET', [ '\Controller\API\App\IntentoController', 'routingList' ] );
+} );
+
 // MyMemory
 $klein->with( '/api/app/mymemory', function () {
 
@@ -185,7 +203,7 @@ route( '/api/app/download-analysis-report', 'POST', ['Controller\API\App\Downloa
 
 // Metadata
 $klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
-    route( '', 'GET', [ '\Controller\API\App\JobMetadataController', 'get' ] );
+    route( '', 'GET', [ '\Controller\API\V3\MetaDataController', 'index' ] );
     route( '', 'POST', [ '\Controller\API\App\JobMetadataController', 'save' ] );
     route( '/[:key]', 'DELETE', [ '\Controller\API\App\JobMetadataController', 'delete' ] );
 } );

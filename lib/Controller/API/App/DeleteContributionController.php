@@ -10,6 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\ChunkDao;
+use Model\Projects\MetadataDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
@@ -151,11 +152,11 @@ class DeleteContributionController extends KleinController {
             throw new InvalidArgumentException( "missing target_lang", -2 );
         }
 
-        if ( empty( $source ) ) {
+        if ( empty( $source ) and !is_numeric( $source ) ) {
             throw new InvalidArgumentException( "missing source", -3 );
         }
 
-        if ( empty( $target ) ) {
+        if ( empty( $target ) and !is_numeric( $source ) ) {
             throw new InvalidArgumentException( "missing target", -4 );
         }
 
