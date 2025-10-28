@@ -823,7 +823,7 @@ class Utils {
         }
 
         $html = $htmlDom->saveHtml( $htmlDom->documentElement );
-        $html = utf8_decode( $html );
+        $html = mb_convert_encoding( $html, 'ISO-8859-15', 'UTF-8' );
 
         $strippedHtml = strip_tags( $html );
         $strippedHtml = ltrim( $strippedHtml );

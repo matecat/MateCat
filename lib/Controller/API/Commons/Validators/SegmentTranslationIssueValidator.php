@@ -56,9 +56,9 @@ class SegmentTranslationIssueValidator extends Base {
             $this->__ensureIssueIsInScope();
         }
 
-        if ( $this->request->method( 'post' ) && $this->request->param( 'revision_number' ) ) {
+        if ( $this->request->httpMethod( 'post' ) && $this->request->param( 'revision_number' ) ) {
             $this->__ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber();
-        } elseif ( $this->request->method( 'delete' ) ) {
+        } elseif ( $this->request->httpMethod( 'delete' ) ) {
             $this->__ensureRevisionPasswordAllowsDeleteForIssue();
         }
 

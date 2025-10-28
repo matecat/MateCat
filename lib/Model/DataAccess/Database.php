@@ -1,6 +1,7 @@
 <?php
 
 namespace Model\DataAccess;
+
 use Exception;
 use PDO;
 use PDOException;
@@ -97,7 +98,7 @@ class Database implements IDatabase {
         return $this->connection;
     }
 
-    public function connect() {
+    public function connect(): void {
         $this->getConnection();
     }
 
@@ -115,7 +116,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function close() {
+    public function close(): void {
         $this->connection = null;
     }
 
@@ -129,7 +130,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function useDb( $name ) {
+    public function useDb( string $name ): void {
         $stmt = $this->getConnection()->prepare( "USE " . $name ); // Table and Column names cannot be replaced by parameters in PDO
         $stmt->execute();
         $stmt->closeCursor();
@@ -154,7 +155,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function commit() {
+    public function commit(): void {
         $this->getConnection()->commit();
     }
 
@@ -163,7 +164,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function rollback() {
+    public function rollback(): void {
         $this->getConnection()->rollBack();
     }
 
@@ -342,7 +343,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function last_insert() {
+    public function last_insert(): false|string {
         return $this->getConnection()->lastInsertId();
     }
 
@@ -353,7 +354,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function escape( $string ) {
+    public function escape( string $string ): string {
         return substr( $this->getConnection()->quote( $string ), 1, -1 );
     }
 

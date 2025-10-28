@@ -2069,7 +2069,7 @@ class QA {
         }
 
         //* Fix error undefined variable trgTagReference when source target contains tags and target not
-        $trgTagReference = [ 'node_idx' => null ];
+        $trgTagReference = [ 'node_idx' => -1 ];
 
         foreach ( $this->srcDomMap[ 'DOMElement' ] as $srcTagReference ) {
 

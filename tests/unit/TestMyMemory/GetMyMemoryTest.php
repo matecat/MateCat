@@ -9,7 +9,6 @@ use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Matches;
 
 
 /**
@@ -92,7 +91,7 @@ class GetMyMemoryTest extends AbstractTest {
 
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -217,7 +216,7 @@ TAB;
         $this->assertNull( $result->responseData[ 'match' ] );
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -361,7 +360,7 @@ TAB;
          */
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -516,7 +515,7 @@ TAB;
          */
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -560,7 +559,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param )->willReturn( $rawValue_error );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
@@ -588,7 +587,7 @@ TAB;
 
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 

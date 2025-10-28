@@ -4,6 +4,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use Stomp\Transport\Frame;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
@@ -40,7 +41,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
     /**
      * @param SplSubject $subject
      */
-    public function update( SplSubject $subject ) {
+    public function update( SplSubject $subject ): void {
         // Do Nothing, should be used to log
         /**
          * @var $subject SetContributionWorker
@@ -123,6 +124,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_ExecContribution_WillCall_MMT_With_single_tm_key() {
 
         /**
@@ -191,17 +193,16 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
         $inspector   = new InvocationInspector( $stubEngineParameterSpy );
         $invocations = $inspector->getInvocations();
 
         if ( !empty( $invocations ) ) {
-            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
-            $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
-            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
-            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
+            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters()[ 0 ][ 'segment' ] );
+            $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->parameters()[ 0 ][ 'keys' ] );
+            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->parameters()[ 0 ][ 'tuid' ] );
+            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->parameters()[ 0 ][ 'session' ] );
         }
     }
 
@@ -209,6 +210,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_ExecContribution_WillCall_MMT_With_multiple_tm_keys() {
 
         /**
@@ -275,17 +277,16 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $contributionMockQueueObject->oldTranslation       = $this->contributionStruct->oldTranslation;
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
         $inspector   = new InvocationInspector( $stubEngineParameterSpy );
         $invocations = $inspector->getInvocations();
 
         if ( !empty( $invocations ) ) {
-            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
-            $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
-            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
-            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
+            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters()[ 0 ][ 'segment' ] );
+            $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->parameters()[ 0 ][ 'keys' ] );
+            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->parameters()[ 0 ][ 'tuid' ] );
+            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->parameters()[ 0 ][ 'session' ] );
         }
     }
 
@@ -293,6 +294,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws ReflectionException
      */
+    #[Test]
     public function testWorker_WillCall_Engine_NONE_With_No_TM_Engine_Configured() {
 
         /**
@@ -326,11 +328,11 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
                 );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
+        
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
         $reflectionProperty = new ReflectionProperty( $_worker, '_engine' );
-        $reflectionProperty->setAccessible( true );
+        
         $engineLoaded = $reflectionProperty->getValue( $_worker );
 
         $this->assertInstanceOf( NONE::class, $engineLoaded );
@@ -341,6 +343,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws ReflectionException
      */
+    #[Test]
     public function testExceptionForEngineSetFailure_MMT() {
 
         /**
@@ -396,7 +399,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
                 );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
+        
 
         $this->expectException( ReQueueException::class );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
@@ -407,6 +410,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws ReflectionException
      */
+    #[Test]
     public function testExceptionForEngineSetFailure_Lara() {
 
         /**
@@ -462,7 +466,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
                 );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
+        
 
         $this->expectException( ReQueueException::class );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
@@ -473,6 +477,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws ReflectionException
      */
+    #[Test]
     public function should_load_the_correct_engine() {
 
         /**
@@ -482,7 +487,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
-        $reflectedMethod->setAccessible( true );
+        
         $reflectedMethod->invokeArgs( $_worker, [
                 new JobStruct(
                         [
@@ -493,7 +498,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         ] );
 
         $reflectionProperty = new ReflectionProperty( $_worker, '_engine' );
-        $reflectionProperty->setAccessible( true );
+        
         $engineLoaded = $reflectionProperty->getValue( $_worker );
 
         $this->assertInstanceOf( MMT::class, $engineLoaded );
@@ -504,6 +509,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws ReflectionException
      */
+    #[Test]
     public function should_throw_exception_with_wrong_engine() {
 
         /**
@@ -517,7 +523,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $this->expectExceptionCode( SetContributionWorker::ERR_NO_TM_ENGINE );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
-        $reflectedMethod->setAccessible( true );
+        
         $reflectedMethod->invokeArgs( $_worker, [
                 new JobStruct(
                         [

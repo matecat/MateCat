@@ -52,8 +52,7 @@ class RedisHandler {
         if ( $this->redisClient != null ) {
             $reflectorClass    = new ReflectionClass( $this->redisClient->getConnection() );
             $reflectorProperty = $reflectorClass->getParentClass()->getProperty( 'resource' );
-            $reflectorProperty->setAccessible( true );
-            $resource = $reflectorProperty->getValue( $this->redisClient->getConnection() );
+            $resource          = $reflectorProperty->getValue( $this->redisClient->getConnection() );
         }
 
         if (
@@ -82,7 +81,7 @@ class RedisHandler {
 
         } elseif ( is_array( $connectionParams ) ) {
 
-            $connectionParams = array_map( 'Utils\Redis\RedisHandler', $connectionParams );
+            $connectionParams = array_map( [ RedisHandler::class, 'formatDSN' ], $connectionParams );
 
         }
 

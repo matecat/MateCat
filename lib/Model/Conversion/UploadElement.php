@@ -20,13 +20,6 @@ class UploadElement implements ArrayAccess {
     use ArrayAccessTrait;
     use RecursiveArrayCopy;
 
-    public string $name;
-    public string $type;
-    public string $tmp_name;
-    public int    $error;
-    public int    $size;
-    public string $file_path;
-
     public function __construct( array $array_params = [] ) {
         if ( $array_params != null ) {
             foreach ( $array_params as $property => $value ) {

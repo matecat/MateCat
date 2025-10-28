@@ -71,6 +71,7 @@ class MemoryKeyStructTest extends TestCase {
         $tmKeyStruct                  = new TmKeyStruct();
         $tmKeyStruct->complete_format = true; //enable the complete format
         $tmKeyStruct->r               = true;
+        $tmKeyStruct->key             = 'xxx';
 
         $memoryKeyStruct         = new MemoryKeyStruct();
         $memoryKeyStruct->uid    = 101112;

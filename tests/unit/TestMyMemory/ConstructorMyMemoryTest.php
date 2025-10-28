@@ -51,17 +51,17 @@ class ConstructorMyMemoryTest extends AbstractTest {
         $this->databaseInstance = new MyMemory( $this->engine_struct_param );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->property         = $this->reflector->getProperty( "engineRecord" );
-        $this->property->setAccessible( true );
+        
 
         $this->assertEquals( $this->engine_struct_param, $this->property->getValue( $this->databaseInstance ) );
 
         $this->property = $this->reflector->getProperty( "className" );
-        $this->property->setAccessible( true );
+        
 
         $this->assertEquals( MyMemory::class, $this->property->getValue( $this->databaseInstance ) );
 
         $this->property = $this->reflector->getProperty( "curl_additional_params" );
-        $this->property->setAccessible( true );
+        
 
         $this->assertEquals( 6, count( $this->property->getValue( $this->databaseInstance ) ) );
 

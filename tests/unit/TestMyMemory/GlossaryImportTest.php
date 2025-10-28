@@ -91,7 +91,7 @@ class GlossaryImportTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -189,7 +189,7 @@ class GlossaryImportTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 

@@ -42,7 +42,7 @@ class GetConnection extends AbstractTest {
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->property         = $this->reflector->getProperty( 'instance' );
         $this->databaseInstance->close();
-        $this->property->setAccessible( true );
+        
         $this->property->setValue( $this->databaseInstance, null );
         $this->instance_after_reset = $this->databaseInstance->obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
@@ -77,7 +77,7 @@ class GetConnection extends AbstractTest {
      */
     public function test_getConnection_not_instance_of_PDO() {
         $this->property = $this->reflector->getProperty( 'connection' );
-        $this->property->setAccessible( true );
+        
         $this->property->setValue( $this->instance_after_reset, [ 'x' => "hello", 'y' => "man" ] );
         $this->current_value = $this->instance_after_reset->getConnection();
         $this->assertTrue( $this->current_value instanceof PDO );
@@ -93,7 +93,7 @@ class GetConnection extends AbstractTest {
      */
     public function test_getConnection_instance_of_PDO() {
         $this->property = $this->reflector->getProperty( 'connection' );
-        $this->property->setAccessible( true );
+        
         $this->property->setValue( $this->instance_after_reset, $this->expected_value );
         $this->current_value = $this->instance_after_reset->getConnection();
 

@@ -1,7 +1,9 @@
 <?php
 
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
 use Utils\Engines\EnginesFactory;
@@ -18,9 +20,9 @@ use Utils\Registry\AppConfig;
  */
 class MMTEngineTest extends AbstractTest {
 
-    protected int       $engine_id           = -1;
-    protected int       $not_valid_engine_id = -1;
-    protected ?Database $database_instance   = null;
+    protected int        $engine_id           = -1;
+    protected int        $not_valid_engine_id = -1;
+    protected ?IDatabase $database_instance   = null;
 
     public function setUp(): void {
 
@@ -61,6 +63,7 @@ H;
      * @test
      * @throws Exception
      */
+    #[Test]
     public function constructor_should_raise_exception_when_is_not_an_MT_engine() {
 
         $this->expectException( Exception::class );
@@ -72,6 +75,7 @@ H;
     /**
      * @test
      */
+    #[Test]
     public function should_invoke_update_on_client() {
 
         $stmt = $this->database_instance->getConnection()->prepare( "select * from engines where id = :id" );
@@ -102,13 +106,13 @@ H;
 
         $this->assertTrue( $result );
         $this->assertTrue( !empty( $invocation ) );
-        $this->assertEquals( 'xx', $inspector->getInvocations()[ 0 ]->getParameters()[ 0 ] );
-        $this->assertEquals( [ 'x_mm-k1', 'x_mm-k2' ], $inspector->getInvocations()[ 0 ]->getParameters()[ 1 ] );
-        $this->assertEquals( '_source', $inspector->getInvocations()[ 0 ]->getParameters()[ 2 ] );
-        $this->assertEquals( '_target', $inspector->getInvocations()[ 0 ]->getParameters()[ 3 ] );
-        $this->assertEquals( '_segment', $inspector->getInvocations()[ 0 ]->getParameters()[ 4 ] );
-        $this->assertEquals( '_translation', $inspector->getInvocations()[ 0 ]->getParameters()[ 5 ] );
-        $this->assertEquals( '_session', $inspector->getInvocations()[ 0 ]->getParameters()[ 6 ] );
+        $this->assertEquals( 'xx', $inspector->getInvocations()[ 0 ]->parameters()[ 0 ] );
+        $this->assertEquals( [ 'x_mm-k1', 'x_mm-k2' ], $inspector->getInvocations()[ 0 ]->parameters()[ 1 ] );
+        $this->assertEquals( '_source', $inspector->getInvocations()[ 0 ]->parameters()[ 2 ] );
+        $this->assertEquals( '_target', $inspector->getInvocations()[ 0 ]->parameters()[ 3 ] );
+        $this->assertEquals( '_segment', $inspector->getInvocations()[ 0 ]->parameters()[ 4 ] );
+        $this->assertEquals( '_translation', $inspector->getInvocations()[ 0 ]->parameters()[ 5 ] );
+        $this->assertEquals( '_session', $inspector->getInvocations()[ 0 ]->parameters()[ 6 ] );
 
     }
 

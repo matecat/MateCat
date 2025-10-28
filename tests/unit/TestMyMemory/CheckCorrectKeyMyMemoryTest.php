@@ -43,7 +43,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $engine_MyMemory );
         $property  = $reflector->getProperty( 'result' );
-        $property->setAccessible( true );
+        
         $object_result = $property->getValue( $engine_MyMemory );
 
 
@@ -79,7 +79,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
         $this->assertFalse( $bool_result );
         $reflector = new ReflectionClass( $engine_MyMemory );
         $property  = $reflector->getProperty( 'result' );
-        $property->setAccessible( true );
+
         $object_result = $property->getValue( $engine_MyMemory );
 
 
@@ -94,7 +94,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
          */
         $reflector = new ReflectionClass( $object_result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
         $this->assertEquals( "", $property->getValue( $object_result ) );
 
 
@@ -129,7 +129,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
          * creation of the engine
          * @var Matches
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_raw_value );
 
 
@@ -137,7 +137,6 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $engine_MyMemory );
         $property  = $reflector->getProperty( 'result' );
-        $property->setAccessible( true );
         $object_result = $property->getValue( $engine_MyMemory );
 
 
@@ -156,7 +155,6 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
          */
         $reflector = new ReflectionClass( $object_result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
         $this->assertEquals( "", $property->getValue( $object_result ) );
 
     }
@@ -198,7 +196,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
          * creation of the engine
          * @var Matches
          */
-        $engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
 
         $this->expectException( 'Exception' );
