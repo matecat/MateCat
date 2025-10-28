@@ -43,7 +43,8 @@
         "ext-gd": "*",
         "ext-iconv": "*",
         "ext-openssl": "*",
-        "ext-simplexml": "*"
+        "ext-simplexml": "*",
+        "ext-intl": "*"
     },
     "config": {
         "use-include-path": true,
