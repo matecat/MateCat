@@ -67,12 +67,13 @@ class Upload {
     /**
      * Start loading instance
      *
-     * @param array $filesToUpload
+     * @param array     $filesToUpload
+     * @param bool|null $disable_upload_limit
      *
      * @return UploadElement
      * @throws Exception
      */
-    public function uploadFiles( array $filesToUpload ): UploadElement {
+    public function uploadFiles( array $filesToUpload, ?bool $disable_upload_limit = false ): UploadElement {
 
         $result = new UploadElement();
 
@@ -86,7 +87,7 @@ class Upload {
 
         $uploadStruct = static::getUniformGlobalFilesStructure( $filesToUpload );
         foreach ( $uploadStruct as $inputName => $file ) {
-            $result->{$inputName} = $this->_uploadFile( $file );
+            $result->{$inputName} = $this->_uploadFile( $file, $disable_upload_limit );
         }
 
         return $result;
@@ -124,11 +125,12 @@ class Upload {
      * $RegistryKeyIndex MUST BE form name Element
      *
      * @param UploadElement $fileUp
+     * @param bool          $disable_upload_limit
      *
      * @return object
      * @throws Exception
      */
-    protected function _uploadFile( UploadElement $fileUp ): object {
+    protected function _uploadFile( UploadElement $fileUp, ?bool $disable_upload_limit = false ): object {
 
         // fix possibly XSS on the file name
         $fileUp[ 'name' ] = $this->fixFileName( $fileUp[ 'name' ] );
@@ -223,13 +225,16 @@ class Upload {
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
 
             $filePathInfo = pathinfo( $out_filename );
-            $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
 
-            if ( $fileSize >= $fileMaxSize ) {
-                $this->setObjectErrorOrThrowException(
-                        $fileUp,
-                        new DomainException ( "File Dimensions Not Allowed. '$out_filename'" )
-                );
+            if($disable_upload_limit === false){
+                $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
+
+                if ( $fileSize >= $fileMaxSize ) {
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new DomainException ( "File Dimensions Not Allowed. '$out_filename'" )
+                    );
+                }
             }
 
             if ( !Utils::isValidFileName( $fileUp->name ) ) {
