@@ -25,7 +25,6 @@ use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\QueueElement;
-use Utils\Tools\Utils;
 
 class AMQHandler {
 

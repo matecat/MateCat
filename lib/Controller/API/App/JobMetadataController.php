@@ -51,7 +51,7 @@ class JobMetadataController extends KleinController implements ChunkPasswordVali
      * @throws ReflectionException
      * @throws Exception
      */
-    public function delete() {
+    public function delete(): void {
         $params = $this->sanitizeRequestParams();
         $dao    = new MetadataDao();
 
@@ -69,20 +69,10 @@ class JobMetadataController extends KleinController implements ChunkPasswordVali
     }
 
     /**
-     * Get all job metadata
-     * @throws ReflectionException
-     */
-    public function get() {
-        $params = $this->sanitizeRequestParams();
-        $dao    = new MetadataDao();
-        $this->response->json( $dao->getByJobIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
-    }
-
-    /**
      * Upsert metadata
      * @throws Exception
      */
-    public function save() {
+    public function save(): void {
 
         $dao = new MetadataDao();
 

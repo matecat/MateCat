@@ -43,11 +43,7 @@ use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
-use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Intento;
-use Utils\Engines\Lara;
-use Utils\Engines\MMT;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
@@ -67,9 +63,9 @@ class NewController extends KleinController {
 
     use ScanDirectoryForConvertedFiles;
 
-    const MAX_NUM_KEYS = 13;
+    const int MAX_NUM_KEYS = 13;
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
@@ -280,7 +276,12 @@ class NewController extends KleinController {
     }
 
     /**
-     * @return void
+     * @return array
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      * @throws Exception
      */
     private function validateTheRequest(): array {
@@ -290,7 +291,7 @@ class NewController extends KleinController {
         $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_SPECIAL_CHARS );
         $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $get_public_matches                        = ($this->request->param( 'get_public_matches' ) !== null) ? filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN ) : true; // used to set the default value of get_public_matches to 1
+        $get_public_matches                        = ( $this->request->param( 'get_public_matches' ) !== null ) ? filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN ) : true; // used to set the default value of get_public_matches to 1
         $id_qa_model                               = filter_var( $this->request->param( 'id_qa_model' ), FILTER_SANITIZE_NUMBER_INT );
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
@@ -505,7 +506,7 @@ class NewController extends KleinController {
      *
      * @throws Exception
      */
-    private function validateMetadataParam( $metadata = null ) {
+    private function validateMetadataParam( $metadata = null ): array {
         if ( !empty( $metadata ) ) {
 
             if ( strlen( $metadata ) > 2048 ) {
@@ -627,7 +628,7 @@ class NewController extends KleinController {
     private function validateSourceLang( Languages $lang_handler, $source_lang ): string {
         try {
             return $lang_handler->validateLanguage( $source_lang );
-        } catch ( Exception $e ) {
+        } catch ( Exception ) {
             throw new InvalidArgumentException( "Missing source language." );
         }
     }
@@ -687,7 +688,7 @@ class NewController extends KleinController {
      * @param      $target_langs
      * @param      $mt_engine
      *
-     * @return array
+     * @return array|null
      * @see filterCreateProjectFeatures callback
      * @see NewController::appendFeaturesToProject()
      * @deprecated
@@ -1174,8 +1175,6 @@ class NewController extends KleinController {
     }
 
     /**
-     * YYY json validation
-     *
      * @param int|null    $mt_qe_workflow_template_id
      * @param string|null $mt_qe_workflow_template_raw_parameters
      *

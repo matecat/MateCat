@@ -10,7 +10,6 @@ use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
-use Model\Projects\MetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;

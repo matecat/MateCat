@@ -144,7 +144,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws ReflectionException
      */
-    protected function _endQueueCallback( QueueElement $queueElement ) {
+    protected function _endQueueCallback( QueueElement $queueElement ): void {
         $this->_forceSetSegmentAnalyzed( $queueElement );
         parent::_endQueueCallback( $queueElement );
     }
@@ -157,7 +157,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws Exception
      * @throws ReQueueException
      */
-    protected function _updateRecord( QueueElement $queueElement ) {
+    protected function _updateRecord( QueueElement $queueElement ): void {
 
         //This function is necessary to prevent TM matches with a value of 75-84% from being overridden by the MT, which has a default value of 86.
         $bestMatch   = $this->getHighestNotMT_OrPickTheFirstOne();
@@ -252,7 +252,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $tm_data[ 'suggestion_source' ] = $bestMatch[ 'created_by' ] ?? null;
         if ( !empty( $tm_data[ 'suggestion_source' ] ) ) {
-            if ( strpos( $tm_data[ 'suggestion_source' ], InternalMatchesConstants::MT ) === false ) {
+            if ( !str_contains( $tm_data[ 'suggestion_source' ], InternalMatchesConstants::MT ) ) {
                 $tm_data[ 'suggestion_source' ] = InternalMatchesConstants::TM;
             } else {
                 $tm_data[ 'suggestion_source' ] = InternalMatchesConstants::MT;
@@ -284,7 +284,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * Get the first available not MT match
      * @return mixed
      */
-    private function getHighestNotMT_OrPickTheFirstOne() {
+    private function getHighestNotMT_OrPickTheFirstOne(): mixed {
         foreach ( $this->_matches as $match ) {
             // return $match if not MT and quality >= 75
             if (
@@ -327,7 +327,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return false|string
      */
-    private function mergeJsonErrors( string $err_json, string $err_json2 ) {
+    private function mergeJsonErrors( string $err_json, string $err_json2 ): false|string {
         if ( $err_json === '' and $err_json2 === '' ) {
             return '';
         }
@@ -417,77 +417,77 @@ class TMAnalysisWorker extends AbstractWorker {
 
         if ( stripos( $tm_match_type, InternalMatchesConstants::MT ) !== false ) {
 
-            if ( !empty( $bestMatch[ 'score' ] ) && $bestMatch[ 'score' ] >= 0.9 ) {
-                $tm_match_fuzzy_band = InternalMatchesConstants::ICE_MT;
-                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::ICE_MT ];
-            } else {
+            $score = $bestMatch[ 'score' ] ?? 0;
 
-                if ( !$queueElement->params->mt_qe_workflow_enabled ) { // default behaviour
-                    $tm_match_fuzzy_band = InternalMatchesConstants::MT;
-                    $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::MT ]; // set all scores as generic MT
-                } else {
+            $tm_match_fuzzy_band = match ( true ) {
+                // First: ICE if score >= 0.9 (regardless of MTQE flag)
+                $score >= 0.9 => InternalMatchesConstants::ICE_MT,
 
-                    // set values for MTQEPayableRateBreakdowns
-                    if ( $bestMatch[ 'score' ] >= 0.8 ) {
-                        $tm_match_fuzzy_band = InternalMatchesConstants::TOP_QUALITY_MT;
-                        $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TOP_QUALITY_MT ];
-                    } elseif ( $bestMatch[ 'score' ] >= 0.5 ) {
-                        $tm_match_fuzzy_band = InternalMatchesConstants::HIGHER_QUALITY_MT;
-                        $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::HIGHER_QUALITY_MT ];
-                    } else {
-                        $tm_match_fuzzy_band = InternalMatchesConstants::STANDARD_QUALITY_MT;
-                        $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::STANDARD_QUALITY_MT ];
-                    }
+                // If not, and MTQE are disabled: generic MT
+                !$queueElement->params->mt_qe_workflow_enabled => InternalMatchesConstants::MT,
 
-                }
+                // With MTQE enabled, classify by thresholds
+                $score >= 0.8 => InternalMatchesConstants::TOP_QUALITY_MT,
+                $score >= 0.5 => InternalMatchesConstants::HIGHER_QUALITY_MT,
+                default => InternalMatchesConstants::STANDARD_QUALITY_MT,
+            };
 
-            }
+            $tm_discount = $equivalentWordMapping[ $tm_match_fuzzy_band ];
 
         } else {
 
+            // Normalize TM match type to integer (e.g., "85%" -> 85)
             $ind = intval( $tm_match_type );
 
             if ( $ind == 100 ) {
-
+                // Exact match (100%)
                 if ( $isICE ) {
+                    // In-Context Exact match: use ICE band and related discount
                     $tm_match_fuzzy_band = InternalMatchesConstants::TM_ICE;
-                    $tm_discount         = ( isset( $equivalentWordMapping[ $tm_match_fuzzy_band ] ) ) ? $equivalentWordMapping[ $tm_match_fuzzy_band ] : null;
+                    $tm_discount         = $equivalentWordMapping[ $tm_match_fuzzy_band ] ?? 0;
                 } else {
+                    // 100% match: distinguish between Public TM and private TM
+                    $tm_match_fuzzy_band = $temp_tm_match_fuzzy_band = $publicTM
+                            ? InternalMatchesConstants::TM_100_PUBLIC
+                            : InternalMatchesConstants::TM_100;
 
-                    $tm_match_fuzzy_band = $temp_tm_match_fuzzy_band = ( $publicTM ) ? InternalMatchesConstants::TM_100_PUBLIC : InternalMatchesConstants::TM_100;
-
+                    // If MT+QE workflow is enabled, remap to the corresponding MT_QE alias
                     if ( $queueElement->params->mt_qe_workflow_enabled ) {
-                        $temp_tm_match_fuzzy_band = ( $publicTM ) ? InternalMatchesConstants::TM_100_PUBLIC_MT_QE : InternalMatchesConstants::TM_100_MT_QE;
+                        $temp_tm_match_fuzzy_band = $publicTM
+                                ? InternalMatchesConstants::TM_100_PUBLIC_MT_QE
+                                : InternalMatchesConstants::TM_100_MT_QE;
                     }
 
-                    $tm_discount = $equivalentWordMapping[ $temp_tm_match_fuzzy_band ];
+                    // Pick discount using the (possibly remapped) fuzzy band
+                    $tm_discount = $equivalentWordMapping[ $temp_tm_match_fuzzy_band ] ?? 0;
                 }
-
-            }
-
-            /**
-             * MyMemory never returns matches below 50%, it sends them as NO_MATCH,
-             * So this block of code results unused
-             */
-            if ( $ind < 50 ) {
+            } elseif ( $ind < 50 ) {
+                /**
+                 * Matches below 50% are treated as NO_MATCH by MyMemory,
+                 * so this branch is effectively unused.
+                 */
                 $tm_match_fuzzy_band = InternalMatchesConstants::NO_MATCH;
-                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ];
-            }
+                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] ?? 0;
 
-            if ( $ind >= 50 and $ind < 75 ) {
+            } elseif ( $ind < 75 ) {
+                // 50–74% fuzzy band
                 $tm_match_fuzzy_band = InternalMatchesConstants::TM_50_74;
-                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_50_74 ];
-            }
+                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_50_74 ] ?? 0;
 
-            if ( $ind >= 75 && $ind <= 84 ) {
+            } elseif ( $ind <= 84 ) {
+                // 75–84% fuzzy band
                 $tm_match_fuzzy_band = InternalMatchesConstants::TM_75_84;
-                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_75_84 ];
-            } elseif ( $ind >= 85 && $ind <= 94 ) {
+                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_75_84 ] ?? 0;
+
+            } elseif ( $ind <= 94 ) {
+                // 85–94% fuzzy band
                 $tm_match_fuzzy_band = InternalMatchesConstants::TM_85_94;
-                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_85_94 ];
-            } elseif ( $ind >= 95 && $ind <= 99 ) {
+                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_85_94 ] ?? 0;
+
+            } elseif ( $ind <= 99 ) {
+                // 95–99% fuzzy band
                 $tm_match_fuzzy_band = InternalMatchesConstants::TM_95_99;
-                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_95_99 ];
+                $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TM_95_99 ] ?? 0;
             }
 
         }
@@ -635,7 +635,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : RequeueException: " . $rEx->getMessage() );
             $this->_forceSetSegmentAnalyzed( $queueElement );
             throw $rEx;  // just to make code more readable, re-throw exception
-        } catch ( NotSupportedMTException $nMTEx ) {
+        } catch ( NotSupportedMTException ) {
             // Do nothing, skip the frame
         }
 
@@ -725,11 +725,11 @@ class TMAnalysisWorker extends AbstractWorker {
             // pre_translate_files
             $pid = $queueElement->params->pid;
 
-            if($pid){
-                $metadataDao = new ProjectsMetadataDao();
+            if ( $pid ) {
+                $metadataDao         = new MetadataDao();
                 $pre_translate_files = $metadataDao->get( $pid, 'pre_translate_files' );
 
-                if($pre_translate_files === true){
+                if ( $pre_translate_files ) {
                     $mtEngine->setSkipAnalysis( false );
                 }
             }
@@ -794,7 +794,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ValidationError
      * @throws Exception
      */
-    protected function _getTM( AbstractEngine $tmsEngine, $_config, QueueElement $queueElement ) {
+    protected function _getTM( AbstractEngine $tmsEngine, $_config, QueueElement $queueElement ): GetMemoryResponse|array|null {
 
         /**
          * @var $tmsEngine MyMemory
@@ -845,7 +845,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws Exception
      */
-    protected function _checkWordCount( QueueElement $queueElement ) {
+    protected function _checkWordCount( QueueElement $queueElement ): void {
 
         if ( $queueElement->params->raw_word_count == 0 ) {
 //            SET as DONE and "decrement counter/close project"
@@ -868,7 +868,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReflectionException
      */
-    protected function _initializeTMAnalysis( QueueElement $queueElement, string $process_pid ) {
+    protected function _initializeTMAnalysis( QueueElement $queueElement, string $process_pid ): void {
 
         $sid = $queueElement->params->id_segment;
         $jid = $queueElement->params->id_job;
@@ -916,7 +916,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReflectionException
      */
-    protected function _incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
+    protected function _incrementAnalyzedCount( $pid, $eq_words, $standard_words ): void {
         $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)( $eq_words * 1000 ) );
         $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)( $standard_words * 1000 ) );
         $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1 );
@@ -930,7 +930,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws Exception
      */
-    protected function _decSegmentsToAnalyzeOfWaitingProjects( int $project_id ) {
+    protected function _decSegmentsToAnalyzeOfWaitingProjects( int $project_id ): void {
 
         if ( empty( $project_id ) ) {
             throw new Exception( 'Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT );
@@ -963,7 +963,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReflectionException
      */
-    protected function _tryToCloseProject( $_params ) {
+    protected function _tryToCloseProject( $_params ): void {
 
         $_project_id = $_params->pid;
 
@@ -1054,7 +1054,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
+    protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ): void {
 
         $data[ 'tm_analysis_status' ] = "DONE"; // DONE. I don't want it to remain in an inconsistent state
         $where                        = [

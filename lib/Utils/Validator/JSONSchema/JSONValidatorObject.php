@@ -3,7 +3,6 @@
 namespace Utils\Validator\JSONSchema;
 
 use Exception;
-use stdClass;
 use Utils\Validator\Contracts\ValidatorObject;
 
 /**

@@ -13,7 +13,6 @@ namespace View\API\V2\Json;
 use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Projects\MetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Utils\LQA\QA;
 

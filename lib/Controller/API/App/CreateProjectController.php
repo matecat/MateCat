@@ -27,11 +27,7 @@ use Plugins\Features\ProjectCompletion;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
-use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Intento;
-use Utils\Engines\Lara;
-use Utils\Engines\MMT;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -54,7 +50,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         return $this->data;
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
@@ -232,15 +228,15 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // MT SETTINGS
         $pre_translate_files                    = filter_var( $this->request->param( 'pre_translate_files' ), FILTER_VALIDATE_BOOLEAN );
         $mmt_glossaries_case_sensitive_matching = filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
-        $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
-        $intento_provider                       = filter_var( $this->request->param( 'intento_provider' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $intento_routing                        = filter_var( $this->request->param( 'intento_routing' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $lara_glossaries                        = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $deepl_id_glossary                      = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $deepl_formality                        = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $deepl_engine_type                      = filter_var( $this->request->param( 'deepl_engine_type' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $intento_provider                       = filter_var( $this->request->param( 'intento_provider' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $intento_routing                        = filter_var( $this->request->param( 'intento_routing' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $lara_glossaries                        = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_id_glossary                      = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_formality                        = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_engine_type                      = filter_var( $this->request->param( 'deepl_engine_type' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
         $array_keys = json_decode( $private_keys_list, true );
         $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
@@ -428,7 +424,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      *
      * @throws Exception
      */
-    private function setMetadataFromPostInput( array $data = [] ) {
+    private function setMetadataFromPostInput( array $data = [] ): void {
         // new raw counter model
         $options = [ MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW ];
 
@@ -690,7 +686,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @return mixed|null
      * @throws Exception
      */
-    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null ) {
+    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null ): mixed {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             $json            = html_entity_decode( $filters_extraction_parameters );
@@ -762,7 +758,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @param      $target_langs
      * @param      $mt_engine
      *
-     * @return array
+     * @return array|null
      * @see filterCreateProjectFeatures callback
      * @see NewController::appendFeaturesToProject()
      * @deprecated
