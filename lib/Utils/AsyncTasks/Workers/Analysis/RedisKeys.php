@@ -20,49 +20,49 @@ class RedisKeys {
     /**
      * Key that holds the number of segments to wait before this job executed
      */
-    const TOTAL_SEGMENTS_TO_WAIT = "seg_to_wait:";
+    const string TOTAL_SEGMENTS_TO_WAIT = "seg_to_wait:";
 
     /**
      * Key that holds the total number of segments in the project
      */
-    const PROJECT_TOT_SEGMENTS = 'p_tot_seg:';
+    const string PROJECT_TOT_SEGMENTS = 'p_tot_seg:';
 
     /**
      * Key that holds the number of segments already analyzed for this job
      */
-    const PROJECT_NUM_SEGMENTS_DONE = 'p_num_done:';
+    const string PROJECT_NUM_SEGMENTS_DONE = 'p_num_done:';
 
 
     /**
      * Key that holds the incremental counter for the equivalent word count of the project
      */
-    const PROJ_EQ_WORD_COUNT = 'eq_wc:';
+    const string PROJ_EQ_WORD_COUNT = 'eq_wc:';
 
     /**
      * Key that holds the incremental counter for the standard word count of the project
      */
-    const PROJ_ST_WORD_COUNT = 'st_wc:';
+    const string PROJ_ST_WORD_COUNT = 'st_wc:';
 
     /**
      * Key Set that holds the main process of TM Analysis
      */
-    const VOLUME_ANALYSIS_PID = 'tm_pid_set';
+    const string VOLUME_ANALYSIS_PID = 'tm_pid_set';
 
     /**
      * Key that holds the process ids of all fast analyses
      */
-    const FAST_PID_SET = 'fast_pid_set';
+    const string FAST_PID_SET = 'fast_pid_set';
 
     /**
      * Key that holds the lock for the first analysis demon child
      * that start the analysis (semaphore)
      */
-    const PROJECT_INIT_SEMAPHORE = 'proj_init_lock:';
+    const string PROJECT_INIT_SEMAPHORE = 'proj_init_lock:';
 
     /**
      * Key that holds the lock for the first analysis demon child
      * that reach the end of analysis (semaphore)
      */
-    const PROJECT_ENDING_SEMAPHORE = 'proj_end_lock:';
+    const string PROJECT_ENDING_SEMAPHORE = 'proj_end_lock:';
 
 }

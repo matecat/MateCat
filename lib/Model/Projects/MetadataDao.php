@@ -12,22 +12,22 @@ use Model\Jobs\JobStruct;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao {
-    const FEATURES_KEY = 'features';
-    const TABLE        = 'project_metadata';
+    const string FEATURES_KEY = 'features';
+    const string TABLE        = 'project_metadata';
 
-    const WORD_COUNT_TYPE_KEY = 'word_count_type';
+    const string WORD_COUNT_TYPE_KEY = 'word_count_type';
 
-    const WORD_COUNT_RAW        = 'raw';
-    const WORD_COUNT_EQUIVALENT = 'equivalent';
+    const string WORD_COUNT_RAW        = 'raw';
+    const string WORD_COUNT_EQUIVALENT = 'equivalent';
 
-    const SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
-    const SPLIT_RAW_WORD_TYPE        = 'raw_word_count';
+    const string SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
+    const string SPLIT_RAW_WORD_TYPE        = 'raw_word_count';
 
-    const MT_QUALITY_VALUE_IN_EDITOR = 'mt_quality_value_in_editor';
-    const MT_EVALUATION              = 'mt_evaluation';
-    const MT_QE_WORKFLOW_ENABLED     = 'mt_qe_workflow_enabled';
-    const MT_QE_WORKFLOW_PARAMETERS  = 'mt_qe_workflow_parameters';
-    const SUBFILTERING_HANDLERS      = 'subfiltering_handlers';
+    const string MT_QUALITY_VALUE_IN_EDITOR = 'mt_quality_value_in_editor';
+    const string MT_EVALUATION              = 'mt_evaluation';
+    const string MT_QE_WORKFLOW_ENABLED     = 'mt_qe_workflow_enabled';
+    const string MT_QE_WORKFLOW_PARAMETERS  = 'mt_qe_workflow_parameters';
+    const string SUBFILTERING_HANDLERS      = 'subfiltering_handlers';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 
@@ -175,7 +175,7 @@ class MetadataDao extends AbstractDao {
     /**
      * @param int $id_project
      *
-     * @return array
+     * @return array|null
      */
     public function getProjectStaticSubfilteringCustomHandlers( int $id_project ): ?array {
 

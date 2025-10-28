@@ -14,7 +14,7 @@ use Utils\Tools\Utils;
 
 class TranslationVersionDao extends AbstractDao {
 
-    const TABLE = 'segment_translation_versions';
+    const string TABLE = 'segment_translation_versions';
 
     protected static array $primary_keys = [ 'id_job', 'id_segment', 'version_number' ];
 

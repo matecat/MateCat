@@ -43,8 +43,8 @@ class AMQHandler {
     protected static Connection $staticStompConnection;
     protected ?string           $clientType = null;
 
-    const CLIENT_TYPE_PUBLISHER  = 'Publisher';
-    const CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
+    const string CLIENT_TYPE_PUBLISHER  = 'Publisher';
+    const string CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
 
     public string $persistent = 'true';
 

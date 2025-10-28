@@ -18,11 +18,11 @@ use Utils\Constants\TranslationStatus;
 use Utils\Logger\LoggerFactory;
 
 class SegmentDao extends AbstractDao {
-    const TABLE = 'segments';
+    const string TABLE = 'segments';
     protected static array $auto_increment_field = [ 'id' ];
 
 
-    const ISSUE_CATEGORY_ALL = 'all';
+    const string ISSUE_CATEGORY_ALL = 'all';
 
     protected static string $queryForGlobalMismatches = " SELECT id_segment, id_job , segment_hash, translation 
                          FROM segment_translations 

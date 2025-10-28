@@ -35,8 +35,8 @@ class Database implements IDatabase {
     public int $affected_rows;
 
 
-    const SEQ_ID_SEGMENT = 'id_segment';
-    const SEQ_ID_PROJECT = 'id_project';
+    const string SEQ_ID_SEGMENT = 'id_segment';
+    const string SEQ_ID_PROJECT = 'id_project';
 
     protected static array $SEQUENCES = [
             Database::SEQ_ID_SEGMENT,

@@ -24,7 +24,7 @@ class SessionTokenStoreHandler {
      * Key pattern for storing active user login tokens in the cache.
      * The `%s` placeholder is replaced with the user UID.
      */
-    private const ACTIVE_USER_LOGIN_TOKENS_MAP = 'active_user_login_tokens:%s';
+    private const string ACTIVE_USER_LOGIN_TOKENS_MAP = 'active_user_login_tokens:%s';
 
     /**
      * Constructor to initialize the cache TTL (time-to-live).

@@ -11,7 +11,7 @@ use Utils\Registry\AppConfig;
 
 class MicrosoftProvider extends AbstractProvider {
 
-    const PROVIDER_NAME = 'microsoft';
+    const string PROVIDER_NAME = 'microsoft';
 
     /**
      * @param string|null $redirectUrl

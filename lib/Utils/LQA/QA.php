@@ -169,61 +169,51 @@ class QA {
      */
     protected $characters_count;
 
-    const ERR_NONE                    = 0;
-    const ERR_COUNT                   = 1;
-    const ERR_SOURCE                  = 2;
-    const ERR_TARGET                  = 3;
-    const ERR_TAG_ID                  = 4;
-    const ERR_WS_HEAD                 = 5;
-    const ERR_WS_TAIL                 = 6;
-    const ERR_TAB_HEAD                = 7;
-    const ERR_TAB_TAIL                = 8;
-    const ERR_CR_HEAD                 = 9;
-    const ERR_CR_TAIL                 = 10;
-    const ERR_BOUNDARY_HEAD           = 11;
-    const ERR_BOUNDARY_TAIL           = 12;
-    const ERR_UNCLOSED_X_TAG          = 13;
-    const ERR_BOUNDARY_HEAD_TEXT      = 14;
-    const ERR_TAG_ORDER               = 15;
-    const ERR_NEWLINE_MISMATCH        = 16;
-    const ERR_DOLLAR_MISMATCH         = 17;
-    const ERR_AMPERSAND_MISMATCH      = 18;
-    const ERR_AT_MISMATCH             = 19;
-    const ERR_HASH_MISMATCH           = 20;
-    const ERR_POUNDSIGN_MISMATCH      = 21;
-    const ERR_PERCENT_MISMATCH        = 22;
-    const ERR_EQUALSIGN_MISMATCH      = 23;
-    const ERR_TAB_MISMATCH            = 24;
-    const ERR_STARSIGN_MISMATCH       = 25;
-    const ERR_GLOSSARY_MISMATCH       = 26;
-    const ERR_SPECIAL_ENTITY_MISMATCH = 27;
-    const ERR_EUROSIGN_MISMATCH       = 28;
-    const ERR_UNCLOSED_G_TAG          = 29;
+    const int ERR_NONE                    = 0;
+    const int ERR_COUNT                   = 1;
+    const int ERR_SOURCE                  = 2;
+    const int ERR_TARGET                  = 3;
+    const int ERR_TAG_ID                  = 4;
+    const int ERR_WS_HEAD                 = 5;
+    const int ERR_WS_TAIL                 = 6;
+    const int ERR_TAB_HEAD                = 7;
+    const int ERR_TAB_TAIL                = 8;
+    const int ERR_CR_HEAD                 = 9;
+    const int ERR_CR_TAIL                 = 10;
+    const int ERR_BOUNDARY_HEAD           = 11;
+    const int ERR_BOUNDARY_TAIL           = 12;
+    const int ERR_UNCLOSED_X_TAG          = 13;
+    const int ERR_BOUNDARY_HEAD_TEXT      = 14;
+    const int ERR_TAG_ORDER               = 15;
+    const int ERR_NEWLINE_MISMATCH        = 16;
+    const int ERR_DOLLAR_MISMATCH         = 17;
+    const int ERR_AMPERSAND_MISMATCH      = 18;
+    const int ERR_AT_MISMATCH             = 19;
+    const int ERR_HASH_MISMATCH           = 20;
+    const int ERR_POUNDSIGN_MISMATCH      = 21;
+    const int ERR_PERCENT_MISMATCH        = 22;
+    const int ERR_EQUALSIGN_MISMATCH      = 23;
+    const int ERR_TAB_MISMATCH            = 24;
+    const int ERR_STARSIGN_MISMATCH       = 25;
+    const int ERR_GLOSSARY_MISMATCH       = 26;
+    const int ERR_SPECIAL_ENTITY_MISMATCH = 27;
+    const int ERR_EUROSIGN_MISMATCH       = 28;
+    const int ERR_UNCLOSED_G_TAG          = 29;
 
-    const ERR_TAG_MISMATCH = 1000;
-
-    const ERR_SPACE_MISMATCH = 1100;
-
-    const ERR_SPACE_MISMATCH_TEXT = 1101;
-
-    const ERR_BOUNDARY_HEAD_SPACE_MISMATCH = 1102;
-
-    const ERR_BOUNDARY_TAIL_SPACE_MISMATCH = 1103;
-
-    const ERR_SPACE_MISMATCH_AFTER_TAG = 1104;
-
-    const ERR_SPACE_MISMATCH_BEFORE_TAG = 1105;
-
-    const ERR_SYMBOL_MISMATCH = 1200;
-
-    const ERR_EX_BX_NESTED_IN_G    = 1300;
-    const ERR_EX_BX_WRONG_POSITION = 1301;
-    const ERR_EX_BX_COUNT_MISMATCH = 1302;
-
-    const SMART_COUNT_PLURAL_MISMATCH = 2000;
-    const SMART_COUNT_MISMATCH        = 2001;
-
-    const ERR_SIZE_RESTRICTION = 3000;
+    const int ERR_TAG_MISMATCH = 1000;
+    const int ERR_SPACE_MISMATCH = 1100;
+    const int ERR_SPACE_MISMATCH_TEXT = 1101;
+    const int ERR_BOUNDARY_HEAD_SPACE_MISMATCH = 1102;
+    const int ERR_BOUNDARY_TAIL_SPACE_MISMATCH = 1103;
+    const int ERR_SPACE_MISMATCH_AFTER_TAG = 1104;
+    const int ERR_SPACE_MISMATCH_BEFORE_TAG = 1105;
+    const int ERR_SYMBOL_MISMATCH = 1200;
+    const int ERR_EX_BX_NESTED_IN_G    = 1300;
+    const int ERR_EX_BX_WRONG_POSITION = 1301;
+    const int ERR_EX_BX_COUNT_MISMATCH = 1302;
+    const int SMART_COUNT_PLURAL_MISMATCH = 2000;
+    const int SMART_COUNT_MISMATCH        = 2001;
+    const int ERR_SIZE_RESTRICTION = 3000;
 
     /**
      * Human Readable error map.
@@ -346,7 +336,7 @@ class QA {
             3000 => 'Maximum characters limit exceeded.',
     ];
 
-    const SIZE_RESTRICTION = "sizeRestriction";
+    const string SIZE_RESTRICTION = "sizeRestriction";
 
     /**
      * <code>
@@ -408,9 +398,9 @@ class QA {
 
     protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
-    const ERROR   = 'ERROR';
-    const WARNING = 'WARNING';
-    const INFO    = 'INFO';
+    const string ERROR   = 'ERROR';
+    const string WARNING = 'WARNING';
+    const string INFO    = 'INFO';
 
     /**
      * List of Errors from  check analysis

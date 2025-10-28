@@ -7,7 +7,7 @@ use Model\DataAccess\Database;
 use ReflectionException;
 
 class ModelDao extends AbstractDao {
-    const TABLE = "qa_models";
+    const string TABLE = "qa_models";
 
     protected static array $auto_increment_field = [ 'id' ];
 

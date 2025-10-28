@@ -12,9 +12,9 @@ use Utils\Registry\AppConfig;
 
 class Intento extends AbstractEngine {
 
-    const INTENTO_USER_AGENT   = 'Intento.MatecatPlugin/1.0.0';
-    const INTENTO_PROVIDER_KEY = 'd3ic8QPYVwRhy6IIEHi6yiytaORI2kQk';
-    const INTENTO_API_URL      = 'https://api.inten.to';
+    const string INTENTO_USER_AGENT   = 'Intento.MatecatPlugin/1.0.0';
+    const string INTENTO_PROVIDER_KEY = 'd3ic8QPYVwRhy6IIEHi6yiytaORI2kQk';
+    const string INTENTO_API_URL      = 'https://api.inten.to';
 
     protected array $_config = [
             'segment' => null,

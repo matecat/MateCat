@@ -12,7 +12,7 @@ use Utils\Registry\AppConfig;
 
 class FacebookProvider extends AbstractProvider {
 
-    const PROVIDER_NAME = 'facebook';
+    const string PROVIDER_NAME = 'facebook';
 
     /**
      * @param string|null $redirectUrl

@@ -19,7 +19,7 @@ use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 class ProjectDao extends AbstractDao {
-    const TABLE = "projects";
+    const string TABLE = "projects";
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];

@@ -22,21 +22,21 @@ use Utils\Engines\YandexTranslate;
  */
 class EngineConstants {
 
-    const MT   = "MT";
-    const TM   = "TM";
-    const NONE = "NONE";
+    const string MT   = "MT";
+    const string TM   = "TM";
+    const string NONE = "NONE";
 
-    const MY_MEMORY        = 'MyMemory';
-    const MICROSOFT_HUB    = 'MicrosoftHub';
-    const APERTIUM         = 'Apertium';
-    const ALTLANG          = 'Altlang';
-    const SMART_MATE       = 'SmartMATE';
-    const YANDEX_TRANSLATE = 'YandexTranslate';
-    const MMT              = 'MMT';
-    const LARA             = 'Lara';
-    const DEEPL            = 'DeepL';
-    const GOOGLE_TRANSLATE = 'GoogleTranslate';
-    const INTENTO          = 'Intento';
+    const string MY_MEMORY        = 'MyMemory';
+    const string MICROSOFT_HUB    = 'MicrosoftHub';
+    const string APERTIUM         = 'Apertium';
+    const string ALTLANG          = 'Altlang';
+    const string SMART_MATE       = 'SmartMATE';
+    const string YANDEX_TRANSLATE = 'YandexTranslate';
+    const string MMT              = 'MMT';
+    const string LARA             = 'Lara';
+    const string DEEPL            = 'DeepL';
+    const string GOOGLE_TRANSLATE = 'GoogleTranslate';
+    const string INTENTO          = 'Intento';
 
     protected static array $ENGINES_LIST = [
             MyMemory::class        => MyMemory::class,

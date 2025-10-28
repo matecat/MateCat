@@ -10,8 +10,8 @@ namespace Utils\Constants;
  */
 class Teams {
 
-    const PERSONAL = 'personal';
-    const GENERAL  = 'general';
+    const string PERSONAL = 'personal';
+    const string GENERAL  = 'general';
 
     protected static array $TYPES = [
             self::PERSONAL,

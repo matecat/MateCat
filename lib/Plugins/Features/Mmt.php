@@ -44,7 +44,7 @@ use Utils\TmKeyManagement\TmKeyManager;
 
 class Mmt extends BaseFeature {
 
-    const FEATURE_CODE = 'mmt';
+    const string FEATURE_CODE = 'mmt';
 
     protected bool $forceOnProject = true;
 

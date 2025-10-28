@@ -19,7 +19,7 @@ class MimeTypesMap {
      *
      * @see Resources/bin/update_mime_types.php
      */
-    public const MAP = [
+    public const array MAP = [
             'application/acrobat'                                                       => [ 'pdf' ],
             'application/andrew-inset'                                                  => [ 'ez' ],
             'application/annodex'                                                       => [ 'anx' ],
@@ -1778,7 +1778,7 @@ class MimeTypesMap {
             'zz-application/zz-winassoc-xls'                                            => [ 'xls', 'xlc', 'xll', 'xlm', 'xlw', 'xla', 'xlt', 'xld' ],
     ];
 
-    public const REVERSE_MAP = [
+    public const array REVERSE_MAP = [
             '123'                      => [ 'application/lotus123', 'application/vnd.lotus-1-2-3', 'application/wk1', 'application/x-123', 'application/x-lotus123', 'zz-application/zz-winassoc-123' ],
             '1km'                      => [ 'application/vnd.1000minds.decision-model+xml' ],
             '32x'                      => [ 'application/x-genesis-32x-rom' ],

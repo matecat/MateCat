@@ -69,7 +69,7 @@ class DownloadController extends AbstractDownloadController {
      */
     protected array $remoteFiles = [];
 
-    const FILES_CHUNK_SIZE = 3;
+    const int FILES_CHUNK_SIZE = 3;
 
     /**
      * @throws AuthenticationError

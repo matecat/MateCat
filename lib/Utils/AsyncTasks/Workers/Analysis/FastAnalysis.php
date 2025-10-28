@@ -68,10 +68,10 @@ class FastAnalysis extends AbstractDaemon {
      */
     protected AbstractFilesStorage $files_storage;
 
-    const ERR_NO_SEGMENTS    = 127;
-    const ERR_TOO_LARGE      = 128;
-    const ERR_500            = 129;
-    const ERR_EMPTY_RESPONSE = 130;
+    const int ERR_NO_SEGMENTS    = 127;
+    const int ERR_TOO_LARGE      = 128;
+    const int ERR_500            = 129;
+    const int ERR_EMPTY_RESPONSE = 130;
 
     /**
      * Reload Configuration every cycle

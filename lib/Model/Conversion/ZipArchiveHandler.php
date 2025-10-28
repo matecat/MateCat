@@ -17,16 +17,16 @@ use ZipArchive;
  */
 class ZipArchiveHandler extends ZipArchive {
 
-    const REFERENCE_FOLDER = '__reference';
-    const META_FOLDER      = '__meta';
-    const PREVIEWS_FOLDER  = '__previews';
+    const string REFERENCE_FOLDER = '__reference';
+    const string META_FOLDER      = '__meta';
+    const string PREVIEWS_FOLDER  = '__previews';
 
-    const MAX_VISITED_DEPTH             = 5;
-    const MAX_VISITED_FOLDERS_PER_DEPTH = 10;
-    const MAX_FOLDERS                   = 100;
-    const INTERNAL_SEPARATOR            = "___SEP___";
+    const int MAX_VISITED_DEPTH             = 5;
+    const int MAX_VISITED_FOLDERS_PER_DEPTH = 10;
+    const int MAX_FOLDERS                   = 100;
+    const string INTERNAL_SEPARATOR            = "___SEP___";
 
-    const ARRAY_FILES_PREFIX = "@@_prefix_@@";
+    const string ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
     public array $tree     = [];
     public array $treeList = [];

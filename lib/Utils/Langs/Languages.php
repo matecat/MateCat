@@ -2,7 +2,7 @@
 
 namespace Utils\Langs;
 
-use Utils\Logger\LoggerFactory;
+use RuntimeException;
 use Utils\Registry\AppConfig;
 
 class Languages {
@@ -39,8 +39,7 @@ class Languages {
 
         $file = AppConfig::$UTILS_ROOT . '/Langs/supported_langs.json';
         if ( !file_exists( $file ) ) {
-            LoggerFactory::doJsonLog( "no language defs found in $file" );
-            exit;
+            throw new RuntimeException( "no language defs found in $file" );
         }
         $string = file_get_contents( $file );
 
@@ -233,7 +232,7 @@ class Languages {
      * @return mixed
      * @throws InvalidLanguageException
      */
-    public function getLocalizedNameRFC( $code, ?string $lang = 'en' ) {
+    public function getLocalizedNameRFC( $code, ?string $lang = 'en' ): mixed {
         if ( !array_key_exists( $code, self::$map_rfc2obj ) ) {
             throw new InvalidLanguageException( 'Invalid language code: ' . $code );
         }

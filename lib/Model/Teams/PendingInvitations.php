@@ -14,7 +14,7 @@ use Predis\Client;
 
 class PendingInvitations {
 
-    const REDIS_INVITATIONS_SET = 'teams_invites:%u';
+    const string REDIS_INVITATIONS_SET = 'teams_invites:%u';
 
     /**
      * @var Client

@@ -53,31 +53,31 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      * MAP for Database values
      */
     /* DOWNLOADS */
-    const DOWNLOAD_EDIT_LOG           = 1;
-    const DOWNLOAD_ANALYSIS_REPORT    = 2;
-    const DOWNLOAD_PREVIEW            = 3;
-    const DOWNLOAD_GDRIVE_PREVIEW     = 4;
-    const DOWNLOAD_ORIGINAL           = 5;
-    const DOWNLOAD_TRANSLATION        = 6;
-    const DOWNLOAD_GDRIVE_TRANSLATION = 7;
-    const DOWNLOAD_JOB_TMX            = 8;
-    const DOWNLOAD_OMEGAT             = 9;
-    const DOWNLOAD_XLIFF              = 10;
-    const DOWNLOAD_KEY_TMX            = 11;
+    const int DOWNLOAD_EDIT_LOG           = 1;
+    const int DOWNLOAD_ANALYSIS_REPORT    = 2;
+    const int DOWNLOAD_PREVIEW            = 3;
+    const int DOWNLOAD_GDRIVE_PREVIEW     = 4;
+    const int DOWNLOAD_ORIGINAL           = 5;
+    const int DOWNLOAD_TRANSLATION        = 6;
+    const int DOWNLOAD_GDRIVE_TRANSLATION = 7;
+    const int DOWNLOAD_JOB_TMX            = 8;
+    const int DOWNLOAD_OMEGAT             = 9;
+    const int DOWNLOAD_XLIFF              = 10;
+    const int DOWNLOAD_KEY_TMX            = 11;
 
     /* ACCESSES */
-    const ACCESS_ANALYZE_PAGE        = 12;
-    const ACCESS_EDITLOG_PAGE        = 13;
-    const ACCESS_TRANSLATE_PAGE      = 14;
-    const ACCESS_REVISE_PAGE         = 15;
-    const ACCESS_MANAGE_PAGE         = 16;
-    const ACCESS_REVISE_SUMMARY_PAGE = 17;
+    const int ACCESS_ANALYZE_PAGE        = 12;
+    const int ACCESS_EDITLOG_PAGE        = 13;
+    const int ACCESS_TRANSLATE_PAGE      = 14;
+    const int ACCESS_REVISE_PAGE         = 15;
+    const int ACCESS_MANAGE_PAGE         = 16;
+    const int ACCESS_REVISE_SUMMARY_PAGE = 17;
 
     /* OTHERS */
-    const PROJECT_CREATED = 18;
-    const JOB_UNARCHIVED  = 19;
+    const int PROJECT_CREATED = 18;
+    const int JOB_UNARCHIVED  = 19;
 
-    const TRANSLATION_DELIVERED = 101;
+    const int TRANSLATION_DELIVERED = 101;
 
     protected array $cached_results = [];
 

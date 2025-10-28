@@ -17,8 +17,8 @@ use Utils\Constants\TranslationStatus;
 
 class TranslationEventDao extends AbstractDao {
 
-    const TABLE       = "segment_translation_events";
-    const STRUCT_TYPE = TranslationEventStruct::class;
+    const string TABLE       = "segment_translation_events";
+    const string STRUCT_TYPE = TranslationEventStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];

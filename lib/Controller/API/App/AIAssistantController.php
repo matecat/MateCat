@@ -11,7 +11,7 @@ use Utils\Registry\AppConfig;
 
 class AIAssistantController extends KleinController {
 
-    const AI_ASSISTANT_EXPLAIN_MEANING = 'AI_ASSISTANT_EXPLAIN_MEANING';
+    const string AI_ASSISTANT_EXPLAIN_MEANING = 'AI_ASSISTANT_EXPLAIN_MEANING';
 
     /**
      * @throws Exception

@@ -27,9 +27,9 @@ use Utils\TmKeyManagement\TmKeyManager;
 
 class SetContributionWorker extends AbstractWorker {
 
-    const ERR_SET_FAILED    = 4;
-    const ERR_UPDATE_FAILED = 6;
-    const ERR_NO_TM_ENGINE  = 5;
+    const int ERR_SET_FAILED    = 4;
+    const int ERR_UPDATE_FAILED = 6;
+    const int ERR_NO_TM_ENGINE  = 5;
 
     /**
      * @var ?EngineInterface

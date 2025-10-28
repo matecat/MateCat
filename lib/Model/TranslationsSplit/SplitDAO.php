@@ -16,9 +16,9 @@ use Model\DataAccess\IDaoStruct;
  */
 class SplitDAO extends AbstractDao {
 
-    const TABLE = "segment_translations_splits";
+    const string TABLE = "segment_translations_splits";
 
-    const STRUCT_TYPE = SegmentSplitStruct::class;
+    const string STRUCT_TYPE = SegmentSplitStruct::class;
 
     /**
      * @param SegmentSplitStruct $obj

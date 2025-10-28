@@ -13,7 +13,7 @@ use Utils\Registry\AppConfig;
 
 class LinkedInProvider extends AbstractProvider {
 
-    const PROVIDER_NAME = 'linkedin';
+    const string PROVIDER_NAME = 'linkedin';
 
     /**
      * @param string|null $redirectUrl

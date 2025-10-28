@@ -21,8 +21,8 @@ use Utils\Tools\Utils;
 
 class MembershipDao extends AbstractDao {
 
-    const TABLE       = "teams_users";
-    const STRUCT_TYPE = "\\Teams\\MembershipStruct";
+    const string TABLE       = "teams_users";
+    const string STRUCT_TYPE = MembershipStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];

@@ -19,9 +19,9 @@ use Utils\Engines\EnginesFactory;
  */
 class EngineDAO extends AbstractDao {
 
-    const TABLE = "engines";
+    const string TABLE = "engines";
 
-    const STRUCT_TYPE = EngineStruct::class;
+    const string STRUCT_TYPE = EngineStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];

@@ -15,8 +15,8 @@ use ReflectionException;
 
 class ContextGroupDao extends AbstractDao {
 
-    const TABLE       = 'context_groups';
-    const STRUCT_TYPE = "ContextStruct";
+    const string TABLE       = 'context_groups';
+    const string STRUCT_TYPE = ContextStruct::class;
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id', 'id_project' ];
 

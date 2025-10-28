@@ -26,13 +26,13 @@ use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
 
 class ProjectTemplateDao extends AbstractDao {
-    const TABLE = 'project_templates';
+    const string TABLE = 'project_templates';
 
-    const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
-    const query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid";
-    const query_default       = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
-    const query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
-    const paginated_map_key   = __CLASS__ . "::getAllPaginated";
+    const string query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
+    const string query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid";
+    const string query_default       = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
+    const string query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
+    const string paginated_map_key   = __CLASS__ . "::getAllPaginated";
 
     /**
      * @param $uid

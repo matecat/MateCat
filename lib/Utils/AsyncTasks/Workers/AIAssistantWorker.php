@@ -17,7 +17,7 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\Tools\Utils;
 
 class AIAssistantWorker extends AbstractWorker {
-    const EXPLAIN_MEANING_ACTION = 'explain_meaning';
+    const string EXPLAIN_MEANING_ACTION = 'explain_meaning';
 
     /**
      * @var OpenAi

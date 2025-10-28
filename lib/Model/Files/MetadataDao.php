@@ -14,8 +14,8 @@ use ReflectionException;
 
 class MetadataDao extends AbstractDao {
 
-    const TABLE                              = 'file_metadata';
-    const _query_metadata_by_project_id_file = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file ";
+    const string  TABLE                              = 'file_metadata';
+    const string  _query_metadata_by_project_id_file = "SELECT * FROM " . self::TABLE . " WHERE id_project = :id_project AND id_file = :id_file ";
 
     /**
      * @param int $id_project

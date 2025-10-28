@@ -30,25 +30,25 @@ use Utils\Validator\IsJobRevisionValidator;
 
 class CatUtils {
 
-    const splitPlaceHolder = '##$_SPLIT$##';
+    const string splitPlaceHolder = '##$_SPLIT$##';
 
-    const lfPlaceholderClass   = '_0A';
-    const crPlaceholderClass   = '_0D';
-    const crlfPlaceholderClass = '_0D0A';
-    const lfPlaceholder        = '##$_0A$##';
-    const crPlaceholder        = '##$_0D$##';
-    const crlfPlaceholder      = '##$_0D0A$##';
-    const lfPlaceholderRegex   = '/\#\#\$_0A\$\#\#/g';
-    const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
-    const crlfPlaceholderRegex = '/#\#\$_0D\$#\#\#\#\$_0A\$#\#/g';
+    const string lfPlaceholderClass   = '_0A';
+    const string crPlaceholderClass   = '_0D';
+    const string crlfPlaceholderClass = '_0D0A';
+    const string lfPlaceholder        = '##$_0A$##';
+    const string crPlaceholder        = '##$_0D$##';
+    const string crlfPlaceholder      = '##$_0D0A$##';
+    const string lfPlaceholderRegex   = '/\#\#\$_0A\$\#\#/g';
+    const string crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
+    const string crlfPlaceholderRegex = '/#\#\$_0D\$#\#\#\#\$_0A\$#\#/g';
 
-    const tabPlaceholder      = '##$_09$##';
-    const tabPlaceholderClass = '_09';
-    const tabPlaceholderRegex = '/\#\#\$_09\$\#\#/g';
+    const string tabPlaceholder      = '##$_09$##';
+    const string tabPlaceholderClass = '_09';
+    const string tabPlaceholderRegex = '/\#\#\$_09\$\#\#/g';
 
-    const nbspPlaceholder      = '##$_A0$##';
-    const nbspPlaceholderClass = '_A0';
-    const nbspPlaceholderRegex = '/\#\#\$_A0\$\#\#/g';
+    const string nbspPlaceholder      = '##$_A0$##';
+    const string nbspPlaceholderClass = '_A0';
+    const string nbspPlaceholderRegex = '/\#\#\$_A0\$\#\#/g';
 
     // CJK and CJ languages
     public static array $cjk = [ 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 ];

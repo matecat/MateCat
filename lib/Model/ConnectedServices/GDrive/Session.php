@@ -43,10 +43,10 @@ use Utils\Tools\Utils;
  */
 class Session {
 
-    const FILE_LIST             = 'gdriveFileList';
-    const FILE_NAME             = 'fileName';
-    const FILE_HASH             = 'fileHash';
-    const CONNNECTED_SERVICE_ID = 'connectedServiceId';
+    const string FILE_LIST             = 'gdriveFileList';
+    const string FILE_NAME             = 'fileName';
+    const string FILE_HASH             = 'fileHash';
+    const string CONNNECTED_SERVICE_ID = 'connectedServiceId';
 
     protected string                       $guid;
     protected string                       $source_lang;

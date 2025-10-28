@@ -11,7 +11,7 @@ use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
 class TranslationVersions extends BaseFeature {
 
-    const FEATURE_CODE = 'translation_versions';
+    const string FEATURE_CODE = 'translation_versions';
 
     /**
      * @param JobStruct     $chunkStruct

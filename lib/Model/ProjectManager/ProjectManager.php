@@ -93,8 +93,8 @@ class ProjectManager {
     /**
      * Configuration for segment notes handling
      */
-    const SEGMENT_NOTES_LIMIT    = 10;
-    const SEGMENT_NOTES_MAX_SIZE = 65535;
+    const int SEGMENT_NOTES_LIMIT    = 10;
+    const int SEGMENT_NOTES_MAX_SIZE = 65535;
 
     /**
      * Counter from the total number of segments in the project with the flag (show_in_cattool == true)
@@ -107,7 +107,7 @@ class ProjectManager {
     protected array $min_max_segments_id          = [];
 
     /**
-     * @var ArrayObject|RecursiveArrayObject
+     * @var ArrayObject
      */
     protected ArrayObject $projectStructure;
 
@@ -138,7 +138,7 @@ class ProjectManager {
      */
     protected FeatureSet $features;
 
-    const TRANSLATED_USER = 'translated_user';
+    const string TRANSLATED_USER = 'translated_user';
 
     /**
      * @var Database|IDatabase

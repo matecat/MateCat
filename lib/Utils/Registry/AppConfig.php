@@ -155,7 +155,7 @@ class AppConfig {
     /**
      * Default Matecat user agent string
      */
-    const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
+    const string MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
     /**
      * ENABLE_OUTSOURCE set as true, will show the option to outsource to an external

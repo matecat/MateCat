@@ -23,13 +23,13 @@ use Utils\Tools\Utils;
 
 class MTQEWorkflowTemplateDao extends AbstractDao {
 
-    const TABLE = 'mt_qe_templates';
+    const string TABLE = 'mt_qe_templates';
 
-    const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
-    const query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
-    const query_by_uid        = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
-    const query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
-    const paginated_map_key   = __CLASS__ . "::getAllPaginated";
+    const string query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
+    const string query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
+    const string query_by_uid        = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
+    const string query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
+    const string paginated_map_key   = __CLASS__ . "::getAllPaginated";
 
     /**
      * @var MTQEWorkflowTemplateDao|null

@@ -19,8 +19,8 @@ use Utils\Constants\TranslationStatus;
 
 class JobDao extends AbstractDao {
 
-    const TABLE       = "jobs";
-    const STRUCT_TYPE = "JobStruct";
+    const string TABLE       = "jobs";
+    const string STRUCT_TYPE = JobStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id', 'password' ];

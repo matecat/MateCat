@@ -16,8 +16,8 @@ use ReflectionException;
 
 class JobsTranslatorsDao extends AbstractDao {
 
-    const TABLE       = "jobs_translators";
-    const STRUCT_TYPE = JobsTranslatorsStruct::class;
+    const string TABLE       = "jobs_translators";
+    const string STRUCT_TYPE = JobsTranslatorsStruct::class;
 
     protected static array $auto_increment_field = [];
     protected static array $primary_keys         = [ 'id_job', 'job_password' ];

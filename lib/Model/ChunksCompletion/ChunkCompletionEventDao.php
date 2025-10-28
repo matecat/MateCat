@@ -13,8 +13,8 @@ use Utils\Tools\Utils;
 
 class ChunkCompletionEventDao extends AbstractDao {
 
-    const REVISE    = 'revise';
-    const TRANSLATE = 'translate';
+    const string REVISE    = 'revise';
+    const string TRANSLATE = 'translate';
 
     public static function validSources() {
         return [

@@ -17,10 +17,10 @@ use Plugins\Features\TranslationVersions;
 
 class FeatureCodes {
 
-    const PROJECT_COMPLETION   = ProjectCompletion::FEATURE_CODE;
-    const TRANSLATION_VERSIONS = TranslationVersions::FEATURE_CODE;
-    const REVIEW_EXTENDED      = ReviewExtended::FEATURE_CODE;
-    const MMT                  = Mmt::FEATURE_CODE;
-    const SECOND_PASS_REVIEW   = SecondPassReview::FEATURE_CODE;
+    const string PROJECT_COMPLETION   = ProjectCompletion::FEATURE_CODE;
+    const string TRANSLATION_VERSIONS = TranslationVersions::FEATURE_CODE;
+    const string REVIEW_EXTENDED      = ReviewExtended::FEATURE_CODE;
+    const string MMT                  = Mmt::FEATURE_CODE;
+    const string SECOND_PASS_REVIEW   = SecondPassReview::FEATURE_CODE;
 
 }

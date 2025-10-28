@@ -12,15 +12,15 @@ use ReflectionException;
 
 class CommentDao extends AbstractDao {
 
-    const TABLE       = "comments";
-    const STRUCT_TYPE = "CommentStruct";
+    const string TABLE       = "comments";
+    const string STRUCT_TYPE = "CommentStruct";
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];
 
-    const TYPE_COMMENT = 1;
-    const TYPE_RESOLVE = 2;
-    const TYPE_MENTION = 3;
+    const int TYPE_COMMENT = 1;
+    const int TYPE_RESOLVE = 2;
+    const int TYPE_MENTION = 3;
 
     /**
      * Returns a structure that lists open threads count

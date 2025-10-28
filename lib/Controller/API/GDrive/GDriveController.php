@@ -19,8 +19,8 @@ use Utils\Tools\Utils;
 
 class GDriveController extends AbstractStatefulKleinController {
 
-    const GDRIVE_LIST_COOKIE_NAME    = 'gdrive_files_to_be_listed';
-    const GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
+    const string GDRIVE_LIST_COOKIE_NAME    = 'gdrive_files_to_be_listed';
+    const string GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
 
     private string                       $source_lang                   = Constants::DEFAULT_SOURCE_LANG;
     private string                       $target_lang                   = Constants::DEFAULT_TARGET_LANG;

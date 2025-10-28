@@ -4,5 +4,5 @@
 namespace Plugins\Features;
 
 class ReviewExtended extends AbstractRevisionFeature {
-    const FEATURE_CODE = 'review_extended';
+    const string FEATURE_CODE = 'review_extended';
 }

@@ -28,7 +28,7 @@ use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController {
 
-    const MAX_PER_PAGE = 200;
+    const int MAX_PER_PAGE = 200;
 
     /**
      * @var ProjectStruct

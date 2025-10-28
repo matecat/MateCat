@@ -61,7 +61,7 @@ abstract class AbstractEngine implements EngineInterface {
     protected ?FeatureSet $featureSet = null;
     protected ?int        $mt_penalty = null;
 
-    const GET_REQUEST_TIMEOUT = 10;
+    const int GET_REQUEST_TIMEOUT = 10;
     protected MatecatLogger $logger;
 
     public function __construct( $engineRecord ) {

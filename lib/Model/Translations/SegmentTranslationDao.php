@@ -25,7 +25,7 @@ use View\API\V2\Json\Propagation as PropagationApi;
 
 class SegmentTranslationDao extends AbstractDao {
 
-    const TABLE = "segment_translations";
+    const string TABLE = "segment_translations";
 
     /**
      * @var array

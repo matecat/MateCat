@@ -16,8 +16,8 @@ use Utils\Tools\Utils;
 
 class Filters {
 
-    const SOURCE_TO_XLIFF_ENDPOINT = "/api/v2/original2xliff";
-    const XLIFF_TO_TARGET_ENDPOINT = "/api/v2/xliff2translated";
+    const string SOURCE_TO_XLIFF_ENDPOINT = "/api/v2/original2xliff";
+    const string XLIFF_TO_TARGET_ENDPOINT = "/api/v2/xliff2translated";
 
     /**
      * @param $dataGroups       array each value must be an associative array

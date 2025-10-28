@@ -27,8 +27,8 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
 
-    const GLOSSARY_WRITE = 'GLOSSARY_WRITE';
-    const GLOSSARY_READ  = 'GLOSSARY_READ';
+    const string GLOSSARY_WRITE = 'GLOSSARY_WRITE';
+    const string GLOSSARY_READ  = 'GLOSSARY_READ';
 
     /**
      * @return array

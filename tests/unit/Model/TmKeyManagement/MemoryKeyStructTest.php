@@ -3,10 +3,10 @@
 namespace unit\Model\TmKeyManagement;
 
 use Model\TmKeyManagement\MemoryKeyStruct;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\TmKeyManagement\TmKeyStruct;
 
-class MemoryKeyStructTest extends TestCase {
+class MemoryKeyStructTest extends AbstractTest {
     /**
      * Test to ensure `toArray` method returns all properties as an associative array
      * when no `TmKeyStruct` is present.

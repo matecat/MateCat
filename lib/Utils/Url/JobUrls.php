@@ -8,9 +8,9 @@ use Utils\Registry\AppConfig;
 class JobUrls {
 
     // STATUS LABELS
-    const LABEL_T  = 't';
-    const LABEL_R1 = 'r1';
-    const LABEL_R2 = 'r2';
+    const string LABEL_T  = 't';
+    const string LABEL_R1 = 'r1';
+    const string LABEL_R2 = 'r2';
 
     /**
      * @var int

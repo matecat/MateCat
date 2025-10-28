@@ -11,7 +11,7 @@ use Utils\Registry\AppConfig;
 
 class GithubProvider extends AbstractProvider {
 
-    const PROVIDER_NAME = 'github';
+    const string PROVIDER_NAME = 'github';
 
     /**
      * @param string|null $redirectUrl

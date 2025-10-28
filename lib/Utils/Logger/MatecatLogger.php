@@ -51,7 +51,7 @@ class MatecatLogger implements LoggerInterface {
      * @param mixed $message The debug message to log. Can be a string, array, or object.
      * @param array $context Additional context to include with the log. Defaults to an empty array.
      */
-    public function debug( $message, array $context = [] ) {
+    public function debug( mixed $message, array $context = [] ): void {
         $this->log( Logger::DEBUG, $message, $context );
     }
 
@@ -83,8 +83,8 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function emergency( $message, array $context = [] ) {
-        $this->log( Logger::EMERGENCY, $message, $context );;
+    public function emergency( mixed $message, array $context = [] ): void {
+        $this->log( Logger::EMERGENCY, $message, $context );
     }
 
     /**
@@ -93,7 +93,7 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function alert( $message, array $context = [] ) {
+    public function alert( mixed $message, array $context = [] ): void {
         $this->log( Logger::ALERT, $message, $context );
     }
 
@@ -103,7 +103,7 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function critical( $message, array $context = [] ) {
+    public function critical( mixed $message, array $context = [] ): void {
         $this->log( Logger::CRITICAL, $message, $context );
     }
 
@@ -113,7 +113,7 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function error( $message, array $context = [] ) {
+    public function error( mixed $message, array $context = [] ): void {
         $this->log( Logger::ERROR, $message, $context );
     }
 
@@ -123,7 +123,7 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function warning( $message, array $context = [] ) {
+    public function warning( mixed $message, array $context = [] ): void {
         $this->log( Logger::WARNING, $message, $context );
     }
 
@@ -133,7 +133,7 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function notice( $message, array $context = [] ) {
+    public function notice( mixed $message, array $context = [] ): void {
         $this->log( Logger::NOTICE, $message, $context );
     }
 
@@ -143,7 +143,7 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function info( $message, array $context = [] ) {
+    public function info( mixed $message, array $context = [] ): void {
         $this->log( Logger::INFO, $message, $context );
     }
 
@@ -160,7 +160,7 @@ class MatecatLogger implements LoggerInterface {
      * @param array $context Additional context to include with the log. Defaults to an empty array.
      *
      */
-    public function log( $level, $message, array $context = [] ) {
+    public function log( $level, $message, array $context = [] ): void {
 
         // Format the message and context into a structured array.
         $r = $this->_formatMessage( $message, $context );
@@ -168,7 +168,7 @@ class MatecatLogger implements LoggerInterface {
         try {
             // Log the formatted message and context using the Monolog logger.
             $this->logger->log( $level, $r[ 'message' ], $r[ 'context' ] );
-        } catch ( Exception $e ) {
+        } catch ( Exception ) {
             // If logging fails, write the log data to a fallback file.
             file_put_contents(
                     self::getFileNamePath( 'logging_configuration_exception.log' ),
@@ -194,7 +194,7 @@ class MatecatLogger implements LoggerInterface {
      *               - 'message': The formatted log message.
      *               - 'context': The merged or original context.
      */
-    private function _formatMessage( $message, array $context = [] ): array {
+    private function _formatMessage( mixed $message, array $context = [] ): array {
 
         // Determine if the message is structured (array or object).
         $isStructured = is_array( $message ) || is_object( $message );

@@ -8,7 +8,7 @@ use Model\DataAccess\Database;
 use ReflectionException;
 
 class FileDao extends AbstractDao {
-    const TABLE = "files";
+    const string TABLE = "files";
 
     protected static array $auto_increment_field = [ 'id' ];
 

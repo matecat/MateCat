@@ -10,7 +10,7 @@ use Utils\Registry\AppConfig;
 
 class LoggerFactory {
 
-    const LOG_FILENAME = 'general_log.txt';
+    const string LOG_FILENAME = 'general_log.txt';
 
     public static ?string $uniqID = null;
 
@@ -27,7 +27,7 @@ class LoggerFactory {
      * @param MatecatLogger $logger     The logger instance to write to.
      * @param mixed         $stringData The data to log.
      */
-    protected static function _writeTo( MatecatLogger $logger, $stringData ) {
+    protected static function _writeTo( MatecatLogger $logger, $stringData ): void {
         try {
             $logger->debug( $stringData );
         } catch ( Exception $e ) {
@@ -72,7 +72,7 @@ class LoggerFactory {
      * @param string      $filename The name of the log file. Defaults to 'log.txt'.
      * @param string|null $logName  The name of the logger. Defaults to the filename.
      */
-    public static function doJsonLog( $content, string $filename = self::LOG_FILENAME, ?string $logName = null ) {
+    public static function doJsonLog( mixed $content, string $filename = self::LOG_FILENAME, ?string $logName = null ): void {
         $logger = self::initMonolog( $logName ?? $filename, $filename );
         self::_writeTo( $logger, $content );
     }
@@ -97,7 +97,7 @@ class LoggerFactory {
      *
      * @throws Exception If an error occurs while setting aliases.
      */
-    public static function setAliases( array $names, MatecatLogger $logger ) {
+    public static function setAliases( array $names, MatecatLogger $logger ): void {
         foreach ( $names as $name ) {
             self::$loggersMap[ $name ] = $logger->withName( $name );
         }
@@ -112,6 +112,7 @@ class LoggerFactory {
      * @param bool  $return     Whether to return the hexdump as a string. Defaults to false.
      *
      * @return string|null The hexdump string if $return is true, otherwise null.
+     * @codeCoverageIgnore
      */
     public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ): ?string {
         if ( is_array( $data ) ) {

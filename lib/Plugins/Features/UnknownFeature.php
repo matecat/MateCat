@@ -19,7 +19,7 @@ namespace Plugins\Features;
  */
 class UnknownFeature extends BaseFeature {
 
-    const FEATURE_CODE = 'UnknownFeature';
+    const string FEATURE_CODE = 'UnknownFeature';
     protected bool $autoActivateOnProject = false;
 
 }

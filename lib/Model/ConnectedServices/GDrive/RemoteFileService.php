@@ -16,13 +16,13 @@ use Model\RemoteFiles\RemoteFileStruct;
 
 class RemoteFileService {
 
-    const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    const MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-    const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const string MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    const string MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+    const string MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-    const MIME_GOOGLE_DOCS   = 'application/vnd.google-apps.document';
-    const MIME_GOOGLE_SLIDES = 'application/vnd.google-apps.presentation';
-    const MIME_GOOGLE_SHEETS = 'application/vnd.google-apps.spreadsheet';
+    const string MIME_GOOGLE_DOCS   = 'application/vnd.google-apps.document';
+    const string MIME_GOOGLE_SLIDES = 'application/vnd.google-apps.presentation';
+    const string MIME_GOOGLE_SHEETS = 'application/vnd.google-apps.spreadsheet';
 
 
     protected $raw_token;

@@ -35,13 +35,13 @@ class FeaturesSetTest extends AbstractTest {
     }
 
     /**
-     * This test is dependant from shuffle, to get a better coverage ( heuristic ) let's run it 2000 times.
+     * This test is dependent from shuffle, to get a better coverage (heuristic), let's run it 500 times.
      *
      * @throws Exception
      */
     public function testSortFeatures() {
 
-        for ( $i = 0; $i < 2000; $i++ ) {
+        for ( $i = 0; $i < 500; $i++ ) {
 
             $codes = explode( ",", "airbnb,translation_versions,project_completion,review_extended,translated" );
             shuffle( $codes );

@@ -15,21 +15,21 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     protected static array $_STATES           = [];
 
     // analysis behaviour
-    const _ANALYSIS_PRE_TRANSLATED = "pre-translated";
-    const _ANALYSIS_NEW            = "new";
+    const string _ANALYSIS_PRE_TRANSLATED = "pre-translated";
+    const string _ANALYSIS_NEW            = "new";
 
     // editor states
-    const _DRAFT      = "draft";
-    const _TRANSLATED = "translated";
-    const _APPROVED   = "approved";
-    const _APPROVED2  = "approved2";
+    const string _DRAFT      = "draft";
+    const string _TRANSLATED = "translated";
+    const string _APPROVED   = "approved";
+    const string _APPROVED2  = "approved2";
 
-    const ALLOWED_ANALYSIS_VALUES = [
+    const array ALLOWED_ANALYSIS_VALUES = [
             self::_ANALYSIS_PRE_TRANSLATED,
             self::_ANALYSIS_NEW
     ];
 
-    const ALLOWED_EDITOR_VALUES = [
+    const array ALLOWED_EDITOR_VALUES = [
             null,
             self::_DRAFT,
             self::_TRANSLATED,

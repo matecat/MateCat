@@ -28,7 +28,7 @@ class Headers implements Iterator {
      *
      * @var string
      */
-    const LARA_PRE_SHARED_KEY_HEADER = 'X-Lara-Engine-Pre-Shared-Key'; //TODO: to be removed when Lara will read directly from the internal queue
+    const string LARA_PRE_SHARED_KEY_HEADER = 'X-Lara-Engine-Pre-Shared-Key'; //TODO: to be removed when Lara will read directly from the internal queue
 
     /**
      * Header name for the LARA TUID.
@@ -36,7 +36,7 @@ class Headers implements Iterator {
      *
      * @var string
      */
-    const LARA_TUID_HEADER = 'X-Lara-Engine-Tuid';
+    const string LARA_TUID_HEADER = 'X-Lara-Engine-Tuid';
 
     /**
      * Header name for the LARA translation origin.
@@ -44,7 +44,7 @@ class Headers implements Iterator {
      *
      * @var string
      */
-    const LARA_TRANSLATION_ORIGIN_HEADER = 'X-Lara-Engine-Translation-Origin';
+    const string LARA_TRANSLATION_ORIGIN_HEADER = 'X-Lara-Engine-Translation-Origin';
 
     /**
      * Stores the headers as an associative array.

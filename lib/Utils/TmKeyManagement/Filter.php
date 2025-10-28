@@ -26,17 +26,17 @@ class Filter {
     /**
      * Type translator
      */
-    const ROLE_TRANSLATOR = 'translator';
+    const string ROLE_TRANSLATOR = 'translator';
 
     /**
      * Type Revisor
      */
-    const ROLE_REVISOR = 'revisor';
+    const string ROLE_REVISOR = 'revisor';
 
     /**
      * A generic Owner Type
      */
-    const OWNER = 'owner';
+    const string OWNER = 'owner';
 
     /**
      * @var int the user id required for filtering

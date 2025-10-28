@@ -6,8 +6,8 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 
 class ChunkCompletionEventStruct extends AbstractDaoSilentStruct {
 
-    const SOURCE_MERGE = 'merge';
-    const SOURCE_USER  = 'user';
+    const string SOURCE_MERGE = 'merge';
+    const string SOURCE_USER  = 'user';
 
     public $id;
     public $id_project;

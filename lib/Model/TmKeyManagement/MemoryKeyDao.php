@@ -23,11 +23,11 @@ use Utils\TmKeyManagement\TmKeyStruct;
  */
 class MemoryKeyDao extends AbstractDao {
 
-    const TABLE = "memory_keys";
+    const string TABLE = "memory_keys";
 
-    const STRUCT_TYPE = MemoryKeyStruct::class;
+    const string STRUCT_TYPE = MemoryKeyStruct::class;
 
-    const MAX_INSERT_NUMBER = 10;
+    const int MAX_INSERT_NUMBER = 10;
 
     /**
      * @param MemoryKeyStruct $obj

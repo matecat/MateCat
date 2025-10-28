@@ -28,12 +28,12 @@ abstract class AbstractDao {
     /**
      * @var string This property will be overridden in the subclasses.
      */
-    const STRUCT_TYPE = '';
+    const string STRUCT_TYPE = '';
 
     /**
      * @var int The maximum number of tuples that can be inserted for a single query
      */
-    const MAX_INSERT_NUMBER = 1;
+    const int MAX_INSERT_NUMBER = 1;
 
     /**
      * @var array
@@ -48,7 +48,7 @@ abstract class AbstractDao {
     /**
      * @var string
      */
-    const TABLE = null;
+    const string TABLE = '';
 
     public function __construct( IDatabase $con = null ) {
         /**

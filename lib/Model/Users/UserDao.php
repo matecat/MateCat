@@ -17,8 +17,8 @@ use ReflectionException;
  */
 class UserDao extends AbstractDao {
 
-    const TABLE       = "users";
-    const STRUCT_TYPE = UserStruct::class;
+    const string TABLE       = "users";
+    const string STRUCT_TYPE = UserStruct::class;
 
     protected static array $auto_increment_field = [ 'uid' ];
     protected static array $primary_keys         = [ 'uid' ];

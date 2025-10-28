@@ -40,6 +40,7 @@ class ConstructorMyMemoryTest extends AbstractTest {
          * @var $engineRecord EngineStruct
          */
         $this->engine_struct_param = $eng[ 0 ];
+        parent::setUp();
     }
 
     /**

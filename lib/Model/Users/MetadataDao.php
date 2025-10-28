@@ -9,9 +9,9 @@ use ReflectionException;
 
 class MetadataDao extends AbstractDao {
 
-    const TABLE = 'user_metadata';
+    const string TABLE = 'user_metadata';
 
-    const _query_metadata_by_uid_key = "SELECT * FROM user_metadata WHERE uid = :uid AND `key` = :key ";
+    const string _query_metadata_by_uid_key = "SELECT * FROM user_metadata WHERE uid = :uid AND `key` = :key ";
 
     /**
      * @throws ReflectionException
