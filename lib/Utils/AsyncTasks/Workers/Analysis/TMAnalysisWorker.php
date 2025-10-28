@@ -161,7 +161,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //This function is necessary to prevent TM matches with a value of 75-84% from being overridden by the MT, which has a default value of 86.
         $bestMatch   = $this->getHighestNotMT_OrPickTheFirstOne();
-        $metadataDao = new MetadataDao();
+        $metadataDao = new ProjectsMetadataDao();
 
         /** @var MatecatFilter $filter */
         $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target, [], $metadataDao->getProjectStaticSubfilteringCustomHandlers( (int)$queueElement->params->pid ) );
