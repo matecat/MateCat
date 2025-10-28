@@ -116,7 +116,7 @@ class JobsBulkActionsController extends ChangePasswordController {
             }
 
             $response[] = [
-                    'id'       => $id,
+                    'id'       => (int)$id,
                     'password' => $password,
                     'outcome'  => $outcome
             ];
