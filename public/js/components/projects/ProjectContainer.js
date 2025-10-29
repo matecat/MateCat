@@ -30,7 +30,7 @@ import {Input} from '../common/Input/Input'
 import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
 import IconClose from '../icons/IconClose'
-import {ProjectBulkActionsContext} from './ProjectBulkActions/ProjectBulkActionsContext'
+import {ProjectsBulkActionsContext} from './ProjectsBulkActions/ProjectsBulkActionsContext'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 const ProjectContainer = ({
@@ -42,7 +42,7 @@ const ProjectContainer = ({
   downloadTranslationFn,
 }) => {
   const {jobsBulk, onCheckedProject, onCheckedJob} = useContext(
-    ProjectBulkActionsContext,
+    ProjectsBulkActionsContext,
   )
 
   const [lastAction, setLastAction] = useState()

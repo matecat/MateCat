@@ -8,7 +8,7 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import UserStore from '../../stores/UserStore'
 import ManageActions from '../../actions/ManageActions'
 import {fromJS} from 'immutable'
-import {ProjectBulkActions} from './ProjectBulkActions'
+import {ProjectsBulkActions} from './ProjectsBulkActions'
 
 class ProjectsContainer extends React.Component {
   constructor(props) {
@@ -297,7 +297,7 @@ class ProjectsContainer extends React.Component {
     return (
       <div className="project-list">
         <div className="ui container">
-          <ProjectBulkActions
+          <ProjectsBulkActions
             projects={this.state.projects.toJS()}
             teams={this.state.teams.toJS()}
           >
@@ -312,7 +312,7 @@ class ProjectsContainer extends React.Component {
                 {spinner}
               </React.Fragment>
             )}
-          </ProjectBulkActions>
+          </ProjectsBulkActions>
         </div>
       </div>
     )

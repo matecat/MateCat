@@ -13,7 +13,7 @@ export const BulkChangePassword = ({jobs, successCallback}) => {
   const [typeSelected, setTypeSelected] = useState()
 
   const jobsWithRevisePassword = jobs.filter(
-    ({revise_passwords}) => revise_passwords && revise_passwords.length,
+    ({revise_passwords}) => revise_passwords && revise_passwords.length > 1,
   )
 
   const options = [

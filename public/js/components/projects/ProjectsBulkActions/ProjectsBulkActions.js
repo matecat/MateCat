@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {ProjectBulkActionsContext} from './ProjectBulkActionsContext'
+import {ProjectsBulkActionsContext} from './ProjectsBulkActionsContext'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
 import useEvent from '../../../hooks/useEvent'
 import ModalsActions from '../../../actions/ModalsActions'
@@ -12,6 +12,7 @@ import BulkMoveToTeam from './BulkMoveToTeam'
 import {jobsBulkActions} from '../../../api/jobsBulkActions/jobsBulkActions'
 import CatToolActions from '../../../actions/CatToolActions'
 import ManageActions from '../../../actions/ManageActions'
+import {fromJS} from 'immutable'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -39,21 +40,24 @@ const ACTIONS_BY_FILTER = {
     JOBS_ACTIONS.CHANGE_PASSWORD,
     JOBS_ACTIONS.GENERATE_REVISE_2,
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
+    JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
   archived: [
     JOBS_ACTIONS.UNARCHIVE,
     JOBS_ACTIONS.CANCEL,
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
+    JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
   cancelled: [
     JOBS_ACTIONS.RESUME,
     JOBS_ACTIONS.DELETE_PERMANENTLY,
     JOBS_ACTIONS.ARCHIVE,
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
+    JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
 }
 
-export const ProjectBulkActions = ({projects, teams, children}) => {
+export const ProjectsBulkActions = ({projects, teams, children}) => {
   const [jobsBulk, setJobsBulk] = useState([])
   const [filterStatusApplied, setFilterStatusApplied] = useState('active')
 
@@ -63,9 +67,11 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
   })
 
   useEffect(() => {
-    const onChangeProjectStatus = (userUid, name, status) =>
+    const onChangeProjectStatus = (userUid, name, status) => {
       setFilterStatusApplied(status)
-    console
+      setJobsBulk([])
+    }
+
     ProjectsStore.addListener(
       ManageConstants.FILTER_PROJECTS,
       onChangeProjectStatus,
@@ -82,6 +88,23 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
     () => projects.reduce((acc, cur) => [...acc, ...cur.jobs], []),
     [projects],
   )
+
+  const isSelectedAllJobsByProjects = useMemo(() => {
+    const projectsInvolved = projects.filter((project) =>
+      project.jobs.some((job) => jobsBulk.some((value) => value === job.id)),
+    )
+
+    return (
+      projectsInvolved.length > 0 &&
+      projectsInvolved.every((project) => {
+        const filteredLength = project.jobs.filter((job) =>
+          jobsBulk.some((value) => value === job.id),
+        ).length
+
+        return filteredLength === project.jobs.length
+      })
+    )
+  }, [jobsBulk, projects])
 
   const onCheckedProject = useCallback(
     (projectId) => {
@@ -250,7 +273,7 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
       .map(({id, password}) => ({id, password}))
 
     jobsBulkActions({jobs, action: id, ...rest})
-      .then((data) => onSubmitSuccessfull({id, jobs, data}))
+      .then((data) => onSubmitSuccessful({id, jobs, requestData: rest, data}))
       .catch(() => {
         CatToolActions.addNotification({
           title: 'Error bulk operation',
@@ -263,7 +286,19 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
       })
   }
 
-  const onSubmitSuccessfull = ({id, jobs, data}) => {
+  const onSubmitSuccessful = ({id, jobs, requestData, data}) => {
+    const generateRevise2Collection = jobs.map((job) => {
+      const {id: idProject, password: passwordProject} = projects.find(
+        (project) => project.jobs.some((jobItem) => jobItem.id === job.id),
+      )
+
+      const {secondPassPassword} =
+        data.jobs.find((jobResponse) => jobResponse.id === job.id)?.outcome ??
+        {}
+
+      return {idProject, passwordProject, job, secondPassPassword}
+    })
+
     switch (id) {
       case JOBS_ACTIONS.ARCHIVE.id:
       case JOBS_ACTIONS.UNARCHIVE.id:
@@ -272,21 +307,24 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
       case JOBS_ACTIONS.DELETE_PERMANENTLY.id:
         ManageActions.changeJobsStatusBulk(projects, jobs)
         break
-
       case JOBS_ACTIONS.GENERATE_REVISE_2.id:
-        const collection = jobs.map((job) => {
-          const {id: idProject, password: passwordProject} = projects.find(
-            (project) => project.jobs.some((jobItem) => jobItem.id === job.id),
+        ManageActions.getSecondPassReviewBulk(generateRevise2Collection)
+        break
+      case JOBS_ACTIONS.CHANGE_PASSWORD.id:
+        jobs.forEach((job) => {
+          const project = projects.find((project) =>
+            project.jobs.some((jobItem) => jobItem.id === job.id),
           )
 
-          const {secondPassPassword} = data.jobs.find(
-            (jobResponse) => parseInt(jobResponse.id) === job.id,
-          )?.outcome
-
-          return {idProject, passwordProject, job, secondPassPassword}
+          ManageActions.changeJobPassword(
+            fromJS(project),
+            fromJS(job),
+            data.jobs.find((jobResponse) => jobResponse.id === job.id)?.outcome
+              ?.newPassword,
+            job.password,
+            requestData.revision_number,
+          )
         })
-
-        ManageActions.getSecondPassReviewBulk(collection)
         break
     }
   }
@@ -302,6 +340,11 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
             {...{
               ...buttonProps,
               ...buttonActionsProps,
+              ...((action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id ||
+                action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id) && {
+                disabled: !jobsBulk.length || !isSelectedAllJobsByProjects,
+                tooltip: 'we wewe we',
+              }),
               onClick: () => onClickAction(action),
             }}
           >
@@ -313,7 +356,7 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
   )
 
   return (
-    <ProjectBulkActionsContext.Provider
+    <ProjectsBulkActionsContext.Provider
       value={{jobsBulk, onCheckedProject, onCheckedJob}}
     >
       <div className="project-bulk-actions-background">
@@ -343,11 +386,11 @@ export const ProjectBulkActions = ({projects, teams, children}) => {
         </div>
       </div>
       {children}
-    </ProjectBulkActionsContext.Provider>
+    </ProjectsBulkActionsContext.Provider>
   )
 }
 
-ProjectBulkActions.propTypes = {
+ProjectsBulkActions.propTypes = {
   projects: PropTypes.array.isRequired,
   teams: PropTypes.array.isRequired,
   children: PropTypes.node,
