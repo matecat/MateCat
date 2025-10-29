@@ -204,6 +204,11 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      */
     public function getLqaModel( $ttl = 86400 ): ?ModelStruct {
         return $this->cachable( __METHOD__, function () use ( $ttl ) {
+
+            if($this->id_qa_model === null){
+                return null;
+            }
+
             return ModelDao::findById( $this->id_qa_model, $ttl );
         } );
     }
