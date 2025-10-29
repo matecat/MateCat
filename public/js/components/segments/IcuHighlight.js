@@ -10,7 +10,7 @@ export const IcuHighlight = ({
   isTarget,
 }) => {
   const token = tokens.find(
-    (item) => item.start === start && item.end === end && item.key === blockKey,
+    (item) => item.start === start && item.end === end, //&& item.key === blockKey
   )
   const refToken = useRef()
   return (

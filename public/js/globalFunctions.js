@@ -91,6 +91,7 @@ const globalFunctions = {
 
     SegmentActions.registerTab('glossary', true, false)
     SegmentActions.registerTab('alternatives', false, false)
+    SegmentActions.registerTab('icu', true, true)
   },
 }
 

@@ -100,74 +100,78 @@ function validateICUMessage(locale, text) {
     }
   }
   nodes.forEach((node) => visitNode(node))
+  console.log('results', results)
   return results
 }
 export const createIcuTokens = (text, editorState, locale) => {
-  const blockMap = editorState.getCurrentContent().getBlockMap()
-  const blocks = blockMap.toArray()
-  let updatedTokens = []
-  blocks.forEach((block) => {
-    const text = block.getText()
-    const tokens = []
-    let error
-    try {
-      parse(text, {tokens: tokens})
-    } catch (e) {
-      error = {
-        type: 'error',
-        text: e.found,
-        start: e.column,
-        end: e.column + e.found.length,
-        message: [e.message],
-        key: block.getKey(),
-      }
+  // const blockMap = editorState.getCurrentContent().getBlockMap()
+  // const blocks = blockMap.toArray()
+  // let updatedTokens = []
+  // blocks.forEach((block) => {
+  //   const text = block.getText()
+  const tokens = []
+  let error
+  try {
+    parse(text, {tokens: tokens})
+  } catch (e) {
+    error = {
+      type: 'error',
+      text: e.found,
+      start: e.column,
+      end: e.column + e.found.length,
+      message: [e.message],
+      // key: block.getKey(),
     }
-    let index = 0
-    let blockTokens = tokens.map((token) => {
-      const value = {
-        type: token[0] === 'type' ? token[1] : token[0],
-        text: token[1],
-        start: index,
-        end: index + token[1].length,
-        key: block.getKey(),
-      }
-      index = index + token[1].length
-      return value
-    })
-    if (error) {
-      if (error.text === 'end of message pattern') {
-        blockTokens = blockTokens.map((token) => {
-          if (token.end === error.start) {
-            token.type = 'error'
-            token.message = [error.message]
-          }
-          return token
-        })
-      } else {
-        blockTokens.push(error)
-      }
-    } else {
-      const warningIssues = validateICUMessage(locale, text)
-      if (warningIssues.length > 0) {
-        warningIssues.forEach((issue) => {
-          const node = issue.node
-          let tokenToUpdate = blockTokens.findIndex(
-            (token) => token.type === node.type && !token.warning,
-          )
-          if (tokenToUpdate >= 0 && issue.issues.length > 0) {
-            blockTokens[tokenToUpdate] = {
-              ...blockTokens[tokenToUpdate],
-              type: 'error',
-              warning: true,
-              message: issue.issues.map((i) => i.message),
-            }
-          }
-        })
-      }
+  }
+  let index = 0
+  let blockTokens = tokens.map((token) => {
+    const value = {
+      type: token[0] === 'type' ? token[1] : token[0],
+      text: token[1],
+      start: index,
+      end: index + token[1].length,
+      // key: block.getKey(),
     }
-    updatedTokens = updatedTokens.concat(blockTokens)
+    index = index + token[1].length
+    return value
   })
-  return updateOffsetBasedOnEditorState(editorState, updatedTokens)
+  if (error) {
+    if (error.text === 'end of message pattern') {
+      blockTokens = blockTokens.map((token) => {
+        if (token.end === error.start) {
+          token.type = 'error'
+          token.message = [error.message]
+        }
+        return token
+      })
+    } else {
+      blockTokens.push(error)
+    }
+  } else {
+    const warningIssues = validateICUMessage(locale, text)
+    if (warningIssues.length > 0) {
+      warningIssues.forEach((issue) => {
+        const node = issue.node
+        console.log("Porco dio l'icu issue", issue)
+        let tokenToUpdate = blockTokens.findIndex(
+          (token) => token.type === node.type && !token.warning,
+        )
+        if (tokenToUpdate >= 0) {
+          blockTokens[tokenToUpdate] = {
+            ...blockTokens[tokenToUpdate],
+            type:
+              issue.issues.length > 0
+                ? 'error'
+                : blockTokens[tokenToUpdate].type,
+            warning: true,
+            message: issue.issues.map((i) => i.message),
+          }
+        }
+      })
+    }
+  }
+  console.log(blockTokens)
+  return updateOffsetBasedOnEditorState(editorState, blockTokens)
 }
 
 export const isEqualICUTokens = (tokens, otherTokens) => {

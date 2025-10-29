@@ -23,6 +23,7 @@ import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
+import {SegmentFooterTabIcu} from './SegmentFooterTabIcu'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -32,6 +33,7 @@ export const TAB = {
   MESSAGES: 'messages',
   MULTIMATCHES: 'multiMatches',
   AI_ASSISTANT: 'AiAssistant',
+  ICU: 'icu',
 }
 
 const TAB_ITEMS = {
@@ -77,6 +79,12 @@ const TAB_ITEMS = {
     tabClass: 'ai-assistant',
     isLoading: false,
     isEnableCloseButton: true,
+  },
+  [TAB.ICU]: {
+    label: 'ICU Validator',
+    code: 'icu',
+    tabClass: 'icu-validator',
+    isLoading: false,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -484,6 +492,16 @@ function SegmentFooter() {
       case 'ai':
         return (
           <SegmentFooterTabAiAssistant
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'icu':
+        return (
+          <SegmentFooterTabIcu
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}
