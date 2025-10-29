@@ -103,6 +103,13 @@ class EntryValidator {
      * @throws ReflectionException
      */
     private function validateCategoryId() {
+
+        if($this->project->id_qa_model === null){
+            $this->errors[] = [ null, 'QA model id not found' ];
+
+            return;
+        }
+
         $this->qa_model = ModelDao::findById( $this->project->id_qa_model );
         $this->category = CategoryDao::findById( $this->struct->id_category );
 
