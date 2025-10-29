@@ -633,11 +633,14 @@ class ProjectTemplateDao extends AbstractDao {
     }
 
     /**
+     * @param PDO $conn
+     * @param int $uid
+     *
      * @throws ReflectionException
      */
     public static function destroyDefaultTemplateCache( PDO $conn, int $uid ) {
         $stmt = $conn->prepare( self::query_default );
-        self::getInstance()->_destroyObjectCache( $stmt, ProjectTemplateStruct::class, [ 'uid' => $uid, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, ProjectTemplateStruct::class, [ 'uid' => $uid, 'is_default' => 1 ] );
     }
 
 }
