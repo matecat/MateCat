@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.358.0",
+            "version": "3.359.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d0558813a2e0d1459959e2fe485b1baf1e9aaaf9"
+                "reference": "7231e7c309d6262855289511d6ee124fafbe664f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d0558813a2e0d1459959e2fe485b1baf1e9aaaf9",
-                "reference": "d0558813a2e0d1459959e2fe485b1baf1e9aaaf9",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7231e7c309d6262855289511d6ee124fafbe664f",
+                "reference": "7231e7c309d6262855289511d6ee124fafbe664f",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.358.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.0"
             },
-            "time": "2025-10-28T00:41:34+00:00"
+            "time": "2025-10-29T00:06:16+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -1655,29 +1655,29 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/simple-s3.git",
-                "reference": "da4682d822bb865193d9a43865b7180d73e897e8"
+                "reference": "49097c76b3d14601850373f4d8a272faebeaee0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/da4682d822bb865193d9a43865b7180d73e897e8",
-                "reference": "da4682d822bb865193d9a43865b7180d73e897e8",
+                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/49097c76b3d14601850373f4d8a272faebeaee0a",
+                "reference": "49097c76b3d14601850373f4d8a272faebeaee0a",
                 "shasum": ""
             },
             "require": {
-                "aws/aws-sdk-php": "^3.356.37",
-                "ext-curl": ">=5.6",
-                "ext-fileinfo": ">=5.6",
+                "aws/aws-sdk-php": "^3.359",
+                "ext-curl": "*",
+                "ext-fileinfo": "*",
                 "ext-json": "*",
                 "ext-redis": "*",
-                "php": ">=5.6",
-                "predis/predis": "^v3.0"
+                "php": ">=8.3",
+                "predis/predis": "^v3"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^2.3",
-                "monolog/monolog": "^2",
-                "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "~9",
-                "symfony/console": "^3.4.17 || ^4.1.6"
+                "monolog/monolog": "^3",
+                "phpstan/phpstan": "^2",
+                "phpunit/phpunit": "^12",
+                "symfony/console": "^v4.3"
             },
             "type": "library",
             "autoload": {
@@ -1708,7 +1708,7 @@
                 "issues": "https://github.com/matecat/simple-s3/issues",
                 "source": "https://github.com/matecat/simple-s3/tree/php8.3"
             },
-            "time": "2025-10-13T17:11:26+00:00"
+            "time": "2025-10-29T12:06:20+00:00"
         },
         {
             "name": "matecat/subfiltering",
