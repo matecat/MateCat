@@ -267,7 +267,7 @@ class DownloadController extends AbstractDownloadController {
                     $xsp = new XliffParser();
 
                     // instantiateXliffReplacerCallback
-                    $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $jobData[ 'target' ], (int)$this->project->id );
+                    $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $jobData[ 'target' ], $this->job );
 
                     // run xliff replacer
                     $this->logger->debug( "work on " . $fileID . " " . $current_filename );
@@ -287,7 +287,7 @@ class DownloadController extends AbstractDownloadController {
                     // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
                     $output_content[ $fileID ][ 'output_filename' ] = $current_filename . ".xlf";
 
-                    if ( $fileType[ 'proprietary_short_name' ] === 'matecat_converter' ) {
+                    if ( $fileType[ 'proprietary_sho$xliffFilePathrt_name' ] === 'matecat_converter' ) {
                         // Set the XLIFF extension to .xlf
                         // Internally, Matecat continues using .sdlxliff as default
                         // extension for the XLIFF behind the projects.
