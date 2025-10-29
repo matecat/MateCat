@@ -393,7 +393,7 @@ class ProjectTemplateDao extends AbstractDao {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `public_tm_penalty`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `subfiltering_handlers`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :public_tm_penalty, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :subfiltering, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :public_tm_penalty, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :subfiltering_handlers, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
