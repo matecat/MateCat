@@ -26,7 +26,7 @@ use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 

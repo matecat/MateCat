@@ -16,7 +16,7 @@ class ProjectCompletionStatus extends KleinController {
      */
     private ProjectStruct $project;
 
-    public function afterConstruct() {
+    public function afterConstruct(): void {
 
         $projectValidator = new ProjectValidator( $this );
 

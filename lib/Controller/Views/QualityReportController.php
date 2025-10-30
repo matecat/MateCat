@@ -25,7 +25,7 @@ use Utils\Tools\Utils;
  */
 class QualityReportController extends BaseKleinViewController implements IController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
     }
 

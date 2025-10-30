@@ -18,7 +18,8 @@ use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 
-abstract class KleinController implements IController {
+abstract class KleinController implements IController
+{
 
     use TimeLoggerTrait;
     use AuthenticationTrait;
@@ -63,7 +64,8 @@ abstract class KleinController implements IController {
     /**
      * @return FeatureSet
      */
-    public function getFeatureSet(): FeatureSet {
+    public function getFeatureSet(): FeatureSet
+    {
         return $this->featureSet;
     }
 
@@ -72,7 +74,8 @@ abstract class KleinController implements IController {
      *
      * @return $this
      */
-    public function setFeatureSet( FeatureSet $featureSet ): KleinController {
+    public function setFeatureSet(FeatureSet $featureSet): KleinController
+    {
         $this->featureSet = $featureSet;
 
         return $this;
@@ -81,11 +84,13 @@ abstract class KleinController implements IController {
     /**
      * @return array
      */
-    public function getParams(): array {
+    public function getParams(): array
+    {
         return $this->params;
     }
 
-    public function isView(): bool {
+    public function isView(): bool
+    {
         return $this->isView;
     }
 
@@ -97,8 +102,8 @@ abstract class KleinController implements IController {
      *
      * @throws Exception
      */
-    public function __construct( Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null ) {
-
+    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
+    {
         $this->startTimer();
         $this->timingLogFileName = 'api_calls_time.log';
 
@@ -110,30 +115,31 @@ abstract class KleinController implements IController {
         $paramsPut        = $this->getPutParams() ?: [];
         $paramsGet        = $this->request->paramsNamed()->getIterator()->getArrayCopy();
         $this->params     = $this->request->paramsPost()->getIterator()->getArrayCopy();
-        $this->params     = array_merge( $this->params, $paramsGet, $paramsPut );
+        $this->params     = array_merge($this->params, $paramsGet, $paramsPut);
         $this->featureSet = new FeatureSet();
-        $this->identifyUser( $this->useSession );
+        $this->identifyUser($this->useSession);
         $this->afterConstruct();
 
         $this->logger = LoggerFactory::getLogger();
-
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    public function refreshClientSessionIfNotApi() {
-        if ( empty( $this->api_key ) ) {
+    public function refreshClientSessionIfNotApi(): void
+    {
+        if (empty($this->api_key)) {
             static::sessionStart();
-            AuthenticationHelper::refreshSession( $_SESSION );
+            AuthenticationHelper::refreshSession($_SESSION);
         }
     }
 
     /**
      * @throws Exception|Throwable
      */
-    public function performValidations() {
+    public function performValidations(): void
+    {
         $this->validateRequest();
     }
 
@@ -142,60 +148,66 @@ abstract class KleinController implements IController {
      *
      * @throws Exception|Throwable
      */
-    public function respond( string $method ) {
-
+    public function respond(string $method): void
+    {
         $this->performValidations();
 
-        if ( !$this->response->isLocked() ) {
+        if (!$this->response->isLocked()) {
             $this->$method();
         }
 
         $this->_logWithTime();
-
     }
 
-    public function getRequest(): Request {
+    public function getRequest(): Request
+    {
         return $this->request;
     }
 
-    public function getPutParams() {
-        return json_decode( file_get_contents( 'php://input' ), true );
+    public function getPutParams()
+    {
+        return json_decode(file_get_contents('php://input'), true);
     }
 
     /**
      * @throws Exception
      * @throws Throwable
      */
-    protected function validateRequest(): void {
-        foreach ( $this->validators as $validator ) {
+    protected function validateRequest(): void
+    {
+        foreach ($this->validators as $validator) {
             $validator->validate();
         }
         $this->validators = [];
         $this->afterValidate();
     }
 
-    protected function appendValidator( Base $validator ): KleinController {
+    protected function appendValidator(Base $validator): KleinController
+    {
         $this->validators[] = $validator;
 
         return $this;
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void
+    {
     }
 
-    protected function _logWithTime() {
+    protected function _logWithTime(): void
+    {
         $this->logPageCall();
     }
 
-    protected function afterValidate() {
-
+    protected function afterValidate()
+    {
     }
 
     /**
-     * @return false|int
+     * @return bool
      */
-    protected function isJsonRequest() {
-        return preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) );
+    protected function isJsonRequest(): bool
+    {
+        return str_starts_with($this->request->headers()->get('Content-Type'), 'application/json');
     }
 
     /**
@@ -203,8 +215,9 @@ abstract class KleinController implements IController {
      *
      * @return array
      */
-    protected function parseIdSegment( $id_segment ): array {
-        $parsedSegment = explode( "-", $id_segment );
+    protected function parseIdSegment($id_segment): array
+    {
+        $parsedSegment = explode("-", $id_segment);
 
         return [
                 'id_segment' => $parsedSegment[ 0 ],

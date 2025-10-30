@@ -14,7 +14,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Files\CSV as CSVParser;
 
 class DeepLGlossaryController extends KleinController {
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
     }

@@ -380,7 +380,7 @@ class UserDao extends AbstractDao {
      * @return UserStruct
      * @throws Exception
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ): UserStruct {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

@@ -121,7 +121,7 @@ abstract class AbstractController extends BaseKleinViewController {
 
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->validateTheRequest();
     }
 

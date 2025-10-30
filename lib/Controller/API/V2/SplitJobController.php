@@ -18,7 +18,7 @@ use ReflectionException;
 
 class SplitJobController extends KleinController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 

@@ -41,7 +41,7 @@ class GlossaryFilesController extends KleinController {
      */
     public string $downloadToken;
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->TMService = new TMSService();
         $this->appendValidator( new LoginValidator( $this ) );
     }

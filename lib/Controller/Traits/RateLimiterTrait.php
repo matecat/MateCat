@@ -15,7 +15,7 @@ trait RateLimiterTrait {
      * @param string   $route
      * @param int      $maxRetries
      *
-     * @return Response
+     * @return Response|null
      * @throws Exception
      */
     public function checkRateLimitResponse( Response $response, string $identifier, string $route, int $maxRetries = 10 ): ?Response {
@@ -42,7 +42,8 @@ trait RateLimiterTrait {
      *
      * @throws Exception
      */
-    public function incrementRateLimitCounter( string $identifier, string $route ) {
+    public function incrementRateLimitCounter( string $identifier, string $route ): void
+    {
         $key   = $this->getKey( $identifier, $route );
         $redis = $this->getRedis();
 

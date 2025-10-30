@@ -23,7 +23,7 @@ use View\API\V2\Json\Membership;
 
 class TeamMembersController extends KleinController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new TeamAccessValidator( $this ) );
     }

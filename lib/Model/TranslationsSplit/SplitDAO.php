@@ -93,7 +93,7 @@ class SplitDAO extends AbstractDao {
      * @return SegmentSplitStruct
      * @throws Exception
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ): SegmentSplitStruct {
 
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

@@ -26,7 +26,8 @@ class SegmentTranslation extends Base {
         }
     }
 
-    public function getTranslation() {
+    public function getTranslation(): ?SegmentTranslationStruct
+    {
         return $this->translation;
     }
 

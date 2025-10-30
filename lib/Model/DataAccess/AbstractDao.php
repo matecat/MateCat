@@ -66,7 +66,8 @@ abstract class AbstractDao {
     /**
      * @return Database|IDatabase
      */
-    public function getDatabaseHandler() {
+    public function getDatabaseHandler(): Database|IDatabase
+    {
         return $this->database;
     }
 
@@ -91,7 +92,8 @@ abstract class AbstractDao {
      * @return T The input object, sanitized.
      * @throws Exception This function throws exception input is not a \DataAccess\IDaoStruct object
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ): IDaoStruct
+    {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
@@ -352,7 +354,7 @@ abstract class AbstractDao {
      * Updates the struct. The record is found via the primary
      * key attributes provided by the struct.
      *
-     * @param AbstractDaoObjectStruct|IDaoStruct $struct
+     * @param AbstractDaoObjectStruct $struct
      * @param array                              $options
      *
      * @return int
@@ -412,10 +414,11 @@ abstract class AbstractDao {
      * @param IDaoStruct $struct
      * @param array|null $options
      *
-     * @return bool|string
+     * @return int|false
      * @throws Exception
      */
-    public static function insertStruct( IDaoStruct $struct, ?array $options = [] ) {
+    public static function insertStruct( IDaoStruct $struct, ?array $options = [] ): int|false
+    {
 
         $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;

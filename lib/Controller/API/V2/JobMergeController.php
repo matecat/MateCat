@@ -57,7 +57,7 @@ class JobMergeController extends KleinController {
      *
      * @return void
      */
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         // Initialize the project password validator.
         $validator = new ProjectPasswordValidator( $this );
 

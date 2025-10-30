@@ -19,7 +19,7 @@ use ReflectionException;
  */
 class ActivityLogController extends BaseKleinViewController implements IController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
         $this->appendValidator(
                 ( new ProjectPasswordValidator( $this ) )->onFailure( function () {

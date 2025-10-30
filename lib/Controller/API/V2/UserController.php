@@ -13,7 +13,7 @@ use Model\Users\UserDao;
 use Utils\Tools\CatUtils;
 
 class UserController extends AbstractStatefulKleinController {
-    public function afterConstruct() {
+    public function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new JSONRequestValidator( $this ) );
     }

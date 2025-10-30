@@ -10,8 +10,8 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Interfaces\ChunkPasswordValidatorInterface;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Model\ActivityLog\ActivityLogDao;
 use Model\ActivityLog\ActivityLogStruct;
@@ -19,83 +19,63 @@ use ReflectionException;
 use Throwable;
 use View\API\V2\Json\Activity;
 
-class ActivityLogController extends KleinController implements ChunkPasswordValidatorInterface {
-
-    protected int    $id_job;
-    protected string $jobPassword;
+class ActivityLogController extends KleinController
+{
 
     /**
-     * @param int $id_job
-     *
-     * @return $this
+     * @throws Throwable
      */
-    public function setIdJob( int $id_job ): static {
-        $this->id_job = $id_job;
+    public function allOnProject(): void
+    {
+        $validator = new ProjectPasswordValidator($this);
+        $validator->validate();
 
-        return $this;
-    }
+        $activityLogDao = new ActivityLogDao();
+        $rawContent     = $activityLogDao->getAllForProject($validator->getIdProject());
 
-    /**
-     * @param string $jobPassword
-     *
-     * @return $this
-     */
-    public function setJobPassword( string $jobPassword ): static {
-        $this->jobPassword = $jobPassword;
-
-        return $this;
+        $formatted = new Activity($rawContent);
+        $this->response->json($formatted->render());
     }
 
     /**
      * @throws Throwable
      */
-    public function allOnProject(): void {
-        $validator = new ProjectPasswordValidator( $this );
+    public function lastOnProject(): void
+    {
+        $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
-        $rawContent     = $activityLogDao->getAllForProject( $validator->getIdProject() );
+        $rawContent     = $activityLogDao->getLastActionInProject($validator->getIdProject());
 
-        $formatted = new Activity( $rawContent );
-        $this->response->json( $formatted->render() );
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function lastOnProject(): void {
-
-        $validator = new ProjectPasswordValidator( $this );
-        $validator->validate();
-
-        $activityLogDao = new ActivityLogDao();
-        $rawContent     = $activityLogDao->getLastActionInProject( $validator->getIdProject() );
-
-        $formatted = new Activity( $rawContent );
-        $this->response->json( [ 'activity' => $formatted->render() ] );
-
+        $formatted = new Activity($rawContent);
+        $this->response->json(['activity' => $formatted->render()]);
     }
 
     /**
      * @throws ReflectionException
      * @throws Throwable
      */
-    public function lastOnJob(): void {
-
-        $validator = new ChunkPasswordValidator( $this );
+    public function lastOnJob(): void
+    {
+        $validator = new ChunkPasswordValidator($this);
         $validator->validate();
 
-        $activityLogDao                  = new ActivityLogDao();
+        $activityLogDao = new ActivityLogDao();
         $activityLogDao->whereConditions = ' id_job = :id_job ';
-        $activityLogDao->epilogueString  = " ORDER BY ID DESC LIMIT 1";
-        $rawLogContent                   = $activityLogDao->read(
+        $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
+        $rawLogContent = $activityLogDao->read(
                 new ActivityLogStruct(),
-                [ 'id_job' => $validator->getJobId() ]
+                ['id_job' => $validator->getJobId()]
         );
 
-        $formatted = new Activity( $rawLogContent );
-        $this->response->json( [ 'activity' => $formatted->render() ] );
+        $formatted = new Activity($rawLogContent);
+        $this->response->json(['activity' => $formatted->render()]);
+    }
 
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
 }

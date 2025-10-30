@@ -40,7 +40,7 @@ class SegmentAnalysisController extends KleinController {
      */
     private ProjectDao $projectDao;
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 

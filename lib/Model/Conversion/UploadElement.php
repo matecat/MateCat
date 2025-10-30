@@ -14,21 +14,30 @@ use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\RecursiveArrayCopy;
 
+/**
+ * @property string $name
+ * @property string $type
+ * @property string $tmp_name
+ * @property string $error
+ * @property int    $size
+ */
 #[AllowDynamicProperties]
-class UploadElement implements ArrayAccess {
-
+class UploadElement implements ArrayAccess
+{
     use ArrayAccessTrait;
     use RecursiveArrayCopy;
 
-    public function __construct( array $array_params = [] ) {
-        if ( $array_params != null ) {
-            foreach ( $array_params as $property => $value ) {
+    public function __construct(array $array_params = [])
+    {
+        if ($array_params != null) {
+            foreach ($array_params as $property => $value) {
                 $this->$property = $value;
             }
         }
     }
 
-    public function __set( $name, $value ) {
+    public function __set($name, $value)
+    {
         $this->$name = $value;
     }
 
@@ -37,16 +46,17 @@ class UploadElement implements ArrayAccess {
      *
      * @return mixed
      */
-    public function __get( $name ) {
-        if ( !property_exists( $this, $name ) ) {
+    public function __get($name)
+    {
+        if (!property_exists($this, $name)) {
             return null;
         }
 
         return $this->$name;
     }
 
-    public function getArrayCopy(): array {
+    public function getArrayCopy(): array
+    {
         return $this->toArray();
     }
-
 }

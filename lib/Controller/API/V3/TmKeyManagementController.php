@@ -11,7 +11,7 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 
 class TmKeyManagementController extends KleinController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 

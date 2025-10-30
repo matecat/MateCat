@@ -442,7 +442,7 @@ class GDriveController extends AbstractStatefulKleinController {
     /**
      * @throws Exception
      */
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->initSessionService();
     }
 

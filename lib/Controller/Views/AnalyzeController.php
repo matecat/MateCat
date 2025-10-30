@@ -27,7 +27,7 @@ use Utils\Tools\Utils;
 
 class AnalyzeController extends BaseKleinViewController implements IController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
     }
 
