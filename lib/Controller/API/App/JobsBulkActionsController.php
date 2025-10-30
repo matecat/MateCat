@@ -258,7 +258,8 @@ class JobsBulkActionsController extends ChangePasswordController {
             throw new InvalidArgumentException( "Team not found." );
         }
 
-        $members = ( new MembershipDao() )->getMemberListByTeamId( $idTeam );
+        $membershipDao = new MembershipDao();
+        $members       = $membershipDao->getMemberListByTeamId( $idTeam );
 
         if ( empty( $members ) ) {
             throw new InvalidArgumentException( "Wrong team id." );
@@ -271,6 +272,10 @@ class JobsBulkActionsController extends ChangePasswordController {
         }
 
         ( new ProjectDao() )->assignToTeam( $pid, (int)$idTeam );
+        $membershipDao->destroyCacheForListByTeamId( (int)$idTeam );
+        $membershipDao->destroyCacheForListByTeamId( (int)$idTeam );
+        $membershipDao->destroyCacheUserTeams( $this->user );
+        $membershipDao->destroyCacheTeamByIdAndUser( (int)$idTeam, $this->user );
 
         for ( $i = 0; $i < count( $response ); $i++ ) {
             $response[ $i ][ 'outcome' ] = [
