@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b9c0e2a75966b08474bcfcc6d33edc14",
+    "content-hash": "5f0e53555ac2eb003438cbfa7d150dcc",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.359.0",
+            "version": "3.359.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "7231e7c309d6262855289511d6ee124fafbe664f"
+                "reference": "40543e3993fc5094094ac9f9bdc4434bf81cca2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7231e7c309d6262855289511d6ee124fafbe664f",
-                "reference": "7231e7c309d6262855289511d6ee124fafbe664f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/40543e3993fc5094094ac9f9bdc4434bf81cca2d",
+                "reference": "40543e3993fc5094094ac9f9bdc4434bf81cca2d",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.1"
             },
-            "time": "2025-10-29T00:06:16+00:00"
+            "time": "2025-10-29T20:13:06+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -1651,16 +1651,16 @@
         },
         {
             "name": "matecat/simple-s3",
-            "version": "dev-php8.3",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/simple-s3.git",
-                "reference": "49097c76b3d14601850373f4d8a272faebeaee0a"
+                "reference": "dae184c71e6aaf3969eb4e17ad2b7813a37ce85f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/49097c76b3d14601850373f4d8a272faebeaee0a",
-                "reference": "49097c76b3d14601850373f4d8a272faebeaee0a",
+                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/dae184c71e6aaf3969eb4e17ad2b7813a37ce85f",
+                "reference": "dae184c71e6aaf3969eb4e17ad2b7813a37ce85f",
                 "shasum": ""
             },
             "require": {
@@ -1706,9 +1706,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/simple-s3/issues",
-                "source": "https://github.com/matecat/simple-s3/tree/php8.3"
+                "source": "https://github.com/matecat/simple-s3/tree/v2.0.0"
             },
-            "time": "2025-10-29T12:06:20+00:00"
+            "time": "2025-10-29T18:19:04+00:00"
         },
         {
             "name": "matecat/subfiltering",
@@ -5240,16 +5240,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.4.1",
+            "version": "12.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "fc5413a2e6d240d2f6d9317bdf7f0a24e73de194"
+                "reference": "a94ea4d26d865875803b23aaf78c3c2c670ea2ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/fc5413a2e6d240d2f6d9317bdf7f0a24e73de194",
-                "reference": "fc5413a2e6d240d2f6d9317bdf7f0a24e73de194",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a94ea4d26d865875803b23aaf78c3c2c670ea2ea",
+                "reference": "a94ea4d26d865875803b23aaf78c3c2c670ea2ea",
                 "shasum": ""
             },
             "require": {
@@ -5317,7 +5317,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.4.1"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.4.2"
             },
             "funding": [
                 {
@@ -5341,7 +5341,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-09T14:08:29+00:00"
+            "time": "2025-10-30T08:41:39+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -6345,9 +6345,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "matecat/simple-s3": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
