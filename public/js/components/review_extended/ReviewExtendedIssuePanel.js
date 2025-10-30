@@ -26,10 +26,9 @@ class ReviewExtendedIssuePanel extends React.Component {
       enableArrows: false,
       severityIndex: 0,
     }
-    this.issueCategories = orderBy(
-      config.lqa_nested_categories.categories,
-      ['id'],
-    )
+    this.issueCategories = orderBy(config.lqa_nested_categories.categories, [
+      'id',
+    ])
 
     this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this)
     this.handleShortcutsKeyUp = this.handleShortcutsKeyUp.bind(this)
