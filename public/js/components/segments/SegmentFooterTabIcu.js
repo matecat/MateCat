@@ -6,26 +6,37 @@ import {
   transformTagsToText,
 } from './utils/DraftMatecatUtils/tagUtils'
 
-export const SegmentFooterTabIcu = ({segment}) => {
-  const [values, setValues] = useState({})
+const SegmentFooterTabIcu = ({segment}) => {
+  const [values, setValues] = useState([])
 
   const variableNames = useMemo(() => {
     try {
-      const tree = parse(segment.translation)
+      const tree = parse(
+        transformTagsToText(removeTagsFromText(segment.translation)),
+      )
       const vars = new Set()
       const walk = (node) => {
         if (Array.isArray(node)) {
-          const [name, options] = node
+          const [name] = node
           if (typeof name === 'string') vars.add(name)
-          if (options && typeof options === 'object') {
+          if (node[2]) {
+            Object.values(node[2]).forEach((childNode) => {
+              if (Array.isArray(childNode)) {
+                childNode.forEach((node) => {
+                  if (Array.isArray(node)) {
+                    walk(node)
+                  }
+                })
+              }
+            })
+          }
+          /*if (options && typeof options === 'object') {
             Object.values(options).forEach((child) =>
               Array.isArray(child) ? handleChildren(child) : null,
             )
-          }
+          }*/
         }
       }
-      const handleChildren = (children) =>
-        Array.isArray(children) && children.forEach((ch) => walk(ch))
       if (Array.isArray(tree)) tree.forEach((n) => walk(n))
       else walk(tree)
       return Array.from(vars)
@@ -80,3 +91,4 @@ export const SegmentFooterTabIcu = ({segment}) => {
     </div>
   )
 }
+export default SegmentFooterTabIcu

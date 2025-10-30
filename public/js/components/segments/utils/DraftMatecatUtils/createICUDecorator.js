@@ -100,7 +100,6 @@ function validateICUMessage(locale, text) {
     }
   }
   nodes.forEach((node) => visitNode(node))
-  console.log('results', results)
   return results
 }
 export const createIcuTokens = (text, editorState, locale) => {
@@ -152,7 +151,6 @@ export const createIcuTokens = (text, editorState, locale) => {
     if (warningIssues.length > 0) {
       warningIssues.forEach((issue) => {
         const node = issue.node
-        console.log("Porco dio l'icu issue", issue)
         let tokenToUpdate = blockTokens.findIndex(
           (token) => token.type === node.type && !token.warning,
         )
@@ -170,7 +168,6 @@ export const createIcuTokens = (text, editorState, locale) => {
       })
     }
   }
-  console.log(blockTokens)
   return updateOffsetBasedOnEditorState(editorState, blockTokens)
 }
 
