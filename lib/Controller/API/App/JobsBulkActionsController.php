@@ -14,6 +14,7 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
@@ -55,8 +56,8 @@ class JobsBulkActionsController extends ChangePasswordController {
 
         $response = [];
 
-        if(count($jobs) > self::JOBS_LIMIT){
-            throw new InvalidArgumentException( "The maximum number of selectable jobs (".self::JOBS_LIMIT.") has been reached." );
+        if ( count( $jobs ) > self::JOBS_LIMIT ) {
+            throw new InvalidArgumentException( "The maximum number of selectable jobs (" . self::JOBS_LIMIT . ") has been reached." );
         }
 
         // Actions on Jobs
@@ -256,6 +257,14 @@ class JobsBulkActionsController extends ChangePasswordController {
         if ( empty( $team ) ) {
             throw new InvalidArgumentException( "Team not found." );
         }
+
+        $members = ( new MembershipDao() )->getMemberListByTeamId( $idTeam );
+
+        if ( empty( $members ) ) {
+            throw new InvalidArgumentException( "Wrong team id." );
+        }
+
+        $team->setMembers( $members );
 
         if ( !$team->hasUser( $this->user->uid ) ) {
             throw new InvalidArgumentException( "Team not belonging to the logged user." );
