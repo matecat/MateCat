@@ -12,8 +12,8 @@ use Utils\Tools\Utils;
 
 class ConnectedServiceDao extends AbstractDao {
 
-    const TABLE          = 'connected_services';
-    const GDRIVE_SERVICE = 'gdrive';
+    const string TABLE          = 'connected_services';
+    const string GDRIVE_SERVICE = 'gdrive';
 
     protected static array $primary_keys         = [ 'id' ];
     protected static array $auto_increment_field = [ 'id' ];
@@ -23,7 +23,7 @@ class ConnectedServiceDao extends AbstractDao {
      *
      * @return ConnectedServiceStruct
      */
-    public function findById( $id ) {
+    public function findById( $id ): ConnectedServiceStruct {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM connected_services WHERE id = :id"

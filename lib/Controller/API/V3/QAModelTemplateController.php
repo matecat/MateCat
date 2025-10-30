@@ -17,7 +17,7 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class QAModelTemplateController extends KleinController {
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
     }

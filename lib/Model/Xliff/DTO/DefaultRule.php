@@ -15,7 +15,7 @@ class DefaultRule extends AbstractXliffRule {
     protected static array $_STATES           = XliffTranslationStatus::ALL_STATES;
     protected static array $_STATE_QUALIFIERS = XliffTranslationStatus::STATE_QUALIFIER_12;
 
-    const ALLOWED_EDITOR_VALUES = [ null ];
+    const array ALLOWED_EDITOR_VALUES = [ null ];
 
     /**
      * @param $analysis

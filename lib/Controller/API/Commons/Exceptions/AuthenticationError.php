@@ -1,7 +1,9 @@
 <?php
 
 namespace Controller\API\Commons\Exceptions;
-class AuthenticationError extends \Exception {
+use Exception;
+
+class AuthenticationError extends Exception {
 
 
 }

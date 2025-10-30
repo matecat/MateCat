@@ -15,8 +15,8 @@ use ReflectionException;
 
 class TranslatorsProfilesDao extends AbstractDao {
 
-    const TABLE       = "translator_profiles";
-    const STRUCT_TYPE = TranslatorProfilesStruct::class;
+    const string TABLE       = "translator_profiles";
+    const string STRUCT_TYPE = TranslatorProfilesStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];

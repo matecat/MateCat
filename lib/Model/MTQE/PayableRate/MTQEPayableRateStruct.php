@@ -106,7 +106,7 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return $this->getArrayCopy();
     }
 

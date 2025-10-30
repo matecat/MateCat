@@ -2,6 +2,7 @@
 
 namespace Controller\API\V2;
 
+use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
@@ -14,49 +15,54 @@ use Model\Users\UserStruct;
 use Throwable;
 use Utils\Tools\CatUtils;
 
-class ChangeProjectNameController extends JobsController {
-    /**
-     * @var ProjectPasswordValidator
-     */
-    private $validator;
+class ChangeProjectNameController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->validator = new ProjectPasswordValidator( $this );
-        $this->appendValidator( new LoginValidator( $this ) );
+    private ?ProjectStruct $project;
+
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+
+        $projectAccessValidator = new ProjectPasswordValidator($this);
+        $this->appendValidator(
+                $projectAccessValidator->onSuccess(
+                        function () use ($projectAccessValidator) {
+                            $this->project = $projectAccessValidator->getProject();
+                        }
+                )
+        );
     }
 
     /**
      * @throws Throwable
      */
-    public function changeName() {
-
-        $id       = filter_var( $this->request->param( 'id_project' ), FILTER_SANITIZE_NUMBER_INT );
-        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $name     = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+    public function changeName(): void
+    {
+        $id       = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $name     = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
         if (
-                empty( $id ) or
-                empty( $password )
+                empty($id) or
+                empty($password)
         ) {
-            throw new InvalidArgumentException( 'Missing required parameters [`id `, `password`]' );
+            throw new InvalidArgumentException('Missing required parameters [`id `, `password`]');
         }
 
-        $name = CatUtils::sanitizeOrFallbackProjectName( $name ?? '' );
+        $name = CatUtils::sanitizeOrFallbackProjectName($name ?? '');
 
-        $this->validator->validate();
+        (new ProjectAccessValidator($this, $this->project))->validate();
+        $ownerEmail = $this->project->id_customer;
 
-        ( new ProjectAccessValidator( $this, $this->validator->getProject() ) )->validate();
-        $ownerEmail = $this->validator->getProject()->id_customer;
+        $this->changeProjectName($id, $password, $name);
+        $this->featureSet->filter('filterProjectNameModified', $id, $name, $password, $ownerEmail);
 
-        $this->changeProjectName( $id, $password, $name );
-        $this->featureSet->filter( 'filterProjectNameModified', $id, $name, $password, $ownerEmail );
-
-        $this->response->status()->setCode( 200 );
-        $this->response->json( [
+        $this->response->status()->setCode(200);
+        $this->response->json([
                 'id'   => $id,
                 'name' => $name,
-        ] );
-
+        ]);
     }
 
     /**
@@ -66,36 +72,34 @@ class ChangeProjectNameController extends JobsController {
      *
      * @throws Exception
      */
-    private function changeProjectName( $id, $password, $name ) {
-        $pStruct = ProjectDao::findByIdAndPassword( $id, $password );
+    private function changeProjectName($id, $password, $name): void
+    {
+        $pStruct = ProjectDao::findByIdAndPassword($id, $password);
 
-        if ( $pStruct === null ) {
-            throw new Exception( 'Project not found' );
-        }
-
-        $this->checkUserPermissions( $pStruct, $this->getUser() );
+        $this->checkUserPermissions($pStruct, $this->getUser());
 
         $pDao = new ProjectDao();
-        $pDao->changeName( $pStruct, $name );
-        $pDao->destroyCacheById( $id );
-        $pDao->destroyCacheForProjectData( $pStruct->id, $pStruct->password );
+        $pDao->changeName($pStruct, $name);
+        $pDao->destroyCacheById($id);
+        $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
     }
 
     /**
      * Check if the logged user has the permissions to change the password
      *
-     * @param ProjectStruct           $project
-     * @param \Model\Users\UserStruct $user
+     * @param ProjectStruct $project
+     * @param UserStruct    $user
      *
      * @throws Exception
      */
-    private function checkUserPermissions( ProjectStruct $project, UserStruct $user ) {
+    private function checkUserPermissions(ProjectStruct $project, UserStruct $user): void
+    {
         // check if user is belongs to the project team
         $team  = $project->getTeam();
-        $check = ( new MembershipDao() )->findTeamByIdAndUser( $team->id, $user );
+        $check = (new MembershipDao())->findTeamByIdAndUser($team->id, $user);
 
-        if ( $check === null ) {
-            throw new Exception( 'The logged user does not belong to the right team', 403 );
+        if ($check === null) {
+            throw new Exception('The logged user does not belong to the right team', 403);
         }
     }
 }

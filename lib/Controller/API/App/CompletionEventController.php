@@ -11,116 +11,89 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 
-class CompletionEventController extends KleinController {
+class CompletionEventController extends KleinController
+{
 
     /**
      * @var JobStruct
      */
-    protected $chunk;
+    protected JobStruct $chunk;
 
     /**
-     * @var \Model\Projects\ProjectStruct
+     * @var ProjectStruct
      */
-    protected $project;
-
-    /**
-     * @param \Model\Projects\ProjectStruct $project
-     */
-    public function setProject( \Model\Projects\ProjectStruct $project ){
-        $this->project = $project;
-    }
-
-    /**
-     * @param \Model\Jobs\JobStruct $chunk
-     *
-     * @return $this
-     */
-    public function setChunk( $chunk ) {
-        $this->chunk = $chunk;
-
-        return $this;
-    }
+    protected ProjectStruct $project;
 
     /**
      * @var ChunkCompletionEventStruct
      */
-    protected $event;
-
-    /**
-     * @param ChunkCompletionEventStruct $event
-     */
-    public function setEvent( ChunkCompletionEventStruct $event ) {
-        $this->event = $event;
-    }
+    protected ChunkCompletionEventStruct $event;
 
     /**
      * @throws Exception
      */
-    protected function afterConstruct() {
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
 
-        $Controller = $this;
-        $Validator  = new ChunkPasswordValidator( $this );
-        $Validator->onSuccess( function () use ( $Controller, $Validator ) {
+        $Validator = new ChunkPasswordValidator($this);
+        $Validator->onSuccess(function () use ($Validator) {
+            $event = (new ChunkCompletionEventDao())->getByIdAndChunk($this->getParams()[ 'id_event' ], $Validator->getChunk());
 
-            $event = ( new ChunkCompletionEventDao() )->getByIdAndChunk( $Controller->getParams()[ 'id_event' ], $Validator->getChunk() );
-
-            if ( !$event ) {
-                throw new \Model\Exceptions\NotFoundException( "Event Not Found.", 404 );
+            if (!$event) {
+                throw new NotFoundException("Event Not Found.", 404);
             }
 
-            $Controller->setChunk( $Validator->getChunk() );
+            $this->chunk = $Validator->getChunk();
 
-            $project = $this->chunk->getProject( 60 * 60 );
-            $Controller->setProject( $project );
-            $Controller->setEvent( $event );
-            $Controller->featureSet->loadForProject( $project );
+            $project       = $this->chunk->getProject(60 * 60);
+            $this->project = $project;
+            $this->event   = $event;
+            $this->featureSet->loadForProject($project);
+        });
 
-        } );
-
-        $this->appendValidator( $Validator );
-
+        $this->appendValidator($Validator);
     }
 
     /**
      * @throws Exception
      */
-    public function delete() {
+    public function delete(): void
+    {
+        $undoable = $this->featureSet->filter('filterIsChunkCompletionUndoable', true, $this->project, $this->chunk);
 
-        $undoable = true;
-
-        $undoable = $this->featureSet->filter( 'filterIsChunkCompletionUndoable', $undoable, $this->project, $this->chunk );
-
-        if ( $undoable ) {
+        if ($undoable) {
             $this->__performUndo();
-            $this->response->code( 200 );
+            $this->response->code(200);
             $this->response->send();
         } else {
-            $this->response->code( 400 );
+            $this->response->code(400);
         }
-
     }
 
     /**
      * @throws Exception
      */
-    private function __performUndo() {
-
+    private function __performUndo(): void
+    {
         Database::obtain()->begin();
 
         /**
          * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
          */
-        $this->featureSet->filter( 'alter_chunk_review_struct', $this->event );
+        $this->featureSet->filter('alter_chunk_review_struct', $this->event);
 
-        ( new ChunkCompletionEventDao() )->deleteEvent( $this->event );
+        (new ChunkCompletionEventDao())->deleteEvent($this->event);
         Database::obtain()->commit();
-
     }
 
 }

@@ -4,31 +4,31 @@ namespace Utils\Constants;
 
 class ConversionHandlerStatus {
 
-    const ZIP_HANDLING  = 2;
-    const OK            = 1;
-    const NOT_CONVERTED = 0;
+    const int ZIP_HANDLING  = 2;
+    const int OK            = 1;
+    const int NOT_CONVERTED = 0;
 
     // ERRORS
-    const INVALID_FILE                 = -1;
-    const NESTED_ZIP_FILES_NOT_ALLOWED = -2;
-    const SOURCE_ERROR                 = -3;
-    const TARGET_ERROR                 = -4;
-    const UPLOAD_ERROR                 = -6;
-    const MISCONFIGURATION             = -7;
-    const INVALID_TOKEN                = -19;
-    const OCR_WARNING                  = -20;
-    const OCR_ERROR                    = -21;
-    const INVALID_SEGMENTATION_RULE    = -22;
-    const GENERIC_ERROR                = -100;
-    const FILESYSTEM_ERROR             = -103;
-    const S3_ERROR                     = -230;
+    const int INVALID_FILE                 = -1;
+    const int NESTED_ZIP_FILES_NOT_ALLOWED = -2;
+    const int SOURCE_ERROR                 = -3;
+    const int TARGET_ERROR                 = -4;
+    const int UPLOAD_ERROR                 = -6;
+    const int MISCONFIGURATION             = -7;
+    const int INVALID_TOKEN                = -19;
+    const int OCR_WARNING                  = -20;
+    const int OCR_ERROR                    = -21;
+    const int INVALID_SEGMENTATION_RULE    = -22;
+    const int GENERIC_ERROR                = -100;
+    const int FILESYSTEM_ERROR             = -103;
+    const int S3_ERROR                     = -230;
 
-    const warningCodes = [
+    const array warningCodes = [
             ConversionHandlerStatus::OCR_WARNING,
             ConversionHandlerStatus::ZIP_HANDLING,
     ];
 
-    const errorCodes = [
+    const array errorCodes = [
             ConversionHandlerStatus::INVALID_FILE,
             ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
             ConversionHandlerStatus::SOURCE_ERROR,

@@ -8,17 +8,19 @@ use InvalidArgumentException;
 use ReflectionException;
 use Utils\OutsourceTo\Translated;
 
-class OutsourceToController extends KleinController {
+class OutsourceToController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws ReflectionException
      */
-    public function outsource(): void {
-
+    public function outsource(): void
+    {
         $request       = $this->validateTheRequest();
         $pid           = $request[ 'pid' ];
         $ppassword     = $request[ 'ppassword' ];
@@ -29,15 +31,15 @@ class OutsourceToController extends KleinController {
         $jobList       = $request[ 'jobList' ];
 
         $outsourceTo = new Translated();
-        $outsourceTo->setPid( $pid )
-                ->setPpassword( $ppassword )
-                ->setCurrency( $currency )
-                ->setTimezone( $timezone )
-                ->setJobList( $jobList )
-                ->setFixedDelivery( $fixedDelivery )
-                ->setTypeOfService( $typeOfService )
-                ->setUser( $this->user )
-                ->setFeatures( $this->featureSet )
+        $outsourceTo->setPid($pid)
+                ->setPpassword($ppassword)
+                ->setCurrency($currency)
+                ->setTimezone($timezone)
+                ->setJobList($jobList)
+                ->setFixedDelivery($fixedDelivery)
+                ->setTypeOfService($typeOfService)
+                ->setUser($this->user)
+                ->setFeatures($this->featureSet)
                 ->performQuote();
 
         /*
@@ -59,37 +61,37 @@ class OutsourceToController extends KleinController {
          *               ),
          *   );
          */
-        $this->response->json( [
+        $this->response->json([
                 'code'       => 1,
                 'errors'     => [],
-                'data'       => array_values( $outsourceTo->getQuotesResult() ),
+                'data'       => array_values($outsourceTo->getQuotesResult()),
                 'return_url' => [
                         'url_ok'       => $outsourceTo->getOutsourceLoginUrlOk(),
                         'url_ko'       => $outsourceTo->getOutsourceLoginUrlKo(),
                         'confirm_urls' => $outsourceTo->getOutsourceConfirmUrl(),
                 ]
-        ] );
-
+        ]);
     }
 
     /**
      * @return array
      */
-    private function validateTheRequest(): array {
-        $pid           = filter_var( $this->request->param( 'pid' ), FILTER_SANITIZE_STRING );
-        $ppassword     = filter_var( $this->request->param( 'ppassword' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $currency      = filter_var( $this->request->param( 'currency' ), FILTER_SANITIZE_STRING );
-        $timezone      = filter_var( $this->request->param( 'timezone' ), FILTER_SANITIZE_STRING );
-        $fixedDelivery = filter_var( $this->request->param( 'fixedDelivery' ), FILTER_SANITIZE_NUMBER_INT );
-        $typeOfService = filter_var( $this->request->param( 'typeOfService' ), FILTER_SANITIZE_STRING );
-        $jobList       = filter_var( $this->request->param( 'jobs' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+    private function validateTheRequest(): array
+    {
+        $pid           = filter_var($this->request->param('pid'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $ppassword     = filter_var($this->request->param('ppassword'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $currency      = filter_var($this->request->param('currency'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $timezone      = filter_var($this->request->param('timezone'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $fixedDelivery = filter_var($this->request->param('fixedDelivery'), FILTER_SANITIZE_NUMBER_INT);
+        $typeOfService = filter_var($this->request->param('typeOfService'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $jobList       = filter_var($this->request->param('jobs'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_REQUIRE_ARRAY | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
-        if ( empty( $pid ) ) {
-            throw new InvalidArgumentException( "No id project provided", -1 );
+        if (empty($pid)) {
+            throw new InvalidArgumentException("No id project provided", -1);
         }
 
-        if ( empty( $ppassword ) ) {
-            throw new InvalidArgumentException( "No project Password Provided", -2 );
+        if (empty($ppassword)) {
+            throw new InvalidArgumentException("No project Password Provided", -2);
         }
 
         /**
@@ -105,19 +107,19 @@ class OutsourceToController extends KleinController {
          *   ];
          * </pre>
          */
-        if ( empty( $jobList ) ) {
-            throw new InvalidArgumentException( "No job list Provided", -3 );
+        if (empty($jobList)) {
+            throw new InvalidArgumentException("No job list Provided", -3);
         }
 
-        if ( empty( $currency ) ) {
+        if (empty($currency)) {
             $currency = $_COOKIE[ "matecat_currency" ] ?? null;
         }
 
-        if ( empty( $timezone ) and $timezone !== "0" ) {
+        if (empty($timezone) and $timezone !== "0") {
             $timezone = $_COOKIE[ "matecat_timezone" ] ?? null;
         }
 
-        if ( !in_array( $typeOfService, [ "premium", "professional" ] ) ) {
+        if (!in_array($typeOfService, ["premium", "professional"])) {
             $typeOfService = "professional";
         }
 

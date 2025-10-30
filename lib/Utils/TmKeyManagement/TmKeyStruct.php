@@ -203,7 +203,7 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
 
         if ( $this->complete_format ) {
             return [

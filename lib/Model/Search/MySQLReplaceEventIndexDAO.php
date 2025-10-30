@@ -7,8 +7,8 @@ use Model\DataAccess\Database;
 
 class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface {
 
-    const STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
-    const TABLE       = 'replace_events_current_version';
+    const string STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
+    const string TABLE       = 'replace_events_current_version';
 
     /**
      * @param $idJob

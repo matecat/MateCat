@@ -12,7 +12,7 @@ class LaraController extends KleinController {
 
     protected Lara $laraClient;
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         parent::afterConstruct();
 
         $loginValidator       = new LoginValidator( $this );

@@ -99,7 +99,7 @@ class MSWord implements IDto, JsonSerializable {
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
 
         $format = [];
 

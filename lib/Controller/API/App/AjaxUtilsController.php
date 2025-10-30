@@ -6,63 +6,65 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Klein\Response;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Utils\TMS\TMSService;
 
-class AjaxUtilsController extends KleinController {
+class AjaxUtilsController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
-    public function ping(): void {
+    public function ping(): void
+    {
         $db   = Database::obtain();
-        $stmt = $db->getConnection()->prepare( "SELECT 1" );
+        $stmt = $db->getConnection()->prepare("SELECT 1");
         $stmt->execute();
 
-        $this->response->json( [
+        $this->response->json([
                 'data' => [
-                        "OK", time()
+                        "OK",
+                        time()
                 ]
-        ] );
+        ]);
     }
 
     /**
      * @return void
      * @throws Exception
      */
-    public function checkTMKey(): void {
+    public function checkTMKey(): void
+    {
+        $tm_key = filter_var($this->request->param('tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
-        $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-
-        if ( empty( $tm_key ) ) {
-            throw new InvalidArgumentException( "TM key not provided.", -9 );
+        if (empty($tm_key)) {
+            throw new InvalidArgumentException("TM key not provided.", -9);
         }
 
         $tmxHandler = new TMSService();
-        $keyExists  = $tmxHandler->checkCorrectKey( $tm_key );
+        $keyExists  = $tmxHandler->checkCorrectKey($tm_key);
 
-        if ( !isset( $keyExists ) or $keyExists === false ) {
-            throw new InvalidArgumentException( "TM key is not valid.", -9 );
+        if (!isset($keyExists) or $keyExists === false) {
+            throw new InvalidArgumentException("TM key is not valid.", -9);
         }
 
-        $this->response->json( [
+        $this->response->json([
                 'success' => true
-        ] );
-
+        ]);
     }
 
     /**
-     * @return Response
+     * @return void
      */
-    public function clearNotCompletedUploads(): void {
+    public function clearNotCompletedUploads(): void
+    {
+        (new Session())->cleanupSessionFiles();
 
-        ( new Session() )->cleanupSessionFiles();
-
-        $this->response->json( [
+        $this->response->json([
                 'success' => true
-        ] );
+        ]);
     }
 }

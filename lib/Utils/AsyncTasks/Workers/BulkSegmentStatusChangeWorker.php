@@ -42,7 +42,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws Exception
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
         /**
          * @var $queueElement QueueElement
          */

@@ -18,7 +18,7 @@ use Utils\TaskRunner\Commons\QueueElement;
  */
 class ActivityLogWorker extends AbstractWorker {
 
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement
@@ -52,7 +52,7 @@ class ActivityLogWorker extends AbstractWorker {
      * </code>
      *
      */
-    protected function _checkDatabaseConnection() {
+    protected function _checkDatabaseConnection(): void {
 
         $db = Database::obtain();
         try {

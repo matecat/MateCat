@@ -14,10 +14,10 @@ class QAWarning {
 
     protected array $structure;
 
-    const GLOSSARY_CATEGORY = "GLOSSARY";
-    const TAGS_CATEGORY     = "TAGS";
-    const SIZE_CATEGORY     = "SIZE";
-    const MISMATCH_CATEGORY = "MISMATCH";
+    const string GLOSSARY_CATEGORY = "GLOSSARY";
+    const string TAGS_CATEGORY     = "TAGS";
+    const string SIZE_CATEGORY     = "SIZE";
+    const string MISMATCH_CATEGORY = "MISMATCH";
 
     protected function pushErrorSegment( $error_type, $error_category, $content ) {
 

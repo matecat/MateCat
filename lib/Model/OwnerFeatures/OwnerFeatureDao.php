@@ -11,8 +11,8 @@ use Utils\Logger\LoggerFactory;
 
 class OwnerFeatureDao extends AbstractDao {
 
-    const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
-    const query_user_id       = "SELECT * FROM owner_features WHERE uid = :uid ORDER BY id";
+    const string query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
+    const string query_user_id       = "SELECT * FROM owner_features WHERE uid = :uid ORDER BY id";
 
     /**
      * @param IDaoStruct|OwnerFeatureStruct $obj

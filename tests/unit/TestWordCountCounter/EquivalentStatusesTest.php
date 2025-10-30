@@ -19,10 +19,11 @@ class EquivalentStatusesTest extends AbstractTest {
     protected $method_equivalentStatuses;
 
     public function setUp(): void {
+        parent::setUp();
         $this->word_counter              = new CounterModel();
         $mirror_word_counter             = new ReflectionClass( $this->word_counter );
         $this->method_equivalentStatuses = $mirror_word_counter->getMethod( 'equivalentStatuses' );
-        $this->method_equivalentStatuses->setAccessible( true );
+        
     }
 
     /**

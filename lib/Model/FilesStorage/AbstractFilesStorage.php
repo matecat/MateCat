@@ -25,8 +25,8 @@ use Utils\Registry\AppConfig;
  */
 abstract class AbstractFilesStorage implements IFilesStorage {
 
-    const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
-    const OBJECTS_SAFE_DELIMITER   = '__';
+    const string ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
+    const string OBJECTS_SAFE_DELIMITER   = '__';
 
     protected string $filesDir;
     protected string $cacheDir;

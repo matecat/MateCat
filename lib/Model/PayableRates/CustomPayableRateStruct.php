@@ -12,7 +12,7 @@ use Utils\Date\DateTimeUtil;
 use Utils\Langs\Languages;
 
 class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
-    const MAX_BREAKDOWN_SIZE = 65535;
+    const int MAX_BREAKDOWN_SIZE = 65535;
 
     public ?int $id = null;
     public ?int $uid = null;
@@ -21,8 +21,8 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     /**
      * @var string|array
      */
-    public $breakdowns;
-    public ?string $created_at = null;
+    public string|array $breakdowns;
+    public ?string      $created_at = null;
     public ?string $modified_at = null;
     public ?string $deleted_at = null;
 

@@ -9,8 +9,8 @@ use PDO;
 
 class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface {
 
-    const STRUCT_TYPE = ReplaceEventStruct::class;
-    const TABLE       = 'replace_events';
+    const string STRUCT_TYPE = ReplaceEventStruct::class;
+    const string TABLE       = 'replace_events';
 
     /**
      * @param $id_job

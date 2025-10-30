@@ -17,21 +17,23 @@ use RuntimeException;
 use Utils\Registry\AppConfig;
 use View\API\App\Json\Ping;
 
-class HeartBeat extends KleinController {
+class HeartBeat extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new WhitelistAccessValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new WhitelistAccessValidator($this));
     }
 
-    public function ping() {
+    public function ping(): void
+    {
         Database::obtain()->ping();
-        if ( !touch( AppConfig::$ROOT . DIRECTORY_SEPARATOR . "touch" ) ) {
-            throw new RuntimeException( "Storage unavailable." );
+        if (!touch(AppConfig::$ROOT . DIRECTORY_SEPARATOR . "touch")) {
+            throw new RuntimeException("Storage unavailable.");
         }
 
-        $format = new Ping( $this );
-        $this->response->json( $format->render() );
-
+        $format = new Ping($this);
+        $this->response->json($format->render());
     }
 
 }

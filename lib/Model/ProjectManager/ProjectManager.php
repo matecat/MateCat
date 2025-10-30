@@ -93,8 +93,8 @@ class ProjectManager {
     /**
      * Configuration for segment notes handling
      */
-    const SEGMENT_NOTES_LIMIT    = 10;
-    const SEGMENT_NOTES_MAX_SIZE = 65535;
+    const int SEGMENT_NOTES_LIMIT    = 10;
+    const int SEGMENT_NOTES_MAX_SIZE = 65535;
 
     /**
      * Counter from the total number of segments in the project with the flag (show_in_cattool == true)
@@ -107,7 +107,7 @@ class ProjectManager {
     protected array $min_max_segments_id          = [];
 
     /**
-     * @var ArrayObject|RecursiveArrayObject
+     * @var ArrayObject
      */
     protected ArrayObject $projectStructure;
 
@@ -138,7 +138,7 @@ class ProjectManager {
      */
     protected FeatureSet $features;
 
-    const TRANSLATED_USER = 'translated_user';
+    const string TRANSLATED_USER = 'translated_user';
 
     /**
      * @var Database|IDatabase
@@ -280,7 +280,7 @@ class ProjectManager {
                 $this->projectStructure[ 'source_language' ],
                 $this->projectStructure[ 'target_language' ],
                 [],
-                json_decode( $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ] ?? null )
+                json_decode( $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ] ?? 'null' )
         );
         $this->filter = $filter;
 
@@ -303,10 +303,11 @@ class ProjectManager {
         $this->filesMetadataDao = new MetadataDao();
     }
 
-    protected function _log( $_msg, ?Throwable $exception = null ) {
-        $this->logger->debug( $_msg );
-        if ( $exception ) {
-            $this->logger->debug( ( new Error( $exception ) )->render( true ) );
+    protected function _log( $_msg, ?Throwable $exception = null ): void {
+        if ( !$exception ) {
+            $this->logger->debug( $_msg );
+        } else {
+            $this->logger->debug( $_msg, ( new Error( $exception ) )->render( true ) );
         }
     }
 
@@ -415,6 +416,58 @@ class ProjectManager {
             );
         }
 
+
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function saveJobsMetadata( JobStruct $newJob, ArrayObject $projectStructure ) {
+
+        $jobsMetadataDao = new JobsMetadataDao();
+
+        // public_tm_penalty
+        if ( isset ( $projectStructure[ 'public_tm_penalty' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure[ 'public_tm_penalty' ] );
+        }
+
+        // character_counter_count_tags
+        if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] ? "1" : "0" ) );
+        }
+
+        // character_counter_mode
+        if ( isset( $projectStructure[ 'character_counter_mode' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_mode', $projectStructure[ 'character_counter_mode' ] );
+        }
+
+        // tm_prioritization
+        if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
+            $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', $projectStructure[ 'tm_prioritization' ] ? 1 : 0 );
+        }
+
+        // dialect_strict
+        if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
+            $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
+
+            foreach ( $dialectStrictObj as $lang => $value ) {
+                if ( trim( $lang ) === trim( $newJob->target ) ) {
+                    $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
+                }
+            }
+        }
+
+        /**
+         * Save the subfiltering handlers in the JobsMetadataDao.
+         * Configuration about handlers can be changed later in the job settings.
+         * But the analysis must everytime be performed with the current configuration.
+         */
+        $jobsMetadataDao->set(
+                $newJob->id,
+                $newJob->password,
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]
+        );
 
     }
 
@@ -598,6 +651,7 @@ class ProjectManager {
                 JobsMetadataDao::SUBFILTERING_HANDLERS,
                 $this->projectStructure[ JobsMetadataDao::SUBFILTERING_HANDLERS ]
         );
+
     }
 
     /**
@@ -1390,14 +1444,14 @@ class ProjectManager {
 
                     if ( $result[ 'completed' ] || strtotime( 'now' ) > $time ) {
 
-                        //"$fileName" has been loaded into Match"
+                        //"$fileName" has been loaded into MyMemory"
                         // OR the indexer is down or stopped for maintenance
                         // exit the loop, the import will be executed at a later time
                         break;
 
                     }
 
-                    //waiting for "$fileName" to be loaded into Match
+                    //waiting for "$fileName" to be loaded into MyMemory
                     sleep( 3 );
 
                 } catch ( Exception $e ) {
@@ -2446,12 +2500,13 @@ class ProjectManager {
         //return structure
         $fileStructures = [];
 
-        foreach ( $_originalFileNames as $originalFileName ) {
+        foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // avoid blank filenames
             if ( !empty( $originalFileName ) ) {
 
                 // get metadata
+                $meta     = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
@@ -2476,6 +2531,11 @@ class ProjectManager {
                 }
 
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
+
+                // pdfAnalysis
+                if ( !empty( $meta[ 'pdfAnalysis' ] ) ) {
+                    $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'pdfAnalysis', json_encode( $meta[ 'pdfAnalysis' ] ) );
+                }
 
                 $fileStructures[ $fid ] = [
                         'fid'               => $fid,
@@ -3168,7 +3228,7 @@ class ProjectManager {
         }
 
 
-        //check if the Match keys provided by the user are already associated to him.
+        //check if the MyMemory keys provided by the user are already associated to him.
 
 
         $mkDao = new MemoryKeyDao( $this->dbHandler );

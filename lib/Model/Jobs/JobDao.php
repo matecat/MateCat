@@ -19,8 +19,8 @@ use Utils\Constants\TranslationStatus;
 
 class JobDao extends AbstractDao {
 
-    const TABLE       = "jobs";
-    const STRUCT_TYPE = "JobStruct";
+    const string TABLE       = "jobs";
+    const string STRUCT_TYPE = JobStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id', 'password' ];
@@ -758,7 +758,7 @@ class JobDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    public static function updateJobStatus( JobStruct $jStruct, string $new_status ) {
+    public static function updateJobStatus( JobStruct $jStruct, string $new_status ): void {
         self::updateFields( [
                 'status_owner' => $new_status,
                 'last_update'  => date( "Y-m-d H:i:s" ),

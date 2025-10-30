@@ -18,7 +18,7 @@ trait TimeLoggerTrait {
 
     protected string $timingLogFileName  = 'fallback_calls_time.log';
     protected array  $timingCustomObject = [];
-    protected int    $startExecutionTime = 0;
+    protected float    $startExecutionTime = 0;
 
     protected function startTimer() {
         $this->startExecutionTime = microtime( true );

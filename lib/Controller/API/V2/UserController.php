@@ -13,7 +13,7 @@ use Model\Users\UserDao;
 use Utils\Tools\CatUtils;
 
 class UserController extends AbstractStatefulKleinController {
-    public function afterConstruct() {
+    public function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new JSONRequestValidator( $this ) );
     }
@@ -87,8 +87,8 @@ class UserController extends AbstractStatefulKleinController {
         $json = $this->request->body();
 
         $filters = [
-                'key'   => FILTER_SANITIZE_STRING,
-                'value' => FILTER_SANITIZE_STRING,
+                'key'   => FILTER_SANITIZE_SPECIAL_CHARS,
+                'value' => FILTER_SANITIZE_SPECIAL_CHARS,
         ];
 
         $options = [

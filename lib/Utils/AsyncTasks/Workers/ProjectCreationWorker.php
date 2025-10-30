@@ -33,7 +33,7 @@ class ProjectCreationWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws Exception
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement
@@ -55,7 +55,7 @@ class ProjectCreationWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws Exception
      */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ) {
+    protected function _checkForReQueueEnd( QueueElement $queueElement ): void {
 
         /**
          *

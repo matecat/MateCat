@@ -27,9 +27,9 @@ use Utils\TmKeyManagement\TmKeyManager;
 
 class SetContributionWorker extends AbstractWorker {
 
-    const ERR_SET_FAILED    = 4;
-    const ERR_UPDATE_FAILED = 6;
-    const ERR_NO_TM_ENGINE  = 5;
+    const int ERR_SET_FAILED    = 4;
+    const int ERR_UPDATE_FAILED = 6;
+    const int ERR_NO_TM_ENGINE  = 5;
 
     /**
      * @var ?EngineInterface
@@ -59,7 +59,7 @@ class SetContributionWorker extends AbstractWorker {
      * @throws Exception
      * @throws ValidationError
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement
@@ -125,7 +125,7 @@ class SetContributionWorker extends AbstractWorker {
     protected function _loadEngine( JobStruct $jobStruct ) {
 
         if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
-            $this->_engine = EnginesFactory::getInstance( $jobStruct->id_tms ); //Load Match
+            $this->_engine = EnginesFactory::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
     }

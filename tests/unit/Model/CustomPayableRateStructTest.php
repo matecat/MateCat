@@ -1,6 +1,7 @@
 <?php
 
 use Model\PayableRates\CustomPayableRateStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Langs\Languages;
 
@@ -15,6 +16,7 @@ class CustomPayableRateStructTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function convertLanguageToIsoCode() {
         $languages = Languages::getInstance();
         $langs     = [
@@ -35,6 +37,7 @@ class CustomPayableRateStructTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function getPayableRates() {
         $model             = new CustomPayableRateStruct();
         $model->id         = 12;

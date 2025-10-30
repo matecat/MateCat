@@ -20,14 +20,14 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
  */
 class GlossaryWorker extends AbstractWorker {
 
-    const CHECK_ACTION   = 'check';
-    const DELETE_ACTION  = 'delete';
-    const GET_ACTION     = 'get';
-    const KEYS_ACTION    = 'keys';
-    const SET_ACTION     = 'set';
-    const UPDATE_ACTION  = 'update';
-    const DOMAINS_ACTION = 'domains';
-    const SEARCH_ACTION  = 'search';
+    const string CHECK_ACTION   = 'check';
+    const string DELETE_ACTION  = 'delete';
+    const string GET_ACTION     = 'get';
+    const string KEYS_ACTION    = 'keys';
+    const string SET_ACTION     = 'set';
+    const string UPDATE_ACTION  = 'update';
+    const string DOMAINS_ACTION = 'domains';
+    const string SEARCH_ACTION  = 'search';
 
     /**
      * @param AbstractElement $queueElement
@@ -35,7 +35,7 @@ class GlossaryWorker extends AbstractWorker {
      * @return void
      * @throws Exception
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement
@@ -80,7 +80,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Check a key on Match
+     * Check a key on MyMemory
      *
      * @param $payload
      *
@@ -109,7 +109,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Delete a key from Match
+     * Delete a key from MyMemory
      *
      * @param $payload
      *
@@ -132,7 +132,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "Match is busy, please try later";
+                    $errMessage = "Matches is busy, please try later";
                     break;
 
                 default:
@@ -161,7 +161,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Exposes domains from Match
+     * Exposes domains from MyMemory
      *
      * @param $payload
      *
@@ -190,7 +190,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Get a key from Match
+     * Get a key from MyMemory
      *
      * @param $payload
      *
@@ -236,7 +236,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Check a key on Match
+     * Check a key on MyMemory
      *
      * @param $payload
      *
@@ -261,7 +261,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Search sentence in Match
+     * Search sentence in MyMemory
      *
      * @param $payload
      *
@@ -311,13 +311,13 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Set a key in Match
+     * Set a key in MyMemory
      *
-     * @param $payload
+     * @param array $payload
      *
      * @throws Exception
      */
-    private function set( $payload ) {
+    private function set( array $payload ): void {
 
         $client = $this->getMyMemoryClient();
 
@@ -331,14 +331,10 @@ class GlossaryWorker extends AbstractWorker {
 
         if ( $response->responseStatus != 200 ) {
 
-            switch ( $response->responseStatus ) {
-                case 202:
-                    $errMessage = "Match is busy, please try later";
-                    break;
-
-                default:
-                    $errMessage = "Error, please try later";
-            }
+            $errMessage = match ( $response->responseStatus ) {
+                202 => "Matches is busy, please try later",
+                default => "Error, please try later",
+            };
 
             $message[ 'error' ] = [
                     'code'    => $response->responseStatus,
@@ -350,7 +346,7 @@ class GlossaryWorker extends AbstractWorker {
         if ( $response->responseStatus == 200 ) {
 
             // reduce $payload['term']['matching_words'] to simple array
-            $matchingWords        = $payload[ 'term' ][ 'matching_words' ];
+            $matchingWords        = $payload[ 'term' ][ 'matching_words' ] ?? [];
             $matchingWordsAsArray = [];
 
             foreach ( $matchingWords as $matchingWord ) {
@@ -385,7 +381,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Update a key from Match
+     * Update a key from MyMemory
      *
      * @param $payload
      *
@@ -407,7 +403,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "Match is busy, please try later";
+                    $errMessage = "Matches is busy, please try later";
                     break;
 
                 default:

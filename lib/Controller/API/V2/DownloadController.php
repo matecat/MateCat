@@ -69,7 +69,7 @@ class DownloadController extends AbstractDownloadController {
      */
     protected array $remoteFiles = [];
 
-    const FILES_CHUNK_SIZE = 3;
+    const int FILES_CHUNK_SIZE = 3;
 
     /**
      * @throws AuthenticationError
@@ -114,19 +114,19 @@ class DownloadController extends AbstractDownloadController {
     private function downloadFile( bool $forceXliff = false ) {
         $__postInput = filter_var_array( $this->request->params(), [
                 'filename'      => [
-                        'filter' => FILTER_SANITIZE_STRING,
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'id_file'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_job'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'download_type' => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'password'      => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'downloadToken' => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'forceXliff'    => [],
                 'original'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]

@@ -10,9 +10,12 @@ use Utils\ServerCheck\ServerCheck;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
-const DIRSEP = "//";
+
+
 
 class UploadHandler {
+
+    const string DIRSEP = "//";
 
     /**
      * @var array
@@ -209,14 +212,14 @@ class UploadHandler {
 
     private function my_basename( $param, $suffix = null ) {
         if ( $suffix ) {
-            $tmp_str = ltrim( substr( $param, strrpos( $param, DIRSEP ) ), DIRSEP );
+            $tmp_str = ltrim( substr( $param, strrpos( $param, self::DIRSEP ) ), self::DIRSEP );
             if ( ( strpos( $param, $suffix ) + strlen( $suffix ) ) == strlen( $param ) ) {
                 return str_ireplace( $suffix, '', $tmp_str );
             } else {
-                return ltrim( substr( $param, strrpos( $param, DIRSEP ) ), DIRSEP );
+                return ltrim( substr( $param, strrpos( $param, self::DIRSEP ) ), self::DIRSEP );
             }
         } else {
-            return ltrim( substr( $param, strrpos( $param, DIRSEP ) ), DIRSEP );
+            return ltrim( substr( $param, strrpos( $param, self::DIRSEP ) ), self::DIRSEP );
         }
     }
 

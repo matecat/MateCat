@@ -7,7 +7,7 @@ use Model\DataAccess\Database;
 use PDO;
 
 class CategoryDao extends AbstractDao {
-    const TABLE = 'qa_categories';
+    const string TABLE = 'qa_categories';
 
     /**
      * @param $id

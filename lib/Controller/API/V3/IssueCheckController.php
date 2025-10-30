@@ -16,7 +16,8 @@ class IssueCheckController extends KleinController {
      * @throws NotFoundException
      * @throws ReflectionException
      */
-    public function segments() {
+    public function segments(): void
+    {
 
         $result = [
                 'modified_segments_count' => 0,

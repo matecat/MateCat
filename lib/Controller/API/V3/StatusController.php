@@ -15,7 +15,7 @@ class StatusController extends KleinController {
     /**
      * Validation callbacks
      */
-    public function afterConstruct() {
+    public function afterConstruct(): void {
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new ProjectPasswordValidator( $this ) );
     }

@@ -157,10 +157,10 @@ trait Oauth {
 
     abstract protected function _setTokenEndLife( ?int $expires_in_seconds = null );
 
-    abstract protected function _fillCallParameters( $_config );
+    abstract protected function _fillCallParameters( array $_config ): array;
 
     abstract protected function _getEngineStruct();
 
-    abstract protected function _formatAuthenticateError( $objResponse );
+    abstract protected function _formatAuthenticateError( array $objResponse ): mixed;
 
 }

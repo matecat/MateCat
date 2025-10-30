@@ -16,38 +16,33 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
-trait ScanDirectoryForConvertedFiles {
+trait ScanDirectoryForConvertedFiles
+{
 
     /**
      * @throws Exception
      */
-    protected function getFilesList( AbstractFilesStorage $fs, array $arFiles, $uploadDir ): array {
-
+    protected function getFilesList(AbstractFilesStorage $fs, array $arFiles, $uploadDir): array
+    {
         $newArFiles = [];
 
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+        foreach ($arFiles as $__fName) {
+            if ('zip' == AbstractFilesStorage::pathinfo_fix($__fName, PATHINFO_EXTENSION)) {
+                $fs->cacheZipArchive(sha1_file($uploadDir . DIRECTORY_SEPARATOR . $__fName), $uploadDir . DIRECTORY_SEPARATOR . $__fName);
 
-                $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $uploadDir );
+                $linkFiles = scandir($uploadDir);
 
                 //fetch cache links, created by converter, from upload directory
-                foreach ( $linkFiles as $storedFileName ) {
+                foreach ($linkFiles as $storedFileName) {
                     //Check if the file begins with the name of the zip file.
                     // If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName ) {
+                    if (str_contains($storedFileName, $__fName) && str_starts_with($storedFileName, $__fName)) {
                         //add file name to the file's array
                         $newArFiles[] = $storedFileName;
                     }
                 }
-
-            } else { //This file was not in a zip. Add it normally
-
-                if ( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
+            } elseif (file_exists($uploadDir . DIRECTORY_SEPARATOR . $__fName)) {
+                $newArFiles[] = $__fName;
             }
         }
 
@@ -55,11 +50,11 @@ trait ScanDirectoryForConvertedFiles {
         $arMeta  = [];
 
         // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $uploadDir . DIRECTORY_SEPARATOR . $arFile );
+        foreach ($arFiles as $arFile) {
+            $arMeta[] = $this->getFileMetadata($uploadDir . DIRECTORY_SEPARATOR . $arFile);
         }
 
-        return [ 'arrayFiles' => $arFiles, 'arrayFilesMeta' => $arMeta ];
+        return ['arrayFiles' => $arFiles, 'arrayFilesMeta' => $arMeta];
     }
 
     /**
@@ -68,18 +63,18 @@ trait ScanDirectoryForConvertedFiles {
      * @return array
      * @throws \ReflectionException
      */
-    private function getFileMetadata( string $filename ): array {
+    private function getFileMetadata(string $filename): array
+    {
+        $info          = XliffProprietaryDetect::getInfo($filename);
+        $isXliff       = XliffFiles::isXliff($filename);
+        $isGlossary    = XliffFiles::isGlossaryFile($filename);
+        $isTMX         = XliffFiles::isTMXFile($filename);
+        $getMemoryType = XliffFiles::getMemoryFileType($filename);
 
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
+        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted($filename, AppConfig::$FORCE_XLIFF_CONVERSION, AppConfig::$FILTERS_ADDRESS);
 
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, AppConfig::$FORCE_XLIFF_CONVERSION, AppConfig::$FILTERS_ADDRESS );
-
-        $redisKey = md5($filename . "__pdfAnalysis.json");
-        $pdfAnalysis = ( new RedisHandler() )->getConnection()->get( $redisKey);
+        $redisKey    = md5($filename . "__pdfAnalysis.json");
+        $pdfAnalysis = (new RedisHandler())->getConnection()->get($redisKey);
         $pdfAnalysis = (!empty($pdfAnalysis)) ? unserialize($pdfAnalysis) : [];
 
         $metadata                      = [];

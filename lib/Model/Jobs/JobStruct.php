@@ -286,7 +286,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @throws ReflectionException
      */
     public function getPeeForTranslatedSegments(): ?float {
-        $pee = round( ( new JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $this->id, $this->password )->avg_pee, 2 );
+        $pee = round( ( new JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $this->id, $this->password )->avg_pee ?? 0, 2 );
         if ( $pee >= 100 ) {
             $pee = null;
         }

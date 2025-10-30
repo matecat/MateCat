@@ -24,12 +24,14 @@ use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
-class UpdateJobKeysController extends KleinController {
+class UpdateJobKeysController extends KleinController
+{
 
     use APISourcePageGuesserTrait;
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
@@ -37,15 +39,15 @@ class UpdateJobKeysController extends KleinController {
      * @throws AuthenticationError
      * @throws Exception
      */
-    public function update(): void {
-
+    public function update(): void
+    {
         $request = $this->validateTheRequest();
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
-        if ( $this->user->email == $request[ 'jobData' ][ 'owner' ] ) {
+        if ($this->user->email == $request[ 'jobData' ][ 'owner' ]) {
             $userRole = Filter::OWNER;
-        } elseif ( $this->isRevision() ) {
+        } elseif ($this->isRevision()) {
             $userRole = Filter::ROLE_REVISOR;
         } else {
             $userRole = Filter::ROLE_TRANSLATOR;
@@ -104,62 +106,60 @@ class UpdateJobKeysController extends KleinController {
          *       )
          *
          */
-        $tm_keys    = json_decode( $request[ 'tm_keys' ], true );
-        $clientKeys = $request[ 'jobData' ]->getClientKeys( $this->user, $userRole );
+        $tm_keys    = json_decode($request[ 'tm_keys' ], true);
+        $clientKeys = $request[ 'jobData' ]->getClientKeys($this->user, $userRole);
 
         /*
          * sanitize owner role key type
          */
-        foreach ( $tm_keys[ 'mine' ] as $k => $val ) {
-
+        foreach ($tm_keys[ 'mine' ] as $k => $val) {
             // check if logged user is owner of $val['key']
-            $check = array_filter( $clientKeys[ 'job_keys' ], function ( ClientTmKeyStruct $element ) use ( $val ) {
-                if ( $element->isEncryptedKey() ) {
+            $check = array_filter($clientKeys[ 'job_keys' ], function (ClientTmKeyStruct $element) use ($val) {
+                if ($element->isEncryptedKey()) {
                     return false;
                 }
 
                 return $val[ 'key' ] === $element->key;
-            } );
+            });
 
-            $tm_keys[ 'mine' ][ $k ][ 'owner' ] = !empty( $check );
+            $tm_keys[ 'mine' ][ $k ][ 'owner' ] = !empty($check);
         }
 
-        $tm_keys = array_merge( $tm_keys[ 'ownergroup' ], $tm_keys[ 'mine' ], $tm_keys[ 'anonymous' ] );
-        $tm_keys = json_encode( $tm_keys );
+        $tm_keys = array_merge($tm_keys[ 'ownergroup' ], $tm_keys[ 'mine' ], $tm_keys[ 'anonymous' ]);
+        $tm_keys = json_encode($tm_keys);
 
 
-        $totalTmKeys = TmKeyManager::mergeJsonKeys( $tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid );
+        $totalTmKeys = TmKeyManager::mergeJsonKeys($tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid);
 
-        $this->logger->debug( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
-        $this->logger->debug( 'After: ' . json_encode( $totalTmKeys ) );
+        $this->logger->debug('Before: ' . $request[ 'jobData' ][ 'tm_keys' ]);
+        $this->logger->debug('After: ' . json_encode($totalTmKeys));
 
-        if ( $this->jobOwnerIsMe( $request[ 'jobData' ][ 'owner' ] ) ) {
+        if ($this->jobOwnerIsMe($request[ 'jobData' ][ 'owner' ])) {
             $request[ 'jobData' ][ 'only_private_tm' ] = $request[ 'only_private' ];
         }
 
         /** @var TmKeyStruct $totalTmKey */
-        foreach ( $totalTmKeys as $totalTmKey ) {
+        foreach ($totalTmKeys as $totalTmKey) {
             $totalTmKey->complete_format = true;
         }
 
-        $request[ 'jobData' ]->tm_keys     = json_encode( $totalTmKeys );
-        $request[ 'jobData' ]->last_update = date( "Y-m-d H:i:s" );
+        $request[ 'jobData' ]->tm_keys     = json_encode($totalTmKeys);
+        $request[ 'jobData' ]->last_update = date("Y-m-d H:i:s");
 
-        $jobDao = new JobDao( Database::obtain() );
-        $jobDao->updateStruct( $request[ 'jobData' ], [ 'fields' => [ 'only_private_tm', 'tm_keys', 'last_update' ] ] );
-        $jobDao->destroyCache( $request[ 'jobData' ] );
+        $jobDao = new JobDao(Database::obtain());
+        $jobDao->updateStruct($request[ 'jobData' ], ['fields' => ['only_private_tm', 'tm_keys', 'last_update']]);
+        $jobDao->destroyCache($request[ 'jobData' ]);
 
         $jobsMetadataDao = new MetadataDao();
 
         // update character_counter_mode job metadata
-        if ( $request[ 'public_tm_penalty' ] !== null ) {
-            $jobsMetadataDao->set( $request[ 'job_id' ], $request[ 'job_pass' ], 'public_tm_penalty', $request[ 'public_tm_penalty' ] );
+        if ($request[ 'public_tm_penalty' ] !== null) {
+            $jobsMetadataDao->set($request[ 'job_id' ], $request[ 'job_pass' ], 'public_tm_penalty', $request[ 'public_tm_penalty' ]);
         }
 
-        $this->response->json( [
+        $this->response->json([
                 'data' => 'OK'
-        ] );
-
+        ]);
     }
 
     /**
@@ -167,48 +167,49 @@ class UpdateJobKeysController extends KleinController {
      * @throws ReflectionException
      * @throws NotFoundException
      */
-    private function validateTheRequest(): array {
-        $public_tm_penalty            = ( $this->request->param( 'public_tm_penalty' ) !== null ) ? filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_VALIDATE_INT ) : null;
-        $job_id                       = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $job_pass                     = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $current_password             = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $get_public_matches           = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
-        $tm_keys                      = filter_var( $this->request->param( 'data' ), FILTER_UNSAFE_RAW, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+    private function validateTheRequest(): array
+    {
+        $public_tm_penalty  = ($this->request->param('public_tm_penalty') !== null) ? filter_var($this->request->param('public_tm_penalty'), FILTER_VALIDATE_INT) : null;
+        $job_id             = filter_var($this->request->param('job_id'), FILTER_SANITIZE_NUMBER_INT);
+        $job_pass           = filter_var($this->request->param('job_pass'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $current_password   = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
+        $tm_keys            = filter_var($this->request->param('data'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
-        if ( empty( $job_id ) ) {
-            throw new InvalidArgumentException( "Job id missing", -1 );
+        if (empty($job_id)) {
+            throw new InvalidArgumentException("Job id missing", -1);
         }
 
-        if ( empty( $job_pass ) ) {
-            throw new InvalidArgumentException( "Job password missing", -2 );
+        if (empty($job_pass)) {
+            throw new InvalidArgumentException("Job password missing", -2);
         }
 
-        if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
-            throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
+        if ($public_tm_penalty < 0 || $public_tm_penalty > 100) {
+            throw new InvalidArgumentException("Invalid public_tm_penalty value (must be between 0 and 100)", -6);
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = ChunkDao::getByIdAndPassword( (int)$job_id, $job_pass );
+        $jobData = ChunkDao::getByIdAndPassword((int)$job_id, $job_pass);
 
         // validate $tm_keys
         try {
-            $this->validateTMKeysArray( $tm_keys );
-        } catch ( Exception $exception ) {
-            throw new DomainException( $exception->getMessage() );
+            $this->validateTMKeysArray($tm_keys);
+        } catch (Exception $exception) {
+            throw new DomainException($exception->getMessage());
         }
 
         $this->id_job           = $job_id;
         $this->request_password = $current_password;
 
         return [
-                'job_id'                       => $job_id,
-                'job_pass'                     => $job_pass,
-                'jobData'                      => $jobData,
-                'current_password'             => $current_password,
-                'public_tm_penalty'            => $public_tm_penalty,
-                'get_public_matches'           => $get_public_matches,
-                'tm_keys'                      => $tm_keys, // this will be filtered inside the TmKeyManagement class
-                'only_private'                 => !$get_public_matches,
+                'job_id'             => $job_id,
+                'job_pass'           => $job_pass,
+                'jobData'            => $jobData,
+                'current_password'   => $current_password,
+                'public_tm_penalty'  => $public_tm_penalty,
+                'get_public_matches' => $get_public_matches,
+                'tm_keys'            => $tm_keys, // this will be filtered inside the TmKeyManagement class
+                'only_private'       => !$get_public_matches,
         ];
     }
 
@@ -217,20 +218,21 @@ class UpdateJobKeysController extends KleinController {
      *
      * @return bool
      */
-    private function jobOwnerIsMe( $owner ): bool {
+    private function jobOwnerIsMe($owner): bool
+    {
         return $this->userIsLogged && $owner == $this->user->email;
     }
 
     /**
-     * @param $tm_keys
+     * @param string $tm_keys
      *
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
-    private function validateTMKeysArray( $tm_keys ) {
-
-        $validatorObject = new JSONValidatorObject( $tm_keys );
-        $validator       = new JSONValidator( 'job_keys.json', true );
-        $validator->validate( $validatorObject );
+    private function validateTMKeysArray(string $tm_keys): void
+    {
+        $validatorObject = new JSONValidatorObject($tm_keys);
+        $validator       = new JSONValidator('job_keys.json', true);
+        $validator->validate($validatorObject);
     }
 }

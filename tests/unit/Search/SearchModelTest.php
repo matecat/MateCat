@@ -103,7 +103,7 @@ class SearchModelTest extends AbstractTest {
      *
      * @throws Exception
      */
-    private function _launchSearchAndVerifyResults( $key, $word, $expectedCount, array $expectedIds = [], $wholeWord = false, $isMatchCaseRequested = false ) {
+    private function _launchSearchAndVerifyResults( $key, $word, $expectedCount, array $expectedIds = [], $wholeWord = false, $isMatchCaseRequested = false ): void {
 
 
         // build $queryParamsStruct

@@ -17,13 +17,13 @@ use Utils\Date\DateTimeUtil;
 use Utils\Tools\Utils;
 
 class CustomPayableRateDao extends AbstractDao {
-    const TABLE           = 'payable_rate_templates';
-    const TABLE_JOB_PIVOT = 'job_custom_payable_rates';
+    const string TABLE           = 'payable_rate_templates';
+    const string TABLE_JOB_PIVOT = 'job_custom_payable_rates';
 
-    const query_by_id_and_user = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id AND uid = :uid";
-    const query_by_id          = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id";
-    const query_paginated      = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
-    const paginated_map_key    = __CLASS__ . "::getAllPaginated";
+    const string query_by_id_and_user = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id AND uid = :uid";
+    const string query_by_id          = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id";
+    const string query_paginated      = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
+    const string paginated_map_key    = __CLASS__ . "::getAllPaginated";
 
     /**
      * @var ?CustomPayableRateDao

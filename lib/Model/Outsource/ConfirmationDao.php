@@ -18,8 +18,8 @@ use ReflectionException;
 
 class ConfirmationDao extends AbstractDao {
 
-    const TABLE       = "outsource_confirmation";
-    const STRUCT_TYPE = "ConfirmationStruct";
+    const string TABLE       = "outsource_confirmation";
+    const string STRUCT_TYPE = "ConfirmationStruct";
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];

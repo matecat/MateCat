@@ -11,7 +11,7 @@ namespace Model\ConnectedServices\Oauth;
 
 abstract class AbstractProvider implements ProviderInterface {
 
-    const PROVIDER_NAME = '';
+    const string PROVIDER_NAME = '';
 
     protected ?string $redirectUrl = null;
 

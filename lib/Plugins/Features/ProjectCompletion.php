@@ -11,7 +11,7 @@ use Utils\Tools\Utils;
 
 class ProjectCompletion extends BaseFeature {
 
-    const FEATURE_CODE = 'project_completion';
+    const string FEATURE_CODE = 'project_completion';
 
     /**
      * @throws Exception

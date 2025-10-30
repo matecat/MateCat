@@ -17,8 +17,8 @@ use ReflectionException;
  */
 class UserDao extends AbstractDao {
 
-    const TABLE       = "users";
-    const STRUCT_TYPE = UserStruct::class;
+    const string TABLE       = "users";
+    const string STRUCT_TYPE = UserStruct::class;
 
     protected static array $auto_increment_field = [ 'uid' ];
     protected static array $primary_keys         = [ 'uid' ];
@@ -380,7 +380,7 @@ class UserDao extends AbstractDao {
      * @return UserStruct
      * @throws Exception
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ): UserStruct {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

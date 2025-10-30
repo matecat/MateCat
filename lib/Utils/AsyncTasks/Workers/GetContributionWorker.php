@@ -45,7 +45,7 @@ class GetContributionWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws Exception
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
 
         /**
          * @var $queueElement QueueElement
@@ -65,7 +65,7 @@ class GetContributionWorker extends AbstractWorker {
      *
      * @throws Exception
      */
-    protected function _execGetContribution( GetContributionRequest $contributionStruct ) {
+    protected function _execGetContribution( GetContributionRequest $contributionStruct ): void {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
@@ -107,7 +107,7 @@ class GetContributionWorker extends AbstractWorker {
             }
 
             if ( !empty( $crossLangMatches ) ) {
-                usort( $crossLangMatches, [ "self", "__compareScoreDesc" ] );
+                usort( $crossLangMatches, self::__compareScoreDesc( ... ) );
             }
 
             if ( false === $contributionStruct->concordanceSearch ) {
@@ -125,7 +125,7 @@ class GetContributionWorker extends AbstractWorker {
      *
      * @throws Exception
      */
-    protected function _publishPayload( array $content, GetContributionRequest $contributionStruct, FeatureSet $featureSet, $targetLang, ?bool $isCrossLang = false ) {
+    protected function _publishPayload( array $content, GetContributionRequest $contributionStruct, FeatureSet $featureSet, $targetLang, ?bool $isCrossLang = false ): void {
 
         $type = 'contribution';
 
@@ -150,7 +150,7 @@ class GetContributionWorker extends AbstractWorker {
         foreach ( $content as &$match ) {
 
             if ( $match[ 'created_by' ] == 'MT!' ) {
-                $match[ 'created_by' ] = EngineConstants::MT; //Match returns MT!
+                $match[ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
             }
 
             // Convert &#10; to layer2 placeholder for the UI
@@ -204,7 +204,7 @@ class GetContributionWorker extends AbstractWorker {
      *
      * @throws Exception
      */
-    public function normalizeMTMatches( array &$matches, GetContributionRequest $contributionStruct, FeatureSet $featureSet ) {
+    public function normalizeMTMatches( array &$matches, GetContributionRequest $contributionStruct, FeatureSet $featureSet ): void {
 
         foreach ( $matches as &$match ) {
 
@@ -348,7 +348,7 @@ class GetContributionWorker extends AbstractWorker {
             preg_replace result => #{be#{a}#utiful}#
 
          */
-        uksort( $regularExpressions, [ 'self', '_sortByLenDesc' ] );
+        uksort( $regularExpressions, self::_sortByLenDesc( ... ) );
 
         return $regularExpressions;
     }
@@ -404,14 +404,14 @@ class GetContributionWorker extends AbstractWorker {
         if ( $jobStruct->id_tms == 1 ) {
 
             /**
-             * Match Enabled
+             * MyMemory Enabled
              */
 
             $_config[ 'get_mt' ]  = true;
             $_config[ 'mt_only' ] = false;
             if ( $jobStruct->id_mt_engine != 1 ) {
                 /**
-                 * Don't get MT contribution from Match ( Custom MT )
+                 * Don't get MT contribution from MyMemory ( Custom MT )
                  */
                 $_config[ 'get_mt' ] = false;
             }
@@ -420,19 +420,19 @@ class GetContributionWorker extends AbstractWorker {
                 $_config[ 'onlyprivate' ] = true;
             }
 
-            $_TMS = true; /* Match */
+            $_TMS = true; /* MyMemory */
 
         } else {
             if ( $jobStruct->id_tms == 0 && $jobStruct->id_mt_engine == 1 ) {
 
                 /**
-                 * Match disabled but MT Enabled, and it is NOT a Custom one
-                 * So tell to Match to get MT only
+                 * MyMemory disabled but MT Enabled, and it is NOT a Custom one
+                 * So tell to MyMemory to get MT only
                  */
                 $_config[ 'get_mt' ]  = true;
                 $_config[ 'mt_only' ] = true;
 
-                $_TMS = true; /* Match */
+                $_TMS = true; /* MyMemory */
 
             }
         }
@@ -462,8 +462,6 @@ class GetContributionWorker extends AbstractWorker {
             }
 
             if ( !empty( $temp_matches ) ) {
-
-                $dataRefMap = $contributionStruct->dataRefMap ?: [];
                 /** @var GetMemoryResponse $temp_matches */
                 $tms_match = $temp_matches->get_matches_as_array( 1 );
             }
@@ -552,7 +550,7 @@ class GetContributionWorker extends AbstractWorker {
      * @throws ReflectionException
      * @throws Exception
      */
-    private function updateAnalysisSuggestion( array $matches, GetContributionRequest $contributionStruct ) {
+    private function updateAnalysisSuggestion( array $matches, GetContributionRequest $contributionStruct ): void {
 
         if (
                 count( $matches ) > 0 and
@@ -571,7 +569,7 @@ class GetContributionWorker extends AbstractWorker {
                     // normalize data for saving `suggestions_array`
 
                     if ( $m[ 'created_by' ] == 'MT!' ) {
-                        $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //Match returns MT!
+                        $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
                     } else {
                         $user = new UserStruct();
 

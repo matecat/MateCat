@@ -4,5 +4,5 @@ namespace Utils\Constants;
 
 class SegmentSize {
 
-    const LIMIT = 65535;
+    const int LIMIT = 65535;
 }

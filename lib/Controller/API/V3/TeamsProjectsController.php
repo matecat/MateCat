@@ -25,7 +25,7 @@ class TeamsProjectsController extends KleinController {
     /** @var TeamStruct */
     protected TeamStruct $team;
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new TeamAccessValidator( $this ) );

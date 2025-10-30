@@ -101,7 +101,7 @@ class MTQEWorkflowTemplateStruct extends AbstractDaoSilentStruct implements Json
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return $this->getArrayCopy();
     }
 

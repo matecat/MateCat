@@ -166,7 +166,7 @@ class ProjectsController extends KleinController {
      * @throws Throwable If the project is not found and no valid access token is provided.
      * @throws Exception For other validation failures or unexpected errors.
      */
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
 
         // Initialize the project password validator.
         $projectValidator = ( new ProjectPasswordValidator( $this ) );

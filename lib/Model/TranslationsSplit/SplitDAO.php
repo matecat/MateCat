@@ -16,9 +16,9 @@ use Model\DataAccess\IDaoStruct;
  */
 class SplitDAO extends AbstractDao {
 
-    const TABLE = "segment_translations_splits";
+    const string TABLE = "segment_translations_splits";
 
-    const STRUCT_TYPE = SegmentSplitStruct::class;
+    const string STRUCT_TYPE = SegmentSplitStruct::class;
 
     /**
      * @param SegmentSplitStruct $obj
@@ -93,7 +93,7 @@ class SplitDAO extends AbstractDao {
      * @return SegmentSplitStruct
      * @throws Exception
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ): SegmentSplitStruct {
 
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

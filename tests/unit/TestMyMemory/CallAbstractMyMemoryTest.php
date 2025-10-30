@@ -7,7 +7,7 @@ use Utils\Engines\AbstractEngine;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
-use Utils\Tools\Match;
+use Utils\Tools\Matches;
 
 
 /**
@@ -20,7 +20,7 @@ use Utils\Tools\Match;
 class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject | Match
+     * @var PHPUnit_Framework_MockObject_MockObject | Matches
      */
     protected $engine_MyMemory;
 
@@ -64,7 +64,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         $reflector            = new ReflectionClass( $this->engine_MyMemory );
         $this->resultProperty = $reflector->getProperty( "result" );
-        $this->resultProperty->setAccessible( true );
+        
 
         $this->test_key = "a6043e606ac9b5d7ff24";
 
@@ -177,7 +177,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
          */
         $reflector = new ReflectionClass( $returned_object );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $returned_object ) );
     }
@@ -319,7 +319,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
          */
         $reflector = new ReflectionClass( $actual_result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $actual_result ) );
     }
@@ -374,7 +374,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         $reflector      = new ReflectionClass( $engine_MyMemory );
         $resultProperty = $reflector->getProperty( "result" );
-        $resultProperty->setAccessible( true );
+        
         /**
          * @var $actual_result GetMemoryResponse
          */
@@ -394,7 +394,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
          */
         $reflector = new ReflectionClass( $actual_result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $actual_result ) );
     }

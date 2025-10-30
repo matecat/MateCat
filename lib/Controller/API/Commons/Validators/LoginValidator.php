@@ -12,11 +12,15 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 
-class LoginValidator extends Base {
+class LoginValidator extends Base
+{
 
-    public function _validate(): void {
-        if ( !$this->controller->isLoggedIn() ) {
-            throw new AuthenticationError( "Invalid Login.", 401 );
-        }
+    /**
+     * @return void
+     * @throws AuthenticationError
+     */
+    public function _validate(): void
+    {
+        $this->controller->isLoggedIn() ?: throw new AuthenticationError("Invalid Login.", 401);
     }
 }

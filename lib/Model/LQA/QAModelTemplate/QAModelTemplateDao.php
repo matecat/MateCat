@@ -20,8 +20,8 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class QAModelTemplateDao extends AbstractDao {
 
-    const query_paginated   = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
-    const paginated_map_key = __CLASS__ . "::getAllPaginated";
+    const string query_paginated   = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
+    const string paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
      * validate a json against schema and then

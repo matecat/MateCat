@@ -55,7 +55,7 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      *
      * @return bool
      */
-    public function offsetExists( $offset ): bool {
+    public function offsetExists( mixed $offset ): bool {
         return property_exists( $this, $offset );
     }
 
@@ -66,7 +66,7 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      *
      * @return null
      */
-    public function offsetGet( $offset ) {
+    public function offsetGet( mixed $offset ): mixed {
         if ( $this->offsetExists( $offset ) ) {
             return $this->$offset;
         }
@@ -80,7 +80,7 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet( $offset, $value ) {
+    public function offsetSet( mixed $offset, mixed $value ): void {
         if ( $this->offsetExists( $offset ) ) {
             $this->$offset = $value;
         }
@@ -91,7 +91,7 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      *
      * @param mixed $offset
      */
-    public function offsetUnset( $offset ) {
+    public function offsetUnset( mixed $offset ): void {
         if ( $this->offsetExists( $offset ) ) {
             $this->$offset = null;
         }

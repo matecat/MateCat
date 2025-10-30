@@ -92,7 +92,7 @@ class Altlang extends AbstractEngine {
      */
     public function get( array $_config ) {
 
-        // Fallback on Match in case of not supported source/target combination
+        // Fallback on MyMemory in case of not supported source/target combination
         if ( !$this->checkLanguageCombination( $_config[ 'source' ], $_config[ 'target' ] ) ) {
 
             /** @var MyMemory $myMemory */

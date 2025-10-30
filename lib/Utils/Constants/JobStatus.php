@@ -18,10 +18,10 @@ class JobStatus {
      *
      */
 
-    const STATUS_ACTIVE    = 'active';
-    const STATUS_ARCHIVED  = 'archived';
-    const STATUS_CANCELLED = 'cancelled';
-    const STATUS_DELETED   = 'deleted';
+    const string STATUS_ACTIVE    = 'active';
+    const string STATUS_ARCHIVED  = 'archived';
+    const string STATUS_CANCELLED = 'cancelled';
+    const string STATUS_DELETED   = 'deleted';
 
     public static array $ALLOWED_STATUSES = [
             self::STATUS_ACTIVE,

@@ -12,6 +12,7 @@ use Model\Xliff\DTO\DefaultRule;
 use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\Xliff20Rule;
 use Model\Xliff\DTO\XliffRulesModel;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Collections\RecursiveArrayObject;
 
@@ -21,6 +22,7 @@ class XliffRulesModelTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function shouldNotAcceptDuplicatedStates() {
 
         $rulesModel = new XliffRulesModel();
@@ -41,6 +43,7 @@ class XliffRulesModelTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function shouldGetTheRightRule() {
 
         $rulesModel = new XliffRulesModel();
@@ -64,6 +67,7 @@ class XliffRulesModelTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function shouldLoadFromArrayObject() {
 
         $array = [

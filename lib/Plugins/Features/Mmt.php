@@ -44,7 +44,7 @@ use Utils\TmKeyManagement\TmKeyManager;
 
 class Mmt extends BaseFeature {
 
-    const FEATURE_CODE = 'mmt';
+    const string FEATURE_CODE = 'mmt';
 
     protected bool $forceOnProject = true;
 
@@ -105,7 +105,7 @@ class Mmt extends BaseFeature {
         try {
 
             // if the MMT-preimport flag is enabled,
-            // then all the user's Match keys must be sent to MMT
+            // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
             if ( !empty( $newTestCreatedMT->extra_parameters[ 'MMT-preimport' ] ) ) {
                 $newTestCreatedMT->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );

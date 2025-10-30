@@ -8,7 +8,7 @@ use Utils\Logger\MatecatLogger;
 use Utils\Network\MultiCurlHandler;
 
 class DeepLApiClient {
-    const DEFAULT_BASE_URL = 'https://api.deepl.com/v1';
+    const string DEFAULT_BASE_URL = 'https://api.deepl.com/v1';
 
     private string        $apiKey;
     private MatecatLogger $logger;

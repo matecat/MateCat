@@ -31,7 +31,7 @@ class TaskManager extends AbstractDaemon {
      * Every Task Manager must have its pid registered to distribute the across multiple servers
      *
      */
-    const TASK_RUNNER_PID = 'task_manager_pid_set';
+    const string TASK_RUNNER_PID = 'task_manager_pid_set';
 
     /**
      * Number of running processes
@@ -49,7 +49,7 @@ class TaskManager extends AbstractDaemon {
     /**
      * Exception code, error to fork the process
      */
-    const ERR_NOT_FORK = 1;
+    const int ERR_NOT_FORK = 1;
 
     /**
      * TaskManager constructor.

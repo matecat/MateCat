@@ -9,8 +9,8 @@ use Utils\Collections\RecursiveArrayObject;
 
 class XliffRulesModel implements JsonSerializable {
 
-    const XLIFF_12 = 'xliff12';
-    const XLIFF_20 = 'xliff20';
+    const string XLIFF_12 = 'xliff12';
+    const string XLIFF_20 = 'xliff20';
 
     /**
      * @var array

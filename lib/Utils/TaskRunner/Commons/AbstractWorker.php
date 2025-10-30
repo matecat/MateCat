@@ -27,9 +27,9 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  */
 abstract class AbstractWorker implements SplSubject {
 
-    const ERR_REQUEUE_END   = 1;
-    const ERR_REQUEUE       = 2;
-    const ERR_EMPTY_ELEMENT = 3;
+    const int ERR_REQUEUE_END = 1;
+    const int ERR_REQUEUE       = 2;
+    const int ERR_EMPTY_ELEMENT = 3;
 
     /**
      * Observer container
@@ -43,7 +43,7 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @var string|array
      */
-    protected $_logMsg;
+    protected string|array $_logMsg;
 
     /**
      * This process ID
@@ -84,16 +84,16 @@ abstract class AbstractWorker implements SplSubject {
     /**
      * Set the caller pid. Needed to log the process ID.
      *
-     * @param $_myPid
+     * @param string $_myPid
      */
-    public function setPid( $_myPid ) {
+    public function setPid( string $_myPid ): void {
         $this->_workerPid = $_myPid;
     }
 
     /**
      * @param Context $context
      */
-    public function setContext( Context $context ) {
+    public function setContext( Context $context ): void {
         $this->_myContext = $context;
     }
 
@@ -124,7 +124,7 @@ abstract class AbstractWorker implements SplSubject {
      * @throws ReQueueException
      * @throws EmptyElementException
      */
-    abstract public function process( AbstractElement $queueElement );
+    abstract public function process( AbstractElement $queueElement ); // TODO: return param for all children
 
     /**
      * Attach an SplObserver
@@ -137,7 +137,7 @@ abstract class AbstractWorker implements SplSubject {
      * @return void
      * @since 5.1.0
      */
-    public function attach( SplObserver $observer ) {
+    public function attach( SplObserver $observer ): void {
         $this->_observer[ spl_object_hash( $observer ) ] = $observer;
     }
 
@@ -152,7 +152,7 @@ abstract class AbstractWorker implements SplSubject {
      * @return void
      * @since 5.1.0
      */
-    public function detach( SplObserver $observer ) {
+    public function detach( SplObserver $observer ): void {
         unset( $this->_observer[ spl_object_hash( $observer ) ] );
     }
 
@@ -162,7 +162,7 @@ abstract class AbstractWorker implements SplSubject {
      * @return void
      * @since 5.1.0
      */
-    public function notify() {
+    public function notify(): void {
         foreach ( $this->_observer as $observer ) {
             $observer->update( $this );
         }
@@ -172,7 +172,7 @@ abstract class AbstractWorker implements SplSubject {
      * Method used by the Observer to get the logging message
      * @return string|array
      */
-    public function getLogMsg() {
+    public function getLogMsg(): array|string {
         return $this->_logMsg;
     }
 
@@ -181,7 +181,7 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @param $msg array|string
      */
-    protected function _doLog( $msg ) {
+    protected function _doLog( $msg ): void {
         $this->_logMsg = $msg;
         $this->notify();
     }
@@ -194,7 +194,7 @@ abstract class AbstractWorker implements SplSubject {
      * @return void
      * @throws EndQueueException
      */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ) {
+    protected function _checkForReQueueEnd( QueueElement $queueElement ): void {
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= $this->maxRequeueNum ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip." );
             $this->_endQueueCallback( $queueElement );
@@ -223,7 +223,7 @@ abstract class AbstractWorker implements SplSubject {
      * </code>
      *
      */
-    protected function _checkDatabaseConnection() {
+    protected function _checkDatabaseConnection(): void {
 
         $db = Database::obtain();
         try {
@@ -242,7 +242,7 @@ abstract class AbstractWorker implements SplSubject {
      * @param $_object
      * @throws Exception
      */
-    protected function publishToNodeJsClients( $_object ) {
+    protected function publishToNodeJsClients( $_object ): void {
 
         $message = json_encode( $_object );
         AMQHandler::getNewInstanceForDaemons()->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );

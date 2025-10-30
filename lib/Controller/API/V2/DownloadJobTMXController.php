@@ -29,11 +29,11 @@ class DownloadJobTMXController extends AbstractDownloadController {
         $getInput = filter_var_array( $this->request->params(), [
                 'id_job'   => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password' => [
-                        'filter' => FILTER_SANITIZE_STRING,
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                         'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ],
                 'type'     => [
-                        'filter' => FILTER_SANITIZE_STRING,
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                         'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ]
         ] );

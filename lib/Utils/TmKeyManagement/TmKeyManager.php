@@ -81,20 +81,15 @@ class TmKeyManager {
         $filter->setGrants( $grant_level )
                 ->setTmType( $type );
 
-        switch ( $user_role ) {
-            case Filter::ROLE_TRANSLATOR:
-                $tmKeys = array_filter( $tmKeys, [ $filter, 'byTranslator' ] );
-                break;
-            case Filter::ROLE_REVISOR:
-                $tmKeys = array_filter( $tmKeys, [ $filter, 'byRevisor' ] );
-                break;
-            default:
-                throw new Exception( "Filter type '$user_role' not allowed." );
-        }
+        $tmKeys = match ( $user_role ) {
+            Filter::ROLE_TRANSLATOR => array_filter( $tmKeys, [ $filter, 'byTranslator' ] ),
+            Filter::ROLE_REVISOR => array_filter( $tmKeys, [ $filter, 'byRevisor' ] ),
+            default => throw new Exception( "Filter type '$user_role' not allowed." ),
+        };
 
         $tmKeys = array_values( $tmKeys );
 
-        return array_map( [ 'self', 'getTmKeyStructure' ], $tmKeys );
+        return array_map( [ TmKeyManager::class, 'getTmKeyStructure' ], $tmKeys );
     }
 
     /**
@@ -167,7 +162,7 @@ class TmKeyManager {
         $result_arr = array_shift( $result_arr );
 
         //convert tm keys into TmKeyStruct objects
-        $result_arr = array_map( [ 'self', 'getTmKeyStructure' ], $result_arr );
+        $result_arr = array_map( self::getTmKeyStructure( ... ), $result_arr );
 
         return array_values( $result_arr );
     }
@@ -179,10 +174,10 @@ class TmKeyManager {
      *
      * @return TmKeyStruct|bool True if the structure is compliant to a TmKeyStruct object. False otherwise.
      */
-    public static function isValidStructure( array $arr ) {
+    public static function isValidStructure( array $arr ): TmKeyStruct|bool {
         try {
             $myObj = new TmKeyStruct( $arr );
-        } catch ( Exception $e ) {
+        } catch ( Exception ) {
             return false;
         }
 
@@ -220,11 +215,11 @@ class TmKeyManager {
 
         if ( !is_null( $obj->name ) ) {
             $obj->name = preg_replace( '/[^.\-_\p{L}\p{N}\s]+/u', '', $obj->name );
-            $obj->name = filter_var( $obj->name, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+            $obj->name = filter_var( $obj->name, FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         }
 
         if ( !is_null( $obj->key ) ) {
-            $obj->key = filter_var( $obj->key, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+            $obj->key = filter_var( $obj->key, FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         }
 
         if ( !is_null( $obj->r ) ) {
@@ -252,20 +247,15 @@ class TmKeyManager {
         }
 
         if ( !is_null( $obj->source ) ) {
-            $obj->source = filter_var( $obj->source, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+            $obj->source = filter_var( $obj->source, FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         }
 
         if ( !is_null( $obj->target ) ) {
-            $obj->target = filter_var( $obj->target, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+            $obj->target = filter_var( $obj->target, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
         }
 
-        if ( !is_null( $obj->penalty ) ) {
-
-            $obj->penalty = filter_var( $obj->penalty, FILTER_SANITIZE_NUMBER_INT );
-
-            if ( is_numeric( $obj->penalty ) and ( $obj->penalty < 0 or $obj->penalty > 100 ) ) {
-                throw new DomainException( "Penalty value must be included in the interval [0-100]" );
-            }
+        if ( $obj->penalty < 0 or $obj->penalty > 100 ) {
+            throw new DomainException( "Penalty value must be included in the interval [0-100]" );
         }
 
         return $obj;
@@ -305,9 +295,9 @@ class TmKeyManager {
             throw new Exception ( "Invalid Role Type string.", 4 );
         }
 
-        $client_tm_keys = array_map( [ 'self', 'getTmKeyStructure' ], $clientDecodedJson );
-        $client_tm_keys = array_map( [ 'self', 'sanitize' ], $client_tm_keys );
-        $job_tm_keys    = array_map( [ 'self', 'getTmKeyStructure' ], $serverDecodedJson );
+        $client_tm_keys = array_map( self::getTmKeyStructure( ... ), $clientDecodedJson );
+        $client_tm_keys = array_map( self::sanitize( ... ), $client_tm_keys );
+        $job_tm_keys    = array_map( self::getTmKeyStructure( ... ), $serverDecodedJson );
 
         $server_reorder_position    = [];
         $reverse_lookup_client_json = [ 'pos' => [], 'elements' => [], 'unique' => [] ];
@@ -625,7 +615,7 @@ class TmKeyManager {
      *
      * @throws Exception
      */
-    public function shareKey( array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user ) {
+    public function shareKey( array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user ): void {
 
         $mkDao   = new MemoryKeyDao();
         $userDao = new UserDao();

@@ -5,6 +5,7 @@
 
 namespace Utils\Network;
 
+use CurlHandle;
 use LogicException;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -285,28 +286,20 @@ class MultiCurlHandler {
     /**
      * Add an already existent curl resource to the pool indexing it with a unique identifier
      *
-     * @param resource    $curl_resource
+     * @param CurlHandle  $curl_resource
      * @param null|string $tokenHash
      *
      * @return string
      * @throws LogicException
      */
-    public function addResource( $curl_resource, ?string $tokenHash = null ): ?string {
+    public function addResource( CurlHandle $curl_resource, ?string $tokenHash = null ): ?string {
 
         if ( $tokenHash === null ) {
             $tokenHash = md5( uniqid( '', true ) );
         }
 
-        if ( is_resource( $curl_resource ) ) {
-            if ( get_resource_type( $curl_resource ) == 'curl' ) {
-                curl_multi_add_handle( $this->multi_handler, $curl_resource );
-                $this->curl_handlers[ $tokenHash ] = $curl_resource;
-            } else {
-                throw new LogicException( __CLASS__ . " - " . "Provided resource is not a valid Curl resource" );
-            }
-        } else {
-            throw new LogicException( __CLASS__ . " - " . var_export( $curl_resource, true ) . " is not a valid resource type." );
-        }
+        curl_multi_add_handle( $this->multi_handler, $curl_resource );
+        $this->curl_handlers[ $tokenHash ] = $curl_resource;
 
         return $tokenHash;
 

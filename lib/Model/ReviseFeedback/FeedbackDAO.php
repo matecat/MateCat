@@ -8,9 +8,9 @@ use ReflectionException;
 
 class FeedbackDAO extends AbstractDao {
 
-    const TABLE = "revision_feedbacks";
+    const string TABLE = "revision_feedbacks";
 
-    const STRUCT_TYPE = "\\Revise\\FeedbackStruct";
+    const string STRUCT_TYPE = FeedbackStruct::class;
 
     /**
      * @param FeedbackStruct $feedbackStruct

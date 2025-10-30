@@ -3,6 +3,7 @@
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Views\CustomPageView;
+use JetBrains\PhpStorm\NoReturn;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\PluginsLoader;
@@ -32,7 +33,7 @@ class Bootstrap {
     /**
      * @throws Exception
      */
-    public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
+    public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ): void {
         new self( $config_file, $task_runner_config_file );
     }
 
@@ -71,7 +72,7 @@ class Bootstrap {
 
     }
 
-    private function setLoggers() {
+    private function setLoggers(): void {
         LoggerFactory::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
         LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
         LoggerFactory::getLogger( 'dao', 'dao.log' );
@@ -94,7 +95,7 @@ class Bootstrap {
     /**
      * @throws Exception
      */
-    private function installApplicationSingletons() {
+    private function installApplicationSingletons(): void {
         WorkerClient::init();
         Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
     }
@@ -114,7 +115,7 @@ class Bootstrap {
      *
      * @throws RuntimeException If any of the required configuration files are not found.
      */
-    private function loadConfigurationFiles( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
+    private function loadConfigurationFiles( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ): void {
 
         // Use the provided config file or default to 'inc/config.ini'
         $config_file = $config_file ?? new SplFileInfo( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini' );
@@ -147,15 +148,16 @@ class Bootstrap {
 
     }
 
-    private function initMandatoryPlugins() {
+    private function initMandatoryPlugins(): void {
         $this->autoLoadedFeatureSet = new FeatureSet();
     }
 
-    private function notifyBootCompleted() {
+    private function notifyBootCompleted(): void {
         $this->autoLoadedFeatureSet->run( 'bootstrapCompleted' );
     }
 
-    public static function exceptionHandler( Throwable $exception ) {
+    #[NoReturn]
+    public static function exceptionHandler( Throwable $exception ): void {
 
         $logger = LoggerFactory::getLogger( 'exception_handler' );
 
@@ -197,7 +199,7 @@ class Bootstrap {
 
     }
 
-    private static function formatOutputExceptions( int $httpStatusCode, Throwable $exception ) {
+    private static function formatOutputExceptions( int $httpStatusCode, Throwable $exception ): void {
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
@@ -211,7 +213,7 @@ class Bootstrap {
             $controllerInstance = new CustomPageView();
             try {
                 $controllerInstance->setView( $httpStatusCode . '.html', $report ?? [], $httpStatusCode );
-            } catch ( Exception $ignore ) {
+            } catch ( Exception ) {
 
             }
 
@@ -224,7 +226,8 @@ class Bootstrap {
 
     }
 
-    public static function shutdownFunctionHandler() {
+    #[NoReturn]
+    public static function shutdownFunctionHandler(): void {
 
         $errorType = [
                 E_CORE_ERROR        => 'E_CORE_ERROR',
@@ -239,7 +242,7 @@ class Bootstrap {
         $error = error_get_last();
 
         # Checking if the last error is a fatal error
-        if ( isset( $error[ 'type' ] ) )
+        if ( isset( $error[ 'type' ] ) ) {
             switch ( $error[ 'type' ] ) {
                 case E_CORE_ERROR:
                 case E_COMPILE_ERROR:
@@ -252,23 +255,23 @@ class Bootstrap {
                     $exception = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
 
                     try {
-                        $reflector = new ReflectionProperty( $exception, 'trace' );
-                        $reflector->setAccessible( true );
+                        $reflector       = new ReflectionProperty( $exception, 'trace' );
                         $error[ 'type' ] = $errorType[ $error[ 'type' ] ];
                         $reflector->setValue( $exception, [ $error ] );
-                    } catch ( ReflectionException $e ) {
+                    } catch ( ReflectionException ) {
 
                     }
 
                     $logger->debug( $exception->getTrace() );
                     self::formatOutputExceptions( 500, $exception );
-                    die();
-
+                    break;
             }
+        }
 
+        die();
     }
 
-    public static function sessionClose() {
+    public static function sessionClose(): void {
         @session_write_close();
     }
 
@@ -301,11 +304,11 @@ class Bootstrap {
      * that configuration is safe.
      *
      */
-    private function initRegistryClass() {
+    private function initRegistryClass(): void {
         AppConfig::init( self::$_ROOT, self::$CONFIG[ 'ENV' ], self::$_INI_VERSION, $this->getConfigurationForEnvironment(), self::$TASK_RUNNER_CONFIG ); //load configurations
     }
 
-    private function createSystemDirectories() {
+    private function createSystemDirectories(): void {
 
         $directories = [
                 AppConfig::$STORAGE_DIR,
@@ -328,14 +331,14 @@ class Bootstrap {
 
     }
 
-    private function setErrorReporting() {
+    private function setErrorReporting(): void {
         if ( AppConfig::$PRINT_ERRORS || stripos( AppConfig::$ENV, 'develop' ) !== false ) {
             ini_set( 'error_log', AppConfig::$STORAGE_DIR . "/log_archive/php_errors.txt" );
             ini_set( 'error_reporting', E_ALL );
         }
     }
 
-    private function configureSessionCookies() {
+    private function configureSessionCookies(): void {
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
             register_shutdown_function( [ Bootstrap::class, 'sessionClose' ] );
@@ -348,7 +351,7 @@ class Bootstrap {
         }
     }
 
-    private function unsetVariables() {
+    private function unsetVariables(): void {
         self::$CONFIG             = [];
         self::$TASK_RUNNER_CONFIG = [];
     }

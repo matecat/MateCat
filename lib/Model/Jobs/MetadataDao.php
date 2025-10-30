@@ -13,12 +13,12 @@ class MetadataDao extends AbstractDao {
 
     use TransactionalTrait;
 
-    const TABLE = 'job_metadata';
+    const string TABLE = 'job_metadata';
 
-    const _query_metadata_by_job_id_key       = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
-    const _query_metadata_by_job_password     = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
-    const _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
-    const SUBFILTERING_HANDLERS               = 'subfiltering_handlers';
+    const string _query_metadata_by_job_id_key       = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
+    const string _query_metadata_by_job_password     = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
+    const string _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
+    const string SUBFILTERING_HANDLERS               = 'subfiltering_handlers';
 
     /**
      * @param int    $id_job

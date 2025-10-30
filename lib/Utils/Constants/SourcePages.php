@@ -11,8 +11,8 @@ namespace Utils\Constants;
 
 class SourcePages {
 
-    const SOURCE_PAGE_TRANSLATE  = 1;
-    const SOURCE_PAGE_REVISION   = 2;
-    const SOURCE_PAGE_REVISION_2 = 3;
+    const int SOURCE_PAGE_TRANSLATE  = 1;
+    const int SOURCE_PAGE_REVISION   = 2;
+    const int SOURCE_PAGE_REVISION_2 = 3;
 
 }

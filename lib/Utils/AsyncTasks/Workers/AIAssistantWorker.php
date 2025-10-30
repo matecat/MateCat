@@ -17,7 +17,7 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\Tools\Utils;
 
 class AIAssistantWorker extends AbstractWorker {
-    const EXPLAIN_MEANING_ACTION = 'explain_meaning';
+    const string EXPLAIN_MEANING_ACTION = 'explain_meaning';
 
     /**
      * @var OpenAi
@@ -50,7 +50,7 @@ class AIAssistantWorker extends AbstractWorker {
      * @inheritDoc
      * @throws EndQueueException
      */
-    public function process( AbstractElement $queueElement ) {
+    public function process( AbstractElement $queueElement ): void {
         $params  = $queueElement->params->toArray();
         $action  = $params[ 'action' ];
         $payload = $params[ 'payload' ];

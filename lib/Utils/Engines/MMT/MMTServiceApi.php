@@ -15,7 +15,7 @@ use Utils\Network\MultiCurlHandler;
 
 class MMTServiceApi {
 
-    const DEFAULT_BASE_URL = 'https://api.modernmt.com';
+    const string DEFAULT_BASE_URL = 'https://api.modernmt.com';
 
     private string        $baseUrl;
     private ?string       $license         = null;

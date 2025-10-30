@@ -7,7 +7,6 @@ namespace Utils\Langs;
 
 use Exception;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Utils;
 
 class LanguageDomains {
 

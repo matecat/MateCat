@@ -15,7 +15,7 @@ use Utils\Registry\AppConfig;
 
 abstract class BaseFeature implements IBaseFeature {
 
-    const FEATURE_CODE = null;
+    const string FEATURE_CODE = '';
 
     protected BasicFeatureStruct $feature;
 

@@ -13,7 +13,7 @@ use Utils\Registry\AppConfig;
 
 class GoogleProvider extends AbstractProvider {
 
-    const PROVIDER_NAME = 'google';
+    const string PROVIDER_NAME = 'google';
 
     /**
      * @var array

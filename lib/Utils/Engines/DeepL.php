@@ -12,7 +12,7 @@ use Utils\Engines\Results\MyMemory\Matches;
 
 class DeepL extends AbstractEngine {
 
-    const ALLOWED_MODEL_TYPES = [
+    const array ALLOWED_MODEL_TYPES = [
             "latency_optimized",
             "quality_optimized",
             "prefer_quality_optimized",

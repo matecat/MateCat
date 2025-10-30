@@ -10,7 +10,7 @@ use Utils\Redis\RedisHandler;
 
 class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface {
 
-    const TABLE = 'replace_events';
+    const string TABLE = 'replace_events';
 
     /**
      * @var Client

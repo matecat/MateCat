@@ -16,7 +16,7 @@ use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class XliffConfigTemplateController extends KleinController {
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
     }

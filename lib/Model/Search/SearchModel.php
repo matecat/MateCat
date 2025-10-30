@@ -27,7 +27,7 @@ class SearchModel {
     protected SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var \Model\DataAccess\Database
+     * @var Database
      */
     protected IDatabase $db;
 
@@ -234,14 +234,20 @@ class SearchModel {
         }
 
         /**
-         * Escape Meta-characters to use in regular expression ( LIKE STATEMENT is treated inside MySQL as a Regexp pattern )
+         * Escape Meta-characters to use in regular expression (LIKE STATEMENT is treated inside MySQL as a Regexp pattern)
          *
          */
-        $this->queryParams->_regexpNotEscapedSrc = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->source );
-        $this->queryParams->regexpEscapedSrc     = $this->db->escape( $this->queryParams->_regexpNotEscapedSrc );
+        if ( isset( $this->queryParams->source ) ) {
+            $escaped = preg_quote( (string) $this->queryParams->source, '#' );
+            $this->queryParams->_regexpNotEscapedSrc = $escaped;
+            $this->queryParams->regexpEscapedSrc     = $this->db->escape( $escaped );
+        }
 
-        $this->queryParams->_regexpEscapedTrg = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->target );
-        $this->queryParams->regexpEscapedTrg  = $this->db->escape( $this->queryParams->_regexpEscapedTrg );
+        if ( isset( $this->queryParams->target ) ) {
+            $escaped = preg_quote( (string) $this->queryParams->target, '#' );
+            $this->queryParams->_regexpEscapedTrg = $escaped;
+            $this->queryParams->regexpEscapedTrg  = $this->db->escape( $escaped );
+        }
 
     }
 

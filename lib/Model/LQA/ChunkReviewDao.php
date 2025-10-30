@@ -15,13 +15,13 @@ use Utils\Constants\SourcePages;
 
 class ChunkReviewDao extends AbstractDao {
 
-    const TABLE = "qa_chunk_reviews";
+    const string TABLE = "qa_chunk_reviews";
 
     public static array $primary_keys = [
             'id'
     ];
 
-    const sql_for_get_by_project_id = "SELECT * FROM qa_chunk_reviews WHERE id_project = :id_project ORDER BY id";
+    const string sql_for_get_by_project_id = "SELECT * FROM qa_chunk_reviews WHERE id_project = :id_project ORDER BY id";
 
     protected function _buildResult( array $array_result ) {
     }

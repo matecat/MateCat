@@ -99,7 +99,7 @@ class XTRFStatus extends AbstractStatus {
         $fileContent .= PHP_EOL;
 
         $fileContent .=
-                str_pad( "Match Types", 16 ) .
+                str_pad( "Matches Types", 16 ) .
                 str_pad( "Words", 12, " ", STR_PAD_LEFT ) .
                 str_pad( "Percent", 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
@@ -111,7 +111,7 @@ class XTRFStatus extends AbstractStatus {
                 PHP_EOL;
 
         $fileContent .=
-                str_pad( "Context Match", 16 ) .
+                str_pad( "Context Matches", 16 ) .
                 str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_ICE )->getRaw(), 12, " ", STR_PAD_LEFT ) .
                 str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_ICE )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
@@ -129,7 +129,7 @@ class XTRFStatus extends AbstractStatus {
                 PHP_EOL;
 
         $fileContent .=
-                str_pad( "Internal Match", 16 ) .
+                str_pad( "Internal Matches", 16 ) .
                 str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_INTERNAL )->getRaw(), 12, " ", STR_PAD_LEFT ) .
                 str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_INTERNAL )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;

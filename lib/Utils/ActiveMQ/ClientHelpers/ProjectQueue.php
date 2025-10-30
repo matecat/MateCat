@@ -35,7 +35,7 @@ class ProjectQueue {
      * //TODO externalize ProjectStruct from @see ProjectManager
      *
      */
-    public static function sendProject( ArrayObject $projectStructure ) {
+    public static function sendProject( ArrayObject $projectStructure ): void {
 
         try {
             WorkerClient::enqueue( 'PROJECT_QUEUE', ProjectCreationWorker::class, $projectStructure->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
@@ -58,7 +58,7 @@ class ProjectQueue {
     public static function getPublishedResults( $id_project ){
 
         $redisHandler = ( new RedisHandler() )->getConnection();
-        $response = json_decode( $redisHandler->get( sprintf( ProjectStatus::PROJECT_QUEUE_HASH, $id_project ) ), true );
+        $response = json_decode( $redisHandler->get( sprintf( ProjectStatus::PROJECT_QUEUE_HASH, $id_project ) ) ?? 'null', true );
         $redisHandler->disconnect();
         return $response;
 

@@ -23,7 +23,8 @@ class ApiKeyDao extends AbstractDao {
         return $stmt->fetch() ?? null;
     }
 
-    public function create( $obj ) {
+    public function create( $obj ): ApiKeyStruct
+    {
         $conn = $this->database->getConnection();
 
         $obj->create_date = date( 'Y-m-d H:i:s' );
@@ -50,7 +51,8 @@ class ApiKeyDao extends AbstractDao {
      *
      * @return ApiKeyStruct[]
      */
-    public function getById( $id ) {
+    public function getById( $id ): array
+    {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare( " SELECT * FROM api_keys WHERE id = ? " );
@@ -62,19 +64,21 @@ class ApiKeyDao extends AbstractDao {
     /**
      * @param $uid
      *
-     * @return ApiKeyStruct
+     * @return ApiKeyStruct|null
      */
-    public function getByUid( $uid ) {
+    public function getByUid( $uid ): ?ApiKeyStruct
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM api_keys WHERE enabled AND uid = :uid " );
         $stmt->execute( [ 'uid' => $uid ] );
 
         $stmt->setFetchMode( PDO::FETCH_CLASS, ApiKeyStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
-    public function deleteByUid( $uid ) {
+    public function deleteByUid( $uid ): int
+    {
 
         $apiKey = $this->getByUid( $uid );
 

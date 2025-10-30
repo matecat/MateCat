@@ -19,8 +19,8 @@ use Utils\Tools\Utils;
 
 class TeamDao extends AbstractDao {
 
-    const TABLE       = "teams";
-    const STRUCT_TYPE = "TeamStruct";
+    const string TABLE       = "teams";
+    const string STRUCT_TYPE = TeamStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];

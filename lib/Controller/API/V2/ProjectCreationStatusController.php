@@ -65,7 +65,7 @@ class ProjectCreationStatusController extends KleinController {
     }
 
 
-    protected function _letsWait() {
+    protected function _letsWait(): void {
         $this->response->code( 202 );
         $this->response->json( ( new WaitCreation() )->render() );
     }

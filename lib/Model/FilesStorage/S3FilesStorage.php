@@ -16,7 +16,6 @@ use UnexpectedValueException;
 use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
-use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
 /**
@@ -35,13 +34,13 @@ use Utils\Tools\Utils;
  */
 class S3FilesStorage extends AbstractFilesStorage {
 
-    const ORIGINAL_ZIP_PLACEHOLDER = "__originalZip";
+    const string ORIGINAL_ZIP_PLACEHOLDER = "__originalZip";
 
-    const CACHE_PACKAGE_FOLDER = 'cache-package';
-    const FILES_FOLDER         = 'files';
-    const QUEUE_FOLDER         = 'queue-projects';
-    const ZIP_FOLDER           = 'originalZip';
-    const FAST_ANALYSIS_FOLDER = 'fast-analysis';
+    const string CACHE_PACKAGE_FOLDER = 'cache-package';
+    const string FILES_FOLDER         = 'files';
+    const string QUEUE_FOLDER         = 'queue-projects';
+    const string ZIP_FOLDER           = 'originalZip';
+    const string FAST_ANALYSIS_FOLDER = 'fast-analysis';
 
     /**
      * @var Client
