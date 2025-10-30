@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {
@@ -9,8 +9,16 @@ import {
 } from '../../common/Button/Button'
 import ModalsActions from '../../../actions/ModalsActions'
 
-const BulkMoveToTeam = ({teams, successCallback}) => {
+const BulkMoveToTeam = ({teams, projects, successCallback}) => {
   const [teamSelected, setTeamSelected] = useState()
+
+  useEffect(() => {
+    const teamId = projects[0].id_team
+    if (projects.every((project) => project.id_team === teamId)) {
+      const team = teams.find((team) => team.id === teamId)
+      setTeamSelected({id: team.id.toString(), name: team.name})
+    }
+  }, [projects, teams])
 
   const options = teams.map((team) => ({
     id: team.id.toString(),
@@ -44,7 +52,7 @@ const BulkMoveToTeam = ({teams, successCallback}) => {
           type={BUTTON_TYPE.PRIMARY}
           size={BUTTON_SIZE.MEDIUM}
           disabled={typeof teamSelected === 'undefined'}
-          onClick={() => successCallback({id_team: teamSelected?.id})}
+          onClick={() => successCallback({id_team: parseInt(teamSelected?.id)})}
         >
           Continue
         </Button>
@@ -55,6 +63,7 @@ const BulkMoveToTeam = ({teams, successCallback}) => {
 
 BulkMoveToTeam.propTypes = {
   teams: PropTypes.array.isRequired,
+  projects: PropTypes.array.isRequired,
   successCallback: PropTypes.func.isRequired,
 }
 

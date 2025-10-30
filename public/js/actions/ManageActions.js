@@ -321,6 +321,71 @@ let ManageActions = {
       })
   },
 
+  changeProjectsTeamBulk: function (teamId, projects) {
+    let team = UserStore.teams.find(function (team) {
+      return team.get('id') == teamId
+    })
+    team = team.toJS()
+    const selectedTeam = UserStore.getSelectedTeam()
+
+    const teamObjectReference =
+      selectedTeam.type === 'personal' && team.type !== 'personal'
+        ? team
+        : teamId !== selectedTeam.id && selectedTeam.type !== 'personal'
+          ? selectedTeam
+          : undefined
+
+    if (teamObjectReference) {
+      getTeamMembers(teamObjectReference.id).then(function (data) {
+        teamObjectReference.members = data.members
+        teamObjectReference.pending_invitations = data.pending_invitations
+
+        AppDispatcher.dispatch({
+          actionType: UserConstants.UPDATE_TEAM,
+          team: teamObjectReference,
+        })
+
+        projects.forEach((project) => {
+          if (teamId !== selectedTeam.id && selectedTeam.type !== 'personal') {
+            setTimeout(function () {
+              AppDispatcher.dispatch({
+                actionType: ManageConstants.HIDE_PROJECT,
+                project: project,
+              })
+            }, 500)
+
+            setTimeout(function () {
+              AppDispatcher.dispatch({
+                actionType: ManageConstants.REMOVE_PROJECT,
+                project: project,
+              })
+            }, 1000)
+          }
+
+          setTimeout(function () {
+            AppDispatcher.dispatch({
+              actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+              project: project,
+              teamId: teamObjectReference.id,
+            })
+          })
+        })
+      })
+    }
+
+    if (teamId !== selectedTeam.id && selectedTeam.type !== 'personal') {
+      const notification = {
+        title: 'Projects Moved',
+        text: 'Text',
+        type: 'success',
+        position: 'bl',
+        allowHtml: true,
+        timer: 3000,
+      }
+      CatToolActions.addNotification(notification)
+    }
+  },
+
   assignTranslator: function (projectId, jobId, jobPassword, translator) {
     if (document.body.classList.contains('manage')) {
       AppDispatcher.dispatch({
@@ -394,6 +459,16 @@ let ManageActions = {
         })
       },
     )
+
+    const notification = {
+      title: 'Generate revise 2 link',
+      text: 'Text',
+      type: 'success',
+      position: 'bl',
+      allowHtml: true,
+      timer: 3000,
+    }
+    CatToolActions.addNotification(notification)
   },
 
   /********* Modals *********/

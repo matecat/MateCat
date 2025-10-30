@@ -13,6 +13,7 @@ import {jobsBulkActions} from '../../../api/jobsBulkActions/jobsBulkActions'
 import CatToolActions from '../../../actions/CatToolActions'
 import ManageActions from '../../../actions/ManageActions'
 import {fromJS} from 'immutable'
+import Tooltip from '../../common/Tooltip'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -239,6 +240,15 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         ? BulkChangePassword
         : BulkMoveToTeam
 
+    const jobsSelected = allJobs.filter(({id}) =>
+      jobsBulk.some((value) => value === id),
+    )
+    const projectsSelected = projects.filter((project) =>
+      project.jobs.some((job) =>
+        jobsSelected.some((jobSelected) => jobSelected.id === job.id),
+      ),
+    )
+
     switch (id) {
       case JOBS_ACTIONS.DELETE_PERMANENTLY.id:
         openConfirmModal({
@@ -250,11 +260,10 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
       case JOBS_ACTIONS.CHANGE_PASSWORD.id:
       case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
         openModal({
-          title: `Bulk ${label}`,
+          title: label,
           component: modalComponent,
-          jobs: allJobs.filter(({id}) =>
-            jobsBulk.some((value) => value === id),
-          ),
+          jobs: jobsSelected,
+          projects: projectsSelected,
           ...(JOBS_ACTIONS.ASSIGN_TO_TEAM && {teams}),
           successCallback: (props) => {
             submit({id, ...props})
@@ -326,10 +335,18 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
           )
         })
         break
+      case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
+        console.log(data)
+        // ManageActions.changeProjectsTeamBulk()
+        break
     }
   }
 
-  const buttonProps = {mode: BUTTON_MODE.LINK, size: BUTTON_SIZE.LINK_SMALL}
+  const buttonProps = {
+    mode: BUTTON_MODE.LINK,
+    size: BUTTON_SIZE.LINK_SMALL,
+    tooltip: 'Tooltip info',
+  }
   const buttonActionsProps = {disabled: !jobsBulk.length}
 
   const actions = (
@@ -343,7 +360,6 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               ...((action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id ||
                 action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id) && {
                 disabled: !jobsBulk.length || !isSelectedAllJobsByProjects,
-                tooltip: 'we wewe we',
               }),
               onClick: () => onClickAction(action),
             }}
