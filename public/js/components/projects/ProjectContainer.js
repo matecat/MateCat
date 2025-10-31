@@ -45,9 +45,11 @@ const ProjectContainer = ({
     ProjectsBulkActionsContext,
   )
 
+  const idTeamProject = project.get('id_team')
+
   const [lastAction, setLastAction] = useState()
   const [jobsActions, setJobsActions] = useState()
-  const [idTeamSelected, setIdTeamSelected] = useState(project.get('id_team'))
+  const [idTeamSelected, setIdTeamSelected] = useState(idTeamProject)
   const [shouldShowEditNameIcon, setShouldShowEditNameIcon] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
 
@@ -96,6 +98,10 @@ const ProjectContainer = ({
       }
     }
   }
+
+  useEffect(() => {
+    setIdTeamSelected(idTeamProject)
+  }, [idTeamProject])
 
   const thereIsChunkOutsourced = (idJob) => {
     const outsourceChunk = project.get('jobs').find(function (item) {

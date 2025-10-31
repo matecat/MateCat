@@ -111,20 +111,6 @@ let ManageActions = {
     })
   },
 
-  changeJobsStatusBulk: function (projects, jobs) {
-    jobs.forEach((job) => {
-      const projectByJob = projects.find((project) =>
-        project.jobs.some((jobItem) => jobItem.id === job.id),
-      )
-
-      AppDispatcher.dispatch({
-        actionType: ManageConstants.REMOVE_JOB,
-        project: fromJS(projectByJob),
-        job: fromJS(job),
-      })
-    })
-  },
-
   changeJobPassword: function (
     project,
     job,
@@ -331,33 +317,40 @@ let ManageActions = {
     const teamObjectReference =
       selectedTeam.type === 'personal' && team.type !== 'personal'
         ? team
-        : teamId !== selectedTeam.id && selectedTeam.type !== 'personal'
-          ? selectedTeam
-          : undefined
+        : selectedTeam
 
-    if (teamObjectReference) {
-      getTeamMembers(teamObjectReference.id).then(function (data) {
-        teamObjectReference.members = data.members
-        teamObjectReference.pending_invitations = data.pending_invitations
+    getTeamMembers(teamObjectReference.id).then((data) => {
+      teamObjectReference.members = data.members
+      teamObjectReference.pending_invitations = data.pending_invitations
 
-        AppDispatcher.dispatch({
-          actionType: UserConstants.UPDATE_TEAM,
-          team: teamObjectReference,
-        })
+      AppDispatcher.dispatch({
+        actionType: UserConstants.UPDATE_TEAM,
+        team: teamObjectReference,
+      })
 
-        projects.forEach((project) => {
+      const promises = projects.map((project) =>
+        changeProjectTeam(teamId, project),
+      )
+
+      Promise.allSettled(promises).then((result) => {
+        const fulfilledPromises = result
+          .filter(({status}) => status === 'fulfilled')
+          .map(({value}) => value)
+
+        fulfilledPromises.forEach((value) => {
+          const project = fromJS(value.project)
           if (teamId !== selectedTeam.id && selectedTeam.type !== 'personal') {
             setTimeout(function () {
               AppDispatcher.dispatch({
                 actionType: ManageConstants.HIDE_PROJECT,
-                project: project,
+                project,
               })
             }, 500)
 
             setTimeout(function () {
               AppDispatcher.dispatch({
                 actionType: ManageConstants.REMOVE_PROJECT,
-                project: project,
+                project,
               })
             }, 1000)
           }
@@ -365,25 +358,35 @@ let ManageActions = {
           setTimeout(function () {
             AppDispatcher.dispatch({
               actionType: ManageConstants.CHANGE_PROJECT_TEAM,
-              project: project,
+              project,
               teamId: teamObjectReference.id,
             })
           })
         })
-      })
-    }
 
-    if (teamId !== selectedTeam.id && selectedTeam.type !== 'personal') {
-      const notification = {
-        title: 'Projects Moved',
-        text: 'Text',
-        type: 'success',
-        position: 'bl',
-        allowHtml: true,
-        timer: 3000,
-      }
-      CatToolActions.addNotification(notification)
-    }
+        if (fulfilledPromises.length) {
+          const notification = {
+            title: 'Change projects team',
+            text: 'Selected projects team has been changed',
+            type: 'warning',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(notification)
+        } else if (fulfilledPromises.length < result.length) {
+          const erroNotification = {
+            title: 'Change projects team',
+            text: 'Some projects change team are failed',
+            type: 'error',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(erroNotification)
+        }
+      })
+    })
   },
 
   assignTranslator: function (projectId, jobId, jobPassword, translator) {
@@ -444,31 +447,6 @@ let ManageActions = {
         secondPassPassword: data.chunk_review.review_password,
       })
     })
-  },
-
-  getSecondPassReviewBulk: function (collection) {
-    collection.forEach(
-      ({idProject, passwordProject, job, secondPassPassword}) => {
-        AppDispatcher.dispatch({
-          actionType: ManageConstants.ADD_SECOND_PASS,
-          idProject: idProject,
-          passwordProject: passwordProject,
-          idJob: job.id,
-          passwordJob: job.password,
-          secondPassPassword,
-        })
-      },
-    )
-
-    const notification = {
-      title: 'Generate revise 2 link',
-      text: 'Text',
-      type: 'success',
-      position: 'bl',
-      allowHtml: true,
-      timer: 3000,
-    }
-    CatToolActions.addNotification(notification)
   },
 
   /********* Modals *********/

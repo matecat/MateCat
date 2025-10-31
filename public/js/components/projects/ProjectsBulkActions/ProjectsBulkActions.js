@@ -9,11 +9,12 @@ import ManageConstants from '../../../constants/ManageConstants'
 import {BulkChangePassword} from './BulkChangePassword'
 import ConfirmMessageModal from '../../modals/ConfirmMessageModal'
 import BulkMoveToTeam from './BulkMoveToTeam'
-import {jobsBulkActions} from '../../../api/jobsBulkActions/jobsBulkActions'
 import CatToolActions from '../../../actions/CatToolActions'
 import ManageActions from '../../../actions/ManageActions'
 import {fromJS} from 'immutable'
-import Tooltip from '../../common/Tooltip'
+import UserStore from '../../../stores/UserStore'
+import UserConstants from '../../../constants/UserConstants'
+import {changeJobPassword} from '../../../api/changeJobPassword'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -73,16 +74,23 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
       setJobsBulk([])
     }
 
+    const onTeamChange = () => setJobsBulk([])
+
     ProjectsStore.addListener(
       ManageConstants.FILTER_PROJECTS,
       onChangeProjectStatus,
     )
 
-    return () =>
+    UserStore.addListener(UserConstants.CHOOSE_TEAM, onTeamChange)
+
+    return () => {
       ProjectsStore.removeListener(
         ManageConstants.FILTER_PROJECTS,
         onChangeProjectStatus,
       )
+
+      UserStore.removeListener(UserConstants.CHOOSE_TEAM, onTeamChange)
+    }
   }, [])
 
   const allJobs = useMemo(
@@ -106,6 +114,18 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
       })
     )
   }, [jobsBulk, projects])
+
+  const projectsSelected = useMemo(() => {
+    const jobsSelected = allJobs.filter(({id}) =>
+      jobsBulk.some((value) => value === id),
+    )
+
+    return projects.filter((project) =>
+      project.jobs.some((job) =>
+        jobsSelected.some((jobSelected) => jobSelected.id === job.id),
+      ),
+    )
+  }, [projects, allJobs, jobsBulk])
 
   const onCheckedProject = useCallback(
     (projectId) => {
@@ -243,11 +263,6 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
     const jobsSelected = allJobs.filter(({id}) =>
       jobsBulk.some((value) => value === id),
     )
-    const projectsSelected = projects.filter((project) =>
-      project.jobs.some((job) =>
-        jobsSelected.some((jobSelected) => jobSelected.id === job.id),
-      ),
-    )
 
     switch (id) {
       case JOBS_ACTIONS.DELETE_PERMANENTLY.id:
@@ -277,36 +292,11 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
   }
 
   const submit = ({id, ...rest}) => {
-    const jobs = allJobs
-      .filter(({id}) => jobsBulk.some((value) => value === id))
-      .map(({id, password}) => ({id, password}))
+    const jobs = allJobs.filter(({id}) =>
+      jobsBulk.some((value) => value === id),
+    )
 
-    jobsBulkActions({jobs, action: id, ...rest})
-      .then((data) => onSubmitSuccessful({id, jobs, requestData: rest, data}))
-      .catch(() => {
-        CatToolActions.addNotification({
-          title: 'Error bulk operation',
-          type: 'error',
-          text: 'There was an error. Please retry!',
-          position: 'br',
-          allowHtml: true,
-          timer: 5000,
-        })
-      })
-  }
-
-  const onSubmitSuccessful = ({id, jobs, requestData, data}) => {
-    const generateRevise2Collection = jobs.map((job) => {
-      const {id: idProject, password: passwordProject} = projects.find(
-        (project) => project.jobs.some((jobItem) => jobItem.id === job.id),
-      )
-
-      const {secondPassPassword} =
-        data.jobs.find((jobResponse) => jobResponse.id === job.id)?.outcome ??
-        {}
-
-      return {idProject, passwordProject, job, secondPassPassword}
-    })
+    let promises
 
     switch (id) {
       case JOBS_ACTIONS.ARCHIVE.id:
@@ -314,30 +304,87 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
       case JOBS_ACTIONS.CANCEL.id:
       case JOBS_ACTIONS.RESUME.id:
       case JOBS_ACTIONS.DELETE_PERMANENTLY.id:
-        ManageActions.changeJobsStatusBulk(projects, jobs)
-        break
-      case JOBS_ACTIONS.GENERATE_REVISE_2.id:
-        ManageActions.getSecondPassReviewBulk(generateRevise2Collection)
-        break
-      case JOBS_ACTIONS.CHANGE_PASSWORD.id:
         jobs.forEach((job) => {
           const project = projects.find((project) =>
             project.jobs.some((jobItem) => jobItem.id === job.id),
           )
-
-          ManageActions.changeJobPassword(
+          ManageActions.changeJobStatus(
             fromJS(project),
             fromJS(job),
-            data.jobs.find((jobResponse) => jobResponse.id === job.id)?.outcome
-              ?.newPassword,
-            job.password,
-            requestData.revision_number,
+            id === JOBS_ACTIONS.UNARCHIVE.id || id === JOBS_ACTIONS.RESUME.id
+              ? JOBS_ACTIONS.ACTIVE.id
+              : id,
           )
         })
         break
+      case JOBS_ACTIONS.GENERATE_REVISE_2.id:
+        jobs.forEach((job) => {
+          const {id: idProject, password: passwordProject} = projects.find(
+            (project) => project.jobs.some((jobItem) => jobItem.id === job.id),
+          )
+          const wasAlreadyGenerated2Pass =
+            job.revise_passwords && job.revise_passwords.length > 1
+
+          if (!wasAlreadyGenerated2Pass)
+            ManageActions.getSecondPassReview(
+              idProject,
+              passwordProject,
+              job.id,
+              job.password,
+            )
+        })
+        break
+      case JOBS_ACTIONS.CHANGE_PASSWORD.id:
+        promises = jobs.map((job) => {
+          return changeJobPassword(job, job.password, rest.revision_number)
+        })
+
+        Promise.allSettled(promises).then((result) => {
+          const fulfilledPromises = result
+            .filter(({status}) => status === 'fulfilled')
+            .map(({value}) => value)
+
+          fulfilledPromises.forEach((value) => {
+            const job = allJobs.find(({id}) => id === parseInt(value.id))
+
+            const project = projects.find((project) =>
+              project.jobs.some((jobItem) => jobItem.id === job.id),
+            )
+
+            ManageActions.changeJobPassword(
+              fromJS(project),
+              fromJS(job),
+              value.new_pwd,
+              value.old_pwd,
+              rest.revision_number,
+            )
+          })
+
+          if (fulfilledPromises.length) {
+            const notification = {
+              title: 'Change jobs password',
+              text: 'Selected jobs password has been changed',
+              type: 'warning',
+              position: 'bl',
+              allowHtml: true,
+              timer: 10000,
+            }
+            CatToolActions.addNotification(notification)
+          } else if (fulfilledPromises.length < result.length) {
+            const erroNotification = {
+              title: 'Error change jobs password',
+              text: 'Some jobs change password are failed',
+              type: 'error',
+              position: 'bl',
+              allowHtml: true,
+              timer: 10000,
+            }
+            CatToolActions.addNotification(erroNotification)
+          }
+        })
+        break
       case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
-        console.log(data)
-        // ManageActions.changeProjectsTeamBulk()
+        ManageActions.changeProjectsTeamBulk(rest.id_team, projectsSelected)
         break
     }
   }
@@ -357,9 +404,18 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
             {...{
               ...buttonProps,
               ...buttonActionsProps,
-              ...((action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id ||
-                action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id) && {
+              ...(action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id && {
                 disabled: !jobsBulk.length || !isSelectedAllJobsByProjects,
+              }),
+              ...(action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id && {
+                disabled:
+                  !jobsBulk.length ||
+                  !isSelectedAllJobsByProjects ||
+                  projectsSelected.some(
+                    (project) =>
+                      teams.find(({id}) => id === project.id_team).type ===
+                      'personal',
+                  ),
               }),
               onClick: () => onClickAction(action),
             }}
