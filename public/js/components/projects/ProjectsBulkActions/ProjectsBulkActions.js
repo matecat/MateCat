@@ -15,6 +15,7 @@ import {fromJS} from 'immutable'
 import UserStore from '../../../stores/UserStore'
 import UserConstants from '../../../constants/UserConstants'
 import {changeJobPassword} from '../../../api/changeJobPassword'
+import {BulkAssignToMember} from './BulkAssignToMember'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -258,7 +259,9 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
     const modalComponent =
       id === JOBS_ACTIONS.CHANGE_PASSWORD.id
         ? BulkChangePassword
-        : BulkMoveToTeam
+        : id == JOBS_ACTIONS.ASSIGN_TO_TEAM.id
+          ? BulkMoveToTeam
+          : BulkAssignToMember
 
     const jobsSelected = allJobs.filter(({id}) =>
       jobsBulk.some((value) => value === id),
@@ -274,12 +277,14 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         break
       case JOBS_ACTIONS.CHANGE_PASSWORD.id:
       case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
+      case JOBS_ACTIONS.ASSIGN_TO_MEMBER.id:
         openModal({
           title: label,
           component: modalComponent,
           jobs: jobsSelected,
           projects: projectsSelected,
-          ...(JOBS_ACTIONS.ASSIGN_TO_TEAM && {teams}),
+          ...((JOBS_ACTIONS.ASSIGN_TO_TEAM ||
+            JOBS_ACTIONS.ASSIGN_TO_MEMBER) && {teams}),
           successCallback: (props) => {
             submit({id, ...props})
             ModalsActions.onCloseModal()
@@ -386,6 +391,26 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
       case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
         ManageActions.changeProjectsTeamBulk(rest.id_team, projectsSelected)
         break
+
+      case JOBS_ACTIONS.ASSIGN_TO_MEMBER.id:
+        // ManageActions.changeProjectAssigneeBulk(
+        //   projectsSelected.map((project) => {
+        //     const team = teams.find((team) => team.id === project.id_team)
+        //     const {user} = team.members.find(({id}) => id === rest.id_assignee)
+
+        //     return {
+        //       team: fromJS(team),
+        //       project: fromJS(project),
+        //       user: fromJS(user),
+        //     }
+        //   }),
+        // )
+        ManageActions.changeProjectAssigneeBulk(
+          rest.id_assignee,
+          projectsSelected,
+          teams,
+        )
+        break
     }
   }
 
@@ -415,6 +440,9 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
                     (project) =>
                       teams.find(({id}) => id === project.id_team).type ===
                       'personal',
+                  ) ||
+                  !projectsSelected.every(
+                    ({id_team}) => id_team === projectsSelected[0].id_team,
                   ),
               }),
               onClick: () => onClickAction(action),

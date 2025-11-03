@@ -205,6 +205,24 @@ let ManageActions = {
             team: team.toJS(),
           })
         })
+
+        const name = user?.toJS
+          ? user.get('first_name') + ' ' + user.get('last_name')
+          : 'Not assigned'
+
+        const notification = {
+          title: 'Assignee changed',
+          text:
+            'The project ' +
+            project.get('name') +
+            ' has been assigned to ' +
+            name,
+          type: 'success',
+          position: 'bl',
+          allowHtml: true,
+          timer: 3000,
+        }
+        CatToolActions.addNotification(notification)
       })
       .catch(() => {
         ManageActions.showNotificationProjectsChanged()
@@ -212,6 +230,61 @@ let ManageActions = {
           actionType: ManageConstants.RELOAD_PROJECTS,
         })
       })
+  },
+
+  changeProjectAssigneeBulk: function (idAssignee, projects, teams) {
+    let team = teams.find((team) => team.id === projects[0].id_team)
+    const {user} = team.members.find(({id}) => id === idAssignee)
+
+    getTeamMembers(team.id).then((data) => {
+      team.members = data.members
+      team.pending_invitations = data.pending_invitations
+
+      AppDispatcher.dispatch({
+        actionType: UserConstants.UPDATE_TEAM,
+        team: team,
+      })
+
+      const promises = projects.map((project) => {
+        return changeProjectAssignee(team.id, project.id, user.uid)
+      })
+
+      Promise.allSettled(promises).then((result) => {
+        const fulfilledPromises = result
+          .filter(({status}) => status === 'fulfilled')
+          .map(({value}) => value)
+
+        fulfilledPromises.forEach((value) => {
+          AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+            project: fromJS(value.project),
+            user: fromJS(user),
+          })
+        })
+
+        if (fulfilledPromises.length) {
+          const notification = {
+            title: 'Change assignee project',
+            text: 'Change assignee project',
+            type: 'warning',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(notification)
+        } else if (fulfilledPromises.length < result.length) {
+          const erroNotification = {
+            title: 'Change assignee project',
+            text: 'Some projects change assignee are failed',
+            type: 'error',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(erroNotification)
+        }
+      })
+    })
   },
 
   changeProjectName: function (project, newName) {

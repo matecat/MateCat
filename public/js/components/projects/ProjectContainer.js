@@ -1,4 +1,10 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
 
@@ -61,43 +67,28 @@ const ProjectContainer = ({
     (team) => team.get('id') === project.get('id_team'),
   )
 
-  const hideProjectAfterChangeAssignee = useRef()
-  hideProjectAfterChangeAssignee.current = (projectCompare, user) => {
-    if (project.get('id') === projectCompare.get('id')) {
-      const uid = user ? user.get('uid') : -1
-      if (
-        (uid !== selectedUser &&
-          selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
-        (team.get('type') == 'personal' && uid !== UserStore.getUser().user.uid)
-      ) {
-        setTimeout(() => {
-          projectRef.current.style.transition = 'transform 0.5s ease-in-out'
-          projectRef.current.style.transform = 'translateX(-2000px)'
-        }, 500)
-        setTimeout(() => {
-          ManageActions.removeProject(project)
-        }, 1000)
-
-        const name = user?.toJS
-          ? user.get('first_name') + ' ' + user.get('last_name')
-          : 'Not assigned'
-
-        const notification = {
-          title: 'Assignee changed',
-          text:
-            'The project ' +
-            project.get('name') +
-            ' has been assigned to ' +
-            name,
-          type: 'success',
-          position: 'bl',
-          allowHtml: true,
-          timer: 3000,
+  const hideProjectAfterChangeAssignee = useCallback(
+    (projectCompare, user) => {
+      if (project.get('id') === projectCompare.get('id')) {
+        const uid = user ? user.get('uid') : -1
+        if (
+          (uid !== selectedUser &&
+            selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
+          (team.get('type') == 'personal' &&
+            uid !== UserStore.getUser().user.uid)
+        ) {
+          setTimeout(() => {
+            projectRef.current.style.transition = 'transform 0.5s ease-in-out'
+            projectRef.current.style.transform = 'translateX(-2000px)'
+          }, 500)
+          setTimeout(() => {
+            ManageActions.removeProject(project)
+          }, 1000)
         }
-        CatToolActions.addNotification(notification)
       }
-    }
-  }
+    },
+    [project, selectedUser, team],
+  )
 
   useEffect(() => {
     setIdTeamSelected(idTeamProject)
@@ -464,17 +455,17 @@ const ProjectContainer = ({
     ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, hideProject)
     ProjectsStore.addListener(
       ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-      hideProjectAfterChangeAssignee.current,
+      hideProjectAfterChangeAssignee,
     )
 
     return () => {
       ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, hideProject)
       ProjectsStore.removeListener(
         ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-        hideProjectAfterChangeAssignee.current,
+        hideProjectAfterChangeAssignee,
       )
     }
-  }, [project])
+  }, [project, hideProjectAfterChangeAssignee])
 
   const handleFormSubmit = (formData) => {
     const {name} = formData
