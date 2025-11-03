@@ -244,12 +244,12 @@ class ConversionHandler {
 
         $this->result->setSize( filesize( $file_path ) );
 
-        if(isset($convertResult["pdfAnalysis"]) and !empty($convertResult["pdfAnalysis"])){
-            $this->result->setPdfAnalysis($convertResult["pdfAnalysis"]);
+        if ( isset( $convertResult[ "pdfAnalysis" ] ) and !empty( $convertResult[ "pdfAnalysis" ] ) ) {
+            $this->result->setPdfAnalysis( $convertResult[ "pdfAnalysis" ] );
 
             // save pdfAnalysis.json
-            $redisKey = md5($file_path . "__pdfAnalysis.json");
-            ( new RedisHandler() )->getConnection()->set( $redisKey, serialize( $convertResult["pdfAnalysis"] ), 'ex', 60 );
+            $redisKey = md5( $file_path . "__pdfAnalysis.json" );
+            ( new RedisHandler() )->getConnection()->set( $redisKey, serialize( $convertResult[ "pdfAnalysis" ] ), 'ex', 60 );
         }
 
     }
@@ -324,10 +324,11 @@ class ConversionHandler {
      */
     private function formatConversionFailureMessage( string $message ): string {
         $errorPatterns = [
-                'WinConverter error 5' => 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload',
-                'WinConverter'         => 'File conversion issue, please contact us at support@matecat.com',
-                'java.lang.'           => 'File conversion issue, please contact us at support@matecat.com',
-                '.okapi.'              => 'File conversion issue, please contact us at support@matecat.com',
+                '[8004C112 - FILE_LOCKVIOLATION_ERR]' => 'Temporary file conversion issue. Please retry upload.',
+                'WinConverter error 5'                => 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload',
+                'WinConverter'                        => 'File conversion issue, please contact us at support@matecat.com',
+                'java.lang.'                          => 'File conversion issue, please contact us at support@matecat.com',
+                '.okapi.'                             => 'File conversion issue, please contact us at support@matecat.com',
         ];
 
         foreach ( $errorPatterns as $pattern => $response ) {
@@ -466,8 +467,8 @@ class ConversionHandler {
 
         $decoded_filename = html_entity_decode( $file_name, ENT_QUOTES );
 
-        if($decoded_filename !== $file_name){
-            throw new Exception("Invalid file name: symbols (e.g. & ') are not allowed.");
+        if ( $decoded_filename !== $file_name ) {
+            throw new Exception( "Invalid file name: symbols (e.g. & ') are not allowed." );
         }
 
         $this->file_name = $decoded_filename;
