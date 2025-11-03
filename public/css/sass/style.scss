@@ -35,6 +35,10 @@ header .wrapper {
   top: 0;
 }
 
+.wrap .outersource {
+  display: flex;
+}
+
 .text .source.item,
 .text .target.item,
 .white li {
@@ -804,12 +808,11 @@ article .approved:active {
 
 .outersource .copy {
   display: none;
-  position: absolute;
-  float: left;
-  margin-left: 49%;
-  margin-top: 5px;
+  margin-top: 14px;
   background: url(/public/img/outercopy.png) center 1px no-repeat;
-  width: 60px !important;
+  width: 50px !important;
+  height: 60px;
+  margin-left: 24px;
   z-index: 1;
   background-size: 42px;
   /*	opacity: 0.4;*/
@@ -1966,7 +1969,7 @@ section.opened.editor .status {
   .text .source.item,
   .text .target.item,
   .white li {
-    width: 46% !important;
+    width: 48% !important;
   }
 }
 
