@@ -33,9 +33,10 @@ const CommentsActions = {
         // showGenericWarning();
       })
   },
-  resolveThread: function (sid) {
+  resolveThread: function (sid, isAnonymous = false) {
     markAsResolvedThread({
       idSegment: sid,
+      isAnonymous: isAnonymous,
       username: UserStore.getUserName(),
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
     })
