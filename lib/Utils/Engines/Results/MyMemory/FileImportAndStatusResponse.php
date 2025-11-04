@@ -11,7 +11,8 @@ use Utils\Logger\LoggerFactory;
  * Date: 03/03/15
  * Time: 15.33
  */
-class FileImportAndStatusResponse extends TMSAbstractResponse {
+class FileImportAndStatusResponse extends TMSAbstractResponse
+{
 
     /*
     {
@@ -31,16 +32,16 @@ class FileImportAndStatusResponse extends TMSAbstractResponse {
 
     public $id;
 
-    public function __construct( $response ) {
-
+    public function __construct($response)
+    {
         $this->responseData    = $response[ 'responseData' ] ?? '';
-        $this->responseStatus  = (int)( $response[ 'responseStatus' ] ?? 200 );
+        $this->responseStatus  = (int)($response[ 'responseStatus' ] ?? 200);
         $this->responseDetails = $response[ 'responseDetails' ] ?? '';
 
-        if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
-            $this->id = empty( $this->responseData[ 'uuid' ] ) ? $this->responseData[ 'UUID' ] : $this->responseData[ 'uuid' ];
+        if ($this->responseStatus == 200 || $this->responseStatus == 202) {
+            $this->id = empty($this->responseData[ 'uuid' ]) ? $this->responseData[ 'UUID' ] : $this->responseData[ 'uuid' ];
         } else {
-            LoggerFactory::doJsonLog( $response );
+            LoggerFactory::doJsonLog($response);
         }
     }
 

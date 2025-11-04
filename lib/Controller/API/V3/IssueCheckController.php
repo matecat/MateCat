@@ -9,7 +9,8 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 
-class IssueCheckController extends KleinController {
+class IssueCheckController extends KleinController
+{
     use ChunkNotFoundHandlerTrait;
 
     /**
@@ -18,7 +19,6 @@ class IssueCheckController extends KleinController {
      */
     public function segments(): void
     {
-
         $result = [
                 'modified_segments_count' => 0,
                 'issue_count'             => 0,
@@ -26,28 +26,27 @@ class IssueCheckController extends KleinController {
         ];
 
         // params
-        $id_job      = $this->request->param( 'id_job' );
-        $password    = $this->request->param( 'password' );
-        $source_page = $this->request->param( 'source_page', 2 );
+        $id_job      = $this->request->param('id_job');
+        $password    = $this->request->param('password');
+        $source_page = $this->request->param('source_page', 2);
 
         // find a job
-        $job = $this->getJob( $id_job, $password );
+        $job = $this->getJob($id_job, $password);
 
-        if ( null === $job ) {
-            throw new NotFoundException( 'Job not found.' );
+        if (null === $job) {
+            throw new NotFoundException('Job not found.');
         }
 
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $modifiedSegments = ( new SegmentTranslationDao() )
-                ->setCacheTTL( 60 * 5 )
-                ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $job->password, $source_page );
+        $modifiedSegments = (new SegmentTranslationDao())
+                ->setCacheTTL(60 * 5)
+                ->getSegmentTranslationsModifiedByRevisorWithIssueCount($id_job, $job->password, $source_page);
 
-        $result[ 'modified_segments_count' ] = count( $modifiedSegments );
+        $result[ 'modified_segments_count' ] = count($modifiedSegments);
 
-        foreach ( $modifiedSegments as $modifiedSegment ) {
-
+        foreach ($modifiedSegments as $modifiedSegment) {
             /** @var ShapelessConcreteStruct $modifiedSegment */
             $result[ 'modified_segments' ][] = [
                     'id_segment'  => (int)$modifiedSegment->id_segment,
@@ -57,7 +56,7 @@ class IssueCheckController extends KleinController {
             $result[ 'issue_count' ] = (int)$result[ 'issue_count' ] + (int)$modifiedSegment->q_count;
         }
 
-        $this->response->json( $result );
+        $this->response->json($result);
     }
 }
 

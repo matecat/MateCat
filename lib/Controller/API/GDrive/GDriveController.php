@@ -7,6 +7,7 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
 use Google_Service_Exception;
+use JetBrains\PhpStorm\NoReturn;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -17,7 +18,8 @@ use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
-class GDriveController extends AbstractStatefulKleinController {
+class GDriveController extends AbstractStatefulKleinController
+{
 
     const string GDRIVE_LIST_COOKIE_NAME    = 'gdrive_files_to_be_listed';
     const string GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
@@ -42,47 +44,38 @@ class GDriveController extends AbstractStatefulKleinController {
     /**
      * @throws Exception
      */
-    public function open() {
-
-        $filtersTemplateString = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $filtersTemplateId     = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_VALIDATE_INT );
-        $this->isAsyncReq      = filter_var( $this->request->param( 'isAsync' ), FILTER_VALIDATE_BOOLEAN );
+    public function open(): void
+    {
+        $filtersTemplateString = filter_var($this->request->param('filters_extraction_parameters_template'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $filtersTemplateId     = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_VALIDATE_INT);
+        $this->isAsyncReq      = filter_var($this->request->param('isAsync'), FILTER_VALIDATE_BOOLEAN);
 
         try {
-
-            $this->segmentation_rule = Constants::validateSegmentationRules( $this->request->param( 'segmentation_rule' ) );
+            $this->segmentation_rule = Constants::validateSegmentationRules($this->request->param('segmentation_rule'));
 
             $this->source_lang = $this->getValidSourceLanguage();
             $this->target_lang = $this->getValidTargetLanguages();
 
-            if ( !empty( $filtersTemplateString ) ) {
-
+            if (!empty($filtersTemplateString)) {
                 $filtersTemplate = new FiltersConfigTemplateStruct();
-                $filtersTemplate->hydrateFromJSON( html_entity_decode($filtersTemplateString) );
-
-                if ( $filtersTemplate === null ) {
-                    throw new Exception( "filters_extraction_parameters_template not valid" );
-                }
+                $filtersTemplate->hydrateFromJSON(html_entity_decode($filtersTemplateString));
 
                 $this->filters_extraction_parameters = $filtersTemplate;
+            } elseif (!empty($filtersTemplateId)) {
+                $filtersTemplate = FiltersConfigTemplateDao::getByIdAndUser($filtersTemplateId, $this->getUser()->uid);
 
-            } elseif ( !empty( $filtersTemplateId ) ) {
-                $filtersTemplate = FiltersConfigTemplateDao::getByIdAndUser( $filtersTemplateId, $this->getUser()->uid );
-
-                if ( empty( $filtersTemplate ) ) {
-                    throw new Exception( "filters_extraction_parameters_template_id not valid" );
+                if (empty($filtersTemplate)) {
+                    throw new Exception("filters_extraction_parameters_template_id not valid");
                 }
 
                 $this->filters_extraction_parameters = $filtersTemplate;
             }
-
-        } catch ( Exception $e ) {
-
+        } catch (Exception $e) {
             $this->isImportingSuccessful = false;
             $this->error                 = [
                     'code'  => $e->getCode(),
-                    'class' => get_class( $e ),
-                    'msg'   => $this->getExceptionMessage( $e )
+                    'class' => get_class($e),
+                    'msg'   => $this->getExceptionMessage($e)
             ];
 
             return;
@@ -92,41 +85,39 @@ class GDriveController extends AbstractStatefulKleinController {
 
         $this->doImport();
         $this->finalize();
-
     }
 
     /**
      * @return string
      * @throws InvalidLanguageException
      */
-    private function getValidSourceLanguage(): string {
-
+    private function getValidSourceLanguage(): string
+    {
         $sLang           = null;
         $languageHandler = Languages::getInstance();
 
-        if ( !empty( $this->request->param( 'target' ) ) ) {
-            $sLang = $languageHandler->validateLanguageListAsString( $this->request->param( 'source' ) );
-        } elseif ( !empty( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) && Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
-            $sLang = $languageHandler->validateLanguageListAsString( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] );
+        if (!empty($this->request->param('target'))) {
+            $sLang = $languageHandler->validateLanguageListAsString($this->request->param('source'));
+        } elseif (!empty($_COOKIE[ Constants::COOKIE_SOURCE_LANG ]) && Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ]) {
+            $sLang = $languageHandler->validateLanguageListAsString($_COOKIE[ Constants::COOKIE_SOURCE_LANG ]);
         }
 
         return $sLang ?? Constants::DEFAULT_SOURCE_LANG;
-
     }
 
     /**
      * @return string
      * @throws InvalidLanguageException
      */
-    private function getValidTargetLanguages(): string {
-
+    private function getValidTargetLanguages(): string
+    {
         $tLang           = null;
         $languageHandler = Languages::getInstance();
 
-        if ( !empty( $this->request->param( 'target' ) ) ) {
-            $tLang = $languageHandler->validateLanguageListAsString( $this->request->param( 'target' ) );
-        } elseif ( !empty( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) && Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) {
-            $tLang = $languageHandler->validateLanguageListAsString( $_COOKIE[ Constants::COOKIE_TARGET_LANG ], '||' );
+        if (!empty($this->request->param('target'))) {
+            $tLang = $languageHandler->validateLanguageListAsString($this->request->param('target'));
+        } elseif (!empty($_COOKIE[ Constants::COOKIE_TARGET_LANG ]) && Constants::EMPTY_VAL !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ]) {
+            $tLang = $languageHandler->validateLanguageListAsString($_COOKIE[ Constants::COOKIE_TARGET_LANG ], '||');
         }
 
         return $tLang ?? Constants::DEFAULT_TARGET_LANG;
@@ -135,21 +126,24 @@ class GDriveController extends AbstractStatefulKleinController {
     /**
      * @throws Exception
      */
-    private function initSessionService() {
+    private function initSessionService(): void
+    {
         $this->gdriveUserSession = new Session();
     }
 
     /**
      * @throws Exception
      */
-    private function doImport() {
-
-        $state = json_decode( $this->request->param( 'state' ), true );
+    private function doImport(): void
+    {
+        $state = json_decode($this->request->param('state'), true);
 
         // set the upload directory name if there are files from gDrive
-        if ( !$this->isAsyncReq ) {
+        if (!$this->isAsyncReq) {
             $guid = Utils::uuid4();
-            CookieManager::setCookie( "upload_token", $guid,
+            CookieManager::setCookie(
+                    "upload_token",
+                    $guid,
                     [
                             'expires'  => time() + 86400,
                             'path'     => '/',
@@ -165,28 +159,26 @@ class GDriveController extends AbstractStatefulKleinController {
 
         $guid = $_SESSION[ "upload_token" ] = $_COOKIE[ "upload_token" ];
 
-        if ( array_key_exists( 'ids', $state ) ) {
+        if (array_key_exists('ids', $state)) {
             $listOfIds = $state[ 'ids' ];
+        } elseif (array_key_exists('exportIds', $state)) {
+            $listOfIds = $state[ 'exportIds' ];
         } else {
-            if ( array_key_exists( 'exportIds', $state ) ) {
-                $listOfIds = $state[ 'exportIds' ];
-            } else {
-                throw new Exception( " no ids or export ids found " );
-            }
+            throw new Exception(" no ids or export ids found ");
         }
 
-        $this->gdriveUserSession->setConversionParams( $guid, $this->source_lang, $this->target_lang, $this->segmentation_rule, $this->filters_extraction_parameters );
+        $this->gdriveUserSession->setConversionParams($guid, $this->source_lang, $this->target_lang, $this->segmentation_rule, $this->filters_extraction_parameters);
 
-        for ( $i = 0; $i < count( $listOfIds ) && $this->isImportingSuccessful === true; $i++ ) {
+        for ($i = 0; $i < count($listOfIds) && $this->isImportingSuccessful === true; $i++) {
             try {
-                $client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
-                $this->gdriveUserSession->importFile( $listOfIds[ $i ], $client );
-            } catch ( Exception $e ) {
+                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
+                $this->gdriveUserSession->importFile($listOfIds[ $i ], $client);
+            } catch (Exception $e) {
                 $this->isImportingSuccessful = false;
                 $this->error                 = [
                         'code'  => $e->getCode(),
-                        'class' => get_class( $e ),
-                        'msg'   => $this->getExceptionMessage( $e )
+                        'class' => get_class($e),
+                        'msg'   => $this->getExceptionMessage($e)
                 ];
                 break;
             }
@@ -200,23 +192,24 @@ class GDriveController extends AbstractStatefulKleinController {
      *
      * @return string
      */
-    private function getExceptionMessage( Exception $e ): string {
+    private function getExceptionMessage(Exception $e): string
+    {
         $rawMessage = $e->getMessage();
 
         // parse Google APIs errors
-        if ( $e instanceof Google_Service_Exception and $jsonDecodedMessage = json_decode( $rawMessage, true ) ) {
-            if ( isset( $jsonDecodedMessage[ 'error' ][ 'message' ] ) ) {
+        if ($e instanceof Google_Service_Exception and $jsonDecodedMessage = json_decode($rawMessage, true)) {
+            if (isset($jsonDecodedMessage[ 'error' ][ 'message' ])) {
                 return $jsonDecodedMessage[ 'error' ][ 'message' ];
             }
 
-            if ( isset( $jsonDecodedMessage[ 'error' ][ 'errors' ] ) ) {
+            if (isset($jsonDecodedMessage[ 'error' ][ 'errors' ])) {
                 $arrayMsg = [];
 
-                foreach ( $jsonDecodedMessage[ 'error' ][ 'errors' ] as $error ) {
+                foreach ($jsonDecodedMessage[ 'error' ][ 'errors' ] as $error) {
                     $arrayMsg[] = $error[ 'message' ];
                 }
 
-                return implode( ',', $arrayMsg );
+                return implode(',', $arrayMsg);
             }
 
             return $jsonDecodedMessage;
@@ -225,25 +218,28 @@ class GDriveController extends AbstractStatefulKleinController {
         return $rawMessage;
     }
 
-    private function finalize() {
-        if ( $this->isAsyncReq ) {
+    private function finalize(): void
+    {
+        if ($this->isAsyncReq) {
             $this->doResponse();
         } else {
             $this->doRedirect();
         }
     }
 
-    private function doRedirect() {
-
+    private function doRedirect(): never
+    {
         // set a cookie for callback outcome to allow the frontend to show errors
         $outcome = [
                 "success"     => $this->isImportingSuccessful,
-                "error_msg"   => isset( $this->error[ 'msg' ] ) ? $this->formatErrorMessage( $this->error[ 'msg' ] ) : null,
+                "error_msg"   => isset($this->error[ 'msg' ]) ? $this->formatErrorMessage($this->error[ 'msg' ]) : null,
                 "error_class" => $this->error[ 'class' ] ?? null,
                 "error_code"  => $this->error[ 'code' ] ?? null,
         ];
 
-        CookieManager::setCookie( self::GDRIVE_OUTCOME_COOKIE_NAME, json_encode( $outcome ),
+        CookieManager::setCookie(
+                self::GDRIVE_OUTCOME_COOKIE_NAME,
+                json_encode($outcome),
                 [
                         'expires'  => time() + 86400,
                         'path'     => '/',
@@ -255,7 +251,9 @@ class GDriveController extends AbstractStatefulKleinController {
         );
 
         // set a cookie to allow the frontend to call list endpoint
-        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, $_SESSION[ "upload_token" ],
+        CookieManager::setCookie(
+                self::GDRIVE_LIST_COOKIE_NAME,
+                $_SESSION[ "upload_token" ],
                 [
                         'expires'  => time() + 86400,
                         'path'     => '/',
@@ -266,17 +264,18 @@ class GDriveController extends AbstractStatefulKleinController {
                 ]
         );
 
-        header( "Location: /", true, 302 );
+        header("Location: /", true, 302);
         exit;
     }
 
-    private function doResponse() {
-        $this->response->json( [
+    private function doResponse(): void
+    {
+        $this->response->json([
                 "success"     => $this->isImportingSuccessful,
-                "error_msg"   => isset( $this->error[ 'msg' ] ) ? $this->formatErrorMessage( $this->error[ 'msg' ] ) : null,
+                "error_msg"   => isset($this->error[ 'msg' ]) ? $this->formatErrorMessage($this->error[ 'msg' ]) : null,
                 "error_class" => $this->error[ 'class' ] ?? null,
                 "error_code"  => $this->error[ 'code' ] ?? null,
-        ] );
+        ]);
     }
 
     /**
@@ -284,17 +283,17 @@ class GDriveController extends AbstractStatefulKleinController {
      *
      * @return string
      */
-    private function formatErrorMessage( $message ): string {
-
-        if ( $message == "This file is too large to be exported." ) {
+    private function formatErrorMessage($message): string
+    {
+        if ($message == "This file is too large to be exported.") {
             return "you are trying to upload a file bigger than 10 mb. Google Drive does not allow exports of files bigger than 10 mb. Please download the file and upload it from your computer.";
         }
 
-        if ( $message == "Export only supports Docs Editors files." ) {
+        if ($message == "Export only supports Docs Editors files.") {
             return "Google Drive does not allow exports of files in this format. Please open the file in Google Drive and save it as a Google Drive file.";
         }
 
-        if ( strpos( $message, 'The specified key does not exist.' ) !== false ) {
+        if (str_contains($message, 'The specified key does not exist.')) {
             return "The name of the file you are trying to upload is too long, please shorten it and try again.";
         }
 
@@ -304,14 +303,16 @@ class GDriveController extends AbstractStatefulKleinController {
     /**
      * @throws Exception
      */
-    public function listImportedFiles() {
-
+    public function listImportedFiles(): void
+    {
         try {
             $response = $this->gdriveUserSession->getFileStructureForJsonOutput();
-            $this->response->json( $response );
+            $this->response->json($response);
 
             // delete the cookie
-            CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, "",
+            CookieManager::setCookie(
+                    self::GDRIVE_LIST_COOKIE_NAME,
+                    "",
                     [
                             'expires'  => time() - 3600,
                             'path'     => '/',
@@ -321,81 +322,68 @@ class GDriveController extends AbstractStatefulKleinController {
                             'samesite' => 'None',
                     ]
             );
-        } catch ( S3Exception $e ) {
-
+        } catch (S3Exception $e) {
             $errorCode = 400;
-            $this->response->code( $errorCode );
-            $this->response->json( [
+            $this->response->code($errorCode);
+            $this->response->json([
                     'code'  => $errorCode,
-                    'class' => get_class( $e ),
-                    'msg'   => $this->formatErrorMessage( $this->getExceptionMessage( $e ) )
-            ] );
-        } catch ( Exception $e ) {
-
+                    'class' => get_class($e),
+                    'msg'   => $this->formatErrorMessage($this->getExceptionMessage($e))
+            ]);
+        } catch (Exception $e) {
             $errorCode = $e->getCode() >= 400 ? $e->getCode() : 500;
-            $this->response->code( $errorCode );
-            $this->response->json( [
+            $this->response->code($errorCode);
+            $this->response->json([
                     'code'  => $errorCode,
-                    'class' => get_class( $e ),
-                    'msg'   => $this->formatErrorMessage( $this->getExceptionMessage( $e ) )
-            ] );
+                    'class' => get_class($e),
+                    'msg'   => $this->formatErrorMessage($this->getExceptionMessage($e))
+            ]);
         }
-
     }
 
     /**
      * @throws Exception
      */
-    public function changeConversionParameters() {
+    public function changeConversionParameters(): void
+    {
         $originalSourceLang             = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-        $newSourceLang                  = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $newSegmentationRule            = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $newFiltersExtractionTemplate   = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $newFiltersExtractionTemplateId = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_VALIDATE_INT );
+        $newSourceLang                  = filter_var($this->request->param('source'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $newSegmentationRule            = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $newFiltersExtractionTemplate   = filter_var($this->request->param('filters_extraction_parameters_template'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $newFiltersExtractionTemplateId = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_VALIDATE_INT);
 
         $filtersExtractionParameters = null;
 
         try {
-
             $languageHandler = Languages::getInstance();
-            $newSourceLang   = $languageHandler->validateLanguage( $newSourceLang );
+            $newSourceLang   = $languageHandler->validateLanguage($newSourceLang);
 
-            if ( !empty( $newFiltersExtractionTemplate ) ) {
-
+            if (!empty($newFiltersExtractionTemplate)) {
                 $filtersExtractionParameters = new FiltersConfigTemplateStruct();
-                $filtersExtractionParameters->hydrateFromJSON( html_entity_decode($newFiltersExtractionTemplate) );
+                $filtersExtractionParameters->hydrateFromJSON(html_entity_decode($newFiltersExtractionTemplate));
+            } elseif (!empty($newFiltersExtractionTemplateId)) {
+                $filtersExtractionParameters = FiltersConfigTemplateDao::getByIdAndUser($newFiltersExtractionTemplateId, $this->getUser()->uid);
 
-                if ( $filtersExtractionParameters === null ) {
-                    throw new Exception( "filters_extraction_parameters_template not valid" );
+                if ($filtersExtractionParameters === null) {
+                    throw new Exception("filters_extraction_parameters_template_id not valid");
                 }
-
-            } elseif ( !empty( $newFiltersExtractionTemplateId ) ) {
-
-                $filtersExtractionParameters = FiltersConfigTemplateDao::getByIdAndUser( $newFiltersExtractionTemplateId, $this->getUser()->uid );
-
-                if ( $filtersExtractionParameters === null ) {
-                    throw new Exception( "filters_extraction_parameters_template_id not valid" );
-                }
-
             }
 
-            $newSegmentationRule = Constants::validateSegmentationRules( $newSegmentationRule );
-
-        } catch ( Exception $e ) {
-
+            $newSegmentationRule = Constants::validateSegmentationRules($newSegmentationRule);
+        } catch (Exception $e) {
             $this->isImportingSuccessful = false;
             $this->error                 = [
                     'code'  => $e->getCode(),
-                    'class' => get_class( $e ),
-                    'msg'   => $this->getExceptionMessage( $e )
+                    'class' => get_class($e),
+                    'msg'   => $this->getExceptionMessage($e)
             ];
 
             return;
         }
 
-        $success = $this->gdriveUserSession->reConvert( $newSourceLang, $newSegmentationRule, $filtersExtractionParameters );
+        $success = $this->gdriveUserSession->reConvert($newSourceLang, $newSegmentationRule, $filtersExtractionParameters);
 
-        if ( $success ) {
+        if ($success) {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
             $this->source_lang                                 = $newSourceLang;
         } else {
@@ -403,46 +391,47 @@ class GDriveController extends AbstractStatefulKleinController {
             $this->source_lang                                 = $originalSourceLang;
         }
 
-        $this->response->json( [
+        $this->response->json([
                 "success" => $success
-        ] );
+        ]);
     }
 
     /**
      * @throws Exception
      */
-    public function deleteImportedFile() {
+    public function deleteImportedFile(): void
+    {
+        $fileId           = $this->request->param('fileId');
+        $segmentationRule = $this->request->param('segmentation_rule');
+        $source           = $this->request->param('source');
+        $filtersTemplate  = $this->request->param('filters_template');
 
-        $fileId           = $this->request->param( 'fileId' );
-        $segmentationRule = $this->request->param( 'segmentation_rule' );
-        $source           = $this->request->param( 'source' );
-        $filtersTemplate  = $this->request->param( 'filters_template' );
-
-        if ( $fileId === 'all' ) {
-            $this->gdriveUserSession->removeAllFiles( $source, $segmentationRule, $filtersTemplate );
+        if ($fileId === 'all') {
+            $this->gdriveUserSession->removeAllFiles($source, $segmentationRule, $filtersTemplate);
             $success = true;
-            unset( $_SESSION[ "gdrive_session" ] );
+            unset($_SESSION[ "gdrive_session" ]);
         } else {
-            $success = $this->gdriveUserSession->removeFile( $fileId, $source, $segmentationRule, $filtersTemplate );
+            $success = $this->gdriveUserSession->removeFile($fileId, $source, $segmentationRule, $filtersTemplate);
 
-            if ( $success ) {
-                if ( !$this->gdriveUserSession->hasFiles() ) {
-                    unset( $_SESSION[ "gdrive_session" ] );
+            if ($success) {
+                if (!$this->gdriveUserSession->hasFiles()) {
+                    unset($_SESSION[ "gdrive_session" ]);
                 } else {
-                    unset( $_SESSION[ "gdrive_session" ][ Session::FILE_LIST ][ $fileId ] );
+                    unset($_SESSION[ "gdrive_session" ][ Session::FILE_LIST ][ $fileId ]);
                 }
             }
         }
 
-        $this->response->json( [
+        $this->response->json([
                 "success" => $success
-        ] );
+        ]);
     }
 
     /**
      * @throws Exception
      */
-    protected function afterConstruct(): void {
+    protected function afterConstruct(): void
+    {
         $this->initSessionService();
     }
 

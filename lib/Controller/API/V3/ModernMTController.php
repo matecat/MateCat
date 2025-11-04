@@ -75,7 +75,8 @@ class ModernMTController extends KleinController
         $uploadManager = new Upload();
         $uploadedFiles = $uploadManager->uploadFiles($_FILES);
 
-        $glossary = $this->extractCSV($uploadedFiles->{'glossary'});
+        /** @noinspection PhpUndefinedFieldInspection */
+        $glossary = $this->extractCSV($uploadedFiles->glossary);
 
 
         // validate
@@ -173,7 +174,8 @@ class ModernMTController extends KleinController
         $uploadManager = new Upload();
         $uploadedFiles = $uploadManager->uploadFiles($_FILES);
 
-        $glossary = $this->extractCSV($uploadedFiles->{'glossary'});
+        /** @noinspection PhpUndefinedFieldInspection */
+        $glossary = $this->extractCSV($uploadedFiles->glossary);
 
         // validate
         $csv = CSVParser::parseToArray($glossary);

@@ -10,6 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
@@ -263,7 +264,7 @@ class GetContributionController extends KleinController
      * @throws NotFoundException
      * @throws ReQueueException
      * @throws ReflectionException
-     * @throws \Model\Exceptions\ValidationError
+     * @throws ValidationError
      * @throws Exception
      */
     private function rewriteContributionContexts(array &$request, MateCatFilter $Filter): void

@@ -9,13 +9,15 @@
 
 namespace Model\ConnectedServices\Oauth;
 
-abstract class AbstractProvider implements ProviderInterface {
+abstract class AbstractProvider implements ProviderInterface
+{
 
     const string PROVIDER_NAME = '';
 
     protected ?string $redirectUrl = null;
 
-    public function __construct( ?string $redirectUrl = null ) {
+    public function __construct(?string $redirectUrl = null)
+    {
         $this->redirectUrl = $redirectUrl;
     }
 

@@ -13,7 +13,8 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Utils\Constants\TranslationStatus;
 
-class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializable
+{
 
     public bool   $analysis_ignore_100             = false;
     public bool   $analysis_ignore_101             = false;
@@ -25,12 +26,14 @@ class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializ
     /**
      * @inheritDoc
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return $this->getArrayCopy();
     }
 
-    public function __toString(): string {
-        return json_encode( $this->jsonSerialize() );
+    public function __toString(): string
+    {
+        return json_encode($this->jsonSerialize());
     }
 
 }

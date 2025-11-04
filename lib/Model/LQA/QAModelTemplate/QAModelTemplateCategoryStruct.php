@@ -6,7 +6,8 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
+class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
+{
     public ?int   $id          = null;
     public ?int   $id_template = null;
     public ?int   $id_parent   = null;
@@ -22,7 +23,8 @@ class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements I
     /**
      * @inheritDoc
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
                 'id'          => (int)$this->id,
                 'id_template' => (int)$this->id_template,

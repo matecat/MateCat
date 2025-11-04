@@ -16,7 +16,8 @@ namespace Model\Translations;
  *
  * @package Translations
  */
-class WarningModel {
+class WarningModel
+{
 
     const int ERROR   = 1;
     const int WARNING = 2;

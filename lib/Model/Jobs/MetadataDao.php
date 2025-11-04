@@ -9,7 +9,8 @@ use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\TransactionalTrait;
 use ReflectionException;
 
-class MetadataDao extends AbstractDao {
+class MetadataDao extends AbstractDao
+{
 
     use TransactionalTrait;
 
@@ -28,23 +29,24 @@ class MetadataDao extends AbstractDao {
      * @return IDaoStruct[]|MetadataStruct[]
      * @throws ReflectionException
      */
-    public function getByIdJob( int $id_job, string $key, int $ttl = 0 ): array {
+    public function getByIdJob(int $id_job, string $key, int $ttl = 0): array
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_id_key);
 
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_id_key );
-
-        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, MetadataStruct::class, [
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
                 'id_job' => $id_job,
                 'key'    => $key
-        ] );
+        ]);
     }
 
     /**
      * @throws ReflectionException
      */
-    public function destroyCacheByJobId( int $id_job, string $key ): bool {
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_id_key );
+    public function destroyCacheByJobId(int $id_job, string $key): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_id_key);
 
-        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'id_job' => $id_job, 'key' => $key ] );
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, ['id_job' => $id_job, 'key' => $key]);
     }
 
     /**
@@ -55,23 +57,24 @@ class MetadataDao extends AbstractDao {
      * @return ?array|?MetadataStruct[]
      * @throws ReflectionException
      */
-    public function getByJobIdAndPassword( int $id_job, string $password, int $ttl = 0 ): ?array {
+    public function getByJobIdAndPassword(int $id_job, string $password, int $ttl = 0): ?array
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_password );
-
-        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, MetadataStruct::class, [
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
                 'id_job'   => $id_job,
                 'password' => $password,
-        ] ) ?? null;
+        ]) ?? null;
     }
 
     /**
      * @throws ReflectionException
      */
-    public function destroyCacheByJobAndPassword( int $id_job, string $password ): bool {
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_password );
+    public function destroyCacheByJobAndPassword(int $id_job, string $password): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
-        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'id_job' => $id_job, 'password' => $password ] );
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, ['id_job' => $id_job, 'password' => $password]);
     }
 
     /**
@@ -80,31 +83,32 @@ class MetadataDao extends AbstractDao {
      * @param string $key
      * @param int    $ttl
      *
-     * @return MetadataStruct
+     * @return MetadataStruct|null
      * @throws ReflectionException
      */
-    public function get( int $id_job, string $password, string $key, int $ttl = 0 ): ?MetadataStruct {
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_password_key );
+    public function get(int $id_job, string $password, string $key, int $ttl = 0): ?MetadataStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password_key);
 
-        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, MetadataStruct::class, [
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
                 'id_job'   => $id_job,
                 'password' => $password,
                 'key'      => $key
-        ] )[ 0 ] ?? null;
-
+        ])[ 0 ] ?? null;
     }
 
     /**
      * @throws ReflectionException
      */
-    public function destroyCacheByJobAndPasswordAndKey( int $id_job, string $password, string $key ): bool {
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_password_key );
+    public function destroyCacheByJobAndPasswordAndKey(int $id_job, string $password, string $key): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password_key);
 
-        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, [
                 'id_job'   => $id_job,
                 'password' => $password,
                 'key'      => $key
-        ] );
+        ]);
     }
 
     /**
@@ -116,7 +120,8 @@ class MetadataDao extends AbstractDao {
      * @return ?MetadataStruct
      * @throws ReflectionException
      */
-    public function set( int $id_job, string $password, string $key, string $value ): ?MetadataStruct {
+    public function set(int $id_job, string $password, string $key, string $value): ?MetadataStruct
+    {
         $sql = "INSERT INTO job_metadata " .
                 " ( `id_job`, `password`, `key`, `value` ) " .
                 " VALUES " .
@@ -125,61 +130,61 @@ class MetadataDao extends AbstractDao {
 
         $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
                 'id_job'   => $id_job,
                 'password' => $password,
                 'key'      => $key,
                 'value'    => $value
-        ] );
+        ]);
 
-        $this->destroyCacheByJobAndPassword( $id_job, $password );
-        $this->destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key );
+        $this->destroyCacheByJobAndPassword($id_job, $password);
+        $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
 
-        $result = $this->get( $id_job, $password, $key );
+        $result = $this->get($id_job, $password, $key);
         $this->commitTransaction(); // commit only if everything went fine
 
         return $result;
-
     }
 
     /**
      * @throws ReflectionException
      */
-    public function delete( $id_job, $password, $key ) {
+    public function delete($id_job, $password, $key): void
+    {
         $sql = "DELETE FROM job_metadata " .
                 " WHERE id_job = :id_job AND password = :password " .
                 " AND `key` = :key ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
                 'id_job'   => $id_job,
                 'password' => $password,
                 'key'      => $key,
-        ] );
+        ]);
 
-        $this->destroyCacheByJobAndPassword( $id_job, $password );
-        $this->destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key );
-
+        $this->destroyCacheByJobAndPassword($id_job, $password);
+        $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
     }
 
-    protected function _buildResult( array $array_result ) {
-
+    protected function _buildResult(array $array_result)
+    {
     }
 
     /**
      * @param int    $id_job
      * @param string $password
      *
-     * @return array
+     * @return array|null
      */
-    public function getSubfilteringCustomHandlers( int $id_job, string $password ): ?array {
+    public function getSubfilteringCustomHandlers(int $id_job, string $password): ?array
+    {
         try {
-            $subfiltering = $this->get( $id_job, $password, self::SUBFILTERING_HANDLERS, 86400 );
+            $subfiltering = $this->get($id_job, $password, self::SUBFILTERING_HANDLERS, 86400);
 
-            return json_decode( $subfiltering->value ?? '[]' ); //null coalescing with an empty array for project backward compatibility, load all handlers by default
-        } catch ( Exception $exception ) {
+            return json_decode($subfiltering->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+        } catch (Exception) {
             return [];
         }
     }

@@ -13,15 +13,19 @@ namespace Utils\Engines\Traits;
 use Exception;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
+use Utils\Tools\Utils;
 
-trait Oauth {
+trait Oauth
+{
 
     protected int $token_endlife = 0;
 
-    protected function getAuthParameters(): array {
+    protected function getAuthParameters(): array
+    {
         return [
                 CURLOPT_POST       => true,
-                CURLOPT_POSTFIELDS => http_build_query( $this->_auth_parameters ), //microsoft doesn't want multi-part form data
+                CURLOPT_POSTFIELDS => http_build_query($this->_auth_parameters), //microsoft doesn't want multi-part form data
                 CURLOPT_TIMEOUT    => 120
         ];
     }
@@ -32,46 +36,41 @@ trait Oauth {
      * @return void
      * @throws Exception
      */
-    protected function _authenticate(): void {
-
+    protected function _authenticate(): void
+    {
         $this->_auth_parameters[ 'client_id' ]     = $this->client_id;
         $this->_auth_parameters[ 'client_secret' ] = $this->client_secret;
 
         $url      = $this->oauth_url;
         $curl_opt = $this->getAuthParameters();
 
-        $rawValue = $this->_call( $url, $curl_opt );
+        $rawValue = $this->_call($url, $curl_opt);
 
-        if ( $this->isJson( $rawValue ) ) {
-            $objResponse = json_decode( $rawValue, true );
+        if (Utils::isJson($rawValue)) {
+            $objResponse = json_decode($rawValue, true);
         } else {
             $objResponse = $rawValue;
         }
 
-        if ( isset( $objResponse[ 'error' ] ) ) {
-
+        if (isset($objResponse[ 'error' ])) {
             //format as a normal Translate Response and send to decoder to output the data
-            $rawValue = $this->_formatAuthenticateError( $objResponse );
-            $this->result = $this->_decode( $rawValue, $this->_auth_parameters, __FUNCTION__ );
+            $rawValue     = $this->_formatAuthenticateError($objResponse);
+            $this->result = $this->_decode($rawValue, $this->_auth_parameters, __FUNCTION__);
 
             //no more valid token
             $this->token = null;
-            $this->_setTokenEndLife( -86400 );
-
+            $this->_setTokenEndLife(-86400);
+        } elseif (is_array($objResponse)) {
+            $this->token = $objResponse[ 'access_token' ];
+            $this->_setTokenEndLife(@$objResponse[ 'expires_in' ]);
         } else {
-            if ( is_array( $objResponse ) ) {
-                $this->token = $objResponse[ 'access_token' ];
-                $this->_setTokenEndLife( @$objResponse[ 'expires_in' ] );
-            } else {
-                $this->token = $objResponse;
-                $this->_setTokenEndLife( 60 * 10 ); // microsoft token expire in 10 minutes
-            }
-
+            $this->token = $objResponse;
+            $this->_setTokenEndLife(60 * 10); // microsoft token expire in 10 minutes
         }
 
-        $record = clone( $this->getEngineRecord() );
+        $record = clone($this->getEngineRecord());
 
-        $engineDAO = new EngineDAO( Database::obtain() );
+        $engineDAO = new EngineDAO(Database::obtain());
 
         /**
          * Use a generic EnginesFactory and not Engine_MicrosoftHubStruct
@@ -82,60 +81,45 @@ trait Oauth {
         $engineStruct->id = $record->id;
 
         //variable assignment only used for debugging purpose
-        $engineDAO->destroyCache( $engineStruct );
-        $engineDAO->updateByStruct( $record );
+        $engineDAO->destroyCache($engineStruct);
+        $engineDAO->updateByStruct($record);
 
-        if ( is_null( $this->token ) ) {
-            throw new Exception( $objResponse[ 'error_description' ] );
+        if (is_null($this->token)) {
+            throw new Exception($objResponse[ 'error_description' ]);
         }
-
-    }
-
-    private function isJson( $string ): bool {
-        if ( is_array( $string ) ) {
-            return false;
-        }
-        json_decode( $string );
-
-        return ( json_last_error() == JSON_ERROR_NONE );
     }
 
     /**
      * @throws Exception
      */
-    public function get( array $_config ) {
+    public function get(array $_config)
+    {
+        $cycle = (int)func_get_arg(1) ?? 0;
 
-        $cycle = (int)func_get_arg( 1 ) ?? 0;
-
-        if ( $cycle == 10 ) {
+        if ($cycle == 10) {
             return $this->_formatRecursionError();
         }
 
         try {
-
             //Check for time to live and refresh cache and token info
-            if ( $this->token_endlife <= time() ) {
+            if ($this->token_endlife <= time()) {
                 $this->_authenticate();
             }
-
-        } catch ( Exception $e ) {
+        } catch (Exception) {
             return $this->result;
         }
 
-        $parameters = $this->_fillCallParameters( $_config );
+        $parameters = $this->_fillCallParameters($_config);
 
 
-        $this->call( "translate_relative_url", $parameters );
+        $this->call("translate_relative_url", $parameters);
 
-        if ( $this->_checkAuthFailure() ) {
-
+        if ($this->_checkAuthFailure()) {
             //if i'm good enough this should not happen because i have the time to live
             try {
-
                 //Check for time to live and refresh cache and token info
                 $this->_authenticate();
-
-            } catch ( Exception $e ) {
+            } catch (Exception) {
                 return $this->result;
             }
 
@@ -143,24 +127,23 @@ trait Oauth {
              * Warning this is a recursion!!!
              *
              */
-            return $this->get( $_config, $cycle + 1 ); //do this request again!
+            return $this->get($_config, $cycle + 1); //do this request again!
 
         }
 
         return $this->result;
-
     }
 
-    abstract protected function _formatRecursionError();
+    abstract protected function _formatRecursionError(): array;
 
-    abstract protected function _checkAuthFailure();
+    abstract protected function _checkAuthFailure(): bool;
 
-    abstract protected function _setTokenEndLife( ?int $expires_in_seconds = null );
+    abstract protected function _setTokenEndLife(?int $expires_in_seconds = null): void;
 
-    abstract protected function _fillCallParameters( array $_config ): array;
+    abstract protected function _fillCallParameters(array $_config): array;
 
-    abstract protected function _getEngineStruct();
+    abstract protected function _getEngineStruct(): EngineStruct;
 
-    abstract protected function _formatAuthenticateError( array $objResponse ): mixed;
+    abstract protected function _formatAuthenticateError(array $objResponse): string|array;
 
 }

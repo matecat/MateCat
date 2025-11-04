@@ -13,6 +13,7 @@ use Exception;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FilesStorage\AbstractFilesStorage;
+use ReflectionException;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
@@ -61,7 +62,7 @@ trait ScanDirectoryForConvertedFiles
      * @param string $filename
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function getFileMetadata(string $filename): array
     {

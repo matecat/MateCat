@@ -14,7 +14,8 @@ use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
-class Filters {
+class Filters
+{
 
     const string SOURCE_TO_XLIFF_ENDPOINT = "/api/v2/original2xliff";
     const string XLIFF_TO_TARGET_ENDPOINT = "/api/v2/xliff2translated";
@@ -26,17 +27,17 @@ class Filters {
      *
      * @return array
      */
-    private static function sendToFilters( array $dataGroups, string $endpoint ): array {
-
-        $logger = LoggerFactory::getLogger( "conversion" );
+    private static function sendToFilters(array $dataGroups, string $endpoint): array
+    {
+        $logger = LoggerFactory::getLogger("conversion");
 
         $multiCurl = new MultiCurlHandler();
 
         // Each group is a POST request
-        foreach ( $dataGroups as $id => $data ) {
+        foreach ($dataGroups as $id => $data) {
             // Add to POST fields the version forced using the config file
-            if ( $endpoint === self::SOURCE_TO_XLIFF_ENDPOINT
-                    && !empty( AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION ) ) {
+            if ($endpoint === self::SOURCE_TO_XLIFF_ENDPOINT
+                    && !empty(AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION)) {
                 $data[ 'forceVersion' ] = AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
             }
 
@@ -49,17 +50,17 @@ class Filters {
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             ];
-            if ( !empty( AppConfig::$FILTERS_RAPIDAPI_KEY ) ) {
+            if (!empty(AppConfig::$FILTERS_RAPIDAPI_KEY)) {
                 $options[ CURLOPT_HTTPHEADER ] = [
-                        'X-RapidAPI-Host: ' . parse_url( AppConfig::$FILTERS_ADDRESS )[ 'host' ],
+                        'X-RapidAPI-Host: ' . parse_url(AppConfig::$FILTERS_ADDRESS)[ 'host' ],
                         'X-RapidAPI-Key: ' . AppConfig::$FILTERS_RAPIDAPI_KEY,
                 ];
             }
 
-            $url = rtrim( AppConfig::$FILTERS_ADDRESS, '/' ) . $endpoint;
-            $logger->debug( "Calling: " . $url );
-            $multiCurl->createResource( $url, $options, $id );
-            $multiCurl->setRequestHeader( $id );
+            $url = rtrim(AppConfig::$FILTERS_ADDRESS, '/') . $endpoint;
+            $logger->debug("Calling: " . $url);
+            $multiCurl->createResource($url, $options, $id);
+            $multiCurl->setRequestHeader($id);
         }
 
         // Launch the multiCURL and get all the results
@@ -69,45 +70,42 @@ class Filters {
         $headers   = $multiCurl->getAllHeaders();
 
         // Compute results
-        foreach ( $responses as $id => &$response ) {
+        foreach ($responses as $id => &$response) {
             $info             = $infos[ $id ];
-            $originalResponse = json_decode( $response );
+            $originalResponse = json_decode($response);
 
             // Compute response
-            if ( $info[ 'http_code' ] != 200 || $response === false ) {
-                $errResponse = [ "isSuccess" => false, "curlInfo" => $info ];
-                if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
+            if ($info[ 'http_code' ] != 200 || $response === false) {
+                $errResponse = ["isSuccess" => false, "curlInfo" => $info];
+                if ($response === '{"message":"Invalid RapidAPI Key"}') {
                     $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
-                } elseif ( isset( $originalResponse->errorMessage ) ) {
-                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage( $originalResponse->errorMessage );
+                } elseif (isset($originalResponse->errorMessage)) {
+                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage($originalResponse->errorMessage);
+                } elseif ($info[ 'errno' ]) {
+                    $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
                 } else {
-                    if ( $info[ 'errno' ] ) {
-                        $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
-                    } else {
-                        $errResponse[ 'errorMessage' ] = "Received status code $info[http_code]";
-                    }
+                    $errResponse[ 'errorMessage' ] = "Received status code $info[http_code]";
                 }
                 $response = $errResponse;
-
             } else {
-                $response = json_decode( $response, true );
-                // Super ugly, but this is the way the old FileFormatConverter
+                $response = json_decode($response, true);
+                // Hideous, but this is the way the old FileFormatConverter
                 // cooperated with callers; changing this requires changing the
                 // callers, a huge and risky refactoring work I couldn't afford
-                if ( isset( $response[ "document" ] ) ) {
-                    $response[ 'document_content' ] = base64_decode( $response[ 'document' ] );
-                    unset( $response[ 'document' ] );
+                if (isset($response[ "document" ])) {
+                    $response[ 'document_content' ] = base64_decode($response[ 'document' ]);
+                    unset($response[ 'document' ]);
                 }
             }
 
             // Compute headers
-            $instanceInfo = self::extractInstanceInfoFromHeaders( $headers[ $id ] );
-            if ( isset( $instanceInfo ) ) {
-                $response = array_merge( $response, $instanceInfo );
+            $instanceInfo = self::extractInstanceInfoFromHeaders($headers[ $id ]);
+            if (isset($instanceInfo)) {
+                $response = array_merge($response, $instanceInfo);
             }
 
             // Add to response the CURL total time in milliseconds
-            $response[ 'time' ] = round( $info[ 'curlinfo_total_time' ] * 1000 );
+            $response[ 'time' ] = round($info[ 'curlinfo_total_time' ] * 1000);
         }
 
         return $responses;
@@ -118,10 +116,10 @@ class Filters {
      *
      * @return string
      */
-    private static function formatErrorMessage( string $error ): string {
-
+    private static function formatErrorMessage(string $error): string
+    {
         // Error from Excel files
-        return str_replace( "net.translated.matecat.filters.ExtendedExcelException: ", "", $error );
+        return str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
     }
 
     /**
@@ -132,9 +130,10 @@ class Filters {
      * @return array|null an array with the address and version of the
      *                    respondent instance; false if the header was not found
      */
-    private static function extractInstanceInfoFromHeaders( array $headers ): ?array {
-        foreach ( $headers as $header ) {
-            if ( preg_match( "|^Filters-Instance: address=([^;]+); version=(.+)$|", $header, $matches ) ) {
+    private static function extractInstanceInfoFromHeaders(array $headers): ?array
+    {
+        foreach ($headers as $header) {
+            if (preg_match("|^Filters-Instance: address=([^;]+); version=(.+)$|", $header, $matches)) {
                 return [
                         'instanceAddress' => $matches[ 1 ],
                         'instanceVersion' => $matches[ 2 ]
@@ -157,35 +156,36 @@ class Filters {
      *
      * @return mixed
      */
-    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false ) {
-        $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
-        $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+    public static function sourceToXliff(string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false): mixed
+    {
+        $basename  = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_FILENAME);
+        $extension = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_EXTENSION);
         $filename  = "$basename.$extension";
 
         $data = [
-                'document'     => new CURLFile( $filePath ),
-                'sourceLocale' => Languages::getInstance()->getLangRegionCode( $sourceLang ),
-                'targetLocale' => Languages::getInstance()->getLangRegionCode( $targetLang ),
+                'document'     => new CURLFile($filePath),
+                'sourceLocale' => Languages::getInstance()->getLangRegionCode($sourceLang),
+                'targetLocale' => Languages::getInstance()->getLangRegionCode($targetLang),
                 'segmentation' => $segmentation,
                 'utf8FileName' => $filename
         ];
 
         // The legacy_icu option overrides any other extractionParams
-        if ( $legacy_icu === true ) {
-            $extractionParams = [];
+        if ($legacy_icu === true) {
+            $extractionParams                 = [];
             $extractionParams[ 'escape_icu' ] = true;
         }
 
-        if ( $extractionParams !== null ) {
-            $data[ 'extractionParams' ] = json_encode( $extractionParams );
+        if ($extractionParams !== null) {
+            $data[ 'extractionParams' ] = json_encode($extractionParams);
         }
 
         // This is probably useless
-        if ( $legacy_icu === true ) {
+        if ($legacy_icu === true) {
             $data[ 'escape_icu' ] = true;
         }
 
-        $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
+        $filtersResponse = self::sendToFilters([$data], self::SOURCE_TO_XLIFF_ENDPOINT);
 
         return $filtersResponse[ 0 ];
     }
@@ -195,28 +195,28 @@ class Filters {
      *
      * @return array
      */
-    public static function xliffToTarget( array $xliffsData ): array {
+    public static function xliffToTarget(array $xliffsData): array
+    {
         $dataGroups = [];
         $tmpFiles   = [];
 
-        foreach ( $xliffsData as $id => $xliffData ) {
-
+        foreach ($xliffsData as $id => $xliffData) {
             // Filters are expecting an upload of a xliff file, so put the xliff
             // data in a temp file and configure POST param to upload it
-            $tmpXliffFile = tempnam( sys_get_temp_dir(), "matecat-xliff-to-target-" );
+            $tmpXliffFile = tempnam(sys_get_temp_dir(), "matecat-xliff-to-target-");
 
 
             $tmpFiles[ $id ] = $tmpXliffFile;
-            file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
+            file_put_contents($tmpXliffFile, $xliffData[ 'document_content' ]);
 
-            $dataGroups[ $id ] = [ 'xliff' => new CURLFile( $tmpXliffFile ) ];
+            $dataGroups[ $id ] = ['xliff' => new CURLFile($tmpXliffFile)];
         }
 
-        $responses = self::sendToFilters( $dataGroups, self::XLIFF_TO_TARGET_ENDPOINT );
+        $responses = self::sendToFilters($dataGroups, self::XLIFF_TO_TARGET_ENDPOINT);
 
         // We sent requests and obtained responses, we can delete temp files
-        foreach ( $tmpFiles as $tmpFile ) {
-            unlink( $tmpFile );
+        foreach ($tmpFiles as $tmpFile) {
+            unlink($tmpFile);
         }
 
         return $responses;
@@ -234,10 +234,10 @@ class Filters {
      *
      * @throws Exception
      */
-    public static function logConversionToXliff( $response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, $extractionParameters ) {
-
+    public static function logConversionToXliff($response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, $extractionParameters): void
+    {
         // @TODO $extractionParameters to MySQL table?
-        self::logConversion( $response, true, $sentFile, [ 'source' => $sourceLang, 'target' => $targetLang ], [ 'segmentation_rule' => $segmentation ] );
+        self::logConversion($response, true, $sentFile, ['source' => $sourceLang, 'target' => $targetLang], ['segmentation_rule' => $segmentation]);
     }
 
     /**
@@ -250,8 +250,9 @@ class Filters {
      *
      * @throws Exception
      */
-    public static function logConversionToTarget( $response, string $sentFile, JobStruct $jobData, array $sourceFileData ) {
-        self::logConversion( $response, false, $sentFile, $jobData->toArray(), $sourceFileData );
+    public static function logConversionToTarget($response, string $sentFile, JobStruct $jobData, array $sourceFileData): void
+    {
+        self::logConversion($response, false, $sentFile, $jobData->toArray(), $sourceFileData);
     }
 
     /**
@@ -267,17 +268,21 @@ class Filters {
      *
      * @throws Exception
      */
-    private static function logConversion( array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData ) {
+    private static function logConversion(array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData): void
+    {
         try {
-            $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . AppConfig::$DB_SERVER,
+            $conn = new PDO(
+                    'mysql:dbname=matecat_conversions_log;host=' . AppConfig::$DB_SERVER,
                     AppConfig::$DB_USER, AppConfig::$DB_PASS, [
                             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
                             PDO::ATTR_EMULATE_PREPARES   => false,
                             PDO::ATTR_ORACLE_NULLS       => true,
                             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
-                    ] );
-        } catch ( Exception $ex ) {
-            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
+                    ]
+            );
+        } catch (Exception $ex) {
+            LoggerFactory::getLogger("conversion")->debug('Unable to connect to matecat_conversions_log database: ' . $ex->getMessage());
+
             return;
         }
 
@@ -286,43 +291,42 @@ class Filters {
                 'filters_version'  => $response[ 'instanceVersion' ] ?? null,
                 'client_ip'        => Utils::getRealIpAddr(),
                 'to_xliff'         => $toXliff,
-                'success'          => ( $response[ 'successful' ] === true ),
+                'success'          => ($response[ 'successful' ] === true),
                 'error_message'    => $response[ 'errorMessage' ] ?? null,
                 'conversion_time'  => $response[ 'time' ],
-                'sent_file_size'   => filesize( $sentFile ),
+                'sent_file_size'   => filesize($sentFile),
                 'source_lang'      => $jobData[ 'source' ],
                 'target_lang'      => $jobData[ 'target' ],
                 'job_id'           => $jobData[ 'id' ] ?? null,
                 'job_pwd'          => $jobData[ 'password' ] ?? null,
                 'job_owner'        => $jobData[ 'owner' ] ?? null,
-                'source_file_id'   => ( $toXliff ? null : $sourceFileData[ 'id_file' ] ),
-                'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
-                'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
-                'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
+                'source_file_id'   => ($toXliff ? null : $sourceFileData[ 'id_file' ]),
+                'source_file_name' => ($toXliff ? AbstractFilesStorage::basename_fix($sentFile) : $sourceFileData[ 'filename' ]),
+                'source_file_ext'  => ($toXliff ? AbstractFilesStorage::pathinfo_fix($sentFile, PATHINFO_EXTENSION) : $sourceFileData[ 'mime_type' ]),
+                'source_file_sha1' => ($toXliff ? sha1_file($sentFile) : $sourceFileData[ 'sha1_original_file' ]),
                 'segmentation'     => $sourceFileData[ 'segmentation_rule' ] ?? null,
         ];
 
         $query = 'INSERT INTO conversions_log ('
-                . implode( ", ", array_keys( $info ) )
+                . implode(", ", array_keys($info))
                 . ') VALUES ('
-                . implode( ", ", array_fill( 0, count( $info ), "?" ) )
+                . implode(", ", array_fill(0, count($info), "?"))
                 . ');';
 
         try {
-            $preparedStatement = $conn->prepare( $query );
-            $preparedStatement->execute( array_values( $info ) );
-            LoggerFactory::getLogger( "conversion" )->debug( $info );
-        } catch ( Exception $ex ) {
-            LoggerFactory::getLogger( "conversion" )->debug( "Unable to log the conversion: " . $ex->getMessage() );
+            $preparedStatement = $conn->prepare($query);
+            $preparedStatement->execute(array_values($info));
+            LoggerFactory::getLogger("conversion")->debug($info);
+        } catch (Exception $ex) {
+            LoggerFactory::getLogger("conversion")->debug("Unable to log the conversion: " . $ex->getMessage());
         }
 
-        if ( $response[ 'successful' ] !== true ) {
-
-            if ( AppConfig::$FILTERS_EMAIL_FAILURES ) {
-                Utils::sendErrMailReport( "Matecat: conversion failed.\n\n" . print_r( $info, true ) );
+        if ($response[ 'successful' ] !== true) {
+            if (AppConfig::$FILTERS_EMAIL_FAILURES) {
+                Utils::sendErrMailReport("Matecat: conversion failed.\n\n" . print_r($info, true));
             }
 
-            self::backupFailedConversion( $sentFile );
+            self::backupFailedConversion($sentFile);
         }
     }
 
@@ -332,19 +336,19 @@ class Filters {
      *
      * @param string $sentFile
      */
-    private static function backupFailedConversion( string &$sentFile ) {
-
+    private static function backupFailedConversion(string &$sentFile): void
+    {
         $backupDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR
                 . 'conversion_errors' . DIRECTORY_SEPARATOR
-                . date( "Ymd" );
-        if ( !is_dir( $backupDir ) ) {
-            mkdir( $backupDir, 0755, true );
+                . date("Ymd");
+        if (!is_dir($backupDir)) {
+            mkdir($backupDir, 0755, true);
         }
 
-        $backupFile = $backupDir . DIRECTORY_SEPARATOR . date( "His" ) . '-' . basename( $sentFile );
+        $backupFile = $backupDir . DIRECTORY_SEPARATOR . date("His") . '-' . basename($sentFile);
 
-        if ( !rename( $sentFile, $backupFile ) ) {
-            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
+        if (!rename($sentFile, $backupFile)) {
+            LoggerFactory::getLogger("conversion")->debug('Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile);
         } else {
             $sentFile = $backupFile;
         }

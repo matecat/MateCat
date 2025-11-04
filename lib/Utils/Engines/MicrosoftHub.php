@@ -23,7 +23,8 @@ use Utils\Engines\Traits\Oauth;
  * @property string client_id
  * @property string client_secret
  */
-class MicrosoftHub extends AbstractEngine {
+class MicrosoftHub extends AbstractEngine
+{
 
     use Oauth;
 
@@ -60,29 +61,30 @@ TAG;
     /**
      * @throws Exception
      */
-    public function __construct( $engineRecord ) {
-        parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+    public function __construct($engineRecord)
+    {
+        parent::__construct($engineRecord);
+        if ($this->getEngineRecord()->type != EngineConstants::MT) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
     }
 
-    protected function _fixLangCode( $lang ) {
-
-        if ( $lang == 'zh-CN' ) {
+    protected function _fixLangCode(string $lang): string
+    {
+        if ($lang == 'zh-CN') {
             return "zh-CHS";
         } //chinese zh-CHS simplified
-        if ( $lang == 'zh-TW' ) {
+        if ($lang == 'zh-TW') {
             return "zh-CHT";
         } //chinese zh-CHT traditional
-        $l = explode( "-", strtolower( trim( $lang ) ) );
+        $l = explode("-", strtolower(trim($lang)));
 
         return $l[ 0 ];
-
     }
 
 
-    protected function getAuthParameters(): array {
+    protected function getAuthParameters(): array
+    {
         return [
                 CURLOPT_POST       => true,
                 CURLOPT_POSTFIELDS => "",
@@ -95,27 +97,27 @@ TAG;
     }
 
     /**
-     * @param       $rawValue
+     * @param mixed $rawValue
      * @param array $parameters
      * @param null  $function
      *
      * @return array
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ): array {
-
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    {
         $all_args = func_get_args();
 
-        if ( !empty( $rawValue[ 'error' ] ) ) {
-            $xmlObj = simplexml_load_string( $rawValue[ 'error' ][ 'response' ], 'SimpleXMLElement', LIBXML_NOENT );
-            if ( empty( $xmlObj ) ) {
-                $jsonObj = json_decode( $rawValue[ 'error' ][ 'response' ] );
+        if (!empty($rawValue[ 'error' ])) {
+            $xmlObj = simplexml_load_string($rawValue[ 'error' ][ 'response' ], 'SimpleXMLElement', LIBXML_NOENT);
+            if (empty($xmlObj)) {
+                $jsonObj = json_decode($rawValue[ 'error' ][ 'response' ]);
                 $decoded = [
-                        'error' => [ "message" => $jsonObj->message, 'code' => -1 ]
+                        'error' => ["message" => $jsonObj->message, 'code' => -1]
                 ];
             } else {
                 $decoded = [
-                        'error' => [ "message" => $xmlObj->body->h1 . ": " . $xmlObj->body->p[ 2 ], 'code' => -1 ]
+                        'error' => ["message" => $xmlObj->body->h1 . ": " . $xmlObj->body->p[ 2 ], 'code' => -1]
                 ];
             }
 
@@ -124,10 +126,9 @@ TAG;
 
         $decoded = [];
 
-        $xmlObj = simplexml_load_string( $rawValue, 'SimpleXMLElement', LIBXML_NOENT | LIBXML_NOEMPTYTAG );
+        $xmlObj = simplexml_load_string($rawValue, 'SimpleXMLElement', LIBXML_NOENT | LIBXML_NOEMPTYTAG);
 
-        foreach ( (array)$xmlObj[ 0 ] as $val ) {
-
+        foreach ((array)$xmlObj[ 0 ] as $val) {
             /*$decoded = [
                     'data' => [
                             "translations" => [
@@ -136,83 +137,81 @@ TAG;
                     ]
             ];*/
 
-            $val = preg_replace( '|(<[^>]+>) (<[^>]+>)|', '${1}${2}', $val );
+            $val = preg_replace('|(<[^>]+>) (<[^>]+>)|', '${1}${2}', $val);
 
             $dDoc = new DOMDocument();
-            @$dDoc->loadXML( "<root>$val</root>", LIBXML_NOENT | LIBXML_NOEMPTYTAG );
-            $tagList = $dDoc->getElementsByTagName( "root" );
+            @$dDoc->loadXML("<root>$val</root>", LIBXML_NOENT | LIBXML_NOEMPTYTAG);
+            $tagList = $dDoc->getElementsByTagName("root");
             $tmpTag  = "";
 
-            foreach ( $tagList as $_tag ) {
-                foreach ( $_tag->childNodes as $node ) {
-                    $tmpTag .= $dDoc->saveXML( $node );
+            foreach ($tagList as $_tag) {
+                foreach ($_tag->childNodes as $node) {
+                    $tmpTag .= $dDoc->saveXML($node);
                 }
             }
 
             $decoded = [
                     'data' => [
                             "translations" => [
-                                    [ 'translatedText' => html_entity_decode( $tmpTag, ENT_QUOTES | 16 ) ]
+                                    ['translatedText' => html_entity_decode($tmpTag, ENT_QUOTES | 16)]
                             ]
                     ]
             ];
-
-
         }
 
-        return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
-
+        return $this->_composeMTResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
     }
 
 
-    public function set( $_config ): bool {
+    public function set($_config): bool
+    {
         // Microsoft Hub does not have this method
         return true;
     }
 
-    public function update( $_config ): bool {
+    public function update($_config): bool
+    {
         // Microsoft Hub does not have this method
         return true;
     }
 
-    public function delete( $_config ): bool {
+    public function delete($_config): bool
+    {
         // Microsoft Hub does not have this method
         return true;
     }
 
-    protected function _formatAuthenticateError( array $objResponse ): string {
-
+    protected function _formatAuthenticateError(array $objResponse): string
+    {
         //format as a normal Translate Response and send to decoder to output the data
-        return sprintf( $this->rawXmlErrStruct, $objResponse[ 'error' ], 'getToken', $objResponse[ 'error_description' ] );
-
+        return sprintf($this->rawXmlErrStruct, $objResponse[ 'error' ], 'getToken', $objResponse[ 'error_description' ]);
     }
 
-    protected function _getEngineStruct(): MicrosoftHubStruct {
-
+    protected function _getEngineStruct(): MicrosoftHubStruct
+    {
         return MicrosoftHubStruct::getStruct();
-
     }
 
-    protected function _setTokenEndLife( ?int $expires_in_seconds = null ) {
-
+    protected function _setTokenEndLife(?int $expires_in_seconds = null): void
+    {
         /**
          * Gain a minute to not fallback into a recursion
          *
          * @see static::get
          */
         $this->token_endlife = time() + $expires_in_seconds - 60;
-
     }
 
-    protected function _checkAuthFailure(): bool {
-        return ( stripos( $this->result[ 'error' ][ 'message' ] ?? '', 'token has expired' ) !== false );
+    protected function _checkAuthFailure(): bool
+    {
+        return (stripos($this->result[ 'error' ][ 'message' ] ?? '', 'token has expired') !== false);
     }
 
     /**
      * @throws Exception
      */
-    protected function _formatRecursionError(): array {
-
+    protected function _formatRecursionError(): array
+    {
         return $this->_composeMTResponseAsMatch(
                 '',
                 [
@@ -225,26 +224,26 @@ TAG;
                         'responseStatus' => 499
                 ] //return negative number
         );
-
     }
 
-    protected function _fillCallParameters( array $_config ): array {
+    protected function _fillCallParameters(array $_config): array
+    {
         $parameters = [];
 
         $parameters[ 'appId' ]    = 'Bearer ' . $this->token;
-        $parameters[ 'to' ]       = $this->_fixLangCode( $_config[ 'target' ] );
-        $parameters[ 'from' ]     = $this->_fixLangCode( $_config[ 'source' ] );
+        $parameters[ 'to' ]       = $this->_fixLangCode($_config[ 'target' ]);
+        $parameters[ 'from' ]     = $this->_fixLangCode($_config[ 'source' ]);
         $parameters[ 'text' ]     = $_config[ 'segment' ];
         $parameters[ 'category' ] = $this->getEngineRecord()->extra_parameters[ 'category' ];
 
         return $parameters;
-
     }
 
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array {
+    public function getExtraParams(): array
+    {
         return [
                 'pre_translate_files',
         ];

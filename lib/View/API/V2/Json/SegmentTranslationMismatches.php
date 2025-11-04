@@ -15,7 +15,8 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 
-class SegmentTranslationMismatches {
+class SegmentTranslationMismatches
+{
 
     protected array       $data;
     protected int         $thereArePropagations;
@@ -31,10 +32,11 @@ class SegmentTranslationMismatches {
      * @param int             $thereArePropagations
      * @param FeatureSet|null $featureSet
      */
-    public function __construct( array $Translation_mismatches, JobStruct $jobStruct, int $thereArePropagations, FeatureSet $featureSet = null ) {
+    public function __construct(array $Translation_mismatches, JobStruct $jobStruct, int $thereArePropagations, FeatureSet $featureSet = null)
+    {
         $this->data                 = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
-        if ( $featureSet == null ) {
+        if ($featureSet == null) {
             $featureSet = new FeatureSet();
         }
         $this->featureSet = $featureSet;
@@ -45,45 +47,42 @@ class SegmentTranslationMismatches {
      * @return array
      * @throws Exception
      */
-    public function render(): array {
-
+    public function render(): array
+    {
         $result = [
                 'editable'       => [],
                 'not_editable'   => [],
                 'prop_available' => $this->thereArePropagations
         ];
 
-        $featureSet  = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $featureSet  = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
         $metadataDao = new MetadataDao();
 
-        foreach ( $this->data as $row ) {
-
+        foreach ($this->data as $row) {
             $Filter = MateCatFilter::getInstance(
                     $featureSet,
                     $row[ 'source' ],
                     $row[ 'target' ],
                     [],
-                    $metadataDao->getSubfilteringCustomHandlers( $this->jobStruct->id, $this->jobStruct->password )
+                    $metadataDao->getSubfilteringCustomHandlers($this->jobStruct->id, $this->jobStruct->password)
             );
 
-            if ( $row[ 'editable' ] ) {
+            if ($row[ 'editable' ]) {
                 $result[ 'editable' ][] = [
-                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
+                        'translation' => $Filter->fromLayer0ToLayer2($row[ 'translation' ]),
                         'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
+                        'involved_id' => explode(",", $row[ 'involved_id' ])
                 ];
             } else {
                 $result[ 'not_editable' ][] = [
-                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
+                        'translation' => $Filter->fromLayer0ToLayer2($row[ 'translation' ]),
                         'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
+                        'involved_id' => explode(",", $row[ 'involved_id' ])
                 ];
             }
-
         }
 
         return $result;
-
     }
 
 }

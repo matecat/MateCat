@@ -18,7 +18,8 @@ use Model\ProjectManager\ProjectManager;
 use Model\Projects\ProjectStruct;
 
 
-class JobMergeController extends KleinController {
+class JobMergeController extends KleinController
+{
 
     private ProjectStruct $project;
     private array         $jobList = [];
@@ -27,19 +28,19 @@ class JobMergeController extends KleinController {
      * @throws NotFoundException
      * @throws Exception
      */
-    public function merge() {
-
+    public function merge(): void
+    {
         $pManager = new ProjectManager();
-        $pManager->setProjectAndReLoadFeatures( $this->project );
+        $pManager->setProjectAndReLoadFeatures($this->project);
 
         $pStruct                   = $pManager->getProjectStructure();
         $pStruct[ 'id_customer' ]  = $this->project->id_customer;
-        $pStruct[ 'job_to_merge' ] = (int)$this->request->param( 'id_job' );
+        $pStruct[ 'job_to_merge' ] = (int)$this->request->param('id_job');
 
-        $pManager->mergeALL( $pStruct, $this->jobList );
+        $pManager->mergeALL($pStruct, $this->jobList);
 
-        $this->response->code( 200 );
-        $this->response->json( [ 'success' => true ] );
+        $this->response->code(200);
+        $this->response->json(['success' => true]);
     }
 
     /**
@@ -57,30 +58,31 @@ class JobMergeController extends KleinController {
      *
      * @return void
      */
-    protected function afterConstruct(): void {
+    protected function afterConstruct(): void
+    {
         // Initialize the project password validator.
-        $validator = new ProjectPasswordValidator( $this );
+        $validator = new ProjectPasswordValidator($this);
 
         // Define the success callback for the password validator.
-        $validator->onSuccess( function () use ( $validator ) {
+        $validator->onSuccess(function () use ($validator) {
             // Assign the validated project to the $project property.
             $this->project = $validator->getProject();
 
             // Retrieve the job list associated with the project.
-            $this->jobList = JobDao::getById( (int)$this->request->param( 'id_job' ) );
+            $this->jobList = JobDao::getById((int)$this->request->param('id_job'));
 
             // Validate the first job in the list.
             $firstChunk = $this->jobList[ 0 ] ?? null;
-            if ( !$firstChunk || $firstChunk->id_project != $this->project->id || $firstChunk->isDeleted() ) {
+            if (!$firstChunk || $firstChunk->id_project != $this->project->id || $firstChunk->isDeleted()) {
                 throw new NotFoundException();
             }
-        } );
+        });
 
         // Append the login validator to the list of validators.
-        $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator(new LoginValidator($this));
 
         // Append the project password validator to the list of validators.
-        $this->appendValidator( $validator );
+        $this->appendValidator($validator);
     }
 
 }

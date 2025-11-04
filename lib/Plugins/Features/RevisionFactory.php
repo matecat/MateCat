@@ -11,7 +11,8 @@ use Model\Projects\ProjectStruct;
 /**
  * Class RevisionFactory
  */
-class RevisionFactory {
+class RevisionFactory
+{
 
     protected AbstractRevisionFeature $revision;
     protected static ?RevisionFactory $INSTANCE = null;
@@ -27,17 +28,19 @@ class RevisionFactory {
      * @return RevisionFactory
      * @throws Exception
      */
-    public static function getInstance( AbstractRevisionFeature $revisionFeature = null ): RevisionFactory {
-        if ( static::$INSTANCE == null && $revisionFeature == null ) {
-            throw new Exception( 'Revision not defined' );
-        } elseif ( static::$INSTANCE == null ) {
-            static::$INSTANCE = new self( $revisionFeature );
+    public static function getInstance(AbstractRevisionFeature $revisionFeature = null): RevisionFactory
+    {
+        if (static::$INSTANCE == null && $revisionFeature == null) {
+            throw new Exception('Revision not defined');
+        } elseif (static::$INSTANCE == null) {
+            static::$INSTANCE = new self($revisionFeature);
         }
 
         return static::$INSTANCE;
     }
 
-    protected function __construct( AbstractRevisionFeature $revisionFeature ) {
+    protected function __construct(AbstractRevisionFeature $revisionFeature)
+    {
         $this->revision = $revisionFeature;
     }
 
@@ -46,8 +49,9 @@ class RevisionFactory {
      *
      * @return ReviewExtended\IChunkReviewModel
      */
-    public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ): ReviewExtended\IChunkReviewModel {
-        return $this->revision->getChunkReviewModel( $chunkReviewStruct );
+    public function getChunkReviewModel(ChunkReviewStruct $chunkReviewStruct): ReviewExtended\IChunkReviewModel
+    {
+        return $this->revision->getChunkReviewModel($chunkReviewStruct);
     }
 
     /**
@@ -55,7 +59,8 @@ class RevisionFactory {
      *
      * @return $this
      */
-    public function setFeatureSet( FeatureSet $featureSet ): RevisionFactory {
+    public function setFeatureSet(FeatureSet $featureSet): RevisionFactory
+    {
         $this->_featureSet = $featureSet;
 
         return $this;
@@ -77,11 +82,12 @@ class RevisionFactory {
      * @return static
      * @throws Exception
      */
-    public static function initFromProject( ProjectStruct $project ): RevisionFactory {
-        foreach ( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ) {
+    public static function initFromProject(ProjectStruct $project): RevisionFactory
+    {
+        foreach ($project->getFeaturesSet()->getFeaturesStructs() as $featureStruct) {
             $feature = $featureStruct->toNewObject();
-            if ( $feature instanceof AbstractRevisionFeature ) { //only one revision type can be present
-                return static::getInstance( $feature )->setFeatureSet( $project->getFeaturesSet() );
+            if ($feature instanceof AbstractRevisionFeature) { //only one revision type can be present
+                return static::getInstance($feature)->setFeatureSet($project->getFeaturesSet());
             }
         }
 
@@ -89,14 +95,15 @@ class RevisionFactory {
          * This return should never happen if the review_extended plugin is loaded as mandatory (or as dependency of mandatory second_pass_review plugin)
          */
         return static::getInstance(
-                new SecondPassReview( new BasicFeatureStruct( [ 'feature_code' => ReviewExtended::FEATURE_CODE ] ) )
-        )->setFeatureSet( $project->getFeaturesSet() );
+                new SecondPassReview(new BasicFeatureStruct(['feature_code' => ReviewExtended::FEATURE_CODE]))
+        )->setFeatureSet($project->getFeaturesSet());
     }
 
     /**
      * @return AbstractRevisionFeature
      */
-    public function getRevisionFeature(): AbstractRevisionFeature {
+    public function getRevisionFeature(): AbstractRevisionFeature
+    {
         return $this->revision;
     }
 

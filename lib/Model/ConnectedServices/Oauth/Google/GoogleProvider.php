@@ -11,7 +11,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Utils\Registry\AppConfig;
 
-class GoogleProvider extends AbstractProvider {
+class GoogleProvider extends AbstractProvider
+{
 
     const string PROVIDER_NAME = 'google';
 
@@ -37,20 +38,20 @@ class GoogleProvider extends AbstractProvider {
      * @return Google_Client
      * @throws Exception
      */
-    public static function getClient( ?string $redirectUrl = null ): Google_Client {
-
+    public static function getClient(?string $redirectUrl = null): Google_Client
+    {
         $client = new Google_Client();
 
-        $client->setApplicationName( AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME );
-        $client->setClientId( AppConfig::$GOOGLE_OAUTH_CLIENT_ID );
-        $client->setClientSecret( AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET );
-        $client->setRedirectUri( $redirectUrl ?? AppConfig::$GOOGLE_OAUTH_REDIRECT_URL );
-        $client->setScopes( static::$OAUTH_SCOPES );
-        $client->setAccessType( "offline" );
-        $client->setApprovalPrompt( 'force' );
-        $client->setIncludeGrantedScopes( true );
-        $client->setPrompt( "consent" );
-        $client->setLogger( self::getLogger() );
+        $client->setApplicationName(AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME);
+        $client->setClientId(AppConfig::$GOOGLE_OAUTH_CLIENT_ID);
+        $client->setClientSecret(AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET);
+        $client->setRedirectUri($redirectUrl ?? AppConfig::$GOOGLE_OAUTH_REDIRECT_URL);
+        $client->setScopes(static::$OAUTH_SCOPES);
+        $client->setAccessType("offline");
+        $client->setApprovalPrompt('force');
+        $client->setIncludeGrantedScopes(true);
+        $client->setPrompt("consent");
+        $client->setLogger(self::getLogger());
 
         return $client;
     }
@@ -59,11 +60,12 @@ class GoogleProvider extends AbstractProvider {
      * @return Logger
      * @throws Exception
      */
-    protected static function getLogger(): Logger {
-        $log           = new Logger( self::$LOGGER_NAME );
-        $streamHandler = new StreamHandler( self::logFilePath(), Logger::INFO );
-        $streamHandler->setFormatter( new GoogleClientLogsFormatter() );
-        $log->pushHandler( $streamHandler );
+    protected static function getLogger(): Logger
+    {
+        $log           = new Logger(self::$LOGGER_NAME);
+        $streamHandler = new StreamHandler(self::logFilePath(), Logger::INFO);
+        $streamHandler->setFormatter(new GoogleClientLogsFormatter());
+        $log->pushHandler($streamHandler);
 
         return $log;
     }
@@ -71,7 +73,8 @@ class GoogleProvider extends AbstractProvider {
     /**
      * @return string
      */
-    protected static function logFilePath(): string {
+    protected static function logFilePath(): string
+    {
         return AppConfig::$LOG_REPOSITORY . '/' . self::$LOGGER_NAME . '.log';
     }
 
@@ -80,9 +83,10 @@ class GoogleProvider extends AbstractProvider {
      *
      * @throws Exception
      */
-    public function getAuthorizationUrl( string $csrfTokenState ): string {
-        $googleClient = static::getClient( $this->redirectUrl );
-        $googleClient->setState( $csrfTokenState );
+    public function getAuthorizationUrl(string $csrfTokenState): string
+    {
+        $googleClient = static::getClient($this->redirectUrl);
+        $googleClient->setState($csrfTokenState);
 
         return $googleClient->createAuthUrl();
     }
@@ -93,10 +97,11 @@ class GoogleProvider extends AbstractProvider {
      * @return AccessToken
      * @throws Exception
      */
-    public function getAccessTokenFromAuthCode( string $code ): AccessToken {
+    public function getAccessTokenFromAuthCode(string $code): AccessToken
+    {
         $googleClient = static::getClient();
 
-        return new AccessToken( $googleClient->fetchAccessTokenWithAuthCode( $code ) );
+        return new AccessToken($googleClient->fetchAccessTokenWithAuthCode($code));
     }
 
     /**
@@ -106,13 +111,13 @@ class GoogleProvider extends AbstractProvider {
      * @throws \Google\Service\Exception
      * @throws Exception
      */
-    public function getResourceOwner( \League\OAuth2\Client\Token\AccessToken $token ): ProviderUser {
+    public function getResourceOwner(\League\OAuth2\Client\Token\AccessToken $token): ProviderUser
+    {
+        $googleClient = self::getClient($this->redirectUrl);
+        $googleClient->setAccessType("offline");
+        $googleClient->setAccessToken($token->__toArray()); // __toArray defined in ConnectedServices\Google\AccessToken
 
-        $googleClient = self::getClient( $this->redirectUrl );
-        $googleClient->setAccessType( "offline" );
-        $googleClient->setAccessToken( $token->__toArray() ); // __toArray defined in ConnectedServices\Google\AccessToken
-
-        $plus    = new Google_Service_Oauth2( $googleClient );
+        $plus    = new Google_Service_Oauth2($googleClient);
         $fetched = $plus->userinfo->get();
 
         $user            = new ProviderUser();
@@ -124,7 +129,6 @@ class GoogleProvider extends AbstractProvider {
         $user->provider  = self::PROVIDER_NAME;
 
         return $user;
-
     }
 
 }

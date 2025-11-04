@@ -1,6 +1,7 @@
 <?php
 
 namespace Utils\Constants;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -8,7 +9,8 @@ namespace Utils\Constants;
  * Time: 14.32
  *
  */
-class TranslationStatus {
+class TranslationStatus
+{
 
     const string STATUS_NEW        = 'NEW';
     const string STATUS_DRAFT      = 'DRAFT';
@@ -52,12 +54,14 @@ class TranslationStatus {
             self::STATUS_REJECTED
     ];
 
-    public static function isReviewedStatus( $status ): bool {
-        return in_array( $status, TranslationStatus::$REVISION_STATUSES );
+    public static function isReviewedStatus($status): bool
+    {
+        return in_array($status, TranslationStatus::$REVISION_STATUSES);
     }
 
-    public static function isNotInitialStatus( $status ): bool {
-        return !in_array( $status, TranslationStatus::$INITIAL_STATUSES );
+    public static function isNotInitialStatus($status): bool
+    {
+        return !in_array($status, TranslationStatus::$INITIAL_STATUSES);
     }
 
 }

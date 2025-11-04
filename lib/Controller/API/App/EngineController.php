@@ -74,7 +74,6 @@ class EngineController extends KleinController
             throw new InvalidArgumentException("Engine provider required", -8);
         }
 
-        $validEngine = true;
         switch (strtolower($provider)) {
             case strtolower(EngineConstants::DEEPL):
 
@@ -203,9 +202,8 @@ class EngineController extends KleinController
             default:
 
                 // MMT
-                $validEngine = $newEngineStruct = $this->featureSet->filter(
+                $newEngineStruct = $this->featureSet->filter(
                         'buildNewEngineStruct',
-                        false,
                         (object)[
                                 'featureSet'   => $this->featureSet,
                                 'providerName' => $provider,
@@ -216,7 +214,7 @@ class EngineController extends KleinController
                 break;
         }
 
-        if (!$validEngine) {
+        if (!$newEngineStruct) {
             throw new DomainException("Engine not allowed", -4);
         }
 

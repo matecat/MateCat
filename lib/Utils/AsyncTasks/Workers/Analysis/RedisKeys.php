@@ -15,7 +15,8 @@ namespace Utils\AsyncTasks\Workers\Analysis;
  *
  * This class contains the constant strings used by the analysis to set/get values on Redis
  */
-class RedisKeys {
+class RedisKeys
+{
 
     /**
      * Key that holds the number of segments to wait before this job executed

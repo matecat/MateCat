@@ -9,7 +9,8 @@
 
 namespace Model\Pagination;
 
-class PaginationParameters {
+class PaginationParameters
+{
 
     protected string  $fetchClass;
     protected int     $current;
@@ -28,7 +29,8 @@ class PaginationParameters {
      * @param int|null $current
      * @param int|null $pagination
      */
-    public function __construct( string $query, array $bindParams, string $fetchClass, string $baseRoute, ?int $current = 1, ?int $pagination = 20 ) {
+    public function __construct(string $query, array $bindParams, string $fetchClass, string $baseRoute, ?int $current = 1, ?int $pagination = 20)
+    {
         $this->query      = $query;
         $this->bindParams = $bindParams;
         $this->fetchClass = $fetchClass;
@@ -37,40 +39,49 @@ class PaginationParameters {
         $this->baseRoute  = $baseRoute;
     }
 
-    public function setCache( string $cacheKeyMap, ?int $ttl = 60 * 60 * 24 ) {
+    public function setCache(string $cacheKeyMap, ?int $ttl = 60 * 60 * 24): void
+    {
         $this->cacheKeyMap = $cacheKeyMap;
         $this->ttl         = $ttl;
     }
 
-    public function getQuery(): string {
+    public function getQuery(): string
+    {
         return $this->query;
     }
 
-    public function getBindParams(): array {
+    public function getBindParams(): array
+    {
         return $this->bindParams;
     }
 
-    public function getFetchClass(): string {
+    public function getFetchClass(): string
+    {
         return $this->fetchClass;
     }
 
-    public function getCurrent(): int {
+    public function getCurrent(): int
+    {
         return $this->current;
     }
 
-    public function getPagination(): int {
+    public function getPagination(): int
+    {
         return $this->pagination;
     }
 
-    public function getBaseRoute(): string {
+    public function getBaseRoute(): string
+    {
         return $this->baseRoute;
     }
 
-    public function getCacheKeyMap(): ?string {
+    public function getCacheKeyMap(): ?string
+    {
         return $this->cacheKeyMap;
     }
 
-    public function getTtl(): ?int {
+    public function getTtl(): ?int
+    {
         return $this->ttl;
     }
 

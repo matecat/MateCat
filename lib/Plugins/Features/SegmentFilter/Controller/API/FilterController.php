@@ -29,7 +29,6 @@ class FilterController extends KleinController
     {
         $this->return404IfTheJobWasDeleted();
 
-        // TODO: validate the input filter
         $model = new SegmentFilterModel($this->chunk, $this->filter);
 
         $ids_as_array = [];

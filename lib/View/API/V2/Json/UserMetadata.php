@@ -11,29 +11,29 @@ namespace View\API\V2\Json;
 
 use Model\Users\MetadataStruct;
 
-class UserMetadata {
+class UserMetadata
+{
 
     /**
      * @param $collection MetadataStruct[]
      *
      * @return array
      */
-    public static function renderMetadataCollection( $collection ) {
-
+    public static function renderMetadataCollection(?array $collection = null): array
+    {
         $out = [];
 
-        $returnable = [ 'gplus_picture' ];
+        $returnable = ['gplus_picture'];
 
-        if ( is_array( $collection ) and !empty( $collection ) ) {
-            foreach ( $collection as $metadata ) {
-                if ( in_array( $metadata->key, $returnable ) ) {
+        if (is_array($collection) and !empty($collection)) {
+            foreach ($collection as $metadata) {
+                if (in_array($metadata->key, $returnable)) {
                     $out[ $metadata->key ] = $metadata->value;
                 }
             }
         }
 
         return $out;
-
     }
 
 

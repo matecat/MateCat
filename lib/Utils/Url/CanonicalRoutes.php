@@ -8,7 +8,8 @@ use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
 
-class CanonicalRoutes {
+class CanonicalRoutes
+{
 
     /**
      * @param array $requestInfo
@@ -17,20 +18,19 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function inviteToTeamConfirm( array $requestInfo, array $options = [] ): string {
+    public static function inviteToTeamConfirm(array $requestInfo, array $options = []): string
+    {
+        $host = self::httpHost($options);
 
-        $host = self::httpHost( $options );
-
-        $jwtHandler = new SimpleJWT( [
+        $jwtHandler = new SimpleJWT([
                 'invited_by_uid' => $requestInfo[ 'invited_by_uid' ],
                 'email'          => $requestInfo[ 'email' ],
                 'team_id'        => $requestInfo[ 'team_id' ],
-        ] );
+        ]);
 
-        $jwtHandler->setTimeToLive( 60 * 60 * 24 * 3 ); //3 days
+        $jwtHandler->setTimeToLive(60 * 60 * 24 * 3); //3 days
 
         return "$host/api/app/teams/members/invite/$jwtHandler";
-
     }
 
     /**
@@ -40,8 +40,9 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function passwordReset( string $confirmation_token, array $options = [] ): string {
-        $host = self::httpHost( $options );
+    public static function passwordReset(string $confirmation_token, array $options = []): string
+    {
+        $host = self::httpHost($options);
 
         return "$host/api/app/user/password_reset/$confirmation_token";
     }
@@ -53,8 +54,9 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function signupConfirmation( string $confirmation_token, array $options = [] ): string {
-        $host = self::httpHost( $options );
+    public static function signupConfirmation(string $confirmation_token, array $options = []): string
+    {
+        $host = self::httpHost($options);
 
         return "$host/api/app/user/confirm/$confirmation_token";
     }
@@ -67,8 +69,9 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function downloadXliff( int $id_job, string $password, array $options = [] ): string {
-        $host = self::httpHost( $options );
+    public static function downloadXliff(int $id_job, string $password, array $options = []): string
+    {
+        $host = self::httpHost($options);
 
         return "$host/api/v2/xliff/$id_job/$password/$id_job.zip";
     }
@@ -83,18 +86,19 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function downloadOriginal( int $id_job, string $password, ?string $filename = null, string $download_type = 'all', array $options = [] ): string {
-        $host = self::httpHost( $options );
+    public static function downloadOriginal(int $id_job, string $password, ?string $filename = null, string $download_type = 'all', array $options = []): string
+    {
+        $host = self::httpHost($options);
 
         $params = [
                 'download_type' => $download_type
         ];
 
-        if ( !empty( $filename ) ) {
+        if (!empty($filename)) {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/api/v2/original/$id_job/$password?" . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
+        return "$host/api/v2/original/$id_job/$password?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
     }
 
     /**
@@ -107,18 +111,19 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function downloadTranslation( int $id_job, string $password, ?string $filename = null, string $download_type = 'all', array $options = [] ): string {
-        $host = self::httpHost( $options );
+    public static function downloadTranslation(int $id_job, string $password, ?string $filename = null, string $download_type = 'all', array $options = []): string
+    {
+        $host = self::httpHost($options);
 
         $params = [
                 'download_type' => $download_type
         ];
 
-        if ( !empty( $filename ) ) {
+        if (!empty($filename)) {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/api/v2/translation/$id_job/$password?" . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
+        return "$host/api/v2/translation/$id_job/$password?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
     }
 
     /**
@@ -132,17 +137,18 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function revise( string $project_name, int $id_job, string $password, string $source, string $target, array $options = [] ): string {
-        $host   = self::httpHost( $options );
+    public static function revise(string $project_name, int $id_job, string $password, string $source, string $target, array $options = []): string
+    {
+        $host   = self::httpHost($options);
         $revise = 'revise';
 
-        if ( isset( $options[ 'revision_number' ] ) && $options[ 'revision_number' ] > 1 ) {
+        if (isset($options[ 'revision_number' ]) && $options[ 'revision_number' ] > 1) {
             $revise .= $options[ 'revision_number' ];
         }
 
         $url = "$host/$revise/$project_name/$source-$target/$id_job-$password";
 
-        if ( isset( $options[ 'id_segment' ] ) ) {
+        if (isset($options[ 'id_segment' ])) {
             $url .= '#' . $options[ 'id_segment' ];
         }
 
@@ -160,8 +166,9 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function translate( string $project_name, int $id_job, string $password, string $source, string $target, array $options = [] ): string {
-        $host = self::httpHost( $options );
+    public static function translate(string $project_name, int $id_job, string $password, string $source, string $target, array $options = []): string
+    {
+        $host = self::httpHost($options);
 
         return "$host/translate/$project_name/$source-$target/$id_job-$password";
     }
@@ -173,14 +180,16 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function analyze( array $params, array $options = [] ): string {
-        $params = Utils::ensure_keys( $params,
-                [ 'project_name', 'id_project', 'password' ]
+    public static function analyze(array $params, array $options = []): string
+    {
+        $params = Utils::ensure_keys(
+                $params,
+                ['project_name', 'id_project', 'password']
         );
 
-        $host = self::httpHost( $options );
+        $host = self::httpHost($options);
 
-        $project_name = Utils::friendly_slug( $params[ 'project_name' ] );
+        $project_name = Utils::friendly_slug($params[ 'project_name' ]);
 
         return $host . "/analyze/" . $project_name . "/" . $params[ 'id_project' ] . "-" . $params[ 'password' ];
     }
@@ -189,7 +198,8 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function manage(): string {
+    public static function manage(): string
+    {
         $host = self::httpHost();
 
         return "$host/manage";
@@ -201,13 +211,14 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function appRoot( array $options = [] ): string {
+    public static function appRoot(array $options = []): string
+    {
         $query = $options[ 'query' ] ?? null;
 
-        $url = self::httpHost( $options ) . AppConfig::$BASEURL;
+        $url = self::httpHost($options) . AppConfig::$BASEURL;
 
-        if ( $query ) {
-            $url .= '?' . http_build_query( $query );
+        if ($query) {
+            $url .= '?' . http_build_query($query);
         }
 
         return $url;
@@ -219,8 +230,9 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function pluginsBase( array $options = [] ): string {
-        return self::httpHost( $options ) . '/plugins';
+    public static function pluginsBase(array $options = []): string
+    {
+        return self::httpHost($options) . '/plugins';
     }
 
     /**
@@ -229,15 +241,16 @@ class CanonicalRoutes {
      * @return string
      * @throws Exception
      */
-    public static function httpHost( array $params = [] ): string {
+    public static function httpHost(array $params = []): string
+    {
         $host = AppConfig::$HTTPHOST;
 
-        if ( !empty( $params[ 'http_host' ] ) ) {
+        if (!empty($params[ 'http_host' ])) {
             $host = $params[ 'http_host' ];
         }
 
-        if ( empty( $host ) ) {
-            throw new Exception( 'HTTP_HOST is not set ' );
+        if (empty($host)) {
+            throw new Exception('HTTP_HOST is not set ');
         }
 
         return $host;

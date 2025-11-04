@@ -20,7 +20,8 @@ use Utils\Engines\YandexTranslate;
  * Date: 23/02/15
  * Time: 15.08
  */
-class EngineConstants {
+class EngineConstants
+{
 
     const string MT   = "MT";
     const string TM   = "TM";
@@ -55,12 +56,14 @@ class EngineConstants {
     /**
      * @return array
      */
-    public static function getAvailableEnginesList(): array {
+    public static function getAvailableEnginesList(): array
+    {
         return self::$ENGINES_LIST;
     }
 
-    public static function setInEnginesList( $engine ) {
-        if ( defined( 'self::' . $engine ) ) {
+    public static function setInEnginesList($engine): void
+    {
+        if (defined('self::' . $engine)) {
             self::$ENGINES_LIST[ $engine ] = $engine;
         }
     }

@@ -10,7 +10,6 @@ use JetBrains\PhpStorm\NoReturn;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\QualityReportSegmentModel;
-use ZipArchive;
 
 
 class DownloadQRController extends KleinController
@@ -480,31 +479,13 @@ class DownloadQRController extends KleinController
     }
 
     /**
-     * @param string $filename
-     * @param array  $files
-     */
-    private function composeZipFile(string $filename, array $files): void
-    {
-        $zip = new ZipArchive;
-
-        if ($zip->open($filename, ZipArchive::CREATE)) {
-            foreach ($files as $index => $fileContent) {
-                $zip->addFromString("qr_file__" . ($index + 1) . "." . $this->format, $fileContent);
-            }
-
-            $zip->close();
-        }
-    }
-
-    /**
      * Download a file
      *
      * @param string $mimeType
      * @param string $filename
      * @param string $filePath
      */
-    #[NoReturn]
-    private function downloadFile(string $mimeType, string $filename, string $filePath): void
+    private function downloadFile(string $mimeType, string $filename, string $filePath): never
     {
         $outputContent = file_get_contents($filePath);
 

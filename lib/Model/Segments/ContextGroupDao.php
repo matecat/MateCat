@@ -13,12 +13,13 @@ use Model\DataAccess\AbstractDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
 
-class ContextGroupDao extends AbstractDao {
+class ContextGroupDao extends AbstractDao
+{
 
     const string TABLE       = 'context_groups';
     const string STRUCT_TYPE = ContextStruct::class;
-    protected static array $auto_increment_field = [ 'id' ];
-    protected static array $primary_keys         = [ 'id', 'id_project' ];
+    protected static array $auto_increment_field = ['id'];
+    protected static array $primary_keys         = ['id', 'id_project'];
 
     protected static string $query_get_all_by_project   = "SELECT * FROM context_groups WHERE id_project = :id_project";
     protected static string $query_get_all_by_file_id   = "SELECT * FROM context_groups WHERE id_file = :id_file";
@@ -31,10 +32,12 @@ class ContextGroupDao extends AbstractDao {
      * @return ProjectStruct[]
      * @throws ReflectionException
      */
-    public function getAllByProject( ProjectStruct $project ): array {
-        $stmt = $this->_getStatementForQuery( self::$query_get_all_by_project );
+    public function getAllByProject(ProjectStruct $project): array
+    {
+        $stmt = $this->_getStatementForQuery(self::$query_get_all_by_project);
 
-        return $this->_fetchObjectMap( $stmt,
+        return $this->_fetchObjectMap(
+                $stmt,
                 ProjectStruct::class,
                 [
                         'id_project' => $project->id
@@ -45,10 +48,12 @@ class ContextGroupDao extends AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function getBySegmentID( $sid ): ?ContextStruct {
-        $stmt = $this->_getStatementForQuery( self::$query_get_by_segment_id );
+    public function getBySegmentID($sid): ?ContextStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::$query_get_by_segment_id);
 
-        return $this->_fetchObjectMap( $stmt,
+        return $this->_fetchObjectMap(
+                $stmt,
                 ContextStruct::class,
                 [
                         'id_segment' => $sid
@@ -60,10 +65,12 @@ class ContextGroupDao extends AbstractDao {
      * @return ContextStruct[]
      * @throws ReflectionException
      */
-    public function getByFileID( $fid ): array {
-        $stmt = $this->_getStatementForQuery( self::$query_get_all_by_file_id );
+    public function getByFileID($fid): array
+    {
+        $stmt = $this->_getStatementForQuery(self::$query_get_all_by_file_id);
 
-        return $this->_fetchObjectMap( $stmt,
+        return $this->_fetchObjectMap(
+                $stmt,
                 ContextStruct::class,
                 [
                         'id_file' => $fid
@@ -78,10 +85,12 @@ class ContextGroupDao extends AbstractDao {
      * @return ContextStruct[]
      * @throws ReflectionException
      */
-    public function getBySIDRange( $start, $stop ): array {
-        $stmt = $this->_getStatementForQuery( self::$query_get_by_segment_range );
+    public function getBySIDRange($start, $stop): array
+    {
+        $stmt = $this->_getStatementForQuery(self::$query_get_by_segment_range);
 
-        $resSet      = $this->_fetchObjectMap( $stmt,
+        $resSet      = $this->_fetchObjectMap(
+                $stmt,
                 ContextStruct::class,
                 [
                         'id_segment_start' => $start,
@@ -89,10 +98,10 @@ class ContextGroupDao extends AbstractDao {
                 ]
         );
         $_fetchGroup = [];
-        foreach ( $resSet as $cStruct ) {
+        foreach ($resSet as $cStruct) {
             $_fetchGroup[ $cStruct->id_segment ] = $cStruct;
         }
-        unset( $resSet );
+        unset($resSet);
 
         return $_fetchGroup;
     }

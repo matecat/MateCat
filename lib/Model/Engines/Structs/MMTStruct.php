@@ -17,7 +17,8 @@ use Utils\Engines\MMT;
  * This class contains the default parameters for a MMT EnginesFactory CREATION
  *
  */
-class MMTStruct extends EngineStruct {
+class MMTStruct extends EngineStruct
+{
 
     /**
      * @var string|null
@@ -50,9 +51,9 @@ class MMTStruct extends EngineStruct {
     public ?string $update_relative_url = "memories/content";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $others = [
+    public string|array|null $others = [
             "tmx_import_relative_url" => "memories/content",
             "api_key_check_auth_url"  => "users/me",
             "user_update_activate"    => "memories/connect",
@@ -66,9 +67,9 @@ class MMTStruct extends EngineStruct {
 
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
+    public string|array|null $extra_parameters = [
             'MMT-License'      => "",
             'MMT-pretranslate' => "",
             'MMT-preimport'    => "",
@@ -86,9 +87,10 @@ class MMTStruct extends EngineStruct {
 
     /**
      * An empty struct
-     * @return EngineStruct
+     * @return MMTStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new MMTStruct();
     }
 }

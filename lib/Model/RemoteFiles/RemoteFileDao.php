@@ -6,7 +6,8 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
 
-class RemoteFileDao extends AbstractDao {
+class RemoteFileDao extends AbstractDao
+{
     /**
      * @param int    $id_file
      * @param int    $id_job
@@ -14,7 +15,8 @@ class RemoteFileDao extends AbstractDao {
      * @param int    $connected_service_id
      * @param int    $is_original
      */
-    public static function insert( int $id_file, int $id_job, string $remote_id, int $connected_service_id, int $is_original = 0 ) {
+    public static function insert(int $id_file, int $id_job, string $remote_id, int $connected_service_id, int $is_original = 0): void
+    {
         $data                  = [];
         $data[ 'id_file' ]     = $id_file;
         $data[ 'id_job' ]      = $id_job;
@@ -24,7 +26,7 @@ class RemoteFileDao extends AbstractDao {
         $data[ 'connected_service_id' ] = $connected_service_id;
 
         $db = Database::obtain();
-        $db->insert( 'remote_files', $data );
+        $db->insert('remote_files', $data);
     }
 
     /**
@@ -32,7 +34,8 @@ class RemoteFileDao extends AbstractDao {
      *
      * @return RemoteFileStruct[]
      */
-    public static function getByJobId( int $id_job ): array {
+    public static function getByJobId(int $id_job): array
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM remote_files " .
@@ -40,8 +43,8 @@ class RemoteFileDao extends AbstractDao {
                 "   AND is_original = 0 "
         );
 
-        $stmt->execute( [ 'id_job' => $id_job ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, RemoteFileStruct::class );
+        $stmt->execute(['id_job' => $id_job]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
         return $stmt->fetchAll();
     }
@@ -52,7 +55,8 @@ class RemoteFileDao extends AbstractDao {
      *
      * @return RemoteFileStruct[]
      */
-    public static function getOriginalsByJobId( int $id_job ): array {
+    public static function getOriginalsByJobId(int $id_job): array
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT r.* FROM remote_files r " .
@@ -63,8 +67,8 @@ class RemoteFileDao extends AbstractDao {
                 " ORDER BY r.id_file "
         );
 
-        $stmt->execute( [ 'id_job' => $id_job ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, RemoteFileStruct::class );
+        $stmt->execute(['id_job' => $id_job]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
         return $stmt->fetchAll();
     }
@@ -75,7 +79,8 @@ class RemoteFileDao extends AbstractDao {
      *
      * @return RemoteFileStruct[]
      */
-    public static function getByFileId( int $id_file, int $is_original = 0 ): array {
+    public static function getByFileId(int $id_file, int $is_original = 0): array
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM remote_files " .
@@ -83,8 +88,8 @@ class RemoteFileDao extends AbstractDao {
                 "   AND is_original = :is_original "
         );
 
-        $stmt->execute( [ 'id_file' => $id_file, 'is_original' => $is_original ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, RemoteFileStruct::class );
+        $stmt->execute(['id_file' => $id_file, 'is_original' => $is_original]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
         return $stmt->fetchAll();
     }
@@ -93,9 +98,10 @@ class RemoteFileDao extends AbstractDao {
      * @param int $id_file
      * @param int $id_job
      *
-     * @return RemoteFileStruct
+     * @return RemoteFileStruct|null
      */
-    public static function getByFileAndJob( int $id_file, int $id_job ): ?RemoteFileStruct {
+    public static function getByFileAndJob(int $id_file, int $id_job): ?RemoteFileStruct
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM remote_files " .
@@ -104,8 +110,8 @@ class RemoteFileDao extends AbstractDao {
                 "   AND is_original = 0 "
         );
 
-        $stmt->execute( [ 'id_file' => $id_file, 'id_job' => $id_job ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, RemoteFileStruct::class );
+        $stmt->execute(['id_file' => $id_file, 'id_job' => $id_job]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
         return $stmt->fetch() ?: null;
     }
@@ -115,7 +121,8 @@ class RemoteFileDao extends AbstractDao {
      *
      * @return boolean
      */
-    public static function jobHasRemoteFiles( int $id_job ): bool {
+    public static function jobHasRemoteFiles(int $id_job): bool
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "  SELECT count(id) "
@@ -123,22 +130,22 @@ class RemoteFileDao extends AbstractDao {
                 . " WHERE id_job = :id_job "
                 . "   AND is_original = 0 "
         );
-        $stmt->setFetchMode( PDO::FETCH_NUM );
-        $stmt->execute( [ 'id_job' => $id_job ] );
+        $stmt->setFetchMode(PDO::FETCH_NUM);
+        $stmt->execute(['id_job' => $id_job]);
 
         $result = $stmt->fetch();
 
         $countRemoteFiles = $result[ 0 ];
 
-        if ( $countRemoteFiles > 0 ) {
+        if ($countRemoteFiles > 0) {
             return true;
         }
 
         return false;
     }
 
-    protected function _buildResult( array $array_result ) {
-        return null;
+    protected function _buildResult(array $array_result): void
+    {
     }
 }
 

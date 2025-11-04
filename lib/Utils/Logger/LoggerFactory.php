@@ -8,7 +8,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Utils\Registry\AppConfig;
 
-class LoggerFactory {
+class LoggerFactory
+{
 
     const string LOG_FILENAME = 'general_log.txt';
 
@@ -27,11 +28,12 @@ class LoggerFactory {
      * @param MatecatLogger $logger     The logger instance to write to.
      * @param mixed         $stringData The data to log.
      */
-    protected static function _writeTo( MatecatLogger $logger, $stringData ): void {
+    protected static function _writeTo(MatecatLogger $logger, mixed $stringData): void
+    {
         try {
-            $logger->debug( $stringData );
-        } catch ( Exception $e ) {
-            file_put_contents( self::getFileNamePath( 'logging_configuration_exception.log' ), $stringData, FILE_APPEND );
+            $logger->debug($stringData);
+        } catch (Exception) {
+            file_put_contents(self::getFileNamePath('logging_configuration_exception.log'), $stringData, FILE_APPEND);
         }
     }
 
@@ -43,12 +45,13 @@ class LoggerFactory {
      *
      * @return MatecatLogger The initialized logger instance.
      */
-    protected static function initMonolog( string $name, string $fileName ): MatecatLogger {
-        if ( !isset( self::$loggersMap[ $name ] ) ) {
-            $streamHandler = new StreamHandler( self::getFileNamePath( $fileName ) );
+    protected static function initMonolog(string $name, string $fileName): MatecatLogger
+    {
+        if (!isset(self::$loggersMap[ $name ])) {
+            $streamHandler = new StreamHandler(self::getFileNamePath($fileName));
             $fileFormatter = new JsonFormatter();
-            $streamHandler->setFormatter( $fileFormatter );
-            self::$loggersMap[ $name ] = new MatecatLogger( new Logger( $name, [ $streamHandler ], [ new LogProcessor( Logger::DEBUG, [ __NAMESPACE__ ] ) ] ) );
+            $streamHandler->setFormatter($fileFormatter);
+            self::$loggersMap[ $name ] = new MatecatLogger(new Logger($name, [$streamHandler], [new LogProcessor(Logger::DEBUG, [__NAMESPACE__])]));
         }
 
         return self::$loggersMap[ $name ];
@@ -61,7 +64,8 @@ class LoggerFactory {
      *
      * @return string The full path to the log file.
      */
-    protected static function getFileNamePath( string $fileName ): string {
+    protected static function getFileNamePath(string $fileName): string
+    {
         return AppConfig::$LOG_REPOSITORY . "/" . $fileName;
     }
 
@@ -72,9 +76,10 @@ class LoggerFactory {
      * @param string      $filename The name of the log file. Defaults to 'log.txt'.
      * @param string|null $logName  The name of the logger. Defaults to the filename.
      */
-    public static function doJsonLog( mixed $content, string $filename = self::LOG_FILENAME, ?string $logName = null ): void {
-        $logger = self::initMonolog( $logName ?? $filename, $filename );
-        self::_writeTo( $logger, $content );
+    public static function doJsonLog(mixed $content, string $filename = self::LOG_FILENAME, ?string $logName = null): void
+    {
+        $logger = self::initMonolog($logName ?? $filename, $filename);
+        self::_writeTo($logger, $content);
     }
 
     /**
@@ -85,8 +90,9 @@ class LoggerFactory {
      *
      * @return MatecatLogger The logger instance.
      */
-    public static function getLogger( ?string $name = null, string $fileName = self::LOG_FILENAME ): MatecatLogger {
-        return self::initMonolog( $name ?? $fileName, $fileName );
+    public static function getLogger(?string $name = null, string $fileName = self::LOG_FILENAME): MatecatLogger
+    {
+        return self::initMonolog($name ?? $fileName, $fileName);
     }
 
     /**
@@ -97,9 +103,10 @@ class LoggerFactory {
      *
      * @throws Exception If an error occurs while setting aliases.
      */
-    public static function setAliases( array $names, MatecatLogger $logger ): void {
-        foreach ( $names as $name ) {
-            self::$loggersMap[ $name ] = $logger->withName( $name );
+    public static function setAliases(array $names, MatecatLogger $logger): void
+    {
+        foreach ($names as $name) {
+            self::$loggersMap[ $name ] = $logger->withName($name);
         }
     }
 
@@ -114,36 +121,37 @@ class LoggerFactory {
      * @return string|null The hexdump string if $return is true, otherwise null.
      * @codeCoverageIgnore
      */
-    public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ): ?string {
-        if ( is_array( $data ) ) {
-            $data = print_r( $data, true );
+    public static function hexDump(string|array $data, bool $htmloutput = false, bool $uppercase = true, bool $return = false): ?string
+    {
+        if (is_array($data)) {
+            $data = print_r($data, true);
         }
 
         $hexi   = '';
         $ascii  = '';
-        $dump   = ( $htmloutput === true ) ? '<pre>' : '';
+        $dump   = ($htmloutput === true) ? '<pre>' : '';
         $offset = 0;
-        $len    = strlen( $data );
+        $len    = strlen($data);
 
-        $x = ( $uppercase === false ) ? 'x' : 'X';
+        $x = ($uppercase === false) ? 'x' : 'X';
 
-        for ( $i = $j = 0; $i < $len; $i++ ) {
-            $hexi .= sprintf( "%02$x ", ord( $data[ $i ] ) );
+        for ($i = $j = 0; $i < $len; $i++) {
+            $hexi .= sprintf("%02$x ", ord($data[ $i ]));
 
             // Replace non-viewable bytes with '.'
-            if ( ord( $data[ $i ] ) >= 32 ) {
-                $ascii .= ( $htmloutput === true ) ? htmlentities( $data[ $i ] ) : $data[ $i ];
+            if (ord($data[ $i ]) >= 32) {
+                $ascii .= ($htmloutput === true) ? htmlentities($data[ $i ]) : $data[ $i ];
             } else {
                 $ascii .= '.';
             }
 
-            if ( $j === 7 ) {
+            if ($j === 7) {
                 $hexi  .= ' ';
                 $ascii .= ' ';
             }
 
-            if ( ++$j === 16 || $i === $len - 1 ) {
-                $dump .= sprintf( "%04$x  %-49s  %s", $offset, $hexi, $ascii );
+            if (++$j === 16 || $i === $len - 1) {
+                $dump .= sprintf("%04$x  %-49s  %s", $offset, $hexi, $ascii);
 
                 // Reset vars
                 $hexi   = $ascii = '';
@@ -151,7 +159,7 @@ class LoggerFactory {
                 $j      = 0;
 
                 // Add newline
-                if ( $i !== $len - 1 ) {
+                if ($i !== $len - 1) {
                     $dump .= "\n";
                 }
             }
@@ -161,9 +169,9 @@ class LoggerFactory {
         $dump .= "\n";
 
         // Output method
-        if ( $return === false ) {
-            $logger = self::initMonolog( 'hex_dump', 'hex_dump.log' );
-            self::_writeTo( $logger, $dump . "\n" );
+        if ($return === false) {
+            $logger = self::initMonolog('hex_dump', 'hex_dump.log');
+            self::_writeTo($logger, $dump . "\n");
 
             return null;
         } else {
@@ -176,8 +184,9 @@ class LoggerFactory {
      *
      * @return string The unique request ID.
      */
-    public static function getRequestID(): string {
-        if ( self::$requestID == null ) {
+    public static function getRequestID(): string
+    {
+        if (self::$requestID == null) {
             self::$requestID = uniqid();
         }
 

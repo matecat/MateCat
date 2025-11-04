@@ -25,7 +25,8 @@ use Utils\Redis\RedisHandler;
  * @package ProjectQueue
  *
  */
-class ProjectQueue {
+class ProjectQueue
+{
 
     /**
      * @param ArrayObject $projectStructure
@@ -35,42 +36,40 @@ class ProjectQueue {
      * //TODO externalize ProjectStruct from @see ProjectManager
      *
      */
-    public static function sendProject( ArrayObject $projectStructure ): void {
-
+    public static function sendProject(ArrayObject $projectStructure): void
+    {
         try {
-            WorkerClient::enqueue( 'PROJECT_QUEUE', ProjectCreationWorker::class, $projectStructure->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( Exception $e ) {
-
+            WorkerClient::enqueue('PROJECT_QUEUE', ProjectCreationWorker::class, $projectStructure->getArrayCopy(), ['persistent' => WorkerClient::$_HANDLER->persistent]);
+        } catch (Exception $e) {
             # Handle the error, logging, ...
             $output = "**** Project Enqueue failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
-            $output .= var_export( $projectStructure, true );
-            LoggerFactory::doJsonLog( $output );
+            $output .= var_export($projectStructure, true);
+            LoggerFactory::doJsonLog($output);
             throw $e;
-
         }
-
     }
 
     /**
      * @throws ReflectionException
      */
-    public static function getPublishedResults( $id_project ){
-
-        $redisHandler = ( new RedisHandler() )->getConnection();
-        $response = json_decode( $redisHandler->get( sprintf( ProjectStatus::PROJECT_QUEUE_HASH, $id_project ) ) ?? 'null', true );
+    public static function getPublishedResults($id_project)
+    {
+        $redisHandler = (new RedisHandler())->getConnection();
+        $response     = json_decode($redisHandler->get(sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $id_project)) ?? 'null', true);
         $redisHandler->disconnect();
-        return $response;
 
+        return $response;
     }
 
     /**
      * @throws ReflectionException
      */
-    public static function publishResults( ArrayObject $projectStructure ): Status {
+    public static function publishResults(ArrayObject $projectStructure): Status
+    {
+        $hashKey = sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure[ 'id_project' ]);
 
-        $hashKey = sprintf( ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure[ 'id_project' ] );
-        return ( new RedisHandler() )->getConnection()->set( $hashKey, json_encode( $projectStructure[ 'result' ], 60 * 60 * 24 * 7 ) ); //store for 7 days
+        return (new RedisHandler())->getConnection()->set($hashKey, json_encode($projectStructure[ 'result' ], 60 * 60 * 24 * 7)); //store for 7 days
 
     }
 

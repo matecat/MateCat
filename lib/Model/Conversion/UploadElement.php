@@ -20,6 +20,7 @@ use Model\DataAccess\RecursiveArrayCopy;
  * @property string $tmp_name
  * @property string $error
  * @property int    $size
+ * @property string $file_path
  */
 #[AllowDynamicProperties]
 class UploadElement implements ArrayAccess

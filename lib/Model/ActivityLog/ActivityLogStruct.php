@@ -11,7 +11,8 @@ use Model\DataAccess\IDaoStruct;
  * Date: 13/06/16
  * Time: 12:30
  */
-class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     /**
      * MAP to convert the values to the right string definition
@@ -82,66 +83,67 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     protected array $cached_results = [];
 
     /**
-     * @var int
+     * @var ?int
      */
-    public $id_project;
+    public ?int $id_project = null;
+
+    /**
+     * @var ?int
+     */
+    public ?int $ID = null;
+
+    /**
+     * @var ?int
+     */
+    public ?int $id_job = null;
 
     /**
      * @var int
      */
-    public $ID;
-
-    /**
-     * @var int
-     */
-    public $id_job;
-
-    /**
-     * @var int
-     */
-    public $action;
+    public int $action;
 
     /**
      * @var string
      */
-    public $ip;
+    public string $ip;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public $uid;
-
-    /**
-     * @var string
-     */
-    public $event_date;
+    public ?int $uid = null; //nullable for anonymous users. Backward compatibility
 
     /**
      * @var string
      */
-    public $memory_key;
+    public string $event_date;
+
+    /**
+     * @var ?string
+     */
+    public ?string $memory_key = null;
 
     /**
      * @var string
      */
-    public $email;
+    public string $email = '';
 
     /**
      * @var string
      */
-    public $first_name;
+    public string $first_name = '';
 
     /**
      * @var string
      */
-    public $last_name;
+    public string $last_name = '';
 
     /**
      * @param $actionID int
      *
      * @return string
      */
-    public static function getAction( $actionID ): string {
+    public static function getAction(int $actionID): string
+    {
         return self::$actionsStrings[ $actionID ];
     }
 

@@ -23,7 +23,8 @@ class SegmentTranslationIssue
 
     public function renderItem(IdaoStruct $record): array
     {
-        $dao      = new EntryCommentDao();
+        $dao = new EntryCommentDao();
+        /** @var EntryStruct $record */
         $comments = $dao->findByIssueId($record->id);
         $record   = new EntryStruct($record->getArrayCopy());
 
@@ -49,7 +50,7 @@ class SegmentTranslationIssue
         ];
     }
 
-    public function genCSVTmpFile($data)
+    public function genCSVTmpFile($data): string
     {
         $filePath   = tempnam("/tmp", "SegmentsIssuesComments_");
         $csvHandler = new SplFileObject($filePath, "w");
@@ -106,7 +107,7 @@ class SegmentTranslationIssue
         return $out;
     }
 
-    private function getDateValue($strDate): ?string
+    private function getDateValue(?string $strDate = null): ?string
     {
         if ($strDate != null) {
             return date('c', strtotime($strDate));
@@ -115,7 +116,7 @@ class SegmentTranslationIssue
         return null;
     }
 
-    public function cleanDownloadResource()
+    public function cleanDownloadResource(): void
     {
         $path = $this->csvHandler->getRealPath();
         unset($this->csvHandler);

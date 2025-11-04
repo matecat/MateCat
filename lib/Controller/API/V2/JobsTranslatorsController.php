@@ -14,10 +14,12 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\JobPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
 use InvalidArgumentException;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Translators\TranslatorsModel;
+use ReflectionException;
 use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController
@@ -31,6 +33,7 @@ class JobsTranslatorsController extends KleinController
 
     /**
      * @throws NotFoundException
+     * @throws Exception
      */
     public function add(): void
     {
@@ -72,6 +75,11 @@ class JobsTranslatorsController extends KleinController
         );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws \Model\Exceptions\NotFoundException
+     * @throws NotFoundException
+     */
     public function get(): void
     {
         $this->params = filter_var_array($this->params, [

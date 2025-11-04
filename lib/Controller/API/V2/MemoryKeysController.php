@@ -17,26 +17,27 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use View\API\V2\Json\MemoryKeys;
 
-class MemoryKeysController extends KleinController {
+class MemoryKeysController extends KleinController
+{
 
-    public function afterConstruct(): void {
-        $this->appendValidator( new LoginValidator( $this ) );
+    public function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
      */
-    public function listKeys() {
-
+    public function listKeys(): void
+    {
         $keyQuery      = new MemoryKeyStruct();
         $keyQuery->uid = $this->user->uid;
 
         $memoryKeyDao = new MemoryKeyDao();
-        $keyList      = $memoryKeyDao->read( $keyQuery );
+        $keyList      = $memoryKeyDao->read($keyQuery);
 
-        $formatter = new MemoryKeys( $keyList );
-        $this->response->json( $formatter->render() );
-
+        $formatter = new MemoryKeys($keyList);
+        $this->response->json($formatter->render());
     }
 
 }

@@ -7,7 +7,8 @@ use Model\DataAccess\Database;
 use PDO;
 use ReflectionException;
 
-class MetadataDao extends AbstractDao {
+class MetadataDao extends AbstractDao
+{
 
     const string TABLE = 'user_metadata';
 
@@ -16,15 +17,15 @@ class MetadataDao extends AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function getAllByUidList( array $UIDs ): array {
-
-        if ( empty( $UIDs ) ) {
+    public function getAllByUidList(array $UIDs): array
+    {
+        if (empty($UIDs)) {
             return [];
         }
 
         $stmt = $this->_getStatementForQuery(
                 "SELECT * FROM user_metadata WHERE " .
-                " uid IN( " . str_repeat( '?,', count( $UIDs ) - 1 ) . '?' . " ) "
+                " uid IN( " . str_repeat('?,', count($UIDs) - 1) . '?' . " ) "
         );
 
         /**
@@ -37,22 +38,22 @@ class MetadataDao extends AbstractDao {
         );
 
         $resultSet = [];
-        foreach ( $rs as $metaDataRow ) {
+        foreach ($rs as $metaDataRow) {
             $resultSet[ $metaDataRow->uid ][] = $metaDataRow;
         }
 
         return $resultSet;
-
     }
 
-    public function getAllByUid( $uid ): array {
+    public function getAllByUid($uid): array
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM user_metadata WHERE " .
                 " uid = :uid "
         );
-        $stmt->execute( [ 'uid' => $uid ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, MetadataStruct::class );
+        $stmt->execute(['uid' => $uid]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, MetadataStruct::class);
 
         return $stmt->fetchAll();
     }
@@ -61,16 +62,17 @@ class MetadataDao extends AbstractDao {
      * @param $uid
      * @param $key
      *
-     * @return MetadataStruct
+     * @return MetadataStruct|null
      * @throws ReflectionException
      */
-    public function get( $uid, $key ): ?MetadataStruct {
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
+    public function get($uid, $key): ?MetadataStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_uid_key);
         /** @var $result MetadataStruct */
-        $result = $this->_fetchObjectMap( $stmt, MetadataStruct::class, [
+        $result = $this->_fetchObjectMap($stmt, MetadataStruct::class, [
                 'uid' => $uid,
                 'key' => $key
-        ] );
+        ]);
 
         return $result[ 0 ] ?? null;
     }
@@ -78,10 +80,11 @@ class MetadataDao extends AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function destroyCacheKey( $uid, $key ): bool {
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
+    public function destroyCacheKey($uid, $key): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_uid_key);
 
-        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'uid' => $uid, 'key' => $key ] );
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, ['uid' => $uid, 'key' => $key]);
     }
 
     /**
@@ -92,7 +95,8 @@ class MetadataDao extends AbstractDao {
      * @return MetadataStruct
      * @throws ReflectionException
      */
-    public function set( int $uid, string $key, $value ): MetadataStruct {
+    public function set(int $uid, string $key, array|string $value): MetadataStruct
+    {
         $sql = "INSERT INTO user_metadata " .
                 " ( uid, `key`, value ) " .
                 " VALUES " .
@@ -100,22 +104,21 @@ class MetadataDao extends AbstractDao {
                 " ON DUPLICATE KEY UPDATE value = :value ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
                 'uid'   => $uid,
                 'key'   => $key,
-                'value' => ( is_array( $value ) ) ? serialize( $value ) : $value,
-        ] );
+                'value' => (is_array($value)) ? serialize($value) : $value,
+        ]);
 
-        $this->destroyCacheKey( $uid, $key );
+        $this->destroyCacheKey($uid, $key);
 
-        return new MetadataStruct( [
+        return new MetadataStruct([
                 'id'    => $conn->lastInsertId(),
                 'uid'   => $uid,
                 'key'   => $key,
                 'value' => $value
-        ] );
-
+        ]);
     }
 
 
@@ -125,21 +128,23 @@ class MetadataDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    public function delete( int $uid, string $key ) {
+    public function delete(int $uid, string $key): void
+    {
         $sql = "DELETE FROM user_metadata " .
                 " WHERE uid = :uid " .
                 " AND `key` LIKE :key ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
                 'uid' => $uid,
                 'key' => '%' . $key,
-        ] );
-        $this->destroyCacheKey( $uid, $key );
+        ]);
+        $this->destroyCacheKey($uid, $key);
     }
 
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult(array $array_result)
+    {
         // TODO: Implement _buildResult() method.
     }
 

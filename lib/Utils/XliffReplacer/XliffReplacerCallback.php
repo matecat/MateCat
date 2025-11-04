@@ -104,7 +104,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     }
 
     /**
-     * @param AbstractFilter|MateCatFilter $filter
+     * @param AbstractFilter $filter
      *
      * @return XliffReplacerCallback
      */

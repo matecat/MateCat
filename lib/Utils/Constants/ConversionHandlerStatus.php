@@ -2,7 +2,8 @@
 
 namespace Utils\Constants;
 
-class ConversionHandlerStatus {
+class ConversionHandlerStatus
+{
 
     const int ZIP_HANDLING  = 2;
     const int OK            = 1;

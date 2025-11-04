@@ -32,7 +32,7 @@ class SetChunkCompletedController extends KleinController
 
         $struct = new CompletionEventStruct([
                 'uid'               => $this->user->getUid(),
-                'remote_ip_address' => Utils::getRealIpAddr(),
+                'remote_ip_address' => Utils::getRealIpAddr() ?? '',
                 'source'            => ChunkCompletionEventStruct::SOURCE_USER,
                 'is_review'         => $this->isRevision()
         ]);

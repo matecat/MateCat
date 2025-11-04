@@ -1,6 +1,7 @@
 <?php
 
 namespace Utils\Constants;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -8,7 +9,8 @@ namespace Utils\Constants;
  * Time: 17.30
  *
  */
-class ProjectStatus {
+class ProjectStatus
+{
 
     const string STATUS_NOT_READY_FOR_ANALYSIS = 'NOT_READY_FOR_ANALYSIS';
     const string STATUS_NOT_TO_ANALYZE         = 'NOT_TO_ANALYZE';
@@ -30,8 +32,9 @@ class ProjectStatus {
             self::STATUS_NOT_READY_FOR_ANALYSIS,
     ];
 
-    public static function isAllowedStatus( $status ): bool {
-        return in_array( strtoupper( $status ), self::$ALLOWED_STATUSES );
+    public static function isAllowedStatus($status): bool
+    {
+        return in_array(strtoupper($status), self::$ALLOWED_STATUSES);
     }
 
 } 

@@ -1,6 +1,7 @@
 <?php
 
 namespace Utils\Constants;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -8,7 +9,8 @@ namespace Utils\Constants;
  * Time: 19.08
  *
  */
-class JobStatus {
+class JobStatus
+{
 
     /**
      * Created by PhpStorm.
@@ -30,8 +32,9 @@ class JobStatus {
             self::STATUS_DELETED
     ];
 
-    public static function isAllowedStatus( string $status ): bool {
-        return in_array( strtolower( $status ), self::$ALLOWED_STATUSES );
+    public static function isAllowedStatus(string $status): bool
+    {
+        return in_array(strtolower($status), self::$ALLOWED_STATUSES);
     }
 
 } 

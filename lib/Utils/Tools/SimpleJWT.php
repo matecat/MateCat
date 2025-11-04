@@ -5,6 +5,7 @@ namespace Utils\Tools;
 use ArrayAccess;
 use DomainException;
 use JsonSerializable;
+use Stringable;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
 
@@ -15,11 +16,12 @@ use Utils\Registry\AppConfig;
  * Time: 20.12
  *
  */
-class SimpleJWT implements ArrayAccess, JsonSerializable {
+class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
+{
 
     protected array $storage = [
             'header'    => null,
-            'payload'   => [ 'exp' => null, 'iss' => null, 'iat' => null, 'context' => null ],
+            'payload'   => ['exp' => null, 'iss' => null, 'iat' => null, 'context' => null],
             'signature' => null
     ];
 
@@ -34,30 +36,30 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      *
      * @throws UnexpectedValueException
      */
-    public function __construct( array $hashMap = [] ) {
-
-        if ( [] !== $hashMap && array_keys( $hashMap ) === range( 0, count( $hashMap ) - 1 ) ) {
-            throw new UnexpectedValueException( 'Provided Array is not associative.' );
+    public function __construct(array $hashMap = [])
+    {
+        if ([] !== $hashMap && array_keys($hashMap) === range(0, count($hashMap) - 1)) {
+            throw new UnexpectedValueException('Provided Array is not associative.');
         }
 
         $this->storage[ 'payload' ][ 'context' ] = $hashMap;
         self::$secretKey                         = AppConfig::$AUTHSECRET;
         $this->now                               = time();
-
     }
 
     /**
      * @return array
      */
-    public function sign(): array {
+    public function sign(): array
+    {
         $expire_date                    = $this->now + $this->timeToLive;
         $_storage                       = $this->storage;
-        $_storage[ 'header' ]           = [ "alg" => "HS256", "typ" => "JWT" ];
+        $_storage[ 'header' ]           = ["alg" => "HS256", "typ" => "JWT"];
         $_storage[ 'payload' ][ 'exp' ] = $expire_date;
         $_storage[ 'payload' ][ 'iss' ] = AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
         $_storage[ 'payload' ][ 'iat' ] = $this->now;
-        $_hash                          = hash_hmac( 'sha256', self::base64url_encode( json_encode( $_storage[ 'header' ] ) ) . "." . self::base64url_encode( json_encode( $_storage[ 'payload' ] ) ), self::$secretKey, true );
-        $_storage[ 'signature' ]        = self::base64url_encode( $_hash );
+        $_hash                          = hash_hmac('sha256', self::base64url_encode(json_encode($_storage[ 'header' ])) . "." . self::base64url_encode(json_encode($_storage[ 'payload' ])), self::$secretKey, true);
+        $_storage[ 'signature' ]        = self::base64url_encode($_hash);
 
         return $_storage;
     }
@@ -67,27 +69,26 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      *
      * @return bool
      */
-    public static function isValid( array|string $_storage ): bool {
-
-        if ( is_string( $_storage ) ) {
-            $_storage = static::parseJWTString( $_storage );
+    public static function isValid(array|string $_storage): bool
+    {
+        if (is_string($_storage)) {
+            $_storage = static::parseJWTString($_storage);
         }
 
         $data_hash = $_storage[ 'signature' ];
 
-        $expected_hash = hash_hmac( 'sha256', self::base64url_encode( json_encode( $_storage[ 'header' ] ) ) . "." . self::base64url_encode( json_encode( $_storage[ 'payload' ] ) ), self::$secretKey, true );
+        $expected_hash = hash_hmac('sha256', self::base64url_encode(json_encode($_storage[ 'header' ])) . "." . self::base64url_encode(json_encode($_storage[ 'payload' ])), self::$secretKey, true);
         //check if valid hash and expiration still in time
 
-        if ( $data_hash != self::base64url_encode( $expected_hash ) ) {
-            throw new DomainException( "Invalid Token Signature", 1 );
+        if ($data_hash != self::base64url_encode($expected_hash)) {
+            throw new DomainException("Invalid Token Signature", 1);
         }
 
-        if ( time() > $_storage[ 'payload' ][ 'exp' ] ) {
-            throw new UnexpectedValueException( "Token Expired", 2 );
+        if (time() > $_storage[ 'payload' ][ 'exp' ]) {
+            throw new UnexpectedValueException("Token Expired", 2);
         }
 
         return true;
-
     }
 
     /**
@@ -96,17 +97,16 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      * @return mixed
      * @throws DomainException
      */
-    public static function getValidPayload( string $jwtString ) {
-
-        if ( self::$secretKey == null ) {
-            SimpleJWT::setSecretKey( AppConfig::$AUTHSECRET );
+    public static function getValidPayload(string $jwtString): mixed
+    {
+        if (self::$secretKey == null) {
+            SimpleJWT::setSecretKey(AppConfig::$AUTHSECRET);
         }
 
-        $jwtArray = self::parseJWTString( $jwtString );
-        static::isValid( $jwtArray );
+        $jwtArray = self::parseJWTString($jwtString);
+        static::isValid($jwtArray);
 
         return $jwtArray[ 'payload' ][ 'context' ];
-
     }
 
     /**
@@ -114,12 +114,13 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      *
      * @return array
      */
-    public static function parseJWTString( string $jwtString ): array {
-        [ $header, $payload, $signature ] = explode( ".", $jwtString );
+    public static function parseJWTString(string $jwtString): array
+    {
+        [$header, $payload, $signature] = explode(".", $jwtString);
 
         return [
-                'header'    => json_decode( self::base64url_decode( $header ), true ),
-                'payload'   => json_decode( self::base64url_decode( $payload ), true ),
+                'header'    => json_decode(self::base64url_decode($header), true),
+                'payload'   => json_decode(self::base64url_decode($payload), true),
                 'signature' => $signature
         ];
     }
@@ -128,7 +129,8 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      * @param string $secretKey
      *
      */
-    public static function setSecretKey( string $secretKey ): void {
+    public static function setSecretKey(string $secretKey): void
+    {
         self::$secretKey = $secretKey;
     }
 
@@ -138,10 +140,10 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      * @return $this
      * @throws UnexpectedValueException
      */
-    public function setTimeToLive( int $timeToLive ): SimpleJWT {
-
-        if ( !is_numeric( $timeToLive ) || $timeToLive < 0 ) {
-            throw new UnexpectedValueException( 'Time To Live must be a positive integer' );
+    public function setTimeToLive(int $timeToLive): SimpleJWT
+    {
+        if (!is_numeric($timeToLive) || $timeToLive < 0) {
+            throw new UnexpectedValueException('Time To Live must be a positive integer');
         }
 
         $this->timeToLive = $timeToLive;
@@ -152,46 +154,55 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
     /**
      * @return int
      */
-    public function getExpireDate(): int {
+    public function getExpireDate(): int
+    {
         return $this->now + $this->timeToLive;
     }
 
-    public function offsetExists( mixed $offset ): bool {
-        return isset( $this->storage[ 'payload' ][ 'context' ][ $offset ] );
+    public function offsetExists(mixed $offset): bool
+    {
+        return isset($this->storage[ 'payload' ][ 'context' ][ $offset ]);
     }
 
-    public function offsetGet( mixed $offset ): mixed {
-        if ( isset( $this->storage[ 'payload' ][ 'context' ][ $offset ] ) ) {
+    public function offsetGet(mixed $offset): mixed
+    {
+        if (isset($this->storage[ 'payload' ][ 'context' ][ $offset ])) {
             return $this->storage[ 'payload' ][ 'context' ][ $offset ];
         }
 
         return null;
     }
 
-    public function offsetSet( mixed $offset, mixed $value ): void {
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
         $this->storage[ 'payload' ][ 'context' ][ $offset ] = $value;
     }
 
-    public function offsetUnset( mixed $offset ): void {
-        unset( $this->storage[ 'payload' ][ 'context' ][ $offset ] );
+    public function offsetUnset(mixed $offset): void
+    {
+        unset($this->storage[ 'payload' ][ 'context' ][ $offset ]);
     }
 
-    public function __toString() {
+    public function __toString(): string
+    {
         $data = $this->sign();
 
-        return self::base64url_encode( json_encode( $data[ 'header' ] ) ) . "." . self::base64url_encode( json_encode( $data[ 'payload' ] ) ) . "." . $data[ 'signature' ];
+        return self::base64url_encode(json_encode($data[ 'header' ])) . "." . self::base64url_encode(json_encode($data[ 'payload' ])) . "." . $data[ 'signature' ];
     }
 
-    public function jsonSerialize(): string {
+    public function jsonSerialize(): string
+    {
         return $this->__toString();
     }
 
-    public function encode(): string {
+    public function encode(): string
+    {
         return $this->__toString();
     }
 
-    private static function base64url_encode( string $data ): string {
-        return rtrim( strtr( base64_encode( $data ), '+/', '-_' ), '=' );
+    private static function base64url_encode(string $data): string
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
     /**
@@ -199,8 +210,9 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
      *
      * @return false|string
      */
-    private static function base64url_decode( $data ): false|string {
-        return base64_decode( str_pad( strtr( $data, '-_', '+/' ), strlen( $data ) % 4, '=' ) );
+    private static function base64url_decode($data): false|string
+    {
+        return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '='));
     }
 
 }

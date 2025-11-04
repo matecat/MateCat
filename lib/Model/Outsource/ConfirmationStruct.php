@@ -13,7 +13,8 @@ namespace Model\Outsource;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-abstract class ConfirmationStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+abstract class ConfirmationStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     const string VENDOR_NAME       = '';
     const int    VENDOR_ID         = -1;

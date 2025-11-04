@@ -26,7 +26,8 @@ use Utils\Registry\AppConfig;
  *
  * @package Utils\Logger
  */
-class MatecatLogger implements LoggerInterface {
+class MatecatLogger implements LoggerInterface
+{
 
     /**
      * @var Logger The Monolog Logger instance used for logging.
@@ -38,7 +39,8 @@ class MatecatLogger implements LoggerInterface {
      *
      * @param Logger $logger The Monolog Logger instance to be used.
      */
-    public function __construct( Logger $logger ) {
+    public function __construct(Logger $logger)
+    {
         $this->logger = $logger;
     }
 
@@ -51,8 +53,9 @@ class MatecatLogger implements LoggerInterface {
      * @param mixed $message The debug message to log. Can be a string, array, or object.
      * @param array $context Additional context to include with the log. Defaults to an empty array.
      */
-    public function debug( mixed $message, array $context = [] ): void {
-        $this->log( Logger::DEBUG, $message, $context );
+    public function debug(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::DEBUG, $message, $context);
     }
 
     /**
@@ -62,7 +65,8 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return string The full path to the log file.
      */
-    protected static function getFileNamePath( string $fileName ): string {
+    protected static function getFileNamePath(string $fileName): string
+    {
         return AppConfig::$LOG_REPOSITORY . "/" . $fileName;
     }
 
@@ -73,8 +77,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return MatecatLogger A new MatecatLogger instance with the specified name.
      */
-    public function withName( string $name ): MatecatLogger {
-        return new MatecatLogger( $this->logger->withName( $name ) );
+    public function withName(string $name): MatecatLogger
+    {
+        return new MatecatLogger($this->logger->withName($name));
     }
 
     /**
@@ -83,8 +88,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function emergency( mixed $message, array $context = [] ): void {
-        $this->log( Logger::EMERGENCY, $message, $context );
+    public function emergency(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::EMERGENCY, $message, $context);
     }
 
     /**
@@ -93,8 +99,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function alert( mixed $message, array $context = [] ): void {
-        $this->log( Logger::ALERT, $message, $context );
+    public function alert(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::ALERT, $message, $context);
     }
 
     /**
@@ -103,8 +110,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function critical( mixed $message, array $context = [] ): void {
-        $this->log( Logger::CRITICAL, $message, $context );
+    public function critical(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::CRITICAL, $message, $context);
     }
 
     /**
@@ -113,8 +121,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function error( mixed $message, array $context = [] ): void {
-        $this->log( Logger::ERROR, $message, $context );
+    public function error(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::ERROR, $message, $context);
     }
 
     /**
@@ -123,8 +132,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function warning( mixed $message, array $context = [] ): void {
-        $this->log( Logger::WARNING, $message, $context );
+    public function warning(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::WARNING, $message, $context);
     }
 
     /**
@@ -133,8 +143,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function notice( mixed $message, array $context = [] ): void {
-        $this->log( Logger::NOTICE, $message, $context );
+    public function notice(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::NOTICE, $message, $context);
     }
 
     /**
@@ -143,8 +154,9 @@ class MatecatLogger implements LoggerInterface {
      *
      * @return void
      */
-    public function info( mixed $message, array $context = [] ): void {
-        $this->log( Logger::INFO, $message, $context );
+    public function info(mixed $message, array $context = []): void
+    {
+        $this->log(Logger::INFO, $message, $context);
     }
 
     /**
@@ -160,23 +172,22 @@ class MatecatLogger implements LoggerInterface {
      * @param array $context Additional context to include with the log. Defaults to an empty array.
      *
      */
-    public function log( $level, $message, array $context = [] ): void {
-
+    public function log(mixed $level, mixed $message, array $context = []): void
+    {
         // Format the message and context into a structured array.
-        $r = $this->_formatMessage( $message, $context );
+        $r = $this->_formatMessage($message, $context);
 
         try {
             // Log the formatted message and context using the Monolog logger.
-            $this->logger->log( $level, $r[ 'message' ], $r[ 'context' ] );
-        } catch ( Exception ) {
+            $this->logger->log($level, $r[ 'message' ], $r[ 'context' ]);
+        } catch (Exception) {
             // If logging fails, write the log data to a fallback file.
             file_put_contents(
-                    self::getFileNamePath( 'logging_configuration_exception.log' ),
-                    json_encode( $r ) . PHP_EOL,
+                    self::getFileNamePath('logging_configuration_exception.log'),
+                    json_encode($r) . PHP_EOL,
                     FILE_APPEND
             );
         }
-
     }
 
     /**
@@ -194,15 +205,15 @@ class MatecatLogger implements LoggerInterface {
      *               - 'message': The formatted log message.
      *               - 'context': The merged or original context.
      */
-    private function _formatMessage( mixed $message, array $context = [] ): array {
-
+    private function _formatMessage(mixed $message, array $context = []): array
+    {
         // Determine if the message is structured (array or object).
-        $isStructured = is_array( $message ) || is_object( $message );
+        $isStructured = is_array($message) || is_object($message);
 
-        if ( $isStructured ) {
+        if ($isStructured) {
             // Merge the structured message with the context if the context is not empty.
-            if ( !empty ( $context ) ) {
-                $context = array_merge( (array)$message, $context );
+            if (!empty ($context)) {
+                $context = array_merge((array)$message, $context);
             } else {
                 $context = (array)$message;
             }
@@ -211,8 +222,7 @@ class MatecatLogger implements LoggerInterface {
         }
 
         // Return the formatted message and context as an array.
-        return [ 'message' => $message, 'context' => $context ];
-
+        return ['message' => $message, 'context' => $context];
     }
 
 }

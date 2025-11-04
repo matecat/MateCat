@@ -2,7 +2,8 @@
 
 namespace Utils\Constants;
 
-class XliffTranslationStatus {
+class XliffTranslationStatus
+{
 
     const array STATES_12 = [
             self::FINAL_STATE,
@@ -100,14 +101,15 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isStateQualifierNew( $status ): bool {
-        return in_array( $status, [
+    public static function isStateQualifierNew($status): bool
+    {
+        return in_array($status, [
                 self::FUZZY_MATCH,
                 self::MT_SUGGESTION,
                 self::LEVERAGED_INHERITED,
                 self::LEVERAGED_TM,
                 self::LEVERAGED_MT
-        ] );
+        ]);
     }
 
     /**
@@ -115,14 +117,15 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isStatusNew( $status ): bool {
-        return in_array( $status, [
+    public static function isStatusNew($status): bool
+    {
+        return in_array($status, [
                 self::NEW_STATE,
                 self::INITIAL, // xliff 2.0
                 self::NEEDS_TRANSLATION,
                 self::NEEDS_L10N,
                 self::NEEDS_ADAPTATION,
-        ] );
+        ]);
     }
 
     /**
@@ -130,13 +133,14 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isTranslated( $status ): bool {
-        return in_array( $status, [
+    public static function isTranslated($status): bool
+    {
+        return in_array($status, [
                 self::TRANSLATED,
                 self::NEEDS_REVIEW_ADAPTATION,
                 self::NEEDS_REVIEW_L10N,
                 self::NEEDS_REVIEW_TRANSLATION,
-        ] );
+        ]);
     }
 
     /**
@@ -144,8 +148,9 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isRevision( $status ): bool {
-        return self::isR1( $status );
+    public static function isRevision($status): bool
+    {
+        return self::isR1($status);
     }
 
     /**
@@ -153,11 +158,12 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isR1( $status ): bool {
-        return in_array( $status, [
+    public static function isR1($status): bool
+    {
+        return in_array($status, [
                 self::REVIEWED, // xliff 2.0
                 self::SIGNED_OFF,
-        ] );
+        ]);
     }
 
     /**
@@ -165,7 +171,8 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isFinalState( $status ): bool {
+    public static function isFinalState($status): bool
+    {
         return $status === self::FINAL_STATE; // xliff 2.0 / 1.2
     }
 }

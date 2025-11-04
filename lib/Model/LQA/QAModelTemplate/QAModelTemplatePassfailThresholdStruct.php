@@ -6,7 +6,8 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class QAModelTemplatePassfailThresholdStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
+class QAModelTemplatePassfailThresholdStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
+{
     public ?int   $id             = null;
     public int    $id_passfail;
     public string $passfail_label;
@@ -15,7 +16,8 @@ class QAModelTemplatePassfailThresholdStruct extends AbstractDaoSilentStruct imp
     /**
      * @inheritDoc
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
                 'id'          => (int)$this->id,
                 'id_passfail' => $this->id_passfail,

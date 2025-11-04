@@ -156,8 +156,7 @@ class Bootstrap {
         $this->autoLoadedFeatureSet->run( 'bootstrapCompleted' );
     }
 
-    #[NoReturn]
-    public static function exceptionHandler( Throwable $exception ): void {
+    public static function exceptionHandler( Throwable $exception ): never {
 
         $logger = LoggerFactory::getLogger( 'exception_handler' );
 
@@ -226,8 +225,7 @@ class Bootstrap {
 
     }
 
-    #[NoReturn]
-    public static function shutdownFunctionHandler(): void {
+    public static function shutdownFunctionHandler(): never {
 
         $errorType = [
                 E_CORE_ERROR        => 'E_CORE_ERROR',

@@ -4,7 +4,8 @@ namespace Model\DataAccess;
 
 use PDO;
 
-interface IDatabase {
+interface IDatabase
+{
 
     /**
      * Obtain an instance of the database
@@ -16,7 +17,7 @@ interface IDatabase {
      *
      * @return IDatabase
      */
-    public static function obtain( string $server = null, string $user = null, string $password = null, string $database = null ): IDatabase;
+    public static function obtain(string $server = null, string $user = null, string $password = null, string $database = null): IDatabase;
 
 
     /**
@@ -35,7 +36,7 @@ interface IDatabase {
      *
      * @param $name string name of the db to connect to
      */
-    public function useDb( string $name ): void;
+    public function useDb(string $name): void;
 
 
     /**
@@ -51,7 +52,7 @@ interface IDatabase {
 
 
     /**
-     * Rollback a transaction for InnoDB tables
+     * Roll back a transaction for InnoDB tables
      */
     public function rollback(): void;
 
@@ -64,7 +65,7 @@ interface IDatabase {
      *
      * @return integer Number of affected rows
      */
-    public function update( string $table, array $data, array $where = [ '1' => '0' ] ): int;
+    public function update(string $table, array $data, array $where = ['1' => '0']): int;
 
 
     /**
@@ -75,7 +76,7 @@ interface IDatabase {
      *
      * @return string
      */
-    public function insert( string $table, array $data ): string;
+    public function insert(string $table, array $data): string;
 
 
     /**
@@ -94,6 +95,11 @@ interface IDatabase {
      *
      * @return string Sanitized string
      */
-    public function escape( string $string ): string;
+    public function escape(string $string): string;
+
+    /**
+     * Get the number of rows affected by the last update/insert query
+     */
+    public function rowCount(): int;
 
 }

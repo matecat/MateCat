@@ -16,7 +16,8 @@ use Plugins\Features\IBaseFeature;
  *
  *
  */
-class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public string $feature_code;
     /**
@@ -24,15 +25,18 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      */
     public $options;
 
-    public function getFullyQualifiedClassName() {
-        return PluginsLoader::getPluginClass( $this->feature_code );
+    public function getFullyQualifiedClassName(): ?string
+    {
+        return PluginsLoader::getPluginClass($this->feature_code);
     }
 
     /**
      * @return IBaseFeature
      */
-    public function toNewObject(): IBaseFeature {
-        $name = PluginsLoader::getPluginClass( $this->feature_code );
-        return new $name( $this );
+    public function toNewObject(): IBaseFeature
+    {
+        $name = PluginsLoader::getPluginClass($this->feature_code);
+
+        return new $name($this);
     }
 }

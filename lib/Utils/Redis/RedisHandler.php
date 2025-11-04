@@ -16,7 +16,8 @@ use Utils\Tools\Utils;
  * Time: 18.51
  *
  */
-class RedisHandler {
+class RedisHandler
+{
 
     /**
      * @var ?Client
@@ -29,12 +30,14 @@ class RedisHandler {
     /**
      * @throws Exception
      */
-    public function __construct() {
-        $this->instanceHash = spl_object_hash( $this );
+    public function __construct()
+    {
+        $this->instanceHash = spl_object_hash($this);
         $this->instanceUUID = Utils::uuid4();
     }
 
-    protected function getInstanceIdentifier(): string {
+    protected function getInstanceIdentifier(): string
+    {
         return $this->instanceHash . ":" . $this->instanceUUID;
     }
 
@@ -46,67 +49,57 @@ class RedisHandler {
      * @return Client
      * @throws ReflectionException
      */
-    public function getConnection(): Client {
-
+    public function getConnection(): Client
+    {
         $resource = null;
-        if ( $this->redisClient != null ) {
-            $reflectorClass    = new ReflectionClass( $this->redisClient->getConnection() );
-            $reflectorProperty = $reflectorClass->getParentClass()->getProperty( 'resource' );
-            $resource          = $reflectorProperty->getValue( $this->redisClient->getConnection() );
+        if ($this->redisClient != null) {
+            $reflectorClass    = new ReflectionClass($this->redisClient->getConnection());
+            $reflectorProperty = $reflectorClass->getParentClass()->getProperty('resource');
+            $resource          = $reflectorProperty->getValue($this->redisClient->getConnection());
         }
 
         if (
                 $this->redisClient === null
                 || !$this->redisClient->getConnection()->isConnected()
-                || !is_resource( $resource )
+                || !is_resource($resource)
         ) {
-
             $this->redisClient = $this->getClient();
-
         }
 
         return $this->redisClient;
-
     }
 
     /**
      * @return Client
      */
-    private function getClient(): Client {
+    private function getClient(): Client
+    {
         $connectionParams = AppConfig::$REDIS_SERVERS;
 
-        if ( is_string( $connectionParams ) ) {
-
-            $connectionParams = $this->formatDSN( $connectionParams );
-
-        } elseif ( is_array( $connectionParams ) ) {
-
-            $connectionParams = array_map( [ RedisHandler::class, 'formatDSN' ], $connectionParams );
-
+        if (is_string($connectionParams)) {
+            $connectionParams = $this->formatDSN($connectionParams);
+        } elseif (is_array($connectionParams)) {
+            $connectionParams = array_map([RedisHandler::class, 'formatDSN'], $connectionParams);
         }
 
-        return new Client( $connectionParams );
-
+        return new Client($connectionParams);
     }
 
-    protected function formatDSN( $dsnString ): string {
+    protected function formatDSN($dsnString): string
+    {
+        if (!is_null(AppConfig::$INSTANCE_ID)) {
+            $conf = parse_url($dsnString);
 
-        if ( !is_null( AppConfig::$INSTANCE_ID ) ) {
-
-            $conf = parse_url( $dsnString );
-
-            if ( isset( $conf[ 'query' ] ) ) {
+            if (isset($conf[ 'query' ])) {
                 $instanceID = "&database=" . AppConfig::$INSTANCE_ID;
             } else {
                 $instanceID = "?database=" . AppConfig::$INSTANCE_ID;
             }
 
             return $dsnString . $instanceID;
-
         }
 
         return $dsnString;
-
     }
 
     /**
@@ -115,29 +108,26 @@ class RedisHandler {
      *
      * @throws Exception
      */
-    public function tryLock( string $key, int $wait_time_seconds = 10 ): void {
-
-        $time      = microtime( true );
+    public function tryLock(string $key, int $wait_time_seconds = 10): void
+    {
+        $time      = microtime(true);
         $exit_time = $time + $wait_time_seconds;
         $sleep     = 500000; // microseconds
 
         do {
-
             // Lock Redis with NX and Expire
-            $lock = (bool)$this->redisClient->setnx( "lock:" . $key, $this->getInstanceIdentifier() );
+            $lock = (bool)$this->redisClient->setnx("lock:" . $key, $this->getInstanceIdentifier());
 
-            if ( $lock ) {
-                $this->redisClient->expire( "lock:" . $key, $wait_time_seconds );
+            if ($lock) {
+                $this->redisClient->expire("lock:" . $key, $wait_time_seconds);
 
                 return;
             }
 
-            usleep( $sleep );
+            usleep($sleep);
+        } while (microtime(true) < $exit_time);
 
-        } while ( microtime( true ) < $exit_time );
-
-        throw new Exception( "Lock wait timeout reached." );
-
+        throw new Exception("Lock wait timeout reached.");
     }
 
     /**
@@ -147,10 +137,11 @@ class RedisHandler {
      *
      * @return void
      */
-    public function unlock( $key ): void {
-        $lockingInstance = $this->redisClient->get( "lock:" . $key );
-        if ( !empty( $lockingInstance ) && $lockingInstance == $this->getInstanceIdentifier() ) {
-            $this->redisClient->del( "lock:" . $key );
+    public function unlock($key): void
+    {
+        $lockingInstance = $this->redisClient->get("lock:" . $key);
+        if (!empty($lockingInstance) && $lockingInstance == $this->getInstanceIdentifier()) {
+            $this->redisClient->del("lock:" . $key);
         }
     }
 

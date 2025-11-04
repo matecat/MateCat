@@ -9,7 +9,8 @@
 
 namespace Utils\Constants;
 
-class SourcePages {
+class SourcePages
+{
 
     const int SOURCE_PAGE_TRANSLATE  = 1;
     const int SOURCE_PAGE_REVISION   = 2;
