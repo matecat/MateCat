@@ -376,15 +376,15 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
             }
             CatToolActions.addNotification(notification)
           } else if (fulfilledPromises.length < result.length) {
-            const erroNotification = {
+            const errorNotification = {
               title: 'Error change jobs password',
-              text: 'Some jobs change password are failed',
+              text: 'Some jobs failed',
               type: 'error',
               position: 'bl',
               allowHtml: true,
               timer: 10000,
             }
-            CatToolActions.addNotification(erroNotification)
+            CatToolActions.addNotification(errorNotification)
           }
         })
         break
@@ -393,18 +393,6 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         break
 
       case JOBS_ACTIONS.ASSIGN_TO_MEMBER.id:
-        // ManageActions.changeProjectAssigneeBulk(
-        //   projectsSelected.map((project) => {
-        //     const team = teams.find((team) => team.id === project.id_team)
-        //     const {user} = team.members.find(({id}) => id === rest.id_assignee)
-
-        //     return {
-        //       team: fromJS(team),
-        //       project: fromJS(project),
-        //       user: fromJS(user),
-        //     }
-        //   }),
-        // )
         ManageActions.changeProjectAssigneeBulk(
           rest.id_assignee,
           projectsSelected,

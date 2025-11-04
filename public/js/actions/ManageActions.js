@@ -273,15 +273,15 @@ let ManageActions = {
           }
           CatToolActions.addNotification(notification)
         } else if (fulfilledPromises.length < result.length) {
-          const erroNotification = {
+          const errorNotification = {
             title: 'Change assignee project',
-            text: 'Some projects change assignee are failed',
+            text: 'Some projects failed',
             type: 'error',
             position: 'bl',
             allowHtml: true,
             timer: 10000,
           }
-          CatToolActions.addNotification(erroNotification)
+          CatToolActions.addNotification(errorNotification)
         }
       })
     })
@@ -448,15 +448,15 @@ let ManageActions = {
           }
           CatToolActions.addNotification(notification)
         } else if (fulfilledPromises.length < result.length) {
-          const erroNotification = {
+          const errorNotification = {
             title: 'Change projects team',
-            text: 'Some projects change team are failed',
+            text: 'Some projects failed',
             type: 'error',
             position: 'bl',
             allowHtml: true,
             timer: 10000,
           }
-          CatToolActions.addNotification(erroNotification)
+          CatToolActions.addNotification(errorNotification)
         }
       })
     })
