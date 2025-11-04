@@ -68,7 +68,7 @@ const createTemplateProxy = ({template, schema}) => {
 
 const orderTemplates = (templates) => {
   return [...templates]
-    .map((item, index) => ({...item, _idx: index}))
+    .map((item, index) => ({...item, index}))
     .sort((a, b) => {
       if (a.id === 0 && b.id !== 0) return -1
       if (b.id === 0 && a.id !== 0) return 1
@@ -81,9 +81,9 @@ const orderTemplates = (templates) => {
 
       if (a.isTemporary !== b.isTemporary) return a.isTemporary ? -1 : 1
 
-      return a._idx - b._idx
+      return a.index - b.index
     })
-    .map(({_idx, ...item}) => item) // eslint-disable-line
+    .map(({index, ...item}) => item) // eslint-disable-line
 }
 
 function useTemplates(schema) {
@@ -202,9 +202,6 @@ function useTemplates(schema) {
   const {id: currentTemplateId, isTemporary: currentTemplateIsTemporary} =
     templates.find(({isSelected}) => isSelected) ?? {}
 
-  if (currentTemplate?.mt) {
-    console.log(templates)
-  }
   // set current template
   if (
     (typeof currentTemplateId === 'number' &&
