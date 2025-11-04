@@ -114,8 +114,8 @@ class GetWarningController extends KleinController {
         $metadata   = new MetadataDao();
         $Filter     = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, [], $metadata->getSubfilteringCustomHandlers( $chunk->id, $password ) );
 
-        $src_content = $Filter->fromLayer0ToLayer2( $src_content );
-        $trg_content = $Filter->fromLayer0ToLayer2( $trg_content );
+        $src_content = $Filter->fromLayer2ToLayer1( $src_content );
+        $trg_content = $Filter->fromLayer2ToLayer1( $trg_content );
 
         $QA = new QA( $src_content, $trg_content );
         $QA->setFeatureSet( $featureSet );
