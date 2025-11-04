@@ -189,6 +189,3 @@ $klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
     route( '', 'POST', [ '\Controller\API\App\JobMetadataController', 'save' ] );
     route( '/[:key]', 'DELETE', [ '\Controller\API\App\JobMetadataController', 'delete' ] );
 } );
-
-// Job bulk actions
-route( '/api/app/jobs/bulk-actions', 'POST', [ '\Controller\API\App\JobsBulkActionsController', 'index' ] );
