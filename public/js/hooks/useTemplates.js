@@ -68,14 +68,22 @@ const createTemplateProxy = ({template, schema}) => {
 
 const orderTemplates = (templates) => {
   return [...templates]
-    .sort((a, b) =>
-      (a.name ?? a.label ?? a.payable_rate_template_name).toLowerCase() >
-      (b.name ?? b.label ?? b.payable_rate_template_name).toLowerCase()
-        ? 1
-        : -1,
-    )
-    .reduce((acc, cur) => (cur.id === 0 ? [cur, ...acc] : [...acc, cur]), [])
-    .sort((a, b) => (a.id === b.id && a.isTemporary ? -1 : 0))
+    .map((item, index) => ({...item, index}))
+    .sort((a, b) => {
+      if (a.id === 0 && b.id !== 0) return -1
+      if (b.id === 0 && a.id !== 0) return 1
+
+      const aName = a.name ?? a.label ?? a.payable_rate_template_name
+      const bName = b.name ?? b.label ?? b.payable_rate_template_name
+
+      const nameCmp = aName.localeCompare(bName)
+      if (nameCmp !== 0) return nameCmp
+
+      if (a.isTemporary !== b.isTemporary) return a.isTemporary ? -1 : 1
+
+      return a.index - b.index
+    })
+    .map(({index, ...item}) => item) // eslint-disable-line
 }
 
 function useTemplates(schema) {
