@@ -298,6 +298,13 @@ class Intento extends AbstractEngine {
             curl_close( $curl );
             $_routings = [];
 
+            // needed by the UI
+            $_routings['smart_routing'] = [
+                    'id' => 'smart_routing',
+                    'name' => 'Smart routing',
+                    'description' => "Intento Smart Routing is a patented feature within the Intento Translator platform that automatically directs your translation requests to the best-performing machine translation (MT) engine for your specific language pair and content, or a combination of engines, to provide the most accurate and contextually relevant translation.",
+            ];
+
             if ( $result and $result->data ) {
                 foreach ( $result->data as $item ) {
                     $_routings[ $item->name ] = [
@@ -347,14 +354,6 @@ class Intento extends AbstractEngine {
         $result   = json_decode( $response );
         curl_close( $curl );
         $_providers = [];
-
-        // needed by the UI
-        $_providers['smart_routing'] = [
-            'id' => 'smart_routing',
-            'name' => 'Smart_routing',
-            'vendor' => "",
-            'auth_example' => ""
-        ];
 
         if ( $result ) {
             foreach ( $result as $value ) {
