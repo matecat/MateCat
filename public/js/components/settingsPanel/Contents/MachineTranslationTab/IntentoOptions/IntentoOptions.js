@@ -8,23 +8,19 @@ import {getIntentoRouting} from '../../../../../api/getIntentoRouting'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 
 const PROVIDERS = config.intento_providers
-  ? Object.values(config.intento_providers).reduce(
-      (acc, cur) =>
-        cur.id === 'smart_routing' ? [cur, ...acc] : [...acc, cur],
-      [],
-    )
+  ? Object.values(config.intento_providers)
   : []
 
 export const IntentoOptions = ({id, isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
-  const {control, watch} = useOptions()
+  const {control} = useOptions()
 
-  const [routing, setRouting] = useState([])
+  const [routings, setRoutings] = useState([])
 
   const allOptions = useMemo(() => {
-    return [...routing, ...PROVIDERS]
-  }, [routing])
+    return [...routings, ...PROVIDERS]
+  }, [routings])
 
   useEffect(() => {
     let cleanup = false
@@ -32,34 +28,31 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
     getIntentoRouting(id).then((data) => {
       if (!cleanup) {
         const items = Object.values(data)
-        setRouting(items.map((item) => ({...item, id: item.id.toString()})))
+        setRoutings(
+          items
+            .map((item) => ({...item, id: item.id.toString()}))
+            .sort((a) => (a.id === 'smart_routing' ? -1 : 1)),
+        )
       }
     })
 
     return () => (cleanup = true)
   }, [id])
+
   const routingOrProviderKey = currentProjectTemplate.mt?.extra
     ?.intento_provider
     ? 'intento_provider'
     : 'intento_routing'
 
-  const activeOption = watch(routingOrProviderKey)
-
   const getOptionsChildren = ({id}) => {
-    const isFirstRouting =
-      routing
-        .filter((item) => item.id !== activeOption)
-        .findIndex((item) => item.id === id) === 0
-    const isFirstProviders =
-      PROVIDERS.filter((item) => item.id !== activeOption).findIndex(
-        (item) => item.id === id,
-      ) === 0
+    const isFirstRouting = routings.findIndex((item) => item.id === id) === 0
+    const isFirstProvider = PROVIDERS.findIndex((item) => item.id === id) === 0
 
     return {
       ...(isFirstRouting && {
-        beforeRow: <h4>Routing</h4>,
+        beforeRow: <h4>Routings</h4>,
       }),
-      ...(isFirstProviders && {
+      ...(isFirstProvider && {
         beforeRow: <h4>Providers</h4>,
       }),
     }
@@ -111,6 +104,7 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
               activeOption={allOptions.find(({id}) => id === value)}
               onSelect={(option) => onChange(option.id)}
               isPortalDropdown={true}
+              isActiveOptionOnTop={false}
               dropdownClassName="select-intento-routing-providers"
               maxHeightDroplist={260}
               isDisabled={disabled}
