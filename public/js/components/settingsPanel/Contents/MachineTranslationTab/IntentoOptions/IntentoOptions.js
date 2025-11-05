@@ -100,6 +100,7 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
             <Select
               name={name}
               placeholder="Select provider"
+              showSearchBar={true}
               options={allOptions}
               activeOption={allOptions.find(({id}) => id === value)}
               onSelect={(option) => onChange(option.id)}

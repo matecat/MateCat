@@ -673,7 +673,7 @@
     margin: 0;
 
     position: sticky;
-    top: 0;
+    top: -1px;
     background: colors.$grey5;
 
     &::after {
@@ -692,5 +692,18 @@
 
   .dropdown__option {
     padding: 5px 20px;
+  }
+
+  .dropdown__search-bar {
+    border-bottom: 1px #d7d8db solid;
+    margin-bottom: 1px;
+  }
+
+  .dropdown__search-bar-input {
+    width: 100%;
+    padding: 8px 8px;
+    background-color: unset;
+    outline: none;
+    font-size: 14px;
   }
 }
