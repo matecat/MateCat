@@ -300,7 +300,7 @@ export const Dropdown = forwardRef(
     ])
 
     useLayoutEffect(() => {
-      if (optionActiveRef?.current) {
+      if (typeof optionActiveRef?.current?.scrollIntoView === 'function') {
         requestAnimationFrame(() =>
           optionActiveRef.current.scrollIntoView({
             behavior: 'instant',
