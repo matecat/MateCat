@@ -13,7 +13,6 @@ import ChevronDown from '../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
 import IconClose from '../icons/IconClose'
-import qaCheckGlossaryHighlightComponent from '../segments/GlossaryComponents/QaCheckGlossaryHighlight.component'
 
 const mergeClassNames = (...args) => {
   return (
@@ -50,6 +49,7 @@ export const Select = ({
   offsetParent,
   onSelect = () => {},
   onToggleOption = () => {},
+  onCloseSelect = () => {},
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
@@ -109,6 +109,7 @@ export const Select = ({
     setDropdownVisibility(false)
     setDropdownReversed(false)
     setPortalCoords()
+    onCloseSelect?.()
   }
   const toggleDropdown = () => {
     if (!isDisabled) {

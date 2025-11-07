@@ -1,24 +1,37 @@
-import React, {useCallback, useContext, useEffect, useMemo, useRef} from 'react'
+import React, {useCallback, useContext, useMemo} from 'react'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import SegmentActions from '../../../../actions/SegmentActions'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const taggingTypes = [
-  {id: 'markup', name: 'Markup', default: true},
-  {id: 'percent_double_curly', name: 'Percent Double Curly', default: true},
-  {id: 'twig', name: 'Twig Double Curly', default: true},
-  {id: 'ruby_on_rails', name: 'Ruby on Rails', default: true},
-  {id: 'double_snail', name: 'Double Snail', default: true},
-  {id: 'double_square', name: 'Double Square', default: true},
-  {id: 'dollar_curly', name: 'Dollar Curly', default: true},
-  {id: 'single_curly', name: 'Single Curly', default: false},
-  {id: 'objective_c_ns', name: 'Objective CNS', default: true},
-  {id: 'double_percent', name: 'Double Percent', default: true},
-  {id: 'square_sprintf', name: 'Square Sprintf', default: true},
-  {id: 'sprintf', name: 'Sprintf', default: true},
+  {id: 'markup', name: 'Markup - <text>', default: true},
+  {id: 'twig', name: 'Twig - {{text}}, {%text%}', default: true},
+  {id: 'ruby_on_rails', name: 'Ruby on Rails - %{text}', default: true},
+  {id: 'double_snail', name: 'Double Snails  - @@text@@', default: true},
+  {
+    id: 'double_square',
+    name: 'Double square brackets - [[text]]',
+    default: true,
+  },
+  {id: 'dollar_curly', name: 'Dollar curly brackets - ${text}', default: true},
+  {id: 'single_curly', name: 'Single curly brackets - {text}', default: false},
+  {id: 'objective_c_ns', name: 'Objective CNS - %@, %1$@', default: true},
+  {
+    id: 'double_percent',
+    name: 'Double percentage signs - %%text%%',
+    default: true,
+  },
+  {
+    id: 'square_sprintf',
+    name: 'Square bracket Sprintf - See guides page',
+    default: true,
+  },
+  {id: 'sprintf', name: 'Sprintf - See guides page', default: true},
 ]
 
-export const Tagging = () => {
+export const Tagging = ({previousCurrentProjectTemplate}) => {
   const {SELECT_HEIGHT} = useContext(CreateProjectContext)
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
@@ -67,6 +80,16 @@ export const Tagging = () => {
       setTagging({options: optionsIds})
     }
   }
+  const onClose = () => {
+    if (
+      config.is_cattool &&
+      previousCurrentProjectTemplate.current.subfilteringHandlers !==
+        currentProjectTemplate?.subfilteringHandlers
+    ) {
+      SegmentActions.removeAllSegments()
+      CatToolActions.onRender()
+    }
+  }
 
   return (
     <div className="options-box">
@@ -88,6 +111,7 @@ export const Tagging = () => {
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
+          onCloseSelect={onClose}
         />
       </div>
     </div>
