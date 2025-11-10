@@ -43,10 +43,17 @@ export const taggingTypes = [
   {
     id: 'square_sprintf',
     name: 'Square bracket Sprintf',
-    code: 'See guides page',
+    code: '<a target="_blank" href="https://guides.matecat.com/">See guides page</a>',
+    html: true,
     default: true,
   },
-  {id: 'sprintf', name: 'Sprintf', code: 'See guides page', default: true},
+  {
+    id: 'sprintf',
+    name: 'Sprintf',
+    code: '<a target="_blank" href="https://guides.matecat.com/">See guides page</a>',
+    html: true,
+    default: true,
+  },
 ]
 
 export const Tagging = ({previousCurrentProjectTemplate}) => {
@@ -131,11 +138,19 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
           multipleSelect={'dropdown'}
           onCloseSelect={onClose}
         >
-          {({name, code}) => ({
+          {({name, code, html}) => ({
             row: (
               <>
                 <span>{name}</span>
-                <div className="code-badge">{code}</div>
+                {html ? (
+                  <div
+                    className="code-badge"
+                    onClick={(e) => e.stopPropagation()}
+                    dangerouslySetInnerHTML={{__html: code}}
+                  />
+                ) : (
+                  <div className="code-badge">{code}</div>
+                )}
               </>
             ),
           })}

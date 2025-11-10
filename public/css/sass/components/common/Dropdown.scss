@@ -195,6 +195,9 @@
     font-size: 14px;
     white-space: nowrap;
     min-width: 60px;
+    a {
+        color: colors.$white;
+    }
   }
 }
 
