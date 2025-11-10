@@ -11,10 +11,13 @@ const PROVIDERS = config.intento_providers
   ? Object.values(config.intento_providers)
   : []
 
+const KEY_ROUTING = 'intento_routing'
+const KEY_PROVIDER = 'intento_provider'
+
 export const IntentoOptions = ({id, isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
-  const {control} = useOptions()
+  const {control, setValue} = useOptions()
 
   const [routings, setRoutings] = useState([])
 
@@ -41,8 +44,8 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
 
   const routingOrProviderKey = currentProjectTemplate.mt?.extra
     ?.intento_provider
-    ? 'intento_provider'
-    : 'intento_routing'
+    ? KEY_PROVIDER
+    : KEY_ROUTING
 
   const getOptionsChildren = ({id}) => {
     const isFirstRouting = routings.findIndex((item) => item.id === id) === 0
@@ -92,14 +95,21 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
           control={control}
           name={routingOrProviderKey}
           disabled={isCattoolPage}
-          render={({field: {onChange, value, name, disabled}}) => (
+          render={({field: {value, name, disabled}}) => (
             <Select
               name={name}
               placeholder="Select provider"
               showSearchBar={true}
               options={allOptions}
               activeOption={allOptions.find(({id}) => id === value)}
-              onSelect={(option) => onChange(option.id)}
+              onSelect={(option) => {
+                const actualKey = routings.some((item) => item.id === option.id)
+                  ? KEY_ROUTING
+                  : KEY_PROVIDER
+
+                setValue(actualKey, option.id)
+                setValue(actualKey === KEY_ROUTING ? KEY_PROVIDER : KEY_ROUTING)
+              }}
               isPortalDropdown={true}
               isActiveOptionOnTop={false}
               dropdownClassName="select-intento-routing-providers"
