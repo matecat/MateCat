@@ -759,7 +759,9 @@ class TMAnalysisWorker extends AbstractWorker {
             // if a callback is not set, only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement ); //YYY verify airbnb plugin and MMT engine, such plugin force to use MMT, but MMT now is enabled by default
 
+
             $mt_result = $mtEngine->get( $config );
+            $this->_doLog("PIPPO ---> " . json_encode($config));
 
             // handle GetMemoryResponse instead of having directly Matches
             if ( $mt_result instanceof GetMemoryResponse ) {

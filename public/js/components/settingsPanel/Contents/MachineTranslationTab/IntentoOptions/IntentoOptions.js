@@ -33,7 +33,7 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
         const items = Object.values(data)
         setRoutings(
           items
-            .map((item) => ({...item, id: item.id.toString()}))
+            .map((item) => ({...item, id: item.name }))
             .sort((a) => (a.id === 'smart_routing' ? -1 : 1)),
         )
       }

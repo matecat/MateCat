@@ -171,20 +171,16 @@ class Intento extends AbstractEngine {
         if ( isset( $_config[ 'pid' ] ) ) {
             $metadataDao   = new MetadataDao();
 
-            // custom provider
+            // custom provider or custom routing
             $customProvider = $metadataDao->get( $_config[ 'pid' ], 'intento_provider', 86400 );
-
-            if ( $customProvider !== null and $customProvider !== "smart_routing" ) {
-                $parameters[ 'service' ][ 'async' ]    = true;
-                $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
-            }
-
-            // custom routing
             $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
 
-            if ( $customRouting !== null ) {
+            if ( $customProvider !== null ) {
+                $parameters[ 'service' ][ 'async' ]    = true;
+                $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
+            } elseif ( $customRouting !== null and $customRouting->value !== "smart_routing" ) {
                 $parameters[ 'service' ][ 'async' ]   = true;
-                $parameters[ 'service' ][ 'routing' ] = $customRouting->value;
+                $parameters[ 'service' ][ 'routing' ] = "best_quality";
             }
         }
 
@@ -301,7 +297,7 @@ class Intento extends AbstractEngine {
             // needed by the UI
             $_routings['smart_routing'] = [
                     'id' => 'smart_routing',
-                    'name' => 'Smart routing',
+                    'name' => 'smart_routing',
                     'description' => "Intento Smart Routing is a patented feature within the Intento Translator platform that automatically directs your translation requests to the best-performing machine translation (MT) engine for your specific language pair and content, or a combination of engines, to provide the most accurate and contextually relevant translation.",
             ];
 
