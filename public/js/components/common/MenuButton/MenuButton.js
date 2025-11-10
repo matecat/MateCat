@@ -2,11 +2,11 @@ import React, {useEffect, useLayoutEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {MenuButtonItem} from './MenuButtonItem'
 import usePortal from '../../../hooks/usePortal'
-import ArrowDown from '../../../../img/icons/ArrowDown'
+import IconDown from '../../icons/IconDown'
 
 export const MenuButton = ({
   label,
-  icon = <ArrowDown />,
+  icon = <IconDown />,
   onClick,
   className = '',
   dropdownClassName = '',

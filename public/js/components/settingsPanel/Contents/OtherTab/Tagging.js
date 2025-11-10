@@ -71,9 +71,11 @@ export const Tagging = () => {
   return (
     <div className="options-box">
       <div className="option-description">
-        <h3>Tagging syntaxes</h3>Choose the syntaxes for tagging. For example,
-        selecting the {'{{tag}}'} syntax locks all text between {'{{and}}'} into
-        a tag.
+        <h3>Tagging syntaxes</h3>
+        <p>
+          Choose the syntaxes for tagging. For example, selecting the{' '}
+          {'{{tag}}'} syntax locks all text between {'{{and}}'} into a tag.
+        </p>
       </div>
       <div className="options-select-container">
         <Select

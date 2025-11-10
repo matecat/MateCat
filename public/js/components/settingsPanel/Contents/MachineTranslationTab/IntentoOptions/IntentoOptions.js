@@ -64,9 +64,9 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
         <div>
           <h3>Pre-translate files</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to automatically translate project files during the
+            analysis phase. Pre-translation may generate additional charges from
+            your MT provider.
           </p>
         </div>
         <Controller
@@ -85,12 +85,8 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
       </div>
       <div className="mt-params-option">
         <div>
-          <h3>Provider/routing to use</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Provider or routing</h3>
+          <p>Select the provider or routing for the project.</p>
         </div>
         <Controller
           control={control}

@@ -96,7 +96,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
   const menu = (
     <MenuButton
       className="button-menu-button quality-framework-columns-menu-button"
-      icon={<IconDown width={14} height={14} />}
+      icon={<IconDown size={20} />}
       onClick={() => false}
       isVisibleRectArrow={false}
       itemsTarget={portalTarget}
@@ -106,7 +106,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
         onMouseUp={() => setIsEditingName(true)}
         data-testid="menu-button-rename"
       >
-        <IconEdit />
+        <IconEdit size={18} />
         Edit
       </MenuButtonItem>
       <MenuButtonItem
@@ -133,7 +133,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
         data-testid="menu-button-delete"
         disabled={isDeleteDisabled}
       >
-        <Trash size={16} />
+        <Trash size={18} />
         Delete
       </MenuButtonItem>
     </MenuButton>

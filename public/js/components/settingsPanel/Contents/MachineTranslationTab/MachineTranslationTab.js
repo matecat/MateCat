@@ -14,7 +14,6 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {deleteMTEngine} from '../../../../api/deleteMTEngine'
 import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanel'
 
-import AddWide from '../../../../../img/icons/AddWide'
 import {DeepL} from './MtEngines/DeepL'
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
 import CatToolActions from '../../../../actions/CatToolActions'
@@ -29,6 +28,7 @@ import defaultMTOptions from '../../Contents/defaultTemplates/mtOptions.json'
 import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
 import IconClose from '../../../icons/IconClose'
+import IconAdd from '../../../icons/IconAdd'
 
 let engineIdFromQueryString = new URLSearchParams(window.location.search).get(
   'engineId',
@@ -345,7 +345,7 @@ export const MachineTranslationTab = () => {
               onClick={() => setAddMTVisible(true)}
               title="Add MT engine"
             >
-              <AddWide size={18} /> Add MT engine
+              <IconAdd size={16} /> Add MT engine
             </button>
           )}
         </div>

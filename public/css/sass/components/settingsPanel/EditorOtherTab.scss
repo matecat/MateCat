@@ -16,7 +16,7 @@
   }
 
   .options-box h3 {
-    font-size: 19px;
+    font-size: 18px;
     margin-bottom: 0;
   }
 
@@ -28,6 +28,11 @@
     line-height: 22px;
     align-items: start;
     text-align: left;
+
+    > p {
+      font-size: 16px;
+      color: colors.$grey6;
+    }
   }
 
   .options-box.option-unavailable p,
