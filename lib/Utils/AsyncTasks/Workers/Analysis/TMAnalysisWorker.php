@@ -721,16 +721,16 @@ class TMAnalysisWorker extends AbstractWorker {
             //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
 
-            // @TODO does it work???
-            // pre_translate_files
+            // Disable analysis if pre_translate_files
+            // is not set to true
             $pid = $queueElement->params->pid;
 
             if($pid){
                 $metadataDao = new ProjectsMetadataDao();
                 $pre_translate_files = $metadataDao->get( $pid, 'pre_translate_files' );
 
-                if($pre_translate_files === true){
-                    $mtEngine->setSkipAnalysis( false );
+                if($pre_translate_files->value == false){
+                    $mtEngine->setSkipAnalysis( true );
                 }
             }
 
