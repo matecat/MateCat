@@ -6,29 +6,47 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 
 export const taggingTypes = [
-  {id: 'markup', name: 'Markup - <text>', default: true},
-  {id: 'twig', name: 'Twig - {{text}}, {%text%}', default: true},
-  {id: 'ruby_on_rails', name: 'Ruby on Rails - %{text}', default: true},
-  {id: 'double_snail', name: 'Double Snails  - @@text@@', default: true},
+  {id: 'markup', name: 'Markup', code: '<text>', default: true},
+  {id: 'twig', name: 'Twig', code: '{{text}}, {%text%}', default: true},
+  {id: 'ruby_on_rails', name: 'Ruby on Rails', code: '%{text}', default: true},
+  {id: 'double_snail', name: 'Double Snails', code: '@@text@@', default: true},
   {
     id: 'double_square',
-    name: 'Double square brackets - [[text]]',
+    name: 'Double square brackets',
+    code: '[[text]]',
     default: true,
   },
-  {id: 'dollar_curly', name: 'Dollar curly brackets - ${text}', default: true},
-  {id: 'single_curly', name: 'Single curly brackets - {text}', default: false},
-  {id: 'objective_c_ns', name: 'Objective CNS - %@, %1$@', default: true},
+  {
+    id: 'dollar_curly',
+    name: 'Dollar curly brackets',
+    code: '${text}',
+    default: true,
+  },
+  {
+    id: 'single_curly',
+    name: 'Single curly brackets',
+    code: '{text}',
+    default: false,
+  },
+  {
+    id: 'objective_c_ns',
+    name: 'Objective CNS',
+    code: '%@, %1$@',
+    default: true,
+  },
   {
     id: 'double_percent',
-    name: 'Double percentage signs - %%text%%',
+    name: 'Double percentage signs',
+    code: '%%text%%',
     default: true,
   },
   {
     id: 'square_sprintf',
-    name: 'Square bracket Sprintf - See guides page',
+    name: 'Square bracket Sprintf',
+    code: 'See guides page',
     default: true,
   },
-  {id: 'sprintf', name: 'Sprintf - See guides page', default: true},
+  {id: 'sprintf', name: 'Sprintf', code: 'See guides page', default: true},
 ]
 
 export const Tagging = ({previousCurrentProjectTemplate}) => {
@@ -87,7 +105,7 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
         currentProjectTemplate?.subfilteringHandlers
     ) {
       SegmentActions.removeAllSegments()
-      CatToolActions.onRender()
+      CatToolActions.onRender({segmentToOpen: config.last_opened_segment})
     }
   }
 
@@ -112,7 +130,16 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
           onCloseSelect={onClose}
-        />
+        >
+          {({name, code}) => ({
+            row: (
+              <>
+                <span>{name}</span>
+                <div className="code-badge">{code}</div>
+              </>
+            ),
+          })}
+        </Select>
       </div>
     </div>
   )

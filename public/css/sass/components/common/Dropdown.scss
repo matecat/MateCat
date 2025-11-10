@@ -185,6 +185,17 @@
     opacity: 0;
     pointer-events: none;
   }
+  .code-badge {
+    display: block;
+    text-align: center;
+    background-color: colors.$grey7;
+    border-radius: 4px;
+    padding: 2px 4px;
+    color: colors.$white;
+    font-size: 14px;
+    white-space: nowrap;
+    min-width: 60px;
+  }
 }
 
 .dropdown__option--is-highlighted-option,
