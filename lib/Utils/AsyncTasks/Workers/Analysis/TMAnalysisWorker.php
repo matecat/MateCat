@@ -729,7 +729,9 @@ class TMAnalysisWorker extends AbstractWorker {
                 $metadataDao = new ProjectsMetadataDao();
                 $pre_translate_files = $metadataDao->get( $pid, 'pre_translate_files' );
 
-                if($pre_translate_files->value == false){
+                if($pre_translate_files !== null && $pre_translate_files->value == true){
+                    $mtEngine->setSkipAnalysis( false );
+                } else {
                     $mtEngine->setSkipAnalysis( true );
                 }
             }
