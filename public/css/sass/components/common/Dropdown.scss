@@ -185,6 +185,10 @@
     opacity: 0;
     pointer-events: none;
   }
+  .codes-container {
+    display: flex;
+    gap: 4px;
+  }
   .code-badge {
     display: block;
     text-align: center;
@@ -194,7 +198,7 @@
     color: colors.$white;
     font-size: 14px;
     white-space: nowrap;
-    min-width: 60px;
+    font-weight: normal !important;
     a {
         color: colors.$white;
     }
