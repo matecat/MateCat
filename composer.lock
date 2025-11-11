@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.359.1",
+            "version": "3.359.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "40543e3993fc5094094ac9f9bdc4434bf81cca2d"
+                "reference": "754b25dae2f50b568b55735931a3cd73263ac5ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/40543e3993fc5094094ac9f9bdc4434bf81cca2d",
-                "reference": "40543e3993fc5094094ac9f9bdc4434bf81cca2d",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/754b25dae2f50b568b55735931a3cd73263ac5ae",
+                "reference": "754b25dae2f50b568b55735931a3cd73263ac5ae",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.1"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.9"
             },
-            "time": "2025-10-29T20:13:06+00:00"
+            "time": "2025-11-10T19:14:56+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -663,16 +663,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.418.0",
+            "version": "v0.420.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "87ad3c880a87f57eb200da0f021527d29128d7e5"
+                "reference": "2033bb7020cab17beb21697b5183473c4597ac2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/87ad3c880a87f57eb200da0f021527d29128d7e5",
-                "reference": "87ad3c880a87f57eb200da0f021527d29128d7e5",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/2033bb7020cab17beb21697b5183473c4597ac2d",
+                "reference": "2033bb7020cab17beb21697b5183473c4597ac2d",
                 "shasum": ""
             },
             "require": {
@@ -701,9 +701,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.418.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.420.0"
             },
-            "time": "2025-10-27T00:58:22+00:00"
+            "time": "2025-11-10T01:02:19+00:00"
         },
         {
             "name": "google/auth",
@@ -1712,16 +1712,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v2.3.2",
+            "version": "v2.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "6624434334434400e7f3dfbd8d289523f13c32d0"
+                "reference": "3c64a257526dadf557a11b088437dd0ca37b582a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/6624434334434400e7f3dfbd8d289523f13c32d0",
-                "reference": "6624434334434400e7f3dfbd8d289523f13c32d0",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/3c64a257526dadf557a11b088437dd0ca37b582a",
+                "reference": "3c64a257526dadf557a11b088437dd0ca37b582a",
                 "shasum": ""
             },
             "require": {
@@ -1766,9 +1766,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v2.3.2"
+                "source": "https://github.com/matecat/subfiltering/tree/v2.3.3"
             },
-            "time": "2025-10-27T12:56:45+00:00"
+            "time": "2025-11-11T15:28:33+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -2958,23 +2958,23 @@
         },
         {
             "name": "phptal/phptal",
-            "version": "1.10.0",
+            "version": "1.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phptal/PHPTAL.git",
-                "reference": "83359dffa90c2009ac317938665471f6cc08802d"
+                "reference": "69926771955ce722605e62ec0259ebf7bc0a2ef4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phptal/PHPTAL/zipball/83359dffa90c2009ac317938665471f6cc08802d",
-                "reference": "83359dffa90c2009ac317938665471f6cc08802d",
+                "url": "https://api.github.com/repos/phptal/PHPTAL/zipball/69926771955ce722605e62ec0259ebf7bc0a2ef4",
+                "reference": "69926771955ce722605e62ec0259ebf7bc0a2ef4",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0"
+                "php": "~8.3.0 || ~8.4.0 || ~8.5.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^11.3.6"
+                "phpunit/phpunit": "^12.4.2"
             },
             "bin": [
                 "tools/phptal_lint.php"
@@ -3010,9 +3010,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phptal/PHPTAL/issues",
-                "source": "https://github.com/phptal/PHPTAL/tree/1.10.0"
+                "source": "https://github.com/phptal/PHPTAL/tree/1.11.0"
             },
-            "time": "2024-09-24T13:20:30+00:00"
+            "time": "2025-11-06T12:57:48+00:00"
         },
         {
             "name": "predis/predis",
@@ -4453,16 +4453,16 @@
         },
         {
             "name": "symfony/service-contracts",
-            "version": "v3.6.0",
+            "version": "v3.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "f021b05a130d35510bd6b25fe9053c2a8a15d5d4"
+                "reference": "45112560a3ba2d715666a509a0bc9521d10b6c43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/f021b05a130d35510bd6b25fe9053c2a8a15d5d4",
-                "reference": "f021b05a130d35510bd6b25fe9053c2a8a15d5d4",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/45112560a3ba2d715666a509a0bc9521d10b6c43",
+                "reference": "45112560a3ba2d715666a509a0bc9521d10b6c43",
                 "shasum": ""
             },
             "require": {
@@ -4516,7 +4516,7 @@
                 "standards"
             ],
             "support": {
-                "source": "https://github.com/symfony/service-contracts/tree/v3.6.0"
+                "source": "https://github.com/symfony/service-contracts/tree/v3.6.1"
             },
             "funding": [
                 {
@@ -4528,11 +4528,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-04-25T09:37:31+00:00"
+            "time": "2025-07-15T11:30:57+00:00"
         },
         {
             "name": "symfony/string",
