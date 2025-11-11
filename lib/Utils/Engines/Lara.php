@@ -183,6 +183,11 @@ class Lara extends AbstractEngine {
      */
     public function get( array $_config ) {
 
+        // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
+        if ($this->_isAnalysis && $this->_skipAnalysis) {
+            return [];
+        }
+
         $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**

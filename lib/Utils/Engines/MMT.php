@@ -108,6 +108,11 @@ class MMT extends AbstractEngine {
      */
     public function get( array $_config ) {
 
+        // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
+        if ($this->_isAnalysis && $this->_skipAnalysis) {
+            return [];
+        }
+
         $client      = $this->_getClient();
         $_keys       = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
         $metadataDao = new ProjectsMetadataDao();
