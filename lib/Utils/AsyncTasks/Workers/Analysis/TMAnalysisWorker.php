@@ -694,17 +694,11 @@ class TMAnalysisWorker extends AbstractWorker
             //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
 
-            // pre_translate_files
-            $pid = $queueElement->params->pid;
-
-            if ($pid) {
-                $metadataDao         = new ProjectsMetadataDao();
-                $pre_translate_files = $metadataDao->get($pid, 'pre_translate_files');
-
-                if ($pre_translate_files) {
-                    $mtEngine->setSkipAnalysis(false);
-                }
-            }
+            // Disable analysis if enable_mt_analysis
+            // is not set to true
+            $metadataDao = new ProjectsMetadataDao();
+            $enable_mt_analysis = $metadataDao->get( $queueElement->params->pid, 'enable_mt_analysis' );
+            $mtEngine->setSkipAnalysis( $enable_mt_analysis ?? false );
 
             // If mt_qe_workflow_enabled is true, force set EnginesFactory.skipAnalysis to `false` to allow the Lara engine to perform the analysis.
             if ($queueElement->params->mt_qe_workflow_enabled) {

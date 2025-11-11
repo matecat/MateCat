@@ -28,13 +28,6 @@ export const EditorOtherTab = () => {
         characterCounterMode: currentProjectTemplate.characterCounterMode,
         subfilteringHandlers: currentProjectTemplate.subfilteringHandlers,
       })
-      if (
-        previousCurrentProjectTemplate.current.subfilteringHandlers !==
-        currentProjectTemplate?.subfilteringHandlers
-      ) {
-        SegmentActions.removeAllSegments()
-        CatToolActions.onRender()
-      }
     }
 
     previousCurrentProjectTemplate.current = {
@@ -55,7 +48,9 @@ export const EditorOtherTab = () => {
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>Character counter settings</h2>
         <CharacterCounterRules />
-        <Tagging />
+        <Tagging
+          previousCurrentProjectTemplate={previousCurrentProjectTemplate}
+        />
       </div>
     </div>
   )

@@ -145,14 +145,10 @@ class Intento extends AbstractEngine
     /**
      * @throws Exception
      */
-    public function get(array $_config)
-    {
-        if ($this->_isAnalysis && $this->_skipAnalysis) {
-            return [];
-        }
+    public function get( array $_config ) {
 
-        $_config[ 'source' ] = $this->_fixLangCode($_config[ 'source' ]);
-        $_config[ 'target' ] = $this->_fixLangCode($_config[ 'target' ]);
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = [];
         if (!empty($this->apiKey)) {
@@ -166,20 +162,16 @@ class Intento extends AbstractEngine
         if (isset($_config[ 'pid' ])) {
             $metadataDao = new MetadataDao();
 
-            // custom provider
-            $customProvider = $metadataDao->get($_config[ 'pid' ], 'intento_provider', 86400);
+            // custom provider or custom routing
+            $customProvider = $metadataDao->get( $_config[ 'pid' ], 'intento_provider', 86400 );
+            $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
 
-            if ($customProvider !== null and $customProvider !== "smart_routing") {
+            if ( $customProvider !== null ) {
                 $parameters[ 'service' ][ 'async' ]    = true;
                 $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
-            }
-
-            // custom routing
-            $customRouting = $metadataDao->get($_config[ 'pid' ], 'intento_routing', 86400);
-
-            if ($customRouting !== null) {
+            } elseif ( $customRouting !== null and $customRouting->value !== "smart_routing" ) {
                 $parameters[ 'service' ][ 'async' ]   = true;
-                $parameters[ 'service' ][ 'routing' ] = $customRouting->value;
+                $parameters[ 'service' ][ 'routing' ] = "best_quality";
             }
         }
 
@@ -292,8 +284,15 @@ class Intento extends AbstractEngine
             curl_close($curl);
             $_routings = [];
 
-            if ($result and $result->data) {
-                foreach ($result->data as $item) {
+            // needed by the UI
+            $_routings['smart_routing'] = [
+                    'id' => 'smart_routing',
+                    'name' => 'smart_routing',
+                    'description' => "Intento Smart Routing is a patented feature within the Intento Translator platform that automatically directs your translation requests to the best-performing machine translation (MT) engine for your specific language pair and content, or a combination of engines, to provide the most accurate and contextually relevant translation.",
+            ];
+
+            if ( $result and $result->data ) {
+                foreach ( $result->data as $item ) {
                     $_routings[ $item->name ] = [
                             'id'          => $item->rt_id,
                             'name'        => $item->name,
@@ -343,16 +342,8 @@ class Intento extends AbstractEngine
         curl_close($curl);
         $_providers = [];
 
-        // needed by the UI
-        $_providers[ 'smart_routing' ] = [
-                'id'           => 'smart_routing',
-                'name'         => 'Smart_routing',
-                'vendor'       => "",
-                'auth_example' => ""
-        ];
-
-        if ($result) {
-            foreach ($result as $value) {
+        if ( $result ) {
+            foreach ( $result as $value ) {
                 $example                  = (array)$value->auth;
                 $example                  = json_encode($example);
                 $_providers[ $value->id ] = ['id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example' => $example];
@@ -371,7 +362,7 @@ class Intento extends AbstractEngine
     public function getExtraParams(): array
     {
         return [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'intento_routing',
                 'intento_provider',
         ];

@@ -20,11 +20,34 @@ export const MMTOptions = ({isCattoolPage}) => {
     <div className="options-container-content">
       <div className="mt-params-option">
         <div>
+          <h3>Pre-translate files</h3>
+          <p>
+            Choose whether to automatically translate project files during the
+            analysis phase. Pre-translation may generate additional charges from
+            your MT provider.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="enable_mt_analysis"
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Switch
+              name={name}
+              active={value}
+              onChange={onChange}
+              disabled={disabled}
+            />
+          )}
+        />
+      </div>
+      <div className="mt-params-option">
+        <div>
           <h3>Activate context analyzer</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to analyze the source content against all your
+            translation memories and automatically identify the most relevant
+            ones for adaptation.
           </p>
         </div>
         <Controller
@@ -41,37 +64,16 @@ export const MMTOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
-      <div className="mt-params-option">
-        <div>
-          <h3>Pre-translate files</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <Controller
-          control={control}
-          name="pre_translate_files"
-          disabled={isCattoolPage}
-          render={({field: {onChange, value, name, disabled}}) => (
-            <Switch
-              name={name}
-              active={value}
-              onChange={onChange}
-              disabled={disabled}
-            />
-          )}
-        />
-      </div>
       <h2>Glossary</h2>
       <div className="mt-params-option">
         <div>
           <h3>Case-sensitive matching</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether glossary terms must match case exactly.
+            <br />
+            If enabled, only terms with the same capitalization are recognized
+            and applied (e.g. the glossary translation for apple won’t be
+            applied when Apple appears in the source text).
           </p>
         </div>
         <Controller

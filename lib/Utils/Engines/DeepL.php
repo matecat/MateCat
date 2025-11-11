@@ -229,7 +229,7 @@ class DeepL extends AbstractEngine
     public function getExtraParams(): array
     {
         return [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'deepl_formality',
                 'deepl_id_glossary',
                 'deepl_engine_type',

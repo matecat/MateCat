@@ -139,7 +139,7 @@ export const MTGlossaryRow = ({
 
   const editingNameButtons = !isEditingName ? (
     <button className="grey-button" onClick={() => setIsEditingName(true)}>
-      <IconEdit size={15} />
+      <IconEdit size={16} />
     </button>
   ) : (
     <div className="editing-buttons">
@@ -212,7 +212,7 @@ export const MTGlossaryRow = ({
               disabled={isWaitingResult}
             />
             <label htmlFor={`file-import${row.id}`} className="grey-button">
-              <Upload size={12} />
+              <Upload size={16} />
               Update
             </label>
           </div>
@@ -223,7 +223,7 @@ export const MTGlossaryRow = ({
               onClick={() => deleteGlossaryConfirm(row)}
               data-testid={`delete-mtglossary-${row.id}`}
             >
-              <Trash size={12} />
+              <Trash size={16} />
             </button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}

@@ -103,7 +103,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
           tooltipPosition: TOOLTIP_POSITION.LEFT,
           children: (
             <>
-              <IconAdd size={22} />
+              <IconAdd size={16} />
             </>
           ),
         }}

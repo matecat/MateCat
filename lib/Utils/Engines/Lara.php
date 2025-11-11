@@ -65,6 +65,11 @@ class Lara extends AbstractEngine
     private ?MMTEngine $mmt_SET_PrivateLicense = null;
 
     /**
+     * @var bool
+     */
+    protected bool $_skipAnalysis = false;
+
+    /**
      * @throws Exception
      */
     public function __construct($engineRecord)
@@ -75,7 +80,6 @@ class Lara extends AbstractEngine
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
 
-        $this->_skipAnalysis = true;
     }
 
     /**
@@ -97,7 +101,6 @@ class Lara extends AbstractEngine
         $mmtStruct->type             = EngineConstants::MT;
         $mmtStruct->extra_parameters = [
                 'MMT-License'      => $extraParams[ 'MMT-License' ] ?: AppConfig::$DEFAULT_MMT_KEY,
-                'MMT-pretranslate' => true,
                 'MMT-preimport'    => false,
         ];
         /**
@@ -106,20 +109,19 @@ class Lara extends AbstractEngine
         $engine                 = EnginesFactory::createTempInstance($mmtStruct);
         $this->mmt_GET_Fallback = $engine;
 
-        if (!empty($extraParams[ 'MMT-License' ])) {
-            $mmtStruct                   = MMTStruct::getStruct();
-            $mmtStruct->type             = EngineConstants::MT;
-            $mmtStruct->extra_parameters = [
-                    'MMT-License'      => $extraParams[ 'MMT-License' ],
-                    'MMT-pretranslate' => true,
-                    'MMT-preimport'    => false,
-            ];
-            /**
-             * @var MMTEngine $engine
-             */
-            $engine                       = EnginesFactory::createTempInstance($mmtStruct);
-            $this->mmt_SET_PrivateLicense = $engine;
-        }
+//        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
+//            $mmtStruct                   = MMTStruct::getStruct();
+//            $mmtStruct->type             = EngineConstants::MT;
+//            $mmtStruct->extra_parameters = [
+//                    'MMT-License'      => $extraParams[ 'MMT-License' ],
+//                    'MMT-preimport'    => false,
+//            ];
+//            /**
+//             * @var MMTEngine $engine
+//             */
+//            $engine                       = EnginesFactory::createTempInstance( $mmtStruct );
+//            $this->mmt_SET_PrivateLicense = $engine;
+//        }
 
         $this->clientLoaded = new LaraClient($credentials);
 
@@ -182,14 +184,10 @@ class Lara extends AbstractEngine
      * @throws LaraException
      * @throws Exception
      */
-    public function get(array $_config)
-    {
-        if ($this->_isAnalysis && $this->_skipAnalysis) {
-            return [];
-        }
+    public function get( array $_config ) {
 
-        $tm_keys           = TmKeyManager::getOwnerKeys([$_config[ 'all_job_tm_keys' ] ?? '[]'], 'r');
-        $_config[ 'keys' ] = array_map(function ($tm_key) {
+        $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
+        $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
              * @var $tm_key MemoryKeyStruct
              */
@@ -199,27 +197,14 @@ class Lara extends AbstractEngine
         // init lara client and mmt fallback
         $client = $this->_getClient();
 
-        // configuration for mmt fallback
-        $_config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
-        if ($this->_isAnalysis && $this->_skipAnalysis) {
-            // for MMT
-            $_config[ 'priority' ] = 'background';
-
-            // analysis on Lara is disabled, fallback on MMT
-            return $this->mmt_GET_Fallback->get($_config);
-        } else {
-            $_config[ 'priority' ] = 'normal';
-        }
-
-        $_lara_keys = $this->_reMapKeyList($_config[ 'keys' ]);
+        $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
 
         try {
             // call lara
             $translateOptions = new TranslateOptions();
-            $translateOptions->setAdaptTo($_lara_keys);
-            $translateOptions->setMultiline(false);
-            $translateOptions->setContentType('application/xliff+xml');
-
+            $translateOptions->setAdaptTo( $_lara_keys );
+            $translateOptions->setMultiline( false );
+            $translateOptions->setContentType( 'application/xliff+xml' );
             $headers = new Headers();
 
             if (!empty($_config[ 'tuid' ]) and is_string($_config[ 'tuid' ])) {
@@ -419,8 +404,11 @@ class Lara extends AbstractEngine
             return false;
         }
 
-        // let MMT to have the last word on requeue
-        return empty($this->mmt_SET_PrivateLicense) || $this->mmt_SET_PrivateLicense->update($_config);
+//         let MMT to have the last word on requeue
+//        return empty( $this->mmt_SET_PrivateLicense ) || $this->mmt_SET_PrivateLicense->update( $_config );
+
+        return true;
+
     }
 
     /**
@@ -449,15 +437,16 @@ class Lara extends AbstractEngine
     {
         $clientMemories = $this->_getClient()->memories;
         try {
-            if (!empty($this->mmt_SET_PrivateLicense)) {
-                $memoryKeyToUpdate         = new MemoryKeyStruct();
-                $memoryKeyToUpdate->tm_key = new TmKeyStruct(['key' => str_replace('ext_my_', '', $memoryKey[ 'externalId' ])]);
 
-                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine($memoryKeyToUpdate);
-                if (!empty($memoryMMT)) {
-                    $this->mmt_SET_PrivateLicense->deleteMemory($memoryMMT);
-                }
-            }
+//            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+//                $memoryKeyToUpdate         = new MemoryKeyStruct();
+//                $memoryKeyToUpdate->tm_key = new TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
+//
+//                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
+//                if ( !empty( $memoryMMT ) ) {
+//                    $this->mmt_SET_PrivateLicense->deleteMemory( $memoryMMT );
+//                }
+//            }
 
             return $clientMemories->delete(trim($memoryKey[ 'id' ]))->jsonSerialize();
         } catch (LaraApiException $e) {
@@ -512,9 +501,10 @@ class Lara extends AbstractEngine
 
         $fp_out = null;
 
-        if (!empty($this->mmt_SET_PrivateLicense)) {
-            $this->mmt_SET_PrivateLicense->importMemory($filePath, $memoryKey, $user);
-        }
+//        if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+//            $this->mmt_SET_PrivateLicense->importMemory( $filePath, $memoryKey, $user );
+//        }
+
     }
 
     /**
@@ -601,7 +591,7 @@ class Lara extends AbstractEngine
     public function getExtraParams(): array
     {
         return [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'lara_glossaries',
         ];
     }

@@ -97,29 +97,29 @@ export const Lara = ({
                 {...register('secret', {required: true})}
               />
             </div>
-            <div className="provider-field-row">
-              <div className="provider-license-label-with-icon">
-                <label>ModernMT License</label>
-                <Tooltip
-                  content={
-                    <div>
-                      (Optional) Enter your ModernMT license to use your
-                      personal ModernMT Full engine for pre-translation.
-                    </div>
-                  }
-                >
-                  <div ref={infoIcon1}>
-                    <InfoIcon />
-                  </div>
-                </Tooltip>
-              </div>
-              <input
-                className="required"
-                type="text"
-                placeholder="Enter your ModernMT license (optional)"
-                {...register('mmt-license')}
-              />
-            </div>
+            {/*<div className="provider-field-row">*/}
+            {/*  <div className="provider-license-label-with-icon">*/}
+            {/*    <label>ModernMT License</label>*/}
+            {/*    <Tooltip*/}
+            {/*      content={*/}
+            {/*        <div>*/}
+            {/*          (Optional) Enter your ModernMT license to use your*/}
+            {/*          personal ModernMT Full engine for pre-translation.*/}
+            {/*        </div>*/}
+            {/*      }*/}
+            {/*    >*/}
+            {/*      <div ref={infoIcon1}>*/}
+            {/*        <InfoIcon />*/}
+            {/*      </div>*/}
+            {/*    </Tooltip>*/}
+            {/*  </div>*/}
+            {/*  <input*/}
+            {/*    className="required"*/}
+            {/*    type="text"*/}
+            {/*    placeholder="Enter your ModernMT license (optional)"*/}
+            {/*    {...register('mmt-license')}*/}
+            {/*  />*/}
+            {/*</div>*/}
             {errors.secret && (
               <span className="field-error">Required field</span>
             )}

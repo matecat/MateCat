@@ -822,7 +822,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $contributionStruct->uid                  = ($ownerUid !== null) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1($this->data[ 'segment' ][ 'segment' ]); //
-        $contributionStruct->oldTranslation       = ($_Translation[ 'translation' ] !== null) ? $this->filter->fromLayer0ToLayer1($old_translation[ 'translation' ]) : "";
+        $contributionStruct->oldTranslation       = ( $old_translation[ 'translation' ] !== null ) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : "";
         $contributionStruct->translation_origin   = $this->getOriginalSuggestionProvider($_Translation, $old_translation);
 
         /*

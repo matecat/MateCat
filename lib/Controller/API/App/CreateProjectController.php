@@ -233,17 +233,17 @@ class CreateProjectController extends AbstractStatefulKleinController
 
 
         // MT SETTINGS
-        $pre_translate_files                    = filter_var($this->request->param('pre_translate_files'), FILTER_VALIDATE_BOOLEAN);
-        $mmt_glossaries_case_sensitive_matching = filter_var($this->request->param('mmt_glossaries_case_sensitive_matching'), FILTER_VALIDATE_BOOLEAN);
-        $mmt_pre_import_tm                      = filter_var($this->request->param('mmt_pre_import_tm'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $mmt_glossaries                         = filter_var($this->request->param('mmt_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $mmt_activate_context_analyzer          = filter_var($this->request->param('mmt_activate_context_analyzer'), FILTER_VALIDATE_BOOLEAN);
-        $intento_provider                       = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $intento_routing                        = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $lara_glossaries                        = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $deepl_id_glossary                      = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $deepl_formality                        = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $deepl_engine_type                      = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $enable_mt_analysis                     = filter_var( $this->request->param( 'enable_mt_analysis' ), FILTER_VALIDATE_BOOLEAN );
+        $mmt_glossaries_case_sensitive_matching = filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
+        $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
+        $intento_provider                       = filter_var( $this->request->param( 'intento_provider' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $intento_routing                        = filter_var( $this->request->param( 'intento_routing' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $lara_glossaries                        = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_id_glossary                      = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_formality                        = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $deepl_engine_type                      = filter_var( $this->request->param( 'deepl_engine_type' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
         $array_keys = json_decode($private_keys_list, true);
         $array_keys = array_values(array_merge($array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ]));
@@ -281,48 +281,48 @@ class CreateProjectController extends AbstractStatefulKleinController
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
-
-                'file_name'                              => $file_name,
-                'project_name'                           => $project_name,
-                'source_lang'                            => $source_lang,
-                'target_lang'                            => $target_lang,
-                'job_subject'                            => $job_subject,
-                'pretranslate_100'                       => $pretranslate_100,
-                'pretranslate_101'                       => $pretranslate_101,
-                'tm_prioritization'                      => (!empty($tm_prioritization)) ? $tm_prioritization : null,
-                'id_team'                                => $id_team,
-                'pre_translate_files'                    => (!empty($pre_translate_files)) ? $pre_translate_files : null,
-                'mmt_glossaries_case_sensitive_matching' => (!empty($mmt_glossaries_case_sensitive_matching)) ? $mmt_glossaries_case_sensitive_matching : null,
-                'mmt_pre_import_tm'                      => (!empty($mmt_pre_import_tm)) ? $mmt_pre_import_tm : null,
-                'mmt_glossaries'                         => (!empty($mmt_glossaries)) ? $mmt_glossaries : null,
-                'mmt_activate_context_analyzer'          => (!empty($mmt_activate_context_analyzer)) ? $mmt_activate_context_analyzer : null,
-                'intento_provider'                       => (!empty($intento_provider)) ? $intento_provider : null,
-                'intento_routing'                        => (!empty($intento_routing)) ? $intento_routing : null,
-                'lara_glossaries'                        => (!empty($lara_glossaries)) ? $lara_glossaries : null,
-                'deepl_id_glossary'                      => (!empty($deepl_id_glossary)) ? $deepl_id_glossary : null,
-                'deepl_formality'                        => (!empty($deepl_formality)) ? $deepl_formality : null,
-                'deepl_engine_type'                      => (!empty($deepl_engine_type)) ? $deepl_engine_type : null,
-                'project_completion'                     => $project_completion,
-                'get_public_matches'                     => $get_public_matches,
-                'character_counter_count_tags'           => (!empty($character_counter_count_tags)) ? $character_counter_count_tags : null,
-                'character_counter_mode'                 => (!empty($character_counter_mode)) ? $character_counter_mode : null,
-                'dialect_strict'                         => (!empty($dialect_strict)) ? $dialect_strict : null,
-                'filters_extraction_parameters'          => (!empty($filters_extraction_parameters)) ? $filters_extraction_parameters : null,
-                'xliff_parameters'                       => (!empty($xliff_parameters)) ? $xliff_parameters : null,
-                'xliff_parameters_template_id'           => (!empty($xliff_parameters_template_id)) ? $xliff_parameters_template_id : null,
-                'qa_model_template'                      => (!empty($qa_model_template)) ? $qa_model_template : null,
-                'qa_model_template_id'                   => (!empty($qa_model_template_id)) ? $qa_model_template_id : null,
-                'payable_rate_template'                  => (!empty($payable_rate_template)) ? $payable_rate_template : null,
-                'payable_rate_template_id'               => (!empty($payable_rate_template_id)) ? $payable_rate_template_id : null,
-                'array_keys'                             => (!empty($array_keys)) ? $array_keys : [],
-                'mt_engine'                              => $mt_engine,
-                'disable_tms_engine_flag'                => $disable_tms_engine_flag,
-                'private_tm_key'                         => $private_tm_key,
-                'only_private'                           => $only_private,
-                'mt_quality_value_in_editor'             => (!empty($mt_quality_value_in_editor)) ? $mt_quality_value_in_editor : 85,
-                'due_date'                               => (empty($due_date) ? null : Utils::mysqlTimestamp($due_date)),
-                'file_names_list'                        => $arFiles,
-                'public_tm_penalty'                      => $public_tm_penalty,
+            
+            'file_name'                              => $file_name,
+            'project_name'                           => $project_name,
+            'source_lang'                            => $source_lang,
+            'target_lang'                            => $target_lang,
+            'job_subject'                            => $job_subject,
+            'pretranslate_100'                       => $pretranslate_100,
+            'pretranslate_101'                       => $pretranslate_101,
+            'tm_prioritization'                      => $tm_prioritization ?? null,
+            'id_team'                                => $id_team,
+            'enable_mt_analysis'                     => $enable_mt_analysis ?? null,
+            'mmt_glossaries_case_sensitive_matching' => $mmt_glossaries_case_sensitive_matching ?? null,
+            'mmt_pre_import_tm'                      => $mmt_pre_import_tm ?? null,
+            'mmt_glossaries'                         => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
+            'mmt_activate_context_analyzer'          => $mmt_activate_context_analyzer ?? null,
+            'intento_provider'                       => ( !empty( $intento_provider ) ) ? $intento_provider : null,
+            'intento_routing'                        => ( !empty( $intento_routing ) ) ? $intento_routing : null,
+            'lara_glossaries'                        => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
+            'deepl_id_glossary'                      => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
+            'deepl_formality'                        => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
+            'deepl_engine_type'                      => ( !empty( $deepl_engine_type ) ) ? $deepl_engine_type : null,
+            'project_completion'                     => $project_completion,
+            'get_public_matches'                     => $get_public_matches,
+            'character_counter_count_tags'           => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
+            'character_counter_mode'                 => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
+            'dialect_strict'                         => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
+            'filters_extraction_parameters'          => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
+            'xliff_parameters'                       => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
+            'xliff_parameters_template_id'           => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+            'qa_model_template'                      => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
+            'qa_model_template_id'                   => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+            'payable_rate_template'                  => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
+            'payable_rate_template_id'               => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
+            'array_keys'                             => ( !empty( $array_keys ) ) ? $array_keys : [],
+            'mt_engine'                              => $mt_engine,
+            'disable_tms_engine_flag'                => $disable_tms_engine_flag,
+            'private_tm_key'                         => $private_tm_key,
+            'only_private'                           => $only_private,
+            'mt_quality_value_in_editor'             => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
+            'due_date'                               => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
+            'file_names_list'               => $arFiles,
+            'public_tm_penalty'             => $public_tm_penalty,
 
             /**
              * Subfiltering configuration (as string input):

@@ -59,7 +59,7 @@ class MMT extends AbstractEngine
     /**
      * @var bool
      */
-    protected bool $_skipAnalysis = true;
+    protected bool $_skipAnalysis = false;
 
     /**
      * @throws Exception
@@ -72,9 +72,6 @@ class MMT extends AbstractEngine
             throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
 
-        if (isset($this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ]) && $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ]) {
-            $this->_skipAnalysis = false;
-        }
     }
 
     /**
@@ -129,12 +126,15 @@ class MMT extends AbstractEngine
             $glossaries = $metadataDao->setCacheTTL(86400)->get($_config[ 'project_id' ], 'mmt_glossaries');
         }
 
-        if ($glossaries !== null) {
-            $glossaries         = html_entity_decode($glossaries->value);
-            $mmtGlossariesArray = json_decode($glossaries, true);
+        if ( $glossaries !== null ) {
+            $mmtGlossariesArray = json_decode( $glossaries->value, true );
+            $ignore_glossary_case = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries_case_sensitive_matching' );
 
-            $_config[ 'glossaries' ]           = implode(",", $mmtGlossariesArray[ 'glossaries' ]);
-            $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ]; // ???? mmt_glossaries_case_sensitive_matching
+            $_config[ 'glossaries' ] = implode( ",", $mmtGlossariesArray );
+
+            if($ignore_glossary_case !== null){
+                $_config[ 'ignore_glossary_case' ] = $ignore_glossary_case->value;
+            }
         }
 
         $_config = $this->configureAnalysisContribution($_config);
@@ -680,7 +680,7 @@ class MMT extends AbstractEngine
     public function getExtraParams(): array
     {
         return [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'mmt_glossaries',
                 'mmt_pre_import_tm',
                 'mmt_activate_context_analyzer',

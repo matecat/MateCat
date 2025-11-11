@@ -249,7 +249,7 @@ class ProjectManager
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
                             'mt_qe_workflow_payable_rate'            => null,
-                            'pre_translate_files'                    => null,
+                            'enable_mt_analysis'                    => null,
                             'mmt_pre_import_tm'                      => null,
                             'mmt_activate_context_analyzer'          => null,
                             'mmt_glossaries_case_sensitive_matching' => null,
@@ -531,7 +531,7 @@ class ProjectManager
 
         // MT extra config parameters
         $extraKeys = [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'mmt_glossaries',
                 'mmt_pre_import_tm',
                 'mmt_activate_context_analyzer',

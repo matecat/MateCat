@@ -63,7 +63,7 @@ class MetaDataController extends KleinController
         $metadata->mt_extra = new stdClass();
 
         $myExtraKeys = [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'mmt_glossaries',
                 'mmt_pre_import_tm',
                 'mmt_activate_context_analyzer',

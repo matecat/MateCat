@@ -46,7 +46,7 @@ abstract class AbstractEngine implements EngineInterface
     protected array $curl_additional_params = [];
 
     protected bool $_isAnalysis   = false;
-    protected bool $_skipAnalysis = false;
+    protected bool $_skipAnalysis = true;
 
     /**
      * @var bool True if the engine can receive contributions through a `set/update` method.
