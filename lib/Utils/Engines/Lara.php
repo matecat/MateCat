@@ -16,7 +16,6 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Plugins\Features\Mmt;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -29,11 +28,9 @@ use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\Matches;
-use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
-use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -77,9 +74,10 @@ class Lara extends AbstractEngine
         parent::__construct($engineRecord);
 
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
-            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
+            throw new Exception(
+                "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}"
+            );
         }
-
     }
 
     /**
@@ -95,18 +93,18 @@ class Lara extends AbstractEngine
         }
 
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
-        $credentials = new LaraCredentials($extraParams[ 'Lara-AccessKeyId' ], $extraParams[ 'Lara-AccessKeySecret' ]);
+        $credentials = new LaraCredentials($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
 
-        $mmtStruct                   = MMTStruct::getStruct();
-        $mmtStruct->type             = EngineConstants::MT;
+        $mmtStruct = MMTStruct::getStruct();
+        $mmtStruct->type = EngineConstants::MT;
         $mmtStruct->extra_parameters = [
-                'MMT-License'      => $extraParams[ 'MMT-License' ] ?: AppConfig::$DEFAULT_MMT_KEY,
-                'MMT-preimport'    => false,
+            'MMT-License' => $extraParams['MMT-License'] ?: AppConfig::$DEFAULT_MMT_KEY,
+            'MMT-preimport' => false,
         ];
         /**
          * @var MMTEngine $engine
          */
-        $engine                 = EnginesFactory::createTempInstance($mmtStruct);
+        $engine = EnginesFactory::createTempInstance($mmtStruct);
         $this->mmt_GET_Fallback = $engine;
 
 //        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
@@ -144,7 +142,7 @@ class Lara extends AbstractEngine
 
         try {
             $value = unserialize($cache->get("lara_languages"));
-        } catch (Throwable $e) {
+        } catch (Throwable) {
         }
 
         if (!empty($value)) {
@@ -152,13 +150,13 @@ class Lara extends AbstractEngine
         }
 
         $client = $this->_getClient();
-        $value  = $client->getLanguages();
+        $value = $client->getLanguages();
 
         if (!empty($value)) {
             $value = array_map(function ($v) {
                 $code = explode('-', $v);
 
-                return $code[ 0 ];
+                return $code[0];
             }, $value);
             $value = array_unique($value);
         }
@@ -179,15 +177,20 @@ class Lara extends AbstractEngine
      *
      * @param array $_config
      *
-     * @return array|TMSAbstractResponse
+     * @return array
      * @throws ReflectionException
      * @throws LaraException
      * @throws Exception
      */
-    public function get( array $_config ) {
+    public function get(array $_config): array
+    {
+        // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
+        if ($this->_isAnalysis && $this->_skipAnalysis) {
+            return [];
+        }
 
-        $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
-        $_config[ 'keys' ] = array_map( function ( $tm_key ) {
+        $tm_keys = TmKeyManager::getOwnerKeys([$_config['all_job_tm_keys'] ?? '[]'], 'r');
+        $_config['keys'] = array_map(function ($tm_key) {
             /**
              * @var $tm_key MemoryKeyStruct
              */
@@ -197,28 +200,28 @@ class Lara extends AbstractEngine
         // init lara client and mmt fallback
         $client = $this->_getClient();
 
-        $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
+        $_lara_keys = $this->_reMapKeyList($_config['keys']);
 
         try {
             // call lara
             $translateOptions = new TranslateOptions();
-            $translateOptions->setAdaptTo( $_lara_keys );
-            $translateOptions->setMultiline( false );
-            $translateOptions->setContentType( 'application/xliff+xml' );
+            $translateOptions->setAdaptTo($_lara_keys);
+            $translateOptions->setMultiline(false);
+            $translateOptions->setContentType('application/xliff+xml');
             $headers = new Headers();
 
-            if (!empty($_config[ 'tuid' ]) and is_string($_config[ 'tuid' ])) {
-                $headers->setTuid($_config[ 'tuid' ]);
+            if (!empty($_config['tuid']) and is_string($_config['tuid'])) {
+                $headers->setTuid($_config['tuid']);
             }
 
             $translateOptions->setHeaders($headers->getArrayCopy());
 
-            if (!empty($_config[ 'project_id' ])) {
+            if (!empty($_config['project_id'])) {
                 $metadataDao = new MetadataDao();
-                $metadata    = $metadataDao->setCacheTTL(86400)->get($_config[ 'project_id' ], 'lara_glossaries');
+                $metadata = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
 
                 if ($metadata !== null) {
-                    $metadata            = html_entity_decode($metadata->value);
+                    $metadata = html_entity_decode($metadata->value);
                     $laraGlossariesArray = json_decode($metadata, true);
                     $translateOptions->setGlossaries($laraGlossariesArray);
                 }
@@ -226,23 +229,28 @@ class Lara extends AbstractEngine
 
             $request_translation = [];
 
-            foreach ($_config[ 'context_list_before' ] ?? [] as $c) {
+            foreach ($_config['context_list_before'] ?? [] as $c) {
                 $request_translation[] = new TextBlock($c, false);
             }
 
-            $request_translation[] = new TextBlock($_config[ 'segment' ]);
+            $request_translation[] = new TextBlock($_config['segment']);
 
-            foreach ($_config[ 'context_list_after' ] ?? [] as $c) {
+            foreach ($_config['context_list_after'] ?? [] as $c) {
                 $request_translation[] = new TextBlock($c, false);
             }
 
-            $time_start          = microtime(true);
-            $translationResponse = $client->translate($request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions);
-            $time_end            = microtime(true);
-            $time                = $time_end - $time_start;
+            $time_start = microtime(true);
+            $translationResponse = $client->translate(
+                $request_translation,
+                $_config['source'],
+                $_config['target'],
+                $translateOptions
+            );
+            $time_end = microtime(true);
+            $time = $time_end - $time_start;
 
             $translation = "";
-            $tList       = $translationResponse->getTranslation();
+            $tList = $translationResponse->getTranslation();
             foreach ($tList as $t) {
                 if ($t->isTranslatable()) {
                     $translation = $t->getText();
@@ -251,22 +259,28 @@ class Lara extends AbstractEngine
             }
 
             // Get score from MMT Quality Estimation
-            if (isset($_config[ 'include_score' ]) and $_config[ 'include_score' ]) {
-                $score = $this->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation, $_config[ 'mt_qe_engine_id' ] ?? '2');
+            if (isset($_config['include_score']) and $_config['include_score']) {
+                $score = $this->getQualityEstimation(
+                    $_config['source'],
+                    $_config['target'],
+                    $_config['segment'],
+                    $translation,
+                    $_config['mt_qe_engine_id'] ?? '2'
+                );
             }
 
             $this->logger->debug([
-                    'LARA REQUEST'  => 'GET https://api.laratranslate.com/translate',
-                    'timing'        => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
-                    'q'             => $request_translation,
-                    'adapt_to'      => $_lara_keys,
-                    'source'        => $_config[ 'source' ],
-                    'target'        => $_config[ 'target' ],
-                    'content_type'  => 'application/xliff+xml',
-                    'multiline'     => false,
-                    'translation'   => $translation,
-                    'score'         => $score ?? null,
-                    'extra_headers' => $headers->getArrayCopy(),
+                'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
+                'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
+                'q' => $request_translation,
+                'adapt_to' => $_lara_keys,
+                'source' => $_config['source'],
+                'target' => $_config['target'],
+                'content_type' => 'application/xliff+xml',
+                'multiline' => false,
+                'translation' => $translation,
+                'score' => $score ?? null,
+                'extra_headers' => $headers->getArrayCopy(),
             ]);
         } catch (LaraException $t) {
             if ($t->getCode() == 429) {
@@ -274,25 +288,32 @@ class Lara extends AbstractEngine
 
                 $engine_type = explode("\\", self::class);
                 $engine_type = array_pop($engine_type);
-                $message     = json_encode([
-                        '_type' => 'quota_exceeded',
-                        'data'  => [
-                                'id_job'  => $_config[ 'job_id' ],
-                                'payload' => [
-                                        'engine'  => $engine_type,
-                                        'code'    => $t->getCode(),
-                                        'message' => "Lara quota exceeded. " . $t->getMessage()
-                                ]
+                $message = json_encode([
+                    '_type' => 'quota_exceeded',
+                    'data' => [
+                        'id_job' => $_config['job_id'],
+                        'payload' => [
+                            'engine' => $engine_type,
+                            'code' => $t->getCode(),
+                            'message' => "Lara quota exceeded. " . $t->getMessage()
                         ]
+                    ]
                 ]);
 
                 $queueHandler = AMQHandler::getNewInstanceForDaemons();
-                $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
+                $queueHandler->publishToNodeJsClients(
+                    AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME,
+                    new Message($message)
+                );
 
                 return [];
             } elseif ($t->getCode() == 401 || $t->getCode() == 403) {
                 $this->logger->debug(["Missing or invalid authentication header.", $t->getMessage(), $t->getCode()]);
-                throw new LaraException("Lara credentials not valid, please verify their validity and try again", $t->getCode(), $t);
+                throw new LaraException(
+                    "Lara credentials not valid, please verify their validity and try again",
+                    $t->getCode(),
+                    $t
+                );
             }
 
             // mmt fallback
@@ -300,15 +321,21 @@ class Lara extends AbstractEngine
         }
 
         return (new Matches([
-                'source'          => $_config[ 'source' ],
-                'target'          => $_config[ 'target' ],
-                'raw_segment'     => $_config[ 'segment' ],
-                'raw_translation' => $translation,
-                'match'           => $this->getStandardMtPenaltyString(),
-                'created-by'      => $this->getMTName(),
-                'create-date'     => date("Y-m-d"),
-                'score'           => $score ?? null
-        ]))->getMatches(1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] ?? null);
+            'source' => $_config['source'],
+            'target' => $_config['target'],
+            'raw_segment' => $_config['segment'],
+            'raw_translation' => $translation,
+            'match' => $this->getStandardMtPenaltyString(),
+            'created-by' => $this->getMTName(),
+            'create-date' => date("Y-m-d"),
+            'score' => $score ?? null
+        ]))->getMatches(
+            1,
+            [],
+            $_config['source'],
+            $_config['target'],
+            $_config[JobsMetadataDao::SUBFILTERING_HANDLERS] ?? null
+        );
     }
 
     /**
@@ -320,26 +347,37 @@ class Lara extends AbstractEngine
      *
      * @return float|null
      */
-    public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = '2'): ?float
-    {
+    public function getQualityEstimation(
+        string $source,
+        string $target,
+        string $sentence,
+        string $translation,
+        string $mt_qe_engine_id = '2'
+    ): ?float {
         $score = null;
 
         try {
-            $score = $this->mmt_GET_Fallback->getQualityEstimation($source, $target, $sentence, $translation, $mt_qe_engine_id);
+            $score = $this->mmt_GET_Fallback->getQualityEstimation(
+                $source,
+                $target,
+                $sentence,
+                $translation,
+                $mt_qe_engine_id
+            );
 
             $this->logger->debug([
-                    'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
-                    'source'                 => $source,
-                    'target'                 => $target,
-                    'segment'                => $sentence,
-                    'translation'            => $translation,
-                    'score'                  => $score,
-                    'purfect_version'        => $mt_qe_engine_id
+                'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                'source' => $source,
+                'target' => $target,
+                'segment' => $sentence,
+                'translation' => $translation,
+                'score' => $score,
+                'purfect_version' => $mt_qe_engine_id
             ]);
         } catch (MMTServiceApiException $exception) {
             $this->logger->debug([
-                    'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
-                    'error'                        => $exception->getMessage(),
+                'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
+                'error' => $exception->getMessage(),
             ]);
         } finally {
             return $score;
@@ -360,7 +398,7 @@ class Lara extends AbstractEngine
     public function update($_config)
     {
         $client = $this->_getClient();
-        $_keys  = $this->_reMapKeyList($_config[ 'keys' ] ?? []);
+        $_keys = $this->_reMapKeyList($_config['keys'] ?? []);
 
         if (empty($_keys)) {
             $this->logger->debug(["LARA: update skipped. No keys provided."]);
@@ -370,36 +408,36 @@ class Lara extends AbstractEngine
 
         try {
             $time_start = microtime(true);
-            $headers    = new Headers($_config[ 'tuid' ], $_config[ 'translation_origin' ]);
+            $headers = new Headers($_config['tuid'], $_config['translation_origin']);
             // call lara
             $client->memories->addTranslation(
-                    $_keys,
-                    $_config[ 'source' ],
-                    $_config[ 'target' ],
-                    $_config[ 'segment' ],
-                    $_config[ 'translation' ],
-                    $_config[ 'tuid' ],
-                    $_config[ 'context_before' ],
-                    $_config[ 'context_after' ],
-                    $headers->getArrayCopy()
+                $_keys,
+                $_config['source'],
+                $_config['target'],
+                $_config['segment'],
+                $_config['translation'],
+                $_config['tuid'],
+                $_config['context_before'],
+                $_config['context_after'],
+                $headers->getArrayCopy()
             );
             $time_end = microtime(true);
-            $time     = $time_end - $time_start;
+            $time = $time_end - $time_start;
 
             $this->logger->debug([
-                    'LARA REQUEST'    => 'PUT https://api.laratranslate.com/memories/content',
-                    'timing'          => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
-                    'keys'            => $_keys,
-                    'source'          => $_config[ 'source' ],
-                    'target'          => $_config[ 'target' ],
-                    'sentence'        => $_config[ 'segment' ],
-                    'translation'     => $_config[ 'translation' ],
-                    'tuid'            => $_config[ 'tuid' ],
-                    'sentence_before' => $_config[ 'context_before' ],
-                    'sentence_after'  => $_config[ 'context_after' ],
-                    'extra_headers'   => $headers->getArrayCopy(),
+                'LARA REQUEST' => 'PUT https://api.laratranslate.com/memories/content',
+                'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
+                'keys' => $_keys,
+                'source' => $_config['source'],
+                'target' => $_config['target'],
+                'sentence' => $_config['segment'],
+                'translation' => $_config['translation'],
+                'tuid' => $_config['tuid'],
+                'sentence_before' => $_config['context_before'],
+                'sentence_after' => $_config['context_after'],
+                'extra_headers' => $headers->getArrayCopy(),
             ]);
-        } catch (Exception $e) {
+        } catch (Exception) {
             // for any exception (HTTP connection or timeout) requeue
             return false;
         }
@@ -408,7 +446,6 @@ class Lara extends AbstractEngine
 //        return empty( $this->mmt_SET_PrivateLicense ) || $this->mmt_SET_PrivateLicense->update( $_config );
 
         return true;
-
     }
 
     /**
@@ -421,12 +458,8 @@ class Lara extends AbstractEngine
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array
     {
         $clientMemories = $this->_getClient()->memories;
-        $memory         = $clientMemories->get('ext_my_' . trim($memoryKey->tm_key->key));
-        if ($memory) {
-            return $memory->jsonSerialize();
-        }
-
-        return null;
+        $memory = $clientMemories->get('ext_my_' . trim($memoryKey->tm_key->key));
+        return $memory?->jsonSerialize();
     }
 
     /**
@@ -437,7 +470,6 @@ class Lara extends AbstractEngine
     {
         $clientMemories = $this->_getClient()->memories;
         try {
-
 //            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
 //                $memoryKeyToUpdate         = new MemoryKeyStruct();
 //                $memoryKeyToUpdate->tm_key = new TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
@@ -448,7 +480,7 @@ class Lara extends AbstractEngine
 //                }
 //            }
 
-            return $clientMemories->delete(trim($memoryKey[ 'id' ]))->jsonSerialize();
+            return $clientMemories->delete(trim($memoryKey['id']))->jsonSerialize();
         } catch (LaraApiException $e) {
             if ($e->getCode() == 404) {
                 return [];
@@ -508,23 +540,23 @@ class Lara extends AbstractEngine
     }
 
     /**
-     * @param array      $projectRow
+     * @param array $projectRow
      * @param array|null $segments
      *
      * @return void
      */
-    public function syncMemories(array $projectRow, ?array $segments = [])
+    public function syncMemories(array $projectRow, ?array $segments = []): void
     {
         try {
             // get jobs keys
-            $project = ProjectDao::findById($projectRow[ 'id' ]);
-            $user    = (new UserDao)->getByEmail($projectRow[ 'id_customer' ]);
+            $project = ProjectDao::findById($projectRow['id']);
+            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
 
             foreach ($project->getJobs() as $job) {
-                $keyIds          = [];
-                $jobKeyListRead  = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
+                $keyIds = [];
+                $jobKeyListRead = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
                 $jobKeyListWrite = TmKeyManager::getJobTmKeys($job->tm_keys, 'w', 'tm', $user->uid);
-                $jobKeyList      = array_merge($jobKeyListRead, $jobKeyListWrite);
+                $jobKeyList = array_merge($jobKeyListRead, $jobKeyListWrite);
 
                 foreach ($jobKeyList as $memKey) {
                     $keyIds[] = $memKey->key;
@@ -532,7 +564,7 @@ class Lara extends AbstractEngine
 
                 $keyIds = $this->_reMapKeyList(array_values(array_unique($keyIds)));
                 $client = $this->_getClient();
-                $res    = $client->memories->connect($keyIds);
+                $res = $client->memories->connect($keyIds);
                 $this->logger->debug("Keys connected: " . implode(',', $keyIds) . " -> " . json_encode($res));
             }
         } catch (Exception $e) {
@@ -575,7 +607,7 @@ class Lara extends AbstractEngine
      */
     public function getGlossaries(): array
     {
-        $client     = $this->_getClient();
+        $client = $this->_getClient();
         $glossaries = $client->glossaries;
 
         if (empty($glossaries)) {
@@ -591,8 +623,8 @@ class Lara extends AbstractEngine
     public function getExtraParams(): array
     {
         return [
-                'enable_mt_analysis',
-                'lara_glossaries',
+            'enable_mt_analysis',
+            'lara_glossaries',
         ];
     }
 }

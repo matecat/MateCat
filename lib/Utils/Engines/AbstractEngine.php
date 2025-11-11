@@ -408,7 +408,7 @@ abstract class AbstractEngine implements EngineInterface
              * @var $gtEngine GoogleTranslate
              */
             return $gtEngine->get($_config);
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return [];
         }
     }
