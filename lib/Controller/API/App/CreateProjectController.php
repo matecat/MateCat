@@ -230,7 +230,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
 
         // MT SETTINGS
-        $pre_translate_files                    = filter_var( $this->request->param( 'pre_translate_files' ), FILTER_VALIDATE_BOOLEAN );
+        $enable_mt_analysis                    = filter_var( $this->request->param( 'enable_mt_analysis' ), FILTER_VALIDATE_BOOLEAN );
         $mmt_glossaries_case_sensitive_matching = filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
         $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -290,7 +290,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             'pretranslate_101'                       => $pretranslate_101,
             'tm_prioritization'                      => (  $tm_prioritization !== null ) ? $tm_prioritization : null,
             'id_team'                                => $id_team,
-            'pre_translate_files'                    => ( $pre_translate_files !== null ) ? $pre_translate_files : null,
+            'enable_mt_analysis'                    => ( $enable_mt_analysis !== null ) ? $enable_mt_analysis : null,
             'mmt_glossaries_case_sensitive_matching' => ( $mmt_glossaries_case_sensitive_matching !== null ) ? $mmt_glossaries_case_sensitive_matching : null,
             'mmt_pre_import_tm'                      => ( $mmt_pre_import_tm  !== null ) ? $mmt_pre_import_tm : null,
             'mmt_glossaries'                         => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,

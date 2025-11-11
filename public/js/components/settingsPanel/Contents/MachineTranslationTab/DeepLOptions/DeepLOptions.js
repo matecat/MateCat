@@ -41,7 +41,7 @@ export const DeepLOptions = ({isCattoolPage}) => {
         </div>
         <Controller
           control={control}
-          name="pre_translate_files"
+          name="enable_mt_analysis"
           disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Switch

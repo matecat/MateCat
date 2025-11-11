@@ -58,7 +58,7 @@ class MMT extends AbstractEngine {
     /**
      * @var bool
      */
-    protected bool $_skipAnalysis = true;
+    protected bool $_skipAnalysis = false;
 
     /**
      * @throws Exception
@@ -69,10 +69,6 @@ class MMT extends AbstractEngine {
 
         if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
-        }
-
-        if ( isset( $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) && $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) {
-            $this->_skipAnalysis = false;
         }
 
     }
@@ -111,10 +107,6 @@ class MMT extends AbstractEngine {
      * @throws ReflectionException
      */
     public function get( array $_config ) {
-
-        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
-            return [];
-        }
 
         $client      = $this->_getClient();
         $_keys       = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
@@ -682,7 +674,7 @@ class MMT extends AbstractEngine {
      */
     public function getExtraParams(): array {
         return [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'mmt_glossaries',
                 'mmt_pre_import_tm',
                 'mmt_activate_context_analyzer',

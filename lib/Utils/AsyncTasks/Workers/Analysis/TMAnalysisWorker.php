@@ -721,20 +721,11 @@ class TMAnalysisWorker extends AbstractWorker {
             //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
 
-            // Disable analysis if pre_translate_files
+            // Disable analysis if enable_mt_analysis
             // is not set to true
-            $pid = $queueElement->params->pid;
-
-            if($pid){
-                $metadataDao = new ProjectsMetadataDao();
-                $pre_translate_files = $metadataDao->get( $pid, 'pre_translate_files' );
-
-                if($pre_translate_files !== null && $pre_translate_files->value == true){
-                    $mtEngine->setSkipAnalysis( false );
-                } else {
-                    $mtEngine->setSkipAnalysis( true );
-                }
-            }
+            $metadataDao = new ProjectsMetadataDao();
+            $enable_mt_analysis = $metadataDao->get( $queueElement->params->pid, 'enable_mt_analysis' );
+            $mtEngine->setSkipAnalysis( $enable_mt_analysis ?? false );
 
             // If mt_qe_workflow_enabled is true, force set EnginesFactory.skipAnalysis to `false` to allow the Lara engine to perform the analysis.
             if ( $queueElement->params->mt_qe_workflow_enabled ) {
@@ -759,9 +750,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // if a callback is not set, only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement ); //YYY verify airbnb plugin and MMT engine, such plugin force to use MMT, but MMT now is enabled by default
 
-
             $mt_result = $mtEngine->get( $config );
-            $this->_doLog("PIPPO ---> " . json_encode($config));
 
             // handle GetMemoryResponse instead of having directly Matches
             if ( $mt_result instanceof GetMemoryResponse ) {

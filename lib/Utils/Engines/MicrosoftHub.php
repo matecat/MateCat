@@ -246,7 +246,7 @@ TAG;
      */
     public function getExtraParams(): array {
         return [
-                'pre_translate_files',
+                'enable_mt_analysis',
         ];
     }
 }

@@ -152,10 +152,6 @@ class Intento extends AbstractEngine {
      */
     public function get( array $_config ) {
 
-        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
-            return [];
-        }
-
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
@@ -370,7 +366,7 @@ class Intento extends AbstractEngine {
      */
     public function getExtraParams(): array {
         return [
-                'pre_translate_files',
+                'enable_mt_analysis',
                 'intento_routing',
                 'intento_provider',
         ];

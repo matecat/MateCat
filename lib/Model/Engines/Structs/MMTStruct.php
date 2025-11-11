@@ -70,7 +70,6 @@ class MMTStruct extends EngineStruct {
      */
     public $extra_parameters = [
             'MMT-License'      => "",
-            'MMT-pretranslate' => "",
             'MMT-preimport'    => "",
     ];
 
