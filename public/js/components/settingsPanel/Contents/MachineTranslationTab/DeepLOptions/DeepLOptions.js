@@ -34,9 +34,9 @@ export const DeepLOptions = ({isCattoolPage}) => {
         <div>
           <h3>Pre-translate files</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to automatically translate project files during the
+            analysis phase. Pre-translation may generate additional charges from
+            your MT provider.
           </p>
         </div>
         <Controller
@@ -56,11 +56,7 @@ export const DeepLOptions = ({isCattoolPage}) => {
       <div className="mt-params-option">
         <div>
           <h3>Formality</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <p>Select the level of formality for the MT output.</p>
         </div>
         <Controller
           control={control}
@@ -82,11 +78,12 @@ export const DeepLOptions = ({isCattoolPage}) => {
       </div>
       <div className="mt-params-option">
         <div>
-          <h3>Type of engine to use</h3>
+          <h3>Language model</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Select the DeepL language model to use for translation. The
+            next‑generation model provides higher translation quality,
+            especially for longer texts, while the classic model offers reliable
+            results and faster processing.
           </p>
         </div>
         <Controller

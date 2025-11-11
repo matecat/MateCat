@@ -128,11 +128,14 @@ class MMT extends AbstractEngine {
         }
 
         if ( $glossaries !== null ) {
-            $glossaries         = html_entity_decode( $glossaries->value );
-            $mmtGlossariesArray = json_decode( $glossaries, true );
+            $mmtGlossariesArray = json_decode( $glossaries->value, true );
+            $ignore_glossary_case = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries_case_sensitive_matching' );
 
-            $_config[ 'glossaries' ]           = implode( ",", $mmtGlossariesArray[ 'glossaries' ] );
-            $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ]; // ???? mmt_glossaries_case_sensitive_matching
+            $_config[ 'glossaries' ] = implode( ",", $mmtGlossariesArray );
+
+            if($ignore_glossary_case !== null){
+                $_config[ 'ignore_glossary_case' ] = $ignore_glossary_case->value;
+            }
         }
 
         $_config = $this->configureAnalysisContribution( $_config );

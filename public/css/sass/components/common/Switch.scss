@@ -1,4 +1,4 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 
 .switch-container-outer {
   display: flex;
@@ -7,7 +7,7 @@
   .switch-container-disabled,
   .switch-container-active,
   .switch-container-inactive {
-    font-size: 18px;
+    font-size: 14px;
     color: colors.$grey6;
   }
   .switch-container-active {

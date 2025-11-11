@@ -83,7 +83,7 @@ export const TeamDropdown = ({isManage = true, showModals = true}) => {
         onClick={toggleDropdown}
       >
         {selectedTeam?.name ?? 'Choose team'}
-        <IconDown width={14} height={14} />
+        <IconDown size={20} />
       </Button>
       <div className={`dropdown${isDropdownVisible ? ' open' : ''}`}>
         <ul>
