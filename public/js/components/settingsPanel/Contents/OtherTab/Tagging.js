@@ -121,8 +121,11 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
       <div className="option-description">
         <h3>Tagging syntaxes</h3>
         <p>
-          Choose the syntaxes for tagging. For example, selecting the{' '}
-          {'{{tag}}'} syntax locks all text between {'{{and}}'} into a tag.
+          Choose which syntaxes to detect and lock in tags during translation.
+          <br />
+          <a target="_blank" href="https://guides.matecat.com" rel="noreferrer">
+            More details
+          </a>
         </p>
       </div>
       <div className="options-select-container">
