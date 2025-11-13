@@ -108,7 +108,7 @@ abstract class AbstractEngine implements EngineInterface {
      *
      * @return $this
      */
-    public function setAnalysis( ?bool $bool = true ): AbstractEngine {
+    public function setAnalysis( bool $bool = true ): AbstractEngine {
         $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
 
         return $this;
@@ -119,7 +119,7 @@ abstract class AbstractEngine implements EngineInterface {
      *
      * @return $this
      */
-    public function setSkipAnalysis( ?bool $bool = true ): AbstractEngine {
+    public function setSkipAnalysis( bool $bool = true ): AbstractEngine {
         $this->_skipAnalysis = $bool;
 
         return $this;

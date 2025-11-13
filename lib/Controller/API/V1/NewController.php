@@ -324,7 +324,12 @@ class NewController extends KleinController {
 
         // MT SETTINGS
         $enable_mt_analysis                    = filter_var( $this->request->param( 'enable_mt_analysis' ), FILTER_VALIDATE_BOOLEAN );
-        $mmt_glossaries_case_sensitive_matching = filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
+
+        // The UI ask for case-sensitive matching true/false.
+        // Negate the validated boolean because the MMT default flag is ignore_glossary_case.
+        // true becomes false, false (or invalid/missing) becomes true.
+        $mmt_ignore_glossary_case               = !filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
+
         $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
@@ -449,8 +454,8 @@ class NewController extends KleinController {
                 'pretranslate_101'                          => $pretranslate_101,
                 'id_team'                                   => $id_team,
                 'team'                                      => $team,
-                'enable_mt_analysis'                       => $enable_mt_analysis,
-                'mmt_glossaries_case_sensitive_matching'    => $mmt_glossaries_case_sensitive_matching,
+                'enable_mt_analysis'                        => $enable_mt_analysis,
+                'mmt_ignore_glossary_case'                  => $mmt_ignore_glossary_case,
                 'mmt_pre_import_tm'                         => $mmt_pre_import_tm,
                 'mmt_glossaries'                            => $mmt_glossaries,
                 'mmt_activate_context_analyzer'             => $mmt_activate_context_analyzer,
