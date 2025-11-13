@@ -126,7 +126,6 @@ abstract class AbstractEngine implements EngineInterface
      */
     public function setSkipAnalysis(bool $bool = true): AbstractEngine
     {
-    public function setSkipAnalysis( bool $bool = true ): AbstractEngine {
         $this->_skipAnalysis = $bool;
 
         return $this;
