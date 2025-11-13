@@ -64,7 +64,7 @@ export const MMTOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
-      <h2>Glossary</h2>
+      <h2>Glossaries</h2>
       <div className="mt-params-option">
         <div>
           <h3>Case-sensitive matching</h3>
@@ -72,8 +72,8 @@ export const MMTOptions = ({isCattoolPage}) => {
             Choose whether glossary terms must match case exactly.
             <br />
             If enabled, only terms with the same capitalization are recognized
-            and applied (e.g. the glossary translation for apple won’t be
-            applied when Apple appears in the source text).
+            and applied (e.g. the glossary translation for 'apple' won’t be
+            applied when 'Apple' appears in the source text).
           </p>
         </div>
         <Controller
