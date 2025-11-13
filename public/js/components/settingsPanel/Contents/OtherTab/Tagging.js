@@ -119,7 +119,7 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
   return (
     <div className="options-box">
       <div className="option-description">
-        <h3>Tagging syntaxes</h3>
+        <h3>Tagged syntaxes</h3>
         <p>
           Choose which syntaxes to detect and lock in tags during translation.
           <br />
