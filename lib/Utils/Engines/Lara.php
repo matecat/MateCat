@@ -16,7 +16,6 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Plugins\Features\Mmt;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -99,7 +98,6 @@ class Lara extends AbstractEngine {
         $mmtStruct->type             = EngineConstants::MT;
         $mmtStruct->extra_parameters = [
                 'MMT-License'      => $extraParams[ 'MMT-License' ] ?: AppConfig::$DEFAULT_MMT_KEY,
-                'MMT-preimport'    => false,
         ];
         /**
          * @var MMTEngine $engine
@@ -107,19 +105,18 @@ class Lara extends AbstractEngine {
         $engine                 = EnginesFactory::createTempInstance( $mmtStruct );
         $this->mmt_GET_Fallback = $engine;
 
-//        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
-//            $mmtStruct                   = MMTStruct::getStruct();
-//            $mmtStruct->type             = EngineConstants::MT;
-//            $mmtStruct->extra_parameters = [
-//                    'MMT-License'      => $extraParams[ 'MMT-License' ],
-//                    'MMT-preimport'    => false,
-//            ];
-//            /**
-//             * @var MMTEngine $engine
-//             */
-//            $engine                       = EnginesFactory::createTempInstance( $mmtStruct );
-//            $this->mmt_SET_PrivateLicense = $engine;
-//        }
+        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
+            $mmtStruct                   = MMTStruct::getStruct();
+            $mmtStruct->type             = EngineConstants::MT;
+            $mmtStruct->extra_parameters = [
+                    'MMT-License'      => $extraParams[ 'MMT-License' ],
+            ];
+            /**
+             * @var MMTEngine $engine
+             */
+            $engine                       = EnginesFactory::createTempInstance( $mmtStruct );
+            $this->mmt_SET_PrivateLicense = $engine;
+        }
 
         $this->clientLoaded = new LaraClient( $credentials );
 
@@ -444,15 +441,15 @@ class Lara extends AbstractEngine {
         $clientMemories = $this->_getClient()->memories;
         try {
 
-//            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-//                $memoryKeyToUpdate         = new MemoryKeyStruct();
-//                $memoryKeyToUpdate->tm_key = new TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
-//
-//                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
-//                if ( !empty( $memoryMMT ) ) {
-//                    $this->mmt_SET_PrivateLicense->deleteMemory( $memoryMMT );
-//                }
-//            }
+            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+                $memoryKeyToUpdate         = new MemoryKeyStruct();
+                $memoryKeyToUpdate->tm_key = new TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
+
+                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
+                if ( !empty( $memoryMMT ) ) {
+                    $this->mmt_SET_PrivateLicense->deleteMemory( $memoryMMT );
+                }
+            }
 
             return $clientMemories->delete( trim( $memoryKey[ 'id' ] ) )->jsonSerialize();
         } catch ( LaraApiException $e ) {
@@ -506,9 +503,9 @@ class Lara extends AbstractEngine {
 
         $fp_out = null;
 
-//        if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-//            $this->mmt_SET_PrivateLicense->importMemory( $filePath, $memoryKey, $user );
-//        }
+        if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+            $this->mmt_SET_PrivateLicense->importMemory( $filePath, $memoryKey, $user );
+        }
 
     }
 
