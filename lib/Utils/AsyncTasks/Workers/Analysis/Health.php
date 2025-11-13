@@ -21,47 +21,45 @@ use Utils\Registry\AppConfig;
  * Should be the final class when daemons will be refactored
  *
  */
-class Health {
+class Health
+{
 
-    public static function fastAnalysisIsRunning( $redisHandler ): bool {
-
+    public static function fastAnalysisIsRunning($redisHandler): bool
+    {
         /**
          * @var $redisHandler Client
          */
 
-        $fastList = $redisHandler->srandmember( RedisKeys::FAST_PID_SET );
+        $fastList = $redisHandler->srandmember(RedisKeys::FAST_PID_SET);
 
-        return !empty( $fastList );
-
+        return !empty($fastList);
     }
 
-    public static function tmAnalysisIsRunning( $redisHandler ): bool {
-
+    public static function tmAnalysisIsRunning($redisHandler): bool
+    {
         /**
          * @var $redisHandler Client
          */
 
-        return (bool)$redisHandler->get( RedisKeys::VOLUME_ANALYSIS_PID );
-
+        return (bool)$redisHandler->get(RedisKeys::VOLUME_ANALYSIS_PID);
     }
 
     /**
      *
      * @return bool
      */
-    public static function thereIsAMisconfiguration(): bool {
-
+    public static function thereIsAMisconfiguration(): bool
+    {
         try {
             $redisHandler = new RedisHandler();
             $redisHandler = $redisHandler->getConnection();
 
-            return ( AppConfig::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning( $redisHandler ) && !self::tmAnalysisIsRunning( $redisHandler ) );
-        } catch ( Exception $ex ) {
+            return (AppConfig::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning($redisHandler) && !self::tmAnalysisIsRunning($redisHandler));
+        } catch (Exception $ex) {
             $msg = "****** No REDIS instances found. ******";
-            LoggerFactory::doJsonLog( $msg );
+            LoggerFactory::doJsonLog($msg);
 
             return false;
         }
-
     }
 }

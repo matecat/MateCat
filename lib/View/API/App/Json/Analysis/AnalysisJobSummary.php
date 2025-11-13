@@ -25,7 +25,7 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable {
         }
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return array_values( $this->matches );
     }
 

@@ -37,7 +37,7 @@ class SetOldWordCountTest extends AbstractTest {
 
         $mirror_word_count       = new ReflectionClass( $word_count );
         $old_word_count_property = $mirror_word_count->getProperty( 'oldWCount' );
-        $old_word_count_property->setAccessible( true );
+        
         $this->assertNull( $old_word_count_property->getValue( $word_count ) );
 
         $word_count->setOldWordCount( $word_count_struct );

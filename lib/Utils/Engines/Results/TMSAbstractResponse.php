@@ -12,20 +12,21 @@ use ReflectionProperty;
  * Date: 02/03/15
  * Time: 19.02
  */
-abstract class TMSAbstractResponse {
+abstract class TMSAbstractResponse
+{
 
     public int $responseStatus = 200;
 
     /**
      * @var string|array
      */
-    public $responseDetails = "";
+    public string|array $responseDetails = "";
 
     /**
      * @var mixed
      */
-    public      $responseData    = [];
-    public bool $mtLangSupported = true;
+    public mixed $responseData    = [];
+    public bool  $mtLangSupported = true;
 
     /**
      * @var ErrorResponse|null
@@ -49,8 +50,8 @@ abstract class TMSAbstractResponse {
      *
      * @return TMSAbstractResponse
      */
-    public static function getInstance( $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null ): TMSAbstractResponse {
-
+    public static function getInstance($result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [], ?int $id_project = null): TMSAbstractResponse
+    {
         /**
          * @var class-string<T> $class
          */
@@ -59,21 +60,21 @@ abstract class TMSAbstractResponse {
         /**
          * @var T $instance
          */
-        $instance = new $class( $result, $dataRefMap, $id_project );
+        $instance = new $class($result, $dataRefMap, $id_project);
 
-        if ( is_array( $result ) && isset($result[ 'responseStatus' ]) && $result[ 'responseStatus' ] >= 400 ) {
-            $instance->error = new ErrorResponse( $result[ 'error' ] ?? $result[ 'responseDetails' ] );
+        if (is_array($result) && isset($result[ 'responseStatus' ]) && $result[ 'responseStatus' ] >= 400) {
+            $instance->error = new ErrorResponse($result[ 'error' ] ?? $result[ 'responseDetails' ]);
         }
 
-        if ( $featureSet !== null ) {
-            $instance->featureSet( $featureSet );
+        if ($featureSet !== null) {
+            $instance->featureSet($featureSet);
         }
 
         return $instance;
-
     }
 
-    public function featureSet( FeatureSet $featureSet ) {
+    public function featureSet(FeatureSet $featureSet): void
+    {
         $this->featureSet = $featureSet;
     }
 
@@ -89,22 +90,21 @@ abstract class TMSAbstractResponse {
      *
      * @return array
      */
-    public function toArray( ?array $mask = [] ): array {
-
+    public function toArray(?array $mask = []): array
+    {
         $attributes       = [];
-        $reflectionClass  = new ReflectionClass( $this );
-        $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC );
-        foreach ( $publicProperties as $property ) {
-            if ( !empty( $mask ) ) {
-                if ( !in_array( $property->getName(), $mask ) ) {
+        $reflectionClass  = new ReflectionClass($this);
+        $publicProperties = $reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC);
+        foreach ($publicProperties as $property) {
+            if (!empty($mask)) {
+                if (!in_array($property->getName(), $mask)) {
                     continue;
                 }
             }
-            $attributes[ $property->getName() ] = $property->getValue( $this );
+            $attributes[ $property->getName() ] = $property->getValue($this);
         }
 
         return $attributes;
-
     }
 
 } 

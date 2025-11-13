@@ -4,7 +4,8 @@ namespace Model\Engines\Structs;
 
 use Utils\Engines\DeepL;
 
-class DeepLStruct extends EngineStruct {
+class DeepLStruct extends EngineStruct
+{
     /**
      * @var ?string
      */
@@ -26,16 +27,16 @@ class DeepLStruct extends EngineStruct {
     public ?string $translate_relative_url = "v1/translate";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $others = [
+    public string|array|null $others = [
             "relative_glossaries_url" => "glossaries",
     ];
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
+    public string|array|null $extra_parameters = [
             'DeepL-Auth-Key' => "",
     ];
 
@@ -49,7 +50,8 @@ class DeepLStruct extends EngineStruct {
      */
     public ?int $penalty = 15; // to get 85% matches
 
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new DeepLStruct();
     }
 }

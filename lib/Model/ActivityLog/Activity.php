@@ -13,7 +13,8 @@ use Utils\AsyncTasks\Workers\ActivityLogWorker;
  */
 class Activity {
 
-    public static function save( ActivityLogStruct $activityLog ) {
+    public static function save( ActivityLogStruct $activityLog ): void
+    {
         WorkerClient::enqueue( 'ACTIVITYLOG', ActivityLogWorker::class, $activityLog->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
     }
 

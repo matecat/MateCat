@@ -100,7 +100,7 @@ class AnalysisProjectSummary implements JsonSerializable {
     }
 
     /**
-     * @return float|int
+     * @return float
      */
     public function getDiscount(): float {
         if ( empty( $this->total_raw ) ) {
@@ -131,21 +131,28 @@ class AnalysisProjectSummary implements JsonSerializable {
     /**
      * @return void
      */
-    public function incrementAnalyzed() {
+    public function incrementAnalyzed(): void
+    {
         $this->segments_analyzed++;
     }
 
     /**
+     * @param float $equivalent
+     *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent( float $equivalent ): void
+    {
         $this->total_equivalent += $equivalent;
     }
 
     /**
+     * @param int $raw
+     *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw( int $raw ): void
+    {
         $this->total_raw += $raw;
     }
 
@@ -154,15 +161,9 @@ class AnalysisProjectSummary implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementIndustry( float $industry ) {
+    public function incrementIndustry( float $industry ): void
+    {
         $this->total_industry += $industry;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalIndustry(): int {
-        return round( $this->total_industry );
     }
 
     /**
@@ -170,13 +171,6 @@ class AnalysisProjectSummary implements JsonSerializable {
      */
     public function getSegmentsAnalyzed(): int {
         return $this->segments_analyzed;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalEquivalent(): int {
-        return round( $this->total_equivalent );
     }
 
     /**

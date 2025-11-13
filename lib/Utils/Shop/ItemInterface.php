@@ -15,7 +15,8 @@ namespace Utils\Shop;
  * Time: 10.34
  *
  */
-interface ItemInterface {
+interface ItemInterface
+{
 
 
     /**
@@ -33,7 +34,7 @@ interface ItemInterface {
      * @see Shop_ItemJob::getInflate
      *
      */
-    public static function getInflate( $storage ): AbstractItem;
+    public static function getInflate($storage): AbstractItem;
 
 
 } 

@@ -19,7 +19,8 @@ use Model\Teams\TeamStruct;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
 
-class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
+class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
+{
 
     use ArrayAccessTrait;
 
@@ -45,7 +46,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     /**
      * @return bool
      */
-    public function analysisComplete(): bool {
+    public function analysisComplete(): bool
+    {
         return
                 $this->status_analysis == ProjectStatus::STATUS_DONE ||
                 $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
@@ -56,10 +58,11 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      *
      * @return JobStruct[]
      */
-    public function getJobs( int $ttl = 0 ): array {
-        return $this->cachable( __METHOD__, function () use ( $ttl ) {
-            return JobDao::getByProjectId( $this->id, $ttl );
-        } );
+    public function getJobs(int $ttl = 0): array
+    {
+        return $this->cachable(__METHOD__, function () use ($ttl) {
+            return JobDao::getByProjectId($this->id, $ttl);
+        });
     }
 
     /**
@@ -71,20 +74,22 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return bool
      * @throws ReflectionException
      */
-    public function setMetadata( string $key, string $value ): bool {
-        $dao = new MetadataDao( Database::obtain() );
+    public function setMetadata(string $key, string $value): bool
+    {
+        $dao = new MetadataDao(Database::obtain());
 
-        return $dao->set( $this->id, $key, $value );
+        return $dao->set($this->id, $key, $value);
     }
 
     /**
      *
      * @return array
      */
-    public function getMetadataAsKeyValue(): array {
+    public function getMetadataAsKeyValue(): array
+    {
         $collection = $this->getMetadata();
         $data       = [];
-        foreach ( $collection as $record ) {
+        foreach ($collection as $record) {
             $data[ $record->key ] = $record->value;
         }
 
@@ -97,9 +102,10 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      *
      * @return ?string
      */
-    public function getMetadataValue( $key ): ?string {
+    public function getMetadataValue($key): ?string
+    {
         $meta = $this->getMetadataAsKeyValue();
-        if ( array_key_exists( $key, $meta ) ) {
+        if (array_key_exists($key, $meta)) {
             return $meta[ $key ];
         }
 
@@ -107,43 +113,42 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     }
 
     /**
-     * @return null|MetadataStruct[]
+     * @return MetadataStruct[]
      */
-    public function getMetadata(): array {
-        return $this->cachable( __METHOD__, function () {
+    public function getMetadata(): array
+    {
+        return $this->cachable(__METHOD__, function () {
             $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $this->id );
-        } );
+            return $mDao->setCacheTTL(60 * 60)->allByProjectId($this->id);
+        });
     }
 
     /**
      * @return ?RemoteFileServiceNameStruct
      */
-    public function getRemoteFileServiceName(): ?RemoteFileServiceNameStruct {
-
-        return $this->cachable( __METHOD__, function () {
-
+    public function getRemoteFileServiceName(): ?RemoteFileServiceNameStruct
+    {
+        return $this->cachable(__METHOD__, function () {
             $dao = new ProjectDao();
 
             /** @var RemoteFileServiceNameStruct[] */
-            return $dao->setCacheTTL( 60 * 60 * 24 * 7 )->getRemoteFileServiceName( [ $this->id ] )[ 0 ] ?? null;
-
-        } );
-
+            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([$this->id])[ 0 ] ?? null;
+        });
     }
 
     /**
      * @return null|TeamStruct
      * @throws ReflectionException
      */
-    public function getTeam(): ?TeamStruct {
-        if ( is_null( $this->id_team ) ) {
+    public function getTeam(): ?TeamStruct
+    {
+        if (is_null($this->id_team)) {
             return null;
         }
         $dao = new TeamDao();
 
-        return $dao->findById( $this->id_team );
+        return $dao->findById($this->id_team);
     }
 
     /**
@@ -152,20 +157,22 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return bool
      *
      */
-    public function isFeatureEnabled( $feature_code ): bool {
-        return in_array( $feature_code, $this->getFeaturesSet()->getCodes() );
+    public function isFeatureEnabled($feature_code): bool
+    {
+        return in_array($feature_code, $this->getFeaturesSet()->getCodes());
     }
 
     /**
      * @return FeatureSet
      */
-    public function getFeaturesSet(): FeatureSet {
-        return $this->cachable( __METHOD__, function () {
+    public function getFeaturesSet(): FeatureSet
+    {
+        return $this->cachable(__METHOD__, function () {
             $featureSet = new FeatureSet();
-            $featureSet->loadForProject( $this );
+            $featureSet->loadForProject($this);
 
             return $featureSet;
-        } );
+        });
     }
 
     /**
@@ -173,48 +180,50 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      *
      * @return JobStruct[]
      */
-    public function getChunks( int $ttl = 0 ): array {
-        return $this->cachable( __METHOD__, function () use ( $ttl ) {
-            $dao = new ChunkDao( Database::obtain() );
+    public function getChunks(int $ttl = 0): array
+    {
+        return $this->cachable(__METHOD__, function () use ($ttl) {
+            $dao = new ChunkDao(Database::obtain());
 
-            return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
-        } );
+            return $dao->setCacheTTL($ttl)->getByProjectID($this->id);
+        });
     }
 
     /**
      * @return string
      */
-    public function getWordCountType(): string {
-
+    public function getWordCountType(): string
+    {
         //this method is already cached internally by the MetadataDao.
         // we can avoid using the cachable method here
-        $type = $this->getMetadataValue( MetadataDao::WORD_COUNT_TYPE_KEY );
+        $type = $this->getMetadataValue(MetadataDao::WORD_COUNT_TYPE_KEY);
 
-        if ( $type == null ) {
+        if ($type == null) {
             return MetadataDao::WORD_COUNT_EQUIVALENT;
         } else {
             return $type;
         }
     }
 
+    public function hasFeature($feature_code): bool
+    {
+        return in_array($feature_code, $this->getFeaturesSet()->getCodes());
+    }
+
     /**
-     * @param float|int $ttl
+     * @param int $ttl
      *
      * @return ?ModelStruct
      */
-    public function getLqaModel( $ttl = 86400 ): ?ModelStruct {
-        return $this->cachable( __METHOD__, function () use ( $ttl ) {
-
-            if($this->id_qa_model === null){
+    public function getLqaModel(int $ttl = 86400): ?ModelStruct
+    {
+        return $this->cachable(__METHOD__, function () use ($ttl) {
+            if ($this->id_qa_model === null) {
                 return null;
             }
 
-            return ModelDao::findById( $this->id_qa_model, $ttl );
-        } );
-    }
-
-    public function hasFeature( $feature_code ): bool {
-        return in_array( $feature_code, $this->getFeaturesSet()->getCodes() );
+            return ModelDao::findById($this->id_qa_model, $ttl);
+        });
     }
 
 

@@ -1,5 +1,7 @@
 <?php
+
 namespace Model\Analysis;
+
 use Utils\Langs\Languages;
 
 /**
@@ -9,7 +11,8 @@ use Utils\Langs\Languages;
  * Time: 15.04
  *
  */
-class PayableRates {
+class PayableRates
+{
 
     public static array $DEFAULT_PAYABLE_RATES = [
             'NO_MATCH'    => 100,
@@ -495,8 +498,9 @@ class PayableRates {
      *
      * @return array
      */
-    public static function getPayableRates( string $source, string $target ): array {
-        return self::resolveBreakdowns( static::$langPair2MTpayableRates, $source, $target );
+    public static function getPayableRates(string $source, string $target): array
+    {
+        return self::resolveBreakdowns(static::$langPair2MTpayableRates, $source, $target);
     }
 
     /**
@@ -507,42 +511,41 @@ class PayableRates {
      *
      * @return array
      */
-    public static function resolveBreakdowns( array $breakdowns, string $source, string $target, ?array $default = null ): array {
+    public static function resolveBreakdowns(array $breakdowns, string $source, string $target, ?array $default = null): array
+    {
         $languages = Languages::getInstance();
-        $isoSource = $languages->convertLanguageToIsoCode( $source );
-        $isoTarget = $languages->convertLanguageToIsoCode( $target );
+        $isoSource = $languages->convertLanguageToIsoCode($source);
+        $isoTarget = $languages->convertLanguageToIsoCode($target);
 
         return array_merge(
-                self::getBreakDown( $breakdowns, $source, $target, $isoSource, $isoTarget ),
-                self::getBreakDown( $breakdowns, $target, $source, $isoTarget, $isoSource )
-        ) ?: ( $default ?: static::$DEFAULT_PAYABLE_RATES );
-
+                self::getBreakDown($breakdowns, $source, $target, $isoSource, $isoTarget),
+                self::getBreakDown($breakdowns, $target, $source, $isoTarget, $isoSource)
+        ) ?: ($default ?: static::$DEFAULT_PAYABLE_RATES);
     }
 
-    protected static function getBreakDown( array $breakdowns, string $source, string $target, string $isoSource, string $isoTarget ): array {
-
-        if ( isset( $breakdowns[ $source ] ) ) {
-            if ( isset( $breakdowns[ $source ][ $target ] ) ) {
+    protected static function getBreakDown(array $breakdowns, string $source, string $target, string $isoSource, string $isoTarget): array
+    {
+        if (isset($breakdowns[ $source ])) {
+            if (isset($breakdowns[ $source ][ $target ])) {
                 return $breakdowns[ $source ][ $target ];
             }
 
-            if ( isset( $breakdowns[ $source ][ $isoTarget ] ) ) {
+            if (isset($breakdowns[ $source ][ $isoTarget ])) {
                 return $breakdowns[ $source ][ $isoTarget ];
             }
         }
 
-        if ( isset( $breakdowns[ $isoSource ] ) ) {
-            if ( isset( $breakdowns[ $isoSource ][ $target ] ) ) {
+        if (isset($breakdowns[ $isoSource ])) {
+            if (isset($breakdowns[ $isoSource ][ $target ])) {
                 return $breakdowns[ $isoSource ][ $target ];
             }
 
-            if ( isset( $breakdowns[ $isoSource ][ $isoTarget ] ) ) {
+            if (isset($breakdowns[ $isoSource ][ $isoTarget ])) {
                 return $breakdowns[ $isoSource ][ $isoTarget ];
             }
         }
 
         return [];
-
     }
 
 }

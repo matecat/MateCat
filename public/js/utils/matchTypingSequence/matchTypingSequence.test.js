@@ -1,6 +1,6 @@
 import matchTypingSequence from './matchTypingSequence'
 
-test('Match typing sequence', async () => {
+test('Matches typing sequence', async () => {
   const {get: checkSequence, reset} = matchTypingSequence(
     ['u', '2', '0', '6', '0'],
     1000,
@@ -52,7 +52,7 @@ test('Match typing sequence', async () => {
   expect(result).toBeFalsy()
 })
 
-test('Match typing sequence with multiple options', () => {
+test('Matches typing sequence with multiple options', () => {
   const {get: checkSequence} = matchTypingSequence(
     [
       [50, 98],

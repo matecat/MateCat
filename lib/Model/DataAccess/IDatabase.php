@@ -1,7 +1,11 @@
 <?php
 
 namespace Model\DataAccess;
-interface IDatabase {
+
+use PDO;
+
+interface IDatabase
+{
 
     /**
      * Obtain an instance of the database
@@ -13,18 +17,18 @@ interface IDatabase {
      *
      * @return IDatabase
      */
-    public static function obtain( string $server = null, string $user = null, string $password = null, string $database = null ): IDatabase;
+    public static function obtain(string $server = null, string $user = null, string $password = null, string $database = null): IDatabase;
 
 
     /**
      * Connect and select database
      */
-    public function connect();
+    public function connect(): void;
 
     /**
      * CLose the connection
      */
-    public function close();
+    public function close(): void;
 
 
     /**
@@ -32,25 +36,25 @@ interface IDatabase {
      *
      * @param $name string name of the db to connect to
      */
-    public function useDb( $name );
+    public function useDb(string $name): void;
 
 
     /**
      * Begin a transaction for InnoDB tables
      */
-    public function begin();
+    public function begin(): PDO;
 
 
     /**
      * Commit a transaction for InnoDB tables
      */
-    public function commit();
+    public function commit(): void;
 
 
     /**
-     * Rollback a transaction for InnoDB tables
+     * Roll back a transaction for InnoDB tables
      */
-    public function rollback();
+    public function rollback(): void;
 
     /**
      * Execute a update query with an array as argument
@@ -61,7 +65,7 @@ interface IDatabase {
      *
      * @return integer Number of affected rows
      */
-    public function update( string $table, array $data, array $where = [ '1' => '0' ] ): int;
+    public function update(string $table, array $data, array $where = ['1' => '0']): int;
 
 
     /**
@@ -72,14 +76,14 @@ interface IDatabase {
      *
      * @return string
      */
-    public function insert( string $table, array $data ): string;
+    public function insert(string $table, array $data): string;
 
 
     /**
      * Get the ID of the last inserted row
-     * @return mixed Last insert ID
+     * @return false|string Last insert ID
      */
-    public function last_insert();
+    public function last_insert(): false|string;
 
 
     /**
@@ -91,6 +95,11 @@ interface IDatabase {
      *
      * @return string Sanitized string
      */
-    public function escape( $string );
+    public function escape(string $string): string;
+
+    /**
+     * Get the number of rows affected by the last update/insert query
+     */
+    public function rowCount(): int;
 
 }

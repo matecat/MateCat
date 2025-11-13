@@ -27,7 +27,7 @@ class BuildQueryForEngineTest extends AbstractTest {
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->engine_struct    = new EngineStruct();
         $this->method           = $this->reflector->getMethod( "_buildQueryForEngine" );
-        $this->method->setAccessible( true );
+        
     }
 
     /**

@@ -16,7 +16,8 @@ use PDO;
 use PDOException;
 use Utils\Logger\LoggerFactory;
 
-class WordCounterDao extends AbstractDao {
+class WordCounterDao extends AbstractDao
+{
 
     /**
      * Update the word count for the job
@@ -31,8 +32,8 @@ class WordCounterDao extends AbstractDao {
      *
      * @return int
      */
-    public static function updateWordCount( WordCountStruct $wStruct ) {
-
+    public static function updateWordCount(WordCountStruct $wStruct)
+    {
         $db = Database::obtain();
 
         //Update in Transaction
@@ -70,20 +71,19 @@ class WordCounterDao extends AbstractDao {
         ];
 
         try {
-            $stmt = $db->getConnection()->prepare( $query );
-            $stmt->execute( $bind_keys );
-        } catch ( PDOException $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
+            $stmt = $db->getConnection()->prepare($query);
+            $stmt->execute($bind_keys);
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
 
             return $e->getCode() * -1;
         }
 
         return $stmt->rowCount();
-
     }
 
-    public function initializeWordCount( WordCountStruct $wStruct ) {
-
+    public function initializeWordCount(WordCountStruct $wStruct)
+    {
         $db = Database::obtain();
 
         $data                       = [];
@@ -107,15 +107,14 @@ class WordCounterDao extends AbstractDao {
         ];
 
         try {
-            $db->update( 'jobs', $data, $where );
-        } catch ( PDOException $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
+            $db->update('jobs', $data, $where);
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
 
             return $e->getCode() * -1;
         }
 
-        return $db->affected_rows;
-
+        return $db->rowCount();
     }
 
     /**
@@ -130,8 +129,8 @@ class WordCounterDao extends AbstractDao {
      *
      * @return array
      */
-    public function getStatsForJob( int $id_job, ?int $id_file = null, ?string $jPassword = null ): array {
-
+    public function getStatsForJob(int $id_job, ?int $id_file = null, ?string $jPassword = null): array
+    {
         /*
          * -- TOTAL field is not used, but we keep here to easy check the values and for documentation
          *
@@ -187,21 +186,21 @@ class WordCounterDao extends AbstractDao {
 
         $db = Database::obtain();
 
-        $bind_values = [ 'id_job' => $id_job ];
+        $bind_values = ['id_job' => $id_job];
 
-        if ( !empty( $jPassword ) ) {
+        if (!empty($jPassword)) {
             $bind_values[ 'password' ] = $jPassword;
             $query                     .= " and j.password = :password";
         }
 
-        if ( !empty( $id_file ) ) {
+        if (!empty($id_file)) {
             $bind_values[ 'id_file' ] = $id_file;
             $query                    .= " and fj.id_file = :id_file";
         }
 
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( $bind_values );
+        $stmt = $db->getConnection()->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute($bind_values);
         $results = $stmt->fetchAll();
         $stmt->closeCursor();
 

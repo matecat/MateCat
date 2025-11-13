@@ -21,19 +21,19 @@ class StandardMatchTypeNamesConstants extends AbstractConstants {
      * These constants refer to the values sent by the APIs and need to be converted
      * into the values that are used internally and to be inserted into the database.
      */
-    const _NEW          = "new";
-    const _50_74        = "tm_50_74";
-    const _75_84        = "tm_75_84";
-    const _85_94        = "tm_85_94";
-    const _95_99        = "tm_95_99";
-    const _100          = "tm_100";
-    const _100_PUBLIC   = "tm_100_public";
-    const _ICE          = "ice";
-    const _MT           = "MT";
-    const _ICE_MT       = "ice_mt";
-    const _REPETITIONS  = 'repetitions';
-    const _INTERNAL     = 'internal';
-    const _NUMBERS_ONLY = 'numbers_only';
+    const string _NEW          = "new";
+    const string _50_74        = "tm_50_74";
+    const string _75_84        = "tm_75_84";
+    const string _85_94        = "tm_85_94";
+    const string _95_99        = "tm_95_99";
+    const string _100          = "tm_100";
+    const string _100_PUBLIC   = "tm_100_public";
+    const string _ICE          = "ice";
+    const string _MT           = "MT";
+    const string _ICE_MT       = "ice_mt";
+    const string _REPETITIONS  = 'repetitions';
+    const string _INTERNAL     = 'internal';
+    const string _NUMBERS_ONLY = 'numbers_only';
 
     protected static array $forValue = [
             self::_NEW          => self::_NEW,

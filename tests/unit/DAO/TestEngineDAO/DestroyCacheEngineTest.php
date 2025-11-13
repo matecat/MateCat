@@ -42,9 +42,7 @@ class DestroyCacheEngineTest extends AbstractTest {
     }
 
     /**
-     * @param EngineStruct
-     * It cleans the cache memory about an engine that corresponds to the struct with initialized id passed as @param
-     *
+     * @throws Exception
      * @group  regression
      * @covers EngineDAO::destroyCache
      */
@@ -64,6 +62,5 @@ class DestroyCacheEngineTest extends AbstractTest {
         $this->engineDAO->destroyCache( $this->engine_struct );
         $output_after_destruction = $this->cache->get( $cache_key );
         $this->assertNull( $output_after_destruction );
-        $this->assertFalse( unserialize( $output_after_destruction ) instanceof EngineStruct );
     }
 }

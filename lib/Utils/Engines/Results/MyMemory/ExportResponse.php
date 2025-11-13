@@ -10,7 +10,8 @@ use Utils\Engines\Results\TMSAbstractResponse;
  * Date: 03/03/15
  * Time: 12.33
  */
-class ExportResponse extends TMSAbstractResponse {
+class ExportResponse extends TMSAbstractResponse
+{
 
     public $id;
     public $resourceLink;
@@ -19,15 +20,14 @@ class ExportResponse extends TMSAbstractResponse {
      */
     public $estimatedTime;
 
-    public function __construct( $response ) {
-
-        $this->responseStatus  = (int)( $response[ 'responseStatus' ] ?? 200 );
+    public function __construct($response)
+    {
+        $this->responseStatus  = (int)($response[ 'responseStatus' ] ?? 200);
         $this->responseData    = $response[ 'responseData' ] ?? '';
         $this->id              = $response[ 'responseData' ][ 'id' ] ?? '';
         $this->resourceLink    = $response[ 'resourceLink' ] ?? '';
         $this->responseDetails = $response[ 'status' ] ?? '';
         $this->estimatedTime   = $response[ 'estimated_time' ] ?? '';
-
     }
 
 } 

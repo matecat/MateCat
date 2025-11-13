@@ -22,7 +22,8 @@ use ReflectionException;
 use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
-class ProjectManagerModel {
+class ProjectManagerModel
+{
 
     /**
      * Creates record in projects table and instantiates the project struct
@@ -33,8 +34,8 @@ class ProjectManagerModel {
      * @return ProjectStruct
      * @throws ReflectionException
      */
-    public static function createProjectRecord( ArrayObject $projectStructure ): ProjectStruct {
-
+    public static function createProjectRecord(ArrayObject $projectStructure): ProjectStruct
+    {
         $data                        = [];
         $data[ 'id' ]                = $projectStructure[ 'id_project' ];
         $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
@@ -44,59 +45,57 @@ class ProjectManagerModel {
         $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
         $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
         $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
-        $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
+        $data[ 'remote_ip_address' ] = empty($projectStructure[ 'user_ip' ]) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
         $data[ 'id_assignee' ]       = $projectStructure[ 'id_assignee' ];
-        $data[ 'instance_id' ]       = !is_null( $projectStructure[ 'instance_id' ] ) ? $projectStructure[ 'instance_id' ] : null;
-        $data[ 'due_date' ]          = !is_null( $projectStructure[ 'due_date' ] ) ? $projectStructure[ 'due_date' ] : null;
+        $data[ 'instance_id' ]       = !is_null($projectStructure[ 'instance_id' ]) ? $projectStructure[ 'instance_id' ] : null;
+        $data[ 'due_date' ]          = !is_null($projectStructure[ 'due_date' ]) ? $projectStructure[ 'due_date' ] : null;
 
         $db = Database::obtain();
         $db->begin();
-        $projectId = $db->insert( 'projects', $data );
-        $project   = ProjectDao::findById( $projectId );
+        $projectId = $db->insert('projects', $data);
+        $project   = ProjectDao::findById($projectId);
         $db->commit();
 
         return $project;
-
     }
 
     /**
-     * @param ArrayObject $projectStructure
-     * @param string      $file_name
-     * @param string      $mime_type
-     * @param string      $fileDateSha1Path
-     * @param ArrayObject $meta
+     * @param ArrayObject      $projectStructure
+     * @param string           $file_name
+     * @param string           $mime_type
+     * @param string           $fileDateSha1Path
+     * @param ArrayObject|null $meta
      *
      * @return string
      * @throws Exception
      */
-    public static function insertFile( ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null ): string {
-
+    public static function insertFile(ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null): string
+    {
         $data                         = [];
         $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
         $data[ 'filename' ]           = $file_name;
         $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
         $data[ 'mime_type' ]          = $mime_type;
         $data[ 'sha1_original_file' ] = $fileDateSha1Path;
-        $data[ 'is_converted' ]       = isset( $meta[ 'mustBeConverted' ] ) ? (int)$meta[ 'mustBeConverted' ] : 0;
+        $data[ 'is_converted' ]       = isset($meta[ 'mustBeConverted' ]) ? (int)$meta[ 'mustBeConverted' ] : 0;
 
         $db = Database::obtain();
 
         try {
-            $idFile = $db->insert( 'files', $data );
-        } catch ( PDOException $e ) {
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Database insert error: {$e->getMessage()} " );
-            throw new Exception( "Database insert file error: {$e->getMessage()} ", -$e->getCode() );
+            $idFile = $db->insert('files', $data);
+        } catch (PDOException $e) {
+            LoggerFactory::getLogger('project_manager')->debug("Database insert error: {$e->getMessage()} ");
+            throw new Exception("Database insert file error: {$e->getMessage()} ", -$e->getCode());
         }
 
         return $idFile;
-
     }
 
     /**
      * @param $query_translations_values
      */
-    public static function insertPreTranslations( &$query_translations_values ) {
-
+    public static function insertPreTranslations(&$query_translations_values): void
+    {
         $dbHandler = Database::obtain();
 
         $baseQuery = "
@@ -122,29 +121,25 @@ class ProjectManagerModel {
 
         $tuple_marks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
-        LoggerFactory::getLogger( 'project_manager' )->debug( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
+        LoggerFactory::getLogger('project_manager')->debug("Pre-Translations: Total Rows to insert: " . count($query_translations_values));
 
         //split the query in to chunks if there are too many segments
-        $query_translations_values = array_chunk( $query_translations_values, 100 );
+        $query_translations_values = array_chunk($query_translations_values, 100);
 
-        LoggerFactory::getLogger( 'project_manager' )->debug( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
+        LoggerFactory::getLogger('project_manager')->debug("Pre-Translations: Total Queries to execute: " . count($query_translations_values));
 
-        foreach ( $query_translations_values as $i => $chunk ) {
-
+        foreach ($query_translations_values as $i => $chunk) {
             try {
+                $query = $baseQuery . rtrim(str_repeat($tuple_marks . ", ", count($chunk)), ", ");
+                $stmt  = $dbHandler->getConnection()->prepare($query);
+                $stmt->execute(iterator_to_array(new RecursiveIteratorIterator(new RecursiveArrayIterator($chunk)), false));
 
-                $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " );
-                $stmt  = $dbHandler->getConnection()->prepare( $query );
-                $stmt->execute( iterator_to_array( new RecursiveIteratorIterator( new RecursiveArrayIterator( $chunk ) ), false ) );
-
-                LoggerFactory::getLogger( 'project_manager' )->debug( "Pre-Translations: Executed Query " . ( $i + 1 ) );
-            } catch ( PDOException $e ) {
-                LoggerFactory::getLogger( 'project_manager' )->debug( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
-                throw new PDOException( "Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+                LoggerFactory::getLogger('project_manager')->debug("Pre-Translations: Executed Query " . ($i + 1));
+            } catch (PDOException $e) {
+                LoggerFactory::getLogger('project_manager')->debug("Segment import - DB Error: " . $e->getMessage() . " - \n");
+                throw new PDOException("Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2);
             }
-
         }
-
     }
 
     /**
@@ -152,14 +147,14 @@ class ProjectManagerModel {
      *
      * @throws Exception
      */
-    public static function bulkInsertSegmentNotes( $notes ) {
+    public static function bulkInsertSegmentNotes($notes)
+    {
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES ";
 
         $insert_values = [];
         $chunk_size    = 30;
 
-        foreach ( $notes as $internal_id => $v ) {
-
+        foreach ($notes as $internal_id => $v) {
             $attributes = $v[ 'from' ];
             $entries    = $v[ 'entries' ];
             $segments   = $v[ 'segment_ids' ];
@@ -167,69 +162,61 @@ class ProjectManagerModel {
             $json_entries     = $v[ 'json' ];
             $json_segment_ids = $v[ 'json_segment_ids' ];
 
-            foreach ( $segments as $id_segment ) {
-                foreach ( $entries as $index => $note ) {
-
+            foreach ($segments as $id_segment) {
+                foreach ($entries as $index => $note) {
                     // NOTE
                     // we need to strip tags from $note
                     // to prevent possible xss attacks
                     // from the UI
 
-                    if ( isset( $attributes[ 'entries' ][ $index ] ) ) {
-                        $metaKey = Utils::stripTagsPreservingHrefs( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
+                    if (isset($attributes[ 'entries' ][ $index ])) {
+                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes[ 'entries' ][ $index ]));
 
                         // check for metaKey is `notes`
-                        if ( !self::isAMetadata( $metaKey ) ) {
-                            $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs( html_entity_decode( $note ) ), null ];
+                        if (!self::isAMetadata($metaKey)) {
+                            $insert_values[] = [$id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null];
                         }
-
                     } else {
-                        $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs( html_entity_decode( $note ) ), null ];
+                        $insert_values[] = [$id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null];
                     }
                 }
             }
 
-            foreach ( $json_segment_ids as $id_segment ) {
-                foreach ( $json_entries as $index => $json ) {
-
-                    if ( isset( $attributes[ 'json' ][ $index ] ) ) {
+            foreach ($json_segment_ids as $id_segment) {
+                foreach ($json_entries as $index => $json) {
+                    if (isset($attributes[ 'json' ][ $index ])) {
                         $metaKey = $attributes[ 'json' ][ $index ];
 
-                        if ( !self::isAMetadata( $metaKey ) ) {
-                            $insert_values[] = [ $id_segment, $internal_id, null, $json ];
+                        if (!self::isAMetadata($metaKey)) {
+                            $insert_values[] = [$id_segment, $internal_id, null, $json];
                         }
-
                     } else {
-                        $insert_values[] = [ $id_segment, $internal_id, null, $json ];
+                        $insert_values[] = [$id_segment, $internal_id, null, $json];
                     }
                 }
             }
-
         }
 
-        $chunked = array_chunk( $insert_values, $chunk_size );
-        LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Total Rows to insert: " . count( $chunked ) );
+        $chunked = array_chunk($insert_values, $chunk_size);
+        LoggerFactory::getLogger('project_manager')->debug("Notes: Total Rows to insert: " . count($chunked));
 
         $conn = Database::obtain()->getConnection();
 
         try {
-
-            foreach ( $chunked as $i => $chunk ) {
-                $values_sql_array = array_fill( 0, count( $chunk ), " ( ?, ?, ?, ? ) " );
-                $stmt             = $conn->prepare( $template . implode( ', ', $values_sql_array ) );
-                $flattened_values = array_reduce( $chunk, 'array_merge', [] );
-                $stmt->execute( $flattened_values );
-                LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Executed Query " . ( $i + 1 ) );
+            foreach ($chunked as $i => $chunk) {
+                $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ?, ? ) ");
+                $stmt             = $conn->prepare($template . implode(', ', $values_sql_array));
+                $flattened_values = array_reduce($chunk, 'array_merge', []);
+                $stmt->execute($flattened_values);
+                LoggerFactory::getLogger('project_manager')->debug("Notes: Executed Query " . ($i + 1));
             }
-
-        } catch ( Exception $e ) {
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes import - DB Error: " . $e->getMessage() );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes import - Statement: " . $stmt->queryString );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes Chunk Dump: " . var_export( $chunk, true ) );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes Flattened Values Dump: " . var_export( $flattened_values, true ) );
-            throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0, $e );
+        } catch (Exception $e) {
+            LoggerFactory::getLogger('project_manager')->debug("Notes import - DB Error: " . $e->getMessage());
+            LoggerFactory::getLogger('project_manager')->debug("Notes import - Statement: " . $stmt->queryString);
+            LoggerFactory::getLogger('project_manager')->debug("Notes Chunk Dump: " . var_export($chunk, true));
+            LoggerFactory::getLogger('project_manager')->debug("Notes Flattened Values Dump: " . var_export($flattened_values, true));
+            throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);
         }
-
     }
 
     /**
@@ -237,15 +224,14 @@ class ProjectManagerModel {
      *
      * @throws Exception
      */
-    public static function bulkInsertSegmentMetaDataFromAttributes( $notes ) {
-
+    public static function bulkInsertSegmentMetaDataFromAttributes($notes): void
+    {
         $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
 
         $insert_values = [];
         $chunk_size    = 30;
 
-        foreach ( $notes as $v ) {
-
+        foreach ($notes as $v) {
             $attributes = $v[ 'from' ];
             $entries    = $v[ 'entries' ];
             $segments   = $v[ 'segment_ids' ];
@@ -253,56 +239,52 @@ class ProjectManagerModel {
             $json_entries     = $v[ 'json' ];
             $json_segment_ids = $v[ 'json_segment_ids' ];
 
-            foreach ( $segments as $id_segment ) {
-                foreach ( $entries as $index => $note ) {
+            foreach ($segments as $id_segment) {
+                foreach ($entries as $index => $note) {
+                    if (isset($attributes[ 'entries' ][ $index ])) {
+                        $metaKey   = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes[ 'entries' ][ $index ]));
+                        $metaValue = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
 
-                    if ( isset( $attributes[ 'entries' ][ $index ] ) ) {
-                        $metaKey   = Utils::stripTagsPreservingHrefs( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
-                        $metaValue = Utils::stripTagsPreservingHrefs( html_entity_decode( $note ) );
-
-                        if ( self::isAMetadata( $metaKey ) ) {
-                            $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        if (self::isAMetadata($metaKey)) {
+                            $insert_values[] = [$id_segment, $metaKey, $metaValue];
                         }
                     }
                 }
             }
 
-            foreach ( $json_segment_ids as $id_segment ) {
-                foreach ( $json_entries as $index => $json ) {
-
-                    if ( isset( $attributes[ 'json' ][ $index ] ) ) {
+            foreach ($json_segment_ids as $id_segment) {
+                foreach ($json_entries as $index => $json) {
+                    if (isset($attributes[ 'json' ][ $index ])) {
                         $metaKey   = $attributes[ 'json' ][ $index ];
                         $metaValue = $json;
 
-                        if ( self::isAMetadata( $metaKey ) ) {
-                            $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
+                        if (self::isAMetadata($metaKey)) {
+                            $insert_values[] = [$id_segment, $metaKey, $metaValue];
                         }
                     }
                 }
             }
         }
 
-        $chunked = array_chunk( $insert_values, $chunk_size );
-        LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes: Total Rows to insert: " . count( $chunked ) );
+        $chunked = array_chunk($insert_values, $chunk_size);
+        LoggerFactory::getLogger('project_manager')->debug("Notes attributes: Total Rows to insert: " . count($chunked));
 
         $conn = Database::obtain()->getConnection();
 
         try {
-
-            foreach ( $chunked as $i => $chunk ) {
-                $values_sql_array = array_fill( 0, count( $chunk ), " ( ?, ?, ? ) " );
-                $stmt             = $conn->prepare( $template . implode( ', ', $values_sql_array ) );
-                $flattened_values = array_reduce( $chunk, 'array_merge', [] );
-                $stmt->execute( $flattened_values );
-                LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes: Executed Query " . ( $i + 1 ) );
+            foreach ($chunked as $i => $chunk) {
+                $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ? ) ");
+                $stmt             = $conn->prepare($template . implode(', ', $values_sql_array));
+                $flattened_values = array_reduce($chunk, 'array_merge', []);
+                $stmt->execute($flattened_values);
+                LoggerFactory::getLogger('project_manager')->debug("Notes attributes: Executed Query " . ($i + 1));
             }
-
-        } catch ( Exception $e ) {
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes import - DB Error: " . $e->getMessage() );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes import - Statement: " . $stmt->queryString );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes Chunk Dump: " . var_export( $chunk, true ) );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Notes attributes Flattened Values Dump: " . var_export( $flattened_values, true ) );
-            throw new Exception( "Notes attributes import - DB Error: " . $e->getMessage(), 0, $e );
+        } catch (Exception $e) {
+            LoggerFactory::getLogger('project_manager')->debug("Notes attributes import - DB Error: " . $e->getMessage());
+            LoggerFactory::getLogger('project_manager')->debug("Notes attributes import - Statement: " . $stmt->queryString);
+            LoggerFactory::getLogger('project_manager')->debug("Notes attributes Chunk Dump: " . var_export($chunk, true));
+            LoggerFactory::getLogger('project_manager')->debug("Notes attributes Flattened Values Dump: " . var_export($flattened_values, true));
+            throw new Exception("Notes attributes import - DB Error: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -311,7 +293,8 @@ class ProjectManagerModel {
      *
      * @return bool
      */
-    private static function isAMetadata( $metaKey ): bool {
+    private static function isAMetadata($metaKey): bool
+    {
         $metaDataKeys = [
                 'id_request',
                 'id_content',
@@ -320,7 +303,7 @@ class ProjectManagerModel {
                 'screenshot'
         ];
 
-        return in_array( $metaKey, $metaDataKeys );
+        return in_array($metaKey, $metaDataKeys);
     }
 
     /**
@@ -328,8 +311,8 @@ class ProjectManagerModel {
      *
      * @throws Exception
      */
-    public static function bulkInsertContextsGroups( $projectStructure ) {
-
+    public static function bulkInsertContextsGroups($projectStructure): void
+    {
         $template = " INSERT INTO context_groups ( id_project, id_segment, context_json ) VALUES ";
 
         $insert_values = [];
@@ -337,40 +320,35 @@ class ProjectManagerModel {
 
         $id_project = $projectStructure[ 'id_project' ];
 
-        foreach ( $projectStructure[ 'context-group' ] as $v ) {
-
-            $context_json = json_encode( $v[ 'context_json' ] );
+        foreach ($projectStructure[ 'context-group' ] as $v) {
+            $context_json = json_encode($v[ 'context_json' ]);
             $segments     = $v[ 'context_json_segment_ids' ];
 
-            foreach ( $segments as $id_segment ) {
-                $insert_values[] = [ $id_project, $id_segment, $context_json ];
+            foreach ($segments as $id_segment) {
+                $insert_values[] = [$id_project, $id_segment, $context_json];
             }
-
         }
 
-        $chunked = array_chunk( $insert_values, $chunk_size );
-        LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Total Rows to insert: " . count( $chunked ) );
+        $chunked = array_chunk($insert_values, $chunk_size);
+        LoggerFactory::getLogger('project_manager')->debug("Notes: Total Rows to insert: " . count($chunked));
 
         $conn = Database::obtain()->getConnection();
 
         try {
-
-            foreach ( $chunked as $i => $chunk ) {
-                $values_sql_array = array_fill( 0, count( $chunk ), " ( ?, ?, ? ) " );
-                $stmt             = $conn->prepare( $template . implode( ', ', $values_sql_array ) );
-                $flattened_values = array_reduce( $chunk, 'array_merge', [] );
-                $stmt->execute( $flattened_values );
-                LoggerFactory::getLogger( 'project_manager' )->debug( "Notes: Executed Query " . ( $i + 1 ) );
+            foreach ($chunked as $i => $chunk) {
+                $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ? ) ");
+                $stmt             = $conn->prepare($template . implode(', ', $values_sql_array));
+                $flattened_values = array_reduce($chunk, 'array_merge', []);
+                $stmt->execute($flattened_values);
+                LoggerFactory::getLogger('project_manager')->debug("Notes: Executed Query " . ($i + 1));
             }
-
-        } catch ( Exception $e ) {
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups import - DB Error: " . $e->getMessage() );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups import - Statement: " . $stmt->queryString );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups Chunk Dump: " . var_export( $chunk, true ) );
-            LoggerFactory::getLogger( 'project_manager' )->debug( "Trans-Unit Context Groups Flattened Values Dump: " . var_export( $flattened_values, true ) );
-            throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0, $e );
+        } catch (Exception $e) {
+            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups import - DB Error: " . $e->getMessage());
+            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups import - Statement: " . $stmt->queryString);
+            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups Chunk Dump: " . var_export($chunk, true));
+            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups Flattened Values Dump: " . var_export($flattened_values, true));
+            throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);
         }
-
     }
 
 }

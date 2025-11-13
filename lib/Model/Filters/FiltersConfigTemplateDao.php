@@ -15,14 +15,15 @@ use PDO;
 use ReflectionException;
 use Utils\Tools\Utils;
 
-class FiltersConfigTemplateDao extends AbstractDao {
-    const TABLE = 'filters_config_templates';
+class FiltersConfigTemplateDao extends AbstractDao
+{
+    const string TABLE = 'filters_config_templates';
 
-    const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
-    const query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
-    const query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
-    const query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
-    const paginated_map_key   = __CLASS__ . "::getAllPaginated";
+    const string query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
+    const string query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
+    const string query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
+    const string query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
+    const string paginated_map_key   = __CLASS__ . "::getAllPaginated";
 
     /**
      * @var FiltersConfigTemplateDao|null
@@ -32,8 +33,9 @@ class FiltersConfigTemplateDao extends AbstractDao {
     /**
      * @return FiltersConfigTemplateDao
      */
-    private static function getInstance(): FiltersConfigTemplateDao {
-        if ( !isset( self::$instance ) ) {
+    private static function getInstance(): FiltersConfigTemplateDao
+    {
+        if (!isset(self::$instance)) {
             self::$instance = new self();
         }
 
@@ -47,11 +49,12 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function createFromJSON( string $json, int $uid ): FiltersConfigTemplateStruct {
+    public static function createFromJSON(string $json, int $uid): FiltersConfigTemplateStruct
+    {
         $templateStruct = new FiltersConfigTemplateStruct();
-        $templateStruct->hydrateFromJSON( $json, $uid );
+        $templateStruct->hydrateFromJSON($json, $uid);
 
-        return self::save( $templateStruct );
+        return self::save($templateStruct);
     }
 
     /**
@@ -62,10 +65,11 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( FiltersConfigTemplateStruct $templateStruct, string $json, int $uid ): FiltersConfigTemplateStruct {
-        $templateStruct->hydrateFromJSON( $json, $uid );
+    public static function editFromJSON(FiltersConfigTemplateStruct $templateStruct, string $json, int $uid): FiltersConfigTemplateStruct
+    {
+        $templateStruct->hydrateFromJSON($json, $uid);
 
-        return self::update( $templateStruct );
+        return self::update($templateStruct);
     }
 
     /**
@@ -78,34 +82,34 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return array
      * @throws ReflectionException
      */
-    public static function getAllPaginated( int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
+    public static function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
+    {
         $conn = Database::obtain()->getConnection();
 
-        $pager = new Pager( $conn );
+        $pager = new Pager($conn);
 
         $totals = $pager->count(
                 "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
-                [ 'uid' => $uid ]
+                ['uid' => $uid]
         );
 
-        $paginationParameters = new PaginationParameters( static::query_paginated, [ 'uid' => $uid ], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination );
-        $paginationParameters->setCache( self::paginated_map_key . ":" . $uid, $ttl );
+        $paginationParameters = new PaginationParameters(static::query_paginated, ['uid' => $uid], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination);
+        $paginationParameters->setCache(self::paginated_map_key . ":" . $uid, $ttl);
 
-        $result = $pager->getPagination( $totals, $paginationParameters );
+        $result = $pager->getPagination($totals, $paginationParameters);
 
         $models = [];
 
         /**
          * @var FiltersConfigTemplateStruct $item
          */
-        foreach ( $result[ 'items' ] as $item ) {
-            $models[] = self::hydrateTemplateStruct( $item->getArrayCopy() );
+        foreach ($result[ 'items' ] as $item) {
+            $models[] = self::hydrateTemplateStruct($item->getArrayCopy());
         }
 
         $result[ 'items' ] = $models;
 
         return $result;
-
     }
 
     /**
@@ -115,17 +119,18 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return FiltersConfigTemplateStruct|null
      * @throws ReflectionException
      */
-    public static function getById( int $id, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
-        $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
+    public static function getById(int $id, int $ttl = 60): ?FiltersConfigTemplateStruct
+    {
+        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_id);
+        $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
                 'id' => $id,
-        ] );
+        ]);
 
-        if ( empty( $result ) ) {
+        if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct( (array)$result[ 0 ] );
+        return self::hydrateTemplateStruct((array)$result[ 0 ]);
     }
 
     /**
@@ -136,18 +141,19 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return FiltersConfigTemplateStruct|null
      * @throws ReflectionException
      */
-    public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
-        $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id_and_uid );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
+    public static function getByIdAndUser(int $id, int $uid, int $ttl = 60): ?FiltersConfigTemplateStruct
+    {
+        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_id_and_uid);
+        $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
                 'id'  => $id,
                 'uid' => $uid,
-        ] );
+        ]);
 
-        if ( empty( $result ) ) {
+        if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct( (array)$result[ 0 ] );
+        return self::hydrateTemplateStruct((array)$result[ 0 ]);
     }
 
     /**
@@ -158,18 +164,19 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return FiltersConfigTemplateStruct|null
      * @throws ReflectionException
      */
-    public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
-        $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectTemplateStruct::class, [
+    public static function getByUidAndName(int $uid, string $name, int $ttl = 60): ?FiltersConfigTemplateStruct
+    {
+        $stmt   = self::getInstance()->_getStatementForQuery(self::query_by_uid_name);
+        $result = self::getInstance()->setCacheTTL($ttl)->_fetchObjectMap($stmt, ProjectTemplateStruct::class, [
                 'uid'  => $uid,
                 'name' => $name,
-        ] );
+        ]);
 
-        if ( empty( $result ) ) {
+        if (empty($result)) {
             return null;
         }
 
-        return self::hydrateTemplateStruct( (array)$result[ 0 ] );
+        return self::hydrateTemplateStruct((array)$result[ 0 ]);
     }
 
     /**
@@ -179,21 +186,22 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return int
      * @throws ReflectionException
      */
-    public static function remove( int $id, int $uid ): int {
+    public static function remove(int $id, int $uid): int
+    {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;" );
-        $stmt->execute( [
+        $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NULL;");
+        $stmt->execute([
                 'id'   => $id,
                 'uid'  => $uid,
-                'now'  => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                'now'  => (new DateTime())->format('Y-m-d H:i:s'),
                 'name' => 'deleted_' . Utils::randomString()
-        ] );
+        ]);
 
-        self::destroyQueryByIdCache( $conn, $id );
-        self::destroyQueryByIdAndUserCache( $conn, $id, $uid );
-        self::destroyQueryPaginated( $uid );
+        self::destroyQueryByIdCache($conn, $id);
+        self::destroyQueryByIdAndUserCache($conn, $id, $uid);
+        self::destroyQueryPaginated($uid);
 
-        ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'filters_template_id' );
+        ProjectTemplateDao::removeSubTemplateByIdAndUser($id, $uid, 'filters_template_id');
 
         return $stmt->rowCount();
     }
@@ -204,9 +212,10 @@ class FiltersConfigTemplateDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryByIdCache( PDO $conn, int $id ) {
-        $stmt = $conn->prepare( self::query_by_id );
-        self::getInstance()->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [ 'id' => $id, ] );
+    private static function destroyQueryByIdCache(PDO $conn, int $id): void
+    {
+        $stmt = $conn->prepare(self::query_by_id);
+        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id,]);
     }
 
     /**
@@ -216,9 +225,10 @@ class FiltersConfigTemplateDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
-        $stmt = $conn->prepare( self::query_by_id_and_uid );
-        self::getInstance()->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [ 'id' => $id, 'uid' => $uid ] );
+    private static function destroyQueryByIdAndUserCache(PDO $conn, int $id, int $uid): void
+    {
+        $stmt = $conn->prepare(self::query_by_id_and_uid);
+        self::getInstance()->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['id' => $id, 'uid' => $uid]);
     }
 
     /**
@@ -228,9 +238,10 @@ class FiltersConfigTemplateDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
-        $stmt = $conn->prepare( self::query_by_uid_name );
-        self::getInstance()->_destroyObjectCache( $stmt, ProjectTemplateStruct::class, [ 'uid' => $uid, 'name' => $name, ] );
+    private static function destroyQueryByUidAndNameCache(PDO $conn, int $uid, string $name): void
+    {
+        $stmt = $conn->prepare(self::query_by_uid_name);
+        self::getInstance()->_destroyObjectCache($stmt, ProjectTemplateStruct::class, ['uid' => $uid, 'name' => $name,]);
     }
 
     /**
@@ -238,8 +249,9 @@ class FiltersConfigTemplateDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryPaginated( int $uid ) {
-        self::getInstance()->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
+    private static function destroyQueryPaginated(int $uid): void
+    {
+        self::getInstance()->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
     }
 
     /**
@@ -247,11 +259,12 @@ class FiltersConfigTemplateDao extends AbstractDao {
      *
      * @return FiltersConfigTemplateStruct|null
      */
-    private static function hydrateTemplateStruct( array $data ): ?FiltersConfigTemplateStruct {
+    private static function hydrateTemplateStruct(array $data): ?FiltersConfigTemplateStruct
+    {
         if (
-                !isset( $data[ 'id' ] ) or
-                !isset( $data[ 'uid' ] ) or
-                !isset( $data[ 'name' ] )
+                !isset($data[ 'id' ]) or
+                !isset($data[ 'uid' ]) or
+                !isset($data[ 'name' ])
         ) {
             return null;
         }
@@ -264,7 +277,7 @@ class FiltersConfigTemplateDao extends AbstractDao {
         $struct->modified_at = $data[ 'modified_at' ];
         $struct->deleted_at  = $data[ 'deleted_at' ];
 
-        $struct->hydrateAllDto( $data );
+        $struct->hydrateAllDto($data);
 
         return $struct;
     }
@@ -275,36 +288,37 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function save( FiltersConfigTemplateStruct $templateStruct ): FiltersConfigTemplateStruct {
+    public static function save(FiltersConfigTemplateStruct $templateStruct): FiltersConfigTemplateStruct
+    {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `dita`, `created_at` ) " .
                 " VALUES " .
                 " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :dita, :now ); ";
 
-        $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
+        $now = (new DateTime())->format('Y-m-d H:i:s');
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
                 "uid"           => $templateStruct->uid,
                 "name"          => $templateStruct->name,
-                "json"          => json_encode( $templateStruct->getJson() ),
-                "xml"           => json_encode( $templateStruct->getXml() ),
-                "yaml"          => json_encode( $templateStruct->getYaml() ),
-                "ms_excel"      => json_encode( $templateStruct->getMsExcel() ),
-                "ms_word"       => json_encode( $templateStruct->getMsWord() ),
-                "ms_powerpoint" => json_encode( $templateStruct->getMsPowerpoint() ),
-                "dita"          => json_encode( $templateStruct->getDita() ),
-                'now'           => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
-        ] );
+                "json"          => json_encode($templateStruct->getJson()),
+                "xml"           => json_encode($templateStruct->getXml()),
+                "yaml"          => json_encode($templateStruct->getYaml()),
+                "ms_excel"      => json_encode($templateStruct->getMsExcel()),
+                "ms_word"       => json_encode($templateStruct->getMsWord()),
+                "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
+                "dita"          => json_encode($templateStruct->getDita()),
+                'now'           => (new DateTime())->format('Y-m-d H:i:s'),
+        ]);
 
         $templateStruct->id         = $conn->lastInsertId();
         $templateStruct->created_at = $now;
 
-        self::destroyQueryByIdCache( $conn, $templateStruct->id );
-        self::destroyQueryByIdAndUserCache( $conn, $templateStruct->id, $templateStruct->uid );
-        self::destroyQueryByUidAndNameCache( $conn, $templateStruct->uid, $templateStruct->name );
-        self::destroyQueryPaginated( $templateStruct->uid );
+        self::destroyQueryByIdCache($conn, $templateStruct->id);
+        self::destroyQueryByIdAndUserCache($conn, $templateStruct->id, $templateStruct->uid);
+        self::destroyQueryByUidAndNameCache($conn, $templateStruct->uid, $templateStruct->name);
+        self::destroyQueryPaginated($templateStruct->uid);
 
         return $templateStruct;
     }
@@ -315,7 +329,8 @@ class FiltersConfigTemplateDao extends AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function update( FiltersConfigTemplateStruct $templateStruct ): FiltersConfigTemplateStruct {
+    public static function update(FiltersConfigTemplateStruct $templateStruct): FiltersConfigTemplateStruct
+    {
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,
@@ -330,25 +345,25 @@ class FiltersConfigTemplateDao extends AbstractDao {
          WHERE id = :id;";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
                 "id"            => $templateStruct->id,
                 "uid"           => $templateStruct->uid,
                 "name"          => $templateStruct->name,
-                "json"          => json_encode( $templateStruct->getJson() ),
-                "xml"           => json_encode( $templateStruct->getXml() ),
-                "yaml"          => json_encode( $templateStruct->getYaml() ),
-                "ms_excel"      => json_encode( $templateStruct->getMsExcel() ),
-                "ms_word"       => json_encode( $templateStruct->getMsWord() ),
-                "ms_powerpoint" => json_encode( $templateStruct->getMsPowerpoint() ),
-                "dita"          => json_encode( $templateStruct->getDita() ),
-                'now'           => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
-        ] );
+                "json"          => json_encode($templateStruct->getJson()),
+                "xml"           => json_encode($templateStruct->getXml()),
+                "yaml"          => json_encode($templateStruct->getYaml()),
+                "ms_excel"      => json_encode($templateStruct->getMsExcel()),
+                "ms_word"       => json_encode($templateStruct->getMsWord()),
+                "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
+                "dita"          => json_encode($templateStruct->getDita()),
+                'now'           => (new DateTime())->format('Y-m-d H:i:s'),
+        ]);
 
-        self::destroyQueryByIdCache( $conn, $templateStruct->id );
-        self::destroyQueryByUidAndNameCache( $conn, $templateStruct->uid, $templateStruct->name );
-        self::destroyQueryByIdAndUserCache( $conn, $templateStruct->id, $templateStruct->uid );
-        self::destroyQueryPaginated( $templateStruct->uid );
+        self::destroyQueryByIdCache($conn, $templateStruct->id);
+        self::destroyQueryByUidAndNameCache($conn, $templateStruct->uid, $templateStruct->name);
+        self::destroyQueryByIdAndUserCache($conn, $templateStruct->id, $templateStruct->uid);
+        self::destroyQueryPaginated($templateStruct->uid);
 
         return $templateStruct;
     }

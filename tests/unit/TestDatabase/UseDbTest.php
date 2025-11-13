@@ -42,7 +42,7 @@ class UseDbTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $this->databaseInstance );
         $property  = $reflector->getProperty( 'database' );
-        $property->setAccessible( true );
+        
 
         $current_database_value = $property->getValue( $this->databaseInstance );
         $this->assertEquals( "information_schema", $current_database_value );

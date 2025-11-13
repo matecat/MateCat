@@ -11,7 +11,8 @@ use Model\DataAccess\IDaoStruct;
  * Date: 23/02/15
  * Time: 14.54
  */
-class SegmentSplitStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class SegmentSplitStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
 
     /**
      * Primary key (Part 1)
@@ -39,7 +40,8 @@ class SegmentSplitStruct extends AbstractDaoObjectStruct implements IDaoStruct {
      * An empty struct
      * @return SegmentSplitStruct
      */
-    public static function getStruct(): SegmentSplitStruct {
+    public static function getStruct(): SegmentSplitStruct
+    {
         return new SegmentSplitStruct();
     }
 

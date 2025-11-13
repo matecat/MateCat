@@ -2,7 +2,8 @@
 
 namespace Model\Search;
 
-interface ReplaceEventDAOInterface {
+interface ReplaceEventDAOInterface
+{
 
     /**
      * @param int $id_job
@@ -10,19 +11,19 @@ interface ReplaceEventDAOInterface {
      *
      * @return ReplaceEventStruct[]
      */
-    public function getEvents( int $id_job, int $version ): array;
+    public function getEvents(int $id_job, int $version): array;
 
     /**
      * @param ReplaceEventStruct $eventStruct
      *
      * @return int
      */
-    public function save( ReplaceEventStruct $eventStruct ): int;
+    public function save(ReplaceEventStruct $eventStruct): int;
 
     /**
-     * @param $ttl
+     * @param int $ttl
      *
-     * @return mixed
+     * @return void
      */
-    public function setTtl( $ttl );
+    public function setTtl(int $ttl): void;
 }

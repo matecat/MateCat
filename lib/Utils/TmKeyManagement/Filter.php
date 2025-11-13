@@ -21,22 +21,23 @@ use Utils\Constants\TmKeyPermissions;
  * @see TmKeyStruct
  *
  */
-class Filter {
+class Filter
+{
 
     /**
      * Type translator
      */
-    const ROLE_TRANSLATOR = 'translator';
+    const string ROLE_TRANSLATOR = 'translator';
 
     /**
      * Type Revisor
      */
-    const ROLE_REVISOR = 'revisor';
+    const string ROLE_REVISOR = 'revisor';
 
     /**
      * A generic Owner Type
      */
-    const OWNER = 'owner';
+    const string OWNER = 'owner';
 
     /**
      * @var int the user id required for filtering
@@ -62,23 +63,23 @@ class Filter {
      * @var array
      */
     public static array $GRANTS_MAP = [
-            self::ROLE_TRANSLATOR => [ "r" => 'r_transl', "w" => 'w_transl' ],
-            self::ROLE_REVISOR    => [ "r" => 'r_rev', "w" => 'w_rev' ],
-            self::OWNER           => [ 'r' => 'r', 'w' => 'w' ]
+            self::ROLE_TRANSLATOR => ["r" => 'r_transl', "w" => 'w_transl'],
+            self::ROLE_REVISOR    => ["r" => 'r_rev', "w" => 'w_rev'],
+            self::OWNER           => ['r' => 'r', 'w' => 'w']
     ];
 
     /**
      * White list of the accepted types constants
      * @var array
      */
-    protected array $_accepted_types = [ "tm", "glos", "tm,glos" ];
+    protected array $_accepted_types = ["tm", "glos", "tm,glos"];
 
     /**
      * @param int|null $uid
      */
-    public function __construct( int $uid = null ) {
+    public function __construct(int $uid = null)
+    {
         $this->__uid = (int)$uid;
-
     }
 
     /**
@@ -88,9 +89,9 @@ class Filter {
      *
      * @return bool
      */
-    public function byTranslator( array $tm_key ): bool {
-
-        if ( $tm_key[ 'owner' ] ) {
+    public function byTranslator(array $tm_key): bool
+    {
+        if ($tm_key[ 'owner' ]) {
             $is_an_owner_key = true;
             $role            = self::OWNER;
         } else {
@@ -109,13 +110,13 @@ class Filter {
         // - o se la chiave è owner E SEI l'owner
         // - oppure se la chiave appartiene all'utente
         //
-        if ( !empty( $this->__uid ) && ( !empty( $tm_key[ 'uid_transl' ] ) ) ) {
+        if (!empty($this->__uid) && (!empty($tm_key[ 'uid_transl' ]))) {
             $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_transl' ];
         }
 
-        return ( $is_an_owner_key || $i_can_see_the_key )
-                && $this->_hasRightGrants( $tm_key, $role )
-                && $this->_isTheRightType( $tm_key );
+        return ($is_an_owner_key || $i_can_see_the_key)
+                && $this->_hasRightGrants($tm_key, $role)
+                && $this->_isTheRightType($tm_key);
     }
 
     /**
@@ -123,9 +124,9 @@ class Filter {
      *
      * @return bool
      */
-    public function byRevisor( array $tm_key ): bool {
-
-        if ( $tm_key[ 'owner' ] ) {
+    public function byRevisor(array $tm_key): bool
+    {
+        if ($tm_key[ 'owner' ]) {
             $is_an_owner_key = true;
             $role            = self::OWNER;
         } else {
@@ -138,21 +139,20 @@ class Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if ( array_key_exists( 'uid_transl', $tm_key ) ) { // this is a new key type
+        if (array_key_exists('uid_transl', $tm_key)) { // this is a new key type
 
-            if ( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ) {
+            if (is_null($tm_key[ 'uid_transl' ]) && is_null($tm_key[ 'uid_rev' ])) {
                 //this is an owner key or anonymous one, so i can use it
                 $i_can_see_the_key = true;
             } else {
                 //it's mine???
                 $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_rev' ];
             }
-
         }
 
-        return ( $is_an_owner_key || $i_can_see_the_key )
-                && $this->_hasRightGrants( $tm_key, $role )
-                && $this->_isTheRightType( $tm_key );
+        return ($is_an_owner_key || $i_can_see_the_key)
+                && $this->_hasRightGrants($tm_key, $role)
+                && $this->_isTheRightType($tm_key);
     }
 
     /**
@@ -162,10 +162,11 @@ class Filter {
      *
      * @return bool
      */
-    public function byOwner( $tm_key ): bool {
-        return ( $tm_key[ self::OWNER ] == true )
-                && $this->_hasRightGrants( $tm_key, self::OWNER )
-                && $this->_isTheRightType( $tm_key );
+    public function byOwner($tm_key): bool
+    {
+        return ($tm_key[ self::OWNER ] == true)
+                && $this->_hasRightGrants($tm_key, self::OWNER)
+                && $this->_isTheRightType($tm_key);
     }
 
     /**
@@ -179,16 +180,15 @@ class Filter {
      * @return $this
      * @throws Exception
      */
-    public function setGrants( string $grant_level = 'rw' ): Filter {
-
-        if ( !in_array( $grant_level, TmKeyPermissions::$_accepted_grants ) ) {
-            throw new Exception ( __METHOD__ . " -> Invalid grant string." );
+    public function setGrants(string $grant_level = 'rw'): Filter
+    {
+        if (!in_array($grant_level, TmKeyPermissions::$_accepted_grants)) {
+            throw new Exception (__METHOD__ . " -> Invalid grant string.");
         }
 
         $this->_required_grant = $grant_level;
 
         return $this;
-
     }
 
     /**
@@ -202,16 +202,15 @@ class Filter {
      * @return $this
      * @throws Exception
      */
-    public function setTmType( string $type ): Filter {
-
-        if ( !in_array( $type, $this->_accepted_types ) ) {
-            throw new Exception ( __METHOD__ . " -> Invalid type string." );
+    public function setTmType(string $type): Filter
+    {
+        if (!in_array($type, $this->_accepted_types)) {
+            throw new Exception (__METHOD__ . " -> Invalid type string.");
         }
 
-        $this->_type = explode( ',', $type );
+        $this->_type = explode(',', $type);
 
         return $this;
-
     }
 
     /**
@@ -223,16 +222,16 @@ class Filter {
      *
      * @return bool
      */
-    protected function _hasRightGrants( array $tm_key, string $role ): bool {
-
+    protected function _hasRightGrants(array $tm_key, string $role): bool
+    {
         /*
          * No filtering required
          */
-        if ( empty( $this->_required_grant ) ) {
+        if (empty($this->_required_grant)) {
             return true;
         }
 
-        if ( $this->_required_grant == 'rw' ) {
+        if ($this->_required_grant == 'rw') {
             $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ 'r' ] ] == true;
             /**
              * Using the logic OR allows us to take all the possible keys.
@@ -245,7 +244,6 @@ class Filter {
         }
 
         return $has_required_grants;
-
     }
 
     /**
@@ -256,24 +254,23 @@ class Filter {
      *
      * @return bool
      */
-    protected function _isTheRightType( array $tm_key ): bool {
-
+    protected function _isTheRightType(array $tm_key): bool
+    {
         /*
          * No filtering required
          */
-        if ( empty( $this->_type ) ) {
+        if (empty($this->_type)) {
             return true;
         }
 
         $_type = true;
-        foreach ( $this->_type as $type ) {
+        foreach ($this->_type as $type) {
             //trim for not well formatted required types
             //    Ex: "tm , glos " instead of "tm,glos"
-            $_type = $_type && ( $tm_key[ trim( $type ) ] == true );
+            $_type = $_type && ($tm_key[ trim($type) ] == true);
         }
 
         return $_type;
-
     }
 
 }

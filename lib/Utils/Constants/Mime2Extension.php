@@ -1,7 +1,9 @@
 <?php
 
 namespace Utils\Constants;
-class Mime2Extension {
+
+class Mime2Extension
+{
 
     protected static array $reference = [
             'application/andrew-inset'                                                                                                                       =>
@@ -3392,7 +3394,8 @@ class Mime2Extension {
      *
      * @return array
      */
-    public static function getMimeTypes(): array {
+    public static function getMimeTypes(): array
+    {
         return self::$reference;
     }
 

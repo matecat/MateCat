@@ -4,6 +4,7 @@ namespace Utils\Collections;
 
 use ArrayIterator;
 use ArrayObject;
+use Stringable;
 
 /**
  * User: domenico
@@ -11,7 +12,8 @@ use ArrayObject;
  * Time: 16.14
  *
  */
-class RecursiveArrayObject extends ArrayObject {
+class RecursiveArrayObject extends ArrayObject implements Stringable
+{
 
     /**
      * Overwrites the ArrayObject constructor for
@@ -23,13 +25,14 @@ class RecursiveArrayObject extends ArrayObject {
      * @param int    $flag
      * @param string $iteratorClass
      */
-    public function __construct( array $array = [], $flag = 0, $iteratorClass = ArrayIterator::class ) {
-        parent::__construct( [], $flag, $iteratorClass );
-        foreach ( $array as $key => $value ) {
-            if ( is_array( $value ) ) {
-                $value = new static( $value, $flag, $iteratorClass );
+    public function __construct(array $array = [], int $flag = 0, string $iteratorClass = ArrayIterator::class)
+    {
+        parent::__construct([], $flag, $iteratorClass);
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = new static($value, $flag, $iteratorClass);
             }
-            $this->offsetSet( $key, $value );
+            $this->offsetSet($key, $value);
         }
     }
 
@@ -39,7 +42,8 @@ class RecursiveArrayObject extends ArrayObject {
      *
      * @return string
      */
-    public function __toString() {
+    public function __toString(): string
+    {
         return 'Array';
     }
 
@@ -48,13 +52,14 @@ class RecursiveArrayObject extends ArrayObject {
      *
      * @return array
      */
-    public function toArray( array $mask = null ): array {
+    public function toArray(array $mask = null): array
+    {
         $collector = [];
-        foreach ( $this as $key => $value ) {
-            if ( !empty( $mask ) && !in_array( $key, $mask ) ) {
+        foreach ($this as $key => $value) {
+            if (!empty($mask) && !in_array($key, $mask)) {
                 continue;
             }
-            if ( $value instanceof RecursiveArrayObject ) {
+            if ($value instanceof RecursiveArrayObject) {
                 $collector[ $key ] = $value->toArray();
             } else {
                 $collector[ $key ] = $value;

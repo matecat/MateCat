@@ -9,6 +9,7 @@
 
 use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\Xliff20Rule;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 class XliffRulesTest extends AbstractTest {
@@ -17,6 +18,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testTranslated() {
 
         $rule = new Xliff12Rule( [ 'needs-l10n' ], 'pre-translated', 'translated', 'tm_100' );
@@ -33,6 +35,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testTranslatedWithoutEditor() {
 
         $rule = new Xliff12Rule( [ 'needs-l10n' ], 'pre-translated' );
@@ -48,6 +51,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testNotTranslatedAndException() {
 
         $rule = new Xliff12Rule( [ 'final' ], 'new' );
@@ -66,6 +70,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testNotTranslatedAndWordCountException() {
 
         $rule = new Xliff12Rule( [ 'final' ], 'new' );
@@ -82,6 +87,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testWrongState() {
 
         $this->expectException( DomainException::class );
@@ -96,6 +102,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testWrongAnalysisValue() {
 
         $this->expectException( DomainException::class );
@@ -110,6 +117,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testWrongEditorValue() {
 
         $this->expectException( DomainException::class );
@@ -124,6 +132,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testWrongEditorValue2() {
 
         $this->expectException( DomainException::class );
@@ -138,6 +147,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testWrongMatchCategory() {
 
         $this->expectException( DomainException::class );
@@ -152,6 +162,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testWrongMatchCategory2() {
 
         $this->expectException( DomainException::class );
@@ -166,6 +177,7 @@ class XliffRulesTest extends AbstractTest {
      * @test
      * @return void
      */
+    #[Test]
     public function testStatesSeparationFor12() {
 
         $rule = new Xliff12Rule( [ /*state */ 'needs-l10n', /*state-qualifier */ 'exact-match' ], 'pre-translated', 'translated', 'tm_100' );

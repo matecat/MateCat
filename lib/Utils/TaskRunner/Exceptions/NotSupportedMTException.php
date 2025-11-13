@@ -13,6 +13,7 @@ namespace Utils\TaskRunner\Exceptions;
  * Class EmptyElementException
  * @package TaskRunner\Exceptions
  */
-class NotSupportedMTException extends \Exception {
+class NotSupportedMTException extends \Exception
+{
 
 }

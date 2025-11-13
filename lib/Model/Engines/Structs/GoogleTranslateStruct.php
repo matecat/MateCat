@@ -16,7 +16,8 @@ use Utils\Engines\GoogleTranslate;
  * This class contains the default parameters for a Google Translate EnginesFactory CREATION
  *
  */
-class GoogleTranslateStruct extends EngineStruct {
+class GoogleTranslateStruct extends EngineStruct
+{
 
     /**
      * @var ?string
@@ -34,9 +35,9 @@ class GoogleTranslateStruct extends EngineStruct {
     public ?string $translate_relative_url = "language/translate/v2";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
+    public string|array|null $extra_parameters = [
             'client_secret' => ""
     ];
 
@@ -60,7 +61,8 @@ class GoogleTranslateStruct extends EngineStruct {
      * An empty struct
      * @return GoogleTranslateStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new GoogleTranslateStruct();
     }
 

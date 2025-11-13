@@ -1,27 +1,29 @@
 <?php
 
 namespace Model\Search;
-interface ReplaceEventIndexDAOInterface {
+
+interface ReplaceEventIndexDAOInterface
+{
 
     /**
      * @param $idJob
      *
      * @return int
      */
-    public function getActualIndex( $idJob ): int;
+    public function getActualIndex(int $idJob): int;
 
     /**
-     * @param int $idJob
+     * @param int $id_job
      * @param int $version
      *
      * @return mixed
      */
-    public function save( int $id_job, int $version ): int;
+    public function save(int $id_job, int $version): int;
 
     /**
-     * @param $ttl
+     * @param int $ttl
      *
-     * @return mixed|void
+     * @return void
      */
-    public function setTtl( $ttl );
+    public function setTtl(int $ttl): void;
 }

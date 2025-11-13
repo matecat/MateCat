@@ -11,21 +11,23 @@ use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
 use Utils\Registry\AppConfig;
 
-class LinkedInProvider extends AbstractProvider {
+class LinkedInProvider extends AbstractProvider
+{
 
-    const PROVIDER_NAME = 'linkedin';
+    const string PROVIDER_NAME = 'linkedin';
 
     /**
      * @param string|null $redirectUrl
      *
-     * @return void
+     * @return LinkedIn
      */
-    public static function getClient( ?string $redirectUrl = null ): LinkedIn {
-        return new LinkedIn( [
+    public static function getClient(?string $redirectUrl = null): LinkedIn
+    {
+        return new LinkedIn([
                 'clientId'     => AppConfig::$LINKEDIN_OAUTH_CLIENT_ID,
                 'clientSecret' => AppConfig::$LINKEDIN_OAUTH_CLIENT_SECRET,
                 'redirectUri'  => $redirectUrl ?? AppConfig::$LINKEDIN_OAUTH_REDIRECT_URL,
-        ] );
+        ]);
     }
 
 
@@ -35,10 +37,11 @@ class LinkedInProvider extends AbstractProvider {
      * @return string
      * @throws Exception
      */
-    public function getAuthorizationUrl( string $csrfTokenState ): string {
+    public function getAuthorizationUrl(string $csrfTokenState): string
+    {
         $options        = [
-                'state' => $csrfTokenState,
-                'scope' => [
+                'state'  => $csrfTokenState,
+                'scope'  => [
                         'email',
                         'profile',
                         'openid',
@@ -47,23 +50,24 @@ class LinkedInProvider extends AbstractProvider {
         ];
         $linkedInClient = static::getClient();
 
-        return $linkedInClient->getAuthorizationUrl( $options );
+        return $linkedInClient->getAuthorizationUrl($options);
     }
 
     /**
      * @param string $code
      *
      * @return AccessToken
+     * @throws GuzzleException
      * @throws IdentityProviderException
      */
-    public function getAccessTokenFromAuthCode( string $code ): AccessToken {
-
-        $linkedInClient = static::getClient( $this->redirectUrl );
+    public function getAccessTokenFromAuthCode(string $code): AccessToken
+    {
+        $linkedInClient = static::getClient($this->redirectUrl);
 
         /** @var AccessToken $token */
-        $token = $linkedInClient->getAccessToken( 'authorization_code', [
+        $token = $linkedInClient->getAccessToken('authorization_code', [
                 'code' => $code
-        ] );
+        ]);
 
         return $token;
     }
@@ -74,8 +78,9 @@ class LinkedInProvider extends AbstractProvider {
      * @return ProviderUser
      * @throws GuzzleException
      */
-    public function getResourceOwner( AccessToken $token ): ProviderUser {
-        $linkedInClient = static::getClient( $this->redirectUrl );
+    public function getResourceOwner(AccessToken $token): ProviderUser
+    {
+        $linkedInClient = static::getClient($this->redirectUrl);
         $response       = $linkedInClient->getHttpClient()->request(
                 'GET',
                 'https://api.linkedin.com/v2/userinfo',
@@ -87,11 +92,7 @@ class LinkedInProvider extends AbstractProvider {
                 ]
         );
 
-        $fetched = json_decode( $response->getBody()->getContents() );
-
-        //TODO provare metodo di interfaccia
-//        $resourceOwner = $linkedInClient->getResourceOwner( $token );
-//        $fetched = $resourceOwner->toArray();
+        $fetched = json_decode($response->getBody()->getContents());
 
         $user            = new ProviderUser();
         $user->email     = $fetched->email;

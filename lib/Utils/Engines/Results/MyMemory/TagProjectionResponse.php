@@ -14,7 +14,8 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Utils\Engines\Results\TMSAbstractResponse;
 
-class TagProjectionResponse extends TMSAbstractResponse {
+class TagProjectionResponse extends TMSAbstractResponse
+{
 
     /**
      * TagProjectionResponse constructor.
@@ -24,10 +25,11 @@ class TagProjectionResponse extends TMSAbstractResponse {
      *
      * @throws Exception
      */
-    public function __construct( $response, array $dataRefMap = [] ) {
-        $featureSet         = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
-        $Filter             = MateCatFilter::getInstance( $featureSet, null, null, $dataRefMap );
-        $this->responseData = isset( $response[ 'data' ][ 'translation' ] ) ? $Filter->fromLayer1ToLayer2( $response[ 'data' ][ 'translation' ] ) : '';
+    public function __construct($response, array $dataRefMap = [])
+    {
+        $featureSet         = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
+        $Filter             = MateCatFilter::getInstance($featureSet, null, null, $dataRefMap);
+        $this->responseData = isset($response[ 'data' ][ 'translation' ]) ? $Filter->fromLayer1ToLayer2($response[ 'data' ][ 'translation' ]) : '';
     }
 
 }

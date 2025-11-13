@@ -13,7 +13,8 @@ namespace Utils\Shop;
  * Time: 15.17
  *
  */
-class ItemHTSQuoteJob extends AbstractItem {
+class ItemHTSQuoteJob extends AbstractItem
+{
 
     /**
      * These items will be the only accepted in setOffset/unsetOffset methods and ArrayAccess

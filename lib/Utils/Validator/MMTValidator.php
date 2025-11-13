@@ -6,20 +6,20 @@ use Exception;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
 
-class MMTValidator extends AbstractValidator {
-
+class MMTValidator extends AbstractValidator
+{
     /**
      * @param ValidatorObject $object
      *
      * @return ValidatorObject|null
      * @throws Exception
      */
-    public function validate( ValidatorObject $object ): ?ValidatorObject {
+    public function validate(ValidatorObject $object): ?ValidatorObject
+    {
+        $mmtGlossariesArray = json_decode($object[ 'glossaryString' ], true);
 
-        $mmtGlossariesArray = json_decode( $object[ 'glossaryString' ], true );
-
-        if ( !is_array( $mmtGlossariesArray ) ) {
-            throw new Exception( "mmt_glossaries is not a valid JSON" );
+        if (!is_array($mmtGlossariesArray)) {
+            throw new Exception("mmt_glossaries is not a valid JSON");
         }
 
         foreach ( $mmtGlossariesArray as $glossaryId ) {
@@ -29,6 +29,5 @@ class MMTValidator extends AbstractValidator {
         }
 
         return $object;
-
     }
 }

@@ -14,7 +14,8 @@ use Utils\Email\AbstractEmail;
  * Time: 18.03
  *
  */
-class ShareKeyEmail extends AbstractEmail {
+class ShareKeyEmail extends AbstractEmail
+{
 
     protected array $userMail = [];
 
@@ -22,38 +23,35 @@ class ShareKeyEmail extends AbstractEmail {
 
     protected UserStruct $sender;
 
-    public function __construct( UserStruct $sender, array $userMail, MemoryKeyStruct $keyStruct ) {
-
+    public function __construct(UserStruct $sender, array $userMail, MemoryKeyStruct $keyStruct)
+    {
         $this->userMail  = $userMail;
         $this->keyStruct = $keyStruct;
         $this->sender    = $sender;
 
 
-        $this->_setLayout( 'skeleton.html' );
-        $this->_setTemplate( 'ShareKey/message_content.html' );
-
+        $this->_setLayout('skeleton.html');
+        $this->_setTemplate('ShareKey/message_content.html');
     }
 
     /**
      * @throws Exception
      */
-    public function send(): bool {
-
+    public function send(): void
+    {
         $mailConf = $this->_getDefaultMailConf();
 
-        $mailConf[ 'address' ] = [ $this->userMail[ 0 ], $this->userMail[ 1 ] ];
+        $mailConf[ 'address' ] = [$this->userMail[ 0 ], $this->userMail[ 1 ]];
         $mailConf[ 'subject' ] = $this->_getLayoutVariables()[ 'title' ];
 
         $mailConf[ 'htmlBody' ] = $this->_buildHTMLMessage();
-        $mailConf[ 'altBody' ]  = $this->_buildTxtMessage( $this->_buildMessageContent() );
+        $mailConf[ 'altBody' ]  = $this->_buildTxtMessage($this->_buildMessageContent());
 
-        $this->_enqueueEmailDelivery( $mailConf );
-
-        return true;
-
+        $this->_enqueueEmailDelivery($mailConf);
     }
 
-    protected function _getTemplateVariables(): array {
+    protected function _getTemplateVariables(): array
+    {
         $params                     = [];
         $params[ "senderFullName" ] = $this->sender->fullName();
         $params[ "senderEmail" ]    = $this->sender->email;
@@ -64,7 +62,8 @@ class ShareKeyEmail extends AbstractEmail {
         return $params;
     }
 
-    protected function _getLayoutVariables( $messageBody = null ): array {
+    protected function _getLayoutVariables($messageBody = null): array
+    {
         $vars                = parent::_getLayoutVariables();
         $vars[ 'showTitle' ] = true;
         $vars[ 'title' ]     = "Matecat - Resource shared";

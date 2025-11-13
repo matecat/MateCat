@@ -21,7 +21,8 @@ use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
-class TranslationEventsHandler {
+class TranslationEventsHandler
+{
 
     use TransactionalTrait;
 
@@ -50,44 +51,50 @@ class TranslationEventsHandler {
      *
      * @param JobStruct $chunkStruct
      */
-    public function __construct( JobStruct $chunkStruct ) {
+    public function __construct(JobStruct $chunkStruct)
+    {
         $this->_chunk = $chunkStruct;
     }
 
     /**
      * @return TranslationEvent[]
      */
-    public function getEvents(): array {
+    public function getEvents(): array
+    {
         return $this->_events;
     }
 
     /**
      * @return TranslationEvent[]
      */
-    public function getPreparedEvents(): array {
-        return array_filter( $this->_events, function ( TranslationEvent $event ) {
+    public function getPreparedEvents(): array
+    {
+        return array_filter($this->_events, function (TranslationEvent $event) {
             return $event->isPrepared();
-        } );
+        });
     }
 
     /**
      * @param FeatureSet $featureSet
      */
-    public function setFeatureSet( FeatureSet $featureSet ) {
+    public function setFeatureSet(FeatureSet $featureSet): void
+    {
         $this->_featureSet = $featureSet;
     }
 
     /**
      * @param TranslationEvent $eventModel
      */
-    public function addEvent( TranslationEvent $eventModel ) {
+    public function addEvent(TranslationEvent $eventModel): void
+    {
         $this->_events[] = $eventModel;
     }
 
     /**
      * @return ProjectStruct
      */
-    public function getProject(): ProjectStruct {
+    public function getProject(): ProjectStruct
+    {
         return $this->_project;
     }
 
@@ -96,7 +103,8 @@ class TranslationEventsHandler {
      *
      * @return $this
      */
-    public function setProject( ProjectStruct $project ): TranslationEventsHandler {
+    public function setProject(ProjectStruct $project): TranslationEventsHandler
+    {
         $this->_project = $project;
 
         return $this;
@@ -107,72 +115,69 @@ class TranslationEventsHandler {
      * @throws ValidationError
      * @throws Exception
      */
-    public function prepareEventStruct( TranslationEvent $event ) {
-
+    public function prepareEventStruct(TranslationEvent $event): void
+    {
         if (
-                in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$REVISION_STATUSES ) &&
+                in_array($event->getWantedTranslation()[ 'status' ], TranslationStatus::$REVISION_STATUSES) &&
                 $event->getSourcePage() < SourcePages::SOURCE_PAGE_REVISION
         ) {
-            throw new ValidationError( 'Setting revised state from translation is not allowed.', -2000 );
+            throw new ValidationError('Setting revised state from translation is not allowed.', -2000);
         }
 
         if (
-                in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$TRANSLATION_STATUSES ) &&
+                in_array($event->getWantedTranslation()[ 'status' ], TranslationStatus::$TRANSLATION_STATUSES) &&
                 $event->getSourcePage() >= SourcePages::SOURCE_PAGE_REVISION
         ) {
-            throw new ValidationError( 'Setting translated state from revision is not allowed.', -2000 );
+            throw new ValidationError('Setting translated state from revision is not allowed.', -2000);
         }
 
         $eventStruct                 = new TranslationEventStruct();
         $eventStruct->id_job         = $event->getWantedTranslation()[ 'id_job' ];
         $eventStruct->id_segment     = $event->getWantedTranslation()[ 'id_segment' ];
-        $eventStruct->uid            = ( $event->getUser() != null ? $event->getUser()->uid : 0 );
+        $eventStruct->uid            = ($event->getUser() != null ? $event->getUser()->uid : 0);
         $eventStruct->status         = $event->getWantedTranslation()[ 'status' ];
         $eventStruct->version_number = $event->getWantedTranslation()[ 'version_number' ] ?? 0;
         $eventStruct->source_page    = $event->getSourcePage();
 
-        if ( $event->isPropagationSource() ) {
+        if ($event->isPropagationSource()) {
             $eventStruct->time_to_edit = $event->getWantedTranslation()[ 'time_to_edit' ];
         }
 
-        $eventStruct->setTimestamp( 'create_date', time() );
+        $eventStruct->setTimestamp('create_date', time());
 
         // set as prepared
-        $event->setTranslationEventStruct( $eventStruct );
-        $event->setPrepared( true );
-
+        $event->setTranslationEventStruct($eventStruct);
+        $event->setPrepared(true);
     }
 
     /**
      * @throws Exception
      */
-    private function saveEvent( TranslationEvent $event ) {
-
+    private function saveEvent(TranslationEvent $event): void
+    {
         $eventStruct = $event->getTranslationEventStruct();
 
-        if ( !$event->isFinalRevisionFlagAllowed() ) {
+        if (!$event->isFinalRevisionFlagAllowed()) {
             $eventStruct->final_revision = 0;
         } else {
             $eventStruct->final_revision = $eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
         }
 
-        $eventStruct->id = TranslationEventDao::insertStruct( $eventStruct );
-
+        $eventStruct->id = TranslationEventDao::insertStruct($eventStruct);
     }
 
     /**
      * @throws Exception
      */
-    private function removeOldFinalRevisionFlag( TranslationEvent $event ) {
-
-        if ( !empty( $event->getUnsetFinalRevision() ) ) {
-            ( new TranslationEventDao() )->unsetFinalRevisionFlag(
+    private function removeOldFinalRevisionFlag(TranslationEvent $event): void
+    {
+        if (!empty($event->getUnsetFinalRevision())) {
+            (new TranslationEventDao())->unsetFinalRevisionFlag(
                     (int)$this->getChunk()->id,
-                    [ $event->getSegmentStruct()->id ],
+                    [$event->getSegmentStruct()->id],
                     $event->getUnsetFinalRevision()
             );
         }
-
     }
 
     /**
@@ -182,38 +187,36 @@ class TranslationEventsHandler {
      *
      * @throws Exception
      */
-    public function save( BatchReviewProcessor $batchReviewProcessor ) {
-
+    public function save(BatchReviewProcessor $batchReviewProcessor): void
+    {
         $this->openTransaction();
 
         try {
-
-            foreach ( $this->_events as $event ) {
-                $this->prepareEventStruct( $event );
+            foreach ($this->_events as $event) {
+                $this->prepareEventStruct($event);
             }
 
-            $batchReviewProcessor->setChunk( $this->getChunk() );
-            $batchReviewProcessor->setPreparedEvents( $this->getPreparedEvents() );
+            $batchReviewProcessor->setChunk($this->getChunk());
+            $batchReviewProcessor->setPreparedEvents($this->getPreparedEvents());
             $batchReviewProcessor->process();
 
-            foreach ( $this->_events as $event ) {
-                $this->removeOldFinalRevisionFlag( $event );
-                $this->saveEvent( $event );
+            foreach ($this->_events as $event) {
+                $this->removeOldFinalRevisionFlag($event);
+                $this->saveEvent($event);
             }
-
-        } catch ( Exception $e ) {
+        } catch (Exception $e) {
             $this->rollbackTransaction();
             throw $e;
         } finally {
             $this->commitTransaction();
         }
-
     }
 
     /**
      * @return JobStruct
      */
-    public function getChunk(): JobStruct {
+    public function getChunk(): JobStruct
+    {
         return $this->_chunk;
     }
 

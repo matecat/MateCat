@@ -706,7 +706,7 @@ const SegmentActions = {
             'If you must edit it, click on the padlock icon to the left of the segment. ' +
             'The owner of the project will be notified of any edits.',
         },
-        'Ice Match',
+        'Ice Matches',
       )
       return
     }

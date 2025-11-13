@@ -11,29 +11,34 @@ namespace Model\Conversion;
 
 use DomainException;
 
-class InternalHashPaths {
+class InternalHashPaths
+{
 
     protected string $cacheHash;
     protected string $diskHash;
 
-    public function __construct( array $array_params ) {
-        if ( $array_params != null ) {
-            foreach ( $array_params as $property => $value ) {
+    public function __construct(array $array_params)
+    {
+        if ($array_params != null) {
+            foreach ($array_params as $property => $value) {
                 $this->$property = $value;
             }
         }
     }
 
-    public function getCacheHash(): string {
+    public function getCacheHash(): string
+    {
         return $this->cacheHash;
     }
 
-    public function getDiskHash(): string {
+    public function getDiskHash(): string
+    {
         return $this->diskHash;
     }
 
-    public function isEmpty(): bool {
-        return empty( $this->cacheHash ) && empty( $this->diskHash );
+    public function isEmpty(): bool
+    {
+        return empty($this->cacheHash) && empty($this->diskHash);
     }
 
     /**
@@ -43,9 +48,10 @@ class InternalHashPaths {
      * @return void
      * @throws DomainException
      */
-    public function __set( $name, $value ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Unknown property ' . $name );
+    public function __set($name, $value)
+    {
+        if (!property_exists($this, $name)) {
+            throw new DomainException('Unknown property ' . $name);
         }
     }
 

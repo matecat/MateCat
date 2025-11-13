@@ -9,6 +9,7 @@
  */
 
 namespace Utils\Contribution;
+
 use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GetContributionWorker;
@@ -19,28 +20,26 @@ use Utils\Logger\LoggerFactory;
  * @package Contribution
  *
  */
-class Get {
+class Get
+{
 
     /**
      * @param GetContributionRequest $contribution
      *
      * @throws Exception
      */
-    public static function contribution( GetContributionRequest $contribution ){
-
-        try{
-            WorkerClient::enqueue( 'CONTRIBUTION_GET', GetContributionWorker::class, $contribution->getArrayCopy(), array( 'persistent' => false ) );
-        } catch ( Exception $e ){
-
+    public static function contribution(GetContributionRequest $contribution): void
+    {
+        try {
+            WorkerClient::enqueue('CONTRIBUTION_GET', GetContributionWorker::class, $contribution->getArrayCopy(), ['persistent' => false]);
+        } catch (Exception $e) {
             # Handle the error, logging, ...
-            $output  = "**** GetContribution failed. AMQ Connection Error. ****\n\t";
+            $output = "**** GetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
-            $output .= var_export( $contribution, true );
-            LoggerFactory::doJsonLog( $output );
+            $output .= var_export($contribution, true);
+            LoggerFactory::doJsonLog($output);
             throw $e;
-
         }
-
     }
 
 }

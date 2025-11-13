@@ -10,14 +10,14 @@ use Utils\Engines\Results\TMSAbstractResponse;
  * Date: 04/03/15
  * Time: 11.50
  */
-class AnalyzeResponse extends TMSAbstractResponse {
+class AnalyzeResponse extends TMSAbstractResponse
+{
 
-    public function __construct( $response ) {
-
-        $this->responseStatus  = (int)( $response[ 'responseStatus' ] ?? 200 );
+    public function __construct($response)
+    {
+        $this->responseStatus  = (int)($response[ 'responseStatus' ] ?? 200);
         $this->responseDetails = $response[ 'responseData' ] ?? '';
         $this->responseData    = $response[ 'data' ] ?? '';
-
     }
 
 } 

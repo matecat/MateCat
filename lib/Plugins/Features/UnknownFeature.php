@@ -17,9 +17,10 @@ namespace Plugins\Features;
  * It can be used to handle cases where a feature is expected but not found,
  * allowing the system to continue functioning without crashing.
  */
-class UnknownFeature extends BaseFeature {
+class UnknownFeature extends BaseFeature
+{
 
-    const FEATURE_CODE = 'UnknownFeature';
+    const string FEATURE_CODE = 'UnknownFeature';
     protected bool $autoActivateOnProject = false;
 
 }

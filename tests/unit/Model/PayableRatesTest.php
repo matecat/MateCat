@@ -1,6 +1,7 @@
 <?php
 
 use Model\Analysis\PayableRates;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -9,11 +10,12 @@ use TestHelpers\AbstractTest;
  * Date: 09/06/2017
  * Time: 16:51
  */
-class PayableRateStructTest extends AbstractTest {
+class PayableRatesTest extends AbstractTest {
 
     /**
      * @test
      */
+    #[Test]
     public function getPayableRates() {
         $languageCombos = [
                 [ 'en', 'zh', 77 ],

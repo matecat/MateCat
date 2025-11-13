@@ -13,7 +13,8 @@ namespace Utils\TaskRunner\Commons;
  * Class QueueElement
  * @package TaskRunner\Commons
  */
-class QueueElement extends AbstractElement {
+class QueueElement extends AbstractElement
+{
 
     /**
      * Worker class definition to be loaded by Executor
@@ -34,13 +35,5 @@ class QueueElement extends AbstractElement {
      * @var int
      */
     public int $reQueueNum = 0;
-
-    /**
-     * Magic method to serialize this object
-     * @return string
-     */
-    public function __toString() {
-        return json_encode( $this );
-    }
 
 }

@@ -12,14 +12,15 @@ namespace Controller\API\Commons\Validators;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Model\Segments\SegmentDao;
 
-class SegmentValidator extends Base {
+class SegmentValidator extends Base
+{
 
     /**
      * @return mixed|void
      * @throws NotFoundException
      */
-    protected function _validate(): void {
-
+    protected function _validate(): void
+    {
         // JobPasswordValidator is actually useless
         // in this case since we need to check for the segment
         // scope inside the job.
@@ -29,7 +30,7 @@ class SegmentValidator extends Base {
         // }
 
         // Ensure chunk is in project
-        $dao = new SegmentDao( \Model\DataAccess\Database::obtain() );
+        $dao = new SegmentDao(\Model\DataAccess\Database::obtain());
 
         $segment = $dao->getByChunkIdAndSegmentId(
                 $this->controller->getParams()[ 'id_job' ],
@@ -37,10 +38,9 @@ class SegmentValidator extends Base {
                 $this->controller->getParams()[ 'id_segment' ]
         );
 
-        if ( !$segment ) {
-            throw new NotFoundException( "Segment Not Found.", 404 );
+        if (!$segment) {
+            throw new NotFoundException("Segment Not Found.", 404);
         }
-
     }
 
 

@@ -18,7 +18,8 @@ use Utils\Shop\AbstractItem;
  * Time: 10.54
  *
  */
-abstract class AbstractProvider {
+abstract class AbstractProvider
+{
 
     /**
      * These are the url where the user will be redirected after
@@ -64,13 +65,14 @@ abstract class AbstractProvider {
      * @see AbstractProvider::$_outsource_login_url_ko
      *
      */
-    public function __construct() {
+    public function __construct()
+    {
     }
 
     /**
      * Object containing the quote result
      *
-     * @var \Utils\Shop\AbstractItem[]
+     * @var AbstractItem[]
      */
     protected array $_quote_result;
 
@@ -120,14 +122,15 @@ abstract class AbstractProvider {
      *
      * @return void
      */
-    abstract public function performQuote();
+    abstract public function performQuote(): void;
 
     /**
      * Get quotes Result after Provider Interrogation
      *
      * @return AbstractItem[]
      */
-    public function getQuotesResult(): array {
+    public function getQuotesResult(): array
+    {
         return $this->_quote_result;
     }
 
@@ -148,7 +151,8 @@ abstract class AbstractProvider {
      *
      * @return $this
      */
-    public function setJobList( array $jobList ): AbstractProvider {
+    public function setJobList(array $jobList): AbstractProvider
+    {
         $this->jobList = $jobList;
 
         return $this;
@@ -161,7 +165,8 @@ abstract class AbstractProvider {
      *
      * @return $this
      */
-    public function setPid( int $pid ): AbstractProvider {
+    public function setPid(int $pid): AbstractProvider
+    {
         $this->pid = $pid;
 
         return $this;
@@ -174,19 +179,21 @@ abstract class AbstractProvider {
      *
      * @return $this
      */
-    public function setPpassword( string $ppassword ): AbstractProvider {
+    public function setPpassword(string $ppassword): AbstractProvider
+    {
         $this->ppassword = $ppassword;
 
         return $this;
     }
 
     /**
-     * @param \Model\FeaturesBase\FeatureSet|null $features
+     * @param FeatureSet|null $features
      *
      * @return $this
      */
-    public function setFeatures( ?FeatureSet $features ): AbstractProvider {
-        if ( !empty( $features ) ) {
+    public function setFeatures(?FeatureSet $features): AbstractProvider
+    {
+        if (!empty($features)) {
             $this->features = $features;
         }
 
@@ -194,12 +201,13 @@ abstract class AbstractProvider {
     }
 
     /**
-     * @param \Model\Users\UserStruct|null $user
+     * @param UserStruct|null $user
      *
      * @return $this
      */
-    public function setUser( ?UserStruct $user ): AbstractProvider {
-        if ( !empty( $user ) ) {
+    public function setUser(?UserStruct $user): AbstractProvider
+    {
+        if (!empty($user)) {
             $this->user = $user;
         }
 
@@ -213,8 +221,9 @@ abstract class AbstractProvider {
      *
      * @return $this
      */
-    public function setCurrency( string $currency ): AbstractProvider {
-        if ( !empty( $currency ) ) {
+    public function setCurrency(string $currency): AbstractProvider
+    {
+        if (!empty($currency)) {
             $this->currency = $currency;
         }
 
@@ -228,8 +237,9 @@ abstract class AbstractProvider {
      *
      * @return $this
      */
-    public function setTimezone( string $timezone ): AbstractProvider {
-        if ( !empty( $timezone ) || $timezone === "0" ) {
+    public function setTimezone(string $timezone): AbstractProvider
+    {
+        if (!empty($timezone) || $timezone === "0") {
             $this->timezone = $timezone;
         }
 
@@ -241,7 +251,8 @@ abstract class AbstractProvider {
      *
      * @return string
      */
-    public function getOutsourceLoginUrlKo(): string {
+    public function getOutsourceLoginUrlKo(): string
+    {
         return $this->_outsource_login_url_ko;
     }
 
@@ -250,11 +261,13 @@ abstract class AbstractProvider {
      *
      * @return string
      */
-    public function getOutsourceLoginUrlOk(): string {
+    public function getOutsourceLoginUrlOk(): string
+    {
         return $this->_outsource_login_url_ok;
     }
 
-    public function getOutsourceConfirmUrl(): array {
+    public function getOutsourceConfirmUrl(): array
+    {
         return $this->_outsource_url_confirm;
     }
 

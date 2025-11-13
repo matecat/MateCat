@@ -49,6 +49,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
      * @covers MyMemory::createExport
      * @covers MyMemory::checkExport
      * @covers MyMemory::downloadExport
+     * @throws ReflectionException
      */
     public function test_about_best_case_scenario_of_TMX_import() {
 
@@ -126,15 +127,15 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
         /**
          * Getting Status
          */
-        $ready = false;
-        $time  = 0;
+        $ready        = false;
+        $time         = 0;
+        $importResult = null;
         while ( ( !$ready ) && ( $time < 100 ) ) {
             usleep( 500000 );//0.5 sec
             $time++;
@@ -155,7 +156,6 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $importResult );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
 
         $this->assertEquals( "", $property->getValue( $result ) );
 

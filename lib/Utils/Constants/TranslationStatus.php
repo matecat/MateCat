@@ -1,6 +1,7 @@
 <?php
 
 namespace Utils\Constants;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -8,15 +9,16 @@ namespace Utils\Constants;
  * Time: 14.32
  *
  */
-class TranslationStatus {
+class TranslationStatus
+{
 
-    const STATUS_NEW        = 'NEW';
-    const STATUS_DRAFT      = 'DRAFT';
-    const STATUS_TRANSLATED = 'TRANSLATED';
-    const STATUS_APPROVED   = 'APPROVED';
-    const STATUS_APPROVED2  = 'APPROVED2';
-    const STATUS_REJECTED   = 'REJECTED';
-    const STATUS_FIXED      = 'FIXED';
+    const string STATUS_NEW        = 'NEW';
+    const string STATUS_DRAFT      = 'DRAFT';
+    const string STATUS_TRANSLATED = 'TRANSLATED';
+    const string STATUS_APPROVED   = 'APPROVED';
+    const string STATUS_APPROVED2  = 'APPROVED2';
+    const string STATUS_REJECTED   = 'REJECTED';
+    const string STATUS_FIXED      = 'FIXED';
 
     public static array $DB_STATUSES_MAP = [
             self::STATUS_NEW        => 1,
@@ -52,12 +54,14 @@ class TranslationStatus {
             self::STATUS_REJECTED
     ];
 
-    public static function isReviewedStatus( $status ): bool {
-        return in_array( $status, TranslationStatus::$REVISION_STATUSES );
+    public static function isReviewedStatus($status): bool
+    {
+        return in_array($status, TranslationStatus::$REVISION_STATUSES);
     }
 
-    public static function isNotInitialStatus( $status ): bool {
-        return !in_array( $status, TranslationStatus::$INITIAL_STATUSES );
+    public static function isNotInitialStatus($status): bool
+    {
+        return !in_array($status, TranslationStatus::$INITIAL_STATUSES);
     }
 
 }

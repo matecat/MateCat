@@ -10,7 +10,8 @@ use Utils\Engines\Intento;
  * This class contains the default parameters for a Intento EnginesFactory CREATION
  *
  */
-class IntentoStruct extends EngineStruct {
+class IntentoStruct extends EngineStruct
+{
 
     /**
      * @var ?string
@@ -28,9 +29,9 @@ class IntentoStruct extends EngineStruct {
     public ?string $translate_relative_url = "translate";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
+    public string|array|null $extra_parameters = [
             'apikey'           => "",
             'provider'         => "",
             'providerkey'      => "",
@@ -50,9 +51,10 @@ class IntentoStruct extends EngineStruct {
 
     /**
      * An empty struct
-     * @return EngineStruct
+     * @return IntentoStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new IntentoStruct();
     }
 

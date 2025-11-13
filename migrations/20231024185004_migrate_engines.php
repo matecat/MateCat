@@ -10,7 +10,7 @@ class MigrateEngines extends AbstractMatecatMigration {
     " ];
 
     public $sql_down = [ "
-        UPDATE engines SET `name` = 'Match', `description` = 'Machine translation by the MT engine best suited to your project'  WHERE id = 1;
+        UPDATE engines SET `name` = 'MyMemory', `description` = 'Machine translation by the MT engine best suited to your project'  WHERE id = 1;
         UPDATE engines SET `name` = 'ModernMT', `description` = 'ModernMT - Adaptive Neural Machine Translation.'  WHERE id > 1 and class_load = 'MMT';
     "];
 }

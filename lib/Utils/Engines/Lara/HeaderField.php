@@ -9,26 +9,31 @@
 
 namespace Utils\Engines\Lara;
 
-class HeaderField {
+class HeaderField
+{
 
     private string $key;
     private string $value;
 
-    public function __construct( string $key, string $value ) {
+    public function __construct(string $key, string $value)
+    {
         $this->key   = $key;
         $this->value = $value;
     }
 
-    public function getKey(): string {
+    public function getKey(): string
+    {
         return $this->key;
     }
 
-    public function getValue(): string {
+    public function getValue(): string
+    {
         return $this->value;
     }
 
-    public function getArrayCopy(): array {
-        return [ $this->key => $this->value ];
+    public function getArrayCopy(): array
+    {
+        return [$this->key => $this->value];
     }
 
 }

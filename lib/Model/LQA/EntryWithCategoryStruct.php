@@ -9,7 +9,8 @@
 namespace Model\LQA;
 
 
-class EntryWithCategoryStruct extends EntryStruct {
+class EntryWithCategoryStruct extends EntryStruct
+{
 
     public string $category;
 

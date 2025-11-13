@@ -15,7 +15,8 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 
-class JobsTranslatorsStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class JobsTranslatorsStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public int    $id_job;
     public string $job_password;
@@ -31,9 +32,10 @@ class JobsTranslatorsStruct extends AbstractDaoSilentStruct implements IDaoStruc
      * @return UserStruct
      * @throws ReflectionException
      */
-    public function getUser(): UserStruct {
-        if ( !empty( $this->id_translator_profile ) ) {
-            return ( new UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
+    public function getUser(): UserStruct
+    {
+        if (!empty($this->id_translator_profile)) {
+            return (new UserDao())->setCacheTTL(60 * 60)->getByEmail($this->email);
         }
 
         return new UserStruct();

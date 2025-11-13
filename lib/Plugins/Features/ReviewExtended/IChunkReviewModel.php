@@ -12,12 +12,13 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;
 
-interface IChunkReviewModel {
+interface IChunkReviewModel
+{
 
     /**
      * @return JobStruct
      */
-    public function getChunk();
+    public function getChunk(): JobStruct;
 
     /**
      * adds penalty_points and updates pass fail result
@@ -25,9 +26,9 @@ interface IChunkReviewModel {
      * @param                         $penalty_points
      * @param ProjectStruct           $projectStruct
      *
-     * @return
+     * @return void
      */
-    public function addPenaltyPoints( $penalty_points, ProjectStruct $projectStruct );
+    public function addPenaltyPoints($penalty_points, ProjectStruct $projectStruct): void;
 
     /**
      * subtract penalty_points and updates pass fail result
@@ -35,20 +36,20 @@ interface IChunkReviewModel {
      * @param float         $penalty_points
      * @param ProjectStruct $projectStruct
      *
-     * @return
+     * @return void
      */
-    public function subtractPenaltyPoints( float $penalty_points, ProjectStruct $projectStruct );
+    public function subtractPenaltyPoints(float $penalty_points, ProjectStruct $projectStruct): void;
 
     /**
      * Returns the calculated score
      */
-    public function getScore();
+    public function getScore(): float;
 
-    public function getPenaltyPoints();
+    public function getPenaltyPoints(): ?float;
 
-    public function getReviewedWordsCount();
+    public function getReviewedWordsCount(): int;
 
-    public function getQALimit( ModelStruct $lqa_model );
+    public function getQALimit(ModelStruct $lqa_model): int;
 
     /**
      * This method invokes the recount of reviewed_words_count and
@@ -56,6 +57,7 @@ interface IChunkReviewModel {
      *
      * @param ProjectStruct $project
      *
+     * @return void
      */
-    public function recountAndUpdatePassFailResult( ProjectStruct $project );
+    public function recountAndUpdatePassFailResult(ProjectStruct $project): void;
 }

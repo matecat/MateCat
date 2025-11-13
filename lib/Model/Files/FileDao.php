@@ -7,10 +7,11 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use ReflectionException;
 
-class FileDao extends AbstractDao {
-    const TABLE = "files";
+class FileDao extends AbstractDao
+{
+    const string TABLE = "files";
 
-    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $auto_increment_field = ['id'];
 
     /**
      * @param     $id_job
@@ -20,8 +21,8 @@ class FileDao extends AbstractDao {
      * @return FileStruct[]
      * @throws ReflectionException
      */
-    public static function getByJobId( $id_job, int $ttl = 60 ): array {
-
+    public static function getByJobId($id_job, int $ttl = 60): array
+    {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare(
@@ -31,8 +32,7 @@ class FileDao extends AbstractDao {
         );
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id_job' => $id_job ] );
-
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_job' => $id_job]);
     }
 
     /**
@@ -43,26 +43,28 @@ class FileDao extends AbstractDao {
      * @return FileStruct[]
      * @throws ReflectionException
      */
-    public static function getByProjectId( int $id_project, int $ttl = 600 ): array {
+    public static function getByProjectId(int $id_project, int $ttl = 600): array
+    {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( "SELECT * FROM files where id_project = :id_project " );
+        $stmt    = $conn->prepare("SELECT * FROM files where id_project = :id_project ");
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id_project' => $id_project ] );
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id_project' => $id_project]);
     }
 
-    public static function updateField( $file, $field, $value ): bool {
+    public static function updateField($file, $field, $value): bool
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "UPDATE files SET $field = :value " .
                 " WHERE id = :id "
         );
 
-        return $stmt->execute( [
+        return $stmt->execute([
                 'value' => $value,
                 'id'    => $file->id
-        ] );
+        ]);
     }
 
     /**
@@ -71,10 +73,11 @@ class FileDao extends AbstractDao {
      *
      * @return int
      */
-    public static function isFileInProject( int $id_file, int $id_project ): int {
+    public static function isFileInProject(int $id_file, int $id_project): int
+    {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM files where id_project = :id_project and id = :id_file " );
-        $stmt->execute( [ 'id_project' => $id_project, 'id_file' => $id_file ] );
+        $stmt = $conn->prepare("SELECT * FROM files where id_project = :id_project and id = :id_file ");
+        $stmt->execute(['id_project' => $id_project, 'id_file' => $id_file]);
 
         return $stmt->rowCount();
     }
@@ -83,18 +86,18 @@ class FileDao extends AbstractDao {
      * @param int      $id
      * @param int|null $ttl
      *
-     * @return FileStruct
+     * @return FileStruct|null
      * @throws ReflectionException
      */
-    public static function getById( int $id, ?int $ttl = 0 ): ?FileStruct {
+    public static function getById(int $id, ?int $ttl = 0): ?FileStruct
+    {
         $thisDao = new self();
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM files where id = :id " );
-        $stmt->execute( [ 'id' => $id ] );
+        $stmt = $conn->prepare("SELECT * FROM files where id = :id ");
+        $stmt->execute(['id' => $id]);
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id' => $id ] )[ 0 ] ?? null;
-
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, FileStruct::class, ['id' => $id])[ 0 ] ?? null;
     }
 
     /**
@@ -102,33 +105,31 @@ class FileDao extends AbstractDao {
      *
      * @return int
      */
-    public function deleteFailedProjectFiles( array $idFiles = [] ): int {
-
-        if ( empty( $idFiles ) ) {
+    public function deleteFailedProjectFiles(array $idFiles = []): int
+    {
+        if (empty($idFiles)) {
             return 0;
         }
 
-        $sql  = "DELETE FROM files WHERE id IN ( " . str_repeat( '?,', count( $idFiles ) - 1 ) . '?' . " ) ";
+        $sql  = "DELETE FROM files WHERE id IN ( " . str_repeat('?,', count($idFiles) - 1) . '?' . " ) ";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( $idFiles );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($idFiles);
 
         return $stmt->rowCount();
-
     }
 
     /**
      * @throws Exception
      */
-    public static function insertFilesJob( $id_job, $id_file ) {
-
+    public static function insertFilesJob($id_job, $id_file): void
+    {
         $data              = [];
         $data[ 'id_job' ]  = (int)$id_job;
         $data[ 'id_file' ] = (int)$id_file;
 
         $db = Database::obtain();
-        $db->insert( 'files_job', $data );
-
+        $db->insert('files_job', $data);
     }
 
 }

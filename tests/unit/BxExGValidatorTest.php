@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\LQA\BxExG\Validator;
 use Utils\LQA\QA;
@@ -10,6 +11,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function noErrors() {
         $source = '<bx ="23"/><g id="1">Ciao</g> questa è una stringa';
         $target = '<bx ="23"/><g id="1">Hi</g> this is a string';
@@ -23,6 +25,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function nestedBxInTargetNotInSource() {
         $source = '<bx ="23"/><g id="1">Ciao</g> questa è una stringa';
         $target = '<g id="1"><bx ="23"/>Hi</g> this is a string';
@@ -37,6 +40,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function nestedBxInSourceNotInTarget() {
         $source = '<g id="1"><bx ="23"/>Ciao</g> questa è una stringa';
         $target = '<bx ="23"/><g id="1">Hi</g> this is a string';
@@ -51,6 +55,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function nestedBxInTargetNotInSourceWithNestedStrings() {
         $source = '<bx ="23"/><g id="1"><g id="2"><g id="3">Ciao</g> questa è una stringa</g></g>';
         $target = '<g id="1"><g id="2"><g id="3"><bx ="23"/>Hi</g> this is a string</g></g>';
@@ -65,6 +70,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function noErrorsIfGArePlacedInDifferentOrder() {
 
         $source = 'Click <g id="1">si puà connettere un encoder magnetico</g> per la saldatura a quota';
@@ -79,6 +85,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function noErrorsIfGArePlacedInDifferentPositions() {
 
         $source = '<g id="1">Grafik 2.3 – </g>2021 yılı finansal <g id="2">fizibilite ve planlanan, bileşen 2.3</g>';
@@ -102,6 +109,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function noErrorsIfGArePlacedInEscapedTags() {
 
         $source = '&lt;div&gt; <g id="1">La mamma è andata a fare la spesa</g> &lt;/div&gt;';
@@ -116,6 +124,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function mismatchCountBetweenSourceAndTarget() {
         $source = '<g id="1"><bx ="23"/>Ciao</g> questa è una stringa<g id="2"></g>';
         $target = '<g id="1"><bx ="23"/>Hi</g> this is a string';
@@ -130,6 +139,7 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function noBxOrExTags() {
         $source = '<g id="1"><g id="2"><g id="3">Ciao</g> questa è una stringa</g></g><g id="5"></g>';
         $target = '<g id="1"><g id="2"><g id="3">Hi</g> this is a string</g></g><g id="4"></g>';

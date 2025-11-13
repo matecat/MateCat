@@ -12,7 +12,8 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 
-class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, JsonSerializable {
+class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, JsonSerializable
+{
     public string $id;
     public string $uid;
     public string $key;
@@ -20,12 +21,13 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     /**
      * @var int|object|string
      */
-    public        $value;
+    public string|int|object $value;
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array
+    {
         return [
                 'id'    => (int)$this->id,
                 'uid'   => (int)$this->uid,
@@ -37,15 +39,16 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     /**
      * @return int|object|string
      */
-    public function getValue() {
+    public function getValue(): object|int|string
+    {
         // in case of numeric value, return a integer
-        if ( is_numeric( $this->value ) ) {
+        if (is_numeric($this->value)) {
             return (int)$this->value;
         }
 
         // in case of serialized data, return an object
-        if ( ( @unserialize( $this->value ) ?? false ) !== false ) {
-            return (object)unserialize( $this->value );
+        if ((@unserialize($this->value) ?? false) !== false) {
+            return (object)unserialize($this->value);
         }
 
         // return a string

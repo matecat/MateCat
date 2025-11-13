@@ -10,39 +10,35 @@ use Model\Jobs\JobStruct;
 use Model\WordCount\WordCountStruct;
 use Utils\Tools\CatUtils;
 
-class StatsController extends KleinController {
+class StatsController extends KleinController
+{
 
     /**
-     * @var ?\Model\Jobs\JobStruct
+     * @var ?JobStruct
      */
     protected ?JobStruct $chunk = null;
-
-    public function setChunk( JobStruct $chunk ) {
-        $this->chunk = $chunk;
-    }
 
     /**
      * @return void
      */
-    public function stats() {
-        $wStruct                          = WordCountStruct::loadFromJob( $this->chunk );
-        $job_stats                        = CatUtils::getFastStatsForJob( $wStruct );
+    public function stats(): void
+    {
+        $wStruct                          = WordCountStruct::loadFromJob($this->chunk);
+        $job_stats                        = CatUtils::getFastStatsForJob($wStruct);
         $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
 
-        $this->response->json( $job_stats );
+        $this->response->json($job_stats);
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $Validator = (new ChunkPasswordValidator($this));
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk = $Validator->getChunk();
+        });
 
-        $Validator  = ( new ChunkPasswordValidator( $this ) );
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setChunk( $Validator->getChunk() );
-        } );
-
-        $this->appendValidator( $Validator );
-        $this->appendValidator( new LoginValidator( $this ) );
-
+        $this->appendValidator($Validator);
     }
 
 }

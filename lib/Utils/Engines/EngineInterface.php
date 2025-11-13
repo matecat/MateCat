@@ -15,35 +15,36 @@ use Utils\Engines\Results\TMSAbstractResponse;
  * Time: 11.55
  *
  */
-interface EngineInterface {
+interface EngineInterface
+{
 
     /**
      * @param array $_config
      *
      * @return TMSAbstractResponse
      */
-    public function get( array $_config );
+    public function get(array $_config);
 
     /**
      * @param $_config
      *
      * @return mixed
      */
-    public function set( $_config );
+    public function set($_config);
 
     /**
      * @param $_config
      *
      * @return mixed
      */
-    public function update( $_config );
+    public function update($_config);
 
     /**
      * @param $_config
      *
      * @return bool
      */
-    public function delete( $_config );
+    public function delete($_config);
 
     /**
      * @return mixed
@@ -60,7 +61,7 @@ interface EngineInterface {
      *
      * @return EngineInterface
      */
-    public function setMTPenalty( int $mt_penalty ): EngineInterface;
+    public function setMTPenalty(int $mt_penalty): EngineInterface;
 
     /**
      * @return EngineStruct
@@ -77,7 +78,7 @@ interface EngineInterface {
     /**
      * @return void
      */
-    public function importMemory( string $filePath, string $memoryKey, UserStruct $user );
+    public function importMemory(string $filePath, string $memoryKey, UserStruct $user);
 
     /**
      * @param array      $projectRow
@@ -85,7 +86,7 @@ interface EngineInterface {
      *
      * @return void
      */
-    public function syncMemories( array $projectRow, ?array $segments = [] );
+    public function syncMemories(array $projectRow, ?array $segments = []);
 
     /**
      * @param MemoryKeyStruct $memoryKey
@@ -93,7 +94,7 @@ interface EngineInterface {
      * @return ?array
      * @throws Exception
      */
-    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array;
+    public function memoryExists(MemoryKeyStruct $memoryKey): ?array;
 
     /**
      * Deletes a specific memory key.
@@ -104,7 +105,7 @@ interface EngineInterface {
      * @throws Exception
      */
 
-    public function deleteMemory( array $memoryKey ): array;
+    public function deleteMemory(array $memoryKey): array;
 
     /**
      * Determines if the provided memory belongs to the caller.
@@ -114,7 +115,7 @@ interface EngineInterface {
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
      * @throws Exception
      */
-    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array;
+    public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array;
 
     /**
      * @param string $source
@@ -125,5 +126,5 @@ interface EngineInterface {
      *
      * @return float|null
      */
-    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default' ): ?float;
+    public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default'): ?float;
 }

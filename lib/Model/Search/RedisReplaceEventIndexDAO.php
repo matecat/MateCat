@@ -3,13 +3,15 @@
 namespace Model\Search;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDatabase;
 use Predis\Client;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
 
-class RedisReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface {
+class RedisReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface
+{
 
-    const TABLE = 'replace_events_current_version';
+    const string TABLE = 'replace_events_current_version';
 
     /**
      * @var Client
@@ -24,24 +26,27 @@ class RedisReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
     /**
      * RedisReplaceEventDAO constructor.
      *
-     * @param null $con
+     * @param IDatabase|null $con
      *
      * @throws ReflectionException
      */
-    public function __construct( $con = null ) {
-        parent::__construct( $con );
+    public function __construct(?IDatabase $con = null)
+    {
+        parent::__construct($con);
 
-        $this->redis = ( new RedisHandler() )->getConnection();
+        $this->redis = (new RedisHandler())->getConnection();
     }
 
     /**
-     * @param $idJob
+     * @param int $idJob
      *
      * @return int
      */
-    public function getActualIndex( $idJob ): int {
-        $index = $this->redis->get( $this->getRedisKey( $idJob ) );
-        return ( null !== $index and $index > 0 ) ? (int)$index : 0;
+    public function getActualIndex(int $idJob): int
+    {
+        $index = $this->redis->get($this->getRedisKey($idJob));
+
+        return (null !== $index and $index > 0) ? (int)$index : 0;
     }
 
     /**
@@ -50,28 +55,31 @@ class RedisReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
      *
      * @return int
      */
-    public function save( int $id_job, int $version ): int {
-        $this->redis->set( $this->getRedisKey( $id_job ), $version );
-        $this->redis->expire( $this->getRedisKey( $id_job ), $this->ttl );
+    public function save(int $id_job, int $version): int
+    {
+        $this->redis->set($this->getRedisKey($id_job), $version);
+        $this->redis->expire($this->getRedisKey($id_job), $this->ttl);
+
         return 1; // Redis doesn't return the number of affected rows, so we return 1 to indicate success
     }
 
     /**
-     * @param $idJob
-     * @param $version
+     * @param int $idJob
      *
      * @return string
      */
-    private function getRedisKey( $idJob ): string {
-        return md5( self::TABLE . '::' . $idJob );
+    private function getRedisKey(int $idJob): string
+    {
+        return md5(self::TABLE . '::' . $idJob);
     }
 
     /**
-     * @param $ttl
+     * @param int $ttl
      *
      * @return void
      */
-    public function setTtl( $ttl ) {
+    public function setTtl(int $ttl): void
+    {
         $this->ttl = $ttl;
     }
 }

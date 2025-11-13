@@ -12,7 +12,8 @@ namespace Plugins\Features\TranslationEvents\Model;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class TranslationEventStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class TranslationEventStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public ?int   $id             = null;
     public int    $uid;

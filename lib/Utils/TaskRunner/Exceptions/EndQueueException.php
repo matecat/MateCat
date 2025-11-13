@@ -15,6 +15,7 @@ use Exception;
  * Class EndQueueException
  * @package TaskRunner\Exceptions
  */
-class EndQueueException extends Exception {
+class EndQueueException extends Exception
+{
 
 }

@@ -15,30 +15,34 @@ use Model\Projects\ProjectDao;
 use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
-set_time_limit( 180 );
+set_time_limit(180);
 
-class DownloadOriginalController extends AbstractDownloadController {
+class DownloadOriginalController extends AbstractDownloadController
+{
 
     /**
      * @throws Exception
      */
-    public function index() {
+    public function index()
+    {
         $filterArgs = [
                 'filename'      => [
-                        'filter' => FILTER_SANITIZE_STRING,
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
                         'flags'  => FILTER_FLAG_STRIP_LOW
                 ],
-                'id_file'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_job'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_file'       => ['filter' => FILTER_SANITIZE_NUMBER_INT],
+                'id_job'        => ['filter' => FILTER_SANITIZE_NUMBER_INT],
                 'download_type' => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'password'      => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ]
         ];
 
-        $__postInput = filter_var_array( $this->request->params(), $filterArgs );
+        $__postInput = filter_var_array($this->request->params(), $filterArgs);
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI Test scripts
@@ -49,41 +53,41 @@ class DownloadOriginalController extends AbstractDownloadController {
         $this->password                = $__postInput[ 'password' ];
 
         // get Job Info, we need only a row of jobs ( split )
-        $jobData = JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
+        $jobData = JobDao::getByIdAndPassword((int)$this->id_job, $this->password);
 
         // if no job was found, check if the provided password is a password_review
-        if ( empty( $jobData ) ) {
-            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, (int)$this->id_job );
+        if (empty($jobData)) {
+            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
             $jobData           = $chunkReviewStruct->getChunk();
         }
 
         // check for Password correctness
-        if ( empty( $jobData ) ) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            $this->logger->debug( $msg );
+        if (empty($jobData)) {
+            $msg = "Error : wrong password provided for download \n\n " . var_export($_POST, true) . "\n";
+            $this->logger->debug($msg);
+
             return null;
         }
 
         //get storage object
         $fs        = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob( $this->id_job, false );
+        $files_job = $fs->getFilesForJob($this->id_job, false);
 
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[ 0 ][ 'id_project' ];
 
-        $this->project = ProjectDao::findById( $id_project );
+        $this->project = ProjectDao::findById($id_project);
 
         $output_content = [];
 
-        foreach ( $files_job as $file ) {
-
+        foreach ($files_job as $file) {
             $id_file = $file[ 'id_file' ];
 
-            $zipPathInfo = ZipArchiveHandler::zipPathInfo( $file[ 'filename' ] );
+            $zipPathInfo = ZipArchiveHandler::zipPathInfo($file[ 'filename' ]);
 
-            if ( is_array( $zipPathInfo ) ) {
+            if (is_array($zipPathInfo)) {
                 $output_content[ $id_file ][ 'output_filename' ] = $zipPathInfo[ 'zipfilename' ];
-                $output_content[ $id_file ][ 'input_filename' ]  = $fs->getOriginalZipPath( $this->project->create_date, $id_project, $zipPathInfo[ 'zipfilename' ] );
+                $output_content[ $id_file ][ 'input_filename' ]  = $fs->getOriginalZipPath($this->project->create_date, $id_project, $zipPathInfo[ 'zipfilename' ]);
             } else {
                 $output_content[ $id_file ][ 'output_filename' ] = $file[ 'filename' ];
                 $output_content[ $id_file ][ 'input_filename' ]  = $file[ 'originalFilePath' ];
@@ -98,28 +102,26 @@ class DownloadOriginalController extends AbstractDownloadController {
          * Note: Two elements are considered equal if and only if (string) $elem1 === (string) $elem2.
          * In words: when the string representation is the same. The first element will be used.
          */
-        $output_content = array_map( 'unserialize', array_unique( array_map( 'serialize', $output_content ) ) );
+        $output_content = array_map('unserialize', array_unique(array_map('serialize', $output_content)));
 
-        foreach ( $output_content as $key => $iFile ) {
-            $output_content[ $key ] = new ZipContentObject( $iFile );
+        foreach ($output_content as $key => $iFile) {
+            $output_content[ $key ] = new ZipContentObject($iFile);
         }
 
-        if ( count( $output_content ) > 1 ) {
+        if (count($output_content) > 1) {
+            $this->setFilename($this->getDefaultFileName($this->project));
+            $pathInfo = AbstractFilesStorage::pathinfo_fix($this->_filename);
 
-            $this->setFilename( $this->getDefaultFileName( $this->project ) );
-            $pathInfo = AbstractFilesStorage::pathinfo_fix( $this->_filename );
-
-            if ( $pathInfo[ 'extension' ] != 'zip' ) {
-                $this->setFilename( $pathInfo[ 'basename' ] . ".zip" );
+            if ($pathInfo[ 'extension' ] != 'zip') {
+                $this->setFilename($pathInfo[ 'basename' ] . ".zip");
             }
 
-            $this->outputContent = self::composeZip( $output_content, null, true ); //add zip archive content here;
+            $this->outputContent = self::composeZip($output_content, null, true); //add zip archive content here;
             $this->setMimeType();
-
-        } elseif ( count( $output_content ) == 1 ) {
-            $oContent = array_pop( $output_content );
-            $this->setFilename( $oContent->output_filename );
-            $this->setOutputContent( $oContent );
+        } elseif (count($output_content) == 1) {
+            $oContent = array_pop($output_content);
+            $this->setFilename($oContent->output_filename);
+            $this->setOutputContent($oContent);
             $this->setMimeType();
         }
 
@@ -129,8 +131,8 @@ class DownloadOriginalController extends AbstractDownloadController {
         $activity->action     = ActivityLogStruct::DOWNLOAD_ORIGINAL;
         $activity->ip         = Utils::getRealIpAddr();
         $activity->uid        = $this->user->uid;
-        $activity->event_date = date( 'Y-m-d H:i:s' );
-        Activity::save( $activity );
+        $activity->event_date = date('Y-m-d H:i:s');
+        Activity::save($activity);
 
         $this->finalize();
     }

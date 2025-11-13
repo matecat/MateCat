@@ -12,7 +12,8 @@ namespace Model\Search;
 use Model\DataAccess\ShapelessConcreteStruct;
 use stdClass;
 
-class SearchQueryParamsStruct extends ShapelessConcreteStruct {
+class SearchQueryParamsStruct extends ShapelessConcreteStruct
+{
 
     /**
      * @var string|null

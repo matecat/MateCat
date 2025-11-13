@@ -2,11 +2,14 @@
 
 namespace Utils\Validator\Contracts;
 
+use AllowDynamicProperties;
 use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use stdClass;
 
-class ValidatorObject implements ArrayAccess {
+#[AllowDynamicProperties]
+class ValidatorObject implements ArrayAccess
+{
 
     use ArrayAccessTrait;
 
@@ -15,9 +18,10 @@ class ValidatorObject implements ArrayAccess {
      *
      * @return ValidatorObject
      */
-    public static function fromObject( stdClass $object ): ValidatorObject {
+    public static function fromObject(stdClass $object): ValidatorObject
+    {
         $that = new static();
-        foreach ( get_object_vars( $object ) as $key => $value ) {
+        foreach (get_object_vars($object) as $key => $value) {
             $that->$key = $value;
         }
 
@@ -29,9 +33,10 @@ class ValidatorObject implements ArrayAccess {
      *
      * @return ValidatorObject
      */
-    public static function fromArray( array $array ): ValidatorObject {
+    public static function fromArray(array $array): ValidatorObject
+    {
         $that = new static();
-        foreach ( $array as $key => $value ) {
+        foreach ($array as $key => $value) {
             $that->$key = $value;
         }
 
@@ -44,7 +49,8 @@ class ValidatorObject implements ArrayAccess {
      * @param string $name
      * @param mixed  $value
      */
-    public function __set( string $name, $value ) {
+    public function __set(string $name, mixed $value)
+    {
         $this->$name = $value;
     }
 
@@ -55,8 +61,9 @@ class ValidatorObject implements ArrayAccess {
      *
      * @return mixed
      */
-    public function __get( string $name ) {
-        if ( !property_exists( $this, $name ) ) {
+    public function __get(string $name)
+    {
+        if (!property_exists($this, $name)) {
             return null;
         }
 

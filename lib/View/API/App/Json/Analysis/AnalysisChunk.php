@@ -17,6 +17,7 @@ use Model\Users\UserStruct;
 use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\Filter;
 use Utils\Url\JobUrlBuilder;
+use View\API\V2\Json\Engine;
 
 class AnalysisChunk implements JsonSerializable {
 
@@ -30,7 +31,7 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected array $files = [];
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
     protected JobStruct $chunkStruct;
     /**
@@ -92,7 +93,7 @@ class AnalysisChunk implements JsonSerializable {
     }
 
     /**
-     * @return \Model\Jobs\JobStruct
+     * @return JobStruct
      */
     public function getChunkStruct(): JobStruct {
         return $this->chunkStruct;
@@ -133,19 +134,19 @@ class AnalysisChunk implements JsonSerializable {
 
         try {
             $tmEngine = EnginesFactory::getInstance( $this->chunkStruct->id_tms );
-        } catch ( Exception $exception ) {
+        } catch ( Exception) {
             $tmEngine = null;
         }
 
         try {
             $mtEngine = EnginesFactory::getInstance( $this->chunkStruct->id_mt_engine );
-        } catch ( Exception $exception ) {
+        } catch ( Exception) {
             $mtEngine = null;
         }
 
         return [
-                'tm' => $tmEngine !== null ? ( new \View\API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
-                'mt' => $mtEngine !== null ? ( new \View\API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
+                'tm' => $tmEngine !== null ? ( new Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
+                'mt' => $mtEngine !== null ? ( new Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
         ];
     }
 
@@ -182,7 +183,8 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw( int $raw ): void
+    {
         $this->total_raw += $raw;
     }
 
@@ -191,7 +193,8 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent( float $equivalent ): void
+    {
         $this->total_equivalent += $equivalent;
     }
 
@@ -200,7 +203,8 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementIndustry( float $industry ) {
+    public function incrementIndustry( float $industry ): void
+    {
         $this->total_industry += $industry;
     }
 

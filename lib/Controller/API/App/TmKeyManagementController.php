@@ -20,10 +20,12 @@ use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\CatUtils;
 
-class TmKeyManagementController extends AbstractStatefulKleinController {
+class TmKeyManagementController extends AbstractStatefulKleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
@@ -32,58 +34,57 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
      *
      * @throws ReflectionException
      */
-    public function getByJob() {
+    public function getByJob(): void
+    {
+        $idJob    = $this->request->param('id_job');
+        $password = $this->request->param('password');
 
-        $idJob    = $this->request->param( 'id_job' );
-        $password = $this->request->param( 'password' );
+        $chunk = CatUtils::getJobFromIdAndAnyPassword($idJob, $password);
 
-        $chunk = CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
-
-        if ( empty( $chunk ) ) {
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
+        if (empty($chunk)) {
+            $this->response->status()->setCode(404);
+            $this->response->json([
                     'errors' => [
                             'The job was not found'
                     ]
-            ] );
+            ]);
             exit();
         }
 
-        $job_keyList = json_decode( $chunk->tm_keys, true );
+        $job_keyList = json_decode($chunk->tm_keys, true);
 
-        if ( !$this->isLoggedIn() ) {
-
+        if (!$this->isLoggedIn()) {
             $tmKeys = [];
 
-            foreach ( $job_keyList as $jobKey ) {
-                $jobKey                  = new ClientTmKeyStruct( $jobKey );
+            foreach ($job_keyList as $jobKey) {
+                $jobKey                  = new ClientTmKeyStruct($jobKey);
                 $jobKey->complete_format = true;
                 $jobKey->r               = true;
                 $jobKey->w               = true;
                 $jobKey->owner           = false;
-                $tmKeys[]                = $jobKey->hideKey( -1 );
+                $tmKeys[]                = $jobKey->hideKey(-1);
             }
 
-            $this->response->json( [
+            $this->response->json([
                     'tm_keys' => $tmKeys
-            ] );
+            ]);
             exit();
         }
 
-        if ( CatUtils::isRevisionFromIdJobAndPassword( $idJob, $password ) ) {
+        if (CatUtils::isRevisionFromIdJobAndPassword($idJob, $password)) {
             $userRole = Filter::ROLE_REVISOR;
-        } elseif ( $this->getUser()->email == $chunk->status_owner ) {
+        } elseif ($this->getUser()->email == $chunk->status_owner) {
             $userRole = Filter::OWNER;
         } else {
             $userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $userKeys = new UserKeysModel( $this->getUser(), $userRole );
-        $keys     = $userKeys->getKeys( $chunk->tm_keys );
+        $userKeys = new UserKeysModel($this->getUser(), $userRole);
+        $keys     = $userKeys->getKeys($chunk->tm_keys);
 
-        $this->response->json( [
-                'tm_keys' => $this->sortKeysInTheRightOrder( $keys[ 'job_keys' ], $job_keyList )
-        ] );
+        $this->response->json([
+                'tm_keys' => $this->sortKeysInTheRightOrder($keys[ 'job_keys' ], $job_keyList)
+        ]);
     }
 
     /**
@@ -93,36 +94,35 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
      * @param $keys
      * @param $jobKeyList
      *
-     * @return mixed
+     * @return array
      */
-    private function sortKeysInTheRightOrder( $keys, $jobKeyList ) {
+    private function sortKeysInTheRightOrder($keys, $jobKeyList): array
+    {
         $sortedKeys = [];
 
-        foreach ( $jobKeyList as $jobKey ) {
-            $filter = array_filter( $keys, function ( $key ) use ( $jobKey ) {
-
-                if ( $jobKey[ 'key' ] === $key->key ) {
+        foreach ($jobKeyList as $jobKey) {
+            $filter = array_filter($keys, function ($key) use ($jobKey) {
+                if ($jobKey[ 'key' ] === $key->key) {
                     return true;
                 }
 
-                // compare only last 5 chars (hidden keys)
-                return substr( $jobKey[ 'key' ], -5 ) === substr( $key->key, -5 );
-            } );
+                // compare only the last 5 chars (hidden keys)
+                return substr($jobKey[ 'key' ], -5) === substr($key->key, -5);
+            });
 
-            if ( !empty( $filter ) ) {
-                $sortedKeys[] = array_values( $filter )[ 0 ];
+            if (!empty($filter)) {
+                $sortedKeys[] = array_values($filter)[ 0 ];
             }
-
             // owner a true solo se sono l'owner del job
 
         }
 
-        if(!empty($sortedKeys)){
-            $sortedKeys = array_map( function ( ClientTmKeyStruct $jobKey ) {
-                $jobKey->name = html_entity_decode( $jobKey->name );
+        if (!empty($sortedKeys)) {
+            $sortedKeys = array_map(function (ClientTmKeyStruct $jobKey) {
+                $jobKey->name = html_entity_decode($jobKey->name);
 
                 return $jobKey;
-            }, $sortedKeys );
+            }, $sortedKeys);
         }
 
         return $sortedKeys;
@@ -131,71 +131,65 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
     /**
      * @throws ReflectionException
      */
-    public function getByUserAndKey() {
-
-        $_keyDao = new MemoryKeyDao( Database::obtain() );
-        $dh      = new MemoryKeyStruct( [
+    public function getByUserAndKey(): void
+    {
+        $_keyDao = new MemoryKeyDao(Database::obtain());
+        $dh      = new MemoryKeyStruct([
                 'uid'    => $this->getUser()->uid,
-                'tm_key' => new TmKeyStruct( [
-                                'key' => $this->request->param( 'key' )
+                'tm_key' => new TmKeyStruct([
+                                'key' => $this->request->param('key')
                         ]
                 )
-        ] );
+        ]);
 
-        if ( !empty( $_keyDao->read( $dh )[ 0 ] ) ) {
-            $this->response->json( $this->_checkForAdaptiveEngines( $dh ) );
+        if (!empty($_keyDao->read($dh)[ 0 ])) {
+            $this->response->json($this->_checkForAdaptiveEngines($dh));
 
             return;
         }
 
-        $this->response->code( 404 );
-        $this->response->json( [] );
-
+        $this->response->code(404);
+        $this->response->json([]);
     }
 
     /**
-     * @param \Model\TmKeyManagement\MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return array
      */
-    private function _checkForAdaptiveEngines( MemoryKeyStruct $memoryKey ): array {
-
+    private function _checkForAdaptiveEngines(MemoryKeyStruct $memoryKey): array
+    {
         // load tmx in engines with adaptivity
         $engineList = EngineConstants::getAvailableEnginesList();
 
         $response = [];
 
-        foreach ( $engineList as $engineName ) {
-
+        foreach ($engineList as $engineName) {
             try {
-
                 $struct             = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type       = EngineConstants::MT;
-                $engine             = EnginesFactory::createTempInstance( $struct );
+                $engine             = EnginesFactory::createTempInstance($struct);
 
-                if ( $engine->isAdaptiveMT() ) {
+                if ($engine->isAdaptiveMT()) {
                     //retrieve OWNER EnginesFactory License
-                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $this->getUser()->uid, $engine->getEngineRecord()->class_load ); // engine_id
-                    if ( !empty( $ownerMmtEngineMetaData ) ) {
-                        $engine = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
-                        if ( $engine->getMemoryIfMine( $memoryKey ) ) {
-                            $engine_type = explode( "\\", $engine->getEngineRecord()->class_load );
-                            $response[]  = array_pop( $engine_type );
+                    $ownerMmtEngineMetaData = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->get($this->getUser()->uid, $engine->getEngineRecord()->class_load); // engine_id
+                    if (!empty($ownerMmtEngineMetaData)) {
+                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
+                        if ($engine->getMemoryIfMine($memoryKey)) {
+                            $engine_type = explode("\\", $engine->getEngineRecord()->class_load);
+                            $response[]  = array_pop($engine_type);
                         }
                     }
                 }
-
-            } catch ( Exception $e ) {
-                if ( $engineName != EngineConstants::MY_MEMORY ) {
-                    LoggerFactory::getLogger( 'engines' )->debug( $e->getMessage() );
+            } catch (Exception $e) {
+                if ($engineName != EngineConstants::MY_MEMORY) {
+                    LoggerFactory::getLogger('engines')->debug($e->getMessage());
                 }
             }
-
         }
 
         return $response;
-
     }
 
 }
