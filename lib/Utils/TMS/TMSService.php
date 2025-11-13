@@ -135,13 +135,15 @@ class TMSService {
     /**
      * Saves the uploaded file and returns the file info.
      *
+     * @param bool $disable_upload_limit
+     *
      * @return UploadElement
      * @throws Exception
      */
-    public function uploadFile(): UploadElement {
+    public function uploadFile(?bool $disable_upload_limit = false): UploadElement {
         $uploadManager = new Upload();
 
-        return $uploadManager->uploadFiles( $_FILES );
+        return $uploadManager->uploadFiles( $_FILES, $disable_upload_limit );
     }
 
     /**
