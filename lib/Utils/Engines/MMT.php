@@ -128,10 +128,7 @@ class MMT extends AbstractEngine
 
         if ($glossaries !== null) {
             $mmtGlossariesArray = json_decode($glossaries->value, true);
-            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->get(
-                $_config['project_id'],
-                'mmt_glossaries_case_sensitive_matching'
-            );
+            $ignore_glossary_case = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_ignore_glossary_case' );
 
             $_config['glossaries'] = implode(",", $mmtGlossariesArray);
 
@@ -710,7 +707,7 @@ class MMT extends AbstractEngine
             'mmt_glossaries',
             'mmt_pre_import_tm',
             'mmt_activate_context_analyzer',
-            'mmt_glossaries_case_sensitive_matching',
+                'mmt_ignore_glossary_case',
         ];
     }
 }

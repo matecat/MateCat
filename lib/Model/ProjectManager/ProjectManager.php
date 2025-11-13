@@ -535,7 +535,7 @@ class ProjectManager
                 'mmt_glossaries',
                 'mmt_pre_import_tm',
                 'mmt_activate_context_analyzer',
-                'mmt_glossaries_case_sensitive_matching',
+                'mmt_ignore_glossary_case',
                 'lara_glossaries',
                 'deepl_formality',
                 'deepl_id_glossary',

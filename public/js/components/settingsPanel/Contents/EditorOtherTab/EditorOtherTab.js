@@ -3,8 +3,6 @@ import {CharacterCounterRules} from '../OtherTab/CharacterCounterRules'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'
 import {Tagging} from '../OtherTab/Tagging'
-import CatToolActions from '../../../../actions/CatToolActions'
-import SegmentActions from '../../../../actions/SegmentActions'
 
 export const EditorOtherTab = () => {
   const {currentProjectTemplate, tmKeys} = useContext(SettingsPanelContext)
@@ -47,10 +45,10 @@ export const EditorOtherTab = () => {
     <div className="editor-settings-options-box settings-panel-contentwrapper-tab-background">
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>Character counter settings</h2>
-        <CharacterCounterRules />
         <Tagging
           previousCurrentProjectTemplate={previousCurrentProjectTemplate}
         />
+        <CharacterCounterRules />
       </div>
     </div>
   )
