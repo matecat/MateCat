@@ -65,9 +65,6 @@ $klein->with( '/api/v2/jobs/[:id_job]/[:password]', function () {
 
     route( '/segments-filter', 'GET', [ 'Plugins\Features\SegmentFilter\Controller\API\FilterController', 'index' ] );
 
-    route( '/options', 'POST', [ 'Controller\API\V2\ChunkOptionsController', 'update' ] );
-
-
     route( '/delete', 'POST', [ 'Controller\API\V2\JobsController', 'delete' ] );
     route( '/cancel', 'POST', [ 'Controller\API\V2\JobsController', 'cancel' ] );
     route( '/archive', 'POST', [ 'Controller\API\V2\JobsController', 'archive' ] );
