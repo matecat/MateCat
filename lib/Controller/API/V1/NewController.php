@@ -323,7 +323,7 @@ class NewController extends KleinController {
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
 
         // MT SETTINGS
-        $enable_mt_analysis                    = filter_var( $this->request->param( 'enable_mt_analysis' ), FILTER_VALIDATE_BOOLEAN );
+        $enable_mt_analysis                        = filter_var( $this->request->param( 'enable_mt_analysis', 'INVALID BOOL' ), FILTER_VALIDATE_BOOLEAN , FILTER_NULL_ON_FAILURE ) ?? true;
 
         // The UI ask for case-sensitive matching true/false.
         // Negate the validated boolean because the MMT default flag is ignore_glossary_case.
