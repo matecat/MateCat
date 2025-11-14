@@ -49,81 +49,6 @@ class Mmt extends BaseFeature {
     protected bool $forceOnProject = true;
 
     /**
-     * Called in @see Bootstrap::notifyBootCompleted
-     */
-    public static function bootstrapCompleted() {
-        EngineConstants::setInEnginesList( EngineConstants::MMT );
-    }
-
-    /**
-     * Called in
-     *
-     * @param EngineStruct $newCreatedDbRowStruct
-     *
-     * @param UserStruct   $userStruct
-     *
-     * @return EngineStruct
-     * @throws MMTServiceApiException
-     * @throws ReflectionException
-     * @throws Exception
-     *
-     * @see engineController::add()
-     */
-    public static function postEngineCreation( EngineStruct $newCreatedDbRowStruct, UserStruct $userStruct ): EngineStruct {
-
-        if ( !$newCreatedDbRowStruct instanceof MMTStruct ) {
-            return $newCreatedDbRowStruct;
-        }
-
-        /** @var MMTEngine $newTestCreatedMT */
-        try {
-            $newTestCreatedMT = EnginesFactory::createTempInstance( $newCreatedDbRowStruct );
-        } catch ( Exception $exception ) {
-            throw new Exception( "MMT license not valid" );
-        }
-
-        // Check the account
-        try {
-            $checkAccount = $newTestCreatedMT->checkAccount();
-
-            if ( !isset( $checkAccount[ 'billingPeriod' ][ 'planForCatTool' ] ) ) {
-                throw new Exception( "MMT license not valid" );
-            }
-
-            $planForCatTool = $checkAccount[ 'billingPeriod' ][ 'planForCatTool' ];
-
-            if ( $planForCatTool === false ) {
-                throw new Exception( "The ModernMT license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using the ModernMT plugin." );
-            }
-
-        } catch ( Exception $e ) {
-            ( new EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
-
-            throw new Exception( $e->getMessage(), $e->getCode() );
-        }
-
-        try {
-
-            // if the MMT-preimport flag is enabled,
-            // then all the user's Match keys must be sent to MMT
-            // when the engine is created
-            if ( !empty( $newTestCreatedMT->extra_parameters[ 'MMT-preimport' ] ) ) {
-                $newTestCreatedMT->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
-            }
-
-        } catch ( Exception $e ) {
-            ( new EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
-            throw $e;
-        }
-
-        $UserMetadataDao = new MetadataDao();
-        $UserMetadataDao->set( $userStruct->uid, MMTEngine::class, $newCreatedDbRowStruct->id );
-
-        return $newCreatedDbRowStruct;
-
-    }
-
-    /**
      * Called in
      *
      * @param array          $config
@@ -181,7 +106,7 @@ class Mmt extends BaseFeature {
      *
      * @return MemoryKeyStruct[]
      */
-    private static function _getKeyringOwnerKeysByUid( int $uid ): array {
+    public static function getKeyringOwnerKeysByUid( int $uid ): array {
 
         /*
          * Take the keys of the user
@@ -225,60 +150,6 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param bool   $isValid
-     *
-     * @param object $data      [
-     *                          'providerName' => '',
-     *                          'logged_user'  => UserStruct,
-     *                          'engineData'   => []
-     *                          ]
-     *
-     * @return EngineStruct|bool
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     *
-     * @see EngineController
-     *
-     */
-    public function buildNewEngineStruct( bool $isValid, object $data ) {
-
-        if ( strtolower( EngineConstants::MMT ) == $data->providerName ) {
-
-            /**
-             * @var $featureSet FeatureSet
-             */
-            $featureSet = $data->featureSet;
-
-            /**
-             * @var $logged_user UserStruct
-             */
-            $logged_user = $data->logged_user;
-
-            /**
-             * Create a record of type MMT
-             */
-            $newEngineStruct = MMTStruct::getStruct();
-
-            $newEngineStruct->uid                                        = $logged_user->uid;
-            $newEngineStruct->type                                       = EngineConstants::MT;
-            $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $data->engineData[ 'secret' ];
-            $newEngineStruct->extra_parameters[ 'MMT-preimport' ]        = $data->engineData[ 'preimport' ];
-            $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = $data->engineData[ 'context_analyzer' ];
-
-            return $featureSet->filter( 'disableMMTPreimport', (object)[
-                    'logged_user'     => $logged_user,
-                    'newEngineStruct' => $newEngineStruct
-            ] );
-        }
-
-        return $isValid;
-
-    }
-
-    /**
      * C@param                  $memoryKeyStructs MemoryKeyStruct[]
      *
      * @param                  $uid              integer
@@ -304,14 +175,8 @@ class Mmt extends BaseFeature {
              * @var MMTEngine $MMTEngine
              */
             $MMTEngine    = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
-            $engineStruct = $MMTEngine->getEngineRecord();
+            $MMTEngine->connectKeys( $memoryKeyStructs );
 
-            $extraParams = $engineStruct->getExtraParamsAsArray();
-            $preImport   = $extraParams[ 'MMT-preimport' ];
-
-            if ( $preImport === true ) {
-                $MMTEngine->connectKeys( $memoryKeyStructs );
-            }
         }
     }
 }

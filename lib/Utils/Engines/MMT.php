@@ -321,8 +321,7 @@ class MMT extends AbstractEngine {
 
         // @TODO ho fatto il fallback
         $metadataDao = new ProjectsMetadataDao();
-        $pre_import_tm = $metadataDao->get($pid, "mmt_pre_import_tm") ? $metadataDao->get($pid, "mmt_pre_import_tm")->value : $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ];
-        $context_analyzer = $metadataDao->get($pid, "mmt_activate_context_analyzer") ? $metadataDao->get($pid, "mmt_pre_import_tm")->value : $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ];
+        $context_analyzer = $metadataDao->get($pid, "mmt_activate_context_analyzer") ? $metadataDao->get($pid, "mmt_activate_context_analyzer")->value : $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ];
 
         if ( !empty( $context_analyzer ) ) {
 
@@ -374,41 +373,32 @@ class MMT extends AbstractEngine {
 
             //
             // ==============================================
-            // If the MMT-preimport flag is disabled
-            // and user is logged in
             // send user keys on a project basis
             // ==============================================
             //
-            $preImportIsDisabled = empty( $pre_import_tm );
-            $user                = ( new UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
+            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
 
-            if ( $preImportIsDisabled ) {
+            // get jobs keys
+            $project = ProjectDao::findById($pid);
 
-                // get jobs keys
-                $project = ProjectDao::findById( $pid );
+            foreach ($project->getJobs() as $job) {
+                $memoryKeyStructs = [];
+                $jobKeyList = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
 
-                foreach ( $project->getJobs() as $job ) {
-
-                    $memoryKeyStructs = [];
-                    $jobKeyList       = TmKeyManager::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
-
-                    foreach ( $jobKeyList as $memKey ) {
-                        $memoryKeyStructs[] = new MemoryKeyStruct(
-                                [
-                                        'uid'    => $user->uid,
-                                        'tm_key' => $memKey
-                                ]
-                        );
-                    }
-
-                    $this->connectKeys( $memoryKeyStructs );
-
+                foreach ($jobKeyList as $memKey) {
+                    $memoryKeyStructs[] = new MemoryKeyStruct(
+                        [
+                            'uid' => $user->uid,
+                            'tm_key' => $memKey
+                        ]
+                    );
                 }
 
+                $this->connectKeys($memoryKeyStructs);
             }
-        } catch ( Exception $e ) {
-            $this->logger->debug( $e->getMessage() );
-            $this->logger->debug( $e->getTraceAsString() );
+        } catch (Exception $e) {
+            $this->logger->debug($e->getMessage());
+            $this->logger->debug($e->getTraceAsString());
         }
 
     }
@@ -676,11 +666,10 @@ class MMT extends AbstractEngine {
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array {
+    public function getConfigurationParameters(): array {
         return [
                 'enable_mt_analysis',
                 'mmt_glossaries',
-                'mmt_pre_import_tm',
                 'mmt_activate_context_analyzer',
                 'mmt_ignore_glossary_case',
         ];

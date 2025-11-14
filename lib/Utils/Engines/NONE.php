@@ -32,7 +32,7 @@ class NONE extends AbstractEngine {
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
     }
 
-    public function getExtraParams(): array {
+    public function getConfigurationParameters(): array {
         return [];
     }
 }
