@@ -124,24 +124,21 @@ class Intento extends AbstractEngine {
                 ];
             }
 
+        } elseif ( $rawValue and array_key_exists( 'responseStatus', $rawValue ) and array_key_exists( 'error', $rawValue ) ) {
+            $_response_error = json_decode( $rawValue[ 'error' ][ "response" ], true );
+            $decoded         = [
+                    'error' => [
+                            'code'    => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'code', $_response_error[ 'error' ] ) ? -$_response_error[ 'error' ][ 'code' ] : '-1' : '-1',
+                            'message' => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'message', $_response_error[ 'error' ] ) ? $_response_error[ 'error' ][ 'message' ] : '' : ''
+                    ]
+            ];
         } else {
-            if ( $rawValue and array_key_exists( 'responseStatus', $rawValue ) and array_key_exists( 'error', $rawValue ) ) {
-                $_response_error = json_decode( $rawValue[ 'error' ][ "response" ], true );
-                $decoded         = [
-                        'error' => [
-                                'code'    => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'code', $_response_error[ 'error' ] ) ? -$_response_error[ 'error' ][ 'code' ] : '-1' : '-1',
-                                'message' => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'message', $_response_error[ 'error' ] ) ? $_response_error[ 'error' ][ 'message' ] : '' : ''
-                        ]
-                ];
-            } else {
-                $decoded = [
-                        'error' => [
-                                'code'    => '-1',
-                                'message' => ''
-                        ]
-                ];
-            }
-
+            $decoded = [
+                    'error' => [
+                            'code'    => '-1',
+                            'message' => ''
+                    ]
+            ];
         }
 
         return $this->_composeMTResponseAsMatch( $parameters[ 'context' ][ 'text' ], $decoded );
@@ -252,6 +249,8 @@ class Intento extends AbstractEngine {
     }
 
     /**
+     *  PER USER response, the user api key is required
+     *
      * Get user's routing list
      *
      * @return array
@@ -288,10 +287,10 @@ class Intento extends AbstractEngine {
             $response = curl_exec( $curl );
             $result   = json_decode( $response );
             curl_close( $curl );
-            $_routings = [];
+            $_routing = [];
 
             // needed by the UI
-            $_routings['smart_routing'] = [
+            $_routing['smart_routing'] = [
                     'id' => 'smart_routing',
                     'name' => 'smart_routing',
                     'description' => "Intento Smart Routing is a patented feature within the Intento Translator platform that automatically directs your translation requests to the best-performing machine translation (MT) engine for your specific language pair and content, or a combination of engines, to provide the most accurate and contextually relevant translation.",
@@ -299,7 +298,7 @@ class Intento extends AbstractEngine {
 
             if ( $result and $result->data ) {
                 foreach ( $result->data as $item ) {
-                    $_routings[ $item->name ] = [
+                    $_routing[ $item->name ] = [
                             'id'          => $item->rt_id,
                             'name'        => $item->name,
                             'description' => $item->description,
@@ -307,18 +306,20 @@ class Intento extends AbstractEngine {
                 }
             }
 
-            ksort( $_routings, SORT_STRING | SORT_FLAG_CASE );
+            ksort( $_routing, SORT_STRING | SORT_FLAG_CASE );
 
-            $conn->set( $cacheKey, json_encode( $_routings ) );
+            $conn->set( $cacheKey, json_encode( $_routing ) );
             $conn->expire( $cacheKey, 60 * 60 ); // 1 hour
 
-            return $_routings;
+            return $_routing;
         } catch ( Exception $exception ) {
             return [];
         }
     }
 
     /**
+     * Fixed response (NOT PER USER) a generic Intento API key is valid
+     *
      * Get provider list
      * @throws ReflectionException
      */
@@ -364,7 +365,7 @@ class Intento extends AbstractEngine {
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array {
+    public function getConfigurationParameters(): array {
         return [
                 'enable_mt_analysis',
                 'intento_routing',

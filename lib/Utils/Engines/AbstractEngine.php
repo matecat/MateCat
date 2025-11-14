@@ -181,7 +181,7 @@ abstract class AbstractEngine implements EngineInterface {
     /**
      * @return array
      */
-    abstract public function getExtraParams(): array;
+    abstract public function getConfigurationParameters(): array;
 
     /**
      * @param mixed $rawValue
@@ -500,10 +500,10 @@ abstract class AbstractEngine implements EngineInterface {
      *
      * @return bool
      */
-    public function validateExtraParams(stdClass $extra): bool
+    public function validateConfigurationParams(stdClass $extra): bool
     {
         foreach (array_keys(get_object_vars($extra)) as $key){
-            if(!in_array($key, $this->getExtraParams())){
+            if(!in_array($key, $this->getConfigurationParameters())){
                 return false;
             }
         }

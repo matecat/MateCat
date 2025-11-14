@@ -132,7 +132,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // MT Extra params
         $engine = EnginesFactory::getInstance( $this->data[ 'mt_engine' ] );
 
-        foreach ( $engine->getExtraParams() as $param ) {
+        foreach ($engine->getConfigurationParameters() as $param ) {
             if ( $this->data[ $param ] !== null ) {
                 $projectStructure[ $param ] = $this->data[ $param ];
             }
@@ -237,7 +237,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // true becomes false, false (or invalid/missing) becomes true.
         $mmt_ignore_glossary_case               = !filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
 
-        $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
         $intento_provider                       = filter_var( $this->request->param( 'intento_provider' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -297,7 +296,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
             'id_team'                                => $id_team,
             'enable_mt_analysis'                     => $enable_mt_analysis ?? null,
             'mmt_ignore_glossary_case'               => $mmt_ignore_glossary_case,
-            'mmt_pre_import_tm'                      => $mmt_pre_import_tm ?? null,
             'mmt_glossaries'                         => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
             'mmt_activate_context_analyzer'          => $mmt_activate_context_analyzer ?? null,
             'intento_provider'                       => ( !empty( $intento_provider ) ) ? $intento_provider : null,
@@ -367,7 +365,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'target_lang' ]                           = $this->validateTargetLangs( Languages::getInstance(), $data[ 'target_lang' ] );
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
         $data[ 'mmt_glossaries' ]                        = $this->validateMMTGlossaries( $data[ 'mmt_glossaries' ] );
-        $data[ 'deepl_formality' ]                       = $this->validateDeepLFormalityParams( $data[ 'deepl_formality' ] );
         $data[ 'qa_model_template' ]                     = $this->validateQaModelTemplate( $data[ 'qa_model_template' ], $data[ 'qa_model_template_id' ] );
         $data[ 'payable_rate_model_template' ]           = $this->validatePayableRateTemplate( $data[ 'payable_rate_template' ], $data[ 'payable_rate_template_id' ] );
         $data[ 'dialect_strict' ]                        = $this->validateDialectStrictParam( $data[ 'target_lang' ], $data[ 'dialect_strict' ] );
@@ -578,6 +575,24 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return null;
+    }
+
+    private function validateDeepLEngineType( ?string $deepl_engine_type = null ): ?string {
+        if ( !empty( $deepl_engine_type ) ) {
+            $allowedEngineTypes = [
+                    'prefer_quality_optimized',
+                    'latency_optimized',
+            ];
+
+            if ( !in_array( $deepl_engine_type, $allowedEngineTypes ) ) {
+                throw new InvalidArgumentException( "Not allowed value of DeepL engine type", -7 );
+            }
+
+            return $deepl_engine_type;
+        }
+
+        return null;
+
     }
 
     /**
