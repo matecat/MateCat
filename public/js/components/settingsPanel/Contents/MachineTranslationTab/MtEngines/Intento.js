@@ -20,18 +20,12 @@ export const Intento = ({
   const {
     register,
     handleSubmit,
-    control,
-    watch,
     formState: {errors},
   } = useForm()
   const onSubmit = (data) => {
     addMTEngine(data)
   }
-  const selectOptions = config.intento_providers
-    ? Object.values(config.intento_providers)
-    : []
-  const provider = watch('provider')
-  console.log('Errors', errors)
+
   return (
     <div className="add-provider-container">
       <div className="add-provider-message">
@@ -76,6 +70,9 @@ export const Intento = ({
             />
             {errors.secret && (
               <span className="field-error">Required field</span>
+            )}
+            {typeof error?.message === 'string' && (
+              <span className="field-error">{error?.message}</span>
             )}
           </div>
 
