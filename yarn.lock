@@ -4440,6 +4440,34 @@ foreground-child@^3.1.0, foreground-child@^3.3.1:
     cross-spawn "^7.0.6"
     signal-exit "^4.0.1"
 
+format-message-formats@^6.2.4:
+  version "6.2.4"
+  resolved "https://registry.yarnpkg.com/format-message-formats/-/format-message-formats-6.2.4.tgz#68b782e70c3c15f017377848c3225731e52ac4ea"
+  integrity sha512-smT/fAqBLqusWfWCKRAx6QBDAAbmYznWsIyTyk66COmvwt2Byiqd7SJe2ma9a5oV0kwRaOJpN/F4lr4YK/n6qQ==
+
+format-message-interpret@^6.2.4:
+  version "6.2.4"
+  resolved "https://registry.yarnpkg.com/format-message-interpret/-/format-message-interpret-6.2.4.tgz#28f579b9cd4b57f3de2ec2a4d9623f9870e9ed03"
+  integrity sha512-dRvz9mXhITApyOtfuFEb/XqvCe1u6RMkQW49UJHXS8w2S8cAHCqq5LNDFK+QK6XVzcofROycLb/k1uybTAKt2w==
+  dependencies:
+    format-message-formats "^6.2.4"
+    lookup-closest-locale "^6.2.0"
+
+format-message-parse@^6.2.4:
+  version "6.2.4"
+  resolved "https://registry.yarnpkg.com/format-message-parse/-/format-message-parse-6.2.4.tgz#2c9b39a32665bd247cb1c31ba2723932d9edf3f9"
+  integrity sha512-k7WqXkEzgXkW4wkHdS6Cv2Ou0rIFtiDelZjgoe1saW4p7FT7zS8OeAUpAekhormqzpeecR97e4vBft1zMsfFOQ==
+
+format-message@^6.2.4:
+  version "6.2.4"
+  resolved "https://registry.yarnpkg.com/format-message/-/format-message-6.2.4.tgz#0bd4b6161b036e3fbcf3207dce14a62e318b4c48"
+  integrity sha512-/24zYeSRy2ZlEO2OIctm7jOHvMpoWf+uhqFCaqqyZKi1C229zAAy2E5vF4lSSaMH0a2kewPrOzq6xN4Yy7cQrw==
+  dependencies:
+    format-message-formats "^6.2.4"
+    format-message-interpret "^6.2.4"
+    format-message-parse "^6.2.4"
+    lookup-closest-locale "^6.2.0"
+
 fs-extra@^11.1.1:
   version "11.3.2"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-11.3.2.tgz#c838aeddc6f4a8c74dd15f85e11fe5511bfe02a4"
@@ -5902,6 +5930,11 @@ log-update@^6.1.0:
     slice-ansi "^7.1.0"
     strip-ansi "^7.1.0"
     wrap-ansi "^9.0.0"
+
+lookup-closest-locale@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/lookup-closest-locale/-/lookup-closest-locale-6.2.0.tgz#57f665e604fd26f77142d48152015402b607bcf3"
+  integrity sha512-/c2kL+Vnp1jnV6K6RpDTHK3dgg0Tu2VVp+elEiJpjfS1UyY7AjOYHohRug6wT0OpoX2qFgNORndE9RqesfVxWQ==
 
 loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.4.0:
   version "1.4.0"

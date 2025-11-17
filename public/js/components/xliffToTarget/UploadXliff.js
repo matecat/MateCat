@@ -208,7 +208,11 @@ export const UploadXliff = () => {
                 />
                 {f.name}
               </div>
-              {f.error && <div className="file-item-error"><span dangerouslySetInnerHTML={{__html: f.error}}/></div>}
+              {f.error && (
+                <div className="file-item-error">
+                  <span dangerouslySetInnerHTML={{__html: f.error}} />
+                </div>
+              )}
               {f.warning && (
                 <div className="file-item-warning">{f.warning}</div>
               )}
