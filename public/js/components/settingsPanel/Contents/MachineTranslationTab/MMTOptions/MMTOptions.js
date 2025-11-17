@@ -78,13 +78,13 @@ export const MMTOptions = ({isCattoolPage}) => {
         </div>
         <Controller
           control={control}
-          name="mmt_glossaries_case_sensitive_matching"
+          name="mmt_ignore_glossary_case"
           disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Switch
               name={name}
-              active={value}
-              onChange={onChange}
+              active={!value}
+              onChange={() => onChange(!value)}
               disabled={disabled}
             />
           )}

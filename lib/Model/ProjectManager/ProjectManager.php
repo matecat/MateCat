@@ -251,7 +251,6 @@ class ProjectManager {
                             'enable_mt_analysis'                    => null,
                             'mmt_pre_import_tm'                      => null,
                             'mmt_activate_context_analyzer'          => null,
-                            'mmt_glossaries_case_sensitive_matching' => null,
                             'lara_glossaries'                        => null,
                             'deepl_engine_type'                      => null,
                             'intento_routing'                        => null,

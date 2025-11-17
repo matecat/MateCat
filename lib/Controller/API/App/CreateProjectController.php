@@ -235,7 +235,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // The UI ask for case-sensitive matching true/false.
         // Negate the validated boolean because the MMT default flag is ignore_glossary_case.
         // true becomes false, false (or invalid/missing) becomes true.
-        $mmt_ignore_glossary_case               = !filter_var( $this->request->param( 'mmt_glossaries_case_sensitive_matching' ), FILTER_VALIDATE_BOOLEAN );
+        $mmt_ignore_glossary_case               = filter_var( $this->request->param( 'mmt_ignore_glossary_case' ), FILTER_VALIDATE_BOOLEAN );
 
         $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );

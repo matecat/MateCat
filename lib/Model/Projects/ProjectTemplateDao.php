@@ -77,7 +77,7 @@ class ProjectTemplateDao extends AbstractDao {
         $default->tm                    = json_encode( [] );
         $default->created_at            = date( "Y-m-d H:i:s" );
         $default->modified_at           = date( "Y-m-d H:i:s" );
-        $default->subfiltering_handlers = json_encode( [] );
+        $default->subfiltering_handlers = json_encode( ["markup", "twig", "double_snail", "double_square", "double_percent"] );
 
         return $default;
     }
