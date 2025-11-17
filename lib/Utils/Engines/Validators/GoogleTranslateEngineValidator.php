@@ -7,22 +7,26 @@
  *
  */
 
-namespace Utils\Engines\GoogleTranslate;
+namespace Utils\Engines\Validators;
 
 use DomainException;
 use Exception;
-use Model\Engines\Structs\EngineStruct;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
-class GoogleTranslateEngineValidator
+class GoogleTranslateEngineValidator extends AbstractValidator
 {
 
     /**
+     * @param $object EngineValidatorObject
+     * @return null
      * @throws Exception
      */
-    public static function validate(EngineStruct $engineStruct): void
+    public function validate(ValidatorObject $object): ?ValidatorObject
     {
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";
@@ -34,6 +38,7 @@ class GoogleTranslateEngineValidator
         if (isset($mt_result['error']['code'])) {
             throw new DomainException($mt_result['error']['message']);
         }
+        return null;
     }
 
 }

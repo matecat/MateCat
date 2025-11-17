@@ -7,24 +7,28 @@
  *
  */
 
-namespace Utils\Engines\MMT;
+namespace Utils\Engines\Validators;
 
 use Exception;
-use Model\Engines\Structs\EngineStruct;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT as MMTEngine;
+use Utils\Engines\MMT\MMTServiceApiException;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
-class MMTEngineValidator
+class MMTEngineValidator extends AbstractValidator
 {
 
     /**
+     * @param EngineValidatorObject $object
      * @throws MMTServiceApiException
      * @throws Exception
      */
-    public static function validate(EngineStruct $engineStruct): void
+    public function validate(ValidatorObject $object): ?ValidatorObject
     {
         /** @var MMTEngine $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
 
         // Check the account
         $checkAccount = $newTestCreatedMT->checkAccount();
@@ -40,6 +44,8 @@ class MMTEngineValidator
                 "The ModernMT license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using the ModernMT plugin."
             );
         }
+
+        return null;
     }
 
 }

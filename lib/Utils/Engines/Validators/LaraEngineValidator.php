@@ -7,32 +7,36 @@
  *
  */
 
-namespace Utils\Engines\Lara;
+namespace Utils\Engines\Validators;
 
 use DomainException;
 use Exception;
 use Lara\LaraException;
-use Model\Engines\Structs\EngineStruct;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\MMT\MMTServiceApi;
 use Utils\Engines\MMT\MMTServiceApiException;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Registry\AppConfig;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
-class LaraEngineValidator
+class LaraEngineValidator extends AbstractValidator
 {
 
     /**
+     * @param EngineValidatorObject $object
+     * @return ValidatorObject|null
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function validate(EngineStruct $engineStruct): void
+    public function validate(ValidatorObject $object): ?ValidatorObject
     {
         /**
          * @var $newTestCreatedMT Lara
          */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";
@@ -60,6 +64,8 @@ class LaraEngineValidator
                 throw new DomainException($message, $code, $e);
             }
         }
+
+        return null;
     }
 
 }

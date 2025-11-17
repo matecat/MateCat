@@ -3,13 +3,11 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
-use Lara\LaraException;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\AltlangStruct;
@@ -23,27 +21,18 @@ use Model\Engines\Structs\MicrosoftHubStruct;
 use Model\Engines\Structs\MMTStruct;
 use Model\Engines\Structs\SmartMATEStruct;
 use Model\Engines\Structs\YandexTranslateStruct;
-use Model\Exceptions\NotFoundException;
-use Model\Exceptions\ValidationError;
-use Model\TmKeyManagement\MemoryKeyDao;
 use Model\Users\MetadataDao;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\EngineConstants;
-use Utils\Engines\AltLang\AltLangEngineValidator;
-use Utils\Engines\DeepL\DeepLEngineValidator;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\GoogleTranslate\GoogleTranslateEngineValidator;
-use Utils\Engines\Intento\IntentoEngineValidator;
-use Utils\Engines\Lara;
-use Utils\Engines\Lara\LaraEngineValidator;
-use Utils\Engines\MMT as MMTEngine;
-use Utils\Engines\MMT\MMTEngineValidator;
-use Utils\Engines\MMT\MMTServiceApi;
-use Utils\Engines\MMT\MMTServiceApiException;
-use Utils\Registry\AppConfig;
-use Utils\TaskRunner\Exceptions\EndQueueException;
-use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Engines\Validators\AltLangEngineValidator;
+use Utils\Engines\Validators\DeepLEngineValidator;
+use Utils\Engines\Validators\GoogleTranslateEngineValidator;
+use Utils\Engines\Validators\IntentoEngineValidator;
+use Utils\Engines\Validators\LaraEngineValidator;
+use Utils\Engines\Validators\MMTEngineValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
 class EngineController extends KleinController {
 
@@ -52,11 +41,6 @@ class EngineController extends KleinController {
     }
 
     /**
-     * @throws ReQueueException
-     * @throws AuthenticationError
-     * @throws ValidationError
-     * @throws NotFoundException
-     * @throws EndQueueException
      * @throws ReflectionException
      * @throws Exception
      */
@@ -90,7 +74,7 @@ class EngineController extends KleinController {
                 $newEngineStruct->type                                 = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'DeepL-Auth-Key' ] = $engineData[ 'client_id' ];
 
-                DeepLEngineValidator::validate( $newEngineStruct );
+                (new DeepLEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -120,7 +104,7 @@ class EngineController extends KleinController {
                 $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
-                AltlangEngineValidator::validate( $newEngineStruct );
+                (new AltlangEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -165,7 +149,7 @@ class EngineController extends KleinController {
                 $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
-                GoogleTranslateEngineValidator::validate( $newEngineStruct );
+                (new GoogleTranslateEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -179,7 +163,7 @@ class EngineController extends KleinController {
                 $newEngineStruct->type                                   = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'apikey' ]           = $engineData[ 'secret' ];
 
-                IntentoEngineValidator::validate( $newEngineStruct );
+                (new IntentoEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -195,7 +179,7 @@ class EngineController extends KleinController {
                 $newEngineStruct->extra_parameters[ 'Lara-AccessKeySecret' ] = $engineData[ 'secret' ];
                 $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $engineData[ 'mmt-license' ];
 
-                LaraEngineValidator::validate( $newEngineStruct );
+                (new LaraEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -210,7 +194,7 @@ class EngineController extends KleinController {
                 $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $engineData[ 'secret' ];
                 $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = true;
 
-                MMTEngineValidator::validate( $newEngineStruct );
+                (new MMTEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 

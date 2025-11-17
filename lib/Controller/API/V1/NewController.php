@@ -44,12 +44,12 @@ use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
 use Utils\Engines\AbstractEngine;
-use Utils\Engines\DeepL;
-use Utils\Engines\DeepL\DeepLEngineValidator;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Intento;
-use Utils\Engines\Lara;
-use Utils\Engines\MMT;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Engines\Validators\DeepLEngineOptionsValidator;
+use Utils\Engines\Validators\DeeplFormalityValidator;
+use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
@@ -63,7 +63,6 @@ use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
-use Utils\Validator\MMTValidator;
 
 class NewController extends KleinController {
 
@@ -381,9 +380,31 @@ class NewController extends KleinController {
         $qaModelTemplate                       = $this->validateQaModelTemplate( $id_qa_model_template );
         $payableRateModelTemplate              = $this->validatePayableRateTemplate( $payable_rate_template_name, $payable_rate_template_id );
         $qaModel                               = $this->validateQaModel( $id_qa_model );
-        $mt_engine                             = $this->validateUserMTEngine( $mt_engine );
-        $deepl_formality                       = DeepLEngineValidator::validateFormality( $deepl_formality );
-        $deepl_engine_type                     = DeepLEngineValidator::validateEngineType( $deepl_engine_type );
+        $engineStruct                          = $this->validateUserMTEngine( $mt_engine );
+        $mt_engine                             = !empty($engineStruct) ? $engineStruct->getEngineRecord()->id : null;
+        $mmt_glossaries                        = $this->validateMMTGlossaries( $mmt_glossaries );
+
+        (new DeepLEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'deepl_engine_type' => $deepl_engine_type,
+                    'deepl_formality' => $deepl_formality,
+                    'deepl_id_glossary' => $deepl_id_glossary
+                ]
+            )
+        );
+
+        (new IntentoEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'intento_provider' => $intento_provider,
+                    'intento_routing' => $intento_routing
+                ]
+            )
+        );
+
         $dialect_strict                        = $this->validateDialectStrictParam( $target_lang, $dialect_strict );
         $filters_extraction_parameters         = $this->validateFiltersExtractionParameters( $filters_extraction_parameters, $filters_extraction_parameters_template_id );
         $xliff_parameters                      = $this->validateXliffParameters( $xliff_parameters, $xliff_parameters_template_id );
@@ -1035,19 +1056,19 @@ class NewController extends KleinController {
     /**
      * @param int|null $mt_engine
      *
-     * @return int|null
+     * @return AbstractEngine|null
      */
-    private function validateUserMTEngine( ?int $mt_engine = null ): ?int {
-        // any other engine than Match
+    private function validateUserMTEngine( ?int $mt_engine = null ): ?AbstractEngine {
+        // any other engine than MyMemory
         if ( $mt_engine !== null and $mt_engine > 1 ) {
             try {
-                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
+                return EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage() );
             }
         }
 
-        return $mt_engine;
+        return null;
     }
 
     /**
@@ -1060,7 +1081,7 @@ class NewController extends KleinController {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
 
-                ( new MMTValidator )->validate(
+                ( new MMTGlossaryValidator )->validate(
                         ValidatorObject::fromArray( [
                                 'glossaryString' => $mmtGlossaries,
                         ] )

@@ -27,11 +27,14 @@ use Plugins\Features\ProjectCompletion;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
-use Utils\Engines\DeepL;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Intento;
-use Utils\Engines\Lara;
-use Utils\Engines\MMT;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Engines\Validators\DeepLEngineOptionsValidator;
+use Utils\Engines\Validators\DeeplFormalityValidator;
+use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\IntentoRoutingValidator;
+use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -41,7 +44,6 @@ use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
-use Utils\Validator\MMTValidator;
 
 class CreateProjectController extends AbstractStatefulKleinController {
 
@@ -273,6 +275,41 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $mt_engine      = ( $mt_engine != null ? $mt_engine : 0 );
         $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
         $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
+
+
+        $engineStruct = null;
+        // any other engine than Match
+        if ($mt_engine !== null and $mt_engine > 1) {
+            try {
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage());
+            }
+        }
+
+        (new DeepLEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'deepl_engine_type' => $deepl_engine_type,
+                    'deepl_formality' => $deepl_formality,
+                    'deepl_id_glossary' => $deepl_id_glossary
+                ]
+            )
+        );
+
+        (new IntentoEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'intento_provider' => $intento_provider,
+                    'intento_routing' => $intento_routing
+                ]
+            )
+        );
+
+
+
 
         /**
          * Represents a generic data variable that can hold a variety of information.
@@ -536,7 +573,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
 
-                ( new MMTValidator )->validate(
+                ( new MMTGlossaryValidator )->validate(
                         ValidatorObject::fromArray( [
                                 'glossaryString' => $mmtGlossaries,
                         ] )

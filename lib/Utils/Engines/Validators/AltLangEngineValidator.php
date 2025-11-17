@@ -7,23 +7,28 @@
  *
  */
 
-namespace Utils\Engines\AltLang;
+namespace Utils\Engines\Validators;
 
 use DomainException;
 use Exception;
-use Model\Engines\Structs\EngineStruct;
 use Utils\Engines\Altlang;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
-class AltLangEngineValidator
+class AltLangEngineValidator extends AbstractValidator
 {
+
     /**
+     * @param EngineValidatorObject $object
+     * @return ValidatorObject|null
      * @throws Exception
      */
-    public static function validate(EngineStruct $engineStruct): void
+    public function validate(ValidatorObject $object): ?ValidatorObject
     {
         /** @var AltLang $newTestCreatedMT */
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
         $config = $newTestCreatedMT->getConfigStruct();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";
@@ -34,5 +39,7 @@ class AltLangEngineValidator
         if (isset($mt_result['error']['code'])) {
             throw new DomainException($mt_result['error']['message']);
         }
+
+        return null;
     }
 }

@@ -7,22 +7,27 @@
  *
  */
 
-namespace Utils\Engines\Intento;
+namespace Utils\Engines\Validators;
 
 use DomainException;
 use Exception;
-use Model\Engines\Structs\EngineStruct;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Intento;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
-class IntentoEngineValidator
+class IntentoEngineValidator extends AbstractValidator
 {
 
     /**
+     * @param EngineValidatorObject $object
+     * @return ValidatorObject|null
      * @throws Exception
      */
-    public static function validate(EngineStruct $engineStruct): void
+    public function validate(ValidatorObject $object): ?ValidatorObject
     {
-        $newTestCreatedMT = EnginesFactory::createTempInstance($engineStruct);
+        $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
         $config = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";
@@ -52,14 +57,13 @@ class IntentoEngineValidator
 
             throw new DomainException($message, $code);
         }
+
+        return null;
     }
 
-    public static function validateRouting() // TODO
+    public static function validateRouting(Intento $engine) // TODO
     {
-    }
-
-    public static function validateProvider()
-    {
+        $engine->getRoutingList();
     }
 
 }
