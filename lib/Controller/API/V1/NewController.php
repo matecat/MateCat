@@ -372,7 +372,7 @@ class NewController extends KleinController {
 
         $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
         $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
-        [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
+        [ $tms_engine, $engineStruct ] = $this->validateEngines( $tms_engine, $mt_engine );
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
         [ $private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization ] = $this->validateTmAndKeys( $private_tm_key, $private_tm_key_json );
@@ -380,8 +380,6 @@ class NewController extends KleinController {
         $qaModelTemplate                       = $this->validateQaModelTemplate( $id_qa_model_template );
         $payableRateModelTemplate              = $this->validatePayableRateTemplate( $payable_rate_template_name, $payable_rate_template_id );
         $qaModel                               = $this->validateQaModel( $id_qa_model );
-        $engineStruct                          = $this->validateUserMTEngine( $mt_engine );
-        $mt_engine                             = !empty($engineStruct) ? $engineStruct->getEngineRecord()->id : null;
         $mmt_glossaries                        = $this->validateMMTGlossaries( $mmt_glossaries );
 
         (new DeepLEngineOptionsValidator())->validate(
@@ -594,6 +592,7 @@ class NewController extends KleinController {
             throw new InvalidArgumentException( "Invalid TM Engine.", -21 );
         }
 
+        $engineStruct = null;
         if ( $mt_engine > 1 ) {
 
             if ( !$this->userIsLogged ) {
@@ -601,14 +600,14 @@ class NewController extends KleinController {
             }
 
             try {
-                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage(), -2 );
             }
 
         }
 
-        return [ $tms_engine, $mt_engine ];
+        return [ $tms_engine, $engineStruct ];
     }
 
     /**
@@ -1048,24 +1047,6 @@ class NewController extends KleinController {
             }
 
             return $qaModel;
-        }
-
-        return null;
-    }
-
-    /**
-     * @param int|null $mt_engine
-     *
-     * @return AbstractEngine|null
-     */
-    private function validateUserMTEngine( ?int $mt_engine = null ): ?AbstractEngine {
-        // any other engine than MyMemory
-        if ( $mt_engine !== null and $mt_engine > 1 ) {
-            try {
-                return EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
-            } catch ( Exception $exception ) {
-                throw new InvalidArgumentException( $exception->getMessage() );
-            }
         }
 
         return null;
