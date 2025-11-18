@@ -1118,7 +1118,7 @@ class NewController extends KleinController
                 $mmtGlossaries = html_entity_decode($mmt_glossaries);
 
                 (new MMTGlossaryValidator)->validate(
-                    ValidatorObject::fromArray([
+                    EngineValidatorObject::fromArray([
                         'glossaryString' => $mmtGlossaries,
                     ])
                 );

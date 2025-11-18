@@ -16,6 +16,8 @@ class GlossaryCSVValidator extends AbstractValidator
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
+
+        /** @noinspection PhpUndefinedFieldInspection */
         $headers          = $this->getHeaders($object->csv);
         $languagesHandler = Languages::getInstance();
 
