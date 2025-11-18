@@ -15,9 +15,9 @@ class SetContributionResponse extends TMSAbstractResponse
 
     public function __construct($response)
     {
-        $this->responseData    = $response[ 'responseData' ] ?? '';
-        $this->responseDetails = $response[ 'responseDetails' ] ?? '';
-        $this->responseStatus  = (int)($response[ 'responseStatus' ] ?? 200);
+        $this->responseData = $response['responseData'] ?? '';
+        $this->responseDetails = $response['responseDetails'] ?? '';
+        $this->responseStatus = (int)($response['responseStatus'] ?? 200);
     }
 
 } 

@@ -17,10 +17,10 @@ class Apertium extends AbstractEngine
 {
 
     protected array $_config = [
-            'segment' => null,
-            'source'  => null,
-            'target'  => null,
-            'key'     => null,
+        'segment' => null,
+        'source' => null,
+        'target' => null,
+        'key' => null,
     ];
 
     /**
@@ -47,7 +47,7 @@ class Apertium extends AbstractEngine
     /**
      * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
      * @return array
      * @throws Exception
@@ -57,42 +57,42 @@ class Apertium extends AbstractEngine
         $all_args = func_get_args();
 
         if (is_string($rawValue)) {
-            $original = json_decode($all_args[ 1 ][ "data" ], true);
-            $decoded  = json_decode($rawValue, true);
-            $decoded  = [
-                    'data' => [
-                            "translations" => [
-                                    ['translatedText' => $decoded[ "text" ]]
-                            ]
+            $original = json_decode($all_args[1]["data"], true);
+            $decoded = json_decode($rawValue, true);
+            $decoded = [
+                'data' => [
+                    "translations" => [
+                        ['translatedText' => $decoded["text"]]
                     ]
+                ]
             ];
         } else {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch($original[ "text" ], $decoded);
+        return $this->_composeMTResponseAsMatch($original["text"], $decoded);
     }
 
     public function get(array $_config)
     {
         $param_data = json_encode([
-                "mtsystem" => "apertium",
-                "src"      => $_config[ 'source' ],
-                "trg"      => $_config[ 'target' ],
-                "text"     => $_config[ 'segment' ]
+            "mtsystem" => "apertium",
+            "src" => $_config['source'],
+            "trg" => $_config['target'],
+            "text" => $_config['segment']
         ]);
 
         $parameters = [];
         if ($this->client_secret != '' && $this->client_secret != null) {
-            $parameters[ 'key' ] = $this->client_secret;
+            $parameters['key'] = $this->client_secret;
         }
-        $parameters[ 'func' ] = "translate";
-        $parameters[ 'data' ] = $param_data;
+        $parameters['func'] = "translate";
+        $parameters['data'] = $param_data;
 
         $this->_setAdditionalCurlParams([
-                        CURLOPT_POST           => true,
-                        CURLOPT_RETURNTRANSFER => true
-                ]
+                CURLOPT_POST => true,
+                CURLOPT_RETURNTRANSFER => true
+            ]
         );
         $this->call("translate_relative_url", $parameters, false);
 
@@ -120,9 +120,10 @@ class Apertium extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array {
+    public function getConfigurationParameters(): array
+    {
         return [
-                'enable_mt_analysis',
+            'enable_mt_analysis',
         ];
     }
 }

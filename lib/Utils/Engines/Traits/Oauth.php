@@ -24,9 +24,9 @@ trait Oauth
     protected function getAuthParameters(): array
     {
         return [
-                CURLOPT_POST       => true,
-                CURLOPT_POSTFIELDS => http_build_query($this->_auth_parameters), //microsoft doesn't want multi-part form data
-                CURLOPT_TIMEOUT    => 120
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($this->_auth_parameters), //microsoft doesn't want multi-part form data
+            CURLOPT_TIMEOUT => 120
         ];
     }
 
@@ -38,10 +38,10 @@ trait Oauth
      */
     protected function _authenticate(): void
     {
-        $this->_auth_parameters[ 'client_id' ]     = $this->client_id;
-        $this->_auth_parameters[ 'client_secret' ] = $this->client_secret;
+        $this->_auth_parameters['client_id'] = $this->client_id;
+        $this->_auth_parameters['client_secret'] = $this->client_secret;
 
-        $url      = $this->oauth_url;
+        $url = $this->oauth_url;
         $curl_opt = $this->getAuthParameters();
 
         $rawValue = $this->_call($url, $curl_opt);
@@ -52,17 +52,17 @@ trait Oauth
             $objResponse = $rawValue;
         }
 
-        if (isset($objResponse[ 'error' ])) {
+        if (isset($objResponse['error'])) {
             //format as a normal Translate Response and send to decoder to output the data
-            $rawValue     = $this->_formatAuthenticateError($objResponse);
+            $rawValue = $this->_formatAuthenticateError($objResponse);
             $this->result = $this->_decode($rawValue, $this->_auth_parameters, __FUNCTION__);
 
             //no more valid token
             $this->token = null;
             $this->_setTokenEndLife(-86400);
         } elseif (is_array($objResponse)) {
-            $this->token = $objResponse[ 'access_token' ];
-            $this->_setTokenEndLife(@$objResponse[ 'expires_in' ]);
+            $this->token = $objResponse['access_token'];
+            $this->_setTokenEndLife(@$objResponse['expires_in']);
         } else {
             $this->token = $objResponse;
             $this->_setTokenEndLife(60 * 10); // microsoft token expire in 10 minutes
@@ -77,7 +77,7 @@ trait Oauth
          * because the EnginesFactory Factory Class built the query as generic engine
          *
          */
-        $engineStruct     = $this->_getEngineStruct();
+        $engineStruct = $this->_getEngineStruct();
         $engineStruct->id = $record->id;
 
         //variable assignment only used for debugging purpose
@@ -85,7 +85,7 @@ trait Oauth
         $engineDAO->updateByStruct($record);
 
         if (is_null($this->token)) {
-            throw new Exception($objResponse[ 'error_description' ]);
+            throw new Exception($objResponse['error_description']);
         }
     }
 

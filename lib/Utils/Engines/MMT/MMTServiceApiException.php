@@ -15,9 +15,9 @@ class MMTServiceApiException extends Exception
 
     public static function fromJSONResponse(array $json): MMTServiceApiException
     {
-        $code    = isset($json[ 'status' ]) ? intval($json[ 'status' ]) : 500;
-        $type    = $json[ 'error' ][ 'type' ] ?? 'UnknownException';
-        $message = $json[ 'error' ][ 'message' ] ?? '';
+        $code = isset($json['status']) ? intval($json['status']) : 500;
+        $type = $json['error']['type'] ?? 'UnknownException';
+        $message = $json['error']['message'] ?? '';
 
         return new self($type, $code, $message);
     }

@@ -30,20 +30,19 @@ class IntentoEngineOptionsValidator extends AbstractValidator
         }
 
         $hasProvider = !empty($object->intento_provider);
-        $hasRouting  = !empty($object->intento_routing);
+        $hasRouting = !empty($object->intento_routing);
 
-        if ( $hasProvider && !$hasRouting ) {
+        if ($hasProvider && !$hasRouting) {
             $availableProviders = $object->engineStruct->getProviderList();
 
-            if ( !array_key_exists( $object->intento_provider, $availableProviders ) ) {
-                throw new InvalidArgumentException( "Intento provider not valid." );
+            if (!array_key_exists($object->intento_provider, $availableProviders)) {
+                throw new InvalidArgumentException("Intento provider not valid.");
             }
-
-        } elseif ( !$hasProvider && $hasRouting ) {
+        } elseif (!$hasProvider && $hasRouting) {
             $availableRoutings = $object->engineStruct->getRoutingList();
 
-            if ( !array_key_exists( $object->intento_routing, $availableRoutings ) ) {
-                throw new InvalidArgumentException( "Intento routing not valid." );
+            if (!array_key_exists($object->intento_routing, $availableRoutings)) {
+                throw new InvalidArgumentException("Intento routing not valid.");
             }
         }
 

@@ -25,8 +25,8 @@ abstract class TMSAbstractResponse
     /**
      * @var mixed
      */
-    public mixed $responseData    = [];
-    public bool  $mtLangSupported = true;
+    public mixed $responseData = [];
+    public bool $mtLangSupported = true;
 
     /**
      * @var ErrorResponse|null
@@ -43,10 +43,10 @@ abstract class TMSAbstractResponse
     /**
      * @template T of TMSAbstractResponse
      *
-     * @param array|int       $result
+     * @param array|int $result
      * @param FeatureSet|null $featureSet
-     * @param array|null      $dataRefMap
-     * @param int|null        $id_project
+     * @param array|null $dataRefMap
+     * @param int|null $id_project
      *
      * @return TMSAbstractResponse
      */
@@ -62,8 +62,8 @@ abstract class TMSAbstractResponse
          */
         $instance = new $class($result, $dataRefMap, $id_project);
 
-        if (is_array($result) && isset($result[ 'responseStatus' ]) && $result[ 'responseStatus' ] >= 400) {
-            $instance->error = new ErrorResponse($result[ 'error' ] ?? $result[ 'responseDetails' ]);
+        if (is_array($result) && isset($result['responseStatus']) && $result['responseStatus'] >= 400) {
+            $instance->error = new ErrorResponse($result['error'] ?? $result['responseDetails']);
         }
 
         if ($featureSet !== null) {
@@ -92,8 +92,8 @@ abstract class TMSAbstractResponse
      */
     public function toArray(?array $mask = []): array
     {
-        $attributes       = [];
-        $reflectionClass  = new ReflectionClass($this);
+        $attributes = [];
+        $reflectionClass = new ReflectionClass($this);
         $publicProperties = $reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC);
         foreach ($publicProperties as $property) {
             if (!empty($mask)) {
@@ -101,7 +101,7 @@ abstract class TMSAbstractResponse
                     continue;
                 }
             }
-            $attributes[ $property->getName() ] = $property->getValue($this);
+            $attributes[$property->getName()] = $property->getValue($this);
         }
 
         return $attributes;

@@ -25,8 +25,8 @@ class LaraClient extends Translator
      * Constructor for the LaraClient class.
      * Initializes the HTTP client and sets up memories, documents, and glossaries.
      *
-     * @param LaraCredentials        $credentials The credentials required for authentication.
-     * @param TranslatorOptions|null $options     Optional translator options, including the server URL.
+     * @param LaraCredentials $credentials The credentials required for authentication.
+     * @param TranslatorOptions|null $options Optional translator options, including the server URL.
      *
      */
     public function __construct(LaraCredentials $credentials, TranslatorOptions $options = null)

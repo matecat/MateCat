@@ -19,7 +19,7 @@ class SearchGlossaryResponse extends TMSAbstractResponse
             throw new Exception("Invalid Response", -1);
         }
 
-        $this->matches = $response[ 'matches' ] ?? [];
+        $this->matches = $response['matches'] ?? [];
     }
 
 }

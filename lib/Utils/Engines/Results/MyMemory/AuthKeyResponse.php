@@ -15,7 +15,7 @@ class AuthKeyResponse extends TMSAbstractResponse
 
     public function __construct($response)
     {
-        $this->responseData   = $response ?? [];
+        $this->responseData = $response ?? [];
         $this->responseStatus = 200;
     }
 

@@ -36,16 +36,16 @@ abstract class AbstractEngine implements EngineInterface
     protected EngineStruct $engineRecord;
 
     protected string $className;
-    protected array  $_config = [];
+    protected array $_config = [];
     /**
      * @var mixed
      */
-    protected       $result = []; // this cannot be forced to be an array, engines may use different types
-    protected array $error  = [];
+    protected $result = []; // this cannot be forced to be an array, engines may use different types
+    protected array $error = [];
 
     protected array $curl_additional_params = [];
 
-    protected bool $_isAnalysis   = false;
+    protected bool $_isAnalysis = false;
     protected bool $_skipAnalysis = true;
 
     /**
@@ -56,11 +56,11 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @var bool
      */
-    protected bool   $logging      = true;
+    protected bool $logging = true;
     protected string $content_type = 'xml';
 
     protected ?FeatureSet $featureSet = null;
-    protected ?int        $mt_penalty = null;
+    protected ?int $mt_penalty = null;
 
     const int GET_REQUEST_TIMEOUT = 10;
     protected MatecatLogger $logger;
@@ -68,15 +68,15 @@ abstract class AbstractEngine implements EngineInterface
     public function __construct($engineRecord)
     {
         $this->engineRecord = $engineRecord;
-        $this->className    = get_class($this);
+        $this->className = get_class($this);
 
         $this->curl_additional_params = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2
         ];
 
         $this->featureSet = new FeatureSet();
@@ -142,7 +142,7 @@ abstract class AbstractEngine implements EngineInterface
     {
         $l = explode("-", strtolower(trim($lang)));
 
-        return $l[ 0 ];
+        return $l[0];
     }
 
     /**
@@ -163,9 +163,9 @@ abstract class AbstractEngine implements EngineInterface
         if (property_exists($this->engineRecord, $key)) {
             return $this->engineRecord->$key;
         } elseif (array_key_exists($key, $this->engineRecord->others)) {
-            return $this->engineRecord->others[ $key ];
+            return $this->engineRecord->others[$key];
         } elseif (array_key_exists($key, $this->engineRecord->extra_parameters)) {
-            return $this->engineRecord->extra_parameters[ $key ];
+            return $this->engineRecord->extra_parameters[$key];
         } else {
             return null;
         }
@@ -180,9 +180,9 @@ abstract class AbstractEngine implements EngineInterface
         if (property_exists($this->engineRecord, $key)) {
             $this->engineRecord->$key = $value;
         } elseif (array_key_exists($key, $this->engineRecord->others)) {
-            $this->engineRecord->others[ $key ] = $value;
+            $this->engineRecord->others[$key] = $value;
         } elseif (array_key_exists($key, $this->engineRecord->extra_parameters)) {
-            $this->engineRecord->extra_parameters[ $key ] = $value;
+            $this->engineRecord->extra_parameters[$key] = $value;
         } else {
             throw new DomainException("Property $key does not exists in " . get_class($this));
         }
@@ -196,7 +196,7 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
      * @return array|TMSAbstractResponse
      */
@@ -204,13 +204,13 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param string $url
-     * @param array  $curl_options
+     * @param array $curl_options
      *
      * @return array|bool|string|null
      */
     public function _call(string $url, array $curl_options = [])
     {
-        $mh       = new MultiCurlHandler();
+        $mh = new MultiCurlHandler();
         $uniq_uid = uniqid('', true);
 
         /*
@@ -221,23 +221,23 @@ abstract class AbstractEngine implements EngineInterface
          * Use the + array union operator
          */
         $resourceHash = $mh->createResource(
-                $url,
-                $this->curl_additional_params + $curl_options,
-                $uniq_uid
+            $url,
+            $this->curl_additional_params + $curl_options,
+            $uniq_uid
         );
 
         $mh->multiExec();
 
         if ($mh->hasError($resourceHash)) {
-            $curl_error       = $mh->getError($resourceHash);
+            $curl_error = $mh->getError($resourceHash);
             $responseRawValue = $mh->getSingleContent($resourceHash);
-            $rawValue         = json_encode([
-                    'error'          => [
-                            'code'     => -(int)$curl_error[ 'errno' ],
-                            'message'  => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error[ 'http_code' ] . ")",
-                            'response' => $responseRawValue // Some useful info might still be contained in the response body
-                    ],
-                    'responseStatus' => (int)$curl_error[ 'http_code' ]
+            $rawValue = json_encode([
+                'error' => [
+                    'code' => -(int)$curl_error['errno'],
+                    'message' => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error['http_code'] . ")",
+                    'response' => $responseRawValue // Some useful info might still be contained in the response body
+                ],
+                'responseStatus' => (int)$curl_error['http_code']
             ]); //return a negative number
         } else {
             $rawValue = $mh->getSingleContent($resourceHash);
@@ -248,9 +248,9 @@ abstract class AbstractEngine implements EngineInterface
         if ($this->logging) {
             $log = $mh->getSingleLog($resourceHash);
             if ($this->content_type == 'json' && !$mh->hasError($resourceHash)) {
-                $log[ 'response' ] = json_decode($rawValue, true);
+                $log['response'] = json_decode($rawValue, true);
             } else {
-                $log[ 'response' ] = $rawValue;
+                $log['response'] = $rawValue;
             }
             $this->logger->debug($log);
         }
@@ -260,9 +260,9 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param string $function
-     * @param array  $parameters
-     * @param bool   $isPostRequest
-     * @param bool   $isJsonRequest
+     * @param array $parameters
+     * @param bool $isPostRequest
+     * @param bool $isJsonRequest
      *
      * @return void
      */
@@ -277,10 +277,10 @@ abstract class AbstractEngine implements EngineInterface
         $this->error = []; // reset last error
         if (!$this->$function) {
             $this->result = [
-                    'error' => [
-                            'code'    => -43,
-                            'message' => " Bad Method Call. Requested method '$function' not Found."
-                    ]
+                'error' => [
+                    'code' => -43,
+                    'message' => " Bad Method Call. Requested method '$function' not Found."
+                ]
             ]; //return a negative number
 
             return;
@@ -289,18 +289,18 @@ abstract class AbstractEngine implements EngineInterface
         $function = strtolower(trim($function));
 
         if ($isPostRequest) {
-            $url      = "{$this->engineRecord['base_url']}/" . $this->$function;
+            $url = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = [
-                    CURLOPT_POSTFIELDS  => (!$isJsonRequest ? $parameters : json_encode($parameters)),
-                    CURLINFO_HEADER_OUT => true,
-                    CURLOPT_TIMEOUT     => 120
+                CURLOPT_POSTFIELDS => (!$isJsonRequest ? $parameters : json_encode($parameters)),
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT => 120
             ];
         } else {
-            $url      = "{$this->engineRecord['base_url']}/" . $this->$function . "?";
-            $url      .= http_build_query($parameters);
+            $url = "{$this->engineRecord['base_url']}/" . $this->$function . "?";
+            $url .= http_build_query($parameters);
             $curl_opt = [
-                    CURLOPT_HTTPGET => true,
-                    CURLOPT_TIMEOUT => static::GET_REQUEST_TIMEOUT
+                CURLOPT_HTTPGET => true,
+                CURLOPT_TIMEOUT => static::GET_REQUEST_TIMEOUT
             ];
         }
 
@@ -328,7 +328,7 @@ abstract class AbstractEngine implements EngineInterface
          * In this way, the CURLOPT_FILE does not work.
          */
         foreach ($curlOptParams as $key => $value) {
-            $this->curl_additional_params[ $key ] = $value;
+            $this->curl_additional_params[$key] = $value;
         }
     }
 
@@ -396,11 +396,11 @@ abstract class AbstractEngine implements EngineInterface
              */
             $newEngineStruct = GoogleTranslateStruct::getStruct();
 
-            $newEngineStruct->name                                = "Generic";
-            $newEngineStruct->uid                                 = 0;
-            $newEngineStruct->type                                = EngineConstants::MT;
-            $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
-            $newEngineStruct->others                              = [];
+            $newEngineStruct->name = "Generic";
+            $newEngineStruct->uid = 0;
+            $newEngineStruct->type = EngineConstants::MT;
+            $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'];
+            $newEngineStruct->others = [];
 
             $gtEngine = EnginesFactory::createTempInstance($newEngineStruct);
 
@@ -414,8 +414,8 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param string     $filePath
-     * @param string     $memoryKey
+     * @param string $filePath
+     * @param string $memoryKey
      * @param UserStruct $user
      *
      * @return void
@@ -425,7 +425,7 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param array      $projectRow
+     * @param array $projectRow
      * @param array|null $segments
      *
      * @return void
@@ -485,8 +485,8 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param string $raw_segment
-     * @param array  $decoded
-     * @param int    $layerNum
+     * @param array $decoded
+     * @param int $layerNum
      *
      * @return array
      * @throws Exception
@@ -496,18 +496,18 @@ abstract class AbstractEngine implements EngineInterface
         $mt_result = new MTResponse($decoded);
 
         if ($mt_result->error->code < 0) {
-            $mt_result            = $mt_result->get_as_array();
-            $mt_result[ 'error' ] = (array)$mt_result[ 'error' ];
+            $mt_result = $mt_result->get_as_array();
+            $mt_result['error'] = (array)$mt_result['error'];
 
             return $mt_result;
         }
 
         $mt_match_res = new Matches([
-                'raw_segment'     => $raw_segment,
-                'raw_translation' => $mt_result->translatedText,
-                'match'           => $this->getStandardMtPenaltyString(),
-                'created-by'      => $this->getMTName(),
-                'create-date'     => date("Y-m-d")
+            'raw_segment' => $raw_segment,
+            'raw_translation' => $mt_result->translatedText,
+            'match' => $this->getStandardMtPenaltyString(),
+            'created-by' => $this->getMTName(),
+            'create-date' => date("Y-m-d")
         ]);
 
         return $mt_match_res->getMatches($layerNum);
@@ -523,7 +523,7 @@ abstract class AbstractEngine implements EngineInterface
     public function validateConfigurationParams(stdClass $extra): bool
     {
         foreach (array_keys(get_object_vars($extra)) as $key) {
-            if(!in_array($key, $this->getConfigurationParameters())){
+            if (!in_array($key, $this->getConfigurationParameters())) {
                 return false;
             }
         }

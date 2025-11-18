@@ -12,9 +12,9 @@ class YandexTranslate extends AbstractEngine
 {
 
     protected array $_config = [
-            'segment' => null,
-            'source'  => null,
-            'target'  => null,
+        'segment' => null,
+        'source' => null,
+        'target' => null,
     ];
 
     /**
@@ -37,13 +37,13 @@ class YandexTranslate extends AbstractEngine
     {
         $l = explode("-", strtolower(trim($lang)));
 
-        return $l[ 0 ];
+        return $l[0];
     }
 
     /**
      * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
      * @return array
      * @throws Exception
@@ -54,32 +54,32 @@ class YandexTranslate extends AbstractEngine
 
         if (is_string($rawValue)) {
             $decoded = json_decode($rawValue, true);
-            if ($decoded[ "code" ] == 200) {
+            if ($decoded["code"] == 200) {
                 $decoded = [
-                        'data' => [
-                                'translations' => [
-                                        ['translatedText' => $decoded[ "text" ][ 0 ]]
-                                ]
+                    'data' => [
+                        'translations' => [
+                            ['translatedText' => $decoded["text"][0]]
                         ]
+                    ]
                 ];
             } else {
                 $decoded = [
-                        'error' => [
-                                'code'    => $decoded[ "code" ],
-                                'message' => $decoded[ "message" ]
-                        ]
+                    'error' => [
+                        'code' => $decoded["code"],
+                        'message' => $decoded["message"]
+                    ]
                 ];
             }
         } else {
-            $resp = json_decode($rawValue[ "error" ][ "response" ], true);
-            if (isset($resp[ "code" ]) && isset($resp[ "message" ])) {
-                $rawValue[ "error" ][ "code" ]    = $resp[ "code" ];
-                $rawValue[ "error" ][ "message" ] = $resp[ "message" ];
+            $resp = json_decode($rawValue["error"]["response"], true);
+            if (isset($resp["code"]) && isset($resp["message"])) {
+                $rawValue["error"]["code"] = $resp["code"];
+                $rawValue["error"]["message"] = $resp["message"];
             }
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
     }
 
     /**
@@ -87,23 +87,23 @@ class YandexTranslate extends AbstractEngine
      */
     public function get(array $_config)
     {
-        $_config[ 'source' ] = $this->_fixLangCode($_config[ 'source' ]);
-        $_config[ 'target' ] = $this->_fixLangCode($_config[ 'target' ]);
+        $_config['source'] = $this->_fixLangCode($_config['source']);
+        $_config['target'] = $this->_fixLangCode($_config['target']);
 
         $parameters = [];
         if ($this->client_secret != '' && $this->client_secret != null) {
-            $parameters[ 'key' ] = $this->client_secret;
+            $parameters['key'] = $this->client_secret;
         }
-        $parameters[ 'srv' ]    = "matecat";
-        $parameters[ 'lang' ]   = $_config[ 'source' ] . "-" . $_config[ 'target' ];
-        $parameters[ 'text' ]   = $_config[ 'segment' ];
-        $parameters[ 'format' ] = "html";
+        $parameters['srv'] = "matecat";
+        $parameters['lang'] = $_config['source'] . "-" . $_config['target'];
+        $parameters['text'] = $_config['segment'];
+        $parameters['format'] = "html";
 
         $this->_setAdditionalCurlParams(
-                [
-                        CURLOPT_POST       => true,
-                        CURLOPT_POSTFIELDS => http_build_query($parameters)
-                ]
+            [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => http_build_query($parameters)
+            ]
         );
 
         $this->call("translate_relative_url", $parameters, true);
@@ -132,9 +132,10 @@ class YandexTranslate extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array {
+    public function getConfigurationParameters(): array
+    {
         return [
-                'enable_mt_analysis',
+            'enable_mt_analysis',
         ];
     }
 }

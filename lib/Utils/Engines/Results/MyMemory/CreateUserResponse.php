@@ -24,10 +24,10 @@ class CreateUserResponse extends TMSAbstractResponse
             throw new Exception("Invalid Response", -1);
         }
 
-        $this->responseStatus = (int)($response[ 'code' ] ?? 200);
-        $this->key            = $response[ 'key' ] ?? '';
-        $this->id             = $response[ 'id' ] ?? '';
-        $this->pass           = $response[ 'pass' ] ?? '';
+        $this->responseStatus = (int)($response['code'] ?? 200);
+        $this->key = $response['key'] ?? '';
+        $this->id = $response['id'] ?? '';
+        $this->pass = $response['pass'] ?? '';
     }
 
 } 

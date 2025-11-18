@@ -58,7 +58,7 @@ class DeepLEngineOptionsValidator extends AbstractValidator
 
         if (!empty($object->deepl_id_glossary)) {
             try {
-                $apiKey = $object->engineStruct->getEngineRecord()->extra_parameters[ 'DeepL-Auth-Key' ];
+                $apiKey = $object->engineStruct->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
                 $object->engineStruct->setApiKey($apiKey);
                 $object->engineStruct->getGlossary($object->deepl_id_glossary);
             } catch (Exception $e) {

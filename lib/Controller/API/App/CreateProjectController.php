@@ -209,65 +209,30 @@ class CreateProjectController extends AbstractStatefulKleinController
      */
     private function validateTheRequest(): array
     {
-        $file_name = filter_var(
-            $this->request->param('file_name'),
-            FILTER_UNSAFE_RAW,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $source_lang = filter_var(
-            $this->request->param('source_lang'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $target_lang = filter_var(
-            $this->request->param('target_lang'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $job_subject = filter_var(
-            $this->request->param('job_subject'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
+        $file_name = filter_var($this->request->param('file_name'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $job_subject = filter_var($this->request->param('job_subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $due_date = filter_var($this->request->param('due_date'), FILTER_SANITIZE_NUMBER_INT);
         $mt_engine = filter_var($this->request->param('mt_engine'), FILTER_SANITIZE_NUMBER_INT);
         $disable_tms_engine_flag = filter_var($this->request->param('disable_tms_engine'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_SANITIZE_NUMBER_INT);
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);
-        $id_team = filter_var(
-            $this->request->param('id_team'),
-            FILTER_SANITIZE_NUMBER_INT,
-            ['flags' => FILTER_REQUIRE_SCALAR]
-        );
+        $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
         $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
-        $character_counter_count_tags = filter_var(
-            $this->request->param('character_counter_count_tags'),
-            FILTER_VALIDATE_BOOLEAN
-        );
-        $character_counter_mode = filter_var(
-            $this->request->param('character_counter_mode'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]
-        );
+        $character_counter_count_tags = filter_var($this->request->param('character_counter_count_tags'), FILTER_VALIDATE_BOOLEAN);
+        $character_counter_mode = filter_var($this->request->param('character_counter_mode'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $dialect_strict = filter_var($this->request->param('dialect_strict'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $filters_extraction_parameters = filter_var(
-            $this->request->param('filters_extraction_parameters'),
-            FILTER_SANITIZE_SPECIAL_CHARS
-        );
+        $filters_extraction_parameters = filter_var($this->request->param('filters_extraction_parameters'), FILTER_SANITIZE_SPECIAL_CHARS);
         $xliff_parameters = filter_var($this->request->param('xliff_parameters'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $xliff_parameters_template_id = filter_var(
-            $this->request->param('xliff_parameters_template_id'),
-            FILTER_SANITIZE_NUMBER_INT
-        );
+        $xliff_parameters_template_id = filter_var($this->request->param('xliff_parameters_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $qa_model_template_id = filter_var($this->request->param('qa_model_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $qa_model_template = filter_var($this->request->param('qa_model_template'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $payable_rate_template_id = filter_var(
-            $this->request->param('payable_rate_template_id'),
-            FILTER_SANITIZE_NUMBER_INT
-        );
+        $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
+
         $mt_quality_value_in_editor = filter_var(
             $this->request->param('mt_quality_value_in_editor'),
             FILTER_SANITIZE_NUMBER_INT,
@@ -277,16 +242,13 @@ class CreateProjectController extends AbstractStatefulKleinController
                 'options' => ['default' => 85, 'min_range' => 76, 'max_range' => 102]
             ]
         ); // used to set the absolute value of an MT match (previously fixed to 85)
-        $payable_rate_template = filter_var(
-            $this->request->param('payable_rate_template'),
-            FILTER_SANITIZE_SPECIAL_CHARS
-        );
+
+        $payable_rate_template = filter_var($this->request->param('payable_rate_template'), FILTER_SANITIZE_SPECIAL_CHARS);
         $private_keys_list = filter_var(
             $this->request->param('private_keys_list'),
             FILTER_SANITIZE_FULL_SPECIAL_CHARS,
             ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]
         );
-
 
         // MT SETTINGS
         $enable_mt_analysis = filter_var($this->request->param('enable_mt_analysis'), FILTER_VALIDATE_BOOLEAN);
@@ -294,55 +256,19 @@ class CreateProjectController extends AbstractStatefulKleinController
         // The UI ask for case-sensitive matching true/false.
         // Negate the validated boolean because the MMT default flag is ignore_glossary_case.
         // true becomes false, false (or invalid/missing) becomes true.
-        $mmt_ignore_glossary_case = filter_var(
-            $this->request->param('mmt_ignore_glossary_case'),
-            FILTER_VALIDATE_BOOLEAN
-        );
+        $mmt_ignore_glossary_case = filter_var($this->request->param('mmt_ignore_glossary_case'), FILTER_VALIDATE_BOOLEAN);
 
-        $mmt_glossaries = filter_var(
-            $this->request->param('mmt_glossaries'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $mmt_activate_context_analyzer = filter_var(
-            $this->request->param('mmt_activate_context_analyzer'),
-            FILTER_VALIDATE_BOOLEAN
-        );
-        $intento_provider = filter_var(
-            $this->request->param('intento_provider'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $intento_routing = filter_var(
-            $this->request->param('intento_routing'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $lara_glossaries = filter_var(
-            $this->request->param('lara_glossaries'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $deepl_id_glossary = filter_var(
-            $this->request->param('deepl_id_glossary'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $deepl_formality = filter_var(
-            $this->request->param('deepl_formality'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
-        $deepl_engine_type = filter_var(
-            $this->request->param('deepl_engine_type'),
-            FILTER_SANITIZE_SPECIAL_CHARS,
-            ['flags' => FILTER_FLAG_STRIP_LOW]
-        );
+        $mmt_glossaries = filter_var($this->request->param('mmt_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $mmt_activate_context_analyzer = filter_var($this->request->param('mmt_activate_context_analyzer'), FILTER_VALIDATE_BOOLEAN);
+        $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
         $array_keys = json_decode($private_keys_list, true);
-        $array_keys = array_values(
-            array_merge($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous'])
-        );
+        $array_keys = array_values(array_merge($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous']));
 
         $arFiles = explode('@@SEP@@', html_entity_decode($file_name, ENT_QUOTES, 'UTF-8'));
 

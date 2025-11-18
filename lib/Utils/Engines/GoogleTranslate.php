@@ -15,9 +15,9 @@ class GoogleTranslate extends AbstractEngine
 {
 
     protected array $_config = [
-            'q'      => null,
-            'source' => null,
-            'target' => null,
+        'q' => null,
+        'source' => null,
+        'target' => null,
     ];
 
     public function __construct($engineRecord)
@@ -31,33 +31,33 @@ class GoogleTranslate extends AbstractEngine
     /**
      * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
      * @return array
      * @throws Exception
      */
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
     {
-        $all_args                = func_get_args();
-        $all_args[ 1 ][ 'text' ] = $all_args[ 1 ][ 'q' ];
+        $all_args = func_get_args();
+        $all_args[1]['text'] = $all_args[1]['q'];
 
         if (is_string($rawValue)) {
             $decoded = json_decode($rawValue, true);
-            if (isset($decoded[ "data" ])) {
-                return $this->_composeMTResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
+            if (isset($decoded["data"])) {
+                return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
             } else {
                 $decoded = [
-                        'error' => [
-                                'code'    => $decoded[ "code" ],
-                                'message' => $decoded[ "message" ]
-                        ]
+                    'error' => [
+                        'code' => $decoded["code"],
+                        'message' => $decoded["message"]
+                    ]
                 ];
             }
         } else {
-            $resp = json_decode($rawValue[ "error" ][ "response" ], true);
-            if (isset($resp[ "error" ][ "code" ]) && isset($resp[ "error" ][ "message" ])) {
-                $rawValue[ "error" ][ "code" ]    = $resp[ "error" ][ "code" ];
-                $rawValue[ "error" ][ "message" ] = $resp[ "error" ][ "message" ];
+            $resp = json_decode($rawValue["error"]["response"], true);
+            if (isset($resp["error"]["code"]) && isset($resp["error"]["message"])) {
+                $rawValue["error"]["code"] = $resp["error"]["code"];
+                $rawValue["error"]["message"] = $resp["error"]["message"];
             }
             $decoded = $rawValue; // already decoded in case of error
         }
@@ -70,22 +70,22 @@ class GoogleTranslate extends AbstractEngine
         $parameters = [];
 
         if ($this->client_secret != '' && $this->client_secret != null) {
-            $parameters[ 'key' ] = $this->client_secret;
+            $parameters['key'] = $this->client_secret;
         }
 
-        if (isset($_config[ 'key' ]) and !empty($_config[ 'key' ])) {
-            $parameters[ 'key' ] = $_config[ 'key' ];
+        if (isset($_config['key']) and !empty($_config['key'])) {
+            $parameters['key'] = $_config['key'];
         }
 
-        $parameters[ 'target' ] = $this->_fixLangCode($_config[ 'target' ]);
-        $parameters[ 'source' ] = $this->_fixLangCode($_config[ 'source' ]);
-        $parameters[ 'q' ]      = $_config[ 'segment' ];
+        $parameters['target'] = $this->_fixLangCode($_config['target']);
+        $parameters['source'] = $this->_fixLangCode($_config['source']);
+        $parameters['q'] = $_config['segment'];
 
         $this->_setAdditionalCurlParams(
-                [
-                        CURLOPT_POST       => true,
-                        CURLOPT_POSTFIELDS => http_build_query($parameters)
-                ]
+            [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => http_build_query($parameters)
+            ]
         );
 
         $this->call("translate_relative_url", $parameters, true);
@@ -114,9 +114,10 @@ class GoogleTranslate extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array {
+    public function getConfigurationParameters(): array
+    {
         return [
-                'enable_mt_analysis',
+            'enable_mt_analysis',
         ];
     }
 

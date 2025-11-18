@@ -34,12 +34,12 @@ class FileImportAndStatusResponse extends TMSAbstractResponse
 
     public function __construct($response)
     {
-        $this->responseData    = $response[ 'responseData' ] ?? '';
-        $this->responseStatus  = (int)($response[ 'responseStatus' ] ?? 200);
-        $this->responseDetails = $response[ 'responseDetails' ] ?? '';
+        $this->responseData = $response['responseData'] ?? '';
+        $this->responseStatus = (int)($response['responseStatus'] ?? 200);
+        $this->responseDetails = $response['responseDetails'] ?? '';
 
         if ($this->responseStatus == 200 || $this->responseStatus == 202) {
-            $this->id = empty($this->responseData[ 'uuid' ]) ? $this->responseData[ 'UUID' ] : $this->responseData[ 'uuid' ];
+            $this->id = empty($this->responseData['uuid']) ? $this->responseData['UUID'] : $this->responseData['uuid'];
         } else {
             LoggerFactory::doJsonLog($response);
         }

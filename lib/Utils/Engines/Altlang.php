@@ -65,10 +65,10 @@ class Altlang extends AbstractEngine
         $all_args = func_get_args();
 
         if (is_string($rawValue)) {
-            $original = json_decode($all_args[ 1 ][ "data" ] ?? '', true);
-            $decoded  = json_decode($rawValue, true);
+            $original = json_decode($all_args[1]["data"] ?? '', true);
+            $decoded = json_decode($rawValue, true);
 
-            if (isset($decoded[ 'error' ])) {
+            if (isset($decoded['error'])) {
                 return $this->_composeMTResponseAsMatch('', [
                     'error' => [
                         'message' => $decoded['error'],
@@ -78,17 +78,17 @@ class Altlang extends AbstractEngine
             }
 
             $decoded = [
-                    'data' => [
-                            "translations" => [
-                                    ['translatedText' => $decoded[ "text" ]]
-                            ]
+                'data' => [
+                    "translations" => [
+                        ['translatedText' => $decoded["text"]]
                     ]
+                ]
             ];
         } else {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch($original[ "text" ] ?? '', $decoded);
+        return $this->_composeMTResponseAsMatch($original["text"] ?? '', $decoded);
     }
 
     /**
@@ -105,44 +105,44 @@ class Altlang extends AbstractEngine
     public function get(array $_config)
     {
         // Fallback on MyMemory in case of not supported source/target combination
-        if (!$this->checkLanguageCombination($_config[ 'source' ], $_config[ 'target' ])) {
+        if (!$this->checkLanguageCombination($_config['source'], $_config['target'])) {
             /** @var MyMemory $myMemory */
             $myMemory = EnginesFactory::getInstance(1);
 
-            $result       = $myMemory->get($_config);
+            $result = $myMemory->get($_config);
             $this->result = $result->get_matches_as_array();
 
             return $this->result;
         }
 
         $parameters = [
-                'func'     => 'translate',
-                "mtsystem" => "apertium",
-                "context"  => "altlang",
-                "src"      => $this->convertLanguageCode($_config[ 'source' ]),
-                "trg"      => $this->convertLanguageCode($_config[ 'target' ]),
-                "text"     => $_config[ 'segment' ]
+            'func' => 'translate',
+            "mtsystem" => "apertium",
+            "context" => "altlang",
+            "src" => $this->convertLanguageCode($_config['source']),
+            "trg" => $this->convertLanguageCode($_config['target']),
+            "text" => $_config['segment']
         ];
 
         if ($this->client_secret != '' && $this->client_secret != null) {
-            $parameters[ 'key' ] = $this->client_secret;
+            $parameters['key'] = $this->client_secret;
         }
 
         $this->_setAdditionalCurlParams([
-                CURLOPT_POST           => true,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HTTPHEADER     => ['Content-Type: application/json']
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json']
         ]);
 
         $this->call("translate_relative_url", $parameters, true, true);
 
         // fix missing info
-        if (empty($this->result[ 'raw_segment' ])) {
-            $this->result[ 'raw_segment' ] = $_config[ 'segment' ];
+        if (empty($this->result['raw_segment'])) {
+            $this->result['raw_segment'] = $_config['segment'];
         }
 
-        if (empty($this->result[ 'segment' ])) {
-            $this->result[ 'segment' ] = $_config[ 'segment' ];
+        if (empty($this->result['segment'])) {
+            $this->result['segment'] = $_config['segment'];
         }
 
         return $this->result;
@@ -192,18 +192,18 @@ class Altlang extends AbstractEngine
     private function checkLanguageCombination(string $source, string $target): bool
     {
         $supportedCombinations = [
-                ['pt_BR' => 'pt_PT'],
-                ['pt_PT' => 'pt_BR'],
-                ['fr_CA' => 'fr_FR'],
-                ['fr_FR' => 'fr_CA'],
-                ['en_US' => 'en_GB'],
-                ['en_GB' => 'en_US'],
-                ['es_LA' => 'es_ES'],
-                ['es_ES' => 'es_LA'],
+            ['pt_BR' => 'pt_PT'],
+            ['pt_PT' => 'pt_BR'],
+            ['fr_CA' => 'fr_FR'],
+            ['fr_FR' => 'fr_CA'],
+            ['en_US' => 'en_GB'],
+            ['en_GB' => 'en_US'],
+            ['es_LA' => 'es_ES'],
+            ['es_ES' => 'es_LA'],
         ];
 
         $combination = [
-                $this->convertLanguageCode($source) => $this->convertLanguageCode($target)
+            $this->convertLanguageCode($source) => $this->convertLanguageCode($target)
         ];
 
         return in_array($combination, $supportedCombinations);

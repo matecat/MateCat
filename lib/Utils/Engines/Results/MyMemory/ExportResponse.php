@@ -22,12 +22,12 @@ class ExportResponse extends TMSAbstractResponse
 
     public function __construct($response)
     {
-        $this->responseStatus  = (int)($response[ 'responseStatus' ] ?? 200);
-        $this->responseData    = $response[ 'responseData' ] ?? '';
-        $this->id              = $response[ 'responseData' ][ 'id' ] ?? '';
-        $this->resourceLink    = $response[ 'resourceLink' ] ?? '';
-        $this->responseDetails = $response[ 'status' ] ?? '';
-        $this->estimatedTime   = $response[ 'estimated_time' ] ?? '';
+        $this->responseStatus = (int)($response['responseStatus'] ?? 200);
+        $this->responseData = $response['responseData'] ?? '';
+        $this->id = $response['responseData']['id'] ?? '';
+        $this->resourceLink = $response['resourceLink'] ?? '';
+        $this->responseDetails = $response['status'] ?? '';
+        $this->estimatedTime = $response['estimated_time'] ?? '';
     }
 
 } 

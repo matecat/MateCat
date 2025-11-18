@@ -81,7 +81,7 @@ interface EngineInterface
     public function importMemory(string $filePath, string $memoryKey, UserStruct $user);
 
     /**
-     * @param array      $projectRow
+     * @param array $projectRow
      * @param array|null $segments
      *
      * @return void

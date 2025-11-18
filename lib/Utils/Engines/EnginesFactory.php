@@ -31,8 +31,8 @@ class EnginesFactory
             throw new Exception("Missing id engineRecord", -1);
         }
 
-        $engineDAO        = new EngineDAO(Database::obtain());
-        $engineStruct     = EngineStruct::getStruct();
+        $engineDAO = new EngineDAO(Database::obtain());
+        $engineStruct = EngineStruct::getStruct();
         $engineStruct->id = $id;
 
         $eng = $engineDAO->setCacheTTL(60 * 5)->read($engineStruct);
@@ -40,7 +40,7 @@ class EnginesFactory
         /**
          * @var $engineRecord EngineStruct
          */
-        $engineRecord = $eng[ 0 ] ?? null;
+        $engineRecord = $eng[0] ?? null;
 
         if (empty($engineRecord)) {
             throw new Exception("Engine $id not found", -2);
@@ -59,7 +59,7 @@ class EnginesFactory
      */
     public static function createTempInstance(EngineStruct $engineRecord): EngineInterface
     {
-        $className                = self::getFullyQualifiedClassName($engineRecord->class_load);
+        $className = self::getFullyQualifiedClassName($engineRecord->class_load);
         $engineRecord->class_load = $className;
 
         return new $engineRecord->class_load($engineRecord);
@@ -84,8 +84,8 @@ class EnginesFactory
     /**
      * @template T of AbstractEngine
      *
-     * @param int              $engineId
-     * @param int              $uid
+     * @param int $engineId
+     * @param int $uid
      * @param ?class-string<T> $engineClass
      *
      * @return T
@@ -93,15 +93,15 @@ class EnginesFactory
      */
     public static function getInstanceByIdAndUser(int $engineId, int $uid, ?string $engineClass = null): AbstractEngine
     {
-        $engine       = self::getInstance($engineId);
+        $engine = self::getInstance($engineId);
         $engineRecord = $engine->getEngineRecord();
 
         if ($engineRecord->uid != $uid) {
-            throw new AuthorizationError( "Engine doesn't belong to the user" );
+            throw new AuthorizationError("Engine doesn't belong to the user");
         }
 
         if ($engineRecord->active == 0) {
-            throw new DomainException( "Engine is no longer active" );
+            throw new DomainException("Engine is no longer active");
         }
 
         if ($engineClass !== null and !is_a($engine, $engineClass, true)) {

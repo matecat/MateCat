@@ -21,22 +21,22 @@ class SmartMATE extends AbstractEngine
     use Oauth;
 
     protected $_auth_parameters = [
-            'client_id'     => null,
-            'client_secret' => null,
+        'client_id' => null,
+        'client_secret' => null,
 
         /**
          * Hardcoded params, from documentation
          * @see https://mt.smartmate.co/translate
          */
-            'grant_type'    => "client_credentials",
-            'scope'         => "translate"
+        'grant_type' => "client_credentials",
+        'scope' => "translate"
     ];
 
     protected array $_config = [
-            'segment'     => null,
-            'translation' => null,
-            'source'      => null,
-            'target'      => null,
+        'segment' => null,
+        'translation' => null,
+        'source' => null,
+        'target' => null,
     ];
 
     /**
@@ -54,13 +54,13 @@ class SmartMATE extends AbstractEngine
     {
         $l = explode("-", strtolower(trim($lang)));
 
-        return $l[ 0 ];
+        return $l[0];
     }
 
     protected function _formatAuthenticateError(array $objResponse): array
     {
         //format as a normal Translate Response and send to decoder to output the data
-        $objResponse[ 'error_description' ] = json_decode($objResponse[ 'error' ][ 'response' ])->error;
+        $objResponse['error_description'] = json_decode($objResponse['error']['response'])->error;
 
         return $objResponse;
     }
@@ -75,17 +75,17 @@ class SmartMATE extends AbstractEngine
         if (is_string($rawValue)) {
             $decoded = json_decode($rawValue, true);
             $decoded = [
-                    'data' => [
-                            "translations" => [
-                                    ['translatedText' => $decoded[ "translation" ]]
-                            ]
+                'data' => [
+                    "translations" => [
+                        ['translatedText' => $decoded["translation"]]
                     ]
+                ]
             ];
 
-            return $this->_composeMTResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
+            return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
         } else {
-            if ($rawValue[ 'error' ][ 'code' ] == 0 && $rawValue[ 'responseStatus' ] >= 400) {
-                $rawValue[ 'error' ][ 'code' ] = -$rawValue[ 'responseStatus' ];
+            if ($rawValue['error']['code'] == 0 && $rawValue['responseStatus'] >= 400) {
+                $rawValue['error']['code'] = -$rawValue['responseStatus'];
             }
 
             $this->logger->debug($rawValue);
@@ -117,8 +117,8 @@ class SmartMATE extends AbstractEngine
 
     protected function _checkAuthFailure(): bool
     {
-        $expiration   = (stripos($this->result[ 'error' ][ 'message' ] ?? '', 'token is expired') !== false);
-        $auth_failure = $this->result[ 'error' ][ 'code' ] < 0;
+        $expiration = (stripos($this->result['error']['message'] ?? '', 'token is expired') !== false);
+        $auth_failure = $this->result['error']['code'] < 0;
 
         return $expiration | $auth_failure;
     }
@@ -148,25 +148,25 @@ class SmartMATE extends AbstractEngine
     protected function _formatRecursionError(): array
     {
         return $this->_composeMTResponseAsMatch(
-                '',
-                [
-                        'error'          => [
-                                'code'     => -499,
-                                'message'  => "Client Closed Get",
-                                'response' => 'Maximum recursion limit reached'
-                            // Some useful info might still be contained in the response body
-                        ],
-                        'responseStatus' => 499
-                ] //return negative number
+            '',
+            [
+                'error' => [
+                    'code' => -499,
+                    'message' => "Client Closed Get",
+                    'response' => 'Maximum recursion limit reached'
+                    // Some useful info might still be contained in the response body
+                ],
+                'responseStatus' => 499
+            ] //return negative number
         );
     }
 
     protected function _fillCallParameters(array $_config): array
     {
-        $parameters           = [];
-        $parameters[ 'text' ] = $_config[ 'segment' ];
-        $parameters[ 'from' ] = $_config[ 'source' ];
-        $parameters[ 'to' ]   = $_config[ 'target' ];
+        $parameters = [];
+        $parameters['text'] = $_config['segment'];
+        $parameters['from'] = $_config['source'];
+        $parameters['to'] = $_config['target'];
 
         return $parameters;
     }
@@ -174,9 +174,10 @@ class SmartMATE extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array {
+    public function getConfigurationParameters(): array
+    {
         return [
-                'enable_mt_analysis',
+            'enable_mt_analysis',
         ];
     }
 }

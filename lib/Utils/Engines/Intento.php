@@ -12,14 +12,14 @@ use Utils\Registry\AppConfig;
 class Intento extends AbstractEngine
 {
 
-    const string INTENTO_USER_AGENT   = 'Intento.MatecatPlugin/1.0.0';
+    const string INTENTO_USER_AGENT = 'Intento.MatecatPlugin/1.0.0';
     const string INTENTO_PROVIDER_KEY = 'd3ic8QPYVwRhy6IIEHi6yiytaORI2kQk';
-    const string INTENTO_API_URL      = 'https://api.inten.to';
+    const string INTENTO_API_URL = 'https://api.inten.to';
 
     protected array $_config = [
-            'segment' => null,
-            'source'  => null,
-            'target'  => null
+        'segment' => null,
+        'source' => null,
+        'target' => null
     ];
 
     private $apiKey;
@@ -40,10 +40,10 @@ class Intento extends AbstractEngine
 
         $extra = $engineRecord->getExtraParamsAsArray();
 
-        $this->apiKey           = $extra[ 'apikey' ] ?? null;
-        $this->provider         = $extra[ 'provider' ] ?? [];
-        $this->providerKey      = $extra[ 'providerkey' ] ?? null;
-        $this->providerCategory = $extra[ 'providercategory' ] ?? null;
+        $this->apiKey = $extra['apikey'] ?? null;
+        $this->provider = $extra['provider'] ?? [];
+        $this->providerKey = $extra['providerkey'] ?? null;
+        $this->providerCategory = $extra['providercategory'] ?? null;
     }
 
     /**
@@ -55,13 +55,13 @@ class Intento extends AbstractEngine
     {
         $r = explode("-", strtolower(trim($lang)));
 
-        return $r[ 0 ];
+        return $r[0];
     }
 
     /**
      * @param mixed $rawValue
-     * @param null  $parameters
-     * @param null  $function
+     * @param null $parameters
+     * @param null $function
      *
      * @return array
      * @throws Exception
@@ -72,26 +72,26 @@ class Intento extends AbstractEngine
             $result = json_decode($rawValue, false);
 
             // sync calls
-            if (isset($result->results) and !empty($result->results[ 0 ])) {
+            if (isset($result->results) and !empty($result->results[0])) {
                 $decoded = [
-                        'data' => [
-                                'translations' => [
-                                        ['translatedText' => $result->results[ 0 ]]
-                                ]
+                    'data' => [
+                        'translations' => [
+                            ['translatedText' => $result->results[0]]
                         ]
+                    ]
                 ];
             } // async calls
             elseif ($result and isset($result->id)) {
                 $id = $result->id;
 
                 if (isset($result->response) and !empty($result->response) and isset($result->done) and $result->done) {
-                    $text    = $result->response[ 0 ]->results[ 0 ];
+                    $text = $result->response[0]->results[0];
                     $decoded = [
-                            'data' => [
-                                    'translations' => [
-                                            ['translatedText' => $text]
-                                    ]
+                        'data' => [
+                            'translations' => [
+                                ['translatedText' => $text]
                             ]
+                        ]
                     ];
                 } elseif (isset($result->done) and !$result->done) {
                     sleep(2);
@@ -99,15 +99,15 @@ class Intento extends AbstractEngine
 
                     return $this->_curl_async($cnf, $parameters, $function);
                 } elseif (isset($result->error) and !empty($result->error)) {
-                    $httpCode = $result->error->data[ 0 ]->response->body->error->code ?? 500;
-                    $message  = $result->error->data[ 0 ]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
+                    $httpCode = $result->error->data[0]->response->body->error->code ?? 500;
+                    $message = $result->error->data[0]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
 
                     $decoded = [
-                            'error' => [
-                                    'code'      => -2,
-                                    'message'   => $message,
-                                    'http_code' => $httpCode
-                            ]
+                        'error' => [
+                            'code' => -2,
+                            'message' => $message,
+                            'http_code' => $httpCode
+                        ]
                     ];
                 } else {
                     $cnf = ['async' => true, 'id' => $id];
@@ -116,73 +116,73 @@ class Intento extends AbstractEngine
                 }
             } else {
                 $decoded = [
-                        'error' => [
-                                'code'    => '-1',
-                                'message' => ''
-                        ]
+                    'error' => [
+                        'code' => '-1',
+                        'message' => ''
+                    ]
                 ];
             }
         } elseif ($rawValue and array_key_exists('responseStatus', $rawValue) and array_key_exists('error', $rawValue)) {
-            $_response_error = json_decode($rawValue[ 'error' ][ "response" ], true);
-            $decoded         = [
-                    'error' => [
-                            'code'    => array_key_exists('error', $_response_error) ? array_key_exists('code', $_response_error[ 'error' ]) ? -$_response_error[ 'error' ][ 'code' ] : '-1' : '-1',
-                            'message' => array_key_exists('error', $_response_error) ? array_key_exists('message', $_response_error[ 'error' ]) ? $_response_error[ 'error' ][ 'message' ] : '' : ''
-                    ]
+            $_response_error = json_decode($rawValue['error']["response"], true);
+            $decoded = [
+                'error' => [
+                    'code' => array_key_exists('error', $_response_error) ? array_key_exists('code', $_response_error['error']) ? -$_response_error['error']['code'] : '-1' : '-1',
+                    'message' => array_key_exists('error', $_response_error) ? array_key_exists('message', $_response_error['error']) ? $_response_error['error']['message'] : '' : ''
+                ]
             ];
         } else {
             $decoded = [
-                    'error' => [
-                            'code'    => '-1',
-                            'message' => ''
-                    ]
+                'error' => [
+                    'code' => '-1',
+                    'message' => ''
+                ]
             ];
         }
 
-        return $this->_composeMTResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch($parameters['context']['text'], $decoded);
     }
 
     /**
      * @throws Exception
      */
-    public function get( array $_config ) {
-
-        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+    public function get(array $_config)
+    {
+        $_config['source'] = $this->_fixLangCode($_config['source']);
+        $_config['target'] = $this->_fixLangCode($_config['target']);
 
         $parameters = [];
         if (!empty($this->apiKey)) {
             $_headers = ['apikey: ' . $this->apiKey, 'Content-Type: application/json'];
         }
 
-        $parameters[ 'context' ][ 'from' ] = $_config[ 'source' ];
-        $parameters[ 'context' ][ 'to' ]   = $_config[ 'target' ];
-        $parameters[ 'context' ][ 'text' ] = $_config[ 'segment' ];
+        $parameters['context']['from'] = $_config['source'];
+        $parameters['context']['to'] = $_config['target'];
+        $parameters['context']['text'] = $_config['segment'];
 
-        if (isset($_config[ 'pid' ])) {
+        if (isset($_config['pid'])) {
             $metadataDao = new MetadataDao();
 
             // custom provider or custom routing
-            $customProvider = $metadataDao->get( $_config[ 'pid' ], 'intento_provider', 86400 );
-            $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
+            $customProvider = $metadataDao->get($_config['pid'], 'intento_provider', 86400);
+            $customRouting = $metadataDao->get($_config['pid'], 'intento_routing', 86400);
 
-            if ( $customProvider !== null ) {
-                $parameters[ 'service' ][ 'async' ]    = true;
-                $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
-            } elseif ( $customRouting !== null and $customRouting->value !== "smart_routing" ) {
-                $parameters[ 'service' ][ 'async' ]   = true;
-                $parameters[ 'service' ][ 'routing' ] = "best_quality";
+            if ($customProvider !== null) {
+                $parameters['service']['async'] = true;
+                $parameters['service']['provider'] = $customProvider->value;
+            } elseif ($customRouting !== null and $customRouting->value !== "smart_routing") {
+                $parameters['service']['async'] = true;
+                $parameters['service']['routing'] = "best_quality";
             }
         }
 
         $this->_setIntentoUserAgent(); //Set Intento User Agent
 
         $this->_setAdditionalCurlParams(
-                [
-                        CURLOPT_POST       => true,
-                        CURLOPT_POSTFIELDS => json_encode($parameters),
-                        CURLOPT_HTTPHEADER => $_headers ?? []
-                ]
+            [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($parameters),
+                CURLOPT_HTTPHEADER => $_headers ?? []
+            ]
         );
 
         $this->call("translate_relative_url", $parameters, true);
@@ -195,7 +195,7 @@ class Intento extends AbstractEngine
      */
     protected function _curl_async($config, $parameters = null, $function = null)
     {
-        $id = $config[ 'id' ];
+        $id = $config['id'];
 
         if (!empty($this->apiKey)) {
             $_headers = ['apikey: ' . $this->apiKey, 'Content-Type: application/json'];
@@ -204,15 +204,15 @@ class Intento extends AbstractEngine
         $this->_setIntentoUserAgent(); //Set Intento User Agent
 
         $this->_setAdditionalCurlParams(
-                [
-                        CURLOPT_HTTPHEADER => $_headers ?? []
-                ]
+            [
+                CURLOPT_HTTPHEADER => $_headers ?? []
+            ]
         );
 
-        $url      = self::INTENTO_API_URL . '/operations/' . $id;
+        $url = self::INTENTO_API_URL . '/operations/' . $id;
         $curl_opt = [
-                CURLOPT_HTTPGET => true,
-                CURLOPT_TIMEOUT => static::GET_REQUEST_TIMEOUT
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => static::GET_REQUEST_TIMEOUT
         ];
         $rawValue = $this->_call($url, $curl_opt);
 
@@ -242,7 +242,7 @@ class Intento extends AbstractEngine
      */
     private function _setIntentoUserAgent()
     {
-        $this->curl_additional_params[ CURLOPT_USERAGENT ] = self::INTENTO_USER_AGENT . ' ' . AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
+        $this->curl_additional_params[CURLOPT_USERAGENT] = self::INTENTO_USER_AGENT . ' ' . AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
     }
 
     /**
@@ -260,52 +260,52 @@ class Intento extends AbstractEngine
 
         try {
             $redisHandler = new RedisHandler();
-            $conn         = $redisHandler->getConnection();
-            $cacheKey     = 'IntentoRoutings-' . $this->apiKey;
-            $result       = $conn->get($cacheKey);
+            $conn = $redisHandler->getConnection();
+            $cacheKey = 'IntentoRoutings-' . $this->apiKey;
+            $result = $conn->get($cacheKey);
 
             if ($result) {
                 return json_decode($result, true);
             }
 
             $_api_url = self::INTENTO_API_URL . '/routing-designer';
-            $curl     = curl_init($_api_url);
-            $_params  = [
-                    CURLOPT_HTTPHEADER     => ['apikey: ' . $this->apiKey, 'Content-Type: application/json'],
-                    CURLOPT_HEADER         => false,
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
-                    CURLOPT_CONNECTTIMEOUT => 10,
-                    CURLOPT_SSL_VERIFYPEER => true,
-                    CURLOPT_SSL_VERIFYHOST => 2
+            $curl = curl_init($_api_url);
+            $_params = [
+                CURLOPT_HTTPHEADER => ['apikey: ' . $this->apiKey, 'Content-Type: application/json'],
+                CURLOPT_HEADER => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
             ];
 
             curl_setopt_array($curl, $_params);
             $response = curl_exec($curl);
-            $result   = json_decode($response);
+            $result = json_decode($response);
             curl_close($curl);
             $_routing = [];
 
             // needed by the UI
             $_routing['smart_routing'] = [
-                    'id' => 'smart_routing',
-                    'name' => 'smart_routing',
-                    'description' => "Intento Smart Routing is a patented feature within the Intento Translator platform that automatically directs your translation requests to the best-performing machine translation (MT) engine for your specific language pair and content, or a combination of engines, to provide the most accurate and contextually relevant translation.",
+                'id' => 'smart_routing',
+                'name' => 'smart_routing',
+                'description' => "Intento Smart Routing is a patented feature within the Intento Translator platform that automatically directs your translation requests to the best-performing machine translation (MT) engine for your specific language pair and content, or a combination of engines, to provide the most accurate and contextually relevant translation.",
             ];
 
-            if ( $result and $result->data ) {
-                foreach ( $result->data as $item ) {
-                    $_routing[ $item->name ] = [
-                            'id'          => $item->rt_id,
-                            'name'        => $item->name,
-                            'description' => $item->description,
+            if ($result and $result->data) {
+                foreach ($result->data as $item) {
+                    $_routing[$item->name] = [
+                        'id' => $item->rt_id,
+                        'name' => $item->name,
+                        'description' => $item->description,
                     ];
                 }
             }
 
-            ksort( $_routing, SORT_STRING | SORT_FLAG_CASE );
+            ksort($_routing, SORT_STRING | SORT_FLAG_CASE);
 
-            $conn->set( $cacheKey, json_encode( $_routing ) );
+            $conn->set($cacheKey, json_encode($_routing));
             $conn->expire($cacheKey, 60 * 60); // 1 hour
 
             return $_routing;
@@ -323,34 +323,34 @@ class Intento extends AbstractEngine
     public static function getProviderList()
     {
         $redisHandler = new RedisHandler();
-        $conn         = $redisHandler->getConnection();
-        $result       = $conn->get('IntentoProviders');
+        $conn = $redisHandler->getConnection();
+        $result = $conn->get('IntentoProviders');
         if ($result) {
             return json_decode($result, true);
         }
 
         $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true';
-        $curl     = curl_init($_api_url);
-        $_params  = [
-                CURLOPT_HTTPHEADER     => ['apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json'],
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
-                CURLOPT_CONNECTTIMEOUT => 10,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
+        $curl = curl_init($_api_url);
+        $_params = [
+            CURLOPT_HTTPHEADER => ['apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json'],
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2
         ];
         curl_setopt_array($curl, $_params);
         $response = curl_exec($curl);
-        $result   = json_decode($response);
+        $result = json_decode($response);
         curl_close($curl);
         $_providers = [];
 
-        if ( $result ) {
-            foreach ( $result as $value ) {
-                $example                  = (array)$value->auth;
-                $example                  = json_encode($example);
-                $_providers[ $value->id ] = ['id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example' => $example];
+        if ($result) {
+            foreach ($result as $value) {
+                $example = (array)$value->auth;
+                $example = json_encode($example);
+                $_providers[$value->id] = ['id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example' => $example];
             }
             ksort($_providers);
         }
@@ -363,11 +363,12 @@ class Intento extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array {
+    public function getConfigurationParameters(): array
+    {
         return [
-                'enable_mt_analysis',
-                'intento_routing',
-                'intento_provider',
+            'enable_mt_analysis',
+            'intento_routing',
+            'intento_provider',
         ];
     }
 }

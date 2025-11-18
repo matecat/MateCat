@@ -16,7 +16,7 @@ class KeysGlossaryResponse extends TMSAbstractResponse
             throw new Exception("Invalid Response", -1);
         }
 
-        $this->entries = $response[ 'entries' ] ?? [];
+        $this->entries = $response['entries'] ?? [];
     }
 
     /**

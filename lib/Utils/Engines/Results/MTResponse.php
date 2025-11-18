@@ -8,20 +8,20 @@ class MTResponse
 
     public string $translatedText = "";
     public string $sentence_confidence;
-    public mixed  $error          = "";
+    public mixed $error = "";
 
     public function __construct(array $result)
     {
         $this->error = new ErrorResponse();
         if (array_key_exists("data", $result)) {
-            $this->translatedText = $result[ 'data' ][ 'translations' ][ 0 ][ 'translatedText' ];
-            if (isset($result[ 'data' ][ 'translations' ][ 0 ][ 'sentence_confidence' ])) {
-                $this->sentence_confidence = $result[ 'data' ][ 'translations' ][ 0 ][ 'sentence_confidence' ];
+            $this->translatedText = $result['data']['translations'][0]['translatedText'];
+            if (isset($result['data']['translations'][0]['sentence_confidence'])) {
+                $this->sentence_confidence = $result['data']['translations'][0]['sentence_confidence'];
             }
         }
 
         if (array_key_exists("error", $result)) {
-            $this->error = new ErrorResponse($result[ 'error' ]);
+            $this->error = new ErrorResponse($result['error']);
         }
     }
 

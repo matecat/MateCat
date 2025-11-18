@@ -72,20 +72,20 @@ class Headers implements Iterator
      * Constructor for the Headers class.
      * Initializes the pre-shared key, TUID, and translation origin.
      *
-     * @param string|null $tuid              The TUID value.
+     * @param string|null $tuid The TUID value.
      * @param string|null $translationOrigin The translation origin value (optional).
      */
     public function __construct(?string $tuid = null, ?string $translationOrigin = null)
     {
         if ($tuid) {
-            $this->headers[ self::LARA_TUID_HEADER ] = new HeaderField(self::LARA_TUID_HEADER, $tuid);
+            $this->headers[self::LARA_TUID_HEADER] = new HeaderField(self::LARA_TUID_HEADER, $tuid);
         }
 
         if ($translationOrigin) {
-            $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] = new HeaderField(self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin);
+            $this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER] = new HeaderField(self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin);
         }
 
-        $this->keys     = array_keys($this->headers);
+        $this->keys = array_keys($this->headers);
         $this->position = 0;
     }
 
@@ -96,8 +96,8 @@ class Headers implements Iterator
      */
     public function getTuid(): ?HeaderField
     {
-        if (isset($this->headers[ self::LARA_TUID_HEADER ])) {
-            return clone $this->headers[ self::LARA_TUID_HEADER ];
+        if (isset($this->headers[self::LARA_TUID_HEADER])) {
+            return clone $this->headers[self::LARA_TUID_HEADER];
         }
 
         return null;
@@ -110,8 +110,8 @@ class Headers implements Iterator
      */
     public function getTranslationOrigin(): ?HeaderField
     {
-        if (isset($this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ])) {
-            return clone $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ];
+        if (isset($this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER])) {
+            return clone $this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER];
         }
 
         return null;
@@ -126,8 +126,8 @@ class Headers implements Iterator
      */
     public function setTuid(string $tuid): Headers
     {
-        $this->headers[ self::LARA_TUID_HEADER ] = new HeaderField(self::LARA_TUID_HEADER, $tuid);
-        $this->keys                              = array_keys($this->headers);
+        $this->headers[self::LARA_TUID_HEADER] = new HeaderField(self::LARA_TUID_HEADER, $tuid);
+        $this->keys = array_keys($this->headers);
 
         return $this;
     }
@@ -141,8 +141,8 @@ class Headers implements Iterator
      */
     public function setTranslationOrigin(string $translationOrigin): Headers
     {
-        $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] = new HeaderField(self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin);
-        $this->keys                                            = array_keys($this->headers);
+        $this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER] = new HeaderField(self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin);
+        $this->keys = array_keys($this->headers);
 
         return $this;
     }
@@ -154,7 +154,7 @@ class Headers implements Iterator
      */
     public function current(): HeaderField
     {
-        return $this->headers[ $this->keys[ $this->position ] ];
+        return $this->headers[$this->keys[$this->position]];
     }
 
     /**
@@ -164,7 +164,7 @@ class Headers implements Iterator
      */
     public function key(): string
     {
-        return $this->keys[ $this->position ];
+        return $this->keys[$this->position];
     }
 
     /**
@@ -194,7 +194,7 @@ class Headers implements Iterator
      */
     public function valid(): bool
     {
-        return isset($this->keys[ $this->position ]);
+        return isset($this->keys[$this->position]);
     }
 
     /**
@@ -212,7 +212,7 @@ class Headers implements Iterator
 
         foreach ($this->headers as $header) {
             if (!empty($header->getValue())) {
-                $headers[ $header->getKey() ] = $header->getValue();
+                $headers[$header->getKey()] = $header->getValue();
             }
         }
 

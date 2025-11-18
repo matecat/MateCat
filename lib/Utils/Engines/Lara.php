@@ -106,16 +106,16 @@ class Lara extends AbstractEngine
         $engine = EnginesFactory::createTempInstance($mmtStruct);
         $this->mmt_GET_Fallback = $engine;
 
-        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
-            $mmtStruct                   = MMTStruct::getStruct();
-            $mmtStruct->type             = EngineConstants::MT;
+        if (!empty($extraParams['MMT-License'])) {
+            $mmtStruct = MMTStruct::getStruct();
+            $mmtStruct->type = EngineConstants::MT;
             $mmtStruct->extra_parameters = [
-                    'MMT-License'      => $extraParams[ 'MMT-License' ],
+                'MMT-License' => $extraParams['MMT-License'],
             ];
             /**
              * @var MMTEngine $engine
              */
-            $engine                       = EnginesFactory::createTempInstance( $mmtStruct );
+            $engine = EnginesFactory::createTempInstance($mmtStruct);
             $this->mmt_SET_PrivateLicense = $engine;
         }
 
@@ -441,7 +441,7 @@ class Lara extends AbstractEngine
         }
 
 //         let MMT to have the last word on requeue
-        return empty( $this->mmt_SET_PrivateLicense ) || $this->mmt_SET_PrivateLicense->update( $_config );
+        return empty($this->mmt_SET_PrivateLicense) || $this->mmt_SET_PrivateLicense->update($_config);
 
         return true;
     }
@@ -468,14 +468,13 @@ class Lara extends AbstractEngine
     {
         $clientMemories = $this->_getClient()->memories;
         try {
+            if (!empty($this->mmt_SET_PrivateLicense)) {
+                $memoryKeyToUpdate = new MemoryKeyStruct();
+                $memoryKeyToUpdate->tm_key = new TmKeyStruct(['key' => str_replace('ext_my_', '', $memoryKey['externalId'])]);
 
-            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-                $memoryKeyToUpdate         = new MemoryKeyStruct();
-                $memoryKeyToUpdate->tm_key = new TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
-
-                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
-                if ( !empty( $memoryMMT ) ) {
-                    $this->mmt_SET_PrivateLicense->deleteMemory( $memoryMMT );
+                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine($memoryKeyToUpdate);
+                if (!empty($memoryMMT)) {
+                    $this->mmt_SET_PrivateLicense->deleteMemory($memoryMMT);
                 }
             }
 
@@ -532,10 +531,9 @@ class Lara extends AbstractEngine
 
         $fp_out = null;
 
-        if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-            $this->mmt_SET_PrivateLicense->importMemory( $filePath, $memoryKey, $user );
+        if (!empty($this->mmt_SET_PrivateLicense)) {
+            $this->mmt_SET_PrivateLicense->importMemory($filePath, $memoryKey, $user);
         }
-
     }
 
     /**
@@ -619,7 +617,8 @@ class Lara extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getConfigurationParameters(): array {
+    public function getConfigurationParameters(): array
+    {
         return [
             'enable_mt_analysis',
             'lara_glossaries',
