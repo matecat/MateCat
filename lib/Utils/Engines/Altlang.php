@@ -23,17 +23,22 @@ class Altlang extends AbstractEngine
 {
 
     protected array $_config = [
-            'segment' => null,
-            'source'  => null,
-            'target'  => null,
-            'key'     => null,
+        'segment' => null,
+        'source' => null,
+        'target' => null,
+        'key' => null,
     ];
 
+    /**
+     * @throws Exception
+     */
     public function __construct($engineRecord)
     {
         parent::__construct($engineRecord);
         if ($this->getEngineRecord()->type != EngineConstants::MT) {
-            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
+            throw new Exception(
+                "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}"
+            );
         }
     }
 
@@ -50,7 +55,7 @@ class Altlang extends AbstractEngine
     /**
      * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
      * @return array
      * @throws Exception
@@ -64,7 +69,12 @@ class Altlang extends AbstractEngine
             $decoded  = json_decode($rawValue, true);
 
             if (isset($decoded[ 'error' ])) {
-                return []; // error
+                return $this->_composeMTResponseAsMatch('', [
+                    'error' => [
+                        'message' => $decoded['error'],
+                        'code' => -1
+                    ]
+                ]); // error
             }
 
             $decoded = [
@@ -202,10 +212,10 @@ class Altlang extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array
+    public function getConfigurationParameters(): array
     {
         return [
-                'enable_mt_analysis',
+            'enable_mt_analysis',
         ];
     }
 }

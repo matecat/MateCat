@@ -7,7 +7,6 @@ use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use stdClass;
 
-#[AllowDynamicProperties]
 class ValidatorObject implements ArrayAccess
 {
 
@@ -47,7 +46,7 @@ class ValidatorObject implements ArrayAccess
      * Magic setter
      *
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function __set(string $name, mixed $value)
     {
@@ -69,4 +68,14 @@ class ValidatorObject implements ArrayAccess
 
         return $this->$name;
     }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function __isset(string $name): bool
+    {
+        return property_exists($this, $name);
+    }
+
 }

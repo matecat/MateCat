@@ -441,7 +441,7 @@ class Lara extends AbstractEngine
         }
 
 //         let MMT to have the last word on requeue
-//        return empty( $this->mmt_SET_PrivateLicense ) || $this->mmt_SET_PrivateLicense->update( $_config );
+        return empty( $this->mmt_SET_PrivateLicense ) || $this->mmt_SET_PrivateLicense->update( $_config );
 
         return true;
     }
@@ -619,8 +619,7 @@ class Lara extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array
-    {
+    public function getConfigurationParameters(): array {
         return [
             'enable_mt_analysis',
             'lara_glossaries',

@@ -205,8 +205,12 @@ class GlossaryFilesController extends KleinController
     /**
      * @throws Exception
      */
-    public function download(): void
-    {
+    public function download(): void {
+
+        if ( !isset( $this->tm_key ) or $this->tm_key === "" ) {
+            throw new InvalidArgumentException( "`TM key` field is mandatory" );
+        }
+
         $result = $this->TMService->glossaryExport($this->tm_key, $this->name, $this->getUser()->getEmail(), $this->getUser()->fullName());
 
         if (!$this->response->isLocked() && in_array($result->responseStatus, [200, 202], true)) {

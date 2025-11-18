@@ -34,7 +34,7 @@ class MMTEngineTest extends AbstractTest {
          * engine insertion
          */
         $sql_insert_engine_valid = <<<H
-INSERT INTO engines (name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid) VALUES ('ModernMT Full', 'MT', 'ModernMT for subscribers', 'http://MMT', 'translate', 'memories/content', 'memories/content', null, '{"tmx_import_relative_url":"memories\\/content","api_key_check_auth_url":"users\\/me","user_update_activate":"memories\\/connect","context_get":"context-vector"}', 'MMT', '{"MMT-License":"XXXXX","MMT-preimport":false,"MMT-context-analyzer":false}', '2', 14, 1, 1886428310);
+INSERT INTO engines (name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid) VALUES ('ModernMT Full', 'MT', 'ModernMT for subscribers', 'http://MMT', 'translate', 'memories/content', 'memories/content', null, '{"tmx_import_relative_url":"memories\\/content","api_key_check_auth_url":"users\\/me","user_update_activate":"memories\\/connect","context_get":"context-vector"}', 'MMT', '{"MMT-License":"XXXXX","MMT-context-analyzer":false}', '2', 14, 1, 1886428310);
 H;
 
         $sql_insert_engine_NOT_valid = <<<H

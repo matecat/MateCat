@@ -27,21 +27,19 @@ class EngineConstants
     const string TM   = "TM";
     const string NONE = "NONE";
 
-    const string MY_MEMORY        = 'MyMemory';
-    const string MICROSOFT_HUB    = 'MicrosoftHub';
-    const string APERTIUM         = 'Apertium';
-    const string ALTLANG          = 'Altlang';
-    const string SMART_MATE       = 'SmartMATE';
-    const string YANDEX_TRANSLATE = 'YandexTranslate';
-    const string MMT              = 'MMT';
-    const string LARA             = 'Lara';
-    const string DEEPL            = 'DeepL';
-    const string GOOGLE_TRANSLATE = 'GoogleTranslate';
-    const string INTENTO          = 'Intento';
+    const MY_MEMORY        = 'Match';
+    const APERTIUM         = 'Apertium';
+    const ALTLANG          = 'Altlang';
+    const SMART_MATE       = 'SmartMATE';
+    const YANDEX_TRANSLATE = 'YandexTranslate';
+    const MMT              = 'MMT';
+    const LARA             = 'Lara';
+    const DEEPL            = 'DeepL';
+    const GOOGLE_TRANSLATE = 'GoogleTranslate';
+    const INTENTO          = 'Intento';
 
     protected static array $ENGINES_LIST = [
             MyMemory::class        => MyMemory::class,
-            MicrosoftHub::class    => MicrosoftHub::class,
             Apertium::class        => Apertium::class,
             Altlang::class         => Altlang::class,
             SmartMATE::class       => SmartMATE::class,
@@ -59,13 +57,6 @@ class EngineConstants
     public static function getAvailableEnginesList(): array
     {
         return self::$ENGINES_LIST;
-    }
-
-    public static function setInEnginesList($engine): void
-    {
-        if (defined('self::' . $engine)) {
-            self::$ENGINES_LIST[ $engine ] = $engine;
-        }
     }
 
 }

@@ -3,13 +3,11 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
-use Lara\LaraException;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\AltlangStruct;
@@ -20,22 +18,21 @@ use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\Engines\Structs\IntentoStruct;
 use Model\Engines\Structs\LaraStruct;
 use Model\Engines\Structs\MicrosoftHubStruct;
+use Model\Engines\Structs\MMTStruct;
 use Model\Engines\Structs\SmartMATEStruct;
 use Model\Engines\Structs\YandexTranslateStruct;
-use Model\Exceptions\NotFoundException;
-use Model\Exceptions\ValidationError;
 use Model\Users\MetadataDao;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Lara;
-use Utils\Engines\MMT\MMTServiceApi;
-use Utils\Engines\MMT\MMTServiceApiException;
-use Utils\Registry\AppConfig;
-use Utils\TaskRunner\Exceptions\EndQueueException;
-use Utils\TaskRunner\Exceptions\ReQueueException;
-use Utils\Validator\DeepLValidator;
+use Utils\Engines\Validators\AltLangEngineValidator;
+use Utils\Engines\Validators\DeepLEngineValidator;
+use Utils\Engines\Validators\GoogleTranslateEngineValidator;
+use Utils\Engines\Validators\IntentoEngineValidator;
+use Utils\Engines\Validators\LaraEngineValidator;
+use Utils\Engines\Validators\MMTEngineValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
 class EngineController extends KleinController
 {
@@ -46,11 +43,6 @@ class EngineController extends KleinController
     }
 
     /**
-     * @throws ReQueueException
-     * @throws AuthenticationError
-     * @throws ValidationError
-     * @throws NotFoundException
-     * @throws EndQueueException
      * @throws ReflectionException
      * @throws Exception
      */
@@ -84,23 +76,8 @@ class EngineController extends KleinController
                 $newEngineStruct->type                                 = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'DeepL-Auth-Key' ] = $engineData[ 'client_id' ];
 
-                DeepLValidator::validate($newEngineStruct);
+                (new DeepLEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
-                break;
-
-
-            case strtolower(EngineConstants::MICROSOFT_HUB):
-
-                /**
-                 * Create a record of type MicrosoftHub
-                 */
-                $newEngineStruct = MicrosoftHubStruct::getStruct();
-
-                $newEngineStruct->name                            = $name;
-                $newEngineStruct->uid                             = $this->user->uid;
-                $newEngineStruct->type                            = EngineConstants::MT;
-                $newEngineStruct->extra_parameters[ 'client_id' ] = $engineData[ 'client_id' ];
-                $newEngineStruct->extra_parameters[ 'category' ]  = $engineData[ 'category' ];
                 break;
 
             case strtolower(EngineConstants::APERTIUM):
@@ -128,6 +105,8 @@ class EngineController extends KleinController
                 $newEngineStruct->uid                                 = $this->user->uid;
                 $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
+
+                (new AltlangEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -172,6 +151,8 @@ class EngineController extends KleinController
                 $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
+                (new GoogleTranslateEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+
                 break;
 
             case strtolower(EngineConstants::INTENTO):
@@ -183,6 +164,9 @@ class EngineController extends KleinController
                 $newEngineStruct->uid                          = $this->user->uid;
                 $newEngineStruct->type                         = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'apikey' ] = $engineData[ 'secret' ];
+
+                (new IntentoEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+
                 break;
 
             case strtolower(EngineConstants::LARA):
@@ -197,25 +181,28 @@ class EngineController extends KleinController
                 $newEngineStruct->extra_parameters[ 'Lara-AccessKeySecret' ] = $engineData[ 'secret' ];
                 $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $engineData[ 'mmt-license' ];
 
+                (new LaraEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+
+                break;
+
+            case strtolower( EngineConstants::MMT ):
+                /**
+                 * Create a record of type MMT
+                 */
+                $newEngineStruct = MMTStruct::getStruct();
+
+                $newEngineStruct->uid                                        = $this->user->uid;
+                $newEngineStruct->type                                       = EngineConstants::MT;
+                $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $engineData[ 'secret' ];
+                $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = true;
+
+                (new MMTEngineValidator())->validate(ValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
+
                 break;
 
             default:
-
-                // MMT
-                $newEngineStruct = $this->featureSet->filter(
-                        'buildNewEngineStruct',
-                        (object)[
-                                'featureSet'   => $this->featureSet,
-                                'providerName' => $provider,
-                                'logged_user'  => $this->user,
-                                'engineData'   => $engineData
-                        ]
-                );
-                break;
-        }
-
-        if (!$newEngineStruct) {
             throw new DomainException("Engine not allowed", -4);
+
         }
 
         $engineList      = EngineConstants::getAvailableEnginesList();
@@ -257,108 +244,13 @@ class EngineController extends KleinController
 
                 throw new DomainException($mt_result[ 'error' ]);
             }
-        } elseif ($newEngineStruct instanceof IntentoStruct) {
-            $newTestCreatedMT    = EnginesFactory::createTempInstance($newCreatedDbRowStruct);
-            $config              = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
-            $config[ 'segment' ] = "Hello World";
-            $config[ 'source' ]  = "en-US";
-            $config[ 'target' ]  = "fr-FR";
 
-            $mt_result = $newTestCreatedMT->get($config);
-
-            if (isset($mt_result[ 'error' ][ 'code' ])) {
-                switch ($mt_result[ 'error' ][ 'code' ]) {
-                    // wrong provider credentials
-                    case -2:
-                        $code    = $mt_result[ 'error' ][ 'http_code' ] ?? 413;
-                        $message = $mt_result[ 'error' ][ 'message' ];
-                        break;
-
-                    // not valid license
-                    case -403:
-                        $code    = 413;
-                        $message = "The Intento license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using Intento as MT engine.";
-                        break;
-
-                    default:
-                        $code    = 500;
-                        $message = "Intento license not valid, please verify its validity and try again";
-                        break;
-                }
-
-                $engineDAO->delete($newCreatedDbRowStruct);
-                $this->destroyUserEnginesCache();
-
-                throw new DomainException($message, $code);
-            }
-        } elseif ($newEngineStruct instanceof GoogleTranslateStruct) {
-            $newTestCreatedMT    = EnginesFactory::createTempInstance($newCreatedDbRowStruct);
-            $config              = $newTestCreatedMT->getConfigStruct();
-            $config[ 'segment' ] = "Hello World";
-            $config[ 'source' ]  = "en-US";
-            $config[ 'target' ]  = "fr-FR";
-            $config[ 'key' ]     = $newTestCreatedMT->client_secret ?? null;
-
-            $mt_result = $newTestCreatedMT->get($config);
-
-            if (isset($mt_result[ 'error' ][ 'code' ])) {
-                $engineDAO->delete($newCreatedDbRowStruct);
-                $this->destroyUserEnginesCache();
-
-                throw new DomainException($mt_result[ 'error' ][ 'message' ]);
-            }
         } elseif ($newEngineStruct instanceof LaraStruct) {
-            /**
-             * @var $newTestCreatedMT Lara
-             */
-            $newTestCreatedMT    = EnginesFactory::createTempInstance($newCreatedDbRowStruct);
-            $config              = $newTestCreatedMT->getConfigStruct();
-            $config[ 'segment' ] = "Hello World";
-            $config[ 'source' ]  = "en-US";
-            $config[ 'target' ]  = "it-IT";
-
-            try {
-                $newTestCreatedMT->get($config);
-            } catch (LaraException $e) {
-                $code    = $e->getCode();
-                $message = $e->getMessage();
-                $engineDAO->delete($newCreatedDbRowStruct);
-                $this->destroyUserEnginesCache();
-
-                throw new DomainException($message, $code);
-            }
-
-            // Check MMT License
-            $mmtLicense = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-License' ];
-
-            if (!empty($mmtLicense)) {
-                $mmtClient = MMTServiceApi::newInstance()
-                        ->setIdentity("Matecat", ltrim(AppConfig::$BUILD_NUMBER, 'v'))
-                        ->setLicense($mmtLicense);
-
-                try {
-                    $mmtClient->me();
-                } catch (MMTServiceApiException $e) {
-                    $code    = $e->getCode();
-                    $message = "ModernMT license not valid, please verify its validity and try again";
-                    $engineDAO->delete($newCreatedDbRowStruct);
-                    $this->destroyUserEnginesCache();
-
-                    throw new DomainException($message, $code);
-                }
-            }
-
             $UserMetadataDao = new MetadataDao();
             $UserMetadataDao->set($this->user->uid, $newCreatedDbRowStruct->class_load, $newCreatedDbRowStruct->id);
-        } else {
-            try {
-                $this->featureSet->run('postEngineCreation', $newCreatedDbRowStruct, $this->user);
-            } catch (Exception $e) {
-                $engineDAO->delete($newCreatedDbRowStruct);
-                $this->destroyUserEnginesCache();
-
-                throw new DomainException($e->getMessage(), $e->getCode());
-            }
+        } elseif( $newEngineStruct instanceof MMTStruct){
+            $UserMetadataDao = new MetadataDao();
+            $UserMetadataDao->set($this->user->uid, $newCreatedDbRowStruct->class_load, $newCreatedDbRowStruct->id);
         }
 
         $this->response->json([

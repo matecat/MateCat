@@ -79,7 +79,7 @@ class ProjectTemplateDao extends AbstractDao
         $default->tm                    = json_encode([]);
         $default->created_at            = date("Y-m-d H:i:s");
         $default->modified_at           = date("Y-m-d H:i:s");
-        $default->subfiltering_handlers = json_encode([]);
+        $default->subfiltering_handlers = json_encode( ["markup", "twig", "double_snail", "double_square", "double_percent"] );
 
         return $default;
     }
@@ -262,7 +262,7 @@ class ProjectTemplateDao extends AbstractDao
                     throw new Exception("Engine doesn't belong to the user.", 403);
                 }
 
-                if (isset($mt->extra) and !$engine->validateExtraParams($mt->extra)) {
+                if ( isset( $mt->extra ) and !$engine->validateConfigurationParams( $mt->extra ) ) {
                     throw new Exception("Engine config parameters are not valid.", 401);
                 }
             }

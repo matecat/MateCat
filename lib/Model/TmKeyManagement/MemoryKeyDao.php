@@ -15,6 +15,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Users\UserDao;
 use ReflectionException;
+use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
@@ -63,6 +64,29 @@ class MemoryKeyDao extends AbstractDao
         }
 
         return null;
+    }
+
+    /**
+     * @param int $uid
+     *
+     * @return MemoryKeyStruct[]
+     */
+    public static function getKeyringOwnerKeysByUid(int $uid): array
+    {
+        /*
+         * Take the keys of the user
+         */
+        $keyList = [];
+
+        try {
+            $_keyDao = new MemoryKeyDao(Database::obtain());
+            $dh = new MemoryKeyStruct(['uid' => $uid]);
+            $keyList = $_keyDao->read($dh);
+        } catch (Exception $e) {
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
+        }
+
+        return $keyList;
     }
 
     /**

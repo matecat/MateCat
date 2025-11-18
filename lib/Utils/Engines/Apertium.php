@@ -120,8 +120,7 @@ class Apertium extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array
-    {
+    public function getConfigurationParameters(): array {
         return [
                 'enable_mt_analysis',
         ];
