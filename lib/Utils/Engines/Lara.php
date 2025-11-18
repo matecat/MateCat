@@ -596,7 +596,7 @@ class Lara extends AbstractEngine {
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array {
+    public function getConfigurationParameters(): array {
         return [
                 'enable_mt_analysis',
                 'lara_glossaries',

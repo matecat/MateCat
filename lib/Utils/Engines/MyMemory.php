@@ -809,7 +809,7 @@ class MyMemory extends AbstractEngine {
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array {
+    public function getConfigurationParameters(): array {
         return [];
     }
 }

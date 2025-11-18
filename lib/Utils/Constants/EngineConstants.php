@@ -27,7 +27,6 @@ class EngineConstants {
     const NONE = "NONE";
 
     const MY_MEMORY        = 'Match';
-    const MICROSOFT_HUB    = 'MicrosoftHub';
     const APERTIUM         = 'Apertium';
     const ALTLANG          = 'Altlang';
     const SMART_MATE       = 'SmartMATE';
@@ -40,7 +39,6 @@ class EngineConstants {
 
     protected static array $ENGINES_LIST = [
             MyMemory::class        => MyMemory::class,
-            MicrosoftHub::class    => MicrosoftHub::class,
             Apertium::class        => Apertium::class,
             Altlang::class         => Altlang::class,
             SmartMATE::class       => SmartMATE::class,
@@ -57,12 +55,6 @@ class EngineConstants {
      */
     public static function getAvailableEnginesList(): array {
         return self::$ENGINES_LIST;
-    }
-
-    public static function setInEnginesList( $engine ) {
-        if ( defined( 'self::' . $engine ) ) {
-            self::$ENGINES_LIST[ $engine ] = $engine;
-        }
     }
 
 }

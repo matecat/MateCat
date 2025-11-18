@@ -43,11 +43,13 @@ use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
-use Utils\Engines\DeepL;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Intento;
-use Utils\Engines\Lara;
-use Utils\Engines\MMT;
+use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Engines\Validators\DeepLEngineOptionsValidator;
+use Utils\Engines\Validators\DeeplFormalityValidator;
+use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
@@ -61,7 +63,6 @@ use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
-use Utils\Validator\MMTValidator;
 
 class NewController extends KleinController {
 
@@ -192,7 +193,7 @@ class NewController extends KleinController {
         // MT Extra params
         $engine = EnginesFactory::getInstance( $request[ 'mt_engine' ] );
 
-        foreach ( $engine->getExtraParams() as $param ) {
+        foreach ($engine->getConfigurationParameters() as $param ) {
             if ( $request[ $param ] !== null ) {
                 $projectStructure[ $param ] = $request[ $param ];
             }
@@ -330,7 +331,6 @@ class NewController extends KleinController {
         // true becomes false, false (or invalid/missing) becomes true.
         $mmt_ignore_glossary_case               = filter_var( $this->request->param( 'mmt_ignore_glossary_case' ), FILTER_VALIDATE_BOOLEAN );
 
-        $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
         $intento_routing                        = filter_var( $this->request->param( 'intento_routing' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -372,7 +372,7 @@ class NewController extends KleinController {
 
         $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
         $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
-        [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
+        [ $tms_engine, $engineStruct ] = $this->validateEngines( $tms_engine, $mt_engine );
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
         [ $private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization ] = $this->validateTmAndKeys( $private_tm_key, $private_tm_key_json );
@@ -380,9 +380,29 @@ class NewController extends KleinController {
         $qaModelTemplate                       = $this->validateQaModelTemplate( $id_qa_model_template );
         $payableRateModelTemplate              = $this->validatePayableRateTemplate( $payable_rate_template_name, $payable_rate_template_id );
         $qaModel                               = $this->validateQaModel( $id_qa_model );
-        $mt_engine                             = $this->validateUserMTEngine( $mt_engine );
         $mmt_glossaries                        = $this->validateMMTGlossaries( $mmt_glossaries );
-        $deepl_formality                       = $this->validateDeepLFormality( $deepl_formality );
+
+        (new DeepLEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'deepl_engine_type' => $deepl_engine_type,
+                    'deepl_formality' => $deepl_formality,
+                    'deepl_id_glossary' => $deepl_id_glossary
+                ]
+            )
+        );
+
+        (new IntentoEngineOptionsValidator())->validate(
+            EngineValidatorObject::fromArray(
+                [
+                    'engineStruct' => $engineStruct,
+                    'intento_provider' => $intento_provider,
+                    'intento_routing' => $intento_routing
+                ]
+            )
+        );
+
         $dialect_strict                        = $this->validateDialectStrictParam( $target_lang, $dialect_strict );
         $filters_extraction_parameters         = $this->validateFiltersExtractionParameters( $filters_extraction_parameters, $filters_extraction_parameters_template_id );
         $xliff_parameters                      = $this->validateXliffParameters( $xliff_parameters, $xliff_parameters_template_id );
@@ -455,16 +475,15 @@ class NewController extends KleinController {
                 'id_team'                                   => $id_team,
                 'team'                                      => $team,
                 'enable_mt_analysis'                        => $enable_mt_analysis,
-                'mmt_ignore_glossary_case'                  => $mmt_ignore_glossary_case,
-                'mmt_pre_import_tm'                         => $mmt_pre_import_tm,
-                'mmt_glossaries'                            => $mmt_glossaries,
-                'mmt_activate_context_analyzer'             => $mmt_activate_context_analyzer,
-                'intento_routing'                           => $intento_routing,
-                'intento_provider'                          => $intento_provider,
-                'lara_glossaries'                           => $lara_glossaries,
-                'deepl_id_glossary'                         => $deepl_id_glossary,
-                'deepl_formality'                           => $deepl_formality,
-                'deepl_engine_type'                         => $deepl_engine_type,
+                'mmt_ignore_glossary_case'                  => $mmt_ignore_glossary_case ?? null,
+                'mmt_glossaries'                            => $mmt_glossaries ?? null,
+                'mmt_activate_context_analyzer'             => $mmt_activate_context_analyzer ?? null,
+                'intento_routing'                           => $intento_routing ?? null,
+                'intento_provider'                          => $intento_provider ?? null,
+                'lara_glossaries'                           => $lara_glossaries ?? null,
+                'deepl_id_glossary'                         => $deepl_id_glossary ?? null,
+                'deepl_formality'                           => $deepl_formality ?? null,
+                'deepl_engine_type'                         => $deepl_engine_type ?? null,
                 'project_completion'                        => $project_completion,
                 'get_public_matches'                        => $get_public_matches,
                 'dialect_strict'                            => $dialect_strict,
@@ -573,6 +592,7 @@ class NewController extends KleinController {
             throw new InvalidArgumentException( "Invalid TM Engine.", -21 );
         }
 
+        $engineStruct = null;
         if ( $mt_engine > 1 ) {
 
             if ( !$this->userIsLogged ) {
@@ -580,14 +600,14 @@ class NewController extends KleinController {
             }
 
             try {
-                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage(), -2 );
             }
 
         }
 
-        return [ $tms_engine, $mt_engine ];
+        return [ $tms_engine, $engineStruct ];
     }
 
     /**
@@ -1033,25 +1053,6 @@ class NewController extends KleinController {
     }
 
     /**
-     * @param null $mt_engine
-     *
-     * @return string|null
-     * @throws Exception
-     */
-    private function validateUserMTEngine( $mt_engine = null ): ?string {
-        // any other engine than Match
-        if ( $mt_engine !== null and $mt_engine > 1 ) {
-            try {
-                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
-            } catch ( Exception $exception ) {
-                throw new InvalidArgumentException( $exception->getMessage() );
-            }
-        }
-
-        return $mt_engine;
-    }
-
-    /**
      * @param null $mmt_glossaries
      *
      * @return string|null
@@ -1061,7 +1062,7 @@ class NewController extends KleinController {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
 
-                ( new MMTValidator )->validate(
+                ( new MMTGlossaryValidator )->validate(
                         ValidatorObject::fromArray( [
                                 'glossaryString' => $mmtGlossaries,
                         ] )
@@ -1071,33 +1072,6 @@ class NewController extends KleinController {
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage() );
             }
-        }
-
-        return null;
-    }
-
-    /**
-     * Validate DeepL params
-     *
-     * @param null $deepl_formality
-     *
-     * @return string|null
-     */
-    private function validateDeepLFormality( $deepl_formality = null ): ?string {
-
-        if ( !empty( $deepl_formality ) ) {
-
-            $allowedFormalities = [
-                    'default',
-                    'prefer_less',
-                    'prefer_more'
-            ];
-
-            if ( !in_array( $deepl_formality, $allowedFormalities ) ) {
-                throw new InvalidArgumentException( "Incorrect DeepL formality value (default, prefer_less and prefer_more are the allowed values)" );
-            }
-
-            return $deepl_formality;
         }
 
         return null;

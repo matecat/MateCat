@@ -57,7 +57,6 @@ class MetaDataController extends KleinController {
         $myExtraKeys = [
                 'enable_mt_analysis',
                 'mmt_glossaries',
-                'mmt_pre_import_tm',
                 'mmt_activate_context_analyzer',
                 'mmt_ignore_glossary_case',
                 'lara_glossaries',

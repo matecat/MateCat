@@ -2,6 +2,8 @@
 
 namespace Utils\Engines;
 
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use DomainException;
 use Exception;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
@@ -93,11 +95,11 @@ class EnginesFactory {
         $engineRecord = $engine->getEngineRecord();
 
         if ( $engineRecord->uid != $uid ) {
-            throw new Exception( "Engine doesn't belong to the user" );
+            throw new AuthorizationError( "Engine doesn't belong to the user" );
         }
 
         if ( $engineRecord->active == 0 ) {
-            throw new Exception( "Engine is no longer active" );
+            throw new DomainException( "Engine is no longer active" );
         }
 
         if ( $engineClass !== null and !is_a( $engine, $engineClass, true ) ) {
