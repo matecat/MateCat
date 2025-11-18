@@ -31,6 +31,7 @@ use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -171,6 +172,23 @@ class Lara extends AbstractEngine
     }
 
     /**
+     * @param array $config
+     * @return array
+     */
+    private function configureContribution(array $config = []): array
+    {
+        // Branch-specific values
+        if ($this->_isAnalysis) {
+            $config['keys'] = $this->_reMapKeyList($config['id_user'] ?? []);
+        } else {
+            //get the Owner Keys from the Job
+            $config['keys'] = $this->_reMapKeyList($config['keys'] ?? []);
+        }
+
+        return $config;
+    }
+
+    /**
      * @inheritDoc
      *
      * @param array $_config
@@ -190,12 +208,12 @@ class Lara extends AbstractEngine
         // init lara client and mmt fallback
         $client = $this->_getClient();
 
-        $_lara_keys = $this->_reMapKeyList($_config['keys']);
+        $_config = $this->configureContribution($_config);
 
         try {
             // call lara
             $translateOptions = new TranslateOptions();
-            $translateOptions->setAdaptTo($_lara_keys);
+            $translateOptions->setAdaptTo($_config['keys']);
             $translateOptions->setMultiline(false);
             $translateOptions->setContentType('application/xliff+xml');
             $headers = new Headers();
@@ -263,7 +281,7 @@ class Lara extends AbstractEngine
                 'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
                 'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
                 'q' => $request_translation,
-                'adapt_to' => $_lara_keys,
+                'adapt_to' => $_config['keys'],
                 'source' => $_config['source'],
                 'target' => $_config['target'],
                 'content_type' => 'application/xliff+xml',
@@ -435,7 +453,6 @@ class Lara extends AbstractEngine
 //         let MMT to have the last word on requeue
         return empty($this->mmt_SET_PrivateLicense) || $this->mmt_SET_PrivateLicense->update($_config);
 
-        return true;
     }
 
     /**
@@ -576,17 +593,9 @@ class Lara extends AbstractEngine
      */
     protected function _reMapKeyList(array $_keys = []): array
     {
-        if (!empty($_keys)) {
-            if (!is_array($_keys)) {
-                $_keys = [$_keys];
-            }
-
-            $_keys = array_map(function ($key) {
+        return array_map(function ($key) {
                 return 'ext_my_' . $key;
             }, $_keys);
-        }
-
-        return $_keys;
     }
 
     /**
