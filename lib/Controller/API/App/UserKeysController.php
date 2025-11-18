@@ -75,8 +75,6 @@ class UserKeysController extends KleinController
         $mkDao             = $this->getMkDao();
         $userMemoryKeys    = $mkDao->create($memoryKeyToUpdate);
 
-        $this->featureSet->run('postTMKeyCreation', [$userMemoryKeys], $this->user->uid);
-
         $this->response->json([
                 'errors'  => [],
                 'data'    => $userMemoryKeys,

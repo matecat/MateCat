@@ -645,8 +645,6 @@ class ProjectManager
 
         $this->projectStructure[ 'project_features' ] = new ArrayObject($this->projectStructure[ 'project_features' ]);
 
-        $features = new FeatureSet($this->_getRequestedFeatures());
-        $features->run('sanitizeProjectStructureInCreation', $this->projectStructure);
     }
 
     /**
@@ -1280,15 +1278,9 @@ class ProjectManager
     {
         $memoryFiles = [];
 
-        if (empty($this->projectStructure[ 'private_tm_key' ])) {
-            return;
-        }
-
-        if (!isset($this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ])) {
-            return;
-        }
-
-        if (empty($this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ])) {
+        // If there is no private TM key defined in the project structure,
+        // or the nested indexes don't exist, stop and do nothing.
+        if (empty($this->projectStructure['private_tm_key'][0]['key'] ?? null)) {
             return;
         }
 
@@ -2390,7 +2382,7 @@ class ProjectManager
                 // get metadata
                 $meta     = isset($this->projectStructure[ 'array_files_meta' ][ $pos ]) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
-                $fid      = ProjectManagerModel::insertFile($this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta);
+                $fid = ProjectManagerModel::insertFile($this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path);
 
                 if ($this->gdriveSession) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName($originalFileName);
@@ -3067,25 +3059,16 @@ class ProjectManager
             }
         }
 
-
         //check if the MyMemory keys provided by the user are already associated to him.
-
-
         $mkDao = new MemoryKeyDao($this->dbHandler);
-
-        $searchMemoryKey      = new MemoryKeyStruct();
-        $searchMemoryKey->uid = $this->projectStructure[ 'uid' ];
-
-        $userMemoryKeys = $mkDao->read($searchMemoryKey);
-
-        $userTmKeys             = [];
+        $userMemoryKeys = $mkDao->getKeyringOwnerKeysByUid($this->projectStructure['uid']);
+        $userTmKeys = [];
         $memoryKeysToBeInserted = [];
 
         //extract user tm keys
         foreach ($userMemoryKeys as $_memoKey) {
             $userTmKeys[] = $_memoKey->tm_key->key;
         }
-
 
         foreach ($this->projectStructure[ 'private_tm_key' ] as $_tmKey) {
             if (!in_array($_tmKey[ 'key' ], $userTmKeys)) {
@@ -3112,9 +3095,6 @@ class ProjectManager
         }
         try {
             $mkDao->createList($memoryKeysToBeInserted);
-
-            $featuresSet = new FeatureSet();
-            $featuresSet->run('postTMKeyCreation', $memoryKeysToBeInserted, $this->projectStructure[ 'uid' ]);
         } catch (Exception $e) {
             $this->_log($e->getMessage(), $e);
         }

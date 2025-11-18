@@ -11,7 +11,6 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Plugins\Features\Mmt as MMTFeature;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -117,7 +116,6 @@ class MMT extends AbstractEngine
         }
 
         $client = $this->_getClient();
-        $_keys = $this->_reMapKeyList($_config['keys'] ?? []);
         $metadataDao = new ProjectsMetadataDao();
 
         $glossaries = null;
@@ -140,7 +138,7 @@ class MMT extends AbstractEngine
             }
         }
 
-        $_config = $this->configureAnalysisContribution($_config);
+        $_config = $this->configureContribution($_config);
 
         try {
             $translation = $client->translate(
@@ -148,7 +146,7 @@ class MMT extends AbstractEngine
                 $_config['target'],
                 $_config['segment'],
                 $_config['mt_context'] ?? null,
-                $_keys,
+                $_config['keys'],
                 $_config['job_id'] ?? null,
                 static::GET_REQUEST_TIMEOUT,
                 $_config['priority'] ?? null,
@@ -219,7 +217,7 @@ class MMT extends AbstractEngine
                 $_config['session']
             );
         } catch (MMTServiceApiRequestException $e) {
-            // MMT license expired/changed (401) or account deleted (403) or whatever HTTP exception
+            // MMT license expired/changed (401), or the account is deleted (403), or whatever HTTP exception
             $this->logger->debug($e->getMessage());
 
             return true;
@@ -292,7 +290,7 @@ class MMT extends AbstractEngine
     public function importMemory(string $filePath, string $memoryKey, UserStruct $user)
     {
         $client = $this->_getClient();
-        $response = $client->getMemory('x_mm-' . trim($memoryKey));
+        $response = $client->getMemory('x_mm-' . trim($memoryKey)); //Throw an exception if the key is not synced
 
         if (empty($response)) {
             return null;
@@ -325,7 +323,6 @@ class MMT extends AbstractEngine
     {
         $pid = $projectRow['id'];
 
-        // @TODO ho fatto il fallback
         $metadataDao = new ProjectsMetadataDao();
         $context_analyzer = $metadataDao->get($pid, "mmt_activate_context_analyzer") ? $metadataDao->get(
             $pid,
@@ -670,26 +667,50 @@ class MMT extends AbstractEngine
      *
      * @return array|null
      * @throws ReflectionException
+     * @throws Exception
      */
-    private function configureAnalysisContribution(?array $config = []): ?array
+    private function configureContribution(?array $config = []): ?array
     {
         $id_job = $config['job_id'] ?? null;
+        $cacheTtl = 60 * 60 * 24 * 30;
 
-        if ($id_job and $this->_isAnalysis) {
-            $contextRs = (new MetadataDao())->setCacheTTL(60 * 60 * 24 * 30)->getByIdJob($id_job, 'mt_context');
-            $mt_context = @array_pop($contextRs);
+        // Common metadata loading
+        $metadataDao = new MetadataDao();
+        $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
+        $mt_context = array_pop($contextRs);
             if (!empty($mt_context)) {
                 $config['mt_context'] = $mt_context->value;
             }
 
-            $config['secret_key'] = MMTFeature::getG2FallbackSecretKey();
+        // Common config values
+        $config['secret_key'] = self::getG2FallbackSecretKey();
+
+        // Branch-specific values
+        if ($id_job && $this->_isAnalysis) {
+            $config['keys'] = $this->_reMapKeyList($config['id_user'] ?? []);
             $config['priority'] = 'background';
-            $config['keys'] = $config['id_user'] ?? [];
+        } else {
+            //get the Owner Keys from the Job
+            $config['keys'] = $this->_reMapKeyList($config['keys']);
+            $config['job_id'] = $id_job;
+            $config['priority'] = 'normal';
         }
 
         return $config;
     }
+
+    public static function getG2FallbackSecretKey()
+    {
+        $secret_key = ['secret_key' => null];
+        $config_file_path = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
+        if (file_exists($config_file_path)) {
+            $secret_key = parse_ini_file($config_file_path);
+        }
+
+        return $secret_key['secret_key'];
+    }
+
 
     /**
      * @inheritDoc

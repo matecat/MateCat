@@ -36,7 +36,6 @@ class PluginsLoader
             FeatureCodes::PROJECT_COMPLETION,
             FeatureCodes::TRANSLATION_VERSIONS,
             FeatureCodes::REVIEW_EXTENDED,
-            FeatureCodes::MMT,
             FeatureCodes::SECOND_PASS_REVIEW
     ];
 

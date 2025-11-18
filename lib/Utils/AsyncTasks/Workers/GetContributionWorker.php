@@ -15,6 +15,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -464,9 +465,6 @@ class GetContributionWorker extends AbstractWorker
                 $mt_engine = $contributionStruct->getMTEngine($featureSet);
                 $config    = $mt_engine->getConfigStruct();
 
-                //if a callback is not set only the first argument is returned, get the config params from the callback
-                $config = $featureSet->filter('beforeGetContribution', $config, $mt_engine, $jobStruct); //MMT
-
                 $config[ 'pid' ]                 = $jobStruct->id_project;
                 $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
                 $config[ 'source' ]              = $jobStruct->source;
@@ -482,6 +480,14 @@ class GetContributionWorker extends AbstractWorker
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
                 $config[ 'tuid' ]                = $jobStruct->id . ":" . $contributionStruct->segmentId;
+
+                $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
+                $config['keys'] = array_map(function ($tm_key) {
+                    /**
+                     * @var $tm_key MemoryKeyStruct
+                     */
+                    return $tm_key->key;
+                }, $tm_keys);
 
                 if ($contributionStruct->mt_evaluation) {
                     $config[ 'include_score' ] = $contributionStruct->mt_evaluation;

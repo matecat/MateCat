@@ -187,14 +187,6 @@ class Lara extends AbstractEngine
             return [];
         }
 
-        $tm_keys = TmKeyManager::getOwnerKeys([$_config['all_job_tm_keys'] ?? '[]'], 'r');
-        $_config['keys'] = array_map(function ($tm_key) {
-            /**
-             * @var $tm_key MemoryKeyStruct
-             */
-            return $tm_key->key;
-        }, $tm_keys);
-
         // init lara client and mmt fallback
         $client = $this->_getClient();
 

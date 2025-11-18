@@ -162,13 +162,12 @@ class SetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array                  $config
+     * @param array $config
      * @param SetContributionRequest $contributionStruct
-     * @param int                    $id_mt_engine
+     * @param int $id_mt_engine
      *
-     * @throws ReQueueException
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws ReQueueException
      */
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 1): void
     {

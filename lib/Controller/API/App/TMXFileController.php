@@ -48,8 +48,6 @@ class TMXFileController extends KleinController
             $TMService->addTmxInMyMemory($file, $this->user);
             $uuids[] = ["uuid" => $file->getUuid(), "name" => $file->getName()];
 
-            $this->featureSet->run('postPushTMX', $file, $this->user);
-
             /*
              * We update the KeyRing only if this is NOT the Default MyMemory Key
              *
