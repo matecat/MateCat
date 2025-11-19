@@ -170,7 +170,7 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
               className="grey-button create-glossary-button"
               onClick={openGlossaryPage}
             >
-              <IconAdd size={18} />
+              <IconAdd size={16} />
               Create a glossary on Lara
             </button>
           </div>
