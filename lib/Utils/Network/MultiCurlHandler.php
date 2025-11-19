@@ -96,16 +96,15 @@ class MultiCurlHandler {
      */
     public function multiCurlCloseAll() {
 
-        if ( is_resource( $this->multi_handler ) ) {
-
-            foreach ( $this->curl_handlers as $curl_handler ) {
-                curl_multi_remove_handle( $this->multi_handler, $curl_handler );
-                if ( is_resource( $curl_handler ) ) {
-                    curl_close( $curl_handler );
+        if ($this->multi_handler != null) {
+            foreach ($this->curl_handlers as $curl_handler) {
+                curl_multi_remove_handle($this->multi_handler, $curl_handler);
+                if ($curl_handler != null) {
+                    curl_close($curl_handler);
                     $curl_handler = null;
                 }
             }
-            curl_multi_close( $this->multi_handler );
+            curl_multi_close($this->multi_handler);
             $this->multi_handler = null;
         }
 
@@ -293,20 +292,12 @@ class MultiCurlHandler {
      */
     public function addResource( $curl_resource, ?string $tokenHash = null ): ?string {
 
-        if ( $tokenHash === null ) {
-            $tokenHash = md5( uniqid( '', true ) );
+        if ($tokenHash === null) {
+            $tokenHash = md5(uniqid('', true));
         }
 
-        if ( is_resource( $curl_resource ) ) {
-            if ( get_resource_type( $curl_resource ) == 'curl' ) {
-                curl_multi_add_handle( $this->multi_handler, $curl_resource );
-                $this->curl_handlers[ $tokenHash ] = $curl_resource;
-            } else {
-                throw new LogicException( __CLASS__ . " - " . "Provided resource is not a valid Curl resource" );
-            }
-        } else {
-            throw new LogicException( __CLASS__ . " - " . var_export( $curl_resource, true ) . " is not a valid resource type." );
-        }
+        curl_multi_add_handle($this->multi_handler, $curl_resource);
+        $this->curl_handlers[ $tokenHash ] = $curl_resource;
 
         return $tokenHash;
 
