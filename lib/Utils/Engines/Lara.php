@@ -458,7 +458,19 @@ class Lara extends AbstractEngine {
                 }
             }
 
-            return $clientMemories->delete( trim( $memoryKey[ 'id' ] ) )->jsonSerialize();
+            $time_start = microtime(true);
+            $res = $clientMemories->delete(trim($memoryKey['id']))->jsonSerialize();
+            $time_end = microtime(true);
+            $time = $time_end - $time_start;
+
+            $this->logger->debug( [
+                'LARA REQUEST'    => "DELETE https://api.laratranslate.com/memories/{$memoryKey[ 'id' ]}",
+                'timing'          => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
+                'keys'            => $memoryKey,
+            ] );
+
+            return $res;
+
         } catch ( LaraApiException $e ) {
             if ( $e->getCode() == 404 ) {
                 return [];
@@ -486,7 +498,7 @@ class Lara extends AbstractEngine {
         $clientMemories = $this->_getClient()->memories;
 
         if ( !$clientMemories->get( 'ext_my_' . trim( $memoryKey ) ) ) {
-            return null;
+            throw new RuntimeException('Lara: Memory ' . 'ext_my_' . trim($memoryKey) . ' 404 not found.');
         }
 
         $fp_out = gzopen( "$filePath.gz", 'wb9' );
