@@ -1,7 +1,5 @@
-import React, {useRef} from 'react'
+import React from 'react'
 import {useForm} from 'react-hook-form'
-import Tooltip from '../../../../common/Tooltip'
-import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import Checkmark from '../../../../../../img/icons/Checkmark'
 import {
   Button,
@@ -18,9 +16,6 @@ export const ModernMt = ({
   error,
   isRequestInProgress,
 }) => {
-  const infoIcon1 = useRef()
-  const infoIcon2 = useRef()
-  const infoIcon3 = useRef()
   const {
     register,
     handleSubmit,
@@ -84,7 +79,9 @@ export const ModernMt = ({
             {errors.secret && (
               <span className="field-error">Required field</span>
             )}
-            {error && <span className={'mt-error'}>{error.message}</span>}
+            {typeof error?.message === 'string' && (
+              <span className="field-error">{error?.message}</span>
+            )}
           </div>
           <div className="provider-field container-actions">
             <Button
