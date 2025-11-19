@@ -8,7 +8,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Match;
+use Utils\Tools\Matches;
 
 
 /**
@@ -336,7 +336,7 @@ Z;
 
 
         /**
-         * @var Match
+         * @var Matches
          */
         $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );

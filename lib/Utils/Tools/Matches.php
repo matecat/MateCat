@@ -2,7 +2,7 @@
 
 namespace Utils\Tools;
 
-class Match {
+class Matches {
 
     public static function get( $seg1, $seg2, $language = false ) {
 

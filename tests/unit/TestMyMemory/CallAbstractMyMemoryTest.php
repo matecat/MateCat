@@ -7,7 +7,7 @@ use Utils\Engines\AbstractEngine;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
-use Utils\Tools\Match;
+use Utils\Tools\Matches;
 
 
 /**
@@ -20,7 +20,7 @@ use Utils\Tools\Match;
 class CallAbstractMyMemoryTest extends AbstractTest {
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject | Match
+     * @var PHPUnit_Framework_MockObject_MockObject | Matches
      */
     protected $engine_MyMemory;
 
