@@ -91,7 +91,7 @@ class GetMyMemoryTest extends AbstractTest {
 
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        
+
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -216,7 +216,7 @@ TAB;
         $this->assertNull( $result->responseData[ 'match' ] );
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        
+
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -360,7 +360,7 @@ TAB;
          */
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        
+
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -515,7 +515,7 @@ TAB;
          */
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        
+
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -587,7 +587,7 @@ TAB;
 
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        
+
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
