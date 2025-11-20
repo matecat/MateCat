@@ -33,7 +33,7 @@ export const LaraGlossaryRow = ({row, setRows, isReadOnly}) => {
 
   return (
     <Fragment>
-      <div className="align-center">
+      <div>
         <input
           checked={isActive}
           onChange={onChangeIsActive}

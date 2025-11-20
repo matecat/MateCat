@@ -24,16 +24,12 @@ class FiltersConfigTemplateController extends KleinController {
     /**
      * @param $json
      *
-     * @throws InvalidValue
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
-     * @throws \Swaggest\JsonSchema\Exception
      */
     private function validateJSON( $json ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-        $validator             = new JSONValidator( $jsonSchema, true );
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
         $validator->validate( $validatorObject );
     }
 

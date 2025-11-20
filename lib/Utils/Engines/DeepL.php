@@ -11,6 +11,13 @@ use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 
 class DeepL extends AbstractEngine {
+
+    const ALLOWED_MODEL_TYPES = [
+            "latency_optimized",
+            "quality_optimized",
+            "prefer_quality_optimized",
+    ];
+
     private ?string $apiKey = null;
 
     public function setApiKey( $apiKey ) {
@@ -53,7 +60,7 @@ class DeepL extends AbstractEngine {
                 'match'           => "85%",
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
-        ] ) )->getMatches( 1, [], $source, $target );
+        ] ) )->getMatches( 1 );
     }
 
     /**
@@ -74,8 +81,14 @@ class DeepL extends AbstractEngine {
 
             // glossaries (only for DeepL)
             $metadataDao     = new MetadataDao();
+            // null coalescing operator is used to avoid errors when validating the engine for the first time
             $deepLFormality  = $metadataDao->get( $_config[ 'pid' ], 'deepl_formality', 86400 );
             $deepLIdGlossary = $metadataDao->get( $_config[ 'pid' ], 'deepl_id_glossary', 86400 );
+            $deepLEngineType = $metadataDao->get( $_config[ 'pid' ], 'deepl_engine_type', 86400 );
+
+            if ( $deepLEngineType !== null and in_array( $deepLEngineType->value, self::ALLOWED_MODEL_TYPES ) ) {
+                $_config[ 'model_type' ] = $deepLEngineType->value;
+            }
 
             if ( $deepLFormality !== null ) {
                 $_config[ 'formality' ] = $deepLFormality->value;
@@ -95,6 +108,10 @@ class DeepL extends AbstractEngine {
                     'formality'   => ( $_config[ 'formality' ] ?: null ),
                     'glossary_id' => ( $_config[ 'idGlossary' ] ?: null )
             ];
+
+            if ( !empty( $_config[ 'model_type' ] ) ) {
+                $parameters[ 'model_type' ] = $_config[ 'model_type' ];
+            }
 
             $headers = [
                     'Authorization: DeepL-Auth-Key ' . $extraParams[ 'DeepL-Auth-Key' ],
@@ -194,6 +211,18 @@ class DeepL extends AbstractEngine {
      */
     public function getGlossaryEntries( string $id ) {
         return $this->_getClient()->getGlossaryEntries( $id );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array {
+        return [
+                'enable_mt_analysis',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+        ];
     }
 }
     

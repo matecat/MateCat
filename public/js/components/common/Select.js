@@ -49,12 +49,14 @@ export const Select = ({
   offsetParent,
   onSelect = () => {},
   onToggleOption = () => {},
+  onCloseSelect = () => {},
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
   maxHeightDroplist = 128,
   isPortalDropdown,
+  isActiveOptionOnTop,
   dropdownClassName,
   showResetButton = false,
   resetFunction = () => {},
@@ -108,6 +110,7 @@ export const Select = ({
     setDropdownVisibility(false)
     setDropdownReversed(false)
     setPortalCoords()
+    onCloseSelect?.()
   }
   const toggleDropdown = () => {
     if (!isDisabled) {
@@ -297,6 +300,7 @@ export const Select = ({
           onToggleOption,
           multipleSelect,
           tooltipPosition,
+          isActiveOptionOnTop,
           optionsSelectedCopySingular,
           optionsSelectedCopyPlural,
           resetSelectedOptions,
@@ -335,7 +339,7 @@ export const Select = ({
       >
         <div ref={selectedItemRef} className="select-with-icon__wrapper">
           <div className={inputClassName} onClick={toggleDropdown}>
-            {showResetButton && activeOption ? (
+            {showResetButton && (activeOption || activeOptions) ? (
               <div
                 className="icon-reset"
                 onClick={(e) => {
@@ -404,6 +408,7 @@ Select.propTypes = {
   checkSpaceToReverse: PropTypes.bool,
   maxHeightDroplist: PropTypes.number,
   isPortalDropdown: PropTypes.bool,
+  isActiveOptionOnTop: PropTypes.bool,
   dropdownClassName: PropTypes.string,
   showResetButton: PropTypes.bool,
   resetFunction: PropTypes.func,

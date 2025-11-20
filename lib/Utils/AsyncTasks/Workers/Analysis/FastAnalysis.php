@@ -160,7 +160,7 @@ class FastAnalysis extends AbstractDaemon {
                 continue;
             }
 
-            $this->_logTimeStampedMsg( "Projects found",  $projects_list );
+            $this->_logTimeStampedMsg( "Projects found", $projects_list );
 
             $featureSet = new FeatureSet();
 
@@ -257,6 +257,7 @@ class FastAnalysis extends AbstractDaemon {
                     $mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED );
                     $mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
                     $mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR );
+                    $subfiltering_handlers      = ( new ProjectsMetadataDao )->getProjectStaticSubfilteringCustomHandlers( $projectStruct->id );
                     Database::obtain()->getConnection()->commit();
 
                     $insertReportRes = $this->_insertFastAnalysis(
@@ -268,7 +269,8 @@ class FastAnalysis extends AbstractDaemon {
                             $mt_evaluation,
                             $mt_qe_workflow_enabled,
                             $mt_qe_workflow_parameters,
-                            $mt_quality_value_in_editor
+                            $mt_quality_value_in_editor,
+                            $subfiltering_handlers
                     );
 
                 } catch ( Exception $e ) {
@@ -458,28 +460,29 @@ class FastAnalysis extends AbstractDaemon {
 
     /**
      * @param ProjectStruct $projectStruct
-     * @param string        $projectFeaturesString
-     * @param array         $equivalentWordMapping
-     * @param FeatureSet    $featureSet
-     * @param bool          $perform_Tms_Analysis
-     * @param bool|null     $mt_evaluation
-     * @param bool|null     $mt_qe_workflow_enabled
-     * @param string|null   $mt_qe_workflow_parameters
-     * @param int|null      $mt_quality_value_in_editor
-     *
+     * @param string $projectFeaturesString
+     * @param array $equivalentWordMapping
+     * @param FeatureSet $featureSet
+     * @param bool $perform_Tms_Analysis
+     * @param bool|null $mt_evaluation
+     * @param bool|null $mt_qe_workflow_enabled
+     * @param string|null $mt_qe_workflow_parameters
+     * @param int|null $mt_quality_value_in_editor
+     * @param array|null $subfiltering_handlers
      * @return int
      * @throws Exception
      */
     protected function _insertFastAnalysis(
             ProjectStruct $projectStruct,
-            string $projectFeaturesString,
-            array $equivalentWordMapping,
-            FeatureSet $featureSet,
-            bool $perform_Tms_Analysis = true,
-            ?bool $mt_evaluation = false,
-            ?bool $mt_qe_workflow_enabled = false,
-            ?string $mt_qe_workflow_parameters = "",
-            ?int $mt_quality_value_in_editor = 85
+            string        $projectFeaturesString,
+            array         $equivalentWordMapping,
+            FeatureSet    $featureSet,
+            bool          $perform_Tms_Analysis = true,
+            ?bool         $mt_evaluation = false,
+            ?bool         $mt_qe_workflow_enabled = false,
+            ?string       $mt_qe_workflow_parameters = "",
+            ?int          $mt_quality_value_in_editor = 85,
+            ?array        $subfiltering_handlers = []
     ): int {
 
         $pid               = $projectStruct->id;
@@ -607,7 +610,7 @@ class FastAnalysis extends AbstractDaemon {
 
                 $this->_logTimeStampedMsg( "--- trying to initialize job total word count." );
 
-                $project_details = array_pop( $_details ); //Don't remove, needed to remove rollup row
+                $query_rollup = array_pop( $_details ); //Don't remove, needed to remove rollup row
 
                 foreach ( $_details as $job_info ) {
                     $counter = new CounterModel();
@@ -727,6 +730,8 @@ class FastAnalysis extends AbstractDaemon {
                             $queue_element[ 'mt_qe_workflow_parameters' ] = $mt_qe_workflow_parameters;
                         }
                         $queue_element[ 'mt_quality_value_in_editor' ] = $mt_quality_value_in_editor ?? false;
+
+                        $queue_element[ MetadataDao::SUBFILTERING_HANDLERS ] = $subfiltering_handlers;
 
                         $element            = new QueueElement();
                         $element->params    = new Params( $queue_element );

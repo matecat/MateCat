@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use Model\Projects\MetadataDao;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
@@ -69,7 +70,17 @@ class Intento extends AbstractEngine {
         if ( is_string( $rawValue ) ) {
             $result = json_decode( $rawValue, false );
 
-            if ( $result and isset( $result->id ) ) {
+            // sync calls
+            if ( isset( $result->results ) and !empty( $result->results[ 0 ] ) ) {
+                $decoded = [
+                        'data' => [
+                                'translations' => [
+                                        [ 'translatedText' => $result->results[ 0 ] ]
+                                ]
+                        ]
+                ];
+            } // async calls
+            elseif ( $result and isset( $result->id ) ) {
                 $id = $result->id;
 
                 if ( isset( $result->response ) and !empty( $result->response ) and isset( $result->done ) and $result->done ) {
@@ -113,24 +124,21 @@ class Intento extends AbstractEngine {
                 ];
             }
 
+        } elseif ( $rawValue and array_key_exists( 'responseStatus', $rawValue ) and array_key_exists( 'error', $rawValue ) ) {
+            $_response_error = json_decode( $rawValue[ 'error' ][ "response" ], true );
+            $decoded         = [
+                    'error' => [
+                            'code'    => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'code', $_response_error[ 'error' ] ) ? -$_response_error[ 'error' ][ 'code' ] : '-1' : '-1',
+                            'message' => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'message', $_response_error[ 'error' ] ) ? $_response_error[ 'error' ][ 'message' ] : '' : ''
+                    ]
+            ];
         } else {
-            if ( $rawValue and array_key_exists( 'responseStatus', $rawValue ) and array_key_exists( 'error', $rawValue ) ) {
-                $_response_error = json_decode( $rawValue[ 'error' ][ "response" ], true );
-                $decoded         = [
-                        'error' => [
-                                'code'    => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'code', $_response_error[ 'error' ] ) ? -$_response_error[ 'error' ][ 'code' ] : '-1' : '-1',
-                                'message' => array_key_exists( 'error', $_response_error ) ? array_key_exists( 'message', $_response_error[ 'error' ] ) ? $_response_error[ 'error' ][ 'message' ] : '' : ''
-                        ]
-                ];
-            } else {
-                $decoded = [
-                        'error' => [
-                                'code'    => '-1',
-                                'message' => ''
-                        ]
-                ];
-            }
-
+            $decoded = [
+                    'error' => [
+                            'code'    => '-1',
+                            'message' => ''
+                    ]
+            ];
         }
 
         return $this->_composeMTResponseAsMatch( $parameters[ 'context' ][ 'text' ], $decoded );
@@ -152,20 +160,20 @@ class Intento extends AbstractEngine {
         $parameters[ 'context' ][ 'from' ] = $_config[ 'source' ];
         $parameters[ 'context' ][ 'to' ]   = $_config[ 'target' ];
         $parameters[ 'context' ][ 'text' ] = $_config[ 'segment' ];
-        $provider                          = $this->provider;
-        $providerKey                       = $this->providerKey;
-        $providerCategory                  = $this->providerCategory;
 
-        if ( !empty( $provider ) ) {
-            $parameters[ 'service' ][ 'async' ]    = true;
-            $parameters[ 'service' ][ 'provider' ] = $provider[ 'id' ];
+        if ( isset( $_config[ 'pid' ] ) ) {
+            $metadataDao   = new MetadataDao();
 
-            if ( !empty( $providerKey ) ) {
-                $parameters[ 'service' ][ 'auth' ][ $provider[ 'id' ] ] = [ json_decode( $providerKey, true ) ];
-            }
+            // custom provider or custom routing
+            $customProvider = $metadataDao->get( $_config[ 'pid' ], 'intento_provider', 86400 );
+            $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
 
-            if ( !empty( $providerCategory ) ) {
-                $parameters[ 'context' ][ 'category' ] = $providerCategory;
+            if ( $customProvider !== null ) {
+                $parameters[ 'service' ][ 'async' ]    = true;
+                $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
+            } elseif ( $customRouting !== null and $customRouting->value !== "smart_routing" ) {
+                $parameters[ 'service' ][ 'async' ]   = true;
+                $parameters[ 'service' ][ 'routing' ] = "best_quality";
             }
         }
 
@@ -241,6 +249,77 @@ class Intento extends AbstractEngine {
     }
 
     /**
+     *  PER USER response, the user api key is required
+     *
+     * Get user's routing list
+     *
+     * @return array
+     */
+    public function getRoutingList() {
+
+        if ( empty( $this->apiKey ) ) {
+            return [];
+        }
+
+        try {
+            $redisHandler = new RedisHandler();
+            $conn         = $redisHandler->getConnection();
+            $cacheKey     = 'IntentoRoutings-' . $this->apiKey;
+            $result       = $conn->get( $cacheKey );
+
+            if ( $result ) {
+                return json_decode( $result, true );
+            }
+
+            $_api_url = self::INTENTO_API_URL . '/routing-designer';
+            $curl     = curl_init( $_api_url );
+            $_params  = [
+                    CURLOPT_HTTPHEADER     => [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ],
+                    CURLOPT_HEADER         => false,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+                    CURLOPT_CONNECTTIMEOUT => 10,
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2
+            ];
+
+            curl_setopt_array( $curl, $_params );
+            $response = curl_exec( $curl );
+            $result   = json_decode( $response );
+            curl_close( $curl );
+            $_routing = [];
+
+            // needed by the UI
+            $_routing['smart_routing'] = [
+                    'id' => 'smart_routing',
+                    'name' => 'smart_routing',
+                    'description' => "Intento Smart Routing is a patented feature within the Intento Translator platform that automatically directs your translation requests to the best-performing machine translation (MT) engine for your specific language pair and content, or a combination of engines, to provide the most accurate and contextually relevant translation.",
+            ];
+
+            if ( $result and $result->data ) {
+                foreach ( $result->data as $item ) {
+                    $_routing[ $item->name ] = [
+                            'id'          => $item->rt_id,
+                            'name'        => $item->name,
+                            'description' => $item->description,
+                    ];
+                }
+            }
+
+            ksort( $_routing, SORT_STRING | SORT_FLAG_CASE );
+
+            $conn->set( $cacheKey, json_encode( $_routing ) );
+            $conn->expire( $cacheKey, 60 * 60 ); // 1 hour
+
+            return $_routing;
+        } catch ( Exception $exception ) {
+            return [];
+        }
+    }
+
+    /**
+     * Fixed response (NOT PER USER) a generic Intento API key is valid
+     *
      * Get provider list
      * @throws ReflectionException
      */
@@ -268,6 +347,7 @@ class Intento extends AbstractEngine {
         $result   = json_decode( $response );
         curl_close( $curl );
         $_providers = [];
+
         if ( $result ) {
             foreach ( $result as $value ) {
                 $example                  = (array)$value->auth;
@@ -280,5 +360,16 @@ class Intento extends AbstractEngine {
         $conn->expire( 'IntentoProviders', 60 * 60 * 24 );
 
         return $_providers;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array {
+        return [
+                'enable_mt_analysis',
+                'intento_routing',
+                'intento_provider',
+        ];
     }
 }

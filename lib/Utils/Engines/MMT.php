@@ -11,7 +11,6 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Plugins\Features\Mmt as MMTFeature;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -32,7 +31,8 @@ use Utils\TmKeyManagement\TmKeyManager;
  *
  * @property int id
  */
-class MMT extends AbstractEngine {
+class MMT extends AbstractEngine
+{
 
     /**
      * @inheritdoc
@@ -42,39 +42,34 @@ class MMT extends AbstractEngine {
     protected bool $_isAdaptiveMT = true;
 
     protected array $_config = [
-            'segment'        => null,
-            'translation'    => null,
-            'newsegment'     => null,
-            'newtranslation' => null,
-            'source'         => null,
-            'target'         => null,
-            'langpair'       => null,
-            'email'          => null,
-            'keys'           => null,
-            'mt_context'     => null,
-            'id_user'        => null
+        'segment' => null,
+        'translation' => null,
+        'newsegment' => null,
+        'newtranslation' => null,
+        'source' => null,
+        'target' => null,
+        'langpair' => null,
+        'email' => null,
+        'keys' => null,
+        'mt_context' => null,
+        'id_user' => null
     ];
 
     /**
      * @var bool
      */
-    protected bool $_skipAnalysis = true;
+    protected bool $_skipAnalysis = false;
 
     /**
      * @throws Exception
      */
-    public function __construct( $engineRecord ) {
+    public function __construct($engineRecord)
+    {
+        parent::__construct($engineRecord);
 
-        parent::__construct( $engineRecord );
-
-        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+        if ($this->getEngineRecord()->type != EngineConstants::MT) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
-
-        if ( isset( $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) && $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) {
-            $this->_skipAnalysis = false;
-        }
-
     }
 
     /**
@@ -82,14 +77,14 @@ class MMT extends AbstractEngine {
      *
      * @return MMTServiceApi
      */
-    protected function _getClient(): MMTServiceApi {
-
+    protected function _getClient(): MMTServiceApi
+    {
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
-        $license     = $extraParams[ 'MMT-License' ];
+        $license = $extraParams['MMT-License'];
 
         return MMTServiceApi::newInstance()
-                ->setIdentity( "Matecat", ltrim( AppConfig::$BUILD_NUMBER, 'v' ) )
-                ->setLicense( $license );
+            ->setIdentity("Matecat", ltrim(AppConfig::$BUILD_NUMBER, 'v'))
+            ->setLicense($license);
     }
 
     /**
@@ -98,7 +93,8 @@ class MMT extends AbstractEngine {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function getAvailableLanguages() {
+    public function getAvailableLanguages()
+    {
         $client = $this->_getClient();
 
         return $client->getAvailableLanguages();
@@ -110,64 +106,65 @@ class MMT extends AbstractEngine {
      * @return array|TMSAbstractResponse
      * @throws ReflectionException
      */
-    public function get( array $_config ) {
-
-        //This is not really needed because by default in analysis the Engine_MMT is accepted by Match
-        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+    public function get(array $_config)
+    {
+        // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
+        if ($this->_isAnalysis && $this->_skipAnalysis) {
             return [];
         }
 
         $client = $this->_getClient();
-        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+        $metadataDao = new ProjectsMetadataDao();
 
-        $metadata = null;
-        if ( !empty( $_config[ 'project_id' ] ) ) {
-            $metadataDao = new ProjectsMetadataDao();
-            $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries' );
+        $glossaries = null;
+
+        if (!empty($_config['project_id'])) {
+            $glossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'mmt_glossaries');
         }
 
-        if ( $metadata !== null ) {
-            $metadata           = html_entity_decode( $metadata->value );
-            $mmtGlossariesArray = json_decode( $metadata, true );
+        if ($glossaries !== null) {
+            $mmtGlossariesArray = json_decode($glossaries->value, true);
+            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'mmt_ignore_glossary_case');
 
-            $_config[ 'glossaries' ]           = implode( ",", $mmtGlossariesArray[ 'glossaries' ] );
-            $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
+            $_config['glossaries'] = implode(",", $mmtGlossariesArray);
+
+            if ($ignore_glossary_case !== null) {
+                $_config['ignore_glossary_case'] = $ignore_glossary_case->value;
+            }
         }
 
-        $_config = $this->configureAnalysisContribution( $_config );
+        $_config = $this->configureContribution($_config);
 
         try {
             $translation = $client->translate(
-                    $_config[ 'source' ],
-                    $_config[ 'target' ],
-                    $_config[ 'segment' ],
-                    $_config[ 'mt_context' ] ?? null,
-                    $_keys,
-                    $_config[ 'job_id' ] ?? null,
-                    static::GET_REQUEST_TIMEOUT,
-                    $_config[ 'priority' ] ?? null,
-                    $_config[ 'session' ] ?? null,
-                    $_config[ 'glossaries' ] ?? null,
-                    $_config[ 'ignore_glossary_case' ] ?? null,
-                    $_config[ 'include_score' ] ?? null,
-                    $_config[ 'mt_qe_engine_id' ] ?? '2'
+                $_config['source'],
+                $_config['target'],
+                $_config['segment'],
+                $_config['mt_context'] ?? null,
+                $_config['keys'],
+                $_config['job_id'] ?? null,
+                static::GET_REQUEST_TIMEOUT,
+                $_config['priority'] ?? null,
+                $_config['session'] ?? null,
+                $_config['glossaries'] ?? null,
+                $_config['ignore_glossary_case'] ?? null,
+                $_config['include_score'] ?? null,
+                $_config['mt_qe_engine_id'] ?? '2'
             );
 
-            return ( new Matches( [
-                    'source'          => $_config[ 'source' ],
-                    'target'          => $_config[ 'target' ],
-                    'raw_segment'     => $_config[ 'segment' ],
-                    'raw_translation' => $translation[ 'translation' ],
-                    'match'           => $this->getStandardMtPenaltyString(),
-                    'created-by'      => $this->getMTName(),
-                    'create-date'     => date( "Y-m-d" ),
-                    'score'           => $translation[ 'score' ] ?? null
-            ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
-
-        } catch ( Exception $e ) {
-            return $this->GoogleTranslateFallback( $_config );
+            return (new Matches([
+                'source' => $_config['source'],
+                'target' => $_config['target'],
+                'raw_segment' => $_config['segment'],
+                'raw_translation' => $translation['translation'],
+                'match' => $this->getStandardMtPenaltyString(),
+                'created-by' => $this->getMTName(),
+                'create-date' => date("Y-m-d"),
+                'score' => $translation['score'] ?? null
+            ]))->getMatches(1, [], $_config['source'], $_config['target'], $_config[MetadataDao::SUBFILTERING_HANDLERS]);
+        } catch (Exception $e) {
+            return $this->GoogleTranslateFallback($_config);
         }
-
     }
 
     /**
@@ -175,22 +172,19 @@ class MMT extends AbstractEngine {
      *
      * @return ?array
      */
-    protected function _reMapKeyList( ?array $_keys = [] ): array {
-
-        if ( !empty( $_keys ) ) {
-
-            if ( !is_array( $_keys ) ) {
-                $_keys = [ $_keys ];
+    protected function _reMapKeyList(?array $_keys = []): array
+    {
+        if (!empty($_keys)) {
+            if (!is_array($_keys)) {
+                $_keys = [$_keys];
             }
 
-            $_keys = array_map( function ( $key ) {
+            $_keys = array_map(function ($key) {
                 return 'x_mm-' . $key;
-            }, $_keys );
-
+            }, $_keys);
         }
 
         return $_keys;
-
     }
 
     /**
@@ -198,30 +192,30 @@ class MMT extends AbstractEngine {
      *
      * @return array
      */
-    protected function _reMapKeyStructsList( array $keyList ): array {
-        return array_map( function ( $kStruct ) {
+    protected function _reMapKeyStructsList(array $keyList): array
+    {
+        return array_map(function ($kStruct) {
             return 'x_mm-' . $kStruct->tm_key->key;
-        }, $keyList );
+        }, $keyList);
     }
 
-    public function set( $_config ): bool {
-
+    public function set($_config): bool
+    {
         $client = $this->_getClient();
-        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+        $_keys = $this->_reMapKeyList($_config['keys'] ?? []);
 
         try {
-            $client->addToMemoryContent( $_keys, $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $_config[ 'translation' ], $_config[ 'session' ] );
-        } catch ( MMTServiceApiRequestException $e ) {
-            // MMT license expired/changed (401) or account deleted (403) or whatever HTTP exception
-            $this->logger->debug( $e->getMessage() );
+            $client->addToMemoryContent($_keys, $_config['source'], $_config['target'], $_config['segment'], $_config['translation'], $_config['session']);
+        } catch (MMTServiceApiRequestException $e) {
+            // MMT license expired/changed (401), or the account is deleted (403), or whatever HTTP exception
+            $this->logger->debug($e->getMessage());
 
             return true;
-        } catch ( Exception $e ) {
+        } catch (Exception $e) {
             return false;
         }
 
         return true;
-
     }
 
     /**
@@ -229,42 +223,43 @@ class MMT extends AbstractEngine {
      *
      * @return bool
      */
-    public function update( $_config ): bool {
-
+    public function update($_config): bool
+    {
         $client = $this->_getClient();
-        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+        $_keys = $this->_reMapKeyList($_config['keys'] ?? []);
 
         try {
             $client->updateMemoryContent(
-                    $_config[ 'tuid' ],
-                    $_keys,
-                    $_config[ 'source' ],
-                    $_config[ 'target' ],
-                    $_config[ 'segment' ],
-                    $_config[ 'translation' ],
-                    $_config[ 'session' ]
+                $_config['tuid'],
+                $_keys,
+                $_config['source'],
+                $_config['target'],
+                $_config['segment'],
+                $_config['translation'],
+                $_config['session']
             );
-        } catch ( Exception $e ) {
+        } catch (Exception $e) {
             return false; // requeue
         }
 
         return true;
-
     }
 
-    public function delete( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+    public function delete($_config)
+    {
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
      * @throws MMTServiceApiException
      */
-    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists(MemoryKeyStruct $memoryKey): ?array
+    {
         $client = $this->_getClient();
 
         try {
-            $response = $client->getMemory( 'x_mm-' . trim( $memoryKey->tm_key->key ) );
-        } catch ( MMTServiceApiRequestException $e ) {
+            $response = $client->getMemory('x_mm-' . trim($memoryKey->tm_key->key));
+        } catch (MMTServiceApiRequestException $e) {
             return null;
         }
 
@@ -274,70 +269,71 @@ class MMT extends AbstractEngine {
 
     /**
      *
-     * @param string     $filePath
-     * @param string     $memoryKey
+     * @param string $filePath
+     * @param string $memoryKey
      * @param UserStruct $user *
      *
      * @return void
      * @throws MMTServiceApiException
      * @throws Exception
      */
-    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
+    public function importMemory(string $filePath, string $memoryKey, UserStruct $user)
+    {
+        $client = $this->_getClient();
+        $response = $client->getMemory('x_mm-' . trim($memoryKey)); //Throw an exception if the key is not synced
 
-        $client   = $this->_getClient();
-        $response = $client->getMemory( 'x_mm-' . trim( $memoryKey ) );
-
-        if ( empty( $response ) ) {
+        if (empty($response)) {
             return null;
         }
 
-        $fp_out = gzopen( "$filePath.gz", 'wb9' );
+        $fp_out = gzopen("$filePath.gz", 'wb9');
 
-        if ( !$fp_out ) {
+        if (!$fp_out) {
             $fp_out = null;
-            throw new RuntimeException( 'IOException. Unable to create temporary file.' );
+            throw new RuntimeException('IOException. Unable to create temporary file.');
         }
 
-        $tmpFileObject = new SplFileObject( $filePath, 'r' );
+        $tmpFileObject = new SplFileObject($filePath, 'r');
 
-        while ( !$tmpFileObject->eof() ) {
-            gzwrite( $fp_out, $tmpFileObject->fgets() );
+        while (!$tmpFileObject->eof()) {
+            gzwrite($fp_out, $tmpFileObject->fgets());
         }
 
         $tmpFileObject = null;
-        gzclose( $fp_out );
+        gzclose($fp_out);
 
-        $client->importIntoMemoryContent( 'x_mm-' . trim( $memoryKey ), "$filePath.gz", 'gzip' );
+        $client->importIntoMemoryContent('x_mm-' . trim($memoryKey), "$filePath.gz", 'gzip');
         $fp_out = null;
-
     }
 
     /**
      * @throws Exception
      */
-    public function syncMemories( array $projectRow, ?array $segments = [] ) {
+    public function syncMemories(array $projectRow, ?array $segments = [])
+    {
+        $pid = $projectRow['id'];
 
-        $pid = $projectRow[ 'id' ];
+        $metadataDao = new ProjectsMetadataDao();
+        $context_analyzer = $metadataDao->get($pid, "mmt_activate_context_analyzer") ? $metadataDao->get($pid, "mmt_activate_context_analyzer")->value : $this->getEngineRecord(
+        )->getExtraParamsAsArray()['MMT-context-analyzer'];
 
-        if ( !empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
-
-            $source       = $segments[ 0 ][ 'source' ];
-            $targets      = [];
+        if (!empty($context_analyzer)) {
+            $source = $segments[0]['source'];
+            $targets = [];
             $jobLanguages = [];
-            foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
-                [ $jobId, $target ] = explode( ":", $jid_Lang );
-                $jobLanguages[ $jobId ] = $source . "|" . $target;
-                $targets[]              = $target;
+            foreach (explode(',', $segments[0]['target']) as $jid_Lang) {
+                [$jobId, $target] = explode(":", $jid_Lang);
+                $jobLanguages[$jobId] = $source . "|" . $target;
+                $targets[] = $target;
             }
 
-            $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
-            $tmpFileObject = new SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
-            foreach ( $segments as $segment ) {
-                $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
+            $tmp_name = tempnam(sys_get_temp_dir(), 'mmt_cont_req-');
+            $tmpFileObject = new SplFileObject(tempnam(sys_get_temp_dir(), 'mmt_cont_req-'), 'w+');
+            foreach ($segments as $segment) {
+                $tmpFileObject->fwrite($segment['segment'] . "\n");
             }
 
             try {
-
                 /*
                     $result = Array
                     (
@@ -345,67 +341,54 @@ class MMT extends AbstractEngine {
                         [en-US|it-IT] =>
                     )
                 */
-                $result = $this->getContext( $tmpFileObject, $source, $targets );
+                $result = $this->getContext($tmpFileObject, $source, $targets);
 
                 $jMetadataDao = new MetadataDao();
 
                 Database::obtain()->begin();
-                foreach ( $result as $langPair => $context ) {
-                    $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
+                foreach ($result as $langPair => $context) {
+                    $jMetadataDao->setCacheTTL(60 * 60 * 24 * 30)->set(array_search($langPair, $jobLanguages), "", 'mt_context', $context);
                 }
                 Database::obtain()->commit();
-
-            } catch ( Exception $e ) {
-                $this->logger->debug( $e->getMessage() );
-                $this->logger->debug( $e->getTraceAsString() );
+            } catch (Exception $e) {
+                $this->logger->debug($e->getMessage());
+                $this->logger->debug($e->getTraceAsString());
             } finally {
-                unset( $tmpFileObject );
-                @unlink( $tmp_name );
+                unset($tmpFileObject);
+                @unlink($tmp_name);
             }
-
         }
 
         try {
-
             //
             // ==============================================
-            // If the MMT-preimport flag is disabled
-            // and user is logged in
             // send user keys on a project basis
             // ==============================================
             //
-            $preImportIsDisabled = empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
-            $user                = ( new UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
+            $user = (new UserDao)->getByEmail($projectRow['id_customer']);
 
-            if ( $preImportIsDisabled ) {
+            // get jobs keys
+            $project = ProjectDao::findById($pid);
 
-                // get jobs keys
-                $project = ProjectDao::findById( $pid );
+            foreach ($project->getJobs() as $job) {
+                $memoryKeyStructs = [];
+                $jobKeyList = TmKeyManager::getJobTmKeys($job->tm_keys, 'r', 'tm', $user->uid);
 
-                foreach ( $project->getJobs() as $job ) {
-
-                    $memoryKeyStructs = [];
-                    $jobKeyList       = TmKeyManager::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
-
-                    foreach ( $jobKeyList as $memKey ) {
-                        $memoryKeyStructs[] = new MemoryKeyStruct(
-                                [
-                                        'uid'    => $user->uid,
-                                        'tm_key' => $memKey
-                                ]
-                        );
-                    }
-
-                    $this->connectKeys( $memoryKeyStructs );
-
+                foreach ($jobKeyList as $memKey) {
+                    $memoryKeyStructs[] = new MemoryKeyStruct(
+                        [
+                            'uid' => $user->uid,
+                            'tm_key' => $memKey
+                        ]
+                    );
                 }
 
+                $this->connectKeys($memoryKeyStructs);
             }
-        } catch ( Exception $e ) {
-            $this->logger->debug( $e->getMessage() );
-            $this->logger->debug( $e->getTraceAsString() );
+        } catch (Exception $e) {
+            $this->logger->debug($e->getMessage());
+            $this->logger->debug($e->getTraceAsString());
         }
-
     }
 
     /**
@@ -419,38 +402,37 @@ class MMT extends AbstractEngine {
      * @internal param array $langPairs
      *
      */
-    protected function getContext( SplFileObject $file, string $source, array $targets ): ?array {
-
+    protected function getContext(SplFileObject $file, string $source, array $targets): ?array
+    {
         $fileName = $file->getRealPath();
         $file->rewind();
 
-        $fp_out = gzopen( "$fileName.gz", 'wb9' );
+        $fp_out = gzopen("$fileName.gz", 'wb9');
 
-        if ( !$fp_out ) {
+        if (!$fp_out) {
             $fp_out = null;
-            $file   = null;
-            @unlink( $fileName );
-            @unlink( "$fileName.gz" );
-            throw new RuntimeException( 'IOException. Unable to create temporary file.' );
+            $file = null;
+            @unlink($fileName);
+            @unlink("$fileName.gz");
+            throw new RuntimeException('IOException. Unable to create temporary file.');
         }
 
-        while ( !$file->eof() ) {
-            gzwrite( $fp_out, $file->fgets() );
+        while (!$file->eof()) {
+            gzwrite($fp_out, $file->fgets());
         }
 
         $file = null;
-        gzclose( $fp_out );
+        gzclose($fp_out);
 
         $client = $this->_getClient();
-        $result = $client->getContextVectorFromFile( $source, $targets, "$fileName.gz", 'gzip' );
+        $result = $client->getContextVectorFromFile($source, $targets, "$fileName.gz", 'gzip');
 
         $plainContexts = [];
-        foreach ( $result[ 'vectors' ] as $target => $vector ) {
-            $plainContexts[ "$source|$target" ] = $vector;
+        foreach ($result['vectors'] as $target => $vector) {
+            $plainContexts["$source|$target"] = $vector;
         }
 
         return $plainContexts;
-
     }
 
     /**
@@ -458,14 +440,15 @@ class MMT extends AbstractEngine {
      * @throws MMTServiceApiException
      * @throws Exception
      */
-    public function checkAccount() {
+    public function checkAccount()
+    {
         try {
-            $client       = $this->_getClient();
+            $client = $this->_getClient();
             $this->result = $client->me();
 
             return $this->result;
-        } catch ( Exception $exception ) {
-            throw new Exception( "MMT license not valid" );
+        } catch (Exception $exception) {
+            throw new Exception("MMT license not valid");
         }
     }
 
@@ -477,14 +460,14 @@ class MMT extends AbstractEngine {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function connectKeys( array $keyList ) {
-
-        $keyList = $this->_reMapKeyStructsList( $keyList );
-        $client  = $this->_getClient();
+    public function connectKeys(array $keyList)
+    {
+        $keyList = $this->_reMapKeyStructsList($keyList);
+        $client = $this->_getClient();
 
         // Avoid calling MMT if $keyList is empty
-        if ( !empty( $keyList ) ) {
-            $this->result = $client->connectMemories( $keyList );
+        if (!empty($keyList)) {
+            $this->result = $client->connectMemories($keyList);
         }
 
         return $this->result;
@@ -493,16 +476,17 @@ class MMT extends AbstractEngine {
     /**
      * @param       $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
      * @return void
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode($rawValue, array $parameters = [], $function = null)
+    {
         // Not used since MMT works with an external client
     }
 
     /**
-     * @param string      $name
+     * @param string $name
      * @param string|null $description
      * @param string|null $externalId
      *
@@ -510,10 +494,11 @@ class MMT extends AbstractEngine {
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
-    public function createMemory( string $name, ?string $description = null, ?string $externalId = null ) {
+    public function createMemory(string $name, ?string $description = null, ?string $externalId = null)
+    {
         $client = $this->_getClient();
 
-        return $client->createMemory( $name, $description, $externalId );
+        return $client->createMemory($name, $description, $externalId);
     }
 
     /**
@@ -525,10 +510,11 @@ class MMT extends AbstractEngine {
      * @return array
      * @throws MMTServiceApiException
      */
-    public function deleteMemory( array $memoryKey ): array {
+    public function deleteMemory(array $memoryKey): array
+    {
         $client = $this->_getClient();
 
-        return $client->deleteMemory( trim( $memoryKey[ 'id' ] ) );
+        return $client->deleteMemory(trim($memoryKey['id']));
     }
 
     /**
@@ -538,7 +524,8 @@ class MMT extends AbstractEngine {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function getAllMemories() {
+    public function getAllMemories()
+    {
         $client = $this->_getClient();
 
         return $client->getAllMemories();
@@ -553,10 +540,11 @@ class MMT extends AbstractEngine {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function getMemory( string $id ) {
+    public function getMemory(string $id)
+    {
         $client = $this->_getClient();
 
-        return $client->getMemory( $id );
+        return $client->getMemory($id);
     }
 
     /**
@@ -566,37 +554,40 @@ class MMT extends AbstractEngine {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function updateMemory( string $id, string $name ) {
+    public function updateMemory(string $id, string $name)
+    {
         $client = $this->_getClient();
 
-        return $client->updateMemory( $id, $name );
+        return $client->updateMemory($id, $name);
     }
 
     /**
      * @param string $id
-     * @param array  $data
+     * @param array $data
      *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function importGlossary( string $id, array $data ) {
+    public function importGlossary(string $id, array $data)
+    {
         $client = $this->_getClient();
 
-        return $client->importGlossary( $id, $data );
+        return $client->importGlossary($id, $data);
     }
 
     /**
      * @param string $id
-     * @param array  $data
+     * @param array $data
      *
      * @return mixed
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
-    public function updateGlossary( string $id, array $data  ) {
+    public function updateGlossary(string $id, array $data)
+    {
         $client = $this->_getClient();
 
-        return $client->updateGlossary( $id, $data );
+        return $client->updateGlossary($id, $data);
     }
 
     /**
@@ -606,20 +597,22 @@ class MMT extends AbstractEngine {
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
-    public function importJobStatus( string $uuid ) {
+    public function importJobStatus(string $uuid)
+    {
         $client = $this->_getClient();
 
-        return $client->importJobStatus( $uuid );
+        return $client->importJobStatus($uuid);
     }
 
     /**
      * @throws MMTServiceApiException
      */
-    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array
+    {
         //Get the user account, check if the memory exists and, if so, check if the key owner's ID is mine.
-        $me     = $this->checkAccount();
-        $memory = $this->memoryExists( $memoryKey );
-        if ( !empty( $memory ) && $memory[ 'owner' ][ 'user' ] == $me[ 'id' ] ) {
+        $me = $this->checkAccount();
+        $memory = $this->memoryExists($memoryKey);
+        if (!empty($memory) && $memory['owner']['user'] == $me['id']) {
             return $memory;
         }
 
@@ -636,11 +629,12 @@ class MMT extends AbstractEngine {
      * @return float|null
      * @throws MMTServiceApiException
      */
-    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = '2' ): ?float {
-        $client            = $this->_getClient();
-        $qualityEstimation = $client->qualityEstimation( $source, $target, $sentence, $translation, $mt_qe_engine_id );
+    public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = '2'): ?float
+    {
+        $client = $this->_getClient();
+        $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation, $mt_qe_engine_id);
 
-        return $qualityEstimation[ 'score' ];
+        return $qualityEstimation['score'];
     }
 
     /**
@@ -648,23 +642,61 @@ class MMT extends AbstractEngine {
      *
      * @return array|null
      * @throws ReflectionException
+     * @throws Exception
      */
-    private function configureAnalysisContribution( ?array $config = [] ): ?array {
-        $id_job = $config[ 'job_id' ] ?? null;
+    private function configureContribution(?array $config = []): ?array
+    {
+        $id_job = $config['job_id'] ?? null;
+        $cacheTtl = 60 * 60 * 24 * 30;
 
-        if ( $id_job and $this->_isAnalysis ) {
-            $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_context' );
-            $mt_context = @array_pop( $contextRs );
+        // Common metadata loading
+        $metadataDao = new MetadataDao();
+        $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
-            if ( !empty( $mt_context ) ) {
-                $config[ 'mt_context' ] = $mt_context->value;
-            }
+        $mt_context = array_pop($contextRs);
+        if (!empty($mt_context)) {
+            $config['mt_context'] = $mt_context->value;
+        }
 
-            $config[ 'secret_key' ] = MMTFeature::getG2FallbackSecretKey();
-            $config[ 'priority' ]   = 'background';
-            $config[ 'keys' ]       = $config[ 'id_user' ] ?? [];
+        // Common config values
+        $config['secret_key'] = self::getG2FallbackSecretKey();
+
+        // Branch-specific values
+        if ($id_job && $this->_isAnalysis) {
+            $config['keys'] = $this->_reMapKeyList($config['id_user'] ?? []);
+            $config['priority'] = 'background';
+        } else {
+            //get the Owner Keys from the Job
+            $config['keys'] = $this->_reMapKeyList($config['keys']);
+            $config['job_id'] = $id_job;
+            $config['priority'] = 'normal';
         }
 
         return $config;
+    }
+
+    public static function getG2FallbackSecretKey()
+    {
+        $secret_key = ['secret_key' => null];
+        $config_file_path = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
+        if (file_exists($config_file_path)) {
+            $secret_key = parse_ini_file($config_file_path);
+        }
+
+        return $secret_key['secret_key'];
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array
+    {
+        return [
+            'enable_mt_analysis',
+            'mmt_glossaries',
+            'mmt_activate_context_analyzer',
+            'mmt_ignore_glossary_case',
+        ];
     }
 }

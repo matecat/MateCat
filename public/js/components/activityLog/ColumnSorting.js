@@ -1,7 +1,7 @@
 import React, {useContext, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {ActivityLogContext} from '../../pages/ActivityLog'
-import ArrowDown from '../../../img/icons/ArrowDown'
+import IconDown from '../icons/IconDown'
 
 export const ColumnSorting = ({
   id,
@@ -52,7 +52,7 @@ export const ColumnSorting = ({
       onClick={setOrderDirection}
     >
       {label}
-      {typeof orderDirection.current === 'string' && <ArrowDown size={20} />}
+      {typeof orderDirection.current === 'string' && <IconDown size={20} />}
     </div>
   )
 }

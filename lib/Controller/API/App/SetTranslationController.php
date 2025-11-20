@@ -18,6 +18,7 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -165,7 +166,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
             // update suggestion
-            if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $client_chosen_suggestion ) ) {
+            if ( $this->canUpdateSuggestion( $new_translation, $client_chosen_suggestion ) ) {
 
                 $new_translation->suggestion = !empty( $client_chosen_suggestion ) ? $client_chosen_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
 
@@ -481,7 +482,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 'status'                  => $status,
                 'split_statuses'          => $split_statuses,
                 'chunk'                   => $chunk,
-                'project'                 => $chunk->getProject()
+                'project'                 => $chunk->getProject(),
+                'id_project'              => $chunk->id_project
         ];
 
         $this->logger->debug( $data );
@@ -521,7 +523,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $featureSet->loadForProject( $this->data[ 'project' ] );
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ) );
+        $metadata     = new JobsMetadataDao();
+        $filter       = MateCatFilter::getInstance(
+                $featureSet,
+                $this->data[ 'chunk' ]->source,
+                $this->data[ 'chunk' ]->target,
+                SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ),
+                $metadata->getSubfilteringCustomHandlers( $this->id_job, $this->password )
+        );
         $this->filter = $filter;
 
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
@@ -643,27 +652,17 @@ class SetTranslationController extends AbstractStatefulKleinController {
     }
 
     /**
-     * Update suggestion only if:
-     *
-     * 1) the new state is one of these:
+     * Update suggestion only if the new state is one of these:
      *      - NEW
      *      - DRAFT
      *      - TRANSLATED
      *
-     * 2) the old state is one of these:
-     *      - NEW
-     *      - DRAFT
-     *
      * @param SegmentTranslationStruct $new_translation
-     * @param SegmentTranslationStruct $old_translation
      * @param null                     $old_suggestion
      *
      * @return bool
      */
-    private function canUpdateSuggestion(
-            SegmentTranslationStruct $new_translation,
-            SegmentTranslationStruct $old_translation,
-            $old_suggestion = null ): bool {
+    private function canUpdateSuggestion( SegmentTranslationStruct $new_translation,  $old_suggestion = null ): bool {
         if ( $old_suggestion === null ) {
             return false;
         }
@@ -672,13 +671,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 TranslationStatus::STATUS_NEW,
                 TranslationStatus::STATUS_DRAFT,
                 TranslationStatus::STATUS_TRANSLATED,
-        ] ) ) {
-            return false;
-        }
-
-        if ( !in_array( $old_translation->status, [
-                TranslationStatus::STATUS_NEW,
-                TranslationStatus::STATUS_DRAFT,
         ] ) ) {
             return false;
         }
@@ -817,12 +809,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->job_password         = $this->data[ 'password' ];
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
-        $contributionStruct->translation          = ( !empty( $_Translation[ 'translation' ] ) ) ? $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] ) : "";
+        $contributionStruct->translation          = ( $_Translation[ 'translation' ] !== null ) ? $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] ) : "";
         $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
-        $contributionStruct->oldTranslation       = ( !empty( $old_translation[ 'translation' ] ) ) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : "";
+        $contributionStruct->oldTranslation       = ( $old_translation[ 'translation' ] !== null ) ? $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] ) : "";
         $contributionStruct->translation_origin   = $this->getOriginalSuggestionProvider( $_Translation, $old_translation );
 
         /*

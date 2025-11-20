@@ -1,7 +1,21 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
+import IconClose from '../../../../icons/IconClose'
+import Checkmark from '../../../../../../img/icons/Checkmark'
+import ExternalLink from '../../../../../../img/icons/ExternalLink'
 
-export const AltLang = ({addMTEngine, error, isRequestInProgress}) => {
+export const AltLang = ({
+  addMTEngine,
+  setAddMTVisible,
+  error,
+  isRequestInProgress,
+}) => {
   const {
     register,
     handleSubmit,
@@ -12,45 +26,6 @@ export const AltLang = ({addMTEngine, error, isRequestInProgress}) => {
   }
   return (
     <div className="add-provider-container">
-      <div className="add-provider-fields">
-        <div className="provider-data">
-          <div className="provider-field">
-            <label>
-              Engine Name<sup>*</sup>
-            </label>
-            <input
-              className="new-engine-name required"
-              type="text"
-              {...register('name', {required: true})}
-            />
-            {errors.name && <span className="field-error">Required field</span>}
-          </div>
-          <div className="provider-field">
-            <label>
-              Key<sup>*</sup>
-            </label>
-            <input
-              className="required"
-              type="text"
-              {...register('secret', {required: true})}
-            />
-            {errors.secret && (
-              <span className="field-error">Required field</span>
-            )}
-          </div>
-
-          <div className="provider-field">
-            {error && <span className={'mt-error'}>{error.message}</span>}
-            <button
-              disabled={isRequestInProgress}
-              className="ui primary button"
-              onClick={handleSubmit(onSubmit)}
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      </div>
       <div className="add-provider-message">
         <p>
           <strong>AltLang</strong> is a language variant converter. It
@@ -76,13 +51,65 @@ export const AltLang = ({addMTEngine, error, isRequestInProgress}) => {
             http://www.altlang.net/
           </a>
         </p>
-        <a
-          href="mailto:info@altlang.net"
-          rel="noreferrer"
-          className="ui positive button"
+
+        <Button
+          className="green-button"
+          size={BUTTON_SIZE.MEDIUM}
+          onClick={() => window.open('mailto:info@altlang.net', '_blank')}
         >
           Contact AltLang
-        </a>
+          <ExternalLink size={16} />
+        </Button>
+      </div>
+      <div className="add-provider-fields">
+        <div className="provider-data">
+          <div className="provider-field">
+            <label>
+              Engine Name<sup>*</sup>
+            </label>
+            <input
+              className="new-engine-name required"
+              type="text"
+              {...register('name', {required: true})}
+            />
+            {errors.name && <span className="field-error">Required field</span>}
+          </div>
+          <div className="provider-field">
+            <label>
+              Key<sup>*</sup>
+            </label>
+            <input
+              className="required"
+              type="text"
+              {...register('secret', {required: true})}
+            />
+            {errors.secret && (
+              <span className="field-error">Required field</span>
+            )}
+            {typeof error?.message === 'string' && (
+              <span className="field-error">{error?.message}</span>
+            )}
+          </div>
+
+          <div className="provider-field container-actions">
+            <Button
+              type={BUTTON_TYPE.WARNING}
+              onClick={() => setAddMTVisible(false)}
+            >
+              <IconClose size={11} />
+            </Button>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              mode={BUTTON_MODE.BASIC}
+              size={BUTTON_SIZE.MEDIUM}
+              disabled={isRequestInProgress}
+              onClick={handleSubmit(onSubmit)}
+            >
+              <Checkmark size={12} />
+              Confirm
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )

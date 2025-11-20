@@ -128,4 +128,12 @@ class YandexTranslate extends AbstractEngine {
 
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array {
+        return [
+                'enable_mt_analysis',
+        ];
+    }
 }

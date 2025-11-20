@@ -10,12 +10,12 @@ use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Plugins\Features\Mmt;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -63,6 +63,11 @@ class Lara extends AbstractEngine {
     private ?MMTEngine $mmt_SET_PrivateLicense = null;
 
     /**
+     * @var bool
+     */
+    protected bool $_skipAnalysis = false;
+
+    /**
      * @throws Exception
      */
     public function __construct( $engineRecord ) {
@@ -71,8 +76,6 @@ class Lara extends AbstractEngine {
         if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
-
-        $this->_skipAnalysis = true;
 
     }
 
@@ -95,8 +98,6 @@ class Lara extends AbstractEngine {
         $mmtStruct->type             = EngineConstants::MT;
         $mmtStruct->extra_parameters = [
                 'MMT-License'      => $extraParams[ 'MMT-License' ] ?: AppConfig::$DEFAULT_MMT_KEY,
-                'MMT-pretranslate' => true,
-                'MMT-preimport'    => false,
         ];
         /**
          * @var MMTEngine $engine
@@ -109,8 +110,6 @@ class Lara extends AbstractEngine {
             $mmtStruct->type             = EngineConstants::MT;
             $mmtStruct->extra_parameters = [
                     'MMT-License'      => $extraParams[ 'MMT-License' ],
-                    'MMT-pretranslate' => true,
-                    'MMT-preimport'    => false,
             ];
             /**
              * @var MMTEngine $engine
@@ -170,6 +169,23 @@ class Lara extends AbstractEngine {
     }
 
     /**
+     * @param array $config
+     * @return array
+     */
+    private function configureContribution(array $config = []): array
+    {
+        // Branch-specific values
+        if ($this->_isAnalysis) {
+            $config['keys'] = $this->_reMapKeyList($config['id_user'] ?? []);
+        } else {
+            //get the Owner Keys from the Job
+            $config['keys'] = $this->_reMapKeyList($config['keys'] ?? []);
+        }
+
+        return $config;
+    }
+
+    /**
      * @inheritDoc
      *
      * @param array $_config
@@ -181,43 +197,27 @@ class Lara extends AbstractEngine {
      */
     public function get( array $_config ) {
 
-        $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
-        $_config[ 'keys' ] = array_map( function ( $tm_key ) {
-            /**
-             * @var $tm_key MemoryKeyStruct
-             */
-            return $tm_key->key;
-        }, $tm_keys );
+        // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
+        if ($this->_isAnalysis && $this->_skipAnalysis) {
+            return [];
+        }
 
         // init lara client and mmt fallback
         $client = $this->_getClient();
 
-        // configuration for mmt fallback
-        $_config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
-        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
-            // for MMT
-            $_config[ 'priority' ] = 'background';
-
-            // analysis on Lara is disabled, fallback on MMT
-            return $this->mmt_GET_Fallback->get( $_config );
-        } else {
-            $_config[ 'priority' ] = 'normal';
-        }
-
-        $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
+        $_config = $this->configureContribution($_config);
 
         try {
 
             // call lara
             $translateOptions = new TranslateOptions();
-            $translateOptions->setAdaptTo( $_lara_keys );
-            $translateOptions->setMultiline( false );
-            $translateOptions->setContentType( 'application/xliff+xml' );
-
+            $translateOptions->setAdaptTo($_config['keys']);
+            $translateOptions->setMultiline(false);
+            $translateOptions->setContentType('application/xliff+xml');
             $headers = new Headers();
 
-            if ( !empty( $_config[ 'tuid' ] ) and is_string( $_config[ 'tuid' ] ) ) {
-                $headers->setTuid( $_config[ 'tuid' ] );
+            if (!empty($_config['tuid']) and is_string($_config['tuid'])) {
+                $headers->setTuid($_config['tuid']);
             }
 
             $translateOptions->setHeaders( $headers->getArrayCopy() );
@@ -268,7 +268,7 @@ class Lara extends AbstractEngine {
                     'LARA REQUEST'  => 'GET https://api.laratranslate.com/translate',
                     'timing'        => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
                     'q'             => $request_translation,
-                    'adapt_to'      => $_lara_keys,
+                    'adapt_to'      => $_config['keys'],
                     'source'        => $_config[ 'source' ],
                     'target'        => $_config[ 'target' ],
                     'content_type'  => 'application/xliff+xml',
@@ -319,7 +319,7 @@ class Lara extends AbstractEngine {
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
                 'score'           => $score ?? null
-        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] );
     }
 
     /**
@@ -418,7 +418,7 @@ class Lara extends AbstractEngine {
             return false;
         }
 
-        // let MMT to have the last word on requeue
+//         let MMT to have the last word on requeue
         return empty( $this->mmt_SET_PrivateLicense ) || $this->mmt_SET_PrivateLicense->update( $_config );
 
     }
@@ -458,7 +458,19 @@ class Lara extends AbstractEngine {
                 }
             }
 
-            return $clientMemories->delete( trim( $memoryKey[ 'id' ] ) )->jsonSerialize();
+            $time_start = microtime(true);
+            $res = $clientMemories->delete(trim($memoryKey['id']))->jsonSerialize();
+            $time_end = microtime(true);
+            $time = $time_end - $time_start;
+
+            $this->logger->debug( [
+                'LARA REQUEST'    => "DELETE https://api.laratranslate.com/memories/{$memoryKey[ 'id' ]}",
+                'timing'          => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
+                'keys'            => $memoryKey,
+            ] );
+
+            return $res;
+
         } catch ( LaraApiException $e ) {
             if ( $e->getCode() == 404 ) {
                 return [];
@@ -486,7 +498,7 @@ class Lara extends AbstractEngine {
         $clientMemories = $this->_getClient()->memories;
 
         if ( !$clientMemories->get( 'ext_my_' . trim( $memoryKey ) ) ) {
-            return null;
+            throw new RuntimeException('Lara: Memory ' . 'ext_my_' . trim($memoryKey) . ' 404 not found.');
         }
 
         $fp_out = gzopen( "$filePath.gz", 'wb9' );
@@ -567,21 +579,9 @@ class Lara extends AbstractEngine {
      * @return array
      */
     protected function _reMapKeyList( array $_keys = [] ): array {
-
-        if ( !empty( $_keys ) ) {
-
-            if ( !is_array( $_keys ) ) {
-                $_keys = [ $_keys ];
-            }
-
-            $_keys = array_map( function ( $key ) {
-                return 'ext_my_' . $key;
-            }, $_keys );
-
-        }
-
-        return $_keys;
-
+        return array_map(function ($key) {
+            return 'ext_my_' . $key;
+        }, $_keys);
     }
 
     /**
@@ -600,4 +600,13 @@ class Lara extends AbstractEngine {
         return $glossaries->getAll();
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array {
+        return [
+                'enable_mt_analysis',
+                'lara_glossaries',
+        ];
+    }
 }

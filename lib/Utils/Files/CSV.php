@@ -2,6 +2,7 @@
 
 namespace Utils\Files;
 
+use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use stdClass;
@@ -14,7 +15,7 @@ class CSV {
      * @return false|string
      * @throws Exception
      */
-    public static function extract( stdClass $file, string $prefix = '' ) {
+    public static function extract( UploadElement $file, string $prefix = '' ) {
         if ( !isset( $file->file_path ) ) {
             return false;
         }

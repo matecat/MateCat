@@ -63,10 +63,11 @@ class GetContributionController extends KleinController {
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
 
-        $contributionRequest = new GetContributionRequest();
-        $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $contributionRequest   = new GetContributionRequest();
+        $featureSet            = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $subfiltering_handlers = ( new MetadataDao() )->getSubfilteringCustomHandlers( $jobStruct->id, $jobStruct->password );
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
+        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, $subfiltering_handlers );
 
         $context_list_before = array_map( function ( string $context ) use ( $Filter ) {
             return $Filter->fromLayer2ToLayer1( $context );
@@ -116,6 +117,7 @@ class GetContributionController extends KleinController {
         $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
         $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
         $contributionRequest->mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
+        $contributionRequest->subfiltering_handlers      = $subfiltering_handlers;
 
         if ( $this->isRevision() ) {
             $contributionRequest->userRole = Filter::ROLE_REVISOR;

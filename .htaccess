@@ -17,6 +17,8 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 RewriteCond %{REQUEST_URI} /offline.html
 RewriteRule $ / [R=307,L]
 
+# RewriteRule ^phpinfo phpinfo.php [QSA,L]
+
 RewriteRule ^fileupload/$ lib/View/fileupload/index.php [QSA,L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 

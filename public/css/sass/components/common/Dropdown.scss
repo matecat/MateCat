@@ -185,6 +185,24 @@
     opacity: 0;
     pointer-events: none;
   }
+  .codes-container {
+    display: flex;
+    gap: 4px;
+  }
+  .code-badge {
+    display: block;
+    text-align: center;
+    background-color: colors.$grey7;
+    border-radius: 4px;
+    padding: 2px 4px;
+    color: colors.$white;
+    font-size: 14px;
+    white-space: nowrap;
+    font-weight: normal !important;
+    a {
+        color: colors.$white;
+    }
+  }
 }
 
 .dropdown__option--is-highlighted-option,

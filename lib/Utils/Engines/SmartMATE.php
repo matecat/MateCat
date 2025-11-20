@@ -159,7 +159,7 @@ class SmartMATE extends AbstractEngine {
         );
     }
 
-    protected function _fillCallParameters( array $_config ): array {
+    protected function _fillCallParameters( $_config ): array {
         $parameters           = [];
         $parameters[ 'text' ] = $_config[ 'segment' ];
         $parameters[ 'from' ] = $_config[ 'source' ];
@@ -168,5 +168,12 @@ class SmartMATE extends AbstractEngine {
         return $parameters;
     }
 
-
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array {
+        return [
+                'enable_mt_analysis',
+        ];
+    }
 }

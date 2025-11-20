@@ -76,8 +76,6 @@ class UserKeysController extends KleinController {
         $mkDao             = $this->getMkDao();
         $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
 
-        $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
-
         $this->response->json( [
                 'errors'  => [],
                 'data'    => $userMemoryKeys,
@@ -174,7 +172,7 @@ class UserKeysController extends KleinController {
         // POC. Try to add this string in the input:
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
-        if ( $_POST[ 'description' ] and $_POST[ 'description' ] !== $description ) {
+        if ( $this->request->param( 'description' ) and $this->request->param( 'description' ) !== $description ) {
             throw new InvalidArgumentException( "<span>Resource names cannot contain the following characters:</span><ul><li><</li><li>\"</li><li>'</li></ul>", -3 );
         }
 

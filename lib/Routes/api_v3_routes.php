@@ -96,9 +96,9 @@ $klein->with( '/api/v3/mmt/[i:engineId]', function () {
 $klein->with( '/api/v3/deepl/[:engineId]', function () {
     route( '/glossaries', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'all' ] );
     route( '/glossaries', 'POST', [ '\Controller\API\V3\DeepLGlossaryController', 'create' ] );
-    route( '/glossaries/[i:id]', 'DELETE', [ '\Controller\API\V3\DeepLGlossaryController', 'delete' ] );
-    route( '/glossaries/[i:id]', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'get' ] );
-    route( '/glossaries/[i:id]/entries', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'getEntries' ] );
+    route( '/glossaries/[:id]', 'DELETE', [ '\Controller\API\V3\DeepLGlossaryController', 'delete' ] );
+    route( '/glossaries/[:id]', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'get' ] );
+    route( '/glossaries/[:id]/entries', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'getEntries' ] );
 } );
 
 // PROJECT TEMPLATE

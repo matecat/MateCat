@@ -10,6 +10,7 @@ use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use stdClass;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
@@ -44,7 +45,7 @@ abstract class AbstractEngine implements EngineInterface {
     protected array $curl_additional_params = [];
 
     protected bool $_isAnalysis   = false;
-    protected bool $_skipAnalysis = false;
+    protected bool $_skipAnalysis = true;
 
     /**
      * @var bool True if the engine can receive contributions through a `set/update` method.
@@ -107,7 +108,7 @@ abstract class AbstractEngine implements EngineInterface {
      *
      * @return $this
      */
-    public function setAnalysis( ?bool $bool = true ): AbstractEngine {
+    public function setAnalysis( bool $bool = true ): AbstractEngine {
         $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
 
         return $this;
@@ -118,7 +119,7 @@ abstract class AbstractEngine implements EngineInterface {
      *
      * @return $this
      */
-    public function setSkipAnalysis( ?bool $bool = true ): AbstractEngine {
+    public function setSkipAnalysis( bool $bool = true ): AbstractEngine {
         $this->_skipAnalysis = $bool;
 
         return $this;
@@ -176,6 +177,11 @@ abstract class AbstractEngine implements EngineInterface {
             throw new DomainException( "Property $key does not exists in " . get_class( $this ) );
         }
     }
+
+    /**
+     * @return array
+     */
+    abstract public function getConfigurationParameters(): array;
 
     /**
      * @param mixed $rawValue
@@ -485,5 +491,23 @@ abstract class AbstractEngine implements EngineInterface {
         ] );
 
         return $mt_match_res->getMatches( $layerNum );
+    }
+
+    /**
+     * Validate extra params
+     *
+     * @param stdClass $extra
+     *
+     * @return bool
+     */
+    public function validateConfigurationParams(stdClass $extra): bool
+    {
+        foreach (array_keys(get_object_vars($extra)) as $key){
+            if(!in_array($key, $this->getConfigurationParameters())){
+                return false;
+            }
+        }
+
+        return true;
     }
 }
