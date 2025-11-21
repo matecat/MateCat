@@ -21,29 +21,30 @@ namespace Model\DataAccess;
  * It is assumed that the surrounding code will handle committing the larger transaction.
  *
  */
-trait TransactionalTrait {
+trait TransactionalTrait
+{
 
     private static bool $__transactionStarted = false;
 
-    protected function openTransaction() {
-        if ( !Database::obtain()->getConnection()->inTransaction() ) {
+    protected function openTransaction(): void
+    {
+        if (!Database::obtain()->getConnection()->inTransaction()) {
             Database::obtain()->begin();
             static::$__transactionStarted = true;
         }
     }
 
-    protected function commitTransaction() {
-        if ( static::$__transactionStarted ) {
+    protected function commitTransaction(): void
+    {
+        if (static::$__transactionStarted) {
             Database::obtain()->commit();
             static::$__transactionStarted = false;
         }
     }
 
-    /**
-     * TODO: not sure this is actually sane
-     */
-    protected function rollbackTransaction() {
-        if ( static::$__transactionStarted ) {
+    protected function rollbackTransaction(): void
+    {
+        if (static::$__transactionStarted) {
             Database::obtain()->rollback();
             static::$__transactionStarted = false;
         }

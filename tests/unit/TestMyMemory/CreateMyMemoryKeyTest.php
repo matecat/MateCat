@@ -75,7 +75,7 @@ T;
          */
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
         $this->assertEquals( "", $property->getValue( $result ) );
 
 
@@ -147,7 +147,7 @@ T;
          */
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
         $this->assertEquals( "", $property->getValue( $result ) );
 
 

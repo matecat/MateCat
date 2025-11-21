@@ -3,6 +3,7 @@
 namespace Model\ConnectedServices\Oauth;
 
 use Exception;
+use Google_Client;
 use League\OAuth2\Client\Token\AccessToken;
 
 /**
@@ -11,7 +12,8 @@ use League\OAuth2\Client\Token\AccessToken;
  * Interface ConnectedServiceInterface
  * @package ConnectedServices
  */
-interface ProviderInterface {
+interface ProviderInterface
+{
     /**
      * Return the authorization URL to call
      * to get the Auth Token
@@ -20,7 +22,7 @@ interface ProviderInterface {
      *
      * @return string
      */
-    public function getAuthorizationUrl( string $csrfTokenState ): string;
+    public function getAuthorizationUrl(string $csrfTokenState): string;
 
     /**
      * Generate the Auth Token from the code
@@ -31,7 +33,7 @@ interface ProviderInterface {
      * @return AccessToken
      * @throws Exception
      */
-    public function getAccessTokenFromAuthCode( string $code ): AccessToken;
+    public function getAccessTokenFromAuthCode(string $code): AccessToken;
 
     /**
      * Return the user from the OAuth2 provider as
@@ -41,12 +43,15 @@ interface ProviderInterface {
      *
      * @return ProviderUser
      */
-    public function getResourceOwner( AccessToken $token ): ProviderUser;
+    public function getResourceOwner(AccessToken $token): ProviderUser;
 
     /**
-     * Get the low level client (below the abstraction)
-     * @return mixed
+     * Get the low-level client (below the abstraction)
+     *
+     * @param string|null $redirectUrl
+     *
+     * @return AbstractProvider|Google_Client
      */
-    public static function getClient( ?string $redirectUrl = null );
+    public static function getClient(?string $redirectUrl = null): mixed;
 
 }

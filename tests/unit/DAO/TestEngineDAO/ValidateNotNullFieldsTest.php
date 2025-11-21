@@ -30,7 +30,7 @@ class ValidateNotNullFieldsTest extends AbstractTest {
         $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_validateNotNullFields" );
-        $this->method->setAccessible( true );
+        
         $this->engine_struct_param = new EngineStruct();
 
         $this->engine_struct_param->name                    = "Moses_bar_and_foo";

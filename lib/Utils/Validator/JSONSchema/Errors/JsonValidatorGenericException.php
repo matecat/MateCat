@@ -11,17 +11,18 @@ namespace Utils\Validator\JSONSchema\Errors;
 
 use Exception;
 use JsonSerializable;
-use Utils\Validator\Contracts\ValidatorExceptionInterface;
 
-class JsonValidatorGenericException extends Exception implements JsonSerializable, ValidatorExceptionInterface {
+class JsonValidatorGenericException extends Exception implements JsonSerializable
+{
 
     private ?string $error;
 
     /**
      * @param string|null $error
      */
-    public function __construct( ?string $error = null ) {
-        parent::__construct( $error );
+    public function __construct(?string $error = null)
+    {
+        parent::__construct($error);
         $this->error = $error;
     }
 
@@ -29,7 +30,8 @@ class JsonValidatorGenericException extends Exception implements JsonSerializabl
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): ?string
+    {
         return $this->error;
     }
 

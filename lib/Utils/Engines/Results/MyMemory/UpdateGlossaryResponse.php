@@ -3,6 +3,7 @@
 namespace Utils\Engines\Results\MyMemory;
 
 
-class UpdateGlossaryResponse extends GetMemoryResponse {
+class UpdateGlossaryResponse extends GetMemoryResponse
+{
 
 }

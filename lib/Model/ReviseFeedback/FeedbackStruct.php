@@ -5,7 +5,8 @@ namespace Model\ReviseFeedback;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 
-class FeedbackStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class FeedbackStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
 
     /**
      * @var int

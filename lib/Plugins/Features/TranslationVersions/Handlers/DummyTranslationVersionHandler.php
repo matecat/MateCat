@@ -13,7 +13,8 @@ namespace Plugins\Features\TranslationVersions\Handlers;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
-class DummyTranslationVersionHandler implements VersionHandlerInterface {
+class DummyTranslationVersionHandler implements VersionHandlerInterface
+{
 
     /**
      * Evaluates the need to save a new translation version to database.
@@ -26,14 +27,17 @@ class DummyTranslationVersionHandler implements VersionHandlerInterface {
      *
      * @return bool
      */
-    public function saveVersionAndIncrement( SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation ): bool {
+    public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool
+    {
         return false;
     }
 
-    public function storeTranslationEvent( $params ) {
+    public function storeTranslationEvent(array $params): void
+    {
     }
 
-    public function propagateTranslation( SegmentTranslationStruct $translationStruct ): array {
+    public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+    {
         return [];
     }
 

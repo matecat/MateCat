@@ -11,11 +11,13 @@ namespace Model\DataAccess;
 
 use ArrayAccess;
 
-class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAccess {
+class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAccess
+{
 
     use ArrayAccessTrait;
 
-    public function __set( $name, $value ) {
+    public function __set($name, $value)
+    {
         $this->$name = $value;
     }
 
@@ -24,15 +26,17 @@ class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAc
      *
      * @return mixed
      */
-    public function __get( $name ) {
-        if ( !property_exists( $this, $name ) ) {
+    public function __get($name)
+    {
+        if (!property_exists($this, $name)) {
             return null;
         }
 
         return $this->$name;
     }
 
-    public function getArrayCopy(): array {
+    public function getArrayCopy(): array
+    {
         return $this->toArray();
     }
 

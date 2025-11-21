@@ -18,7 +18,8 @@ use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
-class OauthClient {
+class OauthClient
+{
 
     /**
      * @var self|null
@@ -49,9 +50,10 @@ class OauthClient {
      *
      * @return OauthClient
      */
-    public static function getInstance( ?string $provider = null, ?string $redirectUrl = null ): OauthClient {
-        if ( self::$instance == null or self::$instance->provider_name != $provider ) {
-            self::$instance = new OauthClient( $provider, $redirectUrl );
+    public static function getInstance(?string $provider = null, ?string $redirectUrl = null): OauthClient
+    {
+        if (self::$instance == null or self::$instance->provider_name != $provider) {
+            self::$instance = new OauthClient($provider, $redirectUrl);
         }
 
         self::$instance->provider_name = $provider;
@@ -65,15 +67,17 @@ class OauthClient {
      * @param string|null $provider
      * @param string|null $redirectUrl
      */
-    private function __construct( ?string $provider = null, ?string $redirectUrl = null ) {
+    private function __construct(?string $provider = null, ?string $redirectUrl = null)
+    {
         $className      = self::$providers[ $provider ] ?? GoogleProvider::class;
-        $this->provider = new $className( $redirectUrl );
+        $this->provider = new $className($redirectUrl);
     }
 
     /**
      * @return AbstractProvider
      */
-    public function getProvider(): AbstractProvider {
+    public function getProvider(): AbstractProvider
+    {
         return $this->provider;
     }
 
@@ -84,13 +88,14 @@ class OauthClient {
      * @return string
      * @throws Exception
      */
-    public function getAuthorizationUrl( ?array &$_session = [], ?string $suffixKey = '' ): string {
+    public function getAuthorizationUrl(?array &$_session = [], ?string $suffixKey = ''): string
+    {
         $session =& $_session;
-        if ( !isset( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ] ) ) {
+        if (!isset($session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ])) {
             $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ] = Utils::uuid4();
         }
 
-        return $this->provider->getAuthorizationUrl( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ] );
+        return $this->provider->getAuthorizationUrl($session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ]);
     }
 
 }

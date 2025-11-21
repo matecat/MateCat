@@ -5,7 +5,8 @@ namespace Model\Files;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class FileStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class FileStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
     public int    $id;
     public int    $id_project;
     public string $filename;

@@ -2,7 +2,9 @@
 
 namespace unit;
 
+use Exception;
 use Model\FeaturesBase\FeatureSet;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\LQA\SizeRestriction\SizeRestriction;
 
@@ -11,6 +13,7 @@ class SizeRestrictionTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function test_with_too_long_string() {
         $string = '##$_0A$####$_09$####$_09$####$_09$####$_09$####$_09$##&lt;ph id="source1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiJmd0Ow==" dataRef="source1" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6c3ogdzp2YWw9IjIwIiZndDsmbHQ7L3c6c3omZ3Q7Jmx0O3c6c3pDcyB3OnZhbD0iMjAiJmd0OyZsdDsvdzpzekNzJmd0OyZsdDsvdzpyUHImZ3Q7Jmx0O3c6dCZndDsmbHQ7L3c6dCZndDsmbHQ7L3c6ciZndDs="/&gt;Age (if exact date is not available&lt;ph id="source1_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source1" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6c3ogdzp2YWw9IjIwIiZndDsmbHQ7L3c6c3omZ3Q7Jmx0O3c6c3pDcyB3OnZhbD0iMjAiJmd0OyZsdDsvdzpzekNzJmd0OyZsdDsvdzpyUHImZ3Q7Jmx0O3c6dCZndDsmbHQ7L3c6dCZndDsmbHQ7L3c6ciZndDs="/&gt;##$_0A$####$_09$####$_09$####$_09$####$_09$####$_09$##&lt;ph id="source2_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UyIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTIiJmd0Ow==" dataRef="source2" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6ckZvbnRzJmd0OyZsdDsvdzpyRm9udHMmZ3Q7Jmx0O3c6c3ogdzp2YWw9IjIxIiZndDsmbHQ7L3c6c3omZ3Q7Jmx0O3c6c3pDcyB3OnZhbD0iMjEiJmd0OyZsdDsvdzpzekNzJmd0OyZsdDt3OmhpZ2hsaWdodCB3OnZhbD0id2hpdGUiJmd0OyZsdDsvdzpoaWdobGlnaHQmZ3Q7Jmx0Oy93OnJQciZndDsmbHQ7dzp0Jmd0OyZsdDsvdzp0Jmd0OyZsdDsvdzpyJmd0Ow=="/&gt; &lt;day,month,year&gt;&nbsp; &lt;ph id="source2_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source2" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6ckZvbnRzJmd0OyZsdDsvdzpyRm9udHMmZ3Q7Jmx0O3c6c3ogdzp2YWw9IjIxIiZndDsmbHQ7L3c6c3omZ3Q7Jmx0O3c6c3pDcyB3OnZhbD0iMjEiJmd0OyZsdDsvdzpzekNzJmd0OyZsdDt3OmhpZ2hsaWdodCB3OnZhbD0id2hpdGUiJmd0OyZsdDsvdzpoaWdobGlnaHQmZ3Q7Jmx0Oy93OnJQciZndDsmbHQ7dzp0Jmd0OyZsdDsvdzp0Jmd0OyZsdDsvdzpyJmd0Ow=="/&gt;##$_0A$####$_09$####$_09$####$_09$####$_09$####$_09$##&lt;ph id="source3_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UzIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTMiJmd0Ow==" dataRef="source3" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6c3ogdzp2YWw9IjIwIiZndDsmbHQ7L3c6c3omZ3Q7Jmx0O3c6c3pDcyB3OnZhbD0iMjAiJmd0OyZsdDsvdzpzekNzJmd0OyZsdDsvdzpyUHImZ3Q7Jmx0O3c6dCZndDsmbHQ7L3c6dCZndDsmbHQ7L3c6ciZndDs="/&gt;or we have work/education history to prove the age difference)&lt;ph id="source3_2" dataType="pcEnd" originalData="Jmx0Oy9wYyZndDs=" dataRef="source3" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6c3ogdzp2YWw9IjIwIiZndDsmbHQ7L3c6c3omZ3Q7Jmx0O3c6c3pDcyB3OnZhbD0iMjAiJmd0OyZsdDsvdzpzekNzJmd0OyZsdDsvdzpyUHImZ3Q7Jmx0O3c6dCZndDsmbHQ7L3c6dCZndDsmbHQ7L3c6ciZndDs="/&gt;##$_0A$####$_09$####$_09$####$_09$####$_09$##';
 
@@ -23,6 +26,7 @@ class SizeRestrictionTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function test_with_limit_string() {
         $string = 'dsadsads asd dsaddsadsadsadsa dsadsads asd dsaddsadsad ';
 
@@ -35,6 +39,7 @@ class SizeRestrictionTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function test_with_a_short_string() {
         $string = 'ciao &lt;ph id="source1_1" dataType="pcStart" originalData="Jmx0O3BjIGlkPSJzb3VyY2UxIiBkYXRhUmVmU3RhcnQ9InNvdXJjZTEiJmd0Ow==" dataRef="source1" equiv-text="base64:Jmx0O3c6ciZndDsmbHQ7dzpyUHImZ3Q7Jmx0O3c6c3ogdzp2YWw9IjIwIiZndDsmbHQ7L3c6c3omZ3Q7Jmx0O3c6c3pDcyB3OnZhbD0iMjAiJmd0OyZsdDsvdzpzekNzJmd0OyZsdDsvdzpyUHImZ3Q7Jmx0O3c6dCZndDsmbHQ7L3c6dCZndDsmbHQ7L3c6ciZndDs="/&gt;';
 
@@ -47,6 +52,7 @@ class SizeRestrictionTest extends AbstractTest {
     /**
      * @test
      */
+    #[Test]
     public function test_with_a_russian_string() {
         $string = 'Лорем ипсум долор сит амет, еи нец цонгуе граеце примис';
 
@@ -58,8 +64,9 @@ class SizeRestrictionTest extends AbstractTest {
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
+    #[Test]
     public function test_CJK_string() {
 
         $strings = [
@@ -109,8 +116,9 @@ class SizeRestrictionTest extends AbstractTest {
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
+    #[Test]
     public function test_string_with_emoji() {
 
         $strings = [
@@ -231,9 +239,9 @@ class SizeRestrictionTest extends AbstractTest {
      * @param $string
      * @param $limit
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    private function sizeRestrictionAsserts( $string, $limit ) {
+    private function sizeRestrictionAsserts( $string, $limit ): void {
         $sizeRestriction = new SizeRestriction( $string, new FeatureSet() );
 
         $this->assertTrue( $sizeRestriction->checkLimit( $limit ), "Failed: '" . $string . "'" );

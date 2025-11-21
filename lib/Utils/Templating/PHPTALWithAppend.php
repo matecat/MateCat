@@ -1,6 +1,7 @@
 <?php
 
 namespace Utils\Templating;
+
 use PHPTAL;
 
 /**
@@ -9,7 +10,8 @@ use PHPTAL;
  * Date: 02/05/16
  * Time: 11:09
  */
-class PHPTALWithAppend extends PHPTAL {
+class PHPTALWithAppend extends PHPTAL
+{
 
     protected array $internal_store = [];
 
@@ -19,11 +21,12 @@ class PHPTALWithAppend extends PHPTAL {
      * to push values on the template so that plugins can append
      * their own JavaScripts or assets.
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed  $value
      */
-    public function append( $name, $value ) {
-        if ( !array_key_exists( $name, $this->internal_store ) ) {
+    public function append(string $name, mixed $value): void
+    {
+        if (!array_key_exists($name, $this->internal_store)) {
             $this->internal_store[ $name ] = [];
         }
 

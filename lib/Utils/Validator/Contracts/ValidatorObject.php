@@ -2,6 +2,7 @@
 
 namespace Utils\Validator\Contracts;
 
+use AllowDynamicProperties;
 use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use stdClass;
@@ -47,7 +48,7 @@ class ValidatorObject implements ArrayAccess
      * @param string $name
      * @param mixed $value
      */
-    public function __set(string $name, $value)
+    public function __set(string $name, mixed $value)
     {
         $this->$name = $value;
     }

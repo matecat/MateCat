@@ -8,61 +8,78 @@
 
 namespace Model\ConnectedServices\GDrive;
 
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Google_Client;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 
-class GDriveTokenVerifyModel {
+class GDriveTokenVerifyModel
+{
 
-    protected $service;
-    protected $expired;
-    protected $refreshed;
+    protected ConnectedServiceStruct $service;
+    protected bool                   $expired;
+    protected                        $refreshed;
 
-    public function __construct( ConnectedServiceStruct $service ) {
+    public function __construct(ConnectedServiceStruct $service)
+    {
         $this->service = $service;
     }
 
-    public function validOrRefreshed( Google_Client $gClient ): bool {
+    /**
+     * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     */
+    public function validOrRefreshed(Google_Client $gClient): bool
+    {
         $this->refreshed           = false;
         $this->expired             = false;
         $decryptedOauthAccessToken = $this->service->getDecryptedOauthAccessToken();
 
-        if ( false === $decryptedOauthAccessToken ) {
+        if (false === $decryptedOauthAccessToken) {
             $this->__expireService();
 
             return false;
         }
 
         try {
-            $newToken = GDriveTokenHandler::getNewToken( $gClient, $decryptedOauthAccessToken );
-        } catch ( Exception $e ) {
+            $newToken = GDriveTokenHandler::getNewToken($gClient, $decryptedOauthAccessToken);
+        } catch (Exception) {
             $this->__expireService();
 
             return false;
         }
 
-        if ( $newToken ) {
-            $this->__updateToken( $newToken );
+        if ($newToken) {
+            $this->__updateToken($newToken);
         }
 
         return true;
     }
 
-    public function getService() {
+    public function getService(): ConnectedServiceStruct
+    {
         return $this->service;
     }
 
-    private function __expireService() {
+    /**
+     * @throws Exception
+     */
+    private function __expireService(): void
+    {
         $dao = new ConnectedServiceDao();
-        $dao->setServiceExpired( time(), $this->service );
+        $dao->setServiceExpired(time(), $this->service);
 
         $this->expired = true;
     }
 
-    private function __updateToken( $newToken ) {
+    /**
+     * @throws Exception
+     */
+    private function __updateToken(string $newToken): void
+    {
         $dao           = new ConnectedServiceDao();
-        $this->service = $dao->updateOauthToken( $newToken, $this->service );
+        $this->service = $dao->updateOauthToken($newToken, $this->service);
 
         $this->refreshed = true;
     }

@@ -24,27 +24,28 @@ use Utils\Tools\Utils;
  * Date: 27/02/2018
  * Time: 17:34
  */
-class OAuthSignInModel {
+class OAuthSignInModel
+{
 
     protected UserStruct $user;
     protected ?string    $profilePictureUrl = null;
     protected string     $provider;
 
-    public function __construct( string $email, ?string $firstName = null, ?string $lastName = null ) {
-        if ( empty( $firstName ) ) {
+    public function __construct(string $email, ?string $firstName = null, ?string $lastName = null)
+    {
+        if (empty($firstName)) {
             $firstName = "Anonymous";
         }
 
-        if ( empty( $lastName ) ) {
+        if (empty($lastName)) {
             $lastName = "User";
         }
 
-        $this->user = new UserStruct( [
+        $this->user = new UserStruct([
                 'first_name' => $firstName,
                 'last_name'  => $lastName,
                 'email'      => $email
-        ] );
-
+        ]);
     }
 
     /**
@@ -53,13 +54,15 @@ class OAuthSignInModel {
      * @throws EnvironmentIsBrokenException
      * @throws Exception
      */
-    public function setAccessToken( string $token ) {
+    public function setAccessToken(string $token): void
+    {
         $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
-                json_encode( $token )
+                json_encode($token)
         );
     }
 
-    public function getUser(): UserStruct {
+    public function getUser(): UserStruct
+    {
         return $this->user;
     }
 
@@ -67,31 +70,31 @@ class OAuthSignInModel {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function signIn(): bool {
+    public function signIn(): bool
+    {
         $userDao      = new UserDao();
-        $existingUser = $userDao->getByEmail( $this->user->email );
+        $existingUser = $userDao->getByEmail($this->user->email);
 
-        if ( $existingUser ) {
+        if ($existingUser) {
             $welcome_new_user = !$existingUser->everSignedIn();
-            $this->_updateExistingUser( $existingUser );
-
+            $this->_updateExistingUser($existingUser);
         } else {
             $welcome_new_user = true;
             $this->_createNewUser();
         }
 
-        if ( $welcome_new_user ) {
+        if ($welcome_new_user) {
             $this->_welcomeNewUser();
         }
 
-        if ( !is_null( $this->profilePictureUrl ) ) {
+        if (!is_null($this->profilePictureUrl)) {
             $this->_updateProfilePicture();
         }
 
         $this->_updateProvider();
         $this->_authenticateUser();
 
-        $project = new RedeemableProject( $this->user, $_SESSION );
+        $project = new RedeemableProject($this->user, $_SESSION);
         $project->tryToRedeem();
 
         return true;
@@ -100,24 +103,28 @@ class OAuthSignInModel {
     /**
      * @throws ReflectionException
      */
-    protected function _updateProfilePicture() {
+    protected function _updateProfilePicture(): void
+    {
         $dao = new MetadataDao();
-        $dao->set( $this->user->uid, $this->provider . '_picture', $this->profilePictureUrl );
+        $dao->set($this->user->uid, $this->provider . '_picture', $this->profilePictureUrl);
     }
 
-    public function setProfilePicture( ?string $pictureUrl = null ) {
+    public function setProfilePicture(?string $pictureUrl = null): void
+    {
         $this->profilePictureUrl = $pictureUrl;
     }
 
     /**
      * @throws ReflectionException
      */
-    protected function _updateProvider() {
+    protected function _updateProvider(): void
+    {
         $dao = new MetadataDao();
-        $dao->set( $this->user->uid, 'oauth_provider', $this->provider );
+        $dao->set($this->user->uid, 'oauth_provider', $this->provider);
     }
 
-    public function setProvider( string $provider ) {
+    public function setProvider(string $provider): void
+    {
         $this->provider = $provider;
     }
 
@@ -125,41 +132,45 @@ class OAuthSignInModel {
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function _createNewUser() {
-        $this->user->create_date = Utils::mysqlTimestamp( time() );
-        $this->user->uid         = UserDao::insertStruct( $this->user );
+    protected function _createNewUser(): void
+    {
+        $this->user->create_date = Utils::mysqlTimestamp(time());
+        $this->user->uid         = UserDao::insertStruct($this->user);
 
         $dao = new TeamDao();
         $dao->getDatabaseHandler()->begin();
-        $dao->createPersonalTeam( $this->user );
+        $dao->createPersonalTeam($this->user);
         $dao->getDatabaseHandler()->commit();
     }
 
     /**
      * @throws Exception
      */
-    protected function _updateExistingUser( UserStruct $existing_user ) {
+    protected function _updateExistingUser(UserStruct $existing_user): void
+    {
         $this->user->uid = $existing_user->uid;
-        UserDao::updateStruct( $this->user, [
+        UserDao::updateStruct($this->user, [
                 'fields' =>
-                        [ 'oauth_access_token' ]
-        ] );
+                        ['oauth_access_token']
+        ]);
     }
 
     /**
      */
-    protected function _authenticateUser() {
-        AuthCookie::setCredentials( $this->user, new SessionTokenStoreHandler() );
-        AuthenticationHelper::getInstance( $_SESSION );
+    protected function _authenticateUser(): void
+    {
+        AuthCookie::setCredentials($this->user, new SessionTokenStoreHandler());
+        AuthenticationHelper::getInstance($_SESSION);
     }
 
     /**
      * @throws Exception
      */
-    protected function _welcomeNewUser() {
-        $email = new WelcomeEmail( $this->user );
+    protected function _welcomeNewUser(): void
+    {
+        $email = new WelcomeEmail($this->user);
         $email->send();
-        FlashMessage::set( 'popup', 'profile', FlashMessage::SERVICE );
+        FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
     }
 
 

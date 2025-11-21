@@ -13,16 +13,14 @@ namespace Controller\API\Commons\Validators;
 use DomainException;
 use Utils\Tools\Utils;
 
-class WhitelistAccessValidator extends Base {
+class WhitelistAccessValidator extends Base
+{
 
-    public function _validate(): void {
-
+    public function _validate(): void
+    {
         #Block all not whitelisted IPs
         $ipWhiteList = [
-                "/^10\.30\.1\..*/",
-                "/^10\.3\.14\..*/",
-                "/^10\.3\.15\..*/",
-                "/^10\.6\..*/",
+                "/^10\.40\.1\..*/",
                 "/^10\.128\..*/",
                 "/^10\.144\..*/",
                 "/^172\.(?:1[6-9]|2[0-9]|3[0-1])\..*/",
@@ -31,10 +29,9 @@ class WhitelistAccessValidator extends Base {
                 "/^93\.43\.95\.1(?:29|3[0-4])/",
         ];
 
-        if ( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ) {
-            throw new DomainException( "Invalid Get: not authorized domain: " . Utils::getRealIpAddr(), 403 );
+        if (preg_replace($ipWhiteList, 'ALLOW', Utils::getRealIpAddr()) !== 'ALLOW') {
+            throw new DomainException("Invalid Get: not authorized domain: " . Utils::getRealIpAddr(), 403);
         }
-
     }
 
 }

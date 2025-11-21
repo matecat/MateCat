@@ -43,11 +43,13 @@ use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
-use Utils\Url\CanonicalRoutes;
 
 class CattoolController extends BaseKleinViewController {
 
-    protected function afterConstruct() {
+    private string $request_password;
+    private int    $id_job;
+
+    protected function afterConstruct(): void {
         $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
     }
 
@@ -56,7 +58,7 @@ class CattoolController extends BaseKleinViewController {
         $filterArgs = [
                 'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password' => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
         ];
 
@@ -111,10 +113,7 @@ class CattoolController extends BaseKleinViewController {
     /**
      * @throws Exception
      */
-    public function renderView() {
-
-
-        $rul = CanonicalRoutes::inviteToTeamConfirm( [                         'invited_by_uid' => 1,                         'email'          => "mauro@translated.net",                         'team_id'        => 1                 ] );
+    public function renderView(): void {
 
         $chunkAndPasswords = new stdClass();
         $request           = $this->validateTheRequest();
@@ -124,7 +123,7 @@ class CattoolController extends BaseKleinViewController {
         try {
             $chunkAndPasswords = $this->findJobByIdPasswordAndSourcePage( $request[ 'jid' ], $request[ 'password' ], Utils::getSourcePage(), $isRevision );
             $revisionNumber    = ReviewUtils::sourcePageToRevisionNumber( $chunkAndPasswords->chunkReviewStruct ? $chunkAndPasswords->chunkReviewStruct->source_page : null );
-        } catch ( NotFoundException $e ) {
+        } catch ( NotFoundException ) {
             $this->notFound();
         }
 
@@ -152,9 +151,9 @@ class CattoolController extends BaseKleinViewController {
             $this->notFound();
         }
 
-        $model = $chunkStruct->getProject()->getLqaModel();
-        $jobsMetadataDao = new MetadataDao();
-        $public_tm_penalty = $jobsMetadataDao->get($chunkStruct->id, $chunkStruct->password, 'public_tm_penalty');
+        $model             = $chunkStruct->getProject()->getLqaModel();
+        $jobsMetadataDao   = new MetadataDao();
+        $public_tm_penalty = $jobsMetadataDao->get( $chunkStruct->id, $chunkStruct->password, 'public_tm_penalty' );
 
         $this->setView( "index.html", [
                 'active_engine'                         => new PHPTalMap( $this->getActiveEngine( $chunkStruct->id_mt_engine ) ),
@@ -307,7 +306,7 @@ class CattoolController extends BaseKleinViewController {
     /**
      * @throws Exception
      */
-    private function notFound() {
+    private function notFound(): void {
         $this->setView( 'job_not_found.html', [ "support_mail" => AppConfig::$SUPPORT_MAIL ], 404 );
         $this->render();
     }
@@ -315,7 +314,7 @@ class CattoolController extends BaseKleinViewController {
     /**
      * @throws Exception
      */
-    private function cancelled( array $jobOwnership ) {
+    private function cancelled( array $jobOwnership ): void {
         $this->setView( 'job_cancelled.html', [
                 "support_mail" => AppConfig::$SUPPORT_MAIL,
                 "owner_email"  => $jobOwnership[ 'owner_email' ],
@@ -326,7 +325,7 @@ class CattoolController extends BaseKleinViewController {
     /**
      * @throws Exception
      */
-    private function archived( int $job_id, string $password, array $jobOwnership ) {
+    private function archived( int $job_id, string $password, array $jobOwnership ): void {
         $this->setView( 'job_archived.html', [
                 "support_mail" => AppConfig::$SUPPORT_MAIL,
                 "owner_email"  => $jobOwnership[ 'owner_email' ],
@@ -387,7 +386,7 @@ class CattoolController extends BaseKleinViewController {
 
     }
 
-    protected function _saveActivity( int $job_id, int $project_id, bool $isRevision ) {
+    protected function _saveActivity( int $job_id, int $project_id, bool $isRevision ): void {
 
         if ( $isRevision ) {
             $action = ActivityLogStruct::ACCESS_REVISE_PAGE;

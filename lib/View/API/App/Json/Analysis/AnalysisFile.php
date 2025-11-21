@@ -106,7 +106,8 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw( int $raw ): void
+    {
         $this->total_raw += $raw;
     }
 
@@ -115,7 +116,8 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent( float $equivalent ): void
+    {
         $this->total_equivalent += $equivalent;
     }
 

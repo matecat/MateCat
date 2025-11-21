@@ -11,19 +11,25 @@ namespace View\API\V2\Json;
 
 
 use Model\Translators\JobsTranslatorsStruct;
+use ReflectionException;
 
-class JobTranslator {
+class JobTranslator
+{
 
 
-    protected $data;
+    protected JobsTranslatorsStruct $data;
 
-    public function __construct( JobsTranslatorsStruct $translatorsStruct ) {
+    public function __construct(JobsTranslatorsStruct $translatorsStruct)
+    {
         $this->data = $translatorsStruct;
     }
 
-    public function renderItem( JobsTranslatorsStruct $jTranslatorsStruct = null ) {
-
-        if ( $jTranslatorsStruct == null ) {
+    /**
+     * @throws ReflectionException
+     */
+    public function renderItem(JobsTranslatorsStruct $jTranslatorsStruct = null): array
+    {
+        if ($jTranslatorsStruct == null) {
             $jTranslatorsStruct = $this->data;
         }
 
@@ -31,19 +37,18 @@ class JobTranslator {
                 'email'                 => $jTranslatorsStruct->email,
                 'added_by'              => (int)$jTranslatorsStruct->added_by,
                 'delivery_date'         => $jTranslatorsStruct->delivery_date,
-                'delivery_timestamp'    => strtotime( $jTranslatorsStruct->delivery_date ),
+                'delivery_timestamp'    => strtotime($jTranslatorsStruct->delivery_date),
                 'source'                => $jTranslatorsStruct->source,
                 'target'                => $jTranslatorsStruct->target,
                 'id_translator_profile' => $jTranslatorsStruct->id_translator_profile,
                 'user'                  => null
         ];
 
-        if ( !empty( $jTranslatorsStruct->id_translator_profile ) ) {
-            $translatorJson[ 'user' ] = User::renderItem( $jTranslatorsStruct->getUser() );
+        if (!empty($jTranslatorsStruct->id_translator_profile)) {
+            $translatorJson[ 'user' ] = User::renderItem($jTranslatorsStruct->getUser());
         }
 
         return $translatorJson;
-
     }
 
 }

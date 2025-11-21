@@ -8,13 +8,15 @@
 
 namespace Utils\Email;
 
-class CommentMentionEmail extends BaseCommentEmail {
+class CommentMentionEmail extends BaseCommentEmail
+{
 
     protected ?string $title = "New mention on a comment";
 
-    protected function _getTemplateVariables(): array {
+    protected function _getTemplateVariables(): array
+    {
         $vars                 = parent::_getTemplateVariables();
-        $vars[ 'title' ]       = $this->title;
+        $vars[ 'title' ]      = $this->title;
         $vars[ 'action' ]     = "mentioned you in a comment on";
         $vars[ 'id_segment' ] = $this->comment->id_segment;
 

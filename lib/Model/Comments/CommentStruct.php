@@ -8,7 +8,8 @@ use Model\DataAccess\IDaoStruct;
 /**
  * This is NOT a database Entity, this is a utility vector to transport info.
  */
-class CommentStruct extends BaseCommentStruct implements IDaoStruct, JsonSerializable {
+class CommentStruct extends BaseCommentStruct implements IDaoStruct, JsonSerializable
+{
 
     // database fields
     public int     $id;
@@ -29,22 +30,21 @@ class CommentStruct extends BaseCommentStruct implements IDaoStruct, JsonSeriali
     // returned values
     public ?string $thread_id = null;
 
-    public static function getStruct(): CommentStruct {
+    public static function getStruct(): CommentStruct
+    {
         return new CommentStruct();
     }
 
-    public function getFormattedDate(): string {
-        return date_format( date_create( $this->create_date ), DATE_ATOM ) ?: date_format( date_create(), DATE_ATOM );
-    }
-
-    public function getThreadId(): string {
-        return md5( $this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date );
+    public function getThreadId(): string
+    {
+        return md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date);
     }
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
                 'id'           => $this->id,
                 'uid'          => $this->uid,

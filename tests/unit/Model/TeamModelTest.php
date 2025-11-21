@@ -40,7 +40,7 @@ class TeamModelTest extends AbstractTest {
         $reflection = new ReflectionClass( $teamModel );
 
         $method = $reflection->getMethod( '_getNewMembershipEmailList' );
-        $method->setAccessible( true );
+        
         $notify_list = $method->invoke( $teamModel );
 
         $this->assertEquals( 1, count( $notify_list ) );

@@ -43,25 +43,24 @@ class Altlang extends AbstractEngine
     }
 
     /**
-     * @param $lang
+     * @param string $lang
      *
-     * @return mixed
-     * @throws Exception
+     * @return string
      */
-    protected function _fixLangCode($lang)
+    protected function _fixLangCode(string $lang): string
     {
         return $lang;
     }
 
     /**
-     * @param       $rawValue
+     * @param mixed $rawValue
      * @param array $parameters
      * @param null $function
      *
      * @return array
      * @throws Exception
      */
-    protected function _decode($rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
     {
         $all_args = func_get_args();
 
@@ -105,7 +104,7 @@ class Altlang extends AbstractEngine
      */
     public function get(array $_config)
     {
-        // Fallback on Match in case of not supported source/target combination
+        // Fallback on MyMemory in case of not supported source/target combination
         if (!$this->checkLanguageCombination($_config['source'], $_config['target'])) {
             /** @var MyMemory $myMemory */
             $myMemory = EnginesFactory::getInstance(1);

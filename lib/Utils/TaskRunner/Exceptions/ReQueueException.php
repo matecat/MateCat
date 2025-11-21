@@ -13,6 +13,7 @@ namespace Utils\TaskRunner\Exceptions;
  * Class ReQueueException
  * @package TaskRunner\Exceptions
  */
-class ReQueueException extends \Exception {
+class ReQueueException extends \Exception
+{
 
 }

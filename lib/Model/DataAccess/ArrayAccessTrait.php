@@ -9,7 +9,8 @@
 
 namespace Model\DataAccess;
 
-trait ArrayAccessTrait {
+trait ArrayAccessTrait
+{
 
     /**
      * This method is executed when using isset() or empty() on objects implementing ArrayAccess.
@@ -18,32 +19,36 @@ trait ArrayAccessTrait {
      *
      * @return bool
      */
-    public function offsetExists( $offset ): bool {
-        return property_exists( $this, $offset );
+    public function offsetExists(mixed $offset): bool
+    {
+        return property_exists($this, $offset);
     }
 
     /**
      * @param mixed $offset
      *
-     * @returns mixed
+     * @return mixed
      */
-    public function offsetGet( $offset ) {
-        return $this->__get( $offset );
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->__get($offset);
     }
 
     /**
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet( $offset, $value ) {
-        $this->__set( $offset, $value );
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $this->__set($offset, $value);
     }
 
     /**
      * @param mixed $offset
      */
-    public function offsetUnset( $offset ) {
-        $this->__set( $offset, null );
+    public function offsetUnset(mixed $offset): void
+    {
+        $this->__set($offset, null);
     }
 
 }

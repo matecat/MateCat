@@ -11,7 +11,8 @@ use DomainException;
  * Time: 18.15
  *
  */
-class UploadParams {
+class UploadParams
+{
 
     protected int $post_max_size       = -1;
     protected int $upload_max_filesize = -1;
@@ -19,20 +20,23 @@ class UploadParams {
     /**
      * @return int
      */
-    public function getPostMaxSize(): int {
+    public function getPostMaxSize(): int
+    {
         return $this->post_max_size;
     }
 
     /**
      * @return int
      */
-    public function getUploadMaxFilesize(): int {
+    public function getUploadMaxFilesize(): int
+    {
         return $this->upload_max_filesize;
     }
 
-    public function __set( $name, $value ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Unknown property ' . $name );
+    public function __set($name, $value)
+    {
+        if (!property_exists($this, $name)) {
+            throw new DomainException('Unknown property ' . $name);
         }
     }
 
@@ -41,7 +45,8 @@ class UploadParams {
      *
      * @return $this
      */
-    public function setPostMaxSize( int $post_max_size ): UploadParams {
+    public function setPostMaxSize(int $post_max_size): UploadParams
+    {
         $this->post_max_size = $post_max_size;
 
         return $this;
@@ -52,16 +57,19 @@ class UploadParams {
      *
      * @return $this
      */
-    public function setUploadMaxFilesize( int $upload_max_filesize ): UploadParams {
+    public function setUploadMaxFilesize(int $upload_max_filesize): UploadParams
+    {
         $this->upload_max_filesize = $upload_max_filesize;
 
         return $this;
     }
 
-    public function __clone() {
+    public function __clone()
+    {
         $cloned = new UploadParams();
-        $cloned->setPostMaxSize( $this->getPostMaxSize() );
-        $cloned->setUploadMaxFilesize( $this->getUploadMaxFilesize() );
+        $cloned->setPostMaxSize($this->getPostMaxSize());
+        $cloned->setUploadMaxFilesize($this->getUploadMaxFilesize());
+
         return $cloned;
     }
 

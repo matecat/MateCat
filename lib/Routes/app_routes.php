@@ -66,9 +66,6 @@ $klein->with( '/api/app/api-key', function () {
 route( '/api/app/projects/[:id_project]/[:password]/segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'project' ] ); // to be deleted from here
 route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'job' ] );     // to be deleted from here
 
-route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET', [ 'Controller\API\App\QualityFrameworkController', 'project' ] );
-route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET', [ 'Controller\API\App\QualityFrameworkController', 'job' ] );
-
 route( '/api/app/change-password', 'POST', [ 'Controller\API\V2\ChangePasswordController', 'changePassword' ] );
 route( '/api/app/projects/[:id_project]/[:password]/change-name', 'POST', [ 'Controller\API\V2\ChangeProjectNameController', 'changeName' ] );
 

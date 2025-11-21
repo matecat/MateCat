@@ -2,7 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
-use Predis\Connection\ConnectionException;
+use Predis\Connection\Resource\Exception\StreamInitException;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -26,9 +26,7 @@ class CacheSetConnectionTest extends AbstractTest {
         $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_cacheSetConnection" );
-        $this->method->setAccessible( true );
-        $this->cache_conn = $this->reflector->getProperty( "cache_con" );
-        $this->cache_conn->setAccessible( true );
+        $this->cache_conn       = $this->reflector->getProperty( "cache_con" );
 
     }
 
@@ -61,7 +59,7 @@ class CacheSetConnectionTest extends AbstractTest {
         $this->cache_conn->setValue( $this->databaseInstance, null );
         $this->initial_redis_configuration = AppConfig::$REDIS_SERVERS;
         AppConfig::$REDIS_SERVERS          = "tcp://fake_localhost_and_fake_port:7777";
-        $this->expectException( ConnectionException::class );
+        $this->expectException( StreamInitException::class );
         $this->method->invoke( $this->databaseInstance );
     }
 }

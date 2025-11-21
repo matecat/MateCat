@@ -8,7 +8,8 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Utils\Tools\Utils;
 
-class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public ?int    $id                   = null;
     public int     $id_project;
@@ -28,8 +29,9 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * Sets default values for an empty struct
      */
-    public function setDefaults() {
-        if ( $this->review_password == null ) {
+    public function setDefaults(): void
+    {
+        if ($this->review_password == null) {
             $this->review_password = Utils::randomString();
         }
     }
@@ -37,14 +39,16 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @return JobStruct
      */
-    public function getChunk(): JobStruct {
-        return $this->cachable( __METHOD__, function () {
-            return ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
-        } );
+    public function getChunk(): JobStruct
+    {
+        return $this->cachable(__METHOD__, function () {
+            return ChunkDao::getByIdAndPassword($this->id_job, $this->password);
+        });
     }
 
-    public function getUndoData() {
-        return json_decode( $this->undo_data, true );
+    public function getUndoData()
+    {
+        return json_decode($this->undo_data, true);
     }
 
 }

@@ -11,7 +11,8 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Utils\Constants\TranslationStatus;
 
-class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
+class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
+{
 
     use ArrayAccessTrait;
 
@@ -39,11 +40,13 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     public ?string $serialized_errors_list = null;
     public ?int    $version_number         = 0; // this value should be not null
 
-    public function isReviewedStatus(): bool {
-        return in_array( $this->status, TranslationStatus::$REVISION_STATUSES );
+    public function isReviewedStatus(): bool
+    {
+        return in_array($this->status, TranslationStatus::$REVISION_STATUSES);
     }
 
-    public function isICE(): bool {
+    public function isICE(): bool
+    {
         // In some cases, ICEs are not locked (translations from bilingual xliff). Only consider locked ICEs
         return $this->match_type == InternalMatchesConstants::TM_ICE && $this->locked;
     }
@@ -51,34 +54,34 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     /**
      * @return bool
      */
-    public function isPreTranslated(): bool {
+    public function isPreTranslated(): bool
+    {
         return $this->tm_analysis_status == 'SKIPPED';
     }
 
-    public function isRejected(): bool {
-        return $this->status == TranslationStatus::STATUS_REJECTED;
-    }
-
-    public function isTranslationStatus(): bool {
+    public function isTranslationStatus(): bool
+    {
         return !$this->isReviewedStatus();
     }
 
     /**
      * @return JobStruct|null
      */
-    public function getJob(): ?JobStruct {
-        return $this->cachable( __METHOD__, function () {
-            return JobDao::getById( $this->id_job )[ 0 ] ?? null;
-        } );
+    public function getJob(): ?JobStruct
+    {
+        return $this->cachable(__METHOD__, function () {
+            return JobDao::getById($this->id_job)[ 0 ] ?? null;
+        });
     }
 
     /**
      * @return JobStruct[]|null
      */
-    public function getChunk(): ?JobStruct {
-        return $this->cachable( __METHOD__, function () {
-            return JobDao::getById( $this->id_job )[ 0 ] ?? null;
-        } );
+    public function getChunk(): ?JobStruct
+    {
+        return $this->cachable(__METHOD__, function () {
+            return JobDao::getById($this->id_job)[ 0 ] ?? null;
+        });
     }
 
 }

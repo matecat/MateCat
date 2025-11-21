@@ -2,6 +2,7 @@
 
 use Matecat\SimpleS3\Client;
 use Model\FilesStorage\S3FilesStorage;
+use PHPUnit\Framework\Attributes\Test;
 use Predis\Connection\ConnectionException;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -20,7 +21,6 @@ class S3FilesStorageTest extends AbstractTest {
 
     /**
      * @throws ReflectionException
-     * @throws ConnectionException
      */
     public function setUp(): void {
         parent::setUp();
@@ -33,6 +33,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_creation_of_cache_package_into_a_bucket() {
         $filePath        = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
         $xliffPath       = AppConfig::$ROOT . '/tests/resources/files/xliff/file-with-hello-world.xliff';
@@ -57,6 +58,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @depends test_creation_of_cache_package_into_a_bucket
      * @throws Exception
      */
+    #[Test]
     public function test_copying_a_file_from_cache_package_bucket_to_file_bucket() {
         $filePath     = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
         $sha1         = sha1_file( $filePath );
@@ -71,8 +73,8 @@ class S3FilesStorageTest extends AbstractTest {
 
     /**
      * @throws ReflectionException
-     * @throws ConnectionException
      */
+    #[Test]
     public function testListItems() {
         $workItems = S3FilesStorage::getStaticS3Client()->getItemsInABucket( [
                 'bucket' => S3FilesStorage::getFilesStorageBucket(),
@@ -86,6 +88,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_uploading_files_from_queue_folder_to_queue_bucket() {
 
         // create a backup file from fixtures folder because the folder in upload folder is deleted every time
@@ -129,6 +132,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_get_hashes_from_dir() {
         $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
         $dirToScan     = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
@@ -147,6 +151,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_handling_files_in_fast_analysys_bucket() {
 
         $id_project        = 13;
@@ -184,6 +189,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_cache_zip_archive() {
 
         // create a backup file from fixtures folder because the folder in upload folder is deleted every time
@@ -205,6 +211,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function test_link_zip_to_project() {
         $filePath  = AppConfig::$ROOT . '/tests/resources/files/zip-with-model-json.zip';
         $sha1      = sha1_file( $filePath );

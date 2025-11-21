@@ -5,7 +5,8 @@ namespace Model\RemoteFiles;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class RemoteFileStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class RemoteFileStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
     public int    $id;
     public int    $id_file;
     public int    $id_job;

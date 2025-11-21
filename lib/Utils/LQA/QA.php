@@ -169,61 +169,51 @@ class QA {
      */
     protected $characters_count;
 
-    const ERR_NONE                    = 0;
-    const ERR_COUNT                   = 1;
-    const ERR_SOURCE                  = 2;
-    const ERR_TARGET                  = 3;
-    const ERR_TAG_ID                  = 4;
-    const ERR_WS_HEAD                 = 5;
-    const ERR_WS_TAIL                 = 6;
-    const ERR_TAB_HEAD                = 7;
-    const ERR_TAB_TAIL                = 8;
-    const ERR_CR_HEAD                 = 9;
-    const ERR_CR_TAIL                 = 10;
-    const ERR_BOUNDARY_HEAD           = 11;
-    const ERR_BOUNDARY_TAIL           = 12;
-    const ERR_UNCLOSED_X_TAG          = 13;
-    const ERR_BOUNDARY_HEAD_TEXT      = 14;
-    const ERR_TAG_ORDER               = 15;
-    const ERR_NEWLINE_MISMATCH        = 16;
-    const ERR_DOLLAR_MISMATCH         = 17;
-    const ERR_AMPERSAND_MISMATCH      = 18;
-    const ERR_AT_MISMATCH             = 19;
-    const ERR_HASH_MISMATCH           = 20;
-    const ERR_POUNDSIGN_MISMATCH      = 21;
-    const ERR_PERCENT_MISMATCH        = 22;
-    const ERR_EQUALSIGN_MISMATCH      = 23;
-    const ERR_TAB_MISMATCH            = 24;
-    const ERR_STARSIGN_MISMATCH       = 25;
-    const ERR_GLOSSARY_MISMATCH       = 26;
-    const ERR_SPECIAL_ENTITY_MISMATCH = 27;
-    const ERR_EUROSIGN_MISMATCH       = 28;
-    const ERR_UNCLOSED_G_TAG          = 29;
+    const int ERR_NONE                    = 0;
+    const int ERR_COUNT                   = 1;
+    const int ERR_SOURCE                  = 2;
+    const int ERR_TARGET                  = 3;
+    const int ERR_TAG_ID                  = 4;
+    const int ERR_WS_HEAD                 = 5;
+    const int ERR_WS_TAIL                 = 6;
+    const int ERR_TAB_HEAD                = 7;
+    const int ERR_TAB_TAIL                = 8;
+    const int ERR_CR_HEAD                 = 9;
+    const int ERR_CR_TAIL                 = 10;
+    const int ERR_BOUNDARY_HEAD           = 11;
+    const int ERR_BOUNDARY_TAIL           = 12;
+    const int ERR_UNCLOSED_X_TAG          = 13;
+    const int ERR_BOUNDARY_HEAD_TEXT      = 14;
+    const int ERR_TAG_ORDER               = 15;
+    const int ERR_NEWLINE_MISMATCH        = 16;
+    const int ERR_DOLLAR_MISMATCH         = 17;
+    const int ERR_AMPERSAND_MISMATCH      = 18;
+    const int ERR_AT_MISMATCH             = 19;
+    const int ERR_HASH_MISMATCH           = 20;
+    const int ERR_POUNDSIGN_MISMATCH      = 21;
+    const int ERR_PERCENT_MISMATCH        = 22;
+    const int ERR_EQUALSIGN_MISMATCH      = 23;
+    const int ERR_TAB_MISMATCH            = 24;
+    const int ERR_STARSIGN_MISMATCH       = 25;
+    const int ERR_GLOSSARY_MISMATCH       = 26;
+    const int ERR_SPECIAL_ENTITY_MISMATCH = 27;
+    const int ERR_EUROSIGN_MISMATCH       = 28;
+    const int ERR_UNCLOSED_G_TAG          = 29;
 
-    const ERR_TAG_MISMATCH = 1000;
-
-    const ERR_SPACE_MISMATCH = 1100;
-
-    const ERR_SPACE_MISMATCH_TEXT = 1101;
-
-    const ERR_BOUNDARY_HEAD_SPACE_MISMATCH = 1102;
-
-    const ERR_BOUNDARY_TAIL_SPACE_MISMATCH = 1103;
-
-    const ERR_SPACE_MISMATCH_AFTER_TAG = 1104;
-
-    const ERR_SPACE_MISMATCH_BEFORE_TAG = 1105;
-
-    const ERR_SYMBOL_MISMATCH = 1200;
-
-    const ERR_EX_BX_NESTED_IN_G    = 1300;
-    const ERR_EX_BX_WRONG_POSITION = 1301;
-    const ERR_EX_BX_COUNT_MISMATCH = 1302;
-
-    const SMART_COUNT_PLURAL_MISMATCH = 2000;
-    const SMART_COUNT_MISMATCH        = 2001;
-
-    const ERR_SIZE_RESTRICTION = 3000;
+    const int ERR_TAG_MISMATCH = 1000;
+    const int ERR_SPACE_MISMATCH = 1100;
+    const int ERR_SPACE_MISMATCH_TEXT = 1101;
+    const int ERR_BOUNDARY_HEAD_SPACE_MISMATCH = 1102;
+    const int ERR_BOUNDARY_TAIL_SPACE_MISMATCH = 1103;
+    const int ERR_SPACE_MISMATCH_AFTER_TAG = 1104;
+    const int ERR_SPACE_MISMATCH_BEFORE_TAG = 1105;
+    const int ERR_SYMBOL_MISMATCH = 1200;
+    const int ERR_EX_BX_NESTED_IN_G    = 1300;
+    const int ERR_EX_BX_WRONG_POSITION = 1301;
+    const int ERR_EX_BX_COUNT_MISMATCH = 1302;
+    const int SMART_COUNT_PLURAL_MISMATCH = 2000;
+    const int SMART_COUNT_MISMATCH        = 2001;
+    const int ERR_SIZE_RESTRICTION = 3000;
 
     /**
      * Human Readable error map.
@@ -346,7 +336,7 @@ class QA {
             3000 => 'Maximum characters limit exceeded.',
     ];
 
-    const SIZE_RESTRICTION = "sizeRestriction";
+    const string SIZE_RESTRICTION = "sizeRestriction";
 
     /**
      * <code>
@@ -408,9 +398,9 @@ class QA {
 
     protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
-    const ERROR   = 'ERROR';
-    const WARNING = 'WARNING';
-    const INFO    = 'INFO';
+    const string ERROR   = 'ERROR';
+    const string WARNING = 'WARNING';
+    const string INFO    = 'INFO';
 
     /**
      * List of Errors from  check analysis
@@ -907,7 +897,7 @@ class QA {
             $test_src = $seg;
             foreach ( $matches[ 1 ] as $v ) {
                 $key      = sprintf( "%02X", ord( $v ) );
-                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
+                $test_src = preg_replace(sprintf("/(\\x{%s}{1})/u", sprintf("%02X", ord($v))), self::$asciiPlaceHoldMap[$key]['placeHold'], $test_src, 1);
             }
 
             // Source Content wrong use placeholded one
@@ -2069,7 +2059,7 @@ class QA {
         }
 
         //* Fix error undefined variable trgTagReference when source target contains tags and target not
-        $trgTagReference = [ 'node_idx' => null ];
+        $trgTagReference = [ 'node_idx' => -1 ];
 
         foreach ( $this->srcDomMap[ 'DOMElement' ] as $srcTagReference ) {
 
@@ -2077,76 +2067,79 @@ class QA {
                 continue;
             }
 
-            if ( !is_null( $srcTagReference[ 'parent_id' ] ) ) {
-
-                $srcNode        = $this->_queryDOMElement( $this->srcDom, $srcTagReference );
-                $srcNodeContent = $srcNode->textContent;
-
-                foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
-                    if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
-                        $trgTagReference = $this->trgDomMap[ 'DOMElement' ][ $k ];
-                    }
-                }
-
-                $trgNode        = $this->_queryDOMElement( $this->trgDom, $trgTagReference );
-                $trgNodeContent = $trgNode->textContent;
-
-            } else {
-
-                $srcNode = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
-                if ( $srcNode !== null ) {
+            try {
+                if (!is_null($srcTagReference['parent_id'])) {
+                    $srcNode = $this->_queryDOMElement($this->srcDom, $srcTagReference);
                     $srcNodeContent = $srcNode->textContent;
-                }
 
-                foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
-                    if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
-                        $trgTagReference = $this->trgDomMap[ 'DOMElement' ][ $k ];
+                    foreach ($this->trgDomMap['DOMElement'] as $k => $elements) {
+                        if ($elements['id'] == $srcTagReference['id']) {
+                            $trgTagReference = $this->trgDomMap['DOMElement'][$k];
+                        }
+                    }
+
+                    $trgNode = $this->_queryDOMElement($this->trgDom, $trgTagReference);
+                    $trgNodeContent = $trgNode->textContent;
+                } else {
+                    $srcNode = $srcNodeList->item($srcTagReference['node_idx']);
+                    if ($srcNode !== null) {
+                        $srcNodeContent = $srcNode->textContent;
+                    }
+
+                    foreach ($this->trgDomMap['DOMElement'] as $k => $elements) {
+                        if ($elements['id'] == $srcTagReference['id']) {
+                            $trgTagReference = $this->trgDomMap['DOMElement'][$k];
+                        }
+                    }
+
+                    $trgTagPos = $trgTagReference['node_idx'];
+                    $trgNode = $trgNodeList->item($trgTagPos);
+                    if ($trgNode !== null) {
+                        $trgNodeContent = $trgNode->textContent;
                     }
                 }
 
-                $trgTagPos = $trgTagReference[ 'node_idx' ];
-                $trgNode   = $trgNodeList->item( $trgTagPos );
-                if ( $trgNode !== null ) {
-                    $trgNodeContent = $trgNode->textContent;
+                /**
+                 * Skip double check for first whitespace if there are child nodes.
+                 * Since this check is performed over ALL elements ( parent and childes )
+                 * Avoid to count 2 times a first space for nodeValue when nested
+                 *
+                 * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.nodevalue
+                 *
+                 * nodeValue
+                 *   The value of this node, depending on its type
+                 *
+                 * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.textcontent
+                 * textContent
+                 *   This attribute returns the text content of this node and its descendants.
+                 *
+                 * @example '<g id="pt231"><g id="pt232"> ELSA AND JOY'S APARTMENT </g></g>'
+                 * <code>
+                 *
+                 * // The space before ELSA was checked two times because:
+                 *
+                 *  ( DOMElement id pt231 )->nodeValue == ( DOMElement id pt232 )->nodeValue
+                 *
+                 * </code>
+                 *
+                 */
+                $domSrcNodeString = $srcNode->ownerDocument->saveXML($srcNode);
+
+                if (isset($trgNodeContent) and isset($srcNodeContent)) {
+                    if (!preg_match('/^<g[^>]+></', $domSrcNodeString)) {
+                        $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
+                    }
+
+                    $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent);
+                    $this->_checkHeadTabs($srcNodeContent, $trgNodeContent);
+                    $this->_checkTailTabs($srcNodeContent, $trgNodeContent);
+                    $this->_checkHeadCRNL($srcNodeContent, $trgNodeContent);
+                    $this->_checkTailCRNL($srcNodeContent, $trgNodeContent);
                 }
-            }
-
-            /**
-             * Skip double check for first whitespace if there are child nodes.
-             * Since this check is performed over ALL elements ( parent and childes )
-             * Avoid to count 2 times a first space for nodeValue when nested
-             *
-             * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.nodevalue
-             *
-             * nodeValue
-             *   The value of this node, depending on its type
-             *
-             * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.textcontent
-             * textContent
-             *   This attribute returns the text content of this node and its descendants.
-             *
-             * @example '<g id="pt231"><g id="pt232"> ELSA AND JOY'S APARTMENT </g></g>'
-             * <code>
-             *
-             * // The space before ELSA was checked two times because:
-             *
-             *  ( DOMElement id pt231 )->nodeValue == ( DOMElement id pt232 )->nodeValue
-             *
-             * </code>
-             *
-             */
-            $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
-
-            if ( isset( $trgNodeContent ) and isset( $srcNodeContent ) ) {
-                if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
-                    $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
-                }
-
-                $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent );
-                $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
-                $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
-                $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
-                $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
+            } catch (\Throwable $e) {
+                $this->addError(self::ERR_TAG_MISMATCH);
+                LoggerFactory::getLogger('executor')->debug(var_export($srcNodeList, true));
+                LoggerFactory::getLogger('executor')->debug($e);
             }
         }
     }
@@ -2438,7 +2431,7 @@ class QA {
         }
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $content = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'Utils\Tools\CatUtils', 'htmlentitiesFromUnicode' ], $content );
+        $content = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $content );
 
         /*
          * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

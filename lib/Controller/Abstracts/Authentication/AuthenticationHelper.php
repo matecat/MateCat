@@ -60,9 +60,10 @@ class AuthenticationHelper {
      * If authentication is successful, the user object is populated, and the session is updated.
      * If authentication fails, the user remains unauthenticated.
      *
-     * @param array       $session    Reference to the session array, used to store user data.
-     * @param string|null $api_key    Optional API key for authentication.
+     * @param array $session Reference to the session array, used to store user data.
+     * @param string|null $api_key Optional API key for authentication.
      * @param string|null $api_secret Optional API secret for authentication.
+     * @throws \Exception
      */
     protected function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
 
@@ -104,7 +105,7 @@ class AuthenticationHelper {
                                 'cookie'     => AuthCookie::getCredentials()[ 'user' ] ?? null
                         ]
                 );
-            } catch ( ReflectionException $ignore ) {
+            } catch (ReflectionException) {
             }
         } finally {
             // Set the logged status based on the user's authentication state.

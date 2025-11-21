@@ -13,13 +13,15 @@ use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
 use Utils\Url\CanonicalRoutes;
 
-class SendToTranslatorForDeliveryChangeEmail extends SendToTranslatorAbstract {
+class SendToTranslatorForDeliveryChangeEmail extends SendToTranslatorAbstract
+{
 
-    public function __construct( UserStruct $user, JobsTranslatorsStruct $translator, $projectName ) {
-        parent::__construct( $user, $translator, $projectName );
+    public function __construct(UserStruct $user, JobsTranslatorsStruct $translator, $projectName)
+    {
+        parent::__construct($user, $translator, $projectName);
         $this->title = "Matecat - Job delivery updated.";
-        $this->_setTemplate( 'Translator/job_change_delivery_send_to_translator_content.html' );
-        $this->_RoutesMethod = [ CanonicalRoutes::class, 'translate' ];
+        $this->_setTemplate('Translator/job_change_delivery_send_to_translator_content.html');
+        $this->_RoutesMethod = [CanonicalRoutes::class, 'translate'];
     }
 
 }

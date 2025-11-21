@@ -38,7 +38,7 @@ class DestructTest extends AbstractTest {
         $method->invoke( $instance_to_destruct );
 
         $connection = $reflector->getProperty( 'connection' );
-        $connection->setAccessible( true );
+        
         $current_value = $connection->getValue( $instance_to_destruct );
         $this->assertNull( $current_value );
     }

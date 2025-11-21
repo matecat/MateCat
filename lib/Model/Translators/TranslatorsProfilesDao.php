@@ -13,13 +13,14 @@ namespace Model\Translators;
 use Model\DataAccess\AbstractDao;
 use ReflectionException;
 
-class TranslatorsProfilesDao extends AbstractDao {
+class TranslatorsProfilesDao extends AbstractDao
+{
 
-    const TABLE       = "translator_profiles";
-    const STRUCT_TYPE = TranslatorProfilesStruct::class;
+    const string TABLE = "translator_profiles";
+    const string STRUCT_TYPE = TranslatorProfilesStruct::class;
 
-    protected static array $auto_increment_field = [ 'id' ];
-    protected static array $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = ['id'];
+    protected static array $primary_keys         = ['id'];
 
     protected static string $_query_by_uid_src_trg_rev = "
         SELECT * FROM translator_profiles 
@@ -38,11 +39,12 @@ class TranslatorsProfilesDao extends AbstractDao {
      * @internal param $id
      *
      */
-    public function getByProfile( TranslatorProfilesStruct $profile ): ?TranslatorProfilesStruct {
+    public function getByProfile(TranslatorProfilesStruct $profile): ?TranslatorProfilesStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_by_uid_src_trg_rev);
 
-        $stmt = $this->_getStatementForQuery( self::$_query_by_uid_src_trg_rev );
-
-        return $this->_fetchObjectMap( $stmt,
+        return $this->_fetchObjectMap(
+                $stmt,
                 TranslatorProfilesStruct::class,
                 [
                         'uid_translator' => $profile->uid_translator,

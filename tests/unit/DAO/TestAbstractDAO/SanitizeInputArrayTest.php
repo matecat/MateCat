@@ -25,7 +25,7 @@ class SanitizeInputArrayTest extends AbstractTest {
         $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_sanitizeInputArray" );
-        $this->method->setAccessible( true );
+        
 
 
     }

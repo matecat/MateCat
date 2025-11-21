@@ -11,11 +11,10 @@ namespace Controller\Features\ProjectCompletion;
 
 use Model\DataAccess\AbstractDaoObjectStruct;
 
-class CompletionEventStruct extends AbstractDaoObjectStruct {
-
-    public $uid ;
-    public $remote_ip_address ;
-    public $source ;
-    public $is_review ;
-
+class CompletionEventStruct extends AbstractDaoObjectStruct
+{
+    public int    $uid;
+    public string $remote_ip_address = '';
+    public string $source;
+    public bool   $is_review;
 }

@@ -91,7 +91,7 @@ class GlossaryImportTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 
@@ -162,7 +162,7 @@ class GlossaryImportTest extends AbstractTest {
         ];
 
         /**
-         * @var $this ->engine_MyMemory Match
+         * @var $this ->engine_MyMemory MyMemory
          *            mocking _call
          */
         $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
@@ -189,7 +189,7 @@ class GlossaryImportTest extends AbstractTest {
 
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result ) );
 

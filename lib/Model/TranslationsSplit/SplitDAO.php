@@ -14,11 +14,12 @@ use Model\DataAccess\IDaoStruct;
  * Date: 24/03/15
  * Time: 13.21
  */
-class SplitDAO extends AbstractDao {
+class SplitDAO extends AbstractDao
+{
 
-    const TABLE = "segment_translations_splits";
+    const string TABLE = "segment_translations_splits";
 
-    const STRUCT_TYPE = SegmentSplitStruct::class;
+    const string STRUCT_TYPE = SegmentSplitStruct::class;
 
     /**
      * @param SegmentSplitStruct $obj
@@ -26,8 +27,8 @@ class SplitDAO extends AbstractDao {
      * @return SegmentSplitStruct[]
      * @throws Exception
      */
-    public function read( SegmentSplitStruct $obj ): array {
-
+    public function read(SegmentSplitStruct $obj): array
+    {
         $where_conditions = [];
         $values           = [];
 
@@ -43,20 +44,19 @@ class SplitDAO extends AbstractDao {
         $where_conditions[] = "id_job = :id_job";
         $values[ 'id_job' ] = $obj->id_job;
 
-        if ( count( $where_conditions ) ) {
-            $query .= implode( " AND ", $where_conditions );
+        if (count($where_conditions)) {
+            $query .= implode(" AND ", $where_conditions);
         } else {
-            throw new Exception( "Where condition needed." );
+            throw new Exception("Where condition needed.");
         }
 
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $query );
+        $stmt = $conn->prepare($query);
 
-        $result = $this->_fetchObjectMap( $stmt, SegmentSplitStruct::class, $values );
+        $result = $this->_fetchObjectMap($stmt, SegmentSplitStruct::class, $values);
 
-        return $this->_buildResult( $result );
-
+        return $this->_buildResult($result);
     }
 
     /**
@@ -65,11 +65,11 @@ class SplitDAO extends AbstractDao {
      * @return null|SegmentSplitStruct
      * @throws Exception
      */
-    public function atomicUpdate( SegmentSplitStruct $obj ): ?SegmentSplitStruct {
+    public function atomicUpdate(SegmentSplitStruct $obj): ?SegmentSplitStruct
+    {
+        $obj = $this->sanitize($obj);
 
-        $obj = $this->sanitize( $obj );
-
-        $res = self::insertStruct( $obj, [
+        $res = self::insertStruct($obj, [
                 'no_nulls'            => true,
                 'on_duplicate_update' => [
                         'id_segment'           => 'value',
@@ -77,14 +77,13 @@ class SplitDAO extends AbstractDao {
                         'source_chunk_lengths' => 'value',
                         'target_chunk_lengths' => 'value'
                 ]
-        ] );
+        ]);
 
-        if ( $res > 0 ) {
+        if ($res > 0) {
             return $obj;
         }
 
         return null;
-
     }
 
     /**
@@ -93,12 +92,12 @@ class SplitDAO extends AbstractDao {
      * @return SegmentSplitStruct
      * @throws Exception
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize(IDaoStruct $input): SegmentSplitStruct
+    {
+        parent::_sanitizeInput($input, self::STRUCT_TYPE);
 
-        parent::_sanitizeInput( $input, self::STRUCT_TYPE );
-
-        $input->source_chunk_lengths = ( $input->source_chunk_lengths !== null ) ? json_encode( $input->source_chunk_lengths ) : null;
-        $input->target_chunk_lengths = ( $input->target_chunk_lengths !== null ) ? json_encode( $input->target_chunk_lengths ) : null;
+        $input->source_chunk_lengths = ($input->source_chunk_lengths !== null) ? json_encode($input->source_chunk_lengths) : null;
+        $input->target_chunk_lengths = ($input->target_chunk_lengths !== null) ? json_encode($input->target_chunk_lengths) : null;
 
         return $input;
     }
@@ -110,8 +109,8 @@ class SplitDAO extends AbstractDao {
      * @return void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
-
+    protected function _validatePrimaryKey(IDaoStruct $obj): void
+    {
     }
 
 
@@ -120,10 +119,11 @@ class SplitDAO extends AbstractDao {
      *
      * @return SegmentSplitStruct[]
      */
-    protected function _buildResult( array $array_result ): array {
-        foreach ( $array_result as $item ) {
-            $item->source_chunk_lengths = json_decode( $item->source_chunk_lengths, true );
-            $item->target_chunk_lengths = json_decode( $item->target_chunk_lengths, true );
+    protected function _buildResult(array $array_result): array
+    {
+        foreach ($array_result as $item) {
+            $item->source_chunk_lengths = json_decode($item->source_chunk_lengths, true);
+            $item->target_chunk_lengths = json_decode($item->target_chunk_lengths, true);
         }
 
         return $array_result;

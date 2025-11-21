@@ -37,7 +37,7 @@ class CloseTest extends AbstractTest {
 
         $reflector  = new ReflectionClass( $this->databaseInstance );
         $connection = $reflector->getProperty( 'connection' );
-        $connection->setAccessible( true );
+        
         $current_value = $connection->getValue( $this->databaseInstance );
         $this->assertNull( $current_value );
 

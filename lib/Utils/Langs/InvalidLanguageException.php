@@ -1,4 +1,5 @@
 <?php
+
 namespace Utils\Langs;
 
 use Exception;
@@ -10,6 +11,7 @@ use Exception;
  * Time: 10:52
  *
  */
-class InvalidLanguageException extends Exception {
+class InvalidLanguageException extends Exception
+{
 
 }

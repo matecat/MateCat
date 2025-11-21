@@ -12,7 +12,8 @@ use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 
-class Chunk extends Job {
+class Chunk extends Job
+{
 
     /**
      * @param JobStruct $chunk
@@ -21,14 +22,15 @@ class Chunk extends Job {
      * @throws Exception
      * @throws NotFoundException
      */
-    public function renderOne( JobStruct $chunk ): array {
+    public function renderOne(JobStruct $chunk): array
+    {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
         return [
                 'job' => [
                         'id'     => (int)$chunk->id,
-                        'chunks' => [ $this->renderItem( $chunk, $project, $featureSet ) ]
+                        'chunks' => [$this->renderItem($chunk, $project, $featureSet)]
                 ]
         ];
     }

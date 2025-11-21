@@ -13,6 +13,7 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobStruct;
+use Stringable;
 use Utils\Constants\TranslationStatus;
 use Utils\TaskRunner\Commons\Params;
 
@@ -20,7 +21,8 @@ use Utils\TaskRunner\Commons\Params;
  * Class SetContributionRequest
  * @package Contribution
  */
-class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStruct {
+class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStruct, Stringable
+{
 
     protected array $cached_results = [];
 
@@ -104,7 +106,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     /**
      * @var array|string
      */
-    public $props = [];
+    public string|array $props = [];
 
     /**
      * @var integer
@@ -131,38 +133,42 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      *
      * @return JobStruct The `JobStruct` instance associated with this object.
      */
-    public function getJobStruct(): JobStruct {
+    public function getJobStruct(): JobStruct
+    {
         return $this->jobStruct;
     }
 
     /**
      * @return array
      */
-    public function getProp(): array {
+    public function getProp(): array
+    {
         $jobStruct = $this->getJobStruct();
         $props     = $this->props;
-        if ( !is_array( $props ) ) {
+        if (!is_array($props)) {
             /**
              * @var $props Params
              */
             $props = $props->toArray();
         }
 
-        return array_merge( $jobStruct->getTMProps(), $props );
+        return array_merge($jobStruct->getTMProps(), $props);
     }
 
     /**
      * @return string
      */
-    public function getSessionId(): string {
-        return md5( $this->id_file . '-' . $this->id_job . '-' . $this->job_password );
+    public function getSessionId(): string
+    {
+        return md5($this->id_file . '-' . $this->id_job . '-' . $this->job_password);
     }
 
     /**
      * @return string
      */
-    public function __toString() {
-        return json_encode( $this->toArray() );
+    public function __toString(): string
+    {
+        return json_encode($this->toArray());
     }
 
 }

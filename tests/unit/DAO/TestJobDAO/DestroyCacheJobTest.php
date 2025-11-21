@@ -125,12 +125,12 @@ class DestroyCacheJobTest extends AbstractTest {
         $this->job_Dao->destroyCache( $this->job_struct );
         $output_after_destruction = $this->cache->get( $cache_key );
         $this->assertNull( $output_after_destruction );
-        $this->assertFalse( unserialize( $output_after_destruction ) instanceof JobStruct );
     }
 
     /**
      * @group  regression
      * @covers JobDao::destroyCache
+     * @throws Exception
      */
     public function test_DestroyCache_with_ID_Project() {
 
@@ -146,7 +146,6 @@ class DestroyCacheJobTest extends AbstractTest {
         $this->job_Dao->destroyCache( $this->job_struct );
         $output_after_destruction = $this->cache->get( $cache_key );
         $this->assertNull( $output_after_destruction );
-        $this->assertFalse( unserialize( $output_after_destruction ) instanceof JobStruct );
     }
 
 

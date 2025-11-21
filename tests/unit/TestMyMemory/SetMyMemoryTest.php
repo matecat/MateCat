@@ -77,7 +77,7 @@ class SetMyMemoryTest extends AbstractTest {
         $this->engine_MyMemory = new MyMemory( $this->engine_struct_param );
         $this->reflector       = new ReflectionClass( $this->engine_MyMemory );
         $this->property        = $this->reflector->getProperty( "result" );
-        $this->property->setAccessible( true );
+        
 
 
     }
@@ -172,7 +172,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $this->anything(), $curl_params )->willReturn( $mock_json_return );
 
         $actual_result = $this->engine_MyMemory->set( $params );
@@ -195,7 +195,7 @@ TAB;
          */
         $this->reflector = new ReflectionClass( $result_object );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result_object ) );
 
@@ -289,7 +289,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(
                 $url_mock_param,
                 $curl_params
@@ -316,7 +316,7 @@ TAB;
          */
         $this->reflector = new ReflectionClass( $result_object );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result_object ) );
 
@@ -376,7 +376,7 @@ TAB;
         /**
          * @var Matches
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_params )->willReturn( $rawValue_error );
 
         $actual_result = $this->engine_MyMemory->set( $params );
@@ -404,7 +404,7 @@ TAB;
          */
         $this->reflector = new ReflectionClass( $result_object );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $result_object ) );
 

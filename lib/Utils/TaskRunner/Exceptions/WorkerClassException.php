@@ -13,6 +13,7 @@ namespace Utils\TaskRunner\Exceptions;
  * Class WorkerClassException
  * @package TaskRunner\Exceptions
  */
-class WorkerClassException extends \Exception {
+class WorkerClassException extends \Exception
+{
 
 }
