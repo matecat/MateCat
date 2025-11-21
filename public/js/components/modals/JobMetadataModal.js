@@ -75,7 +75,11 @@ class JobMetadataModal extends React.Component {
             className="instructions-accordion"
             title={title}
             expanded={isCurrentFile}
-            onShow={(id) => this.setState({currentFile: id})}
+            onShow={(id) =>
+              this.setState({
+                currentFile: this.state.currentFile !== id ? id : undefined,
+              })
+            }
           >
             <div className="content">
               <div className="transition">
