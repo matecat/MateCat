@@ -897,7 +897,7 @@ class QA {
             $test_src = $seg;
             foreach ( $matches[ 1 ] as $v ) {
                 $key      = sprintf( "%02X", ord( $v ) );
-                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
+                $test_src = preg_replace(sprintf("/(\\x{%s}{1})/u", sprintf("%02X", ord($v))), self::$asciiPlaceHoldMap[$key]['placeHold'], $test_src, 1);
             }
 
             // Source Content wrong use placeholded one
@@ -2067,76 +2067,79 @@ class QA {
                 continue;
             }
 
-            if ( !is_null( $srcTagReference[ 'parent_id' ] ) ) {
-
-                $srcNode        = $this->_queryDOMElement( $this->srcDom, $srcTagReference );
-                $srcNodeContent = $srcNode->textContent;
-
-                foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
-                    if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
-                        $trgTagReference = $this->trgDomMap[ 'DOMElement' ][ $k ];
-                    }
-                }
-
-                $trgNode        = $this->_queryDOMElement( $this->trgDom, $trgTagReference );
-                $trgNodeContent = $trgNode->textContent;
-
-            } else {
-
-                $srcNode = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
-                if ( $srcNode !== null ) {
+            try {
+                if (!is_null($srcTagReference['parent_id'])) {
+                    $srcNode = $this->_queryDOMElement($this->srcDom, $srcTagReference);
                     $srcNodeContent = $srcNode->textContent;
-                }
 
-                foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
-                    if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
-                        $trgTagReference = $this->trgDomMap[ 'DOMElement' ][ $k ];
+                    foreach ($this->trgDomMap['DOMElement'] as $k => $elements) {
+                        if ($elements['id'] == $srcTagReference['id']) {
+                            $trgTagReference = $this->trgDomMap['DOMElement'][$k];
+                        }
+                    }
+
+                    $trgNode = $this->_queryDOMElement($this->trgDom, $trgTagReference);
+                    $trgNodeContent = $trgNode->textContent;
+                } else {
+                    $srcNode = $srcNodeList->item($srcTagReference['node_idx']);
+                    if ($srcNode !== null) {
+                        $srcNodeContent = $srcNode->textContent;
+                    }
+
+                    foreach ($this->trgDomMap['DOMElement'] as $k => $elements) {
+                        if ($elements['id'] == $srcTagReference['id']) {
+                            $trgTagReference = $this->trgDomMap['DOMElement'][$k];
+                        }
+                    }
+
+                    $trgTagPos = $trgTagReference['node_idx'];
+                    $trgNode = $trgNodeList->item($trgTagPos);
+                    if ($trgNode !== null) {
+                        $trgNodeContent = $trgNode->textContent;
                     }
                 }
 
-                $trgTagPos = $trgTagReference[ 'node_idx' ];
-                $trgNode   = $trgNodeList->item( $trgTagPos );
-                if ( $trgNode !== null ) {
-                    $trgNodeContent = $trgNode->textContent;
+                /**
+                 * Skip double check for first whitespace if there are child nodes.
+                 * Since this check is performed over ALL elements ( parent and childes )
+                 * Avoid to count 2 times a first space for nodeValue when nested
+                 *
+                 * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.nodevalue
+                 *
+                 * nodeValue
+                 *   The value of this node, depending on its type
+                 *
+                 * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.textcontent
+                 * textContent
+                 *   This attribute returns the text content of this node and its descendants.
+                 *
+                 * @example '<g id="pt231"><g id="pt232"> ELSA AND JOY'S APARTMENT </g></g>'
+                 * <code>
+                 *
+                 * // The space before ELSA was checked two times because:
+                 *
+                 *  ( DOMElement id pt231 )->nodeValue == ( DOMElement id pt232 )->nodeValue
+                 *
+                 * </code>
+                 *
+                 */
+                $domSrcNodeString = $srcNode->ownerDocument->saveXML($srcNode);
+
+                if (isset($trgNodeContent) and isset($srcNodeContent)) {
+                    if (!preg_match('/^<g[^>]+></', $domSrcNodeString)) {
+                        $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
+                    }
+
+                    $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent);
+                    $this->_checkHeadTabs($srcNodeContent, $trgNodeContent);
+                    $this->_checkTailTabs($srcNodeContent, $trgNodeContent);
+                    $this->_checkHeadCRNL($srcNodeContent, $trgNodeContent);
+                    $this->_checkTailCRNL($srcNodeContent, $trgNodeContent);
                 }
-            }
-
-            /**
-             * Skip double check for first whitespace if there are child nodes.
-             * Since this check is performed over ALL elements ( parent and childes )
-             * Avoid to count 2 times a first space for nodeValue when nested
-             *
-             * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.nodevalue
-             *
-             * nodeValue
-             *   The value of this node, depending on its type
-             *
-             * @See     : http://www.php.net/manual/en/class.domnode.php#domnode.props.textcontent
-             * textContent
-             *   This attribute returns the text content of this node and its descendants.
-             *
-             * @example '<g id="pt231"><g id="pt232"> ELSA AND JOY'S APARTMENT </g></g>'
-             * <code>
-             *
-             * // The space before ELSA was checked two times because:
-             *
-             *  ( DOMElement id pt231 )->nodeValue == ( DOMElement id pt232 )->nodeValue
-             *
-             * </code>
-             *
-             */
-            $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
-
-            if ( isset( $trgNodeContent ) and isset( $srcNodeContent ) ) {
-                if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
-                    $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
-                }
-
-                $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent );
-                $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
-                $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
-                $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
-                $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
+            } catch (\Throwable $e) {
+                $this->addError(self::ERR_TAG_MISMATCH);
+                LoggerFactory::getLogger('executor')->debug(var_export($srcNodeList, true));
+                LoggerFactory::getLogger('executor')->debug($e);
             }
         }
     }
@@ -2428,7 +2431,7 @@ class QA {
         }
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-        $content = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'Utils\Tools\CatUtils', 'htmlentitiesFromUnicode' ], $content );
+        $content = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $content );
 
         /*
          * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

@@ -14,6 +14,7 @@
 
 namespace Utils\Logger;
 
+use Monolog\LogRecord;
 use Monolog\Processor\IntrospectionProcessor;
 use Utils\Tools\Utils;
 
@@ -28,11 +29,11 @@ class LogProcessor extends IntrospectionProcessor
     /**
      * Invokes the processor to modify the log record.
      *
-     * @param array $record The log record to be processed.
+     * @param LogRecord $record The log record to be processed.
      *
-     * @return array The modified log record with additional contextual information.
+     * @return LogRecord The modified log record with additional contextual information.
      */
-    public function __invoke(array $record): array
+    public function __invoke(LogRecord $record): LogRecord
     {
         // Call the parent processor to handle the base introspection logic.
         $record = parent::__invoke($record);

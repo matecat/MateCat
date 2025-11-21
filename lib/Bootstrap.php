@@ -3,7 +3,6 @@
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Views\CustomPageView;
-use JetBrains\PhpStorm\NoReturn;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\PluginsLoader;
@@ -72,6 +71,9 @@ class Bootstrap {
 
     }
 
+    /**
+     * @throws Exception
+     */
     private function setLoggers(): void {
         LoggerFactory::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
         LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
@@ -138,11 +140,11 @@ class Bootstrap {
         }
 
         // Load the app version from 'version.ini'
-        $matecatVesrsionFile = new SplFileInfo( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/version.ini' );
-        if ( $matecatVesrsionFile->isFile() ) {
-            $mv = parse_ini_file( $matecatVesrsionFile->getRealPath() );
+        $matecatVersionFile = new SplFileInfo( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/version.ini' );
+        if ( $matecatVersionFile->isFile() ) {
+            $mv = parse_ini_file( $matecatVersionFile->getRealPath() );
         } else {
-            throw new RuntimeException( "MateCat version file not found: " . $matecatVesrsionFile->getPathname() );
+            throw new RuntimeException( "MateCat version file not found: " . $matecatVersionFile->getPathname() );
         }
         self::$_INI_VERSION = $mv[ 'version' ];
 
@@ -156,6 +158,9 @@ class Bootstrap {
         $this->autoLoadedFeatureSet->run( 'bootstrapCompleted' );
     }
 
+    /**
+     * @throws Exception
+     */
     public static function exceptionHandler( Throwable $exception ): never {
 
         $logger = LoggerFactory::getLogger( 'exception_handler' );
@@ -225,6 +230,9 @@ class Bootstrap {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public static function shutdownFunctionHandler(): never {
 
         $errorType = [
@@ -303,7 +311,16 @@ class Bootstrap {
      *
      */
     private function initRegistryClass(): void {
-        AppConfig::init( self::$_ROOT, self::$CONFIG[ 'ENV' ], self::$_INI_VERSION, $this->getConfigurationForEnvironment(), self::$TASK_RUNNER_CONFIG ); //load configurations
+        AppConfig::init(
+            self::$_ROOT,
+            self::$CONFIG['ENV'],
+            self::$_INI_VERSION,
+            // Retrieves environment-specific settings (e.g., DB credentials) and handles overrides (e.g., enabling/disabling outsourcing)
+            $this->getConfigurationForEnvironment(),
+            self::$TASK_RUNNER_CONFIG,
+            // Detects if the script is running via Command Line Interface (CLI) to flag the instance as a daemon/background worker
+            stripos( PHP_SAPI, 'cli' ) !== false
+        ); // Initializes the application configuration singleton and sets up static properties (paths, OAuth, storage)
     }
 
     private function createSystemDirectories(): void {

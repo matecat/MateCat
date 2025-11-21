@@ -3,6 +3,7 @@
 namespace Model\ConnectedServices\Oauth\Google;
 
 use Monolog\Formatter\FormatterInterface;
+use Monolog\LogRecord;
 
 class GoogleClientLogsFormatter implements FormatterInterface
 {
@@ -10,11 +11,11 @@ class GoogleClientLogsFormatter implements FormatterInterface
     /**
      * Formats a log record.
      *
-     * @param array $record A record to format
+     * @param LogRecord $record A record to format
      *
      * @return mixed The formatted record
      */
-    public function format(array $record): string
+    public function format(LogRecord $record): string
     {
         return json_encode($record) . PHP_EOL;
     }

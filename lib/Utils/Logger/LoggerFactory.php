@@ -5,6 +5,7 @@ namespace Utils\Logger;
 use Exception;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\StreamHandler;
+use Monolog\Level;
 use Monolog\Logger;
 use Utils\Registry\AppConfig;
 
@@ -40,18 +41,20 @@ class LoggerFactory
     /**
      * Initializes a Monolog logger with a specific name and file.
      *
-     * @param string $name     The name of the logger.
+     * @param string $name The name of the logger.
      * @param string $fileName The file where logs will be written.
      *
      * @return MatecatLogger The initialized logger instance.
+     * @throws Exception
      */
     protected static function initMonolog(string $name, string $fileName): MatecatLogger
     {
         if (!isset(self::$loggersMap[ $name ])) {
             $streamHandler = new StreamHandler(self::getFileNamePath($fileName));
-            $fileFormatter = new JsonFormatter();
-            $streamHandler->setFormatter($fileFormatter);
-            self::$loggersMap[ $name ] = new MatecatLogger(new Logger($name, [$streamHandler], [new LogProcessor(Logger::DEBUG, [__NAMESPACE__])]));
+            $streamHandler->setFormatter(new JsonFormatter());
+            $handlers = HandlersProvider::loadWithName($fileName);
+            array_unshift($handlers, $streamHandler);
+            self::$loggersMap[$name] = new MatecatLogger(new Logger($name, $handlers, [new LogProcessor(Level::Debug, [__NAMESPACE__])]));
         }
 
         return self::$loggersMap[ $name ];
@@ -72,9 +75,10 @@ class LoggerFactory
     /**
      * Logs content in JSON format to a specified file.
      *
-     * @param mixed       $content  The content to log.
-     * @param string      $filename The name of the log file. Defaults to 'log.txt'.
-     * @param string|null $logName  The name of the logger. Defaults to the filename.
+     * @param mixed $content The content to log.
+     * @param string $filename The name of the log file. Defaults to 'log.txt'.
+     * @param string|null $logName The name of the logger. Defaults to the filename.
+     * @throws Exception
      */
     public static function doJsonLog(mixed $content, string $filename = self::LOG_FILENAME, ?string $logName = null): void
     {
@@ -85,10 +89,11 @@ class LoggerFactory
     /**
      * Retrieves a logger instance by name and file.
      *
-     * @param string|null $name     The name of the logger. Defaults to the filename.
-     * @param string      $fileName The name of the log file. Defaults to 'log.txt'.
+     * @param string|null $name The name of the logger. Defaults to the filename.
+     * @param string $fileName The name of the log file. Defaults to 'log.txt'.
      *
      * @return MatecatLogger The logger instance.
+     * @throws Exception
      */
     public static function getLogger(?string $name = null, string $fileName = self::LOG_FILENAME): MatecatLogger
     {
@@ -113,15 +118,16 @@ class LoggerFactory
     /**
      * Generates a hexdump of the provided data and optionally logs it.
      *
-     * @param mixed $data       The data to generate a hexdump for.
-     * @param bool  $htmloutput Whether to format the output as HTML. Defaults to false.
-     * @param bool  $uppercase  Whether to use uppercase hex characters. Defaults to true.
-     * @param bool  $return     Whether to return the hexdump as a string. Defaults to false.
+     * @param mixed $data The data to generate a hexdump for.
+     * @param bool $htmlOutput Whether to format the output as HTML. Defaults to false.
+     * @param bool $uppercase Whether to use uppercase hex characters. Defaults to true.
+     * @param bool $return Whether to return the hexdump as a string. Defaults to false.
      *
      * @return string|null The hexdump string if $return is true, otherwise null.
+     * @throws Exception
      * @codeCoverageIgnore
      */
-    public static function hexDump(string|array $data, bool $htmloutput = false, bool $uppercase = true, bool $return = false): ?string
+    public static function hexDump(string|array $data, bool $htmlOutput = false, bool $uppercase = true, bool $return = false): ?string
     {
         if (is_array($data)) {
             $data = print_r($data, true);
@@ -129,7 +135,7 @@ class LoggerFactory
 
         $hexi   = '';
         $ascii  = '';
-        $dump   = ($htmloutput === true) ? '<pre>' : '';
+        $dump   = ($htmlOutput === true) ? '<pre>' : '';
         $offset = 0;
         $len    = strlen($data);
 
@@ -140,7 +146,7 @@ class LoggerFactory
 
             // Replace non-viewable bytes with '.'
             if (ord($data[ $i ]) >= 32) {
-                $ascii .= ($htmloutput === true) ? htmlentities($data[ $i ]) : $data[ $i ];
+                $ascii .= ($htmlOutput === true) ? htmlentities($data[ $i ]) : $data[ $i ];
             } else {
                 $ascii .= '.';
             }
@@ -165,7 +171,7 @@ class LoggerFactory
             }
         }
 
-        $dump .= $htmloutput === true ? '</pre>' : '';
+        $dump .= $htmlOutput === true ? '</pre>' : '';
         $dump .= "\n";
 
         // Output method

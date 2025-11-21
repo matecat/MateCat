@@ -87,7 +87,7 @@ class FastAnalysis extends AbstractDaemon
         $this->_queueContextList = $configuration->getContextList();
     }
 
-    protected function _checkDatabaseConnection()
+    protected function _checkDatabaseConnection(): void
     {
         $db = Database::obtain();
         try {
@@ -311,12 +311,12 @@ class FastAnalysis extends AbstractDaemon
         try {
             $this->_logTimeStampedMsg("Fetching data from disk");
             $this->segments = $fs::getFastAnalysisData($pid);
-        } catch (UnexpectedValueException $e) {
+        } catch (UnexpectedValueException) {
             $this->_logTimeStampedMsg("Error Fetching data from disk. Fallback to database.");
 
             try {
                 $this->segments = self::_getSegmentsForFastVolumeAnalysis($pid);
-            } catch (PDOException $e) {
+            } catch (PDOException) {
                 throw new Exception("Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE);
             }
         }
@@ -389,7 +389,7 @@ class FastAnalysis extends AbstractDaemon
     /**
      * @throws ReflectionException
      */
-    protected function _updateProject($pid, $status)
+    protected function _updateProject($pid, $status): void
     {
         Database::obtain()->begin();
         $project = ProjectDao::findById($pid);
@@ -409,7 +409,7 @@ class FastAnalysis extends AbstractDaemon
      *
      * @throws PDOException
      */
-    protected function _executeInsert($tuple_list, $bind_values)
+    protected function _executeInsert($tuple_list, $bind_values): void
     {
         $db       = Database::obtain();
         $query_st = "INSERT INTO `segment_translations` ( 
@@ -478,6 +478,7 @@ class FastAnalysis extends AbstractDaemon
             [$eq_word, $standard_words, $match_type] = $this->_getWordCountForSegment($v, $equivalentWordMapping);
 
             $total_eq_wc       += $eq_word;
+            /** @noinspection PhpUnusedLocalVariableInspection */
             $total_standard_wc += $standard_words;
 
             $list_id_jobs_password = explode(',', $list_id_jobs_password);
@@ -574,6 +575,7 @@ class FastAnalysis extends AbstractDaemon
 
                 $this->_logTimeStampedMsg("--- trying to initialize job total word count.");
 
+                /** @noinspection PhpUnusedLocalVariableInspection */
                 $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
 
                 foreach ($_details as $job_info) {
@@ -696,8 +698,12 @@ class FastAnalysis extends AbstractDaemon
                         $element->classLoad = TMAnalysisWorker::class;
 
                         $this->queueHandler->publishToQueues($queueInfo->queue_name, new Message($element, ['persistent' => $this->queueHandler->persistent]));
-                        $this->_logTimeStampedMsg("AMQ Set Executed " . ($k + 1) . " Language: $language");
+
+                        if ($k % 100 == 0 || ($k + 1) == count($this->segments)) {
+                            $this->_logTimeStampedMsg("AMQ Set Executed " . ($k + 1) . " Language: $language");
+                        }
                     }
+
                 } catch (Exception $e) {
                     Utils::sendErrMailReport($e->getMessage() . " " . $e->getTraceAsString(), "Fast Analysis set queue failed.");
                     $this->_logTimeStampedMsg($e->getMessage() . " " . $e->getTraceAsString());
@@ -741,7 +747,7 @@ class FastAnalysis extends AbstractDaemon
      * @param $pid
      *
      * @return array
-     * @throws PDOException
+     * @throws Exception
      */
     protected static function _getSegmentsForFastVolumeAnalysis($pid): array
     {
@@ -808,7 +814,7 @@ HD;
                     'pid'       => null,
                     'queueInfo' => null
             ]
-    ) {
+    ): void {
         if (empty($config[ 'pid' ])) {
             throw new Exception('Can Not set a Total without a Queue ID.');
         }
@@ -848,22 +854,12 @@ HD;
         $contextList = $this->_queueContextList->list;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
-        switch (true) {
-            case ($mtEngine instanceof MMT || $mtEngine instanceof Lara):
-                $context = $contextList[ 'P4' ];
-                break;
-            case (!$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE):
-                $context = $contextList[ 'P3' ];
-                break;
-            case ($queueLen >= 10000): // at rate of 100 segments/s (100 processes) ~ 2m 30s
-                $context = $contextList[ 'P2' ];
-                break;
-            default:
-                $context = $contextList[ 'P1' ];
-                break;
-        }
-
-        return $context;
+        return match (true) {
+            $mtEngine instanceof MMT || $mtEngine instanceof Lara => $contextList['P4'],
+            !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $contextList['P3'],
+            $queueLen >= 10000 => $contextList['P2'],
+            default => $contextList['P1'],
+        };
     }
 
     /**
@@ -910,7 +906,7 @@ HD;
 
                 try {
                     $this->_updateProject($project[ 'id' ], ProjectStatus::STATUS_BUSY);
-                } catch (PDOException $ex) {
+                } catch (PDOException) {
                     $this->queueHandler->getRedisClient()->del('_fPid:' . $project[ 'id' ]);
                 }
             }

@@ -41,6 +41,11 @@ class AppConfig
      */
     public static ?string $ENV = null;
 
+    /**
+     * Indicates whether the current instance is running as a daemon process.
+     */
+    public static bool $IS_DAEMON_INSTANCE = false;
+
     public static string  $ROOT;
     public static string  $BASEURL;
     public static string  $HTTPHOST;
@@ -306,12 +311,24 @@ class AppConfig
     public static bool    $AWS_CACHING       = false;
     public static string  $AWS_STORAGE_BASE_BUCKET;
 
+    /**
+     * Logging configuration
+     */
+    public static array $MONOLOG_HANDLER_PROVIDERS = [];
+
     public static string $REPLACE_HISTORY_DRIVER = '';
     public static int    $REPLACE_HISTORY_TTL    = 0;
 
     private static ?AppConfig $MYSELF = null;
 
-    protected function __construct(string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration)
+    protected function __construct(
+        string $rootPath,
+        string $envName,
+        string $matecatVersion,
+        array $configuration,
+        array $taskManagerConfiguration,
+        bool $isDaemon = false
+    )
     {
         self::$ENV                = $envName;
         self::$BUILD_NUMBER       = $matecatVersion;
@@ -322,6 +339,8 @@ class AppConfig
         self::$BASEURL                     = "/"; // Accessible by the browser
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$TRACKING_CODES_VIEW_PATH    = self::$ROOT . "/lib/View/templates";
+
+        AppConfig::$IS_DAEMON_INSTANCE = $isDaemon;
 
         //Override default configuration
         foreach ($configuration as $KEY => $value) {
@@ -546,13 +565,21 @@ class AppConfig
      * @param string $rootPath
      * @param string $envName
      * @param string $matecatVersion
-     * @param array  $configuration
-     * @param array  $taskManagerConfiguration
+     * @param array $configuration
+     * @param array $taskManagerConfiguration
+     * @param bool $isDaemon
      */
-    public static function init(string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration): void
+    public static function init(
+        string $rootPath,
+        string $envName,
+        string $matecatVersion,
+        array $configuration,
+        array $taskManagerConfiguration,
+        bool $isDaemon = false
+    ): void
     {
         if (empty(self::$MYSELF)) {
-            self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration);
+            self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration, $isDaemon);
         }
     }
 

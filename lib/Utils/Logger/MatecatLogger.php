@@ -14,6 +14,7 @@
 namespace Utils\Logger;
 
 use Exception;
+use Monolog\Level;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Utils\Registry\AppConfig;
@@ -55,7 +56,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function debug(mixed $message, array $context = []): void
     {
-        $this->log(Logger::DEBUG, $message, $context);
+        $this->log(Level::Debug, $message, $context);
     }
 
     /**
@@ -90,7 +91,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function emergency(mixed $message, array $context = []): void
     {
-        $this->log(Logger::EMERGENCY, $message, $context);
+        $this->log(Level::Emergency, $message, $context);
     }
 
     /**
@@ -101,7 +102,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function alert(mixed $message, array $context = []): void
     {
-        $this->log(Logger::ALERT, $message, $context);
+        $this->log(Level::Alert, $message, $context);
     }
 
     /**
@@ -112,7 +113,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function critical(mixed $message, array $context = []): void
     {
-        $this->log(Logger::CRITICAL, $message, $context);
+        $this->log(Level::Critical, $message, $context);
     }
 
     /**
@@ -123,7 +124,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function error(mixed $message, array $context = []): void
     {
-        $this->log(Logger::ERROR, $message, $context);
+        $this->log(Level::Error, $message, $context);
     }
 
     /**
@@ -134,7 +135,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function warning(mixed $message, array $context = []): void
     {
-        $this->log(Logger::WARNING, $message, $context);
+        $this->log(Level::Warning, $message, $context);
     }
 
     /**
@@ -145,7 +146,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function notice(mixed $message, array $context = []): void
     {
-        $this->log(Logger::NOTICE, $message, $context);
+        $this->log(Level::Notice, $message, $context);
     }
 
     /**
@@ -156,7 +157,7 @@ class MatecatLogger implements LoggerInterface
      */
     public function info(mixed $message, array $context = []): void
     {
-        $this->log(Logger::INFO, $message, $context);
+        $this->log(Level::Info, $message, $context);
     }
 
     /**
