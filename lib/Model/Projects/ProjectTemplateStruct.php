@@ -125,7 +125,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         return unserialize($this->target_language);
     }
 
-    public function getSubfilteringHandlers(): array
+    public function getSubfilteringHandlers(): ?array
     {
         if (!empty($this->subfiltering_handlers)) {
             return json_decode($this->subfiltering_handlers, true);
