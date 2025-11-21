@@ -9,7 +9,7 @@ export const taggingTypes = [
   {id: 'markup', name: 'Markup', code: '<text>', default: true},
   {id: 'twig', name: 'Twig', code: '{{text}},{%text%}', default: true},
   {id: 'ruby_on_rails', name: 'Ruby on Rails', code: '%{text}', default: true},
-  {id: 'double_snail', name: 'Double Snails', code: '@@text@@', default: true},
+  {id: 'double_snail', name: 'Double snails', code: '@@text@@', default: true},
   {
     id: 'double_square',
     name: 'Double square brackets',
@@ -30,7 +30,7 @@ export const taggingTypes = [
   },
   {
     id: 'objective_c_ns',
-    name: 'Objective CNS',
+    name: 'Objective-C NSString',
     code: '%@,%1$@',
     default: true,
   },
@@ -43,14 +43,14 @@ export const taggingTypes = [
   {
     id: 'square_sprintf',
     name: 'Square bracket Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#square-bracket-sprintf">See guides page</a>',
     html: true,
     default: true,
   },
   {
     id: 'sprintf',
     name: 'Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#sprintf">See guides page</a>',
     html: true,
     default: true,
   },
@@ -122,10 +122,6 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
         <h3>Tagged syntaxes</h3>
         <p>
           Choose which syntaxes to detect and lock in tags during translation.
-          <br />
-          <a target="_blank" href="https://guides.matecat.com" rel="noreferrer">
-            More details
-          </a>
         </p>
       </div>
       <div className="options-select-container">

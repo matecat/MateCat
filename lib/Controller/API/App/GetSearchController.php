@@ -71,7 +71,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $request[ 'queryParams' ][ 'replacement' ] = $request[ 'replace' ];
 
         // update segment translations
-        $this->updateSegments($search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ] ?? null, $request[ 'queryParams' ], $request[ 'revisionNumber' ]);
+        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'queryParams' ], $request[ 'id_segment' ] ?? null, $request[ 'revisionNumber' ] );
 
         // and save replace events
         $srh             = $this->getReplaceHistory($request[ 'job' ]);
@@ -100,7 +100,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $request        = $this->validateTheRequest();
         $shr            = $this->getReplaceHistory($request[ 'job' ]);
         $search_results = $this->getSegmentForRedoReplaceAll($shr);
-        $this->updateSegments($search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ] ?? null, $request[ 'queryParams' ], $request[ 'revisionNumber' ]);
+        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'queryParams' ], $request[ 'id_segment' ] ?? null, $request[ 'revisionNumber' ] );
         $shr->redo();
 
         $this->response->json([
@@ -118,7 +118,7 @@ class GetSearchController extends AbstractStatefulKleinController
         $request        = $this->validateTheRequest();
         $shr            = $this->getReplaceHistory($request[ 'job' ]);
         $search_results = $this->getSegmentForUndoReplaceAll($shr);
-        $this->updateSegments($search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ] ?? null, $request[ 'queryParams' ], $request[ 'revisionNumber' ]);
+        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'queryParams' ], $request[ 'id_segment' ] ?? null, $request[ 'revisionNumber' ] );
         $shr->undo();
 
         $this->response->json([
@@ -347,8 +347,7 @@ class GetSearchController extends AbstractStatefulKleinController
      * @throws ReflectionException
      * @throws Exception
      */
-    private function updateSegments(array $search_results, int $id_job, string $password, ?string $id_segment, SearchQueryParamsStruct $queryParams, ?int $revisionNumber = null): void
-    {
+    private function updateSegments( array $search_results, int $id_job, string $password, SearchQueryParamsStruct $queryParams, ?string $id_segment = null, ?int $revisionNumber = null ): void {
         $db = Database::obtain();
 
         $chunk           = ChunkDao::getByIdAndPassword($id_job, $password);
