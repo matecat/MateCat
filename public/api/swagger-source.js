@@ -2481,61 +2481,6 @@ var spec = {
           },
         },
       },
-    '/api/v3/jobs/{id_job}/{password}/options': {
-      post: {
-        tags: ['Job', 'Options'],
-        summary: 'Update Options',
-        description: 'Update Options (speech2text, guess tags, lexiqa)',
-        parameters: [
-          {
-            name: 'id_job',
-            in: 'formData',
-            description: 'The id of the job',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'password',
-            in: 'formData',
-            description: 'The password of the job (Translate password)',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'speech2text',
-            in: 'formData',
-            description: 'To enable Speech To Text option',
-            required: false,
-            type: 'boolean',
-          },
-          {
-            name: 'tag_projection',
-            in: 'formData',
-            description: 'To enable Guess Tags option',
-            type: 'boolean',
-            required: false,
-          },
-          {
-            name: 'lexiqa',
-            in: 'formData',
-            description: 'To enable lexiqa option',
-            type: 'boolean',
-            required: false,
-          },
-        ],
-        responses: {
-          200: {
-            description: 'Update Options',
-            schema: {
-              $ref: '#/definitions/Options',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v3/jobs/{id_job}/{password}/files': {
       get: {
         tags: ['Job', 'Files'],
