@@ -46,7 +46,6 @@ use Utils\Constants\TmKeyPermissions;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
-use Utils\Engines\Validators\DeeplFormalityValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Langs\LanguageDomains;
@@ -59,7 +58,6 @@ use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
-use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
