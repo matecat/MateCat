@@ -2,15 +2,21 @@ import {useCallback, useRef, useState} from 'react'
 import {cloneDeep, isEqual, mergeWith} from 'lodash'
 import PropTypes from 'prop-types'
 
-export const normalizeTemplatesWithNullProps = (templates, defaultTemplate) => {
+export const normalizeTemplatesWithNullProps = (
+  templates,
+  defaultTemplate,
+  excludeProps = [],
+) => {
   return templates.map((template) =>
     mergeWith(
       cloneDeep(defaultTemplate),
       cloneDeep(template),
-      (objValue, srcValue) =>
-        typeof srcValue === 'undefined' || srcValue === null
-          ? objValue
-          : srcValue,
+      (defValue, srcValue, key) => {
+        if (excludeProps.some((value) => value === key)) return srcValue
+        return typeof srcValue === 'undefined' || srcValue === null
+          ? defValue
+          : srcValue
+      },
     ),
   )
 }
