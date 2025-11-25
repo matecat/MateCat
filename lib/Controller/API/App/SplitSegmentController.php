@@ -108,6 +108,7 @@ class SplitSegmentController extends KleinController {
                 'job_pass'   => $password,
                 'segment'    => $segment,
                 'target'     => $target,
+                'jobStruct'  => $jobStruct,
         ];
     }
 }
