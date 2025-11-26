@@ -234,6 +234,8 @@ class Bootstrap {
      * @throws Exception
      */
     public static function shutdownFunctionHandler(): never {
+        $logger = LoggerFactory::getLogger( 'exception_handler' );
+        $logger->debug( "ShutDown" );
 
         $errorType = [
                 E_CORE_ERROR        => 'E_CORE_ERROR',
@@ -318,8 +320,6 @@ class Bootstrap {
             // Retrieves environment-specific settings (e.g., DB credentials) and handles overrides (e.g., enabling/disabling outsourcing)
             $this->getConfigurationForEnvironment(),
             self::$TASK_RUNNER_CONFIG,
-            // Detects if the script is running via Command Line Interface (CLI) to flag the instance as a daemon/background worker
-            stripos( PHP_SAPI, 'cli' ) !== false
         ); // Initializes the application configuration singleton and sets up static properties (paths, OAuth, storage)
     }
 
