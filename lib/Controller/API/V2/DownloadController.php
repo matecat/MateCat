@@ -147,8 +147,8 @@ class DownloadController extends AbstractDownloadController {
         $this->download_type     = $__postInput[ 'download_type' ];
         $this->password          = $__postInput[ 'password' ];
         $this->downloadToken     = $__postInput[ 'downloadToken' ];
-        $this->disableErrorCheck = $__postInput[ 'disableErrorCheck' ];
 
+        $this->disableErrorCheck = ( !empty( $__postInput[ 'disableErrorCheck' ] ) && $__postInput[ 'disableErrorCheck' ] == 1 );
         $this->forceXliff        = ( !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
         $this->openOriginalFiles = ( !empty( $__postInput[ 'original' ] ) && $__postInput[ 'original' ] == 1 );
 
