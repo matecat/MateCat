@@ -305,8 +305,8 @@ class AppConfig
      */
     public static ?string $AWS_ACCESS_KEY_ID = null;
     public static ?string $AWS_SECRET_KEY    = null;
-    public static string  $AWS_VERSION;
-    public static string  $AWS_REGION;
+    public static ?string $AWS_VERSION = null;
+    public static ?string $AWS_REGION = null;
     public static bool    $AWS_SSL_VERIFY    = false;
     public static bool    $AWS_CACHING       = false;
     public static string  $AWS_STORAGE_BASE_BUCKET;

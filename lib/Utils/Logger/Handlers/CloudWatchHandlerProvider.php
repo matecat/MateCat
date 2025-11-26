@@ -63,7 +63,7 @@ class CloudWatchHandlerProvider implements ProviderInterface
     {
         if (empty(self::$CLIENT)) {
             // init the client
-            $awsRegion = AppConfig::$AWS_REGION;
+            $awsRegion = AppConfig::$AWS_REGION ?? 'eu-central-1';
 
             $config = [
                 'version' => 'latest',
