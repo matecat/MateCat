@@ -73,7 +73,7 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public function getDiff(): mixed
     {
-        return $this->_diff;
+        return $this->_diff ?? null;
     }
 
     /**

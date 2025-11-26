@@ -67,7 +67,7 @@ class AppConfig
     public static string  $QUEUE_CREDENTIALS;
 
     public static bool   $ENABLE_MULTI_DOMAIN_API = false;
-    public static string $XSRF_TOKEN              = 'xsrf-token';
+    public static string $XSRF_TOKEN              = 'Xsrf-Token';
 
     /**
      * Use or not the js tracking codes macro import (Ex: Google Analytics code injection)
