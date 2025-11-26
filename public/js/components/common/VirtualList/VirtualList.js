@@ -1,6 +1,7 @@
 import React, {forwardRef, useCallback, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {useVirtual} from 'react-virtual'
+import {debounce} from 'lodash'
 
 const VirtualList = forwardRef(
   (
@@ -12,6 +13,7 @@ const VirtualList = forwardRef(
       height,
       scrollToIndex = {},
       onRender,
+      setFirstRowIdVisible,
       itemStyle = () => ({}),
       onScroll = () => {},
       renderedRange = () => {},
@@ -28,6 +30,10 @@ const VirtualList = forwardRef(
       estimateSize: useCallback((index) => items[index].height, [items]),
       overscan,
     })
+
+    const firstRowIdVisible =
+      items[virtualItems[virtualItems.length > overscan ? overscan : 0]?.index]
+        ?.id
 
     const scrollToIndexDebounceTmOut = useRef()
 
@@ -61,6 +67,15 @@ const VirtualList = forwardRef(
           typeof height === 'number' ? 'px' : ''
         }`
     }, [ref, width, height])
+
+    useEffect(() => {
+      const tmOut = setTimeout(
+        () => setFirstRowIdVisible(firstRowIdVisible),
+        100,
+      )
+
+      return () => clearTimeout(tmOut)
+    }, [firstRowIdVisible, setFirstRowIdVisible])
 
     return (
       <div
@@ -109,6 +124,7 @@ VirtualList.propTypes = {
     align: PropTypes.string,
   }),
   onRender: PropTypes.func.isRequired,
+  setFirstRowIdVisible: PropTypes.func.isRequired,
   itemStyle: PropTypes.func,
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,
