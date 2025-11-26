@@ -47,79 +47,6 @@ function RowSegment({
     onChangeRowHeight(id, newHeight)
   }, [id, newHeight, height, hasRendered, onChangeRowHeight])
 
-  const getProjectBar = () => {
-    const openInstructionsModal = (id_file) => {
-      const props = {
-        showCurrent: true,
-        files: CatToolStore.getJobFilesInfo(),
-        currentFile: id_file,
-      }
-      const styleContainer = {
-        minWidth: 600,
-        minHeight: 400,
-        maxWidth: 900,
-      }
-      ModalsActions.showModalComponent(
-        JobMetadataModal,
-        props,
-        'File notes',
-        styleContainer,
-      )
-    }
-
-    const {segment, files, sideOpen} = restProps
-    const idFileSegment = SegmentUtils.getSegmentFileId(segment)
-    if (idFileSegment !== parseInt(currentFileId) ) {
-      const file = files
-        ? files.find((file) => file.id == idFileSegment)
-        : false
-      let fileType = ''
-      if (file) {
-        fileType = file.file_name ? file.file_name.split('.').slice(-1) : ''
-        //check metadata for jsont2 files
-        fileType = file.metadata?.['data-type']
-          ? file.metadata?.['data-type']
-          : fileType
-      }
-      let classes = sideOpen ? 'slide-right' : ''
-      const isFirstSegment =
-        files?.length &&
-        parseInt(segment.sid) === parseInt(files[0].first_segment)
-      classes = isFirstSegment ? classes + ' first-segment' : classes
-
-      return (
-        <div className={'projectbar ' + classes}>
-          {file ? (
-            <div className={'projectbar-filename'}>
-              <span
-                title={segment.filename}
-                className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
-              >
-                {file.file_name}
-              </span>
-            </div>
-          ) : null}
-          {file && file.weighted_words > 0 ? (
-            <div className="projectbar-wordcounter">
-              <span>
-                Payable Words: <strong>{file.weighted_words}</strong>
-              </span>
-            </div>
-          ) : null}
-          {CommonUtils.fileHasInstructions(file) ? (
-            <div
-              className={'button-notes'}
-              onClick={() => openInstructionsModal(idFileSegment)}
-            >
-              <LinkIcon />
-              <span>View notes</span>
-            </div>
-          ) : null}
-        </div>
-      )
-    }
-  }
-
   const isFirstSegmentOfGroup =
     previousSegment?.internal_id !== restProps.segment.internal_id &&
     restProps.segment.internal_id === nextSegment?.internal_id
@@ -138,12 +65,17 @@ function RowSegment({
           ? 'row-border-radius-bottom'
           : ''
 
+  const idFileSegment = SegmentUtils.getSegmentFileId(restProps.segment)
+
   return (
     <div
       ref={ref}
       className={`row${isLastRow ? ' last-row' : ''} ${borderRadiusCssClasses}`}
     >
-      {getProjectBar()}
+      {idFileSegment !== parseInt(currentFileId) &&
+        idFileSegment !== parseInt(restProps.files[0].id) && (
+          <ProjectBar {...restProps} />
+        )}
       {collectionTypeSeparator}
       <Segment {...restProps} />
     </div>
@@ -161,3 +93,70 @@ RowSegment.propTypes = {
 }
 
 export default RowSegment
+
+export const ProjectBar = ({segment, files, sideOpen}) => {
+  const openInstructionsModal = (id_file) => {
+    const props = {
+      showCurrent: true,
+      files: CatToolStore.getJobFilesInfo(),
+      currentFile: id_file,
+    }
+    const styleContainer = {
+      minWidth: 600,
+      minHeight: 400,
+      maxWidth: 900,
+    }
+    ModalsActions.showModalComponent(
+      JobMetadataModal,
+      props,
+      'File notes',
+      styleContainer,
+    )
+  }
+
+  const idFileSegment = SegmentUtils.getSegmentFileId(segment)
+  const file = files ? files.find((file) => file.id == idFileSegment) : false
+  let fileType = ''
+  if (file) {
+    fileType = file.file_name ? file.file_name.split('.')[1] : ''
+    //check metadata for jsont2 files
+    fileType = file.metadata?.['data-type']
+      ? file.metadata?.['data-type']
+      : fileType
+  }
+  let classes = sideOpen ? 'slide-right' : ''
+  const isFirstSegment =
+    files?.length && parseInt(segment.sid) === parseInt(files[0].first_segment)
+  classes = isFirstSegment ? classes + ' first-segment' : classes
+
+  return (
+    <div className={'projectbar ' + classes}>
+      {file ? (
+        <div className={'projectbar-filename'}>
+          <span
+            title={segment.filename}
+            className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
+          >
+            {file.file_name}
+          </span>
+        </div>
+      ) : null}
+      {file && file.weighted_words > 0 ? (
+        <div className="projectbar-wordcounter">
+          <span>
+            Payable Words: <strong>{file.weighted_words}</strong>
+          </span>
+        </div>
+      ) : null}
+      {CommonUtils.fileHasInstructions(file) ? (
+        <div
+          className={'button-notes'}
+          onClick={() => openInstructionsModal(idFileSegment)}
+        >
+          <LinkIcon />
+          <span>View notes</span>
+        </div>
+      ) : null}
+    </div>
+  )
+}

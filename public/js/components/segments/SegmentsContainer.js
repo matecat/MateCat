@@ -14,7 +14,7 @@ import ReactDOMServer from 'react-dom/server'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
 import VirtualList from '../common/VirtualList/VirtualList'
-import RowSegment from '../common/VirtualList/Rows/RowSegment'
+import RowSegment, {ProjectBar} from '../common/VirtualList/Rows/RowSegment'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
@@ -165,6 +165,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
   const [clientConnected, setClientConnected] = useState()
   const [clientId, setClientId] = useState()
+  const [firstRowIdVisible, setFirstRowIdVisible] = useState()
 
   const persistenceVariables = useRef({
     lastScrolled: undefined,
@@ -177,6 +178,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
+  const stickyProjectBarRef = useRef()
 
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
@@ -420,14 +422,18 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       const footerHeight =
         document.getElementsByTagName('footer')[0].offsetHeight
 
-      setHeightArea(window.innerHeight - (headerHeight + footerHeight))
+      setHeightArea(
+        window.innerHeight -
+          (headerHeight + footerHeight) -
+          (stickyProjectBarRef.current?.offsetHeight ?? 0),
+      )
     }
 
     onWindowResize()
     window.addEventListener('resize', onWindowResize)
 
     return () => window.removeEventListener('resize', onWindowResize)
-  }, [])
+  }, [stickyProjectBarRef.current?.offsetHeight])
 
   // add actions listener
   useEffect(() => {
@@ -841,8 +847,19 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
   const goToFirstSegment = () => SegmentActions.scrollToSegment(firstJobSegment)
 
+  const getProjectBar = () => {
+    const props = getSegmentPropsBySid(firstRowIdVisible)
+
+    return <ProjectBar {...props} />
+  }
+
   return (
     <>
+      {typeof firstRowIdVisible !== 'undefined' && (
+        <div ref={stickyProjectBarRef} className="sticky-project-bar">
+          {getProjectBar()}
+        </div>
+      )}
       <VirtualList
         ref={listRef}
         className="virtual-list"
@@ -878,6 +895,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
           segments.get(index).get('opened') && {zIndex: 1}
         }
         renderedRange={renderedRange}
+        setFirstRowIdVisible={setFirstRowIdVisible}
       />
       {scrollTopVisible && (
         <div

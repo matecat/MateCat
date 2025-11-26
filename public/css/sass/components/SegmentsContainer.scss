@@ -1,4 +1,4 @@
-@use "../commons/colors";
+@use '../commons/colors';
 .virtual-list {
   width: 100%;
   height: 100%;
@@ -76,4 +76,10 @@
   > div
   > :first-child:not(.editor) {
   border-top-color: colors.$grey3;
+}
+
+.sticky-project-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
