@@ -9,6 +9,8 @@
 
 namespace Utils\Logger\Handlers;
 
+use Monolog\Handler\AbstractProcessingHandler;
+
 interface ProviderInterface
 {
     /**
@@ -19,5 +21,11 @@ interface ProviderInterface
     /**
      * @return array configuration params for the handler
      */
-    public function getHandlerParams(string $name): array;
+    public function getHandlerParams(string $name, array $configurationParams): array;
+
+    /**
+     * @param AbstractProcessingHandler $handler
+     * @return void
+     */
+    public function setFormatter(AbstractProcessingHandler $handler): void;
 }
