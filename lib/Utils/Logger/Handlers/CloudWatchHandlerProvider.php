@@ -27,8 +27,10 @@ class CloudWatchHandlerProvider implements ProviderInterface
 
     public function getHandlerParams(string $name, array $configurationParams): array
     {
-
-        $configurationParams['tags'] = json_decode($configurationParams['tags'], true);
+        $tags = json_decode($configurationParams['tags'] ?? 'null', true);
+        if (!empty($tags)) {
+            $configurationParams['tags'] = $tags;
+        }
 
         /**
          * CloudWatchLogsClient $client,
