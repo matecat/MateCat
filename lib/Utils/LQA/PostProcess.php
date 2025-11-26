@@ -56,7 +56,7 @@ class PostProcess extends QA {
 
         foreach ( $source_seg as $pos => $_str ) {
 
-            if ( $_str == "" ) {
+            if ( $_str == "" || !isset($target_seg[ $pos ]) ) {
                 continue;
             }
             $target_seg[ $pos ] = $this->_normalizeHeadSpaces( $_str, $target_seg[ $pos ] );
@@ -73,7 +73,7 @@ class PostProcess extends QA {
 
         foreach ( $source_seg as $pos => $_str ) {
 
-            if ( $_str == "" ) {
+            if ( $_str == "" || !isset($target_seg[ $pos ]) ) {
                 continue;
             }
             $target_seg[ $pos ] = $this->_normalizeTailSpaces( $_str, $target_seg[ $pos ] );
