@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.362.1",
+            "version": "3.363.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "f29a49b74d5ee771f13432e16d58651de91f7e79"
+                "reference": "0ec2218d32e291b988b1602583032ca5d11f8e8d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/f29a49b74d5ee771f13432e16d58651de91f7e79",
-                "reference": "f29a49b74d5ee771f13432e16d58651de91f7e79",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0ec2218d32e291b988b1602583032ca5d11f8e8d",
+                "reference": "0ec2218d32e291b988b1602583032ca5d11f8e8d",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.362.1"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.363.3"
             },
-            "time": "2025-11-20T19:10:40+00:00"
+            "time": "2025-11-26T19:05:22+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -663,16 +663,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.420.1",
+            "version": "v0.421.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "f1200dbf48d02dcfa36c5771f4dbc0433655a7ab"
+                "reference": "d84e7301a52405677807564dab6b1a112dfd03bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/f1200dbf48d02dcfa36c5771f4dbc0433655a7ab",
-                "reference": "f1200dbf48d02dcfa36c5771f4dbc0433655a7ab",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/d84e7301a52405677807564dab6b1a112dfd03bd",
+                "reference": "d84e7301a52405677807564dab6b1a112dfd03bd",
                 "shasum": ""
             },
             "require": {
@@ -701,9 +701,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.420.1"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.421.0"
             },
-            "time": "2025-11-17T01:06:15+00:00"
+            "time": "2025-11-23T01:06:22+00:00"
         },
         {
             "name": "google/auth",
@@ -1094,22 +1094,22 @@
         },
         {
             "name": "league/oauth2-client",
-            "version": "2.8.1",
+            "version": "2.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/oauth2-client.git",
-                "reference": "9df2924ca644736c835fc60466a3a60390d334f9"
+                "reference": "26e8c5da4f3d78cede7021e09b1330a0fc093d5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/oauth2-client/zipball/9df2924ca644736c835fc60466a3a60390d334f9",
-                "reference": "9df2924ca644736c835fc60466a3a60390d334f9",
+                "url": "https://api.github.com/repos/thephpleague/oauth2-client/zipball/26e8c5da4f3d78cede7021e09b1330a0fc093d5e",
+                "reference": "26e8c5da4f3d78cede7021e09b1330a0fc093d5e",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "guzzlehttp/guzzle": "^6.5.8 || ^7.4.5",
-                "php": "^7.1 || >=8.0.0 <8.5.0"
+                "php": "^7.1 || >=8.0.0 <8.6.0"
             },
             "require-dev": {
                 "mockery/mockery": "^1.3.5",
@@ -1153,9 +1153,9 @@
             ],
             "support": {
                 "issues": "https://github.com/thephpleague/oauth2-client/issues",
-                "source": "https://github.com/thephpleague/oauth2-client/tree/2.8.1"
+                "source": "https://github.com/thephpleague/oauth2-client/tree/2.9.0"
             },
-            "time": "2025-02-26T04:37:30+00:00"
+            "time": "2025-11-25T22:17:17+00:00"
         },
         {
             "name": "league/oauth2-facebook",
@@ -1714,16 +1714,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v2.3.3",
+            "version": "v2.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "3c64a257526dadf557a11b088437dd0ca37b582a"
+                "reference": "7fb95fe13f7b0f9358526bc63a874a6a8bb06c01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/3c64a257526dadf557a11b088437dd0ca37b582a",
-                "reference": "3c64a257526dadf557a11b088437dd0ca37b582a",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/7fb95fe13f7b0f9358526bc63a874a6a8bb06c01",
+                "reference": "7fb95fe13f7b0f9358526bc63a874a6a8bb06c01",
                 "shasum": ""
             },
             "require": {
@@ -1768,9 +1768,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v2.3.3"
+                "source": "https://github.com/matecat/subfiltering/tree/v2.3.4"
             },
-            "time": "2025-11-11T15:28:33+00:00"
+            "time": "2025-11-27T17:53:30+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -2121,16 +2121,16 @@
         },
         {
             "name": "open-telemetry/api",
-            "version": "1.7.0",
+            "version": "1.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opentelemetry-php/api.git",
-                "reference": "610b79ad9d6d97e8368bcb6c4d42394fbb87b522"
+                "reference": "45bda7efa8fcdd9bdb0daa2f26c8e31f062f49d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/610b79ad9d6d97e8368bcb6c4d42394fbb87b522",
-                "reference": "610b79ad9d6d97e8368bcb6c4d42394fbb87b522",
+                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/45bda7efa8fcdd9bdb0daa2f26c8e31f062f49d4",
+                "reference": "45bda7efa8fcdd9bdb0daa2f26c8e31f062f49d4",
                 "shasum": ""
             },
             "require": {
@@ -2150,7 +2150,7 @@
                     ]
                 },
                 "branch-alias": {
-                    "dev-main": "1.7.x-dev"
+                    "dev-main": "1.8.x-dev"
                 }
             },
             "autoload": {
@@ -2183,11 +2183,11 @@
             ],
             "support": {
                 "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
-                "docs": "https://opentelemetry.io/docs/php",
+                "docs": "https://opentelemetry.io/docs/languages/php",
                 "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
                 "source": "https://github.com/open-telemetry/opentelemetry-php"
             },
-            "time": "2025-10-02T23:44:28+00:00"
+            "time": "2025-10-19T10:49:48+00:00"
         },
         {
             "name": "open-telemetry/context",
@@ -3079,16 +3079,16 @@
         },
         {
             "name": "predis/predis",
-            "version": "v3.2.0",
+            "version": "v3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/predis/predis.git",
-                "reference": "9e9deec4dfd3ebf65d32eb368f498c646ba2ecd8"
+                "reference": "153097374b39a2f737fe700ebcd725642526cdec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/predis/predis/zipball/9e9deec4dfd3ebf65d32eb368f498c646ba2ecd8",
-                "reference": "9e9deec4dfd3ebf65d32eb368f498c646ba2ecd8",
+                "url": "https://api.github.com/repos/predis/predis/zipball/153097374b39a2f737fe700ebcd725642526cdec",
+                "reference": "153097374b39a2f737fe700ebcd725642526cdec",
                 "shasum": ""
             },
             "require": {
@@ -3130,7 +3130,7 @@
             ],
             "support": {
                 "issues": "https://github.com/predis/predis/issues",
-                "source": "https://github.com/predis/predis/tree/v3.2.0"
+                "source": "https://github.com/predis/predis/tree/v3.3.0"
             },
             "funding": [
                 {
@@ -3138,7 +3138,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-08-06T06:41:24+00:00"
+            "time": "2025-11-24T17:48:50+00:00"
         },
         {
             "name": "psr/cache",
