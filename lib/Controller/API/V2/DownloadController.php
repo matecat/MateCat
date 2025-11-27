@@ -363,6 +363,10 @@ class DownloadController extends AbstractDownloadController {
             foreach ( array_keys( $files_to_be_converted ) as $pos => $fileID ) {
                 Filters::logConversionToTarget( $convertResult[ $fileID ], $files_to_be_converted[ $fileID ][ 'out_xliff_name' ], $jobData, $chunk[ $pos ] );
 
+                if(empty($convertResult[ $fileID ] [ 'document_content' ])){
+                    continue;
+                }
+
                 $output_content[ $fileID ][ 'document_content' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'document_content' ], $files_to_be_converted[ $fileID ][ 'output_filename' ] );
 
                 /**
