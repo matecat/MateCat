@@ -48,12 +48,10 @@ class SegmentFilterModel
     public function getSegmentList(): array
     {
         if ($this->filter->isSampled()) {
-            $result = SegmentFilterDao::findSegmentIdsForSample($this->chunk, $this->filter);
-        } else {
-            $result = SegmentFilterDao::findSegmentIdsBySimpleFilter($this->chunk, $this->filter);
+            return SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );
         }
 
-        return $result;
+        return SegmentFilterDao::findSegmentIdsBySimpleFilter($this->chunk, $this->filter);
     }
 
 }
