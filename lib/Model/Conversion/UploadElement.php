@@ -9,10 +9,10 @@
 
 namespace Model\Conversion;
 
-use AllowDynamicProperties;
 use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\RecursiveArrayCopy;
+use stdClass;
 
 /**
  * @property string $name
@@ -22,8 +22,7 @@ use Model\DataAccess\RecursiveArrayCopy;
  * @property int    $size
  * @property string $file_path
  */
-#[AllowDynamicProperties]
-class UploadElement implements ArrayAccess
+class UploadElement extends stdClass implements ArrayAccess
 {
     use ArrayAccessTrait;
     use RecursiveArrayCopy;
@@ -47,7 +46,7 @@ class UploadElement implements ArrayAccess
      *
      * @return mixed
      */
-    public function __get($name)
+    public function __get($name): mixed
     {
         if (!property_exists($this, $name)) {
             return null;
@@ -60,4 +59,14 @@ class UploadElement implements ArrayAccess
     {
         return $this->toArray();
     }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function __isset(string $name): bool
+    {
+        return property_exists($this, $name);
+    }
+
 }

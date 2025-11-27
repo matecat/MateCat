@@ -50,10 +50,7 @@ class LoggerFactory
     protected static function initMonolog(string $name, string $fileName): MatecatLogger
     {
         if (!isset(self::$loggersMap[ $name ])) {
-            $streamHandler = new StreamHandler(self::getFileNamePath($fileName));
-            $streamHandler->setFormatter(new JsonFormatter());
-            $handlers = HandlersProvider::loadWithName($fileName);
-            array_unshift($handlers, $streamHandler);
+            $handlers = HandlersProviderFactory::loadWithName($fileName);
             self::$loggersMap[$name] = new MatecatLogger(new Logger($name, $handlers, [new LogProcessor(Level::Debug, [__NAMESPACE__])]));
         }
 
@@ -67,7 +64,7 @@ class LoggerFactory
      *
      * @return string The full path to the log file.
      */
-    protected static function getFileNamePath(string $fileName): string
+    public static function getFileNamePath(string $fileName): string
     {
         return AppConfig::$LOG_REPOSITORY . "/" . $fileName;
     }

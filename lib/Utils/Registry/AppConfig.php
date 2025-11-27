@@ -305,8 +305,8 @@ class AppConfig
      */
     public static ?string $AWS_ACCESS_KEY_ID = null;
     public static ?string $AWS_SECRET_KEY    = null;
-    public static string  $AWS_VERSION;
-    public static string  $AWS_REGION;
+    public static ?string $AWS_VERSION = null;
+    public static ?string $AWS_REGION = null;
     public static bool    $AWS_SSL_VERIFY    = false;
     public static bool    $AWS_CACHING       = false;
     public static string  $AWS_STORAGE_BASE_BUCKET;
@@ -314,7 +314,7 @@ class AppConfig
     /**
      * Logging configuration
      */
-    public static array $MONOLOG_HANDLER_PROVIDERS = [];
+    public static array $MONOLOG_HANDLERS = [];
 
     public static string $REPLACE_HISTORY_DRIVER = '';
     public static int    $REPLACE_HISTORY_TTL    = 0;
@@ -327,7 +327,6 @@ class AppConfig
         string $matecatVersion,
         array $configuration,
         array $taskManagerConfiguration,
-        bool $isDaemon = false
     )
     {
         self::$ENV                = $envName;
@@ -340,16 +339,23 @@ class AppConfig
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$TRACKING_CODES_VIEW_PATH    = self::$ROOT . "/lib/View/templates";
 
-        AppConfig::$IS_DAEMON_INSTANCE = $isDaemon;
+        // Detects if the script is running via Command Line Interface (CLI) to flag the instance as a daemon/background worker
+        AppConfig::$IS_DAEMON_INSTANCE = stripos(PHP_SAPI, 'cli') !== false;
 
         //Override default configuration
         foreach ($configuration as $KEY => $value) {
             if (property_exists(self::class, $KEY)) {
-                AppConfig::${$KEY} = $value;
+                if ($KEY == 'MONOLOG_HANDLERS') {
+                    foreach ($value as $handler) {
+                        AppConfig::${$KEY}[$handler] = $configuration[$handler] ?? [];
+                    }
+                } else {
+                    AppConfig::${$KEY} = $value;
+                }
             }
         }
 
-        if (stripos(PHP_SAPI, 'cli') === false) {
+        if (!self::$IS_DAEMON_INSTANCE) {
             // Get HTTPS server status
             // Override if the header is set from load balancer
             $localProto = 'http';
@@ -567,7 +573,6 @@ class AppConfig
      * @param string $matecatVersion
      * @param array $configuration
      * @param array $taskManagerConfiguration
-     * @param bool $isDaemon
      */
     public static function init(
         string $rootPath,
@@ -575,11 +580,10 @@ class AppConfig
         string $matecatVersion,
         array $configuration,
         array $taskManagerConfiguration,
-        bool $isDaemon = false
     ): void
     {
         if (empty(self::$MYSELF)) {
-            self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration, $isDaemon);
+            self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration);
         }
     }
 
