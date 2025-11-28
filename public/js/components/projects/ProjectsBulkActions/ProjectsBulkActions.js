@@ -128,48 +128,6 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
     )
   }, [projects, allJobs, jobsBulk])
 
-  const onCheckedProject = useCallback(
-    (projectId) => {
-      const currentProject = projects.find(({id}) => id === projectId)
-
-      if (shiftKeyRef.current.isPressed) {
-        const lastJobIdProject =
-          currentProject.jobs[currentProject.jobs.length - 1].id
-
-        onCheckedJob(
-          shiftKeyRef.current.startJob.id > lastJobIdProject
-            ? lastJobIdProject
-            : currentProject.jobs[0].id,
-        )
-      } else {
-        setJobsBulk((prevState) => {
-          const jobsBulkForCurrentProject = currentProject.jobs.filter(({id}) =>
-            prevState.some((value) => value === id),
-          )
-
-          const isCheckedAllJobs =
-            jobsBulkForCurrentProject.length === currentProject.jobs.length
-
-          return isCheckedAllJobs
-            ? prevState.filter(
-                (value) =>
-                  !jobsBulkForCurrentProject.some(({id}) => id === value),
-              )
-            : [
-                ...prevState.filter(
-                  (value) =>
-                    !jobsBulkForCurrentProject.some(({id}) => id === value),
-                ),
-                ...currentProject.jobs.map(({id}) => id),
-              ]
-        })
-      }
-
-      shiftKeyRef.current.startJob = currentProject.jobs[0]
-    },
-    [projects, onCheckedJob],
-  )
-
   const onCheckedJob = useCallback(
     (jobId) => {
       const currentJob = allJobs.find(({id}) => id === jobId)
@@ -218,6 +176,48 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
       shiftKeyRef.current.startJob = currentJob
     },
     [allJobs],
+  )
+
+  const onCheckedProject = useCallback(
+    (projectId) => {
+      const currentProject = projects.find(({id}) => id === projectId)
+
+      if (shiftKeyRef.current.isPressed) {
+        const lastJobIdProject =
+          currentProject.jobs[currentProject.jobs.length - 1].id
+
+        onCheckedJob(
+          shiftKeyRef.current.startJob.id > lastJobIdProject
+            ? lastJobIdProject
+            : currentProject.jobs[0].id,
+        )
+      } else {
+        setJobsBulk((prevState) => {
+          const jobsBulkForCurrentProject = currentProject.jobs.filter(({id}) =>
+            prevState.some((value) => value === id),
+          )
+
+          const isCheckedAllJobs =
+            jobsBulkForCurrentProject.length === currentProject.jobs.length
+
+          return isCheckedAllJobs
+            ? prevState.filter(
+                (value) =>
+                  !jobsBulkForCurrentProject.some(({id}) => id === value),
+              )
+            : [
+                ...prevState.filter(
+                  (value) =>
+                    !jobsBulkForCurrentProject.some(({id}) => id === value),
+                ),
+                ...currentProject.jobs.map(({id}) => id),
+              ]
+        })
+      }
+
+      shiftKeyRef.current.startJob = currentProject.jobs[0]
+    },
+    [projects, onCheckedJob],
   )
 
   useEvent(document, 'keydown', ({key}) => {
