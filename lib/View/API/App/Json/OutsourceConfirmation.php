@@ -14,13 +14,14 @@ use Model\Outsource\ConfirmationStruct;
 
 class OutsourceConfirmation {
 
-    protected $data;
+    protected ConfirmationStruct $data;
 
     public function __construct( ConfirmationStruct $confirmation ) {
         $this->data = $confirmation;
     }
 
-    public function render() {
+    public function render(): array
+    {
         $result                         = $this->data->toArray();
         $class                          = get_class( $this->data );
         $result[ 'create_timestamp' ]   = strtotime( $result[ 'create_date' ] );

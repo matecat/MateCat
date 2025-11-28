@@ -61,7 +61,7 @@ export const MoreMenu = ({portalTarget}) => {
           setTemplateName(currentProjectTemplate.name)
         }}
       >
-        <IconEdit />
+        <IconEdit size={18} />
         Rename
       </MenuButtonItem>
       <MenuButtonItem
@@ -70,7 +70,7 @@ export const MoreMenu = ({portalTarget}) => {
         disabled={isRequestInProgress}
         onMouseUp={deleteTemplate}
       >
-        <Trash size={16} />
+        <Trash size={18} />
         Delete
       </MenuButtonItem>
     </MenuButton>

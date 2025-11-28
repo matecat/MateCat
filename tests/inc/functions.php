@@ -37,10 +37,10 @@ function setupSignalHandler() {
  *
  * @return void
  */
-function disableAmqWorkerClientHelper() {
-    WorkerClient::$_HANDLER = @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
+function disableAmqWorkerClientHelper(): void {
+    WorkerClient::$_HANDLER = ( new PHPUnit\Framework\MockObject\Generator\Generator() )->testDouble(
             AMQHandler::class,
-            [], [], '', false
+            true
     );
 }
 
@@ -60,9 +60,9 @@ function route() {
  * @return MockObject
  */
 function mockKleinFramework(): MockObject {
-    return @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
+    return ( new PHPUnit\Framework\MockObject\Generator\Generator() )->testDouble(
             Klein::class,
-            [], [], '', false
+            true
     );
 }
 

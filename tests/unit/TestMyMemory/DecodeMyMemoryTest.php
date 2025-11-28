@@ -42,7 +42,7 @@ class DecodeMyMemoryTest extends AbstractTest {
         $this->databaseInstance = new MyMemory( $this->engine_struct_param );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_decode" );
-        $this->method->setAccessible( true );
+        
 
     }
 
@@ -164,7 +164,7 @@ LABEL;
          */
         $this->reflector = new ReflectionClass( $actual_result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $actual_result ) );
 
@@ -226,7 +226,7 @@ LABEL;
          */
         $this->reflector = new ReflectionClass( $actual_result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $actual_result ) );
     }
@@ -279,7 +279,7 @@ LAB;
          */
         $this->reflector = new ReflectionClass( $actual_result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
 
         $this->assertEquals( "", $property->getValue( $actual_result ) );
     }

@@ -4,9 +4,10 @@ namespace unit\Utils\Tools;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
-class CatUtilsTest extends TestCase {
+class CatUtilsTest extends AbstractTest {
     /**
      * Test that a valid project name is returned as is.
      */

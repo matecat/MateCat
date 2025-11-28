@@ -15,7 +15,8 @@ use PDOException;
 use RuntimeException;
 use Utils\Logger\LoggerFactory;
 
-trait ProjectWordCount {
+trait ProjectWordCount
+{
 
     /**
      * This function is heavy, use, but only if it is necessary
@@ -26,8 +27,8 @@ trait ProjectWordCount {
      *
      * @return array
      */
-    protected function getProjectSegmentsTranslationSummary( $pid ): array {
-
+    protected function getProjectSegmentsTranslationSummary($pid): array
+    {
         //TOTAL and eq_word should be equals, BUT
         //tm Analysis can fail on some rows because of external service nature, so use TOTAL field instead of eq_word
         //to set the global word counter in job
@@ -50,17 +51,16 @@ trait ProjectWordCount {
         ";
 
         try {
-
             $db = Database::obtain();
             //Needed to address the query to the master database if exists
-            $stmt = $db->getConnection()->prepare( $query );
-            $stmt->setFetchMode( PDO::FETCH_ASSOC );
-            $stmt->execute( [ 'pid' => $pid ] );
+            $stmt = $db->getConnection()->prepare($query);
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
+            $stmt->execute(['pid' => $pid]);
             $results = $stmt->fetchAll();
-        } catch ( PDOException $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
 
-            throw new RuntimeException( $e );
+            throw new RuntimeException($e);
         }
 
         return $results;

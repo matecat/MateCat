@@ -189,6 +189,7 @@ class AuthCookie {
      *
      * @return ?array
      * @throws ReflectionException
+     * @throws \Exception
      */
     private static function getData(): ?array {
 

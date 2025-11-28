@@ -22,7 +22,7 @@ class SetCacheTTLTest extends AbstractTest {
         $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->cache_TTL        = $this->reflector->getProperty( "cacheTTL" );
-        $this->cache_TTL->setAccessible( true );
+        
 
     }
 

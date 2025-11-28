@@ -28,14 +28,16 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * Concrete worker.
  * This worker handle a queue element ( a segment ) and perform the analysis on it
  */
-class ErrMailWorker extends AbstractWorker {
+class ErrMailWorker extends AbstractWorker
+{
 
     /**
      * Override to set another logger on the same queue
      *
      * @return string
      */
-    public function getLoggerName(): string {
+    public function getLoggerName(): string
+    {
         return "err_mail.log";
     }
 
@@ -44,21 +46,20 @@ class ErrMailWorker extends AbstractWorker {
      *
      * @param AbstractElement $queueElement
      *
-     * @return mixed|void
+     * @return void
      * @throws EmptyElementException
      * @throws EndQueueException
      * @throws Exception
      * @throws ReQueueException
      */
-    public function process( AbstractElement $queueElement ) {
-
+    public function process(AbstractElement $queueElement): void
+    {
         /**
          * @var $queueElement QueueElement
          */
-        $this->_checkForReQueueEnd( $queueElement );
+        $this->_checkForReQueueEnd($queueElement);
 
-        $this->_sendErrMailReport( $queueElement->params );
-
+        $this->_sendErrMailReport($queueElement->params);
     }
 
     /**
@@ -69,16 +70,13 @@ class ErrMailWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws Exception
      */
-    protected function _sendErrMailReport( Params $mailConf ): bool {
-
-        if ( empty( $mailConf->server_configuration ) ) {
-
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Wrong configuration data found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data." );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message not sent." );
-            throw new EmptyElementException( "No eMail in configuration file found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data." );
-
+    protected function _sendErrMailReport(Params $mailConf): bool
+    {
+        if (empty($mailConf->server_configuration)) {
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Wrong configuration data found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data.");
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message not sent.");
+            throw new EmptyElementException("No eMail in configuration file found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data.");
         } else {
-
             $mail = new PHPMailer();
 
             $mail->isSMTP();
@@ -89,17 +87,16 @@ class ErrMailWorker extends AbstractWorker {
             $mail->From     = $mailConf->server_configuration[ 'From' ];
             $mail->FromName = $mailConf->server_configuration[ 'FromName' ];
 
-            $mail->addReplyTo( $mailConf->server_configuration[ 'ReturnPath' ], $mail->FromName );
+            $mail->addReplyTo($mailConf->server_configuration[ 'ReturnPath' ], $mail->FromName);
 
-            if ( !empty( $mailConf->email_list ) ) {
-                foreach ( $mailConf->email_list as $email => $uName ) {
-                    $mail->addAddress( $email, $uName );
+            if (!empty($mailConf->email_list)) {
+                foreach ($mailConf->email_list as $email => $uName) {
+                    $mail->addAddress($email, $uName);
                 }
             } else {
-                $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row." );
-                throw new EmptyElementException( "No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row." );
+                $this->_doLog("--- (Worker " . $this->_workerPid . ") : No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row.");
+                throw new EmptyElementException("No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row.");
             }
-
         }
 
         $mail->XMailer = 'Matecat Mailer';
@@ -124,29 +121,28 @@ class ErrMailWorker extends AbstractWorker {
          */
         $mail->Priority = 1;
 
-        if ( empty( $mailConf->subject ) ) {
-            $mail->Subject = 'Alert from Matecat: ' . php_uname( 'n' );
+        if (empty($mailConf->subject)) {
+            $mail->Subject = 'Alert from Matecat: ' . php_uname('n');
         } else {
             $mail->Subject = $mailConf->subject;
         }
 
         $mail->Body = '<pre>' . $mailConf->body . '</pre>';
 
-        $txtContent    = preg_replace( '|<br[\x{20}/]*>|ui', "\n\n", $mailConf->body );
-        $mail->AltBody = strip_tags( $txtContent );
+        $txtContent    = preg_replace('|<br[\x{20}/]*>|ui', "\n\n", $mailConf->body);
+        $mail->AltBody = strip_tags($txtContent);
 
-        $mail->msgHTML( $mail->Body );
+        $mail->msgHTML($mail->Body);
 
-        if ( !$mail->send() ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Mailer Error: " . $mail->ErrorInfo );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody );
-            throw new ReQueueException( 'Mailer Error: ' . $mail->ErrorInfo );
+        if (!$mail->send()) {
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Mailer Error: " . $mail->ErrorInfo);
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody);
+            throw new ReQueueException('Mailer Error: ' . $mail->ErrorInfo);
         }
 
-        $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message has been sent." );
+        $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message has been sent.");
 
         return true;
-
     }
 
 }

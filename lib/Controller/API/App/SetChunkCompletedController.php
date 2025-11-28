@@ -13,62 +13,64 @@ use Plugins\Features\ProjectCompletion\Model\EventModel;
 use ReflectionException;
 use Utils\Tools\Utils;
 
-class SetChunkCompletedController extends KleinController {
+class SetChunkCompletedController extends KleinController
+{
 
     use APISourcePageGuesserTrait;
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws ReflectionException
      */
-    public function complete(): void {
-
+    public function complete(): void
+    {
         $request = $this->validateTheRequest();
 
-        $struct = new CompletionEventStruct( [
+        $struct = new CompletionEventStruct([
                 'uid'               => $this->user->getUid(),
-                'remote_ip_address' => Utils::getRealIpAddr(),
+                'remote_ip_address' => Utils::getRealIpAddr() ?? '',
                 'source'            => ChunkCompletionEventStruct::SOURCE_USER,
                 'is_review'         => $this->isRevision()
-        ] );
+        ]);
 
-        $model = new EventModel( $request[ 'job' ], $struct );
+        $model = new EventModel($request[ 'job' ], $struct);
         $model->save();
 
-        $this->response->json( [
+        $this->response->json([
                 'data' => [
                         'event' => [
                                 'id' => (int)$model->getChunkCompletionEventId()
                         ]
                 ]
-        ] );
-
+        ]);
     }
 
     /**
      * @return array
      * @throws ReflectionException
      */
-    private function validateTheRequest(): array {
-        $id_job            = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+    private function validateTheRequest(): array
+    {
+        $id_job            = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
+        $password          = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
-        if ( empty( $id_job ) ) {
-            throw new InvalidArgumentException( "Missing id job", -1 );
+        if (empty($id_job)) {
+            throw new InvalidArgumentException("Missing id job", -1);
         }
 
-        if ( empty( $password ) ) {
-            throw new InvalidArgumentException( "Missing id password", -2 );
+        if (empty($password)) {
+            throw new InvalidArgumentException("Missing id password", -2);
         }
 
-        $job = JobDao::getByIdAndPassword( $id_job, $password );
+        $job = JobDao::getByIdAndPassword($id_job, $password);
 
-        if ( empty( $job ) ) {
-            throw new InvalidArgumentException( "wrong password", -10 );
+        if (empty($job)) {
+            throw new InvalidArgumentException("wrong password", -10);
         }
 
         $this->id_job           = $id_job;

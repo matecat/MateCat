@@ -13,7 +13,8 @@ use ReflectionException;
  * Time: 14:24
  *
  */
-class Pager {
+class Pager
+{
 
     use DaoCacheTrait;
 
@@ -22,7 +23,8 @@ class Pager {
     /**
      * @param PDO $connection
      */
-    public function __construct( PDO $connection ) {
+    public function __construct(PDO $connection)
+    {
         $this->connection = $connection;
     }
 
@@ -33,28 +35,27 @@ class Pager {
      * @return array
      * @throws ReflectionException
      */
-    public function getPagination( int $totals, PaginationParameters $paginationParameters ): array {
-
-        $this->setCacheTTL( $paginationParameters->getTtl() );
+    public function getPagination(int $totals, PaginationParameters $paginationParameters): array
+    {
+        $this->setCacheTTL($paginationParameters->getTtl());
 
         $count  = $totals + 1;
-        $pages  = ceil( $count / $paginationParameters->getPagination() );
-        $prev   = ( $paginationParameters->getCurrent() !== 1 ) ? $paginationParameters->getBaseRoute() . ( $paginationParameters->getCurrent() - 1 ) : null;
-        $next   = ( $paginationParameters->getCurrent() < $pages ) ? $paginationParameters->getBaseRoute() . ( $paginationParameters->getCurrent() + 1 ) : null;
-        $offset = ( $paginationParameters->getCurrent() - 1 ) * $paginationParameters->getPagination();
+        $pages  = ceil($count / $paginationParameters->getPagination());
+        $prev   = ($paginationParameters->getCurrent() !== 1) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() - 1) : null;
+        $next   = ($paginationParameters->getCurrent() < $pages) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() + 1) : null;
+        $offset = ($paginationParameters->getCurrent() - 1) * $paginationParameters->getPagination();
 
         $paginationStatement = $this->connection->prepare(
-                sprintf( $paginationParameters->getQuery(), $paginationParameters->getPagination(), $offset )
+                sprintf($paginationParameters->getQuery(), $paginationParameters->getPagination(), $offset)
         );
 
-        if ( !empty( $paginationParameters->getCacheKeyMap() ) ) {
-
+        if (!empty($paginationParameters->getCacheKeyMap())) {
             $_cacheResult = $this->_getFromCacheMap(
                     $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ) . $paginationParameters->getFetchClass()
+                    $paginationStatement->queryString . $this->_serializeForCacheKey($paginationParameters->getBindParams()) . $paginationParameters->getFetchClass()
             );
 
-            if ( !empty( $_cacheResult ) ) {
+            if (!empty($_cacheResult)) {
                 return $this->format(
                         $paginationParameters->getCurrent(),
                         $paginationParameters->getPagination(),
@@ -65,21 +66,18 @@ class Pager {
                         $next
                 );
             }
-
         }
 
-        $paginationStatement->setFetchMode( PDO::FETCH_CLASS, $paginationParameters->getFetchClass() );
-        $paginationStatement->execute( $paginationParameters->getBindParams() );
+        $paginationStatement->setFetchMode(PDO::FETCH_CLASS, $paginationParameters->getFetchClass());
+        $paginationStatement->execute($paginationParameters->getBindParams());
         $result = $paginationStatement->fetchAll();
 
-        if ( !empty( $paginationParameters->getCacheKeyMap() ) ) {
-
+        if (!empty($paginationParameters->getCacheKeyMap())) {
             $this->_setInCacheMap(
                     $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ). $paginationParameters->getFetchClass(),
+                    $paginationStatement->queryString . $this->_serializeForCacheKey($paginationParameters->getBindParams()) . $paginationParameters->getFetchClass(),
                     $result
             );
-
         }
 
         return $this->format(
@@ -91,7 +89,6 @@ class Pager {
                 $prev,
                 $next
         );
-
     }
 
     /**
@@ -100,10 +97,11 @@ class Pager {
      *
      * @return int
      */
-    public function count( string $query, ?array $parameters = [] ): int {
-        $statementCount = $this->connection->prepare( $query );
-        $statementCount->execute( $parameters );
-        $count = $statementCount->fetch( PDO::FETCH_NUM );
+    public function count(string $query, ?array $parameters = []): int
+    {
+        $statementCount = $this->connection->prepare($query);
+        $statementCount->execute($parameters);
+        $count = $statementCount->fetch(PDO::FETCH_NUM);
 
         return $count[ 0 ] ?? 0;
     }
@@ -120,8 +118,8 @@ class Pager {
      *
      * @return array
      */
-    protected function format( int $current, int $pagination, int $pages, int $total, array $items, ?string $prev, ?string $next ): array {
-
+    protected function format(int $current, int $pagination, int $pages, int $total, array $items, ?string $prev, ?string $next): array
+    {
         return [
                 'current_page' => $current,
                 'per_page'     => $pagination,
@@ -131,7 +129,6 @@ class Pager {
                 'next'         => $next,
                 'items'        => $items,
         ];
-
     }
 
 }

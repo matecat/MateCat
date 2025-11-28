@@ -35,7 +35,7 @@ class ConnectTest extends AbstractTest {
         // reset the singleton static field instance
         $this->reflector = new ReflectionClass( $this->databaseInstance );
         $this->property  = $this->reflector->getProperty( 'instance' );
-        $this->property->setAccessible( true );
+        
         $this->property->setValue( $this->databaseInstance, null );
 
     }
@@ -46,7 +46,7 @@ class ConnectTest extends AbstractTest {
     protected function checkInstanceReset() {
         // verify that the setup method has reset the connection
         $connection = $this->reflector->getProperty( 'connection' );
-        $connection->setAccessible( true );
+        
         $current_value = $connection->getValue( $this->databaseInstance );
         $this->assertNull( $current_value );
     }
@@ -72,7 +72,7 @@ class ConnectTest extends AbstractTest {
         $instance_after_reset->connect();
 
         $connection = $this->reflector->getProperty( 'connection' );
-        $connection->setAccessible( true );
+        
         $current_value = $connection->getValue( $instance_after_reset );
 
         $this->assertNotNull( $current_value );
@@ -92,7 +92,7 @@ class ConnectTest extends AbstractTest {
 
         $newDatabaseClassInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $connection               = $this->reflector->getProperty( 'connection' );
-        $connection->setAccessible( true );
+        
         $current_value = $connection->getValue( $newDatabaseClassInstance );
         $this->assertNull( $current_value );
     }
@@ -115,7 +115,7 @@ class ConnectTest extends AbstractTest {
 
         // get the PDO internal resource
         $connection = $this->reflector->getProperty( 'connection' );
-        $connection->setAccessible( true );
+        
         $current_value_first_PDO = $connection->getValue( $instance_after_first_reset );
         $hash_first_PDO          = spl_object_hash( $current_value_first_PDO );
 

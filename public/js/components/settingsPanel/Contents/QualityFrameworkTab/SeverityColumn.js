@@ -143,7 +143,7 @@ export const SeverityColumn = ({
   const menu = (
     <MenuButton
       className="button-menu-button quality-framework-columns-menu-button"
-      icon={<IconDown width={14} height={14} />}
+      icon={<IconDown size={20} />}
       onClick={() => false}
       isVisibleRectArrow={false}
       itemsTarget={portalTarget}
@@ -153,7 +153,7 @@ export const SeverityColumn = ({
         onMouseUp={() => setIsEditingName(true)}
         data-testid="menu-button-rename"
       >
-        <IconEdit />
+        <IconEdit size={18} />
         Rename
       </MenuButtonItem>
       <MenuButtonItem
@@ -180,7 +180,7 @@ export const SeverityColumn = ({
         data-testid="menu-button-delete"
         disabled={isDeleteDisabled}
       >
-        <Trash size={16} />
+        <Trash size={18} />
         Delete
       </MenuButtonItem>
     </MenuButton>

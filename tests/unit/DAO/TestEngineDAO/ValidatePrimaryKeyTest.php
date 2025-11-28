@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -28,10 +29,9 @@ class ValidatePrimaryKeyTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->method           = $this->reflector->getMethod( "_validatePrimaryKey" );
-        $this->method->setAccessible( true );
+        $this->databaseInstance    = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
+        $this->reflector           = new ReflectionClass( $this->databaseInstance );
+        $this->method              = $this->reflector->getMethod( "_validatePrimaryKey" );
         $this->engine_struct_param = new EngineStruct();
 
     }
@@ -43,6 +43,7 @@ class ValidatePrimaryKeyTest extends AbstractTest {
      * @covers EngineDAO::_validatePrimaryKey
      * @doesNotPerformAssertions
      */
+    #[doesNotPerformAssertions]
     public function test__validatePrimaryKey_valid_fields() {
 
         $this->engine_struct_param->id  = 33;

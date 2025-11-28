@@ -25,7 +25,7 @@ class GetStatementForCacheUserTest extends AbstractTest {
         $this->databaseInstance = new UserDao( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_getStatementForQuery" );
-        $this->method->setAccessible( true );
+        
 
 
     }

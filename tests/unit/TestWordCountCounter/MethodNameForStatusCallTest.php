@@ -18,10 +18,11 @@ class MethodNameForStatusCallTest extends AbstractTest {
     protected $method_methodNameForStatusCall;
 
     public function setUp(): void {
+        parent::setUp();
         $this->word_counter                   = new CounterModel();
         $this->mirror_word_counter            = new ReflectionClass( $this->word_counter );
         $this->method_methodNameForStatusCall = $this->mirror_word_counter->getMethod( 'methodNameForStatusCall' );
-        $this->method_methodNameForStatusCall->setAccessible( true );
+        
     }
 
     /**

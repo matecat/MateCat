@@ -159,6 +159,7 @@ function useProjectTemplates({
             const templatesNormalized = normalizeTemplatesWithNullProps(
               items.map(setDefaultExtraMT),
               templateDefaultNormalized,
+              ['subfiltering_handlers'],
             )
 
             const shouldStandardToBeDefault = templatesNormalized.every(

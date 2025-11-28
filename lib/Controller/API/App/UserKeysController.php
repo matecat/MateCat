@@ -22,109 +22,101 @@ use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 
-class UserKeysController extends KleinController {
+class UserKeysController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
      */
-    public function delete(): void {
-
+    public function delete(): void
+    {
         $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
         $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->disable( $memoryKeyToUpdate );
-        $this->removeKeyFromEngines( $userMemoryKeys, $request[ 'remove_from' ] );
+        $userMemoryKeys    = $mkDao->disable($memoryKeyToUpdate);
+        $this->removeKeyFromEngines($userMemoryKeys, $request[ 'remove_from' ]);
 
-        $this->response->json( [
+        $this->response->json([
                 'errors'  => [],
                 'data'    => $userMemoryKeys,
                 "success" => true
-        ] );
-
-
+        ]);
     }
 
     /**
      * @throws Exception
      */
-    public function update(): void {
-
+    public function update(): void
+    {
         $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
         $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->atomicUpdate( $memoryKeyToUpdate );
+        $userMemoryKeys    = $mkDao->atomicUpdate($memoryKeyToUpdate);
 
-        $this->response->json( [
+        $this->response->json([
                 'errors'  => [],
                 'data'    => $userMemoryKeys,
                 "success" => true
-        ] );
-
+        ]);
     }
 
     /**
      * @throws Exception
      */
-    public function newKey(): void {
-
+    public function newKey(): void
+    {
         $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
         $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
+        $userMemoryKeys    = $mkDao->create($memoryKeyToUpdate);
 
-        $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
-
-        $this->response->json( [
+        $this->response->json([
                 'errors'  => [],
                 'data'    => $userMemoryKeys,
                 "success" => true
-        ] );
-
+        ]);
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    public function info(): void {
-
+    public function info(): void
+    {
         $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
         $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->read( $memoryKeyToUpdate );
+        $userMemoryKeys    = $mkDao->read($memoryKeyToUpdate);
 
-        $this->response->json( $this->getKeyUsersInfo( $userMemoryKeys ) );
-
+        $this->response->json($this->getKeyUsersInfo($userMemoryKeys));
     }
 
     /**
      * @throws NotFoundException
      * @throws Exception
      */
-    public function share(): void {
-
+    public function share(): void
+    {
         $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
-        $emailList         = Utils::validateEmailList( $request[ 'emails' ] );
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
+        $emailList         = Utils::validateEmailList($request[ 'emails' ]);
         $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->read( $memoryKeyToUpdate );
 
-        if ( empty( $userMemoryKeys ) ) {
-            throw new NotFoundException( "No user memory keys found" );
-        }
+        $userMemoryKeys = $mkDao->read($memoryKeyToUpdate) ?: throw new NotFoundException("No user memory keys found");
 
-        ( new TmKeyManager() )->shareKey( $emailList, $userMemoryKeys[ 0 ], $this->user );
 
-        $this->response->json( [
+        (new TmKeyManager())->shareKey($emailList, $userMemoryKeys[ 0 ], $this->user);
+
+        $this->response->json([
                 'errors'  => [],
                 'data'    => $userMemoryKeys,
                 "success" => true
-        ] );
-
+        ]);
     }
 
     /**
@@ -132,9 +124,9 @@ class UserKeysController extends KleinController {
      *
      * @return array
      */
-    protected function getKeyUsersInfo( array $userMemoryKeys ): array {
-
-        if ( empty( $userMemoryKeys ) ) {
+    protected function getKeyUsersInfo(array $userMemoryKeys): array
+    {
+        if (empty($userMemoryKeys)) {
             return [
                     'errors'  => [],
                     "data"    => [],
@@ -143,8 +135,8 @@ class UserKeysController extends KleinController {
         }
 
         $_userStructs = [];
-        foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
-            $_userStructs[] = new ClientUserFacade( $userStruct );
+        foreach ($userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct) {
+            $_userStructs[] = new ClientUserFacade($userStruct);
         }
 
         return [
@@ -158,15 +150,16 @@ class UserKeysController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest(): array {
-        $key         = filter_var( $this->request->param( 'key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $emails      = filter_var( $this->request->param( 'emails' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $description = filter_var( $this->request->param( 'description' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $remove_from = filter_var( $this->request->param( 'remove_from' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+    private function validateTheRequest(): array
+    {
+        $key         = filter_var($this->request->param('key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $emails      = filter_var($this->request->param('emails'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $description = filter_var($this->request->param('description'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $remove_from = filter_var($this->request->param('remove_from'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
         // check for eventual errors on the input passed
-        if ( empty( $key ) ) {
-            throw new InvalidArgumentException( "Key missing", -2 );
+        if (empty($key)) {
+            throw new InvalidArgumentException("Key missing", -2);
         }
 
         // Prevent XSS attack
@@ -174,14 +167,14 @@ class UserKeysController extends KleinController {
         // POC. Try to add this string in the input:
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
-        if ( $this->request->param( 'description' ) and $this->request->param( 'description' ) !== $description ) {
-            throw new InvalidArgumentException( "<span>Resource names cannot contain the following characters:</span><ul><li><</li><li>\"</li><li>'</li></ul>", -3 );
+        if ($this->request->param('description') and $this->request->param('description') !== $description) {
+            throw new InvalidArgumentException("<span>Resource names cannot contain the following characters:</span><ul><li><</li><li>\"</li><li>'</li></ul>", -3);
         }
 
         return [
                 'key'         => $key,
                 'emails'      => $emails,
-                'description' => ( !empty( $description ) ) ? $description : null,
+                'description' => (!empty($description)) ? $description : null,
                 'remove_from' => $remove_from,
         ];
     }
@@ -189,8 +182,9 @@ class UserKeysController extends KleinController {
     /**
      * @return MemoryKeyDao
      */
-    private function getMkDao(): MemoryKeyDao {
-        return new MemoryKeyDao( Database::obtain() );
+    private function getMkDao(): MemoryKeyDao
+    {
+        return new MemoryKeyDao(Database::obtain());
     }
 
     /**
@@ -200,11 +194,12 @@ class UserKeysController extends KleinController {
      * @return MemoryKeyStruct
      * @throws Exception
      */
-    private function getMemoryToUpdate( $key, $description = null ): MemoryKeyStruct {
+    private function getMemoryToUpdate($key, $description = null): MemoryKeyStruct
+    {
         $tmService = new TMSService();
 
         //validate the key
-        $tmService->checkCorrectKey( $key );
+        $tmService->checkCorrectKey($key);
 
         $tmKeyStruct       = new TmKeyStruct();
         $tmKeyStruct->key  = $key;
@@ -231,45 +226,41 @@ class UserKeysController extends KleinController {
      * @param string|null     $enginesListCsv A comma-separated list of engine names
      *                                        from which the memory key should be removed.
      */
-    private function removeKeyFromEngines( MemoryKeyStruct $memoryKey, ?string $enginesListCsv = '' ) {
-
+    private function removeKeyFromEngines(MemoryKeyStruct $memoryKey, ?string $enginesListCsv = '')
+    {
         // Convert the CSV string into an array of engine names, filtering out empty values.
-        $deleteFrom = array_filter( explode( ",", $enginesListCsv ) );
+        $deleteFrom = array_filter(explode(",", $enginesListCsv));
 
         // Iterate over each engine name in the list.
-        foreach ( $deleteFrom as $engineName ) {
-
+        foreach ($deleteFrom as $engineName) {
             try {
                 // Create a temporary engine instance using the engine name.
                 $struct             = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type       = EngineConstants::MT;
-                $engine             = EnginesFactory::createTempInstance( $struct );
+                $engine             = EnginesFactory::createTempInstance($struct);
 
                 // Check if the engine supports adaptive MT.
-                if ( $engine->isAdaptiveMT() ) {
+                if ($engine->isAdaptiveMT()) {
                     // Retrieve metadata for the engine, ensuring it belongs to the current user.
-                    $ownerMmtEngineMetaData = ( new MetadataDao() )
-                            ->setCacheTTL( 60 * 60 * 24 * 30 ) // Cache TTL: 30 days.
-                            ->get( $this->getUser()->uid, $engine->getEngineRecord()->class_load );
+                    $ownerMmtEngineMetaData = (new MetadataDao())
+                            ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
+                            ->get($this->getUser()->uid, $engine->getEngineRecord()->class_load);
 
                     // If metadata exists, attempt to delete the memory key from the engine.
-                    if ( !empty( $ownerMmtEngineMetaData ) ) {
-                        $engine    = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
-                        $engineKey = $engine->getMemoryIfMine( $memoryKey );
-                        if ( $engineKey ) {
-                            $engine->deleteMemory( $engineKey );
+                    if (!empty($ownerMmtEngineMetaData)) {
+                        $engine    = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
+                        $engineKey = $engine->getMemoryIfMine($memoryKey);
+                        if ($engineKey) {
+                            $engine->deleteMemory($engineKey);
                         }
                     }
                 }
-
-            } catch ( Exception $e ) {
+            } catch (Exception $e) {
                 // Log any exceptions that occur during the process.
-                LoggerFactory::getLogger( 'engines' )->debug( $e->getMessage() );
+                LoggerFactory::getLogger('engines')->debug($e->getMessage());
             }
-
         }
-
     }
 
 }
