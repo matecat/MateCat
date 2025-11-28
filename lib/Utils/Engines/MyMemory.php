@@ -235,10 +235,8 @@ class MyMemory extends AbstractEngine
         (!empty($_config['isConcordance']) ? $parameters['extended'] = '1' : null);
         (!empty($_config['mt_only']) ? $parameters['mtonly'] = '1' : null);
 
-        if (!empty($_config['context_after']) || !empty($_config['context_before'])) {
-            $parameters['context_after'] = ltrim($_config['context_after'] ?? '', "@-");
-            $parameters['context_before'] = ltrim($_config['context_before'] ?? '', "@-");
-        }
+        $parameters['context_after'] = $_config['context_after'] ?? '';
+        $parameters['context_before'] = $_config['context_before'] ?? '';
 
         if (!empty($_config['id_user'])) {
             if (!is_array($_config['id_user'])) {
@@ -266,13 +264,13 @@ class MyMemory extends AbstractEngine
     /**
      * @param $_config
      *
-     * @return array|bool
+     * @return int
      */
-    public function set($_config)
+    public function set($_config): int
     {
         $parameters = [];
-        $parameters['seg'] = preg_replace("/^(-?@-?)/", "", $_config['segment']);
-        $parameters['tra'] = preg_replace("/^(-?@-?)/", "", $_config['translation']);
+        $parameters['seg'] = $_config['segment'] ?? '';
+        $parameters['tra'] = $_config['translation'] ?? '';
         $parameters['tnote'] = $_config['tnote'];
         $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
         $parameters['de'] = $_config['email'];
@@ -280,10 +278,8 @@ class MyMemory extends AbstractEngine
         $parameters['client_id'] = $_config['uid'] ?? 0;
         $parameters['prop'] = $_config['prop'];
 
-        if (!empty($_config['context_after']) || !empty($_config['context_before'])) {
-            $parameters['context_after'] = preg_replace("/^(-?@-?)/", "", $_config['context_after'] ?? '');
-            $parameters['context_before'] = preg_replace("/^(-?@-?)/", "", $_config['context_before'] ?? '');
-        }
+        $parameters['context_after'] = $_config['context_after'] ?? '';
+        $parameters['context_before'] = $_config['context_before'] ?? '';
 
         if (!empty($_config['id_user'])) {
             if (!is_array($_config['id_user'])) {
@@ -305,10 +301,10 @@ class MyMemory extends AbstractEngine
     public function update($_config)
     {
         $parameters = [];
-        $parameters['seg'] = preg_replace("/^(-?@-?)/", "", $_config['segment']);
-        $parameters['tra'] = preg_replace("/^(-?@-?)/", "", $_config['translation']);
-        $parameters['newseg'] = preg_replace("/^(-?@-?)/", "", $_config['newsegment']);
-        $parameters['newtra'] = preg_replace("/^(-?@-?)/", "", $_config['newtranslation']);
+        $parameters['seg'] = $_config['segment'] ?? '';
+        $parameters['tra'] = $_config['translation'] ?? '';
+        $parameters['newseg'] = $_config['newsegment'] ?? '';
+        $parameters['newtra'] = $_config['newtranslation'] ?? '';
         $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
         $parameters['prop'] = $_config['prop'];
         $parameters['client_id'] = $_config['uid'] ?? 0;
@@ -316,10 +312,8 @@ class MyMemory extends AbstractEngine
         $parameters['mt'] = $_config['set_mt'] ?? true;
         $parameters['spiceMatch'] = $_config['spiceMatch'];
 
-        if (!empty($_config['context_after']) || !empty($_config['context_before'])) {
-            $parameters['context_after'] = (!empty($_config['context_after'])) ? preg_replace("/^(-?@-?)/", "", $_config['context_after']) : null;
-            $parameters['context_before'] = (!empty($_config['context_before'])) ? preg_replace("/^(-?@-?)/", "", $_config['context_before']) : null;
-        }
+        $parameters['context_after'] = $_config['context_after'] ?? '';
+        $parameters['context_before'] = $_config['context_before'] ?? '';
 
         if (!empty($_config['id_user'])) {
             if (!is_array($_config['id_user'])) {
@@ -346,8 +340,8 @@ class MyMemory extends AbstractEngine
         $parameters['de'] = $_config['email'];
 
         if (isset($_config['segment']) and isset($_config['translation'])) {
-            $parameters['seg'] = preg_replace("/^(-?@-?)/", "", $_config['segment']);
-            $parameters['tra'] = preg_replace("/^(-?@-?)/", "", $_config['translation']);
+            $parameters['seg'] = $_config['segment'];
+            $parameters['tra'] = $_config['translation'];
         }
 
         if (isset($_config['id_match'])) {
@@ -630,7 +624,7 @@ class MyMemory extends AbstractEngine
      *
      * @return array|mixed
      */
-    public function importMemory(string $filePath, string $memoryKey, UserStruct $user)
+    public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
     {
         $postFields = [
             'tmx' => $this->getCurlFile($filePath),
@@ -773,9 +767,9 @@ class MyMemory extends AbstractEngine
      *
      * @param array $config
      *
-     * @return array|TagProjectionResponse
+     * @return TagProjectionResponse
      */
-    public function getTagProjection(array $config)
+    public function getTagProjection(array $config): TagProjectionResponse
     {
         // set dataRefMap needed to instance
         // TagProjectionResponse class
