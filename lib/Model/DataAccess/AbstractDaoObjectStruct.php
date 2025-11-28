@@ -15,15 +15,17 @@ use ReflectionObject;
 use ReflectionProperty;
 use stdClass;
 
-abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable {
+abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable
+{
 
     use RecursiveArrayCopy;
 
     protected array $cached_results = [];
 
-    public function __construct( array $array_params = [] ) {
-        if ( $array_params != null ) {
-            foreach ( $array_params as $property => $value ) {
+    public function __construct(array $array_params = [])
+    {
+        if ($array_params != null) {
+            foreach ($array_params as $property => $value) {
                 $this->$property = $value;
             }
         }
@@ -36,9 +38,10 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @return void
      * @throws DomainException
      */
-    public function __set( $name, $value ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Unknown property ' . $name );
+    public function __set($name, $value)
+    {
+        if (!property_exists($this, $name)) {
+            throw new DomainException('Unknown property ' . $name);
         }
     }
 
@@ -56,7 +59,8 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * $model->clear()->foo(); // clears the cache and returns fresh data
      *
      */
-    public function clear(): AbstractDaoObjectStruct {
+    public function clear(): AbstractDaoObjectStruct
+    {
         $this->cached_results = [];
 
         return $this;
@@ -72,12 +76,13 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @return mixed
      *
      */
-    protected function cachable( string $cache_key_name, callable $function ) {
+    protected function cachable(string $cache_key_name, callable $function)
+    {
         /** @var  $resultset ?T */
         $resultset = $this->cached_results[ $cache_key_name ] ?? null;
-        if ( $resultset == null ) {
+        if ($resultset == null) {
             /** @var  $resultset ?T */
-            $resultset = $this->cached_results[ $cache_key_name ] = call_user_func( $function );
+            $resultset = $this->cached_results[ $cache_key_name ] = call_user_func($function);
         }
 
         return $resultset;
@@ -89,16 +94,18 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * @return mixed
      * @throws DomainException
      */
-    public function __get( $name ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Trying to get an undefined property ' . $name );
+    public function __get($name)
+    {
+        if (!property_exists($this, $name)) {
+            throw new DomainException('Trying to get an undefined property ' . $name);
         }
 
         return $this->$name;
     }
 
-    public function setTimestamp( $attribute, $timestamp ) {
-        $this->$attribute = date( 'c', $timestamp );
+    public function setTimestamp($attribute, $timestamp)
+    {
+        $this->$attribute = date('c', $timestamp);
     }
 
     /**
@@ -106,14 +113,16 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      *
      * @return array
      */
-    public function getArrayCopy() {
+    public function getArrayCopy()
+    {
         return $this->toArray();
     }
 
-    public function count(): int {
-        $reflectionClass = new ReflectionObject( $this );
+    public function count(): int
+    {
+        $reflectionClass = new ReflectionObject($this);
 
-        return count( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) );
+        return count($reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC));
     }
 
 } 

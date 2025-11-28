@@ -21,6 +21,7 @@ import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {cloneDeep, isEqual} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
+import IconAdd from '../../../icons/IconAdd'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
@@ -181,7 +182,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
           setPendingExceptionsId((prevState) => [...prevState, uuidV4()])
         }
       >
-        <AddWide size={12} />
+        <IconAdd size={20} />
         Add exception
       </Button>
     </div>

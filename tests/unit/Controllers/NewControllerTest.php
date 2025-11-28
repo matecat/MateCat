@@ -5,9 +5,9 @@ namespace unit\Controllers;
 use Controller\API\V1\NewController;
 use Exception;
 use InvalidArgumentException;
-use Klein\DataCollection\DataCollection;
 use Klein\Request;
 use Klein\Response;
+use Model\DataAccess\Database;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionClass;
@@ -15,6 +15,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
 class NewControllerTest extends AbstractTest {
@@ -28,9 +29,59 @@ class NewControllerTest extends AbstractTest {
     private UserStruct $user;
 
     public function setUp(): void {
+        parent::setUp();
         $this->requestMock  = $this->createMock( Request::class );
         $this->responseMock = $this->createMock( Response::class );
         $this->user         = $this->createMock( UserStruct::class );
+
+
+        /**
+         * engine insertion
+         */
+        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
+        $sql_engine = "INSERT INTO " . AppConfig::$DB_DATABASE . ".engines (
+                name, 
+                type, 
+                description, 
+                base_url, 
+                translate_relative_url, 
+                contribute_relative_url, 
+                update_relative_url, 
+                delete_relative_url, 
+                others, 
+                class_load, 
+                extra_parameters, 
+                google_api_compliant_version, 
+                penalty, 
+                active, 
+                uid
+        ) VALUES (
+                'DeepL', 
+                'MT', 
+                'DeepL - Accurate translations for individuals and Teams.', 
+                'https://api.deepl.com',
+                'v1/translate', 
+                null, 
+                null, 
+                null, 
+                '{\"relative_glossaries_url\":\"glossaries\"}', 
+                'Utils\\\\Engines\\\\DeepL', 
+                '{\"DeepL-Auth-Key\":\"xxxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"}', 
+                '2', 
+                15, 
+                1, 
+                1886428310
+        );";
+
+        $this->database_instance->getConnection()->query($sql_engine);
+        $this->id_engine = $this->database_instance->getConnection()->lastInsertId();
+
+    }
+
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        $this->database_instance->getConnection()->query("DELETE FROM " . AppConfig::$DB_DATABASE . ".engines WHERE id = " . $this->id_engine);
     }
 
     /**
@@ -40,10 +91,8 @@ class NewControllerTest extends AbstractTest {
         $this->controller = new NewController( $this->requestMock, $this->responseMock, null, null );
         $reflector        = new ReflectionClass( $this->controller );
         $this->method     = $reflector->getMethod( 'validateTheRequest' );
-        $this->method->setAccessible( true );
 
         $reflector = new ReflectionProperty( $this->controller, 'user' );
-        $reflector->setAccessible( true );
         $reflector->setValue( $this->controller, $this->user );
     }
 
@@ -55,7 +104,7 @@ class NewControllerTest extends AbstractTest {
 
         $this->user->expects( $this->any() )->method( 'getPersonalTeam' )->willReturn( new TeamStruct() );
 
-        $this->requestMock = $this->getMockBuilder( Request::class )->enableProxyingToOriginalMethods()->setConstructorArgs( [
+        $this->requestMock = new Request(
                 [],
                 [
                         'character_counter_count_tags' => '1',
@@ -69,16 +118,13 @@ class NewControllerTest extends AbstractTest {
                 ],
                 [],
                 [],
-                [ 'file[]' => [ 'name' => 'foo.docx' ] ]
-        ] )->getMock();
-
-        $this->requestMock->expects( $this->any() )
-                ->method( 'paramsNamed' )
-                ->willReturn( new DataCollection() );
-
-        $this->requestMock->expects( $this->any() )
-                ->method( 'paramsPost' )
-                ->willReturn( new DataCollection() );
+                [
+                        'file[]' => [
+                                'name'     => 'foo.docx',
+                                'tmp_name' => '/tmp/xdwlky',
+                        ]
+                ]
+        );
 
         $this->createMocks();
 
@@ -91,10 +137,53 @@ class NewControllerTest extends AbstractTest {
     }
 
     /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function testValidateTheRequestWithValidParametersAndMtDeepLEngine()
+    {
+        $this->user->expects($this->any())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $this->user->uid = 1886428310;
+
+        $this->requestMock = new Request(
+            [],
+            [
+                'character_counter_count_tags' => '1',
+                'character_counter_mode' => 'google_ads',
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'tms_engine' => 1,
+                'mt_engine' => $this->id_engine,
+                'segmentation_rule' => 'patent',
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+        $reflectionProperty = new ReflectionProperty($this->controller, 'userIsLogged');
+        $reflectionProperty->setValue($this->controller, true);
+
+        $validateParameters = $this->method->invoke($this->controller);
+
+        $this->assertIsArray($validateParameters);
+        $this->assertArrayHasKey('source_lang', $validateParameters);
+        $this->assertEquals('en-US', $validateParameters['source_lang']);
+        $this->assertEquals('foo', $validateParameters['project_name']);
+    }
+
+    /**
      * @throws Exception
      */
     public function testValidateTheRequestWithMissingFile() {
-        $this->requestMock = $this->getMockBuilder( Request::class )->enableProxyingToOriginalMethods()->setConstructorArgs( [
+        $this->requestMock = new Request(
                 [],
                 [
                         'character_counter_count_tags' => '1',
@@ -106,7 +195,7 @@ class NewControllerTest extends AbstractTest {
                         'tms_engine'                   => 1,
                         'segmentation_rule'            => 'patent',
                 ]
-        ] )->getMock();
+        );
         $this->createMocks();
 
         $this->expectException( InvalidArgumentException::class );
@@ -120,7 +209,7 @@ class NewControllerTest extends AbstractTest {
      */
     public function testValidateTheRequestWithInvalidParameters() {
 
-        $this->requestMock = $this->getMockBuilder( Request::class )->enableProxyingToOriginalMethods()->setConstructorArgs( [
+        $this->requestMock = new Request(
                 [],
                 [
                         'character_counter_count_tags' => '1',
@@ -135,7 +224,7 @@ class NewControllerTest extends AbstractTest {
                 [],
                 [],
                 [ 'file[]' => [ 'name' => 'foo.docx' ] ]
-        ] )->getMock();
+        );
         $this->createMocks();
 
         $this->expectException( InvalidArgumentException::class );
@@ -148,7 +237,7 @@ class NewControllerTest extends AbstractTest {
      * @throws Exception
      */
     public function testValidateTheRequestWithInvalidSourceLang() {
-        $this->requestMock = $this->getMockBuilder( Request::class )->enableProxyingToOriginalMethods()->setConstructorArgs( [
+        $this->requestMock = new Request(
                 [],
                 [
                         'character_counter_count_tags' => '1',
@@ -163,7 +252,7 @@ class NewControllerTest extends AbstractTest {
                 [],
                 [],
                 [ 'file[]' => [ 'name' => 'foo.docx' ] ]
-        ] )->getMock();
+        );
         $this->createMocks();
 
         $this->expectException( InvalidArgumentException::class );
@@ -184,7 +273,6 @@ class NewControllerTest extends AbstractTest {
 
         $ref = new ReflectionClass( $controller );
         $m   = $ref->getMethod( 'validateSubfilteringOptions' );
-        $m->setAccessible( true );
 
         $this->assertNull( $m->invoke( $controller, 'none' ) );
     }
@@ -201,7 +289,6 @@ class NewControllerTest extends AbstractTest {
 
         $ref = new ReflectionClass( $controller );
         $m   = $ref->getMethod( 'validateSubfilteringOptions' );
-        $m->setAccessible( true );
 
         $this->assertNull( $m->invoke( $controller, '' ) );
     }
@@ -218,7 +305,6 @@ class NewControllerTest extends AbstractTest {
 
         $ref = new ReflectionClass( $controller );
         $m   = $ref->getMethod( 'validateSubfilteringOptions' );
-        $m->setAccessible( true );
 
         $result = $m->invoke( $controller, '["twig","markup"]' );
         $this->assertIsArray( $result );
@@ -237,7 +323,6 @@ class NewControllerTest extends AbstractTest {
 
         $ref = new ReflectionClass( $controller );
         $m   = $ref->getMethod( 'validateSubfilteringOptions' );
-        $m->setAccessible( true );
 
         $result = $m->invoke( $controller, '[]' );
         $this->assertIsArray( $result );
@@ -257,7 +342,6 @@ class NewControllerTest extends AbstractTest {
 
         $ref = new ReflectionClass( $controller );
         $m   = $ref->getMethod( 'validateSubfilteringOptions' );
-        $m->setAccessible( true );
 
         $this->expectException( JsonValidatorGenericException::class );
         $m->invoke( $controller, 'not-a-json' );

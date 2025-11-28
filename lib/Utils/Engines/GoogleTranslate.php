@@ -4,7 +4,6 @@ namespace Utils\Engines;
 
 use Exception;
 use Utils\Constants\EngineConstants;
-use Utils\Engines\Results\MTResponse;
 
 /**
  * Created by PhpStorm.
@@ -12,113 +11,113 @@ use Utils\Engines\Results\MTResponse;
  * Date: 28/12/2017
  * Time: 17:25
  */
-class GoogleTranslate extends AbstractEngine {
+class GoogleTranslate extends AbstractEngine
+{
 
     protected array $_config = [
-            'q'      => null,
-            'source' => null,
-            'target' => null,
+        'q' => null,
+        'source' => null,
+        'target' => null,
     ];
 
-    public function __construct( $engineRecord ) {
-        parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+    public function __construct($engineRecord)
+    {
+        parent::__construct($engineRecord);
+        if ($this->getEngineRecord()->type != EngineConstants::MT) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
     }
 
     /**
-     * @param       $rawValue
+     * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
-     * @return array|MTResponse|mixed
+     * @return array
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    {
+        $all_args = func_get_args();
+        $all_args[1]['text'] = $all_args[1]['q'];
 
-        $all_args                = func_get_args();
-        $all_args[ 1 ][ 'text' ] = $all_args[ 1 ][ 'q' ];
-
-        if ( is_string( $rawValue ) ) {
-            $decoded = json_decode( $rawValue, true );
-            if ( isset( $decoded[ "data" ] ) ) {
-                return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
+        if (is_string($rawValue)) {
+            $decoded = json_decode($rawValue, true);
+            if (isset($decoded["data"])) {
+                return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
             } else {
                 $decoded = [
-                        'error' => [
-                                'code'    => $decoded[ "code" ],
-                                'message' => $decoded[ "message" ]
-                        ]
+                    'error' => [
+                        'code' => $decoded["code"],
+                        'message' => $decoded["message"]
+                    ]
                 ];
             }
         } else {
-            $resp = json_decode( $rawValue[ "error" ][ "response" ], true );
-            if ( isset( $resp[ "error" ][ "code" ] ) && isset( $resp[ "error" ][ "message" ] ) ) {
-                $rawValue[ "error" ][ "code" ]    = $resp[ "error" ][ "code" ];
-                $rawValue[ "error" ][ "message" ] = $resp[ "error" ][ "message" ];
+            $resp = json_decode($rawValue["error"]["response"], true);
+            if (isset($resp["error"]["code"]) && isset($resp["error"]["message"])) {
+                $rawValue["error"]["code"] = $resp["error"]["code"];
+                $rawValue["error"]["message"] = $resp["error"]["message"];
             }
             $decoded = $rawValue; // already decoded in case of error
         }
 
         return $decoded;
-
     }
 
-    public function get( array $_config ) {
-
+    public function get(array $_config)
+    {
         $parameters = [];
 
-        if ( $this->client_secret != '' && $this->client_secret != null ) {
-            $parameters[ 'key' ] = $this->client_secret;
+        if ($this->client_secret != '' && $this->client_secret != null) {
+            $parameters['key'] = $this->client_secret;
         }
 
-        if ( isset( $_config[ 'key' ] ) and !empty( $_config[ 'key' ] ) ) {
-            $parameters[ 'key' ] = $_config[ 'key' ];
+        if (isset($_config['key']) and !empty($_config['key'])) {
+            $parameters['key'] = $_config['key'];
         }
 
-        $parameters[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-        $parameters[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $parameters[ 'q' ]      = $_config[ 'segment' ];
+        $parameters['target'] = $this->_fixLangCode($_config['target']);
+        $parameters['source'] = $this->_fixLangCode($_config['source']);
+        $parameters['q'] = $_config['segment'];
 
         $this->_setAdditionalCurlParams(
-                [
-                        CURLOPT_POST       => true,
-                        CURLOPT_POSTFIELDS => http_build_query( $parameters )
-                ]
+            [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => http_build_query($parameters)
+            ]
         );
 
-        $this->call( "translate_relative_url", $parameters, true );
+        $this->call("translate_relative_url", $parameters, true);
 
         return $this->result;
-
     }
 
-    public function set( $_config ): bool {
-
+    public function set($_config): bool
+    {
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $_config ): bool {
-
+    public function update($_config): bool
+    {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ): bool {
-
+    public function delete($_config): bool
+    {
         //if engine does not implement DELETE method, exit
         return true;
-
     }
 
     /**
      * @inheritDoc
      */
-    public function getExtraParams(): array {
+    public function getConfigurationParameters(): array
+    {
         return [
-                'pre_translate_files',
+            'enable_mt_analysis',
         ];
     }
 

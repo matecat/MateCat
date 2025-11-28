@@ -5,7 +5,8 @@ namespace Model\Conversion;
 use Exception;
 use Utils\Constants\ConversionHandlerStatus;
 
-class ConvertedFileModel {
+class ConvertedFileModel
+{
     /**
      * @var int
      */
@@ -39,31 +40,34 @@ class ConvertedFileModel {
      *
      * @throws Exception
      */
-    public function __construct( ?int $code = null ) {
-        if ( !empty( $code ) ) {
-            $this->setErrorCode( $code );
+    public function __construct(?int $code = null)
+    {
+        if (!empty($code)) {
+            $this->setErrorCode($code);
         }
     }
 
     /**
-     * @param $code
+     * @param int $code
      *
      * @return bool
      */
-    private function validateCode( $code ): bool {
-        $allowed = array_merge( ConversionHandlerStatus::errorCodes, ConversionHandlerStatus::warningCodes, [ ConversionHandlerStatus::OK ] );
+    private function validateCode(int $code): bool
+    {
+        $allowed = array_merge(ConversionHandlerStatus::errorCodes, ConversionHandlerStatus::warningCodes, [ConversionHandlerStatus::OK]);
 
-        return in_array( $code, $allowed );
+        return in_array($code, $allowed);
     }
 
     /**
-     * @param $code
+     * @param int $code
      *
      * @throws Exception
      */
-    public function setErrorCode( $code ) {
-        if ( !$this->validateCode( $code ) ) {
-            throw new Exception( $code . ' is not a valid code' );
+    public function setErrorCode(int $code): void
+    {
+        if (!$this->validateCode($code)) {
+            throw new Exception($code . ' is not a valid code');
         }
 
         $this->code = $code;
@@ -72,56 +76,65 @@ class ConvertedFileModel {
     /**
      * @return int
      */
-    public function getCode(): int {
+    public function getCode(): int
+    {
         return $this->code;
     }
 
     /**
      * @return bool
      */
-    public function isError(): bool {
-        return in_array( $this->code, ConversionHandlerStatus::errorCodes, true );
+    public function isError(): bool
+    {
+        return in_array($this->code, ConversionHandlerStatus::errorCodes, true);
     }
 
     /**
      * @return bool
      */
-    public function isWarning(): bool {
-        return in_array( $this->code, ConversionHandlerStatus::warningCodes, true );
+    public function isWarning(): bool
+    {
+        return in_array($this->code, ConversionHandlerStatus::warningCodes, true);
     }
 
     /**
      * @param string $messageError
      */
-    public function setErrorMessage( string $messageError ) {
+    public function setErrorMessage(string $messageError): void
+    {
         $this->message = $messageError;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getMessage(): ?string {
+    public function getMessage(): ?string
+    {
         return $this->message;
     }
 
-    public function getName(): string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
     /**
      * @param string $name
-     *
+     * @param bool   $isZipContent
      */
-    public function setFileName( string $name, bool $isZipContent = false ) {
+    public function setFileName(string $name, bool $isZipContent = false): void
+    {
         $this->name = $name;
-        $this->zipContent( $isZipContent );
+        $this->zipContent($isZipContent);
     }
 
-    public function getSize(): int {
+    public function getSize(): int
+    {
         return $this->size;
     }
 
-    public function isZipContent(): bool {
+    public function isZipContent(): bool
+    {
         return $this->isZipContent;
     }
 
@@ -129,7 +142,8 @@ class ConvertedFileModel {
      * @param bool $isZipContent
      *
      */
-    public function zipContent( bool $isZipContent = true ) {
+    public function zipContent(bool $isZipContent = true): void
+    {
         $this->isZipContent = $isZipContent;
     }
 
@@ -137,21 +151,24 @@ class ConvertedFileModel {
      * @param int $size
      *
      */
-    public function setSize( int $size ) {
+    public function setSize(int $size): void
+    {
         $this->size = $size;
     }
 
     /**
      * @return array
      */
-    public function getPdfAnalysis(): array {
+    public function getPdfAnalysis(): array
+    {
         return $this->pdfAnalysis;
     }
 
     /**
      * @param array $pdfAnalysis
      */
-    public function setPdfAnalysis( array $pdfAnalysis ): void {
+    public function setPdfAnalysis(array $pdfAnalysis): void
+    {
         $this->pdfAnalysis = $pdfAnalysis;
     }
 
@@ -160,22 +177,26 @@ class ConvertedFileModel {
      *
      * @return void
      */
-    public function addConversionHashes( InternalHashPaths $data ) {
+    public function addConversionHashes(InternalHashPaths $data): void
+    {
         $this->_internal_conversion_hashes = $data;
     }
 
     /**
      * @return InternalHashPaths
      */
-    public function getConversionHashes(): InternalHashPaths {
-        return $this->_internal_conversion_hashes ?? new InternalHashPaths( [] );
+    public function getConversionHashes(): InternalHashPaths
+    {
+        return $this->_internal_conversion_hashes ?? new InternalHashPaths([]);
     }
 
-    public function hasConversionHashes(): bool {
-        return !empty( $this->_internal_conversion_hashes ) && !$this->_internal_conversion_hashes->isEmpty();
+    public function hasConversionHashes(): bool
+    {
+        return !empty($this->_internal_conversion_hashes) && !$this->_internal_conversion_hashes->isEmpty();
     }
 
-    public function asError(): array {
+    public function asError(): array
+    {
         return [
                 'code'    => $this->getCode(),
                 'message' => $this->getMessage(),
@@ -183,7 +204,8 @@ class ConvertedFileModel {
         ];
     }
 
-    public function getResult(): array {
+    public function getResult(): array
+    {
         return [
                 'name'        => $this->getName(),
                 'size'        => $this->getSize(),

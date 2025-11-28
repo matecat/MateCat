@@ -198,7 +198,7 @@ module.exports.Application = class {
             });
             this.logger.debug("Dispatched global message to user: " + uuid);
           } else {
-            this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY + id);
+            this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY, id);
           }
         });
       });

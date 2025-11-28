@@ -9,7 +9,8 @@
 
 namespace Model\Conversion;
 
-class ConvertedFileList {
+class ConvertedFileList
+{
 
     /**
      * @var ConvertedFileModel[]
@@ -18,14 +19,16 @@ class ConvertedFileList {
     private array $erroredFiles   = [];
     private array $warnedFiles    = [];
 
-    public function add( ConvertedFileModel $convertedFileModel ): void {
+    public function add(ConvertedFileModel $convertedFileModel): void
+    {
         $this->convertedFiles[] = $convertedFileModel;
     }
 
     /**
      * @param ConvertedFileModel $warnedFile
      */
-    public function setWarnedFile( ConvertedFileModel $warnedFile ) {
+    public function setWarnedFile(ConvertedFileModel $warnedFile): void
+    {
         $this->warnedFiles[] = $warnedFile->asError();
     }
 
@@ -33,26 +36,30 @@ class ConvertedFileList {
      * @param ConvertedFileModel $erroredFile
      *
      */
-    public function setErroredFile( ConvertedFileModel $erroredFile ) {
+    public function setErroredFile(ConvertedFileModel $erroredFile): void
+    {
         $this->erroredFiles[] = $erroredFile->asError();
     }
 
     /**
      * @return bool
      */
-    public function hasErrors(): bool {
-        return !empty( $this->erroredFiles );
+    public function hasErrors(): bool
+    {
+        return !empty($this->erroredFiles);
     }
 
-    public function hasWarnings(): bool {
-        return !empty( $this->warnedFiles );
+    public function hasWarnings(): bool
+    {
+        return !empty($this->warnedFiles);
     }
 
     /**
      * Check on executed conversion results and filter the stack to get errors only.
      * @return array
      */
-    public function getErrors(): array {
+    public function getErrors(): array
+    {
         return $this->erroredFiles;
     }
 
@@ -60,17 +67,19 @@ class ConvertedFileList {
      * Returns OCR warnings
      * @return array
      */
-    public function getWarnings(): array {
+    public function getWarnings(): array
+    {
         return $this->warnedFiles;
     }
 
     /**
      * @return InternalHashPaths[]
      */
-    public function getHashes(): array {
+    public function getHashes(): array
+    {
         $hashes = [];
-        foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasConversionHashes() ) {
+        foreach ($this->convertedFiles as $res) {
+            if ($res->hasConversionHashes()) {
                 $hashes[] = $res->getConversionHashes();
             }
         }
@@ -81,11 +90,12 @@ class ConvertedFileList {
     /**
      * @return array
      */
-    public function getData(): array {
+    public function getData(): array
+    {
         $data = [];
 
-        foreach ( $this->convertedFiles as $res ) {
-            if ( $res->isZipContent() ) {
+        foreach ($this->convertedFiles as $res) {
+            if ($res->isZipContent()) {
                 $data[ 'zipFiles' ][] = $res->getResult();
             } else {
                 $data[ 'simpleFileName' ][] = $res->getResult();

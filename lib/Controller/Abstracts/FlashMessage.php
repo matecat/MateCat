@@ -6,12 +6,12 @@ use Exception;
 
 class FlashMessage {
 
-    const KEY = 'flashMessages';
+    const string KEY = 'flashMessages';
 
-    const WARNING = 'warning';
-    const ERROR   = 'error';
-    const INFO    = 'info';
-    const SERVICE = 'service';
+    const string WARNING = 'warning';
+    const string ERROR   = 'error';
+    const string INFO    = 'info';
+    const string SERVICE = 'service';
 
     /**
      * @throws Exception

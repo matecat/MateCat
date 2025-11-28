@@ -1,13 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const Share = ({size = 32}) => {
+const Share = ({size = 24}) => {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32">
+    <svg width={size} height={size} viewBox="0 0 24 24">
       <path
-        fillRule="evenodd"
         fill="currentColor"
-        d="M27 22a4.985 4.985 0 0 0-3.594 1.526L9.937 16.792a5.035 5.035 0 0 0 0-1.582l13.469-6.734a5 5 0 1 0-1.343-2.683L8.594 12.527A5 5 0 1 0 5 21.001a4.985 4.985 0 0 0 3.594-1.526l13.469 6.734A5 5 0 1 0 27 22z"
+        fillRule="evenodd"
+        d="M18 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-2.842 4.815a4 4 0 1 0-1.008-1.727L8.842 9.185a4 4 0 1 0 0 5.63l5.309 3.093A4.003 4.003 0 0 0 18 23a4 4 0 1 0-2.839-6.818l-5.31-3.095a4.003 4.003 0 0 0 0-2.175l5.307-3.097ZM7.7 10.945a.973.973 0 0 0 .056.096c.155.285.244.612.244.959a1.99 1.99 0 0 1-.3 1.055A1.999 1.999 0 0 1 4 12a2 2 0 0 1 3.7-1.055Zm8.515 7.151a1.012 1.012 0 0 0 .123-.209 2 2 0 1 1-.122.209Z"
+        clipRule="evenodd"
       />
     </svg>
   )

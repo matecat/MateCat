@@ -7,6 +7,7 @@
  */
 
 namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
@@ -17,120 +18,112 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use InvalidArgumentException;
 use Model\Exceptions\ValidationError;
 use Model\Files\FilesInfoUtility;
-use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use ReflectionException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 
-class FileInfoController extends KleinController {
+class FileInfoController extends KleinController
+{
     use ChunkNotFoundHandlerTrait;
+
     /**
      * @var ProjectStruct
      */
-    protected $project;
+    protected ProjectStruct $project;
 
-    protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this );
-        $Validator->onSuccess( function () use ( $Validator ) {
-            $this->setChunk( $Validator->getChunk() );
-            $this->setProject( $Validator->getChunk()->getProject() );
-            $this->appendValidator( new ProjectAccessValidator( $this, $Validator->getChunk()->getProject() ) );
-            //those are not needed at moment, so avoid unnecessary queries
-//            $this->setFeatureSet( $this->project->getFeaturesSet() );
-        } );
-        $this->appendValidator( $Validator );
-        $this->appendValidator( new LoginValidator( $this ) );
-
-    }
-
-    private function setChunk( JobStruct $chunk ) {
-        $this->chunk = $chunk;
-    }
-
-    private function setProject( ProjectStruct $project ) {
-        $this->project = $project;
-    }
-
-    public function getInfo() {
-
-        // those values where not used
-//        $page    = ( isset( $this->request->page ) ) ? $this->request->page : 1;
-//        $perPage = ( isset( $this->request->per_page ) ) ? $this->request->per_page : 200;
-
-        $this->return404IfTheJobWasDeleted();
-
-        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-        $this->response->json( $filesInfoUtility->getInfo() );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $Validator = new ChunkPasswordValidator($this);
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk   = $Validator->getChunk();
+            $this->project = $Validator->getChunk()->getProject();
+            $this->appendValidator(new ProjectAccessValidator($this, $this->project));
+        });
+        $this->appendValidator($Validator);
     }
 
     /**
-     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    public function getInstructions() {
-
+    public function getInfo(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $id_file          = $this->request->param( 'id_file' );
-        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-        $instructions     = $filesInfoUtility->getInstructions( $id_file );
-
-        if ( !$instructions ) {
-            throw new NotFoundException( 'No instructions for this file' );
-        }
-
-        $this->response->json( $instructions );
+        $filesInfoUtility = new FilesInfoUtility($this->chunk);
+        $this->response->json($filesInfoUtility->getInfo());
     }
 
     /**
-     * @throws NotFoundException
+     * @throws NotFoundException|ReflectionException
      */
-    public function getInstructionsByFilePartsId() {
-
+    public function getInstructions(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $id_file          = $this->request->param( 'id_file' );
-        $id_file_parts    = $this->request->param( 'id_file_parts' );
-        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-        $instructions     = $filesInfoUtility->getInstructions( $id_file, $id_file_parts );
+        $id_file          = $this->request->param('id_file');
+        $filesInfoUtility = new FilesInfoUtility($this->chunk);
+        $instructions     = $filesInfoUtility->getInstructions($id_file);
 
-        if ( !$instructions ) {
-            throw new NotFoundException( 'No instructions for this file parts id' );
+        if (!$instructions) {
+            throw new NotFoundException('No instructions for this file');
         }
 
-        $this->response->json( $instructions );
+        $this->response->json($instructions);
+    }
+
+    /**
+     * @throws NotFoundException|ReflectionException
+     */
+    public function getInstructionsByFilePartsId(): void
+    {
+        $this->return404IfTheJobWasDeleted();
+
+        $id_file          = $this->request->param('id_file');
+        $id_file_parts    = $this->request->param('id_file_parts');
+        $filesInfoUtility = new FilesInfoUtility($this->chunk);
+        $instructions     = $filesInfoUtility->getInstructions($id_file, $id_file_parts);
+
+        if (!$instructions) {
+            throw new NotFoundException('No instructions for this file parts id');
+        }
+
+        $this->response->json($instructions);
     }
 
     /**
      * save instructions
      *
-     * @throws NotFoundException
      * @throws AuthenticationError
-     * @throws \Model\Exceptions\NotFoundException
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
+     * @throws \Model\Exceptions\NotFoundException
      */
-    public function setInstructions() {
-
+    public function setInstructions(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $id_file          = $this->request->param( 'id_file' );
-        $instructions     = $this->request->param( 'instructions' );
-        $filesInfoUtility = new FilesInfoUtility( $this->chunk );
+        $id_file          = $this->request->param('id_file');
+        $instructions     = $this->request->param('instructions');
+        $filesInfoUtility = new FilesInfoUtility($this->chunk);
 
-        $instructions = $this->featureSet->filter( 'decodeInstructions', $instructions );
+        $instructions = $this->featureSet->filter('decodeInstructions', $instructions);
 
-        if(empty($instructions)){
+        if (empty($instructions)) {
             throw new InvalidArgumentException("Empty instructions provided");
         }
 
-        if ( $filesInfoUtility->setInstructions( $id_file, $instructions ) ) {
-            $this->response->json( [
-                "success" => true,
-            ] );
+        if ($filesInfoUtility->setInstructions($id_file, $instructions)) {
+            $this->response->json([
+                    "success" => true,
+            ]);
         } else {
-            throw new NotFoundException( 'File not found on this project' );
+            throw new NotFoundException('File not found on this project');
         }
     }
 }

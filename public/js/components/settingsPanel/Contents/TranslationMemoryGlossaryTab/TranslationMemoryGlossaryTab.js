@@ -18,6 +18,8 @@ import Users from '../../../../../img/icons/Users'
 import AddWide from '../../../../../img/icons/AddWide'
 import {METADATA_KEY} from '../../../../constants/Constants'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
+import IconAdd from '../../../icons/IconAdd'
+import UsersPlus from '../../../../../img/icons/UsersPlus'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -499,7 +501,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 onClick={onAddSharedResource}
                 data-testid="add-shared-resource-tm"
               >
-                <Users size={18} /> Add shared resource
+                <UsersPlus size={18} /> Add shared resource
               </button>
 
               <button
@@ -507,7 +509,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 onClick={onNewResource}
                 data-testid="new-resource-tm"
               >
-                <AddWide size={18} /> New resource
+                <IconAdd size={16} /> New resource
               </button>
             </div>
           </div>
