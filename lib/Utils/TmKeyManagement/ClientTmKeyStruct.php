@@ -13,7 +13,8 @@ namespace Utils\TmKeyManagement;
  *
  * Class ClientTmKeyStruct
  */
-class ClientTmKeyStruct extends TmKeyStruct {
+class ClientTmKeyStruct extends TmKeyStruct
+{
 
     /**
      * Flag that tells wether the key is editable or not by the current user.
@@ -32,24 +33,24 @@ class ClientTmKeyStruct extends TmKeyStruct {
      * <b>Example</b><br />
      * 1234abcd1a2b  -->  *******d1a2b
      */
-    public function hideKey( int $uid ): ClientTmKeyStruct {
-
-        if ( $uid != $this->uid_transl && $uid != $this->uid_rev ) {
+    public function hideKey(int $uid): ClientTmKeyStruct
+    {
+        if ($uid != $this->uid_transl && $uid != $this->uid_rev) {
             $this->key  = $this->getCrypt();
             $this->edit = false;
         }
 
         return $this;
-
     }
 
     /**
      * Used to force the shared parameters if the ClientTmKeyStruct wraps a TmKeyStruct
      * which comes from job data ( json keys in the database does not knows about sharing )
      *
-     * @param $shared
+     * @param bool $shared
      */
-    public function setShared( $shared ) {
+    public function setShared(bool $shared): void
+    {
         $this->is_shared = $shared;
     }
 

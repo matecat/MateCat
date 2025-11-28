@@ -21,7 +21,8 @@ use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use ReflectionException;
 
-class ChunkPasswordValidator extends Base {
+class ChunkPasswordValidator extends Base
+{
     /**
      * @var ?JobStruct
      */
@@ -36,35 +37,31 @@ class ChunkPasswordValidator extends Base {
     protected string $password;
     protected ?int   $revision_number = null;
 
-    public function __construct( KleinController $controller ) {
-
-        parent::__construct( $controller );
+    public function __construct(KleinController $controller)
+    {
+        parent::__construct($controller);
 
         $filterArgs = [
                 'id_job'          => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
                 'password'        => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'revision_number' => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
         ];
 
-        $postInput = (object)filter_var_array( $controller->getParams(), $filterArgs );
+        $postInput = (object)filter_var_array($controller->getParams(), $filterArgs);
 
         $this->id_job   = $postInput->id_job;
         $this->password = $postInput->password;
 
-        $controller->id_job   = $this->id_job;
-        $controller->password = $this->password;
-
-        if ( false === empty( $postInput->revision_number ) ) {
-            $this->revision_number       = $postInput->revision_number;
-            $controller->revision_number = $this->revision_number;
+        if (false === empty($postInput->revision_number)) {
+            $this->revision_number = $postInput->revision_number;
         }
-
     }
 
     /**
@@ -72,52 +69,56 @@ class ChunkPasswordValidator extends Base {
      * @throws NotFoundException
      * @throws ReflectionException
      */
-    protected function _validate(): void {
-
-        //try with translate password
+    protected function _validate(): void
+    {
+        //try with the Translate password
         $this->getChunkFromTranslatePassword();
-        if ( empty( $this->chunk ) ) {
-            //try with review password
+        if (empty($this->chunk)) {
+            //try with the Review password
             $this->getChunkFromRevisePassword();
         }
-
     }
 
     /**
      * @throws NotFoundException
      */
-    protected function getChunkFromRevisePassword() {
-        $this->chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $this->request->param( 'password' ), $this->request->param( 'id_job' ) );
-        if ( empty( $this->chunkReview ) ) {
-            throw new NotFoundException( 'Not found.' );
+    protected function getChunkFromRevisePassword(): void
+    {
+        $this->chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param('password'), $this->request->param('id_job'));
+        if (empty($this->chunkReview)) {
+            throw new NotFoundException('Not found.');
         }
         $this->chunk = $this->chunkReview->getChunk();
-        $this->chunk->setIsReview( true );
-        $this->chunk->setSourcePage( $this->chunkReview->source_page );
+        $this->chunk->setIsReview(true);
+        $this->chunk->setSourcePage($this->chunkReview->source_page);
     }
 
     /**
      * @throws ReflectionException
      */
-    protected function getChunkFromTranslatePassword() {
-        $this->chunk = JobDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
-        if ( !empty( $this->chunk ) ) {
-            $this->chunkReview = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk )[ 0 ] ?? null;
+    protected function getChunkFromTranslatePassword(): void
+    {
+        $this->chunk = JobDao::getByIdAndPassword($this->request->param('id_job'), $this->request->param('password'));
+        if (!empty($this->chunk)) {
+            $this->chunkReview = (new ChunkReviewDao())->findChunkReviews($this->chunk)[ 0 ] ?? null;
         }
     }
 
-    public function getChunk(): JobStruct {
+    public function getChunk(): JobStruct
+    {
         return $this->chunk;
     }
 
     /**
      * @return int
      */
-    public function getJobId(): int {
+    public function getJobId(): int
+    {
         return $this->id_job;
     }
 
-    public function getChunkReview(): ChunkReviewStruct {
+    public function getChunkReview(): ChunkReviewStruct
+    {
         return $this->chunkReview;
     }
 

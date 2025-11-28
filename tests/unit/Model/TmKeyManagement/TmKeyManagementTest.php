@@ -6,6 +6,8 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use TestHelpers\AbstractTest;
 use TestHelpers\Utils;
@@ -126,6 +128,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testGetTmKeyStructure_noArgs() {
         $structure = TmKeyManager::getTmKeyStructure();
 
@@ -166,6 +169,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testGetTmKeyStructure_withArgs() {
         $args = [
                 'key'        => self::$dummyTmKey_key,
@@ -226,6 +230,8 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @depends testGetTmKeyStructure_withArgs
      */
+    #[Test]
+    #[Depends("testGetTmKeyStructure_withArgs")]
     public function testGetClientTmKeyStructure_withArgs() {
 
         $args = [
@@ -262,7 +268,7 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     /** TEST getJobTmKeys */
-
+    #[Test]
     public function testGetJobTmKeys_validInput_noRole_noUid_readKeys() {
 
         $_jobTmKeys = json_encode(
@@ -371,6 +377,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 0, $sndKey->w_transl );
     }
 
+    #[Test]
     public function testGetJobTmKeys_validInput_noRole_Uid_writeKeys() {
 
         $_jobTmKeys = json_encode(
@@ -466,6 +473,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testGetJobTmKeys_validInput_noRole_Uid_readwriteKeys() {
 
         $_jobTmKeys = json_encode(
@@ -562,6 +570,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testGetJobTmKeys_validInput_roleTranslator_Uid_readKeys_1() {
 
         $_jobTmKeys = json_encode(
@@ -680,6 +689,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 0, $sndKey->w_transl );
     }
 
+    #[Test]
     public function testGetJobTmKeys_validInput_roleTranslator_noUid_writeKeys() {
 
         $_jobTmKeys = json_encode(
@@ -770,6 +780,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testGetJobTmKeys_validInput_roleTranslator_uid_readKeys() {
 
         $_idTranslator = 560;
@@ -875,6 +886,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testGetJobTmKeys_validInput_roleTranslator_uid_writeKeys() {
 
         $_idTranslator = 560;
@@ -969,6 +981,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testGetJobTmKeys_validInput_roleTranslator_uid_readwriteKeys() {
 
         $_idTranslator = 560;
@@ -1064,7 +1077,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
-
+    #[Test]
     public function testGetJobTmKeys_invalidJson() {
         try {
             TmKeyManager::getJobTmKeys( self::$invalidJsonStringTmKeyList );
@@ -1078,6 +1091,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testGetJobTmKeys_wGrant() {
 
         $tmKeys = TmKeyManager::getJobTmKeys( self::$validJsonStringTmKeyList, 'w' );
@@ -1086,6 +1100,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEmpty( $tmKeys );
     }
 
+    #[Test]
     public function testGetJobTmKeys_invalidGrant() {
         try {
             TmKeyManager::getJobTmKeys( self::$validJsonStringTmKeyList, self::$invalidGrantString );
@@ -1099,6 +1114,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testGetJobTmKeys_glosType() {
         $tmKeys = TmKeyManager::getJobTmKeys(
                 self::$validJsonStringTmKeyList,
@@ -1113,6 +1129,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testGetJobTmKeys_revisorRole() {
         $tmKeys = TmKeyManager::getJobTmKeys(
                 self::$validJsonStringTmKeyList,
@@ -1125,6 +1142,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEmpty( $tmKeys );
     }
 
+    #[Test]
     public function testGetJobTmKeys_invalidType() {
         try {
             TmKeyManager::getJobTmKeys(
@@ -1139,6 +1157,7 @@ class TmKeyManagementTest extends AbstractTest {
         }
     }
 
+    #[Test]
     public function testGetJobTmKeys_invalidRole() {
         try {
             TmKeyManager::getJobTmKeys(
@@ -1157,6 +1176,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testGetJobTmKeys_uidNotNull() {
         $tmKeys = TmKeyManager::getJobTmKeys(
                 self::$validJsonStringTmKeyListWithUidTranslator,
@@ -1172,6 +1192,7 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     /** TEST isValidStructure */
+    #[Test]
     public function testIsValidStructure_validStructure() {
         $validObj = TmKeyManager::isValidStructure( self::$validTmKeyStructArr );
 
@@ -1185,6 +1206,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( self::$validTmKeyStructArr[ 'uid_transl' ], $validObj->uid_transl );
     }
 
+    #[Test]
     public function testIsValidStructure_invalidStructure() {
         $validObj = TmKeyManager::isValidStructure( self::$invalidTmKeyStructArr );
 
@@ -1193,6 +1215,7 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     /** TEST mergeJsonKeys */
+    #[Test]
     public function testMergeJsonKeys_invalidClientJson() {
         try {
             TmKeyManager::mergeJsonKeys( self::$invalidClientJson, self::$validServerJson );
@@ -1201,6 +1224,7 @@ class TmKeyManagementTest extends AbstractTest {
         }
     }
 
+    #[Test]
     public function testMergeJsonKeys_invalidServerJson() {
         try {
             TmKeyManager::mergeJsonKeys( self::$validClientJson, self::$invalidServerJson );
@@ -1212,6 +1236,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_validInput_clientABCDEF_serverABC() {
 
         $resultMerge = TmKeyManager::mergeJsonKeys(
@@ -1269,6 +1294,7 @@ class TmKeyManagementTest extends AbstractTest {
      *
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_validInput_clientGHI_Anonymous_serverGHI() {
 
         $resultMerge = TmKeyManager::mergeJsonKeys(
@@ -1304,6 +1330,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testMergeJsonKeys_validInput_clientGHI_INVALID_serverGHI() {
 
         $this->expectException( 'Exception' );
@@ -1315,6 +1342,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testMergeJsonKeys_InvalidRole() {
 
         $this->expectException( 'Exception' );
@@ -1328,6 +1356,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testMergeJsonKeys_InvalidAnonymousOWNER() {
 
         $this->expectException( 'Exception' );
@@ -1343,6 +1372,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_OWNER_DELETE_key() {
 
         $resultMerge = TmKeyManager::mergeJsonKeys(
@@ -1359,6 +1389,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_OWNER_clientGHI_serverGHI() {
 
         $resultMerge = TmKeyManager::mergeJsonKeys(
@@ -1398,6 +1429,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_validInput_clientGHIDEF_serverGHI() {
         $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_GHI_DEF,
@@ -1434,6 +1466,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_validInput_clientABC_serverABC() {
         $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_ABC,
@@ -1460,6 +1493,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_validInput_clientDEF_serverABC() {
 
         /*
@@ -1488,6 +1522,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF_anonymous() {
 
         //ABC Key and GHI key already present in job, they can not be modified by an anonymous user
@@ -1507,6 +1542,7 @@ class TmKeyManagementTest extends AbstractTest {
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF() {
 
         $db = Database::obtain();
@@ -1600,6 +1636,7 @@ class TmKeyManagementTest extends AbstractTest {
     /**
      * @throws Exception
      */
+    #[Test]
     public function testOrdering_1() {
 
         //CLIENT changes the position of a key upward and remove a key, also change permissions, add a name
@@ -1697,6 +1734,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testUniqueKeys() {
 
         $client_json = '[
@@ -1728,6 +1766,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
+    #[Test]
     public function testJsonSerialization() {
 
         $client_json = '[{"key":"0000123MNO","name":"My MNO","r":1,"w":0}]';
@@ -1743,6 +1782,7 @@ class TmKeyManagementTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function ownerKeysShouldBeAList() {
 
         if ( !function_exists( 'array_is_list' ) ) {

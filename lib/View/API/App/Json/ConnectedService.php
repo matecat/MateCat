@@ -50,7 +50,7 @@ class ConnectedService {
 
         return [
                 'id'                 => (int)$item->id,
-                'uid'                => (int)$item->uid,
+                'uid'                => $item->uid,
                 'service'            => $item->service,
                 'email'              => $item->email,
                 'name'               => $item->name,

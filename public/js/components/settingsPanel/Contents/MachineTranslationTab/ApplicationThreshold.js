@@ -19,10 +19,10 @@ export const ApplicationThreshold = () => {
         <div className="mt-quality-value-label">
           <h4>Application threshold</h4>
           <p>
-            Defines the value and position of MT compared to TM matches. At 85%,
-            MT pre-populates segments unless TM matches
+            Defines the value of MT compared to TM matches.
             <br />
-            exceed this value.{' '}
+            At 85%, MT pre-populates segments unless available TM matches exceed
+            this value.{' '}
             <a
               href="https://guides.matecat.com/mt-settings#MT-application-threshold"
               target="_blank"

@@ -7,7 +7,8 @@ use Model\Exceptions\NotFoundException;
 use Model\Translations\SegmentTranslationStruct;
 use ReflectionException;
 
-class ChunkDao extends AbstractDao {
+class ChunkDao extends AbstractDao
+{
 
     /**
      * @param int    $id_job
@@ -18,16 +19,15 @@ class ChunkDao extends AbstractDao {
      * @throws NotFoundException
      * @throws ReflectionException
      */
-    public static function getByIdAndPassword( int $id_job, string $password, int $ttl = 0 ): JobStruct {
+    public static function getByIdAndPassword(int $id_job, string $password, int $ttl = 0): JobStruct
+    {
+        $fetched = JobDao::getByIdAndPassword($id_job, $password, $ttl);
 
-        $fetched = JobDao::getByIdAndPassword( $id_job, $password, $ttl );
-
-        if ( empty( $fetched ) ) {
-            throw new NotFoundException( 'Job not found' );
+        if (empty($fetched)) {
+            throw new NotFoundException('Job not found');
         } else {
             return $fetched;
         }
-
     }
 
     /**
@@ -37,8 +37,9 @@ class ChunkDao extends AbstractDao {
      * @return JobStruct
      * @throws ReflectionException
      */
-    public static function getBySegmentTranslation( SegmentTranslationStruct $translation, int $ttl = 0 ): JobStruct {
-        return JobDao::getBySegmentTranslation( $translation, $ttl );
+    public static function getBySegmentTranslation(SegmentTranslationStruct $translation, int $ttl = 0): JobStruct
+    {
+        return JobDao::getBySegmentTranslation($translation, $ttl);
     }
 
     /**
@@ -49,8 +50,9 @@ class ChunkDao extends AbstractDao {
      * @return JobStruct[]
      * @throws ReflectionException
      */
-    public static function getByJobID( int $id_job, int $ttl = 0 ): array {
-        return JobDao::getById( $id_job, $ttl );
+    public static function getByJobID(int $id_job, int $ttl = 0): array
+    {
+        return JobDao::getById($id_job, $ttl);
     }
 
     /**
@@ -60,8 +62,9 @@ class ChunkDao extends AbstractDao {
      * @return JobStruct[]
      * @throws ReflectionException
      */
-    public function getByProjectID( int $id_project, int $ttl = 0 ): array {
-        return JobDao::getByProjectId( $id_project, $ttl );
+    public function getByProjectID(int $id_project, int $ttl = 0): array
+    {
+        return JobDao::getByProjectId($id_project, $ttl);
     }
 
     /**
@@ -72,8 +75,9 @@ class ChunkDao extends AbstractDao {
      * @return JobStruct[]
      * @throws ReflectionException
      */
-    public static function getByIdProjectAndIdJob( int $id_project, int $id_job, int $ttl = 0 ): array {
-        return JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl );
+    public static function getByIdProjectAndIdJob(int $id_project, int $id_job, int $ttl = 0): array
+    {
+        return JobDao::getByIdProjectAndIdJob($id_project, $id_job, $ttl);
     }
 
 }

@@ -18,7 +18,8 @@ use Model\DataAccess\IDaoStruct;
  * @property int    $version_number
  * @property int    $source_page
  */
-class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
 
     /**
      * @var int

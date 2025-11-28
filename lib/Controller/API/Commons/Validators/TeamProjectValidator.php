@@ -12,7 +12,8 @@ namespace Controller\API\Commons\Validators;
 use Model\Exceptions\NotFoundException;
 use Model\Projects\ProjectStruct;
 
-class TeamProjectValidator extends Base {
+class TeamProjectValidator extends Base
+{
 
     /**
      * @var ProjectStruct
@@ -22,12 +23,11 @@ class TeamProjectValidator extends Base {
     /**
      * @throws NotFoundException
      */
-    public function _validate(): void {
-
-        if ( empty( $this->project ) || empty( $this->project->id ) ) {
-            throw new NotFoundException( "Not Found", 404 );
+    public function _validate(): void
+    {
+        if (empty($this->project) || empty($this->project->id)) {
+            throw new NotFoundException("Not Found", 404);
         }
-
     }
 
     /**
@@ -35,7 +35,8 @@ class TeamProjectValidator extends Base {
      *
      * @return TeamProjectValidator
      */
-    public function setProject( ProjectStruct $project ): TeamProjectValidator {
+    public function setProject(ProjectStruct $project): TeamProjectValidator
+    {
         $this->project = $project;
 
         return $this;

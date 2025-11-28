@@ -8,6 +8,7 @@
  */
 
 use Model\Xliff\DTO\DefaultRule;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 class DefaultRuleTest extends AbstractTest {
@@ -16,6 +17,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testStateQualifiers() {
 
         $stateQualifiers = [
@@ -62,6 +64,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testTranslatedWithState() {
 
         // needs-review-adaptation is considered translated
@@ -79,6 +82,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testTranslatedWithStateQualifier() {
 
         $rule = new DefaultRule( [ 'translated' ], 'pre-translated' );
@@ -95,6 +99,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testTranslatedWithNoStates_old_behaviour() {
 
         $rule = new DefaultRule( [], 'pre-translated' );
@@ -111,6 +116,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testNewWithNoStates_old_behaviour() {
 
         $rule = new DefaultRule( [], 'pre-translated' );
@@ -123,6 +129,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testNew_exception() {
 
         $this->expectException( LogicException::class );
@@ -137,6 +144,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testNewWithStateQualifier() {
 
         $rule = new DefaultRule( [ 'fuzzy-match' ], 'pre-translated' );
@@ -149,6 +157,7 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    #[Test]
     public function testNewWithState() {
 
         $rule = new DefaultRule( [ 'initial' ], 'pre-translated' );

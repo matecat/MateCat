@@ -18,7 +18,7 @@ use Utils\LQA\QA;
  *
  * @author domenico
  */
-class Tests_TagPositionTest extends AbstractTest {
+class TagPositionTest extends AbstractTest {
 
     /** @var MateCatFilter */
     protected $filter;
@@ -42,6 +42,9 @@ class Tests_TagPositionTest extends AbstractTest {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function testTagPositionCheck_1() {
 
         $source_seg = <<<TRG
@@ -58,6 +61,8 @@ SRC;
 
         $check = new QA( $source_seg, $target_seg );
         $check->setFeatureSet( $this->featureSet );
+        $check->setSourceSegLang( 'en-EN' );
+        $check->setTargetSegLang( 'it-IT' );
         $check->performConsistencyCheck();
 
         $this->assertTrue( $check->thereAreWarnings() );
@@ -72,6 +77,9 @@ SRC;
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function testTagPositionCheck_2() {
 
         $source_seg = <<<TRG
@@ -88,6 +96,8 @@ SRC;
 
         $check = new QA( $source_seg, $target_seg );
         $check->setFeatureSet( $this->featureSet );
+        $check->setSourceSegLang( 'en-EN' );
+        $check->setTargetSegLang( 'it-IT' );
         $check->performConsistencyCheck();
 
         $this->assertTrue( $check->thereAreWarnings() );
@@ -121,6 +131,8 @@ SRC;
 
         $check = new QA( $source_seg, $target_seg );
         $check->setFeatureSet( $this->featureSet );
+        $check->setSourceSegLang( 'en-EN' );
+        $check->setTargetSegLang( 'it-IT' );
         $check->performConsistencyCheck();
 
         $this->assertTrue( $check->thereAreWarnings() );
@@ -135,6 +147,9 @@ SRC;
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function testTagPositionHardNesting_2() {
 
         $source_seg = <<<SRC
@@ -151,6 +166,8 @@ TRG;
 
         $check = new QA( $source_seg, $target_seg );
         $check->setFeatureSet( $this->featureSet );
+        $check->setSourceSegLang( 'en-EN' );
+        $check->setTargetSegLang( 'it-IT' );
         $check->performConsistencyCheck();
 
         $this->assertTrue( $check->thereAreWarnings() );

@@ -13,7 +13,8 @@ namespace Model\Jobs;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class WarningsCountStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class WarningsCountStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public int    $count;
     public int    $id_job;

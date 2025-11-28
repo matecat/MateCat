@@ -3,9 +3,9 @@
 namespace unit\Model\DataAccess;
 
 use Model\DataAccess\RecursiveArrayCopy;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class RecursiveArrayCopyTest extends TestCase {
+class RecursiveArrayCopyTest extends AbstractTest {
     use RecursiveArrayCopy;
 
     public function testToArrayWithPublicProperties() {

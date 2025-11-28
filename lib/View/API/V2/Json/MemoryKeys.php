@@ -11,43 +11,42 @@ namespace View\API\V2\Json;
 
 use Model\TmKeyManagement\MemoryKeyStruct;
 
-class MemoryKeys {
+class MemoryKeys
+{
 
     /**
      * @var MemoryKeyStruct[]
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Project constructor.
      *
      * @param MemoryKeyStruct[] $data
      */
-    public function __construct( array $data = [] ) {
+    public function __construct(array $data = [])
+    {
         $this->data = $data;
     }
 
-    public static function renderItem( MemoryKeyStruct $keyStruct ) {
-
-
+    public static function renderItem(MemoryKeyStruct $keyStruct): array
+    {
         return [
                 'key'  => $keyStruct->tm_key->key,
                 'name' => $keyStruct->tm_key->name
         ];
-
     }
 
-    public function render() {
+    public function render(): array
+    {
         $out = [];
-        foreach ( $this->data as $keyStruct ) {
-
+        foreach ($this->data as $keyStruct) {
             $keyType = 'private_keys';
-            if ( $keyStruct->tm_key->isShared() ) {
+            if ($keyStruct->tm_key->isShared()) {
                 $keyType = 'shared_keys';
             }
 
-            $out[ $keyType ][] = $this->renderItem( $keyStruct );
-
+            $out[ $keyType ][] = $this->renderItem($keyStruct);
         }
 
         return $out;

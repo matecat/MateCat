@@ -22,14 +22,14 @@ export const LaraOptions = ({isCattoolPage}) => {
         <div>
           <h3>Pre-translate files</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to automatically translate project files during the
+            analysis phase. Pre-translation may generate additional charges from
+            your MT provider.
           </p>
         </div>
         <Controller
           control={control}
-          name="pre_translate_files"
+          name="enable_mt_analysis"
           disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Switch
@@ -41,6 +41,7 @@ export const LaraOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
+      <h2>Glossaries</h2>
       <LaraGlossary
         id={currentProjectTemplate.mt.id}
         {...{setGlossaries, isCattoolPage}}

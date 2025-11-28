@@ -22,18 +22,21 @@ use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 
-class Utils {
+class Utils
+{
 
-    public static function getSourcePageFromReferer(): int {
-        return self::returnSourcePageAsInt( parse_url( $_SERVER[ 'HTTP_REFERER' ] ?? null ) );
+    public static function getSourcePageFromReferer(): int
+    {
+        return self::returnSourcePageAsInt(parse_url($_SERVER[ 'HTTP_REFERER' ] ?? null));
     }
 
 
     /**
      * @return int
      */
-    public static function getSourcePage(): int {
-        return self::returnSourcePageAsInt( parse_url( $_SERVER[ 'REQUEST_URI' ] ?? null ) );
+    public static function getSourcePage(): int
+    {
+        return self::returnSourcePageAsInt(parse_url($_SERVER[ 'REQUEST_URI' ] ?? null));
     }
 
     /**
@@ -41,22 +44,23 @@ class Utils {
      *
      * @return int
      */
-    private static function returnSourcePageAsInt( array $url ): int {
+    private static function returnSourcePageAsInt(array $url): int
+    {
         $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE;
 
-        if ( !isset( $url[ 'path' ] ) ) {
+        if (!isset($url[ 'path' ])) {
             return $sourcePage;
         }
 
         // this regex matches /revise /revise[2-9]
-        preg_match( '/revise([2-9]|\'\')?\//', $url[ 'path' ], $matches );
+        preg_match('/revise([2-9]|\'\')?\//', $url[ 'path' ], $matches);
 
-        if ( count( $matches ) === 1 ) { // [0] => revise/
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage( SourcePages::SOURCE_PAGE_TRANSLATE );
+        if (count($matches) === 1) { // [0] => revise/
+            $sourcePage = ReviewUtils::revisionNumberToSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
         }
 
-        if ( count( $matches ) > 1 ) { // [0] => revise2/ [1] => 2
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage( $matches[ 1 ] );
+        if (count($matches) > 1) { // [0] => revise2/ [1] => 2
+            $sourcePage = ReviewUtils::revisionNumberToSourcePage($matches[ 1 ]);
         }
 
         return $sourcePage;
@@ -67,10 +71,10 @@ class Utils {
      *
      * @return array
      */
-    static public function getBrowser( ?string $agent = null ): array {
-
+    static public function getBrowser(?string $agent = null): array
+    {
         // handle Undefined index: HTTP_USER_AGENT
-        if ( !isset( $_SERVER[ 'HTTP_USER_AGENT' ] ) && empty( $agent ) ) {
+        if (!isset($_SERVER[ 'HTTP_USER_AGENT' ]) && empty($agent)) {
             return [
                     'userAgent' => null,
                     'name'      => null,
@@ -80,26 +84,26 @@ class Utils {
         }
 
         $u_agent = $agent;
-        if ( empty( $u_agent ) ) {
+        if (empty($u_agent)) {
             $u_agent = $_SERVER[ 'HTTP_USER_AGENT' ];
         }
 
         //First get the platform?
-        if ( preg_match( '/linux/i', $u_agent ) ) {
+        if (preg_match('/linux/i', $u_agent)) {
             $platform = 'Linux';
-            if ( preg_match( '/android/i', $u_agent ) ) {
+            if (preg_match('/android/i', $u_agent)) {
                 $platform = 'Android';
             }
-        } elseif ( preg_match( '/macintosh|mac os x/i', $u_agent ) ) {
+        } elseif (preg_match('/macintosh|mac os x/i', $u_agent)) {
             $platform = 'MacOSX';
-            if ( preg_match( '/iphone/i', $u_agent ) ) {
+            if (preg_match('/iphone/i', $u_agent)) {
                 $platform = 'iOS';
-            } elseif ( preg_match( '/ipad/i', $u_agent ) ) {
+            } elseif (preg_match('/ipad/i', $u_agent)) {
                 $platform = 'ipadOS';
             }
-        } elseif ( preg_match( '/windows|win32/i', $u_agent ) ) {
+        } elseif (preg_match('/windows|win32/i', $u_agent)) {
             $platform = 'Windows';
-            if ( preg_match( '/phone/i', $u_agent ) ) {
+            if (preg_match('/phone/i', $u_agent)) {
                 $platform = 'Windows Phone';
             }
         } else {
@@ -107,28 +111,28 @@ class Utils {
         }
 
         // Next get the name of the useragent, yes separately and for good reason
-        if ( preg_match( '/MSIE/i', $u_agent ) && !preg_match( '/Opera|OPR/i', $u_agent ) ) {
+        if (preg_match('/MSIE/i', $u_agent) && !preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Internet Explorer';
             $ub          = "MSIE";
-        } elseif ( preg_match( '|Edg.*?/|i', $u_agent ) && $platform != 'ipadOS' ) {
+        } elseif (preg_match('|Edg.*?/|i', $u_agent) && $platform != 'ipadOS') {
             $browserName = 'Microsoft Edge';
             $ub          = "Edg.*?";
-        } elseif ( preg_match( '/Trident/i', $u_agent ) || preg_match( '/IEMobile/i', $u_agent ) ) {
+        } elseif (preg_match('/Trident/i', $u_agent) || preg_match('/IEMobile/i', $u_agent)) {
             $browserName = 'Internet Explorer Mobile';
             $ub          = "IEMobile";
-        } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
+        } elseif (preg_match('/Firefox/i', $u_agent)) {
             $browserName = 'Mozilla Firefox';
             $ub          = "Firefox";
-        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/Opera|OPR/i', $u_agent ) ) {
+        } elseif (preg_match('/Chrome/i', $u_agent) and !preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Google Chrome';
             $ub          = "Chrome";
-        } elseif ( preg_match( '/Opera|OPR/i', $u_agent ) ) {
+        } elseif (preg_match('/Opera|OPR/i', $u_agent)) {
             $browserName = 'Opera';
             $ub          = "Opera";
-        } elseif ( preg_match( '/Safari/i', $u_agent ) || preg_match( '/applewebkit.*\(.*khtml.*like.*gecko.*\).*mobile.*$/i', $u_agent ) ) {
+        } elseif (preg_match('/Safari/i', $u_agent) || preg_match('/applewebkit.*\(.*khtml.*like.*gecko.*\).*mobile.*$/i', $u_agent)) {
             $browserName = 'Apple Safari';
             $ub          = "Safari|Version";
-            if ( $platform == 'iOS' || preg_match( '/Mobile/i', $u_agent ) ) {
+            if ($platform == 'iOS' || preg_match('/Mobile/i', $u_agent)) {
                 $browserName = 'Mobile Safari';
             }
         } else {
@@ -136,31 +140,29 @@ class Utils {
             $ub          = "Unknown";
         }
         // finally, get the correct version number
-        $known   = [ 'Version', $ub, 'other' ];
-        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z._]*)#i';
-        if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
+        $known   = ['Version', $ub, 'other'];
+        $pattern = '#(?<browser>' . join('|', $known) . ')[/ ]+(?<version>[0-9.|a-zA-Z._]*)#i';
+        if (!preg_match_all($pattern, $u_agent, $matches)) {
             // we have no matching number, continue
         }
 
         // see how many we have
-        $i = count( $matches[ 'browser' ] );
-        if ( $i > 1 ) {
-
+        $i = count($matches[ 'browser' ]);
+        if ($i > 1) {
             //we will have two since we are not using 'other' argument yet
             //see if the version is before or after the name
             //if it is before then use the name's version
-            if ( strtolower( $matches[ 'browser' ][ 0 ] ) == 'version' && strtolower( $matches[ 'browser' ][ 1 ] ) != 'safari' ) {
+            if (strtolower($matches[ 'browser' ][ 0 ]) == 'version' && strtolower($matches[ 'browser' ][ 1 ]) != 'safari') {
                 $version = $matches[ 'version' ][ 1 ] ?? null;
             } else {
                 $version = $matches[ 'version' ][ 0 ] ?? null;
             }
-
         } else {
             $version = $matches[ 'version' ][ 0 ] ?? null;
         }
 
         // check if we have a number
-        if ( $version == null || $version == "" ) {
+        if ($version == null || $version == "") {
             $version = "?";
         }
 
@@ -177,64 +179,478 @@ class Utils {
      *
      * @return string
      */
-    public static function friendly_slug( $string ): string {
+    public static function friendly_slug($string): string
+    {
         // everything to lower and no spaces begin or end
-        $string = strtolower( trim( $string ) );
+        $string = strtolower(trim($string));
 
         //replace accent characters, depends on your language is needed
-        $string = Utils::replace_accents( $string );
+        $string = Utils::replace_accents($string);
 
         // adding - for spaces and union characters
-        $find   = [ ' ', '&', '\r\n', '\n', '+', ',' ];
-        $string = str_replace( $find, '-', $string );
+        $find   = [' ', '&', '\r\n', '\n', '+', ','];
+        $string = str_replace($find, '-', $string);
 
         // transliterate string
-        $string = Transliterator::transliterate( $string );
+        $string = Transliterator::transliterate($string);
 
         // avoid empty strings
-        if ( empty( $string ) ) {
+        if (empty($string)) {
             $string = "-";
         }
 
         //delete and replace rest of special chars
-        $find = [ '/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/' ];
-        $repl = [ '', '-', '' ];
+        $find = ['/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/'];
+        $repl = ['', '-', ''];
 
         //return the friendly url
-        return preg_replace( $find, $repl, $string );
+        return preg_replace($find, $repl, $string);
     }
 
-    public static function replace_accents( $var ): string { //replace it for accents catalan spanish and more
+    public static function replace_accents($var): string
+    { //replace it for accents catalan spanish and more
         $a = [
-                'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ',
-                'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď',
-                'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ',
-                'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś',
-                'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ',
-                'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ'
+                'À',
+                'Á',
+                'Â',
+                'Ã',
+                'Ä',
+                'Å',
+                'Æ',
+                'Ç',
+                'È',
+                'É',
+                'Ê',
+                'Ë',
+                'Ì',
+                'Í',
+                'Î',
+                'Ï',
+                'Ð',
+                'Ñ',
+                'Ò',
+                'Ó',
+                'Ô',
+                'Õ',
+                'Ö',
+                'Ø',
+                'Ù',
+                'Ú',
+                'Û',
+                'Ü',
+                'Ý',
+                'ß',
+                'à',
+                'á',
+                'â',
+                'ã',
+                'ä',
+                'å',
+                'æ',
+                'ç',
+                'è',
+                'é',
+                'ê',
+                'ë',
+                'ì',
+                'í',
+                'î',
+                'ï',
+                'ñ',
+                'ò',
+                'ó',
+                'ô',
+                'õ',
+                'ö',
+                'ø',
+                'ù',
+                'ú',
+                'û',
+                'ü',
+                'ý',
+                'ÿ',
+                'Ā',
+                'ā',
+                'Ă',
+                'ă',
+                'Ą',
+                'ą',
+                'Ć',
+                'ć',
+                'Ĉ',
+                'ĉ',
+                'Ċ',
+                'ċ',
+                'Č',
+                'č',
+                'Ď',
+                'ď',
+                'Đ',
+                'đ',
+                'Ē',
+                'ē',
+                'Ĕ',
+                'ĕ',
+                'Ė',
+                'ė',
+                'Ę',
+                'ę',
+                'Ě',
+                'ě',
+                'Ĝ',
+                'ĝ',
+                'Ğ',
+                'ğ',
+                'Ġ',
+                'ġ',
+                'Ģ',
+                'ģ',
+                'Ĥ',
+                'ĥ',
+                'Ħ',
+                'ħ',
+                'Ĩ',
+                'ĩ',
+                'Ī',
+                'ī',
+                'Ĭ',
+                'ĭ',
+                'Į',
+                'į',
+                'İ',
+                'ı',
+                'Ĳ',
+                'ĳ',
+                'Ĵ',
+                'ĵ',
+                'Ķ',
+                'ķ',
+                'Ĺ',
+                'ĺ',
+                'Ļ',
+                'ļ',
+                'Ľ',
+                'ľ',
+                'Ŀ',
+                'ŀ',
+                'Ł',
+                'ł',
+                'Ń',
+                'ń',
+                'Ņ',
+                'ņ',
+                'Ň',
+                'ň',
+                'ŉ',
+                'Ō',
+                'ō',
+                'Ŏ',
+                'ŏ',
+                'Ő',
+                'ő',
+                'Œ',
+                'œ',
+                'Ŕ',
+                'ŕ',
+                'Ŗ',
+                'ŗ',
+                'Ř',
+                'ř',
+                'Ś',
+                'ś',
+                'Ŝ',
+                'ŝ',
+                'Ş',
+                'ş',
+                'Š',
+                'š',
+                'Ţ',
+                'ţ',
+                'Ť',
+                'ť',
+                'Ŧ',
+                'ŧ',
+                'Ũ',
+                'ũ',
+                'Ū',
+                'ū',
+                'Ŭ',
+                'ŭ',
+                'Ů',
+                'ů',
+                'Ű',
+                'ű',
+                'Ų',
+                'ų',
+                'Ŵ',
+                'ŵ',
+                'Ŷ',
+                'ŷ',
+                'Ÿ',
+                'Ź',
+                'ź',
+                'Ż',
+                'ż',
+                'Ž',
+                'ž',
+                'ſ',
+                'ƒ',
+                'Ơ',
+                'ơ',
+                'Ư',
+                'ư',
+                'Ǎ',
+                'ǎ',
+                'Ǐ',
+                'ǐ',
+                'Ǒ',
+                'ǒ',
+                'Ǔ',
+                'ǔ',
+                'Ǖ',
+                'ǖ',
+                'Ǘ',
+                'ǘ',
+                'Ǚ',
+                'ǚ',
+                'Ǜ',
+                'ǜ',
+                'Ǻ',
+                'ǻ',
+                'Ǽ',
+                'ǽ',
+                'Ǿ',
+                'ǿ'
         ];
         $b = [
-                'A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a',
-                'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C',
-                'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i',
-                'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R',
-                'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z',
-                'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o'
+                'A',
+                'A',
+                'A',
+                'A',
+                'A',
+                'A',
+                'AE',
+                'C',
+                'E',
+                'E',
+                'E',
+                'E',
+                'I',
+                'I',
+                'I',
+                'I',
+                'D',
+                'N',
+                'O',
+                'O',
+                'O',
+                'O',
+                'O',
+                'O',
+                'U',
+                'U',
+                'U',
+                'U',
+                'Y',
+                's',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'ae',
+                'c',
+                'e',
+                'e',
+                'e',
+                'e',
+                'i',
+                'i',
+                'i',
+                'i',
+                'n',
+                'o',
+                'o',
+                'o',
+                'o',
+                'o',
+                'o',
+                'u',
+                'u',
+                'u',
+                'u',
+                'y',
+                'y',
+                'A',
+                'a',
+                'A',
+                'a',
+                'A',
+                'a',
+                'C',
+                'c',
+                'C',
+                'c',
+                'C',
+                'c',
+                'C',
+                'c',
+                'D',
+                'd',
+                'D',
+                'd',
+                'E',
+                'e',
+                'E',
+                'e',
+                'E',
+                'e',
+                'E',
+                'e',
+                'E',
+                'e',
+                'G',
+                'g',
+                'G',
+                'g',
+                'G',
+                'g',
+                'G',
+                'g',
+                'H',
+                'h',
+                'H',
+                'h',
+                'I',
+                'i',
+                'I',
+                'i',
+                'I',
+                'i',
+                'I',
+                'i',
+                'I',
+                'i',
+                'IJ',
+                'ij',
+                'J',
+                'j',
+                'K',
+                'k',
+                'L',
+                'l',
+                'L',
+                'l',
+                'L',
+                'l',
+                'L',
+                'l',
+                'l',
+                'l',
+                'N',
+                'n',
+                'N',
+                'n',
+                'N',
+                'n',
+                'n',
+                'O',
+                'o',
+                'O',
+                'o',
+                'O',
+                'o',
+                'OE',
+                'oe',
+                'R',
+                'r',
+                'R',
+                'r',
+                'R',
+                'r',
+                'S',
+                's',
+                'S',
+                's',
+                'S',
+                's',
+                'S',
+                's',
+                'T',
+                't',
+                'T',
+                't',
+                'T',
+                't',
+                'U',
+                'u',
+                'U',
+                'u',
+                'U',
+                'u',
+                'U',
+                'u',
+                'U',
+                'u',
+                'U',
+                'u',
+                'W',
+                'w',
+                'Y',
+                'y',
+                'Y',
+                'Z',
+                'z',
+                'Z',
+                'z',
+                'Z',
+                'z',
+                's',
+                'f',
+                'O',
+                'o',
+                'U',
+                'u',
+                'A',
+                'a',
+                'I',
+                'i',
+                'O',
+                'o',
+                'U',
+                'u',
+                'U',
+                'u',
+                'U',
+                'u',
+                'U',
+                'u',
+                'U',
+                'u',
+                'A',
+                'a',
+                'AE',
+                'ae',
+                'O',
+                'o'
         ];
 
-        return str_replace( $a, $b, $var );
+        return str_replace($a, $b, $var);
     }
 
-    public static function encryptPass( $clear_pass, $salt ): string {
-        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET );
+    public static function encryptPass($clear_pass, $salt): string
+    {
+        $pepperedPass = hash_hmac("sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET);
 
-        return password_hash( $pepperedPass, PASSWORD_DEFAULT );
+        return password_hash($pepperedPass, PASSWORD_DEFAULT);
     }
 
-    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ): bool {
-        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET );
+    public static function verifyPass($clear_pass, $salt, $db_hashed_pass): bool
+    {
+        $pepperedPass = hash_hmac("sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET);
 
-        return password_verify( $pepperedPass, $db_hashed_pass );
+        return password_verify($pepperedPass, $db_hashed_pass);
     }
 
     /**
@@ -248,27 +664,26 @@ class Utils {
      * @param int  $maxlength
      * @param bool $more_entropy
      *
-     * @return bool|string
+     * @return string
      */
-    public static function randomString( int $maxlength = 12, bool $more_entropy = false ): string {
+    public static function randomString(int $maxlength = 12, bool $more_entropy = false): string
+    {
+        $_pwd = md5(uniqid('', true));
 
-        $_pwd = md5( uniqid( '', true ) );
-
-        if ( $more_entropy ) {
-            $_pwd = base64_encode( $_pwd ); //we want more characters not only [0-9a-f]
+        if ($more_entropy) {
+            $_pwd = base64_encode($_pwd); //we want more characters not only [0-9a-f]
         }
 
-        $pwd = substr( $_pwd, 0, 6 ) . substr( $_pwd, -8, 6 ); //exclude last 2 char2 because they can be == sign
+        $pwd = substr($_pwd, 0, 6) . substr($_pwd, -8, 6); //exclude last 2 char2 because they can be == sign
 
-        if ( $maxlength > 12 ) {
-            while ( strlen( $pwd ) < $maxlength ) {
+        if ($maxlength > 12) {
+            while (strlen($pwd) < $maxlength) {
                 $pwd .= self::randomString();
             }
-            $pwd = substr( $pwd, 0, $maxlength );
+            $pwd = substr($pwd, 0, $maxlength);
         }
 
         return $pwd;
-
     }
 
     /**
@@ -276,16 +691,16 @@ class Utils {
      *
      * @return bool
      */
-    public static function isJson( $string ): bool {
-        json_decode( $string );
-
-        return json_last_error() === JSON_ERROR_NONE;
+    public static function isJson($string): bool
+    {
+        return json_validate($string);
     }
 
-    public static function mysqlTimestamp( $time ): string {
-        $date = date( 'Y-m-d H:i:s', $time );
-        if ( !$date ) {
-            $date = date( 'Y-m-d H:i:s', time() );
+    public static function mysqlTimestamp($time): string
+    {
+        $date = date('Y-m-d H:i:s', $time);
+        if (!$date) {
+            $date = date('Y-m-d H:i:s', time());
         }
 
         return $date;
@@ -294,18 +709,20 @@ class Utils {
     /**
      * @throws Exception
      */
-    public static function api_timestamp( $date_string ): ?string {
-        if ( $date_string == null ) {
+    public static function api_timestamp($date_string): ?string
+    {
+        if ($date_string == null) {
             return null;
         } else {
-            $datetime = new DateTime( $date_string );
+            $datetime = new DateTime($date_string);
 
-            return $datetime->format( 'c' );
+            return $datetime->format('c');
         }
     }
 
-    public static function underscoreToCamelCase( $string ): string {
-        return str_replace( ' ', '', ucwords( str_replace( '_', ' ', $string ) ) );
+    public static function underscoreToCamelCase($string): string
+    {
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
     }
 
     /**
@@ -313,8 +730,9 @@ class Utils {
      *
      * @return string
      */
-    public static function trimAndLowerCase( $string ): string {
-        return trim( strtolower( $string ) );
+    public static function trimAndLowerCase($string): string
+    {
+        return trim(strtolower($string));
     }
 
     /**
@@ -324,16 +742,15 @@ class Utils {
      *
      * @return array
      */
-    public static function removeEmptyStringFromTail( array $array ): array {
+    public static function removeEmptyStringFromTail(array $array): array
+    {
+        if (end($array) === '') {
+            array_pop($array);
 
-        if ( end( $array ) === '' ) {
-            array_pop( $array );
-
-            return self::removeEmptyStringFromTail( $array );
+            return self::removeEmptyStringFromTail($array);
         }
 
         return $array;
-
     }
 
     /**
@@ -343,17 +760,18 @@ class Utils {
      * @return array
      * @throws Exception
      */
-    public static function ensure_keys( array $params, array $required_keys ): array {
+    public static function ensure_keys(array $params, array $required_keys): array
+    {
         $missing = [];
 
-        foreach ( $required_keys as $key ) {
-            if ( !array_key_exists( $key, $params ) ) {
+        foreach ($required_keys as $key) {
+            if (!array_key_exists($key, $params)) {
                 $missing[] = $key;
             }
         }
 
-        if ( count( $missing ) > 0 ) {
-            throw new Exception( "Missing keys: " . implode( ', ', $missing ) );
+        if (count($missing) > 0) {
+            throw new Exception("Missing keys: " . implode(', ', $missing));
         }
 
         return $params;
@@ -362,20 +780,22 @@ class Utils {
     /**
      * @return string|null
      */
-    public static function getRealIpAddr(): ?string {
-
-        foreach ( [
-                          'HTTP_CLIENT_IP',
-                          'HTTP_X_FORWARDED_FOR',
-                          'HTTP_X_FORWARDED',
-                          'HTTP_X_CLUSTER_CLIENT_IP',
-                          'HTTP_FORWARDED_FOR',
-                          'HTTP_FORWARDED',
-                          'REMOTE_ADDR'
-                  ] as $key ) {
-            if ( isset( $_SERVER[ $key ] ) ) {
-                foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
-                    if ( filter_var( trim( $ip ), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 ) !== false ) {
+    public static function getRealIpAddr(): ?string
+    {
+        foreach (
+                [
+                        'HTTP_CLIENT_IP',
+                        'HTTP_X_FORWARDED_FOR',
+                        'HTTP_X_FORWARDED',
+                        'HTTP_X_CLUSTER_CLIENT_IP',
+                        'HTTP_FORWARDED_FOR',
+                        'HTTP_FORWARDED',
+                        'REMOTE_ADDR'
+                ] as $key
+        ) {
+            if (isset($_SERVER[ $key ])) {
+                foreach (explode(',', $_SERVER[ $key ]) as $ip) {
+                    if (filter_var(trim($ip), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) !== false) {
                         return $ip;
                     }
                 }
@@ -383,55 +803,52 @@ class Utils {
         }
 
         return null;
-
     }
 
     /**
      * @throws Exception
      */
-    public static function sendErrMailReport( string $htmlContent, string $subject = null ): void {
-
-        if ( !AppConfig::$SEND_ERR_MAIL_REPORT ) {
+    public static function sendErrMailReport(string $htmlContent, string $subject = null): void
+    {
+        if (!AppConfig::$SEND_ERR_MAIL_REPORT) {
             return;
         }
 
-        $mailConf = @parse_ini_file( AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true );
+        $mailConf = @parse_ini_file(AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true);
 
-        if ( empty( $subject ) ) {
-            $subject = 'Alert from Matecat: ' . php_uname( 'n' );
+        if (empty($subject)) {
+            $subject = 'Alert from Matecat: ' . php_uname('n');
         } else {
-            $subject .= ' ' . php_uname( 'n' );
+            $subject .= ' ' . php_uname('n');
         }
 
-        $queue_element              = array_merge( [], $mailConf );
+        $queue_element              = array_merge([], $mailConf);
         $queue_element[ 'subject' ] = $subject;
         $queue_element[ 'body' ]    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
-        WorkerClient::enqueue( 'MAIL', ErrMailWorker::class, $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        WorkerClient::enqueue('MAIL', ErrMailWorker::class, $queue_element, ['persistent' => WorkerClient::$_HANDLER->persistent]);
 
-        LoggerFactory::doJsonLog( 'Message has been sent' );
-
+        LoggerFactory::doJsonLog('Message has been sent');
     }
 
-    protected static function _getBackTrace(): string {
-
+    protected static function _getBackTrace(): string
+    {
         $trace = debug_backtrace();
-        $now   = date( 'Y-m-d H:i:s' );
+        $now   = date('Y-m-d H:i:s');
 
         $ip = Utils::getRealIpAddr();
 
         $stringDataInfo = "[$now (User IP: $ip)]";
 
-        if ( isset( $trace[ 2 ][ 'class' ] ) ) {
+        if (isset($trace[ 2 ][ 'class' ])) {
             $stringDataInfo .= " " . $trace[ 2 ][ 'class' ] . "-> ";
         }
-        if ( isset( $trace[ 2 ][ 'function' ] ) ) {
+        if (isset($trace[ 2 ][ 'function' ])) {
             $stringDataInfo .= $trace[ 2 ][ 'function' ] . " ";
         }
         $stringDataInfo .= "(line:" . $trace[ 1 ][ 'line' ] . ")";
 
         return $stringDataInfo;
-
     }
 
     /**
@@ -443,25 +860,24 @@ class Utils {
      * @return string|void
      * @throws Exception
      */
-    public static function uuid4() {
-
+    public static function uuid4()
+    {
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
-        if ( PHP_MAJOR_VERSION >= 7 ) {
-            $data = random_bytes( 16 );
+        if (PHP_MAJOR_VERSION >= 7) {
+            $data = random_bytes(16);
         } else {
-            $data = openssl_random_pseudo_bytes( 16 );
+            $data = openssl_random_pseudo_bytes(16);
         }
 
-        assert( strlen( $data ) == 16 );
+        assert(strlen($data) == 16);
 
         // Set version to 0100
-        $data[ 6 ] = chr( ord( $data[ 6 ] ) & 0x0f | 0x40 );
+        $data[ 6 ] = chr(ord($data[ 6 ]) & 0x0f | 0x40);
         // Set bits 6-7 to 10
-        $data[ 8 ] = chr( ord( $data[ 8 ] ) & 0x3f | 0x80 );
+        $data[ 8 ] = chr(ord($data[ 8 ]) & 0x3f | 0x80);
 
         // Output the 36-character UUID.
-        return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
-
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
     /**
@@ -469,8 +885,9 @@ class Utils {
      *
      * @return bool
      */
-    public static function isTokenValid( ?string $token = null ): bool {
-        if ( empty( $token ) || !preg_match( '|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|', $token ) ) {
+    public static function isTokenValid(?string $token = null): bool
+    {
+        if (empty($token) || !preg_match('|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|', $token)) {
             return false;
         }
 
@@ -487,10 +904,11 @@ class Utils {
      *
      * @return string The fixed file name.
      */
-    public static function fixFileName( string $stringName, string $directory = null, bool $upCount = true ): string {
-        $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
-        while ( is_file( $directory . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
-            $string = static::upCountName( $string );
+    public static function fixFileName(string $stringName, string $directory = null, bool $upCount = true): string
+    {
+        $string = filter_var($stringName, FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
+        while (is_file($directory . DIRECTORY_SEPARATOR . $string) && $upCount) {
+            $string = static::upCountName($string);
         }
 
         return $string;
@@ -504,8 +922,9 @@ class Utils {
      *
      * @return string The updated name with the incremented count number.
      */
-    protected static function upCountNameCallback( array $matches ): string {
-        $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
+    protected static function upCountNameCallback(array $matches): string
+    {
+        $index = isset($matches[ 1 ]) ? intval($matches[ 1 ]) + 1 : 1;
         $ext   = $matches[ 2 ] ?? '';
 
         return '_(' . $index . ')' . $ext;
@@ -518,9 +937,13 @@ class Utils {
      *
      * @return string The updated name with the incremented count number.
      */
-    protected static function upCountName( string $name ): string {
+    protected static function upCountName(string $name): string
+    {
         return preg_replace_callback(
-                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ Utils::class, 'upCountNameCallback' ], $name, 1
+                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/',
+                [Utils::class, 'upCountNameCallback'],
+                $name,
+                1
         );
     }
 
@@ -532,52 +955,51 @@ class Utils {
      *
      * @return bool Returns true if the file name is valid, false otherwise.
      */
-    public static function isValidFileName( string $fileUpName ): bool {
-
+    public static function isValidFileName(string $fileUpName): bool
+    {
         if (
-                stripos( $fileUpName, '../' ) !== false ||
-                stripos( $fileUpName, '/../' ) !== false ||
-                stripos( $fileUpName, '/..' ) !== false ||
-                stripos( $fileUpName, '%2E%2E%2F' ) !== false ||
-                stripos( $fileUpName, '%2F%2E%2E%2F' ) !== false ||
-                stripos( $fileUpName, '%2F%2E%2E' ) !== false ||
-                stripos( $fileUpName, '.' ) === 0 ||
-                stripos( $fileUpName, '%2E' ) === 0
+                stripos($fileUpName, '../') !== false ||
+                stripos($fileUpName, '/../') !== false ||
+                stripos($fileUpName, '/..') !== false ||
+                stripos($fileUpName, '%2E%2E%2F') !== false ||
+                stripos($fileUpName, '%2F%2E%2E%2F') !== false ||
+                stripos($fileUpName, '%2F%2E%2E') !== false ||
+                stripos($fileUpName, '.') === 0 ||
+                stripos($fileUpName, '%2E') === 0
         ) {
             //Directory Traversal!
             return false;
         }
 
         return true;
-
     }
 
     /**
      * @param $dirPath
      */
-    public static function deleteDir( $dirPath ) {
+    public static function deleteDir($dirPath): void
+    {
+        if (is_dir($dirPath)) {
+            $iterator = new DirectoryIterator($dirPath);
 
-        if ( is_dir( $dirPath ) ) {
-            $iterator = new DirectoryIterator( $dirPath );
-
-            foreach ( $iterator as $fileInfo ) {
-                if ( $fileInfo->isDot() ) {
+            foreach ($iterator as $fileInfo) {
+                if ($fileInfo->isDot()) {
                     continue;
                 }
-                if ( $fileInfo->isDir() ) {
-                    self::deleteDir( $fileInfo->getPathname() );
+                if ($fileInfo->isDir()) {
+                    self::deleteDir($fileInfo->getPathname());
                 } else {
                     $fileName = $fileInfo->getFilename();
-                    if ( $fileName[ 0 ] == '.' ) {
+                    if ($fileName[ 0 ] == '.') {
                         continue;
                     }
-                    $outcome = unlink( $fileInfo->getPathname() );
-                    if ( !$outcome ) {
-                        LoggerFactory::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
+                    $outcome = unlink($fileInfo->getPathname());
+                    if (!$outcome) {
+                        LoggerFactory::doJsonLog("fail deleting " . $fileInfo->getPathname());
                     }
                 }
             }
-            rmdir( $iterator->getPath() );
+            rmdir($iterator->getPath());
         }
     }
 
@@ -593,43 +1015,45 @@ class Utils {
      * @see        https://www.php.net/manual/en/json.constants.php
      *
      */
-    public static function raiseJsonExceptionError( bool $raise = true ): string {
-
-        if ( function_exists( "json_last_error" ) ) {
+    public static function raiseJsonExceptionError(bool $raise = true): string
+    {
+        if (function_exists("json_last_error")) {
             $error = json_last_error();
-            if ( $raise && $error != JSON_ERROR_NONE ) {
-                throw new Exception( json_last_error_msg(), $error );
+            if ($raise && $error != JSON_ERROR_NONE) {
+                throw new Exception(json_last_error_msg(), $error);
             }
+
             return json_last_error_msg();
         }
 
-        throw new Exception( "json_last_error() function not found" );
-
+        throw new Exception("json_last_error() function not found");
     }
 
     // Previously in FileFormatConverter
     //remove UTF-8 BOM
-    public static function stripFileBOM( $string, $utf = 8 ): string {
+    public static function stripFileBOM($string, $utf = 8): string
+    {
         //depending on encoding, different slices are to be cut
-        switch ( $utf ) {
+        switch ($utf) {
             case 16:
-                $string = substr( $string, 2 );
+                $string = substr($string, 2);
                 break;
             case 32:
-                $string = substr( $string, 4 );
+                $string = substr($string, 4);
                 break;
             case 8:
             default:
-                $string = substr( $string, 3 );
+                $string = substr($string, 3);
                 break;
         }
 
         return $string;
     }
 
-    public static function stripBOM( $string ) {
+    public static function stripBOM(string $string): string
+    {
         //PATCH TO FIX BOM INSERTIONS
-        return str_replace( "\xEF\xBB\xBF", '', $string );
+        return str_replace("\xEF\xBB\xBF", '', $string);
     }
 
     /**
@@ -641,7 +1065,8 @@ class Utils {
      *
      * @return string
      */
-    public static function uploadDirFromSessionCookie( $guid, string $file_name = null ): string {
+    public static function uploadDirFromSessionCookie($guid, string $file_name = null): string
+    {
         return AppConfig::$UPLOAD_REPOSITORY . "/" .
                 $guid . '/' .
                 $file_name;
@@ -652,32 +1077,31 @@ class Utils {
      * @param string   $job_tm_keys
      * @param int|null $uid
      *
-     * @return null|string
+     * @return string
      * @throws Exception
      */
-    public static function changeMemorySuggestionSource( array $match, string $job_tm_keys, ?int $uid = null ): string {
+    public static function changeMemorySuggestionSource(array $match, string $job_tm_keys, ?int $uid = null): string
+    {
         $sug_source = $match[ 'created_by' ];
         $key        = $match[ 'memory_key' ];
 
-        if ( strtolower( $sug_source ) == 'matecat' ) {
+        if (strtolower($sug_source) == 'matecat') {
             // Enter this case if created_by is matecat, we show PUBLIC_TM
             $description = Constants::PUBLIC_TM;
-
-        } elseif ( !empty( $sug_source ) && stripos( $sug_source, "Mymemory" ) === false ) {
-            // This case if for other sources from Match that are public, but we must
+        } elseif (!empty($sug_source) && stripos($sug_source, "Mymemory") === false) {
+            // This case if for other sources from MyMemory that are public, but we must
             // show the specific name of the source.
             $description = $sug_source;
-
-        } elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
+        } elseif (preg_match("/[a-f0-9]{8,}/", $key)) { // md5 Key
             // This condition is for md5 keys
-            $description = self::keyNameFromUserKeyring( $uid, $key );
+            $description = self::keyNameFromUserKeyring($uid, $key);
 
-            if ( empty( $description ) ) {
-                $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
+            if (empty($description)) {
+                $description = self::getDefaultKeyDescription($key, $job_tm_keys);
             }
         }
 
-        if ( empty( $description ) ) {
+        if (empty($description)) {
             $description = Constants::PUBLIC_TM;
         }
 
@@ -687,8 +1111,9 @@ class Utils {
     /**
      * @throws Exception
      */
-    public static function keyNameFromUserKeyring( $uid, $key ): ?string {
-        if ( $uid === null ) {
+    public static function keyNameFromUserKeyring($uid, $key): ?string
+    {
+        if ($uid === null) {
             return null;
         }
 
@@ -698,13 +1123,13 @@ class Utils {
         $memoryKey->tm_key      = new TmKeyStruct();
         $memoryKey->tm_key->key = $key;
 
-        $memoryKeyDao         = new MemoryKeyDao( Database::obtain() );
-        $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
-        if ( count( $currentUserMemoryKey ) > 0 ) {
+        $memoryKeyDao         = new MemoryKeyDao(Database::obtain());
+        $currentUserMemoryKey = $memoryKeyDao->setCacheTTL(3600)->read($memoryKey);
+        if (count($currentUserMemoryKey) > 0) {
             $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
-            $name                 = trim( $currentUserMemoryKey->tm_key->name );
+            $name                 = trim($currentUserMemoryKey->tm_key->name);
 
-            if ( empty( $name ) ) {
+            if (empty($name)) {
                 $name = Constants::NO_DESCRIPTION_TM;
             }
 
@@ -720,24 +1145,24 @@ class Utils {
      * @param string $key
      * @param string $job_tm_keys
      *
-     * @return null|string
+     * @return string
      * @throws Exception
      */
-    public static function getDefaultKeyDescription( string $key, string $job_tm_keys ): string {
-        $ownerKeys   = TmKeyManager::getOwnerKeys( [ $job_tm_keys ] );
+    public static function getDefaultKeyDescription(string $key, string $job_tm_keys): string
+    {
+        $ownerKeys   = TmKeyManager::getOwnerKeys([$job_tm_keys]);
         $description = Constants::NO_DESCRIPTION_TM;
 
         //search the current key
-        for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
-            $name = trim( $ownerKeys[ $i ]->name );
+        for ($i = 0; $i < count($ownerKeys); $i++) {
+            $name = trim($ownerKeys[ $i ]->name);
 
-            if ( $ownerKeys[ $i ]->key == $key && !empty( $name ) ) {
+            if ($ownerKeys[ $i ]->key == $key && !empty($name)) {
                 $description = $ownerKeys[ $i ]->name;
             }
-
         }
 
-        if ( empty( $description ) ) {
+        if (empty($description)) {
             $description = Constants::NO_DESCRIPTION_TM;
         }
 
@@ -752,7 +1177,8 @@ class Utils {
      *
      * @return bool
      */
-    public static function stringsAreEqual( string $stringA, string $stringB ): bool {
+    public static function stringsAreEqual(string $stringA, string $stringB): bool
+    {
         return $stringA == $stringB;
     }
 
@@ -764,8 +1190,9 @@ class Utils {
      *
      * @return string
      */
-    public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ): string {
-        return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
+    public static function htmlentitiesToUft8WithoutDoubleEncoding($string): string
+    {
+        return htmlentities($string, ENT_QUOTES, 'UTF-8', false);
     }
 
     /**
@@ -774,11 +1201,11 @@ class Utils {
      *
      * @return string
      */
-    public static function truncatePhrase( string $phrase, int $max_words ): string {
-
-        $phrase_array = explode( ' ', $phrase );
-        if ( count( $phrase_array ) > $max_words && $max_words > 0 ) {
-            $phrase = implode( ' ', array_slice( $phrase_array, 0, $max_words ) );
+    public static function truncatePhrase(string $phrase, int $max_words): string
+    {
+        $phrase_array = explode(' ', $phrase);
+        if (count($phrase_array) > $max_words && $max_words > 0) {
+            $phrase = implode(' ', array_slice($phrase_array, 0, $max_words));
         }
 
         return $phrase;
@@ -795,40 +1222,41 @@ class Utils {
      *
      * @return string
      */
-    public static function stripTagsPreservingHrefs( string $html ): string {
-        $htmlDom               = new DOMDocument( '1.0', 'UTF-8' );
+    public static function stripTagsPreservingHrefs(string $html): string
+    {
+        $htmlDom               = new DOMDocument('1.0', 'UTF-8');
         $htmlDom->formatOutput = false;
 
-        @$htmlDom->loadHTML( $html );
+        @$htmlDom->loadHTML($html);
 
-        $links  = $htmlDom->getElementsByTagName( 'a' );
-        $images = $htmlDom->getElementsByTagName( 'img' );
+        $links  = $htmlDom->getElementsByTagName('a');
+        $images = $htmlDom->getElementsByTagName('img');
 
         // replace <a> with a label(href)
         /** @var DOMElement $link */
-        foreach ( $links as $link ) {
+        foreach ($links as $link) {
             $linkLabel       = $link->nodeValue;
-            $linkHref        = $link->getAttribute( 'href' );
-            $link->nodeValue = "[" . $linkLabel . "]" . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
+            $linkHref        = $link->getAttribute('href');
+            $link->nodeValue = "[" . $linkLabel . "]" . "(" . str_replace("\\\"", "", $linkHref) . ")";
         }
 
         // replace <img> with src
         $i = $images->length - 1;
-        while ( $i > -1 ) {
-            $image      = $images->item( $i );
-            $src        = $image->getAttribute( 'src' );
-            $newElement = $htmlDom->createTextNode( $src );
-            $image->parentNode->replaceChild( $newElement, $image );
+        while ($i > -1) {
+            $image      = $images->item($i);
+            $src        = $image->getAttribute('src');
+            $newElement = $htmlDom->createTextNode($src);
+            $image->parentNode->replaceChild($newElement, $image);
             $i--;
         }
 
-        $html = $htmlDom->saveHtml( $htmlDom->documentElement );
-        $html = utf8_decode( $html );
+        $html = $htmlDom->saveHtml($htmlDom->documentElement);
+        $html = mb_convert_encoding($html, 'ISO-8859-15', 'UTF-8');
 
-        $strippedHtml = strip_tags( $html );
-        $strippedHtml = ltrim( $strippedHtml );
+        $strippedHtml = strip_tags($html);
+        $strippedHtml = ltrim($strippedHtml);
 
-        return rtrim( $strippedHtml );
+        return rtrim($strippedHtml);
     }
 
     /**
@@ -836,24 +1264,24 @@ class Utils {
      *
      * @return array
      */
-    public static function validateEmailList( $list ): array {
-
+    public static function validateEmailList($list): array
+    {
         $aValid = [];
-        foreach ( explode( ',', $list ) as $sEmailAddress ) {
-            $sEmailAddress = trim( $sEmailAddress );
-            if ( empty( $sEmailAddress ) ) {
+        foreach (explode(',', $list) as $sEmailAddress) {
+            $sEmailAddress = trim($sEmailAddress);
+            if (empty($sEmailAddress)) {
                 continue;
             }
-            $aValid[ $sEmailAddress ] = filter_var( $sEmailAddress, FILTER_VALIDATE_EMAIL );
+            $aValid[ $sEmailAddress ] = filter_var($sEmailAddress, FILTER_VALIDATE_EMAIL);
         }
 
-        $invalidEmails = array_keys( $aValid, false );
+        $invalidEmails = array_keys($aValid, false);
 
-        if ( !empty( $invalidEmails ) ) {
-            throw new InvalidArgumentException( "Not valid e-mail provided: " . implode( ", ", $invalidEmails ), -6 );
+        if (!empty($invalidEmails)) {
+            throw new InvalidArgumentException("Not valid e-mail provided: " . implode(", ", $invalidEmails), -6);
         }
 
-        return array_keys( $aValid );
+        return array_keys($aValid);
     }
 
     /**
@@ -861,34 +1289,34 @@ class Utils {
      *
      * @return bool
      */
-    public static function arrayIsList( array $arr ): bool {
-        if ( $arr === [] ) {
+    public static function arrayIsList(array $arr): bool
+    {
+        if ($arr === []) {
             return true;
         }
 
-        return array_keys( $arr ) === range( 0, count( $arr ) - 1 );
+        return array_keys($arr) === range(0, count($arr) - 1);
     }
 
     /**
-     * @param $nameString
+     * @param string $nameString
      *
      * @return bool|string
      */
-    public static function sanitizeName( $nameString ) {
-
-        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
-        $nameString = preg_replace( '/_{2,}/', "_", $nameString );
-        $nameString = str_replace( '_.', ".", $nameString );
+    public static function sanitizeName(string $nameString)
+    {
+        $nameString = preg_replace('/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString);
+        $nameString = preg_replace('/_{2,}/', "_", $nameString);
+        $nameString = str_replace('_.', ".", $nameString);
 
         // project name validation
         $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
 
-        if ( !preg_match( $pattern, $nameString ) ) {
+        if (!preg_match($pattern, $nameString)) {
             return false;
         }
 
         return $nameString;
-
     }
 
     /**
@@ -896,14 +1324,14 @@ class Utils {
      *
      * @return int|mixed
      */
-    public static function formatStringValue( string $value = "" ) {
-
-        if ( is_numeric( $value ) ) {
+    public static function formatStringValue(string $value = ""): mixed
+    {
+        if (is_numeric($value)) {
             return (int)$value;
         }
 
-        if ( Utils::isJson( $value ) ) {
-            return json_decode( $value );
+        if (Utils::isJson($value)) {
+            return json_decode($value);
         }
 
         return $value;

@@ -7,7 +7,8 @@ use Exception;
 use RuntimeException;
 use Utils\Constants\Mime2Extension;
 
-class AppConfig {
+class AppConfig
+{
 
     public static array $MANDATORY_KEYS = [
             'ENV',
@@ -40,6 +41,11 @@ class AppConfig {
      */
     public static ?string $ENV = null;
 
+    /**
+     * Indicates whether the current instance is running as a daemon process.
+     */
+    public static bool $IS_DAEMON_INSTANCE = false;
+
     public static string  $ROOT;
     public static string  $BASEURL;
     public static string  $HTTPHOST;
@@ -61,7 +67,7 @@ class AppConfig {
     public static string  $QUEUE_CREDENTIALS;
 
     public static bool   $ENABLE_MULTI_DOMAIN_API = false;
-    public static string $XSRF_TOKEN              = 'xsrf-token';
+    public static string $XSRF_TOKEN              = 'Xsrf-Token';
 
     /**
      * Use or not the js tracking codes macro import (Ex: Google Analytics code injection)
@@ -155,7 +161,7 @@ class AppConfig {
     /**
      * Default Matecat user agent string
      */
-    const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
+    const string MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
     /**
      * ENABLE_OUTSOURCE set as true, will show the option to outsource to an external
@@ -183,13 +189,13 @@ class AppConfig {
     public static string $BUILD_NUMBER = '';
 
     /**
-     * Match Developer email Key for the cattool
+     * MyMemory Developer email Key for the cattool
      * @var string
      */
     public static string $MYMEMORY_API_KEY = 'demo@matecat.com';
 
     /**
-     * Match Developer email Key for the analysis
+     * MyMemory Developer email Key for the analysis
      * @var string
      */
     public static string $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com';
@@ -299,19 +305,30 @@ class AppConfig {
      */
     public static ?string $AWS_ACCESS_KEY_ID = null;
     public static ?string $AWS_SECRET_KEY    = null;
-    public static string  $AWS_VERSION;
-    public static string  $AWS_REGION;
+    public static ?string $AWS_VERSION = null;
+    public static ?string $AWS_REGION = null;
     public static bool    $AWS_SSL_VERIFY    = false;
     public static bool    $AWS_CACHING       = false;
     public static string  $AWS_STORAGE_BASE_BUCKET;
+
+    /**
+     * Logging configuration
+     */
+    public static array $MONOLOG_HANDLERS = [];
 
     public static string $REPLACE_HISTORY_DRIVER = '';
     public static int    $REPLACE_HISTORY_TTL    = 0;
 
     private static ?AppConfig $MYSELF = null;
 
-    protected function __construct( string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration ) {
-
+    protected function __construct(
+        string $rootPath,
+        string $envName,
+        string $matecatVersion,
+        array $configuration,
+        array $taskManagerConfiguration,
+    )
+    {
         self::$ENV                = $envName;
         self::$BUILD_NUMBER       = $matecatVersion;
         self::$TASK_RUNNER_CONFIG = $taskManagerConfiguration;
@@ -322,19 +339,28 @@ class AppConfig {
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$TRACKING_CODES_VIEW_PATH    = self::$ROOT . "/lib/View/templates";
 
+        // Detects if the script is running via Command Line Interface (CLI) to flag the instance as a daemon/background worker
+        AppConfig::$IS_DAEMON_INSTANCE = stripos(PHP_SAPI, 'cli') !== false;
+
         //Override default configuration
-        foreach ( $configuration as $KEY => $value ) {
-            if ( property_exists( self::class, $KEY ) ) {
-                AppConfig::${$KEY} = $value;
+        foreach ($configuration as $KEY => $value) {
+            if (property_exists(self::class, $KEY)) {
+                if ($KEY == 'MONOLOG_HANDLERS') {
+                    foreach ($value as $handler) {
+                        AppConfig::${$KEY}[$handler] = $configuration[$handler] ?? [];
+                    }
+                } else {
+                    AppConfig::${$KEY} = $value;
+                }
             }
         }
 
-        if ( stripos( PHP_SAPI, 'cli' ) === false ) {
+        if (!self::$IS_DAEMON_INSTANCE) {
             // Get HTTPS server status
             // Override if the header is set from load balancer
             $localProto = 'http';
-            foreach ( [ 'HTTPS', 'HTTP_X_FORWARDED_PROTO' ] as $_key ) {
-                if ( isset( $_SERVER[ $_key ] ) ) {
+            foreach (['HTTPS', 'HTTP_X_FORWARDED_PROTO'] as $_key) {
+                if (isset($_SERVER[ $_key ])) {
                     $localProto = 'https';
                     break;
                 }
@@ -342,7 +368,7 @@ class AppConfig {
             self::$PROTOCOL = $localProto;
         }
 
-        if ( empty( self::$STORAGE_DIR ) ) {
+        if (empty(self::$STORAGE_DIR)) {
             self::$STORAGE_DIR = self::$ROOT . "/local_storage";
         }
 
@@ -361,38 +387,36 @@ class AppConfig {
 
         $oauth_config_file = self::$ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini';
 
-        if ( file_exists( $oauth_config_file ) ) {
-            self::$OAUTH_CONFIG = parse_ini_file( $oauth_config_file, true ) ?? [];
+        if (file_exists($oauth_config_file)) {
+            self::$OAUTH_CONFIG = parse_ini_file($oauth_config_file, true) ?? [];
         }
 
         //auth sections
         self::$AUTHSECRET_PATH = self::$ROOT . '/inc/login_secret.dat';
 
         //if a secret is set in file
-        if ( file_exists( self::$AUTHSECRET_PATH ) ) {
+        if (file_exists(self::$AUTHSECRET_PATH)) {
             //fetch it
-            self::$AUTHSECRET = file_get_contents( self::$AUTHSECRET_PATH );
+            self::$AUTHSECRET = file_get_contents(self::$AUTHSECRET_PATH);
         } else {
-
             //generates pass
             try {
-                $x                = random_bytes( 256 );
-                self::$AUTHSECRET = bin2Hex( $x );
-            } catch ( Exception $e ) {
-                throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
+                $x                = random_bytes(256);
+                self::$AUTHSECRET = bin2Hex($x);
+            } catch (Exception $e) {
+                throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
             }
 
             //put the file
-            file_put_contents( self::$AUTHSECRET_PATH, self::$AUTHSECRET );
+            file_put_contents(self::$AUTHSECRET_PATH, self::$AUTHSECRET);
             //if put succeeds
-            if ( file_exists( self::$AUTHSECRET_PATH ) ) {
+            if (file_exists(self::$AUTHSECRET_PATH)) {
                 //restrict permissions
-                chmod( self::$AUTHSECRET_PATH, 0400 );
+                chmod(self::$AUTHSECRET_PATH, 0400);
             } else {
                 //if we couldn't create due to permissions, use default secret
                 self::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
-
         }
 
         self::$GITHUB_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
@@ -420,105 +444,104 @@ class AppConfig {
         self::$GOOGLE_OAUTH_BROWSER_API_KEY = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
 
         self::$MIME_TYPES = Mime2Extension::getMimeTypes();
-
     }
 
     public static array $SUPPORTED_FILE_TYPES = [
             'Office'              => [
-                    'pages'   => [ '', '', 'extdoc' ],
-                    'doc'     => [ '', '', 'extdoc' ],
-                    'dot'     => [ '', '', 'extdoc' ],
-                    'docx'    => [ '', '', 'extdoc' ],
-                    'docm'    => [ '', '', 'extdoc' ],
-                    'dotx'    => [ '', '', 'extdoc' ],
-                    'dotm'    => [ '', '', 'extdoc' ],
-                    'rtf'     => [ '', '', 'extdoc' ],
-                    'odt'     => [ '', '', 'extdoc' ],
-                    'ott'     => [ '', '', 'extdoc' ],
-                    'pdf'     => [ '', '', 'extpdf' ],
-                    'numbers' => [ '', '', 'extxls' ],
-                    'txt'     => [ '', '', 'exttxt' ],
-                    'xls'     => [ '', '', 'extxls' ],
-                    'xlt'     => [ '', '', 'extxls' ],
-                    'xlsx'    => [ '', '', 'extxls' ],
-                    'xlsm'    => [ '', '', 'extxls' ],
-                    'xltx'    => [ '', '', 'extxls' ],
-                    'xltm'    => [ '', '', 'extxls' ],
-                    'ods'     => [ '', '', 'extxls' ],
-                    'ots'     => [ '', '', 'extxls' ],
+                    'pages'   => ['', '', 'extdoc'],
+                    'doc'     => ['', '', 'extdoc'],
+                    'dot'     => ['', '', 'extdoc'],
+                    'docx'    => ['', '', 'extdoc'],
+                    'docm'    => ['', '', 'extdoc'],
+                    'dotx'    => ['', '', 'extdoc'],
+                    'dotm'    => ['', '', 'extdoc'],
+                    'rtf'     => ['', '', 'extdoc'],
+                    'odt'     => ['', '', 'extdoc'],
+                    'ott'     => ['', '', 'extdoc'],
+                    'pdf'     => ['', '', 'extpdf'],
+                    'numbers' => ['', '', 'extxls'],
+                    'txt'     => ['', '', 'exttxt'],
+                    'xls'     => ['', '', 'extxls'],
+                    'xlt'     => ['', '', 'extxls'],
+                    'xlsx'    => ['', '', 'extxls'],
+                    'xlsm'    => ['', '', 'extxls'],
+                    'xltx'    => ['', '', 'extxls'],
+                    'xltm'    => ['', '', 'extxls'],
+                    'ods'     => ['', '', 'extxls'],
+                    'ots'     => ['', '', 'extxls'],
                 //'csv'  => array( '', '', 'extxls' ),
-                    'tsv'     => [ '', '', 'extxls' ],
-                    'key'     => [ '', '', 'extppt' ],
-                    'ppt'     => [ '', '', 'extppt' ],
-                    'pps'     => [ '', '', 'extppt' ],
-                    'pot'     => [ '', '', 'extppt' ],
-                    'pptx'    => [ '', '', 'extppt' ],
-                    'pptm'    => [ '', '', 'extppt' ],
-                    'ppsx'    => [ '', '', 'extppt' ],
-                    'ppsm'    => [ '', '', 'extppt' ],
-                    'potx'    => [ '', '', 'extppt' ],
-                    'potm'    => [ '', '', 'extppt' ],
-                    'odp'     => [ '', '', 'extppt' ],
-                    'otp'     => [ '', '', 'extppt' ],
-                    'xml'     => [ '', '', 'extxml' ],
-                    'zip'     => [ '', '', 'extzip' ],
+                    'tsv'     => ['', '', 'extxls'],
+                    'key'     => ['', '', 'extppt'],
+                    'ppt'     => ['', '', 'extppt'],
+                    'pps'     => ['', '', 'extppt'],
+                    'pot'     => ['', '', 'extppt'],
+                    'pptx'    => ['', '', 'extppt'],
+                    'pptm'    => ['', '', 'extppt'],
+                    'ppsx'    => ['', '', 'extppt'],
+                    'ppsm'    => ['', '', 'extppt'],
+                    'potx'    => ['', '', 'extppt'],
+                    'potm'    => ['', '', 'extppt'],
+                    'odp'     => ['', '', 'extppt'],
+                    'otp'     => ['', '', 'extppt'],
+                    'xml'     => ['', '', 'extxml'],
+                    'zip'     => ['', '', 'extzip'],
             ],
             'Web'                 => [
-                    'htm'    => [ '', '', 'exthtm' ],
-                    'html'   => [ '', '', 'exthtm' ],
-                    'xhtml'  => [ '', '', 'exthtm' ],
-                    'xml'    => [ '', '', 'extxml' ],
-                    'dtd'    => [ '', '', 'extxml' ],
+                    'htm'    => ['', '', 'exthtm'],
+                    'html'   => ['', '', 'exthtm'],
+                    'xhtml'  => ['', '', 'exthtm'],
+                    'xml'    => ['', '', 'extxml'],
+                    'dtd'    => ['', '', 'extxml'],
 //                    'php'   => array( '', '', 'extxml' ),
-                    'json'   => [ '', '', 'extxml' ],
-                    'jsont'  => [ '', '', 'extxml' ],
-                    'jsont2' => [ '', '', 'extxml' ],
-                    'yaml'   => [ '', '', 'extxml' ],
-                    'yml'    => [ '', '', 'extxml' ],
-                    'md'     => [ '', '', 'extxml' ],
+                    'json'   => ['', '', 'extxml'],
+                    'jsont'  => ['', '', 'extxml'],
+                    'jsont2' => ['', '', 'extxml'],
+                    'yaml'   => ['', '', 'extxml'],
+                    'yml'    => ['', '', 'extxml'],
+                    'md'     => ['', '', 'extxml'],
             ],
             'Scanned Files'       => [
-                    'pdf'  => [ '', '', 'extpdf' ],
-                    'bmp'  => [ '', '', 'extimg' ],
-                    'png'  => [ '', '', 'extimg' ],
-                    'gif'  => [ '', '', 'extimg' ],
-                    'jpeg' => [ '', '', 'extimg' ],
-                    'jpg'  => [ '', '', 'extimg' ],
-                    'jfif' => [ '', '', 'extimg' ],
-                    'tiff' => [ '', '', 'extimg' ]
+                    'pdf'  => ['', '', 'extpdf'],
+                    'bmp'  => ['', '', 'extimg'],
+                    'png'  => ['', '', 'extimg'],
+                    'gif'  => ['', '', 'extimg'],
+                    'jpeg' => ['', '', 'extimg'],
+                    'jpg'  => ['', '', 'extimg'],
+                    'jfif' => ['', '', 'extimg'],
+                    'tiff' => ['', '', 'extimg']
             ],
             "Interchange Formats" => [
-                    'xliff'    => [ 'default', '', 'extxif' ],
-                    'sdlxliff' => [ 'default', '', 'extxif' ],
-                    'tmx'      => [ '', '', 'exttmx' ],
-                    'ttx'      => [ '', '', 'extttx' ],
-                    'xlf'      => [ 'default', '', 'extxlf' ],
+                    'xliff'    => ['default', '', 'extxif'],
+                    'sdlxliff' => ['default', '', 'extxif'],
+                    'tmx'      => ['', '', 'exttmx'],
+                    'ttx'      => ['', '', 'extttx'],
+                    'xlf'      => ['default', '', 'extxlf'],
             ],
             "Desktop Publishing"  => [
-                    'mif'     => [ '', '', 'extmif' ],
-                    'idml'    => [ '', '', 'extidd' ],
-                    'icml'    => [ '', '', 'exticml' ],
-                    'xml'     => [ '', '', 'extxml' ],
-                    'dita'    => [ '', '', 'extdit' ],
-                    'ditamap' => [ '', '', 'extdit' ]
+                    'mif'     => ['', '', 'extmif'],
+                    'idml'    => ['', '', 'extidd'],
+                    'icml'    => ['', '', 'exticml'],
+                    'xml'     => ['', '', 'extxml'],
+                    'dita'    => ['', '', 'extdit'],
+                    'ditamap' => ['', '', 'extdit']
             ],
             "Localization"        => [
-                    'properties'  => [ '', '', 'extpro' ],
-                    'resx'        => [ '', '', 'extres' ],
-                    'xml'         => [ '', '', 'extxml' ],
-                    'sxml'        => [ '', '', 'extxml' ],
-                    'txml'        => [ '', '', 'extxml' ],
-                    'dita'        => [ '', '', 'extdit' ],
-                    'ditamap'     => [ '', '', 'extdit' ],
-                    'Android xml' => [ '', '', 'extxml' ],
-                    'strings'     => [ '', '', 'extstr' ],
-                    'sbv'         => [ '', '', 'extsbv' ],
-                    'srt'         => [ '', '', 'extsrt' ],
-                    'vtt'         => [ '', '', 'extvtt' ],
-                    'wix'         => [ '', '', 'extwix' ],
-                    'po'          => [ '', '', 'extpo' ],
-                    'g'           => [ '', '', 'extg' ],
-                    'ts'          => [ '', '', 'exts' ],
+                    'properties'  => ['', '', 'extpro'],
+                    'resx'        => ['', '', 'extres'],
+                    'xml'         => ['', '', 'extxml'],
+                    'sxml'        => ['', '', 'extxml'],
+                    'txml'        => ['', '', 'extxml'],
+                    'dita'        => ['', '', 'extdit'],
+                    'ditamap'     => ['', '', 'extdit'],
+                    'Android xml' => ['', '', 'extxml'],
+                    'strings'     => ['', '', 'extstr'],
+                    'sbv'         => ['', '', 'extsbv'],
+                    'srt'         => ['', '', 'extsrt'],
+                    'vtt'         => ['', '', 'extvtt'],
+                    'wix'         => ['', '', 'extwix'],
+                    'po'          => ['', '', 'extpo'],
+                    'g'           => ['', '', 'extg'],
+                    'ts'          => ['', '', 'exts'],
             ]
     ];
 
@@ -532,7 +555,7 @@ class AppConfig {
      */
     public static int $MAX_FILENAME_LENGTH = 210;
 
-    public static array $AUTOLOAD_PLUGINS = [ "second_pass_review" ];
+    public static array $AUTOLOAD_PLUGINS = ["second_pass_review"];
 
     /**
      * Definitions for the asynchronous task runner
@@ -548,12 +571,19 @@ class AppConfig {
      * @param string $rootPath
      * @param string $envName
      * @param string $matecatVersion
-     * @param array  $configuration
-     * @param array  $taskManagerConfiguration
+     * @param array $configuration
+     * @param array $taskManagerConfiguration
      */
-    public static function init( string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration ) {
-        if ( empty( self::$MYSELF ) ) {
-            self::$MYSELF = new self( $rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration );
+    public static function init(
+        string $rootPath,
+        string $envName,
+        string $matecatVersion,
+        array $configuration,
+        array $taskManagerConfiguration,
+    ): void
+    {
+        if (empty(self::$MYSELF)) {
+            self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration);
         }
     }
 
@@ -562,10 +592,10 @@ class AppConfig {
      *
      * @return bool true if all mandatory keys are present, false otherwise
      */
-    public static function areMandatoryKeysPresent(): bool {
-
-        foreach ( self::$MANDATORY_KEYS as $key ) {
-            if ( !property_exists( self::class, $key ) || self::$$key === null ) {
+    public static function areMandatoryKeysPresent(): bool
+    {
+        foreach (self::$MANDATORY_KEYS as $key) {
+            if (!property_exists(self::class, $key) || self::$$key === null) {
                 return false;
             }
         }
@@ -583,8 +613,9 @@ class AppConfig {
      *
      * @return bool Returns `true` if both required properties are configured, `false` otherwise.
      */
-    public static function isGDriveConfigured(): bool {
-        if ( empty( self::$GOOGLE_OAUTH_CLIENT_ID ) || empty( self::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
+    public static function isGDriveConfigured(): bool
+    {
+        if (empty(self::$GOOGLE_OAUTH_CLIENT_ID) || empty(self::$GOOGLE_OAUTH_BROWSER_API_KEY)) {
             return false;
         }
 

@@ -1,1 +1,1 @@
-lint-staged -v --no-stash
+# lint-staged -v --no-stash

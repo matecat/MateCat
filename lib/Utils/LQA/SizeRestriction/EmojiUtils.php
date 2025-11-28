@@ -5,7 +5,7 @@ class EmojiUtils {
     /**
      * @see https://github.com/spatie/emoji/blob/main/src/Emoji.php
      */
-    const EMOJI_LIST = [
+    const array EMOJI_LIST = [
             "\x{1F600}",
             "\x{1F603}",
             "\x{1F604}",

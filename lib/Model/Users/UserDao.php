@@ -15,13 +15,14 @@ use ReflectionException;
  * Date: 01/04/15
  * Time: 12.54
  */
-class UserDao extends AbstractDao {
+class UserDao extends AbstractDao
+{
 
-    const TABLE       = "users";
-    const STRUCT_TYPE = UserStruct::class;
+    const string TABLE       = "users";
+    const string STRUCT_TYPE = UserStruct::class;
 
-    protected static array $auto_increment_field = [ 'uid' ];
-    protected static array $primary_keys         = [ 'uid' ];
+    protected static array $auto_increment_field = ['uid'];
+    protected static array $primary_keys         = ['uid'];
 
     protected static string $_query_user_by_uid            = " SELECT * FROM users WHERE uid = :uid ";
     protected static string $_query_user_by_email          = " SELECT * FROM users WHERE email = :email ";
@@ -40,11 +41,11 @@ class UserDao extends AbstractDao {
      *
      * @return int
      */
-    public function delete( UserStruct $userStruct ): int {
-
+    public function delete(UserStruct $userStruct): int
+    {
         $conn = $this->database->getConnection();
-        $stmt = $conn->prepare( " DELETE FROM users WHERE uid = ?" );
-        $stmt->execute( [ $userStruct->uid ] );
+        $stmt = $conn->prepare(" DELETE FROM users WHERE uid = ?");
+        $stmt->execute([$userStruct->uid]);
 
         return $stmt->rowCount();
     }
@@ -55,26 +56,26 @@ class UserDao extends AbstractDao {
      * @return UserStruct[]
      * @throws ReflectionException
      */
-    public function getByUids( array $uids_array ): array {
-
+    public function getByUids(array $uids_array): array
+    {
         $sanitized_array = [];
 
-        foreach ( $uids_array as $v ) {
-            if ( !is_numeric( $v ) ) {
+        foreach ($uids_array as $v) {
+            if (!is_numeric($v)) {
                 $sanitized_array[] = (int)$v[ 'uid' ];
             } else {
                 $sanitized_array[] = (int)$v;
             }
         }
 
-        if ( empty( $sanitized_array ) ) {
+        if (empty($sanitized_array)) {
             return [];
         }
 
         $query = "SELECT * FROM " . self::TABLE .
-                " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1 ) . '?' . " ) ";
+                " WHERE uid IN ( " . str_repeat('?,', count($sanitized_array) - 1) . '?' . " ) ";
 
-        $stmt = $this->_getStatementForQuery( $query );
+        $stmt = $this->_getStatementForQuery($query);
 
         /**
          * @var $__resultSet UserStruct[]
@@ -86,12 +87,11 @@ class UserDao extends AbstractDao {
         );
 
         $resultSet = [];
-        foreach ( $__resultSet as $user ) {
+        foreach ($__resultSet as $user) {
             $resultSet[ $user->uid ] = $user;
         }
 
         return $resultSet;
-
     }
 
     /**
@@ -99,11 +99,12 @@ class UserDao extends AbstractDao {
      *
      * @return ?UserStruct
      */
-    public function getByConfirmationToken( $token ): ?UserStruct {
+    public function getByConfirmationToken($token): ?UserStruct
+    {
         $conn = $this->database->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?" );
-        $stmt->execute( [ $token ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, UserStruct::class );
+        $stmt = $conn->prepare(" SELECT * FROM users WHERE confirmation_token = ?");
+        $stmt->execute([$token]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, UserStruct::class);
 
         return $stmt->fetch() ?: null;
     }
@@ -111,16 +112,17 @@ class UserDao extends AbstractDao {
     /**
      * @param UserStruct $obj
      *
-     * @return UserStruct
+     * @return UserStruct|null
      * @throws ReflectionException
-     * @throws Exception
      */
-    public function createUser( UserStruct $obj ): ?UserStruct {
+    public function createUser(UserStruct $obj): ?UserStruct
+    {
         $conn = $this->database->getConnection();
         Database::obtain()->begin();
 
-        $obj->create_date = date( 'Y-m-d H:i:s' );
-        $stmt             = $conn->prepare( "INSERT INTO users " .
+        $obj->create_date = date('Y-m-d H:i:s');
+        $stmt             = $conn->prepare(
+                "INSERT INTO users " .
                 " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
                 " VALUES " .
                 " ( " .
@@ -129,15 +131,19 @@ class UserDao extends AbstractDao {
                 " )"
         );
 
-        $stmt->execute( $obj->toArray( [
-                'uid', 'email',
-                'salt', 'pass',
-                'create_date', 'first_name',
-                'last_name', 'confirmation_token'
-        ] )
+        $stmt->execute($obj->toArray([
+                'uid',
+                'email',
+                'salt',
+                'pass',
+                'create_date',
+                'first_name',
+                'last_name',
+                'confirmation_token'
+        ])
         );
 
-        $record = $this->getByUid( $conn->lastInsertId() );
+        $record = $this->getByUid($conn->lastInsertId());
         $conn->commit();
 
         return $record;
@@ -149,11 +155,13 @@ class UserDao extends AbstractDao {
      * @return UserStruct
      * @throws ReflectionException
      */
-    public function updateUser( UserStruct $obj ): UserStruct {
+    public function updateUser(UserStruct $obj): UserStruct
+    {
         $conn = $this->database->getConnection();
         Database::obtain()->begin();
 
-        $stmt = $conn->prepare( "UPDATE users
+        $stmt = $conn->prepare(
+                "UPDATE users
             SET 
                 uid = :uid, 
                 email = :email, 
@@ -165,9 +173,10 @@ class UserDao extends AbstractDao {
                 confirmation_token = :confirmation_token, 
                 oauth_access_token = :oauth_access_token 
             WHERE uid = :uid 
-        " );
+        "
+        );
 
-        $stmt->execute( $obj->toArray( [
+        $stmt->execute($obj->toArray([
                 'uid',
                 'email',
                 'salt',
@@ -177,10 +186,10 @@ class UserDao extends AbstractDao {
                 'last_name',
                 'confirmation_token',
                 'oauth_access_token'
-        ] )
+        ])
         );
 
-        $record = $this->getByUid( $obj->uid );
+        $record = $this->getByUid($obj->uid);
         $conn->commit();
 
         return $record;
@@ -192,13 +201,15 @@ class UserDao extends AbstractDao {
      * @return ?UserStruct
      * @throws ReflectionException
      */
-    public function getByUid( $id ): ?UserStruct {
-        $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
+    public function getByUid($id): ?UserStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_user_by_uid);
 
         /**
          * @var $res ?UserStruct
          */
-        $res = $this->_fetchObjectMap( $stmt,
+        $res = $this->_fetchObjectMap(
+                $stmt,
                 UserStruct::class,
                 [
                         'uid' => $id,
@@ -211,10 +222,12 @@ class UserDao extends AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function destroyCacheByUid( $uid ): bool {
-        $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
+    public function destroyCacheByUid($uid): bool
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_user_by_uid);
 
-        return $this->_destroyObjectCache( $stmt,
+        return $this->_destroyObjectCache(
+                $stmt,
                 UserStruct::class,
                 [
                         'uid' => $uid,
@@ -228,15 +241,17 @@ class UserDao extends AbstractDao {
      * @return ?UserStruct
      * @throws ReflectionException
      */
-    public function getByEmail( string $email ): ?UserStruct {
-        $stmt = $this->_getStatementForQuery( self::$_query_user_by_email );
+    public function getByEmail(string $email): ?UserStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_user_by_email);
 
         /**
          * @var $res ?UserStruct
          */
-        $res = $this->_fetchObjectMap( $stmt,
+        $res = $this->_fetchObjectMap(
+                $stmt,
                 UserStruct::class,
-                [ 'email' => $email ]
+                ['email' => $email]
         )[ 0 ] ?? null;
 
         return $res;
@@ -248,12 +263,13 @@ class UserDao extends AbstractDao {
      * @return bool
      * @throws ReflectionException
      */
-    public function destroyCacheByEmail( $email ): bool {
-        $stmt             = $this->_getStatementForQuery( self::$_query_user_by_email );
+    public function destroyCacheByEmail($email): bool
+    {
+        $stmt             = $this->_getStatementForQuery(self::$_query_user_by_email);
         $userQuery        = new UserStruct();
         $userQuery->email = $email;
 
-        return $this->_destroyObjectCache( $stmt, UserStruct::class, [ 'email' => $userQuery->email ] );
+        return $this->_destroyObjectCache($stmt, UserStruct::class, ['email' => $userQuery->email]);
     }
 
 
@@ -268,24 +284,25 @@ class UserDao extends AbstractDao {
      * @return UserStruct[]
      * @throws Exception
      */
-    public function read( IDaoStruct $UserQuery ): array {
-
-        [ $query, $where_parameters ] = $this->_buildReadQuery( $UserQuery );
-        $stmt = $this->_getStatementForQuery( $query );
+    public function read(IDaoStruct $UserQuery): array
+    {
+        [$query, $where_parameters] = $this->_buildReadQuery($UserQuery);
+        $stmt = $this->_getStatementForQuery($query);
 
         /** @var UserStruct[] */
-        return $this->_fetchObjectMap( $stmt,
+        return $this->_fetchObjectMap(
+                $stmt,
                 UserStruct::class,
                 $where_parameters
         );
-
     }
 
     /**
      * @throws Exception
      */
-    protected function _buildReadQuery( IDaoStruct $UserQuery ): array {
-        $UserQuery = $this->sanitize( $UserQuery );
+    protected function _buildReadQuery(IDaoStruct $UserQuery): array
+    {
+        $UserQuery = $this->sanitize($UserQuery);
 
         $where_conditions = [];
         $where_parameters = [];
@@ -297,24 +314,23 @@ class UserDao extends AbstractDao {
                                     last_name
                              FROM " . self::TABLE . " WHERE %s";
 
-        if ( $UserQuery->uid !== null ) {
+        if ($UserQuery->uid !== null) {
             $where_conditions[]        = "uid = :uid";
             $where_parameters[ 'uid' ] = $UserQuery->uid;
         }
 
-        if ( $UserQuery->email !== null ) {
+        if ($UserQuery->email !== null) {
             $where_conditions[]          = "email = :email";
             $where_parameters[ 'email' ] = $UserQuery->email;
         }
 
-        if ( count( $where_conditions ) ) {
-            $where_string = implode( " AND ", $where_conditions );
+        if (count($where_conditions)) {
+            $where_string = implode(" AND ", $where_conditions);
         } else {
-            throw new Exception( "Where condition needed." );
+            throw new Exception("Where condition needed.");
         }
 
-        return [ sprintf( $query, $where_string ), $where_parameters ];
-
+        return [sprintf($query, $where_string), $where_parameters];
     }
 
     /***
@@ -323,16 +339,17 @@ class UserDao extends AbstractDao {
      * @return ?UserStruct
      * @throws ReflectionException
      */
-    public function getProjectOwner( int $job_id ): ?UserStruct {
-
-        $stmt = $this->_getStatementForQuery( self::$_query_owner_by_job_id );
+    public function getProjectOwner(int $job_id): ?UserStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_owner_by_job_id);
 
         /**
          * @var $res UserStruct
          */
-        $res = $this->_fetchObjectMap( $stmt,
+        $res = $this->_fetchObjectMap(
+                $stmt,
                 UserStruct::class,
-                [ 'job_id' => $job_id ]
+                ['job_id' => $job_id]
         )[ 0 ] ?? null;
 
         return $res;
@@ -341,18 +358,18 @@ class UserDao extends AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function getProjectAssignee( int $project_id ): ?UserStruct {
-
-        $stmt = $this->_getStatementForQuery( self::$_query_assignee_by_project_id );
+    public function getProjectAssignee(int $project_id): ?UserStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_assignee_by_project_id);
 
         /** @var $res UserStruct */
-        $res = $this->_fetchObjectMap( $stmt,
+        $res = $this->_fetchObjectMap(
+                $stmt,
                 UserStruct::class,
-                [ 'id_project' => $project_id ]
+                ['id_project' => $project_id]
         )[ 0 ] ?? null;
 
         return $res;
-
     }
 
     /**
@@ -360,14 +377,15 @@ class UserDao extends AbstractDao {
      *
      * @return UserStruct[]
      */
-    public function getByEmails( array $email_list ): array {
+    public function getByEmails(array $email_list): array
+    {
         $conn = $this->database->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM users WHERE email IN ( " . str_repeat( '?,', count( $email_list ) - 1 ) . '?' . " ) " );
-        $stmt->execute( $email_list );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, UserStruct::class );
+        $stmt = $conn->prepare(" SELECT * FROM users WHERE email IN ( " . str_repeat('?,', count($email_list) - 1) . '?' . " ) ");
+        $stmt->execute($email_list);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, UserStruct::class);
         $res     = $stmt->fetchAll();
         $userMap = [];
-        foreach ( $res as $user ) {
+        foreach ($res as $user) {
             $userMap[ $user->email ] = $user;
         }
 
@@ -380,15 +398,16 @@ class UserDao extends AbstractDao {
      * @return UserStruct
      * @throws Exception
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize(IDaoStruct $input): UserStruct
+    {
         $con = Database::obtain();
-        parent::_sanitizeInput( $input, self::STRUCT_TYPE );
+        parent::_sanitizeInput($input, self::STRUCT_TYPE);
 
-        $input->uid         = ( $input->uid !== null ) ? (int)$input->uid : null;
-        $input->email       = ( $input->email !== null ) ? $con->escape( $input->email ) : null;
-        $input->create_date = ( $input->create_date !== null ) ? $con->escape( $input->create_date ) : null;
-        $input->first_name  = ( $input->first_name !== null ) ? $con->escape( $input->first_name ) : null;
-        $input->last_name   = ( $input->last_name !== null ) ? $con->escape( $input->last_name ) : null;
+        $input->uid         = ($input->uid !== null) ? (int)$input->uid : null;
+        $input->email       = ($input->email !== null) ? $con->escape($input->email) : null;
+        $input->create_date = ($input->create_date !== null) ? $con->escape($input->create_date) : null;
+        $input->first_name  = ($input->first_name !== null) ? $con->escape($input->first_name) : null;
+        $input->last_name   = ($input->last_name !== null) ? $con->escape($input->last_name) : null;
 
         return $input;
     }
@@ -398,11 +417,11 @@ class UserDao extends AbstractDao {
      *
      * @return UserStruct[]
      */
-    protected function _buildResult( array $array_result ): array {
+    protected function _buildResult(array $array_result): array
+    {
         $result = [];
 
-        foreach ( $array_result as $item ) {
-
+        foreach ($array_result as $item) {
             $build_arr = [
                     'uid'         => (int)$item[ 'uid' ],
                     'email'       => $item[ 'email' ],
@@ -411,7 +430,7 @@ class UserDao extends AbstractDao {
                     'last_name'   => $item[ 'last_name' ],
             ];
 
-            $obj = new UserStruct( $build_arr );
+            $obj = new UserStruct($build_arr);
 
             $result[] = $obj;
         }

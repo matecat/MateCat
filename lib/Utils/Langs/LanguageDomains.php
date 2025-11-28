@@ -1,23 +1,25 @@
 <?php
 
 namespace Utils\Langs;
+
 /*
    this class manages supported languages in the CAT tool
  */
 
 use Exception;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Utils;
 
-class LanguageDomains {
+class LanguageDomains
+{
 
-    private static ?LanguageDomains $instance = null; //singleton instance
-    private static array           $subjectMap;
-    private static array           $subjectHashMap = [];
+    private static ?LanguageDomains $instance       = null; //singleton instance
+    private static array            $subjectMap;
+    private static array            $subjectHashMap = [];
 
     //access singleton
-    public static function getInstance(): LanguageDomains {
-        if ( !self::$instance ) {
+    public static function getInstance(): LanguageDomains
+    {
+        if (!self::$instance) {
             self::$instance = new LanguageDomains();
         }
 
@@ -27,7 +29,8 @@ class LanguageDomains {
     /**
      * @throws Exception
      */
-    private function __construct() {
+    private function __construct()
+    {
         //get languages file
         //
         // SDL supported language codes
@@ -35,27 +38,28 @@ class LanguageDomains {
 
         $file = AppConfig::$UTILS_ROOT . '/Langs/languageDomains.json';
 
-        $string = file_get_contents( $file );
+        $string = file_get_contents($file);
         //parse to an associative array
-        $subjects = json_decode( $string, true, 512, JSON_THROW_ON_ERROR );
+        $subjects = json_decode($string, true, 512, JSON_THROW_ON_ERROR);
 
         self::$subjectMap = $subjects;
 
-        array_walk( self::$subjectMap, function ( $element ) {
+        array_walk(self::$subjectMap, function ($element) {
             self::$subjectHashMap[ $element[ 'key' ] ] = $element[ 'display' ];
-        } );
-
+        });
     }
 
     //get list of languages, as RFC3066
-    public static function getEnabledDomains() {
+    public static function getEnabledDomains()
+    {
         return self::$subjectMap;
     }
 
     /**
      * @return array
      */
-    public static function getEnabledHashMap(): array {
+    public static function getEnabledHashMap(): array
+    {
         return self::$subjectHashMap;
     }
 

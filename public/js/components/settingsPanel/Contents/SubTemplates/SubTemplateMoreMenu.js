@@ -138,7 +138,7 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
           setTemplateName(currentTemplate.name)
         }}
       >
-        <IconEdit />
+        <IconEdit size={18} />
         Rename
       </MenuButtonItem>
       <MenuButtonItem
@@ -147,7 +147,7 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
         disabled={isRequestInProgress}
         onMouseUp={deleteTemplateConfirmation}
       >
-        <Trash size={16} />
+        <Trash size={18} />
         Delete
       </MenuButtonItem>
     </MenuButton>

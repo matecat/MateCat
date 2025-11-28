@@ -13,6 +13,9 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\AfterClass;
+use PHPUnit\Framework\Attributes\BeforeClass;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Redis\RedisHandler;
@@ -21,13 +24,13 @@ use Utils\Tools\Utils;
 
 class CacheSystemThroughConcreteClassesTest extends AbstractTest {
     private static string $email;
-    private static string $uid;
+    private static string $uid = '';
     private static string $sql_delete_user;
 
     /**
-     * @beforeClass
      * @throws Exception
      */
+    #[BeforeClass]
     public static function init(): void {
         /**
          * user insertion
@@ -45,6 +48,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
      * @afterClass
      * @throws ReflectionException
      */
+    #[AfterClass]
     public static function clean(): void {
         Database::obtain()->getConnection()->query( self::$sql_delete_user );
         $client = ( new RedisHandler )->getConnection();
@@ -56,6 +60,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
      * @return void
      * @throws ReflectionException
      */
+    #[Test]
     public function test_shouldSetAndGetFromCache() {
 
         $client = ( new RedisHandler )->getConnection();
@@ -96,6 +101,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
      * @depends test_shouldSetAndGetFromCache
      * @throws ReflectionException
      */
+    #[Test]
     public function test_shouldDestroyCache() {
 
         $client = ( new RedisHandler )->getConnection();

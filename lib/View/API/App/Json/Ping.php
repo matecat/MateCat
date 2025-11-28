@@ -14,13 +14,14 @@ use Utils\Tools\Utils;
 
 class Ping {
 
-    protected $controller;
+    protected KleinController $controller;
 
     public function __construct( KleinController $kleinController ) {
         $this->controller = $kleinController;
     }
 
-    public function render() {
+    public function render(): array
+    {
 
         $_request_uri = parse_url( $this->controller->getRequest()->server()[ 'REQUEST_URI' ] );
         if ( isset( $_request_uri[ 'query' ] ) ) {

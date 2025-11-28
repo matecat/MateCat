@@ -1,7 +1,6 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import Trash from '../../../../../img/icons/Trash'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
@@ -68,7 +67,6 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             data-testid="delete-mt"
             onClick={deleteMT}
           >
-            <Trash size={12} />
             Delete
           </button>
         </div>
