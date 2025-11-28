@@ -82,21 +82,6 @@ function useSegmentsLoader({
             current.thereAreNoItemsAfter = true
         }
         setResult({data, segmentId: segmentIdValue, where: data.where})
-
-        // Sentry tracking
-        try {
-          if (
-            isAnalysisCompleted.current &&
-            where === 'center' &&
-            (typeof data.files === 'undefined' ||
-              (data.files && !Object.keys(data.files).length))
-          ) {
-            const trackingMessage = `getSegments (jid: ${idJob}, password: ${password}, step: ${where === 'center' ? INIT_NUM_SEGMENTS : MORE_NUM_SEGMENTS}, segment: ${segmentIdValue}, where: ${where}) response: ${JSON.stringify(data)}`
-            CommonUtils.dispatchTrackingError(trackingMessage)
-          }
-        } catch (error) {
-          //
-        }
       })
       .catch((errors) => {
         if (wasCleaned) return

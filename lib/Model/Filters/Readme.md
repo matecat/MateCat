@@ -131,28 +131,28 @@ Payload example:
 
 ```json
 {
-    "name": "test",
-    "rules": {
-        "xliff12": [
-            {
-                "analysis": "new",
-                "states": [
-                    "new",
-                    "translated",
-                    "needs-translation"
-                ]
-            }
-        ],
-        "xliff20": [
-            {
-                "analysis": "new",
-                "states": [
-                    "final",
-                    "x-pippo"
-                ]
-            }
+  "name": "test",
+  "rules": {
+    "xliff12": [
+      {
+        "analysis": "new",
+        "states": [
+          "new",
+          "translated",
+          "needs-translation"
         ]
-    }
+      }
+    ],
+    "xliff20": [
+      {
+        "analysis": "new",
+        "states": [
+          "final",
+          "x-pippo"
+        ]
+      }
+    ]
+  }
 }
 ```
 
@@ -160,31 +160,31 @@ Response example:
 
 ```json
 {
-    "id": 1,
-    "uid": 1,
-    "name": "test",
-    "rules": {
-        "xliff12": [
-            {
-                "states": [
-                    "new",
-                    "translated",
-                    "needs-translation"
-                ],
-                "analysis": "new"
-            }
+  "id": 1,
+  "uid": 1,
+  "name": "test",
+  "rules": {
+    "xliff12": [
+      {
+        "states": [
+          "new",
+          "translated",
+          "needs-translation"
         ],
-        "xliff20": [
-            {
-                "states": [
-                    "final"
-                ],
-                "analysis": "new"
-            }
-        ]
-    },
-    "createdAt": "2024-07-29T17:18:05+02:00",
-    "modifiedAt": "2024-08-08T15:47:09+02:00"
+        "analysis": "new"
+      }
+    ],
+    "xliff20": [
+      {
+        "states": [
+          "final"
+        ],
+        "analysis": "new"
+      }
+    ]
+  },
+  "createdAt": "2024-07-29T17:18:05+02:00",
+  "modifiedAt": "2024-08-08T15:47:09+02:00"
 }
 ```
 
@@ -200,7 +200,7 @@ If no errors are thrown the endpoint will display the id of the new template:
 
 ```json
 {
-    "id": 1
+  "id": 1
 }
 ```
 
@@ -214,68 +214,68 @@ GET /api/v3/xliff-config-template/
 
 ```json
 {
-    "current_page": 1,
-    "per_page": 20,
-    "last_page": 1,
-    "total_count": 3,
-    "prev": null,
-    "next": null,
-    "items": [
-        {
-            "id": 1,
-            "uid": 1,
-            "name": "test",
-            "rules": {
-                "xliff12": [
-                    {
-                        "states": [
-                            "new"
-                        ],
-                        "analysis": "new",
-                        "editor": "ignore-target-content"
-                    }
-                ],
-                "xliff20": [
-                    {
-                        "states": [
-                            "final"
-                        ],
-                        "analysis": "new",
-                        "editor": "ignore-target-content"
-                    }
-                ]
-            },
-            "createdAt": "2024-05-31T16:49:41+02:00",
-            "modifiedAt": "2024-05-31T17:16:56+02:00"
-        },
-        {
-            "id": 2,
-            "uid": 1,
-            "name": "other test",
-            "rules": {
-                "xliff12": [
-                    {
-                        "states": [
-                            "new"
-                        ],
-                        "analysis": "new",
-                        "editor": "ignore-target-content"
-                    }
-                ],
-                "xliff20": [
-                    {
-                        "states": [
-                            "final"
-                        ],
-                        "analysis": "new",
-                        "editor": "ignore-target-content"
-                    }
-                ]
-            },
-            "createdAt": "2024-05-31T16:57:59+02:00",
-            "modifiedAt": "2024-05-31T17:09:03+02:00"
-        }
-    ]
+  "current_page": 1,
+  "per_page": 20,
+  "last_page": 1,
+  "total_count": 3,
+  "prev": null,
+  "next": null,
+  "items": [
+    {
+      "id": 1,
+      "uid": 1,
+      "name": "test",
+      "rules": {
+        "xliff12": [
+          {
+            "states": [
+              "new"
+            ],
+            "analysis": "new",
+            "editor": "ignore-target-content"
+          }
+        ],
+        "xliff20": [
+          {
+            "states": [
+              "final"
+            ],
+            "analysis": "new",
+            "editor": "ignore-target-content"
+          }
+        ]
+      },
+      "createdAt": "2024-05-31T16:49:41+02:00",
+      "modifiedAt": "2024-05-31T17:16:56+02:00"
+    },
+    {
+      "id": 2,
+      "uid": 1,
+      "name": "other test",
+      "rules": {
+        "xliff12": [
+          {
+            "states": [
+              "new"
+            ],
+            "analysis": "new",
+            "editor": "ignore-target-content"
+          }
+        ],
+        "xliff20": [
+          {
+            "states": [
+              "final"
+            ],
+            "analysis": "new",
+            "editor": "ignore-target-content"
+          }
+        ]
+      },
+      "createdAt": "2024-05-31T16:57:59+02:00",
+      "modifiedAt": "2024-05-31T17:09:03+02:00"
+    }
+  ]
 }
 ```
 
@@ -293,32 +293,32 @@ Response example:
 
 ```json
 {
-    "id": 1,
-    "uid": 1,
-    "name": "test",
-    "rules": {
-        "xliff12": [
-            {
-                "states": [
-                    "new"
-                ],
-                "analysis": "new",
-                "editor": "ignore-target-content"
-            }
+  "id": 1,
+  "uid": 1,
+  "name": "test",
+  "rules": {
+    "xliff12": [
+      {
+        "states": [
+          "new"
         ],
-        "xliff20": [
-            {
-                "states": [
-                    "final"
-                ],
-                "analysis": "new",
-                "editor": "ignore-target-content"
-            }
-        ]
-    },
-    "createdAt": "2024-05-31T16:49:41+02:00",
-    "modifiedAt": "2024-05-31T17:16:53+02:00",
-    "deletedAt": null
+        "analysis": "new",
+        "editor": "ignore-target-content"
+      }
+    ],
+    "xliff20": [
+      {
+        "states": [
+          "final"
+        ],
+        "analysis": "new",
+        "editor": "ignore-target-content"
+      }
+    ]
+  },
+  "createdAt": "2024-05-31T16:49:41+02:00",
+  "modifiedAt": "2024-05-31T17:16:53+02:00",
+  "deletedAt": null
 }
 ```
 
@@ -348,12 +348,18 @@ Payload example:
 {
   "name": "test",
   "json": {
-       "extract_arrays": true,
-       "translate_keys": ["pappa"]
-  	},
-    "yaml": {
-        "translate_keys": ["saas", "ddddd", "sss"]
-    }
+    "extract_arrays": true,
+    "translate_keys": [
+      "pappa"
+    ]
+  },
+  "yaml": {
+    "translate_keys": [
+      "saas",
+      "ddddd",
+      "sss"
+    ]
+  }
 }
 ```
 
@@ -470,7 +476,7 @@ If no errors are thrown the endpoint will display the id of the new template:
 
 ```json
 {
-    "id": 1
+  "id": 1
 }
 ```
 
@@ -557,7 +563,6 @@ Response example:
   "modifiedAt": "2024-08-12T18:02:44+02:00"
 }
 ```
-
 
 ### Get values for the default template
 

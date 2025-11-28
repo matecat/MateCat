@@ -106,8 +106,8 @@ abstract class AbstractController extends BaseKleinViewController {
         }
 
         $filterArgs = [
-                $this->tokenName   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
-                $this->dataKeyName => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                $this->tokenName   => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                $this->dataKeyName => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
         ];
 
         $__getInput = filter_input_array( INPUT_GET, $filterArgs );
@@ -121,7 +121,7 @@ abstract class AbstractController extends BaseKleinViewController {
 
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->validateTheRequest();
     }
 

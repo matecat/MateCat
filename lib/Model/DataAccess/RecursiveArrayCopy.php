@@ -12,7 +12,8 @@ namespace Model\DataAccess;
 use ReflectionObject;
 use ReflectionProperty;
 
-trait RecursiveArrayCopy {
+trait RecursiveArrayCopy
+{
 
     /**
      * Converts the public properties of an object into an associative array.
@@ -27,46 +28,41 @@ trait RecursiveArrayCopy {
      *
      * @return array An associative array of the object's public properties.
      */
-    public function toArray( array $mask = null, object $class = null ): array {
-
+    public function toArray(array $mask = null, object $class = null): array
+    {
         $attributes      = [];
         $reflectable     = $class ?? $this;
-        $reflectionClass = new ReflectionObject( $reflectable );
+        $reflectionClass = new ReflectionObject($reflectable);
 
-        foreach ( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) as $property ) {
-
+        foreach ($reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
             $propertyName = $property->getName();
 
             // Skip properties not included in the mask, if a mask is provided.
-            if ( $mask && !in_array( $propertyName, $mask ) ) {
+            if ($mask && !in_array($propertyName, $mask)) {
                 continue;
             }
 
             // Check if the property is initialized and retrieve its value.
-            if ( $property->isInitialized( $reflectable ) ) {
-                $value = $property->getValue( $reflectable );
+            if ($property->isInitialized($reflectable)) {
+                $value = $property->getValue($reflectable);
             } else {
                 $value = null;
             }
 
             // Recursively convert objects to arrays.
-            if ( is_object( $value ) ) {
-                $attributes[ $propertyName ] = $this->toArray( [], $value );
-            }
-            // Recursively process arrays, preserving keys.
-            elseif ( is_array( $value ) ) {
-
-                if ( empty( $value ) ) {
+            if (is_object($value)) {
+                $attributes[ $propertyName ] = $this->toArray([], $value);
+            } // Recursively process arrays, preserving keys.
+            elseif (is_array($value)) {
+                if (empty($value)) {
                     $attributes[ $propertyName ] = [];
                     continue;
                 }
 
-                foreach ( $value as $k => $v ) {
-                    $attributes[ $propertyName ][ $k ] = is_object( $v ) ? $this->toArray( [], $v ) : $v;
+                foreach ($value as $k => $v) {
+                    $attributes[ $propertyName ][ $k ] = is_object($v) ? $this->toArray([], $v) : $v;
                 }
-
-            }
-            // Assign scalar values directly.
+            } // Assign scalar values directly.
             else {
                 $attributes[ $propertyName ] = $value;
             }

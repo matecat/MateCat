@@ -106,7 +106,8 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
           {
             id: SETTINGS_PANEL_TABS.other,
             label: 'Other',
-            description: 'Adjust other project creation settings.',
+            description:
+              'Adjust other project creation settings. <a href="https://guides.matecat.com/settings#other" target="_blank">More details</a>',
             component: <OtherTab />,
           },
         ]
@@ -125,7 +126,8 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
                 {
                   id: SETTINGS_PANEL_TABS.editorOther,
                   label: 'Other',
-                  description: 'Adjust other project creation settings.',
+                  description:
+                    'Adjust other project creation settings. <a href="https://guides.matecat.com/settings#other" target="_blank">More details</a>',
                   component: <EditorOtherTab />,
                 },
               ]

@@ -442,7 +442,7 @@ test('DeepL and glossary', async () => {
         deepl_engine_type: undefined,
         deepl_formality: 'prefer_more',
         deepl_id_glossary: '316e350e-81d1-4781-900c-2ab69aa4e6f4',
-        pre_translate_files: undefined,
+        enable_mt_analysis: undefined,
       },
     },
   })

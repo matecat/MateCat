@@ -17,7 +17,8 @@ use Utils\Engines\Altlang;
  * This class contains the default parameters for an Altlang EnginesFactory CREATION
  *
  */
-class AltlangStruct extends EngineStruct {
+class AltlangStruct extends EngineStruct
+{
 
     /**
      * @var ?string
@@ -57,9 +58,10 @@ class AltlangStruct extends EngineStruct {
 
     /**
      * An empty struct
-     * @return EngineStruct
+     * @return AltlangStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new AltlangStruct();
     }
 

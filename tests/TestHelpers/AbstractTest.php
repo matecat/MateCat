@@ -26,7 +26,7 @@ abstract class AbstractTest extends TestCase {
     public function tearDown(): void {
         parent::tearDown();
         $resultTime = microtime( true ) - $this->thisTest;
-        echo " " . str_pad( get_class( $this ) . " " . $this->getName( false ), 35, " ", STR_PAD_RIGHT ) . " - Did in " . $resultTime . " seconds.\n";
+        echo " " . str_pad( get_class( $this ) . "::" . $this->name(), 35 ) . " - Did in " . $resultTime . " seconds.\n";
     }
 
     /**

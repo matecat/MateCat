@@ -6,6 +6,7 @@ import React, {
   useCallback,
   forwardRef,
   useImperativeHandle,
+  useLayoutEffect,
 } from 'react'
 import PropTypes from 'prop-types'
 
@@ -26,6 +27,7 @@ export const Dropdown = forwardRef(
       searchPlaceholder = 'Search...',
       multipleSelect = 'off',
       tooltipPosition = 'left',
+      isActiveOptionOnTop = true,
       onSelect = () => {},
       onToggleOption = () => {},
       onSearchBarFocus = () => {},
@@ -42,6 +44,7 @@ export const Dropdown = forwardRef(
     const [rowTooltip, setRowTooltip] = useState()
 
     const listRef = useRef()
+    const optionActiveRef = useRef()
     const textInputRef = useRef()
     const queryFilterRef = useRef('')
     const itemsOnTopRef = useRef(activeOptions)
@@ -136,7 +139,9 @@ export const Dropdown = forwardRef(
               activeOptions.filter((activeOption) => {
                 return activeOption.id === option.id
               }).length > 0
-            const isOnTop = isActiveOption || !!isActiveOptions
+            const isOnTop = isActiveOptionOnTop
+              ? isActiveOption || !!isActiveOptions
+              : false
             if (isOnTop) {
               onTopOptions.push(option)
             } else {
@@ -294,6 +299,17 @@ export const Dropdown = forwardRef(
       getFilteredOptions,
     ])
 
+    useLayoutEffect(() => {
+      if (typeof optionActiveRef?.current?.scrollIntoView === 'function') {
+        requestAnimationFrame(() =>
+          optionActiveRef.current.scrollIntoView({
+            behavior: 'instant',
+            block: 'nearest',
+          }),
+        )
+      }
+    }, [activeOption])
+
     useEffect(() => {
       setHighlightedOption(undefined)
     }, [queryFilter])
@@ -335,6 +351,7 @@ export const Dropdown = forwardRef(
         <Fragment key={index}>
           {beforeRow && beforeRow}
           <li
+            ref={isActiveOption ? optionActiveRef : null}
             className={`dropdown__option ${
               isActiveOption || isActiveOptions
                 ? 'dropdown__option--is-active-option'
@@ -484,6 +501,7 @@ Dropdown.propTypes = {
   searchPlaceholder: PropTypes.string,
   multipleSelect: PropTypes.oneOf(['off', 'dropdown', 'modal']),
   tooltipPosition: PropTypes.oneOf(['left', 'right']),
+  isActiveOptionOnTop: PropTypes.bool,
   onSelect: PropTypes.func,
   onToggleOption: PropTypes.func,
   onSearchBarFocus: PropTypes.func,

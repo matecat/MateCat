@@ -13,7 +13,6 @@ import ChevronDown from '../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
 import IconClose from '../icons/IconClose'
-import qaCheckGlossaryHighlightComponent from '../segments/GlossaryComponents/QaCheckGlossaryHighlight.component'
 
 const mergeClassNames = (...args) => {
   return (
@@ -50,12 +49,14 @@ export const Select = ({
   offsetParent,
   onSelect = () => {},
   onToggleOption = () => {},
+  onCloseSelect = () => {},
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
   maxHeightDroplist = 128,
   isPortalDropdown,
+  isActiveOptionOnTop,
   dropdownClassName,
   showResetButton = false,
   resetFunction = () => {},
@@ -109,6 +110,7 @@ export const Select = ({
     setDropdownVisibility(false)
     setDropdownReversed(false)
     setPortalCoords()
+    onCloseSelect?.()
   }
   const toggleDropdown = () => {
     if (!isDisabled) {
@@ -298,6 +300,7 @@ export const Select = ({
           onToggleOption,
           multipleSelect,
           tooltipPosition,
+          isActiveOptionOnTop,
           optionsSelectedCopySingular,
           optionsSelectedCopyPlural,
           resetSelectedOptions,
@@ -405,6 +408,7 @@ Select.propTypes = {
   checkSpaceToReverse: PropTypes.bool,
   maxHeightDroplist: PropTypes.number,
   isPortalDropdown: PropTypes.bool,
+  isActiveOptionOnTop: PropTypes.bool,
   dropdownClassName: PropTypes.string,
   showResetButton: PropTypes.bool,
   resetFunction: PropTypes.func,

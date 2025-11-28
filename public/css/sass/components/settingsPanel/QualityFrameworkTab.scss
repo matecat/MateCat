@@ -146,9 +146,10 @@
       .column {
         display: grid;
         grid-template-columns: 1fr 10%;
+        align-items: center;
         height: 32px;
         border: 1px solid colors.$grey3;
-        padding: 5px 10px;
+        padding: 0 10px;
 
         .label {
           display: inherit;

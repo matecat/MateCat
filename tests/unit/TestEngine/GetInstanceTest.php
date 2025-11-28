@@ -18,7 +18,7 @@ use Utils\Registry\AppConfig;
  */
 class GetInstanceTest extends AbstractTest {
     /**
-     * @var \Model\DataAccess\Database
+     * @var Database
      */
     protected $database_instance;
     protected $sql_insert_user;

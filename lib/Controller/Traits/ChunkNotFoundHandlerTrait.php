@@ -7,7 +7,8 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use ReflectionException;
 
-trait ChunkNotFoundHandlerTrait {
+trait ChunkNotFoundHandlerTrait
+{
 
     /**
      * @var JobStruct
@@ -21,13 +22,13 @@ trait ChunkNotFoundHandlerTrait {
      * @return ?JobStruct
      * @throws ReflectionException
      */
-    protected function getJob( $id_job, $password ): ?JobStruct {
+    protected function getJob($id_job, $password): ?JobStruct
+    {
+        $job = JobDao::getByIdAndPassword($id_job, $password);
 
-        $job = JobDao::getByIdAndPassword( $id_job, $password );
-
-        if ( null === $job ) {
-            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
-            if ( $chunkReview ) {
+        if (null === $job) {
+            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
+            if ($chunkReview) {
                 $job = $chunkReview->getChunk();
             }
         }
@@ -38,15 +39,16 @@ trait ChunkNotFoundHandlerTrait {
     /**
      * Return 404 if chunk was deleted
      */
-    protected function return404IfTheJobWasDeleted() {
-        if ( $this->chunk->isDeleted() ) {
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
+    protected function return404IfTheJobWasDeleted(): void
+    {
+        if ($this->chunk->isDeleted()) {
+            $this->response->status()->setCode(404);
+            $this->response->json([
                     'errors' => [
                             'code'    => 0,
                             'message' => 'No job found.'
                     ]
-            ] );
+            ]);
             exit();
         }
     }

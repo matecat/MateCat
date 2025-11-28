@@ -18,6 +18,7 @@ class ValidSecretTest extends AbstractTest {
 
         $this->test_data          = new StdClass();
         $this->test_data->api_key = Factory_ApiKey::create( [] );
+        parent::setUp();
     }
 
 

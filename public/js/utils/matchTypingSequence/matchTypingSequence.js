@@ -1,5 +1,5 @@
 /**
- * Match typing sequence
+ * Matches typing sequence
  *
  * @param {Array} sequence
  * @param {number} [delay=1000]

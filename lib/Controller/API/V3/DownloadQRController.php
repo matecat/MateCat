@@ -3,19 +3,17 @@
 namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
-use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use DOMDocument;
 use Exception;
-use Model\Exceptions\NotFoundException;
+use JetBrains\PhpStorm\NoReturn;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\QualityReportSegmentModel;
-use Model\QualityReport\QualityReportSegmentStruct;
-use ZipArchive;
 
 
-class DownloadQRController extends KleinController {
-    use ChunkNotFoundHandlerTrait;
+class DownloadQRController extends KleinController
+{
 
     /**
      * @var string|null
@@ -30,77 +28,51 @@ class DownloadQRController extends KleinController {
     /**
      * @var array
      */
-    private array $allowedFormats = [ 'csv', 'json', 'xml' ];
+    private array $allowedFormats = ['csv', 'json', 'xml'];
 
     /**
      * Download QR to a file
+     * @throws Exception
      */
-    public function download() {
+    public function download(): void
+    {
+        $idJob                 = $this->request->param('jid');
+        $password              = $this->request->param('password');
+        $this->format          = $this->request->param('format', 'csv');
+        $this->segmentsPerFile = $this->request->param('segmentsPerFile', 20);
 
-        $idJob                 = $this->request->param( 'jid' );
-        $password              = $this->request->param( 'password' );
-        $this->format          = $this->request->param( 'format', 'csv' );
-        $this->segmentsPerFile = $this->request->param( 'segmentsPerFile', 20 );
-
-        if ( $this->segmentsPerFile > 100 ) {
+        if ($this->segmentsPerFile > 100) {
             $this->segmentsPerFile = 100;
         }
 
-        if ( !in_array( $this->format, $this->allowedFormats ) ) {
-            $this->response->status()->setCode( 403 );
-            $this->response->json( [
-                    'errors' => [
-                            'code'    => 0,
-                            'message' => 'Invalid format. Allowed formats are [' . implode( ', ', $this->allowedFormats ) . ']'
-                    ]
-            ] );
-            exit();
+        if (!in_array($this->format, $this->allowedFormats)) {
+            throw new AuthorizationError('Invalid format. Allowed formats are [' . implode(', ', $this->allowedFormats) . ']');
         }
 
-        try {
-            $chunk = ChunkDao::getByIdAndPassword( $idJob, $password );
+        $chunk = ChunkDao::getByIdAndPassword($idJob, $password);
 
-            $prefix   = "QR_" . $idJob . "_" . $password . "_";
-            $filePath = tempnam( "/tmp", $prefix );
+        $prefix   = "QR_" . $idJob . "_" . $password . "_";
+        $filePath = tempnam("/tmp", $prefix);
 
-            $fileContent = $this->composeFileContent( $chunk );
-            file_put_contents( $filePath, $fileContent );
-            $this->downloadFile( $this->fileMimeType(), $prefix . date( 'YmdHis' ) . '.' . $this->format, $filePath );
-
-        } catch ( NotFoundException $e ) {
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
-                    'errors' => [
-                            'code'    => 0,
-                            'message' => $e->getMessage()
-                    ]
-            ] );
-            exit();
-        } catch ( Exception $e ) {
-            $this->response->status()->setCode( 500 );
-            $this->response->json( [
-                    'errors' => [
-                            'code'    => 0,
-                            'message' => $e->getMessage()
-                    ]
-            ] );
-            exit();
-        }
+        $fileContent = $this->composeFileContent($chunk);
+        file_put_contents($filePath, $fileContent);
+        $this->downloadFile($this->fileMimeType(), $prefix . date('YmdHis') . '.' . $this->format, $filePath);
     }
 
     /**
      * @return string
      */
-    private function fileMimeType(): string {
-        if ( $this->format === 'json' ) {
+    private function fileMimeType(): string
+    {
+        if ($this->format === 'json') {
             return 'application/json';
         }
 
-        if ( $this->format === 'csv' ) {
+        if ($this->format === 'csv') {
             return 'text/csv';
         }
 
-        if ( $this->format === 'xml' ) {
+        if ($this->format === 'xml') {
             return 'text/xml';
         }
 
@@ -108,16 +80,16 @@ class DownloadQRController extends KleinController {
     }
 
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return bool|false|string
      * @throws Exception
      */
-    private function composeFileContent( JobStruct $chunk ) {
-
+    private function composeFileContent(JobStruct $chunk): bool|string
+    {
         $data = [];
 
-        $qrSegmentModel = new QualityReportSegmentModel( $chunk );
+        $qrSegmentModel = new QualityReportSegmentModel($chunk);
 
         // categories issues
         $project    = $chunk->getProject();
@@ -126,35 +98,35 @@ class DownloadQRController extends KleinController {
 
         $categoryIssues = [];
 
-        foreach ( $categories as $category ) {
-            foreach ( $category[ 'severities' ] as $severity ) {
+        foreach ($categories as $category) {
+            foreach ($category[ 'severities' ] as $severity) {
                 $categoryIssues[] = $category[ 'label' ] . ' [' . $severity[ 'label' ] . ']';
             }
         }
 
         $ids = [];
-        $this->buildArrayOfSegmentIds( $qrSegmentModel, $this->segmentsPerFile, 0, $ids );
+        $this->buildArrayOfSegmentIds($qrSegmentModel, $this->segmentsPerFile, 0, $ids);
 
         // merge all data here
-        foreach ( $ids as $segments_ids ) {
-            $data = array_merge( $data, $this->buildFileContentFromArrayOfSegmentIds( $qrSegmentModel, $segments_ids ) );
+        foreach ($ids as $segments_ids) {
+            $data = array_merge($data, $this->buildFileContentFromArrayOfSegmentIds($qrSegmentModel, $segments_ids));
         }
 
         // compose a unique file
-        if ( $this->format === 'json' ) {
-            $uniqueFile = $this->createJsonFile( $data, $categoryIssues );
+        if ($this->format === 'json') {
+            $uniqueFile = $this->createJsonFile($data, $categoryIssues);
         }
 
-        if ( $this->format === 'csv' ) {
-            $uniqueFile = $this->createCSVFile( $data, $categoryIssues );
+        if ($this->format === 'csv') {
+            $uniqueFile = $this->createCSVFile($data, $categoryIssues);
         }
 
-        if ( $this->format === 'xml' ) {
-            $uniqueFile = $this->createXMLFile( $data, $categoryIssues );
+        if ($this->format === 'xml') {
+            $uniqueFile = $this->createXMLFile($data, $categoryIssues);
         }
 
-        if ( !isset( $uniqueFile ) ) {
-            throw new Exception( 'Merging files for download failed.' );
+        if (!isset($uniqueFile)) {
+            throw new Exception('Merging files for download failed.');
         }
 
         return $uniqueFile;
@@ -169,17 +141,17 @@ class DownloadQRController extends KleinController {
      * @return void
      * @throws Exception
      */
-    private function buildArrayOfSegmentIds( QualityReportSegmentModel $qrSegmentModel, int $step, int $refSegment, array &$ids ): void {
-
+    private function buildArrayOfSegmentIds(QualityReportSegmentModel $qrSegmentModel, int $step, int $refSegment, array &$ids): void
+    {
         $where  = "after";
-        $filter = [ 'filter' => null ];
+        $filter = ['filter' => null];
 
-        $segments_ids = $qrSegmentModel->getSegmentsIdForQR( $step, $refSegment, $where, $filter );
+        $segments_ids = $qrSegmentModel->getSegmentsIdForQR($step, $refSegment, $where, $filter);
 
-        if ( !empty( $segments_ids ) ) {
-            $refSegment = end( $segments_ids );
+        if (!empty($segments_ids)) {
+            $refSegment = end($segments_ids);
             $ids[]      = $segments_ids;
-            $this->buildArrayOfSegmentIds( $qrSegmentModel, $step, $refSegment, $ids );
+            $this->buildArrayOfSegmentIds($qrSegmentModel, $step, $refSegment, $ids);
         }
     }
 
@@ -190,28 +162,26 @@ class DownloadQRController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function buildFileContentFromArrayOfSegmentIds( QualityReportSegmentModel $qrSegmentModel, $segments_ids ): array {
-        $segments = $qrSegmentModel->getSegmentsForQR( $segments_ids );
+    private function buildFileContentFromArrayOfSegmentIds(QualityReportSegmentModel $qrSegmentModel, $segments_ids): array
+    {
+        $segments = $qrSegmentModel->getSegmentsForQR($segments_ids);
 
         $data = [];
 
-        /** @var QualityReportSegmentStruct $segment */
-        foreach ( $segments as $segment ) {
-
+        foreach ($segments as $segment) {
             $issues   = [];
             $comments = [];
 
-            foreach ( $segment->issues as $issue ) {
-
+            foreach ($segment->issues as $issue) {
                 $label = $issue->issue_category . ' [' . $issue->issue_severity . ']';
 
-                if ( !isset( $issues[ $label ] ) ) {
+                if (!isset($issues[ $label ])) {
                     $issues[ $label ] = 0;
                 }
 
                 $issues[ $label ] = $issues[ $label ] + 1;
 
-                foreach ( $issue->comments as $comment ) {
+                foreach ($issue->comments ?? [] as $comment) {
                     $comments[ $label ][] = $comment;
                 }
             }
@@ -240,8 +210,8 @@ class DownloadQRController extends KleinController {
                     $segment->secs_per_word,
                     $segment->parsed_time_to_edit[ 0 ] . ":" . $segment->parsed_time_to_edit[ 1 ] . ":" . $segment->parsed_time_to_edit[ 2 ] . "." . $segment->parsed_time_to_edit[ 3 ],
                     $segment->last_translation,
-                    ( !empty( $segment->last_revisions ) and isset( $segment->last_revisions[ 0 ] ) ) ? $segment->last_revisions[ 0 ][ 'translation' ] : null,
-                    ( !empty( $segment->last_revisions ) and isset( $segment->last_revisions[ 1 ] ) ) ? $segment->last_revisions[ 1 ][ 'translation' ] : null,
+                    (!empty($segment->last_revisions) and isset($segment->last_revisions[ 0 ])) ? $segment->last_revisions[ 0 ][ 'translation' ] : null,
+                    (!empty($segment->last_revisions) and isset($segment->last_revisions[ 1 ])) ? $segment->last_revisions[ 1 ][ 'translation' ] : null,
                     $segment->pee_translation_revise,
                     $segment->pee_translation_suggestion,
                     $segment->version_number,
@@ -261,8 +231,8 @@ class DownloadQRController extends KleinController {
      *
      * @return bool|false|string
      */
-    private function createCSVFile( array $data, array $categoryIssues = [] ) {
-
+    private function createCSVFile(array $data, array $categoryIssues = []): bool|string
+    {
         $headings = [
                 "sid",
                 "target",
@@ -296,7 +266,7 @@ class DownloadQRController extends KleinController {
                 "is_pre_translated",
         ];
 
-        foreach ( $categoryIssues as $categoryIssue ) {
+        foreach ($categoryIssues as $categoryIssue) {
             $headings[] = $categoryIssue;
             $headings[] = "comments";
         }
@@ -304,69 +274,67 @@ class DownloadQRController extends KleinController {
         $csvData   = [];
         $csvData[] = $headings;
 
-        foreach ( $data as $datum ) {
-
+        foreach ($data as $datum) {
             // comments
             $comments = $datum[ 31 ];
 
             // issues
             $issues = $datum[ 30 ];
-            unset( $datum[ 30 ] );
-            unset( $datum[ 31 ] );
+            unset($datum[ 30 ]);
+            unset($datum[ 31 ]);
 
-            foreach ( $categoryIssues as $categoryIssue ) {
-                $count         = ( isset( $issues[ $categoryIssue ] ) ) ? $issues[ $categoryIssue ] : 0;
+            foreach ($categoryIssues as $categoryIssue) {
+                $count         = (isset($issues[ $categoryIssue ])) ? $issues[ $categoryIssue ] : 0;
                 $issueComments = [];
 
-                if ( isset( $comments[ $categoryIssue ] ) ) {
-                    foreach ( $comments[ $categoryIssue ] as $issueComment ) {
+                if (isset($comments[ $categoryIssue ])) {
+                    foreach ($comments[ $categoryIssue ] as $issueComment) {
                         $issueComments[] = $issueComment[ 'comment' ];
                     }
                 }
 
                 $datum[] = $count;
-                $datum[] = implode( "|||", $issueComments );
+                $datum[] = implode("|||", $issueComments);
             }
 
-            $csvData[] = array_values( $datum );
+            $csvData[] = array_values($datum);
         }
 
-        $tmpFilePath = tempnam( "/tmp", '' );
+        $tmpFilePath = tempnam("/tmp", '');
 
-        $fp = fopen( $tmpFilePath, 'w' );
-        foreach ( $csvData as $fields ) {
-            if ( !fputcsv( $fp, $fields ) ) {
+        $fp = fopen($tmpFilePath, 'w');
+        foreach ($csvData as $fields) {
+            if (!fputcsv($fp, $fields)) {
                 return false;
             }
         }
-        fclose( $fp );
+        fclose($fp);
 
-        $fileContent = file_get_contents( $tmpFilePath );
-        unlink( $tmpFilePath );
+        $fileContent = file_get_contents($tmpFilePath);
+        unlink($tmpFilePath);
 
         return $fileContent;
     }
 
-    private function createXMLFile( array $data, array $categoryIssues = [] ) {
-
+    private function createXMLFile(array $data, array $categoryIssues = []): false|string
+    {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<segments>';
 
-        foreach ( $data as $datum ) {
-
+        foreach ($data as $datum) {
             // comments
             $comments = $datum[ 31 ];
 
             // issues
             $issues = $datum[ 30 ];
-            unset( $datum[ 30 ] );
+            unset($datum[ 30 ]);
             $issueValues = [];
 
-            foreach ( $categoryIssues as $categoryIssue ) {
-                $count                         = ( isset( $issues[ $categoryIssue ] ) ) ? $issues[ $categoryIssue ] : 0;
+            foreach ($categoryIssues as $categoryIssue) {
+                $count                         = (isset($issues[ $categoryIssue ])) ? $issues[ $categoryIssue ] : 0;
                 $issueValues[ $categoryIssue ] = [
                         'count'    => $count,
-                        'comments' => ( isset( $comments[ $categoryIssue ] ) ) ? $comments[ $categoryIssue ] : [],
+                        'comments' => (isset($comments[ $categoryIssue ])) ? $comments[ $categoryIssue ] : [],
                 ];
             }
 
@@ -405,8 +373,7 @@ class DownloadQRController extends KleinController {
             //$issueValues
             $xml .= '<issues>';
 
-            foreach ( $issueValues as $label => $issueValue ) {
-
+            foreach ($issueValues as $label => $issueValue) {
                 $count    = $issueValue[ 'count' ];
                 $comments = $issueValue[ 'comments' ];
 
@@ -415,8 +382,8 @@ class DownloadQRController extends KleinController {
                 $xml .= '<count>' . $count . '</count>';
                 $xml .= '<comments>';
 
-                if ( !empty( $comments ) ) {
-                    foreach ( $comments as $comment ) {
+                if (!empty($comments)) {
+                    foreach ($comments as $comment) {
                         $xml .= '<comment>';
                         $xml .= '<id>' . $comment[ 'id' ] . '</id>';
                         $xml .= '<uid>' . $comment[ 'uid' ] . '</uid>';
@@ -440,7 +407,7 @@ class DownloadQRController extends KleinController {
 
         $dom                     = new DOMDocument;
         $dom->preserveWhiteSpace = false;
-        $dom->loadXML( $xml, LIBXML_NOENT );
+        $dom->loadXML($xml, LIBXML_NOENT);
         $dom->formatOutput = true;
 
         return $dom->saveXML();
@@ -452,25 +419,24 @@ class DownloadQRController extends KleinController {
      *
      * @return false|string
      */
-    private function createJsonFile( array $data, array $categoryIssues = [] ) {
-
+    private function createJsonFile(array $data, array $categoryIssues = []): false|string
+    {
         $jsonData = [];
 
-        foreach ( $data as $datum ) {
-
+        foreach ($data as $datum) {
             // comments
             $comments = $datum[ 31 ];
 
             // issues
             $issues = $datum[ 30 ];
-            unset( $datum[ 30 ] );
+            unset($datum[ 30 ]);
             $issueValues = [];
 
-            foreach ( $categoryIssues as $categoryIssue ) {
-                $count                         = ( isset( $issues[ $categoryIssue ] ) ) ? $issues[ $categoryIssue ] : 0;
+            foreach ($categoryIssues as $categoryIssue) {
+                $count                         = (isset($issues[ $categoryIssue ])) ? $issues[ $categoryIssue ] : 0;
                 $issueValues[ $categoryIssue ] = [
                         'count'    => $count,
-                        'comments' => ( isset( $comments[ $categoryIssue ] ) ) ? $comments[ $categoryIssue ] : [],
+                        'comments' => (isset($comments[ $categoryIssue ])) ? $comments[ $categoryIssue ] : [],
                 ];
             }
 
@@ -509,23 +475,7 @@ class DownloadQRController extends KleinController {
             ];
         }
 
-        return json_encode( $jsonData, JSON_PRETTY_PRINT );
-    }
-
-    /**
-     * @param string $filename
-     * @param array  $files
-     */
-    private function composeZipFile( string $filename, array $files ) {
-        $zip = new ZipArchive;
-
-        if ( $zip->open( $filename, ZipArchive::CREATE ) ) {
-            foreach ( $files as $index => $fileContent ) {
-                $zip->addFromString( "qr_file__" . ( $index + 1 ) . "." . $this->format, $fileContent );
-            }
-
-            $zip->close();
-        }
+        return json_encode($jsonData, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -535,25 +485,25 @@ class DownloadQRController extends KleinController {
      * @param string $filename
      * @param string $filePath
      */
-    private function downloadFile( string $mimeType, string $filename, string $filePath ) {
-
-        $outputContent = file_get_contents( $filePath );
+    private function downloadFile(string $mimeType, string $filename, string $filePath): never
+    {
+        $outputContent = file_get_contents($filePath);
 
         ob_get_contents();
         ob_get_clean();
-        ob_start( "ob_gzhandler" );
-        header( "Expires: Tue, 03 Jul 2001 06:00:00 GMT" );
-        header( "Last-Modified: " . gmdate( "D, d M Y H:i:s" ) . " GMT" );
-        header( "Cache-Control: no-store, no-cache, must-revalidate, max-age=0" );
-        header( "Cache-Control: post-check=0, pre-check=0", false );
-        header( "Pragma: no-cache" );
-        header( "Content-Type: $mimeType" );
-        header( "Content-Disposition: attachment; filename=\"$filename\"" );
-        header( "Expires: 0" );
-        header( "Connection: close" );
-        header( "Content-Length: " . strlen( $outputContent ) );
+        ob_start("ob_gzhandler");
+        header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        header("Cache-Control: post-check=0, pre-check=0", false);
+        header("Pragma: no-cache");
+        header("Content-Type: $mimeType");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header("Expires: 0");
+        header("Connection: close");
+        header("Content-Length: " . strlen($outputContent));
         echo $outputContent;
-        unlink( $filePath );
+        unlink($filePath);
         exit;
     }
 }

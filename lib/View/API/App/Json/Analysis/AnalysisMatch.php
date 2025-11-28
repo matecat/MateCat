@@ -79,7 +79,8 @@ class AnalysisMatch implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw( int $raw ): void
+    {
         $this->raw += $raw;
     }
 
@@ -88,7 +89,8 @@ class AnalysisMatch implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent( float $equivalent ): void
+    {
         $this->equivalent += $equivalent;
     }
 

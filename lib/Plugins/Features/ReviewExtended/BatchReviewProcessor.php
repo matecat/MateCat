@@ -20,7 +20,8 @@ use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 
-class BatchReviewProcessor {
+class BatchReviewProcessor
+{
 
     /**
      * @var CounterModel
@@ -36,7 +37,8 @@ class BatchReviewProcessor {
      */
     private array $prepared_events;
 
-    public function __construct() {
+    public function __construct()
+    {
     }
 
     /**
@@ -44,10 +46,11 @@ class BatchReviewProcessor {
      *
      * @return $this
      */
-    public function setChunk( JobStruct $chunk ): BatchReviewProcessor {
+    public function setChunk(JobStruct $chunk): BatchReviewProcessor
+    {
         $this->chunk          = $chunk;
-        $old_wStruct          = WordCountStruct::loadFromJob( $chunk );
-        $this->jobWordCounter = new CounterModel( $old_wStruct );
+        $old_wStruct          = WordCountStruct::loadFromJob($chunk);
+        $this->jobWordCounter = new CounterModel($old_wStruct);
 
         return $this;
     }
@@ -57,7 +60,8 @@ class BatchReviewProcessor {
      *
      * @return $this
      */
-    public function setPreparedEvents( array $prepared_events ): BatchReviewProcessor {
+    public function setPreparedEvents(array $prepared_events): BatchReviewProcessor
+    {
         $this->prepared_events = $prepared_events;
 
         return $this;
@@ -66,9 +70,9 @@ class BatchReviewProcessor {
     /**
      * @throws ReflectionException
      */
-    private function getOrCreateChunkReviews( ProjectStruct $project ): array {
-
-        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
+    private function getOrCreateChunkReviews(ProjectStruct $project): array
+    {
+        $chunkReviews = (new ChunkReviewDao())->findChunkReviews($this->chunk);
 
         //
         // ----------------------------------------------
@@ -79,8 +83,7 @@ class BatchReviewProcessor {
         // 1) create a chunkReview
         // 2) send an alert email
         //
-        if ( empty( $chunkReviews ) ) {
-
+        if (empty($chunkReviews)) {
             $data = [
                     'id_project'  => $project->id,
                     'id_job'      => $this->chunk->id,
@@ -88,66 +91,58 @@ class BatchReviewProcessor {
                     'source_page' => 2,
             ];
 
-            $chunkReview = ChunkReviewDao::createRecord( $data );
-            ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $project );
+            $chunkReview = ChunkReviewDao::createRecord($data);
+            (new ChunkReviewModel($chunkReview))->recountAndUpdatePassFailResult($project);
             $chunkReviews[] = $chunkReview;
 
-            LoggerFactory::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id );
+            LoggerFactory::doJsonLog('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);
 
-            $alertEmail = new BatchReviewProcessorAlertEmail( $this->chunk, $chunkReview );
+            $alertEmail = new BatchReviewProcessorAlertEmail($this->chunk, $chunkReview);
             $alertEmail->send();
-
         }
 
         return $chunkReviews;
-
     }
 
     /**
      * @throws Exception
      */
-    public function process(): void {
-
+    public function process(): void
+    {
         $project      = $this->chunk->getProject();
-        $chunkReviews = $this->getOrCreateChunkReviews( $project );
+        $chunkReviews = $this->getOrCreateChunkReviews($project);
 
-        $revisionFactory = RevisionFactory::initFromProject( $project );
+        $revisionFactory = RevisionFactory::initFromProject($project);
 
         $data = [];
 
-        foreach ( $this->prepared_events as $translationEvent ) {
-
-            $segmentTranslationModel = new ReviewedWordCountModel( $translationEvent, $this->jobWordCounter, $chunkReviews );
+        foreach ($this->prepared_events as $translationEvent) {
+            $segmentTranslationModel = new ReviewedWordCountModel($translationEvent, $this->jobWordCounter, $chunkReviews);
 
             // here we process and count the reviewed word count and
             $segmentTranslationModel->evaluateChunkReviewEventTransitions();
             $segmentTranslationModel->deleteIssues();
             $segmentTranslationModel->sendNotificationEmail();
 
-            foreach ( $segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview ) {
-
+            foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
                 // send chunkReviewUpdated notifications through FeaturesSet hook
                 $project          = $chunkReview->getChunk()->getProject();
-                $chunkReviewModel = new ChunkReviewModel( $chunkReview );
-                $chunkReviewModel->updateChunkReviewCountersAndPassFail( $chunkReview->penalty_points, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project );
-
+                $chunkReviewModel = new ChunkReviewModel($chunkReview);
+                $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }
-
         }
 
         $this->updateJobWordCounter();
-
     }
 
     /**
      * @throws Exception
      */
-    private function updateJobWordCounter(): void {
-
+    private function updateJobWordCounter(): void
+    {
         // if empty, no segment status changes are present
-        if ( !empty( $this->jobWordCounter->getValues() ) ) {
-
-            $newCount                      = $this->jobWordCounter->updateDB( $this->jobWordCounter->getValues() );
+        if (!empty($this->jobWordCounter->getValues())) {
+            $newCount                      = $this->jobWordCounter->updateDB($this->jobWordCounter->getValues());
             $this->chunk->draft_words      = $newCount->getDraftWords();
             $this->chunk->new_words        = $newCount->getNewWords();
             $this->chunk->translated_words = $newCount->getTranslatedWords();
@@ -161,10 +156,8 @@ class BatchReviewProcessor {
             $this->chunk->approved_raw_words   = $newCount->getApprovedRawWords();
             $this->chunk->approved2_raw_words  = $newCount->getApproved2RawWords();
             $this->chunk->rejected_raw_words   = $newCount->getRejectedRawWords();
-
             // updateTodoValues for the JOB
         }
-
     }
 
 }

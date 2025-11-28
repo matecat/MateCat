@@ -16,19 +16,21 @@ use ReflectionException;
 use Utils\Constants\JobStatus;
 use Utils\Constants\Teams;
 
-class GetProjectsController extends KleinController {
+class GetProjectsController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    public function fetch(): void {
-
-        $this->featureSet->loadFromUserEmail( $this->user->email );
+    public function fetch(): void
+    {
+        $this->featureSet->loadFromUserEmail($this->user->email);
         $request = $this->validateTheRequest();
 
         $page            = $request[ 'page' ];
@@ -39,19 +41,19 @@ class GetProjectsController extends KleinController {
         $search_in_pname = $request[ 'search_in_pname' ];
         $source          = $request[ 'source' ];
         $target          = $request[ 'target' ];
-        $status          = $request[ 'status' ];
-        $only_completed  = $request[ 'onlycompleted' ] ?? null;
-        $id_team         = $request[ 'id_team' ];
-        $id_assignee     = $request[ 'id_assignee' ];
-        $no_assignee     = $request[ 'no_assignee' ];
+//        $status          = $request[ 'status' ];
+        $only_completed = $request[ 'onlycompleted' ] ?? null;
+        $id_team        = $request[ 'id_team' ];
+        $id_assignee    = $request[ 'id_assignee' ];
+        $no_assignee    = $request[ 'no_assignee' ];
 
-        $team = $this->filterTeam( $id_team );
+        $team = $this->filterTeam($id_team);
 
-        if ( $team->type == Teams::PERSONAL ) {
+        if ($team->type == Teams::PERSONAL) {
             $assignee = $this->user;
             $team     = null;
         } else {
-            $assignee = $this->filterAssignee( $team, $id_assignee );
+            $assignee = $this->filterAssignee($team, $id_assignee);
         }
 
         $projects = ManageModel::getProjects(
@@ -80,39 +82,39 @@ class GetProjectsController extends KleinController {
                 $no_assignee
         );
 
-        $this->response->json( [
+        $this->response->json([
                 'data'     => $projects,
                 'page'     => $page,
                 'pnumber'  => $projnum[ 0 ][ 'c' ],
                 'pageStep' => $step,
-        ] );
-
+        ]);
     }
 
     /**
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest(): array {
-        $page            = filter_var( $this->request->param( 'page' ), FILTER_SANITIZE_NUMBER_INT );
-        $step            = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
-        $project_id      = filter_var( $this->request->param( 'project' ), FILTER_SANITIZE_NUMBER_INT );
-        $search_in_pname = filter_var( $this->request->param( 'pn' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source          = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $target          = filter_var( $this->request->param( 'target' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $status          = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $only_completed  = filter_var( $this->request->param( 'onlycompleted' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
-        $id_team         = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_assignee     = filter_var( $this->request->param( 'id_assignee' ), FILTER_SANITIZE_NUMBER_INT );
-        $no_assignee     = filter_var( $this->request->param( 'no_assignee' ), FILTER_VALIDATE_BOOLEAN );
+    private function validateTheRequest(): array
+    {
+        $page            = filter_var($this->request->param('page'), FILTER_SANITIZE_NUMBER_INT);
+        $step            = filter_var($this->request->param('step'), FILTER_SANITIZE_NUMBER_INT);
+        $project_id      = filter_var($this->request->param('project'), FILTER_SANITIZE_NUMBER_INT);
+        $search_in_pname = filter_var($this->request->param('pn'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $source          = filter_var($this->request->param('source'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $target          = filter_var($this->request->param('target'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $status          = filter_var($this->request->param('status'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $only_completed  = filter_var($this->request->param('onlycompleted'), FILTER_VALIDATE_BOOLEAN, ['flags' => FILTER_NULL_ON_FAILURE]);
+        $id_team         = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT);
+        $id_assignee     = filter_var($this->request->param('id_assignee'), FILTER_SANITIZE_NUMBER_INT);
+        $no_assignee     = filter_var($this->request->param('no_assignee'), FILTER_VALIDATE_BOOLEAN);
 
-        $search_status = ( !empty( $status ) and JobStatus::isAllowedStatus( $status ) ) ? $status : JobStatus::STATUS_ACTIVE;
-        $page          = ( !empty( $page ) ) ? (int)$page : 1;
-        $step          = ( !empty( $step ) ) ? ( (int)$step <= 20 ? (int)$step : 10 ) : 10;
-        $start         = ( $page - 1 ) * $step;
+        $search_status = (!empty($status) and JobStatus::isAllowedStatus($status)) ? $status : JobStatus::STATUS_ACTIVE;
+        $page          = (!empty($page)) ? (int)$page : 1;
+        $step          = (!empty($step)) ? ((int)$step <= 20 ? (int)$step : 10) : 10;
+        $start         = ($page - 1) * $step;
 
-        if ( empty( $id_team ) ) {
-            throw new InvalidArgumentException( "No id team provided", -1 );
+        if (empty($id_team)) {
+            throw new InvalidArgumentException("No id team provided", -1);
         }
 
         return [
@@ -120,42 +122,44 @@ class GetProjectsController extends KleinController {
                 'start'           => $start,
                 'step'            => $step,
                 'search_status'   => $search_status,
-                'project_id'      => ( !empty( $project_id ) ) ? $project_id : null,
-                'search_in_pname' => ( !empty( $search_in_pname ) ) ? $search_in_pname : null,
-                'source'          => ( !empty( $source ) ) ? $source : null,
-                'target'          => ( !empty( $target ) ) ? $target : null,
-                'status'          => ( !empty( $status ) ) ? $status : null,
+                'project_id'      => (!empty($project_id)) ? $project_id : null,
+                'search_in_pname' => (!empty($search_in_pname)) ? $search_in_pname : null,
+                'source'          => (!empty($source)) ? $source : null,
+                'target'          => (!empty($target)) ? $target : null,
+                'status'          => (!empty($status)) ? $status : null,
                 'only_completed'  => $only_completed,
                 'id_team'         => $id_team,
-                'id_assignee'     => ( !empty( $id_assignee ) ) ? $id_assignee : null,
+                'id_assignee'     => (!empty($id_assignee)) ? $id_assignee : null,
                 'no_assignee'     => $no_assignee,
         ];
     }
 
     /**
      * @param TeamStruct $team
-     * @param            $id_assignee
+     * @param int|null   $id_assignee
      *
-     * @return \Model\Users\UserStruct|null
-     * @throws Exception
+     * @return UserStruct|null
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    private function filterAssignee( TeamStruct $team, $id_assignee ): ?UserStruct {
-        if ( is_null( $id_assignee ) ) {
+    private function filterAssignee(TeamStruct $team, ?int $id_assignee): ?UserStruct
+    {
+        if (is_null($id_assignee)) {
             return null;
         }
 
         $dao         = new MembershipDao();
-        $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $team->id );
+        $memberships = $dao->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($team->id);
 
         /**
          * @var $users MembershipStruct[]
          */
-        $users = array_values( array_filter( $memberships, function ( MembershipStruct $membership ) use ( $id_assignee ) {
+        $users = array_values(array_filter($memberships, function (MembershipStruct $membership) use ($id_assignee) {
             return $membership->getUser()->uid == $id_assignee;
-        } ) );
+        }));
 
-        if ( empty( $users ) ) {
-            throw new NotFoundException( 'Assignee not found in team' );
+        if (empty($users)) {
+            throw new NotFoundException('Assignee not found in team');
         }
 
         return $users[ 0 ]->getUser();
@@ -167,12 +171,13 @@ class GetProjectsController extends KleinController {
      * @return TeamStruct|null
      * @throws Exception
      */
-    private function filterTeam( $id_team ): ?TeamStruct {
+    private function filterTeam($id_team): ?TeamStruct
+    {
         $dao  = new MembershipDao();
-        $team = $dao->findTeamByIdAndUser( $id_team, $this->user );
+        $team = $dao->findTeamByIdAndUser($id_team, $this->user);
 
-        if ( !$team ) {
-            throw  new NotFoundException( 'Team not found in user memberships', 404 );
+        if (!$team) {
+            throw  new NotFoundException('Team not found in user memberships', 404);
         }
 
         return $team;

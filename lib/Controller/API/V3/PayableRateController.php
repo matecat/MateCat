@@ -15,173 +15,165 @@ use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
-class PayableRateController extends KleinController {
-    protected function afterConstruct() {
+class PayableRateController extends KleinController
+{
+    protected function afterConstruct(): void
+    {
         parent::afterConstruct();
-        $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @return Response
      */
-    public function index(): Response {
-
+    public function index(): Response
+    {
         try {
+            $currentPage = $this->request->param('page') ?? 1;
+            $pagination  = $this->request->param('perPage') ?? 20;
 
-            $currentPage = $this->request->param( 'page' ) ?? 1;
-            $pagination  = $this->request->param( 'perPage' ) ?? 20;
-
-            if ( $pagination > 200 ) {
+            if ($pagination > 200) {
                 $pagination = 200;
             }
 
             $uid = $this->getUser()->uid;
 
-            return $this->response->json( CustomPayableRateDao::getAllPaginated( $uid, "/api/v3/payable_rate?page=", (int)$currentPage, (int)$pagination ) );
+            return $this->response->json(CustomPayableRateDao::getAllPaginated($uid, "/api/v3/payable_rate?page=", (int)$currentPage, (int)$pagination));
+        } catch (Exception $exception) {
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode($code);
 
-        } catch ( Exception $exception ) {
-            $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
-            $this->response->status()->setCode( $code );
-
-            return $this->response->json( [
+            return $this->response->json([
                     'error' => $exception->getMessage()
-            ] );
+            ]);
         }
-
     }
 
     /**
      * @return Response
      */
-    public function create(): Response {
-
+    public function create(): Response
+    {
         // try to create the template
         try {
-
             // accept only JSON
-            if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Method not allowed', 405 );
+            if (!$this->isJsonRequest()) {
+                throw new Exception('Method not allowed', 405);
             }
 
             $json = $this->request->body();
-            $this->validateJSON( $json );
+            $this->validateJSON($json);
 
-            $struct = CustomPayableRateDao::createFromJSON( $json, $this->getUser()->uid );
+            $struct = CustomPayableRateDao::createFromJSON($json, $this->getUser()->uid);
 
-            $this->response->code( 201 );
+            $this->response->code(201);
 
-            return $this->response->json( $struct );
-        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception ) {
-            $errorCode = max( $exception->getCode(), 400 );
-            $this->response->code( $errorCode );
+            return $this->response->json($struct);
+        } catch (JSONValidatorException|JsonValidatorGenericException $exception) {
+            $errorCode = max($exception->getCode(), 400);
+            $this->response->code($errorCode);
 
-            return $this->response->json( [ 'error' => $exception->getMessage() ] );
-        } catch ( Exception $exception ) {
+            return $this->response->json(['error' => $exception->getMessage()]);
+        } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-            $this->response->code( $errorCode );
+            $this->response->code($errorCode);
 
-            return $this->response->json( [
+            return $this->response->json([
                     'error' => $exception->getMessage()
-            ] );
+            ]);
         }
     }
 
     /**
      * @return Response
      */
-    public function delete(): Response {
-
-        $id = $this->request->param( 'id' );
+    public function delete(): Response
+    {
+        $id = $this->request->param('id');
 
         try {
+            $count = CustomPayableRateDao::remove($id, $this->getUser()->uid);
 
-            $count = CustomPayableRateDao::remove( $id, $this->getUser()->uid );
-
-            if ( $count == 0 ) {
-                throw new Exception( 'Model not found', 404 );
+            if ($count == 0) {
+                throw new Exception('Model not found', 404);
             }
 
-            return $this->response->json( [
+            return $this->response->json([
                     'id' => (int)$id
-            ] );
-        } catch ( Exception $exception ) {
+            ]);
+        } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-            $this->response->code( $errorCode );
+            $this->response->code($errorCode);
 
-            return $this->response->json( [
+            return $this->response->json([
                     'error' => $exception->getMessage()
-            ] );
+            ]);
         }
     }
 
     /**
      * @return Response
      */
-    public function edit(): Response {
-
+    public function edit(): Response
+    {
         try {
-
             // accept only JSON
-            if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Get', 400 );
+            if (!$this->isJsonRequest()) {
+                throw new Exception('Bad Get', 400);
             }
 
-            $id = $this->request->param( 'id' );
+            $id = $this->request->param('id');
 
-            $model = CustomPayableRateDao::getByIdAndUser( $id, $this->getUser()->uid );
-            if ( empty( $model ) ) {
-                throw new Exception( 'Model not found', 404 );
+            $model = CustomPayableRateDao::getByIdAndUser($id, $this->getUser()->uid);
+            if (empty($model)) {
+                throw new Exception('Model not found', 404);
             }
 
             $json = $this->request->body();
-            $this->validateJSON( $json );
+            $this->validateJSON($json);
 
-            $struct = CustomPayableRateDao::editFromJSON( $model, $json );
+            $struct = CustomPayableRateDao::editFromJSON($model, $json);
 
-            $this->response->code( 200 );
+            $this->response->code(200);
 
-            return $this->response->json( $struct );
+            return $this->response->json($struct);
+        } catch (JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception) {
+            $errorCode = max($exception->getCode(), 400);
+            $this->response->code($errorCode);
 
-        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception ) {
-            $errorCode = max( $exception->getCode(), 400 );
-            $this->response->code( $errorCode );
-
-            return $this->response->json( [ 'error' => $exception->getMessage() ] );
-        } catch ( Exception $exception ) {
+            return $this->response->json(['error' => $exception->getMessage()]);
+        } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-            $this->response->code( $errorCode );
+            $this->response->code($errorCode);
 
-            return $this->response->json( [
+            return $this->response->json([
                     'error' => $exception->getMessage()
-            ] );
+            ]);
         }
     }
 
     /**
      * @return Response
      */
-    public function view(): Response {
-
+    public function view(): Response
+    {
         try {
+            $id    = $this->request->param('id');
+            $model = CustomPayableRateDao::getByIdAndUser($id, $this->getUser()->uid);
 
-            $id    = $this->request->param( 'id' );
-            $model = CustomPayableRateDao::getByIdAndUser( $id, $this->getUser()->uid );
-
-            if ( empty( $model ) ) {
-                throw new Exception( 'Model not found', 404 );
+            if (empty($model)) {
+                throw new Exception('Model not found', 404);
             }
 
-            return $this->response->json( $model );
-
-        } catch ( Exception $exception ) {
+            return $this->response->json($model);
+        } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-            $this->response->code( $errorCode );
+            $this->response->code($errorCode);
 
-            return $this->response->json( [
+            return $this->response->json([
                     'error' => $exception->getMessage()
-            ] );
+            ]);
         }
-
     }
 
     /**
@@ -189,8 +181,9 @@ class PayableRateController extends KleinController {
      *
      * @return Response
      */
-    public function schema(): Response {
-        return $this->response->json( json_decode( $this->getPayableRateModelSchema() ) );
+    public function schema(): Response
+    {
+        return $this->response->json(json_decode($this->getPayableRateModelSchema()));
     }
 
     /**
@@ -198,55 +191,56 @@ class PayableRateController extends KleinController {
      *
      * @return Response
      */
-    public function validate(): Response {
+    public function validate(): Response
+    {
         try {
             $json = $this->request->body();
 
-            $validatorObject = new JSONValidatorObject( $json );
-            $validator       = new JSONValidator( $this->getPayableRateModelSchema() );
-            $validator->validate( $validatorObject );
+            $validatorObject = new JSONValidatorObject($json);
+            $validator       = new JSONValidator($this->getPayableRateModelSchema());
+            $validator->validate($validatorObject);
 
             $errors = $validator->getExceptions();
 
-            if ( $validator->isValid() ) {
+            if ($validator->isValid()) {
                 $customPayableRateStruct = new CustomPayableRateStruct();
-                $customPayableRateStruct->hydrateFromJSON( $json );
+                $customPayableRateStruct->hydrateFromJSON($json);
             }
 
-            $code = ( $validator->isValid() ) ? 200 : 500;
+            $code = ($validator->isValid()) ? 200 : 500;
 
-            $this->response->code( $code );
+            $this->response->code($code);
 
-            return $this->response->json( [
+            return $this->response->json([
                     'errors' => $errors
-            ] );
-        } catch ( Exception $exception ) {
+            ]);
+        } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-            $this->response->code( $errorCode );
+            $this->response->code($errorCode);
 
-            return $this->response->json( [
+            return $this->response->json([
                     'error' => $exception->getMessage()
-            ] );
+            ]);
         }
     }
 
     /**
-     * @return false|string
+     * @return string
      */
-    private function getPayableRateModelSchema() {
-        return file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
+    private function getPayableRateModelSchema(): string
+    {
+        return file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json') ?: '';
     }
 
     /**
      * @throws Exception
      */
-    public function default() {
-
-        $this->response->status()->setCode( 200 );
+    public function default(): void
+    {
+        $this->response->status()->setCode(200);
         $this->response->json(
-                CustomPayableRateDao::getDefaultTemplate( $this->getUser()->uid )
+                CustomPayableRateDao::getDefaultTemplate($this->getUser()->uid)
         );
-
     }
 
     /**
@@ -255,10 +249,11 @@ class PayableRateController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
-    private static function validateJSON( string $json ) {
-        $validatorObject = new JSONValidatorObject( $json );
-        $validator       = new JSONValidator( 'payable_rate.json', true );
-        $validator->validate( $validatorObject );
+    private static function validateJSON(string $json): void
+    {
+        $validatorObject = new JSONValidatorObject($json);
+        $validator       = new JSONValidator('payable_rate.json', true);
+        $validator->validate($validatorObject);
     }
 
 }
