@@ -13,7 +13,7 @@ class DeepLEngineValidator extends AbstractValidator
 {
     /**
      * @param EngineValidatorObject $object
-     * @return null
+     * @return ValidatorObject|null
      * @throws Exception
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
@@ -22,7 +22,7 @@ class DeepLEngineValidator extends AbstractValidator
         $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
         try {
             $newTestCreatedMT->glossaries();
-        } catch (Exception $exception) {
+        } catch (Exception $e) {
             throw new Exception("Invalid DeepL API key.");
         }
         return null;
