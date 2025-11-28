@@ -59,9 +59,8 @@ class JSONValidatorException extends Exception implements JsonSerializable
     /**
      * @return Error[]
      */
-    public function getSubErrors(): array
-    {
-        return $this->error->subErrors;
+    public function getSubErrors(): array {
+        return $this->error->subErrors ?? [];
     }
 
     /**
