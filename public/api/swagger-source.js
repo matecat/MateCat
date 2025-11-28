@@ -1952,8 +1952,8 @@ var spec = {
     '/api/v3/jobs/{id_job}/{password}/translation-issues': {
       get: {
         tags: ['Job', 'Translation Issues'],
-        summary: 'Project translation issues',
-        description: 'Project translation issues',
+        summary: 'Retrieve a complete list of all revision issues in a job',
+        description: 'Retrieve a complete list of all revision issues in a job',
         parameters: [
           {
             name: 'id_job',
@@ -1975,48 +1975,6 @@ var spec = {
             description: 'Translation issues',
             schema: {
               $ref: '#/definitions/TranslationIssues',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
-    '/api/v3/jobs/{id_job}/{password}/{source_page}/issue-report/segments': {
-      get: {
-        tags: ['Job', 'Segment issues'],
-        summary: 'Segment issues',
-        description: 'Segment issues',
-        parameters: [
-          {
-            name: 'id_job',
-            in: 'path',
-            description: 'The id of the job',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'password',
-            in: 'path',
-            description: 'The password of the job (Translate password)',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'source_page',
-            in: 'path',
-            description:
-              'The source page (possible values: 2 for R1, 3 for R2)',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'Segment issues report',
-            schema: {
-              $ref: '#/definitions/SegmentIssueReport',
             },
           },
           default: {
@@ -2150,337 +2108,61 @@ var spec = {
           },
         },
       },
-    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues':
-      {
-        post: {
-          tags: ['Job', 'Translation Issues'],
-          summary: 'Create translation issues',
-          description: 'Create translation issues',
-          parameters: [
-            {
-              name: 'id_job',
-              in: 'formData',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
+    '/api/v3/jobs/{id_job}/{password}/options': {
+      post: {
+        tags: ['Job', 'Options'],
+        summary: 'Update Options',
+        description: 'Update Options (speech2text, guess tags, lexiqa)',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'formData',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'formData',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'speech2text',
+            in: 'formData',
+            description: 'To enable Speech To Text option',
+            required: false,
+            type: 'boolean',
+          },
+          {
+            name: 'tag_projection',
+            in: 'formData',
+            description: 'To enable Guess Tags option',
+            type: 'boolean',
+            required: false,
+          },
+          {
+            name: 'lexiqa',
+            in: 'formData',
+            description: 'To enable lexiqa option',
+            type: 'boolean',
+            required: false,
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Update Options',
+            schema: {
+              $ref: '#/definitions/Options',
             },
-            {
-              name: 'password',
-              in: 'formData',
-              description: 'The password of the job (Translate password)',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'formData',
-              description: 'The id of the segment',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'version_number',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_job',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_category',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'severity',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'translation_version',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'target_text',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'start_node',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'start_offset',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'end_node',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'end_offset',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'is_full_segment',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'comment',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Segment version',
-              schema: {
-                $ref: '#/definitions/Issue',
-              },
-            },
-            default: {
-              description: 'Unexpected error',
-            },
+          },
+          default: {
+            description: 'Unexpected error',
           },
         },
       },
-    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}':
-      {
-        post: {
-          tags: ['Job', 'Translation Issues'],
-          summary: 'Update translation issues',
-          description: 'Update translation issues',
-          parameters: [
-            {
-              name: 'id_job',
-              in: 'formData',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'formData',
-              description:
-                'The password of the revision phase that the issue pertains to. If the issue pertains to r1, use the "revise" link password, otherwise use the "revise2" link password',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'formData',
-              description: 'The id of the segment',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_issue',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'rebutted_at',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Update Translation issue',
-            },
-            default: {
-              description: 'Unexpected error',
-            },
-          },
-        },
-        delete: {
-          tags: ['Job', 'Translation Issues'],
-          summary: 'Delete a translation Issue',
-          description: 'Delete a translation Issue',
-          parameters: [
-            {
-              name: 'id_job',
-              in: 'path',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'path',
-              description: 'The password of the job (Translate password)',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'path',
-              description: 'The id of the segment',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_issue',
-              in: 'path',
-              description: 'The id of the issue',
-              required: true,
-              type: 'string',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Delete',
-              schema: {
-                $ref: '#/definitions/Issue',
-              },
-            },
-            default: {
-              description: 'Unexpected error',
-            },
-          },
-        },
-      },
-    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments':
-      {
-        post: {
-          tags: ['Job', 'Translation Issues'],
-          summary: 'Add comment to a translation issue',
-          description: 'Create a comment translation issue',
-          parameters: [
-            {
-              name: 'id_job',
-              in: 'formData',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'formData',
-              description: 'The password of the job (Translate password)',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'formData',
-              description: 'The id of the segment',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_issue',
-              in: 'formData',
-              description: 'The id of the issue',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'comment',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_qa_entry',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'source_page',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'uid',
-              in: 'formData',
-              required: true,
-              type: 'string',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Add comment',
-            },
-            default: {
-              description: 'Unexpected error',
-            },
-          },
-        },
-        get: {
-          tags: ['Job', 'Translation Issues'],
-          summary: 'Get comments',
-          description: 'Get comments',
-          parameters: [
-            {
-              name: 'id_job',
-              in: 'path',
-              description: 'The id of the job',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'password',
-              in: 'path',
-              description: 'The password of the job (Translate password)',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_segment',
-              in: 'path',
-              description: 'The id of the segment',
-              required: true,
-              type: 'string',
-            },
-            {
-              name: 'id_issue',
-              in: 'path',
-              description: 'The id of the issue',
-              required: true,
-              type: 'string',
-            },
-          ],
-          responses: {
-            200: {
-              description: 'Get comments',
-            },
-            default: {
-              description: 'Unexpected error',
-            },
-          },
-        },
-      },
+    },
     '/api/v3/jobs/{id_job}/{password}/files': {
       get: {
         tags: ['Job', 'Files'],
