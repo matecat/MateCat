@@ -107,7 +107,7 @@ class SetMyMemoryTest extends AbstractTest {
 
         $result = $this->engine_MyMemory->set( $params );
 
-        $this->assertTrue( (bool)preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
+        $this->assertTrue((bool)preg_match('/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result->responseDetails[0]));
 
         /**
          *  general check of the SetContributionResponse object
@@ -177,7 +177,7 @@ TAB;
 
         $actual_result = $this->engine_MyMemory->set( $params );
 
-        $this->assertEquals( 484525156, $actual_result );
+        $this->assertEquals(484525156, $actual_result->responseDetails[0]);
 
         /**
          * check of the SetContributionResponse object
@@ -185,7 +185,7 @@ TAB;
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
+        $this->assertTrue($result_object instanceof SetContributionResponse);
         $this->assertEquals( 200, $result_object->responseStatus );
         $this->assertEquals( [ '0' => 484525156 ], $result_object->responseDetails );
         $this->assertEquals( "OK", $result_object->responseData );
@@ -227,7 +227,7 @@ TAB;
 
         $result = $this->engine_MyMemory->set( $params );
 
-        $this->assertTrue( (bool)preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
+        $this->assertTrue((bool)preg_match('/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result->responseDetails[0]));
 
         /**
          *  general check of the SetContributionResponse object
@@ -235,7 +235,7 @@ TAB;
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
+        $this->assertTrue($result_object instanceof SetContributionResponse);
         $this->assertFalse( property_exists( $result_object, 'matches' ) );
         $this->assertTrue( property_exists( $result_object, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result_object, 'responseDetails' ) );
@@ -297,7 +297,7 @@ TAB;
 
         $actual_result = $this->engine_MyMemory->set( $params );
 
-        $this->assertEquals( 484540480, $actual_result );
+        $this->assertEquals(484540480, $actual_result->responseDetails[0]);
 
 
         /**
@@ -306,7 +306,7 @@ TAB;
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
+        $this->assertTrue($result_object instanceof SetContributionResponse);
         $this->assertEquals( 200, $result_object->responseStatus );
         $this->assertEquals( [ '0' => 484540480 ], $result_object->responseDetails );
         $this->assertEquals( "OK", $result_object->responseData );
@@ -381,16 +381,16 @@ TAB;
 
         $actual_result = $this->engine_MyMemory->set( $params );
 
-        $this->assertFalse( $actual_result );
+        $this->assertNull($actual_result);
 
 
         /**
          * check of the SetContributionResponse object
-         * @var SetContributionResponse
+         * @var SetContributionResponse $result_object
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
+        $this->assertTrue($result_object instanceof SetContributionResponse);
         $this->assertEquals( 401, $result_object->responseStatus );
         $this->assertEquals( "", $result_object->responseDetails );
         $this->assertEquals( "", $result_object->responseData );

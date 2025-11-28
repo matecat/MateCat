@@ -100,7 +100,7 @@ abstract class AbstractEngine implements EngineInterface
         return $this;
     }
 
-    public function setFeatureSet(FeatureSet $fSet = null)
+    public function setFeatureSet(FeatureSet $fSet = null): void
     {
         if ($fSet != null) {
             $this->featureSet = $fSet;
@@ -206,9 +206,9 @@ abstract class AbstractEngine implements EngineInterface
      * @param string $url
      * @param array $curl_options
      *
-     * @return array|bool|string|null
+     * @return string|bool|null
      */
-    public function _call(string $url, array $curl_options = [])
+    public function _call(string $url, array $curl_options = []): string|bool|null
     {
         $mh = new MultiCurlHandler();
         $uniq_uid = uniqid('', true);
@@ -266,7 +266,7 @@ abstract class AbstractEngine implements EngineInterface
      *
      * @return void
      */
-    public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false)
+    public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false): void
     {
         if ($this->_isAnalysis && $this->_skipAnalysis) {
             $this->result = [];
@@ -316,7 +316,7 @@ abstract class AbstractEngine implements EngineInterface
         $this->result = $this->_decode($rawValue, $parameters, $function);
     }
 
-    public function _setAdditionalCurlParams(array $curlOptParams = [])
+    public function _setAdditionalCurlParams(array $curlOptParams = []): void
     {
         /*
          * Append array elements from the second array to the first array while not
@@ -388,7 +388,7 @@ abstract class AbstractEngine implements EngineInterface
      * @return array|TMSAbstractResponse
      * @throws Exception
      */
-    protected function GoogleTranslateFallback(array $_config)
+    protected function GoogleTranslateFallback(array $_config): TMSAbstractResponse|array
     {
         try {
             /**

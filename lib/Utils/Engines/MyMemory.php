@@ -26,6 +26,7 @@ use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
 use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\TagProjectionResponse;
+use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Registry\AppConfig;
@@ -159,8 +160,10 @@ class MyMemory extends AbstractEngine
                 $result_object = AnalyzeResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'contribute_relative_url':
-            case 'update_relative_url':
                 $result_object = SetContributionResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
+                break;
+            case 'update_relative_url':
+                $result_object = UpdateContributionResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             default:
 
@@ -235,8 +238,10 @@ class MyMemory extends AbstractEngine
         (!empty($_config['isConcordance']) ? $parameters['extended'] = '1' : null);
         (!empty($_config['mt_only']) ? $parameters['mtonly'] = '1' : null);
 
-        $parameters['context_after'] = $_config['context_after'] ?? '';
-        $parameters['context_before'] = $_config['context_before'] ?? '';
+        if (isset($_config['context_after']) || isset($_config['context_before'])) {
+            $parameters['context_after'] = $_config['context_after'] ?? '';
+            $parameters['context_before'] = $_config['context_before'] ?? '';
+        }
 
         if (!empty($_config['id_user'])) {
             if (!is_array($_config['id_user'])) {
@@ -266,7 +271,7 @@ class MyMemory extends AbstractEngine
      *
      * @return int
      */
-    public function set($_config): int
+    public function set($_config): ?SetContributionResponse
     {
         $parameters = [];
         $parameters['seg'] = $_config['segment'] ?? '';
@@ -278,8 +283,10 @@ class MyMemory extends AbstractEngine
         $parameters['client_id'] = $_config['uid'] ?? 0;
         $parameters['prop'] = $_config['prop'];
 
-        $parameters['context_after'] = $_config['context_after'] ?? '';
-        $parameters['context_before'] = $_config['context_before'] ?? '';
+        if (isset($_config['context_after']) || isset($_config['context_before'])) {
+            $parameters['context_after'] = $_config['context_after'] ?? '';
+            $parameters['context_before'] = $_config['context_before'] ?? '';
+        }
 
         if (!empty($_config['id_user'])) {
             if (!is_array($_config['id_user'])) {
@@ -290,15 +297,15 @@ class MyMemory extends AbstractEngine
 
         $this->call('contribute_relative_url', $parameters, true);
 
-        if ($this->result->responseStatus != "200") {
-            return false;
+        if ($this->result->responseStatus != 200) {
+            return null;
         }
 
-        return $this->result->responseDetails[0]; // return the MyMemory ID
+        return $this->result;
 
     }
 
-    public function update($_config)
+    public function update($_config): UpdateContributionResponse
     {
         $parameters = [];
         $parameters['seg'] = $_config['segment'] ?? '';
@@ -312,8 +319,10 @@ class MyMemory extends AbstractEngine
         $parameters['mt'] = $_config['set_mt'] ?? true;
         $parameters['spiceMatch'] = $_config['spiceMatch'];
 
-        $parameters['context_after'] = $_config['context_after'] ?? '';
-        $parameters['context_before'] = $_config['context_before'] ?? '';
+        if (isset($_config['context_after']) || isset($_config['context_before'])) {
+            $parameters['context_after'] = $_config['context_after'] ?? '';
+            $parameters['context_before'] = $_config['context_before'] ?? '';
+        }
 
         if (!empty($_config['id_user'])) {
             if (!is_array($_config['id_user'])) {

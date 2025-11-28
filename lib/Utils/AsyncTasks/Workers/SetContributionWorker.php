@@ -129,12 +129,11 @@ class SetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array                  $config
+     * @param array $config
      * @param SetContributionRequest $contributionStruct
      *
-     * @throws ReQueueException
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws ReQueueException
      */
     protected function _set(array $config, SetContributionRequest $contributionStruct): void
     {
@@ -152,9 +151,9 @@ class SetContributionWorker extends AbstractWorker
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set($config);
-        if ($res->responseStatus >= 400 && $res->responseStatus < 500) {
+        if ($res?->responseStatus >= 400 && $res?->responseStatus < 500) {
             $this->_raiseEndQueueException('Set', $config);
-        } elseif ($res->responseStatus != 200) {
+        } elseif ($res?->responseStatus != 200) {
             $this->_raiseReQueueException('Set', $config);
         } else {
             $this->_doLog("Set complete");
