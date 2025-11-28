@@ -256,3 +256,7 @@ route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'Controller\API\V2\Download
 // User
 route( '/api/v3/user', 'PUT', [ 'Controller\API\V2\UserController', 'edit' ] );
 route( '/api/v3/user/metadata', 'PUT', [ 'Controller\API\V2\UserController', 'setMetadata' ] );
+
+// TMX
+route( '/api/v3/tmx/import', 'POST', [ 'Controller\API\App\TMXFileController', 'import' ] );
+route( '/api/v3/tmx/export', 'POST', [ 'Controller\API\App\RequestExportTMXController', 'download' ] );

@@ -30,7 +30,7 @@ class TMXFileController extends KleinController
     {
         $request   = $this->validateTheRequest();
         $TMService = new TMSService();
-        $file      = $TMService->uploadFile();
+        $file      = $TMService->uploadFile($request['disable_upload_limit']);
 
         $uuids = [];
 
@@ -100,15 +100,16 @@ class TMXFileController extends KleinController
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest(): array
-    {
-        $name   = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $tm_key = filter_var($this->request->param('tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
-        $uuid   = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+    private function validateTheRequest(): array {
+        $name                 = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $tm_key               = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $uuid                 = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $disable_upload_limit = filter_var( $this->request->param( 'disable_upload_limit' ), FILTER_VALIDATE_BOOLEAN );
 
-        if (empty($tm_key)) {
-            if (empty(AppConfig::$DEFAULT_TM_KEY)) {
-                throw new InvalidArgumentException("Please specify a TM key.", -2);
+        if ( empty( $tm_key ) ) {
+
+            if ( empty( AppConfig::$DEFAULT_TM_KEY ) ) {
+                throw new InvalidArgumentException( "Please specify a TM key.", -2 );
             }
 
             /*
@@ -119,9 +120,10 @@ class TMXFileController extends KleinController
         }
 
         return [
-                'name'   => $name,
-                'tm_key' => $tm_key,
-                'uuid'   => $uuid,
+                'name'                 => $name,
+                'tm_key'               => $tm_key,
+                'uuid'                 => $uuid,
+                'disable_upload_limit' => $disable_upload_limit ?? false,
         ];
     }
 }
