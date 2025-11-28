@@ -21,7 +21,6 @@ use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
-use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Langs\Languages;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
@@ -150,16 +149,15 @@ class GlossaryImportTest extends AbstractTest {
      * @covers MyMemory::glossaryImport
      */
     public function test_glossaryImport_with_error_from_mocked__call_for_coverage_purpose() {
-
-
-        $rawValue_error = [
+        $rawValue_error = json_encode([
                 'error'          => [
                         'code'     => -6,
                         'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
                         'response' => "",
                 ],
                 'responseStatus' => 401
-        ];
+            ]
+        );
 
         /**
          * @var $this ->engine_MyMemory MyMemory

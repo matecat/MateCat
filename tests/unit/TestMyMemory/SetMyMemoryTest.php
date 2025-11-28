@@ -347,14 +347,15 @@ TAB;
 
         $url_mock_param = "https://api.mymemory.translated.net/set";
 
-        $rawValue_error = [
+        $rawValue_error = json_encode([
                 'error'          => [
                         'code'     => -6,
                         'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
                         'response' => "",
                 ],
                 'responseStatus' => 401
-        ];
+            ]
+        );
 
         $curl_params = [
                 CURLOPT_POSTFIELDS  => [

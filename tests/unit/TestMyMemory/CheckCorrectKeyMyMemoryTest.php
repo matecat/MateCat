@@ -172,14 +172,14 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
                 CURLOPT_TIMEOUT => 10
         ];
 
-        $rawValue_error = [
+        $rawValue_error = json_encode([
                 'error'          => [
                         'code'     => -6,
                         'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
                         'response' => "",
                 ],
                 'responseStatus' => 0
-        ];
+        ]);
 
 
         $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
