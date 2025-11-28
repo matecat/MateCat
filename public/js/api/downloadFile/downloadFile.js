@@ -12,9 +12,10 @@ import {saveAs} from 'file-saver'
 export const downloadFile = async ({
   idJob = config.id_job,
   password = config.password,
+  checkErrors = 1,
 }) => {
   const response = await fetch(
-    `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&encoding=base64`,
+    `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&encoding=base64&disableErrorCheck=${checkErrors ? 0 : 1}`,
     {
       credentials: 'include',
     },

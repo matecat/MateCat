@@ -264,7 +264,10 @@ export const MachineTranslationTab = () => {
   const disableMT = () => setActiveMTEngine.current()
 
   const activeMTEngineData =
-    !config.is_cattool || (config.is_cattool && config.ownerIsMe)
+    !config.is_cattool ||
+    (config.is_cattool &&
+      config.ownerIsMe &&
+      mtEngines.some(({id}) => id === activeMTEngine))
       ? mtEngines.find(({id}) => id === activeMTEngine)
       : config.active_engine
 
