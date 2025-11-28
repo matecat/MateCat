@@ -14,7 +14,7 @@ use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
-use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
@@ -138,7 +138,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
                 ->method( 'update' )
                 ->with( $this->anything() )
                 ->willReturn(
-                        SetContributionResponse::getInstance(
+                    UpdateContributionResponse::getInstance(
                                 json_decode( '{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true )
                         )
                 );
@@ -223,7 +223,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
                 ->method( 'update' )
                 ->with( $this->anything() )
                 ->willReturn(
-                        SetContributionResponse::getInstance(
+                    UpdateContributionResponse::getInstance(
                                 json_decode( '{"responseData":"OK","responseStatus":200,"responseDetails":[545518095,545518096]}', true )
                         )
                 );
@@ -354,7 +354,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $stubEngine->expects( $this->once() )
                 ->method( 'update' )
                 ->with( $this->anything() )
-                ->willReturn( new SetContributionResponse( [ 'responseStatus' => 500, 'responseData' => [] ] ) );
+            ->willReturn(new UpdateContributionResponse(['responseStatus' => 500, 'responseData' => []]));
 
         $_worker->setEngine( $stubEngine );
 

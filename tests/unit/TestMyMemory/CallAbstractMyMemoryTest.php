@@ -7,6 +7,7 @@ use Utils\Engines\AbstractEngine;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
 use Utils\Tools\Matches;
 
 
@@ -166,7 +167,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
          */
         $returned_object = $this->resultProperty->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $returned_object instanceof SetContributionResponse );
+        $this->assertTrue($returned_object instanceof SetContributionResponse);
         $this->assertEquals( 200, $returned_object->responseStatus );
         $this->assertEquals( [ '0' => "0a64b364-f4f0-d301-66c4-5a6c04c2a2bf" ], $returned_object->responseDetails );
         $this->assertEquals( "OK", $returned_object->responseData );
@@ -222,7 +223,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
         /**
          * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof SetContributionResponse );
+        $this->assertTrue($actual_result instanceof SetContributionResponse);
         $this->assertFalse( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -338,7 +339,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
         ] );
 
         /**
-         * @var $result_object SetContributionResponse
+         * @var $result_object UpdateContributionResponse
          */
         $result_object = $this->resultProperty->getValue( $this->engine_MyMemory );
         $code          = $result_object[ 'error' ][ 'code' ];

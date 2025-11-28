@@ -208,7 +208,7 @@ LABEL;
         /**
          * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof SetContributionResponse );
+        $this->assertTrue($actual_result instanceof SetContributionResponse);
         $this->assertFalse( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
