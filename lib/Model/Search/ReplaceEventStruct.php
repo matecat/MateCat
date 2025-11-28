@@ -4,20 +4,21 @@ namespace Model\Search;
 
 use Model\DataAccess\ShapelessConcreteStruct;
 
-class ReplaceEventStruct extends ShapelessConcreteStruct {
+class ReplaceEventStruct extends ShapelessConcreteStruct
+{
 
     // DATABASE FIELDS
-    public $id;
-    public $replace_version;
-    public $id_job;
-    public $job_password;
-    public $id_segment;
-    public $segment_version;
-    public $translation_before_replacement;
-    public $translation_after_replacement;
-    public $source;
-    public $target;
-    public $status;
-    public $replacement;
-    public $created_at;
+    public ?int     $id                             = null;
+    public string   $replace_version;
+    public int      $id_job;
+    public string   $job_password;
+    public int      $id_segment;
+    public ?int     $segment_version                = 0;
+    public ?string  $translation_before_replacement = null;
+    public string   $translation_after_replacement;
+    public ?string  $source = null;
+    public string   $target;
+    public string   $status;
+    public string   $replacement;
+    public string   $created_at                     = '';
 }

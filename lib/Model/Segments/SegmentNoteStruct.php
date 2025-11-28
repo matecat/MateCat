@@ -5,7 +5,8 @@ namespace Model\Segments;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class SegmentNoteStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class SegmentNoteStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public ?int    $id          = null;
     public int     $id_segment;

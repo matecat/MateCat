@@ -3,11 +3,13 @@
 namespace Utils\Validator\Contracts;
 
 use Exception;
+use Throwable;
 
-abstract class AbstractValidator {
+abstract class AbstractValidator
+{
 
     /**
-     * @return ValidatorErrorObject[]
+     * @return Throwable[]
      */
     protected array $errors = [];
 
@@ -17,28 +19,29 @@ abstract class AbstractValidator {
      * @return ValidatorObject|null
      * @throws Exception
      */
-    abstract public function validate( ValidatorObject $object ): ?ValidatorObject;
+    abstract public function validate(ValidatorObject $object): ?ValidatorObject;
 
     /**
-     * @return ValidatorErrorObject[]
+     * @return Throwable[]
      */
-    public function getExceptions(): array {
+    public function getExceptions(): array
+    {
         return $this->errors;
     }
 
     /**
-     * @param ValidatorExceptionInterface $error
+     * @param Throwable $error
      */
-    public function addException( ValidatorExceptionInterface $error ) {
-        $errorObject        = new ValidatorErrorObject();
-        $errorObject->error = $error;
-        $this->errors[]     = $errorObject;
+    public function addException(Throwable $error): void
+    {
+        $this->errors[] = $error;
     }
 
     /**
      * @return bool
      */
-    public function isValid(): bool {
-        return empty( $this->errors );
+    public function isValid(): bool
+    {
+        return empty($this->errors);
     }
 }

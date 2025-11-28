@@ -17,7 +17,8 @@ use Utils\Engines\Apertium;
  * This class contains the default parameters for a Apertium EnginesFactory CREATION
  *
  */
-class ApertiumStruct extends EngineStruct {
+class ApertiumStruct extends EngineStruct
+{
 
     /**
      * @var ?string
@@ -27,7 +28,7 @@ class ApertiumStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $base_url = "http://api.prompsit.com";
+    public ?string $base_url = "https://api.prompsit.com";
 
     /**
      * @var ?string
@@ -57,9 +58,10 @@ class ApertiumStruct extends EngineStruct {
 
     /**
      * An empty struct
-     * @return EngineStruct
+     * @return ApertiumStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new ApertiumStruct();
     }
 

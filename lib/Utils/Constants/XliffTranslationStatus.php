@@ -2,9 +2,10 @@
 
 namespace Utils\Constants;
 
-class XliffTranslationStatus {
+class XliffTranslationStatus
+{
 
-    const STATES_12 = [
+    const array STATES_12 = [
             self::FINAL_STATE,
             self::NEEDS_ADAPTATION,
             self::NEEDS_L10N,
@@ -17,7 +18,7 @@ class XliffTranslationStatus {
             self::TRANSLATED,
     ];
 
-    const STATE_QUALIFIER_12 = [
+    const array STATE_QUALIFIER_12 = [
             self::EXACT_MATCH,
             self::FUZZY_MATCH,
             self::ID_MATCH,
@@ -34,14 +35,14 @@ class XliffTranslationStatus {
             self::TM_SUGGESTION
     ];
 
-    const STATES_20 = [
+    const array STATES_20 = [
             self::INITIAL,
             self::TRANSLATED,
             self::REVIEWED,
             self::FINAL_STATE
     ];
 
-    const ALL_STATES = [
+    const array ALL_STATES = [
             self::FINAL_STATE,
             self::NEEDS_ADAPTATION,
             self::NEEDS_L10N,
@@ -60,38 +61,38 @@ class XliffTranslationStatus {
 
     // xliff 1.2 state-qualifiers
     // @see https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#state-qualifier
-    const EXACT_MATCH          = 'exact-match';
-    const FUZZY_MATCH          = 'fuzzy-match';
-    const ID_MATCH             = 'id-match';
-    const LEVERAGED_GLOSSARY   = 'leveraged-glossary';
-    const LEVERAGED_INHERITED  = 'leveraged-inherited';
-    const LEVERAGED_MT         = 'leveraged-mt';
-    const LEVERAGED_REPOSITORY = 'leveraged-repository';
-    const LEVERAGED_TM         = 'leveraged-tm';
-    const MT_SUGGESTION        = 'mt-suggestion';
-    const REJECTED_GRAMMAR     = 'rejected-grammar';
-    const REJECTED_INACCURATE  = 'rejected-inaccurate';
-    const REJECTED_LENGTH      = 'rejected-length';
-    const REJECTED_SPELLING    = 'rejected-spelling';
-    const TM_SUGGESTION        = 'tm-suggestion';
+    const string EXACT_MATCH          = 'exact-match';
+    const string FUZZY_MATCH          = 'fuzzy-match';
+    const string ID_MATCH             = 'id-match';
+    const string LEVERAGED_GLOSSARY   = 'leveraged-glossary';
+    const string LEVERAGED_INHERITED  = 'leveraged-inherited';
+    const string LEVERAGED_MT         = 'leveraged-mt';
+    const string LEVERAGED_REPOSITORY = 'leveraged-repository';
+    const string LEVERAGED_TM         = 'leveraged-tm';
+    const string MT_SUGGESTION        = 'mt-suggestion';
+    const string REJECTED_GRAMMAR     = 'rejected-grammar';
+    const string REJECTED_INACCURATE  = 'rejected-inaccurate';
+    const string REJECTED_LENGTH      = 'rejected-length';
+    const string REJECTED_SPELLING    = 'rejected-spelling';
+    const string TM_SUGGESTION        = 'tm-suggestion';
 
     // xliff 1.2 states
-    const NEEDS_TRANSLATION        = 'needs-translation';
-    const NEEDS_L10N               = 'needs-l10n';
-    const NEEDS_ADAPTATION         = 'needs-adaptation';
-    const NEEDS_REVIEW_ADAPTATION  = 'needs-review-adaptation';
-    const NEEDS_REVIEW_L10N        = 'needs-review-l10n';
-    const NEEDS_REVIEW_TRANSLATION = 'needs-review-translation';
-    const SIGNED_OFF               = 'signed-off';
+    const string NEEDS_TRANSLATION        = 'needs-translation';
+    const string NEEDS_L10N               = 'needs-l10n';
+    const string NEEDS_ADAPTATION         = 'needs-adaptation';
+    const string NEEDS_REVIEW_ADAPTATION  = 'needs-review-adaptation';
+    const string NEEDS_REVIEW_L10N        = 'needs-review-l10n';
+    const string NEEDS_REVIEW_TRANSLATION = 'needs-review-translation';
+    const string SIGNED_OFF               = 'signed-off';
 
     // xliff 2.0/1.2 states
-    const NEW_STATE   = 'new';
-    const TRANSLATED  = 'translated';
-    const FINAL_STATE = 'final';
+    const string NEW_STATE   = 'new';
+    const string TRANSLATED  = 'translated';
+    const string FINAL_STATE = 'final';
 
     // xliff 2.0 states
-    const INITIAL  = 'initial';
-    const REVIEWED = 'reviewed';
+    const string INITIAL  = 'initial';
+    const string REVIEWED = 'reviewed';
 
     /**
      * Those state-qualifiers (xliff 1.2) must force the translation to status NEW
@@ -100,14 +101,15 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isStateQualifierNew( $status ): bool {
-        return in_array( $status, [
+    public static function isStateQualifierNew($status): bool
+    {
+        return in_array($status, [
                 self::FUZZY_MATCH,
                 self::MT_SUGGESTION,
                 self::LEVERAGED_INHERITED,
                 self::LEVERAGED_TM,
                 self::LEVERAGED_MT
-        ] );
+        ]);
     }
 
     /**
@@ -115,14 +117,15 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isStatusNew( $status ): bool {
-        return in_array( $status, [
+    public static function isStatusNew($status): bool
+    {
+        return in_array($status, [
                 self::NEW_STATE,
                 self::INITIAL, // xliff 2.0
                 self::NEEDS_TRANSLATION,
                 self::NEEDS_L10N,
                 self::NEEDS_ADAPTATION,
-        ] );
+        ]);
     }
 
     /**
@@ -130,13 +133,14 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isTranslated( $status ): bool {
-        return in_array( $status, [
+    public static function isTranslated($status): bool
+    {
+        return in_array($status, [
                 self::TRANSLATED,
                 self::NEEDS_REVIEW_ADAPTATION,
                 self::NEEDS_REVIEW_L10N,
                 self::NEEDS_REVIEW_TRANSLATION,
-        ] );
+        ]);
     }
 
     /**
@@ -144,8 +148,9 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isRevision( $status ): bool {
-        return self::isR1( $status );
+    public static function isRevision($status): bool
+    {
+        return self::isR1($status);
     }
 
     /**
@@ -153,11 +158,12 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isR1( $status ): bool {
-        return in_array( $status, [
+    public static function isR1($status): bool
+    {
+        return in_array($status, [
                 self::REVIEWED, // xliff 2.0
                 self::SIGNED_OFF,
-        ] );
+        ]);
     }
 
     /**
@@ -165,7 +171,8 @@ class XliffTranslationStatus {
      *
      * @return bool
      */
-    public static function isFinalState( $status ): bool {
+    public static function isFinalState($status): bool
+    {
         return $status === self::FINAL_STATE; // xliff 2.0 / 1.2
     }
 }

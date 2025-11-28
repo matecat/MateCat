@@ -5,9 +5,9 @@ namespace Utils\Validator\JSONSchema\Errors;
 use Exception;
 use JsonSerializable;
 use Swaggest\JsonSchema\Exception\Error;
-use Utils\Validator\Contracts\ValidatorExceptionInterface;
 
-class JSONValidatorException extends Exception implements JsonSerializable, ValidatorExceptionInterface {
+class JSONValidatorException extends Exception implements JsonSerializable
+{
     /**
      * @var Error
      */
@@ -18,36 +18,41 @@ class JSONValidatorException extends Exception implements JsonSerializable, Vali
      *
      * @param Error $error
      */
-    public function __construct( Error $error ) {
-        parent::__construct( "JSON Validation Error: " . $error->error );
+    public function __construct(Error $error)
+    {
+        parent::__construct("JSON Validation Error: " . $error->error);
         $this->error = $error;
     }
 
     /**
      * @return string
      */
-    public function getError(): string {
+    public function getError(): string
+    {
         return $this->error->error;
     }
 
     /**
      * @return string[]
      */
-    public function getSchemaPointers(): array {
+    public function getSchemaPointers(): array
+    {
         return $this->error->schemaPointers;
     }
 
     /**
      * @return string
      */
-    public function getDataPointer(): string {
+    public function getDataPointer(): string
+    {
         return $this->error->dataPointer;
     }
 
     /**
      * @return string
      */
-    public function getProcessingPath(): string {
+    public function getProcessingPath(): string
+    {
         return $this->error->processingPath;
     }
 
@@ -55,13 +60,14 @@ class JSONValidatorException extends Exception implements JsonSerializable, Vali
      * @return Error[]
      */
     public function getSubErrors(): array {
-        return $this->error->subErrors;
+        return $this->error->subErrors ?? [];
     }
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array
+    {
         return [
                 'error'          => $this->getError(),
                 'schemaPointers' => $this->getSchemaPointers(),

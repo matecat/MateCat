@@ -9,6 +9,7 @@
 
 namespace TestHelpers;
 
+use PHPUnit\Framework\MockObject\Invocation;
 use PHPUnit\Framework\MockObject\Rule\InvocationOrder;
 use ReflectionClass;
 
@@ -24,14 +25,13 @@ class InvocationInspector {
         $this->parameters = [];
 
         foreach ( $parentReflectionClass->getProperties() as $p ) {
-            $p->setAccessible( true );
             $this->parameters[ $p->getName() ] = $p->getValue( $invocation );
         }
 
     }
 
     /**
-     * @return array
+     * @return Invocation[]
      */
     public function getInvocations(): array {
         return $this->parameters[ 'invocations' ];

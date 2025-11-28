@@ -96,9 +96,9 @@ $klein->with( '/api/v3/mmt/[i:engineId]', function () {
 $klein->with( '/api/v3/deepl/[:engineId]', function () {
     route( '/glossaries', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'all' ] );
     route( '/glossaries', 'POST', [ '\Controller\API\V3\DeepLGlossaryController', 'create' ] );
-    route( '/glossaries/[i:id]', 'DELETE', [ '\Controller\API\V3\DeepLGlossaryController', 'delete' ] );
-    route( '/glossaries/[i:id]', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'get' ] );
-    route( '/glossaries/[i:id]/entries', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'getEntries' ] );
+    route( '/glossaries/[:id]', 'DELETE', [ '\Controller\API\V3\DeepLGlossaryController', 'delete' ] );
+    route( '/glossaries/[:id]', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'get' ] );
+    route( '/glossaries/[:id]/entries', 'GET', [ '\Controller\API\V3\DeepLGlossaryController', 'getEntries' ] );
 } );
 
 // PROJECT TEMPLATE
@@ -188,12 +188,9 @@ $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST', [ 'Controller\API\V2\SegmentTranslationIssueController', 'createComment' ] );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET', [ 'Controller\API\V2\SegmentTranslationIssueController', 'getComments' ] );
 
-    route( '/segments/status', 'POST', [ '\Controller\API\V2\JobStatusController', 'changeSegmentsStatus' ] ); // mark as translated bulk
+    route( '/segments/status', 'POST', ['\Controller\API\V2\MarkAllSegmentStatusController', 'changeSegmentsStatus' ] ); // mark as translated bulk
 
     route( '/segments-filter', 'GET', [ 'Plugins\Features\SegmentFilter\Controller\API\FilterController', 'index' ] );
-
-    route( '/options', 'POST', [ 'Controller\API\V2\ChunkOptionsController', 'update' ] );
-
 
     route( '/delete', 'POST', [ 'Controller\API\V2\JobsController', 'delete' ] );
     route( '/cancel', 'POST', [ 'Controller\API\V2\JobsController', 'cancel' ] );
@@ -259,3 +256,7 @@ route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'Controller\API\V2\Download
 // User
 route( '/api/v3/user', 'PUT', [ 'Controller\API\V2\UserController', 'edit' ] );
 route( '/api/v3/user/metadata', 'PUT', [ 'Controller\API\V2\UserController', 'setMetadata' ] );
+
+// TMX
+route( '/api/v3/tmx/import', 'POST', [ 'Controller\API\App\TMXFileController', 'import' ] );
+route( '/api/v3/tmx/export', 'POST', [ 'Controller\API\App\RequestExportTMXController', 'download' ] );

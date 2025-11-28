@@ -65,8 +65,8 @@ class InitializeJobWordCountTest extends AbstractTest {
         $inspector  = new InvocationInspector( $spy );
         $invocation = $inspector->getInvocations()[ 0 ];
 
-        $this->assertEquals( $invocation->getParameters()[ 0 ], $result );
-        $this->assertSame( $invocation->getParameters()[ 0 ], $result ); // same instance
+        $this->assertEquals( $invocation->parameters()[ 0 ], $result );
+        $this->assertSame( $invocation->parameters()[ 0 ], $result ); // same instance
 
         $this->assertTrue( $result instanceof WordCountStruct );
         $this->assertEquals( 1, $result->getIdJob() );

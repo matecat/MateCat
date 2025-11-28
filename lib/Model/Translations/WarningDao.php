@@ -10,7 +10,8 @@ use Model\Jobs\WarningsCountStruct;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
 
-class WarningDao extends AbstractDao {
+class WarningDao extends AbstractDao
+{
 
     protected string $_query_warnings_by_chunk = "
           SELECT count(1) AS count, jobs.id AS id_job, jobs.password
@@ -24,14 +25,14 @@ class WarningDao extends AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function getWarningsByProjectIds( $projectIds ): array {
-
+    public function getWarningsByProjectIds($projectIds): array
+    {
         $statuses[] = TranslationStatus::STATUS_TRANSLATED;
         $statuses[] = TranslationStatus::STATUS_APPROVED;
 
-        $arrayCount   = count( $projectIds );
-        $rowCount     = ( $arrayCount ? $arrayCount - 1 : 0 );
-        $placeholders = sprintf( "?%s", str_repeat( ",?", $rowCount ) );
+        $arrayCount   = count($projectIds);
+        $rowCount     = ($arrayCount ? $arrayCount - 1 : 0);
+        $placeholders = sprintf("?%s", str_repeat(",?", $rowCount));
 
         $sql = "
         SELECT 	COUNT( jobs.id ) as count,
@@ -46,14 +47,13 @@ class WarningDao extends AbstractDao {
                         GROUP BY id_job, password;
         ";
 
-        $params = array_merge( $projectIds, $statuses );
+        $params = array_merge($projectIds, $statuses);
 
         $con = $this->database->getConnection();
 
-        $stmt = $con->prepare( $sql );
+        $stmt = $con->prepare($sql);
 
-        return $this->_fetchObjectMap( $stmt, WarningsCountStruct::class, $params );
-
+        return $this->_fetchObjectMap($stmt, WarningsCountStruct::class, $params);
     }
 
     /**
@@ -61,31 +61,33 @@ class WarningDao extends AbstractDao {
      *
      * @return int
      */
-    public function getErrorsByChunk( JobStruct $chunk ): int {
+    public function getErrorsByChunk(JobStruct $chunk): int
+    {
         $con = $this->database->getConnection();
 
-        $stmt = $con->prepare( $this->_query_warnings_by_chunk );
-        $stmt->execute( [
+        $stmt = $con->prepare($this->_query_warnings_by_chunk);
+        $stmt->execute([
                 'id'       => $chunk->id,
                 'password' => $chunk->password,
                 'level'    => WarningModel::ERROR,
                 'status'   => TranslationStatus::STATUS_NEW
-        ] );
+        ]);
 
         $result = $stmt->fetch() ?: [];
-        return  $result[ 'count' ] ?? 0;
 
+        return $result[ 'count' ] ?? 0;
     }
 
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult(array $array_result)
+    {
         // TODO: Implement _buildResult() method.
     }
 
     /**
      * @throws ReflectionException
      */
-    public static function getWarningsByJobIdAndPassword( $jid, $jpassword ): array {
-
+    public static function getWarningsByJobIdAndPassword($jid, $jpassword): array
+    {
         $thisDao = new self();
         $db      = $thisDao->getDatabaseHandler();
 
@@ -98,14 +100,13 @@ class WarningDao extends AbstractDao {
 		-- following is a condition on bitmask to filter by severity ERROR
 		  AND warning & 1 = 1 ";
 
-        $stmt = $db->getConnection()->prepare( $query );
+        $stmt = $db->getConnection()->prepare($query);
 
-        return $thisDao->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
+        return $thisDao->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
                 'id_job'         => $jid,
                 'password'       => $jpassword,
                 'segment_status' => TranslationStatus::STATUS_NEW
-        ] );
-
+        ]);
     }
 
 

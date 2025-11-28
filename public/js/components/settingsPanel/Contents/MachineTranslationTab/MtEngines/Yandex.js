@@ -76,6 +76,9 @@ export const Yandex = ({
             {errors.secret && (
               <span className="field-error">Required field</span>
             )}
+            {typeof error?.message === 'string' && (
+              <span className="field-error">{error?.message}</span>
+            )}
           </div>
 
           <div className="provider-field container-actions">

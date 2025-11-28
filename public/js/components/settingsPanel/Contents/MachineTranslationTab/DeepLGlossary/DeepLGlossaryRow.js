@@ -55,7 +55,7 @@ export const DeepLGlossaryRow = ({
               onClick={() => deleteGlossaryConfirm(row)}
               data-testid={`delete-deeplglossary-${row.id}`}
             >
-              <Trash size={12} />
+              <Trash size={16} />
             </button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}

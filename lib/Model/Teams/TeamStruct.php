@@ -12,7 +12,8 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Utils\Constants\Teams;
 
-class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public ?int   $id   = null;
     public string $name;
@@ -30,7 +31,8 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      *
      * @return $this
      */
-    public function setMembers( array $list ): TeamStruct {
+    public function setMembers(array $list): TeamStruct
+    {
         $this->members = $list;
 
         return $this;
@@ -39,18 +41,20 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @return null|MembershipStruct[]
      */
-    public function getMembers(): ?array {
+    public function getMembers(): ?array
+    {
         return $this->members;
     }
 
     /**
-     * @param $uid
+     * @param int $uid
      *
      * @return bool
      */
-    public function hasUser( $uid ): bool {
-        foreach ( $this->getMembers() as $member ) {
-            if ( $member->uid === $uid ) {
+    public function hasUser(int $uid): bool
+    {
+        foreach ($this->getMembers() as $member) {
+            if ($member->uid === $uid) {
                 return true;
             }
         }

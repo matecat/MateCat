@@ -39,16 +39,27 @@ function useOptions() {
       !isEqual(mtExtra.current, restPropsValue) &&
       Object.keys(restPropsValue).length
     ) {
-      modifyingCurrentTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        mt: {
-          ...prevTemplate.mt,
-          extra: {
-            ...prevTemplate.mt.extra,
-            ...restPropsValue,
+      modifyingCurrentTemplate((prevTemplate) => {
+        const extraWithoutUndefinedValue = Object.entries(
+          prevTemplate.mt.extra,
+        ).reduce((acc, [key, value]) => {
+          return {
+            ...acc,
+            ...(typeof value !== 'undefined' ? {[key]: value} : {}),
+          }
+        }, {})
+
+        return {
+          ...prevTemplate,
+          mt: {
+            ...prevTemplate.mt,
+            extra: {
+              ...extraWithoutUndefinedValue,
+              ...restPropsValue,
+            },
           },
-        },
-      }))
+        }
+      })
     }
   }, [formData, modifyingCurrentTemplate, setValue])
 

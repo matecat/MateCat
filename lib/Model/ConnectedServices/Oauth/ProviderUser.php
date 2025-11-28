@@ -2,7 +2,8 @@
 
 namespace Model\ConnectedServices\Oauth;
 
-class ProviderUser {
+class ProviderUser
+{
 
     public string  $name      = "";
     public ?string $lastName  = "";
