@@ -15,7 +15,8 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
 
-class ProjectPasswordValidator extends Base {
+class ProjectPasswordValidator extends Base
+{
     /**
      * @var ?ProjectStruct
      */
@@ -24,18 +25,20 @@ class ProjectPasswordValidator extends Base {
     private int     $id_project;
     private ?string $password;
 
-    public function __construct( KleinController $controller ) {
-
+    public function __construct(KleinController $controller)
+    {
         $filterArgs = [
                 'id_project' => [
-                        'filter' => FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT ]
+                        'filter' => FILTER_SANITIZE_NUMBER_INT,
+                        ['filter' => FILTER_VALIDATE_INT]
                 ],
                 'password'   => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
         ];
 
-        $postInput = (object)filter_var_array( $controller->params, $filterArgs );
+        $postInput = (object)filter_var_array($controller->params, $filterArgs);
 
         $this->id_project = $postInput->id_project;
         $this->password   = $postInput->password;
@@ -43,7 +46,7 @@ class ProjectPasswordValidator extends Base {
         $controller->params[ 'id_project' ] = $this->id_project;
         $controller->params[ 'password' ]   = $this->password;
 
-        parent::__construct( $controller );
+        parent::__construct($controller);
     }
 
     /**
@@ -51,37 +54,39 @@ class ProjectPasswordValidator extends Base {
      * @throws NotFoundException
      * @throws ReflectionException
      */
-    public function _validate(): void {
-
-        if( !$this->password ) {
-            throw new NotFoundException( "No project found.", 404 );
+    public function _validate(): void
+    {
+        if (!$this->password) {
+            throw new NotFoundException("No project found.", 404);
         }
 
         $this->project = ProjectDao::findByIdAndPassword(
                 $this->id_project,
                 $this->password
         );
-
     }
 
     /**
      * @return ?ProjectStruct
      */
-    public function getProject(): ?ProjectStruct {
+    public function getProject(): ?ProjectStruct
+    {
         return $this->project;
     }
 
     /**
      * @return int
      */
-    public function getIdProject(): int {
+    public function getIdProject(): int
+    {
         return $this->id_project;
     }
 
     /**
      * @return string
      */
-    public function getPassword(): string {
+    public function getPassword(): string
+    {
         return $this->password;
     }
 

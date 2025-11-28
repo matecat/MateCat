@@ -20,7 +20,8 @@ use Utils\Tools\Utils;
  * Date: 01/04/15
  * Time: 12.54
  */
-class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public ?int    $uid                           = null;
     public ?string $email                         = null;
@@ -37,68 +38,80 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @return bool
      */
-    public function isAnonymous(): bool {
+    public function isAnonymous(): bool
+    {
         return !$this->isLogged();
     }
 
     /**
      * @return bool
      */
-    public function isLogged(): bool {
-        return !empty( $this->uid ) &&
-                !empty( $this->email ) &&
-                !empty( $this->first_name ) &&
-                !empty( $this->last_name );
+    public function isLogged(): bool
+    {
+        return !empty($this->uid) &&
+                !empty($this->email) &&
+                !empty($this->first_name) &&
+                !empty($this->last_name);
     }
 
-    public function clearAuthToken() {
+    public function clearAuthToken(): void
+    {
         $this->confirmation_token            = null;
         $this->confirmation_token_created_at = null;
     }
 
-    public function initAuthToken() {
-        $this->confirmation_token            = Utils::randomString( 50, true );
-        $this->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
+    public function initAuthToken(): void
+    {
+        $this->confirmation_token            = Utils::randomString(50, true);
+        $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
     }
 
-    public static function getStruct(): UserStruct {
+    public static function getStruct(): UserStruct
+    {
         return new UserStruct();
     }
 
-    public function everSignedIn(): bool {
-        return !( is_null( $this->email_confirmed_at ) && is_null( $this->oauth_access_token ) );
+    public function everSignedIn(): bool
+    {
+        return !(is_null($this->email_confirmed_at) && is_null($this->oauth_access_token));
     }
 
-    public function fullName(): string {
-        return trim( $this->first_name . ' ' . $this->last_name );
+    public function fullName(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
     }
 
-    public function shortName(): string {
-        return trim( mb_substr( $this->first_name, 0, 1 ) . mb_substr( $this->last_name, 0, 1 ) );
+    public function shortName(): string
+    {
+        return trim(mb_substr($this->first_name, 0, 1) . mb_substr($this->last_name, 0, 1));
     }
 
-    public function getEmail(): ?string {
+    public function getEmail(): ?string
+    {
         return $this->email;
     }
 
     /**
      * @return ?int
      */
-    public function getUid(): ?int {
+    public function getUid(): ?int
+    {
         return $this->uid;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getFirstName(): ?string {
+    public function getFirstName(): ?string
+    {
         return $this->first_name;
     }
 
     /**
      * @return string|null
      */
-    public function getLastName(): ?string {
+    public function getLastName(): ?string
+    {
         return $this->last_name;
     }
 
@@ -106,22 +119,24 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function getPersonalTeam(): TeamStruct {
+    public function getPersonalTeam(): TeamStruct
+    {
         $oDao = new TeamDao();
-        $oDao->setCacheTTL( 60 * 60 * 24 );
+        $oDao->setCacheTTL(60 * 60 * 24);
 
-        return $oDao->getPersonalByUser( $this );
+        return $oDao->getPersonalByUser($this);
     }
 
     /**
      * @return TeamStruct[]|null
      * @throws ReflectionException
      */
-    public function getUserTeams(): ?array {
+    public function getUserTeams(): ?array
+    {
         $mDao = new MembershipDao();
-        $mDao->setCacheTTL( 60 * 60 * 24 );
+        $mDao->setCacheTTL(60 * 60 * 24);
 
-        return $mDao->findUserTeams( $this );
+        return $mDao->findUserTeams($this);
     }
 
     /**
@@ -143,13 +158,14 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @return array
      */
-    public function getMetadataAsKeyValue(): array {
+    public function getMetadataAsKeyValue(): array
+    {
         $dao        = new MetadataDao();
-        $collection = $dao->getAllByUid( $this->uid );
+        $collection = $dao->getAllByUid($this->uid);
         $data       = [];
 
         /** @var MetadataStruct $record */
-        foreach ( $collection as $record ) {
+        foreach ($collection as $record) {
             $data[ $record->key ] = $record->getValue();
         }
 
@@ -163,9 +179,9 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
                 'cross_language_matches' => new stdClass(),
         ];
 
-        foreach ( $mandatory as $key => $value ) {
-            if ( !isset( $data[ $key ] ) ) {
-                $data[ $key ] = is_numeric( $value ) ? (int)$value : $value;
+        foreach ($mandatory as $key => $value) {
+            if (!isset($data[ $key ])) {
+                $data[ $key ] = is_numeric($value) ? (int)$value : $value;
             }
         }
 
@@ -179,8 +195,9 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      *
      * @return bool
      */
-    public function passwordMatch( $password ): bool {
-        return Utils::verifyPass( $password, $this->salt, $this->pass );
+    public function passwordMatch($password): bool
+    {
+        return Utils::verifyPass($password, $this->salt, $this->pass);
     }
 
     /**
@@ -190,26 +207,29 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      * @throws EnvironmentIsBrokenException
      * @throws Exception
      */
-    public function getDecryptedOauthAccessToken(): ?string {
+    public function getDecryptedOauthAccessToken(): ?string
+    {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
-        return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
+        return $oauthTokenEncryption->decrypt($this->oauth_access_token);
     }
 
     /**
-     * @param null $field
+     * @param string|null $field
      *
      * @return mixed
+     * @throws EnvironmentIsBrokenException
      * @throws Exception
      */
-    public function getDecodedOauthAccessToken( $field = null ) {
-        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), true );
+    public function getDecodedOauthAccessToken(?string $field = null): mixed
+    {
+        $decoded = json_decode($this->getDecryptedOauthAccessToken(), true);
 
-        if ( $field ) {
-            if ( array_key_exists( $field, $decoded ) ) {
+        if ($field) {
+            if (array_key_exists($field, $decoded)) {
                 return $decoded[ $field ];
             } else {
-                throw new Exception( 'key not found on token: ' . $field );
+                throw new Exception('key not found on token: ' . $field);
             }
         }
 

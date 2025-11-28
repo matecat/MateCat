@@ -7,6 +7,7 @@ import {
 import useTemplates, {normalizeTemplatesWithNullProps} from './useTemplates'
 import {ComponentExtendInterface} from '../utils/ComponentExtendInterface'
 import {CHARS_SIZE_COUNTER_TYPES} from '../utils/charsSizeCounterUtil'
+import defaultMTOptions from '../components/settingsPanel/Contents/defaultTemplates/mtOptions.json'
 
 export const isStandardTemplate = ({id} = {}) => id === 0
 
@@ -86,7 +87,11 @@ export class UseProjectTemplateInterface extends ComponentExtendInterface {
 
 const useProjectTemplateInterface = new UseProjectTemplateInterface()
 
-function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
+function useProjectTemplates({
+  tmKeys,
+  mtEngines,
+  isCattool = config.is_cattool,
+} = {}) {
   const {
     templates: projectTemplates,
     setTemplates: setProjectTemplates,
@@ -97,8 +102,10 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
 
   const tmKeysRef = useRef()
   tmKeysRef.current = tmKeys
+  const mtEnginesRef = useRef()
+  mtEnginesRef.current = mtEngines
 
-  const canRetrieveTemplates = Array.isArray(tmKeys)
+  const canRetrieveTemplates = Array.isArray(tmKeys) && Array.isArray(mtEngines)
 
   // retrieve templates
   useEffect(() => {
@@ -117,6 +124,30 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
                 value === useProjectTemplateInterface.getCharacterCounterMode(),
             )
 
+            const setDefaultExtraMT = (template) => {
+              const mt = mtEnginesRef.current.find(
+                ({id}) => id === template.mt?.id,
+              )
+
+              const defaultExtra = defaultMTOptions[mt?.engine_type]
+              if (mt && defaultExtra) {
+                return {
+                  ...template,
+                  mt: {
+                    ...template.mt,
+                    extra: {
+                      ...normalizeTemplatesWithNullProps(
+                        [template.mt?.extra ?? {}],
+                        defaultExtra,
+                      )[0],
+                    },
+                  },
+                }
+              }
+
+              return template
+            }
+
             const templateDefaultNormalized = {
               ...templateDefault,
               ...(shouldUsePresetCharacterMode && {
@@ -126,8 +157,9 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
             }
             // check if users templates have some properties value to undefined or null and assign them default value
             const templatesNormalized = normalizeTemplatesWithNullProps(
-              items,
+              items.map(setDefaultExtraMT),
               templateDefaultNormalized,
+              ['subfiltering_handlers'],
             )
 
             const shouldStandardToBeDefault = templatesNormalized.every(
@@ -178,6 +210,7 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
 
 useProjectTemplates.propTypes = {
   tmKeys: PropTypes.array,
+  mtEngines: PropTypes.array,
   isCattool: PropTypes.bool,
 }
 

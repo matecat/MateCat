@@ -17,7 +17,8 @@ namespace Model\MTQE\PayableRate\DTO;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 
-class MTQEPayableRateBreakdowns extends AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEPayableRateBreakdowns extends AbstractDaoSilentStruct implements JsonSerializable
+{
 
     /** @var int $ice The rate for ICE matches. Default is 0. */
     public int $ice = 0;
@@ -48,7 +49,8 @@ class MTQEPayableRateBreakdowns extends AbstractDaoSilentStruct implements JsonS
      *
      * @return array The object properties as an associative array.
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return $this->getArrayCopy();
     }
 
@@ -57,8 +59,9 @@ class MTQEPayableRateBreakdowns extends AbstractDaoSilentStruct implements JsonS
      *
      * @return string The JSON-encoded string of the object.
      */
-    public function __toString(): string {
-        return json_encode( $this->jsonSerialize() );
+    public function __toString(): string
+    {
+        return json_encode($this->jsonSerialize());
     }
 
 }

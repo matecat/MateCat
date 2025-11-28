@@ -16,7 +16,8 @@ namespace Utils\TaskRunner\Commons;
  *
  * @package TaskRunner\Commons
  */
-class ContextList {
+class ContextList
+{
 
     /**
      * Variable holding contextes
@@ -30,12 +31,11 @@ class ContextList {
      *
      * @param array $queue_info
      */
-    protected function __construct( array $queue_info ) {
-
-        foreach ( $queue_info as $level => $values ) {
-            $this->list[ $level ] = Context::buildFromArray( $values );
+    protected function __construct(array $queue_info)
+    {
+        foreach ($queue_info as $level => $values) {
+            $this->list[ $level ] = Context::buildFromArray($values);
         }
-
     }
 
     /**
@@ -45,8 +45,9 @@ class ContextList {
      *
      * @return static
      */
-    public static function get( array $queue_info = [] ): ContextList {
-        return new static( $queue_info );
+    public static function get(array $queue_info = []): ContextList
+    {
+        return new static($queue_info);
     }
 
 }

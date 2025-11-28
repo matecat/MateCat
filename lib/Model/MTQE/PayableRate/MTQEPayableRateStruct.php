@@ -14,7 +14,8 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 
-class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSerializable
+{
 
     public int     $id          = 0;
     public string  $name        = "";
@@ -35,48 +36,47 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
      *
      * @return $this
      */
-    public function hydrateFromJSON( string $json, $uid = null ): MTQEPayableRateStruct {
+    public function hydrateFromJSON(string $json, $uid = null): MTQEPayableRateStruct
+    {
+        $decoded_json = json_decode($json, true);
 
-        $decoded_json = json_decode( $json, true );
-
-        if ( !isset( $decoded_json[ 'name' ] ) ) {
-            throw new DomainException( "Cannot instantiate a new MTQEPayableRateStruct. Invalid data provided.", 400 );
+        if (!isset($decoded_json[ 'name' ])) {
+            throw new DomainException("Cannot instantiate a new MTQEPayableRateStruct. Invalid data provided.", 400);
         }
 
-        if ( empty( $uid ) && empty( $decoded_json[ 'uid' ] ) ) {
-            throw new DomainException( "Cannot instantiate a new MTQEPayableRateStruct. Invalid user id provided.", 400 );
+        if (empty($uid) && empty($decoded_json[ 'uid' ])) {
+            throw new DomainException("Cannot instantiate a new MTQEPayableRateStruct. Invalid user id provided.", 400);
         }
 
         $this->uid  = $decoded_json[ 'uid' ] ?? $uid;
         $this->name = $decoded_json[ 'name' ];
 
-        if ( isset( $decoded_json[ 'id' ] ) ) {
+        if (isset($decoded_json[ 'id' ])) {
             $this->id = $decoded_json[ 'id' ];
         }
 
-        if ( isset( $decoded_json[ 'version' ] ) ) {
+        if (isset($decoded_json[ 'version' ])) {
             $this->version = $decoded_json[ 'version' ];
         }
 
-        if ( isset( $decoded_json[ 'created_at' ] ) ) {
+        if (isset($decoded_json[ 'created_at' ])) {
             $this->created_at = $decoded_json[ 'created_at' ];
         }
 
-        if ( isset( $decoded_json[ 'deleted_at' ] ) ) {
+        if (isset($decoded_json[ 'deleted_at' ])) {
             $this->deleted_at = $decoded_json[ 'deleted_at' ];
         }
 
-        if ( isset( $decoded_json[ 'modified_at' ] ) ) {
+        if (isset($decoded_json[ 'modified_at' ])) {
             $this->modified_at = $decoded_json[ 'modified_at' ];
         }
 
         // params
-        if ( isset( $decoded_json[ 'breakdowns' ] ) ) {
-            ( is_string( $decoded_json[ 'breakdowns' ] ) ) ? $this->hydrateBreakdownsFromJson( $decoded_json[ 'breakdowns' ] ) : $this->hydrateBreakdownsFromDataArray( $decoded_json[ 'breakdowns' ] );
+        if (isset($decoded_json[ 'breakdowns' ])) {
+            (is_string($decoded_json[ 'breakdowns' ])) ? $this->hydrateBreakdownsFromJson($decoded_json[ 'breakdowns' ]) : $this->hydrateBreakdownsFromDataArray($decoded_json[ 'breakdowns' ]);
         }
 
         return $this;
-
     }
 
     /**
@@ -84,34 +84,36 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
      *
      * @return MTQEPayableRateStruct
      */
-    public function hydrateBreakdownsFromJson( string $jsonParams ): MTQEPayableRateStruct {
-        $rules = json_decode( $jsonParams, true );
+    public function hydrateBreakdownsFromJson(string $jsonParams): MTQEPayableRateStruct
+    {
+        $rules = json_decode($jsonParams, true);
 
-        return $this->hydrateBreakdownsFromDataArray( $rules );
+        return $this->hydrateBreakdownsFromDataArray($rules);
     }
 
-    public function hydrateBreakdownsFromDataArray( array $params ): MTQEPayableRateStruct {
-
+    public function hydrateBreakdownsFromDataArray(array $params): MTQEPayableRateStruct
+    {
         $this->breakdowns = new MTQEPayableRateBreakdowns();
 
         // rules
-        if ( isset( $params[ 'breakdowns' ] ) ) {
-            $this->breakdowns = new MTQEPayableRateBreakdowns( $params[ 'breakdowns' ] );
+        if (isset($params[ 'breakdowns' ])) {
+            $this->breakdowns = new MTQEPayableRateBreakdowns($params[ 'breakdowns' ]);
         }
 
         return $this;
-
     }
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array
+    {
         return $this->getArrayCopy();
     }
 
-    public function __toString(): string {
-        return json_encode( $this->jsonSerialize() );
+    public function __toString(): string
+    {
+        return json_encode($this->jsonSerialize());
     }
 
 }

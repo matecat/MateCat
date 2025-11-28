@@ -119,14 +119,14 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
       onSubmit={onSubmit}
     >
       <div
-        className={`align-center${
+        className={`${
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
         <input
           checked={isActive}
           onChange={onChangeIsActive}
-          type="checkbox"
+          type="radio"
           title=""
           disabled
         />
@@ -155,7 +155,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           />
           {!file ? (
             <label htmlFor="file-import" className={fileNameClasses}>
-              <Upload size={14} />
+              <Upload size={18} />
               Choose file
             </label>
           ) : (

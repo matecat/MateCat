@@ -430,7 +430,7 @@ const PreferencesModal = (props) => {
                   setModifyUser(true)
                 }}
               >
-                <IconEdit />
+                <IconEdit size={18} />
               </div>
             </div>
           )}

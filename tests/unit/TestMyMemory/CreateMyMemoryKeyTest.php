@@ -8,7 +8,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Match;
+use Utils\Tools\Matches;
 
 
 /**
@@ -75,7 +75,7 @@ T;
          */
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
         $this->assertEquals( "", $property->getValue( $result ) );
 
 
@@ -117,7 +117,7 @@ T;
 
         /**
          * creation of the engine
-         * @var Match
+         * @var Matches
          */
         $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
 
@@ -147,7 +147,7 @@ T;
          */
         $reflector = new ReflectionClass( $result );
         $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        
         $this->assertEquals( "", $property->getValue( $result ) );
 
 

@@ -12,11 +12,13 @@ use ReflectionException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
-class JobMetadataController extends KleinController {
+class JobMetadataController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
-        $this->appendValidator( new ChunkPasswordValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $this->appendValidator(new ChunkPasswordValidator($this));
     }
 
     /**
@@ -24,74 +26,65 @@ class JobMetadataController extends KleinController {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function delete() {
+    public function delete(): void
+    {
         $params = $this->sanitizeRequestParams();
         $dao    = new MetadataDao();
 
-        $struct = $dao->get( $params[ 'id_job' ], $params[ 'password' ], $params[ 'key' ] );
+        $struct = $dao->get($params[ 'id_job' ], $params[ 'password' ], $params[ 'key' ]);
 
-        if ( empty( $struct ) ) {
-            throw new NotFoundException( 'Metadata not found', 404 );
+        if (empty($struct)) {
+            throw new NotFoundException('Metadata not found', 404);
         }
 
-        $dao->delete( $params[ 'id_job' ], $params[ 'password' ], $params[ 'key' ] );
-        $this->response->json( [
+        $dao->delete($params[ 'id_job' ], $params[ 'password' ], $params[ 'key' ]);
+        $this->response->json([
                 'id' => $struct->id
-        ] );
-    }
-
-    /**
-     * Get all job metadata
-     * @throws ReflectionException
-     */
-    public function get() {
-        $params = $this->sanitizeRequestParams();
-        $dao    = new MetadataDao();
-        $this->response->json( $dao->getByJobIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
+        ]);
     }
 
     /**
      * Upsert metadata
      * @throws Exception
      */
-    public function save() {
-
+    public function save(): void
+    {
         $dao = new MetadataDao();
 
         // accept only JSON
-        if ( !$this->isJsonRequest() ) {
-            throw new Exception( 'Bad request', 400 );
+        if (!$this->isJsonRequest()) {
+            throw new Exception('Bad request', 400);
         }
 
         $params = $this->sanitizeRequestParams();
 
-        $jsonValidatorObject = new JSONValidatorObject( $this->request->body() );
-        $jsonValidator       = new JSONValidator( 'job_metadata.json', true );
-        $jsonValidator->validate( $jsonValidatorObject );
+        $jsonValidatorObject = new JSONValidatorObject($this->request->body());
+        $jsonValidator       = new JSONValidator('job_metadata.json', true);
+        $jsonValidator->validate($jsonValidatorObject);
 
         $return = [];
-        foreach ( $jsonValidatorObject->getValue( true ) as $item ) {
+        foreach ($jsonValidatorObject->getValue(true) as $item) {
             $struct   = $dao->set(
                     $params[ 'id_job' ],
                     $params[ 'password' ],
                     $item[ 'key' ],
-                    is_array( $item[ 'value' ] ) ? json_encode( $item[ 'value' ] ) : $item[ 'value' ]
+                    is_array($item[ 'value' ]) ? json_encode($item[ 'value' ]) : $item[ 'value' ] ?? 'null'
             );
             $return[] = $struct;
         }
 
-        $this->response->json( $return );
-
+        $this->response->json($return);
     }
 
     /**
      * @return array
      */
-    private function sanitizeRequestParams(): array {
-        return filter_var_array( $this->request->params(), [
-                'id_job'   => FILTER_SANITIZE_STRING,
-                'password' => FILTER_SANITIZE_STRING,
-                'key'      => FILTER_SANITIZE_STRING,
-        ] );
+    private function sanitizeRequestParams(): array
+    {
+        return filter_var_array($this->request->params(), [
+                'id_job'   => FILTER_SANITIZE_SPECIAL_CHARS,
+                'password' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'key'      => FILTER_SANITIZE_SPECIAL_CHARS,
+        ]);
     }
 }

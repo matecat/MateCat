@@ -5,6 +5,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -18,7 +19,7 @@ use Utils\Registry\AppConfig;
  */
 class GetProjectOwnerTest extends AbstractTest {
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     protected $flusher;
     /**
@@ -153,21 +154,20 @@ class GetProjectOwnerTest extends AbstractTest {
     public function test_getProjectOwner_mocked() {
 
         /**
-         * @var UserDao
+         * @var UserDao $mock_user_Dao
          */
         $mock_user_Dao = $this->getMockBuilder( UserDao::class )
                 ->setConstructorArgs( [ $this->database_instance ] )
-                ->setMethods( [ '_buildResult', '_fetch_array' ] )
+                ->onlyMethods( [ '_buildResult' ] )
                 ->getMock();
 
-//        $mock_user_Dao->expects( $this->exactly( 1 ) )
-//                ->method( '_fetch_array' );
-
-//        $mock_user_Dao->expects( $this->exactly( 1 ) )
-//                ->method( '_buildResult' );
+        $originalCacheValue = AppConfig::$SKIP_SQL_CACHE;
+        AppConfig::$SKIP_SQL_CACHE = true;
 
         /** @var UserStruct $user */
         $user = $mock_user_Dao->getProjectOwner( $this->id_job );
+
+        AppConfig::$SKIP_SQL_CACHE = $originalCacheValue;
 
         $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( $this->uid_user, $user->uid );

@@ -100,8 +100,8 @@ class AnalysisJob implements JsonSerializable {
         $this->source        = $source;
         $this->target        = $target;
         $lang_handler        = Languages::getInstance();
-        $this->sourceName    = $lang_handler->getLocalizedName( $source );
-        $this->targetName    = $lang_handler->getLocalizedName( $target );
+        $this->sourceName    = $lang_handler->getLocalizedName( $source ) ?? '';
+        $this->targetName    = $lang_handler->getLocalizedName( $target ) ?? '';
         $this->payable_rates = new stdClass();
     }
 
@@ -144,7 +144,8 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw( int $raw ): void
+    {
         $this->total_raw += $raw;
     }
 
@@ -153,7 +154,8 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent( float $equivalent ): void
+    {
         $this->total_equivalent += $equivalent;
     }
 
@@ -162,7 +164,8 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementIndustry( float $industry ) {
+    public function incrementIndustry( float $industry ): void
+    {
         $this->total_industry += $industry;
     }
 

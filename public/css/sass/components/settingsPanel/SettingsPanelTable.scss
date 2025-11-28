@@ -127,8 +127,6 @@
   min-height: 0px;
   max-height: 0px;
   opacity: 0;
-  border-top: 1px solid #e1e1e1;
-  box-shadow: inset 0px 2px 5px 0px #e4e4e4;
   transition:
     max-height 0.8s ease-in-out,
     min-height 0.2s ease-in-out,
@@ -138,9 +136,8 @@
 .settings-panel-row-extra-content-expanded {
   visibility: visible;
   min-height: 50px;
-  max-height: 400px;
+  max-height: fit-content;
   opacity: 1;
-  overflow: auto;
 }
 
 .settings-panel-mt-row {
@@ -155,4 +152,5 @@
 
 .settings-panel-mt-row-description {
   padding: 5px 10px !important;
+  font-size: 14px;
 }

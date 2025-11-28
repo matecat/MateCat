@@ -21,50 +21,46 @@ use Utils\Logger\LoggerFactory;
  * @package Contribution
  *
  */
-class Set {
+class Set
+{
 
     /**
      * @param SetContributionRequest $contribution
      *
      * @throws Exception
      */
-    public static function contribution( SetContributionRequest $contribution ) {
-
+    public static function contribution(SetContributionRequest $contribution): void
+    {
         try {
-            WorkerClient::enqueue( 'CONTRIBUTION', SetContributionWorker::class, $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( Exception $e ) {
-
+            WorkerClient::enqueue('CONTRIBUTION', SetContributionWorker::class, $contribution->getArrayCopy(), ['persistent' => WorkerClient::$_HANDLER->persistent]);
+        } catch (Exception $e) {
             # Handle the error, logging, ...
             $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
-            $output .= var_export( $contribution, true );
-            LoggerFactory::doJsonLog( $output );
+            $output .= var_export($contribution, true);
+            LoggerFactory::doJsonLog($output);
             throw $e;
-
         }
-
     }
 
     /**
      * @throws Exception
      */
-    public static function contributionMT( SetContributionRequest $contribution = null ) {
+    public static function contributionMT(SetContributionRequest $contribution = null): void
+    {
         try {
-
-            if ( empty( $contribution ) ) {
+            if (empty($contribution)) {
                 return;
             }
 
-            WorkerClient::enqueue( 'CONTRIBUTION_MT', SetContributionMTWorker::class, $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( Exception $e ) {
-
+            WorkerClient::enqueue('CONTRIBUTION_MT', SetContributionMTWorker::class, $contribution->getArrayCopy(), ['persistent' => WorkerClient::$_HANDLER->persistent]);
+        } catch (Exception $e) {
             # Handle the error, logging, ...
             $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
-            $output .= var_export( $contribution, true );
-            LoggerFactory::doJsonLog( $output );
+            $output .= var_export($contribution, true);
+            LoggerFactory::doJsonLog($output);
             throw $e;
-
         }
     }
 

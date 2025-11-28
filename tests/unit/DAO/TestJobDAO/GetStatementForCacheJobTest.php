@@ -24,7 +24,7 @@ class GetStatementForCacheJobTest extends AbstractTest {
         $this->databaseInstance = new JobDao( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_getStatementForQuery" );
-        $this->method->setAccessible( true );
+        
 
 
     }
@@ -32,7 +32,7 @@ class GetStatementForCacheJobTest extends AbstractTest {
     public function test__getStatementForCache() {
 
         $propReflection = $this->reflector->getProperty( '_query_cache' );
-        $propReflection->setAccessible( true );
+        
 
         $result = $this->method->invoke( $this->databaseInstance, $propReflection->getValue( $this->databaseInstance ) );
         $this->assertTrue( $result instanceof PDOStatement );

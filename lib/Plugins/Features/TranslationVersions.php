@@ -9,9 +9,10 @@ use Plugins\Features\TranslationVersions\Handlers\DummyTranslationVersionHandler
 use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
-class TranslationVersions extends BaseFeature {
+class TranslationVersions extends BaseFeature
+{
 
-    const FEATURE_CODE = 'translation_versions';
+    const string FEATURE_CODE = 'translation_versions';
 
     /**
      * @param JobStruct     $chunkStruct
@@ -21,9 +22,9 @@ class TranslationVersions extends BaseFeature {
      *
      * @return VersionHandlerInterface
      */
-    public static function getVersionHandlerNewInstance( JobStruct $chunkStruct, UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment = null ) {
-
-        if ( $id_segment && $projectStruct->isFeatureEnabled( self::FEATURE_CODE ) ) {
+    public static function getVersionHandlerNewInstance(JobStruct $chunkStruct, UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment = null): VersionHandlerInterface
+    {
+        if ($id_segment && $projectStruct->isFeatureEnabled(self::FEATURE_CODE)) {
             return new TranslationVersionsHandler(
                     $chunkStruct,
                     $id_segment,
@@ -33,7 +34,6 @@ class TranslationVersions extends BaseFeature {
         }
 
         return new DummyTranslationVersionHandler();
-
     }
 
 }

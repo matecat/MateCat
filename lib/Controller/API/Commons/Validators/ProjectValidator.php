@@ -15,7 +15,8 @@ use ReflectionException;
  * Class ProjectValidator
  * @package    API\V2\Validators
  */
-class ProjectValidator extends Base {
+class ProjectValidator extends Base
+{
 
     /**
      * @var ?UserStruct
@@ -32,7 +33,8 @@ class ProjectValidator extends Base {
      *
      * @return $this
      */
-    public function setUser( UserStruct $user ): ProjectValidator {
+    public function setUser(UserStruct $user): ProjectValidator
+    {
         $this->user = $user;
 
         return $this;
@@ -43,7 +45,8 @@ class ProjectValidator extends Base {
      *
      * @return $this
      */
-    public function setIdProject( $id_project ): ProjectValidator {
+    public function setIdProject($id_project): ProjectValidator
+    {
         $this->id_project = $id_project;
 
         return $this;
@@ -58,15 +61,18 @@ class ProjectValidator extends Base {
     /**
      * @param ProjectStruct $project
      */
-    public function setProject( ProjectStruct $project ) {
+    public function setProject(ProjectStruct $project)
+    {
         $this->project = $project;
     }
 
-    public function getProject(): ProjectStruct {
+    public function getProject(): ProjectStruct
+    {
         return $this->project;
     }
 
-    public function setFeature( $feature ) {
+    public function setFeature($feature)
+    {
         $this->feature = $feature;
     }
 
@@ -76,38 +82,38 @@ class ProjectValidator extends Base {
      * @throws NotFoundException
      * @throws ReflectionException
      */
-    protected function _validate(): void {
-
-        if ( !$this->project ) {
-            $this->project = ProjectDao::findById( $this->id_project );
+    protected function _validate(): void
+    {
+        if (!$this->project) {
+            $this->project = ProjectDao::findById($this->id_project);
         }
 
-        if ( empty( $this->project ) ) {
-            throw new NotFoundException( "Project not found.", 404 );
+        if (empty($this->project)) {
+            throw new NotFoundException("Project not found.", 404);
         }
 
-        if ( !$this->validateFeatureEnabled() ) {
-            throw new NotFoundException( "Feature not enabled on this project.", 404 );
+        if (!$this->validateFeatureEnabled()) {
+            throw new NotFoundException("Feature not enabled on this project.", 404);
         }
 
-        if ( !$this->inProjectScope() ) {
-            throw new NotFoundException( "You are not allowed to access to this project", 403 );
+        if (!$this->inProjectScope()) {
+            throw new NotFoundException("You are not allowed to access to this project", 403);
         }
-
     }
 
-    private function validateFeatureEnabled(): bool {
-        return $this->feature == null || $this->project->isFeatureEnabled( $this->feature );
+    private function validateFeatureEnabled(): bool
+    {
+        return $this->feature == null || $this->project->isFeatureEnabled($this->feature);
     }
 
     /**
      * @return bool
      * @throws AuthenticationError
      */
-    private function inProjectScope(): bool {
-
-        if ( !$this->user ) {
-            throw new AuthenticationError( "Invalid API key", 401 );
+    private function inProjectScope(): bool
+    {
+        if (!$this->user) {
+            throw new AuthenticationError("Invalid API key", 401);
         }
 
         return $this->user->email == $this->project->id_customer;

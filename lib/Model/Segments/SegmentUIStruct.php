@@ -15,7 +15,8 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 
-class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
+class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess
+{
 
     use ArrayAccessTrait;
 
@@ -50,12 +51,12 @@ class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arr
     /**
      * @var array|string
      */
-    public        $data_ref_map   = '[]';
+    public $data_ref_map = '[]';
     /**
      * @var ?ContextStruct
      */
     public ?ContextStruct $context_groups = null;
-    public ?array $metadata       = null;
-    public string $internal_id;
+    public ?array         $metadata       = null;
+    public string         $internal_id;
 
 }

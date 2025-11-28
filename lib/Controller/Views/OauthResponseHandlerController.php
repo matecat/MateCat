@@ -25,10 +25,10 @@ class OauthResponseHandlerController extends BaseKleinViewController {
     public function response() {
 
         $params = filter_var_array( $this->request->params(), [
-                'provider' => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'state'    => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'code'     => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'error'    => [ 'filter' => FILTER_SANITIZE_STRING ]
+                'provider' => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS ],
+                'state'    => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS ],
+                'code'     => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS ],
+                'error'    => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS ]
         ] );
 
         if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . AppConfig::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
@@ -47,7 +47,7 @@ class OauthResponseHandlerController extends BaseKleinViewController {
      * @return void
      * @throws Exception
      */
-    protected function afterConstruct() {
+    protected function afterConstruct(): void {
         $this->setView( 'oauth_response_handler.html', [ 'wanted_url' => $_SESSION[ 'wanted_url' ] ?? null ] ); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
     }
 
@@ -90,6 +90,9 @@ class OauthResponseHandlerController extends BaseKleinViewController {
         try {
             $client           = OauthClient::getInstance( $provider )->getProvider();
             $token            = $client->getAccessTokenFromAuthCode( $code );
+            $x = var_export(get_current_user(), true);
+            $y = var_export(getmyuid(), true);
+            $z = var_export(getmygid(), true);
             $this->remoteUser = $client->getResourceOwner( $token );
         } catch ( Exception $exception ) {
             $this->render( $exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400 );

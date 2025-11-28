@@ -88,10 +88,11 @@ class AnalysisDao extends AbstractDao {
     /**
      * @param $project_id
      *
-     * @return bool|int
+     * @return bool
      * @throws ReflectionException
      */
-    public static function destroyCacheByProjectId( $project_id ) {
+    public static function destroyCacheByProjectId( $project_id ): bool
+    {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
         $thisDao = new static();

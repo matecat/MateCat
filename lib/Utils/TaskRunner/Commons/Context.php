@@ -9,6 +9,8 @@
 
 namespace Utils\TaskRunner\Commons;
 
+use Stringable;
+
 /**
  * Class Context
  *
@@ -16,7 +18,8 @@ namespace Utils\TaskRunner\Commons;
  *
  * @package TaskRunner\Commons
  */
-class Context {
+class Context implements Stringable
+{
 
     /**
      * The name for the queue on AMQ
@@ -58,14 +61,13 @@ class Context {
      *
      * @param array $queueElement
      */
-    protected function __construct( array $queueElement ) {
-
+    protected function __construct(array $queueElement)
+    {
         $this->queue_name    = $queueElement[ 'queue_name' ];
         $this->pid_set_name  = $queueElement[ 'queue_name' ] . '_pid_set';
         $this->max_executors = $queueElement[ 'max_executors' ];
         $this->redis_key     = $queueElement[ 'queue_name' ] . '_redis_key';
         $this->loggerName    = $queueElement[ 'queue_name' ] . '.log';
-
     }
 
     /**
@@ -75,8 +77,9 @@ class Context {
      *
      * @return static
      */
-    public static function buildFromArray( array $context ): Context {
-        return new static( $context );
+    public static function buildFromArray(array $context): Context
+    {
+        return new static($context);
     }
 
     /**
@@ -84,8 +87,9 @@ class Context {
      *
      * @return string
      */
-    public function __toString() {
-        return json_encode( $this );
+    public function __toString(): string
+    {
+        return json_encode($this);
     }
 
 }

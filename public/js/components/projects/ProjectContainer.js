@@ -581,7 +581,7 @@ const ProjectContainer = ({
                     size={BUTTON_SIZE.ICON_SMALL}
                     onClick={() => setIsEditingName(true)}
                   >
-                    <IconEdit />
+                    <IconEdit size={18} />
                   </Button>
                 )}
                 {isEditingName && (

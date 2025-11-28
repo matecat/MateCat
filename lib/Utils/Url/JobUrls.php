@@ -5,12 +5,13 @@ namespace Utils\Url;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\Registry\AppConfig;
 
-class JobUrls {
+class JobUrls
+{
 
     // STATUS LABELS
-    const LABEL_T  = 't';
-    const LABEL_R1 = 'r1';
-    const LABEL_R2 = 'r2';
+    const string LABEL_T  = 't';
+    const string LABEL_R1 = 'r1';
+    const string LABEL_R2 = 'r2';
 
     /**
      * @var int
@@ -73,7 +74,7 @@ class JobUrls {
         $this->target      = $target;
         $this->passwords   = $passwords;
         $this->segmentId   = $segmentId;
-        $this->setUrls( $httpHost );
+        $this->setUrls($httpHost);
     }
 
     /**
@@ -81,10 +82,11 @@ class JobUrls {
      *
      * @return bool
      */
-    private function isLabelAllowed( string $label ): bool {
-        $allowed = [ self::LABEL_T, self::LABEL_R1, self::LABEL_R2 ];
+    private function isLabelAllowed(string $label): bool
+    {
+        $allowed = [self::LABEL_T, self::LABEL_R1, self::LABEL_R2];
 
-        return in_array( $label, $allowed );
+        return in_array($label, $allowed);
     }
 
     /**
@@ -92,13 +94,12 @@ class JobUrls {
      *
      * @param string|null $httpHost
      */
-    private function setUrls( ?string $httpHost = null ) {
-
+    private function setUrls(?string $httpHost = null): void
+    {
         // loop passwords array
-        foreach ( $this->passwords as $label => $password ) {
-            if ( $password and $this->isLabelAllowed( $label ) ) {
-
-                switch ( $label ) {
+        foreach ($this->passwords as $label => $password) {
+            if ($password and $this->isLabelAllowed($label)) {
+                switch ($label) {
                     default:
                     case self::LABEL_T:
                         $revisionNumber = null;
@@ -111,11 +112,11 @@ class JobUrls {
                         break;
                 }
 
-                $sourcePage = ReviewUtils::revisionNumberToSourcePage( $revisionNumber );
+                $sourcePage = ReviewUtils::revisionNumberToSourcePage($revisionNumber);
 
-                $url = $this->httpHost( $httpHost );
+                $url = $this->httpHost($httpHost);
                 $url .= DIRECTORY_SEPARATOR;
-                $url .= $this->getJobType( $sourcePage );
+                $url .= $this->getJobType($sourcePage);
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->projectName;
                 $url .= DIRECTORY_SEPARATOR;
@@ -123,7 +124,7 @@ class JobUrls {
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->jid . '-' . $password;
 
-                if ( $this->segmentId ) {
+                if ($this->segmentId) {
                     $url .= '#' . $this->segmentId;
                 }
 
@@ -137,10 +138,11 @@ class JobUrls {
      *
      * @return string
      */
-    private function httpHost( ?string $httpHost = null ): string {
+    private function httpHost(?string $httpHost = null): string
+    {
         $host = AppConfig::$HTTPHOST;
 
-        if ( !empty( $httpHost ) ) {
+        if (!empty($httpHost)) {
             $host = $httpHost;
         }
 
@@ -158,17 +160,18 @@ class JobUrls {
      *
      * @return string|null
      */
-    private function getJobType( int $sourcePage ): ?string {
-        if ( $sourcePage == 1 ) {
+    private function getJobType(int $sourcePage): ?string
+    {
+        if ($sourcePage == 1) {
             return 'translate';
         }
 
-        if ( $sourcePage == 2 ) {
+        if ($sourcePage == 2) {
             return 'revise';
         }
 
-        if ( $sourcePage > 2 ) {
-            return 'revise' . ( $sourcePage - 1 );
+        if ($sourcePage > 2) {
+            return 'revise' . ($sourcePage - 1);
         }
 
         return null;
@@ -177,28 +180,32 @@ class JobUrls {
     /**
      * @return ?string
      */
-    public function getTranslationUrl(): ?string {
+    public function getTranslationUrl(): ?string
+    {
         return $this->urls[ self::LABEL_T ] ?? null;
     }
 
     /**
      * @return ?string
      */
-    public function getReviseUrl(): ?string {
+    public function getReviseUrl(): ?string
+    {
         return $this->urls[ self::LABEL_R1 ] ?? null;
     }
 
     /**
      * @return ?string
      */
-    public function getRevise2Url(): ?string {
+    public function getRevise2Url(): ?string
+    {
         return $this->urls[ self::LABEL_R2 ] ?? null;
     }
 
     /**
      * @return array
      */
-    public function getUrls(): array {
+    public function getUrls(): array
+    {
         return $this->urls;
     }
 
@@ -209,17 +216,17 @@ class JobUrls {
      *
      * @return string|null
      */
-    public function getUrlByRevisionNumber( ?int $revisionNumber = null ): ?string {
-
-        if ( !$revisionNumber ) {
+    public function getUrlByRevisionNumber(?int $revisionNumber = null): ?string
+    {
+        if (!$revisionNumber) {
             return $this->getTranslationUrl();
         }
 
-        if ( $revisionNumber === 1 ) {
+        if ($revisionNumber === 1) {
             return $this->getReviseUrl();
         }
 
-        if ( $revisionNumber === 2 ) {
+        if ($revisionNumber === 2) {
             return $this->getRevise2Url();
         }
 
@@ -229,14 +236,16 @@ class JobUrls {
     /**
      * @return bool
      */
-    public function hasReview(): bool {
-        return isset( $this->urls[ self::LABEL_R1 ] ) and !isset( $this->urls[ self::LABEL_R2 ] );
+    public function hasReview(): bool
+    {
+        return isset($this->urls[ self::LABEL_R1 ]) and !isset($this->urls[ self::LABEL_R2 ]);
     }
 
     /**
      * @return bool
      */
-    public function hasSecondPassReview(): bool {
-        return isset( $this->urls[ self::LABEL_R2 ] );
+    public function hasSecondPassReview(): bool
+    {
+        return isset($this->urls[ self::LABEL_R2 ]);
     }
 }

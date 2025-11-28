@@ -12,7 +12,8 @@ use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use ReflectionException;
 
-class EntryValidator {
+class EntryValidator
+{
 
     public ?SegmentStruct  $segment;
     public ?ProjectStruct  $project;
@@ -23,28 +24,33 @@ class EntryValidator {
 
     protected EntryStruct $struct;
 
-    protected bool    $validated = false;
+    protected bool $validated = false;
 
-    public function __construct( EntryStruct $struct ) {
+    public function __construct(EntryStruct $struct)
+    {
         $this->struct = $struct;
     }
 
-    public function getErrors(): array {
+    public function getErrors(): array
+    {
         return $this->errors;
     }
 
-    public function flushErrors() {
+    public function flushErrors(): void
+    {
         $this->errors = [];
     }
 
-    public function getErrorMessages(): array {
-        return array_map( function ( $item ) {
-            return implode( ' ', $item );
-        }, $this->errors );
+    public function getErrorMessages(): array
+    {
+        return array_map(function ($item) {
+            return implode(' ', $item);
+        }, $this->errors);
     }
 
-    public function getErrorsAsString(): string {
-        return implode( ', ', $this->getErrorMessages() );
+    public function getErrorsAsString(): string
+    {
+        return implode(', ', $this->getErrorMessages());
     }
 
     /**
@@ -52,9 +58,10 @@ class EntryValidator {
      * @throws ReflectionException
      * @throws ValidationError
      */
-    public function ensureValid() {
-        if ( !$this->validated && !$this->isValid() ) {
-            throw new ValidationError ( $this->getErrorsAsString() );
+    public function ensureValid(): void
+    {
+        if (!$this->validated && !$this->isValid()) {
+            throw new ValidationError ($this->getErrorsAsString());
         }
     }
 
@@ -62,13 +69,14 @@ class EntryValidator {
      * @throws ReflectionException
      * @throws NotFoundException
      */
-    public function isValid(): bool {
+    public function isValid(): bool
+    {
         $this->flushErrors();
         $this->validate();
         $errors          = $this->getErrors();
         $this->validated = true;
 
-        return empty( $errors );
+        return empty($errors);
     }
 
     /**
@@ -76,25 +84,27 @@ class EntryValidator {
      * @throws ReflectionException
      */
 
-    public function validate() {
-        $dao           = new SegmentDao( Database::obtain() );
-        $this->segment = $dao->getById( $this->struct->id_segment );
+    public function validate(): void
+    {
+        $dao           = new SegmentDao(Database::obtain());
+        $this->segment = $dao->getById($this->struct->id_segment);
 
-        if ( !$this->segment ) {
-            throw new NotFoundException( 'segment not found' );
+        if (!$this->segment) {
+            throw new NotFoundException('segment not found');
         }
 
-        $job           = JobDao::getById( $this->struct->id_job )[ 0 ];
-        $this->project = ProjectDao::findById( $job->id_project );
+        $job           = JobDao::getById($this->struct->id_job)[ 0 ];
+        $this->project = ProjectDao::findById($job->id_project);
 
         $this->validateCategoryId();
         $this->validateInSegmentScope();
     }
 
-    private function validateInSegmentScope() {
-        if ( $this->struct->id ) {
-            if ( $this->struct->id_segment != $this->segment->id ) {
-                $this->errors[] = [ null, 'issue not found' ];
+    private function validateInSegmentScope(): void
+    {
+        if ($this->struct->id) {
+            if ($this->struct->id_segment != $this->segment->id) {
+                $this->errors[] = [null, 'issue not found'];
             }
         }
     }
@@ -102,12 +112,19 @@ class EntryValidator {
     /**
      * @throws ReflectionException
      */
-    private function validateCategoryId() {
-        $this->qa_model = ModelDao::findById( $this->project->id_qa_model );
-        $this->category = CategoryDao::findById( $this->struct->id_category );
+    private function validateCategoryId(): void
+    {
+        if ($this->project->id_qa_model === null) {
+            $this->errors[] = [null, 'QA model id not found'];
 
-        if ( $this->category->id_model != $this->qa_model->id ) {
-            $this->errors[] = [ null, 'QA model id mismatch' ];
+            return;
+        }
+
+        $this->qa_model = ModelDao::findById($this->project->id_qa_model);
+        $this->category = CategoryDao::findById($this->struct->id_category);
+
+        if ($this->category->id_model != $this->qa_model->id) {
+            $this->errors[] = [null, 'QA model id mismatch'];
         }
     }
 }

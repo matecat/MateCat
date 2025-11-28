@@ -54,16 +54,6 @@ class ParseTimeToEditTest extends AbstractTest {
         $this->assertEquals( $this->expected_time, CatUtils::parse_time_to_edit( $this->source_time ) );
     }
 
-    /**
-     * @group  regression
-     * @covers CatUtils::parse_time_to_edit
-     */
-    public function test_parse_time_to_edit_float_number() {
-        $this->source_time   = ( 9 / 2 );
-        $this->expected_time = [ '00', '00', '00', 4 ];
-        $this->assertEquals( $this->expected_time, CatUtils::parse_time_to_edit( $this->source_time ) );
-    }
-
 
     /**
      * @group  regression

@@ -8,7 +8,7 @@
   p {
     display: block;
     text-align: left;
-    color: #666666;
+    color: colors.$grey6;
     font-size: 16px;
     line-height: 24px;
   }
@@ -56,8 +56,12 @@
   display: flex;
   gap: 40px;
   align-items: center;
-  padding: 15px 0;
+  padding: 10px 0;
   border: unset;
+
+  h3 {
+    margin: 0;
+  }
 
   > :first-child {
     width: 55%;

@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_SIZE} from '../Button/Button'
 import {debounce} from 'lodash'
-import ArrowDown from '../../../../img/icons/ArrowDown'
+import IconDown from '../../icons/IconDown'
 
 export const NumericStepper = ({
   value,
@@ -82,14 +82,14 @@ export const NumericStepper = ({
           disabled={disabled}
           onClick={increase}
         >
-          <ArrowDown />
+          <IconDown size={16} />
         </Button>
         <Button
           size={BUTTON_SIZE.ICON_SMALL}
           disabled={disabled}
           onClick={decrease}
         >
-          <ArrowDown />
+          <IconDown size={16} />
         </Button>
       </div>
     </div>

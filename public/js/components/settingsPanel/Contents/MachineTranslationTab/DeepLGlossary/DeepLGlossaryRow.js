@@ -28,12 +28,12 @@ export const DeepLGlossaryRow = ({
 
   return (
     <Fragment>
-      <div className="align-center">
+      <div>
         <input
           name="active"
           checked={isActive}
           onChange={onChangeIsActive}
-          type="checkbox"
+          type="radio"
           disabled={isWaitingResult || isReadOnly}
           data-testid={`deeplglossary-active-${row.id}`}
         />
@@ -55,7 +55,7 @@ export const DeepLGlossaryRow = ({
               onClick={() => deleteGlossaryConfirm(row)}
               data-testid={`delete-deeplglossary-${row.id}`}
             >
-              <Trash size={12} />
+              <Trash size={16} />
             </button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}

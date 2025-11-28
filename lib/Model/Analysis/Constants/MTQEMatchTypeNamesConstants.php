@@ -21,14 +21,14 @@ class MTQEMatchTypeNamesConstants extends AbstractConstants {
      * These constants refer to the values sent by the APIs and need to be converted
      * into the values that are used internally and to be inserted into the database.
      */
-    const TM_100              = "tm_100";
-    const TM_100_PUBLIC       = "tm_100_public";
-    const ICE                 = "ice";
-    const ICE_MT              = "ice_mt";
-    const REPETITIONS         = 'repetitions';
-    const TOP_QUALITY_MT      = 'top_quality_mt';
-    const HIGHER_QUALITY_MT   = 'higher_quality_mt';
-    const STANDARD_QUALITY_MT = 'standard_quality_mt';
+    const string TM_100              = "tm_100";
+    const string TM_100_PUBLIC       = "tm_100_public";
+    const string ICE                 = "ice";
+    const string ICE_MT              = "ice_mt";
+    const string REPETITIONS         = 'repetitions';
+    const string TOP_QUALITY_MT      = 'top_quality_mt';
+    const string HIGHER_QUALITY_MT   = 'higher_quality_mt';
+    const string STANDARD_QUALITY_MT = 'standard_quality_mt';
 
     protected static array $forValue = [
             self::TM_100              => self::TM_100,
