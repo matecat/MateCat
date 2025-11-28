@@ -66,6 +66,18 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     }
 
     /**
+     * @return int
+     */
+    public function getJobsCount(): int {
+
+        if ( empty( $this->getJobs() ) ) {
+            return 0;
+        }
+
+        return count( $this->getJobs() );
+    }
+
+    /**
      * Proxy to set metadata for the current project
      *
      * @param string $key
