@@ -61,9 +61,4 @@ class IntentoEngineValidator extends AbstractValidator
         return null;
     }
 
-    public static function validateRouting(Intento $engine) // TODO
-    {
-        $engine->getRoutingList();
-    }
-
 }

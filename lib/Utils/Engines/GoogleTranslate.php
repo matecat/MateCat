@@ -20,6 +20,9 @@ class GoogleTranslate extends AbstractEngine
         'target' => null,
     ];
 
+    /**
+     * @throws Exception
+     */
     public function __construct($engineRecord)
     {
         parent::__construct($engineRecord);
@@ -68,10 +71,6 @@ class GoogleTranslate extends AbstractEngine
     public function get(array $_config)
     {
         $parameters = [];
-
-        if ($this->client_secret != '' && $this->client_secret != null) {
-            $parameters['key'] = $this->client_secret;
-        }
 
         if (isset($_config['key']) and !empty($_config['key'])) {
             $parameters['key'] = $_config['key'];

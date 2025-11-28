@@ -21,7 +21,7 @@ class GoogleTranslateEngineValidator extends AbstractValidator
 
     /**
      * @param $object EngineValidatorObject
-     * @return null
+     * @return ValidatorObject|null
      * @throws Exception
      */
     public function validate(ValidatorObject $object): ?ValidatorObject

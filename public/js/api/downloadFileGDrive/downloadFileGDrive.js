@@ -13,10 +13,11 @@ export const downloadFileGDrive = async (
   openOriginalFiles,
   idJob,
   password,
+  checkErrors = 1,
   downloadToken,
 ) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/translation/${idJob}/${password}?original=${openOriginalFiles}&downloadToken=${downloadToken}`,
+    `${getMatecatApiDomain()}api/v2/translation/${idJob}/${password}?original=${openOriginalFiles}&downloadToken=${downloadToken}&disableErrorCheck=${checkErrors ? 0 : 1}`,
     {
       credentials: 'include',
     },

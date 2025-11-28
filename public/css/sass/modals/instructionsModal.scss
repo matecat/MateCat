@@ -197,4 +197,10 @@
       color: black;
     }
   }
+
+  &:first-child:nth-last-child(1) {
+    .accordion-component-title:not(.accordion-expanded) {
+      border-radius: 8px !important;
+    }
+  }
 }

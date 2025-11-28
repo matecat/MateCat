@@ -21,7 +21,7 @@ class DeepL extends AbstractEngine
 
     private ?string $apiKey = null;
 
-    public function setApiKey($apiKey)
+    public function setApiKey(?string $apiKey): void
     {
         $this->apiKey = $apiKey;
     }
@@ -32,6 +32,8 @@ class DeepL extends AbstractEngine
      */
     protected function _getClient(): DeepLApiClient
     {
+        $this->apiKey = $engineRecord->extra_parameters['DeepL-Auth-Key'] ?? null;
+
         if ($this->apiKey === null) {
             throw new Exception("API ket not set");
         }
@@ -137,7 +139,7 @@ class DeepL extends AbstractEngine
             $this->call("translate_relative_url", $parameters, true);
 
             return $this->result;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return $this->GoogleTranslateFallback($_config);
         }
     }
@@ -167,11 +169,11 @@ class DeepL extends AbstractEngine
     }
 
     /**
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function glossaries()
+    public function glossaries(): array
     {
         return $this->_getClient()->allGlossaries();
     }
@@ -179,11 +181,11 @@ class DeepL extends AbstractEngine
     /**
      * @param string $id
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function getGlossary(string $id)
+    public function getGlossary(string $id): array
     {
         return $this->_getClient()->getGlossary($id);
     }
@@ -191,11 +193,11 @@ class DeepL extends AbstractEngine
     /**
      * @param string $id
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function deleteGlossary(string $id)
+    public function deleteGlossary(string $id): array
     {
         return $this->_getClient()->deleteGlossary($id);
     }
@@ -203,11 +205,11 @@ class DeepL extends AbstractEngine
     /**
      * @param array $data
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function createGlossary(array $data)
+    public function createGlossary(array $data): array
     {
         return $this->_getClient()->createGlossary($data);
     }
@@ -215,11 +217,11 @@ class DeepL extends AbstractEngine
     /**
      * @param string $id
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function getGlossaryEntries(string $id)
+    public function getGlossaryEntries(string $id): array
     {
         return $this->_getClient()->getGlossaryEntries($id);
     }

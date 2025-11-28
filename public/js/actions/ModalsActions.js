@@ -8,7 +8,7 @@ import ModalsConstants from '../constants/ModalsConstants'
 import PreferencesModal from '../components/modals/PreferencesModal'
 import SuccessModal from '../components/modals/SuccessModal'
 import OnBoarding, {ONBOARDING_STEP} from '../components/onBoarding/OnBoarding'
-import {ModalBulkActions} from '../components/projects/ProjectsBulkActions/BulkChangePassword'
+import {DownloadAlertModal} from '../components/modals/DownloadAlertModal'
 
 let ModalsActions = {
   showModalComponent: (
@@ -136,21 +136,15 @@ let ModalsActions = {
     this.showModalComponent(ConfirmMessageModal, props, 'Confirmation required')
   },
 
-  showDownloadWarningsModal: function (successCallback, cancelCallback) {
+  showDownloadWarningsModal: function (
+    successCallback,
+    successCallbackWithoutErrors,
+    cancelCallback,
+  ) {
     ModalsActions.showModalComponent(
-      ConfirmMessageModal,
-      {
-        cancelText: 'Fix issues',
-        cancelCallback: () => cancelCallback(),
-        successCallback: () => successCallback(),
-        successText: 'Download anyway',
-        text:
-          'Unresolved tag issues may prevent the successful download of your translation.<br />' +
-          'For information on how to fix them, please open <a style="color: #4183C4; font-weight: 700; text-decoration: underline;"' +
-          ' href="https://guides.matecat.com/fixing-tags" target="_blank">the dedicated support page </a>. <br /><br /> ' +
-          ' If you download the file anyway, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.',
-      },
-      'Confirmation required',
+      DownloadAlertModal,
+      {successCallback, successCallbackWithoutErrors, cancelCallback},
+      'Unresolved Major Issues',
     )
   },
 }

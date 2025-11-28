@@ -192,9 +192,6 @@ $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
 
     route( '/segments-filter', 'GET', [ 'Plugins\Features\SegmentFilter\Controller\API\FilterController', 'index' ] );
 
-    route( '/options', 'POST', [ 'Controller\API\V2\ChunkOptionsController', 'update' ] );
-
-
     route( '/delete', 'POST', [ 'Controller\API\V2\JobsController', 'delete' ] );
     route( '/cancel', 'POST', [ 'Controller\API\V2\JobsController', 'cancel' ] );
     route( '/archive', 'POST', [ 'Controller\API\V2\JobsController', 'archive' ] );
@@ -259,3 +256,7 @@ route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'Controller\API\V2\Download
 // User
 route( '/api/v3/user', 'PUT', [ 'Controller\API\V2\UserController', 'edit' ] );
 route( '/api/v3/user/metadata', 'PUT', [ 'Controller\API\V2\UserController', 'setMetadata' ] );
+
+// TMX
+route( '/api/v3/tmx/import', 'POST', [ 'Controller\API\App\TMXFileController', 'import' ] );
+route( '/api/v3/tmx/export', 'POST', [ 'Controller\API\App\RequestExportTMXController', 'download' ] );
