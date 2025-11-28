@@ -35,7 +35,7 @@ class FilterController extends KleinController
         $ids_grouping = [];
         $segments_id  = $model->getSegmentList();
         foreach ($segments_id as $segment_id) {
-            $ids_as_array[] = $segment_id[ 'id' ];
+            $ids_as_array[] = (string)$segment_id[ 'id' ];
             if (isset($segment_id[ 'segment_hash' ])) {
                 $ids_grouping[ $segment_id[ 'segment_hash' ] ][] = $segment_id[ 'id' ];
             }
