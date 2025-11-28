@@ -198,7 +198,7 @@ class GlossaryFilesController extends KleinController
         $result = $this->TMService->glossaryUploadStatus($uuid);
 
         if (!$this->response->isLocked()) {
-            $this->setSuccessResponse($result[ 'data' ]->responseStatus, $result[ 'data' ]);
+            $this->setSuccessResponse($result['completed'] ? 200 : 202, $result['data']);
         }
     }
 
