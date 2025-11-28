@@ -29,7 +29,7 @@ class DeepL extends AbstractEngine {
      * @throws Exception
      */
     protected function _getClient(): DeepLApiClient {
-        $this->apiKey = $engineRecord->extra_parameters['DeepL-Auth-Key'] ?? null;
+        $this->apiKey = $this->engineRecord->extra_parameters['DeepL-Auth-Key'] ?? null;
 
         if ( $this->apiKey === null ) {
             throw new Exception( "API ket not set" );
