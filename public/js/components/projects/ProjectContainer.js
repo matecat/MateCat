@@ -1,7 +1,12 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
-import $ from 'jquery'
 
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
@@ -31,6 +36,8 @@ import {Input} from '../common/Input/Input'
 import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
 import IconClose from '../icons/IconClose'
+import {ProjectsBulkActionsContext} from './ProjectsBulkActions/ProjectsBulkActionsContext'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 const ProjectContainer = ({
   project,
@@ -40,9 +47,15 @@ const ProjectContainer = ({
   changeStatusFn,
   downloadTranslationFn,
 }) => {
+  const {jobsBulk, onCheckedProject, onCheckedJob} = useContext(
+    ProjectsBulkActionsContext,
+  )
+
+  const idTeamProject = project.get('id_team')
+
   const [lastAction, setLastAction] = useState()
   const [jobsActions, setJobsActions] = useState()
-  const [idTeamSelected, setIdTeamSelected] = useState(project.get('id_team'))
+  const [idTeamSelected, setIdTeamSelected] = useState(idTeamProject)
   const [shouldShowEditNameIcon, setShouldShowEditNameIcon] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
 
@@ -54,43 +67,32 @@ const ProjectContainer = ({
     (team) => team.get('id') === project.get('id_team'),
   )
 
-  const hideProjectAfterChangeAssignee = useRef()
-  hideProjectAfterChangeAssignee.current = (projectCompare, user) => {
-    if (project.get('id') === projectCompare.get('id')) {
-      const uid = user ? user.get('uid') : -1
-      if (
-        (uid !== selectedUser &&
-          selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
-        (team.get('type') == 'personal' && uid !== UserStore.getUser().user.uid)
-      ) {
-        setTimeout(() => {
-          projectRef.current.style.transition = 'transform 0.5s ease-in-out'
-          projectRef.current.style.transform = 'translateX(-2000px)'
-        }, 500)
-        setTimeout(() => {
-          ManageActions.removeProject(project)
-        }, 1000)
-
-        const name = user?.toJS
-          ? user.get('first_name') + ' ' + user.get('last_name')
-          : 'Not assigned'
-
-        const notification = {
-          title: 'Assignee changed',
-          text:
-            'The project ' +
-            project.get('name') +
-            ' has been assigned to ' +
-            name,
-          type: 'success',
-          position: 'bl',
-          allowHtml: true,
-          timer: 3000,
+  const hideProjectAfterChangeAssignee = useCallback(
+    (projectCompare, user) => {
+      if (project.get('id') === projectCompare.get('id')) {
+        const uid = user ? user.get('uid') : -1
+        if (
+          (uid !== selectedUser &&
+            selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
+          (team.get('type') == 'personal' &&
+            uid !== UserStore.getUser().user.uid)
+        ) {
+          setTimeout(() => {
+            projectRef.current.style.transition = 'transform 0.5s ease-in-out'
+            projectRef.current.style.transform = 'translateX(-2000px)'
+          }, 500)
+          setTimeout(() => {
+            ManageActions.removeProject(project)
+          }, 1000)
         }
-        CatToolActions.addNotification(notification)
       }
-    }
-  }
+    },
+    [project, selectedUser, team],
+  )
+
+  useEffect(() => {
+    setIdTeamSelected(idTeamProject)
+  }, [idTeamProject])
 
   const thereIsChunkOutsourced = (idJob) => {
     const outsourceChunk = project.get('jobs').find(function (item) {
@@ -331,6 +333,8 @@ const ProjectContainer = ({
           lastAction={lastAction}
           isChunkOutsourced={isChunkOutsourced}
           activityLogUrl={getActivityLogUrl()}
+          isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
+          onCheckedJob={onCheckedJob}
         />
       )
       chunks.push(item)
@@ -451,17 +455,17 @@ const ProjectContainer = ({
     ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, hideProject)
     ProjectsStore.addListener(
       ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-      hideProjectAfterChangeAssignee.current,
+      hideProjectAfterChangeAssignee,
     )
 
     return () => {
       ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, hideProject)
       ProjectsStore.removeListener(
         ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-        hideProjectAfterChangeAssignee.current,
+        hideProjectAfterChangeAssignee,
       )
     }
-  }, [project])
+  }, [project, hideProjectAfterChangeAssignee])
 
   const handleFormSubmit = (formData) => {
     const {name} = formData
@@ -520,6 +524,11 @@ const ProjectContainer = ({
     ''
   )
 
+  const jobsBulkForCurrentProject = project
+    .get('jobs')
+    .toJS()
+    .filter(({id}) => jobsBulk.some((value) => value === id))
+
   return (
     <div
       className="project ui column grid shadow-1"
@@ -538,6 +547,18 @@ const ProjectContainer = ({
                 className={`sixteen wide column project-title ${isEditingName ? 'project-title-editing-name-mode' : ``}`}
               >
                 <div className="ui ribbon label">
+                  <Checkbox
+                    className="project-checkbox"
+                    onChange={() => onCheckedProject(project.get('id'))}
+                    value={
+                      jobsBulkForCurrentProject.length === 0
+                        ? CHECKBOX_STATE.UNCHECKED
+                        : jobsBulkForCurrentProject.length ===
+                            project.get('jobs').size
+                          ? CHECKBOX_STATE.CHECKED
+                          : CHECKBOX_STATE.INDETERMINATE
+                    }
+                  />
                   <div className="project-id" title="Project id">
                     {'(' + project.get('id') + ')'}
                   </div>

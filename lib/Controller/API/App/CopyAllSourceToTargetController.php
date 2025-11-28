@@ -37,7 +37,7 @@ class CopyAllSourceToTargetController extends KleinController
         $revision_number = $request[ 'revision_number' ];
         $job_data        = $request[ 'job_data' ];
 
-        $data = $this->saveEventsAndUpdateTranslations($job_data, $revision_number);
+        $data = $this->saveEventsAndUpdateTranslations($job_data, (int)$revision_number);
         $this->response->json($data);
     }
 

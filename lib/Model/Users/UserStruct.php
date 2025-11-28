@@ -140,6 +140,22 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     }
 
     /**
+     * @param $teamId
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function belongsToTeam($teamId): bool {
+        foreach ( $this->getUserTeams() as $team ) {
+            if ( $team->id === $teamId ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @return array
      */
     public function getMetadataAsKeyValue(): array
