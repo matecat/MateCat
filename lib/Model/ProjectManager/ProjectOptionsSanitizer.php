@@ -1,9 +1,11 @@
 <?php
 
 namespace Model\ProjectManager;
+
 use Exception;
 
-class ProjectOptionsSanitizer {
+class ProjectOptionsSanitizer
+{
 
     private array $options;
     private array $sanitized = [];
@@ -11,7 +13,7 @@ class ProjectOptionsSanitizer {
     private ?string $source_lang = null;
     private ?array  $target_lang = [];
 
-    private array $boolean_keys = [ 'speech2text', 'lexiqa', 'tag_projection' ];
+    private array $boolean_keys = ['speech2text', 'lexiqa', 'tag_projection'];
 
     public static array $lexiQA_allowed_languages = [
             'af-ZA',
@@ -163,7 +165,8 @@ class ProjectOptionsSanitizer {
     ];
 
 
-    public function __construct( array $input_options ) {
+    public function __construct(array $input_options)
+    {
         $this->options = $input_options;
     }
 
@@ -173,7 +176,8 @@ class ProjectOptionsSanitizer {
      *
      * @throws Exception
      */
-    public function setLanguages( string $source, array $target ) {
+    public function setLanguages(string $source, array $target): void
+    {
         $this->source_lang = $source;
         $this->target_lang = $target;
     }
@@ -185,18 +189,19 @@ class ProjectOptionsSanitizer {
      * @return array
      * @throws Exception
      */
-    public function sanitize(): array {
+    public function sanitize(): array
+    {
         $this->sanitized = $this->options;
 
-        if ( isset( $this->options[ 'speech2text' ] ) ) {
+        if (isset($this->options[ 'speech2text' ])) {
             $this->sanitizeSpeech2Text();
         }
 
-        if ( isset( $this->options[ 'tag_projection' ] ) ) {
+        if (isset($this->options[ 'tag_projection' ])) {
             $this->sanitizeTagProjection();
         }
 
-        if ( isset( $this->options[ 'lexiqa' ] ) ) {
+        if (isset($this->options[ 'lexiqa' ])) {
             $this->sanitizeLexiQA();
         }
 
@@ -207,29 +212,32 @@ class ProjectOptionsSanitizer {
         return $this->sanitized;
     }
 
-    private function convertBooleansToInt() {
-        foreach ( $this->boolean_keys as $key ) {
-            if ( isset( $this->sanitized [ $key ] ) ) {
+    private function convertBooleansToInt(): void
+    {
+        foreach ($this->boolean_keys as $key) {
+            if (isset($this->sanitized [ $key ])) {
                 $this->sanitized[ $key ] = (int)$this->sanitized[ $key ];
             }
         }
     }
 
-    private function sanitizeSegmentationRule() {
-        $rules = [ 'patent', 'paragraph' ];
+    private function sanitizeSegmentationRule(): void
+    {
+        $rules = ['patent', 'paragraph'];
 
         if (
-                isset( $this->options[ 'segmentation_rule' ] ) &&
-                in_array( $this->options[ 'segmentation_rule' ], $rules )
+                isset($this->options[ 'segmentation_rule' ]) &&
+                in_array($this->options[ 'segmentation_rule' ], $rules)
         ) {
             $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];
         } else {
-            unset( $this->sanitized[ 'segmentation_rule' ] );
+            unset($this->sanitized[ 'segmentation_rule' ]);
         }
     }
 
     // No special sanitization for the speech2text field is required
-    private function sanitizeSpeech2Text() {
+    private function sanitizeSpeech2Text(): void
+    {
         $this->sanitized[ 'speech2text' ] = !!$this->options[ 'speech2text' ];
     }
 
@@ -237,16 +245,18 @@ class ProjectOptionsSanitizer {
      * If Lexiqa is requested to be enabled, then check if the language is in combination
      * @throws Exception
      */
-    private function sanitizeLexiQA() {
-        $this->sanitized[ 'lexiqa' ] = ( $this->options[ 'lexiqa' ] == true and $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) );
+    private function sanitizeLexiQA(): void
+    {
+        $this->sanitized[ 'lexiqa' ] = ($this->options[ 'lexiqa' ] == true and $this->checkSourceAndTargetAreInCombination(self::$lexiQA_allowed_languages));
     }
 
     /**
      * If the tag projection is requested to be enabled, check if the language combination is allowed.
      * @throws Exception
      */
-    private function sanitizeTagProjection() {
-        $this->sanitized[ 'tag_projection' ] = ( $this->options[ 'tag_projection' ] == true and $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) );
+    private function sanitizeTagProjection(): void
+    {
+        $this->sanitized[ 'tag_projection' ] = ($this->options[ 'tag_projection' ] == true and $this->checkSourceAndTargetAreInCombinationForTagProjection(self::$tag_projection_allowed_languages));
     }
 
     /**
@@ -255,12 +265,13 @@ class ProjectOptionsSanitizer {
      * @return bool
      * @throws Exception
      */
-    private function checkSourceAndTargetAreInCombination( array $langs ): bool {
+    private function checkSourceAndTargetAreInCombination(array $langs): bool
+    {
         $this->__ensureLanguagesAreSet();
 
-        $all_langs = array_merge( $this->target_lang, [ $this->source_lang ] );
-        $all_langs = array_unique( $all_langs );
-        $found     = count( array_intersect( $langs, $all_langs ) );
+        $all_langs = array_merge($this->target_lang, [$this->source_lang]);
+        $all_langs = array_unique($all_langs);
+        $found     = count(array_intersect($langs, $all_langs));
 
         return $found >= 2;
     }
@@ -268,18 +279,19 @@ class ProjectOptionsSanitizer {
     /**
      * @throws Exception
      */
-    private function checkSourceAndTargetAreInCombinationForTagProjection( array $langs ): bool {
+    private function checkSourceAndTargetAreInCombinationForTagProjection(array $langs): bool
+    {
         $this->__ensureLanguagesAreSet();
 
         $lang_combination = [];
         $found            = false;
-        foreach ( $this->target_lang as $value ) {
-            $lang_combination[] = explode( '-', $value )[ 0 ] . '-' . explode( '-', $this->source_lang )[ 0 ];
-            $lang_combination[] = explode( '-', $this->source_lang )[ 0 ] . '-' . explode( '-', $value )[ 0 ];
+        foreach ($this->target_lang as $value) {
+            $lang_combination[] = explode('-', $value)[ 0 ] . '-' . explode('-', $this->source_lang)[ 0 ];
+            $lang_combination[] = explode('-', $this->source_lang)[ 0 ] . '-' . explode('-', $value)[ 0 ];
         }
 
-        foreach ( $lang_combination as $langPair ) {
-            if ( array_key_exists( $langPair, $langs ) ) {
+        foreach ($lang_combination as $langPair) {
+            if (array_key_exists($langPair, $langs)) {
                 $found = true;
                 break;
             }
@@ -291,9 +303,10 @@ class ProjectOptionsSanitizer {
     /**
      * @throws Exception
      */
-    private function __ensureLanguagesAreSet() {
-        if ( is_null( $this->target_lang ) || empty( $this->source_lang ) ) {
-            throw  new Exception( 'Trying to sanitize options, but languages are not set' );
+    private function __ensureLanguagesAreSet(): void
+    {
+        if (is_null($this->target_lang) || empty($this->source_lang)) {
+            throw  new Exception('Trying to sanitize options, but languages are not set');
         }
     }
 

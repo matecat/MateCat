@@ -13,7 +13,8 @@ use Model\Users\UserStruct;
 use Utils\Registry\AppConfig;
 use Utils\Url\CanonicalRoutes;
 
-class  ForgotPasswordEmail extends AbstractEmail {
+class  ForgotPasswordEmail extends AbstractEmail
+{
 
     protected ?string $title = 'Password reset';
 
@@ -22,36 +23,41 @@ class  ForgotPasswordEmail extends AbstractEmail {
      */
     private UserStruct $user;
 
-    public function __construct( UserStruct $user ) {
-
+    public function __construct(UserStruct $user)
+    {
         $this->user = $user;
-        $this->_setLayout( 'skeleton.html' );
-        $this->_setTemplate( 'Signup/forgot_password_content.html' );
+        $this->_setLayout('skeleton.html');
+        $this->_setTemplate('Signup/forgot_password_content.html');
     }
 
     /**
      * @throws Exception
      */
-    public function send() {
-        $recipient = [ $this->user->email, $this->user->fullName() ];
+    public function send(): void
+    {
+        $recipient = [$this->user->email, $this->user->fullName()];
 
-        $this->doSend( $recipient, $this->title,
+        $this->doSend(
+                $recipient,
+                $this->title,
                 $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage( $this->_buildMessageContent() )
+                $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
     /**
      * @throws Exception
      */
-    protected function _getTemplateVariables(): array {
+    protected function _getTemplateVariables(): array
+    {
         return [
                 'user'               => $this->user->toArray(),
-                'password_reset_url' => CanonicalRoutes::passwordReset( $this->user->confirmation_token )
+                'password_reset_url' => CanonicalRoutes::passwordReset($this->user->confirmation_token)
         ];
     }
 
-    protected function _getLayoutVariables( $messageBody = null ): array {
+    protected function _getLayoutVariables($messageBody = null): array
+    {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
@@ -59,7 +65,8 @@ class  ForgotPasswordEmail extends AbstractEmail {
     }
 
 
-    protected function _getDefaultMailConf(): array {
+    protected function _getDefaultMailConf(): array
+    {
         $mailConf = parent::_getDefaultMailConf();
 
         $mailConf[ 'from' ]       = AppConfig::$MAILER_RETURN_PATH;

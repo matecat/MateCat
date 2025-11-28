@@ -12,6 +12,7 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
+use Exception;
 use Model\Teams\InvitedUser;
 use Utils\Url\CanonicalRoutes;
 
@@ -21,17 +22,18 @@ use Utils\Url\CanonicalRoutes;
  * Class TeamsInvitationsController
  * @package API\App
  */
-class TeamsInvitationsController extends AbstractStatefulKleinController {
+class TeamsInvitationsController extends AbstractStatefulKleinController
+{
 
     /**
      * @throws ValidationError
+     * @throws Exception
      */
-    public function collectBackInvitation() {
-
-        $invite = new InvitedUser( $this->request->param( 'jwt' ), $this->response );
+    public function collectBackInvitation(): void
+    {
+        $invite = new InvitedUser($this->request->param('jwt'), $this->response);
         $invite->prepareUserInvitedSignUpRedirect();
-        $this->response->redirect( CanonicalRoutes::appRoot() );
-
+        $this->response->redirect(CanonicalRoutes::appRoot());
     }
 
 }

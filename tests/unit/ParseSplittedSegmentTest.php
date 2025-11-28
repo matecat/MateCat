@@ -27,7 +27,7 @@ class ParseSplittedSegmentTest extends AbstractTest {
     }
 
     /**
-     * Test for JobStatusController/BulkSegmentStatusChangeWorker
+     * Test for MarkAllSegmentStatusController/BulkSegmentStatusChangeWorker
      */
     public function testInputSplitted() {
 

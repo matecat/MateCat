@@ -17,7 +17,8 @@ use Model\FilesStorage\Exceptions\FileSystemException;
  *
  * @package FilesStorage
  */
-interface IFilesStorage {
+interface IFilesStorage
+{
 
     /**
      **********************************************************************************************
@@ -38,40 +39,40 @@ interface IFilesStorage {
      *          |_work
      *          |_xliff file
      *
-     * @param         $hash
-     * @param         $lang
+     * @param string  $hash
+     * @param string  $lang
      * @param ?string $originalPath
-     * @param         $xliffPath
+     * @param string  $xliffPath
      *
      * @return mixed
      * @throws FileSystemException
      */
-    public function makeCachePackage( $hash, $lang, ?string $originalPath, $xliffPath );
+    public function makeCachePackage(string $hash, string $lang, ?string $originalPath, string $xliffPath): bool;
 
     /**
      * Rebuild the filename that will be taken from disk in the cache directory
      *
-     * @param $hash
-     * @param $lang
+     * @param string $hash
+     * @param string $lang
      *
      * @return mixed
      */
-    public function getOriginalFromCache( $hash, $lang );
+    public function getOriginalFromCache(string $hash, string $lang): false|string;
 
     /**
-     * @param $hash
-     * @param $lang
+     * @param string $hash
+     * @param string $lang
      *
-     * @return mixed
+     * @return bool|string
      */
-    public function getXliffFromCache( $hash, $lang );
+    public function getXliffFromCache(string $hash, string $lang): false|string;
 
     /**
-     * @param $dirToScan
+     * @param string $dirToScan
      *
      * @return mixed
      */
-    public function getHashesFromDir( $dirToScan );
+    public function getHashesFromDir(string $dirToScan): array;
 
     /**
      **********************************************************************************************
@@ -90,32 +91,32 @@ interface IFilesStorage {
      *          |_package
      *          |_work
      *
-     * @param      $dateHashPath
-     * @param      $lang
-     * @param      $idFile
-     * @param null $newFileName
+     * @param string      $dateHashPath
+     * @param string      $lang
+     * @param string      $idFile
+     * @param string|null $newFileName
      *
      * @return mixed
      */
-    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null );
+    public function moveFromCacheToFileDir(string $dateHashPath, string $lang, string $idFile, ?string $newFileName = null): bool;
 
     /**
      * Rebuild the filename that will be taken from disk in files directory
      *
-     * @param $id
-     * @param $dateHashPath
+     * @param string $id
+     * @param string $dateHashPath
      *
      * @return bool|string
      */
-    public function getOriginalFromFileDir( $id, $dateHashPath );
+    public function getOriginalFromFileDir(string $id, string $dateHashPath): false|string;
 
     /**
-     * @param $id
-     * @param $dateHashPath
+     * @param string $id
+     * @param string $dateHashPath
      *
      * @return mixed
      */
-    public function getXliffFromFileDir( $id, $dateHashPath );
+    public function getXliffFromFileDir(string $id, string $dateHashPath): false|string;
 
     /**
      **********************************************************************************************
@@ -130,7 +131,7 @@ interface IFilesStorage {
      *
      * @return mixed
      */
-    public static function moveFileFromUploadSessionToQueuePath( $uploadSession );
+    public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void;
 
     /**
      **********************************************************************************************
@@ -141,30 +142,30 @@ interface IFilesStorage {
     /**
      * Stores a serialized file to fast analysis storage
      *
-     * @param       $id_project
-     * @param array $segments_metadata
+     * @param string $id_project
+     * @param array  $segments_metadata
      *
-     * @return mixed
+     * @return void
      */
-    public static function storeFastAnalysisFile( $id_project, array $segments_metadata = [] );
+    public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void;
 
     /**
      * Gets a serialized file from fast analysis storage
      *
-     * @param $id_project
+     * @param int $id_project
      *
-     * @return mixed
+     * @return array
      */
-    public static function getFastAnalysisData( $id_project );
+    public static function getFastAnalysisData(int $id_project): array;
 
     /**
      * Deletes a serialized file from fast analysis storage
      *
-     * @param $id_project
+     * @param string $id_project
      *
      * @return mixed
      */
-    public static function deleteFastAnalysisFile( $id_project );
+    public static function deleteFastAnalysisFile(string $id_project): bool;
 
     /**
      **********************************************************************************************
@@ -180,33 +181,33 @@ interface IFilesStorage {
      *
      * @return bool
      */
-    public function cacheZipArchive( string $hash, string $zipPath ): bool;
+    public function cacheZipArchive(string $hash, string $zipPath): bool;
 
     /**
-     * @param $create_date
-     * @param $zipHash
-     * @param $projectID
+     * @param string $create_date
+     * @param string $zipHash
+     * @param string $projectID
      *
      * @return mixed
      */
-    public function linkZipToProject( $create_date, $zipHash, $projectID );
+    public function linkZipToProject(string $create_date, string $zipHash, string $projectID): bool;
 
     /**
-     * @param $projectDate
-     * @param $projectID
-     * @param $zipName
+     * @param string $projectDate
+     * @param string $projectID
+     * @param string $zipName
      *
      * @return string
      */
-    public function getOriginalZipPath( $projectDate, $projectID, $zipName );
+    public function getOriginalZipPath(string $projectDate, string $projectID, string $zipName): string;
 
     /**
-     * @param $projectDate
-     * @param $projectID
+     * @param string $projectDate
+     * @param string $projectID
      *
      * @return string
      */
-    public function getOriginalZipDir( $projectDate, $projectID );
+    public function getOriginalZipDir(string $projectDate, string $projectID): string;
 
     /**
      **********************************************************************************************
@@ -221,6 +222,6 @@ interface IFilesStorage {
      * @return bool
      * @throws Exception
      */
-    public function transferFiles( $source, $destination );
+    public function transferFiles(string $source, string $destination): bool;
 
 }

@@ -18,6 +18,8 @@ class GetUserApiKeyTest extends AbstractTest {
 
     public function setUp(): void {
 
+        parent::setUp();
+
         /**
          * environment initialization
          */

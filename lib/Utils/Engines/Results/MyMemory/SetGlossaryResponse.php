@@ -2,7 +2,8 @@
 
 namespace Utils\Engines\Results\MyMemory;
 
-class SetGlossaryResponse extends GetMemoryResponse {
+class SetGlossaryResponse extends GetMemoryResponse
+{
 
 
 }

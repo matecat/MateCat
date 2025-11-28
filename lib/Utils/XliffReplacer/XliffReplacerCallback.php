@@ -35,13 +35,12 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * XliffReplacerCallback constructor.
      *
-     * @param FeatureSet $featureSet
-     * @param string     $sourceLang
-     * @param string     $targetLang
-     *
-     * @param int|null   $idProject
+     * @param FeatureSet     $featureSet
+     * @param string         $sourceLang
+     * @param string         $targetLang
+     * @param JobStruct|null $jobStruct
      */
-    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, JobStruct $jobStruct = null ) {
+    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, ?JobStruct $jobStruct = null ) {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
@@ -105,7 +104,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     }
 
     /**
-     * @param AbstractFilter|MateCatFilter $filter
+     * @param AbstractFilter $filter
      *
      * @return XliffReplacerCallback
      */

@@ -3,8 +3,6 @@ import {CharacterCounterRules} from '../OtherTab/CharacterCounterRules'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata'
 import {Tagging} from '../OtherTab/Tagging'
-import CatToolActions from '../../../../actions/CatToolActions'
-import SegmentActions from '../../../../actions/SegmentActions'
 
 export const EditorOtherTab = () => {
   const {currentProjectTemplate, tmKeys} = useContext(SettingsPanelContext)
@@ -28,13 +26,6 @@ export const EditorOtherTab = () => {
         characterCounterMode: currentProjectTemplate.characterCounterMode,
         subfilteringHandlers: currentProjectTemplate.subfilteringHandlers,
       })
-      if (
-        previousCurrentProjectTemplate.current.subfilteringHandlers !==
-        currentProjectTemplate?.subfilteringHandlers
-      ) {
-        SegmentActions.removeAllSegments()
-        CatToolActions.onRender()
-      }
     }
 
     previousCurrentProjectTemplate.current = {
@@ -53,9 +44,14 @@ export const EditorOtherTab = () => {
   return (
     <div className="editor-settings-options-box settings-panel-contentwrapper-tab-background">
       <div className="settings-panel-contentwrapper-tab-subcategories">
+        <h2>General settings</h2>
+        <Tagging
+          previousCurrentProjectTemplate={previousCurrentProjectTemplate}
+        />
+      </div>
+      <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>Character counter settings</h2>
         <CharacterCounterRules />
-        <Tagging />
       </div>
     </div>
   )

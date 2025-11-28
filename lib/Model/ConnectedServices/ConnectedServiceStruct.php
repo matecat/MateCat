@@ -15,7 +15,8 @@ use Model\ConnectedServices\Oauth\OauthTokenEncryption;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     public ?int    $id                 = null;
     public int     $uid;
@@ -37,20 +38,23 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @throws EnvironmentIsBrokenException
      * @throws Exception
      */
-    public function getDecryptedOauthAccessToken(): ?string {
+    public function getDecryptedOauthAccessToken(): ?string
+    {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
-        return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
+        return $oauthTokenEncryption->decrypt($this->oauth_access_token);
     }
 
     /**
-     * @param $token
+     * @param string $token
      *
+     * @throws EnvironmentIsBrokenException
      * @throws Exception
      */
-    public function setEncryptedAccessToken( $token ) {
+    public function setEncryptedAccessToken(string $token): void
+    {
         $oauthTokenEncryption     = OauthTokenEncryption::getInstance();
-        $this->oauth_access_token = $oauthTokenEncryption->encrypt( $token );
+        $this->oauth_access_token = $oauthTokenEncryption->encrypt($token);
     }
 
     /**
@@ -59,14 +63,15 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @return ?array
      * @throws Exception
      */
-    public function getDecodedOauthAccessToken( ?string $field = null ): ?array {
-        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), true );
+    public function getDecodedOauthAccessToken(?string $field = null): ?array
+    {
+        $decoded = json_decode($this->getDecryptedOauthAccessToken(), true);
 
-        if ( $field ) {
-            if ( array_key_exists( $field, $decoded ) ) {
+        if ($field) {
+            if (array_key_exists($field, $decoded)) {
                 return $decoded[ $field ];
             } else {
-                throw new Exception( 'key not found on token: ' . $field );
+                throw new Exception('key not found on token: ' . $field);
             }
         }
 

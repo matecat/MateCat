@@ -13,19 +13,19 @@ namespace Controller\API\Commons\Validators;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Model\Projects\ProjectStruct;
 
-class ProjectExistsInTeamValidator extends Base {
+class ProjectExistsInTeamValidator extends Base
+{
 
     /**
      * @var ProjectStruct
      */
     protected ProjectStruct $project;
 
-    public function _validate(): void {
-
-        if ( $this->request->param( 'id_team' ) != $this->project->id_team ) {
-            throw new NotFoundException( "Project not found", 404 );
+    public function _validate(): void
+    {
+        if ($this->request->param('id_team') != $this->project->id_team) {
+            throw new NotFoundException("Project not found", 404);
         }
-
     }
 
     /**
@@ -33,7 +33,8 @@ class ProjectExistsInTeamValidator extends Base {
      *
      * @return ProjectExistsInTeamValidator
      */
-    public function setProject( ProjectStruct $project ): ProjectExistsInTeamValidator {
+    public function setProject(ProjectStruct $project): ProjectExistsInTeamValidator
+    {
         $this->project = $project;
 
         return $this;

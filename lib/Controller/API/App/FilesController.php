@@ -3,120 +3,108 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
-use Controller\API\Commons\Validators\LoginValidator;
+use InvalidArgumentException;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use ReflectionException;
 
-class FilesController extends AbstractStatefulKleinController {
+class FilesController extends AbstractStatefulKleinController
+{
 
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
     protected JobStruct $chunk;
 
-    public function setChunk( JobStruct $chunk ) {
-        $this->chunk = $chunk;
-    }
-
     /**
      * @throws ReflectionException
+     * @throws NotFoundException
      */
-    public function segments() {
+    public function segments(): void
+    {
         // `file_part_id` has the priority
-        if ( isset( $_POST[ 'file_part_id' ] ) ) {
+        if (isset($_POST[ 'file_part_id' ])) {
             $filePartId = $_POST[ 'file_part_id' ];
-            $this->validateInteger( $filePartId );
-            $this->getFirstAndLastSegmentFromFilePartId( $filePartId );
-        }
-
-        if ( isset( $_POST[ 'file_id' ] ) ) {
+            $this->validateInteger($filePartId);
+            $this->getFirstAndLastSegmentFromFilePartId($filePartId);
+        } elseif (isset($_POST[ 'file_id' ])) {
             $fileId = $_POST[ 'file_id' ];
-            $this->validateInteger( $fileId );
-            $this->getFirstAndLastSegmentFromFileId( $fileId );
+            $this->validateInteger($fileId);
+            $this->getFirstAndLastSegmentFromFileId($fileId);
+        } else {
+            $this->response->status()->setCode(500);
+            $this->response->json([
+                    'error' => 'Missing parameters. `file_part_id` or `file_id` must be provided'
+            ]);
         }
-
-        $this->response->status()->setCode( 500 );
-        $this->response->json( [
-                'error' => 'Missing parameters. `file_part_id` or `file_id` must be provided'
-        ] );
     }
 
     /**
-     * @param $filePartId
+     * @param int $filePartId
      *
      * @throws ReflectionException
+     * @throws NotFoundException
      */
-    private function getFirstAndLastSegmentFromFilePartId( $filePartId ) {
+    private function getFirstAndLastSegmentFromFilePartId(int $filePartId): void
+    {
         $filePartsDao        = new FilesPartsDao();
-        $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment( $filePartId );
+        $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment($filePartId);
 
-        if ( null === $firstAndLastSegment->first_segment ) {
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
-                    'error' => 'File part id ' . $filePartId . ' was not found'
-            ] );
-            exit();
+        if (null === $firstAndLastSegment->first_segment) {
+            throw new NotFoundException('File part id ' . $filePartId . ' was not found');
         }
 
-        $this->response->json( [
+        $this->response->json([
                 'first_segment' => (int)$firstAndLastSegment->first_segment,
                 'last_segment'  => (int)$firstAndLastSegment->last_segment,
-        ] );
-        exit();
+        ]);
     }
 
     /**
-     * @param $fileId
+     * @param int $fileId
      *
      * @throws ReflectionException
+     * @throws NotFoundException
      */
-    private function getFirstAndLastSegmentFromFileId( $fileId ) {
-        $fileInfo = JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
+    private function getFirstAndLastSegmentFromFileId(int $fileId): void
+    {
+        $fileInfo = JobDao::getFirstSegmentOfFilesInJob($this->chunk, 60 * 5);
 
-        if ( empty( $fileInfo ) ) {
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
-                    'error' => 'File id ' . $fileId . ' was not found'
-            ] );
-            exit();
+        if (empty($fileInfo)) {
+            throw new NotFoundException('File id ' . $fileId . ' was not found');
         }
 
-        $firstAndLastSegment = array_filter( $fileInfo, function ( $item ) use ( $fileId ) {
+        $firstAndLastSegment = array_filter($fileInfo, function ($item) use ($fileId) {
             return $item->id_file == $fileId;
-        } )[ 0 ];
+        })[ 0 ];
 
-        $this->response->json( [
+        $this->response->json([
                 'fist_segment' => (int)$firstAndLastSegment->first_segment,
                 'last_segment' => (int)$firstAndLastSegment->last_segment,
-        ] );
-        exit();
+        ]);
     }
 
     /**
-     * @param $value
+     * @param mixed $value
      */
-    private function validateInteger( $value ) {
-        if ( !filter_var( $value, FILTER_VALIDATE_INT ) ) {
-
-            $this->response->status()->setCode( 500 );
-            $this->response->json( [
-                    'error' => '`file_part_id` is not an integer'
-            ] );
-            exit();
+    private function validateInteger(mixed $value): void
+    {
+        if (!filter_var($value, FILTER_VALIDATE_INT)) {
+            throw new InvalidArgumentException('`file_part_id` is not an integer');
         }
     }
 
-    protected function afterConstruct() {
-        $Validator  = ( new ChunkPasswordValidator( $this ) );
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setChunk( $Validator->getChunk() );
-        } );
+    protected function afterConstruct(): void
+    {
+//        $this->appendValidator(new LoginValidator($this));
+        $Validator = (new ChunkPasswordValidator($this));
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk = $Validator->getChunk();
+        });
 
-        $this->appendValidator( $Validator );
-        $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator($Validator);
     }
 }

@@ -41,7 +41,7 @@ class AnalysisProject implements JsonSerializable {
      */
     private string $createDate;
     /**
-     * @var mixed
+     * @var string
      */
     protected string $subject;
     /**
@@ -66,23 +66,28 @@ class AnalysisProject implements JsonSerializable {
     }
 
     /**
-     * @param mixed $status
+     * @param string $status
+     *
+     * @return void
      */
-    public function setStatus( $status ) {
+    public function setStatus( string $status ): void
+    {
         $this->status = $status;
     }
 
     /**
      * @return string
      */
-    public function getAnalyzeLink() {
+    public function getAnalyzeLink(): string
+    {
         return $this->analyzeLink;
     }
 
     /**
      * @param string $analyzeLink
      */
-    public function setAnalyzeLink( string $analyzeLink ) {
+    public function setAnalyzeLink( string $analyzeLink ): void
+    {
         $this->analyzeLink = $analyzeLink;
     }
 
@@ -146,7 +151,7 @@ class AnalysisProject implements JsonSerializable {
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'name'          => $this->name,
                 'status'        => $this->status,

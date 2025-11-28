@@ -9,7 +9,8 @@
 namespace Plugins\Features;
 
 
-interface IBaseFeature {
+interface IBaseFeature
+{
     /**
      * This method returns true if the feature is to be added to project metadata `features` key.
      *

@@ -17,7 +17,8 @@ use Utils\Engines\Lara;
  * This class contains the default parameters for a Lara EnginesFactory CREATION
  *
  */
-class LaraStruct extends EngineStruct {
+class LaraStruct extends EngineStruct
+{
 
     /**
      * @var string|null
@@ -50,9 +51,9 @@ class LaraStruct extends EngineStruct {
     public ?string $update_relative_url = "memories/content";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $others = [
+    public string|array|null $others = [
             "tmx_import_relative_url" => "memories/content",
             "user_update_activate"    => "memories/connect",
     ];
@@ -64,9 +65,9 @@ class LaraStruct extends EngineStruct {
 
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
+    public string|array|null $extra_parameters = [
             'Lara-AccessKeyId'     => "",
             'Lara-AccessKeySecret' => "",
             'MMT-License'          => ""
@@ -78,7 +79,7 @@ class LaraStruct extends EngineStruct {
     public ?int $google_api_compliant_version = 2;
 
     /**
-     * @var int
+     * @var int|null
      */
     public ?int $penalty = 14;
 
@@ -86,7 +87,8 @@ class LaraStruct extends EngineStruct {
      * An empty struct
      * @return LaraStruct
      */
-    public static function getStruct(): LaraStruct {
+    public static function getStruct(): static
+    {
         return new LaraStruct();
     }
 }

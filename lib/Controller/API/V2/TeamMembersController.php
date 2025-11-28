@@ -21,92 +21,93 @@ use ReflectionException;
 use Utils\Redis\RedisHandler;
 use View\API\V2\Json\Membership;
 
-class TeamMembersController extends KleinController {
+class TeamMembersController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
-        $this->appendValidator( new TeamAccessValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $this->appendValidator(new TeamAccessValidator($this));
     }
 
     /**
      * Get the team members list
      * @throws ReflectionException
      */
-    public function index() {
+    public function index(): void
+    {
+        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
 
-        $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
-
-        $team      = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->request->param( 'id_team' ) );
-        $teamModel = new TeamModel( $team );
+        $team      = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($this->request->param('id_team'));
+        $teamModel = new TeamModel($team);
         $teamModel->updateMembersProjectsCount();
 
-        $formatter = new Membership( $team->getMembers() );
-        $this->response->json( [
+        $formatter = new Membership($team->getMembers());
+        $this->response->json([
                 'members'             => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $this->request->param( 'id_team' ) )
-        ] );
-
+                'pending_invitations' => $pendingInvitation->hasPendingInvitation($this->request->param('id_team'))
+        ]);
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    public function update() {
+    public function update(): void
+    {
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
-        $params = filter_var_array( $params, [
+        $params = filter_var_array($params, [
                 'members' => [
                         'filter' => FILTER_SANITIZE_EMAIL,
                         'flags'  => FILTER_REQUIRE_ARRAY
                 ]
-        ] );
+        ]);
 
-        $teamStruct = ( new TeamDao() )
-                ->findById( $this->request->param( 'id_team' ) );
+        $teamStruct = (new TeamDao())
+                ->findById($this->request->param('id_team'));
 
-        $model = new TeamModel( $teamStruct );
-        $model->setUser( $this->user );
-        $model->addMemberEmails( $params[ 'members' ] );
+        $model = new TeamModel($teamStruct);
+        $model->setUser($this->user);
+        $model->addMemberEmails($params[ 'members' ]);
         $full_members_list = $model->updateMembers();
 
-        $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
-        $formatter         = new Membership( $full_members_list );
+        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
+        $formatter         = new Membership($full_members_list);
 
         $this->refreshClientSessionIfNotApi();
 
-        $this->response->json( [
+        $this->response->json([
                 'members'             => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $teamStruct->id )
-        ] );
-
+                'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
+        ]);
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    public function delete() {
+    public function delete(): void
+    {
         Database::obtain()->begin();
 
-        $teamStruct = ( new TeamDao() )
-                ->findById( $this->request->param( 'id_team' ) );
+        $teamStruct = (new TeamDao())
+                ->findById($this->request->param('id_team'));
 
-        $model = new TeamModel( $teamStruct );
-        $model->removeMemberUids( [ $this->request->param( 'uid_member' ) ] );
-        $model->setUser( $this->user );
+        $model = new TeamModel($teamStruct);
+        $model->removeMemberUids([$this->request->param('uid_member')]);
+        $model->setUser($this->user);
         $membersList = $model->updateMembers();
 
-        $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
-        $formatter         = new Membership( $membersList );
+        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
+        $formatter         = new Membership($membersList);
 
         $this->refreshClientSessionIfNotApi();
 
-        $this->response->json( [
+        $this->response->json([
                 'members'             => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $teamStruct->id )
-        ] );
-
+                'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
+        ]);
     }
 
 

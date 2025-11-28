@@ -39,7 +39,7 @@ class ConstructorDatabaseTest extends AbstractTest {
 
         // get the singleton static instance reference
         $property = $this->reflector->getProperty( 'instance' );
-        $property->setAccessible( true );
+        
         $property->setValue( $this->databaseInstance, null ); // unset
 
         $this->expectException( TypeError::class );

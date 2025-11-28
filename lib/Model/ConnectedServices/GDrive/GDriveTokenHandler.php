@@ -5,7 +5,8 @@ namespace Model\ConnectedServices\GDrive;
 
 use Exception;
 
-class GDriveTokenHandler {
+class GDriveTokenHandler
+{
 
     /**
      * This function returns a new token if the previous is expired.
@@ -17,18 +18,18 @@ class GDriveTokenHandler {
      * @return false|string
      * @throws Exception
      */
-    public static function getNewToken( $client, $raw_token ) {
-        $client->setAccessToken( $raw_token );
+    public static function getNewToken($client, $raw_token): false|string
+    {
+        $client->setAccessToken($raw_token);
 
-        $json_token    = json_decode( $raw_token, true );
+        $json_token    = json_decode($raw_token, true);
         $refresh_token = $json_token[ 'refresh_token' ];
 
-        if ( $client->isAccessTokenExpired() ) {
+        if ($client->isAccessTokenExpired()) {
+            $grants = $client->refreshToken($refresh_token);
 
-            $grants = $client->refreshToken( $refresh_token );
-
-            if ( isset( $grants[ 'error' ] ) ) {
-                throw new Exception( $grants[ 'error_description' ] );
+            if (isset($grants[ 'error' ])) {
+                throw new Exception($grants[ 'error_description' ]);
             }
 
             $access_token = $client->getAccessToken();
@@ -38,8 +39,8 @@ class GDriveTokenHandler {
             // -------------------------
             // Google Api V3 return $access_token as an array, so we need to encode it to JSON string
             //
-            if ( is_array( $access_token ) ) {
-                $access_token = json_encode( $access_token, true );
+            if (is_array($access_token)) {
+                $access_token = json_encode($access_token, true);
             }
 
             return $access_token;
@@ -56,11 +57,12 @@ class GDriveTokenHandler {
      *
      * @return string
      */
-    public static function accessTokenToJsonString( $token ): string {
-        if ( !is_array( $token ) ) {
-            $token = json_decode( $token );
+    public static function accessTokenToJsonString($token): string
+    {
+        if (!is_array($token)) {
+            $token = json_decode($token);
         }
 
-        return json_encode( $token, JSON_UNESCAPED_SLASHES );
+        return json_encode($token, JSON_UNESCAPED_SLASHES);
     }
 }

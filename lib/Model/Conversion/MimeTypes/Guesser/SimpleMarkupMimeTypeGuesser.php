@@ -33,44 +33,45 @@ use RuntimeException;
  *      </target>
  *  </code>
  */
-class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface {
+class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface
+{
 
     /**
      * @inheritDoc
      */
-    public function isGuesserSupported(): bool {
+    public function isGuesserSupported(): bool
+    {
         return true;
     }
 
     /**
      * @inheritDoc
      */
-    public function guessMimeType( string $path ): ?string {
-
-        if ( !( $fp = fopen( $path, "r", false, stream_context_create( null ) ) ) ) {
-            throw new RuntimeException( "could not open XML input" );
+    public function guessMimeType(string $path): ?string
+    {
+        if (!($fp = fopen($path, "r", false, stream_context_create(null)))) {
+            throw new RuntimeException("could not open XML input");
         }
-        $buffer = fread( $fp, 1024 );
-        fclose( $fp );
+        $buffer = fread($fp, 1024);
+        fclose($fp);
 
-        $r1 = stripos( $buffer, '<?xml' ) !== false;
-        $r2 = stripos( $buffer, '<xliff' ) !== false && $r1;
-        $r4 = stripos( $buffer, '<tmx' ) !== false && $r1;
-        $r3 = stripos( $buffer, '<html' ) !== false;
+        $r1 = stripos($buffer, '<?xml') !== false;
+        $r2 = stripos($buffer, '<xliff') !== false && $r1;
+        $r4 = stripos($buffer, '<tmx') !== false && $r1;
+        $r3 = stripos($buffer, '<html') !== false;
 
-        if ( $r3 ) {
+        if ($r3) {
             return 'text/html';
         }
 
-        if ( $r2 ) {
+        if ($r2) {
             return 'application/x-xliff';
         }
 
-        if ( $r1 || $r4 ) {
+        if ($r1 || $r4) {
             return 'text/xml';
         }
 
         return null;
-
     }
 }

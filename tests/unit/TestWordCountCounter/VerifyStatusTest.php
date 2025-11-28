@@ -20,7 +20,7 @@ class VerifyStatusTest extends AbstractTest {
         $word_counter         = new CounterModel();
         $mirror_word_counter  = new ReflectionClass( $word_counter );
         $method__verifyStatus = $mirror_word_counter->getMethod( '_verifyStatus' );
-        $method__verifyStatus->setAccessible( true );
+        
 
         $method__verifyStatus->invoke( $word_counter, "NEW" );
         $method__verifyStatus->invoke( $word_counter, "DRAFT" );
@@ -39,7 +39,7 @@ class VerifyStatusTest extends AbstractTest {
         $word_counter         = new CounterModel();
         $mirror_word_counter  = new ReflectionClass( $word_counter );
         $method__verifyStatus = $mirror_word_counter->getMethod( '_verifyStatus' );
-        $method__verifyStatus->setAccessible( true );
+        
 
         $this->expectException( 'BadMethodCallException' );
         $method__verifyStatus->invoke( $word_counter, "BARANDFOO" );

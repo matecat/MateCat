@@ -1,6 +1,7 @@
 <?php
 
 namespace Model\DataAccess;
+
 use Exception;
 use PDO;
 use PDOException;
@@ -10,7 +11,8 @@ use PDOException;
  *
  * The used test script can be found at: https://gist.github.com/reneses/3108444332d4e56c0b73
  */
-class Database implements IDatabase {
+class Database implements IDatabase
+{
 
     /**
      * Unique instance of the class (singleton design pattern)
@@ -30,12 +32,12 @@ class Database implements IDatabase {
     protected string $password; //database login password
     protected string $database; //database name
 
-    // Affected rows TODO: remove, it's not thread safe. Just kept for legacy support
-    public int $affected_rows;
+    // Affected rows
+    protected int $affected_rows;
 
 
-    const SEQ_ID_SEGMENT = 'id_segment';
-    const SEQ_ID_PROJECT = 'id_project';
+    const string SEQ_ID_SEGMENT = 'id_segment';
+    const string SEQ_ID_PROJECT = 'id_project';
 
     protected static array $SEQUENCES = [
             Database::SEQ_ID_SEGMENT,
@@ -50,7 +52,8 @@ class Database implements IDatabase {
      * @param string $password
      * @param string $database
      */
-    protected function __construct( string $server, string $user, string $password, string $database ) {
+    protected function __construct(string $server, string $user, string $password, string $database)
+    {
         // Set fields
         $this->server   = $server;
         $this->user     = $user;
@@ -63,9 +66,10 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public static function obtain( string $server = null, string $user = null, string $password = null, string $database = null ): IDatabase {
-        if ( !self::$instance || $server != null && $user != null && $password != null && $database != null ) {
-            self::$instance = new Database( $server, $user, $password, $database );
+    public static function obtain(string $server = null, string $user = null, string $password = null, string $database = null): IDatabase
+    {
+        if (!self::$instance || $server != null && $user != null && $password != null && $database != null) {
+            self::$instance = new Database($server, $user, $password, $database);
         }
 
         return self::$instance;
@@ -74,15 +78,17 @@ class Database implements IDatabase {
     /**
      * Class destructor
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->close();
     }
 
     /**
      * @return PDO
      */
-    public function getConnection(): PDO {
-        if ( empty( $this->connection ) ) {
+    public function getConnection(): PDO
+    {
+        if (empty($this->connection)) {
             $this->connection = new PDO(
                     "mysql:host=$this->server;dbname=$this->database",
                     $this->user,
@@ -90,14 +96,16 @@ class Database implements IDatabase {
                     [
                             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
                             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                    ] );
-            $this->connection->exec( "SET names utf8" );
+                    ]
+            );
+            $this->connection->exec("SET names utf8");
         }
 
         return $this->connection;
     }
 
-    public function connect() {
+    public function connect(): void
+    {
         $this->getConnection();
     }
 
@@ -105,8 +113,9 @@ class Database implements IDatabase {
      * @return bool
      * @throws PDOException
      */
-    public function ping(): bool {
-        $this->getConnection()->query( "SELECT 1 FROM DUAL" );
+    public function ping(): bool
+    {
+        $this->getConnection()->query("SELECT 1 FROM DUAL");
 
         return true;
     }
@@ -115,13 +124,14 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function close() {
+    public function close(): void
+    {
         $this->connection = null;
     }
 
-    public function reconnect() {
-        $this->close();
-        $this->getConnection();
+    public function rowCount(): int
+    {
+        return $this->affected_rows;
     }
 
 
@@ -129,11 +139,12 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function useDb( $name ) {
-        $stmt = $this->getConnection()->prepare( "USE " . $name ); // Table and Column names cannot be replaced by parameters in PDO
+    public function useDb(string $name): void
+    {
+        $stmt = $this->getConnection()->prepare("USE " . $name); // Table and Column names cannot be replaced by parameters in PDO
         $stmt->execute();
         $stmt->closeCursor();
-        unset( $stmt );
+        unset($stmt);
         $this->database = $name;
     }
 
@@ -141,8 +152,9 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function begin(): PDO {
-        if ( !$this->getConnection()->inTransaction() ) {
+    public function begin(): PDO
+    {
+        if (!$this->getConnection()->inTransaction()) {
             $this->getConnection()->beginTransaction();
         }
 
@@ -154,7 +166,8 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function commit() {
+    public function commit(): void
+    {
         $this->getConnection()->commit();
     }
 
@@ -163,7 +176,8 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function rollback() {
+    public function rollback(): void
+    {
         $this->getConnection()->rollBack();
     }
 
@@ -172,25 +186,24 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function update( string $table, array $data, array $where = [ '1' => '0' ] ): int {
-
+    public function update(string $table, array $data, array $where = ['1' => '0']): int
+    {
         // Prepare the statement
         $valuesToBind = [];
         $query        = "UPDATE $table SET ";
         $currentIndex = 0;
 
-        foreach ( $data as $key => $value ) {
+        foreach ($data as $key => $value) {
             $query                                 .= "$key = :value$currentIndex, ";
             $valuesToBind[ ":value$currentIndex" ] = $value;
             ++$currentIndex;
         }
 
-        $query = rtrim( $query, ', ' );
+        $query = rtrim($query, ', ');
         $query .= " WHERE ";
 
-        foreach ( $where as $k => $v ) {
-
-            if ( $v !== null ) {
+        foreach ($where as $k => $v) {
+            if ($v !== null) {
                 $query .= $k . " = :" . $k . " AND ";
             } else {
                 $query .= $k . " IS :" . $k . " AND ";
@@ -199,18 +212,17 @@ class Database implements IDatabase {
             $valuesToBind[ $k ] = $v;
         }
 
-        $query = substr( $query, 0, -5 );
+        $query = substr($query, 0, -5);
 
-        $stmt = $this->getConnection()->prepare( $query );
+        $stmt = $this->getConnection()->prepare($query);
 
         // Execute it
-        $stmt->execute( $valuesToBind );
+        $stmt->execute($valuesToBind);
 
         $affected            = $stmt->rowCount();
         $this->affected_rows = $affected;
 
         return $affected;
-
     }
 
     /**
@@ -218,26 +230,22 @@ class Database implements IDatabase {
      * {@inheritdoc}
      * @throws Exception
      */
-    public function insert( string $table, array $data, array &$mask = [], $ignore = false, $no_nulls = false, array $onDuplicateKey = [] ): string {
+    public function insert(string $table, array $data, array &$mask = [], $ignore = false, $no_nulls = false, array $onDuplicateKey = []): string
+    {
+        $query = static::buildInsertStatement($table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey);
 
-        $query = static::buildInsertStatement( $table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey );
+        $preparedStatement = $this->getConnection()->prepare($query);
 
-        $preparedStatement = $this->getConnection()->prepare( $query );
-
-        $valuesToBind = [];
-        foreach ( $data as $key => $value ) {
-            if ( isset( $mask[ $key ] ) ) {
-                $valuesToBind [ $key ] = $value;
-            }
-        }
+        $valuesToBind = array_filter($data, function ($key) use ($mask) {
+            return isset($mask[ $key ]);
+        }, ARRAY_FILTER_USE_KEY);
 
 
         // Execute it
-        $preparedStatement->execute( $valuesToBind );
+        $preparedStatement->execute($valuesToBind);
         $this->affected_rows = $preparedStatement->rowCount();
 
         return $this->last_insert();
-
     }
 
     /**
@@ -256,14 +264,14 @@ class Database implements IDatabase {
      * @throws Exception
      * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement( string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = [] ): string {
-
-        if ( empty( $table ) ) {
-            throw new Exception( 'TABLE constant is not defined' );
+    public static function buildInsertStatement(string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): string
+    {
+        if (empty($table)) {
+            throw new Exception('TABLE constant is not defined');
         }
 
-        if ( $ignore && !empty( $on_duplicate_fields ) ) {
-            throw new Exception( 'INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.' );
+        if ($ignore && !empty($on_duplicate_fields)) {
+            throw new Exception('INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.');
         }
 
         $first  = [];
@@ -272,16 +280,15 @@ class Database implements IDatabase {
         $sql_ignore = $ignore ? " IGNORE " : "";
 
         $duplicate_statement = "";
-        if ( !empty( $on_duplicate_fields ) ) {
+        if (!empty($on_duplicate_fields)) {
             $duplicate_statement = " ON DUPLICATE KEY UPDATE ";
-            foreach ( $on_duplicate_fields as $key => $value ) {
-
-                if ( $no_nulls && is_null( $attrs[ $key ] ) ) {
+            foreach ($on_duplicate_fields as $key => $value) {
+                if ($no_nulls && is_null($attrs[ $key ])) {
                     /*
                      *
                      * if NO NULLS flag is set and there is an ON DUPLICATE entry "value"
                      * for such field we do not want override the database value with null
-                     * ( because it will not be inserted in the value fields and it will be null by definition )
+                     * (because it will not be inserted in the value fields, and it will be null by definition)
                      *
                      * Ex:
                      *
@@ -298,29 +305,29 @@ class Database implements IDatabase {
 
                 //set the update keys
                 $duplicate_statement .= " $key = ";
-                if ( stripos( $value, "value" ) !== false ) {
-                    //if string contains VALUES( .. ) , it is not needed to bind to PDO
+                if (stripos($value, "value") !== false) {
+                    //if the string contains VALUES( .. ) , it is not needed to bind to PDO
                     $duplicate_statement .= "VALUES( $key )";
                 } else {
                     //bind to PDO
                     $duplicate_statement                  .= ":dupUpdate_" . $key;
-                    $valuesToBind[ ":dupUpdate_" . $key ] = $value; //TODO this is a bug bind values are not returned and not inserted in the mask
+                    $valuesToBind[ ":dupUpdate_" . $key ] = $value; //TODO this is a bug: bind values are not returned and not inserted in the mask
                 }
                 $duplicate_statement .= ", ";
             }
         }
 
-        $duplicate_statement = rtrim( $duplicate_statement, ", " );
+        $duplicate_statement = rtrim($duplicate_statement, ", ");
 
-        if ( empty( $mask ) ) {
-            $mask = array_keys( $attrs );
+        if (empty($mask)) {
+            $mask = array_keys($attrs);
         }
-        $mask = array_combine( $mask, $mask );
+        $mask = array_combine($mask, $mask);
 
-        foreach ( $attrs as $key => $value ) {
-            if ( array_key_exists( $key, $mask ) ) {
-                if ( $no_nulls && is_null( $value ) ) {
-                    unset( $mask[ $key ] );
+        foreach ($attrs as $key => $value) {
+            if (array_key_exists($key, $mask)) {
+                if ($no_nulls && is_null($value)) {
+                    unset($mask[ $key ]);
                     continue;
                 }
                 $first[]  = "`$key`";
@@ -330,9 +337,9 @@ class Database implements IDatabase {
 
         return "INSERT $sql_ignore INTO " . $table .
                 " (" .
-                implode( ', ', $first ) .
+                implode(', ', $first) .
                 ") VALUES (" .
-                implode( ', ', $second ) .
+                implode(', ', $second) .
                 ")
                 $duplicate_statement ;
         ";
@@ -342,7 +349,8 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function last_insert() {
+    public function last_insert(): false|string
+    {
         return $this->getConnection()->lastInsertId();
     }
 
@@ -353,8 +361,9 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function escape( $string ) {
-        return substr( $this->getConnection()->quote( $string ), 1, -1 );
+    public function escape(string $string): string
+    {
+        return substr($this->getConnection()->quote($string), 1, -1);
     }
 
     /**
@@ -363,26 +372,25 @@ class Database implements IDatabase {
      *
      * @return array
      */
-    public function nextSequence( string $sequence_name, int $seqIncrement = 1 ): array {
-
-        if ( !in_array( $sequence_name, static::$SEQUENCES ) ) {
-            throw new PDOException( "Undefined sequence " . $sequence_name );
+    public function nextSequence(string $sequence_name, int $seqIncrement = 1): array
+    {
+        if (!in_array($sequence_name, static::$SEQUENCES)) {
+            throw new PDOException("Undefined sequence " . $sequence_name);
         }
 
         $this->getConnection()->beginTransaction();
 
-        $statement = $this->getConnection()->prepare( "SELECT " . $sequence_name . " FROM sequences FOR UPDATE;" );
+        $statement = $this->getConnection()->prepare("SELECT " . $sequence_name . " FROM sequences FOR UPDATE;");
         $statement->execute();
-        $first_id = $statement->fetch( PDO::FETCH_OBJ );
+        $first_id = $statement->fetch(PDO::FETCH_OBJ);
 
-        $statement = $this->getConnection()->prepare( "UPDATE sequences SET " . $sequence_name . " = " . $sequence_name . " + :seqIncrement where 1 limit 1;" );
-        $statement->bindValue( ':seqIncrement', $seqIncrement, PDO::PARAM_INT );
+        $statement = $this->getConnection()->prepare("UPDATE sequences SET " . $sequence_name . " = " . $sequence_name . " + :seqIncrement where 1 limit 1;");
+        $statement->bindValue(':seqIncrement', $seqIncrement, PDO::PARAM_INT);
         $statement->execute();
 
         $this->getConnection()->commit();
 
-        return range( $first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1 );
-
+        return range($first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1);
     }
 
 }

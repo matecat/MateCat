@@ -180,7 +180,7 @@ export const XliffRulesRow = ({
         size={BUTTON_SIZE.SMALL}
         onClick={deleteRow}
       >
-        <Trash size={16} />
+        <Trash size={20} />
       </Button>
     </>
   )

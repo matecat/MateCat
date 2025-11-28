@@ -13,9 +13,10 @@ use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 
-abstract class BaseFeature implements IBaseFeature {
+abstract class BaseFeature implements IBaseFeature
+{
 
-    const FEATURE_CODE = null;
+    const string FEATURE_CODE = '';
 
     protected BasicFeatureStruct $feature;
 
@@ -48,20 +49,22 @@ abstract class BaseFeature implements IBaseFeature {
     /**
      * @return array
      */
-    public static function getConflictingDependencies(): array {
+    public static function getConflictingDependencies(): array
+    {
         return static::$conflictingDependencies;
     }
 
     /**
      * @throws Exception
      */
-    public static function getConfig() {
-        $config_file_path = realpath( self::getPluginBasePath() . '/../config.ini' );
-        if ( !file_exists( $config_file_path ) ) {
-            throw new Exception( 'Config file not found', 500 );
+    public static function getConfig(): array
+    {
+        $config_file_path = realpath(self::getPluginBasePath() . '/../config.ini');
+        if (!file_exists($config_file_path)) {
+            throw new Exception('Config file not found', 500);
         }
 
-        return parse_ini_file( $config_file_path, true );
+        return parse_ini_file($config_file_path, true);
     }
 
     /**
@@ -74,61 +77,71 @@ abstract class BaseFeature implements IBaseFeature {
      *
      * @param BasicFeatureStruct $feature
      */
-    public function __construct( BasicFeatureStruct $feature ) {
+    public function __construct(BasicFeatureStruct $feature)
+    {
         $fCode = static::FEATURE_CODE;
-        if ( empty( $fCode ) ) {
-            throw new LogicException( "Plugin code not defined." );
+        if (empty($fCode)) {
+            throw new LogicException("Plugin code not defined.");
         }
         $this->feature     = $feature;
         $this->logger_name = $this->feature->feature_code . '_plugin';
     }
 
-    public function isAutoActivableOnProject(): bool {
+    public function isAutoActivableOnProject(): bool
+    {
         return $this->autoActivateOnProject;
     }
 
-    public function isForceableOnProject(): bool {
+    public function isForceableOnProject(): bool
+    {
         return $this->forceOnProject;
     }
 
-    public static function getDependencies(): array {
+    public static function getDependencies(): array
+    {
         return static::$dependencies;
     }
 
     /**
-     * gets a feature specific logger
+     * gets a feature-specific logger
      *
-     * @return MatecatLogger
+     * @return LoggerInterface
      * @throws Exception
      */
-    public function getLogger() {
-        if ( $this->log == null ) {
-            $this->log = LoggerFactory::getLogger( self::FEATURE_CODE, $this->logger_name );
+    public function getLogger(): LoggerInterface
+    {
+        if ($this->log == null) {
+            $this->log = LoggerFactory::getLogger(self::FEATURE_CODE, $this->logger_name);
         }
 
         return $this->log;
     }
 
-    protected function logFilePath(): string {
+    protected function logFilePath(): string
+    {
         return AppConfig::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
 
-    public static function getClassPath(): string {
-        $rc = new ReflectionClass( get_called_class() );
+    public static function getClassPath(): string
+    {
+        $rc = new ReflectionClass(get_called_class());
 
-        return dirname( $rc->getFileName() ) . '/' . pathinfo( $rc->getFileName(), PATHINFO_FILENAME );
+        return dirname($rc->getFileName()) . '/' . pathinfo($rc->getFileName(), PATHINFO_FILENAME);
     }
 
-    public static function getPluginBasePath() {
-        return realpath( static::getClassPath() . '/../..' );
+    public static function getPluginBasePath(): false|string
+    {
+        return realpath(static::getClassPath() . '/../..');
     }
 
-    public static function getTemplatesPath() {
+    public static function getTemplatesPath(): string
+    {
         return static::getClassPath() . '/View';
     }
 
-    public function getFeatureStruct(): BasicFeatureStruct {
+    public function getFeatureStruct(): BasicFeatureStruct
+    {
         return $this->feature;
     }
 
@@ -137,7 +150,8 @@ abstract class BaseFeature implements IBaseFeature {
      *
      * @see \Model\FeaturesBase\PluginsLoader::loadRoutes
      */
-    public static function loadRoutes( Klein $klein ) {
+    public static function loadRoutes(Klein $klein)
+    {
     }
 
     /**
@@ -145,13 +159,14 @@ abstract class BaseFeature implements IBaseFeature {
      * Return a list of files in build path of a plugin
      * @return array|false
      */
-    public function getBuildFiles() {
-        $path = realpath( self::getPluginBasePath() . '/../static/build' );
-        if ( empty( $path ) ) {
-            return false;
+    public function getBuildFiles(): ?array
+    {
+        $path = realpath(self::getPluginBasePath() . '/../static/build');
+        if (empty($path)) {
+            return null;
         }
 
-        return scandir( $path );
+        return scandir($path);
     }
 
 }

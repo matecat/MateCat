@@ -208,6 +208,7 @@
     > :first-child {
       min-width: 140px;
       border-radius: 2px;
+      height: 28px;
     }
 
     > :last-child {
@@ -238,6 +239,9 @@
 }
 
 .tm-key-row-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: colors.$grey;
 }
 

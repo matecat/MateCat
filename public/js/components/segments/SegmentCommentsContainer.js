@@ -240,7 +240,7 @@ class SegmentCommentsContainer extends React.Component {
               size={BUTTON_SIZE.ICON_SMALL}
               onClick={this.deleteComment}
             >
-              <Trash size={16} />
+              <Trash size={20} />
             </Button>
           ) : (
             ''
