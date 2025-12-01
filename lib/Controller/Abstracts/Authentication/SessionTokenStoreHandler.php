@@ -12,6 +12,7 @@
 
 namespace Controller\Abstracts\Authentication;
 
+use Exception;
 use Model\DataAccess\DaoCacheTrait;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
@@ -37,12 +38,13 @@ class SessionTokenStoreHandler {
     /**
      * Log cache operations for debugging and monitoring purposes.
      *
-     * @param string $type     The type of cache operation (e.g., set, get, remove).
-     * @param string $key      The cache key being operated on.
-     * @param mixed  $value    The value associated with the cache key.
+     * @param string $type The type of cache operation (e.g., set, get, remove).
+     * @param string $key The cache key being operated on.
+     * @param mixed $value The value associated with the cache key.
      * @param string $sqlQuery The SQL query related to the cache operation.
      *
      * @return void
+     * @throws Exception
      */
     protected function _logCache( string $type, string $key, mixed $value, string $sqlQuery ): void {
         LoggerFactory::getLogger( "login_cookie_cache" )->debug( [
