@@ -304,16 +304,16 @@ class TranslationEvent
     }
 
     /**
-     * @param $status
+     * @param string $status
      *
      * @return int
      */
-    private function statusAsSourcePage($status): int
+    private function statusAsSourcePage(string $status): int
     {
         return match ($status) {
-            $status == TranslationStatus::STATUS_TRANSLATED => SourcePages::SOURCE_PAGE_TRANSLATE,
-            $status == TranslationStatus::STATUS_APPROVED => SourcePages::SOURCE_PAGE_REVISION,
-            $status == TranslationStatus::STATUS_APPROVED2 => SourcePages::SOURCE_PAGE_REVISION_2,
+            TranslationStatus::STATUS_TRANSLATED => SourcePages::SOURCE_PAGE_TRANSLATE,
+            TranslationStatus::STATUS_APPROVED => SourcePages::SOURCE_PAGE_REVISION,
+            TranslationStatus::STATUS_APPROVED2 => SourcePages::SOURCE_PAGE_REVISION_2,
             default => 0,
         };
     }
