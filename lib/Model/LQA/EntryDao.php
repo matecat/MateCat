@@ -193,6 +193,66 @@ class EntryDao extends AbstractDao
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws ValidationError
+     */
+    public static function modifyEntry(EntryStruct $entryStruct): EntryStruct
+    {
+        $entryStruct = self::ensureStartAndStopPositionAreOrdered($entryStruct);
+        $entryStruct->setDefaults();
+
+        $sql  = "UPDATE qa_entries SET 
+                id_segment=:id_segment,
+                id_job=:id_job,
+                id_category=:id_category,
+                severity=:severity,
+                translation_version=:translation_version,
+                start_node=:start_node,
+                start_offset=:start_offset,
+                end_node=:end_node,
+                end_offset=:end_offset,
+                is_full_segment=:is_full_segment,
+                penalty_points=:penalty_points,
+                comment=:comment,
+                target_text=:target_text,
+                uid=:uid,
+                source_page=:source_page 
+                WHERE id = :id; 
+        ";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+
+        $values = $entryStruct->toArray(
+            [
+                'id',
+                'id_segment',
+                'id_job',
+                'id_category',
+                'severity',
+                'translation_version',
+                'start_node',
+                'start_offset',
+                'end_node',
+                'end_offset',
+                'is_full_segment',
+                'penalty_points',
+                'comment',
+                'target_text',
+                'uid',
+                'source_page'
+            ]
+        );
+
+        $stmt->execute($values);
+
+        return $entryStruct;
+    }
+
+    /**
+     * @param EntryStruct $entryStruct
+     *
+     * @return EntryStruct
      * @throws ReflectionException
      * @throws ValidationError
      * @throws NotFoundException

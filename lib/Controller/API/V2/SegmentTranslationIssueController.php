@@ -71,10 +71,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController
                 $struct
         );
 
-        if ($this->request->param('diff')) {
-            $model->setDiff((array)$this->request->param('diff'));
-        }
-
         $struct = $model->save();
 
         Database::obtain()->commit();
@@ -86,12 +82,51 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController
     }
 
     /**
-     * This method does nothing
-     * @return void
+     * @throws Exception
      */
     public function update(): void
     {
-        $this->response->json(['issue' => 'ok']);
+        $data = [
+                'id_issue'            => $this->request->param('id_issue'),
+                'id_segment'          => $this->request->param('id_segment'),
+                'id_job'              => $this->request->param('id_job'),
+                'id_category'         => $this->request->param('id_category'),
+                'severity'            => $this->request->param('severity'),
+                'translation_version' => $this->validator->translation->version_number,
+                'target_text'         => $this->request->param('target_text'),
+                'start_node'          => $this->request->param('start_node'),
+                'start_offset'        => $this->request->param('start_offset'),
+                'end_node'            => $this->request->param('end_node'),
+                'end_offset'          => $this->request->param('end_offset'),
+                'is_full_segment'     => false,
+                'comment'             => $this->request->param('comment'),
+                'uid'                 => $this->user->uid ?? null,
+                'source_page'         => ReviewUtils::revisionNumberToSourcePage($this->request->param('revision_number')),
+        ];
+
+        Database::obtain()->begin();
+
+        $oldStruct = EntryDao::findById($data['id_issue']);
+        $oldStruct->setDefaults();
+
+        $newStruct = new EntryStruct($data);
+        $newStruct->id = $data['id_issue'];
+        $newStruct->setDefaults();
+
+        $model = $this->_getSegmentTranslationIssueModel(
+            $this->request->param('id_job'),
+            $this->request->param('password'),
+            $newStruct
+        );
+
+        $struct = $model->editFrom($oldStruct);
+
+        Database::obtain()->commit();
+
+        $json     = new TranslationIssueFormatter();
+        $rendered = $json->renderItem($struct);
+
+        $this->response->json(['issue' => $rendered]);
     }
 
     /**
