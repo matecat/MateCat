@@ -137,8 +137,6 @@ class EngineDAO extends AbstractDao
      */
     public function read(EngineStruct $obj): array
     {
-        $obj = $this->sanitize($obj);
-
         /*
          * build the query
          */
@@ -167,8 +165,6 @@ class EngineDAO extends AbstractDao
      */
     public function destroyCache(EngineStruct $obj): bool
     {
-        $obj = $this->sanitize($obj);
-
         /*
         * build the query
         */
@@ -352,9 +348,9 @@ class EngineDAO extends AbstractDao
         $input->contribute_relative_url = ($input->contribute_relative_url !== null) ? $input->contribute_relative_url : null;
         $input->update_relative_url     = ($input->update_relative_url !== null) ? $input->update_relative_url : null;
         $input->delete_relative_url     = ($input->delete_relative_url !== null) ? $input->delete_relative_url : null;
-        $input->others                  = ($input->others !== '{}') ? json_encode($input->others) : '{}';
+        $input->others = !empty($input->others) ? json_encode($input->others) : '{}';
         $input->class_load              = ($input->class_load !== null) ? $input->class_load : null;
-        $input->extra_parameters        = ($input->extra_parameters !== '{}') ? json_encode($input->extra_parameters) : '{}';
+        $input->extra_parameters = !empty($input->extra_parameters) ? json_encode($input->extra_parameters) : '{}';
         $input->penalty                 = ($input->penalty !== null) ? $input->penalty : null;
         $input->active                  = ($input->active !== null) ? $input->active : null;
         $input->uid                     = ($input->uid !== null) ? $input->uid : null;

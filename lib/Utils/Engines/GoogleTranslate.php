@@ -72,10 +72,7 @@ class GoogleTranslate extends AbstractEngine
     {
         $parameters = [];
 
-        if (isset($_config['key']) and !empty($_config['key'])) {
-            $parameters['key'] = $_config['key'];
-        }
-
+        $parameters['key'] = $this->getEngineRecord()->getExtraParamsAsArray()['client_secret'] ?? null;
         $parameters['target'] = $this->_fixLangCode($_config['target']);
         $parameters['source'] = $this->_fixLangCode($_config['source']);
         $parameters['q'] = $_config['segment'];
