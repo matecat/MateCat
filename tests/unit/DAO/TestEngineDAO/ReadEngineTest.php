@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\Engines\NONE;
 use Utils\Registry\AppConfig;
@@ -19,7 +20,7 @@ class ReadEngineTest extends AbstractTest {
 
     protected $engine_struct_simple;
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     protected $flusher;
     /**
@@ -49,9 +50,9 @@ class ReadEngineTest extends AbstractTest {
         $this->engine_struct_param->translate_relative_url  = "translate";
         $this->engine_struct_param->contribute_relative_url = "contribute";
         $this->engine_struct_param->delete_relative_url     = "delete";
-        $this->engine_struct_param->others                  = "{}";
+        $this->engine_struct_param->others = [];
         $this->engine_struct_param->class_load              = "MMT";
-        $this->engine_struct_param->extra_parameters        = "{}";
+        $this->engine_struct_param->extra_parameters = [];
         $this->engine_struct_param->penalty                 = 1;
         $this->engine_struct_param->active                  = 4;
         $this->engine_struct_param->uid                     = 1;

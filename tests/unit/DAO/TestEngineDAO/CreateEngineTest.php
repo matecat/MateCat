@@ -30,7 +30,7 @@ class CreateEngineTest extends AbstractTest {
     protected $sql_select_engine;
     protected $id;
     /**
-     * @var \Model\DataAccess\Database
+     * @var Database
      */
     protected $database_instance;
     protected $actual;
@@ -52,9 +52,9 @@ class CreateEngineTest extends AbstractTest {
         $this->engine_struct_param->update_relative_url     = "";
         $this->engine_struct_param->contribute_relative_url = '';
         $this->engine_struct_param->delete_relative_url     = '';
-        $this->engine_struct_param->others                  = '{}';
+        $this->engine_struct_param->others = [];
         $this->engine_struct_param->class_load              = "foo_bar";
-        $this->engine_struct_param->extra_parameters        = '{}';
+        $this->engine_struct_param->extra_parameters = [];
         $this->engine_struct_param->penalty                 = 1;
         $this->engine_struct_param->active                  = 1;
         $this->engine_struct_param->uid                     = 1;
