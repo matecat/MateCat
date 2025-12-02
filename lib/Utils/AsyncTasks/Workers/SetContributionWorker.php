@@ -151,12 +151,12 @@ class SetContributionWorker extends AbstractWorker
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set($config);
-        if ($res?->responseStatus >= 400 && $res?->responseStatus < 500) {
-            $this->_raiseEndQueueException('Set', $config);
-        } elseif ($res?->responseStatus != 200) {
-            $this->_raiseReQueueException('Set', $config);
+        if ($res?->responseStatus >= 200 && $res?->responseStatus < 300) {
+            $this->_doLog("Update complete");
+        } elseif ($res?->responseStatus >= 400 && $res?->responseStatus < 500) {
+            $this->_raiseEndQueueException('Update', $config);
         } else {
-            $this->_doLog("Set complete");
+            $this->_raiseReQueueException('Update', $config);
         }
     }
 
@@ -189,14 +189,14 @@ class SetContributionWorker extends AbstractWorker
         $config[ 'spiceMatch' ]     = $contributionStruct->contextIsSpice;
 
         $this->_doLog("Executing Update on " . get_class($this->_engine));
+        
         $res = $this->_engine->update($config);
-
-        if ($res->responseStatus >= 400 && $res->responseStatus < 500) {
-            $this->_raiseEndQueueException('Update', $config);
-        } elseif ($res->responseStatus != 200) {
-            $this->_raiseReQueueException('Update', $config);
-        } else {
+        if ($res?->responseStatus >= 200 && $res?->responseStatus < 300) {
             $this->_doLog("Update complete");
+        } elseif ($res?->responseStatus >= 400 && $res?->responseStatus < 500) {
+            $this->_raiseEndQueueException('Update', $config);
+        } else {
+            $this->_raiseReQueueException('Update', $config);
         }
     }
 
