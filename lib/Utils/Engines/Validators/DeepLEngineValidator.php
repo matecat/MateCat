@@ -21,7 +21,13 @@ class DeepLEngineValidator extends AbstractValidator
         /** @var DeepL $newTestCreatedMT */
         $newTestCreatedMT = EnginesFactory::createTempInstance($object->engineStruct);
         try {
-            $newTestCreatedMT->glossaries();
+            $config = $newTestCreatedMT->getConfigStruct();
+            $config['segment'] = "Hello World";
+            $config['source'] = "en-US";
+            $config['target'] = "fr-FR";
+            $config['pid'] = -(mt_rand(1000, PHP_INT_MAX));
+
+            $newTestCreatedMT->get($config);
         } catch (Exception $e) {
             throw new Exception("Invalid DeepL API key.");
         }
