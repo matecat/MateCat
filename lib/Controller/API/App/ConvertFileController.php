@@ -90,7 +90,16 @@ class ConvertFileController extends KleinController
         $target_lang                               = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $segmentation_rule                         = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $filters_extraction_parameters_template    = filter_var($this->request->param('filters_extraction_parameters_template'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $filters_extraction_parameters_template_id = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_SANITIZE_NUMBER_INT);
+        $filters_extraction_parameters_template_id = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_VALIDATE_INT, [
+                'options' => [
+                    'default' => 0,
+                    'min_range' => 0,
+                ],
+                [
+                    'flags' => FILTER_REQUIRE_SCALAR
+                ]
+            ]
+        );
         $restarted_conversion                      = filter_var($this->request->param('restarted_conversion'), FILTER_VALIDATE_BOOLEAN);
 
         if (empty($file_name)) {
