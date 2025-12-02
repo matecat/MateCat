@@ -1,7 +1,0 @@
-Order deny,allow
-deny from all
-allow from 10.3.
-allow from 10.11.
-allow from 10.30.
-allow from 192.168.
-allow from 127.0.0.1
