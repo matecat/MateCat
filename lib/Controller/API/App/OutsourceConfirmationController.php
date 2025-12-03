@@ -18,6 +18,7 @@ use Model\Outsource\ConfirmationDao;
 use Model\Outsource\TranslatedConfirmationStruct;
 use Model\Translators\TranslatorsModel;
 use ReflectionException;
+use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController
@@ -36,7 +37,10 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
                 'payload'  => FILTER_SANITIZE_SPECIAL_CHARS,
         ]);
 
-        $payload = SimpleJWT::getValidPayload($params[ 'payload' ]);
+        $payload = SimpleJWT::getValidatedInstanceFromString(
+            $params['payload'],
+            AppConfig::$AUTHSECRET
+        )->getPayload();
 
         if ($params[ 'id_job' ] != $payload[ 'id_job' ] || $params[ 'password' ] != $payload[ 'password' ]) {
             throw new AuthorizationError("Invalid Job");

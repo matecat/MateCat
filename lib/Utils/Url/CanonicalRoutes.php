@@ -22,13 +22,16 @@ class CanonicalRoutes
     {
         $host = self::httpHost($options);
 
-        $jwtHandler = new SimpleJWT([
+        $jwtHandler = new SimpleJWT(
+            [
                 'invited_by_uid' => $requestInfo[ 'invited_by_uid' ],
                 'email'          => $requestInfo[ 'email' ],
                 'team_id'        => $requestInfo[ 'team_id' ],
-        ]);
-
-        $jwtHandler->setTimeToLive(60 * 60 * 24 * 3); //3 days
+            ],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60 * 60 * 24 * 3 //3 days
+        );
 
         return "$host/api/app/teams/members/invite/$jwtHandler";
     }

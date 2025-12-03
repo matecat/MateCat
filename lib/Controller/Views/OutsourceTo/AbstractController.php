@@ -10,6 +10,7 @@ use Exception;
 use LogicException;
 use Model\Outsource\ConfirmationStruct;
 use Utils\Logger\LoggerFactory;
+use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
 use Utils\Tools\SimpleJWT;
 
@@ -128,7 +129,8 @@ abstract class AbstractController extends BaseKleinViewController {
     /**
      * @throws Exception
      */
-    public function renderView() {
+    public function renderView(): void
+    {
 
         $this->shop_cart = Cart::getInstance( 'outsource_to_external' );
 
@@ -157,7 +159,8 @@ abstract class AbstractController extends BaseKleinViewController {
      * @return void
      * @throws Exception
      */
-    public function setTemplateVars() {
+    public function setTemplateVars(): void
+    {
 
         //we need a list, not a hashmap
         $item_list      = [];
@@ -178,8 +181,12 @@ abstract class AbstractController extends BaseKleinViewController {
         $payload[ 'delivery_date' ] = $item[ 'delivery' ];
         $payload[ 'quote_pid' ]     = $item[ 'quote_pid' ];
 
-        $JWT = new SimpleJWT( $payload );
-        $JWT->setTimeToLive( 60 * 20 ); //20 minutes to complete the order
+        $JWT = new SimpleJWT(
+            $payload,
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60 * 20 //20 minutes to complete the order
+        );
 
         $confirm_tokens[ $item[ 'id' ] ] = $JWT->jsonSerialize();
 

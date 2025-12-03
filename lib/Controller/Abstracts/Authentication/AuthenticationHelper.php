@@ -2,6 +2,8 @@
 
 namespace Controller\Abstracts\Authentication;
 
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
+use Exception;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
@@ -34,11 +36,12 @@ class AuthenticationHelper {
     private static ?AuthenticationHelper $instance   = null;
 
     /**
-     * @param array       $session
+     * @param array $session
      * @param string|null $api_key
      * @param string|null $api_secret
      *
      * @return AuthenticationHelper
+     * @throws Exception
      */
     public static function getInstance( array &$session, ?string $api_key = null, ?string $api_secret = null ): AuthenticationHelper {
         if ( !self::$instance ) {
@@ -63,7 +66,7 @@ class AuthenticationHelper {
      * @param array $session Reference to the session array, used to store user data.
      * @param string|null $api_key Optional API key for authentication.
      * @param string|null $api_secret Optional API secret for authentication.
-     * @throws \Exception
+     * @throws Exception
      */
     protected function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
 
@@ -116,8 +119,10 @@ class AuthenticationHelper {
 
     /**
      * @param array $session
+     * @throws Exception
      */
-    public static function refreshSession( array &$session ) {
+    public static function refreshSession(array &$session): void
+    {
         unset( $session[ 'user' ] );
         unset( $session[ 'user_profile' ] );
         self::$instance = new AuthenticationHelper( $session );
@@ -126,7 +131,8 @@ class AuthenticationHelper {
     /**
      * @throws ReflectionException
      */
-    public static function destroyAuthentication( array &$session ) {
+    public static function destroyAuthentication(array &$session): void
+    {
         unset( $session[ 'user' ] );
         unset( $session[ 'user_profile' ] );
         AuthCookie::destroyAuthentication( new SessionTokenStoreHandler() );
@@ -134,8 +140,10 @@ class AuthenticationHelper {
 
     /**
      * @throws ReflectionException
+     * @throws EnvironmentIsBrokenException
      */
-    protected function setUserSession() {
+    protected function setUserSession(): void
+    {
         $session_status = session_status();
         if ( $session_status == PHP_SESSION_ACTIVE ) {
             $this->session[ 'cid' ]          = $this->user->getEmail();
@@ -147,6 +155,7 @@ class AuthenticationHelper {
 
     /**
      * @throws ReflectionException
+     * @throws EnvironmentIsBrokenException
      */
     protected static function getUserProfile( UserStruct $user ): array {
 

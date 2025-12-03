@@ -18,6 +18,7 @@ use Klein\Response;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 
 class InvitedUser
@@ -41,7 +42,10 @@ class InvitedUser
     public function __construct(string $jwt, Response $response)
     {
         try {
-            $this->jwt = SimpleJWT::getValidPayload($jwt);
+            $this->jwt = SimpleJWT::getValidatedInstanceFromString(
+                $jwt,
+                AppConfig::$AUTHSECRET
+            )->getPayload();
         } catch (DomainException $e) {
             throw new ValidationError($e->getMessage(), $e->getCode(), $e);
         }
