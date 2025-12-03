@@ -28,7 +28,6 @@ import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
-import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
@@ -36,7 +35,6 @@ import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentI
 import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
 import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../constants/Constants'
 import {getSegmentsIssues} from '../api/getSegmentsIssues'
-import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
 import {
@@ -1267,23 +1265,6 @@ const SegmentActions = {
       sid: sid,
       data: type,
     })
-  },
-
-  submitIssue: function (sid, data) {
-    const promise = sendSegmentVersionIssue(sid, {
-      ...data,
-    })
-    promise
-      .then(() => {
-        this.getSegmentVersionsIssues(sid)
-        CatToolActions.reloadQualityReport()
-      })
-      .catch(() => {
-        //todo Capture Error
-        console.log('Error creating issue')
-      })
-
-    return promise
   },
 
   getSegmentVersionsIssues: function (segmentId) {
