@@ -42,7 +42,7 @@ class InvitedUser
     public function __construct(string $jwt, Response $response)
     {
         try {
-            $this->jwt = SimpleJWT::getInstanceFromString(
+            $this->jwt = SimpleJWT::getValidatedInstanceFromString(
                 $jwt,
                 AppConfig::$AUTHSECRET
             )->getPayload();

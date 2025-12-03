@@ -140,7 +140,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
      * @param string $jwtString The JWT string to be parsed and validated.
      * @return SimpleJWT       A SimpleJWT object initialized with the JWT data.
      */
-    public static function getInstanceFromString(string $jwtString, string $secretKey = ''): SimpleJWT
+    private static function getInstanceFromString(string $jwtString, string $secretKey = ''): SimpleJWT
     {
         // Parse the JWT string into its internal representation (header, payload, signature)
         $storage = self::parseJWTString($jwtString);
@@ -170,6 +170,25 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
 
         // Return the initialized and validated SimpleJWT instance
         return $that;
+    }
+
+    /**
+     * @param string $jwtString The JSON Web Token as a string to be validated and parsed into an instance.
+     * @param string $secretKey Optional secret key for validating the token.
+     * @return SimpleJWT Validated instance of the SimpleJWT class created from the given token string.
+     */
+    public static function getValidatedInstanceFromString(string $jwtString, string $secretKey): SimpleJWT
+    {
+        return self::getInstanceFromString($jwtString, $secretKey);
+    }
+
+    /**
+     * @param string $jwtString The JWT string to create an instance from.
+     * @return SimpleJWT An instance of SimpleJWT created from the given JWT string without validation.
+     */
+    public static function getNotValidatedInstanceFromString(string $jwtString): SimpleJWT
+    {
+        return self::getInstanceFromString($jwtString);
     }
 
     /**

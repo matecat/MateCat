@@ -199,7 +199,7 @@ class AuthCookie {
         if ( isset( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ) and !empty( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ) ) {
 
             try {
-                return SimpleJWT::getInstanceFromString(
+                return SimpleJWT::getValidatedInstanceFromString(
                     $_COOKIE[AppConfig::$AUTHCOOKIENAME],
                     AppConfig::$AUTHSECRET
                 )->getPayload();

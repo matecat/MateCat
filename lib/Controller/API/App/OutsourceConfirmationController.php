@@ -37,7 +37,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
                 'payload'  => FILTER_SANITIZE_SPECIAL_CHARS,
         ]);
 
-        $payload = SimpleJWT::getInstanceFromString(
+        $payload = SimpleJWT::getValidatedInstanceFromString(
             $params['payload'],
             AppConfig::$AUTHSECRET
         )->getPayload();

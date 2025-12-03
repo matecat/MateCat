@@ -539,7 +539,7 @@ class SimpleJWTTest extends AbstractTest
         $jwt = new SimpleJWT(['foo' => 'bar'], 'my.custom.namespace', $this->secretKey, 3600);
 
         $tokenString = $jwt->encode();
-        $instance = SimpleJWT::getInstanceFromString($tokenString);
+        $instance = SimpleJWT::getNotValidatedInstanceFromString($tokenString);
 
         $this->assertEquals($jwt->getPayload(), $instance->getPayload());
     }
@@ -552,7 +552,7 @@ class SimpleJWTTest extends AbstractTest
         $jwt = new SimpleJWT(['foo' => 'bar'], 'my.custom.namespace', $this->secretKey, 3600);
 
         $tokenString = $jwt->encode();
-        $instance = SimpleJWT::getInstanceFromString($tokenString, $this->secretKey);
+        $instance = SimpleJWT::getValidatedInstanceFromString($tokenString, $this->secretKey);
 
         $ref = new ReflectionClass($instance);
         $storageProp = $ref->getProperty('storage');
