@@ -274,6 +274,10 @@ class ProjectTemplateDao extends AbstractDao
             $mkDao  = new MemoryKeyDao();
 
             foreach ($tmKeys as $tmKey) {
+
+                // convert $tmKey to an array
+                $tmKey = json_decode(json_encode($tmKey), true);
+
                 $keyRing = $mkDao->read(
                         (new MemoryKeyStruct([
                                 'uid'    => $projectTemplateStruct->uid,
