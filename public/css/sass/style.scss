@@ -2422,6 +2422,8 @@ section.editor .toolbar {
   position: relative;
   float: left;
   width: 45.2%;
+  display: flex;
+  flex-direction: column;
   .splitArea {
     width: 100%;
     padding: 3px 0px 5px 3px;
@@ -2442,7 +2444,7 @@ section.editor .toolbar {
   .splitBar {
     position: relative;
     clear: both;
-    margin-top: 100px;
+    margin-top: 40px;
     width: 100%;
     margin-left: 19px;
   }
