@@ -177,13 +177,13 @@ class CrudEngineTest extends AbstractTest {
 
         $this->engine_struct_param->uid++;
         $this->engine_DAO->updateFields( $this->engine_struct_param->toArray(), [
-                'id'  => $this->engine_struct_param,
+                'id'  => $this->engine_struct_param->id,
                 'uid' => $this->engine_struct_param->uid
         ] );
 
         //update on the same object is null
         $this->assertEquals( 0, $this->engine_DAO->updateFields( $this->engine_struct_param->toArray(), [
-                'id'  => $this->engine_struct_param,
+                'id'  => $this->engine_struct_param->id,
                 'uid' => $this->engine_struct_param->uid
         ] ) );
 

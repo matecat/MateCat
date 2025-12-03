@@ -195,6 +195,11 @@ class Database implements IDatabase
 
         foreach ($data as $key => $value) {
             $query                                 .= "$key = :value$currentIndex, ";
+
+            if (is_array($value) || is_object($value)) {
+                $value = json_encode($value);
+            }
+
             $valuesToBind[ ":value$currentIndex" ] = $value;
             ++$currentIndex;
         }
