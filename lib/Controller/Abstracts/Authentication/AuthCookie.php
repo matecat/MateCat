@@ -3,6 +3,7 @@
 namespace Controller\Abstracts\Authentication;
 
 use DomainException;
+use Exception;
 use Model\Users\UserStruct;
 use ReflectionException;
 use UnexpectedValueException;
@@ -112,8 +113,8 @@ class AuthCookie {
      * @return array
      */
     protected static function generateSignedAuthCookie( UserStruct $user ): array {
-
-        $JWT = new SimpleJWT( [
+        $JWT = new SimpleJWT(
+            [
                 'user' => [
                         'email'        => $user->email,
                         'first_name'   => $user->first_name,
@@ -121,9 +122,11 @@ class AuthCookie {
                         'last_name'    => $user->last_name,
                         'uid'          => (int)$user->uid,
                 ],
-        ] );
-
-        $JWT->setTimeToLive( AppConfig::$AUTHCOOKIEDURATION );
+            ],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            AppConfig::$AUTHCOOKIEDURATION
+        );
 
         return [ $JWT->jsonSerialize(), $JWT->getExpireDate() ];
     }
@@ -189,14 +192,17 @@ class AuthCookie {
      *
      * @return ?array
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     private static function getData(): ?array {
 
         if ( isset( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ) and !empty( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ) ) {
 
             try {
-                return SimpleJWT::getValidPayload( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
+                return SimpleJWT::getInstanceFromString(
+                    $_COOKIE[AppConfig::$AUTHCOOKIENAME],
+                    AppConfig::$AUTHSECRET
+                )->getPayload();
             } catch ( DomainException|UnexpectedValueException $e ) {
                 LoggerFactory::getLogger( 'login_exceptions' )->debug( $e->getMessage() . " " . $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
                 self::destroyAuthentication();

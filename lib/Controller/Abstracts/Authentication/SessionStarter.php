@@ -16,7 +16,8 @@ trait SessionStarter {
     /**
      * @throws Exception
      */
-    protected static function sessionStart() {
+    protected static function sessionStart(): void
+    {
         $session_status = session_status();
         if ( $session_status == PHP_SESSION_NONE ) {
             session_start();
