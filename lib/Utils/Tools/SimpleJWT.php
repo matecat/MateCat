@@ -107,7 +107,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         $_storage['payload']['iat'] = $this->now; // Issued-at time
 
         if (
-            $_storage['payload']['nbf'] !== null &&
+            ($_storage['payload']['nbf'] ?? null) !== null &&
             (
                 !is_numeric($_storage['payload']['nbf']) ||
                 (int)$_storage['payload']['nbf'] < 0 ||
