@@ -1,5 +1,4 @@
 import React from 'react'
-import ReviewExtendedIssue from './ReviewExtendedIssue'
 import WrapperLoader from '../common/WrapperLoader'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentActions from '../../actions/SegmentActions'
@@ -13,7 +12,7 @@ import {each} from 'lodash/collection'
 import {findIndex} from 'lodash/array'
 import classnames from 'classnames'
 import ReviewExtendedIssuesTabGroup from './ReviewExtendedIssuesTabGroup'
-import {ReviewExtendedIssueNew} from './ReviewExtendedIssueNew'
+import {ReviewExtendedIssue} from './ReviewExtendedIssue'
 
 class ReviewExtendedIssuesContainer extends React.Component {
   static contextType = SegmentContext
@@ -243,7 +242,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     forEach(sorted_issues, (item) => {
       if (item.revision_number === 2) {
         issuesR2.push(
-          <ReviewExtendedIssueNew
+          <ReviewExtendedIssue
             lastIssueId={this.state.lastIssueAdded}
             sid={this.context.segment.sid}
             isReview={this.props.isReview}
@@ -264,7 +263,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
         )
       } else {
         issuesR1.push(
-          <ReviewExtendedIssueNew
+          <ReviewExtendedIssue
             lastIssueId={this.state.lastIssueAdded}
             sid={this.context.segment.sid}
             isReview={this.props.isReview}
