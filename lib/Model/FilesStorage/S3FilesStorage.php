@@ -809,7 +809,7 @@ class S3FilesStorage extends AbstractFilesStorage
             $filename  = $file_info[ 'filename' ];
             $extension = $file_info[ 'extension' ];
 
-            if (strlen(urlencode($prefix . $filename)) > 221) {
+            if (strlen(urlencode($prefix . $filename . "." . $extension . ".sdlxliff")) > 221) {
                 return sha1($filename) . "." . $extension;
             }
 
