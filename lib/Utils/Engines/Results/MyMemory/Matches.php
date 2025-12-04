@@ -50,7 +50,7 @@ class Matches
     private $id_project;
 
     /**
-     * Matches constructor.
+     * MyMemory constructor.
      *
      * @param array $data
      */

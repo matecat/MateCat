@@ -452,7 +452,7 @@ class JobDao extends AbstractDao
             JOIN jobs j ON j.id = st.id_job
             WHERE id_job = :id_job 
                 AND show_in_cattool = 1
-                AND  password = :password
+                AND password = :password
                 AND st.status NOT IN( :status_new , :status_draft )
                 AND time_to_edit/raw_word_count BETWEEN :edit_time_fast_cut AND :edit_time_slow_cut
                 AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment

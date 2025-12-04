@@ -24,7 +24,6 @@ use Utils\Engines\Results\ErrorResponse;
 use Utils\Langs\Languages;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Matches;
 use Utils\Tools\Utils;
 
 error_reporting( ~E_DEPRECATED );
@@ -32,9 +31,9 @@ error_reporting( ~E_DEPRECATED );
 class GlossaryImportTest extends AbstractTest {
     protected $engine_struct_param;
     /**
-     * @var Matches
+     * @var MyMemory
      */
-    protected $engine_MyMemory;
+    protected MyMemory $engine_MyMemory;
     protected $glossary_folder_path;
     protected $filename;
     protected $path_of_file_for_test;

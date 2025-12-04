@@ -2,10 +2,30 @@
 
 namespace Utils\Tools;
 
-class Matches
+class PostEditing
 {
 
-    public static function get($seg1, $seg2, $language = false): float
+    public static function getPee(string $seg1, string $seg2, ?string $targetLang = 'en-US'): float
+    {
+        $post_editing_effort = round(
+            (1 - self::get(
+                    htmlspecialchars_decode($seg1, ENT_QUOTES),
+                    htmlspecialchars_decode($seg2, ENT_QUOTES),
+                    $targetLang ?? 'en-US'
+                )
+            ) * 100
+        );
+
+        if ($post_editing_effort < 0) {
+            $post_editing_effort = 0;
+        } elseif ($post_editing_effort > 100) {
+            $post_editing_effort = 100;
+        }
+
+        return $post_editing_effort;
+    }
+
+    private static function get(string $seg1, string $seg2, string $language): float
     {
         $originalSeg1 = $seg1;
         $originalSeg2 = $seg2;
@@ -22,7 +42,7 @@ class Matches
         // Tag Penalties
         preg_match_all('/<.*?>/s', $seg1, $temp1);
         preg_match_all('/<.*?>/s', $seg2, $temp2);
-        $c = count(self::array_xor($temp1[ 0 ], $temp2[ 0 ]));
+        $c = count(self::array_xor($temp1[0], $temp2[0]));
 
         $seg1 = preg_replace('/<.*?>/s', ' ', $seg1);
         $seg2 = preg_replace('/<.*?>/s', ' ', $seg2);
@@ -34,7 +54,7 @@ class Matches
         $temp2 = '';
         preg_match_all('/(0-9|,|\.)+/u', $seg1, $temp1);
         preg_match_all('/(0-9|,|\.)+/u', $seg2, $temp2);
-        $c = count(self::array_xor($temp1[ 0 ], $temp2[ 0 ]));
+        $c = count(self::array_xor($temp1[0], $temp2[0]));
 
         $seg1 = preg_replace('/(0-9|,|\.)+/u', ' ', $seg1);
         $seg2 = preg_replace('/(0-9|,|\.)+/u', ' ', $seg2);
@@ -47,10 +67,10 @@ class Matches
         $temp2 = '';
         preg_match_all('/(\p{P}|\p{S}|\x{00a0})+/u', $seg1, $temp1);
         preg_match_all('/(\p{P}|\p{S}|\x{00a0})+/u', $seg2, $temp2);
-        $c = count(self::array_xor($temp1[ 0 ], $temp2[ 0 ]));
+        $c = count(self::array_xor($temp1[0], $temp2[0]));
 
-        $seg1              = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1);
-        $seg2              = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2);
+        $seg1 = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1);
+        $seg2 = preg_replace('/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2);
         $penalty_placeable += 0.02 * $c;
 
         // penalty per case-sensitive / formatting
@@ -60,7 +80,7 @@ class Matches
         $seg1 = preg_replace('/ +/u', ' ', $seg1);
         $seg2 = preg_replace('/ +/u', ' ', $seg2);
 
-        if (!empty($language) && CatUtils::isCJK($language)) {
+        if (CatUtils::isCJK($language)) {
             $a = self::CJK_tokenizer($seg1);
             $b = self::CJK_tokenizer($seg2);
         } else {
@@ -108,23 +128,23 @@ class Matches
         $stringB = '';
 
         foreach ($array1 as $entry) {
-            $stringA .= CatUtils::unicode2chr($aliases[ $entry ]);
+            $stringA .= CatUtils::unicode2chr($aliases[$entry]);
             if (mb_strlen($entry) > 4) {
-                $stringA .= chr($aliases[ $entry ]);
+                $stringA .= chr($aliases[$entry]);
             }
         }
 
         foreach ($array2 as $entry) {
-            $stringB .= CatUtils::unicode2chr($aliases[ $entry ]);
+            $stringB .= CatUtils::unicode2chr($aliases[$entry]);
             if (mb_strlen($entry) > 4) {
-                $stringB .= chr($aliases[ $entry ]);
+                $stringB .= chr($aliases[$entry]);
             }
         }
 
         similar_text($stringA, $stringB, $p);
 
-        $la   = strlen($stringA);
-        $lb   = strlen($stringB);
+        $la = strlen($stringA);
+        $lb = strlen($stringB);
         $lmax = max($la, $lb);
 
         return ($p > 0 ? (1 - $lmax / max($lmax, $min_words_norm) * (1 - $p / 100)) : 0);
@@ -136,12 +156,12 @@ class Matches
         //If characters aren't latin, then use bigram
         if (preg_match('/[^\\p{Common}\\p{Latin}]/u', $text)) {
             $number_of_words = count($words);
-            $tokens          = [];
+            $tokens = [];
             for ($i = 0; $i < $number_of_words; $i++) {
-                if (preg_match('/[^\\p{Common}\\p{Latin}]/u', $words[ $i ])) {
-                    $tokens = array_merge($tokens, self::compute_bigram($words[ $i ]));
+                if (preg_match('/[^\\p{Common}\\p{Latin}]/u', $words[$i])) {
+                    $tokens = array_merge($tokens, self::compute_bigram($words[$i]));
                 } else {
-                    $tokens[] = $words[ $i ];
+                    $tokens[] = $words[$i];
                 }
             }
         } else {
@@ -154,10 +174,10 @@ class Matches
     protected static function compute_bigram(string $text): array
     {
         $chrArray = preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY);
-        $length   = count($chrArray);
+        $length = count($chrArray);
         if ($length > 1) {
             for ($i = 0; $i < $length - 1; $i++) {
-                $chrArray[ $i ] = $chrArray[ $i ] . $chrArray[ $i + 1 ];
+                $chrArray[$i] = $chrArray[$i] . $chrArray[$i + 1];
             }
             array_pop($chrArray);
         }
@@ -174,7 +194,7 @@ class Matches
     // Expect this to be in PHP in the future
     protected static function array_xor(array $array_a, array $array_b): array
     {
-        $union_array     = array_merge($array_a, $array_b);
+        $union_array = array_merge($array_a, $array_b);
         $intersect_array = array_intersect($array_a, $array_b);
 
         return array_diff($union_array, $intersect_array);

@@ -4,7 +4,7 @@ namespace Model\EditLog;
 
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
-use Utils\Tools\Matches;
+use Utils\Tools\PostEditing;
 
 /**
  * Created by PhpStorm.
@@ -46,7 +46,7 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
     /**
      * @var ?string
      */
-    public ?string $target_language_code = null;
+    public ?string $target_language = null;
 
     /**
      * @return float
@@ -67,7 +67,7 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
         $secsPerWord = $this->getSecsPerWord();
 
         return ($secsPerWord > self::EDIT_TIME_FAST_CUT) &&
-                ($secsPerWord < self::EDIT_TIME_SLOW_CUT);
+            ($secsPerWord < self::EDIT_TIME_SLOW_CUT);
     }
 
     /**
@@ -75,26 +75,10 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
      */
     public function getPEE(): float
     {
-        $post_editing_effort = round(
-                (1 - Matches::get(
-                                self::cleanSegmentForPee($this->suggestion),
-                                self::cleanSegmentForPee($this->translation),
-                                $this->target_language_code
-                        )
-                ) * 100
+        return PostEditing::getPee(
+            $this->suggestion,
+            $this->translation,
+            $this->target_language
         );
-
-        if ($post_editing_effort < 0) {
-            $post_editing_effort = 0;
-        } elseif ($post_editing_effort > 100) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-    }
-
-    private static function cleanSegmentForPee($segment): string
-    {
-        return htmlspecialchars_decode($segment, ENT_QUOTES);
     }
 }
