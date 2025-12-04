@@ -117,11 +117,11 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array                  $content
+     * @param array $content
      * @param GetContributionRequest $contributionStruct
-     * @param FeatureSet             $featureSet
+     * @param FeatureSet $featureSet
      * @param                        $targetLang
-     * @param bool                   $isCrossLang
+     * @param bool $isCrossLang
      *
      * @throws Exception
      */
@@ -141,35 +141,34 @@ class GetContributionWorker extends AbstractWorker
 
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
-                $featureSet,
-                $jobStruct->source,
-                $targetLang,
-                $contributionStruct->dataRefMap
+            $featureSet,
+            $jobStruct->source,
+            $targetLang,
+            $contributionStruct->dataRefMap
         );
 
         foreach ($content as &$match) {
-            if ($match[ 'created_by' ] == 'MT!') {
-                $match[ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
+            if ($match['created_by'] == 'MT!') {
+                $match['created_by'] = EngineConstants::MT; //MyMemory returns MT!
             }
 
             // Convert &#10; to layer2 placeholder for the UI
             // Those strings are on layer 1, force the transition to layer 2.
             $match['segment'] = $Filter->fromLayer1ToLayer2($match['segment'] ?? '');
             $match['translation'] = $Filter->fromLayer1ToLayer2($match['translation'] ?? '');
-
         }
 
         $_object = [
-                '_type' => $type,
-                'data'  => [
-                        'id_job'    => $contributionStruct->getJobStruct()->id,
-                        'passwords' => $contributionStruct->getJobStruct()->password,
-                        'payload'   => [
-                                'id_segment' => (string)$contributionStruct->segmentId,
-                                'matches'    => $content,
-                        ],
-                        'id_client' => $contributionStruct->id_client,
-                ]
+            '_type' => $type,
+            'data' => [
+                'id_job' => $contributionStruct->getJobStruct()->id,
+                'passwords' => $contributionStruct->getJobStruct()->password,
+                'payload' => [
+                    'id_segment' => (string)$contributionStruct->segmentId,
+                    'matches' => $content,
+                ],
+                'id_client' => $contributionStruct->id_client,
+            ]
         ];
 
         $this->publishToNodeJsClients($_object);
@@ -196,9 +195,9 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array                  $matches
+     * @param array $matches
      * @param GetContributionRequest $contributionStruct
-     * @param FeatureSet             $featureSet
+     * @param FeatureSet $featureSet
      *
      * @throws Exception
      */
@@ -206,9 +205,9 @@ class GetContributionWorker extends AbstractWorker
     {
         foreach ($matches as &$match) {
             if ($this->isMtMatch($match)) {
-                $match[ 'match' ] = EngineConstants::MT;
+                $match['match'] = EngineConstants::MT;
 
-                $QA = new PostProcess($match[ 'segment' ], $match[ 'translation' ]); // layer 1 here
+                $QA = new PostProcess($match['segment'], $match['translation']); // layer 1 here
                 $QA->setFeatureSet($featureSet);
                 $QA->realignMTSpaces();
 
@@ -216,7 +215,7 @@ class GetContributionWorker extends AbstractWorker
                 //for logic correctness
                 if (!$QA->thereAreErrors()) {
                     // Note: DomDocument class forces the conversion of some entities like &#10; to the original character "\n"
-                    $match[ 'translation' ] = $QA->getTrgNormalized();
+                    $match['translation'] = $QA->getTrgNormalized();
                 } else {
                     $this->_doLog($QA->getErrors());
                 }
@@ -228,10 +227,10 @@ class GetContributionWorker extends AbstractWorker
                 $user = $contributionStruct->getUser();
             }
 
-            $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                    $match,
-                    $contributionStruct->getJobStruct()->tm_keys,
-                    $user->uid
+            $match['created_by'] = Utils::changeMemorySuggestionSource(
+                $match,
+                $contributionStruct->getJobStruct()->tm_keys,
+                $user->uid
             );
 
             $match = $this->_matchRewrite($match);
@@ -240,9 +239,9 @@ class GetContributionWorker extends AbstractWorker
                 $regularExpressions = $this->tokenizeSourceSearch($contributionStruct->getContexts()->segment);
 
                 if (!$contributionStruct->fromTarget) {
-                    [$match[ 'segment' ], $match[ 'translation' ]] = $this->_formatConcordanceValues($match[ 'segment' ], $match[ 'translation' ], $regularExpressions);
+                    [$match['segment'], $match['translation']] = $this->_formatConcordanceValues($match['segment'], $match['translation'], $regularExpressions);
                 } else {
-                    [$match[ 'translation' ], $match[ 'segment' ]] = $this->_formatConcordanceValues($match[ 'segment' ], $match[ 'translation' ], $regularExpressions);
+                    [$match['translation'], $match['segment']] = $this->_formatConcordanceValues($match['segment'], $match['translation'], $regularExpressions);
                 }
             }
         }
@@ -267,8 +266,8 @@ class GetContributionWorker extends AbstractWorker
      */
     protected function _matchRewrite(array $match): array
     {
-        if (!empty($match[ 'score' ]) && $match[ 'score' ] >= 0.9) {
-            $match[ 'match' ] = 'ICE_MT';
+        if (!empty($match['score']) && $match['score'] >= 0.9) {
+            $match['match'] = 'ICE_MT';
         }
 
         return $match;
@@ -304,13 +303,13 @@ class GetContributionWorker extends AbstractWorker
         $tmp_text = str_replace(' - ', chr(0x20), $tmp_text);
         $tmp_text = preg_replace('#\x{20}{2,}#u', chr(0x20), $tmp_text);
 
-        $tokenizedBySpaces  = explode(" ", $tmp_text);
+        $tokenizedBySpaces = explode(" ", $tmp_text);
         $regularExpressions = [];
         foreach ($tokenizedBySpaces as $token) {
             $token = trim($token);
             if ($token != '') {
-                $regularExp                        = '|(\s{1})?' . addslashes($token) . '(\s{1})?|ui'; /* unicode insensitive */
-                $regularExpressions[ $regularExp ] = '$1#{' . $token . '}#$2'; /* unicode insensitive */
+                $regularExp = '|(\s{1})?' . addslashes($token) . '(\s{1})?|ui'; /* unicode insensitive */
+                $regularExpressions[$regularExp] = '$1#{' . $token . '}#$2'; /* unicode insensitive */
             }
         }
 
@@ -342,10 +341,10 @@ class GetContributionWorker extends AbstractWorker
 
     /**
      * @param GetContributionRequest $contributionStruct
-     * @param JobStruct              $jobStruct
-     * @param string                 $targetLang
-     * @param FeatureSet             $featureSet
-     * @param bool                   $isCrossLang
+     * @param JobStruct $jobStruct
+     * @param string $targetLang
+     * @param FeatureSet $featureSet
+     * @param bool $isCrossLang
      *
      * @return array
      * @throws EndQueueException
@@ -354,38 +353,38 @@ class GetContributionWorker extends AbstractWorker
      */
     protected function _getMatches(GetContributionRequest $contributionStruct, JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false): array
     {
-        $_config              = [];
-        $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
-        $_config[ 'source' ]  = $jobStruct->source;
-        $_config[ 'target' ]  = $targetLang;
-        $_config[ 'uid' ]     = $contributionStruct->getUser()->uid ?? 0;
+        $_config = [];
+        $_config['segment'] = $contributionStruct->getContexts()->segment;
+        $_config['source'] = $jobStruct->source;
+        $_config['target'] = $targetLang;
+        $_config['uid'] = $contributionStruct->getUser()->uid ?? 0;
 
-        $_config[ 'email' ] = AppConfig::$MYMEMORY_API_KEY;
+        $_config['email'] = AppConfig::$MYMEMORY_API_KEY;
 
-        $_config[ 'context_before' ] = $contributionStruct->getContexts()->context_before;
-        $_config[ 'context_after' ]  = $contributionStruct->getContexts()->context_after;
-        $_config[ 'id_user' ]        = $this->_extractAvailableKeysForUser($contributionStruct);
-        $_config[ 'num_result' ]     = $contributionStruct->resultNum;
-        $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
+        $_config['context_before'] = $contributionStruct->getContexts()->context_before;
+        $_config['context_after'] = $contributionStruct->getContexts()->context_after;
+        $_config['id_user'] = $this->_extractAvailableKeysForUser($contributionStruct);
+        $_config['num_result'] = $contributionStruct->resultNum;
+        $_config['isConcordance'] = $contributionStruct->concordanceSearch;
 
-        $_config[ 'dialect_strict' ]                       = $contributionStruct->dialect_strict;
-        $_config[ 'priority_key' ]                         = $contributionStruct->tm_prioritization;
-        $_config[ JobsMetadataDao::SUBFILTERING_HANDLERS ] = $contributionStruct->subfiltering_handlers;
+        $_config['dialect_strict'] = $contributionStruct->dialect_strict;
+        $_config['priority_key'] = $contributionStruct->tm_prioritization;
+        $_config[JobsMetadataDao::SUBFILTERING_HANDLERS] = $contributionStruct->subfiltering_handlers;
 
         // penalty_key
         $penalty_key = TmKeyManager::getPenaltyMap($contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole);
         if (!empty($penalty_key)) {
-            $_config[ 'penalty_key' ] = $penalty_key;
+            $_config['penalty_key'] = $penalty_key;
         }
 
         if (!empty($contributionStruct->public_tm_penalty)) {
-            $_config[ 'public_tm_penalty' ] = $contributionStruct->public_tm_penalty;
+            $_config['public_tm_penalty'] = $contributionStruct->public_tm_penalty;
         }
 
         if ($contributionStruct->concordanceSearch && $contributionStruct->fromTarget) {
             //invert direction
-            $_config[ 'target' ] = $jobStruct->source;
-            $_config[ 'source' ] = $targetLang;
+            $_config['target'] = $jobStruct->source;
+            $_config['source'] = $targetLang;
         }
 
         if ($jobStruct->id_tms == 1) {
@@ -393,17 +392,17 @@ class GetContributionWorker extends AbstractWorker
              * MyMemory Enabled
              */
 
-            $_config[ 'get_mt' ]  = true;
-            $_config[ 'mt_only' ] = false;
+            $_config['get_mt'] = true;
+            $_config['mt_only'] = false;
             if ($jobStruct->id_mt_engine != 1) {
                 /**
                  * Don't get MT contribution from MyMemory ( Custom MT )
                  */
-                $_config[ 'get_mt' ] = false;
+                $_config['get_mt'] = false;
             }
 
             if ($jobStruct->only_private_tm) {
-                $_config[ 'onlyprivate' ] = true;
+                $_config['onlyprivate'] = true;
             }
 
             $_TMS = true; /* MyMemory */
@@ -412,14 +411,14 @@ class GetContributionWorker extends AbstractWorker
              * MyMemory disabled but MT Enabled, and it is NOT a Custom one
              * So tell to MyMemory to get MT only
              */
-            $_config[ 'get_mt' ]  = true;
-            $_config[ 'mt_only' ] = true;
+            $_config['get_mt'] = true;
+            $_config['mt_only'] = true;
 
             $_TMS = true; /* MyMemory */
         }
 
         if ($isCrossLang) {
-            $_config[ 'get_mt' ] = false;
+            $_config['get_mt'] = false;
         }
 
         /**
@@ -432,12 +431,14 @@ class GetContributionWorker extends AbstractWorker
         if (isset($_TMS)) {
             /** @var MyMemory $tmEngine */
             $tmEngine = $contributionStruct->getTMEngine($featureSet);
-            $config   = array_merge($tmEngine->getConfigStruct(), $_config);
+            $config = array_merge($tmEngine->getConfigStruct(), $_config);
 
             $temp_matches = [];
 
             if ($this->issetSourceAndTarget($config)) {
-                $tmEngine->setMTPenalty($contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
+                $tmEngine->setMTPenalty(
+                    $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null
+                ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
                 $temp_matches = $tmEngine->get($config);
             }
 
@@ -450,11 +451,11 @@ class GetContributionWorker extends AbstractWorker
         $mt_result = [];
 
         if (
-                $jobStruct->id_mt_engine > 1 /* Get MT Directly */ &&
-                !$contributionStruct->concordanceSearch &&
-                !$isCrossLang
+            $jobStruct->id_mt_engine > 1 /* Get MT Directly */ &&
+            !$contributionStruct->concordanceSearch &&
+            !$isCrossLang
         ) {
-            if (($contributionStruct->mt_quality_value_in_editor ?? 0) > 99 || empty($tms_match) || (int)str_replace("%", "", $tms_match[ 0 ][ 'match' ]) < 100) {
+            if (($contributionStruct->mt_quality_value_in_editor ?? 0) > 99 || empty($tms_match) || (int)str_replace("%", "", $tms_match[0]['match']) < 100) {
                 /**
                  * Call The MT EnginesFactory IF
                  * - The user has set an MT Quality value in the editor > 99
@@ -464,23 +465,23 @@ class GetContributionWorker extends AbstractWorker
                  * - The TM EnginesFactory has returned a match with a score < 100
                  */
                 $mt_engine = $contributionStruct->getMTEngine($featureSet);
-                $config    = $mt_engine->getConfigStruct();
+                $config = $mt_engine->getConfigStruct();
 
-                $config[ 'pid' ]                 = $jobStruct->id_project;
-                $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]              = $jobStruct->source;
-                $config[ 'target' ]              = $jobStruct->target;
-                $config[ 'email' ]               = AppConfig::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]               = $contributionStruct->segmentId;
-                $config[ 'job_id' ]              = $jobStruct->id;
-                $config[ 'job_password' ]        = $jobStruct->password;
-                $config[ 'session' ]             = $contributionStruct->getSessionId();
-                $config[ 'all_job_tm_keys' ]     = $jobStruct->tm_keys;
-                $config[ 'project_id' ]          = $contributionStruct->getProjectStruct()->id;
-                $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
-                $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
-                $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
-                $config[ 'tuid' ]                = $jobStruct->id . ":" . $contributionStruct->segmentId;
+                $config['pid'] = $jobStruct->id_project;
+                $config['segment'] = $contributionStruct->getContexts()->segment;
+                $config['source'] = $jobStruct->source;
+                $config['target'] = $jobStruct->target;
+                $config['email'] = AppConfig::$MYMEMORY_API_KEY;
+                $config['segid'] = $contributionStruct->segmentId;
+                $config['job_id'] = $jobStruct->id;
+                $config['job_password'] = $jobStruct->password;
+                $config['session'] = $contributionStruct->getSessionId();
+                $config['all_job_tm_keys'] = $jobStruct->tm_keys;
+                $config['project_id'] = $contributionStruct->getProjectStruct()->id;
+                $config['context_list_before'] = $contributionStruct->context_list_before;
+                $config['context_list_after'] = $contributionStruct->context_list_after;
+                $config['user_id'] = $contributionStruct->getUser()->uid;
+                $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
                 $config['keys'] = array_map(function ($tm_key) {
@@ -491,23 +492,24 @@ class GetContributionWorker extends AbstractWorker
                 }, $tm_keys);
 
                 if ($contributionStruct->mt_evaluation) {
-                    $config[ 'include_score' ] = $contributionStruct->mt_evaluation;
+                    $config['include_score'] = $contributionStruct->mt_evaluation;
                 }
 
                 if ($contributionStruct->mt_qe_workflow_enabled) {
                     // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-                    $mt_qe_config                = new MTQEWorkflowParams(json_decode($queueElement->params->mt_qe_workflow_parameters ?? null, true) ?? []); // params or default configuration (NULL safe)
-                    $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_version;
+                    $mt_qe_config = new MTQEWorkflowParams(json_decode($queueElement->params->mt_qe_workflow_parameters ?? null, true) ?? []); // params or default configuration (NULL safe)
+                    $config['mt_qe_engine_id'] = $mt_qe_config->qe_model_version;
                 }
 
-                $mt_engine->setMTPenalty($contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
+                $mt_engine->setMTPenalty(
+                    $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null
+                ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
                 try {
-                $mt_result = $mt_engine->get($config);
+                    $mt_result = $mt_engine->get($config);
                 } catch (Exception $e) {
                     $this->_doLog($e->getMessage());
                 }
-
             }
         }
 
@@ -521,7 +523,7 @@ class GetContributionWorker extends AbstractWorker
      */
     private function issetSourceAndTarget($_config): bool
     {
-        return (isset($_config[ 'source' ]) and $_config[ 'source' ] !== '' and isset($_config[ 'target' ]) and $_config[ 'target' ] !== '');
+        return (isset($_config['source']) and $_config['source'] !== '' and isset($_config['target']) and $_config['target'] !== '');
     }
 
     private function _sortByLenDesc($stringA, $stringB): int
@@ -534,7 +536,7 @@ class GetContributionWorker extends AbstractWorker
     }
 
     /**
-     * @param array                  $matches
+     * @param array $matches
      * @param GetContributionRequest $contributionStruct
      *
      * @throws ReflectionException
@@ -543,10 +545,10 @@ class GetContributionWorker extends AbstractWorker
     private function updateAnalysisSuggestion(array $matches, GetContributionRequest $contributionStruct): void
     {
         if (
-                count($matches) > 0 and
-                $contributionStruct->segmentId !== null and
-                $contributionStruct->getJobStruct() !== null and
-                !empty($contributionStruct->getJobStruct()->id)
+            count($matches) > 0 and
+            $contributionStruct->segmentId !== null and
+            $contributionStruct->getJobStruct() !== null and
+            !empty($contributionStruct->getJobStruct()->id)
         ) {
             $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
@@ -555,8 +557,8 @@ class GetContributionWorker extends AbstractWorker
                 foreach ($matches as $k => $m) {
                     // normalize data for saving `suggestions_array`
 
-                    if ($m[ 'created_by' ] == 'MT!') {
-                        $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
+                    if ($m['created_by'] == 'MT!') {
+                        $matches[$k]['created_by'] = EngineConstants::MT; //MyMemory returns MT!
                     } else {
                         $user = new UserStruct();
 
@@ -564,27 +566,27 @@ class GetContributionWorker extends AbstractWorker
                             $user = $contributionStruct->getUser();
                         }
 
-                        $matches[ $k ][ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                                $m,
-                                $contributionStruct->getJobStruct()->tm_keys,
-                                $user->uid
+                        $matches[$k]['created_by'] = Utils::changeMemorySuggestionSource(
+                            $m,
+                            $contributionStruct->getJobStruct()->tm_keys,
+                            $user->uid
                         );
                     }
                 }
 
                 $suggestions_json_array = json_encode($matches);
-                $match                  = $matches[ 0 ];
+                $match = $matches[0];
 
-                $data                        = [];
-                $data[ 'suggestions_array' ] = $suggestions_json_array;
-                $data[ 'suggestion' ]        = $match[ 'raw_translation' ]; // this is Layer 0
-                $data[ 'translation' ]       = $match[ 'raw_translation' ]; // this is Layer 0
-                $data[ 'suggestion_match' ]  = str_replace('%', '', $match[ 'match' ]);
+                $data = [];
+                $data['suggestions_array'] = $suggestions_json_array;
+                $data['suggestion'] = $match['raw_translation']; // this is Layer 0
+                $data['translation'] = $match['raw_translation']; // this is Layer 0
+                $data['suggestion_match'] = str_replace('%', '', $match['match']);
 
                 $where = [
-                        'id_segment' => $contributionStruct->segmentId,
-                        'id_job'     => $contributionStruct->getJobStruct()->id,
-                        'status'     => TranslationStatus::STATUS_NEW
+                    'id_segment' => $contributionStruct->segmentId,
+                    'id_job' => $contributionStruct->getJobStruct()->id,
+                    'status' => TranslationStatus::STATUS_NEW
                 ];
 
                 SegmentTranslationDao::updateFirstTimeOpenedContribution($data, $where);

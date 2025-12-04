@@ -92,71 +92,69 @@ class DeepL extends AbstractEngine
      */
     public function get(array $_config)
     {
-        try {
-            $source = explode("-", $_config['source']);
-            $target = explode("-", $_config['target']);
+        $source = explode("-", $_config['source']);
+        $target = explode("-", $_config['target']);
 
         $extraParams = $this->getEngineRecord()->extra_parameters;
 
-            if (!isset($extraParams['DeepL-Auth-Key'])) {
-                throw new Exception("DeepL API key not set");
-            }
+        if (!isset($extraParams['DeepL-Auth-Key'])) {
+            throw new Exception("DeepL API key not set");
+        }
 
-            // glossaries (only for DeepL)
-            $metadataDao = new MetadataDao();
-            // null coalescing operator is used to avoid errors when validating the engine for the first time
-            $deepLFormality = $metadataDao->get($_config['pid'], 'deepl_formality', 86400);
-            $deepLIdGlossary = $metadataDao->get($_config['pid'], 'deepl_id_glossary', 86400);
-            $deepLEngineType = $metadataDao->get($_config['pid'], 'deepl_engine_type', 86400);
+        // glossaries (only for DeepL)
+        $metadataDao = new MetadataDao();
+        // null coalescing operator is used to avoid errors when validating the engine for the first time
+        $deepLFormality = $metadataDao->get($_config['pid'], 'deepl_formality', 86400);
+        $deepLIdGlossary = $metadataDao->get($_config['pid'], 'deepl_id_glossary', 86400);
+        $deepLEngineType = $metadataDao->get($_config['pid'], 'deepl_engine_type', 86400);
 
-            if ($deepLEngineType !== null and in_array($deepLEngineType->value, self::ALLOWED_MODEL_TYPES)) {
-                $_config['model_type'] = $deepLEngineType->value;
-            }
+        if ($deepLEngineType !== null and in_array($deepLEngineType->value, self::ALLOWED_MODEL_TYPES)) {
+            $_config['model_type'] = $deepLEngineType->value;
+        }
 
-            if ($deepLFormality !== null) {
-                $_config['formality'] = $deepLFormality->value;
-            }
+        if ($deepLFormality !== null) {
+            $_config['formality'] = $deepLFormality->value;
+        }
 
-            if ($deepLIdGlossary !== null) {
-                $_config['idGlossary'] = $deepLIdGlossary->value;
-            }
-            // glossaries (only for DeepL)
+        if ($deepLIdGlossary !== null) {
+            $_config['idGlossary'] = $deepLIdGlossary->value;
+        }
+        // glossaries (only for DeepL)
 
-            $parameters = [
-                'text' => [
-                    $_config['segment'],
-                ],
-                'source_lang' => $source[0],
-                'target_lang' => $target[0],
-                'formality' => ($_config['formality'] ?: null),
-                'glossary_id' => ($_config['idGlossary'] ?: null)
-            ];
+        $parameters = [
+            'text' => [
+                $_config['segment'],
+            ],
+            'source_lang' => $source[0],
+            'target_lang' => $target[0],
+            'formality' => ($_config['formality'] ?: null),
+            'glossary_id' => ($_config['idGlossary'] ?: null)
+        ];
 
-            if (!empty($_config['model_type'])) {
-                $parameters['model_type'] = $_config['model_type'];
-            }
+        if (!empty($_config['model_type'])) {
+            $parameters['model_type'] = $_config['model_type'];
+        }
 
-            $headers = [
-                'Authorization: DeepL-Auth-Key ' . $extraParams['DeepL-Auth-Key'],
-                'Content-Type: application/json'
-            ];
+        $headers = [
+            'Authorization: DeepL-Auth-Key ' . $extraParams['DeepL-Auth-Key'],
+            'Content-Type: application/json'
+        ];
 
-            $this->_setAdditionalCurlParams(
-                [
-                    CURLOPT_POST => true,
-                    CURLOPT_POSTFIELDS => json_encode($parameters),
-                    CURLOPT_HTTPHEADER => $headers,
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_HEADER => false,
-                    CURLOPT_SSL_VERIFYPEER => true,
-                    CURLOPT_SSL_VERIFYHOST => 2
-                ]
-            );
+        $this->_setAdditionalCurlParams(
+            [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($parameters),
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER => false,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
+            ]
+        );
 
-            $this->call("translate_relative_url", $parameters, true);
+        $this->call("translate_relative_url", $parameters, true);
 
         return $this->result;
-
     }
 
     /**
