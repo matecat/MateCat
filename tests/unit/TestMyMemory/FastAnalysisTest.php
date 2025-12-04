@@ -3,12 +3,12 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Matches;
 
 
 /**
@@ -337,9 +337,9 @@ Z;
 
 
         /**
-         * @var Matches
+         * @var $engine_MyMemory MockObject|MyMemory
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param])->onlyMethods(['_call'])->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
 
         $result = $engine_MyMemory->fastAnalysis( $array_paramemeter );

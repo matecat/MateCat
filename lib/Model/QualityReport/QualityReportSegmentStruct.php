@@ -14,7 +14,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Utils\LQA\QA;
-use Utils\Tools\Matches;
+use Utils\Tools\PostEditing;
 use View\API\V2\Json\QALocalWarning;
 
 
@@ -129,7 +129,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
             return 0;
         }
 
-        return self::calculatePEE($this->suggestion, $this->translation, $this->target);
+        return PostEditing::getPee($this->suggestion, $this->translation, $this->target);
     }
 
     public function getPEEBwtTranslationSuggestion(): int
@@ -138,7 +138,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
             return 0;
         }
 
-        return self::calculatePEE($this->suggestion, $this->last_translation, $this->target);
+        return PostEditing::getPee($this->suggestion, $this->last_translation, $this->target);
     }
 
     public function getPEEBwtTranslationRevise(): int
@@ -148,35 +148,9 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
         }
 
         $last_revision_record = end($this->last_revisions);
-        $last_revision        = $last_revision_record[ 'translation' ];
+        $last_revision = $last_revision_record['translation'];
 
-        return self::calculatePEE($this->last_translation, $last_revision, $this->target);
-    }
-
-    static function calculatePEE($str_1, $str_2, $target): int
-    {
-        $post_editing_effort = round(
-                (1 - Matches::get(
-                                self::cleanSegmentForPee($str_1),
-                                self::cleanSegmentForPee($str_2),
-                                $target
-                        )
-                ) * 100
-        );
-
-        if ($post_editing_effort < 0) {
-            $post_editing_effort = 0;
-        } elseif ($post_editing_effort > 100) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-    }
-
-
-    private static function cleanSegmentForPee($segment): string
-    {
-        return htmlspecialchars_decode($segment, ENT_QUOTES);
+        return PostEditing::getPee($this->last_translation, $last_revision, $this->target);
     }
 
     /**

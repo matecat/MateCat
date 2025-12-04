@@ -454,6 +454,7 @@ class CatUtils
      * @param string $documentContent Reference to the string document
      *
      * @return array( $charset, $converted )
+     * @throws Exception
      */
     public static function convertEncoding(string $toEncoding, string $documentContent): array
     {

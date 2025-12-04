@@ -151,7 +151,7 @@ class GlossaryWorker extends AbstractWorker
 
         if ($response->responseStatus != 200) {
             $errMessage = match ($response->responseStatus) {
-                202 => "Matches is busy, please try later",
+                202 => "MyMemory is busy, please try later",
                 default => "Error, please try later",
             };
 
@@ -361,7 +361,7 @@ class GlossaryWorker extends AbstractWorker
 
         if ($response->responseStatus != 200) {
             $errMessage = match ($response->responseStatus) {
-                202 => "Matches is busy, please try later",
+                202 => "MyMemory is busy, please try later",
                 default => "Error, please try later",
             };
 
@@ -429,7 +429,7 @@ class GlossaryWorker extends AbstractWorker
 
         if ($response->responseStatus != 200) {
             $errMessage = match ($response->responseStatus) {
-                202 => "Matches is busy, please try later",
+                202 => "MyMemory is busy, please try later",
                 default => "Error, please try later",
             };
 

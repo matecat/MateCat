@@ -2,13 +2,13 @@
 //TODO:estendere
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
 use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
-use Utils\Tools\Matches;
 
 
 /**
@@ -20,10 +20,7 @@ use Utils\Tools\Matches;
  */
 class CallAbstractMyMemoryTest extends AbstractTest {
 
-    /**
-     * @var PHPUnit_Framework_MockObject_MockObject | Matches
-     */
-    protected $engine_MyMemory;
+    protected MyMemory|MockObject $engine_MyMemory;
 
 
     /**
@@ -60,7 +57,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
 
-        /** @var $engine_MyMemory MyMemory */
+        /** @var $engine_MyMemory MockObject|MyMemory */
         $this->engine_MyMemory = @$this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $engine_struct_MyMemory ] )->onlyMethods( [ '_call' ] )->getMock();
 
         $reflector            = new ReflectionClass( $this->engine_MyMemory );
