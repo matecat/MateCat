@@ -502,7 +502,12 @@ class GetContributionWorker extends AbstractWorker
 
                 $mt_engine->setMTPenalty($contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
+                try {
                 $mt_result = $mt_engine->get($config);
+                } catch (Exception $e) {
+                    $this->_doLog($e->getMessage());
+                }
+
             }
         }
 

@@ -52,6 +52,23 @@ class DeepL extends AbstractEngine
     protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
     {
         $rawValue = json_decode($rawValue, true);
+
+        if (($rawValue['responseStatus'] ?? 200) == 403) {
+            /*
+            [
+                'error' =>
+                    [
+                        'code' => 0,
+                        'message' => '  - Server Error (http status 403)',
+                        'response' => '{"message":"This account is not allowed to access the API. You can find more info in our docs: https://developers.deepl.com/docs/getting-started/auth"}',
+                    ],
+                'responseStatus' => 403,
+            ];
+            */
+            $error = json_decode($rawValue['error']['response'], true);
+            throw new Exception($error['message']);
+        }
+
         $translation = $rawValue['translations'][0]['text'];
         $translation = html_entity_decode($translation, ENT_QUOTES | 16);
         $source = $parameters['source_lang'];
@@ -79,7 +96,7 @@ class DeepL extends AbstractEngine
             $source = explode("-", $_config['source']);
             $target = explode("-", $_config['target']);
 
-            $extraParams = $this->getEngineRecord()->extra_parameters;
+        $extraParams = $this->getEngineRecord()->extra_parameters;
 
             if (!isset($extraParams['DeepL-Auth-Key'])) {
                 throw new Exception("DeepL API key not set");
@@ -138,10 +155,8 @@ class DeepL extends AbstractEngine
 
             $this->call("translate_relative_url", $parameters, true);
 
-            return $this->result;
-        } catch (Exception) {
-            return $this->GoogleTranslateFallback($_config);
-        }
+        return $this->result;
+
     }
 
     /**
