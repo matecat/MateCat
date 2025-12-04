@@ -13,12 +13,6 @@ use Utils\Engines\Results\MyMemory\Matches;
 class DeepL extends AbstractEngine
 {
 
-    const array ALLOWED_MODEL_TYPES = [
-        "latency_optimized",
-        "quality_optimized",
-        "prefer_quality_optimized",
-    ];
-
     private ?string $apiKey = null;
 
     public function setApiKey(?string $apiKey): void
@@ -108,51 +102,29 @@ class DeepL extends AbstractEngine
         $deepLIdGlossary = $metadataDao->get($_config['pid'], 'deepl_id_glossary', 86400);
         $deepLEngineType = $metadataDao->get($_config['pid'], 'deepl_engine_type', 86400);
 
-        if ($deepLEngineType !== null and in_array($deepLEngineType->value, self::ALLOWED_MODEL_TYPES)) {
-            $_config['model_type'] = $deepLEngineType->value;
-        }
-
-        if ($deepLFormality !== null) {
-            $_config['formality'] = $deepLFormality->value;
-        }
-
-        if ($deepLIdGlossary !== null) {
-            $_config['idGlossary'] = $deepLIdGlossary->value;
-        }
-        // glossaries (only for DeepL)
-
         $parameters = [
             'text' => [
                 $_config['segment'],
             ],
             'source_lang' => $source[0],
             'target_lang' => $target[0],
-            'formality' => ($_config['formality'] ?: null),
-            'glossary_id' => ($_config['idGlossary'] ?: null)
-        ];
 
-        if (!empty($_config['model_type'])) {
-            $parameters['model_type'] = $_config['model_type'];
-        }
-
-        $headers = [
-            'Authorization: DeepL-Auth-Key ' . $extraParams['DeepL-Auth-Key'],
-            'Content-Type: application/json'
+            // glossaries (only for DeepL)
+            'formality' => $deepLFormality?->value ?? null,
+            'glossary_id' => $deepLIdGlossary?->value ?? null,
+            'model_type' => $deepLEngineType?->value ?? null
         ];
 
         $this->_setAdditionalCurlParams(
             [
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => json_encode($parameters),
-                CURLOPT_HTTPHEADER => $headers,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => false,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
+                CURLOPT_HTTPHEADER => [
+            'Authorization: DeepL-Auth-Key ' . $extraParams['DeepL-Auth-Key'],
+            'Content-Type: application/json'
+                ],
             ]
         );
 
-        $this->call("translate_relative_url", $parameters, true);
+        $this->call("translate_relative_url", $parameters, true, true);
 
         return $this->result;
     }
@@ -160,7 +132,7 @@ class DeepL extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function set($_config)
+    public function set(mixed $_config)
     {
         throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
@@ -168,7 +140,7 @@ class DeepL extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function update($_config)
+    public function update(mixed $_config)
     {
         throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
@@ -176,7 +148,7 @@ class DeepL extends AbstractEngine
     /**
      * @inheritDoc
      */
-    public function delete($_config): bool
+    public function delete(mixed $_config): bool
     {
         throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }

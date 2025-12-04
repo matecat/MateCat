@@ -6,6 +6,7 @@ use Exception;
 use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
+use Utils\Logger\LoggerFactory;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
 
@@ -29,6 +30,7 @@ class DeepLEngineValidator extends AbstractValidator
 
             $newTestCreatedMT->get($config);
         } catch (Exception $e) {
+            LoggerFactory::getLogger('engines')->error($e->getMessage());
             throw new Exception("Invalid DeepL API key.");
         }
         return null;
