@@ -2,6 +2,7 @@
 
 namespace Utils\Engines\DeepL;
 
+use Exception;
 use InvalidArgumentException;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -127,6 +128,7 @@ class DeepLApiClient
      *
      * @return array
      * @throws DeepLApiException
+     * @throws Exception
      */
     private function send(string $method, string $url, array $params = null, int $timeout = 0): array
     {
@@ -146,7 +148,6 @@ class DeepLApiClient
         ];
 
         $handler = new MultiCurlHandler();
-        $handler->verbose = true;
 
         $options = [
             CURLOPT_RETURNTRANSFER => true,
@@ -159,12 +160,12 @@ class DeepLApiClient
             $options[CURLOPT_HTTPHEADER] = $headers;
         }
 
-        // Set up POST request
+        // Set up a POST request
         if ($method === 'POST') {
             $options[CURLOPT_POST] = 1;
         }
 
-        // Set up DELETE request
+        // Set up a DELETE request
         if ($method === 'DELETE') {
             $options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
         }
