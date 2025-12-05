@@ -33,9 +33,10 @@ class UserKeysModel
 
     /**
      * @param string $jobKeys
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return array
+     * @throws Exception
      */
     public function getKeys(string $jobKeys, int $ttl = 0): array
     {
