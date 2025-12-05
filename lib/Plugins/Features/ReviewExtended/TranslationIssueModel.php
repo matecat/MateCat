@@ -71,6 +71,36 @@ class TranslationIssueModel
         $this->diff = $diff;
     }
 
+    /**
+     * @param EntryStruct $oldStruct
+     *
+     * @return EntryStruct
+     * @throws Exception
+     */
+    public function editFrom(EntryStruct $oldStruct): EntryStruct
+    {
+        $this->setDefaultIssueValues();
+
+        if (!empty($this->diff)) {
+            $this->saveDiff();
+        }
+
+        EntryDao::modifyEntry($this->issue);
+
+        // update score
+        $penaltyPointDiff = $this->issue->penalty_points - $oldStruct->penalty_points;
+
+        $chunk_review_model = new ChunkReviewModel($this->chunk_review);
+
+        if($penaltyPointDiff < 0){
+            $chunk_review_model->subtractPenaltyPoints(-$penaltyPointDiff, $this->project);
+        } elseif($penaltyPointDiff > 0){
+            $chunk_review_model->addPenaltyPoints($penaltyPointDiff, $this->project);
+        }
+
+        return $this->issue;
+    }
+
 
     /**
      * Inserts the struct in database and updates review result

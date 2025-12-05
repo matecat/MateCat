@@ -1,17 +1,20 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Send type of issue of segment
+ * Edit segment issue
  *
- * @param {string} idSegment
+ * @param {Object} options
+ * @param {string} options.idSegment
+ * @param {string} options.issueId
  * @param {Object} issueDetails
- * @param {string} [idJob=config.id_job]
- * @param {string} [reviewPassword=config.review_password]
+ * @param {string} [options.idJob=config.id_job]
+ * @param {string} [options.reviewPassword=config.review_password]
  * @param {number} [revisionNumber=config.revisionNumber]
  * @returns {Promise<object>}
  */
-export const sendSegmentVersionIssue = async ({
+export const editSegmentIssue = async ({
   idSegment,
+  issueId,
   issueDetails,
   idJob = config.id_job,
   reviewPassword = config.review_password,
@@ -26,15 +29,15 @@ export const sendSegmentVersionIssue = async ({
   Object.keys(dataParams).forEach((key) => {
     formData.append(key, dataParams[key])
   })
+
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues`,
+    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues/${issueId}`,
     {
       method: 'POST',
       credentials: 'include',
       body: formData,
     },
   )
-
   if (!response.ok) {
     if (response.headers.get('Content-Length') !== '0') {
       const data = await response.json()
@@ -45,7 +48,7 @@ export const sendSegmentVersionIssue = async ({
   }
 
   const {errors, ...data} = await response.json()
-  if (errors && errors.length > 0) return Promise.reject({errors})
+  if (errors && errors.length > 0) return Promise.reject({response, errors})
 
   return data
 }

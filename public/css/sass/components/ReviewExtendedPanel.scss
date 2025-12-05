@@ -48,7 +48,7 @@ input {
       }
       .re-list {
         overflow-y: auto;
-        max-height: 250px;
+        max-height: 500px;
 
         &.no-scroll {
           overflow-y: hidden;
@@ -70,7 +70,7 @@ input {
         .re-item {
           &:hover,
           &.active {
-            background: #f2f4f7 !important;
+            background: colors.$grey5 !important;
           }
           .re-item-box {
             display: flex;
@@ -113,7 +113,7 @@ input {
           }
           .comments-view {
             .re-add-comment {
-              padding: 7px 5px;
+              padding: 10px;
               .re-comment-input {
                 border-radius: 20px !important;
               }
@@ -199,19 +199,15 @@ input {
       }
     }
     .re-item.issue-comments-open {
-      margin: 20px 0 20px;
       transition: 0.3s ease;
       background: #f2f4f7;
-      &:nth-child(2) {
-        margin-top: 5px !important;
-      }
     }
     .re-created {
       background: colors.$grey3;
       padding: 10px 10px 10px;
       margin-bottom: 0;
       .issues {
-        .re-item-box {
+        .re-item-issue-value {
           background: #ffffff;
         }
       }
@@ -320,8 +316,6 @@ section {
     background-color: #ffeb3b;
   }
 
-
-
   .translation-issues-button {
     cursor: pointer;
     position: relative;
@@ -353,7 +347,9 @@ section {
 
   &:hover .translation-issues-button .revise-button,
   .translation-issues-button:hover .revise-button,
-  .segment-side-buttons:hover .translation-issues-button .revise-button.no-object {
+  .segment-side-buttons:hover
+    .translation-issues-button
+    .revise-button.no-object {
     display: block !important;
   }
 
@@ -364,6 +360,25 @@ section {
 
 .undo-issue-deleted {
   cursor: pointer;
+}
+
+.editing-highlight {
+  background-color: colors.$grey5 !important;
+}
+
+.editing-backward-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 10px;
+}
+
+.issue-panel-edit-mode {
+  padding: 10px;
+
+  .re-issues-box {
+    border: 2px solid white;
+  }
 }
 //*******************************************************/
 
