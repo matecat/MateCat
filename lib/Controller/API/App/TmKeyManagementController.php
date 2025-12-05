@@ -33,6 +33,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      * AND the all keys of the user
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getByJob(): void
     {
@@ -71,10 +72,10 @@ class TmKeyManagementController extends AbstractStatefulKleinController
             exit();
         }
 
-        if (CatUtils::isRevisionFromIdJobAndPassword($idJob, $password)) {
-            $userRole = Filter::ROLE_REVISOR;
-        } elseif ($this->getUser()->email == $chunk->status_owner) {
+        if ($this->getUser()->email == $chunk->status_owner) {
             $userRole = Filter::OWNER;
+        } elseif (CatUtils::isRevisionFromIdJobAndPassword($idJob, $password)) {
+            $userRole = Filter::ROLE_REVISOR;
         } else {
             $userRole = Filter::ROLE_TRANSLATOR;
         }

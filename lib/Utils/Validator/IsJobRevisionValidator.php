@@ -6,6 +6,7 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\LQA\ChunkReviewDao;
+use ReflectionException;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
 
@@ -13,7 +14,14 @@ class IsJobRevisionValidator extends AbstractValidator
 {
 
     /**
-     * @inheritDoc
+     * Validates the provided ValidatorObject for specific criteria, ensuring required parameters are present
+     * and verifying against the data obtained from the ChunkReviewDao.
+     *
+     * @param ValidatorObject $object The object to validate, containing the necessary parameters such as 'jid' and 'password'.
+     * @return ValidatorObject|null Returns the validated object if criteria are met, otherwise null. Throws exceptions on validation errors.
+     * @throws ValidationError If the required parameters are missing.
+     * @throws DomainException
+     * @throws ReflectionException
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
@@ -22,7 +30,7 @@ class IsJobRevisionValidator extends AbstractValidator
         }
 
         if (!isset($object[ 'password' ])) {
-            throw new ValidationError('Missing jid parameter');
+            throw new ValidationError('Missing password parameter');
         }
 
         /** @var ShapelessConcreteStruct $data */
