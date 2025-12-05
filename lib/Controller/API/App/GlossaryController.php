@@ -393,11 +393,6 @@ class GlossaryController extends KleinController
             if ($keyIsUse->glos === false) {
                 throw new NotFoundException("Key " . $key . " is not a glossary key");
             }
-
-            // write permissions?
-            if ($keyIsUse->edit === false || empty($keyIsUse->w)) {
-                throw new AuthorizationError("Key " . $key . " has not write permissions");
-            }
         }
     }
 
