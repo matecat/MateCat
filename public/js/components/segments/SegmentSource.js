@@ -24,6 +24,12 @@ import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import {flushSync} from 'react-dom'
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 import CommonUtils from '../../utils/commonUtils'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -714,21 +720,22 @@ class SegmentSource extends React.Component {
         {editorHtml}
         <div className="splitBar">
           <div className="buttons">
-            <a
-              className="ui button cancel-button cancel btn-cancel"
+            <Button
+              mode={BUTTON_MODE.OUTLINE}
+              size={BUTTON_SIZE.MEDIUM}
               onClick={() => SegmentActions.closeSplitSegment()}
             >
               Cancel
-            </a>
-            <a
-              className={`ui primary button done btn-ok pull-right ${
-                this.splitPoint ? '' : 'disabled'
-              }`}
+            </Button>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              disabled={!this.splitPoint}
+              size={BUTTON_SIZE.MEDIUM}
               onClick={() => splitSegmentNew()}
             >
               {' '}
               Confirm{' '}
-            </a>
+            </Button>
           </div>
           {!!this.splitPoint && (
             <div className="splitNum pull-right">

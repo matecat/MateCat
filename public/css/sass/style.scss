@@ -1968,8 +1968,12 @@ section.opened.editor .status {
 @media screen and (min-width: 1600px) {
   .text .source.item,
   .text .target.item,
-  .white li {
+  .white li,
+  .splitContainer{
     width: 48% !important;
+  }
+  .splitContainer {
+    padding: 0 38px 0 10px !important;
   }
 }
 
@@ -2421,10 +2425,10 @@ section.editor .toolbar {
 .splitContainer {
   position: relative;
   float: left;
-  width: 45.2%;
+  width: 45%;
   display: flex;
   flex-direction: column;
-  padding: 0 26px 0 10px;
+  padding: 0 30px 0 10px;
   .splitArea {
     width: 100%;
     padding: 3px 0px 5px 3px;
@@ -2473,8 +2477,8 @@ section.editor .toolbar {
 }
 
 .splitBar .buttons {
-  float: right;
-  margin: 0;
+  gap: 16px;
+  margin-left: 16px;
 }
 
 .splitBar .buttons a {
