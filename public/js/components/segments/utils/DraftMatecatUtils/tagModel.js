@@ -192,7 +192,7 @@ const tagSignaturesMap = {
     convertToLexiqaIgnoreAnglesBrackets: true,
   },
   splitPoint: {
-    type: 'splitpoint',
+    type: 'splitPoint',
     regex: /##\$_(SPLIT)\$##/g,
     selfClosing: true,
     isClosure: false,
