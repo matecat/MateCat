@@ -92,6 +92,10 @@ class QAModelTemplateController extends KleinController
         } catch (JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception) {
             $this->response->code(400);
 
+            if($exception instanceof JSONValidatorException){
+                return $this->response->json(['error' => $exception->getFormattedError()]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
@@ -161,6 +165,10 @@ class QAModelTemplateController extends KleinController
         } catch (JSONValidatorException|JsonValidatorGenericException|InvalidValue  $exception) {
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
+
+            if($exception instanceof JSONValidatorException){
+                return $this->response->json(['error' => $exception->getFormattedError()]);
+            }
 
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {

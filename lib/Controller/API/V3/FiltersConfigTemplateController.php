@@ -115,6 +115,10 @@ class FiltersConfigTemplateController extends KleinController
         } catch (JSONValidatorException|JsonValidatorGenericException $exception) {
             $this->response->code(400);
 
+            if($exception instanceof JSONValidatorException){
+                return $this->response->json(['error' => $exception->getFormattedError()]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
@@ -175,6 +179,10 @@ class FiltersConfigTemplateController extends KleinController
         } catch (JSONValidatorException|JsonValidatorGenericException|InvalidValue  $exception) {
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
+
+            if($exception instanceof JSONValidatorException){
+                return $this->response->json(['error' => $exception->getFormattedError()]);
+            }
 
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {
