@@ -93,7 +93,7 @@ class QAModelTemplateController extends KleinController
             $this->response->code(400);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("qa_model_template")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);
@@ -167,7 +167,7 @@ class QAModelTemplateController extends KleinController
             $this->response->code($errorCode);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("qa_model_template")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);

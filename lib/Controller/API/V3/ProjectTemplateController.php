@@ -120,7 +120,7 @@ class ProjectTemplateController extends KleinController
             $this->response->code($errorCode);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("project-template")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);
@@ -190,7 +190,7 @@ class ProjectTemplateController extends KleinController
             $this->response->code($errorCode);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("project-template")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);

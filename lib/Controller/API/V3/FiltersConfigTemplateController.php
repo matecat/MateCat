@@ -116,7 +116,7 @@ class FiltersConfigTemplateController extends KleinController
             $this->response->code(400);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("filters-config-template")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);
@@ -181,7 +181,7 @@ class FiltersConfigTemplateController extends KleinController
             $this->response->code($errorCode);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("filters-config-template")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);

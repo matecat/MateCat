@@ -74,7 +74,7 @@ class PayableRateController extends KleinController
             $this->response->code($errorCode);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("payable_rate")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);
@@ -146,7 +146,7 @@ class PayableRateController extends KleinController
             $this->response->code($errorCode);
 
             if($exception instanceof JSONValidatorException){
-                return $this->response->json(['error' => $exception->getFormattedError()]);
+                return $this->response->json(['error' => $exception->getFormattedError("payable_rate")]);
             }
 
             return $this->response->json(['error' => $exception->getMessage()]);
