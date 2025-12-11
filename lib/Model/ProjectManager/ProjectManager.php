@@ -3036,7 +3036,6 @@ class ProjectManager
      *
      * @param string|null $firstTMXFileName
      *
-     * @throws ReflectionException
      */
     private function setPrivateTMKeys(?string $firstTMXFileName = ''): void
     {

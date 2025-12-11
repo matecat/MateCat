@@ -93,6 +93,7 @@ class ProjectManagerModel
 
     /**
      * @param $query_translations_values
+     * @throws Exception
      */
     public static function insertPreTranslations(&$query_translations_values): void
     {
