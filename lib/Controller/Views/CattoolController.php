@@ -142,7 +142,7 @@ class CattoolController extends BaseKleinViewController {
         if ( $chunkStruct->isArchived() ) {
             $this->archived(
                     $request[ 'jid' ],
-                    $request['password'],
+                    $isRevision ? $chunkReviewStruct->review_password : $chunkStruct->password,
                     $jobOwnership
             );
         }

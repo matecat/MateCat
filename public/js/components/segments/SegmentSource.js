@@ -14,7 +14,7 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
-import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
+import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
 import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
@@ -713,10 +713,7 @@ class SegmentSource extends React.Component {
 
     // Wrap editor in splitContainer
     return segment.openSplit ? (
-      <div
-        className="splitContainer"
-        ref={(splitContainer) => (this.splitContainer = splitContainer)}
-      >
+      <div className="splitContainer">
         {editorHtml}
         <div className="splitBar">
           <div className="buttons">
@@ -843,10 +840,9 @@ class SegmentSource extends React.Component {
     })
   }
 
-  onEntityClick = (start, end) => {
+  onEntityClick = (start, end, entityName) => {
     const {editorState} = this.state
     const {segment} = this.context
-    const {isSplitPoint} = this
     try {
       // Get latest selection
       let newSelection = this.editor._latestEditorState.getSelection()
@@ -869,7 +865,7 @@ class SegmentSource extends React.Component {
       let newEditorState = EditorState.forceSelection(editorState, newSelection)
       const contentState = newEditorState.getCurrentContent()
       // remove split tag
-      if (segment.openSplit && isSplitPoint(contentState, newSelection)) {
+      if (segment.openSplit && entityName === tagSignatures.splitPoint.type) {
         const contentStateWithoutSplitPoint = Modifier.removeRange(
           contentState,
           newSelection,
@@ -893,17 +889,6 @@ class SegmentSource extends React.Component {
     } catch (e) {
       console.log(e)
     }
-  }
-
-  isSplitPoint = (contentState, selection) => {
-    const anchorKey = selection.getAnchorKey()
-    const anchorBlock = contentState.getBlockForKey(anchorKey)
-    const anchorOffset = selection.getAnchorOffset() + 1
-    const anchorEntityKey = anchorBlock.getEntityAt(anchorOffset)
-    const entityInstance = contentState.getEntity(anchorEntityKey)
-    const entityData = entityInstance.getData()
-    const tagName = entityData ? entityData.name : ''
-    return getSplitPointTag().includes(tagName)
   }
 
   copyFragment = (e) => {

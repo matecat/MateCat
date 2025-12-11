@@ -45,18 +45,13 @@ header .wrapper {
   width: 45%;
   table-layout: fixed;
   float: left;
-  padding: 3px 1%;
+  padding: 3px 16px;
   text-align: left;
   list-style: none;
   height: 95%;
   outline: none;
   line-height: 23px;
   word-break: break-word;
-}
-
-.text .source.item {
-  padding-bottom: 10px;
-  padding-top: 11px !important;
 }
 
 .text a {
@@ -1972,9 +1967,6 @@ section.opened.editor .status {
   .splitContainer{
     width: 48% !important;
   }
-  .splitContainer {
-    padding: 0 38px 0 10px !important;
-  }
 }
 
 @media screen and (max-width: 1380px) {
@@ -2093,7 +2085,8 @@ section.opened.editor .status {
 
   .text .source.item,
   .text .target.item,
-  .white li {
+  .white li,
+  .splitContainer {
     width: 44% !important;
   }
 
@@ -2428,7 +2421,7 @@ section.editor .toolbar {
   width: 45%;
   display: flex;
   flex-direction: column;
-  padding: 0 30px 0 10px;
+  padding-right: 42px;
   .splitArea {
     width: 100%;
     padding: 3px 0px 5px 3px;
@@ -2445,13 +2438,6 @@ section.editor .toolbar {
     word-break: normal !important;
     cursor: col-resize;
     float: left;
-  }
-  .splitBar {
-    position: relative;
-    clear: both;
-    margin-top: 40px;
-    width: 100%;
-    margin-left: 19px;
   }
   .cancel {
     margin-right: 4px;
