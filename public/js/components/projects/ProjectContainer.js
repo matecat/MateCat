@@ -14,7 +14,6 @@ import UserActions from '../../actions/UserActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
-import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import UserStore from '../../stores/UserStore'
@@ -56,7 +55,7 @@ const ProjectContainer = ({
   const [lastAction, setLastAction] = useState()
   const [jobsActions, setJobsActions] = useState()
   const [idTeamSelected, setIdTeamSelected] = useState(idTeamProject)
-  const [shouldShowEditNameIcon, setShouldShowEditNameIcon] = useState(false)
+  const [shouldShowMoreActions, setShouldShowMoreActions] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
 
   const {handleSubmit, control, reset} = useForm()
@@ -291,6 +290,11 @@ const ProjectContainer = ({
     return date.toDateString()
   }
 
+  const jobsBulkForCurrentProject = project
+    .get('jobs')
+    .toJS()
+    .filter(({id}) => jobsBulk.some((value) => value === id))
+
   const getJobsList = (jobsLength) => {
     const jobsList = []
     let chunks = [],
@@ -320,6 +324,7 @@ const ProjectContainer = ({
 
       const lastAction = getLastJobAction(job.get('id'))
       const isChunkOutsourced = thereIsChunkOutsourced(job.get('id'))
+
       let item = (
         <JobContainer
           key={job.get('id') + '-' + i}
@@ -335,6 +340,9 @@ const ProjectContainer = ({
           activityLogUrl={getActivityLogUrl()}
           isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
           onCheckedJob={onCheckedJob}
+          isCheckboxVisible={
+            shouldShowMoreActions || jobsBulkForCurrentProject.length
+          }
         />
       )
       chunks.push(item)
@@ -524,11 +532,6 @@ const ProjectContainer = ({
     ''
   )
 
-  const jobsBulkForCurrentProject = project
-    .get('jobs')
-    .toJS()
-    .filter(({id}) => jobsBulk.some((value) => value === id))
-
   return (
     <div
       className="project ui column grid shadow-1"
@@ -537,8 +540,8 @@ const ProjectContainer = ({
     >
       <div
         className="sixteen wide column"
-        onMouseOver={() => setShouldShowEditNameIcon(true)}
-        onMouseLeave={() => setShouldShowEditNameIcon(false)}
+        onMouseOver={() => setShouldShowMoreActions(true)}
+        onMouseLeave={() => setShouldShowMoreActions(false)}
       >
         <div className="project-header ui grid">
           <div className="nine wide column">
@@ -548,7 +551,7 @@ const ProjectContainer = ({
               >
                 <div className="ui ribbon label">
                   <Checkbox
-                    className="project-checkbox"
+                    className={`project-checkbox ${!shouldShowMoreActions && !jobsBulkForCurrentProject.length ? 'project-container-checkbox-hidden' : ''}`}
                     onChange={() => onCheckedProject(project.get('id'))}
                     value={
                       jobsBulkForCurrentProject.length === 0
@@ -574,7 +577,7 @@ const ProjectContainer = ({
                     </div>
                   )}
                 </div>
-                {shouldShowEditNameIcon && !isEditingName && (
+                {shouldShowMoreActions && !isEditingName && (
                   <Button
                     className="project-container-button-edit-name"
                     mode={BUTTON_MODE.GHOST}

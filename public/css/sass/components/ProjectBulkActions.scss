@@ -4,11 +4,10 @@
   position: sticky;
   top: 0;
   z-index: 3;
-  width: calc(100% + 100px);
-  height: 76px;
-  padding-top: 22px;
+  width: calc(100% + 102px);
+  padding-top: 14px;
   margin-left: -50px;
-  margin-bottom: 16px;
+  margin-bottom: 30px;
   background: colors.$grey5;
   background: linear-gradient(
     180deg,
@@ -16,6 +15,10 @@
     rgba(colors.$grey5, 1) 84%,
     rgba(colors.$grey5, 0) 100%
   );
+
+  &.project-bulk-actions-background-hidden {
+    visibility: hidden;
+  }
 }
 
 .project-bulk-actions-container {
@@ -27,7 +30,7 @@
   align-items: center;
   height: 32px;
   background-color: colors.$grey4;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 2px 0 rgba(0, 0, 0, 0.15);
   border-radius: 24px;
 
   > div {
@@ -39,7 +42,7 @@
   .project-bulk-actions-buttons {
     > span {
       margin-right: 10px;
-      color: colors.$grey7;
+      color: colors.$grey6;
 
       > :first-child {
         margin-right: 2px;

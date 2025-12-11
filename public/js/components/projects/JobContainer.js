@@ -889,7 +889,8 @@ class JobContainer extends React.Component {
       nextState.showDownloadProgress !== this.state.showDownloadProgress ||
       nextState.openOutsource !== this.state.openOutsource ||
       nextState.showTranslatorBox !== this.state.showTranslatorBox ||
-      nextProps.isChecked !== this.props.isChecked
+      nextProps.isChecked !== this.props.isChecked ||
+      nextProps.isCheckboxVisible !== this.props.isCheckboxVisible
     )
   }
 
@@ -963,6 +964,11 @@ class JobContainer extends React.Component {
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
             >
               <Checkbox
+                className={
+                  !this.props.isCheckboxVisible
+                    ? 'project-container-checkbox-hidden'
+                    : ''
+                }
                 onChange={() =>
                   this.props.onCheckedJob(this.props.job.get('id'))
                 }

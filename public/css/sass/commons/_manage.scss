@@ -115,6 +115,7 @@ div#manage-container {
       border-radius: 0 2px 2px 0;
       display: inline-block;
       margin-right: -33px;
+      padding-left: 10px !important;
     }
     .project-header {
       background-color: colors.$grey4;
@@ -136,7 +137,7 @@ div#manage-container {
       .project-id {
         font-size: 14px;
         font-weight: normal;
-        margin-left: 10px;
+        margin-left: 8px;
         display: inline-block;
         vertical-align: text-bottom;
         min-width: 72px;
@@ -427,10 +428,10 @@ div#manage-container {
                 70px
                 150px 120px 106px auto auto 1fr auto auto auto;
               align-items: center;
-              gap: 10px;
+              gap: 6px;
               transition: 0.3s ease;
               background-color: #ffffff;
-              padding: 8px 15px;
+              padding: 8px 10px !important;
 
               @media only screen and (max-width: 1200px) {
                 gap: 5px;
@@ -1040,4 +1041,8 @@ div#manage-container {
 
 ul {
   padding: 0;
+}
+
+.project-container-checkbox-hidden {
+  opacity: 0;
 }
