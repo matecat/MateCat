@@ -25,6 +25,20 @@ class JSONValidatorException extends Exception implements JsonSerializable
     }
 
     /**
+     * @param string $context
+     *
+     * @return array
+     */
+    public function getFormattedError(string $context): array
+    {
+        return [
+            'node'  => $this->error->dataPointer,
+            'schema' => '/api/v3/'.$context.'/schema',
+            'error' => $this->error->error,
+        ];
+    }
+
+    /**
      * @return string
      */
     public function getError(): string
