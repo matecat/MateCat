@@ -1,6 +1,11 @@
 # Matecat
 
 Matecat is an enterprise-level, web-based Computer-Assisted Translation (CAT) tool. It is designed to simplify post-editing and outsourcing workflows, providing a comprehensive set of features for managing and monitoring translation projects. Matecat is built for professional translators, project managers, and organizations that require efficient, collaborative, and scalable translation solutions.
+<<<<<<< Updated upstream
+=======
+
+You can freely use Matecat online at [www.matecat.com](https://www.matecat.com).
+>>>>>>> Stashed changes
 
 ## Installation
 
