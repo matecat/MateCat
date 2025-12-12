@@ -1,25 +1,33 @@
 # Matecat
-Matecat Official Repository. Matecat is an enterprise-level, web-based CAT tool designed to make post-editing and outsourcing easy and to provide a complete set of features to manage and monitor translation projects.
+
+Matecat is an enterprise-level, web-based Computer-Assisted Translation (CAT) tool. It is designed to simplify post-editing and outsourcing workflows, providing a comprehensive set of features for managing and monitoring translation projects. Matecat is built for professional translators, project managers, and organizations that require efficient, collaborative, and scalable translation solutions.
 
 ## Installation
-See the complete installation guide here:
+
+For detailed installation instructions, please refer to the official guide:
 
 [http://site.matecat.com/installation-guide/](http://site.matecat.com/installation-guide/)
 
-## Available scripts
+## What is Matecat?
 
-### `yarn format`
+Matecat enables users to translate documents efficiently by leveraging translation memories, machine translation, and advanced project management tools. It is built to support large-scale translation projects, facilitate collaboration among multiple users, and ensure high-quality results through an intuitive web interface.
 
-Format all supported files using [prettier](https://prettier.io/).
+## Available Scripts
 
-### `yarn lint`
+The following yarn commands are available for development and building:
 
-Lint JavaScript files using [eslint](https://eslint.org/).
+### `yarn watch`
 
-### `yarn test`
+Watches for changes in the source files and automatically rebuilds the project in development mode. Useful for local development as it provides live updates.
 
-Run tests related to files changed since last commit in watch mode, thanks to [jest](https://jestjs.io/).
+### `yarn build:dev`
 
-### `yarn coverage`
+Builds the project in development mode. This command prepares the application for testing and debugging, including source maps and unminified code.
 
-Run all the tests and collect the coverage information and report it, thanks to [jest](https://jestjs.io/).
+### `yarn build:production`
+
+Builds the project for production. This command generates optimized and minified assets suitable for deployment.
+
+---
+
+For more information, please visit the [Matecat website](http://site.matecat.com/).
