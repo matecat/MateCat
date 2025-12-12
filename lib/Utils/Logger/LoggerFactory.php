@@ -45,7 +45,6 @@ class LoggerFactory
      * @param string $fileName The file where logs will be written.
      *
      * @return MatecatLogger The initialized logger instance.
-     * @throws Exception
      */
     protected static function initMonolog(string $name, string $fileName): MatecatLogger
     {
@@ -90,7 +89,6 @@ class LoggerFactory
      * @param string $fileName The name of the log file. Defaults to 'log.txt'.
      *
      * @return MatecatLogger The logger instance.
-     * @throws Exception
      */
     public static function getLogger(?string $name = null, string $fileName = self::LOG_FILENAME): MatecatLogger
     {

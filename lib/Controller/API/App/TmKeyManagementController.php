@@ -131,6 +131,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getByUserAndKey(): void
     {
@@ -157,6 +158,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      * @param MemoryKeyStruct $memoryKey
      *
      * @return array
+     * @throws Exception
      */
     private function _checkForAdaptiveEngines(MemoryKeyStruct $memoryKey): array
     {

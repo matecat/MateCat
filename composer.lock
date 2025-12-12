@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "68e639ec6f41708f480cdc788c5d49cc",
+    "content-hash": "47ab1f56606e78388e29868604b58d0f",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1827,16 +1827,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v2.2.12",
+            "version": "v2.2.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "71765132c2ae03b445c877aa7ef60200bd839ded"
+                "reference": "84c35fa74a61edd1f2ff006eca5b92feed0b2ed6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/71765132c2ae03b445c877aa7ef60200bd839ded",
-                "reference": "71765132c2ae03b445c877aa7ef60200bd839ded",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/84c35fa74a61edd1f2ff006eca5b92feed0b2ed6",
+                "reference": "84c35fa74a61edd1f2ff006eca5b92feed0b2ed6",
                 "shasum": ""
             },
             "require": {
@@ -1888,9 +1888,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.12"
+                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.13"
             },
-            "time": "2025-10-27T17:38:26+00:00"
+            "time": "2025-12-11T13:18:31+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
@@ -4749,16 +4749,16 @@
         },
         {
             "name": "translated/lara-sdk",
-            "version": "1.3.0",
+            "version": "dev-feature/new-v2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/translated/lara-php.git",
-                "reference": "078ccc1733bf8846a228c313653f49ed58a42288"
+                "url": "git@github.com:translated/lara-php-dev.git",
+                "reference": "cc2dd2916305e3a2e0f592127ba47a5cab17bbb8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/translated/lara-php/zipball/078ccc1733bf8846a228c313653f49ed58a42288",
-                "reference": "078ccc1733bf8846a228c313653f49ed58a42288",
+                "url": "https://api.github.com/repos/translated/lara-php-dev/zipball/cc2dd2916305e3a2e0f592127ba47a5cab17bbb8",
+                "reference": "cc2dd2916305e3a2e0f592127ba47a5cab17bbb8",
                 "shasum": ""
             },
             "require": {
@@ -4766,13 +4766,18 @@
                 "ext-json": "*",
                 "php": ">=5.6.0"
             },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7|^6.0|^7.0|^8.0|^9.0"
+            },
+            "suggest": {
+                "monolog/monolog": "Allows logging of API requests and responses (^1.17 for PHP 5.6 compatibility)"
+            },
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "Lara\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -4784,11 +4789,7 @@
             ],
             "description": "Official Lara SDK for PHP",
             "homepage": "https://laratranslate.com/",
-            "support": {
-                "issues": "https://github.com/translated/lara-php/issues",
-                "source": "https://github.com/translated/lara-php/tree/v1.3.0"
-            },
-            "time": "2025-12-02T10:13:22+00:00"
+            "time": "2025-12-12T11:03:27+00:00"
         }
     ],
     "packages-dev": [
@@ -6469,7 +6470,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "translated/lara-sdk": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

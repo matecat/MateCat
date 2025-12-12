@@ -17,6 +17,7 @@ use Exception;
 use Klein\Response;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
+use ReflectionException;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
@@ -27,7 +28,7 @@ class LoginController extends AbstractStatefulKleinController
     use RateLimiterTrait;
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function directLogout(): void
     {

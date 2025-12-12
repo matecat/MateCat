@@ -3,12 +3,14 @@
 namespace Utils\Engines;
 
 use Exception;
+use Lara\AccessKey;
 use Lara\Glossary;
+use Lara\Internal\HttpClient;
 use Lara\LaraApiException;
-use Lara\LaraCredentials;
 use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
+use Lara\Translator;
 use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
@@ -24,6 +26,7 @@ use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara\Headers;
+use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
@@ -82,9 +85,22 @@ class Lara extends AbstractEngine
     }
 
     /**
+     * Retrieves the internal HTTP client instance used for making requests.
+     * This method abstracts the retrieval of the HttpClient from the underlying client structure.
+     *
+     * @return HttpClient & HttpClientInterface An instance of the HttpClient used internally for HTTP operations.
+     * @throws Exception
+     */
+    public function getInternalClient(): HttpClient & HttpClientInterface
+    {
+        return $this->_getClient()->getHttpClient();
+    }
+
+    /**
      * Get MMTServiceApi client
      *
      * @return LaraClient
+     * @throws LaraException
      * @throws Exception
      */
     protected function _getClient(): LaraClient
@@ -94,7 +110,7 @@ class Lara extends AbstractEngine
         }
 
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
-        $credentials = new LaraCredentials($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
+        $credentials = new AccessKey($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
 
         $mmtStruct = MMTStruct::getStruct();
         $mmtStruct->type = EngineConstants::MT;
@@ -121,7 +137,6 @@ class Lara extends AbstractEngine
         }
 
         $this->clientLoaded = new LaraClient($credentials);
-
         return $this->clientLoaded;
     }
 
@@ -179,10 +194,10 @@ class Lara extends AbstractEngine
     {
         // Branch-specific values
         if ($this->_isAnalysis) {
-            $config['keys'] = $this->_reMapKeyList($config['id_user'] ?? []);
+            $config['keys'] = $this->reMapKeyList($config['id_user'] ?? []);
         } else {
             //get the Owner Keys from the Job
-            $config['keys'] = $this->_reMapKeyList($config['keys'] ?? []);
+            $config['keys'] = $this->reMapKeyList($config['keys'] ?? []);
         }
 
         return $config;
@@ -406,7 +421,7 @@ class Lara extends AbstractEngine
     public function update($_config)
     {
         $client = $this->_getClient();
-        $_keys = $this->_reMapKeyList($_config['keys'] ?? []);
+        $_keys = $this->reMapKeyList($_config['keys'] ?? []);
 
         if (empty($_keys)) {
             $this->logger->debug(["LARA: update skipped. No keys provided."]);
@@ -452,7 +467,6 @@ class Lara extends AbstractEngine
 
 //         let MMT to have the last word on requeue
         return empty($this->mmt_SET_PrivateLicense) || $this->mmt_SET_PrivateLicense->update($_config);
-
     }
 
     /**
@@ -492,14 +506,13 @@ class Lara extends AbstractEngine
             $time_end = microtime(true);
             $time = $time_end - $time_start;
 
-            $this->logger->debug( [
-                'LARA REQUEST'    => "DELETE https://api.laratranslate.com/memories/{$memoryKey[ 'id' ]}",
-                'timing'          => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
-                'keys'            => $memoryKey,
-            ] );
+            $this->logger->debug([
+                'LARA REQUEST' => "DELETE https://api.laratranslate.com/memories/{$memoryKey[ 'id' ]}",
+                'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
+                'keys' => $memoryKey,
+            ]);
 
             return $res;
-
         } catch (LaraApiException $e) {
             if ($e->getCode() == 404) {
                 return [];
@@ -523,7 +536,7 @@ class Lara extends AbstractEngine
      * @throws LaraException
      * @throws Exception
      */
-    public function importMemory(string $filePath, string $memoryKey, UserStruct $user)
+    public function importMemory(string $filePath, string $memoryKey, UserStruct $user): void
     {
         $clientMemories = $this->_getClient()->memories;
 
@@ -580,7 +593,7 @@ class Lara extends AbstractEngine
                     $keyIds[] = $memKey->key;
                 }
 
-                $keyIds = $this->_reMapKeyList(array_values(array_unique($keyIds)));
+                $keyIds = $this->reMapKeyList(array_values(array_unique($keyIds)));
                 $client = $this->_getClient();
                 $res = $client->memories->connect($keyIds);
                 $this->logger->debug("Keys connected: " . implode(',', $keyIds) . " -> " . json_encode($res));
@@ -603,11 +616,11 @@ class Lara extends AbstractEngine
      *
      * @return array
      */
-    protected function _reMapKeyList(array $_keys = []): array
+    public function reMapKeyList(array $_keys = []): array
     {
         return array_map(function ($key) {
-                return 'ext_my_' . $key;
-            }, $_keys);
+            return 'ext_my_' . $key;
+        }, $_keys);
     }
 
     /**

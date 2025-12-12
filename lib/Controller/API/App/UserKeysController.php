@@ -222,11 +222,12 @@ class UserKeysController extends KleinController
      * supports adaptive machine translation (MT), it verifies ownership of the memory
      * key before deletion.
      *
-     * @param MemoryKeyStruct $memoryKey      The memory key to be removed.
-     * @param string|null     $enginesListCsv A comma-separated list of engine names
+     * @param MemoryKeyStruct $memoryKey The memory key to be removed.
+     * @param string|null $enginesListCsv A comma-separated list of engine names
      *                                        from which the memory key should be removed.
+     * @throws Exception
      */
-    private function removeKeyFromEngines(MemoryKeyStruct $memoryKey, ?string $enginesListCsv = '')
+    private function removeKeyFromEngines(MemoryKeyStruct $memoryKey, ?string $enginesListCsv = ''): void
     {
         // Convert the CSV string into an array of engine names, filtering out empty values.
         $deleteFrom = array_filter(explode(",", $enginesListCsv));

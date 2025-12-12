@@ -43,35 +43,57 @@ route( '/api/app/teams/members/invite/[:jwt]', 'GET', [ '\Controller\API\App\Tea
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]', 'POST', [ '\Controller\API\App\OutsourceConfirmationController', 'confirm' ] );
 
-route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]', 'DELETE', [ 'Controller\API\App\CompletionEventController', 'delete' ] );
-
 //Health check
 route( '/api/app/heartbeat/ping', 'GET', [ '\Controller\API\App\HeartBeat', 'ping' ] );
 
+// JOBS
 $klein->with( '/api/app/jobs/[:id_job]/[:password]', function () {
     route( '', 'GET', [ '\Controller\API\V3\ChunkController', 'show' ] );
     route( '/quality-report', 'GET', [ '\Controller\API\App\QualityReportControllerAPI', 'show' ] ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
     route( '/quality-report/segments', 'GET', [ 'Controller\API\App\QualityReportControllerAPI', 'segments_for_ui' ] ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
+    route( '/stats', 'GET', [ 'Controller\API\V2\StatsController', 'stats' ] );
+    route( '/segments', 'POST', [ 'Controller\API\App\FilesController', 'segments' ] );
+
+    route(' /segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'job' ] );
+
+    // Completion events
+    route( '/completion-events/[:id_event]', 'DELETE', [ 'Controller\API\App\CompletionEventController', 'delete' ] );
+
+    // Metadata
+    route( '/metadata', 'GET', ['\Controller\API\V3\MetaDataController', 'index'] );
+    route( '/metadata', 'POST', ['\Controller\API\App\JobMetadataController', 'save'] );
+    route( '/metadata/[:key]', 'DELETE', ['\Controller\API\App\JobMetadataController', 'delete'] );
+
+    // LARA AUTH
+    route( '/lara/auth', 'GET', [ '\Controller\API\App\Authentication\LaraAuthController', 'auth' ] );
+
 } );
 
-route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET', [ 'Controller\API\V2\StatsController', 'stats' ] );
-route( '/api/app/jobs/[:id_job]/[:password]/segments', 'POST', [ 'Controller\API\App\FilesController', 'segments' ] );
+// PROJECTS
+$klein->with( '/api/app/projects/[:id_project]/[:password]', function () {
+    route( '/segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'project' ] );
+    route( '/change-name', 'POST', [ 'Controller\API\V2\ChangeProjectNameController', 'changeName' ] );
 
+});
+route( '/api/app/projects/[:id_project]/token/[:project_access_token]', 'GET', [ 'Controller\API\V2\ProjectsController', 'get' ] );
+
+// LARA
+$klein->with( '/api/v3/lara/[i:engineId]', function () {
+    route( '/glossaries', 'GET', [ 'Controller\API\V3\LaraController', 'glossaries' ] );
+} );
+
+// MEMORY KEYS
 $klein->with( '/api/app/api-key', function () {
     route( '/create', 'POST', [ '\Controller\API\App\ApiKeyController', 'create' ] );
     route( '/show', 'GET', [ '\Controller\API\App\ApiKeyController', 'show' ] );
     route( '/delete', 'DELETE', [ '\Controller\API\App\ApiKeyController', 'delete' ] );
 } );
 
-route( '/api/app/projects/[:id_project]/[:password]/segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'project' ] ); // to be deleted from here
-route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'job' ] );     // to be deleted from here
+route( '/api/app/change-password', 'POST', [ 'Controller\API\V2\ChangePasswordController', 'changePassword' ] ); // ?? this should be in the `jobs` namespace
 
-route( '/api/app/change-password', 'POST', [ 'Controller\API\V2\ChangePasswordController', 'changePassword' ] );
-route( '/api/app/projects/[:id_project]/[:password]/change-name', 'POST', [ 'Controller\API\V2\ChangeProjectNameController', 'changeName' ] );
-
-// TM Keys
+// MEMORY TM Keys
 $klein->with( '/api/app/tm-keys', function () {
-    route( '/[:id_job]/[:password]', 'GET', [ '\Controller\API\App\TmKeyManagementController', 'getByJob' ] );
+    route( '/[:id_job]/[:password]', 'GET', [ '\Controller\API\App\TmKeyManagementController', 'getByJob' ] ); // ?? this should be in the `jobs` namespace
     route( '/engines/info/[:key]', 'GET', [ '\Controller\API\App\TmKeyManagementController', 'getByUserAndKey' ] );
 } );
 
@@ -149,7 +171,6 @@ $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\Controller\API\V3\FiltersConfigTemplateController', 'default' ] );
 } );
 
-route( '/api/app/projects/[:id_project]/token/[:project_access_token]', 'GET', [ 'Controller\API\V2\ProjectsController', 'get' ] );
 
 // MISC (OLD AJAX ROUTES)
 route( '/api/app/xliff-to-target/convert', 'POST', [ 'Controller\API\App\XliffToTargetConverterController', 'convert' ] );
@@ -198,9 +219,4 @@ route( '/api/app/convert-file', 'POST', ['Controller\API\App\ConvertFileControll
 route( '/api/app/set-chunk-completed', 'POST', ['Controller\API\App\SetChunkCompletedController', 'complete' ] );
 route( '/api/app/download-analysis-report', 'POST', ['Controller\API\App\DownloadAnalysisReportController', 'download' ] );
 
-// Metadata
-$klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
-    route( '', 'GET', [ '\Controller\API\V3\MetaDataController', 'index' ] );
-    route( '', 'POST', [ '\Controller\API\App\JobMetadataController', 'save' ] );
-    route( '/[:key]', 'DELETE', [ '\Controller\API\App\JobMetadataController', 'delete' ] );
-} );
+
