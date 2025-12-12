@@ -14,6 +14,7 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentOriginalDataDao;
 use Model\Translations\WarningDao;
 use Utils\LQA\QA;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -112,7 +113,9 @@ class GetWarningController extends KleinController
         $chunk      = $this->getChunk($id_job, $password);
         $featureSet = $this->getFeatureSet();
         $metadata   = new MetadataDao();
-        $Filter     = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, [], $metadata->getSubfilteringCustomHandlers($chunk->id, $password));
+        $dataRefMap = (!empty($id)) ? SegmentOriginalDataDao::getSegmentDataRefMap($id) : [];
+
+        $Filter     = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $password));
 
         $src_content = $Filter->fromLayer2ToLayer1( $src_content );
         $trg_content = $Filter->fromLayer2ToLayer1( $trg_content );
