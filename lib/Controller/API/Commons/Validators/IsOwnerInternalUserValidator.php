@@ -9,14 +9,23 @@
 
 namespace Controller\API\Commons\Validators;
 
+use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
-use Controller\API\Commons\Exceptions\UnprocessableException;
 use Exception;
 use Model\Jobs\JobStruct;
 
 class IsOwnerInternalUserValidator extends Base
 {
+
+    private JobStruct $jobStruct;
+
+    public function __construct(KleinController $controller, JobStruct $jobStruct)
+    {
+        parent::__construct($controller);
+        $this->jobStruct = $jobStruct;
+    }
+
     /**
      * @return void
      * @throws AuthorizationError
@@ -25,14 +34,9 @@ class IsOwnerInternalUserValidator extends Base
      */
     public function _validate(): void
     {
-        /** @var JobStruct $jobStruct */
-        $jobStruct = $this->args[0];
-        if (!$jobStruct instanceof JobStruct || empty($jobStruct->owner)) {
-            throw new UnprocessableException("Invalid job");
-        }
         $this->controller->getFeatureSet()->filter(
             "isAnInternalUser",
-            $jobStruct->owner
+            $this->jobStruct->owner
         ) ?: throw new AuthorizationError('Forbidden, Lara Think only accepts requests from internal users');
     }
 

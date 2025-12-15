@@ -66,6 +66,7 @@ $klein->with( '/api/app/jobs/[:id_job]/[:password]', function () {
 
     // LARA AUTH
     route( '/lara/auth', 'GET', [ '\Controller\API\App\Authentication\LaraAuthController', 'auth' ] );
+    route( '/lara/format', 'POST', [ '\Controller\API\App\Authentication\LaraAuthController', 'formatContribution' ] );
 
 } );
 

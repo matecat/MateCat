@@ -36,14 +36,16 @@ class LaraAuthController extends AbstractStatefulKleinController
     {
         $this->appendValidator(new LoginValidator($this));
 
-        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator = new ChunkPasswordValidator($this, ttl: 3600);
         $this->appendValidator(
             $chunkValidator->onSuccess(
                 function () use ($chunkValidator) {
                     $this->chunk = $chunkValidator->getChunk();
                 }
             )->onSuccess(
-                fn() => (new IsOwnerInternalUserValidator($this, $this->chunk))->validate()
+                function () use ($chunkValidator) {
+                    (new IsOwnerInternalUserValidator($this, $chunkValidator->getChunk()))->validate();
+                }
             )
         );
     }
@@ -122,6 +124,16 @@ class LaraAuthController extends AbstractStatefulKleinController
             $this->incrementRateLimitCounter($email, $rateLimitKey);
             $this->incrementRateLimitCounter($ip, $rateLimitKey);
         }
+    }
+
+    /**
+     * TODO: implement this method
+     * @param array $data
+     * @return array
+     */
+    public function formatContribution(array $data): array
+    {
+        return $data;
     }
 
 }

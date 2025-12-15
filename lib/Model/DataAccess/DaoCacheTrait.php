@@ -70,6 +70,7 @@ trait DaoCacheTrait
      *
      * @return ?T[]
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _getFromCacheMap(string $keyMap, string $query): ?array
     {
