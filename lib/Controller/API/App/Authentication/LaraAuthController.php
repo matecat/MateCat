@@ -11,6 +11,7 @@ namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\IsOwnerInternalUserValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
 use DomainException;
@@ -41,6 +42,8 @@ class LaraAuthController extends AbstractStatefulKleinController
                 function () use ($chunkValidator) {
                     $this->chunk = $chunkValidator->getChunk();
                 }
+            )->onSuccess(
+                fn() => (new IsOwnerInternalUserValidator($this, $this->chunk))->validate()
             )
         );
     }
