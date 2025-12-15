@@ -64,6 +64,7 @@
   }
 
   .label-tmx-select > span:last-of-type {
+    color: colors.$linkBlue;
     &[aria-label]::after {
       min-width: 260px;
       white-space: normal;
