@@ -220,6 +220,7 @@ let TranslationMatches = {
             })
             .catch((e) => {
               console.error('Lara Translate error:', e)
+              return getContributionRequest()
             })
         })
         .catch(() => {
