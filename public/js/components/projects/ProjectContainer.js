@@ -333,8 +333,8 @@ const ProjectContainer = ({
           lastAction={lastAction}
           isChunkOutsourced={isChunkOutsourced}
           activityLogUrl={getActivityLogUrl()}
-          isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
-          onCheckedJob={onCheckedJob}
+          /* isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
+          onCheckedJob={onCheckedJob} */
         />
       )
       chunks.push(item)
@@ -524,10 +524,10 @@ const ProjectContainer = ({
     ''
   )
 
-  const jobsBulkForCurrentProject = project
+  /*  const jobsBulkForCurrentProject = project
     .get('jobs')
     .toJS()
-    .filter(({id}) => jobsBulk.some((value) => value === id))
+    .filter(({id}) => jobsBulk.some((value) => value === id)) */
 
   return (
     <div
@@ -547,7 +547,7 @@ const ProjectContainer = ({
                 className={`sixteen wide column project-title ${isEditingName ? 'project-title-editing-name-mode' : ``}`}
               >
                 <div className="ui ribbon label">
-                  <Checkbox
+                  {/* <Checkbox
                     className="project-checkbox"
                     onChange={() => onCheckedProject(project.get('id'))}
                     value={
@@ -558,7 +558,7 @@ const ProjectContainer = ({
                           ? CHECKBOX_STATE.CHECKED
                           : CHECKBOX_STATE.INDETERMINATE
                     }
-                  />
+                  /> */}
                   <div className="project-id" title="Project id">
                     {'(' + project.get('id') + ')'}
                   </div>

@@ -962,7 +962,7 @@ class JobContainer extends React.Component {
               className="chunk wide column pad-right-10 shadow-1"
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
             >
-              <Checkbox
+              {/* <Checkbox
                 onChange={() =>
                   this.props.onCheckedJob(this.props.job.get('id'))
                 }
@@ -971,7 +971,7 @@ class JobContainer extends React.Component {
                     ? CHECKBOX_STATE.CHECKED
                     : CHECKBOX_STATE.UNCHECKED
                 }
-              />
+              /> */}
               <div className="job-id" title="Job Id">
                 ID: {idJobLabel}
               </div>
