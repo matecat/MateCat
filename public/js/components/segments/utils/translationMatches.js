@@ -12,6 +12,8 @@ import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
+import {laraAuth} from '../../../api/laraAuth'
+import {laraTranslate} from '../../../api/laraTranslate'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -195,18 +197,37 @@ let TranslationMatches = {
     }
     const {contextListBefore, contextListAfter} =
       SegmentUtils.getSegmentContext(id_segment_original)
-    return getContributions({
-      idSegment: id_segment_original,
-      target: currentSegment.segment,
-      crossLanguages: crossLanguageSettings
-        ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
-        : [],
-      contextListBefore,
-      contextListAfter,
-    }).catch((errors) => {
-      CatToolActions.processErrors(errors, 'getContribution')
-      TranslationMatches.renderContributionErrors(errors, id_segment_original)
-    })
+    const getContributionRequest = () => {
+      return getContributions({
+        idSegment: id_segment_original,
+        target: currentSegment.segment,
+        crossLanguages: crossLanguageSettings
+          ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
+          : [],
+        contextListBefore,
+        contextListAfter,
+      }).catch((errors) => {
+        CatToolActions.processErrors(errors, 'getContribution')
+        TranslationMatches.renderContributionErrors(errors, id_segment_original)
+      })
+    }
+    if (config.active_engine?.name === 'Lara') {
+      laraAuth({idJob: config.id_job, password: config.password})
+        .then((response) => {
+          laraTranslate({token: response.token, source: currentSegment.segment})
+            .then((response) => {
+              console.log('Lara Translate response:', response)
+            })
+            .catch((e) => {
+              console.error('Lara Translate error:', e)
+            })
+        })
+        .catch(() => {
+          return getContributionRequest()
+        })
+    } else {
+      return getContributionRequest()
+    }
   },
 
   processContributions: function (data, sid) {
