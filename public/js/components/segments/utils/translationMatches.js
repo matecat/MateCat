@@ -222,6 +222,25 @@ let TranslationMatches = {
           })
             .then((response) => {
               console.log('Lara Translate response:', response)
+              const translation =
+                response.translation.find((item) => item.translatable)?.text ||
+                ''
+              const contributionData = {
+                id: '0',
+                segment: currentSegment.segment,
+                translation: translation,
+                match: '100%',
+                created_by: 'Lara MT',
+                raw_translation: translation,
+                raw_segment: currentSegment.segment,
+                ICE: false,
+              }
+              const data = {
+                matches: [contributionData],
+                errors: [],
+                id_segment: id_segment_original,
+              }
+              SegmentActions.getContributionsSuccess(data, data.id_segment)
             })
             .catch((e) => {
               console.error('Lara Translate error:', e)
