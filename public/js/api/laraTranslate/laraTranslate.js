@@ -7,6 +7,7 @@ export const laraTranslate = async ({
   contextListAfter,
   sid,
   jobId,
+  glossaries,
 }) => {
   const credentials = new AuthToken(token, null)
 
@@ -14,6 +15,7 @@ export const laraTranslate = async ({
     multiline: false,
     contentType: 'application/xliff+xml',
     headers: {'X-Lara-Engine-Tuid': `${jobId}:${sid}`},
+    glossaries: glossaries,
   })
   let textBlocks = [
     ...contextListBefore.map((item) => {

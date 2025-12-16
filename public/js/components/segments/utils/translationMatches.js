@@ -14,6 +14,7 @@ import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
 import {laraAuth} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
+import CatToolStore from '../../../stores/CatToolStore'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -216,7 +217,9 @@ let TranslationMatches = {
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
           // console.log('Text to translate via Lara:', currentSegment.segment)
-          // todo glossaries
+          const jobMetadata = CatToolStore.getJobMetadata()
+          const glossaries =
+            jobMetadata?.project?.mt_extra?.lara_glossaries || []
           laraTranslate({
             token: response.token,
             source: currentSegment.segment,
@@ -224,10 +227,13 @@ let TranslationMatches = {
             contextListAfter,
             sid: id_segment_original,
             jobId: config.id_job,
+            glossaries,
           })
             .then((response) => {
               // console.log('Lara Translate response:', response)
-              const translation = response.translation.find((item) => item.translatable)?.text || ''
+              const translation =
+                response.translation.find((item) => item.translatable)?.text ||
+                ''
               return getContributionRequest(translation)
             })
             .catch((e) => {
