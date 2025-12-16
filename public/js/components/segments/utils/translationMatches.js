@@ -214,7 +214,12 @@ let TranslationMatches = {
     if (config.active_engine?.name === 'Lara') {
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
-          laraTranslate({token: response.token, source: currentSegment.segment})
+          laraTranslate({
+            token: response.token,
+            source: currentSegment.segment,
+            contextListBefore,
+            contextListAfter,
+          })
             .then((response) => {
               console.log('Lara Translate response:', response)
             })
