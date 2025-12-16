@@ -214,6 +214,7 @@ let TranslationMatches = {
     if (config.active_engine?.name === 'Lara') {
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
+          // console.log('Text to translate via Lara:', currentSegment.segment)
           laraTranslate({
             token: response.token,
             source: currentSegment.segment,
@@ -221,7 +222,7 @@ let TranslationMatches = {
             contextListAfter,
           })
             .then((response) => {
-              console.log('Lara Translate response:', response)
+              // console.log('Lara Translate response:', response)
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
@@ -235,6 +236,7 @@ let TranslationMatches = {
                 raw_segment: currentSegment.segment,
                 ICE: false,
               }
+              // console.log('Translation from Lara MT:', translation)
               const data = {
                 matches: [contributionData],
                 errors: [],

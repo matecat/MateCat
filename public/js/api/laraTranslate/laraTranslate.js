@@ -5,12 +5,15 @@ export const laraTranslate = async ({
   source,
   contextListBefore,
   contextListAfter,
+  sid,
+  jobId,
 }) => {
   const credentials = new AuthToken(token, null)
 
   const lara = new Translator(credentials, {
     multiline: false,
     contentType: 'application/xliff+xml',
+    headers: {'X-Lara-Engine-Tuid': `${jobId}:${sid}`},
   })
   let textBlocks = [
     ...contextListBefore.map((item) => {
