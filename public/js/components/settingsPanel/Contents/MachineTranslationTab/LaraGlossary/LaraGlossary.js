@@ -59,9 +59,13 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const glossaries = activeGlossariesRef.current
     let memories = []
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
-      const rows = memories.filter(({id}) =>
-        project.mt_extra?.lara_glossaries?.some((value) => value === id),
-      )
+      const rows = memories.filter(({id}) => {
+        const laraGlossaries = project.mt_extra?.lara_glossaries
+          ? JSON.parse(project.mt_extra.lara_glossaries)
+          : []
+
+        return laraGlossaries.some((value) => value === id)
+      })
       updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
     }
 
