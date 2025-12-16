@@ -213,7 +213,11 @@ let TranslationMatches = {
         TranslationMatches.renderContributionErrors(errors, id_segment_original)
       })
     }
-    if (config.active_engine?.name === 'Lara') {
+
+    const jobLanguages = [ config.source_code, config.target_code ];
+    let allowed = jobLanguages.filter(x => ['en', 'it'].includes(x.split('-')[0])).length === 2;
+
+    if (config.active_engine?.name === 'Lara' && allowed) {
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
           // console.log('Text to translate via Lara:', currentSegment.segment)
