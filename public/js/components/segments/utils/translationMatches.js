@@ -14,6 +14,7 @@ import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
 import {laraAuth} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
+import {laraContribution} from '../../../api/laraContribtion/laraContribution'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -220,13 +221,15 @@ let TranslationMatches = {
             source: currentSegment.segment,
             contextListBefore,
             contextListAfter,
+            sid: id_segment_original,
+            jobId: config.id_job,
           })
             .then((response) => {
               // console.log('Lara Translate response:', response)
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
-              const contributionData = {
+              /*const contributionData = {
                 id: '0',
                 segment: currentSegment.segment,
                 translation: translation,
@@ -242,7 +245,16 @@ let TranslationMatches = {
                 errors: [],
                 id_segment: id_segment_original,
               }
-              SegmentActions.getContributionsSuccess(data, data.id_segment)
+              SegmentActions.getContributionsSuccess(data, data.id_segment)*/
+
+              laraContribution({
+                source: currentSegment.segment,
+                contextListBefore,
+                contextListAfter,
+                sid: id_segment_original,
+                jobId: config.id_job,
+                translation,
+              }).catch(() => getContributionRequest())
             })
             .catch((e) => {
               console.error('Lara Translate error:', e)
