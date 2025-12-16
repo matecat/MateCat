@@ -17,6 +17,13 @@ import UserConstants from '../../../constants/UserConstants'
 import {changeJobPassword} from '../../../api/changeJobPassword'
 import {BulkAssignToMember} from './BulkAssignToMember'
 import {TOOLTIP_POSITION} from '../../common/Tooltip'
+import SwitchHorizontal from '../../../../img/icons/SwitchHorizontal'
+import AssignToMember from '../../../../img/icons/AssignToMember'
+import Archive from '../../../../img/icons/Archive'
+import Refresh from '../../../../img/icons/Refresh'
+import Trash from '../../../../img/icons/Trash'
+import ChangePassword from '../../../../img/icons/ChangePassword'
+import PencilLine from '../../../../img/icons/PencilLine'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -474,6 +481,26 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         const tooltip =
           'Some projects are only partially selected. Select all jobs to enable this action.'
 
+        const icon =
+          action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id ? (
+            <SwitchHorizontal />
+          ) : action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id ? (
+            <AssignToMember />
+          ) : action.id === JOBS_ACTIONS.ARCHIVE.id ? (
+            <Archive />
+          ) : action.id === JOBS_ACTIONS.UNARCHIVE.id ||
+            action.id === JOBS_ACTIONS.RESUME.id ? (
+            <Refresh />
+          ) : action.id === JOBS_ACTIONS.CANCEL.id ||
+            action.id === JOBS_ACTIONS.DELETE.id ||
+            action.id === JOBS_ACTIONS.DELETE_PERMANENTLY.id ? (
+            <Trash />
+          ) : action.id === JOBS_ACTIONS.CHANGE_PASSWORD.id ? (
+            <ChangePassword />
+          ) : action.id === JOBS_ACTIONS.GENERATE_REVISE_2.id ? (
+            <PencilLine />
+          ) : undefined
+
         return (
           <div key={index}>
             <Button
@@ -495,6 +522,7 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
                 onClick: () => onClickAction(action),
               }}
             >
+              {icon}
               {action.label}
             </Button>
           </div>
