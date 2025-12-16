@@ -37,6 +37,8 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      */
     public ?array $projectStruct = [];
 
+    public ?string $translation = null; // is set in the case of Lara Think
+
     public array $contexts = [
             'context_before' => null,
             'segment'        => null,

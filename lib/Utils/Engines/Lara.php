@@ -10,7 +10,6 @@ use Lara\LaraApiException;
 use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
-use Lara\Translator;
 use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
@@ -220,69 +219,134 @@ class Lara extends AbstractEngine
             return [];
         }
 
-        // init lara client and mmt fallback
-        $client = $this->_getClient();
+        if (empty($_config['translation'])) { // This is a normal request, not Lara Think
 
-        $_config = $this->configureContribution($_config);
+            // init lara client and mmt fallback
+            $client = $this->_getClient();
 
-        try {
-            // call lara
-            $translateOptions = new TranslateOptions();
-            $translateOptions->setAdaptTo($_config['keys']);
-            $translateOptions->setMultiline(false);
-            $translateOptions->setContentType('application/xliff+xml');
-            $headers = new Headers();
+            $_config = $this->configureContribution($_config);
 
-            if (!empty($_config['tuid']) and is_string($_config['tuid'])) {
-                $headers->setTuid($_config['tuid']);
-            }
+            try {
+                // call lara
+                $translateOptions = new TranslateOptions();
+                $translateOptions->setAdaptTo($_config['keys']);
+                $translateOptions->setMultiline(false);
+                $translateOptions->setContentType('application/xliff+xml');
+                $headers = new Headers();
 
-            $translateOptions->setHeaders($headers->getArrayCopy());
-
-            if (!empty($_config['project_id'])) {
-                $metadataDao = new MetadataDao();
-                $metadata = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
-
-                if ($metadata !== null) {
-                    $metadata = html_entity_decode($metadata->value);
-                    $laraGlossariesArray = json_decode($metadata, true);
-                    $translateOptions->setGlossaries($laraGlossariesArray);
+                if (!empty($_config['tuid']) and is_string($_config['tuid'])) {
+                    $headers->setTuid($_config['tuid']);
                 }
-            }
 
-            $request_translation = [];
+                $translateOptions->setHeaders($headers->getArrayCopy());
 
-            foreach ($_config['context_list_before'] ?? [] as $c) {
-                $request_translation[] = new TextBlock($c, false);
-            }
+                if (!empty($_config['project_id'])) {
+                    $metadataDao = new MetadataDao();
+                    $metadata = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
 
-            $request_translation[] = new TextBlock($_config['segment']);
-
-            foreach ($_config['context_list_after'] ?? [] as $c) {
-                $request_translation[] = new TextBlock($c, false);
-            }
-
-            $time_start = microtime(true);
-            $translationResponse = $client->translate(
-                $request_translation,
-                $_config['source'],
-                $_config['target'],
-                $translateOptions
-            );
-            $time_end = microtime(true);
-            $time = $time_end - $time_start;
-
-            $translation = "";
-            $tList = $translationResponse->getTranslation();
-            foreach ($tList as $t) {
-                if ($t->isTranslatable()) {
-                    $translation = $t->getText();
-                    break;
+                    if ($metadata !== null) {
+                        $metadata = html_entity_decode($metadata->value);
+                        $laraGlossariesArray = json_decode($metadata, true);
+                        $translateOptions->setGlossaries($laraGlossariesArray);
+                    }
                 }
-            }
 
+                $request_translation = [];
+
+                foreach ($_config['context_list_before'] ?? [] as $c) {
+                    $request_translation[] = new TextBlock($c, false);
+                }
+
+                $request_translation[] = new TextBlock($_config['segment']);
+
+                foreach ($_config['context_list_after'] ?? [] as $c) {
+                    $request_translation[] = new TextBlock($c, false);
+                }
+
+                $time_start = microtime(true);
+                $translationResponse = $client->translate(
+                    $request_translation,
+                    $_config['source'],
+                    $_config['target'],
+                    $translateOptions
+                );
+                $time_end = microtime(true);
+                $time = $time_end - $time_start;
+
+                $translation = "";
+                $tList = $translationResponse->getTranslation();
+                foreach ($tList as $t) {
+                    if ($t->isTranslatable()) {
+                        $translation = $t->getText();
+                        break;
+                    }
+                }
+
+                // Get score from MMT Quality Estimation
+                if (isset($_config['include_score']) && $_config['include_score']) {
+                    $score = $this->getQualityEstimation(
+                        $_config['source'],
+                        $_config['target'],
+                        $_config['segment'],
+                        $translation,
+                        $_config['mt_qe_engine_id'] ?? '2'
+                    );
+                }
+
+                $this->logger->debug([
+                    'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
+                    'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
+                    'q' => $request_translation,
+                    'adapt_to' => $_config['keys'],
+                    'source' => $_config['source'],
+                    'target' => $_config['target'],
+                    'content_type' => 'application/xliff+xml',
+                    'multiline' => false,
+                    'translation' => $translation,
+                    'score' => $score ?? null,
+                    'extra_headers' => $headers->getArrayCopy(),
+                ]);
+            } catch (LaraException $t) {
+                if ($t->getCode() == 429) {
+                    $this->logger->debug("Lara quota exceeded. You have exceeded your 'api_translation_chars' quota");
+
+                    $engine_type = explode("\\", self::class);
+                    $engine_type = array_pop($engine_type);
+                    $message = json_encode([
+                        '_type' => 'quota_exceeded',
+                        'data' => [
+                            'id_job' => $_config['job_id'],
+                            'payload' => [
+                                'engine' => $engine_type,
+                                'code' => $t->getCode(),
+                                'message' => "Lara quota exceeded. " . $t->getMessage()
+                            ]
+                        ]
+                    ]);
+
+                    $queueHandler = AMQHandler::getNewInstanceForDaemons();
+                    $queueHandler->publishToNodeJsClients(
+                        AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME,
+                        new Message($message)
+                    );
+
+                    return [];
+                } elseif ($t->getCode() == 401 || $t->getCode() == 403) {
+                    $this->logger->debug(["Missing or invalid authentication header.", $t->getMessage(), $t->getCode()]);
+                    throw new LaraException(
+                        "Lara credentials not valid, please verify their validity and try again",
+                        $t->getCode(),
+                        $t
+                    );
+                }
+
+                // mmt fallback
+                return $this->mmt_GET_Fallback->get($_config);
+            }
+        } else {
+            $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
-            if (isset($_config['include_score']) and $_config['include_score']) {
+            if (isset($_config['include_score']) && $_config['include_score']) {
                 $score = $this->getQualityEstimation(
                     $_config['source'],
                     $_config['target'],
@@ -293,54 +357,14 @@ class Lara extends AbstractEngine
             }
 
             $this->logger->debug([
-                'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
-                'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
-                'q' => $request_translation,
-                'adapt_to' => $_config['keys'],
+                'LARA THINK REQUEST' => 'from browser',
                 'source' => $_config['source'],
                 'target' => $_config['target'],
                 'content_type' => 'application/xliff+xml',
                 'multiline' => false,
                 'translation' => $translation,
                 'score' => $score ?? null,
-                'extra_headers' => $headers->getArrayCopy(),
             ]);
-        } catch (LaraException $t) {
-            if ($t->getCode() == 429) {
-                $this->logger->debug("Lara quota exceeded. You have exceeded your 'api_translation_chars' quota");
-
-                $engine_type = explode("\\", self::class);
-                $engine_type = array_pop($engine_type);
-                $message = json_encode([
-                    '_type' => 'quota_exceeded',
-                    'data' => [
-                        'id_job' => $_config['job_id'],
-                        'payload' => [
-                            'engine' => $engine_type,
-                            'code' => $t->getCode(),
-                            'message' => "Lara quota exceeded. " . $t->getMessage()
-                        ]
-                    ]
-                ]);
-
-                $queueHandler = AMQHandler::getNewInstanceForDaemons();
-                $queueHandler->publishToNodeJsClients(
-                    AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME,
-                    new Message($message)
-                );
-
-                return [];
-            } elseif ($t->getCode() == 401 || $t->getCode() == 403) {
-                $this->logger->debug(["Missing or invalid authentication header.", $t->getMessage(), $t->getCode()]);
-                throw new LaraException(
-                    "Lara credentials not valid, please verify their validity and try again",
-                    $t->getCode(),
-                    $t
-                );
-            }
-
-            // mmt fallback
-            return $this->mmt_GET_Fallback->get($_config);
         }
 
         return (new Matches([

@@ -14,7 +14,6 @@ import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
 import {laraAuth} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
-import {laraContribution} from '../../../api/laraContribtion/laraContribution'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -198,10 +197,11 @@ let TranslationMatches = {
     }
     const {contextListBefore, contextListAfter} =
       SegmentUtils.getSegmentContext(id_segment_original)
-    const getContributionRequest = () => {
+    const getContributionRequest = (translation = null) => {
       return getContributions({
         idSegment: id_segment_original,
         target: currentSegment.segment,
+        translation: translation,
         crossLanguages: crossLanguageSettings
           ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
           : [],
@@ -216,6 +216,7 @@ let TranslationMatches = {
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
           // console.log('Text to translate via Lara:', currentSegment.segment)
+          // todo glossaries
           laraTranslate({
             token: response.token,
             source: currentSegment.segment,
@@ -226,35 +227,8 @@ let TranslationMatches = {
           })
             .then((response) => {
               // console.log('Lara Translate response:', response)
-              const translation =
-                response.translation.find((item) => item.translatable)?.text ||
-                ''
-              /*const contributionData = {
-                id: '0',
-                segment: currentSegment.segment,
-                translation: translation,
-                match: '100%',
-                created_by: 'Lara MT',
-                raw_translation: translation,
-                raw_segment: currentSegment.segment,
-                ICE: false,
-              }
-              // console.log('Translation from Lara MT:', translation)
-              const data = {
-                matches: [contributionData],
-                errors: [],
-                id_segment: id_segment_original,
-              }
-              SegmentActions.getContributionsSuccess(data, data.id_segment)*/
-
-              laraContribution({
-                source: currentSegment.segment,
-                contextListBefore,
-                contextListAfter,
-                sid: id_segment_original,
-                jobId: config.id_job,
-                translation,
-              }).catch(() => getContributionRequest())
+              const translation = response.translation.find((item) => item.translatable)?.text || ''
+              return getContributionRequest(translation)
             })
             .catch((e) => {
               console.error('Lara Translate error:', e)

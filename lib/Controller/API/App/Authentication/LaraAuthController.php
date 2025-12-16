@@ -126,14 +126,4 @@ class LaraAuthController extends AbstractStatefulKleinController
         }
     }
 
-    /**
-     * TODO: implement this method
-     * @param array $data
-     * @return array
-     */
-    public function formatContribution(array $data): array
-    {
-        return $data;
-    }
-
 }
