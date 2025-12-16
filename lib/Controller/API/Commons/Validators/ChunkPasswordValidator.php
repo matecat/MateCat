@@ -39,7 +39,7 @@ class ChunkPasswordValidator extends Base
     protected ?int $revision_number = null;
     private int $ttl;
 
-    public function __construct(KleinController $controller, int $ttl)
+    public function __construct(KleinController $controller, int $ttl = 0)
     {
         parent::__construct($controller);
 
