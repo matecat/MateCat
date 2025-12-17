@@ -1334,6 +1334,6 @@ class Utils
             return json_decode($value);
         }
 
-        return $value;
+        return html_entity_decode($value);
     }
 }
