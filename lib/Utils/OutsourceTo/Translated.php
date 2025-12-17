@@ -116,7 +116,7 @@ class Translated extends AbstractProvider
 
     private string $fixedDelivery;
     private string $typeOfService;
-    private array  $_curlOptions;
+    private array $_curlOptions;
 
     private static string $OUTSOURCE_URL_CONFIRM = '';
 
@@ -144,15 +144,15 @@ class Translated extends AbstractProvider
         static::$OUTSOURCE_URL_CONFIRM = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "api/app/outsource/confirm/%u/%s";
 
         $this->_curlOptions = [
-                CURLOPT_HEADER         => 0,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPGET        => true,
-                CURLOPT_TIMEOUT        => 10,
-                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_FOLLOWLOCATION => true
+            CURLOPT_HEADER => 0,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_FOLLOWLOCATION => true
         ];
     }
 
@@ -192,21 +192,21 @@ class Translated extends AbstractProvider
          ************************** GET VOLUME ANALYSIS FIRST *************************
          */
 
-        $_project_data  = ProjectDao::getProjectAndJobData($this->pid);
+        $_project_data = ProjectDao::getProjectAndJobData($this->pid);
         $analysisStatus = new Status($_project_data, $this->features, $this->user);
-        $volAnalysis    = json_encode($analysisStatus->fetchData()->getResult());
+        $volAnalysis = json_encode($analysisStatus->fetchData()->getResult());
 
         /**
          *************************** GET SUBJECT **************************************
          */
         // `subject` is retrieved from the database: get the first job of the project and get its subject
-        $jStruct           = new JobStruct();
-        $jStruct->id       = $this->jobList[ 0 ][ 'jid' ];
-        $jStruct->password = $this->jobList[ 0 ][ 'jpassword' ];
-        $jobDao            = new JobDao();
-        $jobData           = $jobDao->setCacheTTL(60 * 60)->read($jStruct)[ 0 ];
+        $jStruct = new JobStruct();
+        $jStruct->id = $this->jobList[0]['jid'];
+        $jStruct->password = $this->jobList[0]['jpassword'];
+        $jobDao = new JobDao();
+        $jobData = $jobDao->setCacheTTL(60 * 60)->read($jStruct)[0];
 
-        return [$jobData[ 'subject' ], json_decode($volAnalysis, true)];
+        return [$jobData['subject'], json_decode($volAnalysis, true)];
     }
 
 
@@ -222,7 +222,7 @@ class Translated extends AbstractProvider
      *      2- In the second phase, call the vendor with the above jobs and cache al the replies in session
      *
      * @param string $subject
-     * @param array  $volAnalysis
+     * @param array $volAnalysis
      *
      * @see GUIDE->"PROCEDURE"->POINT 2 for details
      *
@@ -236,25 +236,25 @@ class Translated extends AbstractProvider
          */
         foreach ($this->jobList as $job) {
             // Is there in the cache anything that tells this job has already been outsourced?
-            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced")) {
+            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-outsourced")) {
                 // if so, then update the job localization info (currency and timezone), according to user preferences
-                $this->__updateCartElements($job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced", $this->currency, $this->timezone);
+                $this->__updateCartElements($job['jid'] . "-" . $job['jpassword'] . "-outsourced", $this->currency, $this->timezone);
                 continue;
             }
 
             $url = "https://www.translated.net/hts/matecat-endpoint.php?" . http_build_query([
-                            'f'             => 'outsourced',
-                            'cid'           => 'htsdemo',
-                            'p'             => 'htsdemo5',
-                            'matecat_pid'   => $this->pid,
-                            'matecat_ppass' => $this->ppassword,
-                            'matecat_words' => $this->getTotalPayableWords($volAnalysis),
-                            'matecat_jid'   => $job[ 'jid' ],
-                            'matecat_jpass' => $job[ 'jpassword' ],
-                            'of'            => 'json'
-                    ], PHP_QUERY_RFC3986);
+                    'f' => 'outsourced',
+                    'cid' => 'htsdemo',
+                    'p' => 'htsdemo5',
+                    'matecat_pid' => $this->pid,
+                    'matecat_ppass' => $this->ppassword,
+                    'matecat_words' => $this->getTotalPayableWords($volAnalysis),
+                    'matecat_jid' => $job['jid'],
+                    'matecat_jpass' => $job['jpassword'],
+                    'of' => 'json'
+                ], PHP_QUERY_RFC3986);
 
-            $mh->createResource($url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced");
+            $mh->createResource($url, $this->_curlOptions, $job['jid'] . "-" . $job['jpassword'] . "-outsourced");
         }
 
 
@@ -272,7 +272,7 @@ class Translated extends AbstractProvider
             LoggerFactory::doJsonLog($outsourceInfo);
 
             // if some error occurred, or the job has not been outsourced yet, then skip this job
-            if ($result_outsource[ "code" ] != 1 || $result_outsource[ "outsourced" ] != 1) {
+            if ($result_outsource["code"] != 1 || $result_outsource["outsourced"] != 1) {
                 continue;
             }
 
@@ -303,7 +303,7 @@ class Translated extends AbstractProvider
      *      2- In the second phase, call the vendor with the above jobs and cache al the replies in session
      *
      * @param string $subject
-     * @param array  $volAnalysis
+     * @param array $volAnalysis
      *
      * @see GUIDE->"PROCEDURE"->POINT 3 for details
      *
@@ -323,18 +323,18 @@ class Translated extends AbstractProvider
             // NOTE:    this "if" is necessary to not process again a job already outsourced.
             //          A possible alternative is to unset from the $this->jobList array all the jobs detected as
             //          outsourced during Translated::__processOutsourcedJobs function
-            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced")) {
+            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-outsourced")) {
                 continue;
             }
 
             // in case we have a quote in the cache, we are done with this job anyway
-            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery)) {
+            if (Cart::getInstance('outsource_to_external_cache')->itemExists($job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery)) {
                 // update the job localization info (currency and timezone), according to user preferences
-                $this->__updateCartElements($job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery, $this->currency, $this->timezone, $this->typeOfService);
+                $this->__updateCartElements($job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery, $this->currency, $this->timezone, $this->typeOfService);
                 continue;
             }
 
-            $langPairs = $this->getLangPairs($job[ 'jid' ], $job[ 'jpassword' ], $volAnalysis);
+            $langPairs = $this->getLangPairs($job['jid'], $job['jpassword'], $volAnalysis);
 
             if (!empty($langPairs)) {
                 // Get the delivery date chosen by the user (if any), otherwise set it to 0 to tell the vendor no date has been specified
@@ -346,25 +346,25 @@ class Translated extends AbstractProvider
                 $fixedDeliveryDateForQuote = ($this->fixedDelivery > 0) ? date("Y-m-d H:i:s", $this->fixedDelivery / 1000) : "0";
 
                 $url = "https://www.translated.net/hts/matecat-endpoint.php?" . http_build_query([
-                                'f'             => 'quote',
-                                'cid'           => 'htsdemo',
-                                'p'             => 'htsdemo5',
-                                's'             => $langPairs[ 'source' ],
-                                't'             => $langPairs[ 'target' ],
-                                'pn'            => "MATECAT_{$job['jid']}-{$job['jpassword']}",
-                                'w'             => $this->getTotalPayableWords($volAnalysis),
-                                'df'            => 'matecat',
-                                'matecat_pid'   => $this->pid,
-                                'matecat_ppass' => $this->ppassword,
-                                'matecat_pname' => $volAnalysis[ 'name' ],
-                                'subject'       => $subject,
-                                'jt'            => 'R',
-                                'fd'            => $fixedDeliveryDateForQuote,
-                                'of'            => 'json'
-                        ], PHP_QUERY_RFC3986);
+                        'f' => 'quote',
+                        'cid' => 'htsdemo',
+                        'p' => 'htsdemo5',
+                        's' => $langPairs['source'],
+                        't' => $langPairs['target'],
+                        'pn' => "MATECAT_{$job['jid']}-{$job['jpassword']}",
+                        'w' => $this->getTotalPayableWords($volAnalysis),
+                        'df' => 'matecat',
+                        'matecat_pid' => $this->pid,
+                        'matecat_ppass' => $this->ppassword,
+                        'matecat_pname' => $volAnalysis['name'],
+                        'subject' => $subject,
+                        'jt' => 'R',
+                        'fd' => $fixedDeliveryDateForQuote,
+                        'of' => 'json'
+                    ], PHP_QUERY_RFC3986);
 
                 LoggerFactory::doJsonLog("Not Found in Cache. Call url for Quote:  " . $url);
-                $mh->createResource($url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery);
+                $mh->createResource($url, $this->_curlOptions, $job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery);
             }
         }
 
@@ -388,7 +388,7 @@ class Translated extends AbstractProvider
 
             // Parse the result and check if the vendor returned some error. In case, skip the quote
             $result_quote = json_decode($quote, true);
-            if ($result_quote[ 'code' ] != 1) {
+            if ($result_quote['code'] != 1) {
                 LoggerFactory::doJsonLog("HTS returned an error. Skip quote");
                 continue;
             }
@@ -411,9 +411,9 @@ class Translated extends AbstractProvider
      * Create a ItemHTSQuoteJob, which wraps a "job already outsourced" vendor reply
      *
      * @param string $jpid
-     * @param array  $volAnalysis
+     * @param array $volAnalysis
      * @param string $subject
-     * @param array  $apiCallResult
+     * @param array $apiCallResult
      *
      * @return ItemHTSQuoteJob|null
      */
@@ -435,23 +435,23 @@ class Translated extends AbstractProvider
             //      "type_of_service": "STRING",            <- "professional" or "premium"
             //      "link_to_status": "STRING"              <- where to see the order status
             //  }
-            $itemCart                     = new ItemHTSQuoteJob();
-            $itemCart[ 'id' ]             = $jpid;
-            $itemCart[ 'project_name' ]   = $volAnalysis[ 'name' ];
-            $itemCart[ 'name' ]           = "MATECAT_$jpid";
-            $itemCart[ 'source' ]         = $langPairs[ 'source' ];
-            $itemCart[ 'target' ]         = $langPairs[ 'target' ];
-            $itemCart[ 'words' ]          = $this->getTotalPayableWords($volAnalysis);
-            $itemCart[ 'subject' ]        = $subject;
-            $itemCart[ 'currency' ]       = $this->currency;
-            $itemCart[ 'timezone' ]       = $this->timezone;
-            $itemCart[ 'quote_result' ]   = $apiCallResult[ 'code' ];
-            $itemCart[ 'outsourced' ]     = 1;
-            $itemCart[ 'typeOfService' ]  = $apiCallResult[ 'type_of_service' ];
-            $itemCart[ 'price' ]          = $apiCallResult[ 'price' ];
-            $itemCart[ 'delivery' ]       = $apiCallResult[ 'delivery' ];
-            $itemCart[ 'link_to_status' ] = $apiCallResult[ 'link_to_status' ];
-            $itemCart[ 'quantity' ]       = 1;
+            $itemCart = new ItemHTSQuoteJob();
+            $itemCart['id'] = $jpid;
+            $itemCart['project_name'] = $volAnalysis['name'];
+            $itemCart['name'] = "MATECAT_$jpid";
+            $itemCart['source'] = $langPairs['source'];
+            $itemCart['target'] = $langPairs['target'];
+            $itemCart['words'] = $this->getTotalPayableWords($volAnalysis);
+            $itemCart['subject'] = $subject;
+            $itemCart['currency'] = $this->currency;
+            $itemCart['timezone'] = $this->timezone;
+            $itemCart['quote_result'] = $apiCallResult['code'];
+            $itemCart['outsourced'] = 1;
+            $itemCart['typeOfService'] = $apiCallResult['type_of_service'];
+            $itemCart['price'] = $apiCallResult['price'];
+            $itemCart['delivery'] = $apiCallResult['delivery'];
+            $itemCart['link_to_status'] = $apiCallResult['link_to_status'];
+            $itemCart['quantity'] = 1;
 
             // NOTE:
             //  vendor returns an error in case words = 0, therefore, during functions
@@ -470,9 +470,9 @@ class Translated extends AbstractProvider
      * Create a ItemHTSQuoteJob which wraps a quote vendor reply
      *
      * @param string $jpid
-     * @param array  $volAnalysis
+     * @param array $volAnalysis
      * @param string $subject
-     * @param array  $apiCallResult
+     * @param array $apiCallResult
      *
      * @return ItemHTSQuoteJob
      */
@@ -484,8 +484,8 @@ class Translated extends AbstractProvider
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
         $langPairs = $this->getLangPairs($jid, $jpsw, $volAnalysis);
-        $source    = $langPairs[ 'source' ];
-        $target    = $langPairs[ 'target' ];
+        $source = $langPairs['source'];
+        $target = $langPairs['target'];
 
         // Instantiate the ItemHTSQuoteJob and fill it
         // SAMPLE VENDOR REPLY:
@@ -519,50 +519,50 @@ class Translated extends AbstractProvider
         //      }
         //  }
 
-        $itemCart                        = new ItemHTSQuoteJob();
-        $itemCart[ 'id' ]                = $jpid;
-        $itemCart[ 'project_name' ]      = $volAnalysis[ 'name' ];
-        $itemCart[ 'name' ]              = "MATECAT_$jpid";
-        $itemCart[ 'source' ]            = $source;
-        $itemCart[ 'target' ]            = $target;
-        $itemCart[ 'words' ]             = $this->getTotalPayableWords($volAnalysis);
-        $itemCart[ 'subject' ]           = $subject;
-        $itemCart[ 'subject_printable' ] = $subjectsHashMap[ $subject ];
-        $itemCart[ 'currency' ]          = $this->currency;
-        $itemCart[ 'timezone' ]          = $this->timezone;
-        $itemCart[ 'quote_result' ]      = $apiCallResult[ 'code' ];
-        $itemCart[ 'outsourced' ]        = 0;
-        $itemCart[ 'quote_available' ]   = $apiCallResult[ 'quote_available' ];
-        $itemCart[ 'typeOfService' ]     = $this->typeOfService;
+        $itemCart = new ItemHTSQuoteJob();
+        $itemCart['id'] = $jpid;
+        $itemCart['project_name'] = $volAnalysis['name'];
+        $itemCart['name'] = "MATECAT_$jpid";
+        $itemCart['source'] = $source;
+        $itemCart['target'] = $target;
+        $itemCart['words'] = $this->getTotalPayableWords($volAnalysis);
+        $itemCart['subject'] = $subject;
+        $itemCart['subject_printable'] = $subjectsHashMap[$subject];
+        $itemCart['currency'] = $this->currency;
+        $itemCart['timezone'] = $this->timezone;
+        $itemCart['quote_result'] = $apiCallResult['code'];
+        $itemCart['outsourced'] = 0;
+        $itemCart['quote_available'] = $apiCallResult['quote_available'];
+        $itemCart['typeOfService'] = $this->typeOfService;
 
         // if the vendor has a quote available for this job, then get the info
-        if ($itemCart[ 'quote_result' ] == 1 && $itemCart[ 'quote_available' ] == 1) {
-            $itemCart[ 'price' ]                = $apiCallResult[ 'translation' ][ 'price' ];
-            $itemCart[ 'delivery' ]             = $apiCallResult[ 'translation' ][ 'delivery' ];
-            $itemCart[ 'r_price' ]              = $apiCallResult[ 'revision' ][ 'price' ];
-            $itemCart[ 'r_delivery' ]           = $apiCallResult[ 'revision' ][ 'delivery' ];
-            $itemCart[ 'quote_pid' ]            = $apiCallResult[ 'pid' ];
-            $itemCart[ 'show_info' ]            = $apiCallResult[ 'showquote' ];
-            $itemCart[ 'show_translator_data' ] = $apiCallResult[ 'show_translator_data' ];
+        if ($itemCart['quote_result'] == 1 && $itemCart['quote_available'] == 1) {
+            $itemCart['price'] = $apiCallResult['translation']['price'];
+            $itemCart['delivery'] = $apiCallResult['translation']['delivery'];
+            $itemCart['r_price'] = $apiCallResult['revision']['price'];
+            $itemCart['r_delivery'] = $apiCallResult['revision']['delivery'];
+            $itemCart['quote_pid'] = $apiCallResult['pid'];
+            $itemCart['show_info'] = $apiCallResult['showquote'];
+            $itemCart['show_translator_data'] = $apiCallResult['show_translator_data'];
 
             // if the vendor provided data about the translator, then get it
-            if ($itemCart[ 'show_translator_data' ] == 1) {
-                $itemCart[ 't_name' ]               = $apiCallResult[ 'translation' ][ 'translator_name' ];
-                $itemCart[ 't_native_lang' ]        = $apiCallResult[ 'translation' ][ 'translator_native_lang' ];
-                $itemCart[ 't_words_specific' ]     = $apiCallResult[ 'translation' ][ 'translator_words_specific' ];
-                $itemCart[ 't_words_total' ]        = $apiCallResult[ 'translation' ][ 'translator_words_total' ];
-                $itemCart[ 't_vote' ]               = $apiCallResult[ 'translation' ][ 'translator_vote' ];
-                $itemCart[ 't_positive_feedbacks' ] = $apiCallResult[ 'translation' ][ 'translator_positive_feedbacks' ];
-                $itemCart[ 't_total_feedbacks' ]    = $apiCallResult[ 'translation' ][ 'translator_total_feedbacks' ];
-                $itemCart[ 't_experience_years' ]   = $apiCallResult[ 'translation' ][ 'translator_experience_years' ];
-                $itemCart[ 't_education' ]          = $apiCallResult[ 'translation' ][ 'translator_education' ];
-                $itemCart[ 't_chosen_subject' ]     = $apiCallResult[ 'translation' ][ 'chosen_subject' ];
-                $itemCart[ 't_subjects' ]           = $apiCallResult[ 'translation' ][ 'translator_subjects' ];
-                $itemCart[ 'show_revisor_data' ]    = $apiCallResult[ 'show_revisor_data' ];
+            if ($itemCart['show_translator_data'] == 1) {
+                $itemCart['t_name'] = $apiCallResult['translation']['translator_name'];
+                $itemCart['t_native_lang'] = $apiCallResult['translation']['translator_native_lang'];
+                $itemCart['t_words_specific'] = $apiCallResult['translation']['translator_words_specific'];
+                $itemCart['t_words_total'] = $apiCallResult['translation']['translator_words_total'];
+                $itemCart['t_vote'] = $apiCallResult['translation']['translator_vote'];
+                $itemCart['t_positive_feedbacks'] = $apiCallResult['translation']['translator_positive_feedbacks'];
+                $itemCart['t_total_feedbacks'] = $apiCallResult['translation']['translator_total_feedbacks'];
+                $itemCart['t_experience_years'] = $apiCallResult['translation']['translator_experience_years'];
+                $itemCart['t_education'] = $apiCallResult['translation']['translator_education'];
+                $itemCart['t_chosen_subject'] = $apiCallResult['translation']['chosen_subject'];
+                $itemCart['t_subjects'] = $apiCallResult['translation']['translator_subjects'];
+                $itemCart['show_revisor_data'] = $apiCallResult['show_revisor_data'];
 
                 // if the vendor provided data about revisor, then get it
-                if ($itemCart[ 'show_revisor_data' ] == 1) {
-                    $itemCart[ 'r_vote' ] = $apiCallResult[ 'revision' ][ 'revisor_vote' ];
+                if ($itemCart['show_revisor_data'] == 1) {
+                    $itemCart['r_vote'] = $apiCallResult['revision']['revisor_vote'];
                 }
             }
         }
@@ -584,19 +584,19 @@ class Translated extends AbstractProvider
      *      - update the parameters
      *      - re-add it to the cache
      *
-     * @param string      $cartId
-     * @param string      $newCurrency
-     * @param int         $newTimezone
+     * @param string $cartId
+     * @param string $newCurrency
+     * @param int $newTimezone
      * @param string|null $newTypeOfService
      *
      * @see Translated::__addCartElement
      */
     private function __updateCartElements(string $cartId, string $newCurrency, int $newTimezone, string $newTypeOfService = null): void
     {
-        $cartElem                    = Cart::getInstance('outsource_to_external_cache')->getItem($cartId);
-        $cartElem[ "currency" ]      = !empty($newCurrency) ? $newCurrency : $cartElem[ "currency" ];
-        $cartElem[ "timezone" ]      = !empty($newTimezone) ? $newTimezone : $cartElem[ "timezone" ];
-        $cartElem[ "typeOfService" ] = !empty($newTypeOfService) ? $newTypeOfService : $cartElem[ "typeOfService" ];
+        $cartElem = Cart::getInstance('outsource_to_external_cache')->getItem($cartId);
+        $cartElem["currency"] = !empty($newCurrency) ? $newCurrency : $cartElem["currency"];
+        $cartElem["timezone"] = !empty($newTimezone) ? $newTimezone : $cartElem["timezone"];
+        $cartElem["typeOfService"] = !empty($newTypeOfService) ? $newTypeOfService : $cartElem["typeOfService"];
 
         $this->__addCartElement($cartElem);
     }
@@ -610,7 +610,7 @@ class Translated extends AbstractProvider
      *  Moreover, the cart element is added to the array of results, $this->_quote_result
      *
      * @param ItemHTSQuoteJob $cartElem
-     * @param bool            $deleteOnPartialMatch
+     * @param bool $deleteOnPartialMatch
      *
      * @see Translated::__addCartElementToCart
      *
@@ -645,15 +645,15 @@ class Translated extends AbstractProvider
      *
      *
      * @param ItemHTSQuoteJob $cartElem
-     * @param string          $cartName
-     * @param bool            $deleteOnPartialMatch
+     * @param string $cartName
+     * @param bool $deleteOnPartialMatch
      *
      * @see Translated::__processOutsourcedJobs for when parameter $deleteOnPartialMatch is set to true
      *
      */
     private function __addCartElementToCart(ItemHTSQuoteJob $cartElem, string $cartName, bool $deleteOnPartialMatch): void
     {
-        $idToUse = ($deleteOnPartialMatch) ? substr($cartElem[ "id" ], 0, strrpos($cartElem[ "id" ], "-")) : $cartElem[ "id" ];
+        $idToUse = ($deleteOnPartialMatch) ? substr($cartElem["id"], 0, strrpos($cartElem["id"], "-")) : $cartElem["id"];
         Cart::getInstance($cartName)->delItem($idToUse);
         Cart::getInstance($cartName)->addItem($cartElem);
     }
@@ -698,7 +698,7 @@ class Translated extends AbstractProvider
     {
         $urls = [];
         foreach ($this->jobList as $job) {
-            $urls[] = sprintf(static::$OUTSOURCE_URL_CONFIRM, $job[ 'jid' ], $job[ 'jpassword' ]);
+            $urls[] = sprintf(static::$OUTSOURCE_URL_CONFIRM, $job['jid'], $job['jpassword']);
         }
 
         return $urls;
@@ -711,17 +711,17 @@ class Translated extends AbstractProvider
      */
     private function getTotalPayableWords(array $volAnalysis): int
     {
-        $total   = 0;
+        $total = 0;
         $jobList = $this->jobList;
 
         foreach ($jobList as $job) {
-            $jid       = $job[ 'jid' ];
-            $jpassword = $job[ 'jpassword' ];
+            $jid = $job['jid'];
+            $jpassword = $job['jpassword'];
 
-            foreach ($volAnalysis[ 'jobs' ] as $jobVolAnalysis) {
-                foreach ($jobVolAnalysis[ 'chunks' ] as $chunkVolAnalysis) {
-                    if ($jid == $jobVolAnalysis[ 'id' ] and $jpassword == $chunkVolAnalysis[ 'password' ]) {
-                        $total = $total + $chunkVolAnalysis[ 'total_equivalent' ];
+            foreach ($volAnalysis['jobs'] as $jobVolAnalysis) {
+                foreach ($jobVolAnalysis['chunks'] as $chunkVolAnalysis) {
+                    if ($jid == $jobVolAnalysis['id'] and $jpassword == $chunkVolAnalysis['password']) {
+                        $total = $total + $chunkVolAnalysis['total_equivalent'];
                     }
                 }
             }
@@ -735,20 +735,20 @@ class Translated extends AbstractProvider
     }
 
     /**
-     * @param int    $jid
+     * @param int $jid
      * @param string $password
-     * @param array  $volAnalysis
+     * @param array $volAnalysis
      *
      * @return array
      */
     private function getLangPairs(int $jid, string $password, array $volAnalysis): array
     {
-        foreach ($volAnalysis[ 'jobs' ] as $job) {
-            foreach ($job[ 'chunks' ] as $chunk) {
-                if ($job[ 'id' ] == $jid and $chunk[ 'password' ] === $password) {
+        foreach ($volAnalysis['jobs'] as $job) {
+            foreach ($job['chunks'] as $chunk) {
+                if ($job['id'] == $jid and $chunk['password'] === $password) {
                     return [
-                            'source' => $job[ 'source' ],
-                            'target' => $job[ 'target' ],
+                        'source' => $job['source'],
+                        'target' => $job['target'],
                     ];
                 }
             }

@@ -34,7 +34,7 @@ class ContextList
     protected function __construct(array $queue_info)
     {
         foreach ($queue_info as $level => $values) {
-            $this->list[ $level ] = Context::buildFromArray($values);
+            $this->list[$level] = Context::buildFromArray($values);
         }
     }
 

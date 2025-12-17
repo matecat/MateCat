@@ -29,16 +29,18 @@ use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
-error_reporting( ~E_DEPRECATED );
+error_reporting(~E_DEPRECATED);
 
 
-class TmxImportMyMemoryTest extends AbstractTest {
+class TmxImportMyMemoryTest extends AbstractTest
+{
 
     protected $resource;
 
-    public function tearDown(): void {
-        if ( is_resource( $this->resource ) ) {
-            fclose( $this->resource );
+    public function tearDown(): void
+    {
+        if (is_resource($this->resource)) {
+            fclose($this->resource);
         }
         parent::tearDown();
     }
@@ -51,52 +53,54 @@ class TmxImportMyMemoryTest extends AbstractTest {
      * @covers MyMemory::downloadExport
      * @throws ReflectionException
      */
-    public function test_about_best_case_scenario_of_TMX_import() {
-
+    public function test_about_best_case_scenario_of_TMX_import()
+    {
         /**
          * EnginesFactory creation
          */
-
-
-        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $engine_struct     = EngineStruct::getStruct();
+        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
-        $eng               = $engineDAO->read( $engine_struct );
+        $eng = $engineDAO->read($engine_struct);
 
         /**
          * @var $engineRecord EngineStruct
          */
-        $engine_struct_param = $eng[ 0 ];
+        $engine_struct_param = $eng[0];
 
         $uuid = Utils::uuid4();
 
-        $engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ 'getImportStatus', 'importMemory' ] )->getMock();
-        $engine_MyMemory->expects( $this->any() )->method( 'importMemory' )->willReturn( new FileImportAndStatusResponse( [
-                        'responseStatus'  => '202',
-                        'responseDetails' => '',
-                        'responseData'    =>
-                                [
-                                        'UUID' => $uuid,
-                                ],
-                ] )
+        $engine_MyMemory = $this->getMockBuilder(MyMemory::class)
+            ->setConstructorArgs([$engine_struct_param])
+            ->onlyMethods(['getImportStatus', 'importMemory'])
+            ->getMock();
+
+        $engine_MyMemory->expects($this->exactly(1))->method('importMemory')->willReturn(new FileImportAndStatusResponse([
+                'responseStatus' => '202',
+                'responseDetails' => '',
+                'responseData' =>
+                    [
+                        'UUID' => $uuid,
+                    ],
+            ])
         );
 
-        $engine_MyMemory->expects( $this->any() )->method( 'getImportStatus' )->willReturn( new FileImportAndStatusResponse( [
-                        'messageType'    => 'tms-import',
-                        'responseData'   =>
-                                [
-                                        'uuid'          => $uuid,
-                                        'id'            => 2094143,
-                                        'creation_date' => '2025-10-01 15:31:49',
-                                        'totals'        => 2,
-                                        'completed'     => 2,
-                                        'skipped'       => 0,
-                                        'status'        => 1,
-                                        'log'           => null,
-                                        'download_url'  => null,
-                                ],
-                        'responseStatus' => 200,
-                ] )
+        $engine_MyMemory->expects($this->exactly(1))->method('getImportStatus')->willReturn(new FileImportAndStatusResponse([
+                'messageType' => 'tms-import',
+                'responseData' =>
+                    [
+                        'uuid' => $uuid,
+                        'id' => 2094143,
+                        'creation_date' => '2025-10-01 15:31:49',
+                        'totals' => 2,
+                        'completed' => 2,
+                        'skipped' => 0,
+                        'status' => 1,
+                        'log' => null,
+                        'download_url' => null,
+                    ],
+                'responseStatus' => 200,
+            ])
         );
 //        $engine_MyMemory = new MyMemory( $engine_struct_param ); // real call
 
@@ -109,56 +113,54 @@ class TmxImportMyMemoryTest extends AbstractTest {
         $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/tmx/exampleForTestOriginal.tmx';
 
         $file_param = $path_of_the_original_file;
-        $key_param  = "a6043e606ac9b5d7ff24";
+        $key_param = "a6043e606ac9b5d7ff24";
 
 
         /**
          * Importing
          */
-        $result = $engine_MyMemory->importMemory( $file_param, $key_param, new UserStruct() );
+        $result = $engine_MyMemory->importMemory($file_param, $key_param, new UserStruct());
 
+        $this->assertTrue($result instanceof FileImportAndStatusResponse);
+        $this->assertTrue(Utils::isTokenValid($result->id));
+        $this->assertEquals(202, $result->responseStatus);
+        $this->assertEquals("", $result->responseDetails);
+        $this->assertCount(1, $result->responseData);
+        $this->assertNull($result->error);
 
-        $this->assertTrue( $result instanceof FileImportAndStatusResponse );
-        $this->assertTrue( Utils::isTokenValid( $result->id ) );
-        $this->assertEquals( 202, $result->responseStatus );
-        $this->assertEquals( "", $result->responseDetails );
-        $this->assertCount( 1, $result->responseData );
-        $this->assertNull( $result->error );
+        $reflector = new ReflectionClass($result);
+        $property = $reflector->getProperty('_rawResponse');
 
-        $reflector = new ReflectionClass( $result );
-        $property  = $reflector->getProperty( '_rawResponse' );
-
-        $this->assertEquals( "", $property->getValue( $result ) );
+        $this->assertEquals("", $property->getValue($result));
 
         /**
          * Getting Status
          */
-        $ready        = false;
-        $time         = 0;
+        $ready = false;
+        $time = 0;
         $importResult = null;
-        while ( ( !$ready ) && ( $time < 100 ) ) {
-            usleep( 500000 );//0.5 sec
+        while ((!$ready) && ($time < 100)) {
+            usleep(500000);//0.5 sec
             $time++;
-            $importResult = $engine_MyMemory->getImportStatus( $result->id );
-            if ( $importResult->responseData[ 'status' ] == 1 ) {
+            $importResult = $engine_MyMemory->getImportStatus($result->id);
+            if ($importResult->responseData['status'] == 1) {
                 $ready = true;
             }
         }
 
-        $this->assertTrue( $importResult instanceof FileImportAndStatusResponse );
-        $this->assertTrue( Utils::isTokenValid( $importResult->id ) );
-        $this->assertEquals( $importResult->id, $result->id );
-        $this->assertEquals( 200, $importResult->responseStatus );
-        $this->assertEquals( "", $importResult->responseDetails );
-        $this->assertCount( 9, $importResult->responseData );
+        $this->assertTrue($importResult instanceof FileImportAndStatusResponse);
+        $this->assertTrue(Utils::isTokenValid($importResult->id));
+        $this->assertEquals($importResult->id, $result->id);
+        $this->assertEquals(200, $importResult->responseStatus);
+        $this->assertEquals("", $importResult->responseDetails);
+        $this->assertCount(9, $importResult->responseData);
 
-        $this->assertNull( $importResult->error );
+        $this->assertNull($importResult->error);
 
-        $reflector = new ReflectionClass( $importResult );
-        $property  = $reflector->getProperty( '_rawResponse' );
+        $reflector = new ReflectionClass($importResult);
+        $property = $reflector->getProperty('_rawResponse');
 
-        $this->assertEquals( "", $property->getValue( $result ) );
-
+        $this->assertEquals("", $property->getValue($result));
     }
 
 

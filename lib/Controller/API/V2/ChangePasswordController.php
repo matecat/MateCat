@@ -30,12 +30,12 @@ class ChangePasswordController extends KleinController
      */
     public function changePassword(): void
     {
-        $res             = filter_var($this->request->param('res'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $id              = filter_var($this->request->param('id'), FILTER_SANITIZE_NUMBER_INT);
-        $password        = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $new_password    = filter_var($this->request->param('new_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $res = filter_var($this->request->param('res'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $id = filter_var($this->request->param('id'), FILTER_SANITIZE_NUMBER_INT);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $new_password = filter_var($this->request->param('new_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $revision_number = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
-        $undo            = filter_var($this->request->param('undo'), FILTER_VALIDATE_BOOLEAN);
+        $undo = filter_var($this->request->param('undo'), FILTER_VALIDATE_BOOLEAN);
 
         if (empty($id) || empty($password)) {
             throw new InvalidArgumentException('Missing required parameters [`id `, `password`]');
@@ -47,10 +47,10 @@ class ChangePasswordController extends KleinController
                 throw new InvalidArgumentException('Missing required parameters [`new_password`]');
             }
 
-            $new_pwd    = $new_password;
+            $new_pwd = $new_password;
             $actual_pwd = $password;
         } else {
-            $new_pwd    = Utils::randomString();
+            $new_pwd = Utils::randomString();
             $actual_pwd = $password;
         }
 
@@ -69,19 +69,19 @@ class ChangePasswordController extends KleinController
 
         $this->response->status()->setCode(200);
         $this->response->json([
-                'id'      => $id,
-                'new_pwd' => $new_pwd,
-                'old_pwd' => $actual_pwd,
+            'id' => $id,
+            'new_pwd' => $new_pwd,
+            'old_pwd' => $actual_pwd,
         ]);
     }
 
     /**
-     * @param UserStruct       $user
+     * @param UserStruct $user
      * @param                  $res
      * @param                  $id
      * @param                  $actual_pwd
      * @param                  $new_password
-     * @param null             $revision_number
+     * @param null $revision_number
      *
      * @throws Exception
      */
@@ -114,21 +114,21 @@ class ChangePasswordController extends KleinController
                 $this->checkUserPermissions($jStruct->getProject(), $user);
 
                 $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
-                $dao         = new ChunkReviewDao();
+                $dao = new ChunkReviewDao();
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
                 $jStruct->getProject()
-                        ->getFeaturesSet()
-                        ->run('review_password_changed', $id, $actual_pwd, $new_password, $revision_number);
+                    ->getFeaturesSet()
+                    ->run('review_password_changed', $id, $actual_pwd, $new_password, $revision_number);
             } else { // change job password
                 $jStruct = JobDao::getByIdAndPassword($id, $actual_pwd);
-                $jDao    = new JobDao();
+                $jDao = new JobDao();
 
                 $this->checkUserPermissions($jStruct->getProject(), $user);
 
                 $jDao->changePassword($jStruct, $new_password);
                 $jStruct->getProject()
-                        ->getFeaturesSet()
-                        ->run('job_password_changed', $jStruct, $actual_pwd);
+                    ->getFeaturesSet()
+                    ->run('job_password_changed', $jStruct, $actual_pwd);
             }
 
             // invalidate ChunkReviewDao cache for the job
@@ -150,14 +150,14 @@ class ChangePasswordController extends KleinController
      * Check if the logged user has the permissions to change the password
      *
      * @param ProjectStruct $project
-     * @param UserStruct    $user
+     * @param UserStruct $user
      *
      * @throws Exception
      */
     private function checkUserPermissions(ProjectStruct $project, UserStruct $user): void
     {
         // check if user is belongs to the project team
-        $team  = $project->getTeam();
+        $team = $project->getTeam();
         $check = (new MembershipDao())->findTeamByIdAndUser($team->id, $user);
 
         if ($check === null) {

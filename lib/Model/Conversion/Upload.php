@@ -70,14 +70,14 @@ class Upload
     /**
      * Start loading instance
      *
-     * @param array     $filesToUpload
+     * @param array $filesToUpload
      * @param bool|null $disable_upload_limit
      *
      * @return UploadElement
      * @throws Exception
      */
-    public function uploadFiles( array $filesToUpload, ?bool $disable_upload_limit = false ): UploadElement {
-
+    public function uploadFiles(array $filesToUpload, ?bool $disable_upload_limit = false): UploadElement
+    {
         $result = new UploadElement();
 
         if (empty($filesToUpload)) {
@@ -88,9 +88,9 @@ class Upload
             throw new Exception ("Too much files uploaded. Maximum value is " . AppConfig::$MAX_NUM_FILES);
         }
 
-        $uploadStruct = static::getUniformGlobalFilesStructure( $filesToUpload );
-        foreach ( $uploadStruct as $inputName => $file ) {
-            $result->{$inputName} = $this->_uploadFile( $file, $disable_upload_limit );
+        $uploadStruct = static::getUniformGlobalFilesStructure($filesToUpload);
+        foreach ($uploadStruct as $inputName => $file) {
+            $result->{$inputName} = $this->_uploadFile($file, $disable_upload_limit);
         }
 
         return $result;
@@ -100,15 +100,15 @@ class Upload
     {
         $result = new UploadElement();
         foreach ($filesToUpload as $inputName => $file) {
-            if (isset($file[ 'tmp_name' ]) && is_array($file[ 'tmp_name' ])) {
-                foreach ($file[ 'tmp_name' ] as $index => $value) {
-                    $_file                          = new UploadElement();
-                    $_file[ 'tmp_name' ]            = $file[ 'tmp_name' ][ $index ];
-                    $_file[ 'name' ]                = $file[ 'name' ][ $index ];
-                    $_file[ 'size' ]                = $file[ 'size' ][ $index ];
-                    $_file[ 'type' ]                = $file[ 'type' ][ $index ];
-                    $_file[ 'error' ]               = $file[ 'error' ][ $index ];
-                    $result->{$_file[ 'tmp_name' ]} = $_file;
+            if (isset($file['tmp_name']) && is_array($file['tmp_name'])) {
+                foreach ($file['tmp_name'] as $index => $value) {
+                    $_file = new UploadElement();
+                    $_file['tmp_name'] = $file['tmp_name'][$index];
+                    $_file['name'] = $file['name'][$index];
+                    $_file['size'] = $file['size'][$index];
+                    $_file['type'] = $file['type'][$index];
+                    $_file['error'] = $file['error'][$index];
+                    $result->{$_file['tmp_name']} = $_file;
                 }
             } else {
                 $result->$inputName = new UploadElement($file);
@@ -123,21 +123,21 @@ class Upload
      * $RegistryKeyIndex MUST BE form name Element
      *
      * @param UploadElement $fileUp
-     * @param bool          $disable_upload_limit
+     * @param bool $disable_upload_limit
      *
      * @return object
      * @throws Exception
      */
-    protected function _uploadFile( UploadElement $fileUp, ?bool $disable_upload_limit = false ): object {
-
+    protected function _uploadFile(UploadElement $fileUp, ?bool $disable_upload_limit = false): object
+    {
         // fix possibly XSS on the file name
-        $fileUp[ 'name' ] = $this->fixFileName($fileUp[ 'name' ]);
+        $fileUp['name'] = $this->fixFileName($fileUp['name']);
 
-        $fileName    = $fileUp[ 'name' ];
-        $fileTmpName = $fileUp[ 'tmp_name' ];
-        $fileType    = $fileUp[ 'type' ] = (new MimeTypes())->guessMimeType($fileUp[ 'tmp_name' ]);
-        $fileError   = $fileUp[ 'error' ];
-        $fileSize    = $fileUp[ 'size' ];
+        $fileName = $fileUp['name'];
+        $fileTmpName = $fileUp['tmp_name'];
+        $fileType = $fileUp['type'] = (new MimeTypes())->guessMimeType($fileUp['tmp_name']);
+        $fileError = $fileUp['error'];
+        $fileSize = $fileUp['size'];
 
         $out_filename = ZipArchiveHandler::getFileName($fileName);
 
@@ -149,50 +149,52 @@ class Upload
             switch ($fileError) {
                 case 1 : //UPLOAD_ERR_INI_SIZE
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("The file '$out_filename' is bigger than this PHP installation allows.")
+                        $fileUp,
+                        new Exception ("The file '$out_filename' is bigger than this PHP installation allows.")
                     );
                     break;
                 case 2 : //UPLOAD_ERR_FORM_SIZE
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("The file '$out_filename' is bigger than this form allows.")
+                        $fileUp,
+                        new Exception ("The file '$out_filename' is bigger than this form allows.")
                     );
                     break;
                 case 3 : //UPLOAD_ERR_PARTIAL
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("Only part of the file '$out_filename'  was uploaded.")
+                        $fileUp,
+                        new Exception ("Only part of the file '$out_filename'  was uploaded.")
                     );
                     break;
                 case 4 : //UPLOAD_ERR_NO_FILE
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("No file was uploaded.")
+                        $fileUp,
+                        new Exception ("No file was uploaded.")
                     );
                     break;
                 case 6 : //UPLOAD_ERR_NO_TMP_DIR
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("Missing a temporary folder. ")
+                        $fileUp,
+                        new Exception ("Missing a temporary folder. ")
                     );
                     break;
                 case 7 : //UPLOAD_ERR_CANT_WRITE
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("Failed to write file to disk.")
+                        $fileUp,
+                        new Exception ("Failed to write file to disk.")
                     );
                     break;
                 case 8 : //UPLOAD_ERR_EXTENSION
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("A PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help.")
+                        $fileUp,
+                        new Exception (
+                            "A PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help."
+                        )
                     );
                     break;
                 default:
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new Exception ("Unknown Error: $fileError")
+                        $fileUp,
+                        new Exception ("Unknown Error: $fileError")
                     );
                     break;
             }
@@ -200,39 +202,39 @@ class Upload
             if ($fileType !== null) {
                 if (!$this->_isRightMime($fileUp)) {
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new DomainException ("File format not supported. '" . $out_filename . "'")
+                        $fileUp,
+                        new DomainException ("File format not supported. '" . $out_filename . "'")
                     );
                 }
             }
 
             if (!$this->_isRightExtension($fileUp)) {
                 $this->setObjectErrorOrThrowException(
-                        $fileUp,
-                        new DomainException ("File Extension Not Allowed. '" . $out_filename . "'")
+                    $fileUp,
+                    new DomainException ("File Extension Not Allowed. '" . $out_filename . "'")
                 );
             }
 
             // NOTE FOR ZIP FILES
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
 
-            $filePathInfo = pathinfo( $out_filename );
+            $filePathInfo = pathinfo($out_filename);
 
-            if($disable_upload_limit === false){
-                $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
+            if ($disable_upload_limit === false) {
+                $fileMaxSize = ($filePathInfo['extension'] === 'tmx') ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
 
-                if ( $fileSize >= $fileMaxSize ) {
+                if ($fileSize >= $fileMaxSize) {
                     $this->setObjectErrorOrThrowException(
-                            $fileUp,
-                            new DomainException ( "File Dimensions Not Allowed. '$out_filename'" )
+                        $fileUp,
+                        new DomainException ("File Dimensions Not Allowed. '$out_filename'")
                     );
                 }
             }
 
             if (!Utils::isValidFileName($fileUp->name)) {
                 $this->setObjectErrorOrThrowException(
-                        $fileUp,
-                        new DomainException ("Invalid File Name '" . $out_filename . "'")
+                    $fileUp,
+                    new DomainException ("Invalid File Name '" . $out_filename . "'")
                 );
             }
 
@@ -246,8 +248,8 @@ class Upload
             //All Right!!! GO!!!
             if (!copy($fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $fileUp->name)) {
                 $this->setObjectErrorOrThrowException(
-                        $fileUp,
-                        new Exception ("Failed To Store File '$out_filename' On Server.")
+                    $fileUp,
+                    new Exception ("Failed To Store File '$out_filename' On Server.")
                 );
             }
 
@@ -258,8 +260,8 @@ class Upload
             // octal; changing mode
             if (!chmod($this->dirUpload . DIRECTORY_SEPARATOR . $fileUp->name, 0664)) {
                 $this->setObjectErrorOrThrowException(
-                        $fileUp,
-                        new Exception ("Failed To Set Permissions On File. '$out_filename'")
+                    $fileUp,
+                    new Exception ("Failed To Set Permissions On File. '$out_filename'")
                 );
             }
         }
@@ -274,7 +276,7 @@ class Upload
      * Fixes the file name by appending a unique suffix and adjusting the path.
      *
      * @param string $stringName The original file name.
-     * @param bool   $upCount    Optional. Whether to include a counter in the file name suffix. Defaults to true.
+     * @param bool $upCount Optional. Whether to include a counter in the file name suffix. Defaults to true.
      *
      * @return string The fixed file name with the adjusted path.
      */
@@ -295,8 +297,8 @@ class Upload
     {
         $count = 0;
         foreach ($filesToUpload as $value) {
-            if (is_array($value[ 'tmp_name' ])) {
-                $count += count($value[ 'tmp_name' ]);
+            if (is_array($value['tmp_name'])) {
+                $count += count($value['tmp_name']);
             } else {
                 $count++;
             }
@@ -341,7 +343,7 @@ class Upload
         $fileNameChunks = explode(".", $fileUp->name);
 
         //first Check the extension
-        if (in_array(strtolower($fileNameChunks[ count($fileNameChunks) - 1 ]), $acceptedExtensions)) {
+        if (in_array(strtolower($fileNameChunks[count($fileNameChunks) - 1]), $acceptedExtensions)) {
             return true;
         }
 
@@ -349,7 +351,7 @@ class Upload
     }
 
     /**
-     * @param object    $fileUp
+     * @param object $fileUp
      * @param Exception $exn
      *
      * @return void
@@ -361,8 +363,8 @@ class Upload
             throw $exn;
         } else {
             $fileUp->error = [
-                    'code'    => $exn->getCode(),
-                    'message' => $exn->getMessage()
+                'code' => $exn->getCode(),
+                'message' => $exn->getMessage()
             ];
         }
     }

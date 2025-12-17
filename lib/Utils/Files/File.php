@@ -46,7 +46,7 @@ class File
 
     /**
      * @param      $filepath
-     * @param int  $options
+     * @param int $options
      *
      * @return string|string[]
      */

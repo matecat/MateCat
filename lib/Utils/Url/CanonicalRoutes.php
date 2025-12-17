@@ -24,9 +24,9 @@ class CanonicalRoutes
 
         $jwtHandler = new SimpleJWT(
             [
-                'invited_by_uid' => $requestInfo[ 'invited_by_uid' ],
-                'email'          => $requestInfo[ 'email' ],
-                'team_id'        => $requestInfo[ 'team_id' ],
+                'invited_by_uid' => $requestInfo['invited_by_uid'],
+                'email' => $requestInfo['email'],
+                'team_id' => $requestInfo['team_id'],
             ],
             AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
             AppConfig::$AUTHSECRET,
@@ -38,7 +38,7 @@ class CanonicalRoutes
 
     /**
      * @param string $confirmation_token
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      * @throws Exception
@@ -52,7 +52,7 @@ class CanonicalRoutes
 
     /**
      * @param string $confirmation_token
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      * @throws Exception
@@ -65,9 +65,9 @@ class CanonicalRoutes
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      * @throws Exception
@@ -80,11 +80,11 @@ class CanonicalRoutes
     }
 
     /**
-     * @param int         $id_job
-     * @param string      $password
+     * @param int $id_job
+     * @param string $password
      * @param string|null $filename
-     * @param string      $download_type
-     * @param array       $options
+     * @param string $download_type
+     * @param array $options
      *
      * @return string
      * @throws Exception
@@ -94,22 +94,22 @@ class CanonicalRoutes
         $host = self::httpHost($options);
 
         $params = [
-                'download_type' => $download_type
+            'download_type' => $download_type
         ];
 
         if (!empty($filename)) {
-            $params[ 'filename' ] = $filename;
+            $params['filename'] = $filename;
         }
 
         return "$host/api/v2/original/$id_job/$password?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
     }
 
     /**
-     * @param int         $id_job
-     * @param string      $password
+     * @param int $id_job
+     * @param string $password
      * @param string|null $filename
-     * @param string      $download_type
-     * @param array       $options
+     * @param string $download_type
+     * @param array $options
      *
      * @return string
      * @throws Exception
@@ -119,11 +119,11 @@ class CanonicalRoutes
         $host = self::httpHost($options);
 
         $params = [
-                'download_type' => $download_type
+            'download_type' => $download_type
         ];
 
         if (!empty($filename)) {
-            $params[ 'filename' ] = $filename;
+            $params['filename'] = $filename;
         }
 
         return "$host/api/v2/translation/$id_job/$password?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
@@ -131,28 +131,28 @@ class CanonicalRoutes
 
     /**
      * @param string $project_name
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
      * @param string $source
      * @param string $target
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      * @throws Exception
      */
     public static function revise(string $project_name, int $id_job, string $password, string $source, string $target, array $options = []): string
     {
-        $host   = self::httpHost($options);
+        $host = self::httpHost($options);
         $revise = 'revise';
 
-        if (isset($options[ 'revision_number' ]) && $options[ 'revision_number' ] > 1) {
-            $revise .= $options[ 'revision_number' ];
+        if (isset($options['revision_number']) && $options['revision_number'] > 1) {
+            $revise .= $options['revision_number'];
         }
 
         $url = "$host/$revise/$project_name/$source-$target/$id_job-$password";
 
-        if (isset($options[ 'id_segment' ])) {
-            $url .= '#' . $options[ 'id_segment' ];
+        if (isset($options['id_segment'])) {
+            $url .= '#' . $options['id_segment'];
         }
 
         return $url;
@@ -160,11 +160,11 @@ class CanonicalRoutes
 
     /**
      * @param string $project_name
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
      * @param string $source
      * @param string $target
-     * @param array  $options
+     * @param array $options
      *
      * @return string
      * @throws Exception
@@ -186,15 +186,15 @@ class CanonicalRoutes
     public static function analyze(array $params, array $options = []): string
     {
         $params = Utils::ensure_keys(
-                $params,
-                ['project_name', 'id_project', 'password']
+            $params,
+            ['project_name', 'id_project', 'password']
         );
 
         $host = self::httpHost($options);
 
-        $project_name = Utils::friendly_slug($params[ 'project_name' ]);
+        $project_name = Utils::friendly_slug($params['project_name']);
 
-        return $host . "/analyze/" . $project_name . "/" . $params[ 'id_project' ] . "-" . $params[ 'password' ];
+        return $host . "/analyze/" . $project_name . "/" . $params['id_project'] . "-" . $params['password'];
     }
 
     /**
@@ -216,7 +216,7 @@ class CanonicalRoutes
      */
     public static function appRoot(array $options = []): string
     {
-        $query = $options[ 'query' ] ?? null;
+        $query = $options['query'] ?? null;
 
         $url = self::httpHost($options) . AppConfig::$BASEURL;
 
@@ -248,8 +248,8 @@ class CanonicalRoutes
     {
         $host = AppConfig::$HTTPHOST;
 
-        if (!empty($params[ 'http_host' ])) {
-            $host = $params[ 'http_host' ];
+        if (!empty($params['http_host'])) {
+            $host = $params['http_host'];
         }
 
         if (empty($host)) {

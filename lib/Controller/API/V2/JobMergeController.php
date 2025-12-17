@@ -22,7 +22,7 @@ class JobMergeController extends KleinController
 {
 
     private ProjectStruct $project;
-    private array         $jobList = [];
+    private array $jobList = [];
 
     /**
      * @throws NotFoundException
@@ -33,9 +33,9 @@ class JobMergeController extends KleinController
         $pManager = new ProjectManager();
         $pManager->setProjectAndReLoadFeatures($this->project);
 
-        $pStruct                   = $pManager->getProjectStructure();
-        $pStruct[ 'id_customer' ]  = $this->project->id_customer;
-        $pStruct[ 'job_to_merge' ] = (int)$this->request->param('id_job');
+        $pStruct = $pManager->getProjectStructure();
+        $pStruct['id_customer'] = $this->project->id_customer;
+        $pStruct['job_to_merge'] = (int)$this->request->param('id_job');
 
         $pManager->mergeALL($pStruct, $this->jobList);
 
@@ -72,7 +72,7 @@ class JobMergeController extends KleinController
             $this->jobList = JobDao::getById((int)$this->request->param('id_job'));
 
             // Validate the first job in the list.
-            $firstChunk = $this->jobList[ 0 ] ?? null;
+            $firstChunk = $this->jobList[0] ?? null;
             if (!$firstChunk || $firstChunk->id_project != $this->project->id || $firstChunk->isDeleted()) {
                 throw new NotFoundException();
             }

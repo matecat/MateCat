@@ -31,9 +31,9 @@ class ChangeJobsStatusController extends KleinController
     {
         $request = $this->validateTheRequest();
 
-        if ($request[ 'res_type' ] == "prj") {
+        if ($request['res_type'] == "prj") {
             try {
-                $project = ProjectDao::findByIdAndPassword($request[ 'res_id' ], $request[ 'password' ]);
+                $project = ProjectDao::findByIdAndPassword($request['res_id'], $request['password']);
             } catch (Exception) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export($_POST, true) . "\n";
                 $this->logger->debug($msg);
@@ -43,7 +43,7 @@ class ChangeJobsStatusController extends KleinController
 
             $chunks = $project->getJobs();
 
-            JobDao::updateAllJobsStatusesByProjectId($project->id, $request[ 'new_status' ]);
+            JobDao::updateAllJobsStatusesByProjectId($project->id, $request['new_status']);
 
             foreach ($chunks as $chunk) {
                 $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($chunk);
@@ -51,7 +51,7 @@ class ChangeJobsStatusController extends KleinController
             }
         } else {
             try {
-                $firstChunk = ChunkDao::getByIdAndPassword($request[ 'res_id' ], $request[ 'password' ]);
+                $firstChunk = ChunkDao::getByIdAndPassword($request['res_id'], $request['password']);
             } catch (Exception) {
                 $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export($_POST, true) . "\n";
                 $this->logger->debug($msg);
@@ -59,16 +59,16 @@ class ChangeJobsStatusController extends KleinController
                 throw new NotFoundException("Job not found");
             }
 
-            JobDao::updateJobStatus($firstChunk, $request[ 'new_status' ]);
+            JobDao::updateJobStatus($firstChunk, $request['new_status']);
             $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($firstChunk);
             SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
         }
 
         $this->response->json([
-                'errors' => [],
-                'code'   => 1,
-                'data'   => 'OK',
-                'status' => $request[ 'new_status' ]
+            'errors' => [],
+            'code' => 1,
+            'data' => 'OK',
+            'status' => $request['new_status']
         ]);
     }
 
@@ -78,10 +78,10 @@ class ChangeJobsStatusController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $pn         = filter_var($this->request->param('pn'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $id         = filter_var($this->request->param('id'), FILTER_VALIDATE_INT);
-        $res        = filter_var($this->request->param('res'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
-        $password   = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $pn = filter_var($this->request->param('pn'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $id = filter_var($this->request->param('id'), FILTER_VALIDATE_INT);
+        $res = filter_var($this->request->param('res'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $new_status = filter_var($this->request->param('new_status'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
 
         if (!JobStatus::isAllowedStatus($new_status)) {
@@ -89,11 +89,11 @@ class ChangeJobsStatusController extends KleinController
         }
 
         return [
-                'pn'         => $pn,
-                'res_type'   => $res,
-                'res_id'     => $id,
-                'password'   => $password,
-                'new_status' => $new_status,
+            'pn' => $pn,
+            'res_type' => $res,
+            'res_id' => $id,
+            'password' => $password,
+            'new_status' => $new_status,
         ];
     }
 }

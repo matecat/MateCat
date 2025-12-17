@@ -63,8 +63,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable, Stringable
         string $issuer = 'simple.jwt.claims',
         string $authSecret = '',
         int $ttl = 86400
-    )
-    {
+    ) {
         // set the namespace for custom claims
         $this->customClaimsNamespace = $issuer;
 

@@ -64,12 +64,12 @@ class FileinfoMimeTypeGuesser implements MimeTypeGuesserInterface
             throw new LogicException(sprintf('The "%s" guesser is not supported.', __CLASS__));
         }
 
-        $finfo    = new finfo(FILEINFO_MIME_TYPE, $this->magicFile);
+        $finfo = new finfo(FILEINFO_MIME_TYPE, $this->magicFile);
         $mimeType = $finfo->file($path);
 
         if ($mimeType && 0 === (strlen($mimeType) % 2)) {
             $mimeStart = substr($mimeType, 0, strlen($mimeType) >> 1);
-            $mimeType  = $mimeStart . $mimeStart === $mimeType ? $mimeStart : $mimeType;
+            $mimeType = $mimeStart . $mimeStart === $mimeType ? $mimeStart : $mimeType;
         }
 
         return $mimeType;

@@ -32,15 +32,15 @@ class WelcomeEmail extends AbstractEmail
     protected function _getTemplateVariables(): array
     {
         return [
-                'user' => $this->user->toArray()
+            'user' => $this->user->toArray()
         ];
     }
 
     protected function _getLayoutVariables($messageBody = null): array
     {
-        $vars                  = parent::_getLayoutVariables();
-        $vars[ 'title' ]       = $this->title;
-        $vars[ 'closingLine' ] = 'Happy translating!';
+        $vars = parent::_getLayoutVariables();
+        $vars['title'] = $this->title;
+        $vars['closingLine'] = 'Happy translating!';
 
         return $vars;
     }
@@ -50,10 +50,10 @@ class WelcomeEmail extends AbstractEmail
         $recipient = [$this->user->email, $this->user->fullName()];
 
         $this->doSend(
-                $recipient,
-                $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage($this->_buildMessageContent())
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 
@@ -61,9 +61,9 @@ class WelcomeEmail extends AbstractEmail
     {
         $mailConf = parent::_getDefaultMailConf();
 
-        $mailConf[ 'from' ]       = 'noreply@matecat.com';
-        $mailConf[ 'sender' ]     = 'noreply@matecat.com';
-        $mailConf[ 'returnPath' ] = 'noreply@matecat.com';
+        $mailConf['from'] = 'noreply@matecat.com';
+        $mailConf['sender'] = 'noreply@matecat.com';
+        $mailConf['returnPath'] = 'noreply@matecat.com';
 
         return $mailConf;
     }

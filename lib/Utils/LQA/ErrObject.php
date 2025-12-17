@@ -23,9 +23,9 @@ use Stringable;
 class ErrObject implements Stringable
 {
 
-    public ?int    $outcome = null;
-    public ?string $debug   = null;
-    public string  $tip     = "";
+    public ?int $outcome = null;
+    public ?string $debug = null;
+    public string $tip = "";
 
     protected string $orig_debug;
 
@@ -56,12 +56,12 @@ class ErrObject implements Stringable
      */
     public static function get(array $errors): ErrObject
     {
-        $errObj             = new self();
-        $errObj->outcome    = $errors[ 'outcome' ];
-        $errObj->orig_debug = $errors[ 'debug' ];
-        $errObj->debug      = $errors[ 'debug' ];
+        $errObj = new self();
+        $errObj->outcome = $errors['outcome'];
+        $errObj->orig_debug = $errors['debug'];
+        $errObj->debug = $errors['debug'];
 
-        (!empty($errors[ 'tip' ])) ? $errObj->tip = $errors[ 'tip' ] : null;
+        (!empty($errors['tip'])) ? $errObj->tip = $errors['tip'] : null;
 
         return $errObj;
     }

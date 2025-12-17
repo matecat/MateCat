@@ -53,9 +53,9 @@ class TranslatorsModel
      */
     protected array $mailsToBeSent = ['new' => null, 'update' => null, 'split' => null];
 
-    protected int    $delivery_date;
-    protected int    $job_owner_timezone = 0;
-    protected ?int   $id_job;
+    protected int $delivery_date;
+    protected int $job_owner_timezone = 0;
+    protected ?int $id_job;
     protected string $email;
     protected string $job_password;
 
@@ -139,17 +139,17 @@ class TranslatorsModel
      * TranslatorsModel constructor.
      *
      * @param JobStruct $jStruct
-     * @param int       $project_cache_TTL
+     * @param int $project_cache_TTL
      */
     public function __construct(JobStruct $jStruct, int $project_cache_TTL = 60 * 60)
     {
         //get the job
         $this->jStruct = $jStruct;
 
-        $this->id_job       = $jStruct->id;
+        $this->id_job = $jStruct->id;
         $this->job_password = $jStruct->password;
 
-        $this->project    = $this->jStruct->getProject($project_cache_TTL);
+        $this->project = $this->jStruct->getProject($project_cache_TTL);
         $this->featureSet = $this->project->getFeaturesSet();
     }
 
@@ -160,7 +160,7 @@ class TranslatorsModel
     {
         $jTranslatorsDao = new JobsTranslatorsDao();
 
-        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct($this->jStruct)[ 0 ] ?? null;
+        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL($cache)->findByJobsStruct($this->jStruct)[0] ?? null;
     }
 
     /**
@@ -169,7 +169,7 @@ class TranslatorsModel
      */
     public function update(): JobsTranslatorsStruct
     {
-        $confDao            = new ConfirmationDao();
+        $confDao = new ConfirmationDao();
         $confirmationStruct = $confDao->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
@@ -198,37 +198,37 @@ class TranslatorsModel
                 $this->changeJobPassword();
 
                 //send a mail to the new translator
-                $this->mailsToBeSent[ 'new' ] = $this->email;
+                $this->mailsToBeSent['new'] = $this->email;
             } elseif (strtotime($this->jobTranslator->delivery_date) != $this->delivery_date) {
                 //send a mail to the translator if delivery_date changes
-                $this->mailsToBeSent[ 'update' ] = $this->email;
+                $this->mailsToBeSent['update'] = $this->email;
             } elseif ($this->jobTranslator->job_password != $this->job_password) {
                 $this->changeJobPassword($this->job_password);
 
-                $this->mailsToBeSent[ 'split' ] = $this->email;
+                $this->mailsToBeSent['split'] = $this->email;
             }
         } else {
             //send a mail to the new translator
-            $this->mailsToBeSent[ 'new' ] = $this->email;
+            $this->mailsToBeSent['new'] = $this->email;
         }
 
         //set the old id and password to make "ON DUPLICATE KEY UPDATE" possible
-        $translatorStruct->id_job             = $this->jStruct->id;
-        $translatorStruct->job_password       = $this->jStruct->password;
-        $translatorStruct->delivery_date      = Utils::mysqlTimestamp($this->delivery_date);
+        $translatorStruct->id_job = $this->jStruct->id;
+        $translatorStruct->job_password = $this->jStruct->password;
+        $translatorStruct->delivery_date = Utils::mysqlTimestamp($this->delivery_date);
         $translatorStruct->job_owner_timezone = $this->job_owner_timezone;
-        $translatorStruct->added_by           = $this->callingUser->uid;
-        $translatorStruct->email              = $this->email;
-        $translatorStruct->source             = $this->jStruct[ 'source' ];
-        $translatorStruct->target             = $this->jStruct[ 'target' ];
+        $translatorStruct->added_by = $this->callingUser->uid;
+        $translatorStruct->email = $this->email;
+        $translatorStruct->source = $this->jStruct['source'];
+        $translatorStruct->target = $this->jStruct['target'];
 
         $jTranslatorsDao->insertStruct($translatorStruct, [
-                'no_nulls'            => true,
-                'on_duplicate_update' => [
-                        'delivery_date'      => 'value',
-                        'job_password'       => 'value',
-                        'job_owner_timezone' => 'value'
-                ]
+            'no_nulls' => true,
+            'on_duplicate_update' => [
+                'delivery_date' => 'value',
+                'job_password' => 'value',
+                'job_owner_timezone' => 'value'
+            ]
         ]);
 
         //Update internal variable
@@ -248,18 +248,18 @@ class TranslatorsModel
     protected function saveProfile(UserStruct $existentUser): int
     {
         //associate the translator with an existent user and create a profile
-        $profileStruct                 = new TranslatorProfilesStruct();
+        $profileStruct = new TranslatorProfilesStruct();
         $profileStruct->uid_translator = $existentUser->uid;
-        $profileStruct->is_revision    = 0;
-        $profileStruct->source         = $this->jStruct[ 'source' ];
-        $profileStruct->target         = $this->jStruct[ 'target' ];
+        $profileStruct->is_revision = 0;
+        $profileStruct->source = $this->jStruct['source'];
+        $profileStruct->target = $this->jStruct['target'];
 
-        $tProfileDao           = new TranslatorsProfilesDao();
+        $tProfileDao = new TranslatorsProfilesDao();
         $existentProfileStruct = $tProfileDao->getByProfile($profileStruct);
 
         if (empty($existentProfileStruct)) {
             $profileStruct->id = $tProfileDao->insertStruct($profileStruct, [
-                    'no_nulls' => true
+                'no_nulls' => true
             ]);
 
             return $profileStruct->id;

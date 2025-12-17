@@ -689,9 +689,9 @@ class MMT extends AbstractEngine
         $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
         $mt_context = array_pop($contextRs);
-            if (!empty($mt_context)) {
-                $config['mt_context'] = $mt_context->value;
-            }
+        if (!empty($mt_context)) {
+            $config['mt_context'] = $mt_context->value;
+        }
 
         // Common config values
         $config['secret_key'] = self::getG2FallbackSecretKey();

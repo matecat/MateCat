@@ -15,9 +15,9 @@ use ReflectionException;
 class EntryValidator
 {
 
-    public ?SegmentStruct  $segment;
-    public ?ProjectStruct  $project;
-    public ?ModelStruct    $qa_model = null;
+    public ?SegmentStruct $segment;
+    public ?ProjectStruct $project;
+    public ?ModelStruct $qa_model = null;
     public ?CategoryStruct $category = null;
 
     protected array $errors = [];
@@ -73,7 +73,7 @@ class EntryValidator
     {
         $this->flushErrors();
         $this->validate();
-        $errors          = $this->getErrors();
+        $errors = $this->getErrors();
         $this->validated = true;
 
         return empty($errors);
@@ -86,14 +86,14 @@ class EntryValidator
 
     public function validate(): void
     {
-        $dao           = new SegmentDao(Database::obtain());
+        $dao = new SegmentDao(Database::obtain());
         $this->segment = $dao->getById($this->struct->id_segment);
 
         if (!$this->segment) {
             throw new NotFoundException('segment not found');
         }
 
-        $job           = JobDao::getById($this->struct->id_job)[ 0 ];
+        $job = JobDao::getById($this->struct->id_job)[0];
         $this->project = ProjectDao::findById($job->id_project);
 
         $this->validateCategoryId();

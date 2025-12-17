@@ -20,16 +20,16 @@ class JobStatus
      *
      */
 
-    const string STATUS_ACTIVE    = 'active';
-    const string STATUS_ARCHIVED  = 'archived';
+    const string STATUS_ACTIVE = 'active';
+    const string STATUS_ARCHIVED = 'archived';
     const string STATUS_CANCELLED = 'cancelled';
-    const string STATUS_DELETED   = 'deleted';
+    const string STATUS_DELETED = 'deleted';
 
     public static array $ALLOWED_STATUSES = [
-            self::STATUS_ACTIVE,
-            self::STATUS_ARCHIVED,
-            self::STATUS_CANCELLED,
-            self::STATUS_DELETED
+        self::STATUS_ACTIVE,
+        self::STATUS_ARCHIVED,
+        self::STATUS_CANCELLED,
+        self::STATUS_DELETED
     ];
 
     public static function isAllowedStatus(string $status): bool

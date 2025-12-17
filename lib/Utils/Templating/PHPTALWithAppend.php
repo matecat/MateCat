@@ -22,16 +22,16 @@ class PHPTALWithAppend extends PHPTAL
      * their own JavaScripts or assets.
      *
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function append(string $name, mixed $value): void
     {
         if (!array_key_exists($name, $this->internal_store)) {
-            $this->internal_store[ $name ] = [];
+            $this->internal_store[$name] = [];
         }
 
-        $this->internal_store[ $name ][] = $value;
+        $this->internal_store[$name][] = $value;
 
-        $this->$name = $this->internal_store[ $name ];
+        $this->$name = $this->internal_store[$name];
     }
 }

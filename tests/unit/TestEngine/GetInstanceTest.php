@@ -16,7 +16,8 @@ use Utils\Registry\AppConfig;
  * Date: 14/04/16
  * Time: 17.45
  */
-class GetInstanceTest extends AbstractTest {
+class GetInstanceTest extends AbstractTest
+{
     /**
      * @var Database
      */
@@ -29,38 +30,40 @@ class GetInstanceTest extends AbstractTest {
     protected $id_user;
     protected $id_database;
 
-    public function setUp(): void {
-
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         /**
          * user insertion
          */
-        $this->sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ( '" . uniqid( '', true ) . "bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
-        $this->database_instance->getConnection()->query( $this->sql_insert_user );
+        $this->sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ( '" . uniqid(
+                '',
+                true
+            ) . "bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $this->database_instance->getConnection()->query($this->sql_insert_user);
         $this->id_user = $this->database_instance->getConnection()->lastInsertId();
 
         /**
          * engine insertion
          */
         $this->sql_insert_engine = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`engines` (`name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ( 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'Apertium', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
-        $this->database_instance->getConnection()->query( $this->sql_insert_engine );
+        $this->database_instance->getConnection()->query($this->sql_insert_engine);
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 
 
-        $this->sql_delete_user   = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
+        $this->sql_delete_user = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
         $this->sql_delete_engine = "DELETE FROM engines WHERE id=" . $this->id_database . ";";
     }
 
-    public function tearDown(): void {
-
-        $this->database_instance->getConnection()->query( $this->sql_delete_user );
-        $this->database_instance->getConnection()->query( $this->sql_delete_engine );
-        $flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
-        $flusher->select( AppConfig::$INSTANCE_ID );
+    public function tearDown(): void
+    {
+        $this->database_instance->getConnection()->query($this->sql_delete_user);
+        $this->database_instance->getConnection()->query($this->sql_delete_engine);
+        $flusher = new Predis\Client(AppConfig::$REDIS_SERVERS);
+        $flusher->select(AppConfig::$INSTANCE_ID);
         $flusher->flushdb();
         parent::tearDown();
-
     }
 
     /**
@@ -68,10 +71,10 @@ class GetInstanceTest extends AbstractTest {
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
-    public function test_getInstance_of_constructed_engine() {
-
-        $engine = EnginesFactory::getInstance( $this->id_database );
-        $this->assertTrue( $engine instanceof Apertium );
+    public function test_getInstance_of_constructed_engine()
+    {
+        $engine = EnginesFactory::getInstance($this->id_database);
+        $this->assertTrue($engine instanceof Apertium);
     }
 
     /**
@@ -79,10 +82,10 @@ class GetInstanceTest extends AbstractTest {
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
-    public function test_getInstance_of_constructed_engine_my_memory() {
-
-        $engine = EnginesFactory::getInstance( 1 );
-        $this->assertTrue( $engine instanceof MyMemory );
+    public function test_getInstance_of_constructed_engine_my_memory()
+    {
+        $engine = EnginesFactory::getInstance(1);
+        $this->assertTrue($engine instanceof MyMemory);
     }
 
     /**
@@ -90,10 +93,10 @@ class GetInstanceTest extends AbstractTest {
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
-    public function test_getInstance_of_default_engine() {
-        $engine = EnginesFactory::getInstance( 0 );
-        $this->assertTrue( $engine instanceof NONE );
-
+    public function test_getInstance_of_default_engine()
+    {
+        $engine = EnginesFactory::getInstance(0);
+        $this->assertTrue($engine instanceof NONE);
     }
 
     /**
@@ -101,10 +104,10 @@ class GetInstanceTest extends AbstractTest {
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
-    public function test_getInstance_without_id() {
-
-        $this->expectException( TypeError::class );
-        EnginesFactory::getInstance(  );
+    public function test_getInstance_without_id()
+    {
+        $this->expectException(TypeError::class);
+        EnginesFactory::getInstance();
     }
 
     /**
@@ -112,10 +115,10 @@ class GetInstanceTest extends AbstractTest {
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
-    public function test_getInstance_whit_null_id() {
-
-        $this->expectException( TypeError::class );
-        EnginesFactory::getInstance( null );
+    public function test_getInstance_whit_null_id()
+    {
+        $this->expectException(TypeError::class);
+        EnginesFactory::getInstance(null);
     }
 
     /**
@@ -123,10 +126,10 @@ class GetInstanceTest extends AbstractTest {
      * @group  regression
      * @covers EnginesFactory::getInstance
      */
-    public function test_getInstance_with_no_mach_for_engine_id() {
-
-        $this->expectException( Exception::class );
-        EnginesFactory::getInstance( $this->id_database + 1 );
+    public function test_getInstance_with_no_mach_for_engine_id()
+    {
+        $this->expectException(Exception::class);
+        EnginesFactory::getInstance($this->id_database + 1);
     }
 
     /**
@@ -135,17 +138,17 @@ class GetInstanceTest extends AbstractTest {
      * @covers EnginesFactory::getInstance
      * @throws Exception
      */
-    public function test_getInstance_with_no_mach_for_engine_class_name() {
-
+    public function test_getInstance_with_no_mach_for_engine_class_name()
+    {
         $sql_update_engine_class_name = "UPDATE `engines` SET class_load='YourMemory' WHERE id=" . $this->id_database . ";";
 
-        $this->database_instance->getConnection()->query( $sql_update_engine_class_name );
-        $flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
-        $flusher->select( AppConfig::$INSTANCE_ID );
+        $this->database_instance->getConnection()->query($sql_update_engine_class_name);
+        $flusher = new Predis\Client(AppConfig::$REDIS_SERVERS);
+        $flusher->select(AppConfig::$INSTANCE_ID);
         $flusher->flushdb();
 
-        $engine = EnginesFactory::getInstance( $this->id_database );
-        $this->assertTrue( $engine instanceof NONE );
+        $engine = EnginesFactory::getInstance($this->id_database);
+        $this->assertTrue($engine instanceof NONE);
     }
 
 

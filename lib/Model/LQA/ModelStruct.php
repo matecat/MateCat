@@ -9,7 +9,7 @@ use Model\DataAccess\IDaoStruct;
 class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface
 {
 
-    public ?int   $id = null;
+    public ?int $id = null;
     public string $label;
     public string $create_date;
     public string $pass_type;
@@ -18,7 +18,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     public string $hash;
 
     public ?int $qa_model_template_id = null;
-    public ?int $uid                  = null; // nullable for backward compatibility
+    public ?int $uid = null; // nullable for backward compatibility
 
     /**
      * Returns the serialized representation of categories and subcategories.
@@ -63,7 +63,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
             throw new Exception('limit is not defined in JSON options');
         }
 
-        return $this->normalizeLimits($options[ 'limit' ]);
+        return $this->normalizeLimits($options['limit']);
     }
 
     /**
@@ -97,28 +97,28 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
 
             if (!empty($category)) {
                 $categoriesArray[] = [
-                        'id'         => (int)$category[ 'id' ],
-                        'label'      => $category[ 'label' ],
-                        'code'       => ($category[ 'options' ][ 'code' ] ?? null),
-                        'severities' => $category[ 'severities' ],
+                    'id' => (int)$category['id'],
+                    'label' => $category['label'],
+                    'code' => ($category['options']['code'] ?? null),
+                    'severities' => $category['severities'],
                 ];
             }
         }
 
         return [
-                'model' => [
-                        "id"                => (int)$this->id,
-                        "uid"               => $this->uid,
-                        "template_model_id" => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
-                        "version"           => 1,
-                        "label"             => $this->label,
-                        "create_date"       => $this->create_date,
-                        "categories"        => $categoriesArray,
-                        "passfail"          => [
-                                'type'    => $this->pass_type,
-                                'options' => $this->getPassOptions()
-                        ],
-                ]
+            'model' => [
+                "id" => (int)$this->id,
+                "uid" => $this->uid,
+                "template_model_id" => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
+                "version" => 1,
+                "label" => $this->label,
+                "create_date" => $this->create_date,
+                "categories" => $categoriesArray,
+                "passfail" => [
+                    'type' => $this->pass_type,
+                    'options' => $this->getPassOptions()
+                ],
+            ]
         ];
     }
 }

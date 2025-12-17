@@ -26,11 +26,11 @@ class ChangeProjectNameController extends KleinController
 
         $projectAccessValidator = new ProjectPasswordValidator($this);
         $this->appendValidator(
-                $projectAccessValidator->onSuccess(
-                        function () use ($projectAccessValidator) {
-                            $this->project = $projectAccessValidator->getProject();
-                        }
-                )
+            $projectAccessValidator->onSuccess(
+                function () use ($projectAccessValidator) {
+                    $this->project = $projectAccessValidator->getProject();
+                }
+            )
         );
     }
 
@@ -39,13 +39,13 @@ class ChangeProjectNameController extends KleinController
      */
     public function changeName(): void
     {
-        $id       = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT);
+        $id = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT);
         $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $name     = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $name = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
         if (
-                empty($id) or
-                empty($password)
+            empty($id) or
+            empty($password)
         ) {
             throw new InvalidArgumentException('Missing required parameters [`id `, `password`]');
         }
@@ -60,8 +60,8 @@ class ChangeProjectNameController extends KleinController
 
         $this->response->status()->setCode(200);
         $this->response->json([
-                'id'   => $id,
-                'name' => $name,
+            'id' => $id,
+            'name' => $name,
         ]);
     }
 
@@ -88,14 +88,14 @@ class ChangeProjectNameController extends KleinController
      * Check if the logged user has the permissions to change the password
      *
      * @param ProjectStruct $project
-     * @param UserStruct    $user
+     * @param UserStruct $user
      *
      * @throws Exception
      */
     private function checkUserPermissions(ProjectStruct $project, UserStruct $user): void
     {
         // check if user is belongs to the project team
-        $team  = $project->getTeam();
+        $team = $project->getTeam();
         $check = (new MembershipDao())->findTeamByIdAndUser($team->id, $user);
 
         if ($check === null) {

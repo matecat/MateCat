@@ -19,7 +19,7 @@ use stdClass;
  * @property string $type
  * @property string $tmp_name
  * @property string $error
- * @property int    $size
+ * @property int $size
  * @property string $file_path
  */
 class UploadElement extends stdClass implements ArrayAccess

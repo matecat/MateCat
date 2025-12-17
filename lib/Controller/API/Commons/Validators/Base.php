@@ -35,9 +35,9 @@ abstract class Base
 
     public function __construct(KleinController $kleinController, ...$args)
     {
-        $this->request    = $kleinController->getRequest();
+        $this->request = $kleinController->getRequest();
         $this->controller = $kleinController;
-        $this->args       = $args;
+        $this->args = $args;
     }
 
     /**

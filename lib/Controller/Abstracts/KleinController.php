@@ -25,7 +25,7 @@ abstract class KleinController implements IController
     use AuthenticationTrait;
 
     protected bool $useSession = false;
-    protected bool $isView     = false;
+    protected bool $isView = false;
 
     /**
      * @var Request
@@ -35,9 +35,9 @@ abstract class KleinController implements IController
     /**
      * @var Response
      */
-    protected Response         $response;
+    protected Response $response;
     protected ?ServiceProvider $service = null;
-    protected ?App             $app     = null;
+    protected ?App $app = null;
 
     /**
      * @var Base[]
@@ -95,10 +95,10 @@ abstract class KleinController implements IController
     }
 
     /**
-     * @param Request          $request
-     * @param Response         $response
+     * @param Request $request
+     * @param Response $response
      * @param ?ServiceProvider $service
-     * @param ?App             $app
+     * @param ?App $app
      *
      * @throws Exception
      */
@@ -107,15 +107,15 @@ abstract class KleinController implements IController
         $this->startTimer();
         $this->timingLogFileName = 'api_calls_time.log';
 
-        $this->request  = $request;
+        $this->request = $request;
         $this->response = $response;
-        $this->service  = $service;
-        $this->app      = $app;
+        $this->service = $service;
+        $this->app = $app;
 
-        $paramsPut        = $this->getPutParams() ?: [];
-        $paramsGet        = $this->request->paramsNamed()->getIterator()->getArrayCopy();
-        $this->params     = $this->request->paramsPost()->getIterator()->getArrayCopy();
-        $this->params     = array_merge($this->params, $paramsGet, $paramsPut);
+        $paramsPut = $this->getPutParams() ?: [];
+        $paramsGet = $this->request->paramsNamed()->getIterator()->getArrayCopy();
+        $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
+        $this->params = array_merge($this->params, $paramsGet, $paramsPut);
         $this->featureSet = new FeatureSet();
         $this->identifyUser($this->useSession);
         $this->afterConstruct();
@@ -220,8 +220,8 @@ abstract class KleinController implements IController
         $parsedSegment = explode("-", $id_segment);
 
         return [
-                'id_segment' => $parsedSegment[ 0 ],
-                'split_num'  => $parsedSegment[ 1 ] ?? null,
+            'id_segment' => $parsedSegment[0],
+            'split_num' => $parsedSegment[1] ?? null,
         ];
     }
 

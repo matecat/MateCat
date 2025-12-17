@@ -57,8 +57,8 @@ class TranslationIssueModel
         $review = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
 
         $this->chunk_review = $review;
-        $this->chunk        = $this->chunk_review->getChunk();
-        $this->project      = $this->chunk->getProject();
+        $this->chunk = $this->chunk_review->getChunk();
+        $this->project = $this->chunk->getProject();
     }
 
     /**
@@ -119,18 +119,18 @@ class TranslationIssueModel
         /**
          * in order to save diff we need to lookup for current version in segment_translations.
          */
-        $struct                 = new TranslationVersionStruct();
-        $struct->id_job         = $this->issue->id_job;
-        $struct->id_segment     = $this->issue->id_segment;
-        $struct->creation_date  = Utils::mysqlTimestamp(time());
-        $struct->is_review      = true;
+        $struct = new TranslationVersionStruct();
+        $struct->id_job = $this->issue->id_job;
+        $struct->id_segment = $this->issue->id_segment;
+        $struct->creation_date = Utils::mysqlTimestamp(time());
+        $struct->is_review = true;
         $struct->version_number = $this->issue->translation_version;
-        $struct->raw_diff       = $string_to_save;
+        $struct->raw_diff = $string_to_save;
 
         $version_record = (new TranslationVersionDao())->getVersionNumberForTranslation(
-                $struct->id_job,
-                $struct->id_segment,
-                $struct->version_number
+            $struct->id_job,
+            $struct->id_segment,
+            $struct->version_number
         );
 
         if (!$version_record) {

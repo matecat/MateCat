@@ -20,9 +20,9 @@ class FetchChangeRatesController extends KleinController
         $changeRatesFetcher->fetchChangeRates();
 
         $this->response->json([
-                "errors" => [],
-                "code"   => 1,
-                'data'   => $changeRatesFetcher->getChangeRates()
+            "errors" => [],
+            "code" => 1,
+            'data' => $changeRatesFetcher->getChangeRates()
         ]);
     }
 }

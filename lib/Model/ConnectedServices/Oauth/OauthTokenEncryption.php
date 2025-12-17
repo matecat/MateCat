@@ -27,7 +27,7 @@ class OauthTokenEncryption extends DefuseEncryption
     {
         if (self::$instance === null) {
             self::$instance = new OauthTokenEncryption(
-                    AppConfig::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
+                AppConfig::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
             );
         }
 

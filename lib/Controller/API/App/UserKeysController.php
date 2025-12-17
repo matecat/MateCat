@@ -35,16 +35,16 @@ class UserKeysController extends KleinController
      */
     public function delete(): void
     {
-        $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
-        $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->disable($memoryKeyToUpdate);
-        $this->removeKeyFromEngines($userMemoryKeys, $request[ 'remove_from' ]);
+        $request = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
+        $mkDao = $this->getMkDao();
+        $userMemoryKeys = $mkDao->disable($memoryKeyToUpdate);
+        $this->removeKeyFromEngines($userMemoryKeys, $request['remove_from']);
 
         $this->response->json([
-                'errors'  => [],
-                'data'    => $userMemoryKeys,
-                "success" => true
+            'errors' => [],
+            'data' => $userMemoryKeys,
+            "success" => true
         ]);
     }
 
@@ -53,15 +53,15 @@ class UserKeysController extends KleinController
      */
     public function update(): void
     {
-        $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
-        $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->atomicUpdate($memoryKeyToUpdate);
+        $request = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
+        $mkDao = $this->getMkDao();
+        $userMemoryKeys = $mkDao->atomicUpdate($memoryKeyToUpdate);
 
         $this->response->json([
-                'errors'  => [],
-                'data'    => $userMemoryKeys,
-                "success" => true
+            'errors' => [],
+            'data' => $userMemoryKeys,
+            "success" => true
         ]);
     }
 
@@ -70,15 +70,15 @@ class UserKeysController extends KleinController
      */
     public function newKey(): void
     {
-        $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
-        $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->create($memoryKeyToUpdate);
+        $request = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
+        $mkDao = $this->getMkDao();
+        $userMemoryKeys = $mkDao->create($memoryKeyToUpdate);
 
         $this->response->json([
-                'errors'  => [],
-                'data'    => $userMemoryKeys,
-                "success" => true
+            'errors' => [],
+            'data' => $userMemoryKeys,
+            "success" => true
         ]);
     }
 
@@ -88,10 +88,10 @@ class UserKeysController extends KleinController
      */
     public function info(): void
     {
-        $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
-        $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->read($memoryKeyToUpdate);
+        $request = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
+        $mkDao = $this->getMkDao();
+        $userMemoryKeys = $mkDao->read($memoryKeyToUpdate);
 
         $this->response->json($this->getKeyUsersInfo($userMemoryKeys));
     }
@@ -102,20 +102,20 @@ class UserKeysController extends KleinController
      */
     public function share(): void
     {
-        $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate($request[ 'key' ], $request[ 'description' ]);
-        $emailList         = Utils::validateEmailList($request[ 'emails' ]);
-        $mkDao             = $this->getMkDao();
+        $request = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
+        $emailList = Utils::validateEmailList($request['emails']);
+        $mkDao = $this->getMkDao();
 
         $userMemoryKeys = $mkDao->read($memoryKeyToUpdate) ?: throw new NotFoundException("No user memory keys found");
 
 
-        (new TmKeyManager())->shareKey($emailList, $userMemoryKeys[ 0 ], $this->user);
+        (new TmKeyManager())->shareKey($emailList, $userMemoryKeys[0], $this->user);
 
         $this->response->json([
-                'errors'  => [],
-                'data'    => $userMemoryKeys,
-                "success" => true
+            'errors' => [],
+            'data' => $userMemoryKeys,
+            "success" => true
         ]);
     }
 
@@ -128,21 +128,21 @@ class UserKeysController extends KleinController
     {
         if (empty($userMemoryKeys)) {
             return [
-                    'errors'  => [],
-                    "data"    => [],
-                    "success" => true
+                'errors' => [],
+                "data" => [],
+                "success" => true
             ];
         }
 
         $_userStructs = [];
-        foreach ($userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct) {
+        foreach ($userMemoryKeys[0]->tm_key->getInUsers() as $userStruct) {
             $_userStructs[] = new ClientUserFacade($userStruct);
         }
 
         return [
-                'errors'  => [],
-                "data"    => $_userStructs,
-                "success" => true
+            'errors' => [],
+            "data" => $_userStructs,
+            "success" => true
         ];
     }
 
@@ -152,8 +152,8 @@ class UserKeysController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $key         = filter_var($this->request->param('key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $emails      = filter_var($this->request->param('emails'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $key = filter_var($this->request->param('key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $emails = filter_var($this->request->param('emails'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $description = filter_var($this->request->param('description'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $remove_from = filter_var($this->request->param('remove_from'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
@@ -172,10 +172,10 @@ class UserKeysController extends KleinController
         }
 
         return [
-                'key'         => $key,
-                'emails'      => $emails,
-                'description' => (!empty($description)) ? $description : null,
-                'remove_from' => $remove_from,
+            'key' => $key,
+            'emails' => $emails,
+            'description' => (!empty($description)) ? $description : null,
+            'remove_from' => $remove_from,
         ];
     }
 
@@ -201,14 +201,14 @@ class UserKeysController extends KleinController
         //validate the key
         $tmService->checkCorrectKey($key);
 
-        $tmKeyStruct       = new TmKeyStruct();
-        $tmKeyStruct->key  = $key;
+        $tmKeyStruct = new TmKeyStruct();
+        $tmKeyStruct->key = $key;
         $tmKeyStruct->name = $description;
-        $tmKeyStruct->tm   = true;
+        $tmKeyStruct->tm = true;
         $tmKeyStruct->glos = true;
 
-        $memoryKeyToUpdate         = new MemoryKeyStruct();
-        $memoryKeyToUpdate->uid    = $this->user->uid;
+        $memoryKeyToUpdate = new MemoryKeyStruct();
+        $memoryKeyToUpdate->uid = $this->user->uid;
         $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 
         return $memoryKeyToUpdate;
@@ -236,21 +236,21 @@ class UserKeysController extends KleinController
         foreach ($deleteFrom as $engineName) {
             try {
                 // Create a temporary engine instance using the engine name.
-                $struct             = EngineStruct::getStruct();
+                $struct = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
-                $struct->type       = EngineConstants::MT;
-                $engine             = EnginesFactory::createTempInstance($struct);
+                $struct->type = EngineConstants::MT;
+                $engine = EnginesFactory::createTempInstance($struct);
 
                 // Check if the engine supports adaptive MT.
                 if ($engine->isAdaptiveMT()) {
                     // Retrieve metadata for the engine, ensuring it belongs to the current user.
                     $ownerMmtEngineMetaData = (new MetadataDao())
-                            ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
-                            ->get($this->getUser()->uid, $engine->getEngineRecord()->class_load);
+                        ->setCacheTTL(60 * 60 * 24 * 30) // Cache TTL: 30 days.
+                        ->get($this->getUser()->uid, $engine->getEngineRecord()->class_load);
 
                     // If metadata exists, attempt to delete the memory key from the engine.
                     if (!empty($ownerMmtEngineMetaData)) {
-                        $engine    = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
+                        $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
                         $engineKey = $engine->getMemoryIfMine($memoryKey);
                         if ($engineKey) {
                             $engine->deleteMemory($engineKey);

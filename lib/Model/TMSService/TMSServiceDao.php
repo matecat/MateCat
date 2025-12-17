@@ -21,7 +21,7 @@ class TMSServiceDao
 {
 
     /**
-     * @param int    $jid
+     * @param int $jid
      * @param string $jPassword
      *
      * @return array
@@ -50,15 +50,15 @@ class TMSServiceDao
         $stmt = $db->getConnection()->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute([
-                'id_job'   => $jid,
-                'password' => $jPassword
+            'id_job' => $jid,
+            'password' => $jPassword
         ]);
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param int    $jid
+     * @param int $jid
      * @param string $jPassword
      *
      * @return array
@@ -87,10 +87,10 @@ class TMSServiceDao
             $stmt = $db->getConnection()->prepare($sql);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
             $stmt->execute([
-                    'id_job'      => $jid,
-                    'password'    => $jPassword,
-                    '_translated' => TranslationStatus::STATUS_TRANSLATED,
-                    '_approved'   => TranslationStatus::STATUS_APPROVED
+                'id_job' => $jid,
+                'password' => $jPassword,
+                '_translated' => TranslationStatus::STATUS_TRANSLATED,
+                '_approved' => TranslationStatus::STATUS_APPROVED
             ]);
             $results = $stmt->fetchAll();
         } catch (PDOException $e) {
@@ -103,7 +103,7 @@ class TMSServiceDao
     }
 
     /**
-     * @param int    $jid
+     * @param int $jid
      * @param string $jPassword
      *
      * @return array
@@ -137,10 +137,10 @@ class TMSServiceDao
             $stmt = $db->getConnection()->prepare($sql);
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
             $stmt->execute([
-                    'id_job'      => $jid,
-                    'password'    => $jPassword,
-                    '_translated' => TranslationStatus::STATUS_TRANSLATED,
-                    '_approved'   => TranslationStatus::STATUS_APPROVED
+                'id_job' => $jid,
+                'password' => $jPassword,
+                '_translated' => TranslationStatus::STATUS_TRANSLATED,
+                '_approved' => TranslationStatus::STATUS_APPROVED
             ]);
             $results = $stmt->fetchAll();
         } catch (PDOException $e) {
@@ -150,16 +150,16 @@ class TMSServiceDao
 
         foreach ($results as $key => $value) {
             //we already extracted a 100% match by definition
-            if (in_array($value[ 'status' ], [
-                            TranslationStatus::STATUS_TRANSLATED,
-                            TranslationStatus::STATUS_APPROVED
-                    ]
+            if (in_array($value['status'], [
+                    TranslationStatus::STATUS_TRANSLATED,
+                    TranslationStatus::STATUS_APPROVED
+                ]
             )
             ) {
                 continue;
             }
 
-            $suggestions_array = json_decode($value[ 'suggestions_array' ]);
+            $suggestions_array = json_decode($value['suggestions_array']);
             foreach ($suggestions_array as $_sugg) {
                 //we want the highest value of TM and we must exclude the MT
                 if (str_contains($_sugg->created_by, 'MT')) {
@@ -167,17 +167,17 @@ class TMSServiceDao
                 }
 
                 //override the content of the result with the fuzzy matches
-                $results[ $key ][ 'segment' ]     = $_sugg->segment;
-                $results[ $key ][ 'translation' ] = $_sugg->translation;
-                $results[ $key ][ '_created_by' ] = 'MateCat_OmegaT_Export';
+                $results[$key]['segment'] = $_sugg->segment;
+                $results[$key]['translation'] = $_sugg->translation;
+                $results[$key]['_created_by'] = 'MateCat_OmegaT_Export';
 
                 //stop, we found the first TM value in the list
                 break;
             }
 
             //if no TM found unset the result
-            if (!isset($results[ $key ][ '_created_by' ])) {
-                unset($results[ $key ]);
+            if (!isset($results[$key]['_created_by'])) {
+                unset($results[$key]);
             }
         }
 

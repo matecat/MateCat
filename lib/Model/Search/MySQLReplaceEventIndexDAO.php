@@ -9,7 +9,7 @@ class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
 {
 
     const string STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
-    const string TABLE       = 'replace_events_current_version';
+    const string TABLE = 'replace_events_current_version';
 
     /**
      * @param int $idJob
@@ -18,14 +18,14 @@ class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
      */
     public function getActualIndex(int $idJob): int
     {
-        $conn  = Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $query = "SELECT version as v FROM " . self::TABLE . " WHERE id_job=:id_job";
-        $stmt  = $conn->prepare($query);
+        $stmt = $conn->prepare($query);
         $stmt->execute([
-                ':id_job' => $idJob,
+            ':id_job' => $idJob,
         ]);
 
-        return (int)$stmt->fetch()[ 0 ][ 'v' ];
+        return (int)$stmt->fetch()[0]['v'];
     }
 
     /**
@@ -46,8 +46,8 @@ class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndex
 
         $stmt = $conn->prepare($query);
         $stmt->execute([
-                ':id_job'  => $id_job,
-                ':version' => $version,
+            ':id_job' => $id_job,
+            ':version' => $version,
         ]);
 
         return $stmt->rowCount();

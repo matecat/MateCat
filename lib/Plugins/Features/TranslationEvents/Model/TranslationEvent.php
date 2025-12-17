@@ -85,20 +85,20 @@ class TranslationEvent
     /**
      * @param SegmentTranslationStruct $old_translation
      * @param SegmentTranslationStruct $translation
-     * @param UserStruct|null          $user
-     * @param int                      $source_page_code
+     * @param UserStruct|null $user
+     * @param int $source_page_code
      *
      */
     public function __construct(
-            SegmentTranslationStruct $old_translation,
-            SegmentTranslationStruct $translation,
-            ?UserStruct $user,
-            int $source_page_code
+        SegmentTranslationStruct $old_translation,
+        SegmentTranslationStruct $translation,
+        ?UserStruct $user,
+        int $source_page_code
     ) {
-        $this->old_translation    = $old_translation;
+        $this->old_translation = $old_translation;
         $this->wanted_translation = $translation;
-        $this->user               = $user;
-        $this->source_page        = $source_page_code;
+        $this->user = $user;
+        $this->source_page = $source_page_code;
 
         try {
             $this->chunk = $this->wanted_translation->getChunk();
@@ -163,8 +163,8 @@ class TranslationEvent
     public function isUnModifiedIce(): bool
     {
         return $this->isIce() &&
-                $this->old_translation->version_number == 0 &&
-                $this->wanted_translation->version_number == 0;
+            $this->old_translation->version_number == 0 &&
+            $this->wanted_translation->version_number == 0;
     }
 
     /**
@@ -176,9 +176,9 @@ class TranslationEvent
         $dao = new SegmentDao(Database::obtain());
 
         return $dao->getByChunkIdAndSegmentId(
-                $this->chunk->id,
-                $this->chunk->password,
-                $this->wanted_translation->id_segment
+            $this->chunk->id,
+            $this->chunk->password,
+            $this->wanted_translation->id_segment
         );
     }
 
@@ -239,8 +239,8 @@ class TranslationEvent
     {
         if (empty($this->previous_event)) {
             $this->previous_event = (new TranslationEventDao())->getLatestEventForSegment(
-                    $this->old_translation->id_job,
-                    $this->old_translation->id_segment
+                $this->old_translation->id_job,
+                $this->old_translation->id_segment
             );
         }
 
@@ -280,13 +280,13 @@ class TranslationEvent
     {
         if (!$this->getLatestEventForSegment()) {
             if (
-                    in_array(
-                            $this->getOldTranslation()->status,
-                            array_merge(
-                                    TranslationStatus::$TRANSLATION_STATUSES,
-                                    TranslationStatus::$INITIAL_STATUSES
-                            )
+                in_array(
+                    $this->getOldTranslation()->status,
+                    array_merge(
+                        TranslationStatus::$TRANSLATION_STATUSES,
+                        TranslationStatus::$INITIAL_STATUSES
                     )
+                )
             ) {
                 $source_page = SourcePages::SOURCE_PAGE_TRANSLATE;
             } elseif ($this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED) {
@@ -398,8 +398,8 @@ class TranslationEvent
      */
     public function setChunkReviewForPassFailUpdate(ChunkReviewStruct $chunk_review): void
     {
-        if (false === isset($this->chunk_reviews_partials_to_update[ $chunk_review->id ])) {
-            $this->chunk_reviews_partials_to_update[ $chunk_review->id ] = $chunk_review;
+        if (false === isset($this->chunk_reviews_partials_to_update[$chunk_review->id])) {
+            $this->chunk_reviews_partials_to_update[$chunk_review->id] = $chunk_review;
         }
     }
 
@@ -416,8 +416,8 @@ class TranslationEvent
      */
     public function addIssueToDelete(EntryWithCategoryStruct $issue): void
     {
-        if (false === isset($this->issues_to_delete[ $issue->id ])) {
-            $this->issues_to_delete[ $issue->id ] = $issue;
+        if (false === isset($this->issues_to_delete[$issue->id])) {
+            $this->issues_to_delete[$issue->id] = $issue;
         }
     }
 

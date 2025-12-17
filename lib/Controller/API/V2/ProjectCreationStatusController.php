@@ -36,9 +36,9 @@ class ProjectCreationStatusController extends KleinController
 
         if (empty($result)) {
             $this->_letsWait();
-        } elseif (!empty($result[ 'errors' ])) {
-            foreach ($result[ 'errors' ] as $error) {
-                throw new Exception($error[ 'message' ], (int)$error[ 'code' ]);
+        } elseif (!empty($result['errors'])) {
+            foreach ($result['errors'] as $error) {
+                throw new Exception($error['message'], (int)$error['code']);
             }
         } else {
             // project is created, find it with password
@@ -49,9 +49,9 @@ class ProjectCreationStatusController extends KleinController
             }
 
             $featureSet = $project->getFeaturesSet();
-            $result     = $featureSet->filter('filterCreationStatus', $result, $project);
+            $result = $featureSet->filter('filterCreationStatus', $result, $project);
 
-            if (empty($result[ 'id_project' ])) {
+            if (empty($result['id_project'])) {
                 $this->_letsWait();
             } else {
                 $result = (object)$result;

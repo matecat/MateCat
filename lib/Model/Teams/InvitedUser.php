@@ -34,7 +34,7 @@ class InvitedUser
     /**
      * InvitedUser constructor.
      *
-     * @param string   $jwt
+     * @param string $jwt
      * @param Response $response
      *
      * @throws ValidationError
@@ -58,30 +58,30 @@ class InvitedUser
      */
     public function prepareUserInvitedSignUpRedirect(): void
     {
-        $_SESSION[ 'invited_to_team' ] = $this->jwt;
+        $_SESSION['invited_to_team'] = $this->jwt;
         FlashMessage::set('popup', 'signup', FlashMessage::SERVICE);
-        FlashMessage::set('signup_email', $this->jwt[ 'email' ], FlashMessage::SERVICE);
+        FlashMessage::set('signup_email', $this->jwt['email'], FlashMessage::SERVICE);
     }
 
     /**
      * @param UserStruct $user
-     * @param array      $invitation
+     * @param array $invitation
      *
      * @throws ReflectionException
      */
     public static function completeTeamSignUp(UserStruct $user, array $invitation): void
     {
-        $teamStruct = (new TeamDao)->findById($invitation[ 'team_id' ]);
+        $teamStruct = (new TeamDao)->findById($invitation['team_id']);
 
         $teamModel = new TeamModel($teamStruct);
         $teamModel->setUser($user);
-        $teamModel->addMemberEmail($invitation[ 'email' ]);
+        $teamModel->addMemberEmail($invitation['email']);
         $teamModel->updateMembers();
 
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), $invitation);
         $pendingInvitation->remove(); // remove pending invitation
 
-        unset($_SESSION[ 'invited_to_team' ]);
+        unset($_SESSION['invited_to_team']);
     }
 
     /**
@@ -89,12 +89,12 @@ class InvitedUser
      */
     public static function hasPendingInvitations(): bool
     {
-        if (!isset($_SESSION[ 'invited_to_team' ]) || empty($_SESSION[ 'invited_to_team' ][ 'team_id' ])) { // check if this is the right session caller
+        if (!isset($_SESSION['invited_to_team']) || empty($_SESSION['invited_to_team']['team_id'])) { // check if this is the right session caller
             return false;
         }
 
-        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), $_SESSION[ 'invited_to_team' ]);
-        if (!$pendingInvitation->hasPendingInvitation($_SESSION[ 'invited_to_team' ][ 'team_id' ])) {
+        $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), $_SESSION['invited_to_team']);
+        if (!$pendingInvitation->hasPendingInvitation($_SESSION['invited_to_team']['team_id'])) {
             return false; // pending invitation already accepted (one-time token consumed)
         }
 

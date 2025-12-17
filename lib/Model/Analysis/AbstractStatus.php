@@ -48,11 +48,11 @@ abstract class AbstractStatus
      */
     protected ?AnalysisProject $result = null;
 
-    protected int    $total_segments   = 0;
-    protected array  $_resultSet       = [];
-    protected int    $_others_in_queue = 0;
-    protected array  $_project_data    = [];
-    protected string $status_project   = "";
+    protected int $total_segments = 0;
+    protected array $_resultSet = [];
+    protected int $_others_in_queue = 0;
+    protected array $_project_data = [];
+    protected string $status_project = "";
 
     protected FeatureSet $featureSet;
     /**
@@ -69,8 +69,8 @@ abstract class AbstractStatus
     protected mixed $subject;
 
     /**
-     * @param array           $_project_data
-     * @param FeatureSet      $features
+     * @param array $_project_data
+     * @param FeatureSet $features
      * @param UserStruct|null $user
      *
      * @throws ReflectionException
@@ -78,13 +78,13 @@ abstract class AbstractStatus
     public function __construct(array $_project_data, FeatureSet $features, ?UserStruct $user = null)
     {
         if (is_null($user)) { // avoid null pointer exception when calling methods on class property user
-            $user      = new UserStruct();
+            $user = new UserStruct();
             $user->uid = -1;
         }
-        $this->user          = $user;
-        $this->project       = ProjectDao::findById($_project_data[ 0 ][ 'pid' ], 60 * 60);
+        $this->user = $user;
+        $this->project = ProjectDao::findById($_project_data[0]['pid'], 60 * 60);
         $this->_project_data = $_project_data;
-        $this->featureSet    = $features;
+        $this->featureSet = $features;
     }
 
     /**
@@ -105,7 +105,7 @@ abstract class AbstractStatus
         $this->_resultSet = AnalysisDao::getProjectStatsVolumeAnalysis($this->project->id);
 
         try {
-            $amqHandler         = new AMQHandler();
+            $amqHandler = new AMQHandler();
             $segmentsBeforeMine = $amqHandler->getActualForQID($this->project->id);
         } catch (Exception) {
             $segmentsBeforeMine = null;
@@ -116,11 +116,11 @@ abstract class AbstractStatus
         $this->total_segments = count($this->_resultSet);
 
         //get the status of a project
-        $this->status_project = $this->_project_data[ 0 ][ 'status_analysis' ];
+        $this->status_project = $this->_project_data[0]['status_analysis'];
 
         $subject_handler = LanguageDomains::getInstance();
-        $subjects        = $subject_handler->getEnabledHashMap();
-        $this->subject   = $subjects[ $this->_project_data[ 0 ][ 'subject' ] ];
+        $subjects = $subject_handler->getEnabledHashMap();
+        $this->subject = $subjects[$this->_project_data[0]['subject']];
 
         return $this;
     }
@@ -155,9 +155,9 @@ abstract class AbstractStatus
         // if any plugin does not trigger the hook
         if (!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)) {
             $outsourceAvailableInfo = [
-                    'disabled_email'         => false,
-                    'custom_payable_rate'    => false,
-                    'language_not_supported' => false,
+                'disabled_email' => false,
+                'custom_payable_rate' => false,
+                'language_not_supported' => false,
             ];
         }
 
@@ -169,134 +169,134 @@ abstract class AbstractStatus
      */
     protected function loadObjects(): AbstractStatus
     {
-        $target                 = null;
+        $target = null;
         $mt_qe_workflow_enabled = $this->project->getMetadataValue(MetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
-        $matchConstantsClass    = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
+        $matchConstantsClass = MatchConstantsFactory::getInstance($mt_qe_workflow_enabled);
 
         $this->result = $project = new AnalysisProject(
-                $this->_project_data[ 0 ][ 'pname' ],
-                $this->_project_data[ 0 ][ 'status_analysis' ],
-                $this->_project_data[ 0 ][ 'create_date' ],
-                $this->subject,
-                new AnalysisProjectSummary(
-                        $this->_others_in_queue,
-                        $this->total_segments,
-                        $this->status_project
-                ),
-                $matchConstantsClass
+            $this->_project_data[0]['pname'],
+            $this->_project_data[0]['status_analysis'],
+            $this->_project_data[0]['create_date'],
+            $this->subject,
+            new AnalysisProjectSummary(
+                $this->_others_in_queue,
+                $this->total_segments,
+                $this->status_project
+            ),
+            $matchConstantsClass
         );
 
         $project->setAnalyzeLink($this->getAnalyzeLink());
 
         foreach ($this->_resultSet as $segInfo) {
-            if ($project->getSummary()->getTotalFastAnalysis() == 0 and $segInfo[ 'fast_analysis_wc' ] > 0) {
-                $project->getSummary()->setTotalFastAnalysis((int)$segInfo[ 'fast_analysis_wc' ]);
+            if ($project->getSummary()->getTotalFastAnalysis() == 0 and $segInfo['fast_analysis_wc'] > 0) {
+                $project->getSummary()->setTotalFastAnalysis((int)$segInfo['fast_analysis_wc']);
             }
 
             /*
              *  Create & Set objects while iterating
              */
-            if (!isset($job) || $job->getId() != $segInfo[ 'jid' ]) {
-                $job = new AnalysisJob($segInfo[ 'jid' ], $segInfo[ 'source' ], $segInfo[ 'target' ]);
+            if (!isset($job) || $job->getId() != $segInfo['jid']) {
+                $job = new AnalysisJob($segInfo['jid'], $segInfo['source'], $segInfo['target']);
                 $project->setJob($job);
             }
 
-            if (!isset($chunk) || $chunk->getPassword() != $segInfo[ 'jpassword' ]) {
-                $chunkStruct = ChunkDao::getByIdAndPassword($segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10);
-                $chunk       = new AnalysisChunk($chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user, $matchConstantsClass);
+            if (!isset($chunk) || $chunk->getPassword() != $segInfo['jpassword']) {
+                $chunkStruct = ChunkDao::getByIdAndPassword($segInfo['jid'], $segInfo['jpassword'], 60 * 10);
+                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user, $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }
 
             // is outsource available?
-            if ($target === null or $segInfo[ 'target' ] !== $target) {
+            if ($target === null or $segInfo['target'] !== $target) {
                 $job->setOutsourceAvailable(
-                        $this->isOutsourceEnabled($segInfo[ 'target' ], $segInfo[ 'id_customer' ], $segInfo[ 'jid' ])
+                    $this->isOutsourceEnabled($segInfo['target'], $segInfo['id_customer'], $segInfo['jid'])
                 );
-                $target = $segInfo[ 'target' ];
+                $target = $segInfo['target'];
             }
 
-            if (!isset($file) || $file->getId() != $segInfo[ 'id_file' ] || !$chunk->hasFile($segInfo[ 'id_file' ])) {
-                $originalFile = (!empty($segInfo[ 'tag_key' ]) and $segInfo[ 'tag_key' ] === 'original') ? $segInfo[ 'tag_value' ] : $segInfo[ 'filename' ];
-                $id_file_part = (!empty($segInfo[ 'id_file_part' ])) ? (int)$segInfo[ 'id_file_part' ] : null;
-                $metadata     = (new FileMetadataDao())->getByJobIdProjectAndIdFile((int)$this->_project_data[ 0 ][ 'pid' ], $segInfo[ 'id_file' ], 60 * 5);
-                $file         = new AnalysisFile($segInfo[ 'id_file' ], $id_file_part, ZipArchiveHandler::getFileName($segInfo[ 'filename' ]), $originalFile, $matchConstantsClass, $metadata);
+            if (!isset($file) || $file->getId() != $segInfo['id_file'] || !$chunk->hasFile($segInfo['id_file'])) {
+                $originalFile = (!empty($segInfo['tag_key']) and $segInfo['tag_key'] === 'original') ? $segInfo['tag_value'] : $segInfo['filename'];
+                $id_file_part = (!empty($segInfo['id_file_part'])) ? (int)$segInfo['id_file_part'] : null;
+                $metadata = (new FileMetadataDao())->getByJobIdProjectAndIdFile((int)$this->_project_data[0]['pid'], $segInfo['id_file'], 60 * 5);
+                $file = new AnalysisFile($segInfo['id_file'], $id_file_part, ZipArchiveHandler::getFileName($segInfo['filename']), $originalFile, $matchConstantsClass, $metadata);
                 $chunk->setFile($file);
             }
             // Runtime Initialization Completed
 
-            $matchType = $matchConstantsClass::toExternalMatchTypeName($segInfo[ 'match_type' ] ?? 'default');
+            $matchType = $matchConstantsClass::toExternalMatchTypeName($segInfo['match_type'] ?? 'default');
 
             // increment file totals
-            $file->incrementRaw($segInfo[ 'raw_word_count' ] ?? 0);
-            $file->incrementEquivalent($segInfo[ 'eq_word_count' ] ?? 0);
+            $file->incrementRaw($segInfo['raw_word_count'] ?? 0);
+            $file->incrementEquivalent($segInfo['eq_word_count'] ?? 0);
 
             // increment single file match
             $match = $file->getMatch($matchType);
-            $match->incrementRaw($segInfo[ 'raw_word_count' ] ?? 0);
-            $match->incrementEquivalent($segInfo[ 'eq_word_count' ] ?? 0);
+            $match->incrementRaw($segInfo['raw_word_count'] ?? 0);
+            $match->incrementEquivalent($segInfo['eq_word_count'] ?? 0);
 
             //increment chunk summary for the current match type
             $chunkMatchTotal = $chunk->getSummary()->getMatch($matchType);
-            $chunkMatchTotal->incrementRaw($segInfo[ 'raw_word_count' ] ?? 0);
-            $chunkMatchTotal->incrementEquivalent($segInfo[ 'eq_word_count' ] ?? 0);
+            $chunkMatchTotal->incrementRaw($segInfo['raw_word_count'] ?? 0);
+            $chunkMatchTotal->incrementEquivalent($segInfo['eq_word_count'] ?? 0);
 
             // increment job totals
-            $job->incrementRaw($segInfo[ 'raw_word_count' ] ?? 0);
-            $job->incrementEquivalent($segInfo[ 'eq_word_count' ] ?? 0);
-            $job->incrementIndustry($segInfo[ 'standard_word_count' ] ?? 0); //backward compatibility, some old projects may have this field set as null
+            $job->incrementRaw($segInfo['raw_word_count'] ?? 0);
+            $job->incrementEquivalent($segInfo['eq_word_count'] ?? 0);
+            $job->incrementIndustry($segInfo['standard_word_count'] ?? 0); //backward compatibility, some old projects may have this field set as null
 
             // increment chunk totals
-            $chunk->incrementRaw($segInfo[ 'raw_word_count' ] ?? 0);
-            $chunk->incrementEquivalent($segInfo[ 'eq_word_count' ] ?? 0);
-            $chunk->incrementIndustry($segInfo[ 'standard_word_count' ] ?? 0); //backward compatibility, some old projects may have this field set as null
+            $chunk->incrementRaw($segInfo['raw_word_count'] ?? 0);
+            $chunk->incrementEquivalent($segInfo['eq_word_count'] ?? 0);
+            $chunk->incrementIndustry($segInfo['standard_word_count'] ?? 0); //backward compatibility, some old projects may have this field set as null
 
             // increment project summary
-            if ($segInfo[ 'st_status_analysis' ] == 'DONE') {
+            if ($segInfo['st_status_analysis'] == 'DONE') {
                 $project->getSummary()->incrementAnalyzed();
             }
-            $project->getSummary()->incrementRaw($segInfo[ 'raw_word_count' ] ?? 0);
-            $project->getSummary()->incrementEquivalent($segInfo[ 'eq_word_count' ] ?? 0);
-            $project->getSummary()->incrementIndustry($segInfo[ 'standard_word_count' ] ?? 0); //backward compatibility, some old projects may have this field set as null
+            $project->getSummary()->incrementRaw($segInfo['raw_word_count'] ?? 0);
+            $project->getSummary()->incrementEquivalent($segInfo['eq_word_count'] ?? 0);
+            $project->getSummary()->incrementIndustry($segInfo['standard_word_count'] ?? 0); //backward compatibility, some old projects may have this field set as null
 
         }
 
         if ($project->getSummary()->getSegmentsAnalyzed() == 0 && in_array(
-                        $this->status_project,
-                        [
-                                ProjectStatus::STATUS_NEW,
-                                ProjectStatus::STATUS_BUSY
-                        ]
-                )) {
+                $this->status_project,
+                [
+                    ProjectStatus::STATUS_NEW,
+                    ProjectStatus::STATUS_BUSY
+                ]
+            )) {
             //Related to an issue in the outsourcing
             //Here, the Fast analysis was not performed, return the number of raw word counts
             //Needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
             //(there are no segment_translations)
 
             foreach ($this->_project_data as $_job_fallback) {
-                $lang_pair = explode("|", $_job_fallback[ 'lang_pair' ]);
-                $job       = new AnalysisJob($_job_fallback[ 'jid' ], $lang_pair[ 0 ], $lang_pair[ 1 ]);
+                $lang_pair = explode("|", $_job_fallback['lang_pair']);
+                $job = new AnalysisJob($_job_fallback['jid'], $lang_pair[0], $lang_pair[1]);
 
                 $project->setJob($job);
-                $job->incrementIndustry(round($_job_fallback[ 'standard_analysis_wc' ]));
-                $job->incrementEquivalent(round($_job_fallback[ 'standard_analysis_wc' ] ?? 0));  //backward compatibility, some old projects may have this field set as null
-                $job->incrementRaw(round($_job_fallback[ 'standard_analysis_wc' ]));
+                $job->incrementIndustry(round($_job_fallback['standard_analysis_wc']));
+                $job->incrementEquivalent(round($_job_fallback['standard_analysis_wc'] ?? 0));  //backward compatibility, some old projects may have this field set as null
+                $job->incrementRaw(round($_job_fallback['standard_analysis_wc']));
 
-                $chunkStruct                = new JobStruct();
-                $chunkStruct->id            = $_job_fallback[ 'jid' ];
-                $chunkStruct->password      = $_job_fallback[ 'jpassword' ];
-                $chunkStruct->source        = $lang_pair[ 0 ];
-                $chunkStruct->target        = $lang_pair[ 1 ];
-                $chunkStruct->payable_rates = $_job_fallback[ 'payable_rates' ];
+                $chunkStruct = new JobStruct();
+                $chunkStruct->id = $_job_fallback['jid'];
+                $chunkStruct->password = $_job_fallback['jpassword'];
+                $chunkStruct->source = $lang_pair[0];
+                $chunkStruct->target = $lang_pair[1];
+                $chunkStruct->payable_rates = $_job_fallback['payable_rates'];
 
-                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user, $matchConstantsClass);
+                $chunk = new AnalysisChunk($chunkStruct, $this->_project_data[0]['pname'], $this->user, $matchConstantsClass);
                 $job->setPayableRates(json_decode($chunkStruct->payable_rates));
                 $job->setChunk($chunk);
             }
 
-            $project->getSummary()->incrementRaw($this->_project_data[ 0 ][ 'standard_analysis_wc' ] ?? 0);
-            $project->getSummary()->incrementIndustry($this->_project_data[ 0 ][ 'standard_analysis_wc' ] ?? 0);  //backward compatibility, some old projects may have this field set as null
-            $project->getSummary()->incrementEquivalent($this->_project_data[ 0 ][ 'standard_analysis_wc' ] ?? 0);
+            $project->getSummary()->incrementRaw($this->_project_data[0]['standard_analysis_wc'] ?? 0);
+            $project->getSummary()->incrementIndustry($this->_project_data[0]['standard_analysis_wc'] ?? 0);  //backward compatibility, some old projects may have this field set as null
+            $project->getSummary()->incrementEquivalent($this->_project_data[0]['standard_analysis_wc'] ?? 0);
 
             return $this;
         }
@@ -311,9 +311,9 @@ abstract class AbstractStatus
     private function getAnalyzeLink(): string
     {
         return CanonicalRoutes::analyze([
-                'project_name' => $this->project->name,
-                'id_project'   => $this->project->id,
-                'password'     => $this->project->password,
+            'project_name' => $this->project->name,
+            'id_project' => $this->project->id,
+            'password' => $this->project->password,
         ]);
     }
 

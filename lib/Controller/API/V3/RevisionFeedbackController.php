@@ -18,19 +18,19 @@ class RevisionFeedbackController extends KleinController
     public function feedback(): void
     {
         // insert or update feedback
-        $feedbackStruct                  = new FeedbackStruct();
-        $feedbackStruct->id_job          = $this->request->param('id_job');
-        $feedbackStruct->password        = $this->request->param('password');
+        $feedbackStruct = new FeedbackStruct();
+        $feedbackStruct->id_job = $this->request->param('id_job');
+        $feedbackStruct->password = $this->request->param('password');
         $feedbackStruct->revision_number = $this->request->param('revision_number');
-        $feedbackStruct->feedback        = $this->request->param('feedback');
+        $feedbackStruct->feedback = $this->request->param('feedback');
 
         $this->return404IfTheJobWasDeleted();
 
-        $rows   = (new FeedbackDAO())->insertOrUpdate($feedbackStruct);
+        $rows = (new FeedbackDAO())->insertOrUpdate($feedbackStruct);
         $status = ($rows > 0) ? 'ok' : 'ko';
 
         $this->response->json([
-                'status' => $status
+            'status' => $status
         ]);
     }
 

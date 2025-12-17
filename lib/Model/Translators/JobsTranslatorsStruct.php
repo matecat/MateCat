@@ -18,13 +18,13 @@ use ReflectionException;
 class JobsTranslatorsStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public int    $id_job;
+    public int $id_job;
     public string $job_password;
-    public ?int   $id_translator_profile = null;
+    public ?int $id_translator_profile = null;
     public string $email;
-    public int    $added_by;
+    public int $added_by;
     public string $delivery_date;
-    public float  $job_owner_timezone    = 0;
+    public float $job_owner_timezone = 0;
     public string $source;
     public string $target;
 

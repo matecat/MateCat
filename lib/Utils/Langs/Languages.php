@@ -8,9 +8,9 @@ use Utils\Registry\AppConfig;
 class Languages
 {
 
-    private static ?Languages $instance       = null; //singleton instance
-    private static array      $map_string2rfc = []; //associative map on language names -> codes
-    private static array      $map_rfc2obj    = []; //internal support map rfc -> language data
+    private static ?Languages $instance = null; //singleton instance
+    private static array $map_string2rfc = []; //associative map on language names -> codes
+    private static array $map_rfc2obj = []; //internal support map rfc -> language data
 
     /*
      * Associative map iso → rfc codes.
@@ -23,10 +23,10 @@ class Languages
      * This map should be used only to allow internal code to work even for general language codes.
      *
      */
-    private static array $map_iso2rfc           = [];
-    private static array $languages_definition  = []; // the complete json struct
-    private static array $ocr_supported         = [];
-    private static array $ocr_notSupported      = [];
+    private static array $map_iso2rfc = [];
+    private static array $languages_definition = []; // the complete json struct
+    private static array $ocr_supported = [];
+    private static array $ocr_notSupported = [];
     private static array $enabled_language_list = [];
 
     /**
@@ -46,75 +46,75 @@ class Languages
         $string = file_get_contents($file);
 
         //parse to associative array
-        $langs                      = json_decode($string, true);
-        self::$languages_definition = $langs[ 'langs' ];
+        $langs = json_decode($string, true);
+        self::$languages_definition = $langs['langs'];
 
         //build internal maps
         //for each lang
         foreach (self::$languages_definition as $k1 => $lang) {
             //for each localization of that lang
-            foreach ($lang[ 'localized' ] as $k2 => $localizedTagPair) {
+            foreach ($lang['localized'] as $k2 => $localizedTagPair) {
                 foreach ($localizedTagPair as $isocode => $localizedTag) {
                     //build mapping of localized string -> rfc code
-                    self::$map_string2rfc[ $localizedTag ] = $lang[ 'rfc3066code' ];
+                    self::$map_string2rfc[$localizedTag] = $lang['rfc3066code'];
 
                     //add associative reference
-                    self::$languages_definition[ $k1 ][ 'localized' ][ $isocode ] = $localizedTag;
+                    self::$languages_definition[$k1]['localized'][$isocode] = $localizedTag;
 
                     // ocr support
-                    if ($lang[ 'ocr' ][ 'supported' ] === true) {
-                        self::$ocr_supported[ $localizedTag ] = $lang[ 'rfc3066code' ];
+                    if ($lang['ocr']['supported'] === true) {
+                        self::$ocr_supported[$localizedTag] = $lang['rfc3066code'];
                     }
 
-                    if ($lang[ 'ocr' ][ 'not_supported_or_rtl' ] === true) {
-                        self::$ocr_notSupported[ $localizedTag ] = $lang[ 'rfc3066code' ];
+                    if ($lang['ocr']['not_supported_or_rtl'] === true) {
+                        self::$ocr_notSupported[$localizedTag] = $lang['rfc3066code'];
                     }
                 }
 
                 //remove positional reference
-                unset(self::$languages_definition[ $k1 ][ 'localized' ][ $k2 ]);
+                unset(self::$languages_definition[$k1]['localized'][$k2]);
             }
         }
 
         //create internal support objects representation
         foreach (self::$languages_definition as $lang) {
             //add code -> rfc mapping
-            if (isset($lang[ 'languageRegionCode' ])) {
-                self::$map_string2rfc[ $lang[ 'languageRegionCode' ] ] = $lang[ 'rfc3066code' ];
+            if (isset($lang['languageRegionCode'])) {
+                self::$map_string2rfc[$lang['languageRegionCode']] = $lang['rfc3066code'];
             }
 
             //add rfc fallback
-            self::$map_string2rfc[ $lang[ 'rfc3066code' ] ] = $lang[ 'rfc3066code' ];
+            self::$map_string2rfc[$lang['rfc3066code']] = $lang['rfc3066code'];
 
             //primary pointers are RFC
-            self::$map_rfc2obj[ $lang[ 'rfc3066code' ] ] = $lang;
+            self::$map_rfc2obj[$lang['rfc3066code']] = $lang;
 
             //set support for ISO by indirect reference through RFC pointers
-            self::$map_iso2rfc[ $lang[ 'isocode' ] ] = $lang[ 'rfc3066code' ];
+            self::$map_iso2rfc[$lang['isocode']] = $lang['rfc3066code'];
 
             //manage ambiguities (approximation)
-            self::$map_iso2rfc[ 'en' ] = 'en-US';
-            self::$map_iso2rfc[ 'sp' ] = 'sp-SP';
-            self::$map_iso2rfc[ 'pt' ] = 'pt-PT';
-            self::$map_iso2rfc[ 'fr' ] = 'fr-FR';
-            self::$map_iso2rfc[ 'ar' ] = 'ar-SA';
-            self::$map_iso2rfc[ 'zh' ] = 'zh-CN';
-            self::$map_iso2rfc[ 'it' ] = 'it-IT';
+            self::$map_iso2rfc['en'] = 'en-US';
+            self::$map_iso2rfc['sp'] = 'sp-SP';
+            self::$map_iso2rfc['pt'] = 'pt-PT';
+            self::$map_iso2rfc['fr'] = 'fr-FR';
+            self::$map_iso2rfc['ar'] = 'ar-SA';
+            self::$map_iso2rfc['zh'] = 'zh-CN';
+            self::$map_iso2rfc['it'] = 'it-IT';
         }
 
         foreach (self::$map_rfc2obj as $rfc => $lang) {
             //if marked as enabled, add to result
-            if ($lang[ 'enabled' ]) {
-                self::$enabled_language_list[ $rfc ] = [
-                        'code'      => $rfc,
-                        'name'      => $lang[ 'localized' ][ 'en' ],
-                        'direction' => ($lang[ 'rtl' ]) ? 'rtl' : 'ltr'
+            if ($lang['enabled']) {
+                self::$enabled_language_list[$rfc] = [
+                    'code' => $rfc,
+                    'name' => $lang['localized']['en'],
+                    'direction' => ($lang['rtl']) ? 'rtl' : 'ltr'
                 ];
             }
         }
 
         uasort(self::$enabled_language_list, function ($a, $b) {
-            return strcmp($a[ 'name' ], $b[ 'name' ]);
+            return strcmp($a['name'], $b['name']);
         });
     }
 
@@ -142,7 +142,7 @@ class Languages
         //convert ISO code in RFC
         $code = self::getInstance()->normalizeLanguageCode($code);
 
-        return self::$map_rfc2obj[ $code ][ 'rtl' ];
+        return self::$map_rfc2obj[$code]['rtl'];
     }
 
     /**
@@ -157,7 +157,7 @@ class Languages
         //convert ISO code in RFC
         $code = $this->normalizeLanguageCode($code);
 
-        return self::$map_rfc2obj[ $code ][ 'enabled' ];
+        return self::$map_rfc2obj[$code]['enabled'];
     }
 
     /**
@@ -167,7 +167,7 @@ class Languages
      */
     public function getLangRegionCode(string $localizedName): string
     {
-        $value = self::$map_rfc2obj[ self::$map_string2rfc[ $localizedName ] ][ 'languageRegionCode' ] ?? null;
+        $value = self::$map_rfc2obj[self::$map_string2rfc[$localizedName]]['languageRegionCode'] ?? null;
         if (empty($value)) {
             $value = $this->get3066Code($localizedName);
         }
@@ -184,7 +184,7 @@ class Languages
      */
     public function get3066Code(string $localizedName): string
     {
-        return self::$map_string2rfc[ $localizedName ];
+        return self::$map_string2rfc[$localizedName];
     }
 
     /**
@@ -196,7 +196,7 @@ class Languages
      */
     public function getIsoCode(string $localizedName): string
     {
-        return self::$map_rfc2obj[ self::$map_string2rfc[ $localizedName ] ][ 'isocode' ];
+        return self::$map_rfc2obj[self::$map_string2rfc[$localizedName]]['isocode'];
     }
 
     /**
@@ -213,7 +213,7 @@ class Languages
      *
      * Get the corresponding ISO 639-1 code given a localized name
      *
-     * @param string      $code
+     * @param string $code
      * @param string|null $lang
      *
      * @return string
@@ -222,7 +222,7 @@ class Languages
     {
         $code = $this->normalizeLanguageCode($code);
 
-        return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
+        return self::$map_rfc2obj[$code]['localized'][$lang];
     }
 
     /**
@@ -241,7 +241,7 @@ class Languages
             throw new InvalidLanguageException('Invalid language code: ' . $code);
         }
 
-        return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
+        return self::$map_rfc2obj[$code]['localized'][$lang];
     }
 
     /**
@@ -253,7 +253,7 @@ class Languages
     {
         $acc = [];
         foreach (self::$map_rfc2obj as $code => $value) {
-            if ($value[ 'rtl' ] && $value[ 'enabled' ]) {
+            if ($value['rtl'] && $value['enabled']) {
                 $acc[] = $code;
             }
         }
@@ -318,18 +318,18 @@ class Languages
     {
         $langParts = explode('-', $languageCode);
 
-        $langParts[ 0 ] = trim(strtolower($langParts[ 0 ]));
+        $langParts[0] = trim(strtolower($langParts[0]));
 
         if (sizeof($langParts) == 1) {
             /*
              *  IMPORTANT: Pick the first language region. This is an approximation. Use this only to normalize the language code.
              */
-            return self::$map_iso2rfc[ $langParts[ 0 ] ] ?? null;
+            return self::$map_iso2rfc[$langParts[0]] ?? null;
         } elseif (sizeof($langParts) == 2) {
-            $langParts[ 1 ] = trim(strtoupper($langParts[ 1 ]));
+            $langParts[1] = trim(strtoupper($langParts[1]));
         } elseif (sizeof($langParts) == 3) {
-            $langParts[ 1 ] = ucfirst(trim(strtolower($langParts[ 1 ])));
-            $langParts[ 2 ] = trim(strtoupper($langParts[ 2 ]));
+            $langParts[1] = ucfirst(trim(strtolower($langParts[1])));
+            $langParts[2] = trim(strtoupper($langParts[2]));
         } else {
             return null;
         }
@@ -357,8 +357,8 @@ class Languages
     public static function getLocalizedLanguage(string $rfc3066code): ?string
     {
         foreach (self::$languages_definition as $lang) {
-            if ($lang[ 'rfc3066code' ] === $rfc3066code) {
-                return $lang[ 'localized' ][ 'en' ] ?? null;
+            if ($lang['rfc3066code'] === $rfc3066code) {
+                return $lang['localized']['en'] ?? null;
             }
         }
 
@@ -380,7 +380,7 @@ class Languages
     {
         $code = self::getInstance()->normalizeLanguageCode($code);
 
-        return self::$map_rfc2obj[ $code ][ 'isocode' ] ?? null;
+        return self::$map_rfc2obj[$code]['isocode'] ?? null;
     }
 
     /**

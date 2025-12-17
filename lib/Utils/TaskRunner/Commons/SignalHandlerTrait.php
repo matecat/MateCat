@@ -21,7 +21,7 @@ trait SignalHandlerTrait
      */
     public function installHandler(): void
     {
-        if (PHP_SAPI != 'cli' || isset ($_SERVER [ 'HTTP_HOST' ])) {
+        if (PHP_SAPI != 'cli' || isset ($_SERVER ['HTTP_HOST'])) {
             die ("This script can be run only in CLI Mode.\n\n");
         }
 
@@ -49,7 +49,7 @@ trait SignalHandlerTrait
     /**
      * Posix Signal handling method
      *
-     * @param int   $sig_no
+     * @param int $sig_no
      * @param mixed $siginfo
      */
     public function sigSwitch(int $sig_no, mixed $siginfo)

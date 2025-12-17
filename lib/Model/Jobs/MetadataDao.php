@@ -16,15 +16,15 @@ class MetadataDao extends AbstractDao
 
     const string TABLE = 'job_metadata';
 
-    const string _query_metadata_by_job_id_key       = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
-    const string _query_metadata_by_job_password     = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
+    const string _query_metadata_by_job_id_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
+    const string _query_metadata_by_job_password = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
     const string _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
-    const string SUBFILTERING_HANDLERS               = 'subfiltering_handlers';
+    const string SUBFILTERING_HANDLERS = 'subfiltering_handlers';
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $key
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return IDaoStruct[]|MetadataStruct[]
      * @throws ReflectionException
@@ -34,8 +34,8 @@ class MetadataDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_id_key);
 
         return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
-                'id_job' => $id_job,
-                'key'    => $key
+            'id_job' => $id_job,
+            'key' => $key
         ]);
     }
 
@@ -50,9 +50,9 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return ?array|?MetadataStruct[]
      * @throws ReflectionException
@@ -62,8 +62,8 @@ class MetadataDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
         return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
-                'id_job'   => $id_job,
-                'password' => $password,
+            'id_job' => $id_job,
+            'password' => $password,
         ]) ?? null;
     }
 
@@ -78,10 +78,10 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
      * @param string $key
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return MetadataStruct|null
      * @throws ReflectionException
@@ -91,10 +91,10 @@ class MetadataDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password_key);
 
         return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
-                'id_job'   => $id_job,
-                'password' => $password,
-                'key'      => $key
-        ])[ 0 ] ?? null;
+            'id_job' => $id_job,
+            'password' => $password,
+            'key' => $key
+        ])[0] ?? null;
     }
 
     /**
@@ -105,14 +105,14 @@ class MetadataDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password_key);
 
         return $this->_destroyObjectCache($stmt, MetadataStruct::class, [
-                'id_job'   => $id_job,
-                'password' => $password,
-                'key'      => $key
+            'id_job' => $id_job,
+            'password' => $password,
+            'key' => $key
         ]);
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
      * @param string $key
      * @param string $value
@@ -123,19 +123,19 @@ class MetadataDao extends AbstractDao
     public function set(int $id_job, string $password, string $key, string $value): ?MetadataStruct
     {
         $sql = "INSERT INTO job_metadata " .
-                " ( `id_job`, `password`, `key`, `value` ) " .
-                " VALUES " .
-                " ( :id_job, :password, :key, :value ) " .
-                " ON DUPLICATE KEY UPDATE `value` = :value ";
+            " ( `id_job`, `password`, `key`, `value` ) " .
+            " VALUES " .
+            " ( :id_job, :password, :key, :value ) " .
+            " ON DUPLICATE KEY UPDATE `value` = :value ";
 
         $this->openTransaction(); // because we have to invalidate the cache after the insert, use the transactional trait
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                'id_job'   => $id_job,
-                'password' => $password,
-                'key'      => $key,
-                'value'    => $value
+            'id_job' => $id_job,
+            'password' => $password,
+            'key' => $key,
+            'value' => $value
         ]);
 
         $this->destroyCacheByJobAndPassword($id_job, $password);
@@ -153,15 +153,15 @@ class MetadataDao extends AbstractDao
     public function delete($id_job, $password, $key): void
     {
         $sql = "DELETE FROM job_metadata " .
-                " WHERE id_job = :id_job AND password = :password " .
-                " AND `key` = :key ";
+            " WHERE id_job = :id_job AND password = :password " .
+            " AND `key` = :key ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                'id_job'   => $id_job,
-                'password' => $password,
-                'key'      => $key,
+            'id_job' => $id_job,
+            'password' => $password,
+            'key' => $key,
         ]);
 
         $this->destroyCacheByJobAndPassword($id_job, $password);
@@ -173,7 +173,7 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
      *
      * @return array|null

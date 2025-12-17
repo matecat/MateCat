@@ -54,12 +54,12 @@ trait DaoCacheTrait
     protected function _logCache(string $type, string $key, mixed $value, string $sqlQuery): void
     {
         LoggerFactory::getLogger('query_cache')->debug(
-                [
-                        "type" => $type,
-                        "key"  => $key,
-                        "sql"  => preg_replace("/ +/", " ", str_replace("\n", " ", $sqlQuery)),
-                    //"result_set" => $value,
-                ]
+            [
+                "type" => $type,
+                "key" => $key,
+                "sql" => preg_replace("/ +/", " ", str_replace("\n", " ", $sqlQuery)),
+                //"result_set" => $value,
+            ]
         );
     }
 
@@ -82,7 +82,7 @@ trait DaoCacheTrait
 
         $value = null;
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
-            $key   = md5($query);
+            $key = md5($query);
             $value = unserialize(self::$cache_con->hget($keyMap, $key) ?? '');
             $this->_logCache("GETMAP: " . $keyMap, $key, $value, $query);
         }
@@ -141,7 +141,7 @@ trait DaoCacheTrait
     protected function _serializeForCacheKey(array $params): string
     {
         foreach ($params as $key => $value) {
-            $params[ $key ] = (string)$value;
+            $params[$key] = (string)$value;
         }
 
         return serialize($params);
@@ -172,7 +172,7 @@ trait DaoCacheTrait
      * Destroy a key directly when it is known
      *
      * @param string $key
-     * @param ?bool  $isReverseKeyMap
+     * @param ?bool $isReverseKeyMap
      *
      * @return bool
      * @throws ReflectionException
@@ -184,7 +184,7 @@ trait DaoCacheTrait
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             if ($isReverseKeyMap) {
                 $keyMap = self::$cache_con->get($key);
-                $res    = self::$cache_con->del($keyMap);
+                $res = self::$cache_con->del($keyMap);
                 self::$cache_con->del($key);
 
                 return $res;

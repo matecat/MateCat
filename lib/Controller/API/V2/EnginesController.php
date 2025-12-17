@@ -31,12 +31,12 @@ class EnginesController extends KleinController
      */
     public function listEngines(): void
     {
-        $engineDAO            = new EngineDAO(Database::obtain());
-        $engineStruct         = EngineStruct::getStruct();
-        $engineStruct->uid    = $this->user->uid;
+        $engineDAO = new EngineDAO(Database::obtain());
+        $engineStruct = EngineStruct::getStruct();
+        $engineStruct->uid = $this->user->uid;
         $engineStruct->active = true;
 
-        $eng       = $engineDAO->setCacheTTL(60 * 5)->read($engineStruct);
+        $eng = $engineDAO->setCacheTTL(60 * 5)->read($engineStruct);
         $formatter = new Engine($eng);
         $this->response->json($formatter->render());
     }

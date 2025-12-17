@@ -3,8 +3,6 @@
 namespace Utils\Logger;
 
 use Exception;
-use Monolog\Formatter\JsonFormatter;
-use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Utils\Registry\AppConfig;
@@ -26,8 +24,8 @@ class LoggerFactory
     /**
      * Writes data to the provided logger. If an exception occurs, writes the data to a fallback file.
      *
-     * @param MatecatLogger $logger     The logger instance to write to.
-     * @param mixed         $stringData The data to log.
+     * @param MatecatLogger $logger The logger instance to write to.
+     * @param mixed $stringData The data to log.
      */
     protected static function _writeTo(MatecatLogger $logger, mixed $stringData): void
     {
@@ -48,12 +46,12 @@ class LoggerFactory
      */
     protected static function initMonolog(string $name, string $fileName): MatecatLogger
     {
-        if (!isset(self::$loggersMap[ $name ])) {
+        if (!isset(self::$loggersMap[$name])) {
             $handlers = HandlersProviderFactory::loadWithName($fileName);
             self::$loggersMap[$name] = new MatecatLogger(new Logger($name, $handlers, [new LogProcessor(Level::Debug, [__NAMESPACE__])]));
         }
 
-        return self::$loggersMap[ $name ];
+        return self::$loggersMap[$name];
     }
 
     /**
@@ -98,7 +96,7 @@ class LoggerFactory
     /**
      * Sets aliases for a logger instance.
      *
-     * @param array         $names  The aliases to set.
+     * @param array $names The aliases to set.
      * @param MatecatLogger $logger The logger instance to associate with the aliases.
      *
      * @throws Exception If an error occurs while setting aliases.
@@ -106,7 +104,7 @@ class LoggerFactory
     public static function setAliases(array $names, MatecatLogger $logger): void
     {
         foreach ($names as $name) {
-            self::$loggersMap[ $name ] = $logger->withName($name);
+            self::$loggersMap[$name] = $logger->withName($name);
         }
     }
 
@@ -128,26 +126,26 @@ class LoggerFactory
             $data = print_r($data, true);
         }
 
-        $hexi   = '';
-        $ascii  = '';
-        $dump   = ($htmlOutput === true) ? '<pre>' : '';
+        $hexi = '';
+        $ascii = '';
+        $dump = ($htmlOutput === true) ? '<pre>' : '';
         $offset = 0;
-        $len    = strlen($data);
+        $len = strlen($data);
 
         $x = ($uppercase === false) ? 'x' : 'X';
 
         for ($i = $j = 0; $i < $len; $i++) {
-            $hexi .= sprintf("%02$x ", ord($data[ $i ]));
+            $hexi .= sprintf("%02$x ", ord($data[$i]));
 
             // Replace non-viewable bytes with '.'
-            if (ord($data[ $i ]) >= 32) {
-                $ascii .= ($htmlOutput === true) ? htmlentities($data[ $i ]) : $data[ $i ];
+            if (ord($data[$i]) >= 32) {
+                $ascii .= ($htmlOutput === true) ? htmlentities($data[$i]) : $data[$i];
             } else {
                 $ascii .= '.';
             }
 
             if ($j === 7) {
-                $hexi  .= ' ';
+                $hexi .= ' ';
                 $ascii .= ' ';
             }
 
@@ -155,9 +153,9 @@ class LoggerFactory
                 $dump .= sprintf("%04$x  %-49s  %s", $offset, $hexi, $ascii);
 
                 // Reset vars
-                $hexi   = $ascii = '';
+                $hexi = $ascii = '';
                 $offset += 16;
-                $j      = 0;
+                $j = 0;
 
                 // Add newline
                 if ($i !== $len - 1) {

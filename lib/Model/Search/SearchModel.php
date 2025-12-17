@@ -41,13 +41,13 @@ class SearchModel
      * SearchModel constructor.
      *
      * @param SearchQueryParamsStruct $queryParams
-     * @param MateCatFilter           $filters
+     * @param MateCatFilter $filters
      */
     public function __construct(SearchQueryParamsStruct $queryParams, MateCatFilter $filters)
     {
         $this->queryParams = $queryParams;
-        $this->db          = Database::obtain();
-        $this->filters     = $filters;
+        $this->db = Database::obtain();
+        $this->filters = $filters;
         $this->_loadParams();
     }
 
@@ -68,12 +68,12 @@ class SearchModel
                 break;
             case 'coupled':
                 $rawResults = array_merge_recursive($this->_getQuery($this->_loadSearchInSourceQuery($inCurrentChunkOnly)), $this->_getQuery($this->_loadSearchInTargetQuery($inCurrentChunkOnly)));
-                $results    = [];
+                $results = [];
 
                 // in this case, $results is the merge of two queries results,
                 // every segment id will possibly have 2 occurrences (source and target)
                 foreach ($rawResults as $rawResult) {
-                    $results[ $rawResult[ 'id' ] ][] = $rawResult[ 'text' ];
+                    $results[$rawResult['id']][] = $rawResult['text'];
                 }
 
                 break;
@@ -86,54 +86,54 @@ class SearchModel
         }
 
         $vector = [
-                'sid_list' => [],
-                'count'    => '0'
+            'sid_list' => [],
+            'count' => '0'
         ];
 
         if ($this->queryParams->key === 'source' || $this->queryParams->key === 'target') {
             $searchTerm = (false === empty($this->queryParams->source)) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ($results as $occurrence) {
-                $matches      = $this->find($occurrence[ 'text' ], $searchTerm);
+                $matches = $this->find($occurrence['text'], $searchTerm);
                 $matchesCount = count($matches);
 
                 if ($this->hasMatches($matches)) {
-                    $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
-                    $vector[ 'count' ]      = $vector[ 'count' ] + $matchesCount;
+                    $vector['sid_list'][] = $occurrence['id'];
+                    $vector['count'] = $vector['count'] + $matchesCount;
                 }
             }
 
-            if ($vector[ 'count' ] == 0) {
-                $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]    = 0;
+            if ($vector['count'] == 0) {
+                $vector['sid_list'] = [];
+                $vector['count'] = 0;
             }
         } elseif ($this->queryParams->key === 'coupled') {
             foreach ($results as $id => $occurrence) {
                 // check if exists match target
-                if (isset($occurrence[ 1 ])) {
+                if (isset($occurrence[1])) {
                     // match source
-                    $searchTermSource   = $this->queryParams->source;
-                    $matchesSource      = $this->find($occurrence[ 0 ], $searchTermSource);
+                    $searchTermSource = $this->queryParams->source;
+                    $matchesSource = $this->find($occurrence[0], $searchTermSource);
                     $matchesSourceCount = count($matchesSource);
 
-                    $searchTermTarget   = $this->queryParams->target;
-                    $matchesTarget      = $this->find($occurrence[ 1 ], $searchTermTarget);
+                    $searchTermTarget = $this->queryParams->target;
+                    $matchesTarget = $this->find($occurrence[1], $searchTermTarget);
                     $matchesTargetCount = count($matchesTarget);
 
                     if ($this->hasMatches($matchesSource) and $this->hasMatches($matchesTarget)) {
-                        $vector[ 'sid_list' ][] = strval($id);
-                        $vector[ 'count' ]      = $vector[ 'count' ] + $matchesTargetCount + $matchesSourceCount;
+                        $vector['sid_list'][] = strval($id);
+                        $vector['count'] = $vector['count'] + $matchesTargetCount + $matchesSourceCount;
                     }
                 }
             }
 
-            if ($vector[ 'count' ] == 0) {
-                $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]    = 0;
+            if ($vector['count'] == 0) {
+                $vector['sid_list'] = [];
+                $vector['count'] = 0;
             }
         } else {
             foreach ($results as $occurrence) {
-                $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
+                $vector['sid_list'][] = $occurrence['id'];
             }
         }
 
@@ -147,7 +147,7 @@ class SearchModel
      */
     private function hasMatches(array $matches): bool
     {
-        return count($matches) > 0 and $matches[ 0 ][ 0 ] !== '';
+        return count($matches) > 0 and $matches[0][0] !== '';
     }
 
     /**
@@ -162,12 +162,12 @@ class SearchModel
         $this->filters->fromLayer0ToLayer2($haystack);
 
         return WholeTextFinder::find(
-                $haystack,
-                $needle,
-                true,
-                $this->queryParams->isExactMatchRequested,
-                $this->queryParams->isMatchCaseRequested,
-                true
+            $haystack,
+            $needle,
+            true,
+            $this->queryParams->isExactMatchRequested,
+            $this->queryParams->isMatchCaseRequested,
+            true
         );
     }
 
@@ -204,7 +204,7 @@ class SearchModel
 
         $this->queryParams->where_status = "";
         if ($this->queryParams->status != 'all') {
-            $this->queryParams->status       = $this->db->escape($this->queryParams->status); //escape: hardcoded
+            $this->queryParams->status = $this->db->escape($this->queryParams->status); //escape: hardcoded
             $this->queryParams->where_status = "AND st.status = '{$this->queryParams->status}'";
         }
 
@@ -221,7 +221,7 @@ class SearchModel
 
         $this->queryParams->exactMatch = new stdClass();
         if ($this->queryParams->isExactMatchRequested) {
-            $this->queryParams->exactMatch->Space_Left  = "[[:space:]]{0,}";
+            $this->queryParams->exactMatch->Space_Left = "[[:space:]]{0,}";
             $this->queryParams->exactMatch->Space_Right = "([[:space:]]|$)";
         } else {
             $this->queryParams->exactMatch->Space_Left = $this->queryParams->exactMatch->Space_Right = ""; // we want to search for all occurrences in a string: the word mod will take two matches: "mod" and "mod modifier"
@@ -232,15 +232,15 @@ class SearchModel
          *
          */
         if (isset($this->queryParams->source)) {
-            $escaped                                 = preg_quote((string)$this->queryParams->source, '#');
+            $escaped = preg_quote((string)$this->queryParams->source, '#');
             $this->queryParams->_regexpNotEscapedSrc = $escaped;
-            $this->queryParams->regexpEscapedSrc     = $this->db->escape($escaped);
+            $this->queryParams->regexpEscapedSrc = $this->db->escape($escaped);
         }
 
         if (isset($this->queryParams->target)) {
-            $escaped                              = preg_quote((string)$this->queryParams->target, '#');
+            $escaped = preg_quote((string)$this->queryParams->target, '#');
             $this->queryParams->_regexpEscapedTrg = $escaped;
-            $this->queryParams->regexpEscapedTrg  = $this->db->escape($escaped);
+            $this->queryParams->regexpEscapedTrg = $this->db->escape($escaped);
         }
     }
 

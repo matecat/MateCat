@@ -22,10 +22,10 @@ class UserController extends AbstractStatefulKleinController
      */
     public function show(): void
     {
-        if (empty($_SESSION[ 'user_profile' ])) {
+        if (empty($_SESSION['user_profile'])) {
             $this->response->code(401);
         }
-        $this->response->json($_SESSION[ 'user_profile' ] ?? ['error' => 'Invalid login.']);
+        $this->response->json($_SESSION['user_profile'] ?? ['error' => 'Invalid login.']);
     }
 
     /**
@@ -56,8 +56,8 @@ class UserController extends AbstractStatefulKleinController
             return;
         }
 
-        $old_password              = filter_var($this->request->param('old_password'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $new_password              = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $old_password = filter_var($this->request->param('old_password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
         $new_password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
 
         try {
@@ -79,7 +79,7 @@ class UserController extends AbstractStatefulKleinController
      */
     public function redeemProject(): void
     {
-        $_SESSION[ 'redeem_project' ] = true;
+        $_SESSION['redeem_project'] = true;
         $this->response->code(200);
     }
 

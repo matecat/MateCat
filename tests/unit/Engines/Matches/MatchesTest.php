@@ -3,7 +3,8 @@
 use TestHelpers\AbstractTest;
 use Utils\Engines\Results\MyMemory\Matches;
 
-class MatchesTest extends AbstractTest {
+class MatchesTest extends AbstractTest
+{
 
 
     public function test_empty_constructor()
@@ -19,7 +20,7 @@ class MatchesTest extends AbstractTest {
 
     public function test_real_constructor()
     {
-        $createDate = date( "Y-m-d" );
+        $createDate = date("Y-m-d");
 
         $match = new Matches([
             'id' => '234',
@@ -49,7 +50,7 @@ class MatchesTest extends AbstractTest {
         $match = new Matches([
             'id' => '123134123',
             'raw_segment' => 'This is a sample page for Demo purposes.',
-            'raw_translation' =>  'Ceci est un exemple de page à des fins de démonstration',
+            'raw_translation' => 'Ceci est un exemple de page à des fins de démonstration',
             'match' => '100%',
             'created-by' => "Public TM",
             'create-date' => '2024-12-30 15:56:32',
@@ -92,7 +93,7 @@ class MatchesTest extends AbstractTest {
 
     public function test_lara_constructor()
     {
-        $createDate = date( "Y-m-d" );
+        $createDate = date("Y-m-d");
 
         $match = new Matches([
             'id' => '234',

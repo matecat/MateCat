@@ -31,7 +31,7 @@ class ActivityLogController extends KleinController
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
-        $rawContent     = $activityLogDao->getAllForProject($validator->getIdProject());
+        $rawContent = $activityLogDao->getAllForProject($validator->getIdProject());
 
         $formatted = new Activity($rawContent);
         $this->response->json($formatted->render());
@@ -46,7 +46,7 @@ class ActivityLogController extends KleinController
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
-        $rawContent     = $activityLogDao->getLastActionInProject($validator->getIdProject());
+        $rawContent = $activityLogDao->getLastActionInProject($validator->getIdProject());
 
         $formatted = new Activity($rawContent);
         $this->response->json(['activity' => $formatted->render()]);
@@ -65,8 +65,8 @@ class ActivityLogController extends KleinController
         $activityLogDao->whereConditions = ' id_job = :id_job ';
         $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
         $rawLogContent = $activityLogDao->read(
-                new ActivityLogStruct(),
-                ['id_job' => $validator->getJobId()]
+            new ActivityLogStruct(),
+            ['id_job' => $validator->getJobId()]
         );
 
         $formatted = new Activity($rawLogContent);
