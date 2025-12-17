@@ -260,25 +260,31 @@ export const decodePlaceholdersToPlainText = (str) => {
 export const encodePlaceholdersToTags = (str) => {
   return str
     ? str
-        .replace(
+        .replaceAll(
           tagSignatures['lineFeed'].placeholder,
-          config.lfPlaceholderRegex,
+          tagSignatures['lineFeed'].encodedPlaceholder,
         )
-        .replace(
+        .replaceAll(
           tagSignatures['carriageReturn'].placeholder,
-          config.crPlaceholderRegex,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
         )
-        .replace(
+        .replaceAll(
           `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
-          config.crlfPlaceholderRegex,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
         )
-        .replace(tagSignatures['tab'].placeholder, config.tabPlaceholderRegex)
-        .replace(tagSignatures['nbsp'].placeholder, config.nbspPlaceholderRegex)
+        .replaceAll(
+          tagSignatures['tab'].placeholder,
+          tagSignatures['tab'].encodedPlaceholder,
+        )
+        .replaceAll(
+          tagSignatures['nbsp'].placeholder,
+          tagSignatures['nbsp'].encodedPlaceholder,
+        )
     : str
 }
 
 export const removePlaceholdersForGlossary = (str) => {
-  return str.replace(config.nbspPlaceholderRegex, ' ')
+  return str.replace(tagSignatures['nbsp'].regex, ' ')
 }
 
 export const decodeHtmlEntities = (text) => {
