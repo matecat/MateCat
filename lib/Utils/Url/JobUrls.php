@@ -4,6 +4,7 @@ namespace Utils\Url;
 
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 class JobUrls
 {
@@ -118,7 +119,7 @@ class JobUrls
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->getJobType($sourcePage);
                 $url .= DIRECTORY_SEPARATOR;
-                $url .= $this->projectName;
+                $url .= Utils::friendly_slug($this->projectName);
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->source . '-' . $this->target;
                 $url .= DIRECTORY_SEPARATOR;
