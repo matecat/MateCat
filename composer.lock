@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "47ab1f56606e78388e29868604b58d0f",
+    "content-hash": "4420273e26e3754e49d18fa311e96011",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.367.0",
+            "version": "3.368.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "6ce549c3efe117e76f1f878ae8463d95b838ef9d"
+                "reference": "c1189f8e4ba3268d6306e515f6f65611c671d033"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6ce549c3efe117e76f1f878ae8463d95b838ef9d",
-                "reference": "6ce549c3efe117e76f1f878ae8463d95b838ef9d",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c1189f8e4ba3268d6306e515f6f65611c671d033",
+                "reference": "c1189f8e4ba3268d6306e515f6f65611c671d033",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.367.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.368.0"
             },
-            "time": "2025-12-10T19:12:49+00:00"
+            "time": "2025-12-16T20:11:32+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -663,16 +663,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.423.0",
+            "version": "v0.424.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "c8f2e8a92e2848987db421175eaaf7602ef30c33"
+                "reference": "b368dcc5dce8043fed1b248a66020747d5cec353"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/c8f2e8a92e2848987db421175eaaf7602ef30c33",
-                "reference": "c8f2e8a92e2848987db421175eaaf7602ef30c33",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/b368dcc5dce8043fed1b248a66020747d5cec353",
+                "reference": "b368dcc5dce8043fed1b248a66020747d5cec353",
                 "shasum": ""
             },
             "require": {
@@ -701,9 +701,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.423.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.424.0"
             },
-            "time": "2025-12-08T01:10:26+00:00"
+            "time": "2025-12-15T00:58:22+00:00"
         },
         {
             "name": "google/auth",
@@ -1650,6 +1650,55 @@
                 "source": "https://github.com/matecat/klein.php/tree/v3.2.0"
             },
             "time": "2025-10-28T13:27:44+00:00"
+        },
+        {
+            "name": "matecat/lara-php",
+            "version": "v2.0.0-beta",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/matecat/lara-php.git",
+                "reference": "1c98c7a27e182b5ec7297c75600a5af916b91826"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/matecat/lara-php/zipball/1c98c7a27e182b5ec7297c75600a5af916b91826",
+                "reference": "1c98c7a27e182b5ec7297c75600a5af916b91826",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7|^6.0|^7.0|^8.0|^9.0"
+            },
+            "suggest": {
+                "monolog/monolog": "Allows logging of API requests and responses (^1.17 for PHP 5.6 compatibility)"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lara\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Translated",
+                    "email": "support@laratranslate.com"
+                }
+            ],
+            "description": "Matecat Lara SDK for PHP",
+            "homepage": "https://laratranslate.com/",
+            "support": {
+                "issues": "https://github.com/matecat/lara-php/issues",
+                "source": "https://github.com/matecat/lara-php/tree/v2.0.0-beta"
+            },
+            "time": "2025-12-17T10:54:45+00:00"
         },
         {
             "name": "matecat/simple-s3",
@@ -2911,16 +2960,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.47",
+            "version": "3.0.48",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "9d6ca36a6c2dd434765b1071b2644a1c683b385d"
+                "reference": "64065a5679c50acb886e82c07aa139b0f757bb89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/9d6ca36a6c2dd434765b1071b2644a1c683b385d",
-                "reference": "9d6ca36a6c2dd434765b1071b2644a1c683b385d",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/64065a5679c50acb886e82c07aa139b0f757bb89",
+                "reference": "64065a5679c50acb886e82c07aa139b0f757bb89",
                 "shasum": ""
             },
             "require": {
@@ -3001,7 +3050,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.47"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.48"
             },
             "funding": [
                 {
@@ -3017,7 +3066,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-06T01:07:24+00:00"
+            "time": "2025-12-15T11:51:42+00:00"
         },
         {
             "name": "phptal/phptal",
@@ -4746,50 +4795,6 @@
                 }
             ],
             "time": "2024-11-10T20:33:58+00:00"
-        },
-        {
-            "name": "translated/lara-sdk",
-            "version": "dev-feature/new-v2",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:translated/lara-php-dev.git",
-                "reference": "cc2dd2916305e3a2e0f592127ba47a5cab17bbb8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/translated/lara-php-dev/zipball/cc2dd2916305e3a2e0f592127ba47a5cab17bbb8",
-                "reference": "cc2dd2916305e3a2e0f592127ba47a5cab17bbb8",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "ext-json": "*",
-                "php": ">=5.6.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^5.7|^6.0|^7.0|^8.0|^9.0"
-            },
-            "suggest": {
-                "monolog/monolog": "Allows logging of API requests and responses (^1.17 for PHP 5.6 compatibility)"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Lara\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Translated",
-                    "email": "support@laratranslate.com"
-                }
-            ],
-            "description": "Official Lara SDK for PHP",
-            "homepage": "https://laratranslate.com/",
-            "time": "2025-12-12T11:03:27+00:00"
         }
     ],
     "packages-dev": [
@@ -5365,16 +5370,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.3",
+            "version": "12.5.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "6dc2e076d09960efbb0c1272aa9bc156fc80955e"
+                "reference": "4ba0e923f9d3fc655de22f9547c01d15a41fc93a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/6dc2e076d09960efbb0c1272aa9bc156fc80955e",
-                "reference": "6dc2e076d09960efbb0c1272aa9bc156fc80955e",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/4ba0e923f9d3fc655de22f9547c01d15a41fc93a",
+                "reference": "4ba0e923f9d3fc655de22f9547c01d15a41fc93a",
                 "shasum": ""
             },
             "require": {
@@ -5442,7 +5447,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.3"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.4"
             },
             "funding": [
                 {
@@ -5466,7 +5471,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-11T08:52:59+00:00"
+            "time": "2025-12-15T06:05:34+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -6471,7 +6476,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "translated/lara-sdk": 20
+        "matecat/lara-php": 10
     },
     "prefer-stable": false,
     "prefer-lowest": false,

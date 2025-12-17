@@ -26,7 +26,7 @@
         "stevenmaguire/oauth2-microsoft": "^2.2",
         "league/oauth2-github": "^3.1",
         "league/oauth2-facebook": "^2.2",
-        "translated/lara-sdk": "dev-feature/new-v2",
+        "matecat/lara-php": "^v2.0.0-beta",
         "elasticsearch/elasticsearch": "8.*",
         "psr/log": "^3.0",
         "ext-curl": "*",
@@ -53,12 +53,6 @@
             "php-http/discovery": true
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:translated/lara-php-dev.git"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "": "lib/"
