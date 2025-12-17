@@ -50,7 +50,7 @@
     "socket.io-client": "^4.8.1",
     "sprintf-js": "^1.1.2",
     "uuid": "^13.0.0",
-    "@translated/lara": "1.8.0-beta.1"
+    "@translated/lara": "1.8.0-beta.3"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
