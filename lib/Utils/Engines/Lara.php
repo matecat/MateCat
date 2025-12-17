@@ -344,6 +344,7 @@ class Lara extends AbstractEngine
                 return $this->mmt_GET_Fallback->get($_config);
             }
         } else {
+            $think = 'Think';
             $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
             if (isset($_config['include_score']) && $_config['include_score']) {
@@ -373,7 +374,7 @@ class Lara extends AbstractEngine
             'raw_segment' => $_config['segment'],
             'raw_translation' => $translation,
             'match' => $this->getStandardMtPenaltyString(),
-            'created-by' => $this->getMTName(),
+            'created-by' => $this->getMTName($think ?? ''),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
         ]))->getMatches(
