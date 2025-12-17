@@ -103,8 +103,8 @@ class GetInstanceTest extends AbstractTest {
      */
     public function test_getInstance_without_id() {
 
-        $this->expectException( Exception::class );
-        EnginesFactory::getInstance( '' );
+        $this->expectException( TypeError::class );
+        EnginesFactory::getInstance(  );
     }
 
     /**
@@ -114,7 +114,7 @@ class GetInstanceTest extends AbstractTest {
      */
     public function test_getInstance_whit_null_id() {
 
-        $this->expectException( Exception::class );
+        $this->expectException( TypeError::class );
         EnginesFactory::getInstance( null );
     }
 
