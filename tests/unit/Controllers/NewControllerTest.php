@@ -106,7 +106,7 @@ class NewControllerTest extends AbstractTest
 
         $user = $this->createMock(UserStruct::class);
         $user->expects( $this->once() )->method( 'getPersonalTeam' )->willReturn( new TeamStruct() );
-        $user->expects( $this->once() )->method( 'getEmail' )->willReturn( "mauro@translated.com" );
+        $user->expects( $this->once() )->method( 'getEmail' )->willReturn( "test-email@translated.com" );
 
         $this->requestMock = new Request(
             [],
@@ -151,7 +151,7 @@ class NewControllerTest extends AbstractTest
     {
         $this->user = $this->createMock(UserStruct::class);
         $this->user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
-        $this->user->expects($this->once())->method('getEmail')->willReturn("mauro@translated.com");
+        $this->user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
         $this->user->uid = 1886428310;
 
         $this->requestMock = new Request(
