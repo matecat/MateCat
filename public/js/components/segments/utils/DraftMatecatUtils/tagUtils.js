@@ -242,19 +242,38 @@ export const decodePlaceholdersToPlainText = (str) => {
   return str
     ? str
         .replace(
-          config.lfPlaceholderRegex,
+          tagSignatures['lineFeed'].regex,
           tagSignatures['lineFeed'].placeholder,
         )
         .replace(
-          config.crPlaceholderRegex,
+          tagSignatures['carriageReturn'].regex,
           tagSignatures['carriageReturn'].placeholder,
         )
         .replace(
-          config.crlfPlaceholderRegex,
+          tagSignatures['carriageReturn'].regex,
           `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
         )
-        .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
-        .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
+        .replace(tagSignatures['tab'].regex, tagSignatures['tab'].placeholder)
+        .replace(tagSignatures['nbsp'].regex, tagSignatures['nbsp'].placeholder)
+    : str
+}
+export const encodePlaceholdersToTags = (str) => {
+  return str
+    ? str
+        .replace(
+          tagSignatures['lineFeed'].placeholder,
+          config.lfPlaceholderRegex,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].placeholder,
+          config.crPlaceholderRegex,
+        )
+        .replace(
+          `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
+          config.crlfPlaceholderRegex,
+        )
+        .replace(tagSignatures['tab'].placeholder, config.tabPlaceholderRegex)
+        .replace(tagSignatures['nbsp'].placeholder, config.nbspPlaceholderRegex)
     : str
 }
 

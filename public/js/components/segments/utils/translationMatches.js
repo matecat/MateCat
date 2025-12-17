@@ -15,6 +15,10 @@ import CatToolActions from '../../../actions/CatToolActions'
 import {laraAuth} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
 import CatToolStore from '../../../stores/CatToolStore'
+import {
+  decodePlaceholdersToPlainText,
+  encodePlaceholdersToTags,
+} from './DraftMatecatUtils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -214,8 +218,10 @@ let TranslationMatches = {
       })
     }
 
-    const jobLanguages = [ config.source_code, config.target_code ];
-    let allowed = jobLanguages.filter(x => ['en', 'it'].includes(x.split('-')[0])).length === 2;
+    const jobLanguages = [config.source_code, config.target_code]
+    let allowed =
+      jobLanguages.filter((x) => ['en', 'it'].includes(x.split('-')[0]))
+        .length === 2
 
     if (config.active_engine?.name === 'Lara' && allowed) {
       laraAuth({idJob: config.id_job, password: config.password})
@@ -224,11 +230,18 @@ let TranslationMatches = {
           const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []
+          const decodedSource = decodePlaceholdersToPlainText(
+            currentSegment.segment,
+          )
           laraTranslate({
             token: response.token,
-            source: currentSegment.segment,
-            contextListBefore,
-            contextListAfter,
+            source: decodedSource,
+            contextListBefore: contextListBefore.map((t) =>
+              decodePlaceholdersToPlainText(t),
+            ),
+            contextListAfter: contextListAfter.map((t) =>
+              decodePlaceholdersToPlainText(t),
+            ),
             sid: id_segment_original,
             jobId: config.id_job,
             glossaries,
@@ -238,7 +251,9 @@ let TranslationMatches = {
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
-              return getContributionRequest(translation)
+              return getContributionRequest(
+                encodePlaceholdersToTags(translation),
+              )
             })
             .catch((e) => {
               console.error('Lara Translate error:', e)
