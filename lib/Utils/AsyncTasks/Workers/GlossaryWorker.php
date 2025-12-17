@@ -21,14 +21,14 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 class GlossaryWorker extends AbstractWorker
 {
 
-    const string CHECK_ACTION   = 'check';
-    const string DELETE_ACTION  = 'delete';
-    const string GET_ACTION     = 'get';
-    const string KEYS_ACTION    = 'keys';
-    const string SET_ACTION     = 'set';
-    const string UPDATE_ACTION  = 'update';
+    const string CHECK_ACTION = 'check';
+    const string DELETE_ACTION = 'delete';
+    const string GET_ACTION = 'get';
+    const string KEYS_ACTION = 'keys';
+    const string SET_ACTION = 'set';
+    const string UPDATE_ACTION = 'update';
     const string DOMAINS_ACTION = 'domains';
-    const string SEARCH_ACTION  = 'search';
+    const string SEARCH_ACTION = 'search';
 
     /**
      * @param AbstractElement $queueElement
@@ -41,9 +41,9 @@ class GlossaryWorker extends AbstractWorker
         /**
          * @var $queueElement QueueElement
          */
-        $params  = $queueElement->params->toArray();
-        $action  = $params[ 'action' ];
-        $payload = $params[ 'payload' ];
+        $params = $queueElement->params->toArray();
+        $action = $params['action'];
+        $payload = $params['payload'];
 
         $this->_checkDatabaseConnection();
 
@@ -102,21 +102,21 @@ class GlossaryWorker extends AbstractWorker
     {
         $client = $this->getMyMemoryClient();
 
-        $response = $client->glossaryCheck($payload[ 'source' ], $payload[ 'target' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ]);
-        $matches  = $response->matches;
+        $response = $client->glossaryCheck($payload['source'], $payload['target'], $payload['source_language'], $payload['target_language'], $payload['keys']);
+        $matches = $response->matches;
 
-        if (empty($matches[ 'id_segment' ])) {
-            $id_segment              = $payload[ 'id_segment' ] ?? null;
-            $matches[ 'id_segment' ] = $id_segment;
+        if (empty($matches['id_segment'])) {
+            $id_segment = $payload['id_segment'] ?? null;
+            $matches['id_segment'] = $id_segment;
         }
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_check',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $matches
-                )
+            $this->setResponsePayload(
+                'glossary_check',
+                $payload['id_client'],
+                $payload['jobData'],
+                $matches
+            )
         );
     }
 
@@ -142,37 +142,34 @@ class GlossaryWorker extends AbstractWorker
         $client = $this->getMyMemoryClient();
 
         /** @var UpdateGlossaryResponse $response */
-        $response = $client->glossaryDelete($payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ]);
+        $response = $client->glossaryDelete($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
 
         $message = [
-                'id_segment' => $payload[ 'id_segment' ],
-                'payload'    => null,
+            'id_segment' => $payload['id_segment'],
+            'payload' => null,
         ];
 
-        if ($response->responseStatus != 200) {
-            $errMessage = match ($response->responseStatus) {
-                202 => "MyMemory is busy, please try later",
-                default => "Error, please try later",
-            };
+        if ($response->responseStatus >= 300) {
+            $errMessage = "Error, please try later";
 
-            $message[ 'error' ] = [
-                    'code'    => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
-        if ($response->responseStatus == 200) {
-            $message[ 'payload' ] = $payload;
+        if ($response->responseStatus < 300) {
+            $message['payload'] = $payload;
         }
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_delete',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_delete',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
@@ -198,22 +195,22 @@ class GlossaryWorker extends AbstractWorker
      */
     private function domains(array $payload): void
     {
-        $message    = [];
-        $id_segment = $payload[ 'id_segment' ] ?? null;
-        $client     = $this->getMyMemoryClient();
+        $message = [];
+        $id_segment = $payload['id_segment'] ?? null;
+        $client = $this->getMyMemoryClient();
 
-        $domains = $client->glossaryDomains($payload[ 'keys' ]);
+        $domains = $client->glossaryDomains($payload['keys']);
 
-        $message[ 'entries' ]    = (!empty($domains->entries)) ? $domains->entries : [];
-        $message[ 'id_segment' ] = $id_segment;
+        $message['entries'] = (!empty($domains->entries)) ? $domains->entries : [];
+        $message['id_segment'] = $id_segment;
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_domains',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_domains',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
@@ -228,39 +225,39 @@ class GlossaryWorker extends AbstractWorker
     private function get(array $payload): void
     {
         if (
-                empty($payload[ 'id_segment' ]) ||
-                empty($payload[ 'source' ]) ||
-                empty ($payload[ 'source_language' ]) ||
-                empty ($payload[ 'target_language' ])
+            empty($payload['id_segment']) ||
+            empty($payload['source']) ||
+            empty($payload['source_language']) ||
+            empty($payload['target_language'])
         ) {
             throw new EndQueueException("Invalid Payload");
         }
 
         $keys = [];
-        foreach ($payload[ 'tmKeys' ] as $key) {
-            $keys[] = $key[ 'key' ];
+        foreach ($payload['tmKeys'] as $key) {
+            $keys[] = $key['key'];
         }
 
         $client = $this->getMyMemoryClient();
 
         $response = $client->glossaryGet(
-                $payload[ 'id_job' ],
-                $payload[ 'id_segment' ],
-                $payload[ 'source' ],
-                $payload[ 'source_language' ],
-                $payload[ 'target_language' ],
-                $keys
+            $payload['id_job'],
+            $payload['id_segment'],
+            $payload['source'],
+            $payload['source_language'],
+            $payload['target_language'],
+            $keys
         );
-        $matches  = $response->matches;
-        $matches  = $this->formatGetGlossaryMatches($matches, $payload);
+        $matches = $response->matches;
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_get',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $matches
-                )
+            $this->setResponsePayload(
+                'glossary_get',
+                $payload['id_client'],
+                $payload['jobData'],
+                $matches
+            )
         );
     }
 
@@ -275,17 +272,17 @@ class GlossaryWorker extends AbstractWorker
     {
         $client = $this->getMyMemoryClient();
 
-        $response = $client->glossaryKeys($payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ]);
+        $response = $client->glossaryKeys($payload['source_language'], $payload['target_language'], $payload['keys']);
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_keys',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        [
-                                'has_glossary' => $response->hasGlossary()
-                        ]
-                )
+            $this->setResponsePayload(
+                'glossary_keys',
+                $payload['id_client'],
+                $payload['jobData'],
+                [
+                    'has_glossary' => $response->hasGlossary()
+                ]
+            )
         );
     }
 
@@ -300,23 +297,23 @@ class GlossaryWorker extends AbstractWorker
     private function search(array $payload): void
     {
         $keys = [];
-        foreach ($payload[ 'tmKeys' ] as $key) {
-            $keys[] = $key[ 'key' ];
+        foreach ($payload['tmKeys'] as $key) {
+            $keys[] = $key['key'];
         }
 
         $client = $this->getMyMemoryClient();
 
-        $response = $client->glossarySearch($payload[ 'sentence' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $keys);
-        $matches  = $response->matches;
-        $matches  = $this->formatGetGlossaryMatches($matches, $payload);
+        $response = $client->glossarySearch($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
+        $matches = $response->matches;
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_search',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $matches
-                )
+            $this->setResponsePayload(
+                'glossary_search',
+                $payload['id_client'],
+                $payload['jobData'],
+                $matches
+            )
         );
     }
 
@@ -333,8 +330,8 @@ class GlossaryWorker extends AbstractWorker
             throw new EndQueueException("Empty response received from Glossary");
         }
 
-        if ($matches[ 'id_segment' ] === null or $matches[ 'id_segment' ] === "") {
-            $matches[ 'id_segment' ] = $payload[ 'id_segment' ] ?? null;
+        if ($matches['id_segment'] === null or $matches['id_segment'] === "") {
+            $matches['id_segment'] = $payload['id_segment'] ?? null;
         }
 
         return $matches;
@@ -351,60 +348,57 @@ class GlossaryWorker extends AbstractWorker
     {
         $client = $this->getMyMemoryClient();
 
-        $response   = $client->glossarySet($payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ]);
-        $id_segment = $payload[ 'id_segment' ] ?? null;
+        $response = $client->glossarySet($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
+        $id_segment = $payload['id_segment'] ?? null;
 
         $message = [
-                'id_segment' => $id_segment,
-                'payload'    => null,
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
 
-        if ($response->responseStatus != 200) {
-            $errMessage = match ($response->responseStatus) {
-                202 => "MyMemory is busy, please try later",
-                default => "Error, please try later",
-            };
+        if ($response->responseStatus >= 300) {
+            $errMessage = "Error, please try later";
 
-            $message[ 'error' ] = [
-                    'code'    => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
-        if ($response->responseStatus == 200) {
+        if ($response->responseStatus < 300) {
             // reduce $payload['term']['matching_words'] to simple array
-            $matchingWords        = $payload[ 'term' ][ 'matching_words' ] ?? [];
+            $matchingWords = $payload['term']['matching_words'] ?? [];
             $matchingWordsAsArray = [];
 
             foreach ($matchingWords as $matchingWord) {
                 $matchingWordsAsArray[] = $matchingWord;
             }
 
-            $payload[ 'term' ][ 'matching_words' ] = $matchingWordsAsArray;
+            $payload['term']['matching_words'] = $matchingWordsAsArray;
 
             // reduce $payload['term']['metadata']['keys'] to simple array
-            $keys        = $payload[ 'term' ][ 'metadata' ][ 'keys' ];
+            $keys = $payload['term']['metadata']['keys'];
             $keysAsArray = [];
 
             foreach ($keys as $key) {
                 $keysAsArray[] = $key;
             }
 
-            $payload[ 'term' ][ 'metadata' ][ 'keys' ] = $keysAsArray;
+            $payload['term']['metadata']['keys'] = $keysAsArray;
 
-            $payload[ 'request_id' ] = $response->responseDetails;
+            $payload['request_id'] = $response->responseDetails;
 
-            $message[ 'payload' ] = $payload;
+            $message['payload'] = $payload;
         }
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_set',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_set',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
@@ -419,48 +413,48 @@ class GlossaryWorker extends AbstractWorker
     {
         $client = $this->getMyMemoryClient();
 
-        $response   = $client->glossaryUpdate($payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ]);
-        $id_segment = $payload[ 'id_segment' ] ?? null;
+        $response = $client->glossaryUpdate($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
+        $id_segment = $payload['id_segment'] ?? null;
 
         $message = [
-                'id_segment' => $id_segment,
-                'payload'    => null,
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
 
-        if ($response->responseStatus != 200) {
+        if ($response->responseStatus >= 300) {
             $errMessage = match ($response->responseStatus) {
                 202 => "MyMemory is busy, please try later",
                 default => "Error, please try later",
             };
 
-            $message[ 'error' ] = [
-                    'code'    => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
-        if ($response->responseStatus == 200) {
+        if ($response->responseStatus < 300) {
             // reduce $payload['term']['matching_words'] to simple array
-            $matchingWords        = $payload[ 'term' ][ 'matching_words' ];
+            $matchingWords = $payload['term']['matching_words'];
             $matchingWordsAsArray = [];
 
             foreach ($matchingWords as $matchingWord) {
                 $matchingWordsAsArray[] = $matchingWord;
             }
 
-            $payload[ 'term' ][ 'matching_words' ] = $matchingWordsAsArray;
-            $payload[ 'request_id' ]               = $response->responseDetails;
-            $message[ 'payload' ]                  = $payload;
+            $payload['term']['matching_words'] = $matchingWordsAsArray;
+            $payload['request_id'] = $response->responseDetails;
+            $message['payload'] = $payload;
         }
 
         $this->publishToNodeJsClients(
-                $this->setResponsePayload(
-                        'glossary_update',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+            $this->setResponsePayload(
+                'glossary_update',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
@@ -475,13 +469,13 @@ class GlossaryWorker extends AbstractWorker
     private function setResponsePayload($type, $id_client, $jobData, $message): array
     {
         return [
-                '_type' => $type,
-                'data'  => [
-                        'payload'   => $message,
-                        'id_client' => $id_client,
-                        'id_job'    => $jobData[ 'id' ],
-                        'passwords' => $jobData[ 'password' ]
-                ]
+            '_type' => $type,
+            'data' => [
+                'payload' => $message,
+                'id_client' => $id_client,
+                'id_job' => $jobData['id'],
+                'passwords' => $jobData['password']
+            ]
         ];
     }
 
