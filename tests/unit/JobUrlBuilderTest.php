@@ -58,13 +58,13 @@ class JobUrlBuilderTest extends AbstractTest {
 
     public function testBuildTranslationUrlFromCredentials() {
         $job          = new JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs ORDER BY id DESC LIMIT 1" )->fetch() );
-        $jobUrlStruct = JobUrlBuilder::createFromJobStructAndProjectName( $job, 'fake_name', [
+        $jobUrlStruct = JobUrlBuilder::createFromJobStructAndProjectName( $job, 'fake name', [
                 'id_segment' => 1
         ] );
 
         $this->assertInstanceOf( JobUrls::class, $jobUrlStruct );
         $this->assertNotNull( $jobUrlStruct->getTranslationUrl() );
-        $this->assertTrue( strpos( $jobUrlStruct->getTranslationUrl(), 'fake_name' ) !== false );
+        $this->assertTrue( strpos( $jobUrlStruct->getTranslationUrl(), 'fake-name' ) !== false );
         $this->assertEquals( $jobUrlStruct->getUrlByRevisionNumber(), $jobUrlStruct->getTranslationUrl() );
         $this->assertNull( $jobUrlStruct->getReviseUrl() );
         $this->assertNull( $jobUrlStruct->getRevise2Url() );
