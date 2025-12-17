@@ -98,7 +98,7 @@ class SearchModel
                 $matchesCount = count($matches);
 
                 if ($this->hasMatches($matches)) {
-                    $vector['sid_list'][] = $occurrence['id'];
+                    $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
                     $vector['count'] = $vector['count'] + $matchesCount;
                 }
             }
@@ -133,7 +133,7 @@ class SearchModel
             }
         } else {
             foreach ($results as $occurrence) {
-                $vector['sid_list'][] = $occurrence['id'];
+                $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
             }
         }
 

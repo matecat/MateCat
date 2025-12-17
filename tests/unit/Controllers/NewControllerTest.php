@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Model\DataAccess\Database;
+use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionClass;
 use ReflectionException;
@@ -101,8 +102,11 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
-    public function testValidateTheRequestWithValidParameters()
-    {
+    public function testValidateTheRequestWithValidParameters() {
+
+        $this->user->expects( $this->any() )->method( 'getPersonalTeam' )->willReturn( new TeamStruct() );
+        $this->user->expects( $this->any() )->method( 'getEmail' )->willReturn( "mauro@translated.com" );
+
         $this->requestMock = new Request(
             [],
             [
@@ -141,6 +145,8 @@ class NewControllerTest extends AbstractTest
      */
     public function testValidateTheRequestWithValidParametersAndMtDeepLEngine()
     {
+        $this->user->expects($this->any())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $this->user->expects($this->any())->method('getEmail')->willReturn("mauro@translated.com");
         $this->user->uid = 1886428310;
 
         $this->requestMock = new Request(
