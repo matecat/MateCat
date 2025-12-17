@@ -104,8 +104,9 @@ class NewControllerTest extends AbstractTest
      */
     public function testValidateTheRequestWithValidParameters() {
 
-        $this->user->expects( $this->any() )->method( 'getPersonalTeam' )->willReturn( new TeamStruct() );
-        $this->user->expects( $this->any() )->method( 'getEmail' )->willReturn( "mauro@translated.com" );
+        $user = $this->createMock(UserStruct::class);
+        $user->expects( $this->once() )->method( 'getPersonalTeam' )->willReturn( new TeamStruct() );
+        $user->expects( $this->once() )->method( 'getEmail' )->willReturn( "mauro@translated.com" );
 
         $this->requestMock = new Request(
             [],
@@ -131,6 +132,9 @@ class NewControllerTest extends AbstractTest
 
         $this->createMocks();
 
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
         $validateParameters = $this->method->invoke($this->controller);
 
         $this->assertIsArray($validateParameters);
@@ -145,8 +149,9 @@ class NewControllerTest extends AbstractTest
      */
     public function testValidateTheRequestWithValidParametersAndMtDeepLEngine()
     {
-        $this->user->expects($this->any())->method('getPersonalTeam')->willReturn(new TeamStruct());
-        $this->user->expects($this->any())->method('getEmail')->willReturn("mauro@translated.com");
+        $this->user = $this->createMock(UserStruct::class);
+        $this->user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $this->user->expects($this->once())->method('getEmail')->willReturn("mauro@translated.com");
         $this->user->uid = 1886428310;
 
         $this->requestMock = new Request(
