@@ -11,6 +11,7 @@ use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -40,6 +41,7 @@ use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
+use Utils\Engines\Results\MyMemory\Matches;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -151,7 +153,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $old_translation = $this->getOldTranslation();
 
             $client_suggestion_array = json_decode($this->data['suggestion_array'] ?? '[]', true);
-            $client_chosen_suggestion = $this->data['chosen_suggestion_index'] !== null ? $client_suggestion_array[$this->data['chosen_suggestion_index'] - 1] : null;
+            $client_chosen_suggestion = new ShapelessConcreteStruct($this->data['chosen_suggestion_index'] !== null ? $client_suggestion_array[$this->data['chosen_suggestion_index'] - 1] : []);
 
             $new_translation = new SegmentTranslationStruct();
             $new_translation->id_segment = $this->data['id_segment'];
@@ -170,7 +172,7 @@ class SetTranslationController extends AbstractStatefulKleinController
 
             // update suggestion
             if ($this->canUpdateSuggestion($new_translation, $client_chosen_suggestion)) {
-                $new_translation->suggestion = !empty($client_chosen_suggestion) ? $client_chosen_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
+                $new_translation->suggestion = !empty($client_chosen_suggestion->raw_translation) ? $client_chosen_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
 
                 // update suggestion match
                 if ($client_chosen_suggestion->match == EngineConstants::MT) {
@@ -671,16 +673,12 @@ class SetTranslationController extends AbstractStatefulKleinController
      *      - TRANSLATED
      *
      * @param SegmentTranslationStruct $new_translation
-     * @param null $old_suggestion
+     * @param ShapelessConcreteStruct $old_suggestion
      *
      * @return bool
      */
-    private function canUpdateSuggestion(SegmentTranslationStruct $new_translation, $old_suggestion = null): bool
+    private function canUpdateSuggestion(SegmentTranslationStruct $new_translation, ShapelessConcreteStruct $old_suggestion): bool
     {
-        if ($old_suggestion === null) {
-            return false;
-        }
-
         if (!in_array($new_translation->status, [
             TranslationStatus::STATUS_NEW,
             TranslationStatus::STATUS_DRAFT,
@@ -690,7 +688,6 @@ class SetTranslationController extends AbstractStatefulKleinController
         }
 
         if (
-            !empty($old_suggestion) and
             isset($old_suggestion->raw_translation) and
             isset($old_suggestion->match) and
             isset($old_suggestion->created_by)

@@ -12,7 +12,7 @@ export const laraTranslate = async ({
     const credentials = new AuthToken(token, null)
 
     const lara = new Translator(credentials, {
-        connectionTimeoutMs: 7000
+        connectionTimeoutMs: 10000
     })
     let textBlocks = [
         ...contextListBefore.map((item) => {
