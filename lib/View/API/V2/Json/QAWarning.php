@@ -16,8 +16,8 @@ class QAWarning
     protected array $structure;
 
     const string GLOSSARY_CATEGORY = "GLOSSARY";
-    const string TAGS_CATEGORY     = "TAGS";
-    const string SIZE_CATEGORY     = "SIZE";
+    const string TAGS_CATEGORY = "TAGS";
+    const string SIZE_CATEGORY = "SIZE";
     const string MISMATCH_CATEGORY = "MISMATCH";
 
     protected function pushErrorSegment($error_type, $error_category, $content): void
@@ -36,12 +36,12 @@ class QAWarning
             default => self::TAGS_CATEGORY,
         };
 
-        if (!isset($this->structure[ $error_type ][ 'Categories' ][ $category ])) {
-            $this->structure[ $error_type ][ 'Categories' ][ $category ] = [];
+        if (!isset($this->structure[$error_type]['Categories'][$category])) {
+            $this->structure[$error_type]['Categories'][$category] = [];
         }
 
-        if (!in_array($content, $this->structure[ $error_type ][ 'Categories' ][ $category ])) {
-            $this->structure[ $error_type ][ 'Categories' ][ $category ][] = $content;
+        if (!in_array($content, $this->structure[$error_type]['Categories'][$category])) {
+            $this->structure[$error_type]['Categories'][$category][] = $content;
         }
     }
 }

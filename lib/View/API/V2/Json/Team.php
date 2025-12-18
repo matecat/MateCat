@@ -32,22 +32,22 @@ class Team
     public function renderItem(TeamStruct $team): array
     {
         $row = [
-                'id'         => (int)$team->id,
-                'name'       => $team->name,
-                'type'       => $team->type,
-                'created_at' => Utils::api_timestamp($team->created_at),
-                'created_by' => $team->created_by
+            'id' => (int)$team->id,
+            'name' => $team->name,
+            'type' => $team->type,
+            'created_at' => Utils::api_timestamp($team->created_at),
+            'created_by' => $team->created_by
         ];
 
-        $members     = $team->getMembers();
+        $members = $team->getMembers();
         $invitations = (new PendingInvitations((new RedisHandler())->getConnection(), []))->hasPendingInvitation((int)$team->id);
 
         if (!empty($members)) {
             $memberShipFormatter = new Membership($members);
-            $row[ 'members' ]    = $memberShipFormatter->render();
+            $row['members'] = $memberShipFormatter->render();
         }
 
-        $row[ 'pending_invitations' ] = $invitations;
+        $row['pending_invitations'] = $invitations;
 
         return $row;
     }

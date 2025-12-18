@@ -11,9 +11,9 @@ class ChunkDao extends AbstractDao
 {
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return JobStruct
      * @throws NotFoundException
@@ -32,7 +32,7 @@ class ChunkDao extends AbstractDao
 
     /**
      * @param SegmentTranslationStruct $translation
-     * @param int                      $ttl
+     * @param int $ttl
      *
      * @return JobStruct
      * @throws ReflectionException

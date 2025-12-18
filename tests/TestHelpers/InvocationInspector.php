@@ -13,28 +13,29 @@ use PHPUnit\Framework\MockObject\Invocation;
 use PHPUnit\Framework\MockObject\Rule\InvocationOrder;
 use ReflectionClass;
 
-class InvocationInspector {
+class InvocationInspector
+{
 
     protected array $parameters = [];
 
-    public function __construct( InvocationOrder $invocation ) {
-
-        $reflectionClass       = new ReflectionClass( $invocation );
+    public function __construct(InvocationOrder $invocation)
+    {
+        $reflectionClass = new ReflectionClass($invocation);
         $parentReflectionClass = $reflectionClass->getParentClass();
 
         $this->parameters = [];
 
-        foreach ( $parentReflectionClass->getProperties() as $p ) {
-            $this->parameters[ $p->getName() ] = $p->getValue( $invocation );
+        foreach ($parentReflectionClass->getProperties() as $p) {
+            $this->parameters[$p->getName()] = $p->getValue($invocation);
         }
-
     }
 
     /**
      * @return Invocation[]
      */
-    public function getInvocations(): array {
-        return $this->parameters[ 'invocations' ];
+    public function getInvocations(): array
+    {
+        return $this->parameters['invocations'];
     }
 
 }

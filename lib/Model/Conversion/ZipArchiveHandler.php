@@ -19,17 +19,17 @@ class ZipArchiveHandler extends ZipArchive
 {
 
     const string REFERENCE_FOLDER = '__reference';
-    const string META_FOLDER      = '__meta';
-    const string PREVIEWS_FOLDER  = '__previews';
+    const string META_FOLDER = '__meta';
+    const string PREVIEWS_FOLDER = '__previews';
 
-    const int    MAX_VISITED_DEPTH             = 5;
+    const int    MAX_VISITED_DEPTH = 5;
     const int    MAX_VISITED_FOLDERS_PER_DEPTH = 10;
-    const int    MAX_FOLDERS                   = 100;
-    const string INTERNAL_SEPARATOR            = "___SEP___";
+    const int    MAX_FOLDERS = 100;
+    const string INTERNAL_SEPARATOR = "___SEP___";
 
     const string ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
-    public array $tree     = [];
+    public array $tree = [];
     public array $treeList = [];
 
     protected static int $MAX_FILES;
@@ -77,31 +77,31 @@ class ZipArchiveHandler extends ZipArchive
     {
         self::$MAX_FILES = AppConfig::$MAX_NUM_FILES;
 
-        $Tree              = [];
+        $Tree = [];
         $path2numOfFolders = [];
-        $filePaths         = [];
+        $filePaths = [];
 
         $numOfFolders = 0;
-        $numOfFiles   = 0;
+        $numOfFiles = 0;
 
         for ($i = 0; $i < $this->numFiles; $i++) {
             $path = $this->getNameIndex($i);
 
             $pathBySlash = array_values(explode('/', $path));
 
-            if ($pathBySlash[ 0 ] == '__MACOSX') {
+            if ($pathBySlash[0] == '__MACOSX') {
                 continue;
             }
 
-            if ($pathBySlash[ 0 ] == self::REFERENCE_FOLDER) {
+            if ($pathBySlash[0] == self::REFERENCE_FOLDER) {
                 continue;
             }
 
-            if ($pathBySlash[ 0 ] == self::META_FOLDER) {
+            if ($pathBySlash[0] == self::META_FOLDER) {
                 continue;
             }
 
-            if ($pathBySlash[ 0 ] == self::PREVIEWS_FOLDER) {
+            if ($pathBySlash[0] == self::PREVIEWS_FOLDER) {
                 continue;
             }
 
@@ -112,17 +112,17 @@ class ZipArchiveHandler extends ZipArchive
             $pathBySlash = array_map([ZipArchiveHandler::class, 'treeKey'], $pathBySlash);
 
             $pathWithoutFile = $pathBySlash;
-            $fileName        = array_pop($pathWithoutFile);
+            $fileName = array_pop($pathWithoutFile);
             array_pop($pathWithoutFile);
             //remove the last element, which is the file name, and the second last, which is the folder name
             $pathWithoutFile = implode(DIRECTORY_SEPARATOR, $pathWithoutFile);
 
-            if ($pathWithoutFile != "" && !isset($path2numOfFolders[ $pathWithoutFile ])) {
-                $path2numOfFolders[ $pathWithoutFile ] = 0;
+            if ($pathWithoutFile != "" && !isset($path2numOfFolders[$pathWithoutFile])) {
+                $path2numOfFolders[$pathWithoutFile] = 0;
             }
 
             if ($pathWithoutFile != "" && $fileName == self::ARRAY_FILES_PREFIX) {    //this is the path of a directory: add directory count
-                $path2numOfFolders[ $pathWithoutFile ]++;
+                $path2numOfFolders[$pathWithoutFile]++;
                 $numOfFolders++;
             } else {
                 $numOfFiles++;
@@ -158,23 +158,23 @@ class ZipArchiveHandler extends ZipArchive
 
             $temp = &$Tree;
             for ($j = 0; $j < $c - 1; $j++) {
-                $count       = 1;
-                $originalKey = str_replace(self::ARRAY_FILES_PREFIX, "", $pathBySlash[ $j ], $count);
-                if (!isset($temp[ $originalKey ])) {
-                    $temp[ $originalKey ] = [];
+                $count = 1;
+                $originalKey = str_replace(self::ARRAY_FILES_PREFIX, "", $pathBySlash[$j], $count);
+                if (!isset($temp[$originalKey])) {
+                    $temp[$originalKey] = [];
                 }
-                $temp = &$temp[ $originalKey ];
+                $temp = &$temp[$originalKey];
             }
 
-            $last_originalKey = str_replace(self::ARRAY_FILES_PREFIX, "", $pathBySlash[ $c - 1 ], $count);
+            $last_originalKey = str_replace(self::ARRAY_FILES_PREFIX, "", $pathBySlash[$c - 1], $count);
             if ($this->isDir($path)) {
-                $temp[ $last_originalKey ] = [];
+                $temp[$last_originalKey] = [];
             } else {
                 $temp[] = $last_originalKey;
             }
         }
 
-        $this->tree     = $Tree;
+        $this->tree = $Tree;
         $this->treeList = array_unique($filePaths);
         $this->treeList = str_replace(DIRECTORY_SEPARATOR, self::INTERNAL_SEPARATOR, $this->treeList);
         $this->treeList = array_map([ZipArchiveHandler::class, 'prependZipFileName'], $this->treeList);
@@ -188,9 +188,9 @@ class ZipArchiveHandler extends ZipArchive
         //pre: createTree() must have been called so that $this->treeList is not empty.
         foreach ($this->treeList as $filePath) {
             $realPath = str_replace(
-                    [self::INTERNAL_SEPARATOR, AbstractFilesStorage::pathinfo_fix($this->filename, PATHINFO_BASENAME)],
-                    [DIRECTORY_SEPARATOR, ""],
-                    $filePath
+                [self::INTERNAL_SEPARATOR, AbstractFilesStorage::pathinfo_fix($this->filename, PATHINFO_BASENAME)],
+                [DIRECTORY_SEPARATOR, ""],
+                $filePath
             );
 
             $realPath = ltrim($realPath, "/");
@@ -204,7 +204,7 @@ class ZipArchiveHandler extends ZipArchive
             }
 
             $sizeExceeded = false;
-            $fileSize     = 0;
+            $fileSize = 0;
             while (!feof($fp) && !$sizeExceeded) {
                 $realSize = fwrite($tmpFp, fread($fp, 8192));
                 $fileSize += $realSize;
@@ -215,22 +215,22 @@ class ZipArchiveHandler extends ZipArchive
             }
 
             if ($sizeExceeded) {
-                $fileErrors[ $filePath ] = 'Max upload file size exceeded.';
+                $fileErrors[$filePath] = 'Max upload file size exceeded.';
             }
 
             fclose($fp);
             fclose($tmpFp);
 
-            $filesArray[ $filePath ] = [
-                    'size'     => $fileSize,
-                    'name'     => $filePath,
-                    'tmp_name' => $tmp_folder . $filePath,
+            $filesArray[$filePath] = [
+                'size' => $fileSize,
+                'name' => $filePath,
+                'tmp_name' => $tmp_folder . $filePath,
             ];
         }
 
         foreach ($filesArray as $filePath => &$objectFile) {
-            $objectFile[ 'error' ] = $fileErrors[ $filePath ] ?? null;
-            $objectFile[ 'type' ]  = (new MimeTypes())->guessMimeType($tmp_folder . $filePath);
+            $objectFile['error'] = $fileErrors[$filePath] ?? null;
+            $objectFile['type'] = (new MimeTypes())->guessMimeType($tmp_folder . $filePath);
         }
 
         return $filesArray;
@@ -260,20 +260,20 @@ class ZipArchiveHandler extends ZipArchive
         }
         $path = explode(self::INTERNAL_SEPARATOR, $path);
 
-        $zipFile  = array_shift($path);
+        $zipFile = array_shift($path);
         $basename = array_pop($path);
 
         $filenameInfo = explode(".", $basename);
-        $extension    = array_pop($filenameInfo);
-        $filename     = implode(".", $filenameInfo);
-        $dirname      = implode(DIRECTORY_SEPARATOR, $path);
+        $extension = array_pop($filenameInfo);
+        $filename = implode(".", $filenameInfo);
+        $dirname = implode(DIRECTORY_SEPARATOR, $path);
 
         return [
-                'dirname'     => $dirname,
-                'basename'    => $basename,
-                'extension'   => $extension,
-                'filename'    => $filename,
-                'zipfilename' => $zipFile
+            'dirname' => $dirname,
+            'basename' => $basename,
+            'extension' => $extension,
+            'filename' => $filename,
+            'zipfilename' => $zipFile
         ];
     }
 

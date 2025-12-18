@@ -27,7 +27,7 @@ class CreateRandUserController extends KleinController
         $tms = EnginesFactory::getInstance(1);
 
         $this->response->json([
-                'data' => $tms->createMyMemoryKey()
+            'data' => $tms->createMyMemoryKey()
         ]);
     }
 }

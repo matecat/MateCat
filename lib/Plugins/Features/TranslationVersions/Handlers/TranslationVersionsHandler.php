@@ -51,24 +51,24 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     /**
      * @var int
      */
-    private int           $uid;
+    private int $uid;
     private ProjectStruct $projectStruct;
 
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param JobStruct     $chunkStruct
-     * @param int|null      $id_segment
-     * @param UserStruct    $userStruct
+     * @param JobStruct $chunkStruct
+     * @param int|null $id_segment
+     * @param UserStruct $userStruct
      * @param ProjectStruct $projectStruct
      */
     public function __construct(JobStruct $chunkStruct, ?int $id_segment, UserStruct $userStruct, ProjectStruct $projectStruct)
     {
-        $this->chunkStruct   = $chunkStruct;
-        $this->id_job        = $chunkStruct->id;
-        $this->id_segment    = $id_segment;
-        $this->uid           = $userStruct->uid;
-        $this->dao           = new TranslationVersionDao();
+        $this->chunkStruct = $chunkStruct;
+        $this->id_job = $chunkStruct->id;
+        $this->id_segment = $id_segment;
+        $this->uid = $userStruct->uid;
+        $this->dao = new TranslationVersionDao();
         $this->projectStruct = $projectStruct;
     }
 
@@ -101,10 +101,10 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
     {
         return SegmentTranslationDao::propagateTranslation(
-                $translationStruct,
-                $this->chunkStruct,
-                $this->id_segment,
-                $this->projectStruct,
+            $translationStruct,
+            $this->chunkStruct,
+            $this->id_segment,
+            $this->projectStruct,
         );
     }
 
@@ -117,8 +117,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface
      * @return bool
      */
     private function saveVersion(
-            SegmentTranslationStruct $new_translation,
-            SegmentTranslationStruct $old_translation
+        SegmentTranslationStruct $new_translation,
+        SegmentTranslationStruct $old_translation
     ): bool {
         if (Utils::stringsAreEqual($new_translation->translation, $old_translation->translation ?? '')) {
             return false;
@@ -136,9 +136,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
         // From now on, translations are treated as arrays and get attributes attached
         // just to be passed to version save. Create two arrays for the purpose.
-        $new_version             = new TranslationVersionStruct($old_translation->toArray());
-        $new_version->old_status = TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ];
-        $new_version->new_status = TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ];
+        $new_version = new TranslationVersionStruct($old_translation->toArray());
+        $new_version->old_status = TranslationStatus::$DB_STATUSES_MAP[$old_translation->status];
+        $new_version->new_status = TranslationStatus::$DB_STATUSES_MAP[$new_translation->status];
 
         /**
          * In some cases, version 0 may already be there among saved_versions, because
@@ -152,9 +152,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface
          *
          */
         $version_record = $this->dao->getVersionNumberForTranslation(
-                $this->id_job,
-                $this->id_segment,
-                $new_version->version_number
+            $this->id_job,
+            $this->id_segment,
+            $new_version->version_number
         );
 
         if ($version_record) {
@@ -172,30 +172,30 @@ class TranslationVersionsHandler implements VersionHandlerInterface
     {
         // evaluate if the record is to be created, either the
         // status changed, or the translation changed
-        $user = $params[ 'user' ];
+        $user = $params['user'];
 
         /** @var SegmentTranslationStruct $translation */
-        $translation = $params[ 'translation' ];
+        $translation = $params['translation'];
 
         /** @var SegmentTranslationStruct $old_translation */
-        $old_translation = $params[ 'old_translation' ];
+        $old_translation = $params['old_translation'];
 
-        $source_page_code = $params[ 'source_page_code' ];
+        $source_page_code = $params['source_page_code'];
 
         /** @var JobStruct $chunk */
-        $chunk = $params[ 'chunk' ];
+        $chunk = $params['chunk'];
 
         /** @var FeatureSet $features */
-        $features = $params[ 'features' ];
+        $features = $params['features'];
 
         /** @var ProjectStruct $project */
-        $project = $params[ 'project' ];
+        $project = $params['project'];
 
         $sourceEvent = new TranslationEvent(
-                $old_translation,
-                $translation,
-                $user,
-                $source_page_code
+            $old_translation,
+            $translation,
+            $user,
+            $source_page_code
         );
 
         $translationEventsHandler = new TranslationEventsHandler($chunk);
@@ -205,31 +205,31 @@ class TranslationVersionsHandler implements VersionHandlerInterface
 
         // If propagated segments exist, start cycle here
         // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
-        if (isset($params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ]) and !empty($params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ])) {
-            $segments_for_propagation = $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ];
-            $segmentTranslations      = [];
+        if (isset($params['propagation']['segments_for_propagation']['propagated']) and !empty($params['propagation']['segments_for_propagation']['propagated'])) {
+            $segments_for_propagation = $params['propagation']['segments_for_propagation']['propagated'];
+            $segmentTranslations = [];
 
-            if (!empty($segments_for_propagation[ 'not_ice' ])) {
-                $segmentTranslations = array_merge($segmentTranslations, $segments_for_propagation[ 'not_ice' ][ 'object' ]);
+            if (!empty($segments_for_propagation['not_ice'])) {
+                $segmentTranslations = array_merge($segmentTranslations, $segments_for_propagation['not_ice']['object']);
             }
 
-            if (!empty($segments_for_propagation[ 'ice' ])) {
-                $segmentTranslations = array_merge($segmentTranslations, $segments_for_propagation[ 'ice' ][ 'object' ]);
+            if (!empty($segments_for_propagation['ice'])) {
+                $segmentTranslations = array_merge($segmentTranslations, $segments_for_propagation['ice']['object']);
             }
 
             foreach ($segmentTranslations as $segmentTranslationBeforeChange) {
                 /** @var SegmentTranslationStruct $propagatedSegmentAfterChange */
-                $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
-                $propagatedSegmentAfterChange->translation         = $translation->translation;
-                $propagatedSegmentAfterChange->status              = $translation->status;
+                $propagatedSegmentAfterChange = clone $segmentTranslationBeforeChange;
+                $propagatedSegmentAfterChange->translation = $translation->translation;
+                $propagatedSegmentAfterChange->status = $translation->status;
                 $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment; // nullable
-                $propagatedSegmentAfterChange->time_to_edit        = 0;
+                $propagatedSegmentAfterChange->time_to_edit = 0;
 
                 $propagatedEvent = new TranslationEvent(
-                        $segmentTranslationBeforeChange,
-                        $propagatedSegmentAfterChange,
-                        $user,
-                        $source_page_code
+                    $segmentTranslationBeforeChange,
+                    $propagatedSegmentAfterChange,
+                    $user,
+                    $source_page_code
                 );
 
                 $propagatedEvent->setPropagationSource(false);

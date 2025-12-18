@@ -65,13 +65,13 @@ class ProjectsController extends KleinController
     public function updateDueDate(): void
     {
         if (
-                array_key_exists("due_date", $this->params)
-                &&
-                is_numeric($this->params[ 'due_date' ])
-                &&
-                $this->params[ 'due_date' ] > time()
+            array_key_exists("due_date", $this->params)
+            &&
+            is_numeric($this->params['due_date'])
+            &&
+            $this->params['due_date'] > time()
         ) {
-            $due_date    = Utils::mysqlTimestamp($this->params[ 'due_date' ]);
+            $due_date = Utils::mysqlTimestamp($this->params['due_date']);
             $project_dao = new ProjectDao;
             $project_dao->updateField($this->project, "due_date", $due_date);
         }
@@ -179,19 +179,19 @@ class ProjectsController extends KleinController
         $projectValidator->onSuccess(function () use ($projectValidator) {
             $this->project = $projectValidator->getProject();
         })
-                // Define the failure callback for the password validator.
-                ->onFailure(function (Throwable $exception) {
-                    if ($exception instanceof NotFoundException && !empty($this->request->param('project_access_token'))) {
-                        // If the project is not found, attempt validation using an access token.
-                        $projectByTokenValidator = new ProjectAccessTokenValidator($this);
-                        $projectByTokenValidator->onSuccess(function () use ($projectByTokenValidator) {
-                            $this->project = $projectByTokenValidator->getProject();
-                        })->validate();
-                    } else {
-                        // Rethrow the exception for other validation failures.
-                        throw $exception;
-                    }
-                });
+            // Define the failure callback for the password validator.
+            ->onFailure(function (Throwable $exception) {
+                if ($exception instanceof NotFoundException && !empty($this->request->param('project_access_token'))) {
+                    // If the project is not found, attempt validation using an access token.
+                    $projectByTokenValidator = new ProjectAccessTokenValidator($this);
+                    $projectByTokenValidator->onSuccess(function () use ($projectByTokenValidator) {
+                        $this->project = $projectByTokenValidator->getProject();
+                    })->validate();
+                } else {
+                    // Rethrow the exception for other validation failures.
+                    throw $exception;
+                }
+            });
 
         // Append the login validator to the list of validators.
         $this->appendValidator(new LoginValidator($this));

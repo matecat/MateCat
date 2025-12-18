@@ -48,8 +48,8 @@ class BatchReviewProcessor
      */
     public function setChunk(JobStruct $chunk): BatchReviewProcessor
     {
-        $this->chunk          = $chunk;
-        $old_wStruct          = WordCountStruct::loadFromJob($chunk);
+        $this->chunk = $chunk;
+        $old_wStruct = WordCountStruct::loadFromJob($chunk);
         $this->jobWordCounter = new CounterModel($old_wStruct);
 
         return $this;
@@ -85,10 +85,10 @@ class BatchReviewProcessor
         //
         if (empty($chunkReviews)) {
             $data = [
-                    'id_project'  => $project->id,
-                    'id_job'      => $this->chunk->id,
-                    'password'    => $this->chunk->password,
-                    'source_page' => 2,
+                'id_project' => $project->id,
+                'id_job' => $this->chunk->id,
+                'password' => $this->chunk->password,
+                'source_page' => 2,
             ];
 
             $chunkReview = ChunkReviewDao::createRecord($data);
@@ -109,7 +109,7 @@ class BatchReviewProcessor
      */
     public function process(): void
     {
-        $project      = $this->chunk->getProject();
+        $project = $this->chunk->getProject();
         $chunkReviews = $this->getOrCreateChunkReviews($project);
 
         $revisionFactory = RevisionFactory::initFromProject($project);
@@ -126,7 +126,7 @@ class BatchReviewProcessor
 
             foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
                 // send chunkReviewUpdated notifications through FeaturesSet hook
-                $project          = $chunkReview->getChunk()->getProject();
+                $project = $chunkReview->getChunk()->getProject();
                 $chunkReviewModel = new ChunkReviewModel($chunkReview);
                 $chunkReviewModel->updateChunkReviewCountersAndPassFail($chunkReview->penalty_points, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project);
             }
@@ -142,20 +142,20 @@ class BatchReviewProcessor
     {
         // if empty, no segment status changes are present
         if (!empty($this->jobWordCounter->getValues())) {
-            $newCount                      = $this->jobWordCounter->updateDB($this->jobWordCounter->getValues());
-            $this->chunk->draft_words      = $newCount->getDraftWords();
-            $this->chunk->new_words        = $newCount->getNewWords();
+            $newCount = $this->jobWordCounter->updateDB($this->jobWordCounter->getValues());
+            $this->chunk->draft_words = $newCount->getDraftWords();
+            $this->chunk->new_words = $newCount->getNewWords();
             $this->chunk->translated_words = $newCount->getTranslatedWords();
-            $this->chunk->approved_words   = $newCount->getApprovedWords();
-            $this->chunk->approved2_words  = $newCount->getApproved2Words();
-            $this->chunk->rejected_words   = $newCount->getRejectedWords();
+            $this->chunk->approved_words = $newCount->getApprovedWords();
+            $this->chunk->approved2_words = $newCount->getApproved2Words();
+            $this->chunk->rejected_words = $newCount->getRejectedWords();
 
-            $this->chunk->draft_raw_words      = $newCount->getDraftRawWords();
-            $this->chunk->new_raw_words        = $newCount->getNewRawWords();
+            $this->chunk->draft_raw_words = $newCount->getDraftRawWords();
+            $this->chunk->new_raw_words = $newCount->getNewRawWords();
             $this->chunk->translated_raw_words = $newCount->getTranslatedRawWords();
-            $this->chunk->approved_raw_words   = $newCount->getApprovedRawWords();
-            $this->chunk->approved2_raw_words  = $newCount->getApproved2RawWords();
-            $this->chunk->rejected_raw_words   = $newCount->getRejectedRawWords();
+            $this->chunk->approved_raw_words = $newCount->getApprovedRawWords();
+            $this->chunk->approved2_raw_words = $newCount->getApproved2RawWords();
+            $this->chunk->rejected_raw_words = $newCount->getRejectedRawWords();
             // updateTodoValues for the JOB
         }
     }

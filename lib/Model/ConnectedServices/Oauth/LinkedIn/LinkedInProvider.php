@@ -24,9 +24,9 @@ class LinkedInProvider extends AbstractProvider
     public static function getClient(?string $redirectUrl = null): LinkedIn
     {
         return new LinkedIn([
-                'clientId'     => AppConfig::$LINKEDIN_OAUTH_CLIENT_ID,
-                'clientSecret' => AppConfig::$LINKEDIN_OAUTH_CLIENT_SECRET,
-                'redirectUri'  => $redirectUrl ?? AppConfig::$LINKEDIN_OAUTH_REDIRECT_URL,
+            'clientId' => AppConfig::$LINKEDIN_OAUTH_CLIENT_ID,
+            'clientSecret' => AppConfig::$LINKEDIN_OAUTH_CLIENT_SECRET,
+            'redirectUri' => $redirectUrl ?? AppConfig::$LINKEDIN_OAUTH_REDIRECT_URL,
         ]);
     }
 
@@ -39,14 +39,14 @@ class LinkedInProvider extends AbstractProvider
      */
     public function getAuthorizationUrl(string $csrfTokenState): string
     {
-        $options        = [
-                'state'  => $csrfTokenState,
-                'scope'  => [
-                        'email',
-                        'profile',
-                        'openid',
-                ],
-                'prompt' => 'select_account'
+        $options = [
+            'state' => $csrfTokenState,
+            'scope' => [
+                'email',
+                'profile',
+                'openid',
+            ],
+            'prompt' => 'select_account'
         ];
         $linkedInClient = static::getClient();
 
@@ -66,7 +66,7 @@ class LinkedInProvider extends AbstractProvider
 
         /** @var AccessToken $token */
         $token = $linkedInClient->getAccessToken('authorization_code', [
-                'code' => $code
+            'code' => $code
         ]);
 
         return $token;
@@ -81,26 +81,26 @@ class LinkedInProvider extends AbstractProvider
     public function getResourceOwner(AccessToken $token): ProviderUser
     {
         $linkedInClient = static::getClient($this->redirectUrl);
-        $response       = $linkedInClient->getHttpClient()->request(
-                'GET',
-                'https://api.linkedin.com/v2/userinfo',
-                [
-                        'headers' =>
-                                [
-                                        'Authorization' => "Bearer $token"
-                                ]
-                ]
+        $response = $linkedInClient->getHttpClient()->request(
+            'GET',
+            'https://api.linkedin.com/v2/userinfo',
+            [
+                'headers' =>
+                    [
+                        'Authorization' => "Bearer $token"
+                    ]
+            ]
         );
 
         $fetched = json_decode($response->getBody()->getContents());
 
-        $user            = new ProviderUser();
-        $user->email     = $fetched->email;
-        $user->name      = $fetched->given_name;
-        $user->lastName  = $fetched->family_name;
-        $user->picture   = $fetched->picture;
+        $user = new ProviderUser();
+        $user->email = $fetched->email;
+        $user->name = $fetched->given_name;
+        $user->lastName = $fetched->family_name;
+        $user->picture = $fetched->picture;
         $user->authToken = $token;
-        $user->provider  = self::PROVIDER_NAME;
+        $user->provider = self::PROVIDER_NAME;
 
         return $user;
     }

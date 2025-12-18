@@ -12,6 +12,13 @@ import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import {SEGMENTS_STATUS} from '../../../constants/Constants'
 import CatToolActions from '../../../actions/CatToolActions'
+import {laraAuth} from '../../../api/laraAuth'
+import {laraTranslate} from '../../../api/laraTranslate'
+import CatToolStore from '../../../stores/CatToolStore'
+import {
+  decodePlaceholdersToPlainText,
+  encodePlaceholdersToTags,
+} from './DraftMatecatUtils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -195,18 +202,70 @@ let TranslationMatches = {
     }
     const {contextListBefore, contextListAfter} =
       SegmentUtils.getSegmentContext(id_segment_original)
-    return getContributions({
-      idSegment: id_segment_original,
-      target: currentSegment.segment,
-      crossLanguages: crossLanguageSettings
-        ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
-        : [],
-      contextListBefore,
-      contextListAfter,
-    }).catch((errors) => {
-      CatToolActions.processErrors(errors, 'getContribution')
-      TranslationMatches.renderContributionErrors(errors, id_segment_original)
-    })
+    const getContributionRequest = (translation = null) => {
+      return getContributions({
+        idSegment: id_segment_original,
+        target: currentSegment.segment,
+        translation: translation,
+        crossLanguages: crossLanguageSettings
+          ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
+          : [],
+        contextListBefore,
+        contextListAfter,
+      }).catch((errors) => {
+        CatToolActions.processErrors(errors, 'getContribution')
+        TranslationMatches.renderContributionErrors(errors, id_segment_original)
+      })
+    }
+
+    const jobLanguages = [config.source_code, config.target_code]
+    let allowed =
+      jobLanguages.filter((x) => ['en', 'it'].includes(x.split('-')[0]))
+        .length === 2
+
+    if (config.active_engine?.name === 'Lara' && allowed) {
+      laraAuth({idJob: config.id_job, password: config.password})
+        .then((response) => {
+          // console.log('Text to translate via Lara:', currentSegment.segment)
+          const jobMetadata = CatToolStore.getJobMetadata()
+          const glossaries =
+            jobMetadata?.project?.mt_extra?.lara_glossaries || []
+          const decodedSource = decodePlaceholdersToPlainText(
+            currentSegment.segment,
+          )
+          laraTranslate({
+            token: response.token,
+            source: decodedSource,
+            contextListBefore: contextListBefore.map((t) =>
+              decodePlaceholdersToPlainText(t),
+            ),
+            contextListAfter: contextListAfter.map((t) =>
+              decodePlaceholdersToPlainText(t),
+            ),
+            sid: id_segment_original,
+            jobId: config.id_job,
+            glossaries,
+          })
+            .then((response) => {
+              // console.log('Lara Translate response:', response)
+              const translation =
+                response.translation.find((item) => item.translatable)?.text ||
+                ''
+              return getContributionRequest(
+                encodePlaceholdersToTags(translation),
+              )
+            })
+            .catch((e) => {
+              console.error('Lara Translate error:', e)
+              return getContributionRequest()
+            })
+        })
+        .catch(() => {
+          return getContributionRequest()
+        })
+    } else {
+      return getContributionRequest()
+    }
   },
 
   processContributions: function (data, sid) {

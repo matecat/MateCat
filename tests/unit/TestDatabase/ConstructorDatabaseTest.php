@@ -12,20 +12,22 @@ use Utils\Registry\AppConfig;
  * Date: 11/04/16
  * Time: 17.51
  */
-class ConstructorDatabaseTest extends AbstractTest {
+class ConstructorDatabaseTest extends AbstractTest
+{
 
     protected ReflectionClass $reflector;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
         $this->databaseInstance->close();
 
-        $this->reflector = new ReflectionClass( $this->databaseInstance );
-
+        $this->reflector = new ReflectionClass($this->databaseInstance);
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
     }
 
@@ -35,18 +37,16 @@ class ConstructorDatabaseTest extends AbstractTest {
      * @covers Database::__construct
      * @throws ReflectionException
      */
-    public function test___construct_without_parameters() {
-
+    public function test___construct_without_parameters()
+    {
         // get the singleton static instance reference
-        $property = $this->reflector->getProperty( 'instance' );
-        
-        $property->setValue( $this->databaseInstance, null ); // unset
+        $property = $this->reflector->getProperty('instance');
 
-        $this->expectException( TypeError::class );
+        $property->setValue($this->databaseInstance, null); // unset
+
+        $this->expectException(TypeError::class);
 
         $this->databaseInstance->obtain();
-
-
     }
 
 

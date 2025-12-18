@@ -4,7 +4,6 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractDownloadController;
 use Exception;
-use JetBrains\PhpStorm\NoReturn;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -18,9 +17,9 @@ use Utils\Tools\Utils;
 class DownloadJobTMXController extends AbstractDownloadController
 {
 
-    private int         $jobID;
+    private int $jobID;
     private SplFileInfo $tmx;
-    private string      $fileName;
+    private string $fileName;
 
     protected array $errors;
 
@@ -32,34 +31,34 @@ class DownloadJobTMXController extends AbstractDownloadController
     public function index(): void
     {
         $getInput = filter_var_array($this->request->params(), [
-                'id_job'   => ['filter' => FILTER_SANITIZE_NUMBER_INT],
-                'password' => [
-                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                ],
-                'type'     => [
-                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                ]
+            'id_job' => ['filter' => FILTER_SANITIZE_NUMBER_INT],
+            'password' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+            ],
+            'type' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+            ]
         ]);
 
         $this->errors = [];
 
-        $this->jobID = $getInput[ 'id_job' ];
-        $jobPass     = $getInput[ 'password' ];
-        $type        = $getInput[ 'type' ];
+        $this->jobID = $getInput['id_job'];
+        $jobPass = $getInput['password'];
+        $type = $getInput['type'];
 
         if (empty($this->jobID)) {
             $this->errors [] = [
-                    'code'    => -1,
-                    'message' => 'Job ID missing'
+                'code' => -1,
+                'message' => 'Job ID missing'
             ];
         }
 
         if (empty($jobPass)) {
             $this->errors [] = [
-                    'code'    => -2,
-                    'message' => 'Job password missing'
+                'code' => -2,
+                'message' => 'Job password missing'
             ];
         }
 
@@ -80,8 +79,8 @@ class DownloadJobTMXController extends AbstractDownloadController
 
         $projectData = $this->jobInfo->getProject();
 
-        $source = $jobData[ 'source' ];
-        $target = $jobData[ 'target' ];
+        $source = $jobData['source'];
+        $target = $jobData['target'];
 
         $tmsService = new TMSService($this->featureSet);
 
@@ -90,15 +89,15 @@ class DownloadJobTMXController extends AbstractDownloadController
                 /**
                  * @var $tmx SplTempFileObject
                  */
-                $this->tmx      = $tmsService->exportJobAsCSV($this->jobID, $jobPass, $source, $target);
-                $this->fileName = $projectData[ 'name' ] . "-" . $this->jobID . ".csv";
+                $this->tmx = $tmsService->exportJobAsCSV($this->jobID, $jobPass, $source, $target);
+                $this->fileName = $projectData['name'] . "-" . $this->jobID . ".csv";
                 break;
             default:
                 /**
                  * @var $tmx SplTempFileObject
                  */
-                $this->tmx      = $tmsService->exportJobAsTMX($this->jobID, $jobPass, $source, $target);
-                $this->fileName = $projectData[ 'name' ] . "-" . $this->jobID . ".tmx";
+                $this->tmx = $tmsService->exportJobAsTMX($this->jobID, $jobPass, $source, $target);
+                $this->fileName = $projectData['name'] . "-" . $this->jobID . ".tmx";
                 break;
         }
 
@@ -108,12 +107,12 @@ class DownloadJobTMXController extends AbstractDownloadController
 
     protected function _saveActivity(): void
     {
-        $activity             = new ActivityLogStruct();
-        $activity->id_job     = $this->jobID;
-        $activity->id_project = $this->jobInfo[ 'id_project' ];
-        $activity->action     = ActivityLogStruct::DOWNLOAD_JOB_TMX;
-        $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->user->uid;
+        $activity = new ActivityLogStruct();
+        $activity->id_job = $this->jobID;
+        $activity->id_project = $this->jobInfo['id_project'];
+        $activity->action = ActivityLogStruct::DOWNLOAD_JOB_TMX;
+        $activity->ip = Utils::getRealIpAddr();
+        $activity->uid = $this->user->uid;
         $activity->event_date = date('Y-m-d H:i:s');
         Activity::save($activity);
     }

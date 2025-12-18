@@ -19,8 +19,8 @@ use stdClass;
 class ZipContentObject extends stdClass
 {
 
-    public string  $output_filename;
-    public ?string $input_filename   = null;
+    public string $output_filename;
+    public ?string $input_filename = null;
     public ?string $document_content = null;
 
     /**
@@ -52,9 +52,9 @@ class ZipContentObject extends stdClass
     private function setDocumentContentFromS3(): void
     {
         $s3Client = S3FilesStorage::getStaticS3Client();
-        $config   = [
-                'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                'key'    => $this->input_filename,
+        $config = [
+            'bucket' => S3FilesStorage::getFilesStorageBucket(),
+            'key' => $this->input_filename,
         ];
 
         if ($s3Client->hasItem($config)) {
@@ -82,7 +82,7 @@ class ZipContentObject extends stdClass
     public function __construct(ZipContentObject|array $_array_params = [])
     {
         //This is a multidimensional array
-        if (is_array($_array_params) and isset($_array_params[ 0 ])) {
+        if (is_array($_array_params) and isset($_array_params[0])) {
             foreach ($_array_params as $array_params) {
                 $this->build($array_params);
             }
@@ -99,7 +99,7 @@ class ZipContentObject extends stdClass
     public function build(ZipContentObject|array $_array_params = []): void
     {
         //This is a multidimensional array
-        if (is_array($_array_params) and isset($_array_params[ 0 ])) {
+        if (is_array($_array_params) and isset($_array_params[0])) {
             foreach ($_array_params as $array_params) {
                 $this->build($array_params);
             }

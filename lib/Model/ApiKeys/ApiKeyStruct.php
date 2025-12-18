@@ -12,13 +12,13 @@ use ReflectionException;
 class ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
 {
 
-    public ?int   $id = null;
-    public int    $uid;
+    public ?int $id = null;
+    public int $uid;
     public string $api_key;
     public string $api_secret;
     public string $create_date;
     public string $last_update;
-    public bool   $enabled;
+    public bool $enabled;
 
     public function validSecret($secret): bool
     {

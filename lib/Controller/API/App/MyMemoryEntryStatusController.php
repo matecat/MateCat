@@ -18,14 +18,14 @@ class MyMemoryEntryStatusController extends KleinController
     public function status(): void
     {
         try {
-            $uuid     = $this->request->param('uuid');
+            $uuid = $this->request->param('uuid');
             $mmEngine = $this->getMMEngine($this->featureSet);
-            $status   = $mmEngine->entryStatus($uuid);
+            $status = $mmEngine->entryStatus($uuid);
             $this->response->json($status);
         } catch (Exception $exception) {
             $this->response->status()->setCode(500);
             $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }

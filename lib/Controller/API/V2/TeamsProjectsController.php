@@ -54,12 +54,12 @@ class TeamsProjectsController extends KleinController
 
         foreach ($acceptedFields as $field) {
             if (array_key_exists($field, $this->params)) {
-                $projectModel->prepareUpdate($field, $this->params[ $field ]);
+                $projectModel->prepareUpdate($field, $this->params[$field]);
             }
         }
 
         $updatedStruct = $projectModel->update();
-        $formatted     = new Project();
+        $formatted = new Project();
         $formatted->setUser($this->user);
 
         $this->refreshClientSessionIfNotApi();
@@ -105,30 +105,30 @@ class TeamsProjectsController extends KleinController
      */
     public function getByName(): void
     {
-        $start                 = 0;
-        $step                  = 25;
-        $search_in_pname       = $this->request->param('project_name');
-        $search_source         = null;
-        $search_target         = null;
-        $search_status         = "active";
+        $start = 0;
+        $step = 25;
+        $search_in_pname = $this->request->param('project_name');
+        $search_source = null;
+        $search_target = null;
+        $search_status = "active";
         $search_only_completed = null;
-        $project_id            = null;
-        $assignee              = null;
-        $no_assignee           = null;
+        $project_id = null;
+        $assignee = null;
+        $no_assignee = null;
 
         $projects = ManageModel::getProjects(
-                $this->user,
-                $start,
-                $step,
-                $search_in_pname,
-                $search_source,
-                $search_target,
-                $search_status,
-                $search_only_completed,
-                $project_id,
-                $this->team,
-                $assignee,
-                $no_assignee
+            $this->user,
+            $start,
+            $step,
+            $search_in_pname,
+            $search_source,
+            $search_target,
+            $search_status,
+            $search_only_completed,
+            $project_id,
+            $this->team,
+            $assignee,
+            $no_assignee
         );
 
         if (empty($projects)) {

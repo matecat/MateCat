@@ -30,7 +30,7 @@ class GoogleClientLogsFormatter implements FormatterInterface
     public function formatBatch(array $records): array
     {
         foreach ($records as $key => $record) {
-            $records[ $key ] = $this->format($record);
+            $records[$key] = $this->format($record);
         }
 
         return $records;

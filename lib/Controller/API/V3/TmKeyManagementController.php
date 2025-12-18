@@ -24,12 +24,12 @@ class TmKeyManagementController extends KleinController
     {
         try {
             $_keyDao = new MemoryKeyDao(Database::obtain());
-            $dh      = new MemoryKeyStruct(['uid' => $this->user->uid]);
+            $dh = new MemoryKeyStruct(['uid' => $this->user->uid]);
             $keyList = $_keyDao->read($dh);
 
             $list = ['tm_keys' => []];
             foreach ($keyList as $key) {
-                $list[ 'tm_keys' ][] = $key->tm_key;
+                $list['tm_keys'][] = $key->tm_key;
             }
 
             $this->response->json($list);
@@ -37,9 +37,9 @@ class TmKeyManagementController extends KleinController
         } catch (Exception $exception) {
             $this->response->status()->setCode(500);
             $this->response->json([
-                    'errors' => [
-                            $exception->getMessage()
-                    ]
+                'errors' => [
+                    $exception->getMessage()
+                ]
             ]);
             exit();
         }

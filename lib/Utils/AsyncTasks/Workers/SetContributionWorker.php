@@ -28,9 +28,9 @@ use Utils\TmKeyManagement\TmKeyManager;
 class SetContributionWorker extends AbstractWorker
 {
 
-    const int ERR_SET_FAILED    = 4;
+    const int ERR_SET_FAILED = 4;
     const int ERR_UPDATE_FAILED = 6;
-    const int ERR_NO_TM_ENGINE  = 5;
+    const int ERR_NO_TM_ENGINE = 5;
 
     /**
      * @var ?EngineInterface
@@ -72,7 +72,7 @@ class SetContributionWorker extends AbstractWorker
         $this->_checkDatabaseConnection();
 
         $this->_execContribution(
-                $this->toSetContributionRequest($queueElement)
+            $this->toSetContributionRequest($queueElement)
         );
     }
 
@@ -96,10 +96,10 @@ class SetContributionWorker extends AbstractWorker
             return;
         }
 
-        $config             = $this->_engine->getConfigStruct();
-        $config[ 'source' ] = $jobStruct->source;
-        $config[ 'target' ] = $jobStruct->target;
-        $config[ 'email' ]  = $contributionStruct->api_key;
+        $config = $this->_engine->getConfigStruct();
+        $config['source'] = $jobStruct->source;
+        $config['target'] = $jobStruct->target;
+        $config['email'] = $contributionStruct->api_key;
 
         $config = array_merge($config, $this->_extractAvailableKeysForUser($contributionStruct, $jobStruct));
 
@@ -139,15 +139,15 @@ class SetContributionWorker extends AbstractWorker
     {
         $jobStruct = $contributionStruct->getJobStruct();
 
-        $config[ 'uid' ]            = $contributionStruct->uid;
-        $config[ 'segment' ]        = $contributionStruct->segment;
-        $config[ 'translation' ]    = $contributionStruct->translation;
-        $config[ 'context_after' ]  = $contributionStruct->context_after;
-        $config[ 'context_before' ] = $contributionStruct->context_before;
-        $config[ 'set_mt' ]         = !(($jobStruct->id_mt_engine != 1));
+        $config['uid'] = $contributionStruct->uid;
+        $config['segment'] = $contributionStruct->segment;
+        $config['translation'] = $contributionStruct->translation;
+        $config['context_after'] = $contributionStruct->context_after;
+        $config['context_before'] = $contributionStruct->context_before;
+        $config['set_mt'] = !(($jobStruct->id_mt_engine != 1));
 
         //get the Props
-        $config[ 'prop' ] = json_encode($contributionStruct->getProp());
+        $config['prop'] = json_encode($contributionStruct->getProp());
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set($config);
@@ -171,25 +171,25 @@ class SetContributionWorker extends AbstractWorker
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 1): void
     {
         // update the contribution for every key in the job belonging to the user
-        $config[ 'uid' ]            = $contributionStruct->uid;
-        $config[ 'segment' ]        = $contributionStruct->oldSegment;
-        $config[ 'translation' ]    = $contributionStruct->oldTranslation;
-        $config[ 'context_after' ]  = $contributionStruct->context_after;
-        $config[ 'context_before' ] = $contributionStruct->context_before;
-        $config[ 'prop' ]           = json_encode(
-                array_merge(
-                        $contributionStruct->getProp(),
-                        (new Headers($contributionStruct->id_job . ":" . $contributionStruct->id_segment, $contributionStruct->translation_origin))->getArrayCopy()
-                )
+        $config['uid'] = $contributionStruct->uid;
+        $config['segment'] = $contributionStruct->oldSegment;
+        $config['translation'] = $contributionStruct->oldTranslation;
+        $config['context_after'] = $contributionStruct->context_after;
+        $config['context_before'] = $contributionStruct->context_before;
+        $config['prop'] = json_encode(
+            array_merge(
+                $contributionStruct->getProp(),
+                (new Headers($contributionStruct->id_job . ":" . $contributionStruct->id_segment, $contributionStruct->translation_origin))->getArrayCopy()
+            )
         );
-        $config[ 'set_mt' ]         = !(($id_mt_engine != 1));
+        $config['set_mt'] = !(($id_mt_engine != 1));
 
-        $config[ 'newsegment' ]     = $contributionStruct->segment;
-        $config[ 'newtranslation' ] = $contributionStruct->translation;
-        $config[ 'spiceMatch' ]     = $contributionStruct->contextIsSpice;
+        $config['newsegment'] = $contributionStruct->segment;
+        $config['newtranslation'] = $contributionStruct->translation;
+        $config['spiceMatch'] = $contributionStruct->contextIsSpice;
 
         $this->_doLog("Executing Update on " . get_class($this->_engine));
-        
+
         $res = $this->_engine->update($config);
         if ($res?->responseStatus >= 200 && $res?->responseStatus < 300) {
             $this->_doLog("Update complete");
@@ -202,7 +202,7 @@ class SetContributionWorker extends AbstractWorker
 
     /**
      * @param SetContributionRequest $contributionStruct
-     * @param JobStruct              $jobStruct
+     * @param JobStruct $jobStruct
      *
      * @return array
      * @throws Exception
@@ -220,9 +220,9 @@ class SetContributionWorker extends AbstractWorker
 
         $config = [];
         if (!empty($tm_keys)) {
-            $config[ 'keys' ] = [];
+            $config['keys'] = [];
             foreach ($tm_keys as $tm_info) {
-                $config[ 'id_user' ][] = $tm_info->key;
+                $config['id_user'][] = $tm_info->key;
             }
         }
 
@@ -238,7 +238,7 @@ class SetContributionWorker extends AbstractWorker
     protected function _raiseReQueueException($type, array $config)
     {
         //reset the engine
-        $engineName    = get_class($this->_engine);
+        $engineName = get_class($this->_engine);
         $this->_engine = null;
 
         switch (strtolower($type)) {
@@ -256,14 +256,14 @@ class SetContributionWorker extends AbstractWorker
 
     /**
      * @param string $type
-     * @param array  $config
+     * @param array $config
      *
      * @throws EndQueueException
      */
     protected function _raiseEndQueueException(string $type, array $config)
     {
         //reset the engine
-        $engineName    = get_class($this->_engine);
+        $engineName = get_class($this->_engine);
         $this->_engine = null;
 
         switch (strtolower($type)) {

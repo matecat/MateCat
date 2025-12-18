@@ -172,7 +172,7 @@ class GetContributionWorker extends AbstractWorker
         ];
 
         $this->publishToNodeJsClients($_object);
-        $this->_doLog(json_encode($_object));
+        $this->_doLog($_object);
     }
 
 
@@ -482,6 +482,7 @@ class GetContributionWorker extends AbstractWorker
                 $config['context_list_after'] = $contributionStruct->context_list_after;
                 $config['user_id'] = $contributionStruct->getUser()->uid;
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
+                $config['translation'] = $contributionStruct->translation;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
                 $config['keys'] = array_map(function ($tm_key) {

@@ -42,9 +42,9 @@ class AMQHandler
      * @var Connection
      */
     protected static Connection $staticStompConnection;
-    protected ?string           $clientType = null;
+    protected ?string $clientType = null;
 
-    const string CLIENT_TYPE_PUBLISHER  = 'Publisher';
+    const string CLIENT_TYPE_PUBLISHER = 'Publisher';
     const string CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
 
     public string $persistent = 'true';
@@ -134,23 +134,23 @@ class AMQHandler
 
     /**
      *
-     * @param string  $destination
+     * @param string $destination
      * @param ?string $selector
-     * @param string  $ack
-     * @param array   $header
+     * @param string $ack
+     * @param array $header
      *
      * @return int
      */
     public function subscribe(string $destination, ?string $selector = null, string $ack = 'client-individual', array $header = []): int
     {
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
-        $this->queueName  = $destination;
+        $this->queueName = $destination;
 
         return $this->statefulStomp->subscribe('/queue/' . AppConfig::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header);
     }
 
     /**
-     * @param string  $destination
+     * @param string $destination
      * @param Message $message
      *
      * @return bool
@@ -179,7 +179,7 @@ class AMQHandler
     }
 
     /**
-     * @param string  $destination
+     * @param string $destination
      * @param Message $message
      *
      * @return bool
@@ -274,13 +274,13 @@ class AMQHandler
         $mHandler = new MultiCurlHandler();
 
         $options = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER     => ['Authorization: Basic ' . base64_encode(AppConfig::$QUEUE_CREDENTIALS)]
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER => ['Authorization: Basic ' . base64_encode(AppConfig::$QUEUE_CREDENTIALS)]
         ];
 
         $resource = $mHandler->createResource($queue_interface_url, $options);
@@ -289,7 +289,7 @@ class AMQHandler
         $mHandler->multiCurlCloseAll();
         $result = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
 
-        return $result[ 'value' ];
+        return $result['value'];
     }
 
 }

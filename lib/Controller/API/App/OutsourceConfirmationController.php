@@ -32,9 +32,9 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
     public function confirm(): void
     {
         $params = filter_var_array($this->request->params(), [
-                'id_job'   => FILTER_SANITIZE_SPECIAL_CHARS,
-                'password' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'payload'  => FILTER_SANITIZE_SPECIAL_CHARS,
+            'id_job' => FILTER_SANITIZE_SPECIAL_CHARS,
+            'password' => FILTER_SANITIZE_SPECIAL_CHARS,
+            'payload' => FILTER_SANITIZE_SPECIAL_CHARS,
         ]);
 
         $payload = SimpleJWT::getValidatedInstanceFromString(
@@ -42,12 +42,12 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
             AppConfig::$AUTHSECRET
         )->getPayload();
 
-        if ($params[ 'id_job' ] != $payload[ 'id_job' ] || $params[ 'password' ] != $payload[ 'password' ]) {
+        if ($params['id_job'] != $payload['id_job'] || $params['password'] != $payload['password']) {
             throw new AuthorizationError("Invalid Job");
         }
 
-        $jStruct           = (JobDao::getByIdAndPassword($params[ 'id_job' ], $params[ 'password' ]));
-        $translatorModel   = new TranslatorsModel($jStruct, 0);
+        $jStruct = (JobDao::getByIdAndPassword($params['id_job'], $params['password']));
+        $translatorModel = new TranslatorsModel($jStruct, 0);
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $confirmationStruct = new TranslatedConfirmationStruct($payload);
@@ -58,16 +58,16 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         }
 
         $confirmationStruct->create_date = date(DATE_ATOM, time());
-        $cDao                            = new ConfirmationDao();
+        $cDao = new ConfirmationDao();
         $cDao->insertStruct($confirmationStruct, ['ignore' => true, 'no_nulls' => true]);
         $cDao->destroyConfirmationCache($jStruct);
 
         $confirmationArray = $confirmationStruct->toArray();
-        unset($confirmationArray[ 'id' ]);
+        unset($confirmationArray['id']);
 
         $this->response->json([
-                'errors'  => [],
-                'confirm' => $confirmationArray
+            'errors' => [],
+            'confirm' => $confirmationArray
         ]);
     }
 

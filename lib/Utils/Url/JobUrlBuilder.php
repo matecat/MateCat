@@ -21,46 +21,46 @@ class JobUrlBuilder
      * Returns null in case of wrong parameters
      *
      * @param JobStruct $job
-     * @param string    $projectName
-     * @param array     $options
+     * @param string $projectName
+     * @param array $options
      *
      * @return JobUrls
      */
     public static function createFromJobStructAndProjectName(JobStruct $job, string $projectName, array $options = []): JobUrls
     {
         // 3. get passwords array
-        $passwords   = [];
+        $passwords = [];
         $sourcePages = [
-                JobUrls::LABEL_T  => 1,
-                JobUrls::LABEL_R1 => 2,
-                JobUrls::LABEL_R2 => 3
+            JobUrls::LABEL_T => 1,
+            JobUrls::LABEL_R1 => 2,
+            JobUrls::LABEL_R2 => 3
         ];
 
         foreach ($sourcePages as $label => $sourcePage) {
-            $passwords[ $label ] = CatUtils::getJobPassword($job, $sourcePage);
+            $passwords[$label] = CatUtils::getJobPassword($job, $sourcePage);
         }
 
         // 4. httpHost
-        $httpHost = (isset($options[ 'http_host' ])) ? $options[ 'http_host' ] : null;
+        $httpHost = (isset($options['http_host'])) ? $options['http_host'] : null;
 
         // 5. add segment id only if belongs to the job
         $segmentId = null;
-        if (isset($options[ 'id_segment' ])) {
-            if (!empty($options[ 'skip_check_segment' ])) {
-                $segmentId = $options[ 'id_segment' ];
-            } elseif (($job->job_first_segment <= $options[ 'id_segment' ]) and ($options[ 'id_segment' ] <= $job->job_last_segment)) {
-                $segmentId = $options[ 'id_segment' ];
+        if (isset($options['id_segment'])) {
+            if (!empty($options['skip_check_segment'])) {
+                $segmentId = $options['id_segment'];
+            } elseif (($job->job_first_segment <= $options['id_segment']) and ($options['id_segment'] <= $job->job_last_segment)) {
+                $segmentId = $options['id_segment'];
             }
         }
 
         return new JobUrls(
-                $job->id,
-                $projectName,
-                $job->source,
-                $job->target,
-                $passwords,
-                $httpHost,
-                $segmentId
+            $job->id,
+            $projectName,
+            $job->source,
+            $job->target,
+            $passwords,
+            $httpHost,
+            $segmentId
         );
     }
 
@@ -73,8 +73,8 @@ class JobUrlBuilder
      *
      * Returns null in case of wrong parameters
      *
-     * @param JobStruct          $job
-     * @param array              $options
+     * @param JobStruct $job
+     * @param array $options
      * @param ProjectStruct|null $project
      *
      * @return JobUrls|null

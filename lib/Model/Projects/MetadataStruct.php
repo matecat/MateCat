@@ -9,8 +9,8 @@ class MetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
     public ?string $id = null;
-    public int     $id_project;
-    public string  $key;
-    public string  $value;
+    public int $id_project;
+    public string $key;
+    public string $value;
 
 }

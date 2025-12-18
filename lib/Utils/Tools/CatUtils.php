@@ -714,7 +714,6 @@ class CatUtils
         } catch (Exception) {
             return false;
         }
-
     }
 
     /**

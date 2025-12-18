@@ -12,7 +12,8 @@ namespace Controller\Abstracts;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 
-interface IController {
+interface IController
+{
 
     /**
      * @return null|\Model\Users\UserStruct
@@ -28,7 +29,7 @@ interface IController {
      *
      * @return mixed
      */
-    public function setFeatureSet( FeatureSet $featureSet );
+    public function setFeatureSet(FeatureSet $featureSet);
 
     public function isView(): bool;
 

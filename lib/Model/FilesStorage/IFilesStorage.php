@@ -39,10 +39,10 @@ interface IFilesStorage
      *          |_work
      *          |_xliff file
      *
-     * @param string  $hash
-     * @param string  $lang
+     * @param string $hash
+     * @param string $lang
      * @param ?string $originalPath
-     * @param string  $xliffPath
+     * @param string $xliffPath
      *
      * @return mixed
      * @throws FileSystemException
@@ -91,9 +91,9 @@ interface IFilesStorage
      *          |_package
      *          |_work
      *
-     * @param string      $dateHashPath
-     * @param string      $lang
-     * @param string      $idFile
+     * @param string $dateHashPath
+     * @param string $lang
+     * @param string $idFile
      * @param string|null $newFileName
      *
      * @return mixed
@@ -143,7 +143,7 @@ interface IFilesStorage
      * Stores a serialized file to fast analysis storage
      *
      * @param string $id_project
-     * @param array  $segments_metadata
+     * @param array $segments_metadata
      *
      * @return void
      */

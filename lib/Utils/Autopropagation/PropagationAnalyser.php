@@ -62,7 +62,7 @@ class PropagationAnalyser
     }
 
     /**
-     * @param SegmentTranslationStruct   $parentSegmentTranslation
+     * @param SegmentTranslationStruct $parentSegmentTranslation
      * @param SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
      * @return PropagationTotalStruct
@@ -81,9 +81,9 @@ class PropagationAnalyser
                     $propagation->addPropagatedId($segmentTranslation->id_segment);
 
                     if (false === Utils::stringsAreEqual(
-                                    $parentSegmentTranslation->translation,
-                                    $segmentTranslation->translation ?? ''
-                            )) {
+                            $parentSegmentTranslation->translation,
+                            $segmentTranslation->translation ?? ''
+                        )) {
                         $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
                     }
 
@@ -98,9 +98,9 @@ class PropagationAnalyser
                     $propagation->addPropagatedId($segmentTranslation->id_segment);
 
                     if (false === Utils::stringsAreEqual(
-                                    $parentSegmentTranslation->translation,
-                                    $segmentTranslation->translation ?? ''
-                            )) {
+                            $parentSegmentTranslation->translation,
+                            $segmentTranslation->translation ?? ''
+                        )) {
                         $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
                     }
 

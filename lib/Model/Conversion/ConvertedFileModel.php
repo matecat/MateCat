@@ -120,7 +120,7 @@ class ConvertedFileModel
 
     /**
      * @param string $name
-     * @param bool   $isZipContent
+     * @param bool $isZipContent
      */
     public function setFileName(string $name, bool $isZipContent = false): void
     {
@@ -198,18 +198,18 @@ class ConvertedFileModel
     public function asError(): array
     {
         return [
-                'code'    => $this->getCode(),
-                'message' => $this->getMessage(),
-                'name'    => $this->getName(),
+            'code' => $this->getCode(),
+            'message' => $this->getMessage(),
+            'name' => $this->getName(),
         ];
     }
 
     public function getResult(): array
     {
         return [
-                'name'        => $this->getName(),
-                'size'        => $this->getSize(),
-                'pdfAnalysis' => $this->getPdfAnalysis(),
+            'name' => $this->getName(),
+            'size' => $this->getSize(),
+            'pdfAnalysis' => $this->getPdfAnalysis(),
         ];
     }
 

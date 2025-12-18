@@ -31,12 +31,12 @@ class SetCurrentSegmentController extends KleinController
      */
     public function set(): void
     {
-        $request         = $this->validateTheRequest();
-        $revision_number = $request[ 'revision_number' ];
-        $id_segment      = $request[ 'id_segment' ];
-        $id_job          = $request[ 'id_job' ];
-        $password        = $request[ 'password' ];
-        $split_num       = $request[ 'split_num' ];
+        $request = $this->validateTheRequest();
+        $revision_number = $request['revision_number'];
+        $id_segment = $request['id_segment'];
+        $id_job = $request['id_job'];
+        $password = $request['password'];
+        $split_num = $request['split_num'];
 
         //get Job Info, we need only a row of jobs (split)
         ChunkDao::getByIdAndPassword($id_job, $password);
@@ -45,11 +45,11 @@ class SetCurrentSegmentController extends KleinController
             throw new InvalidArgumentException("missing segment id", -1);
         }
 
-        $segmentStruct             = new SegmentSplitStruct();
+        $segmentStruct = new SegmentSplitStruct();
         $segmentStruct->id_segment = (int)$id_segment;
-        $segmentStruct->id_job     = $id_job;
+        $segmentStruct->id_job = $id_job;
 
-        $translationDao  = new SplitDAO(Database::obtain());
+        $translationDao = new SplitDAO(Database::obtain());
         $currSegmentInfo = $translationDao->read($segmentStruct);
 
         /**
@@ -60,7 +60,7 @@ class SetCurrentSegmentController extends KleinController
 
         if (count($currSegmentInfo) > 0) {
             $isASplittedSegment = true;
-            $currSegmentInfo    = array_shift($currSegmentInfo);
+            $currSegmentInfo = array_shift($currSegmentInfo);
 
             //get the chunk number and check whether it is the last one or not
             $isLastSegmentChunk = ($split_num == count($currSegmentInfo->source_chunk_lengths) - 1);
@@ -87,10 +87,10 @@ class SetCurrentSegmentController extends KleinController
         }
 
         $this->response->json([
-                'code'          => 1,
-                'errors'        => [],
-                'data'          => [],
-                'nextSegmentId' => $nextSegmentId ?? null,
+            'code' => 1,
+            'errors' => [],
+            'data' => [],
+            'nextSegmentId' => $nextSegmentId ?? null,
         ]);
     }
 
@@ -100,9 +100,9 @@ class SetCurrentSegmentController extends KleinController
     private function validateTheRequest(): array
     {
         $revision_number = filter_var($this->request->param('revision_number'), FILTER_SANITIZE_NUMBER_INT);
-        $id_segment      = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
-        $id_job          = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
-        $password        = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $id_segment = filter_var($this->request->param('id_segment'), FILTER_SANITIZE_NUMBER_INT);
+        $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
         if (empty($id_job)) {
             throw new InvalidArgumentException("No id job provided", -1);
@@ -116,16 +116,16 @@ class SetCurrentSegmentController extends KleinController
             throw new InvalidArgumentException("No id segment provided", -3);
         }
 
-        $segment    = explode("-", $id_segment);
-        $id_segment = $segment[ 0 ];
-        $split_num  = $segment[ 1 ] ?? null;
+        $segment = explode("-", $id_segment);
+        $id_segment = $segment[0];
+        $split_num = $segment[1] ?? null;
 
         return [
-                'revision_number' => $revision_number,
-                'id_segment'      => $id_segment,
-                'id_job'          => $id_job,
-                'password'        => $password,
-                'split_num'       => $split_num,
+            'revision_number' => $revision_number,
+            'id_segment' => $id_segment,
+            'id_job' => $id_job,
+            'password' => $password,
+            'split_num' => $split_num,
         ];
     }
 }

@@ -60,8 +60,8 @@ interface IDatabase
      * Execute a update query with an array as argument
      *
      * @param string $table Table to update
-     * @param array  $data  Data to update, with the form (keyToUpdate => newValue)
-     * @param array  $where Condition
+     * @param array $data Data to update, with the form (keyToUpdate => newValue)
+     * @param array $where Condition
      *
      * @return integer Number of affected rows
      */
@@ -72,7 +72,7 @@ interface IDatabase
      * Run an insert query with an array as argument
      *
      * @param string $table Table to insert data in
-     * @param array  $data  Data to insert, with the form (keyToUpdate => newValue)
+     * @param array $data Data to insert, with the form (keyToUpdate => newValue)
      *
      * @return string
      */

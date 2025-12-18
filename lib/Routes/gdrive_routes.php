@@ -7,23 +7,29 @@
  */
 
 route(
-        '/webhooks/gdrive/open', 'POST',
-        [ 'Controller\API\GDrive\GDriveController', 'open' ]
-);
-
-route( '/gdrive/oauth/response', 'GET',
-        [ 'Controller\API\GDrive\OAuthController', 'response' ]
+    '/webhooks/gdrive/open',
+    'POST',
+    ['Controller\API\GDrive\GDriveController', 'open']
 );
 
 route(
-        '/gdrive/list', 'GET',
-        [ 'Controller\API\GDrive\GDriveController', 'listImportedFiles' ]
+    '/gdrive/oauth/response',
+    'GET',
+    ['Controller\API\GDrive\OAuthController', 'response']
+);
+
+route(
+    '/gdrive/list',
+    'GET',
+    ['Controller\API\GDrive\GDriveController', 'listImportedFiles']
 );
 route(
-        '/gdrive/change', 'GET',
-        [ 'Controller\API\GDrive\GDriveController', 'changeConversionParameters' ]
+    '/gdrive/change',
+    'GET',
+    ['Controller\API\GDrive\GDriveController', 'changeConversionParameters']
 );
 route(
-        '/gdrive/delete/[:fileId]', 'GET',
-        [ 'Controller\API\GDrive\GDriveController', 'deleteImportedFile' ]
+    '/gdrive/delete/[:fileId]',
+    'GET',
+    ['Controller\API\GDrive\GDriveController', 'deleteImportedFile']
 );
