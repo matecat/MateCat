@@ -88,7 +88,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'user_plugins'} = new PHPTalMap($this->featureSet->getCodes());
         $this->view->{'isLoggedIn'} = new PHPTalBoolean($this->isLoggedIn());
         $this->view->{'userMail'} = $this->getUser()->email;
-        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->filter("isAnInternalUser", $this->getUser()->email));
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean($this->featureSet->filter("isAnInternalUser", $this->getUser()->email ?? ''));
 
         $this->view->{'footer_js'} = [];
         $this->view->{'config_js'} = [];
