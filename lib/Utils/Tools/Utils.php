@@ -1326,6 +1326,8 @@ class Utils
      */
     public static function formatStringValue(string $value = ""): mixed
     {
+        $value = html_entity_decode($value);
+
         if (is_numeric($value)) {
             return (int)$value;
         }
@@ -1334,6 +1336,6 @@ class Utils
             return json_decode($value);
         }
 
-        return html_entity_decode($value);
+        return $value;
     }
 }

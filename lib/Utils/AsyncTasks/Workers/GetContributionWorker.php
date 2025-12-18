@@ -172,7 +172,7 @@ class GetContributionWorker extends AbstractWorker
         ];
 
         $this->publishToNodeJsClients($_object);
-        $this->_doLog(json_encode($_object));
+        $this->_doLog($_object);
     }
 
 
