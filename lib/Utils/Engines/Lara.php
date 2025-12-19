@@ -214,13 +214,11 @@ class Lara extends AbstractEngine
      */
     public function get(array $_config): array
     {
-        // This is needed because Lara uses an SDK for the API, and the SDK does not support the 'skipAnalysis' parameter
         if ($this->_isAnalysis && $this->_skipAnalysis) {
             return [];
         }
 
         if (empty($_config['translation'])) {
-
             // This is a normal request, not Lara Think
             $reasoning = false;
 
