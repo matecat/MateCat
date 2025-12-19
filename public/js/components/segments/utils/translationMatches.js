@@ -111,6 +111,13 @@ let TranslationMatches = {
       }
     }
   },
+  /**
+   * Get contributions for the current segment and prefetch for the next ones
+   * @param sid Segment ID
+   * @param crossLanguageSettings Cross language settings
+   * @param force Force to fetch new contributions
+   * @param prefetch Number of segments to prefetch contributions for
+   */
   getContributionsWithPrefetch: function ({
     sid,
     crossLanguageSettings,
@@ -167,6 +174,14 @@ let TranslationMatches = {
       })
     })
   },
+  /**
+   * Get contribution for a segment
+   * @param sid Segment ID
+   * @param crossLanguageSettings Cross language settings
+   * @param force Force to fetch new contributions
+   * @param fastFetch If true, skip advanced MT engines like Lara
+   * @returns {Promise<Object | void>|Promise<void>}
+   */
   getContribution: function ({
     sid,
     crossLanguageSettings,
