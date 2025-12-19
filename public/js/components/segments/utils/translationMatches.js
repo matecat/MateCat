@@ -111,6 +111,7 @@ let TranslationMatches = {
       }
     }
   },
+  segmentsWaitingForContributions: [],
   /**
    * Get contributions for the current segment and prefetch for the next ones
    * @param sid Segment ID
@@ -164,7 +165,11 @@ let TranslationMatches = {
         }
       }
     }
-    console.log('Segments to fetch contributions for:', segmentsToFetch)
+    console.log(
+      'Segments to fetch contributions for:',
+      segmentsToFetch,
+      this.segmentsWaitingForContributions,
+    )
     segmentsToFetch.forEach((segmentSid, index) => {
       this.getContribution({
         sid: segmentSid,
@@ -251,7 +256,11 @@ let TranslationMatches = {
       SegmentUtils.getSegmentContext(id_segment_original)
     const getContributionRequest = (translation = null) => {
       if (!translation) {
-        console.log('Call classic matches for segment:', id_segment_original)
+        console.log(
+          'Call classic matches for segment:',
+          id_segment_original,
+          this.segmentsWaitingForContributions,
+        )
       }
       return getContributions({
         idSegment: id_segment_original,
@@ -262,10 +271,26 @@ let TranslationMatches = {
           : [],
         contextListBefore,
         contextListAfter,
-      }).catch((errors) => {
-        CatToolActions.processErrors(errors, 'getContribution')
-        TranslationMatches.renderContributionErrors(errors, id_segment_original)
       })
+        .then(() => {
+          // Remove from waiting list
+          if (
+            this.segmentsWaitingForContributions.indexOf(id_segment_original) >
+            -1
+          ) {
+            this.segmentsWaitingForContributions.splice(
+              this.segmentsWaitingForContributions.indexOf(id_segment_original),
+              1,
+            )
+          }
+        })
+        .catch((errors) => {
+          CatToolActions.processErrors(errors, 'getContribution')
+          TranslationMatches.renderContributionErrors(
+            errors,
+            id_segment_original,
+          )
+        })
     }
 
     const jobLanguages = [config.source_code, config.target_code]
@@ -274,12 +299,22 @@ let TranslationMatches = {
         .length === 2
 
     if (
+      this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
+    ) {
+      return Promise.resolve()
+    }
+    if (
       config.active_engine?.name === 'Lara' &&
       allowed &&
       !fastFetch &&
       !callNewContributions
     ) {
-      console.log('Call Lara for segment:', id_segment_original)
+      this.segmentsWaitingForContributions.push(id_segment_original)
+      console.log(
+        'Call Lara for segment:',
+        id_segment_original,
+        this.segmentsWaitingForContributions,
+      )
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
           // console.log('Text to translate via Lara:', currentSegment.segment)
@@ -320,6 +355,7 @@ let TranslationMatches = {
           return getContributionRequest()
         })
     } else {
+      this.segmentsWaitingForContributions.push(id_segment_original)
       return getContributionRequest()
     }
   },
