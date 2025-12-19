@@ -219,7 +219,10 @@ class Lara extends AbstractEngine
             return [];
         }
 
-        if (empty($_config['translation'])) { // This is a normal request, not Lara Think
+        if (empty($_config['translation'])) {
+
+            // This is a normal request, not Lara Think
+            $reasoning = false;
 
             // init lara client and mmt fallback
             $client = $this->_getClient();
@@ -344,7 +347,7 @@ class Lara extends AbstractEngine
                 return $this->mmt_GET_Fallback->get($_config);
             }
         } else {
-            $think = 'Think';
+            $reasoning = true;
             $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
             if (isset($_config['include_score']) && $_config['include_score']) {
@@ -374,7 +377,7 @@ class Lara extends AbstractEngine
             'raw_segment' => $_config['segment'],
             'raw_translation' => $translation,
             'match' => $this->getStandardMtPenaltyString(),
-            'created-by' => $this->getMTName($think ?? ''),
+            'created-by' => $this->getMTName($this->engineRecord->name . ($reasoning ? ' Think' : '')),
             'create-date' => date("Y-m-d"),
             'score' => $score ?? null
         ]))->getMatches(

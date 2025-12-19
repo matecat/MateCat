@@ -355,9 +355,12 @@ abstract class AbstractEngine implements EngineInterface
         return $this->engineRecord->name;
     }
 
-    public function getMTName(string $postFix = ''): string
+    public function getMTName(string $forceName = ''): string
     {
-        return "MT-" . $this->getName() . ($postFix ? "-$postFix" : '');
+        if (!empty($forceName)) {
+            return "MT-" . $forceName;
+        }
+        return "MT-" . $this->getName();
     }
 
     public function isTMS(): bool
