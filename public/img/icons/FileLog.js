@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const File02 = ({size = 24}) => {
+const FileLog = ({size = 24}) => {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24">
       <path
@@ -14,8 +14,8 @@ const File02 = ({size = 24}) => {
   )
 }
 
-File02.propTypes = {
+FileLog.propTypes = {
   size: PropTypes.number,
 }
 
-export default File02
+export default FileLog

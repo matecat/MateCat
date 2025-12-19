@@ -19,7 +19,6 @@ div#manage-container {
   overflow: auto;
   height: calc(100% - 60px);
   position: relative;
-  padding-top: 40px;
   scroll-behavior: smooth;
 }
 
@@ -53,9 +52,6 @@ div#manage-container {
   .menu {
     .item.submenu {
       width: 180px;
-      i.icon-refresh.icon {
-        margin-right: 9px !important;
-      }
     }
     .item.submenu a {
       color: colors.$black;
@@ -425,6 +421,7 @@ div#manage-container {
             .chunk {
               display: grid;
               grid-template-columns:
+                auto
                 70px
                 150px 120px 106px auto auto 1fr auto auto auto;
               align-items: center;

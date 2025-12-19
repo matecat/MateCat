@@ -541,7 +541,7 @@ function SegmentFooter() {
 
           {tab.isEnableCloseButton && (
             <span className="icon-close" onClick={onClickRemoveTab}>
-              <IconCloseCircle />
+              <IconCloseCircle size={16} />
             </span>
           )}
         </a>

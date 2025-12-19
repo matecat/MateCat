@@ -17,6 +17,7 @@ import {Popup} from 'semantic-ui-react'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_SIZE} from '../common/Button/Button'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import Download from '../../../img/icons/Download'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -340,7 +341,7 @@ class JobContainer extends React.Component {
     let remoteService = this.props.project.get('remote_file_service')
     let label = (
       <>
-        <i className="icon-eye icon" /> Draft
+        <Download size={18} /> Draft
       </>
     )
     let action = () => {
@@ -353,21 +354,21 @@ class JobContainer extends React.Component {
     if (jobTranslated && !remoteService) {
       label = (
         <>
-          <i className="icon-download icon" /> Download Translation
+          <Download size={18} /> Download Translation
         </>
       )
       action = this.downloadTranslation
     } else if (jobTranslated && remoteService === 'gdrive') {
       label = (
         <>
-          <i className="icon-download icon" /> Open in Google Drive
+          <Download size={18} /> Open in Google Drive
         </>
       )
       action = this.downloadTranslation
     } else if (remoteService && remoteService === 'gdrive') {
       label = (
         <>
-          <i className="icon-eye icon" /> Preview in Google Drive
+          <Download size={18} /> Preview in Google Drive
         </>
       )
       action = this.downloadTranslation

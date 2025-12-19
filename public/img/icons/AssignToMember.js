@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 const AssignToMember = ({size = 24}) => {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24">
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
       <path
         stroke="currentColor"
         strokeLinecap="round"

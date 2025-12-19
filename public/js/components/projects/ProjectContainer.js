@@ -37,6 +37,10 @@ import Checkmark from '../../../img/icons/Checkmark'
 import IconClose from '../icons/IconClose'
 import {ProjectsBulkActionsContext} from './ProjectsBulkActions/ProjectsBulkActionsContext'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import FileLog from '../../../img/icons/FileLog'
+import Archive from '../../../img/icons/Archive'
+import Refresh from '../../../img/icons/Refresh'
+import Trash from '../../../img/icons/Trash'
 
 const ProjectContainer = ({
   project,
@@ -171,7 +175,7 @@ const ProjectContainer = ({
       {
         label: (
           <>
-            <i className="icon-download-logs icon" />
+            <FileLog size={18} />
             Activity Log
           </>
         ),
@@ -182,7 +186,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer icon" />
+                  <Archive size={18} />
                   Archive project
                 </>
               ),
@@ -191,7 +195,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel project
                 </>
               ),
@@ -204,7 +208,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <Refresh size={18} />
                   Unarchive project
                 </>
               ),
@@ -213,7 +217,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel project
                 </>
               ),
@@ -226,7 +230,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <Refresh size={18} />
                   Resume Project
                 </>
               ),
@@ -235,7 +239,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer icon-trash-o icon" />
+                  <Trash size={18} />
                   Delete project permanently
                 </>
               ),

@@ -23,7 +23,9 @@ import Archive from '../../../../img/icons/Archive'
 import Refresh from '../../../../img/icons/Refresh'
 import Trash from '../../../../img/icons/Trash'
 import ChangePassword from '../../../../img/icons/ChangePassword'
-import PencilLine from '../../../../img/icons/PencilLine'
+import Revise from '../../../../img/icons/Revise'
+import IconCloseCircle from '../../icons/IconCloseCircle'
+import CheckDone from '../../../../img/icons/CheckDone'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -38,7 +40,7 @@ const JOBS_ACTIONS = {
   CHANGE_PASSWORD: {id: 'change_password', label: 'Change password'},
   GENERATE_REVISE_2: {
     id: 'generate_second_pass',
-    label: 'Generate revise 2 link',
+    label: 'Generate revise 2',
   },
   ASSIGN_TO_MEMBER: {id: 'assign_to_member', label: 'Assign to member'},
   ASSIGN_TO_TEAM: {id: 'assign_to_team', label: 'Move to team'},
@@ -483,23 +485,25 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
 
         const icon =
           action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id ? (
-            <SwitchHorizontal />
+            <SwitchHorizontal size={16} />
           ) : action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id ? (
-            <AssignToMember />
+            <AssignToMember size={16} />
           ) : action.id === JOBS_ACTIONS.ARCHIVE.id ? (
-            <Archive />
+            <Archive size={16} />
           ) : action.id === JOBS_ACTIONS.UNARCHIVE.id ||
             action.id === JOBS_ACTIONS.RESUME.id ? (
-            <Refresh />
+            <Refresh size={16} />
           ) : action.id === JOBS_ACTIONS.CANCEL.id ||
             action.id === JOBS_ACTIONS.DELETE.id ||
             action.id === JOBS_ACTIONS.DELETE_PERMANENTLY.id ? (
-            <Trash />
+            <Trash size={16} />
           ) : action.id === JOBS_ACTIONS.CHANGE_PASSWORD.id ? (
-            <ChangePassword />
-          ) : action.id === JOBS_ACTIONS.GENERATE_REVISE_2.id ? (
-            <PencilLine />
-          ) : undefined
+            <ChangePassword size={16} />
+          ) : (
+            action.id === JOBS_ACTIONS.GENERATE_REVISE_2.id && (
+              <Revise size={16} />
+            )
+          )
 
         return (
           <div key={index}>
@@ -552,6 +556,7 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               onClick={selectAll}
               disabled={!projects.length}
             >
+              <CheckDone size={16} />
               Select all jobs
             </Button>
             <Button
@@ -559,6 +564,7 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               onClick={clearAll}
               disabled={!projects.length}
             >
+              <IconCloseCircle size={16} />
               Clear selection
             </Button>
           </div>
