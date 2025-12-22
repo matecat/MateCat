@@ -267,7 +267,7 @@ class Dashboard extends React.Component {
       continueDownloadFunction = function () {
         ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
-        DownloadFileUtils.downloadFile(job.id, job.password, callback)
+        DownloadFileUtils.downloadFile(job.id, job.password, false, callback)
       }
     }
     const continueDownloadFunctionWithoutErrors = () =>
