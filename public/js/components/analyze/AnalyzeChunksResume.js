@@ -16,6 +16,12 @@ import {
 } from '../../constants/Constants'
 import UserStore from '../../stores/UserStore'
 import LabelWithTooltip from '../common/LabelWithTooltip'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -152,16 +158,17 @@ class AnalyzeChunksResume extends React.Component {
   getDirectOpenButton = (chunk, index) => {
     const {status} = this.props
     return (
-      <div
-        className={`open-translate ui primary button open ${
-          status !== ANALYSIS_STATUS.DONE ? 'disabled' : ''
-        }`}
+      <Button
+        type={BUTTON_TYPE.PRIMARY}
+        size={BUTTON_SIZE.MEDIUM}
+        className={`open-translate`}
+        disabled={status !== ANALYSIS_STATUS.DONE}
         onClick={(e) => {
           this.goToTranslate(chunk, index, e)
         }}
       >
         Translate
-      </div>
+      </Button>
     )
   }
 
@@ -180,8 +187,6 @@ class AnalyzeChunksResume extends React.Component {
     const {copyJobLinkToClipboard, thereIsChunkOutsourced} = this
     const {status, jobsAnalysis} = this.props
 
-    let buttonsClass =
-      status !== 'DONE' || thereIsChunkOutsourced() ? 'disabled' : ''
     if (jobsAnalysis) {
       return jobsAnalysis.map((job, indexJob) => {
         if (job.chunks.length > 1) {
@@ -231,12 +236,12 @@ class AnalyzeChunksResume extends React.Component {
                       pinned
                       position="top center"
                       trigger={
-                        <button
+                        <Button
                           onClick={copyJobLinkToClipboard(jidChunk)}
-                          className={'ui icon button copy'}
+                          className={'copy'}
                         >
                           <i className="icon-link icon" />
-                        </button>
+                        </Button>
                       }
                     />
                   </div>
@@ -319,13 +324,15 @@ class AnalyzeChunksResume extends React.Component {
                   </div>
 
                   <div className="activity-icons splitted">
-                    <div
-                      className="merge ui blue basic button"
+                    <Button
+                      type={BUTTON_TYPE.PRIMARY}
+                      mode={BUTTON_MODE.OUTLINE}
+                      className="merge"
                       onClick={this.openMergeModal(jobsAnalysis[indexJob].id)}
                     >
                       <i className="icon-compress icon" />
                       Merge
-                    </div>
+                    </Button>
                   </div>
                 </div>
                 {chunksHtml}
@@ -393,16 +400,16 @@ class AnalyzeChunksResume extends React.Component {
                         }
                         onClick={(e) => e.stopPropagation()}
                       />
-                      <button
+                      <Button
                         onClick={copyJobLinkToClipboard(
                           jobsAnalysis[indexJob].id,
                         )}
-                        className={'ui icon button copy'}
+                        className={'copy'}
                         data-content="Copied to Clipboard!"
                         data-position="top center"
                       >
                         <i className="icon-link icon" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className="titles-compare">
@@ -435,9 +442,13 @@ class AnalyzeChunksResume extends React.Component {
                       className={`activity-button  ${config.jobAnalysis ? 'disable-outsource' : ''}`}
                     >
                       {!config.jobAnalysis && config.splitEnabled ? (
-                        <div
-                          className={
-                            'split ui blue basic button ' + buttonsClass + ' '
+                        <Button
+                          type={BUTTON_TYPE.PRIMARY}
+                          mode={BUTTON_MODE.OUTLINE}
+                          size={BUTTON_SIZE.MEDIUM}
+                          className={'split'}
+                          disabled={
+                            status !== 'DONE' || thereIsChunkOutsourced()
                           }
                           onClick={this.openSplitModal(
                             jobsAnalysis[indexJob].id,
@@ -445,7 +456,7 @@ class AnalyzeChunksResume extends React.Component {
                         >
                           <i className="icon-expand icon" />
                           Split
-                        </div>
+                        </Button>
                       ) : null}
                       {/*{this.getOpenButton(job.toJS(), jobsAnalysis[indexJob].id)}*/}
                       {this.getDirectOpenButton(chunkAnalysis)}
@@ -586,11 +597,9 @@ class AnalyzeChunksResume extends React.Component {
         <div className="compare-table jobs sixteen wide column">{html}</div>
         {this.props.jobsAnalysis ? (
           <div className="analyze-report" onClick={this.openAnalysisReport}>
-            <div>
-              <h3>{showHideText}</h3>
-              <div className="rounded">
-                <i className={'icon-sort-down icon ' + iconClass} />
-              </div>
+            <h3>{showHideText}</h3>
+            <div className="rounded">
+              <i className={'icon-sort-down icon ' + iconClass} />
             </div>
           </div>
         ) : null}

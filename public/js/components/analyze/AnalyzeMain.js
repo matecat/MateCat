@@ -4,6 +4,7 @@ import $ from 'jquery'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
+import {Button} from '../common/Button/Button'
 
 const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   const [showAnalysis, setShowAnalysis] = useState(false)
@@ -101,13 +102,13 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
             ) : null}
           </div>
           {scrollTop > 200 ? (
-            <button
+            <Button
               title="Back to top"
               className="scroll"
               onClick={() => scrollToTop()}
             >
               <i className="icon-sort-up icon"></i>
-            </button>
+            </Button>
           ) : null}
         </div>
       ) : (
