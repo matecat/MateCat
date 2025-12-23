@@ -896,9 +896,6 @@ test('Rendering elements', () => {
     screen.getByText(job.get('stats').get('raw').get('total')),
   ).toBeInTheDocument()
 
-  // TM button
-  expect(screen.getByTestId('tm-button')).toBeInTheDocument()
-
   // assign job to translator
   expect(screen.getByText('Assign job to translator')).toBeInTheDocument()
 
@@ -941,26 +938,6 @@ test('Job payable: check analisys URL', () => {
     project.get('password'),
   )
   expect(hrefAttribute).toBe(correctUrl)
-})
-
-xtest('Check TM onClick callback', async () => {
-  const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
-  act(() => {
-    render(<JobContainer {...props} />)
-  })
-  // TM function
-  const tmCallback = jest.fn()
-  act(() => {
-    ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, tmCallback)
-  })
-  await waitFor(() => {
-    expect(screen.getByTestId('tm-button')).toBeInTheDocument()
-  })
-  userEvent.click(screen.getByTestId('tm-button'))
-  expect(tmCallback).toHaveBeenCalled()
-  act(() => {
-    ProjectsStore.removeListener(ManageConstants.OPEN_JOB_TM_PANEL, tmCallback)
-  })
 })
 
 test('Assign job to translator: check onClick event', () => {
