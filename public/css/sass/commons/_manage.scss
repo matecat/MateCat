@@ -1,4 +1,5 @@
 @use 'colors';
+@use 'variables';
 
 // rewrite semantic CSS
 html,
@@ -91,7 +92,7 @@ div#manage-container {
 
   .project {
     margin-bottom: 30px !important;
-    //border: 1px solid $grey2;
+    border-radius: variables.$border-radius-default;
     .project-title {
       display: flex !important;
       gap: 10px;
@@ -109,10 +110,10 @@ div#manage-container {
       left: -33px;
       max-width: 540px;
       min-width: 0px;
-      line-height: 16px;
+      line-height: 24px;
       background-color: colors.$grey2;
       color: colors.$black;
-      height: 30px;
+      height: 38px;
       border-radius: 0 2px 2px 0;
       display: inline-block;
       margin-right: -33px;
@@ -423,15 +424,13 @@ div#manage-container {
           .chunks {
             .chunk {
               display: grid;
-              grid-template-columns:
-                70px
-                150px 120px 106px auto auto 1fr auto auto auto;
+              grid-template-columns: 70px 170px 150px 106px auto 1fr auto auto auto;
               align-items: center;
               gap: 10px;
               transition: 0.3s ease;
               background-color: #ffffff;
               padding: 8px 15px;
-
+              border-radius: variables.$border-radius-default;
               @media only screen and (max-width: 1200px) {
                 gap: 5px;
               }
@@ -444,9 +443,11 @@ div#manage-container {
               .source-target {
                 font-weight: bold;
                 position: relative;
+                display: flex;
+                gap: 2px;
                 .source-box {
                   float: left;
-                  max-width: 60px;
+                  max-width: 120px;
                   min-width: 60px;
                   white-space: nowrap;
                   overflow: hidden;
@@ -466,7 +467,7 @@ div#manage-container {
                 }
                 .target-box {
                   float: left;
-                  width: 60px;
+                  max-width: 120px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
@@ -480,7 +481,6 @@ div#manage-container {
                 margin: unset !important;
                 min-width: unset !important;
               }
-              .tm-job,
               .activity-icon-single {
                 width: 30px;
                 height: 30px;
@@ -751,8 +751,6 @@ div#manage-container {
                 }
               }
               .job-menu {
-                width: 28px !important;
-                height: 28px !important;
                 &:hover {
                   background-color: rgba(colors.$grey8, 0.5) !important;
                 }
@@ -787,11 +785,15 @@ div#manage-container {
         }
       }
     }
+    .chunk-container {
+      border-radius: variables.$border-radius-default;
+    }
 
     .project-footer {
       padding: 0 30px 5px !important;
       text-align: right;
       background-color: colors.$grey4;
+      border-radius: 0 0 8px 8px;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;
@@ -966,8 +968,9 @@ div#manage-container {
 
 .project-team-dropdown,
 .user-project-dropdown {
+  border-radius: 999px !important;
+  font-weight: 500 !important;
   line-height: 1;
-  border-radius: 15px !important;
   box-shadow:
     0 0 0 #e0e0e0,
     0 0 2px rgba(0, 0, 0, 0.12),
@@ -976,9 +979,9 @@ div#manage-container {
 
 .project-menu-dropdown {
   border-radius: 50% !important;
-  width: 28px !important;
-  height: 28px !important;
-  background-color: rgba(colors.$grey8, 0.5) !important;
+  width: 40px !important;
+  height: 40px !important;
+  //background-color: rgba(colors.$grey8, 0.5) !important;
 
   &:hover {
     background-color: rgba(colors.$grey8, 1) !important;
@@ -986,7 +989,6 @@ div#manage-container {
 }
 
 .project-activity-icon button.project-team-dropdown {
-  height: 30px;
   font-size: 14px;
   color: #000;
   padding: 5px 15px;
@@ -994,7 +996,6 @@ div#manage-container {
 }
 
 .user-project-dropdown-container button.user-project-dropdown {
-  height: 30px !important;
   color: #000 !important;
   font-size: 14px;
 }
@@ -1018,7 +1019,7 @@ div#manage-container {
     height: 28px;
     min-width: 250px;
     max-width: 400px;
-
+    border-radius: variables.$border-radius-default;
     &:active,
     &:focus {
       box-shadow: unset;

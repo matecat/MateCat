@@ -13,7 +13,7 @@ a.button-component-container {
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
   width: auto;
   font-weight: 700;
   transition-property: color, background-color, box-shadow, opacity;

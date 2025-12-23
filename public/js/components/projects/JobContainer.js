@@ -453,39 +453,6 @@ class JobContainer extends React.Component {
     )
   }
 
-  getTMIcon() {
-    if (this.props.job.get('private_tm_key').size) {
-      let keys = this.props.job.get('private_tm_key')
-      const tooltipText = keys.map((key) => {
-        let descript = key.get('name') ? key.get('name') : 'Private resource'
-        return (
-          <div style={{textAlign: 'left'}} key={key.get('key')}>
-            <span style={{fontWeight: 'bold'}}> {descript}</span> ({' '}
-            {key.get('key')})
-          </div>
-        )
-      })
-      return (
-        <Popup
-          content={<>{tooltipText}</>}
-          size="tiny"
-          hoverable
-          trigger={
-            <a
-              className=" ui icon basic button tm-keys"
-              onClick={this.openTMPanel.bind(this)}
-              data-testid="tm-button"
-            >
-              <i className="icon-tm-matecat icon" />
-            </a>
-          }
-        />
-      )
-    } else {
-      return ''
-    }
-  }
-
   getCommentsIcon() {
     let icon = ''
     let openThreads = this.props.job.get('open_threads_count')
@@ -850,31 +817,9 @@ class JobContainer extends React.Component {
 
   getWarningsGroup() {
     const icons = this.getWarningsInfo()
-    const iconsBody =
-      icons.number > 1 ? (
-        <DropdownMenu
-          className="group-activity-icon"
-          toggleButtonProps={{
-            children: (
-              <div className="ui icon top right pointing dropdown group-activity-icon basic button">
-                <i className="icon-alarm icon" />
-              </div>
-            ),
-            size: BUTTON_SIZE.ICON_STANDARD,
-          }}
-          items={[
-            ...this.getQRMenuItem(),
-            ...this.getWarningsMenuItem(),
-            ...this.getCommentsMenuItem(),
-          ]}
-        />
-      ) : (
-        icons.icon
-      )
-
     return (
       <div className="job-activity-icons" data-testid="job-activity-icons">
-        {iconsBody}
+        {icons.icon}
       </div>
     )
   }
@@ -946,7 +891,6 @@ class JobContainer extends React.Component {
     let analysisUrl = this.getProjectAnalyzeUrl()
     let warningIcons = this.getWarningsGroup()
     let jobMenu = this.getJobMenu()
-    let tmIcon = this.getTMIcon()
     let outsourceClass = this.props.job.get('outsource')
       ? 'outsource'
       : 'translator'
@@ -1008,9 +952,6 @@ class JobContainer extends React.Component {
                 <a href={analysisUrl} target="_blank" rel="noreferrer">
                   <span id="words">{Math.round(stats.raw.total)}</span> words
                 </a>
-              </div>
-              <div className="tm-job" data-testid="tm-container">
-                {tmIcon}
               </div>
               {warningIcons}
               <div className="outsource-job">

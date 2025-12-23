@@ -6,6 +6,7 @@ import {
   DropdownMenu,
 } from '../common/DropdownMenu/DropdownMenu'
 import DotsHorizontal from '../../../img/icons/DotsHorizontal'
+import {BUTTON_SIZE} from '../common/Button/Button'
 class JobMenu extends React.Component {
   constructor(props) {
     super(props)
@@ -326,6 +327,7 @@ class JobMenu extends React.Component {
         toggleButtonProps={{
           children: <DotsHorizontal size={18} />,
           testId: 'job-menu-button',
+          size: BUTTON_SIZE.ICON_STANDARD,
         }}
         align={DROPDOWN_MENU_ALIGN.RIGHT}
       />

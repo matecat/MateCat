@@ -926,13 +926,6 @@ test('Check job activity', () => {
   expect(screen.getByTestId('job-activity-icons')).toBeInTheDocument()
 })
 
-test('Check job without TM button', () => {
-  const {props} = getFakeProperties(fakeProjectsData.jobActivity)
-  render(<JobContainer {...props} />)
-
-  expect(screen.getByTestId('tm-container')).toBeEmptyDOMElement()
-})
-
 test('Job payable: check analisys URL', () => {
   const {project, props} = getFakeProperties(
     fakeProjectsData.jobWithoutActivity,

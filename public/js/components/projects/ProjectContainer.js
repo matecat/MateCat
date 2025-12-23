@@ -417,7 +417,7 @@ const ProjectContainer = ({
         align={DROPDOWN_MENU_ALIGN.RIGHT}
         toggleButtonProps={{
           mode: BUTTON_MODE.BASIC,
-          size: BUTTON_SIZE.SMALL,
+          size: BUTTON_SIZE.STANDARD,
           children: teamsCollections.find(({id}) => id === idTeamSelected)
             ?.name,
           testId: 'teams-dropdown',
