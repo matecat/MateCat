@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 button.button-component-container,
 a.button-component-container {
@@ -6,16 +7,15 @@ a.button-component-container {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   border: none;
   background-color: transparent;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  display: flex;
-  border-radius: 4px;
+  border-radius: 8px;
   width: auto;
-  font-weight: 500;
+  font-weight: 700;
   transition-property: color, background-color, box-shadow, opacity;
   transition-duration: 0.3s;
   transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
@@ -125,35 +125,37 @@ a.button-component-container {
 
   // Size modifiers
   &.small {
-    height: 28px;
-    padding: 0 10px;
-    font-size: 12px;
-    font-weight: 500;
+    height: 32px;
+    padding: 6px 12px;
+    gap: 6px;
+    font: variables.$font-style-small;
+    font-weight: 700;
   }
   &.standard {
     height: 40px;
-    padding: 0 16px;
-    line-height: 40px;
-    font-size: 14px;
-    font-weight: bold;
+    padding: 10px 16px;
+    font: variables.$font-style-small;
+    gap: 6px;
+    font-weight: 700;
   }
   &.medium {
-    height: 40px;
-    padding: 0 16px;
-    line-height: 40px;
-    font-size: 16px;
-    font-weight: bold;
+    height: 48px;
+    padding: 12px 20px;
+    font: variables.$font-style-base;
+    gap: 8px;
+    font-weight: 700;
   }
   &.big {
-    height: 48px;
-    padding: 0 24px;
-    line-height: 48px;
-    font-size: 18px;
-    font-weight: bold;
+    height: 54px;
+    padding: 14px 28px;
+    gap: 10px;
+    font: variables.$font-style-big;
+    font-weight: 700;
   }
   &.iconSmall {
     width: 24px;
     height: 24px;
+    padding: 4px;
     line-height: 24px;
     font-size: 12px;
   }

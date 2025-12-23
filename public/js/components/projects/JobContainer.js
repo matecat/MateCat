@@ -15,7 +15,12 @@ import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
-import {BUTTON_SIZE} from '../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 class JobContainer extends React.Component {
@@ -1029,14 +1034,13 @@ class JobContainer extends React.Component {
                 </div>
               </div>
               {outsourceButton}
-              <a
-                className="open-translate ui primary button open"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
                 target="_blank"
                 href={translateUrl}
-                rel="noreferrer"
               >
                 Open
-              </a>
+              </Button>
               {jobMenu}
 
               {this.state.showDownloadProgress ? (
@@ -1111,13 +1115,14 @@ const OutsourceButton = ({job, openOutsourceModal}) => {
   if (job.get('outsource')) {
     if (job.get('outsource').get('id_vendor') == '1') {
       label = (
-        <a
-          className="open-outsourced ui button "
+        <Button
+          type={BUTTON_TYPE.DEFAULT}
+          mode={BUTTON_MODE.OUTLINE}
           id="open-quote-request"
           onClick={openOutsourceModal.bind(this, false, true)}
         >
           View status
-        </a>
+        </Button>
       )
     }
   }
