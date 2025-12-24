@@ -359,15 +359,8 @@ a {
     .matecat-modal-bottom {
       padding: 15px 17px;
     }
-
-    .ui.button {
-      font-size: 15px;
-    }
-
-    .ui.button.cancel-button {
-      //margin-right: 45px;
-    }
   }
+
 }
 
 .user-link {
@@ -639,6 +632,13 @@ a {
 
   .check-conditions {
     margin-left: 5px;
+  }
+  .buttons-container {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 20px;
   }
 }
 

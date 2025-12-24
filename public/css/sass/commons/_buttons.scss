@@ -103,21 +103,6 @@
   }
 }
 
-.ui.button.cancel-button {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  margin-top: 0;
-  border: 1px solid #797979;
-  border-radius: 2px;
-  background-color: #f6f6f6;
-  margin-right: 15px;
-  &:hover {
-    //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  }
-  &:focus {
-    box-shadow: none;
-  }
-}
-
 // Button TR, LR navigation through filter
 .ui.next-repetition-group,
 .ui.next-repetition {

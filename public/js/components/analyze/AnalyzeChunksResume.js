@@ -160,7 +160,7 @@ class AnalyzeChunksResume extends React.Component {
     return (
       <Button
         type={BUTTON_TYPE.PRIMARY}
-        size={BUTTON_SIZE.MEDIUM}
+        size={BUTTON_SIZE.SMALL}
         className={`open-translate`}
         disabled={status !== ANALYSIS_STATUS.DONE}
         onClick={(e) => {
@@ -445,7 +445,7 @@ class AnalyzeChunksResume extends React.Component {
                         <Button
                           type={BUTTON_TYPE.PRIMARY}
                           mode={BUTTON_MODE.OUTLINE}
-                          size={BUTTON_SIZE.MEDIUM}
+                          size={BUTTON_SIZE.SMALL}
                           className={'split'}
                           disabled={
                             status !== 'DONE' || thereIsChunkOutsourced()
@@ -464,19 +464,19 @@ class AnalyzeChunksResume extends React.Component {
                     {!config.jobAnalysis &&
                       this.getOutsourceButton(chunkAnalysis, chunkAnalysis.id)}
                   </div>
+                  <OutsourceContainer
+                    project={this.props.project}
+                    job={chunkJob}
+                    url={chunkAnalysis.urls.t}
+                    standardWC={chunkAnalysis.total_equivalent}
+                    showTranslatorBox={false}
+                    extendedView={true}
+                    onClickOutside={this.closeOutsourceModal}
+                    openOutsource={openOutsource}
+                    idJobLabel={jobsAnalysis[indexJob].id}
+                    outsourceJobId={this.state.outsourceJobId}
+                  />
                 </div>
-                <OutsourceContainer
-                  project={this.props.project}
-                  job={chunkJob}
-                  url={chunkAnalysis.urls.t}
-                  standardWC={chunkAnalysis.total_equivalent}
-                  showTranslatorBox={false}
-                  extendedView={true}
-                  onClickOutside={this.closeOutsourceModal}
-                  openOutsource={openOutsource}
-                  idJobLabel={jobsAnalysis[indexJob].id}
-                  outsourceJobId={this.state.outsourceJobId}
-                />
               </div>
             </div>
           )
@@ -553,8 +553,6 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   render() {
-    let showHideText = this.props.showAnalysis ? 'Hide Details' : 'Show Details'
-    let iconClass = this.props.showAnalysis ? 'open' : ''
     let html = this.getResumeJobs()
     return (
       <div
@@ -595,14 +593,6 @@ class AnalyzeChunksResume extends React.Component {
           </div>
         </div>
         <div className="compare-table jobs sixteen wide column">{html}</div>
-        {this.props.jobsAnalysis ? (
-          <div className="analyze-report" onClick={this.openAnalysisReport}>
-            <h3>{showHideText}</h3>
-            <div className="rounded">
-              <i className={'icon-sort-down icon ' + iconClass} />
-            </div>
-          </div>
-        ) : null}
       </div>
     )
   }

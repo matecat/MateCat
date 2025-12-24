@@ -58,6 +58,9 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
     }
   })
 
+  let showHideText = showAnalysis ? 'Hide Details' : 'Show Details'
+  let iconClass = showAnalysis ? 'open' : ''
+
   return (
     <div className="ui container">
       {volumeAnalysis && project ? (
@@ -79,6 +82,14 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
                   showAnalysis={showAnalysis}
                   openAnalysisReport={openAnalysisReport}
                 />
+                {volumeAnalysis.get('jobs') ? (
+                  <div className="analyze-report" onClick={openAnalysisReport}>
+                    <h3>{showHideText}</h3>
+                    <div className="rounded">
+                      <i className={'icon-sort-down icon ' + iconClass} />
+                    </div>
+                  </div>
+                ) : null}
                 {showAnalysis ? (
                   <div className="project-body ui grid">
                     {/*<TransitionGroup>

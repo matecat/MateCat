@@ -977,8 +977,7 @@ class JobContainer extends React.Component {
               {outsourceButton}
               <Button
                 type={BUTTON_TYPE.PRIMARY}
-                target="_blank"
-                href={translateUrl}
+                onClick={() => window.open(translateUrl, '_blank')}
               >
                 Open
               </Button>
