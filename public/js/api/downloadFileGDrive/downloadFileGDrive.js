@@ -6,6 +6,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {number} openOriginalFiles
  * @param {string} idJob
  * @param {string} password
+ * @param checkErrors
  * @param {string} downloadToken
  * @returns {Promise<object>}
  */
@@ -13,7 +14,7 @@ export const downloadFileGDrive = async (
   openOriginalFiles,
   idJob,
   password,
-  checkErrors = 1,
+  checkErrors = true,
   downloadToken,
 ) => {
   const response = await fetch(

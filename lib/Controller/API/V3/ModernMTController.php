@@ -174,7 +174,6 @@ class ModernMTController extends KleinController
         $uploadManager = new Upload();
         $uploadedFiles = $uploadManager->uploadFiles($_FILES);
 
-        /** @noinspection PhpUndefinedFieldInspection */
         $glossary = $this->extractCSV($uploadedFiles->glossary);
 
         // validate
