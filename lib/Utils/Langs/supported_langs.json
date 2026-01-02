@@ -5333,7 +5333,7 @@
             "rtl": true,
             "rfc3066code": "ur-Latn-PK",
             "ocr": {
-                "supported": true,
+                "supported": false,
                 "not_supported_or_rtl": false
             }
         },
