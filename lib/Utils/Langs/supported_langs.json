@@ -5328,10 +5328,10 @@
                     "en": "Urdu (Latin script)"
                 }
             ],
-            "isocode": "bn",
+            "isocode": "ur",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "bn-Latn-BD",
+            "rfc3066code": "ur-Latn-PK",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false
