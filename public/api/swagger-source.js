@@ -121,6 +121,15 @@ var spec = {
             type: 'string',
           },
           {
+            name: 'private_tm_key_json',
+            in: 'formData',
+            description: 'Private key(s) for MyMemory in a JSON format. `tm_prioritization` must be specified.',
+            required: false,
+            type: 'string',
+            example:
+                '{"tm_prioritization":true, "keys":[{"key": "123456","read": true, "write": true, "penalty": 97},{"key": "xdfr3r","read": true, "write": true, "penalty": 95}]}',
+          },
+          {
             name: 'subject',
             in: 'formData',
             description: 'The subject of the project you want to create.',
@@ -194,6 +203,14 @@ var spec = {
             default: 0,
           },
           {
+            name: 'pretranslate_101',
+            in: 'formData',
+            description: 'Pre-translate 101% matches from TM',
+            required: false,
+            type: 'integer',
+            default: 0,
+          },
+          {
             name: 'dialect_strict',
             in: 'formData',
             description:
@@ -221,6 +238,20 @@ var spec = {
               '{"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }',
           },
           {
+            name: 'mmt_ignore_glossary_case',
+            in: 'formData',
+            description: 'Ignore case sensitivity for MMT glossaries',
+            required: false,
+            type: 'boolean',
+          },
+          {
+            name: 'mmt_activate_context_analyzer',
+            in: 'formData',
+            description: 'Activate context analyzer on MMT glossaries',
+            required: false,
+            type: 'boolean',
+          },
+          {
             name: 'deepl_formality',
             in: 'formData',
             description:
@@ -239,10 +270,18 @@ var spec = {
             example: '34532',
           },
           {
+            name: 'deepl_engine_type',
+            in: 'formData',
+            description: 'Select the DeepL engine type',
+            required: false,
+            type: 'string',
+            enum: ['prefer_quality_optimized','latency_optimized']
+          },
+          {
             name: 'filters_extraction_parameters',
             in: 'formData',
             description:
-              'Set the filters extraction parameters throught a json string',
+              'Set the filters extraction parameters through a json string',
             required: false,
             type: 'string',
             example:
@@ -300,6 +339,121 @@ var spec = {
             required: false,
             type: 'string',
           },
+          {
+            name: 'character_counter_count_tags',
+            in: 'formData',
+            description: 'Include tags in the character counter',
+            required: false,
+            type: 'boolean',
+          },
+          {
+            name: 'character_counter_mode',
+            in: 'formData',
+            description: 'Select character count mode',
+            required: false,
+            type: 'string',
+            enum: ['google_ads', 'exclude_cjk', 'all_one'],
+          },
+          {
+            name: 'mt_evaluation',
+            in: 'formData',
+            description: 'Activate MT evaluation',
+            required: false,
+            type: 'boolean',
+          },
+          {
+            name: 'mt_quality_value_in_editor',
+            in: 'formData',
+            description: 'Enable MT quality value in the editor',
+            required: false,
+            type: 'integer',
+            default: 86,
+            minimum: 76,
+            maximum: 102
+          },
+          {
+            name: 'legacy_icu',
+            in: 'formData',
+            description: 'Enable legacy ICU',
+            required: false,
+            type: 'boolean',
+          },
+          {
+            name: 'project_info',
+            in: 'formData',
+            description: 'Additional project information',
+            required: false,
+            type: 'string'
+          },
+          {
+            name: 'public_tm_penalty',
+            in: 'formData',
+            description: 'The penalty value (between 0 and 100) to be applied to the public TM matches',
+            required: false,
+            type: 'integer',
+            default: 0,
+            minimum: 0,
+            maximum: 100
+          },
+          {
+            name: 'project_completion',
+            in: 'formData',
+            description: 'Enable project completion feature',
+            required: false,
+            type: 'boolean',
+          },
+          {
+            name: 'qa_model_template_id',
+            in: 'formData',
+            description: 'The id of the QA model you want to use in the project you are creating (if you want to use a custom QA model in a project, both relevant parameters must be included in the API call)',
+            required: false,
+            type: 'integer'
+          },
+          {
+            name: 'speech2text',
+            in: 'formData',
+            description: 'Enable speech to text for this project',
+            required: false,
+            type: 'boolean',
+          },
+          {
+            name: 'enable_mt_analysis',
+            in: 'formData',
+            description: 'Enable MT during analysis',
+            required: false,
+            default: true,
+            type: 'boolean',
+          },
+          {
+            name: 'intento_routing',
+            in: 'formData',
+            description: 'Select the Intento routing (this parameter is only applied if Intento is enabled for the project)',
+            required: false,
+            type: 'string',
+          },
+          {
+            name: 'intento_provider',
+            in: 'formData',
+            description: 'Select the Intento provider (this parameter is only applied if Intento is enabled for the project)',
+            required: false,
+            type: 'string',
+          },
+          {
+            name: 'instructions[]',
+            in: 'formData',
+            description: 'A set of project instructions',
+            required: false,
+            type: 'string',
+          },
+          {
+            name: 'subfiltering_handlers',
+            in: 'formData',
+            description: 'An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: "markup", "percent_double_curly", "twig", "ruby_on_rails", "double_snail", "double_square", "dollar_curly", "single_curly", "objective_c_ns", "double_percent", "square_sprintf", "sprintf"',
+            required: false,
+            type: 'string',
+            default: '[]',
+            example: '["markup","percent_double_curly","twig"]'
+          }
         ],
         responses: {
           200: {
