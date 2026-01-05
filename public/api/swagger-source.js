@@ -379,34 +379,6 @@ var spec = {
             type: 'boolean',
           },
           {
-            name: 'mt_qe_workflow_enable',
-            in: 'formData',
-            description: 'lorem ipsum',
-            required: false,
-            type: 'boolean',
-          },
-          {
-            name: 'mt_qe_workflow_qe_model_id',
-            in: 'formData',
-            description: 'lorem ipsum',
-            required: false,
-            type: 'integer'
-          },
-          {
-            name: 'mt_qe_workflow_template_raw_parameters',
-            in: 'formData',
-            description: 'lorem ipsum',
-            required: false,
-            type: 'string'
-          },
-          {
-            name: 'mt_qe_workflow_payable_rate_template_id',
-            in: 'formData',
-            description: 'lorem ipsum',
-            required: false,
-            type: 'integer'
-          },
-          {
             name: 'project_info',
             in: 'formData',
             description: 'Additional project information',
@@ -472,6 +444,15 @@ var spec = {
             description: 'A set of project instructions',
             required: false,
             type: 'string',
+          },
+          {
+            name: 'subfiltering_handlers',
+            in: 'formData',
+            description: 'An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: "markup", "percent_double_curly", "twig", "ruby_on_rails", "double_snail", "double_square", "dollar_curly", "single_curly", "objective_c_ns", "double_percent", "square_sprintf", "sprintf"',
+            required: false,
+            type: 'string',
+            default: '[]',
+            example: '["markup","percent_double_curly","twig"]'
           }
         ],
         responses: {
