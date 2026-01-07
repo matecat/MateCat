@@ -12,21 +12,21 @@ require_once '../../lib/Bootstrap.php';
 try {
     Bootstrap::start();
     session_start();
-} catch ( Exception $e ) {
+} catch (Exception $e) {
 }
 
 $count = 0;
-foreach ( AppConfig::$SUPPORTED_FILE_TYPES as $key => $value ) {
-    $count += count( $value );
+foreach (AppConfig::$SUPPORTED_FILE_TYPES as $key => $value) {
+    $count += count($value);
 }
 
 $nr_supoported_files = $count;
 
-$max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
+$max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 
 $csp_nonce = Utils::uuid4();
-$csp       = file_get_contents( AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html" );
-$csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
+$csp = file_get_contents(AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html");
+$csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
 
 ?>
 <!DOCTYPE html>
@@ -42,7 +42,7 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
     <script nonce="<?= $csp_nonce ?>">
         /*<![CDATA[*/
         config = {};
-        config.swagger_host = '<?php echo $_SERVER[ 'HTTP_HOST' ] ?>';
+        config.swagger_host = '<?php echo $_SERVER['HTTP_HOST'] ?>';
         /*]]>*/
     </script>
 
@@ -53,13 +53,13 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
     <script src='/public/api/swagger-source.js' type='text/javascript'></script>
     <?php
 
-    $reflect  = new ReflectionClass( CustomPageView::class );
+    $reflect = new ReflectionClass(CustomPageView::class);
     $instance = $reflect->newInstanceArgs();
 
     $featureSet = new FeatureSet();
 
-    if($instance->getUser()->email !== null){
-        $featureSet->loadFromUserEmail( $instance->getUser()->email );
+    if ($instance->getUser()->email !== null) {
+        $featureSet->loadFromUserEmail($instance->getUser()->email);
     }
 
     ?>
@@ -67,41 +67,41 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
         /*<![CDATA[*/
 
         // add active class to menu
-        function setActivesMenuLink( element ) {
-            if ( !$( element ).hasClass( 'active' ) ) {
+        function setActivesMenuLink(element) {
+            if (!$(element).hasClass('active')) {
                 location.hash = element.hash;
-                $( ".menu a" ).removeClass( 'active' );
-                $( element ).addClass( 'active' );
+                $(".menu a").removeClass('active');
+                $(element).addClass('active');
             }
         }
 
         function hideSwaggerElements() {
-            var swaggerElements = $( ".is-open" );
-            swaggerElements.each( function () {
+            var swaggerElements = $(".is-open");
+            swaggerElements.each(function () {
                 //close tags
-                $( this ).children( 'h4' ).click();
-            } );
+                $(this).children('h4').click();
+            });
         }
 
         function generateSwaggerMenu() {
 
-            var tags = $( '.opblock-tag' );
+            var tags = $('.opblock-tag');
             var elements = $();
-            tags.each( function () {
-                var name = $( this ).prop( 'id' ).replace( 'operations-tag-', '' );
-                elements = elements.add( '<li><a id="' + name + '" href="#' + name + '">' + name.replace( '_', ' ' ) + '</a></li>' );
-            } );
+            tags.each(function () {
+                var name = $(this).prop('id').replace('operations-tag-', '');
+                elements = elements.add('<li><a id="' + name + '" href="#' + name + '">' + name.replace('_', ' ') + '</a></li>');
+            });
 
-            $( '#menuElements' ).prepend( elements );
+            $('#menuElements').prepend(elements);
 
         }
 
-        $( document ).ready( function () {
+        $(document).ready(function () {
 
             var hash = location.hash;
 
             // Build a system
-            window.swaggerUi = SwaggerUIBundle( {
+            window.swaggerUi = SwaggerUIBundle({
                 url: spec,
                 spec: spec,
                 dom_id: '#swagger-ui-container',
@@ -122,43 +122,43 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
                 ],
                 //layout: "StandaloneLayout"
 
-            } );
+            });
 
             generateSwaggerMenu();
 
             // smooth scrolling for normal links
-            $( '#menuElements li a' ).click( function () {
+            $('#menuElements li a').click(function () {
 
                 //menu href
-                var anchorName = this.hash.slice( 1 );
+                var anchorName = this.hash.slice(1);
 
                 //exists an element with anchor in the page?
-                var domAnchorList = $( '[name="' + anchorName + '"]' );
+                var domAnchorList = $('[name="' + anchorName + '"]');
 
                 //exist a swagger tag element?
-                var swaggerTagList = $( "#operations-tag-" + anchorName );
+                var swaggerTagList = $("#operations-tag-" + anchorName);
 
                 hideSwaggerElements();
 
                 var target = null;
-                if ( domAnchorList.length ) {
+                if (domAnchorList.length) {
                     target = domAnchorList;
-                } else if ( swaggerTagList.length ) {
+                } else if (swaggerTagList.length) {
                     target = swaggerTagList;
                     //open Swagger Menu
-                    $( target[0] ).trigger( 'click' );
+                    $(target[0]).trigger('click');
                 }
 
-                setActivesMenuLink( this );
-                $( 'html,body' ).animate( {
+                setActivesMenuLink(this);
+                $('html,body').animate({
                     scrollTop: target.offset().top
-                }, 500 );
+                }, 500);
 
                 return false;
 
-            } );
-            $( '#menuElements li a[href="' + hash.replace( '/', '' ) + '"]' ).trigger( 'click' );
-        } );
+            });
+            $('#menuElements li a[href="' + hash.replace('/', '') + '"]').trigger('click');
+        });
 
         /*]]>*/
     </script>
@@ -337,9 +337,11 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
                 <tr>
                     <td>
                         <ul class="lang-list">
-                            <?php foreach ( Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
-                                <li><?= $lang[ 'name' ] . " (" . $lang[ 'code' ] . ")" ?></li>
-                            <?php endforeach; ?>
+                            <?php
+                            foreach (Languages::getInstance()->getEnabledLanguages() as $lang): ?>
+                                <li><?= $lang['name'] . " (" . $lang['code'] . ")" ?></li>
+                            <?php
+                            endforeach; ?>
                         </ul>
                     </td>
                 </tr>
@@ -358,12 +360,14 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ( LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
+                <?php
+                foreach (LanguageDomains::getInstance()->getEnabledDomains() as $domains): ?>
                     <tr>
-                        <td><?= $domains[ 'display' ] ?></td>
-                        <td><?= $domains[ 'key' ] ?></td>
+                        <td><?= $domains['display'] ?></td>
+                        <td><?= $domains['key'] ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php
+                endforeach; ?>
                 </tbody>
             </table>
             <a class="gototop" href="#top">Go to top</a>

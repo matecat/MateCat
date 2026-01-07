@@ -24,24 +24,24 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
 
     use ArrayAccessTrait;
 
-    public ?int    $id                   = null;
-    public string  $password;
-    public string  $name;
-    public string  $id_customer;
-    public string  $create_date;
-    public ?int    $id_engine_tm         = null;
-    public ?int    $id_engine_mt         = null;
-    public string  $status_analysis;
-    public ?float  $fast_analysis_wc     = 0;
-    public ?float  $standard_analysis_wc = 0;
-    public ?float  $tm_analysis_wc       = 0;
-    public string  $remote_ip_address;
-    public ?int    $instance_id          = 0;
-    public ?int    $pretranslate_100     = 0;
-    public ?int    $id_qa_model          = null;
-    public ?int    $id_team              = null;
-    public ?int    $id_assignee          = null;
-    public ?string $due_date             = null;
+    public ?int $id = null;
+    public string $password;
+    public string $name;
+    public string $id_customer;
+    public string $create_date;
+    public ?int $id_engine_tm = null;
+    public ?int $id_engine_mt = null;
+    public string $status_analysis;
+    public ?float $fast_analysis_wc = 0;
+    public ?float $standard_analysis_wc = 0;
+    public ?float $tm_analysis_wc = 0;
+    public string $remote_ip_address;
+    public ?int $instance_id = 0;
+    public ?int $pretranslate_100 = 0;
+    public ?int $id_qa_model = null;
+    public ?int $id_team = null;
+    public ?int $id_assignee = null;
+    public ?string $due_date = null;
 
     /**
      * @return bool
@@ -49,8 +49,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     public function analysisComplete(): bool
     {
         return
-                $this->status_analysis == ProjectStatus::STATUS_DONE ||
-                $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
+            $this->status_analysis == ProjectStatus::STATUS_DONE ||
+            $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
     }
 
     /**
@@ -68,13 +68,13 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     /**
      * @return int
      */
-    public function getJobsCount(): int {
-
-        if ( empty( $this->getJobs() ) ) {
+    public function getJobsCount(): int
+    {
+        if (empty($this->getJobs())) {
             return 0;
         }
 
-        return count( $this->getJobs() );
+        return count($this->getJobs());
     }
 
     /**
@@ -100,9 +100,9 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     public function getMetadataAsKeyValue(): array
     {
         $collection = $this->getMetadata();
-        $data       = [];
+        $data = [];
         foreach ($collection as $record) {
-            $data[ $record->key ] = $record->value;
+            $data[$record->key] = $record->value;
         }
 
         return $data;
@@ -118,7 +118,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     {
         $meta = $this->getMetadataAsKeyValue();
         if (array_key_exists($key, $meta)) {
-            return $meta[ $key ];
+            return $meta[$key];
         }
 
         return null;
@@ -145,7 +145,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
             $dao = new ProjectDao();
 
             /** @var RemoteFileServiceNameStruct[] */
-            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([$this->id])[ 0 ] ?? null;
+            return $dao->setCacheTTL(60 * 60 * 24 * 7)->getRemoteFileServiceName([$this->id])[0] ?? null;
         });
     }
 

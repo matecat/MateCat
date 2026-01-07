@@ -8,12 +8,12 @@ use Model\DataAccess\IDaoStruct;
 
 class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
 {
-    public ?int   $id          = null;
-    public ?int   $id_template = null;
-    public ?int   $id_parent   = null;
+    public ?int $id = null;
+    public ?int $id_template = null;
+    public ?int $id_parent = null;
     public string $category_label;
     public string $code;
-    public ?int   $sort        = 0;
+    public ?int $sort = 0;
 
     /**
      * @var QAModelTemplateSeverityStruct[]
@@ -26,13 +26,13 @@ class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements I
     public function jsonSerialize(): array
     {
         return [
-                'id'          => (int)$this->id,
-                'id_template' => (int)$this->id_template,
-                'id_parent'   => (int)$this->id_parent,
-                'label'       => $this->category_label,
-                'code'        => $this->code,
-                'severities'  => $this->severities,
-                'sort'        => $this->sort ?: null,
+            'id' => (int)$this->id,
+            'id_template' => (int)$this->id_template,
+            'id_parent' => (int)$this->id_parent,
+            'label' => $this->category_label,
+            'code' => $this->code,
+            'severities' => $this->severities,
+            'sort' => $this->sort ?: null,
         ];
     }
 }

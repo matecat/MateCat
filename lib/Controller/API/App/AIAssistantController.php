@@ -28,61 +28,61 @@ class AIAssistantController extends KleinController
         $json = json_decode($this->request->body(), true);
 
         // target
-        if (!isset($json[ 'target' ])) {
+        if (!isset($json['target'])) {
             throw new InvalidArgumentException('Missing `target` parameter');
         }
 
-        $languages         = Languages::getInstance();
-        $localizedLanguage = $languages->getLocalizedLanguage($json[ 'target' ]);
+        $languages = Languages::getInstance();
+        $localizedLanguage = $languages->getLocalizedLanguage($json['target']);
 
         if (empty($localizedLanguage)) {
-            throw new InvalidLanguageException($json[ 'target' ] . ' is not a valid language');
+            throw new InvalidLanguageException($json['target'] . ' is not a valid language');
         }
 
         // id_segment
-        if (!isset($json[ 'id_segment' ])) {
+        if (!isset($json['id_segment'])) {
             throw new InvalidArgumentException('Missing `id_segment` parameter');
         }
 
         // word
-        if (!isset($json[ 'word' ])) {
+        if (!isset($json['word'])) {
             throw new InvalidArgumentException('Missing `word` parameter');
         }
 
         // phrase
-        if (!isset($json[ 'phrase' ])) {
+        if (!isset($json['phrase'])) {
             throw new InvalidArgumentException('Missing `phrase` parameter');
         }
 
         // id_client
-        if (!isset($json[ 'id_client' ])) {
+        if (!isset($json['id_client'])) {
             throw new InvalidArgumentException('Missing `id_client` parameter');
         }
 
         // id_job
-        if (!isset($json[ 'id_job' ])) {
+        if (!isset($json['id_job'])) {
             throw new InvalidArgumentException('Missing `id_job` parameter');
         }
 
         // password
-        if (!isset($json[ 'password' ])) {
+        if (!isset($json['password'])) {
             throw new InvalidArgumentException('Missing `password` parameter');
         }
 
         $json = [
-                'id_client'        => $json[ 'id_client' ],
-                'id_segment'       => $json[ 'id_segment' ],
-                'id_job'           => $json[ 'id_job' ],
-                'password'         => $json[ 'password' ],
-                'target'           => $json[ 'target' ],
-                'localized_target' => $localizedLanguage,
-                'word'             => trim($json[ 'word' ]),
-                'phrase'           => trim($json[ 'phrase' ]),
+            'id_client' => $json['id_client'],
+            'id_segment' => $json['id_segment'],
+            'id_job' => $json['id_job'],
+            'password' => $json['password'],
+            'target' => $json['target'],
+            'localized_target' => $localizedLanguage,
+            'word' => trim($json['word']),
+            'phrase' => trim($json['phrase']),
         ];
 
         $params = [
-                'action'  => AIAssistantWorker::EXPLAIN_MEANING_ACTION,
-                'payload' => $json,
+            'action' => AIAssistantWorker::EXPLAIN_MEANING_ACTION,
+            'payload' => $json,
         ];
 
         $this->enqueueWorker($params);

@@ -22,31 +22,31 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
     protected static array $actionsStrings = [
 
         /* DOWNLOADS */
-            self::DOWNLOAD_EDIT_LOG           => "Editing Log downloaded",
-            self::DOWNLOAD_ANALYSIS_REPORT    => "Analysis Report downloaded",
-            self::DOWNLOAD_PREVIEW            => "Preview downloaded",
-            self::DOWNLOAD_GDRIVE_PREVIEW     => "Preview opened in Google Drive",
-            self::DOWNLOAD_ORIGINAL           => "Original file downloaded",
-            self::DOWNLOAD_TRANSLATION        => "Translation downloaded",
-            self::DOWNLOAD_GDRIVE_TRANSLATION => "Translation opened in Google Drive",
-            self::DOWNLOAD_JOB_TMX            => "Job TMX exported",
-            self::DOWNLOAD_OMEGAT             => "OmegaT package exported",
-            self::DOWNLOAD_XLIFF              => "XLIFF file(s) downloaded",
-            self::DOWNLOAD_KEY_TMX            => "Private translation memory %s downloaded",
+        self::DOWNLOAD_EDIT_LOG => "Editing Log downloaded",
+        self::DOWNLOAD_ANALYSIS_REPORT => "Analysis Report downloaded",
+        self::DOWNLOAD_PREVIEW => "Preview downloaded",
+        self::DOWNLOAD_GDRIVE_PREVIEW => "Preview opened in Google Drive",
+        self::DOWNLOAD_ORIGINAL => "Original file downloaded",
+        self::DOWNLOAD_TRANSLATION => "Translation downloaded",
+        self::DOWNLOAD_GDRIVE_TRANSLATION => "Translation opened in Google Drive",
+        self::DOWNLOAD_JOB_TMX => "Job TMX exported",
+        self::DOWNLOAD_OMEGAT => "OmegaT package exported",
+        self::DOWNLOAD_XLIFF => "XLIFF file(s) downloaded",
+        self::DOWNLOAD_KEY_TMX => "Private translation memory %s downloaded",
 
         /* ACCESSES */
-            self::ACCESS_ANALYZE_PAGE         => "Access to the Analyze page",
-            self::ACCESS_EDITLOG_PAGE         => "Access to the Editing Log page",
-            self::ACCESS_TRANSLATE_PAGE       => "Access to the Translate page",
-            self::ACCESS_REVISE_PAGE          => "Access to the Revise page",
-            self::ACCESS_MANAGE_PAGE          => "Access to the Manage page",
-            self::ACCESS_REVISE_SUMMARY_PAGE  => "Access to the Revise Summary page",
+        self::ACCESS_ANALYZE_PAGE => "Access to the Analyze page",
+        self::ACCESS_EDITLOG_PAGE => "Access to the Editing Log page",
+        self::ACCESS_TRANSLATE_PAGE => "Access to the Translate page",
+        self::ACCESS_REVISE_PAGE => "Access to the Revise page",
+        self::ACCESS_MANAGE_PAGE => "Access to the Manage page",
+        self::ACCESS_REVISE_SUMMARY_PAGE => "Access to the Revise Summary page",
 
         /* OTHERS */
-            self::PROJECT_CREATED             => "Project created.",
-            self::JOB_UNARCHIVED              => "Job unarchived.",
+        self::PROJECT_CREATED => "Project created.",
+        self::JOB_UNARCHIVED => "Job unarchived.",
 
-            self::TRANSLATION_DELIVERED => 'Translation Delivered'
+        self::TRANSLATION_DELIVERED => 'Translation Delivered'
 
     ];
 
@@ -54,29 +54,29 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * MAP for Database values
      */
     /* DOWNLOADS */
-    const int DOWNLOAD_EDIT_LOG           = 1;
-    const int DOWNLOAD_ANALYSIS_REPORT    = 2;
-    const int DOWNLOAD_PREVIEW            = 3;
-    const int DOWNLOAD_GDRIVE_PREVIEW     = 4;
-    const int DOWNLOAD_ORIGINAL           = 5;
-    const int DOWNLOAD_TRANSLATION        = 6;
+    const int DOWNLOAD_EDIT_LOG = 1;
+    const int DOWNLOAD_ANALYSIS_REPORT = 2;
+    const int DOWNLOAD_PREVIEW = 3;
+    const int DOWNLOAD_GDRIVE_PREVIEW = 4;
+    const int DOWNLOAD_ORIGINAL = 5;
+    const int DOWNLOAD_TRANSLATION = 6;
     const int DOWNLOAD_GDRIVE_TRANSLATION = 7;
-    const int DOWNLOAD_JOB_TMX            = 8;
-    const int DOWNLOAD_OMEGAT             = 9;
-    const int DOWNLOAD_XLIFF              = 10;
-    const int DOWNLOAD_KEY_TMX            = 11;
+    const int DOWNLOAD_JOB_TMX = 8;
+    const int DOWNLOAD_OMEGAT = 9;
+    const int DOWNLOAD_XLIFF = 10;
+    const int DOWNLOAD_KEY_TMX = 11;
 
     /* ACCESSES */
-    const int ACCESS_ANALYZE_PAGE        = 12;
-    const int ACCESS_EDITLOG_PAGE        = 13;
-    const int ACCESS_TRANSLATE_PAGE      = 14;
-    const int ACCESS_REVISE_PAGE         = 15;
-    const int ACCESS_MANAGE_PAGE         = 16;
+    const int ACCESS_ANALYZE_PAGE = 12;
+    const int ACCESS_EDITLOG_PAGE = 13;
+    const int ACCESS_TRANSLATE_PAGE = 14;
+    const int ACCESS_REVISE_PAGE = 15;
+    const int ACCESS_MANAGE_PAGE = 16;
     const int ACCESS_REVISE_SUMMARY_PAGE = 17;
 
     /* OTHERS */
     const int PROJECT_CREATED = 18;
-    const int JOB_UNARCHIVED  = 19;
+    const int JOB_UNARCHIVED = 19;
 
     const int TRANSLATION_DELIVERED = 101;
 
@@ -144,7 +144,7 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public static function getAction(int $actionID): string
     {
-        return self::$actionsStrings[ $actionID ];
+        return self::$actionsStrings[$actionID];
     }
 
 }

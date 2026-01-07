@@ -29,7 +29,7 @@ class KeyCheckController extends KleinController
     public function ping(): void
     {
         $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/ping', 3);
-        $checkRateLimitIp    = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/ping', 3);
+        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/ping', 3);
 
         if ($checkRateLimitEmail) {
             $this->response = $checkRateLimitEmail;
@@ -61,7 +61,7 @@ class KeyCheckController extends KleinController
     public function getUID(): void
     {
         $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/[:user_api_key]', 3);
-        $checkRateLimitIp    = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]', 3);
+        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]', 3);
 
         if ($checkRateLimitEmail) {
             $this->response = $checkRateLimitEmail;
@@ -81,7 +81,7 @@ class KeyCheckController extends KleinController
             throw new AuthenticationError('Unauthorized', 401);
         }
 
-        [$user_api_key, $user_api_secret] = explode('-', $this->params[ 'user_api_key' ]);
+        [$user_api_key, $user_api_secret] = explode('-', $this->params['user_api_key']);
 
         if ($user_api_key && $user_api_secret) {
             $api_record = ApiKeyDao::findByKey($user_api_key);

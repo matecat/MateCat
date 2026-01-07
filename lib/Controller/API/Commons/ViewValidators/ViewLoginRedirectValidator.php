@@ -28,10 +28,10 @@ class ViewLoginRedirectValidator extends Base
     public function _validate(): void
     {
         if (!$this->controller->isLoggedIn()) {
-            $_SESSION[ 'wanted_url' ] = ltrim($_SERVER[ 'REQUEST_URI' ], '/');
+            $_SESSION['wanted_url'] = ltrim($_SERVER['REQUEST_URI'], '/');
             header("Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . "signin", false);
             exit;
-        } elseif (isset($_SESSION[ 'wanted_url' ])) {
+        } elseif (isset($_SESSION['wanted_url'])) {
             // handle redirect after login
             /** @var $controller BaseKleinViewController */
             $controller = $this->controller;

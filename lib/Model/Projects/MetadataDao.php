@@ -14,21 +14,21 @@ use ReflectionException;
 class MetadataDao extends AbstractDao
 {
     const string FEATURES_KEY = 'features';
-    const string TABLE        = 'project_metadata';
+    const string TABLE = 'project_metadata';
 
     const string WORD_COUNT_TYPE_KEY = 'word_count_type';
 
-    const string WORD_COUNT_RAW        = 'raw';
+    const string WORD_COUNT_RAW = 'raw';
     const string WORD_COUNT_EQUIVALENT = 'equivalent';
 
     const string SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
-    const string SPLIT_RAW_WORD_TYPE        = 'raw_word_count';
+    const string SPLIT_RAW_WORD_TYPE = 'raw_word_count';
 
     const string MT_QUALITY_VALUE_IN_EDITOR = 'mt_quality_value_in_editor';
-    const string MT_EVALUATION              = 'mt_evaluation';
-    const string MT_QE_WORKFLOW_ENABLED     = 'mt_qe_workflow_enabled';
-    const string MT_QE_WORKFLOW_PARAMETERS  = 'mt_qe_workflow_parameters';
-    const string SUBFILTERING_HANDLERS      = 'subfiltering_handlers';
+    const string MT_EVALUATION = 'mt_evaluation';
+    const string MT_QE_WORKFLOW_ENABLED = 'mt_qe_workflow_enabled';
+    const string MT_QE_WORKFLOW_PARAMETERS = 'mt_qe_workflow_parameters';
+    const string SUBFILTERING_HANDLERS = 'subfiltering_handlers';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 
@@ -73,9 +73,9 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * @param int    $id_project
+     * @param int $id_project
      * @param string $key
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return MetadataStruct|null
      * @throws ReflectionException
@@ -83,22 +83,22 @@ class MetadataDao extends AbstractDao
     public function get(int $id_project, string $key, int $ttl = 0): ?MetadataStruct
     {
         $stmt = $this->setCacheTTL($ttl)->_getStatementForQuery(
-                "SELECT * FROM project_metadata WHERE " .
-                " id_project = :id_project " .
-                " AND `key` = :key "
+            "SELECT * FROM project_metadata WHERE " .
+            " id_project = :id_project " .
+            " AND `key` = :key "
         );
 
         /**
          * @var $result MetadataStruct[]
          */
         return $this->_fetchObjectMap($stmt, MetadataStruct::class, [
-                'id_project' => $id_project,
-                'key'        => $key
-        ])[ 0 ] ?? null;
+            'id_project' => $id_project,
+            'key' => $key
+        ])[0] ?? null;
     }
 
     /**
-     * @param int    $id_project
+     * @param int $id_project
      * @param string $key
      * @param string $value
      *
@@ -107,18 +107,18 @@ class MetadataDao extends AbstractDao
      */
     public function set(int $id_project, string $key, string $value): bool
     {
-        $sql  = "INSERT INTO project_metadata " .
-                " ( id_project, `key`, value ) " .
-                " VALUES " .
-                " ( :id_project, :key, :value ) " .
-                " ON DUPLICATE KEY UPDATE value = :value ";
+        $sql = "INSERT INTO project_metadata " .
+            " ( id_project, `key`, value ) " .
+            " VALUES " .
+            " ( :id_project, :key, :value ) " .
+            " ON DUPLICATE KEY UPDATE value = :value ";
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                'id_project' => $id_project,
-                'key'        => $key,
-                'value'      => $value
+            'id_project' => $id_project,
+            'key' => $key,
+            'value' => $value
         ]);
 
         $this->destroyMetadataCache($id_project);
@@ -133,14 +133,14 @@ class MetadataDao extends AbstractDao
     public function delete(int $id_project, string $key): void
     {
         $sql = "DELETE FROM project_metadata " .
-                " WHERE id_project = :id_project " .
-                " AND `key` = :key ";
+            " WHERE id_project = :id_project " .
+            " AND `key` = :key ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                'id_project' => $id_project,
-                'key'        => $key,
+            'id_project' => $id_project,
+            'key' => $key,
         ]);
 
         $this->destroyMetadataCache($id_project);
@@ -162,12 +162,12 @@ class MetadataDao extends AbstractDao
     public function cleanupChunksOptions(array $jobs): void
     {
         foreach ($jobs as $job) {
-            $chunk = ChunkDao::getByIdAndPassword($job[ 'id' ], $job[ 'password' ]);
+            $chunk = ChunkDao::getByIdAndPassword($job['id'], $job['password']);
 
             foreach (ChunkOptionsModel::$valid_keys as $key) {
                 $this->delete(
-                        $chunk->id_project,
-                        self::buildChunkKey($key, $chunk)
+                    $chunk->id_project,
+                    self::buildChunkKey($key, $chunk)
                 );
             }
         }

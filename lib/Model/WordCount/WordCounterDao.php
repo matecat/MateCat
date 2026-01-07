@@ -54,20 +54,20 @@ class WordCounterDao extends AbstractDao
                   AND j.password = :password";
 
         $bind_keys = [
-                'newWords'           => $wStruct->getNewWords(),
-                'draftWords'         => $wStruct->getDraftWords(),
-                'translatedWords'    => $wStruct->getTranslatedWords(),
-                'approvedWords'      => $wStruct->getApprovedWords(),
-                'approved2Words'     => $wStruct->getApproved2Words(),
-                'rejectedWords'      => $wStruct->getRejectedWords(),
-                'newRawWords'        => $wStruct->getNewRawWords(),
-                'draftRawWords'      => $wStruct->getDraftRawWords(),
-                'translatedRawWords' => $wStruct->getTranslatedRawWords(),
-                'approvedRawWords'   => $wStruct->getApprovedRawWords(),
-                'approved2RawWords'  => $wStruct->getApproved2RawWords(),
-                'rejectedRawWords'   => $wStruct->getRejectedRawWords(),
-                'id_job'             => $wStruct->getIdJob(),
-                'password'           => $wStruct->getJobPassword()
+            'newWords' => $wStruct->getNewWords(),
+            'draftWords' => $wStruct->getDraftWords(),
+            'translatedWords' => $wStruct->getTranslatedWords(),
+            'approvedWords' => $wStruct->getApprovedWords(),
+            'approved2Words' => $wStruct->getApproved2Words(),
+            'rejectedWords' => $wStruct->getRejectedWords(),
+            'newRawWords' => $wStruct->getNewRawWords(),
+            'draftRawWords' => $wStruct->getDraftRawWords(),
+            'translatedRawWords' => $wStruct->getTranslatedRawWords(),
+            'approvedRawWords' => $wStruct->getApprovedRawWords(),
+            'approved2RawWords' => $wStruct->getApproved2RawWords(),
+            'rejectedRawWords' => $wStruct->getRejectedRawWords(),
+            'id_job' => $wStruct->getIdJob(),
+            'password' => $wStruct->getJobPassword()
         ];
 
         try {
@@ -86,24 +86,24 @@ class WordCounterDao extends AbstractDao
     {
         $db = Database::obtain();
 
-        $data                       = [];
-        $data[ 'new_words' ]        = $wStruct->getNewWords();
-        $data[ 'draft_words' ]      = $wStruct->getDraftWords();
-        $data[ 'translated_words' ] = $wStruct->getTranslatedWords();
-        $data[ 'approved_words' ]   = $wStruct->getApprovedWords();
-        $data[ 'approved2_words' ]  = $wStruct->getApproved2Words();
-        $data[ 'rejected_words' ]   = $wStruct->getRejectedWords();
+        $data = [];
+        $data['new_words'] = $wStruct->getNewWords();
+        $data['draft_words'] = $wStruct->getDraftWords();
+        $data['translated_words'] = $wStruct->getTranslatedWords();
+        $data['approved_words'] = $wStruct->getApprovedWords();
+        $data['approved2_words'] = $wStruct->getApproved2Words();
+        $data['rejected_words'] = $wStruct->getRejectedWords();
 
-        $data[ 'new_raw_words' ]        = $wStruct->getNewRawWords();
-        $data[ 'draft_raw_words' ]      = $wStruct->getDraftRawWords();
-        $data[ 'translated_raw_words' ] = $wStruct->getTranslatedRawWords();
-        $data[ 'approved_raw_words' ]   = $wStruct->getApprovedRawWords();
-        $data[ 'approved2_raw_words' ]  = $wStruct->getApproved2RawWords();
-        $data[ 'rejected_raw_words' ]   = $wStruct->getRejectedRawWords();
+        $data['new_raw_words'] = $wStruct->getNewRawWords();
+        $data['draft_raw_words'] = $wStruct->getDraftRawWords();
+        $data['translated_raw_words'] = $wStruct->getTranslatedRawWords();
+        $data['approved_raw_words'] = $wStruct->getApprovedRawWords();
+        $data['approved2_raw_words'] = $wStruct->getApproved2RawWords();
+        $data['rejected_raw_words'] = $wStruct->getRejectedRawWords();
 
         $where = [
-                'id'       => $wStruct->getIdJob(),
-                'password' => $wStruct->getJobPassword()
+            'id' => $wStruct->getIdJob(),
+            'password' => $wStruct->getJobPassword()
         ];
 
         try {
@@ -123,8 +123,8 @@ class WordCounterDao extends AbstractDao
      * Leave untouched for getSegmentsController, split job recalculation
      * because of file level granularity in payable words
      *
-     * @param int         $id_job
-     * @param int|null    $id_file
+     * @param int $id_job
+     * @param int|null $id_file
      * @param string|null $jPassword
      *
      * @return array
@@ -189,13 +189,13 @@ class WordCounterDao extends AbstractDao
         $bind_values = ['id_job' => $id_job];
 
         if (!empty($jPassword)) {
-            $bind_values[ 'password' ] = $jPassword;
-            $query                     .= " and j.password = :password";
+            $bind_values['password'] = $jPassword;
+            $query .= " and j.password = :password";
         }
 
         if (!empty($id_file)) {
-            $bind_values[ 'id_file' ] = $id_file;
-            $query                    .= " and fj.id_file = :id_file";
+            $bind_values['id_file'] = $id_file;
+            $query .= " and fj.id_file = :id_file";
         }
 
         $stmt = $db->getConnection()->prepare($query);

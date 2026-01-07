@@ -16,8 +16,8 @@ class ConvertedFileList
      * @var ConvertedFileModel[]
      */
     private array $convertedFiles = [];
-    private array $erroredFiles   = [];
-    private array $warnedFiles    = [];
+    private array $erroredFiles = [];
+    private array $warnedFiles = [];
 
     public function add(ConvertedFileModel $convertedFileModel): void
     {
@@ -96,9 +96,9 @@ class ConvertedFileList
 
         foreach ($this->convertedFiles as $res) {
             if ($res->isZipContent()) {
-                $data[ 'zipFiles' ][] = $res->getResult();
+                $data['zipFiles'][] = $res->getResult();
             } else {
-                $data[ 'simpleFileName' ][] = $res->getResult();
+                $data['simpleFileName'][] = $res->getResult();
             }
         }
 

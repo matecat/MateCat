@@ -33,18 +33,18 @@ class FilterController extends KleinController
 
         $ids_as_array = [];
         $ids_grouping = [];
-        $segments_id  = $model->getSegmentList();
+        $segments_id = $model->getSegmentList();
         foreach ($segments_id as $segment_id) {
-            $ids_as_array[] = (string)$segment_id[ 'id' ];
-            if (isset($segment_id[ 'segment_hash' ])) {
-                $ids_grouping[ $segment_id[ 'segment_hash' ] ][] = $segment_id[ 'id' ];
+            $ids_as_array[] = (string)$segment_id['id'];
+            if (isset($segment_id['segment_hash'])) {
+                $ids_grouping[$segment_id['segment_hash']][] = $segment_id['id'];
             }
         }
 
         $this->response->json([
-                'segment_ids' => $ids_as_array,
-                'count'       => count($ids_as_array),
-                'grouping'    => $ids_grouping
+            'segment_ids' => $ids_as_array,
+            'count' => count($ids_as_array),
+            'grouping' => $ids_grouping
         ]);
     }
 
@@ -55,13 +55,13 @@ class FilterController extends KleinController
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
             $this->chunk = $Validator->getChunk();
-            $get         = $this->getRequest()->paramsGet();
+            $get = $this->getRequest()->paramsGet();
 
-            if (!isset($get[ 'filter' ])) {
+            if (!isset($get['filter'])) {
                 throw new ValidationError('Filter is null. You must call this endpoint adding `filter[]` to query string. (Example: ?filter[status]=NEW)');
             }
 
-            $this->filter = new FilterDefinition($get[ 'filter' ]);
+            $this->filter = new FilterDefinition($get['filter']);
             if (!$this->filter->isValid()) {
                 throw new ValidationError('Filter is invalid');
             }

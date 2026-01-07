@@ -19,9 +19,9 @@ class ContextStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
 
     use ArrayAccessTrait;
 
-    public ?int $id      = null;
-    public int  $id_project;
-    public int  $id_segment;
+    public ?int $id = null;
+    public int $id_project;
+    public int $id_segment;
     public ?int $id_file = null;
     /**
      * @var string|array

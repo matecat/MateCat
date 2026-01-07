@@ -20,19 +20,19 @@ class SegmentNoteDao extends AbstractDao
     public static function getBySegmentId(int $id_segment, int $ttl = 86400): array
     {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare("SELECT * FROM segment_notes WHERE id_segment = ? ");
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_notes WHERE id_segment = ? ");
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
-                $stmt,
-                SegmentNoteStruct::class,
-                [$id_segment]
+            $stmt,
+            SegmentNoteStruct::class,
+            [$id_segment]
         );
     }
 
     /**
      * @param array $ids
-     * @param int   $ttl
+     * @param int $ttl
      *
      * @return SegmentNoteStruct[]
      * @throws ReflectionException
@@ -40,13 +40,13 @@ class SegmentNoteDao extends AbstractDao
     public static function getBySegmentIds(array $ids = [], int $ttl = 86400): array
     {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare("SELECT * FROM segment_notes WHERE id_segment IN ( " . implode(', ', $ids) . " ) ");
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_notes WHERE id_segment IN ( " . implode(', ', $ids) . " ) ");
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
-                $stmt,
-                SegmentNoteStruct::class,
-                []
+            $stmt,
+            SegmentNoteStruct::class,
+            []
         );
     }
 
@@ -61,8 +61,8 @@ class SegmentNoteDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT id_segment, id, note FROM segment_notes " .
-                " WHERE id_segment BETWEEN :start AND :stop AND json IS NULL"
+            "SELECT id_segment, id, note FROM segment_notes " .
+            " WHERE id_segment BETWEEN :start AND :stop AND json IS NULL"
         );
         $stmt->execute(['start' => $start, 'stop' => $stop]);
 
@@ -79,8 +79,8 @@ class SegmentNoteDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT id_segment, id, note, json FROM segment_notes " .
-                " WHERE id_segment BETWEEN :start AND :stop"
+            "SELECT id_segment, id, note, json FROM segment_notes " .
+            " WHERE id_segment BETWEEN :start AND :stop"
         );
         $stmt->execute(['start' => $start, 'stop' => $stop]);
 
@@ -99,16 +99,16 @@ class SegmentNoteDao extends AbstractDao
     public static function getJsonNotesByRange(int $id_segment_start, int $id_segment_stop, int $ttl = 0): array
     {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare("SELECT id_segment, json FROM segment_notes WHERE id_segment BETWEEN :start AND :stop AND note IS NULL ");
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("SELECT id_segment, json FROM segment_notes WHERE id_segment BETWEEN :start AND :stop AND note IS NULL ");
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
-                $stmt,
-                SegmentNoteStruct::class,
-                [
-                        'start' => $id_segment_start,
-                        'stop'  => $id_segment_stop
-                ]
+            $stmt,
+            SegmentNoteStruct::class,
+            [
+                'start' => $id_segment_start,
+                'stop' => $id_segment_stop
+            ]
         );
     }
 

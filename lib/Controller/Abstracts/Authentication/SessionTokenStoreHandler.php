@@ -17,7 +17,8 @@ use Model\DataAccess\DaoCacheTrait;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 
-class SessionTokenStoreHandler {
+class SessionTokenStoreHandler
+{
 
     use DaoCacheTrait;
 
@@ -31,7 +32,8 @@ class SessionTokenStoreHandler {
      * Constructor to initialize the cache TTL (time-to-live).
      * The default TTL is set to 7 days.
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->cacheTTL = 60 * 60 * 24 * 7; // 7 days
     }
 
@@ -46,13 +48,14 @@ class SessionTokenStoreHandler {
      * @return void
      * @throws Exception
      */
-    protected function _logCache( string $type, string $key, mixed $value, string $sqlQuery ): void {
-        LoggerFactory::getLogger( "login_cookie_cache" )->debug( [
-                "type"  => $type,
-                "key"   => $key,
-                "value" => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
+    protected function _logCache(string $type, string $key, mixed $value, string $sqlQuery): void
+    {
+        LoggerFactory::getLogger("login_cookie_cache")->debug([
+            "type" => $type,
+            "key" => $key,
+            "value" => preg_replace("/ +/", " ", str_replace("\n", " ", $sqlQuery)),
             //"result_set" => $value,
-        ] );
+        ]);
     }
 
     /**
@@ -63,16 +66,17 @@ class SessionTokenStoreHandler {
      * once when the user is authenticated and the session is established
      * or when the cookie expires during the current session.
      *
-     * @param int    $userId           The unique identifier of the user.
+     * @param int $userId The unique identifier of the user.
      * @param string $loginCookieValue The value of the login cookie to activate.
      *
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
      */
-    public function setCookieLoginTokenActive( int $userId, string $loginCookieValue ): void {
-        $key = sprintf( self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId );
+    public function setCookieLoginTokenActive(int $userId, string $loginCookieValue): void
+    {
+        $key = sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId);
         $this->_cacheSetConnection();
-        $this->_setInCacheMap( $key, $loginCookieValue, [ $loginCookieValue ] );
+        $this->_setInCacheMap($key, $loginCookieValue, [$loginCookieValue]);
     }
 
     /**
@@ -84,14 +88,15 @@ class SessionTokenStoreHandler {
      * to check that the user has a valid login token. This helps to determine if
      * the user's session is still valid and can be prolonged.
      *
-     * @param int    $userId           The unique identifier of the user.
+     * @param int $userId The unique identifier of the user.
      * @param string $loginCookieValue The value of the login cookie to validate.
      *
      * @return bool Returns true if the token is active, false otherwise.
      * @throws ReflectionException If there is an issue with the cache operation.
      */
-    public function isLoginCookieStillActive( int $userId, string $loginCookieValue ): bool {
-        return $this->_getFromCacheMap( sprintf( self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId ), $loginCookieValue ) !== null;
+    public function isLoginCookieStillActive(int $userId, string $loginCookieValue): bool
+    {
+        return $this->_getFromCacheMap(sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId), $loginCookieValue) !== null;
     }
 
     /**
@@ -101,20 +106,20 @@ class SessionTokenStoreHandler {
      * effectively invalidating it. It should be called when the user logs out
      * or when the token is no longer valid.
      *
-     * @param int    $userId           The unique identifier of the user.
+     * @param int $userId The unique identifier of the user.
      * @param string $loginCookieValue The value of the login cookie to remove.
      *
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
      */
-    public function removeLoginCookieFromStore( int $userId, string $loginCookieValue ): void {
-
-        if ( empty( $loginCookieValue ) ) {
+    public function removeLoginCookieFromStore(int $userId, string $loginCookieValue): void
+    {
+        if (empty($loginCookieValue)) {
             return;
         }
 
-        $key = sprintf( self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId );
-        $this->_removeObjectCacheMapElement( $key, $loginCookieValue );
+        $key = sprintf(self::ACTIVE_USER_LOGIN_TOKENS_MAP, $userId);
+        $this->_removeObjectCacheMapElement($key, $loginCookieValue);
     }
 
 }

@@ -4,15 +4,15 @@ import {saveAs} from 'file-saver'
 /**
  * Export TMX
  *
- * @param {Object} options
- * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
+ * @param {string} [idJob=config.id_job]
+ * @param {string} [password=config.password]
+ * @param checkErrors
  * @returns {Promise<object>}
  */
 export const downloadFile = async ({
   idJob = config.id_job,
   password = config.password,
-  checkErrors = 1,
+  checkErrors = true,
 }) => {
   const response = await fetch(
     `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&encoding=base64&disableErrorCheck=${checkErrors ? 0 : 1}`,

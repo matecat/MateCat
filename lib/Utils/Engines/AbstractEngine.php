@@ -355,8 +355,11 @@ abstract class AbstractEngine implements EngineInterface
         return $this->engineRecord->name;
     }
 
-    public function getMTName(): string
+    public function getMTName(string $forceName = ''): string
     {
+        if (!empty($forceName)) {
+            return "MT-" . $forceName;
+        }
         return "MT-" . $this->getName();
     }
 

@@ -23,7 +23,7 @@ function useOptions() {
 
     previousData.current = temporaryFormData
   }, [temporaryFormData])
-  console.log('# formData', formData)
+
   useEffect(() => {
     if (typeof formData === 'undefined') return
 

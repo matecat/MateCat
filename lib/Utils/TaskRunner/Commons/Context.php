@@ -63,11 +63,11 @@ class Context implements Stringable
      */
     protected function __construct(array $queueElement)
     {
-        $this->queue_name    = $queueElement[ 'queue_name' ];
-        $this->pid_set_name  = $queueElement[ 'queue_name' ] . '_pid_set';
-        $this->max_executors = $queueElement[ 'max_executors' ];
-        $this->redis_key     = $queueElement[ 'queue_name' ] . '_redis_key';
-        $this->loggerName    = $queueElement[ 'queue_name' ] . '.log';
+        $this->queue_name = $queueElement['queue_name'];
+        $this->pid_set_name = $queueElement['queue_name'] . '_pid_set';
+        $this->max_executors = $queueElement['max_executors'];
+        $this->redis_key = $queueElement['queue_name'] . '_redis_key';
+        $this->loggerName = $queueElement['queue_name'] . '.log';
     }
 
     /**

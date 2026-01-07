@@ -44,6 +44,8 @@ class IntentoEngineOptionsValidator extends AbstractValidator
             if (!array_key_exists($object->intento_routing, $availableRouting)) {
                 throw new InvalidArgumentException("Intento routing not valid.");
             }
+        } else {
+            throw new InvalidArgumentException("Intento provider and routing cannot be set at the same time.");
         }
 
         return null;

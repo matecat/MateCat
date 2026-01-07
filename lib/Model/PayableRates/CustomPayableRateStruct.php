@@ -15,17 +15,17 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
 {
     const int MAX_BREAKDOWN_SIZE = 65535;
 
-    public ?int   $id  = null;
-    public ?int   $uid = null;
-    public int    $version;
+    public ?int $id = null;
+    public ?int $uid = null;
+    public int $version;
     public string $name;
     /**
      * @var string|array
      */
     public string|array $breakdowns;
-    public ?string      $created_at  = null;
-    public ?string      $modified_at = null;
-    public ?string      $deleted_at  = null;
+    public ?string $created_at = null;
+    public ?string $modified_at = null;
+    public ?string $deleted_at = null;
 
     /**
      * @return string
@@ -48,8 +48,8 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
                 continue;
             }
             foreach ($targetLanguages as $targetLanguage => $targetPayableRates) {
-                if (!isset($targetPayableRates[ 'ICE_MT' ])) {
-                    $this->breakdowns[ $sourceLang ][ $targetLanguage ][ 'ICE_MT' ] = $targetPayableRates[ 'MT' ];
+                if (!isset($targetPayableRates['ICE_MT'])) {
+                    $this->breakdowns[$sourceLang][$targetLanguage]['ICE_MT'] = $targetPayableRates['MT'];
                 }
             }
         }
@@ -70,7 +70,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
         $this->validateLanguage($source);
         $this->validateLanguage($target);
 
-        return PayableRates::resolveBreakdowns($breakdowns, $source, $target, $breakdowns[ 'default' ]);
+        return PayableRates::resolveBreakdowns($breakdowns, $source, $target, $breakdowns['default']);
     }
 
     /**
@@ -85,20 +85,20 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
         $json = json_decode($json, true);
 
         if (
-                !isset($json[ 'payable_rate_template_name' ]) and
-                !isset($json[ 'breakdowns' ])
+            !isset($json['payable_rate_template_name']) and
+            !isset($json['breakdowns'])
         ) {
             throw new Exception("Cannot instantiate a new CustomPayableRateStruct. Invalid JSON provided.", 403);
         }
 
-        $this->validateBreakdowns($json[ 'breakdowns' ]);
+        $this->validateBreakdowns($json['breakdowns']);
 
-        if (isset($json[ 'version' ])) {
-            $this->version = $json[ 'version' ];
+        if (isset($json['version'])) {
+            $this->version = $json['version'];
         }
 
-        $this->name       = $json[ 'payable_rate_template_name' ];
-        $this->breakdowns = $json[ 'breakdowns' ];
+        $this->name = $json['payable_rate_template_name'];
+        $this->breakdowns = $json['breakdowns'];
 
         return $this;
     }
@@ -116,11 +116,11 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
             throw new Exception('`breakdowns` string is too large. Max size: 64kb', 400);
         }
 
-        if (!isset($breakdowns[ 'default' ])) {
+        if (!isset($breakdowns['default'])) {
             throw new DomainException('`default` node is MANDATORY in the breakdowns array.', 403);
         }
 
-        unset($breakdowns[ 'default' ]);
+        unset($breakdowns['default']);
 
         foreach ($breakdowns as $language => $breakdown) {
             $this->validateLanguage($language);
@@ -151,13 +151,13 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     public function jsonSerialize(): array
     {
         return [
-                'id'                         => (int)$this->id,
-                'uid'                        => (int)$this->uid,
-                'version'                    => $this->version,
-                'payable_rate_template_name' => $this->name,
-                'breakdowns'                 => $this->getBreakdownsArray(),
-                'createdAt'                  => $this->created_at !== null ? DateTimeUtil::formatIsoDate($this->created_at) : null,
-                'modifiedAt'                 => $this->modified_at !== null ? DateTimeUtil::formatIsoDate($this->modified_at) : null,
+            'id' => (int)$this->id,
+            'uid' => (int)$this->uid,
+            'version' => $this->version,
+            'payable_rate_template_name' => $this->name,
+            'breakdowns' => $this->getBreakdownsArray(),
+            'createdAt' => $this->created_at !== null ? DateTimeUtil::formatIsoDate($this->created_at) : null,
+            'modifiedAt' => $this->modified_at !== null ? DateTimeUtil::formatIsoDate($this->modified_at) : null,
         ];
     }
 }

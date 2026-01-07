@@ -302,7 +302,6 @@ class MyMemory extends AbstractEngine
         }
 
         return $this->result;
-
     }
 
     public function update($_config): UpdateContributionResponse

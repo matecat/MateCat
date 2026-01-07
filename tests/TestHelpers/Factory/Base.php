@@ -1,5 +1,6 @@
 <?php
 
-class Factory_Base {
+class Factory_Base
+{
 
 }

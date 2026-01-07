@@ -15,10 +15,10 @@ class TranslationVersions extends BaseFeature
     const string FEATURE_CODE = 'translation_versions';
 
     /**
-     * @param JobStruct     $chunkStruct
-     * @param UserStruct    $userStruct
+     * @param JobStruct $chunkStruct
+     * @param UserStruct $userStruct
      * @param ProjectStruct $projectStruct
-     * @param int|null      $id_segment
+     * @param int|null $id_segment
      *
      * @return VersionHandlerInterface
      */
@@ -26,10 +26,10 @@ class TranslationVersions extends BaseFeature
     {
         if ($id_segment && $projectStruct->isFeatureEnabled(self::FEATURE_CODE)) {
             return new TranslationVersionsHandler(
-                    $chunkStruct,
-                    $id_segment,
-                    $userStruct,
-                    $projectStruct
+                $chunkStruct,
+                $id_segment,
+                $userStruct,
+                $projectStruct
             );
         }
 

@@ -14,7 +14,7 @@ class SupportedFilesController extends KleinController
     public function index(): void
     {
         $this->response->json(
-                $this->getFileList()
+            $this->getFileList()
         );
     }
 
@@ -29,13 +29,13 @@ class SupportedFilesController extends KleinController
             $val = [];
             foreach ($value as $ext => $info) {
                 $val[] = [
-                        'ext'   => $ext,
-                        'class' => $info[ 2 ]
+                    'ext' => $ext,
+                    'class' => $info[2]
                 ];
             }
 
-            $val         = array_chunk($val, 1);
-            $ret[ $key ] = $val;
+            $val = array_chunk($val, 1);
+            $ret[$key] = $val;
         }
 
         return $ret;

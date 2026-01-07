@@ -69,8 +69,8 @@ class MultiCurlHandler
      */
     protected array $multi_curl_log = [];
 
-    public bool            $verbose        = false;
-    public bool            $high_verbosity = false;
+    public bool $verbose = false;
+    public bool $high_verbosity = false;
     private ?MatecatLogger $logger;
 
     /**
@@ -133,81 +133,81 @@ class MultiCurlHandler
              */
             if (($info = curl_multi_info_read($this->multi_handler)) !== false) {
                 //Strict standards: resource ID#16 used as offset, casting to integer (16)
-                $_info[ (int)$info[ 'handle' ] ] = $info;
+                $_info[(int)$info['handle']] = $info;
             }
         } while ($still_running > 0);
 
         foreach ($this->curl_handlers as $tokenHash => $curl_resource) {
-            $this->multi_curl_results[ $tokenHash ]                                = curl_multi_getcontent($curl_resource);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]          = curl_getinfo($curl_resource, CURLINFO_TOTAL_TIME);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_connect_time' ]        = curl_getinfo($curl_resource, CURLINFO_CONNECT_TIME);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_pretransfer_time' ]    = curl_getinfo($curl_resource, CURLINFO_PRETRANSFER_TIME);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ] = curl_getinfo($curl_resource, CURLINFO_STARTTRANSFER_TIME);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ]       = curl_getinfo($curl_resource, CURLINFO_EFFECTIVE_URL);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_upload' ]         = curl_getinfo($curl_resource, CURLINFO_SIZE_UPLOAD);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_download' ]       = curl_getinfo($curl_resource, CURLINFO_SIZE_DOWNLOAD);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]         = curl_getinfo($curl_resource, CURLINFO_HEADER_SIZE);
-            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_out' ]          = curl_getinfo($curl_resource, CURLINFO_HEADER_OUT);
-            $this->multi_curl_info[ $tokenHash ][ 'http_code' ]                    = curl_getinfo($curl_resource, CURLINFO_HTTP_CODE);
-            $this->multi_curl_info[ $tokenHash ][ 'primary_ip' ]                   = curl_getinfo($curl_resource, CURLINFO_PRIMARY_IP);
-            $this->multi_curl_info[ $tokenHash ][ 'error' ]                        = curl_error($curl_resource);
-            $this->multi_curl_info[ $tokenHash ][ 'transfer_time' ]                = round(
-                    (
-                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ] -
-                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ]
-                    ),
-                    5
+            $this->multi_curl_results[$tokenHash] = curl_multi_getcontent($curl_resource);
+            $this->multi_curl_info[$tokenHash]['curlinfo_total_time'] = curl_getinfo($curl_resource, CURLINFO_TOTAL_TIME);
+            $this->multi_curl_info[$tokenHash]['curlinfo_connect_time'] = curl_getinfo($curl_resource, CURLINFO_CONNECT_TIME);
+            $this->multi_curl_info[$tokenHash]['curlinfo_pretransfer_time'] = curl_getinfo($curl_resource, CURLINFO_PRETRANSFER_TIME);
+            $this->multi_curl_info[$tokenHash]['curlinfo_start_transfer_time'] = curl_getinfo($curl_resource, CURLINFO_STARTTRANSFER_TIME);
+            $this->multi_curl_info[$tokenHash]['curlinfo_effective_url'] = curl_getinfo($curl_resource, CURLINFO_EFFECTIVE_URL);
+            $this->multi_curl_info[$tokenHash]['curlinfo_size_upload'] = curl_getinfo($curl_resource, CURLINFO_SIZE_UPLOAD);
+            $this->multi_curl_info[$tokenHash]['curlinfo_size_download'] = curl_getinfo($curl_resource, CURLINFO_SIZE_DOWNLOAD);
+            $this->multi_curl_info[$tokenHash]['curlinfo_header_size'] = curl_getinfo($curl_resource, CURLINFO_HEADER_SIZE);
+            $this->multi_curl_info[$tokenHash]['curlinfo_header_out'] = curl_getinfo($curl_resource, CURLINFO_HEADER_OUT);
+            $this->multi_curl_info[$tokenHash]['http_code'] = curl_getinfo($curl_resource, CURLINFO_HTTP_CODE);
+            $this->multi_curl_info[$tokenHash]['primary_ip'] = curl_getinfo($curl_resource, CURLINFO_PRIMARY_IP);
+            $this->multi_curl_info[$tokenHash]['error'] = curl_error($curl_resource);
+            $this->multi_curl_info[$tokenHash]['transfer_time'] = round(
+                (
+                    $this->multi_curl_info[$tokenHash]['curlinfo_total_time'] -
+                    $this->multi_curl_info[$tokenHash]['curlinfo_start_transfer_time']
+                ),
+                5
             );
 
             //Strict standards: resource ID#16 used as offset, casting to integer (16)
-            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = @$_info[ (int)$curl_resource ][ 'result' ];
+            $this->multi_curl_info[$tokenHash]['errno'] = @$_info[(int)$curl_resource]['result'];
 
             //HEADERS
-            if (isset($this->curl_headers_requests[ $tokenHash ])) {
-                $header                                    = substr($this->multi_curl_results[ $tokenHash ], 0, $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]);
-                $header                                    = explode("\r\n", $header);
-                $this->multi_curl_results[ $tokenHash ]    = substr(
-                        $this->multi_curl_results[ $tokenHash ],
-                        $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]
+            if (isset($this->curl_headers_requests[$tokenHash])) {
+                $header = substr($this->multi_curl_results[$tokenHash], 0, $this->multi_curl_info[$tokenHash]['curlinfo_header_size']);
+                $header = explode("\r\n", $header);
+                $this->multi_curl_results[$tokenHash] = substr(
+                    $this->multi_curl_results[$tokenHash],
+                    $this->multi_curl_info[$tokenHash]['curlinfo_header_size']
                 );
-                $this->curl_headers_requests[ $tokenHash ] = $header;
+                $this->curl_headers_requests[$tokenHash] = $header;
             }
 
             //TIMING nad LOGGING
-            $this->multi_curl_log[ $tokenHash ]             = [];
-            $this->multi_curl_log[ $tokenHash ][ 'timing' ] = [
-                    'Total Time'          => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ],
-                    'Connect Time'        => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_connect_time' ],
-                    'Pre-Transfer Time'   => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_pretransfer_time' ],
-                    'Start Transfer Time' => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ],
-                    'Transfer Time'       => round(
-                                    (
-                                            (
-                                                    $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ] -
-                                                    $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ]
-                                            ) * 1000000)
-                            ) . "μs"
+            $this->multi_curl_log[$tokenHash] = [];
+            $this->multi_curl_log[$tokenHash]['timing'] = [
+                'Total Time' => $this->multi_curl_info[$tokenHash]['curlinfo_total_time'],
+                'Connect Time' => $this->multi_curl_info[$tokenHash]['curlinfo_connect_time'],
+                'Pre-Transfer Time' => $this->multi_curl_info[$tokenHash]['curlinfo_pretransfer_time'],
+                'Start Transfer Time' => $this->multi_curl_info[$tokenHash]['curlinfo_start_transfer_time'],
+                'Transfer Time' => round(
+                        (
+                            (
+                                $this->multi_curl_info[$tokenHash]['curlinfo_total_time'] -
+                                $this->multi_curl_info[$tokenHash]['curlinfo_start_transfer_time']
+                            ) * 1000000)
+                    ) . "μs"
             ];
 
-            $this->multi_curl_log[ $tokenHash ][ "resource_hash" ] = $tokenHash;
-            $this->multi_curl_log[ $tokenHash ][ "url" ]           = $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ];
+            $this->multi_curl_log[$tokenHash]["resource_hash"] = $tokenHash;
+            $this->multi_curl_log[$tokenHash]["url"] = $this->multi_curl_info[$tokenHash]['curlinfo_effective_url'];
 
             if ($this->high_verbosity) {
-                $this->multi_curl_log[ $tokenHash ][ 'options' ]                      = $this->curl_options_requests[ $tokenHash ] ?? null;
-                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ?? null;
-                unset($this->multi_curl_info[ $tokenHash ][ 'logging' ][ 'options' ][ CURLOPT_POSTFIELDS ]);
+                $this->multi_curl_log[$tokenHash]['options'] = $this->curl_options_requests[$tokenHash] ?? null;
+                $this->multi_curl_log[$tokenHash]['options']["post_parameters"] = $this->curl_options_requests[$tokenHash][CURLOPT_POSTFIELDS] ?? null;
+                unset($this->multi_curl_info[$tokenHash]['logging']['options'][CURLOPT_POSTFIELDS]);
             } else {
-                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ?? null;
+                $this->multi_curl_log[$tokenHash]['options']["post_parameters"] = $this->curl_options_requests[$tokenHash][CURLOPT_POSTFIELDS] ?? null;
             }
 
             if ($this->hasError($tokenHash)) {
-                $this->multi_curl_log[ $tokenHash ][ "error" ]      = $this->getError($tokenHash);
-                $this->multi_curl_log[ $tokenHash ][ "error_body" ] = $this->getSingleContent($tokenHash);
+                $this->multi_curl_log[$tokenHash]["error"] = $this->getError($tokenHash);
+                $this->multi_curl_log[$tokenHash]["error_body"] = $this->getSingleContent($tokenHash);
             }
             //TIMING nad LOGGING
 
             if ($this->verbose) {
-                $this->_log($this->multi_curl_log[ $tokenHash ]);
+                $this->_log($this->multi_curl_log[$tokenHash]);
             }
         }
     }
@@ -231,9 +231,9 @@ class MultiCurlHandler
      */
     public function setRequestHeader(string $tokenHash): MultiCurlHandler
     {
-        $resource = $this->curl_handlers[ $tokenHash ];
+        $resource = $this->curl_handlers[$tokenHash];
         curl_setopt($resource, CURLOPT_HEADER, true);
-        $this->curl_headers_requests[ $tokenHash ] = true;
+        $this->curl_headers_requests[$tokenHash] = true;
 
         return $this;
     }
@@ -247,7 +247,7 @@ class MultiCurlHandler
      */
     public function getSingleHeader(string $tokenHash): array
     {
-        return $this->curl_headers_requests[ $tokenHash ];
+        return $this->curl_headers_requests[$tokenHash];
     }
 
     /**
@@ -263,8 +263,8 @@ class MultiCurlHandler
     /**
      * Create a curl resource and add it to the pool indexing it with a unique identifier
      *
-     * @param string      $url       string
-     * @param array|null  $options   array
+     * @param string $url string
+     * @param array|null $options array
      * @param string|null $tokenHash string
      *
      * @return string|null Curl identifier
@@ -280,7 +280,7 @@ class MultiCurlHandler
         curl_setopt($curl_resource, CURLOPT_URL, $url);
         @curl_setopt_array($curl_resource, $options);
 
-        $this->curl_options_requests[ $tokenHash ] = $options;
+        $this->curl_options_requests[$tokenHash] = $options;
 
         return $this->addResource($curl_resource, $tokenHash);
     }
@@ -288,7 +288,7 @@ class MultiCurlHandler
     /**
      * Add an already existent curl resource to the pool indexing it with a unique identifier
      *
-     * @param CurlHandle  $curl_resource
+     * @param CurlHandle $curl_resource
      * @param null|string $tokenHash
      *
      * @return string|null
@@ -300,7 +300,7 @@ class MultiCurlHandler
         }
 
         curl_multi_add_handle($this->multi_handler, $curl_resource);
-        $this->curl_handlers[ $tokenHash ] = $curl_resource;
+        $this->curl_handlers[$tokenHash] = $curl_resource;
 
         return $tokenHash;
     }
@@ -339,7 +339,7 @@ class MultiCurlHandler
     public function getSingleContent($tokenHash, callable $function = null): bool|string|null
     {
         if (array_key_exists($tokenHash, $this->multi_curl_results)) {
-            return $this->_callbackExecute($this->multi_curl_results[ $tokenHash ], $function);
+            return $this->_callbackExecute($this->multi_curl_results[$tokenHash], $function);
         }
 
         return null;
@@ -347,7 +347,7 @@ class MultiCurlHandler
 
     public function getSingleLog($tokenHash)
     {
-        return @$this->multi_curl_log[ $tokenHash ];
+        return @$this->multi_curl_log[$tokenHash];
     }
 
     public function getAllLogs(): array
@@ -364,20 +364,20 @@ class MultiCurlHandler
      */
     public function getSingleInfo($tokenHash): ?array
     {
-        return $this->multi_curl_info[ $tokenHash ] ?? null;
+        return $this->multi_curl_info[$tokenHash] ?? null;
     }
 
     public function getOptionRequest($tokenHash)
     {
-        return $this->curl_options_requests[ $tokenHash ];
+        return $this->curl_options_requests[$tokenHash];
     }
 
     public function getError($tokenHash): array
     {
-        $res                = [];
-        $res[ 'http_code' ] = $this->multi_curl_info[ $tokenHash ][ 'http_code' ];
-        $res[ 'error' ]     = $this->multi_curl_info[ $tokenHash ][ 'error' ];
-        $res[ 'errno' ]     = $this->multi_curl_info[ $tokenHash ][ 'errno' ];
+        $res = [];
+        $res['http_code'] = $this->multi_curl_info[$tokenHash]['http_code'];
+        $res['error'] = $this->multi_curl_info[$tokenHash]['error'];
+        $res['errno'] = $this->multi_curl_info[$tokenHash]['errno'];
 
         return $res;
     }
@@ -391,7 +391,7 @@ class MultiCurlHandler
      */
     public function hasError(string $tokenHash): bool
     {
-        return (!empty($this->multi_curl_info[ $tokenHash ][ 'error' ]) && $this->multi_curl_info[ $tokenHash ][ 'errno' ] != 0) || (int)$this->multi_curl_info[ $tokenHash ][ 'http_code' ] >= 400;
+        return (!empty($this->multi_curl_info[$tokenHash]['error']) && $this->multi_curl_info[$tokenHash]['errno'] != 0) || (int)$this->multi_curl_info[$tokenHash]['http_code'] >= 400;
     }
 
     /**
@@ -417,9 +417,9 @@ class MultiCurlHandler
         $this->multiCurlCloseAll();
         $this->curl_headers_requests = [];
         $this->curl_options_requests = [];
-        $this->multi_curl_results    = [];
-        $this->multi_curl_info       = [];
-        $this->multi_curl_log        = [];
+        $this->multi_curl_results = [];
+        $this->multi_curl_info = [];
+        $this->multi_curl_log = [];
     }
 
     protected function _callbackExecute($record, callable $function = null): mixed
@@ -433,7 +433,7 @@ class MultiCurlHandler
             $record = array_map($function, $record);
 
             if (!$is_array) {
-                $record = $record[ 0 ];
+                $record = $record[0];
             }
         }
 

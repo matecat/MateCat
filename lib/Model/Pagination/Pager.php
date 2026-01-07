@@ -29,7 +29,7 @@ class Pager
     }
 
     /**
-     * @param int                  $totals
+     * @param int $totals
      * @param PaginationParameters $paginationParameters
      *
      * @return array
@@ -39,31 +39,31 @@ class Pager
     {
         $this->setCacheTTL($paginationParameters->getTtl());
 
-        $count  = $totals + 1;
-        $pages  = ceil($count / $paginationParameters->getPagination());
-        $prev   = ($paginationParameters->getCurrent() !== 1) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() - 1) : null;
-        $next   = ($paginationParameters->getCurrent() < $pages) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() + 1) : null;
+        $count = $totals + 1;
+        $pages = ceil($count / $paginationParameters->getPagination());
+        $prev = ($paginationParameters->getCurrent() !== 1) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() - 1) : null;
+        $next = ($paginationParameters->getCurrent() < $pages) ? $paginationParameters->getBaseRoute() . ($paginationParameters->getCurrent() + 1) : null;
         $offset = ($paginationParameters->getCurrent() - 1) * $paginationParameters->getPagination();
 
         $paginationStatement = $this->connection->prepare(
-                sprintf($paginationParameters->getQuery(), $paginationParameters->getPagination(), $offset)
+            sprintf($paginationParameters->getQuery(), $paginationParameters->getPagination(), $offset)
         );
 
         if (!empty($paginationParameters->getCacheKeyMap())) {
             $_cacheResult = $this->_getFromCacheMap(
-                    $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey($paginationParameters->getBindParams()) . $paginationParameters->getFetchClass()
+                $paginationParameters->getCacheKeyMap(),
+                $paginationStatement->queryString . $this->_serializeForCacheKey($paginationParameters->getBindParams()) . $paginationParameters->getFetchClass()
             );
 
             if (!empty($_cacheResult)) {
                 return $this->format(
-                        $paginationParameters->getCurrent(),
-                        $paginationParameters->getPagination(),
-                        $pages,
-                        $count,
-                        $_cacheResult,
-                        $prev,
-                        $next
+                    $paginationParameters->getCurrent(),
+                    $paginationParameters->getPagination(),
+                    $pages,
+                    $count,
+                    $_cacheResult,
+                    $prev,
+                    $next
                 );
             }
         }
@@ -74,25 +74,25 @@ class Pager
 
         if (!empty($paginationParameters->getCacheKeyMap())) {
             $this->_setInCacheMap(
-                    $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey($paginationParameters->getBindParams()) . $paginationParameters->getFetchClass(),
-                    $result
+                $paginationParameters->getCacheKeyMap(),
+                $paginationStatement->queryString . $this->_serializeForCacheKey($paginationParameters->getBindParams()) . $paginationParameters->getFetchClass(),
+                $result
             );
         }
 
         return $this->format(
-                $paginationParameters->getCurrent(),
-                $paginationParameters->getPagination(),
-                $pages,
-                $count,
-                $result,
-                $prev,
-                $next
+            $paginationParameters->getCurrent(),
+            $paginationParameters->getPagination(),
+            $pages,
+            $count,
+            $result,
+            $prev,
+            $next
         );
     }
 
     /**
-     * @param string     $query
+     * @param string $query
      * @param array|null $parameters
      *
      * @return int
@@ -103,15 +103,15 @@ class Pager
         $statementCount->execute($parameters);
         $count = $statementCount->fetch(PDO::FETCH_NUM);
 
-        return $count[ 0 ] ?? 0;
+        return $count[0] ?? 0;
     }
 
     /**
-     * @param int         $current
-     * @param int         $pagination
-     * @param int         $pages
-     * @param int         $total
-     * @param array       $items
+     * @param int $current
+     * @param int $pagination
+     * @param int $pages
+     * @param int $total
+     * @param array $items
      *
      * @param string|null $prev
      * @param string|null $next
@@ -121,13 +121,13 @@ class Pager
     protected function format(int $current, int $pagination, int $pages, int $total, array $items, ?string $prev, ?string $next): array
     {
         return [
-                'current_page' => $current,
-                'per_page'     => $pagination,
-                'last_page'    => $pages,
-                'total'        => $total,
-                'prev'         => $prev,
-                'next'         => $next,
-                'items'        => $items,
+            'current_page' => $current,
+            'per_page' => $pagination,
+            'last_page' => $pages,
+            'total' => $total,
+            'prev' => $prev,
+            'next' => $next,
+            'items' => $items,
         ];
     }
 

@@ -242,24 +242,49 @@ export const decodePlaceholdersToPlainText = (str) => {
   return str
     ? str
         .replace(
-          config.lfPlaceholderRegex,
+          tagSignatures['lineFeed'].regex,
           tagSignatures['lineFeed'].placeholder,
         )
         .replace(
-          config.crPlaceholderRegex,
+          tagSignatures['carriageReturn'].regex,
           tagSignatures['carriageReturn'].placeholder,
         )
         .replace(
-          config.crlfPlaceholderRegex,
+          tagSignatures['carriageReturn'].regex,
           `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
         )
-        .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
-        .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
+        .replace(tagSignatures['tab'].regex, tagSignatures['tab'].placeholder)
+        .replace(tagSignatures['nbsp'].regex, tagSignatures['nbsp'].placeholder)
+    : str
+}
+export const encodePlaceholdersToTags = (str) => {
+  return str
+    ? str
+        .replaceAll(
+          tagSignatures['lineFeed'].placeholder,
+          tagSignatures['lineFeed'].encodedPlaceholder,
+        )
+        .replaceAll(
+          tagSignatures['carriageReturn'].placeholder,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
+        )
+        .replaceAll(
+          `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
+        )
+        .replaceAll(
+          tagSignatures['tab'].placeholder,
+          tagSignatures['tab'].encodedPlaceholder,
+        )
+        .replaceAll(
+          tagSignatures['nbsp'].placeholder,
+          tagSignatures['nbsp'].encodedPlaceholder,
+        )
     : str
 }
 
 export const removePlaceholdersForGlossary = (str) => {
-  return str.replace(config.nbspPlaceholderRegex, ' ')
+  return str.replace(tagSignatures['nbsp'].regex, ' ')
 }
 
 export const decodeHtmlEntities = (text) => {

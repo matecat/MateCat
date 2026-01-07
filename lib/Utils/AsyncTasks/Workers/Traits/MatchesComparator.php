@@ -51,23 +51,23 @@ trait MatchesComparator
     private function __compareScoreDesc(array $a, array $b): int
     {
         // Check if the 'ICE' key is set and cast it to a boolean
-        $aIsICE = (bool)($a[ 'ICE' ] ?? false);
-        $bIsICE = (bool)($b[ 'ICE' ] ?? false);
+        $aIsICE = (bool)($a['ICE'] ?? false);
+        $bIsICE = (bool)($b['ICE'] ?? false);
 
         // Convert 'match' values to float for comparison
-        $aMatch = floatval($a[ 'match' ]);
-        $bMatch = floatval($b[ 'match' ]);
+        $aMatch = floatval($a['match']);
+        $bMatch = floatval($b['match']);
 
         // If 'match' values are equal, compare based on 'ICE' and MT match since MT matches can be customized and should be prioritized over equivalent matches
         if ($aMatch == $bMatch) {
             $conditions = [
-                    [$aIsICE && !$bIsICE, -1], // The First array has 'ICE' set to true
-                    [!$aIsICE && $bIsICE, 1],  // The Second array has 'ICE' set to true
-                    [$this->isMtMatch($a), -1], // The First array is an MT match
-                    [$this->isMtMatch($b), 1]   // The Second array is an MT match
+                [$aIsICE && !$bIsICE, -1], // The First array has 'ICE' set to true
+                [!$aIsICE && $bIsICE, 1],  // The Second array has 'ICE' set to true
+                [$this->isMtMatch($a), -1], // The First array is an MT match
+                [$this->isMtMatch($b), 1]   // The Second array is an MT match
             ];
 
-            foreach ($conditions as [ $condition, $result ]) {
+            foreach ($conditions as [$condition, $result]) {
                 if ($condition) {
                     return $result;
                 }
@@ -82,7 +82,7 @@ trait MatchesComparator
 
     public function isMtMatch(array $match): bool
     {
-        return stripos($match[ 'created_by' ] ?? '', InternalMatchesConstants::MT) !== false;
+        return stripos($match['created_by'] ?? '', InternalMatchesConstants::MT) !== false;
     }
 
 }

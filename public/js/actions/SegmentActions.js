@@ -1181,9 +1181,11 @@ const SegmentActions = {
   },
 
   getContributions: function (sid, multiMatchLangs, force) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
-    TranslationMatches.getContribution(sid, 1, multiMatchLangs, force)
-    TranslationMatches.getContribution(sid, 2, multiMatchLangs, force)
+    TranslationMatches.getContributionsWithPrefetch({
+      sid,
+      crossLanguageSettings: multiMatchLangs,
+      force,
+    })
   },
 
   getContribution: function (sid, multiMatchLangs, force) {

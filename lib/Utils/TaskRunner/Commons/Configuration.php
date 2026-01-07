@@ -20,10 +20,10 @@ class Configuration
     protected ContextList $_contextList;
 
     protected string $_loggerName;
-    private array    $__raw;
+    private array $__raw;
 
     /**
-     * @param string      $rawConfig
+     * @param string $rawConfig
      * @param string|null $contextIndex
      *
      * @throws Exception
@@ -32,18 +32,18 @@ class Configuration
     {
         $config = @parse_ini_file($rawConfig, true);
 
-        if (empty($rawConfig) || empty($config[ 'context_definitions' ])) {
+        if (empty($rawConfig) || empty($config['context_definitions'])) {
             throw new Exception('Wrong configuration file provided.');
         }
 
         if (!isset($contextIndex)) {
-            $this->_contextList = ContextList::get($config[ 'context_definitions' ]);
+            $this->_contextList = ContextList::get($config['context_definitions']);
         } else {
-            $this->_contextList = ContextList::get($config[ 'context_definitions' ][ $contextIndex ]);
+            $this->_contextList = ContextList::get($config['context_definitions'][$contextIndex]);
         }
 
-        $this->_loggerName = $config[ 'loggerName' ];
-        $this->__raw       = $config;
+        $this->_loggerName = $config['loggerName'];
+        $this->__raw = $config;
     }
 
     public function getContextList(): ContextList

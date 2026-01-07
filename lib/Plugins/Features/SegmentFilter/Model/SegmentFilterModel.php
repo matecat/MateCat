@@ -29,14 +29,14 @@ class SegmentFilterModel
     /**
      * SegmentFilterModel constructor.
      *
-     * @param JobStruct        $chunk
+     * @param JobStruct $chunk
      * @param FilterDefinition $filter
      *
      * @throws Exception
      */
     public function __construct(JobStruct $chunk, FilterDefinition $filter)
     {
-        $this->chunk  = $chunk;
+        $this->chunk = $chunk;
         $this->filter = $filter;
     }
 
@@ -48,7 +48,7 @@ class SegmentFilterModel
     public function getSegmentList(): array
     {
         if ($this->filter->isSampled()) {
-            return SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );
+            return SegmentFilterDao::findSegmentIdsForSample($this->chunk, $this->filter);
         }
 
         return SegmentFilterDao::findSegmentIdsBySimpleFilter($this->chunk, $this->filter);

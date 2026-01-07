@@ -14,25 +14,27 @@ use Utils\Registry\AppConfig;
  * Date: 15/04/16
  * Time: 19.17
  */
-class CacheSetConnectionTest extends AbstractTest {
+class CacheSetConnectionTest extends AbstractTest
+{
     protected $reflector;
     protected $method;
     protected $cache_conn;
 
     protected $initial_redis_configuration;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->method           = $this->reflector->getMethod( "_cacheSetConnection" );
-        $this->cache_conn       = $this->reflector->getProperty( "cache_con" );
-
+        $this->databaseInstance = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->method = $this->reflector->getMethod("_cacheSetConnection");
+        $this->cache_conn = $this->reflector->getProperty("cache_con");
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
-        if ( !empty( $this->initial_redis_configuration ) ) {
+        if (!empty($this->initial_redis_configuration)) {
             AppConfig::$REDIS_SERVERS = $this->initial_redis_configuration;
         }
     }
@@ -42,11 +44,11 @@ class CacheSetConnectionTest extends AbstractTest {
      * @group  regression
      * @covers Model\DataAccess\AbstractDao::_cacheSetConnection
      */
-    public function test_set_connection_after_creation_of_engine() {
-
-        $this->cache_conn->setValue( $this->databaseInstance, null );
-        $this->method->invoke( $this->databaseInstance );
-        $this->assertTrue( $this->cache_conn->getValue( $this->databaseInstance ) instanceof Predis\Client );
+    public function test_set_connection_after_creation_of_engine()
+    {
+        $this->cache_conn->setValue($this->databaseInstance, null);
+        $this->method->invoke($this->databaseInstance);
+        $this->assertTrue($this->cache_conn->getValue($this->databaseInstance) instanceof Predis\Client);
     }
 
     /**
@@ -54,12 +56,12 @@ class CacheSetConnectionTest extends AbstractTest {
      * @group  regression
      * @covers Model\DataAccess\AbstractDao::_cacheSetConnection
      */
-    public function test_set_connection_with_wrong_global_constant() {
-
-        $this->cache_conn->setValue( $this->databaseInstance, null );
+    public function test_set_connection_with_wrong_global_constant()
+    {
+        $this->cache_conn->setValue($this->databaseInstance, null);
         $this->initial_redis_configuration = AppConfig::$REDIS_SERVERS;
-        AppConfig::$REDIS_SERVERS          = "tcp://fake_localhost_and_fake_port:7777";
-        $this->expectException( StreamInitException::class );
-        $this->method->invoke( $this->databaseInstance );
+        AppConfig::$REDIS_SERVERS = "tcp://fake_localhost_and_fake_port:7777";
+        $this->expectException(StreamInitException::class);
+        $this->method->invoke($this->databaseInstance);
     }
 }

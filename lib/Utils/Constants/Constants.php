@@ -19,14 +19,14 @@ class Constants
 
     const string OAUTH_TOKEN_KEY_FILE = '/inc/oauth-token-key.txt';
 
-    const string PUBLIC_TM         = "Public TM";
+    const string PUBLIC_TM = "Public TM";
     const string NO_DESCRIPTION_TM = "No description";
 
     public static array $allowed_seg_rules = [
-            'standard',
-            'patent',
-            'paragraph',
-            ''
+        'standard',
+        'patent',
+        'paragraph',
+        ''
     ];
 
     /**

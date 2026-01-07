@@ -22,14 +22,14 @@ class GDriveTokenHandler
     {
         $client->setAccessToken($raw_token);
 
-        $json_token    = json_decode($raw_token, true);
-        $refresh_token = $json_token[ 'refresh_token' ];
+        $json_token = json_decode($raw_token, true);
+        $refresh_token = $json_token['refresh_token'];
 
         if ($client->isAccessTokenExpired()) {
             $grants = $client->refreshToken($refresh_token);
 
-            if (isset($grants[ 'error' ])) {
-                throw new Exception($grants[ 'error_description' ]);
+            if (isset($grants['error'])) {
+                throw new Exception($grants['error_description']);
             }
 
             $access_token = $client->getAccessToken();

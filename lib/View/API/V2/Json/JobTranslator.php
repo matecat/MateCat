@@ -34,18 +34,18 @@ class JobTranslator
         }
 
         $translatorJson = [
-                'email'                 => $jTranslatorsStruct->email,
-                'added_by'              => (int)$jTranslatorsStruct->added_by,
-                'delivery_date'         => $jTranslatorsStruct->delivery_date,
-                'delivery_timestamp'    => strtotime($jTranslatorsStruct->delivery_date),
-                'source'                => $jTranslatorsStruct->source,
-                'target'                => $jTranslatorsStruct->target,
-                'id_translator_profile' => $jTranslatorsStruct->id_translator_profile,
-                'user'                  => null
+            'email' => $jTranslatorsStruct->email,
+            'added_by' => (int)$jTranslatorsStruct->added_by,
+            'delivery_date' => $jTranslatorsStruct->delivery_date,
+            'delivery_timestamp' => strtotime($jTranslatorsStruct->delivery_date),
+            'source' => $jTranslatorsStruct->source,
+            'target' => $jTranslatorsStruct->target,
+            'id_translator_profile' => $jTranslatorsStruct->id_translator_profile,
+            'user' => null
         ];
 
         if (!empty($jTranslatorsStruct->id_translator_profile)) {
-            $translatorJson[ 'user' ] = User::renderItem($jTranslatorsStruct->getUser());
+            $translatorJson['user'] = User::renderItem($jTranslatorsStruct->getUser());
         }
 
         return $translatorJson;

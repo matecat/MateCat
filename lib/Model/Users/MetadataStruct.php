@@ -29,10 +29,10 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     public function jsonSerialize(): array
     {
         return [
-                'id'    => (int)$this->id,
-                'uid'   => (int)$this->uid,
-                'key'   => $this->key,
-                'value' => $this->getValue()
+            'id' => (int)$this->id,
+            'uid' => (int)$this->uid,
+            'key' => $this->key,
+            'value' => $this->getValue()
         ];
     }
 

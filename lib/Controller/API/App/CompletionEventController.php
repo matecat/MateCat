@@ -47,7 +47,7 @@ class CompletionEventController extends KleinController
 
         $Validator = new ChunkPasswordValidator($this);
         $Validator->onSuccess(function () use ($Validator) {
-            $event = (new ChunkCompletionEventDao())->getByIdAndChunk($this->getParams()[ 'id_event' ], $Validator->getChunk());
+            $event = (new ChunkCompletionEventDao())->getByIdAndChunk($this->getParams()['id_event'], $Validator->getChunk());
 
             if (!$event) {
                 throw new NotFoundException("Event Not Found.", 404);
@@ -55,9 +55,9 @@ class CompletionEventController extends KleinController
 
             $this->chunk = $Validator->getChunk();
 
-            $project       = $this->chunk->getProject(60 * 60);
+            $project = $this->chunk->getProject(60 * 60);
             $this->project = $project;
-            $this->event   = $event;
+            $this->event = $event;
             $this->featureSet->loadForProject($project);
         });
 

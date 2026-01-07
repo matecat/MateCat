@@ -28,11 +28,11 @@ class ModernMTController extends KleinController
      */
     public function keys(): void
     {
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
-        $params    = $this->request->params();
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $params = $this->request->params();
         $MMTClient = $this->getModernMTClient($engineId);
-        $memories  = $MMTClient->getAllMemories();
-        $results   = [];
+        $memories = $MMTClient->getAllMemories();
+        $results = [];
 
         foreach ($memories as $memory) {
             if ($this->filterResult($params, $memory)) {
@@ -50,8 +50,8 @@ class ModernMTController extends KleinController
      */
     public function importStatus(): void
     {
-        $uuid      = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH);
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH);
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
 
         $this->response->status()->setCode(200);
@@ -66,11 +66,11 @@ class ModernMTController extends KleinController
     {
         $this->validateImportGlossaryParams();
 
-        if (!isset($_POST[ 'memoryId' ])) {
+        if (!isset($_POST['memoryId'])) {
             throw new Exception('Missing `memoryId` param', 400);
         }
 
-        $memoryId = filter_var($_POST[ 'memoryId' ], FILTER_SANITIZE_NUMBER_INT);
+        $memoryId = filter_var($_POST['memoryId'], FILTER_SANITIZE_NUMBER_INT);
 
         $uploadManager = new Upload();
         $uploadedFiles = $uploadManager->uploadFiles($_FILES);
@@ -87,13 +87,13 @@ class ModernMTController extends KleinController
         }
 
         $this->validateCSVContent($csv);
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
 
         $this->response->status()->setCode(200);
         $this->response->json($MMTClient->importGlossary($memoryId, [
-                'csv'  => new CURLFile($glossary, 'text/csv'),
-                'type' => $this->getCsvType($csv)
+            'csv' => new CURLFile($glossary, 'text/csv'),
+            'type' => $this->getCsvType($csv)
         ]));
     }
 
@@ -105,21 +105,21 @@ class ModernMTController extends KleinController
     {
         $this->validateModifyGlossaryParams();
 
-        $memoryId = filter_var($this->params[ 'memoryId' ], FILTER_SANITIZE_NUMBER_INT);
-        $tuid     = (isset($this->params[ 'tuid' ])) ? filter_var($this->params[ 'tuid' ], FILTER_SANITIZE_SPECIAL_CHARS) : null;
-        $terms    = $this->params[ 'terms' ];
-        $type     = filter_var($this->params[ 'type' ], FILTER_SANITIZE_SPECIAL_CHARS);
+        $memoryId = filter_var($this->params['memoryId'], FILTER_SANITIZE_NUMBER_INT);
+        $tuid = (isset($this->params['tuid'])) ? filter_var($this->params['tuid'], FILTER_SANITIZE_SPECIAL_CHARS) : null;
+        $terms = $this->params['terms'];
+        $type = filter_var($this->params['type'], FILTER_SANITIZE_SPECIAL_CHARS);
 
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
 
         $payload = [
-                'type'  => $type,
-                'terms' => $terms
+            'type' => $type,
+            'terms' => $terms
         ];
 
         if ($tuid) {
-            $payload[ 'tuid' ] = $tuid;
+            $payload['tuid'] = $tuid;
         }
 
         $this->response->status()->setCode(200);
@@ -132,15 +132,15 @@ class ModernMTController extends KleinController
      */
     public function createMemory(): void
     {
-        if (!isset($_POST[ 'name' ])) {
+        if (!isset($_POST['name'])) {
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name        = filter_var($_POST[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
-        $description = isset($_POST[ 'description' ]) ? filter_var($_POST[ 'description' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
-        $externalId  = isset($_POST[ 'external_id' ]) ? filter_var($_POST[ 'external_id' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
+        $name = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        $description = isset($_POST['description']) ? filter_var($_POST['description'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
+        $externalId = isset($_POST['external_id']) ? filter_var($_POST['external_id'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
 
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
 
         $this->response->status()->setCode(200);
@@ -155,26 +155,25 @@ class ModernMTController extends KleinController
     {
         $this->validateImportGlossaryParams();
 
-        if (!isset($_POST[ 'name' ])) {
+        if (!isset($_POST['name'])) {
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name = filter_var($_POST[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        $name = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
 
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
 
         // create a new memory
         $memory = $MMTClient->createMemory($name);
 
         // wait to be completed
-        $memoryId = $memory[ 'id' ];
+        $memoryId = $memory['id'];
 
         // upload glossary
         $uploadManager = new Upload();
         $uploadedFiles = $uploadManager->uploadFiles($_FILES);
 
-        /** @noinspection PhpUndefinedFieldInspection */
         $glossary = $this->extractCSV($uploadedFiles->glossary);
 
         // validate
@@ -188,8 +187,8 @@ class ModernMTController extends KleinController
 
         $this->response->status()->setCode(200);
         $this->response->json($MMTClient->importGlossary($memoryId, [
-                'csv'  => new CURLFile($glossary, 'text/csv'),
-                'type' => $this->getCsvType($csv)
+            'csv' => new CURLFile($glossary, 'text/csv'),
+            'type' => $this->getCsvType($csv)
         ]));
     }
 
@@ -199,13 +198,13 @@ class ModernMTController extends KleinController
      */
     public function updateMemory(): void
     {
-        if (!isset($_POST[ 'name' ])) {
+        if (!isset($_POST['name'])) {
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name      = filter_var($_POST[ 'name' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
-        $memoryId  = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $name = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        $memoryId = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
 
         $this->response->status()->setCode(200);
@@ -218,8 +217,8 @@ class ModernMTController extends KleinController
      */
     public function deleteMemory(): void
     {
-        $memoryId  = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
-        $engineId  = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
+        $memoryId = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
+        $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
 
         $response = $MMTClient->deleteMemory(['id' => $memoryId]);
@@ -232,7 +231,7 @@ class ModernMTController extends KleinController
      */
     private function validateImportGlossaryParams(): void
     {
-        if (!isset($_FILES[ 'glossary' ])) {
+        if (!isset($_FILES['glossary'])) {
             throw new Exception('Missing `glossary` files', 400);
         }
     }
@@ -242,40 +241,40 @@ class ModernMTController extends KleinController
      */
     private function validateModifyGlossaryParams(): void
     {
-        if (!isset($this->params[ 'memoryId' ])) {
+        if (!isset($this->params['memoryId'])) {
             throw new Exception('Missing `memoryId` param', 400);
         }
 
-        if (!isset($this->params[ 'type' ])) {
+        if (!isset($this->params['type'])) {
             throw new Exception('Missing `type` param', 400);
         }
 
         $allowedTypes = [
-                'unidirectional',
-                'equivalent',
+            'unidirectional',
+            'equivalent',
         ];
 
-        if (!in_array($this->params[ 'type' ], $allowedTypes)) {
+        if (!in_array($this->params['type'], $allowedTypes)) {
             throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]', 400);
         }
 
-        if ($this->params[ 'type' ] === 'equivalent' and !isset($this->params[ 'tuid' ])) {
+        if ($this->params['type'] === 'equivalent' and !isset($this->params['tuid'])) {
             throw new Exception('Missing `tuid` param', 400);
         }
 
-        if (!isset($this->params[ 'terms' ])) {
+        if (!isset($this->params['terms'])) {
             throw new Exception('Missing `terms` param', 400);
         }
 
         // validate terms
-        $terms = $this->params[ 'terms' ];
+        $terms = $this->params['terms'];
 
         if (!is_array($terms)) {
             throw new Exception('`terms` is not an array', 400);
         }
 
         foreach ($terms as $term) {
-            if (!isset($term[ 'term' ]) or !isset($term[ 'language' ])) {
+            if (!isset($term['term']) or !isset($term['language'])) {
                 throw new Exception('`terms` array is malformed.', 400);
             }
         }
@@ -294,10 +293,10 @@ class ModernMTController extends KleinController
         $objReader = IOFactory::createReaderForFile($glossary->file_path);
 
         $objPHPExcel = $objReader->load($glossary->file_path);
-        $objWriter   = new Csv($objPHPExcel);
+        $objWriter = new Csv($objPHPExcel);
         $objWriter->save($tmpFileName);
 
-        $oldPath             = $glossary->file_path;
+        $oldPath = $glossary->file_path;
         $glossary->file_path = $tmpFileName;
 
         unlink($oldPath);
@@ -316,7 +315,7 @@ class ModernMTController extends KleinController
 
         foreach ($csvContent as $csvRowIndex => $csvRow) {
             // missing tuid (for equivalent)
-            if ($type === 'equivalent' and empty($csvRow[ 0 ])) {
+            if ($type === 'equivalent' and empty($csvRow[0])) {
                 throw new Exception("Row " . ($csvRowIndex + 1) . " invalid, please provide a tuid for the row.");
             }
 
@@ -324,7 +323,7 @@ class ModernMTController extends KleinController
 
             for ($i = 0; $i < count($csvRow); $i++) {
                 // empty cells
-                if (empty($csvRow[ $i ])) {
+                if (empty($csvRow[$i])) {
                     $emptyCells++;
                     if ($type === 'unidirectional') {
                         // empty cell (for unidirectional)
@@ -359,9 +358,9 @@ class ModernMTController extends KleinController
      */
     private function filterResult(array $params, array $memory): bool
     {
-        if (isset($params[ 'q' ])) {
-            $q = filter_var($params[ 'q' ], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
-            if (!str_contains(strtolower($memory[ 'name' ]), strtolower($q))) {
+        if (isset($params['q'])) {
+            $q = filter_var($params['q'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW);
+            if (!str_contains(strtolower($memory['name']), strtolower($q))) {
                 return false;
             }
         }
@@ -377,9 +376,9 @@ class ModernMTController extends KleinController
     private function buildResult(array $memory): array
     {
         return [
-                'id'           => $memory[ 'id' ],
-                'name'         => $memory[ 'name' ],
-                'has_glossary' => ($memory[ 'hasGlossary' ] == 1),
+            'id' => $memory['id'],
+            'name' => $memory['name'],
+            'has_glossary' => ($memory['hasGlossary'] == 1),
         ];
     }
 
@@ -391,8 +390,8 @@ class ModernMTController extends KleinController
      */
     private function getCsvType(array $csv): string
     {
-        $firstCell    = $csv[ 0 ][ 0 ];
-        $numberOfRows = count($csv[ 0 ]);
+        $firstCell = $csv[0][0];
+        $numberOfRows = count($csv[0]);
 
         if ($numberOfRows === 1) {
             throw new Exception("Glossary invalid: unidirectional glossaries should have exactly two columns");

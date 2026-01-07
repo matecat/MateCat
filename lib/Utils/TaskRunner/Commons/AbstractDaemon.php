@@ -88,13 +88,13 @@ abstract class AbstractDaemon
     protected function __construct(string $configFile = null, ?string $contextIndex = null)
     {
         AppConfig::$PRINT_ERRORS = true;
-        $this->myProcessPid      = posix_getpid();
+        $this->myProcessPid = posix_getpid();
     }
 
     /**
      * Singleton Pattern, Unique Instance of This  ( Concrete class )
      *
-     * @param ?string     $config_file
+     * @param ?string $config_file
      * @param string|null $queueIndex
      *
      * @return static

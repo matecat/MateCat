@@ -24,22 +24,22 @@ class MetadataDao extends AbstractDao
         }
 
         $stmt = $this->_getStatementForQuery(
-                "SELECT * FROM user_metadata WHERE " .
-                " uid IN( " . str_repeat('?,', count($UIDs) - 1) . '?' . " ) "
+            "SELECT * FROM user_metadata WHERE " .
+            " uid IN( " . str_repeat('?,', count($UIDs) - 1) . '?' . " ) "
         );
 
         /**
          * @var $rs MetadataStruct[]
          */
         $rs = $this->_fetchObjectMap(
-                $stmt,
-                MetadataStruct::class,
-                $UIDs
+            $stmt,
+            MetadataStruct::class,
+            $UIDs
         );
 
         $resultSet = [];
         foreach ($rs as $metaDataRow) {
-            $resultSet[ $metaDataRow->uid ][] = $metaDataRow;
+            $resultSet[$metaDataRow->uid][] = $metaDataRow;
         }
 
         return $resultSet;
@@ -49,8 +49,8 @@ class MetadataDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM user_metadata WHERE " .
-                " uid = :uid "
+            "SELECT * FROM user_metadata WHERE " .
+            " uid = :uid "
         );
         $stmt->execute(['uid' => $uid]);
         $stmt->setFetchMode(PDO::FETCH_CLASS, MetadataStruct::class);
@@ -70,11 +70,11 @@ class MetadataDao extends AbstractDao
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_uid_key);
         /** @var $result MetadataStruct */
         $result = $this->_fetchObjectMap($stmt, MetadataStruct::class, [
-                'uid' => $uid,
-                'key' => $key
+            'uid' => $uid,
+            'key' => $key
         ]);
 
-        return $result[ 0 ] ?? null;
+        return $result[0] ?? null;
     }
 
     /**
@@ -88,8 +88,8 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * @param int          $uid
-     * @param string       $key
+     * @param int $uid
+     * @param string $key
      * @param array|string $value
      *
      * @return MetadataStruct
@@ -98,32 +98,32 @@ class MetadataDao extends AbstractDao
     public function set(int $uid, string $key, array|string $value): MetadataStruct
     {
         $sql = "INSERT INTO user_metadata " .
-                " ( uid, `key`, value ) " .
-                " VALUES " .
-                " ( :uid, :key, :value ) " .
-                " ON DUPLICATE KEY UPDATE value = :value ";
+            " ( uid, `key`, value ) " .
+            " VALUES " .
+            " ( :uid, :key, :value ) " .
+            " ON DUPLICATE KEY UPDATE value = :value ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                'uid'   => $uid,
-                'key'   => $key,
-                'value' => (is_array($value)) ? serialize($value) : $value,
+            'uid' => $uid,
+            'key' => $key,
+            'value' => (is_array($value)) ? serialize($value) : $value,
         ]);
 
         $this->destroyCacheKey($uid, $key);
 
         return new MetadataStruct([
-                'id'    => $conn->lastInsertId(),
-                'uid'   => $uid,
-                'key'   => $key,
-                'value' => $value
+            'id' => $conn->lastInsertId(),
+            'uid' => $uid,
+            'key' => $key,
+            'value' => $value
         ]);
     }
 
 
     /**
-     * @param int    $uid
+     * @param int $uid
      * @param string $key
      *
      * @throws ReflectionException
@@ -131,14 +131,14 @@ class MetadataDao extends AbstractDao
     public function delete(int $uid, string $key): void
     {
         $sql = "DELETE FROM user_metadata " .
-                " WHERE uid = :uid " .
-                " AND `key` LIKE :key ";
+            " WHERE uid = :uid " .
+            " AND `key` LIKE :key ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-                'uid' => $uid,
-                'key' => '%' . $key,
+            'uid' => $uid,
+            'key' => '%' . $key,
         ]);
         $this->destroyCacheKey($uid, $key);
     }

@@ -9,6 +9,6 @@ class SegmentMetadataStruct extends AbstractDaoSilentStruct implements IDaoStruc
 {
 
     public ?string $id_segment = null;
-    public string  $meta_key;
-    public string  $meta_value;
+    public string $meta_key;
+    public string $meta_value;
 }

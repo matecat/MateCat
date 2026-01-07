@@ -33,32 +33,32 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     use ArrayAccessTrait;
 
-    public ?int    $id       = null; // null is an accepted value for MySQL autoincrement
+    public ?int $id = null; // null is an accepted value for MySQL autoincrement
     public ?string $password = null;
-    public int     $id_project;
+    public int $id_project;
 
     public int $job_first_segment;
     public int $job_last_segment;
 
-    public string  $source;
-    public string  $target;
-    public string  $tm_keys                 = '[]';
-    public ?string $id_translator           = null;
-    public ?string $job_type                = null;
-    public int     $total_time_to_edit      = 0;
-    public int     $avg_post_editing_effort = 0;
-    public int     $only_private_tm         = 0;
-    public ?int    $last_opened_segment     = null;
-    public int     $id_tms                  = 1;
-    public int     $id_mt_engine            = 0;
-    public ?string $create_date             = null;
-    public ?string $last_update             = null;
-    public int     $disabled                = 0;
-    public string  $owner                   = '';
-    public string  $status_owner            = JobStatus::STATUS_ACTIVE;
-    public ?string $status_translator       = null;
-    public string  $status                  = 'active';
-    public int     $standard_analysis_wc    = 0;
+    public string $source;
+    public string $target;
+    public string $tm_keys = '[]';
+    public ?string $id_translator = null;
+    public ?string $job_type = null;
+    public int $total_time_to_edit = 0;
+    public int $avg_post_editing_effort = 0;
+    public int $only_private_tm = 0;
+    public ?int $last_opened_segment = null;
+    public int $id_tms = 1;
+    public int $id_mt_engine = 0;
+    public ?string $create_date = null;
+    public ?string $last_update = null;
+    public int $disabled = 0;
+    public string $owner = '';
+    public string $status_owner = JobStatus::STATUS_ACTIVE;
+    public ?string $status_translator = null;
+    public string $status = 'active';
+    public int $standard_analysis_wc = 0;
 
     /**
      * Column 'completed' cannot be null, moreover, it is BIT(1), and
@@ -67,22 +67,22 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * So, we can't set 0 because it will be treated as string, set it to false, it works.
      * @see https://bugs.php.net/bug.php?id=50757
      */
-    public bool  $completed        = false; //Column 'completed' cannot be null
-    public float $new_words        = 0;
-    public float $draft_words      = 0;
+    public bool $completed = false; //Column 'completed' cannot be null
+    public float $new_words = 0;
+    public float $draft_words = 0;
     public float $translated_words = 0;
-    public float $approved_words   = 0;
-    public float $approved2_words  = 0;
-    public float $rejected_words   = 0;
+    public float $approved_words = 0;
+    public float $approved2_words = 0;
+    public float $rejected_words = 0;
 
-    public int $new_raw_words        = 0;
-    public int $draft_raw_words      = 0;
+    public int $new_raw_words = 0;
+    public int $draft_raw_words = 0;
     public int $translated_raw_words = 0;
-    public int $approved_raw_words   = 0;
-    public int $approved2_raw_words  = 0;
-    public int $rejected_raw_words   = 0;
+    public int $approved_raw_words = 0;
+    public int $approved2_raw_words = 0;
+    public int $rejected_raw_words = 0;
 
-    public string $subject       = '';
+    public string $subject = '';
     public string $payable_rates = '[]';
 
     public int $total_raw_wc = 0;
@@ -116,9 +116,9 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         $projectData = $this->getProject();
 
         return [
-                'project_id'   => $projectData->id,
-                'project_name' => $projectData->name,
-                'job_id'       => $this->id,
+            'project_id' => $projectData->id,
+            'project_name' => $projectData->name,
+            'job_id' => $this->id,
         ];
     }
 
@@ -130,7 +130,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
         $this->_translator = $this->cachable(__METHOD__, function () {
             $jTranslatorsDao = new JobsTranslatorsDao();
 
-            return $jTranslatorsDao->setCacheTTL(60 * 60)->findByJobsStruct($this)[ 0 ] ?? null;
+            return $jTranslatorsDao->setCacheTTL(60 * 60)->findByJobsStruct($this)[0] ?? null;
         });
 
         return $this->_translator;
@@ -176,7 +176,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public function getOpenThreadsCount()
     {
         $this->_openThreads = $this->cachable(__METHOD__, function () {
-            $dao         = new CommentDao();
+            $dao = new CommentDao();
             $openThreads = $dao->setCacheTTL(60 * 10)->getOpenThreadsForProjects([$this->id_project]); //ten minutes cache
             foreach ($openThreads as $openThread) {
                 if ($openThread->id_job == $this->id && $openThread->password == $this->password) {
@@ -193,14 +193,14 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public function getWarningsCount(): object
     {
         return $this->cachable(__METHOD__, function () {
-            $dao                     = new WarningDao();
-            $warningsCount           = $dao->setCacheTTL(60 * 10)->getWarningsByProjectIds([$this->id_project]) ?? [];
-            $ret                     = [];
-            $ret[ 'warnings_count' ] = 0;
+            $dao = new WarningDao();
+            $warningsCount = $dao->setCacheTTL(60 * 10)->getWarningsByProjectIds([$this->id_project]) ?? [];
+            $ret = [];
+            $ret['warnings_count'] = 0;
             foreach ($warningsCount as $count) {
                 if ($count->id_job == $this->id && $count->password == $this->password) {
-                    $ret[ 'warnings_count' ]   = (int)$count->count;
-                    $ret[ 'warning_segments' ] = array_map(function ($id_segment) {
+                    $ret['warnings_count'] = (int)$count->count;
+                    $ret['warning_segments'] = array_map(function ($id_segment) {
                         return (int)$id_segment;
                     }, explode(",", $count->segment_list));
                 }
@@ -255,7 +255,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param UserStruct       $user
+     * @param UserStruct $user
      * @param                  $role
      *
      * @return array

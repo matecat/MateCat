@@ -14,20 +14,19 @@ use Utils\Registry\AppConfig;
  * Date: 27/05/16
  * Time: 18.50
  */
-class BuildResultUserTest extends AbstractTest {
+class BuildResultUserTest extends AbstractTest
+{
     protected $array_param;
     protected $reflector;
     protected $method;
 
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = new UserDao( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->method           = $this->reflector->getMethod( "_buildResult" );
-        
-
-
+        $this->databaseInstance = new UserDao(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->method = $this->reflector->getMethod("_buildResult");
     }
 
     /**
@@ -35,34 +34,34 @@ class BuildResultUserTest extends AbstractTest {
      * @group  regression
      * @covers UserDao::_buildResult
      */
-    public function test_build_result_from_simple_array() {
-
+    public function test_build_result_from_simple_array()
+    {
         $this->array_param = [
-                0 =>
-                        [
-                                'uid'                => null,  //SET NULL FOR AUTOINCREMENT
-                                'email'              => "barandfoo@translated.net",
-                                'create_date'        => "2016-04-29 18:06:42",
-                                'first_name'         => "Edoardo",
-                                'last_name'          => "BarAndFoo",
-                                'salt'               => "801b32d6a9ce745",
-                                'api_key'            => "",
-                                'pass'               => "bd40541bFAKE0cbar143033and731foo",
-                                'oauth_access_token' => ""
-                        ]
+            0 =>
+                [
+                    'uid' => null,  //SET NULL FOR AUTOINCREMENT
+                    'email' => "barandfoo@translated.net",
+                    'create_date' => "2016-04-29 18:06:42",
+                    'first_name' => "Edoardo",
+                    'last_name' => "BarAndFoo",
+                    'salt' => "801b32d6a9ce745",
+                    'api_key' => "",
+                    'pass' => "bd40541bFAKE0cbar143033and731foo",
+                    'oauth_access_token' => ""
+                ]
         ];
 
-        $actual_array_of_user_structures = $this->method->invoke( $this->databaseInstance, $this->array_param );
-        $actual_user_struct              = $actual_array_of_user_structures[ '0' ];
-        $this->assertTrue( $actual_user_struct instanceof UserStruct );
+        $actual_array_of_user_structures = $this->method->invoke($this->databaseInstance, $this->array_param);
+        $actual_user_struct = $actual_array_of_user_structures['0'];
+        $this->assertTrue($actual_user_struct instanceof UserStruct);
 
-        $this->assertEquals( "barandfoo@translated.net", $actual_user_struct->email );
+        $this->assertEquals("barandfoo@translated.net", $actual_user_struct->email);
 
-        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $actual_user_struct->create_date );
-        $this->assertEquals( "Edoardo", $actual_user_struct->first_name );
-        $this->assertEquals( "BarAndFoo", $actual_user_struct->last_name );
-        $this->assertNull( $actual_user_struct->salt );
-        $this->assertNull( $actual_user_struct->pass );
-        $this->assertNull( $actual_user_struct->oauth_access_token );
+        $this->assertMatchesRegularExpression('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $actual_user_struct->create_date);
+        $this->assertEquals("Edoardo", $actual_user_struct->first_name);
+        $this->assertEquals("BarAndFoo", $actual_user_struct->last_name);
+        $this->assertNull($actual_user_struct->salt);
+        $this->assertNull($actual_user_struct->pass);
+        $this->assertNull($actual_user_struct->oauth_access_token);
     }
 }

@@ -17,13 +17,13 @@ use Utils\Tools\Utils;
 
 class FilesConverter
 {
-    private string  $source_lang;
-    private string  $target_lang;
-    private string  $fullUploadDirPath;
-    private string  $errDir;
-    private string  $uploadTokenValue;
+    private string $source_lang;
+    private string $target_lang;
+    private string $fullUploadDirPath;
+    private string $errDir;
+    private string $uploadTokenValue;
     private ?string $segmentation_rule;
-    private array   $files;
+    private array $files;
 
     /**
      * @var ConvertedFileList
@@ -53,41 +53,41 @@ class FilesConverter
     /**
      * FilesConverter constructor.
      *
-     * @param array                            $files
-     * @param string                           $source_lang
-     * @param string                           $target_lang
-     * @param string                           $intDir
-     * @param string                           $errDir
-     * @param string                           $uploadTokenValue
-     * @param string|null                      $segmentation_rule
-     * @param FeatureSet                       $featureSet
+     * @param array $files
+     * @param string $source_lang
+     * @param string $target_lang
+     * @param string $intDir
+     * @param string $errDir
+     * @param string $uploadTokenValue
+     * @param string|null $segmentation_rule
+     * @param FeatureSet $featureSet
      * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
-     * @param bool|null                        $legacy_icu
+     * @param bool|null $legacy_icu
      */
     public function __construct(
-            array $files,
-            string $source_lang,
-            string $target_lang,
-            string $intDir,
-            string $errDir,
-            string $uploadTokenValue,
-            ?string $segmentation_rule,
-            FeatureSet $featureSet,
-            ?FiltersConfigTemplateStruct $filters_extraction_parameters = null,
-            ?bool $legacy_icu = false
+        array $files,
+        string $source_lang,
+        string $target_lang,
+        string $intDir,
+        string $errDir,
+        string $uploadTokenValue,
+        ?string $segmentation_rule,
+        FeatureSet $featureSet,
+        ?FiltersConfigTemplateStruct $filters_extraction_parameters = null,
+        ?bool $legacy_icu = false
     ) {
         $this->lang_handler = Languages::getInstance();
-        $this->files        = $files;
+        $this->files = $files;
         $this->setSourceLang($source_lang);
         $this->setTargetLangs($target_lang);
-        $this->fullUploadDirPath             = $intDir;
-        $this->errDir                        = $errDir;
-        $this->uploadTokenValue              = $uploadTokenValue;
-        $this->segmentation_rule             = $segmentation_rule;
-        $this->featureSet                    = $featureSet;
+        $this->fullUploadDirPath = $intDir;
+        $this->errDir = $errDir;
+        $this->uploadTokenValue = $uploadTokenValue;
+        $this->segmentation_rule = $segmentation_rule;
+        $this->featureSet = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
-        $this->legacy_icu                    = $legacy_icu;
-        $this->resultStack                   = new ConvertedFileList();
+        $this->legacy_icu = $legacy_icu;
+        $this->resultStack = new ConvertedFileList();
     }
 
     /**
@@ -241,7 +241,7 @@ class FilesConverter
                     continue;
                 }
 
-                throw new RuntimeException($fileError->error[ 'message' ], $fileError->error[ 'code' ]);
+                throw new RuntimeException($fileError->error['message'], $fileError->error['code']);
             }
         }
 

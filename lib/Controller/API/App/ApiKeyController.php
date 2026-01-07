@@ -48,10 +48,10 @@ class ApiKeyController extends KleinController
     private function createApiKeyStruct(): ApiKeyStruct
     {
         return new ApiKeyStruct([
-                'uid'        => $this->getUser()->uid,
-                'api_key'    => Utils::randomString(20, true),
-                'api_secret' => Utils::randomString(20, true),
-                'enabled'    => true
+            'uid' => $this->getUser()->uid,
+            'api_key' => Utils::randomString(20, true),
+            'api_secret' => Utils::randomString(20, true),
+            'enabled' => true
         ]);
     }
 
