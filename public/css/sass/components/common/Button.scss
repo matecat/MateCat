@@ -94,10 +94,6 @@ a.button-component-container {
 
     &:disabled {
       color: var(--btnAltTextColorDisabled);
-
-      svg {
-        color: var(--btnAltTextColorDisabled);
-      }
     }
   }
   &.link {

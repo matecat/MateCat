@@ -199,7 +199,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <QR size={22} /> QA Report
+            <QR /> QA Report
           </>
         ),
         onClick: () => {

@@ -455,9 +455,10 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
   }
 
   const buttonProps = {
-    mode: BUTTON_MODE.LINK,
-    size: BUTTON_SIZE.LINK_SMALL,
-    tooltipPosition: TOOLTIP_POSITION.BOTTOM,
+    mode: BUTTON_MODE.GHOST,
+    size: BUTTON_SIZE.ICON_STANDARD,
+    tooltipPosition: TOOLTIP_POSITION.RIGHT,
+    className: 'bulk-actions-circle-button',
   }
   const buttonActionsProps = {disabled: !jobsBulk.length}
 
@@ -485,23 +486,23 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
 
         const icon =
           action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id ? (
-            <SwitchHorizontal size={16} />
+            <SwitchHorizontal size={20} />
           ) : action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id ? (
-            <AssignToMember size={16} />
+            <AssignToMember size={20} />
           ) : action.id === JOBS_ACTIONS.ARCHIVE.id ? (
-            <Archive size={16} />
+            <Archive size={20} />
           ) : action.id === JOBS_ACTIONS.UNARCHIVE.id ||
             action.id === JOBS_ACTIONS.RESUME.id ? (
-            <Refresh size={16} />
+            <Refresh size={20} />
           ) : action.id === JOBS_ACTIONS.CANCEL.id ||
             action.id === JOBS_ACTIONS.DELETE.id ||
             action.id === JOBS_ACTIONS.DELETE_PERMANENTLY.id ? (
-            <Trash size={16} />
+            <Trash size={20} />
           ) : action.id === JOBS_ACTIONS.CHANGE_PASSWORD.id ? (
-            <ChangePassword size={16} />
+            <ChangePassword size={20} />
           ) : (
             action.id === JOBS_ACTIONS.GENERATE_REVISE_2.id && (
-              <Revise size={16} />
+              <Revise size={20} />
             )
           )
 
@@ -511,23 +512,23 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               {...{
                 ...buttonProps,
                 ...buttonActionsProps,
+                tooltip: action.label,
                 ...(action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id && {
                   disabled,
                   ...(disabled && {
-                    tooltip,
+                    tooltip: `${action.label} - ${tooltip}`,
                   }),
                 }),
                 ...(action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id && {
                   disabled,
                   ...(disabled && {
-                    tooltip,
+                    tooltip: `${action.label} - ${tooltip}`,
                   }),
                 }),
                 onClick: () => onClickAction(action),
               }}
             >
               {icon}
-              {action.label}
             </Button>
           </div>
         )
@@ -544,28 +545,29 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
       >
         <div className="project-bulk-actions-container">
           <div className="project-bulk-actions-buttons">
-            <span>
-              <span>{jobsBulk.length}</span>{' '}
-              {jobsBulk.length > 1 ? 'jobs' : 'job'} selected
+            <span
+              className="jobs-selected"
+              aria-label={`${jobsBulk.length} ${jobsBulk.length > 1 ? 'jobs' : 'job'} selected`}
+              tooltip-position="right"
+            >
+              <span>{jobsBulk.length}</span>
             </span>
             {actions}
-          </div>
-          <div>
             <Button
               {...buttonProps}
+              tooltip="Select all"
               onClick={selectAll}
               disabled={!projects.length}
             >
-              <CheckDone size={16} />
-              Select all jobs
+              <CheckDone size={20} />
             </Button>
             <Button
               {...buttonProps}
+              tooltip="Clear all"
               onClick={clearAll}
               disabled={!projects.length}
             >
-              <IconCloseCircle size={16} />
-              Clear selection
+              <IconCloseCircle size={20} />
             </Button>
           </div>
         </div>
