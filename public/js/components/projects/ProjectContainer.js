@@ -346,7 +346,7 @@ const ProjectContainer = ({
             data-testid={job.get('id')}
           >
             <div className="job-body sixteen wide column">
-              <div className="ui grid chunks">{chunks}</div>
+              <div className="ui grid chunks shadow-1">{chunks}</div>
             </div>
           </div>
         )

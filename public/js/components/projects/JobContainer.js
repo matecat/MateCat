@@ -908,7 +908,7 @@ class JobContainer extends React.Component {
         >
           {!this.state.openOutsource ? (
             <div
-              className="chunk wide column pad-right-10 shadow-1"
+              className="chunk wide column pad-right-10"
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
             >
               {/* <Checkbox

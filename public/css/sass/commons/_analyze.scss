@@ -427,14 +427,17 @@ body.analyze {
           position: relative;
           .job {
             margin-bottom: 15px;
+            &:first-child .chunks{
+              border-radius: 0 0 8px 8px;
+            }
             .chunks {
+              border-radius: variables.$border-radius-default;
+              overflow: hidden;
+
               .chunk {
                 background-color: #ffffff;
                 transition: 0.3s ease;
                 cursor: pointer;
-                &:last-child {
-                  border-radius: 0 0 8px 8px;
-                }
                 .job-details {
                   font-size: 15px;
                   float: right;
@@ -686,7 +689,7 @@ body.analyze {
       .target-box {
         display: inline-block;
         /*line-height: 30px;*/
-        max-width: 50%;
+        max-width: 300px;
         min-width: 60px;
         vertical-align: middle;
         overflow: hidden;

@@ -422,6 +422,8 @@ div#manage-container {
         }
         .job-body {
           .chunks {
+            border-radius: variables.$border-radius-default;
+            overflow: hidden;
             .chunk {
               display: grid;
               grid-template-columns: 70px 170px 150px 106px auto 1fr auto auto auto;
@@ -430,7 +432,6 @@ div#manage-container {
               transition: 0.3s ease;
               background-color: #ffffff;
               padding: 8px 15px;
-              border-radius: variables.$border-radius-default;
               @media only screen and (max-width: 1200px) {
                 gap: 5px;
               }
@@ -960,12 +961,12 @@ div#manage-container {
 .project-team-dropdown,
 .user-project-dropdown {
   border-radius: 999px !important;
-  font-weight: 500 !important;
   line-height: 1;
   box-shadow:
     0 0 0 #e0e0e0,
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  height: 40px;
 }
 
 .project-menu-dropdown {

@@ -299,9 +299,9 @@ class AnalyzeChunksResume extends React.Component {
 
           return (
             <div key={indexJob} className="job ui grid">
-              <div className="chunks sixteen wide column">
+              <div className="chunks sixteen wide column shadow-1">
                 <div
-                  className="chunk ui grid shadow-1"
+                  className="chunk ui grid "
                   onClick={this.showDetails(jobsAnalysis[indexJob].id)}
                 >
                   <div className="title-job heading splitted">
@@ -368,9 +368,9 @@ class AnalyzeChunksResume extends React.Component {
 
           return (
             <div key={indexJob} className="job ui grid">
-              <div className="chunks sixteen wide column">
+              <div className="chunks sixteen wide column shadow-1">
                 <div
-                  className={'chunk ui grid shadow-1 ' + openOutsourceClass}
+                  className={'chunk ui grid  ' + openOutsourceClass}
                   onClick={this.showDetails(jobsAnalysis[indexJob].id)}
                 >
                   <div className="title-job">
@@ -486,8 +486,8 @@ class AnalyzeChunksResume extends React.Component {
       return this.props.project.get('jobs').map((jobInfo, indexJob) => {
         return (
           <div key={jobInfo.get('id') + '-' + indexJob} className="job ui grid">
-            <div className="chunks sixteen wide column">
-              <div className="chunk ui grid shadow-1">
+            <div className="chunks sixteen wide column shadow-1">
+              <div className="chunk ui grid ">
                 <div className="title-job no-split">
                   <div className="source-target">
                     <LabelWithTooltip className="source-box no-split">
