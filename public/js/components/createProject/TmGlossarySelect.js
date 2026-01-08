@@ -26,7 +26,7 @@ export const TmGlossarySelect = () => {
     <Select
       label={
         <div className="label-tmx-select">
-          <span>TM & Glossary</span>
+          <span>TM & TB</span>
           <span
             aria-label="By updating MyMemory, you are contributing to making MateCat better
         and helping fellow MateCat users improve their translations.
