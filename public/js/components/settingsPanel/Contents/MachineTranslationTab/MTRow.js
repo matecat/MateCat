@@ -42,7 +42,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
         )}
         {row.engine_type === 'DeepL' && (
           <a
-            href="https://guides.matecat.com/machine-translation-engines#DeepL"
+            href="https://guides.matecat.com/deepl"
             target="_blank"
             rel="noreferrer"
           >
@@ -52,6 +52,15 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
         {row.engine_type === 'Lara' && (
           <a
             href="https://guides.matecat.com/lara"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <InfoIcon />
+          </a>
+        )}
+        {row.engine_type === 'Intento' && (
+          <a
+            href="https://guides.matecat.com/intento"
             target="_blank"
             rel="noreferrer"
           >
