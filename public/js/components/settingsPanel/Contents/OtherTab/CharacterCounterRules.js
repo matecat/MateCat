@@ -80,11 +80,11 @@ export const CharacterCounterRules = () => {
             id="chars-counter-rule"
             name="chars-counter-rule"
             isPortalDropdown={true}
-            dropdownClassName="select-dropdown__wrapper-portal option-characters-counter-rule-dropdown"
+            dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
             options={OPTIONS.map((option) => ({
               ...option,
               name: (
-                <div className="option-characters-counter-rule-select-option-content">
+                <div className="option-dropdown-with-descrition-select-content">
                   {option.name}
                   <p>{option.description}</p>
                 </div>
