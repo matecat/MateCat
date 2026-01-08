@@ -23,7 +23,7 @@ class ProductionSummary extends React.Component {
         <br />
         <code>(Tot. error points * 1000) / reviewed words</code>
         <br />
-        Reviewed words = raw words - unmodified ICE matches
+        Reviewed words = raw words - unmodified 101% matches
         <br />
         <br />
         The score is compared to a max. amount of tolerated error points.

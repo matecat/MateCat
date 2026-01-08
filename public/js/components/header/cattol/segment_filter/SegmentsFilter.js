@@ -15,9 +15,9 @@ class SegmentsFilter extends React.Component {
   constructor(props) {
     super(props)
     this.moreFilters = [
-      {value: 'ice', label: 'ICE'},
-      {value: 'unlocked', label: 'Not ICE'},
-      {value: 'modified_ice', label: 'Modified ICE'},
+      {value: 'ice', label: '101%'},
+      {value: 'unlocked', label: 'Not 101%'},
+      {value: 'modified_ice', label: 'Modified 101%'},
       {value: 'repetitions', label: 'Repetitions'},
       {value: 'mt', label: 'MT'},
       {value: 'matches', label: '100% Matches'},

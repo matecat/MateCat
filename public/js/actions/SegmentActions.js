@@ -1497,7 +1497,7 @@ const SegmentActions = {
         ModalsActions.showModalComponent(
           UnlockAllSegmentsModal,
           {},
-          'Unlock all ICE segments',
+          'Unlock all 101% segments',
         )
       }
     }
