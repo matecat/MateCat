@@ -3,6 +3,8 @@ import React from 'react'
 import LanguageSelectorList from './LanguageSelectorList'
 import LanguageSelectorSearch from './LanguageSelectorSearch'
 import LabelWithTooltip from '../common/LabelWithTooltip'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
+import FlipBackwardIcon from '../../../img/icons/FlipBackwardIcon'
 
 const RECENTLY_USED_LOCAL_STORAGE_KEY = `target_languages_recently_used-${config.userMail}`
 const MAX_RECENTLY_USED_STORED = 3
@@ -182,13 +184,14 @@ class LanguageSelector extends React.Component {
               {(filteredLanguages.length > 0 ||
                 (querySearch && !filteredLanguages.length)) && (
                 <div className="button-all-languages">
-                  <button
-                    className={'modal-btn secondary gray'}
+                  <Button
+                    type={BUTTON_TYPE.DEFAULT}
+                    mode={BUTTON_MODE.OUTLINE}
                     onClick={onResetResults}
                   >
-                    <span className="icon-undo2"></span>
+                    <FlipBackwardIcon />
                     All languages
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -253,9 +256,9 @@ class LanguageSelector extends React.Component {
               </span>
             </div>
             <div className="">
-              <button className={'modal-btn primary blue'} onClick={onConfirm}>
+              <Button type={BUTTON_TYPE.PRIMARY} onClick={onConfirm}>
                 Confirm
-              </button>
+              </Button>
             </div>
           </div>
         </div>

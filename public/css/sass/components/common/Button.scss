@@ -4,6 +4,7 @@
 button.button-component-container,
 a.button-component-container {
   appearance: none;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -256,19 +257,19 @@ a.button-component-container {
 .success {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$greenDefault};
-  --btnAltTextColorHover: #{colors.$greenDefaultHover};
-  --btnAltTextColorDisabled: #{rgba(colors.$greenDefault, 0.24)};
+  --btnAltTextColor: #{colors.$approvedGreen};
+  --btnAltTextColorHover: #{colors.$approvedGreenHover};
+  --btnAltTextColorDisabled: #{rgba(colors.$approvedGreenTransparent, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$greenDefault, 0.24)};
-  --btnBorderColorHover: #{colors.$greenDefault};
-  --btnBorderColorActive: #{colors.$greenDefault};
-  --btnBorderColorDisabled: #{rgba(colors.$greenDefault, 0.24)};
+  --btnBorderColor: #{rgba(colors.$approvedGreen, 0.24)};
+  --btnBorderColorHover: #{colors.$approvedGreen};
+  --btnBorderColorActive: #{colors.$approvedGreen};
+  --btnBorderColorDisabled: #{rgba(colors.$approvedGreen, 0.24)};
 
-  --btnBgColor: #{colors.$greenDefault};
-  --btnBgColorAlt: #{colors.$greenDefaultHover};
-  --btnBgColorSemitrans: #{rgba(colors.$greenDefault, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$greenDefault, 0.24)};
+  --btnBgColor: #{colors.$approvedGreen};
+  --btnBgColorAlt: #{colors.$approvedGreenHover};
+  --btnBgColorSemitrans: #{rgba(colors.$approvedGreen, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$approvedGreen, 0.24)};
 }
 .warning {
   --btnTextColor: #{colors.$white};
@@ -303,4 +304,21 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$redDefaultHover};
   --btnBgColorSemitrans: #{rgba(colors.$redDefault, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$redDefault, 0.24)};
+}
+.purple {
+  --btnTextColor: #{colors.$white};
+  --btnTextColorDisabled: #{colors.$white};
+  --btnAltTextColor: #{colors.$approved2Green};
+  --btnAltTextColorHover: #{colors.$approved2GreenHover};
+  --btnAltTextColorDisabled: #{rgba(colors.$approved2Green, 0.24)};
+
+  --btnBorderColor: #{rgba(colors.$approved2Green, 0.24)};
+  --btnBorderColorHover: #{colors.$approved2Green};
+  --btnBorderColorActive: #{colors.$approved2Green};
+  --btnBorderColorDisabled: #{rgba(colors.$approved2Green, 0.24)};
+
+  --btnBgColor: #{colors.$approved2Green};
+  --btnBgColorAlt: #{colors.$approved2GreenHover};
+  --btnBgColorSemitrans: #{rgba(colors.$approved2Green, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$approved2Green, 0.24)};
 }

@@ -102,36 +102,3 @@
     }
   }
 }
-
-// Button TR, LR navigation through filter
-.ui.next-repetition-group,
-.ui.next-repetition {
-  border: 1px solid #797979;
-  position: relative;
-  padding: 9px 12px 8px !important;
-}
-
-.ui.next-review-repetition-group,
-.ui.next-review-repetition {
-  border: 1px solid #797979;
-  position: relative;
-  padding: 9px 12px 8px !important;
-  background: colors.$approvedGreen !important;
-  &.revise-button-2 {
-    background: #bc6ac9 !important;
-  }
-}
-
-.ui.next-repetition-group,
-.ui.next-review-repetition-group {
-  margin-right: 4px;
-}
-
-// Button comment segment
-.ui.primary.mbc-comment-send-btn {
-  font-size: 14px;
-  padding: 8px 10px;
-  text-align: right;
-  border-radius: 2px;
-  float: right;
-}

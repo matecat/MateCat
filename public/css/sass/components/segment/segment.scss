@@ -125,6 +125,8 @@ section {
       text-align: right;
       z-index: 0;
       position: relative;
+      gap: 16px;
+      justify-content: flex-end;
     }
     .segment-body-content {
       .warnings-block {
