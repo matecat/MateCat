@@ -570,6 +570,11 @@
   flex-direction: column;
   text-align: left;
 
+  > :first-child {
+    display: flex;
+    gap: 10px;
+  }
+
   h4 {
     margin-bottom: 5px;
     font-size: 16px;
