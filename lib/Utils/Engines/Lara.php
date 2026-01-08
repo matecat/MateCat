@@ -241,14 +241,22 @@ class Lara extends AbstractEngine
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
+                $laraStyle = null;
+                $laraGlossariesArray = [];
+
                 if (!empty($_config['project_id'])) {
                     $metadataDao = new MetadataDao();
-                    $metadata = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
+                    $laraStyle = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
 
-                    if ($metadata !== null) {
-                        $metadata = html_entity_decode($metadata->value);
-                        $laraGlossariesArray = json_decode($metadata, true);
+                    if ($laraGlossaries !== null) {
+                        $laraGlossaries = html_entity_decode($laraGlossaries->value);
+                        $laraGlossariesArray = json_decode($laraGlossaries, true);
                         $translateOptions->setGlossaries($laraGlossariesArray);
+                    }
+
+                    if ($laraStyle !== null) {
+                        $translateOptions->setStyle($laraStyle->value);
                     }
                 }
 
@@ -302,6 +310,8 @@ class Lara extends AbstractEngine
                     'source' => $_config['source'],
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
+                    'style' => $laraStyle,
+                    'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
@@ -673,6 +683,7 @@ class Lara extends AbstractEngine
     {
         return [
             'enable_mt_analysis',
+            'lara_style',
             'lara_glossaries',
         ];
     }

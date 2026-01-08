@@ -186,6 +186,11 @@ class NewController extends KleinController
             $projectStructure['lara_glossaries'] = $request['lara_glossaries'];
         }
 
+        // Lara style
+        if($request['lara_style']){
+            $projectStructure['lara_style'] = $request['lara_style'];
+        }
+
         // mmtGlossaries
         if ($request['mmt_glossaries']) {
             $projectStructure['mmt_glossaries'] = $request['mmt_glossaries'];
@@ -373,6 +378,7 @@ class NewController extends KleinController
         $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -448,6 +454,11 @@ class NewController extends KleinController
                 ]
             )
         );
+
+        // validate Lara style
+        if(!empty($lara_style)){
+            $lara_style = $this->validateLaraStyle($lara_style);
+        }
 
         $dialect_strict = $this->validateDialectStrictParam($target_lang, $dialect_strict);
         $filters_extraction_parameters = $this->validateFiltersExtractionParameters(
@@ -536,6 +547,7 @@ class NewController extends KleinController
             'intento_routing' => $intento_routing ?? null,
             'intento_provider' => $intento_provider ?? null,
             'lara_glossaries' => $lara_glossaries ?? null,
+            'lara_style' => $lara_style ?? null,
             'deepl_id_glossary' => $deepl_id_glossary ?? null,
             'deepl_formality' => $deepl_formality ?? null,
             'deepl_engine_type' => $deepl_engine_type ?? null,
@@ -573,6 +585,25 @@ class NewController extends KleinController
             'legacy_icu' => $legacy_icu,
             JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode($subfiltering_handlers)
         ];
+    }
+
+    /**
+     * @param string $lara_style
+     * @return string
+     */
+    private function validateLaraStyle(string $lara_style): string
+    {
+        $allowedValues = [
+            'faithful',
+            'fluid ',
+            'creative',
+        ];
+
+        if(!in_array($lara_style, $allowedValues)) {
+            throw new InvalidArgumentException("Invalid lara style.", -1);
+        }
+
+        return $lara_style;
     }
 
     /**
