@@ -367,6 +367,7 @@ class GetContributionWorker extends AbstractWorker
         $_config['id_user'] = $this->_extractAvailableKeysForUser($contributionStruct);
         $_config['num_result'] = $contributionStruct->resultNum;
         $_config['isConcordance'] = $contributionStruct->concordanceSearch;
+        $_config['lara_style'] = $contributionStruct->lara_style;
 
         $_config['dialect_strict'] = $contributionStruct->dialect_strict;
         $_config['priority_key'] = $contributionStruct->tm_prioritization;

@@ -44,6 +44,7 @@ use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
@@ -457,7 +458,7 @@ class NewController extends KleinController
 
         // validate Lara style
         if(!empty($lara_style)){
-            $lara_style = $this->validateLaraStyle($lara_style);
+            $lara_style = Lara::validateLaraStyle($lara_style);
         }
 
         $dialect_strict = $this->validateDialectStrictParam($target_lang, $dialect_strict);
@@ -585,25 +586,6 @@ class NewController extends KleinController
             'legacy_icu' => $legacy_icu,
             JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode($subfiltering_handlers)
         ];
-    }
-
-    /**
-     * @param string $lara_style
-     * @return string
-     */
-    private function validateLaraStyle(string $lara_style): string
-    {
-        $allowedValues = [
-            'faithful',
-            'fluid ',
-            'creative',
-        ];
-
-        if(!in_array($lara_style, $allowedValues)) {
-            throw new InvalidArgumentException("Invalid lara style.", -1);
-        }
-
-        return $lara_style;
     }
 
     /**

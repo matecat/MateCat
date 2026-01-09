@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use InvalidArgumentException;
 use Lara\AccessKey;
 use Lara\Glossary;
 use Lara\Internal\HttpClient;
@@ -241,23 +242,27 @@ class Lara extends AbstractEngine
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
-                $laraStyle = null;
+                $laraStyle = $_config['lara_style'] ?? null;
                 $laraGlossariesArray = [];
 
                 if (!empty($_config['project_id'])) {
                     $metadataDao = new MetadataDao();
                     $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
-                    $laraStyle = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
+
+                    if($laraStyle === null){
+                        $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
+                        $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
+                    }
 
                     if ($laraGlossaries !== null) {
                         $laraGlossaries = html_entity_decode($laraGlossaries->value);
                         $laraGlossariesArray = json_decode($laraGlossaries, true);
                         $translateOptions->setGlossaries($laraGlossariesArray);
                     }
+                }
 
-                    if ($laraStyle !== null) {
-                        $translateOptions->setStyle($laraStyle->value);
-                    }
+                if ($laraStyle !== null) {
+                    $translateOptions->setStyle($laraStyle);
                 }
 
                 $request_translation = [];
@@ -686,5 +691,24 @@ class Lara extends AbstractEngine
             'lara_style',
             'lara_glossaries',
         ];
+    }
+
+    /**
+     * @param string $lara_style
+     * @return string
+     */
+    public static function validateLaraStyle(string $lara_style): string
+    {
+        $allowedValues = [
+            'faithful',
+            'fluid ',
+            'creative',
+        ];
+
+        if(!in_array($lara_style, $allowedValues)) {
+            throw new InvalidArgumentException("Invalid lara style.", -1);
+        }
+
+        return $lara_style;
     }
 }

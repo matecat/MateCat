@@ -28,6 +28,7 @@ use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\DeeplFormalityValidator;
@@ -329,7 +330,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         // validate Lara style
         if(!empty($lara_style)){
-            $lara_style = $this->validateLaraStyle($lara_style);
+            $lara_style = Lara::validateLaraStyle($lara_style);
         }
 
         /**
@@ -454,25 +455,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         $this->setMetadataFromPostInput($data);
 
         return $data;
-    }
-
-    /**
-     * @param string $lara_style
-     * @return string
-     */
-    private function validateLaraStyle(string $lara_style): string
-    {
-        $allowedValues = [
-            'faithful',
-            'fluid ',
-            'creative',
-        ];
-
-        if(!in_array($lara_style, $allowedValues)) {
-            throw new InvalidArgumentException("Invalid lara style.", -1);
-        }
-
-        return $lara_style;
     }
 
     /**
