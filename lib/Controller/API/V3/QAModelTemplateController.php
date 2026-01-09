@@ -243,8 +243,14 @@ class QAModelTemplateController extends KleinController
 
             $this->response->code($code);
 
+            $formattedErrors = [];
+
+            foreach ($errors as $error) {
+                $formattedErrors[] = $error->getFormattedError("qa_model_template");
+            }
+
             return $this->response->json([
-                'errors' => $errors
+                'errors' => $formattedErrors
             ]);
         } catch (Exception $exception) {
             $this->response->code(500);
