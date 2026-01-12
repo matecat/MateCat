@@ -373,8 +373,7 @@ TAB;
 
         $actual_result = $this->engine_MyMemory->set($params);
 
-        $this->assertNull($actual_result);
-
+        $this->assertNotNull($actual_result);
 
         /**
          * check of the SetContributionResponse object
