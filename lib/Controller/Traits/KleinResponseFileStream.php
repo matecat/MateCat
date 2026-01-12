@@ -12,7 +12,8 @@ namespace Controller\Traits;
 use Klein\Response;
 use Model\FilesStorage\AbstractFilesStorage;
 
-class KleinResponseFileStream {
+class KleinResponseFileStream
+{
 
     /**
      * @var Response
@@ -24,7 +25,8 @@ class KleinResponseFileStream {
      *
      * @param Response $response
      */
-    public function __construct( Response $response ) {
+    public function __construct(Response $response)
+    {
         $this->response = $response;
     }
 
@@ -41,40 +43,41 @@ class KleinResponseFileStream {
      * the file's data
      *
      * @param resource $filePointer The pointer to the file to send
-     * @param string  $filename    The file's name
-     * @param string   $mimeType
-     * @param string   $disposition
+     * @param string $filename The file's name
+     * @param string $mimeType
+     * @param string $disposition
      *
      * @internal param KleinController $controller The MIME type of the file
      */
-    public function streamFileFromPointer( $filePointer, string $mimeType, string $disposition, string $filename ) {
-
-        $this->response->body( '' );
+    public function streamFileFromPointer($filePointer, string $mimeType, string $disposition, string $filename): void
+    {
+        $this->response->body('');
         $this->response->noCache();
 
-        $filename = AbstractFilesStorage::basename_fix( $filename );
+        $filename = AbstractFilesStorage::basename_fix($filename);
 
-        $this->response->header( 'Content-type', $mimeType );
-        $this->response->header( 'Content-Disposition', $disposition . '; filename="' . $filename . '"' );
-        $this->response->header( 'Expires', "0" );
-        $this->response->header( 'Connection', "close" );
+        $this->response->header('Content-type', $mimeType);
+        $this->response->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
+        $this->response->header('Expires', "0");
+        $this->response->header('Connection', "close");
 
         $this->response->send();
 
-        while ( !feof( $filePointer ) ) {
-            echo fgets( $filePointer, 2048 );
+        while (!feof($filePointer)) {
+            echo fgets($filePointer, 2048);
         }
 
-        fclose( $filePointer );
-
+        fclose($filePointer);
     }
 
-    public function streamFileDownloadFromPointer( $filePointer, $filename ) {
-        $this->streamFileFromPointer( $filePointer, "application/download", 'attachment', $filename );
+    public function streamFileDownloadFromPointer($filePointer, $filename)
+    {
+        $this->streamFileFromPointer($filePointer, "application/download", 'attachment', $filename);
     }
 
-    public function streamFileInlineFromPointer( $filePointer, $filename, $mimeType ) {
-        $this->streamFileFromPointer( $filePointer, $mimeType, 'inline', $filename );
+    public function streamFileInlineFromPointer($filePointer, $filename, $mimeType)
+    {
+        $this->streamFileFromPointer($filePointer, $mimeType, 'inline', $filename);
     }
 
 }

@@ -7,8 +7,8 @@ import {downloadFileGDrive} from '../api/downloadFileGDrive'
 import {downloadFile} from '../api/downloadFile'
 
 const DownloadFileUtils = {
-  downloadFile: function (idJob, pass, callback) {
-    downloadFile({idJob, password: pass})
+  downloadFile: function (idJob, pass, checkErrors, callback) {
+    downloadFile({idJob, password: pass, checkErrors})
       .then(() => callback())
       .catch((e) => {
         const notification = {
@@ -32,7 +32,13 @@ const DownloadFileUtils = {
     CatToolActions.addNotification(notification)
   },
 
-  downloadGDriveFile: function (openOriginalFiles, jobId, pass, callback) {
+  downloadGDriveFile: function (
+    openOriginalFiles,
+    jobId,
+    pass,
+    checkErrors,
+    callback,
+  ) {
     if (typeof openOriginalFiles === 'undefined') {
       openOriginalFiles = 0
     }
@@ -84,7 +90,13 @@ const DownloadFileUtils = {
     const downloadToken =
       new Date().getTime() + '_' + parseInt(Math.random(0, 1) * 10000000)
 
-    downloadFileGDrive(openOriginalFiles, jobId, pass, downloadToken)
+    downloadFileGDrive(
+      openOriginalFiles,
+      jobId,
+      pass,
+      checkErrors,
+      downloadToken,
+    )
       .then((data) => {
         driveUpdateDone(data)
         if (callback) {

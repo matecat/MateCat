@@ -13,7 +13,8 @@ use JsonSerializable;
 use Utils\Constants\ProjectStatus;
 use Utils\Registry\AppConfig;
 
-class AnalysisProjectSummary implements JsonSerializable {
+class AnalysisProjectSummary implements JsonSerializable
+{
 
     /**
      * @var int
@@ -53,61 +54,63 @@ class AnalysisProjectSummary implements JsonSerializable {
     protected int $total_fast_analysis = 0;
 
     /**
-     * @param int    $in_queue_before
-     * @param int    $total_segments
+     * @param int $in_queue_before
+     * @param int $total_segments
      * @param string $analysis_status
      */
-    public function __construct( int $in_queue_before, int $total_segments, string $analysis_status ) {
+    public function __construct(int $in_queue_before, int $total_segments, string $analysis_status)
+    {
         $this->in_queue_before = $in_queue_before;
-        $this->total_segments  = $total_segments;
+        $this->total_segments = $total_segments;
         $this->analysis_status = $analysis_status;
     }
 
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
-                'in_queue_before'   => $this->in_queue_before,
-                'total_segments'    => $this->total_segments,
-                'segments_analyzed' => $this->segments_analyzed,
-                'status'            => $this->analysis_status,
-                'total_raw'         => $this->total_raw,
-                'total_industry'    => max( round( $this->total_industry ), round( $this->total_equivalent ) ),
-                'total_equivalent'  => round( $this->total_equivalent ),
-                'discount'          => $this->getDiscount()
+            'in_queue_before' => $this->in_queue_before,
+            'total_segments' => $this->total_segments,
+            'segments_analyzed' => $this->segments_analyzed,
+            'status' => $this->analysis_status,
+            'total_raw' => $this->total_raw,
+            'total_industry' => max(round($this->total_industry), round($this->total_equivalent)),
+            'total_equivalent' => round($this->total_equivalent),
+            'discount' => $this->getDiscount()
         ];
     }
 
-    private function getEstimatedWorkTime(): string {
-
+    private function getEstimatedWorkTime(): string
+    {
         $wc_time = $this->total_equivalent / AppConfig::$ANALYSIS_WORDS_PER_DAYS;
         $wc_unit = 'day';
 
-        if ( $wc_time > 0 and $wc_time < 1 ) {
+        if ($wc_time > 0 and $wc_time < 1) {
             $wc_time *= 8; //convert to hours (1 work day = 8 hours)
             $wc_unit = 'hour';
         }
 
-        if ( $wc_time > 0 and $wc_time < 1 ) {
+        if ($wc_time > 0 and $wc_time < 1) {
             $wc_time *= 60; //convert to minutes
             $wc_unit = 'minute';
         }
 
-        if ( $wc_time > 1 ) {
+        if ($wc_time > 1) {
             $wc_unit .= 's';
         }
 
-        return number_format( round( $wc_time ) ) . " work " . $wc_unit;
-
+        return number_format(round($wc_time)) . " work " . $wc_unit;
     }
 
     /**
-     * @return float|int
+     * @return float
      */
-    public function getDiscount(): float {
-        if ( empty( $this->total_raw ) ) {
+    public function getDiscount(): float
+    {
+        if (empty($this->total_raw)) {
             return 0;
         }
 
-        return round( ( ( $this->total_raw - round( $this->total_equivalent ) ) / $this->total_raw ) * 100 );
+        return round((($this->total_raw - round($this->total_equivalent)) / $this->total_raw) * 100);
     }
 
     /**
@@ -115,7 +118,8 @@ class AnalysisProjectSummary implements JsonSerializable {
      *
      * @return $this
      */
-    public function setTotalFastAnalysis( int $total_fast_analysis ): AnalysisProjectSummary {
+    public function setTotalFastAnalysis(int $total_fast_analysis): AnalysisProjectSummary
+    {
         $this->total_fast_analysis = $total_fast_analysis;
 
         return $this;
@@ -124,28 +128,36 @@ class AnalysisProjectSummary implements JsonSerializable {
     /**
      * @return int
      */
-    public function getTotalFastAnalysis(): int {
+    public function getTotalFastAnalysis(): int
+    {
         return $this->total_fast_analysis;
     }
 
     /**
      * @return void
      */
-    public function incrementAnalyzed() {
+    public function incrementAnalyzed(): void
+    {
         $this->segments_analyzed++;
     }
 
     /**
+     * @param float $equivalent
+     *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent(float $equivalent): void
+    {
         $this->total_equivalent += $equivalent;
     }
 
     /**
+     * @param int $raw
+     *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw(int $raw): void
+    {
         $this->total_raw += $raw;
     }
 
@@ -154,35 +166,24 @@ class AnalysisProjectSummary implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementIndustry( float $industry ) {
+    public function incrementIndustry(float $industry): void
+    {
         $this->total_industry += $industry;
     }
 
     /**
-     * @return float
-     */
-    public function getTotalIndustry(): int {
-        return round( $this->total_industry );
-    }
-
-    /**
      * @return int
      */
-    public function getSegmentsAnalyzed(): int {
+    public function getSegmentsAnalyzed(): int
+    {
         return $this->segments_analyzed;
     }
 
     /**
-     * @return float
-     */
-    public function getTotalEquivalent(): int {
-        return round( $this->total_equivalent );
-    }
-
-    /**
      * @return int
      */
-    public function getTotalSegments(): int {
+    public function getTotalSegments(): int
+    {
         return $this->total_segments;
     }
 

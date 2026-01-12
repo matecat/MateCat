@@ -11,59 +11,66 @@ namespace Utils\TMS;
 
 use stdClass;
 
-class TMSFile extends stdClass {
+class TMSFile extends stdClass
+{
 
-    private string  $file_path;
-    private string  $tm_key;
-    private string  $name;
-    private int     $position;
+    private string $file_path;
+    private string $tm_key;
+    private string $name;
+    private int $position;
     private ?string $uuid = null;
 
     /**
      * @param string $file_path
      * @param string $tm_key
      * @param string $name
-     * @param int    $position
+     * @param int $position
      */
-    public function __construct( string $file_path, string $tm_key, string $name, int $position = 0 ) {
+    public function __construct(string $file_path, string $tm_key, string $name, int $position = 0)
+    {
         $this->file_path = $file_path;
-        $this->tm_key    = $tm_key;
-        $this->name      = $name;
-        $this->position  = $position;
+        $this->tm_key = $tm_key;
+        $this->name = $name;
+        $this->position = $position;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getFilePath() {
+    public function getFilePath(): string
+    {
         return $this->file_path;
     }
 
     /**
      * @return string
      */
-    public function getTmKey(): string {
+    public function getTmKey(): string
+    {
         return $this->tm_key;
     }
 
     /**
      * @return string
      */
-    public function getName(): string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
     /**
      * @return int
      */
-    public function getPosition(): int {
+    public function getPosition(): int
+    {
         return $this->position;
     }
 
     /**
      * @return string|null
      */
-    public function getUuid(): ?string {
+    public function getUuid(): ?string
+    {
         return $this->uuid;
     }
 
@@ -72,7 +79,8 @@ class TMSFile extends stdClass {
      *
      * @return $this
      */
-    public function setUuid( string $uuid ): TMSFile {
+    public function setUuid(string $uuid): TMSFile
+    {
         $this->uuid = $uuid;
 
         return $this;

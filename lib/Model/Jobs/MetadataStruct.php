@@ -11,9 +11,10 @@ namespace Model\Jobs;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 
-class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct {
-    public ?int   $id = null;
-    public int    $id_job;
+class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
+    public ?int $id = null;
+    public int $id_job;
     public string $password;
     public string $key;
     public string $value;

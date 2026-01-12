@@ -8,7 +8,8 @@ use Model\Search\MySQLReplaceEventIndexDAO;
 use Model\Search\RedisReplaceEventDAO;
 use Model\Search\RedisReplaceEventIndexDAO;
 
-class ReplaceHistoryFactory {
+class ReplaceHistoryFactory
+{
 
     /**
      * @param $id_job
@@ -17,34 +18,36 @@ class ReplaceHistoryFactory {
      *
      * @return ReplaceHistory
      */
-    public static function create( $id_job, $driver, $ttl ): ReplaceHistory {
-        self::_checkDriver( $driver );
+    public static function create($id_job, $driver, $ttl): ReplaceHistory
+    {
+        self::_checkDriver($driver);
 
-        if ( $driver === 'redis' ) {
+        if ($driver === 'redis') {
             return new ReplaceHistory(
-                    $id_job,
-                    new RedisReplaceEventDAO(),
-                    new RedisReplaceEventIndexDAO(),
-                    $ttl
+                $id_job,
+                new RedisReplaceEventDAO(),
+                new RedisReplaceEventIndexDAO(),
+                $ttl
             );
         }
 
         return new ReplaceHistory(
-                $id_job,
-                new MySQLReplaceEventDAO(),
-                new MySQLReplaceEventIndexDAO(),
-                $ttl
+            $id_job,
+            new MySQLReplaceEventDAO(),
+            new MySQLReplaceEventIndexDAO(),
+            $ttl
         );
     }
 
     /**
-     * @param $driver
+     * @param string $driver
      */
-    private static function _checkDriver( $driver ) {
-        $allowed_drivers = [ 'redis', 'mysql' ];
+    private static function _checkDriver(string $driver): void
+    {
+        $allowed_drivers = ['redis', 'mysql'];
 
-        if ( !in_array( $driver, $allowed_drivers ) ) {
-            throw new InvalidArgumentException( $driver . ' is not an allowed driver ' );
+        if (!in_array($driver, $allowed_drivers)) {
+            throw new InvalidArgumentException($driver . ' is not an allowed driver ');
         }
     }
 }

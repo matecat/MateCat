@@ -19,7 +19,8 @@ use PDOException;
 use stdClass;
 use Utils\Logger\LoggerFactory;
 
-class SearchModel {
+class SearchModel
+{
 
     /**
      * @var SearchQueryParamsStruct
@@ -27,7 +28,7 @@ class SearchModel {
     protected SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var \Model\DataAccess\Database
+     * @var Database
      */
     protected IDatabase $db;
 
@@ -40,12 +41,13 @@ class SearchModel {
      * SearchModel constructor.
      *
      * @param SearchQueryParamsStruct $queryParams
-     * @param MateCatFilter           $filters
+     * @param MateCatFilter $filters
      */
-    public function __construct( SearchQueryParamsStruct $queryParams, MateCatFilter $filters ) {
+    public function __construct(SearchQueryParamsStruct $queryParams, MateCatFilter $filters)
+    {
         $this->queryParams = $queryParams;
-        $this->db          = Database::obtain();
-        $this->filters     = $filters;
+        $this->db = Database::obtain();
+        $this->filters = $filters;
         $this->_loadParams();
     }
 
@@ -55,28 +57,28 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    public function search( bool $inCurrentChunkOnly ): array {
-
-        switch ( $this->queryParams->key ) {
+    public function search(bool $inCurrentChunkOnly): array
+    {
+        switch ($this->queryParams->key) {
             case 'source':
-                $results = $this->_getQuery( $this->_loadSearchInSourceQuery( $inCurrentChunkOnly ) );
+                $results = $this->_getQuery($this->_loadSearchInSourceQuery($inCurrentChunkOnly));
                 break;
             case 'target':
-                $results = $this->_getQuery( $this->_loadSearchInTargetQuery( $inCurrentChunkOnly ) );
+                $results = $this->_getQuery($this->_loadSearchInTargetQuery($inCurrentChunkOnly));
                 break;
             case 'coupled':
-                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery( $inCurrentChunkOnly ) ), $this->_getQuery( $this->_loadSearchInTargetQuery( $inCurrentChunkOnly ) ) );
-                $results    = [];
+                $rawResults = array_merge_recursive($this->_getQuery($this->_loadSearchInSourceQuery($inCurrentChunkOnly)), $this->_getQuery($this->_loadSearchInTargetQuery($inCurrentChunkOnly)));
+                $results = [];
 
                 // in this case, $results is the merge of two queries results,
                 // every segment id will possibly have 2 occurrences (source and target)
-                foreach ( $rawResults as $rawResult ) {
-                    $results[ $rawResult[ 'id' ] ][] = $rawResult[ 'text' ];
+                foreach ($rawResults as $rawResult) {
+                    $results[$rawResult['id']][] = $rawResult['text'];
                 }
 
                 break;
             case 'status_only':
-                $results = $this->_getQuery( $this->_loadSearchStatusOnlyQuery() );
+                $results = $this->_getQuery($this->_loadSearchStatusOnlyQuery());
                 break;
             default:
                 $results = [];
@@ -84,63 +86,55 @@ class SearchModel {
         }
 
         $vector = [
-                'sid_list' => [],
-                'count'    => '0'
+            'sid_list' => [],
+            'count' => '0'
         ];
 
-        if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' ) {
+        if ($this->queryParams->key === 'source' || $this->queryParams->key === 'target') {
+            $searchTerm = (false === empty($this->queryParams->source)) ? $this->queryParams->source : $this->queryParams->target;
 
-            $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
+            foreach ($results as $occurrence) {
+                $matches = $this->find($occurrence['text'], $searchTerm);
+                $matchesCount = count($matches);
 
-            foreach ( $results as $occurrence ) {
-                $matches      = $this->find( $occurrence[ 'text' ], $searchTerm );
-                $matchesCount = count( $matches );
-
-                if ( $this->hasMatches( $matches ) ) {
-                    $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
-                    $vector[ 'count' ]      = $vector[ 'count' ] + $matchesCount;
+                if ($this->hasMatches($matches)) {
+                    $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
+                    $vector['count'] = $vector['count'] + $matchesCount;
                 }
             }
 
-            if ( $vector[ 'count' ] == 0 ) {
-                $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]    = 0;
+            if ($vector['count'] == 0) {
+                $vector['sid_list'] = [];
+                $vector['count'] = 0;
             }
-
-        } elseif ( $this->queryParams->key === 'coupled' ) {
-
-            foreach ( $results as $id => $occurrence ) {
-
+        } elseif ($this->queryParams->key === 'coupled') {
+            foreach ($results as $id => $occurrence) {
                 // check if exists match target
-                if ( isset( $occurrence[ 1 ] ) ) {
-
+                if (isset($occurrence[1])) {
                     // match source
-                    $searchTermSource   = $this->queryParams->source;
-                    $matchesSource      = $this->find( $occurrence[ 0 ], $searchTermSource );
-                    $matchesSourceCount = count( $matchesSource );
+                    $searchTermSource = $this->queryParams->source;
+                    $matchesSource = $this->find($occurrence[0], $searchTermSource);
+                    $matchesSourceCount = count($matchesSource);
 
-                    $searchTermTarget   = $this->queryParams->target;
-                    $matchesTarget      = $this->find( $occurrence[ 1 ], $searchTermTarget );
-                    $matchesTargetCount = count( $matchesTarget );
+                    $searchTermTarget = $this->queryParams->target;
+                    $matchesTarget = $this->find($occurrence[1], $searchTermTarget);
+                    $matchesTargetCount = count($matchesTarget);
 
-                    if ( $this->hasMatches( $matchesSource ) and $this->hasMatches( $matchesTarget ) ) {
-                        $vector[ 'sid_list' ][] = strval( $id );
-                        $vector[ 'count' ]      = $vector[ 'count' ] + $matchesTargetCount + $matchesSourceCount;
+                    if ($this->hasMatches($matchesSource) and $this->hasMatches($matchesTarget)) {
+                        $vector['sid_list'][] = strval($id);
+                        $vector['count'] = $vector['count'] + $matchesTargetCount + $matchesSourceCount;
                     }
                 }
             }
 
-            if ( $vector[ 'count' ] == 0 ) {
-                $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]    = 0;
+            if ($vector['count'] == 0) {
+                $vector['sid_list'] = [];
+                $vector['count'] = 0;
             }
-
         } else {
-
-            foreach ( $results as $occurrence ) {
-                $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
+            foreach ($results as $occurrence) {
+                $vector[ 'sid_list' ][] = strval($occurrence[ 'id' ]);
             }
-
         }
 
         return $vector;
@@ -151,9 +145,9 @@ class SearchModel {
      *
      * @return bool
      */
-    private function hasMatches( array $matches ): bool {
-
-        return count( $matches ) > 0 and $matches[ 0 ][ 0 ] !== '';
+    private function hasMatches(array $matches): bool
+    {
+        return count($matches) > 0 and $matches[0][0] !== '';
     }
 
     /**
@@ -163,17 +157,17 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    private function find( string $haystack, string $needle ): array {
-
-        $this->filters->fromLayer0ToLayer2( $haystack );
+    private function find(string $haystack, string $needle): array
+    {
+        $this->filters->fromLayer0ToLayer2($haystack);
 
         return WholeTextFinder::find(
-                $haystack,
-                $needle,
-                true,
-                $this->queryParams->isExactMatchRequested,
-                $this->queryParams->isMatchCaseRequested,
-                true
+            $haystack,
+            $needle,
+            true,
+            $this->queryParams->isExactMatchRequested,
+            $this->queryParams->isMatchCaseRequested,
+            true
         );
     }
 
@@ -183,15 +177,15 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    protected function _getQuery( $sql ): array {
-
+    protected function _getQuery($sql): array
+    {
         try {
-            $stmt = $this->db->getConnection()->prepare( $sql );
+            $stmt = $this->db->getConnection()->prepare($sql);
             $stmt->execute();
-            $results = $stmt->fetchAll( PDO::FETCH_ASSOC );
-        } catch ( PDOException $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
-            throw new Exception( $e->getMessage(), $e->getCode() * -1, $e );
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
+            throw new Exception($e->getMessage(), $e->getCode() * -1, $e);
         }
 
         return $results;
@@ -200,8 +194,8 @@ class SearchModel {
     /**
      * Pay attention to possible SQL injection
      */
-    protected function _loadParams() {
-
+    protected function _loadParams(): void
+    {
         // bring the src and target from layer 2 (UI) to layer 0 (DB)
 //        $this->queryParams->source = $this->filters->fromLayer2ToLayer0( $this->queryParams->src );
 //        $this->queryParams->target = $this->filters->fromLayer2ToLayer0( $this->queryParams->trg );
@@ -209,13 +203,13 @@ class SearchModel {
         $this->queryParams->target = $this->queryParams->trg;
 
         $this->queryParams->where_status = "";
-        if ( $this->queryParams->status != 'all' ) {
-            $this->queryParams->status       = $this->db->escape( $this->queryParams->status ); //escape: hardcoded
+        if ($this->queryParams->status != 'all') {
+            $this->queryParams->status = $this->db->escape($this->queryParams->status); //escape: hardcoded
             $this->queryParams->where_status = "AND st.status = '{$this->queryParams->status}'";
         }
 
         $this->queryParams->matchCase = new stdClass();
-        if ( $this->queryParams->isMatchCaseRequested ) {
+        if ($this->queryParams->isMatchCaseRequested) {
             $this->queryParams->matchCase->SQL_REGEXP_CASE = "BINARY";
             $this->queryParams->matchCase->SQL_LENGHT_CASE = "";
             $this->queryParams->matchCase->REGEXP_MODIFIER = 'u';
@@ -226,23 +220,28 @@ class SearchModel {
         }
 
         $this->queryParams->exactMatch = new stdClass();
-        if ( $this->queryParams->isExactMatchRequested ) {
-            $this->queryParams->exactMatch->Space_Left  = "[[:space:]]{0,}";
+        if ($this->queryParams->isExactMatchRequested) {
+            $this->queryParams->exactMatch->Space_Left = "[[:space:]]{0,}";
             $this->queryParams->exactMatch->Space_Right = "([[:space:]]|$)";
         } else {
             $this->queryParams->exactMatch->Space_Left = $this->queryParams->exactMatch->Space_Right = ""; // we want to search for all occurrences in a string: the word mod will take two matches: "mod" and "mod modifier"
         }
 
         /**
-         * Escape Meta-characters to use in regular expression ( LIKE STATEMENT is treated inside MySQL as a Regexp pattern )
+         * Escape Meta-characters to use in regular expression (LIKE STATEMENT is treated inside MySQL as a Regexp pattern)
          *
          */
-        $this->queryParams->_regexpNotEscapedSrc = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->source );
-        $this->queryParams->regexpEscapedSrc     = $this->db->escape( $this->queryParams->_regexpNotEscapedSrc );
+        if (isset($this->queryParams->source)) {
+            $escaped = preg_quote((string)$this->queryParams->source, '#');
+            $this->queryParams->_regexpNotEscapedSrc = $escaped;
+            $this->queryParams->regexpEscapedSrc = $this->db->escape($escaped);
+        }
 
-        $this->queryParams->_regexpEscapedTrg = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->target );
-        $this->queryParams->regexpEscapedTrg  = $this->db->escape( $this->queryParams->_regexpEscapedTrg );
-
+        if (isset($this->queryParams->target)) {
+            $escaped = preg_quote((string)$this->queryParams->target, '#');
+            $this->queryParams->_regexpEscapedTrg = $escaped;
+            $this->queryParams->regexpEscapedTrg = $this->db->escape($escaped);
+        }
     }
 
     /**
@@ -250,10 +249,10 @@ class SearchModel {
      *
      * @return string
      */
-    protected function _loadSearchInTargetQuery( bool $inCurrentChunkOnly = false ): string {
-
+    protected function _loadSearchInTargetQuery(bool $inCurrentChunkOnly = false): string
+    {
         $this->_loadParams();
-        $password_where = ( $inCurrentChunkOnly ) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
+        $password_where = ($inCurrentChunkOnly) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
         return "
         SELECT  st.id_segment as id, st.translation as text, od.map as original_map
@@ -265,7 +264,6 @@ class SearchModel {
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
 			GROUP BY st.id_segment";
-
     }
 
     /**
@@ -273,10 +271,10 @@ class SearchModel {
      *
      * @return string
      */
-    protected function _loadSearchInSourceQuery( ?bool $inCurrentChunkOnly = false ): string {
-
+    protected function _loadSearchInSourceQuery(?bool $inCurrentChunkOnly = false): string
+    {
         $this->_loadParams();
-        $password_where = ( $inCurrentChunkOnly ) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
+        $password_where = ($inCurrentChunkOnly) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
         return "
         SELECT s.id, s.segment as text, od.map as original_map
@@ -290,11 +288,10 @@ class SearchModel {
 			AND show_in_cattool = 1
 			{$this->queryParams->where_status}
 			GROUP BY s.id";
-
     }
 
-    protected function _loadSearchStatusOnlyQuery(): string {
-
+    protected function _loadSearchStatusOnlyQuery(): string
+    {
         $this->_loadParams();
 
         return "
@@ -303,7 +300,6 @@ class SearchModel {
 			WHERE st.id_job = {$this->queryParams->job}
 		    {$this->queryParams->where_status}
 		";
-
     }
 
 }

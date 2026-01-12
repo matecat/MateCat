@@ -6,7 +6,8 @@ use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Utils\Tools\Utils;
 
-class PropagationAnalyser {
+class PropagationAnalyser
+{
 
     /**
      * @var int
@@ -31,81 +32,81 @@ class PropagationAnalyser {
     /**
      * @return int
      */
-    public function getPropagatedIceCount(): int {
+    public function getPropagatedIceCount(): int
+    {
         return $this->propagatedIceCount;
     }
 
     /**
      * @return int
      */
-    public function getNotPropagatedIceCount(): int {
+    public function getNotPropagatedIceCount(): int
+    {
         return $this->notPropagatedIceCount;
     }
 
     /**
      * @return int
      */
-    public function getPropagatedCount(): int {
+    public function getPropagatedCount(): int
+    {
         return $this->propagatedCount;
     }
 
     /**
      * @return int
      */
-    public function getNotPropagatedCount(): int {
+    public function getNotPropagatedCount(): int
+    {
         return $this->notPropagatedCount;
     }
 
     /**
-     * @param SegmentTranslationStruct   $parentSegmentTranslation
+     * @param SegmentTranslationStruct $parentSegmentTranslation
      * @param SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
      * @return PropagationTotalStruct
      */
-    public function analyse( SegmentTranslationStruct $parentSegmentTranslation, array $arrayOfSegmentTranslationToPropagate ): PropagationTotalStruct {
-
+    public function analyse(SegmentTranslationStruct $parentSegmentTranslation, array $arrayOfSegmentTranslationToPropagate): PropagationTotalStruct
+    {
         $propagation = new PropagationTotalStruct();
 
-        if ( $parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1 ) { // check IF the parent segment is ICE
-            foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
-
-                if ( $this->detectIce( $segmentTranslation ) ) {
-                    $propagation->addNotPropagatedIce( $segmentTranslation ); // IF the parent segment is NOT ICE, we can not propagate it to ICEs
+        if ($parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1) { // check IF the parent segment is ICE
+            foreach ($arrayOfSegmentTranslationToPropagate as $segmentTranslation) {
+                if ($this->detectIce($segmentTranslation)) {
+                    $propagation->addNotPropagatedIce($segmentTranslation); // IF the parent segment is NOT ICE, we can not propagate it to ICEs
                     $this->notPropagatedIceCount++;
                 } else {
-                    $propagation->addPropagatedNotIce( $segmentTranslation );
-                    $propagation->addPropagatedId( $segmentTranslation->id_segment );
+                    $propagation->addPropagatedNotIce($segmentTranslation);
+                    $propagation->addPropagatedId($segmentTranslation->id_segment);
 
-                    if ( false === Utils::stringsAreEqual(
-                                    $parentSegmentTranslation->translation,
-                                    $segmentTranslation->translation ?? ''
-                            ) ) {
-                        $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
+                    if (false === Utils::stringsAreEqual(
+                            $parentSegmentTranslation->translation,
+                            $segmentTranslation->translation ?? ''
+                        )) {
+                        $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
                     }
 
                     $this->propagatedCount++;
                 }
             }
         } else { // keep only ICE with the corresponding hash
-            foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
-
+            foreach ($arrayOfSegmentTranslationToPropagate as $segmentTranslation) {
                 //Propagate to other ICEs
-                if ( $this->detectMatchingIce( $parentSegmentTranslation, $segmentTranslation ) ) {
+                if ($this->detectMatchingIce($parentSegmentTranslation, $segmentTranslation)) {
+                    $propagation->addPropagatedIce($segmentTranslation);
+                    $propagation->addPropagatedId($segmentTranslation->id_segment);
 
-                    $propagation->addPropagatedIce( $segmentTranslation );
-                    $propagation->addPropagatedId( $segmentTranslation->id_segment );
-
-                    if ( false === Utils::stringsAreEqual(
-                                    $parentSegmentTranslation->translation,
-                                    $segmentTranslation->translation ?? ''
-                            ) ) {
-                        $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
+                    if (false === Utils::stringsAreEqual(
+                            $parentSegmentTranslation->translation,
+                            $segmentTranslation->translation ?? ''
+                        )) {
+                        $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
                     }
 
                     $this->propagatedIceCount++;
-
                 } else { // ??? Why ICEs can not propagate to normal segments?
-                    $propagation->addNotPropagatedNotIce( $segmentTranslation );
+                    $propagation->addNotPropagatedNotIce($segmentTranslation);
                     $this->notPropagatedCount++;
                 }
             }
@@ -119,8 +120,9 @@ class PropagationAnalyser {
      *
      * @return bool
      */
-    private function detectIce( SegmentTranslationStruct $segmentTranslation ): bool {
-        return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 );
+    private function detectIce(SegmentTranslationStruct $segmentTranslation): bool
+    {
+        return ($segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1);
     }
 
     /**
@@ -129,7 +131,8 @@ class PropagationAnalyser {
      *
      * @return bool
      */
-    private function detectMatchingIce( SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation ): bool {
-        return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash );
+    private function detectMatchingIce(SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation): bool
+    {
+        return ($segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash);
     }
 }

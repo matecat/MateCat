@@ -17,11 +17,12 @@ use Utils\Registry\AppConfig;
  * Time: 15:00
  *
  */
-trait AuthenticationTrait {
+trait AuthenticationTrait
+{
 
     use SessionStarter;
 
-    protected bool       $userIsLogged;
+    protected bool $userIsLogged;
     protected UserStruct $user;
 
     /**
@@ -37,10 +38,10 @@ trait AuthenticationTrait {
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function identifyUser( ?bool $useSession = true ) {
-
+    protected function identifyUser(?bool $useSession = true): void
+    {
         $_session = [];
-        if ( $useSession ) {
+        if ($useSession) {
             //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disable
             static::sessionStart();
             $_session =& $_SESSION;
@@ -48,66 +49,69 @@ trait AuthenticationTrait {
 
         $this->setAuthKeysIfExists();
 
-        $auth               = AuthenticationHelper::getInstance( $_session, $this->api_key, $this->api_secret );
-        $this->user         = $auth->getUser();
+        $auth = AuthenticationHelper::getInstance($_session, $this->api_key, $this->api_secret);
+        $this->user = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
-        $this->api_record   = $auth->getApiRecord();
-
+        $this->api_record = $auth->getApiRecord();
     }
 
     /**
      * @return void
      */
-    protected function setAuthKeysIfExists(): void {
+    protected function setAuthKeysIfExists(): void
+    {
+        $headers = array_change_key_case(getallheaders());
 
-        $headers = array_change_key_case( getallheaders() );
+        $this->api_key = $headers['x-matecat-key'] ?? base64_decode(explode('Bearer ', $headers['authorization'] ?? '')[1] ?? '');
+        $this->api_secret = $headers['x-matecat-secret'] ?? null;
 
-        $this->api_key    = $headers[ 'x-matecat-key' ] ?? base64_decode( explode( 'Bearer ', $headers[ 'authorization' ] ?? '' )[ 1 ] ?? null );
-        $this->api_secret = $headers[ 'x-matecat-secret' ] ?? null;
-
-        if ( false !== strpos( $this->api_key, '-' ) ) {
-            [ $this->api_key, $this->api_secret ] = explode( '-', $this->api_key );
+        if (str_contains($this->api_key, '-')) {
+            [$this->api_key, $this->api_secret] = explode('-', $this->api_key);
         }
-
     }
 
-    public function isLoggedIn(): bool {
+    public function isLoggedIn(): bool
+    {
         return $this->userIsLogged;
     }
 
     /**
-     * @return ?UserStruct
+     * @return UserStruct
      */
-    public function getUser(): UserStruct {
+    public function getUser(): UserStruct
+    {
         return $this->user;
     }
 
     /**
      * @throws ReflectionException
      */
-    public function broadcastLogout() {
+    public function broadcastLogout(): void
+    {
         $this->logout();
         $queueHandler = new AMQHandler();
-        $message      = json_encode( [
-                '_type' => 'logout',
-                'data'  => [
-                        'uid'     => $this->user->uid,
-                        'payload' => [
-                                'uid' => $this->user->uid,
-                        ]
+        $message = json_encode([
+            '_type' => 'logout',
+            'data' => [
+                'uid' => $this->user->uid,
+                'payload' => [
+                    'uid' => $this->user->uid,
                 ]
-        ] );
-        $queueHandler->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+            ]
+        ]);
+        $queueHandler->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message));
     }
 
     /**
      * @throws ReflectionException
      */
-    public function logout() {
-        AuthenticationHelper::destroyAuthentication( $_SESSION );
+    public function logout(): void
+    {
+        AuthenticationHelper::destroyAuthentication($_SESSION);
     }
 
-    public function getApiRecord(): ?ApiKeyStruct {
+    public function getApiRecord(): ?ApiKeyStruct
+    {
         return $this->api_record;
     }
 

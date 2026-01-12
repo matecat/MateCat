@@ -1,69 +1,48 @@
 <?php
 
 namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
-use Model\Jobs\JobStruct;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\ReviseFeedback\FeedbackStruct;
-use ReflectionException;
 
-class RevisionFeedbackController extends KleinController {
+class RevisionFeedbackController extends KleinController
+{
     use ChunkNotFoundHandlerTrait;
-    /**
-     * @param JobStruct $chunk
-     *
-     * @return $this
-     */
-    public function setChunk( JobStruct $chunk ): RevisionFeedbackController {
-        $this->chunk = $chunk;
-
-        return $this;
-    }
 
     /**
-     * @throws ReflectionException
-     * @throws NotFoundException
      */
-    public function feedback() {
-
+    public function feedback(): void
+    {
         // insert or update feedback
-        $feedbackStruct                  = new FeedbackStruct();
-        $feedbackStruct->id_job          = $this->request->param( 'id_job' );
-        $feedbackStruct->password        = $this->request->param( 'password' );
-        $feedbackStruct->revision_number = $this->request->param( 'revision_number' );
-        $feedbackStruct->feedback        = $this->request->param( 'feedback' );
+        $feedbackStruct = new FeedbackStruct();
+        $feedbackStruct->id_job = $this->request->param('id_job');
+        $feedbackStruct->password = $this->request->param('password');
+        $feedbackStruct->revision_number = $this->request->param('revision_number');
+        $feedbackStruct->feedback = $this->request->param('feedback');
 
-        // check if job exists and it is not deleted
-        $job = $this->getJob( $feedbackStruct->id_job, $feedbackStruct->password );
-
-        if ( null === $job ) {
-            throw new NotFoundException( 'Job not found.' );
-        }
-
-        $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $rows   = ( new FeedbackDAO() )->insertOrUpdate( $feedbackStruct );
-        $status = ( $rows > 0 ) ? 'ok' : 'ko';
+        $rows = (new FeedbackDAO())->insertOrUpdate($feedbackStruct);
+        $status = ($rows > 0) ? 'ok' : 'ko';
 
-        $this->response->json( [
-                'status' => $status
-        ] );
+        $this->response->json([
+            'status' => $status
+        ]);
     }
 
-    protected function afterConstruct() {
-        $validator  = new ChunkPasswordValidator( $this );
-        $controller = $this;
-        $validator->onSuccess( function () use ( $validator, $controller ) {
-            $controller->setChunk( $validator->getChunk() );
-        } );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $validator = new ChunkPasswordValidator($this);
+        $validator->onSuccess(function () use ($validator) {
+            $this->chunk = $validator->getChunk();
+        });
 
-        $this->appendValidator( $validator );
-        $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator($validator);
     }
 }
 

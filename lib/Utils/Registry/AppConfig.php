@@ -7,22 +7,23 @@ use Exception;
 use RuntimeException;
 use Utils\Constants\Mime2Extension;
 
-class AppConfig {
+class AppConfig
+{
 
     public static array $MANDATORY_KEYS = [
-            'ENV',
-            'DB_SERVER',
-            'DB_DATABASE',
-            'DB_USER',
-            'DB_PASS',
-            'REDIS_SERVERS',
-            'QUEUE_BROKER_ADDRESS',
-            'QUEUE_JMX_ADDRESS',
-            'QUEUE_CREDENTIALS',
-            'HTTPHOST',
-            'CLI_HTTP_HOST',
-            'COOKIE_DOMAIN',
-            'AUTHSECRET',
+        'ENV',
+        'DB_SERVER',
+        'DB_DATABASE',
+        'DB_USER',
+        'DB_PASS',
+        'REDIS_SERVERS',
+        'QUEUE_BROKER_ADDRESS',
+        'QUEUE_JMX_ADDRESS',
+        'QUEUE_CREDENTIALS',
+        'HTTPHOST',
+        'CLI_HTTP_HOST',
+        'COOKIE_DOMAIN',
+        'AUTHSECRET',
     ];
 
     /**
@@ -40,28 +41,33 @@ class AppConfig {
      */
     public static ?string $ENV = null;
 
-    public static string  $ROOT;
-    public static string  $BASEURL;
-    public static string  $HTTPHOST;
-    public static string  $CLI_HTTP_HOST;
-    public static string  $COOKIE_DOMAIN;
-    public static string  $PHP_SESSION_NAME = 'PHPSESSID';
-    public static int     $AJAX_DOMAINS     = 100;
-    public static string  $PROTOCOL         = 'https';
-    public static bool    $DEBUG            = true;
-    public static bool    $PRINT_ERRORS     = false;
-    public static ?string $DB_SERVER        = null;
-    public static ?string $DB_DATABASE      = null;
-    public static ?string $DB_USER          = null;
-    public static ?string $DB_PASS          = null;
-    public static int     $INSTANCE_ID      = 0;
-    public static string  $REDIS_SERVERS    = '';
-    public static string  $QUEUE_BROKER_ADDRESS;
-    public static string  $QUEUE_JMX_ADDRESS;
-    public static string  $QUEUE_CREDENTIALS;
+    /**
+     * Indicates whether the current instance is running as a daemon process.
+     */
+    public static bool $IS_DAEMON_INSTANCE = false;
 
-    public static bool   $ENABLE_MULTI_DOMAIN_API = false;
-    public static string $XSRF_TOKEN              = 'xsrf-token';
+    public static string $ROOT;
+    public static string $BASEURL;
+    public static string $HTTPHOST;
+    public static string $CLI_HTTP_HOST;
+    public static string $COOKIE_DOMAIN;
+    public static string $PHP_SESSION_NAME = 'PHPSESSID';
+    public static int $AJAX_DOMAINS = 100;
+    public static string $PROTOCOL = 'https';
+    public static bool $DEBUG = true;
+    public static bool $PRINT_ERRORS = false;
+    public static ?string $DB_SERVER = null;
+    public static ?string $DB_DATABASE = null;
+    public static ?string $DB_USER = null;
+    public static ?string $DB_PASS = null;
+    public static int $INSTANCE_ID = 0;
+    public static string $REDIS_SERVERS = '';
+    public static string $QUEUE_BROKER_ADDRESS;
+    public static string $QUEUE_JMX_ADDRESS;
+    public static string $QUEUE_CREDENTIALS;
+
+    public static bool $ENABLE_MULTI_DOMAIN_API = false;
+    public static string $XSRF_TOKEN = 'Xsrf-Token';
 
     /**
      * Use or not the js tracking codes macro import (Ex: Google Analytics code injection)
@@ -72,54 +78,54 @@ class AppConfig {
      */
     public static string $TRACKING_CODES_VIEW_PATH = "";
 
-    public static bool   $COMMENTS_ENABLED                = true;
+    public static bool $COMMENTS_ENABLED = true;
     public static string $SOCKET_NOTIFICATIONS_QUEUE_NAME = "/queue/matecat_socket_notifications";
-    public static string $SOCKET_BASE_URL                 = '';
+    public static string $SOCKET_BASE_URL = '';
 
-    public static ?string $SMTP_HOST     = null;
-    public static ?int    $SMTP_PORT     = null;
-    public static ?string $SMTP_SENDER   = null;
+    public static ?string $SMTP_HOST = null;
+    public static ?int $SMTP_PORT = null;
+    public static ?string $SMTP_SENDER = null;
     public static ?string $SMTP_HOSTNAME = null;
 
-    public static string $MAILER_FROM_NAME   = 'Matecat';
+    public static string $MAILER_FROM_NAME = 'Matecat';
     public static string $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
-    public static ?string $LOG_REPOSITORY              = null;
-    public static ?string $STORAGE_DIR                 = null;
-    public static string  $UPLOAD_REPOSITORY;
-    public static string  $FILES_REPOSITORY;
-    public static string  $CACHE_REPOSITORY;
-    public static string  $ZIP_REPOSITORY;
-    public static string  $ANALYSIS_FILES_REPOSITORY;
-    public static string  $QUEUE_PROJECT_REPOSITORY;
-    public static string  $CONVERSION_ERRORS_REPOSITORY;
-    public static string  $TMP_DOWNLOAD;
-    public static string  $TEMPLATE_ROOT;
-    public static string  $UTILS_ROOT;
-    public static int     $DEFAULT_NUM_RESULTS_FROM_TM = 3;
-    public static string  $AUTHSECRET;
-    public static string  $AUTHSECRET_PATH;
+    public static ?string $LOG_REPOSITORY = null;
+    public static ?string $STORAGE_DIR = null;
+    public static string $UPLOAD_REPOSITORY;
+    public static string $FILES_REPOSITORY;
+    public static string $CACHE_REPOSITORY;
+    public static string $ZIP_REPOSITORY;
+    public static string $ANALYSIS_FILES_REPOSITORY;
+    public static string $QUEUE_PROJECT_REPOSITORY;
+    public static string $CONVERSION_ERRORS_REPOSITORY;
+    public static string $TMP_DOWNLOAD;
+    public static string $TEMPLATE_ROOT;
+    public static string $UTILS_ROOT;
+    public static int $DEFAULT_NUM_RESULTS_FROM_TM = 3;
+    public static string $AUTHSECRET;
+    public static string $AUTHSECRET_PATH;
 
-    public static bool   $FORCE_XLIFF_CONVERSION    = false;
-    public static bool   $FILTERS_OCR_CHECK         = true;
-    public static bool   $VOLUME_ANALYSIS_ENABLED   = true;
-    public static int    $WARNING_POLLING_INTERVAL  = 20; //seconds
-    public static int    $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
-    public static string $AUTHCOOKIENAME            = 'matecat_login_v6';
-    public static string $SUPPORT_MAIL              = 'the owner of this MateCat instance.';//the default string is 'the owner of this Matecat instance'
-    public static int    $ANALYSIS_WORDS_PER_DAYS   = 3000;
-    public static int    $AUTHCOOKIEDURATION        = 86400 * 7;        // 24 hours
-    public static int    $MAX_UPLOAD_FILE_SIZE      = 62914560;     // 60 * 1024 * 1024 // bytes
-    public static int    $MAX_UPLOAD_TMX_FILE_SIZE  = 314572800;    // 300 * 1024 * 1024 // bytes
-    public static int    $MAX_NUM_FILES             = 100;
-    public static int    $MAX_SOURCE_WORDS          = 250000;
+    public static bool $FORCE_XLIFF_CONVERSION = false;
+    public static bool $FILTERS_OCR_CHECK = true;
+    public static bool $VOLUME_ANALYSIS_ENABLED = true;
+    public static int $WARNING_POLLING_INTERVAL = 20; //seconds
+    public static int $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
+    public static string $AUTHCOOKIENAME = 'matecat_login_v6';
+    public static string $SUPPORT_MAIL = 'the owner of this MateCat instance.';//the default string is 'the owner of this Matecat instance'
+    public static int $ANALYSIS_WORDS_PER_DAYS = 3000;
+    public static int $AUTHCOOKIEDURATION = 86400 * 7;        // 24 hours
+    public static int $MAX_UPLOAD_FILE_SIZE = 62914560;     // 60 * 1024 * 1024 // bytes
+    public static int $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024 // bytes
+    public static int $MAX_NUM_FILES = 100;
+    public static int $MAX_SOURCE_WORDS = 250000;
 
     /**
      * OPENAI configuration
      */
-    public static string $OPENAI_API_KEY     = '';
-    public static string $OPEN_AI_MODEL      = '';
-    public static int    $OPEN_AI_TIMEOUT    = 30; //seconds
+    public static string $OPENAI_API_KEY = '';
+    public static string $OPEN_AI_MODEL = '';
+    public static int $OPEN_AI_TIMEOUT = 30; //seconds
     public static string $OPEN_AI_MAX_TOKENS = '';
 
     /**
@@ -131,7 +137,7 @@ class AppConfig {
      *
      */
     public static ?string $LXQ_LICENSE = null;
-    public static string  $LXQ_SERVER  = "https://backend.lexiqa.net";
+    public static string $LXQ_SERVER = "https://backend.lexiqa.net";
     /**
      * Your partnerId will be provided along with your
      * @see http://www.lexiqa.net
@@ -155,7 +161,7 @@ class AppConfig {
     /**
      * Default Matecat user agent string
      */
-    const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
+    const string MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
     /**
      * ENABLE_OUTSOURCE set as true, will show the option to outsource to an external
@@ -171,11 +177,11 @@ class AppConfig {
     /**
      * MateCat Filters configuration
      */
-    public static string $FILTERS_USER_AGENT                    = "MateCat Community Instance";
-    public static string $FILTERS_ADDRESS                       = "https://translated-matecat-filters-v1.p.rapidapi.com";
-    public static string $FILTERS_RAPIDAPI_KEY                  = "https://rapidapi.com/translated/api/matecat-filters to obtain your RapidAPI Key";
-    public static bool   $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
-    public static bool   $FILTERS_EMAIL_FAILURES                = false;
+    public static string $FILTERS_USER_AGENT = "MateCat Community Instance";
+    public static string $FILTERS_ADDRESS = "https://translated-matecat-filters-v1.p.rapidapi.com";
+    public static string $FILTERS_RAPIDAPI_KEY = "https://rapidapi.com/translated/api/matecat-filters to obtain your RapidAPI Key";
+    public static bool $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
+    public static bool $FILTERS_EMAIL_FAILURES = false;
 
     /**
      * The MateCat Version
@@ -183,13 +189,13 @@ class AppConfig {
     public static string $BUILD_NUMBER = '';
 
     /**
-     * Match Developer email Key for the cattool
+     * MyMemory Developer email Key for the cattool
      * @var string
      */
     public static string $MYMEMORY_API_KEY = 'demo@matecat.com';
 
     /**
-     * Match Developer email Key for the analysis
+     * MyMemory Developer email Key for the analysis
      * @var string
      */
     public static string $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com';
@@ -253,39 +259,39 @@ class AppConfig {
     /**
      * Google credentials
      */
-    public static ?string $GOOGLE_OAUTH_CLIENT_ID       = null;
-    public static ?string $GOOGLE_OAUTH_CLIENT_SECRET   = null;
+    public static ?string $GOOGLE_OAUTH_CLIENT_ID = null;
+    public static ?string $GOOGLE_OAUTH_CLIENT_SECRET = null;
     public static ?string $GOOGLE_OAUTH_CLIENT_APP_NAME = null;
-    public static ?string $GOOGLE_OAUTH_REDIRECT_URL    = null;
+    public static ?string $GOOGLE_OAUTH_REDIRECT_URL = null;
     public static ?string $GOOGLE_OAUTH_BROWSER_API_KEY = null;
 
     /**
      * GitHub credentials
      */
-    public static ?string $GITHUB_OAUTH_CLIENT_ID     = null;
+    public static ?string $GITHUB_OAUTH_CLIENT_ID = null;
     public static ?string $GITHUB_OAUTH_CLIENT_SECRET = null;
-    public static ?string $GITHUB_OAUTH_REDIRECT_URL  = null;
+    public static ?string $GITHUB_OAUTH_REDIRECT_URL = null;
 
     /**
      * Linkedin credentials
      */
-    public static ?string $LINKEDIN_OAUTH_CLIENT_ID     = null;
+    public static ?string $LINKEDIN_OAUTH_CLIENT_ID = null;
     public static ?string $LINKEDIN_OAUTH_CLIENT_SECRET = null;
-    public static ?string $LINKEDIN_OAUTH_REDIRECT_URL  = null;
+    public static ?string $LINKEDIN_OAUTH_REDIRECT_URL = null;
 
     /**
      * Microsoft credentials
      */
-    public static ?string $MICROSOFT_OAUTH_CLIENT_ID     = null;
+    public static ?string $MICROSOFT_OAUTH_CLIENT_ID = null;
     public static ?string $MICROSOFT_OAUTH_CLIENT_SECRET = null;
-    public static ?string $MICROSOFT_OAUTH_REDIRECT_URL  = null;
+    public static ?string $MICROSOFT_OAUTH_REDIRECT_URL = null;
 
     /**
      * Facebook credentials
      */
-    public static ?string $FACEBOOK_OAUTH_CLIENT_ID     = null;
+    public static ?string $FACEBOOK_OAUTH_CLIENT_ID = null;
     public static ?string $FACEBOOK_OAUTH_CLIENT_SECRET = null;
-    public static ?string $FACEBOOK_OAUTH_REDIRECT_URL  = null;
+    public static ?string $FACEBOOK_OAUTH_REDIRECT_URL = null;
 
     public static bool $SKIP_SQL_CACHE = false;
 
@@ -298,43 +304,62 @@ class AppConfig {
      * S3FilesStorage Configuration
      */
     public static ?string $AWS_ACCESS_KEY_ID = null;
-    public static ?string $AWS_SECRET_KEY    = null;
-    public static string  $AWS_VERSION;
-    public static string  $AWS_REGION;
-    public static bool    $AWS_SSL_VERIFY    = false;
-    public static bool    $AWS_CACHING       = false;
-    public static string  $AWS_STORAGE_BASE_BUCKET;
+    public static ?string $AWS_SECRET_KEY = null;
+    public static ?string $AWS_VERSION = null;
+    public static ?string $AWS_REGION = null;
+    public static bool $AWS_SSL_VERIFY = false;
+    public static bool $AWS_CACHING = false;
+    public static string $AWS_STORAGE_BASE_BUCKET;
+
+    /**
+     * Logging configuration
+     */
+    public static array $MONOLOG_HANDLERS = [];
 
     public static string $REPLACE_HISTORY_DRIVER = '';
-    public static int    $REPLACE_HISTORY_TTL    = 0;
+    public static int $REPLACE_HISTORY_TTL = 0;
 
     private static ?AppConfig $MYSELF = null;
 
-    protected function __construct( string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration ) {
-
-        self::$ENV                = $envName;
-        self::$BUILD_NUMBER       = $matecatVersion;
+    protected function __construct(
+        string $rootPath,
+        string $envName,
+        string $matecatVersion,
+        array $configuration,
+        array $taskManagerConfiguration,
+    ) {
+        self::$ENV = $envName;
+        self::$BUILD_NUMBER = $matecatVersion;
         self::$TASK_RUNNER_CONFIG = $taskManagerConfiguration;
 
         // Overridable defaults
-        self::$ROOT                        = $rootPath; // Accessible by Apache/PHP
-        self::$BASEURL                     = "/"; // Accessible by the browser
+        self::$ROOT = $rootPath; // Accessible by Apache/PHP
+        self::$BASEURL = "/"; // Accessible by the browser
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
-        self::$TRACKING_CODES_VIEW_PATH    = self::$ROOT . "/lib/View/templates";
+        self::$TRACKING_CODES_VIEW_PATH = self::$ROOT . "/lib/View/templates";
+
+        // Detects if the script is running via Command Line Interface (CLI) to flag the instance as a daemon/background worker
+        AppConfig::$IS_DAEMON_INSTANCE = stripos(PHP_SAPI, 'cli') !== false;
 
         //Override default configuration
-        foreach ( $configuration as $KEY => $value ) {
-            if ( property_exists( self::class, $KEY ) ) {
-                AppConfig::${$KEY} = $value;
+        foreach ($configuration as $KEY => $value) {
+            if (property_exists(self::class, $KEY)) {
+                if ($KEY == 'MONOLOG_HANDLERS') {
+                    foreach ($value as $handler) {
+                        AppConfig::${$KEY}[$handler] = $configuration[$handler] ?? [];
+                    }
+                } else {
+                    AppConfig::${$KEY} = $value;
+                }
             }
         }
 
-        if ( stripos( PHP_SAPI, 'cli' ) === false ) {
+        if (!self::$IS_DAEMON_INSTANCE) {
             // Get HTTPS server status
             // Override if the header is set from load balancer
             $localProto = 'http';
-            foreach ( [ 'HTTPS', 'HTTP_X_FORWARDED_PROTO' ] as $_key ) {
-                if ( isset( $_SERVER[ $_key ] ) ) {
+            foreach (['HTTPS', 'HTTP_X_FORWARDED_PROTO'] as $_key) {
+                if (isset($_SERVER[$_key])) {
                     $localProto = 'https';
                     break;
                 }
@@ -342,184 +367,181 @@ class AppConfig {
             self::$PROTOCOL = $localProto;
         }
 
-        if ( empty( self::$STORAGE_DIR ) ) {
+        if (empty(self::$STORAGE_DIR)) {
             self::$STORAGE_DIR = self::$ROOT . "/local_storage";
         }
 
-        self::$HTTPHOST                     = self::$CLI_HTTP_HOST;
-        self::$LOG_REPOSITORY               = self::$STORAGE_DIR . "/log_archive";
-        self::$UPLOAD_REPOSITORY            = self::$STORAGE_DIR . "/upload";
-        self::$FILES_REPOSITORY             = self::$STORAGE_DIR . "/files_storage/files";
-        self::$CACHE_REPOSITORY             = self::$STORAGE_DIR . "/files_storage/cache";
-        self::$ZIP_REPOSITORY               = self::$STORAGE_DIR . "/files_storage/originalZip";
-        self::$ANALYSIS_FILES_REPOSITORY    = self::$STORAGE_DIR . "/files_storage/fastAnalysis";
-        self::$QUEUE_PROJECT_REPOSITORY     = self::$STORAGE_DIR . "/files_storage/queueProjects";
+        self::$HTTPHOST = self::$CLI_HTTP_HOST;
+        self::$LOG_REPOSITORY = self::$STORAGE_DIR . "/log_archive";
+        self::$UPLOAD_REPOSITORY = self::$STORAGE_DIR . "/upload";
+        self::$FILES_REPOSITORY = self::$STORAGE_DIR . "/files_storage/files";
+        self::$CACHE_REPOSITORY = self::$STORAGE_DIR . "/files_storage/cache";
+        self::$ZIP_REPOSITORY = self::$STORAGE_DIR . "/files_storage/originalZip";
+        self::$ANALYSIS_FILES_REPOSITORY = self::$STORAGE_DIR . "/files_storage/fastAnalysis";
+        self::$QUEUE_PROJECT_REPOSITORY = self::$STORAGE_DIR . "/files_storage/queueProjects";
         self::$CONVERSION_ERRORS_REPOSITORY = self::$STORAGE_DIR . "/conversion_errors";
-        self::$TMP_DOWNLOAD                 = self::$STORAGE_DIR . "/tmp_download";
-        self::$TEMPLATE_ROOT                = self::$ROOT . "/lib/View";
-        self::$UTILS_ROOT                   = self::$ROOT . '/lib/Utils';
+        self::$TMP_DOWNLOAD = self::$STORAGE_DIR . "/tmp_download";
+        self::$TEMPLATE_ROOT = self::$ROOT . "/lib/View";
+        self::$UTILS_ROOT = self::$ROOT . '/lib/Utils';
 
         $oauth_config_file = self::$ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini';
 
-        if ( file_exists( $oauth_config_file ) ) {
-            self::$OAUTH_CONFIG = parse_ini_file( $oauth_config_file, true ) ?? [];
+        if (file_exists($oauth_config_file)) {
+            self::$OAUTH_CONFIG = parse_ini_file($oauth_config_file, true) ?? [];
         }
 
         //auth sections
         self::$AUTHSECRET_PATH = self::$ROOT . '/inc/login_secret.dat';
 
         //if a secret is set in file
-        if ( file_exists( self::$AUTHSECRET_PATH ) ) {
+        if (file_exists(self::$AUTHSECRET_PATH)) {
             //fetch it
-            self::$AUTHSECRET = file_get_contents( self::$AUTHSECRET_PATH );
+            self::$AUTHSECRET = file_get_contents(self::$AUTHSECRET_PATH);
         } else {
-
             //generates pass
             try {
-                $x                = random_bytes( 256 );
-                self::$AUTHSECRET = bin2Hex( $x );
-            } catch ( Exception $e ) {
-                throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
+                $x = random_bytes(256);
+                self::$AUTHSECRET = bin2Hex($x);
+            } catch (Exception $e) {
+                throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
             }
 
             //put the file
-            file_put_contents( self::$AUTHSECRET_PATH, self::$AUTHSECRET );
+            file_put_contents(self::$AUTHSECRET_PATH, self::$AUTHSECRET);
             //if put succeeds
-            if ( file_exists( self::$AUTHSECRET_PATH ) ) {
+            if (file_exists(self::$AUTHSECRET_PATH)) {
                 //restrict permissions
-                chmod( self::$AUTHSECRET_PATH, 0400 );
+                chmod(self::$AUTHSECRET_PATH, 0400);
             } else {
                 //if we couldn't create due to permissions, use default secret
                 self::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
-
         }
 
-        self::$GITHUB_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
-        self::$GITHUB_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$GITHUB_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_ID = self::$OAUTH_CONFIG['GITHUB_OAUTH_CONFIG']['GITHUB_OAUTH_CLIENT_ID'] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG['GITHUB_OAUTH_CONFIG']['GITHUB_OAUTH_CLIENT_SECRET'] ?? null;
+        self::$GITHUB_OAUTH_REDIRECT_URL = self::$OAUTH_CONFIG['GITHUB_OAUTH_CONFIG']['GITHUB_OAUTH_REDIRECT_URL'] ?? null;
 
-        self::$LINKEDIN_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_ID' ] ?? null;
-        self::$LINKEDIN_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$LINKEDIN_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_ID = self::$OAUTH_CONFIG['LINKEDIN_OAUTH_CONFIG']['LINKEDIN_OAUTH_CLIENT_ID'] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG['LINKEDIN_OAUTH_CONFIG']['LINKEDIN_OAUTH_CLIENT_SECRET'] ?? null;
+        self::$LINKEDIN_OAUTH_REDIRECT_URL = self::$OAUTH_CONFIG['LINKEDIN_OAUTH_CONFIG']['LINKEDIN_OAUTH_REDIRECT_URL'] ?? null;
 
-        self::$MICROSOFT_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_ID' ] ?? null;
-        self::$MICROSOFT_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$MICROSOFT_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_ID = self::$OAUTH_CONFIG['MICROSOFT_OAUTH_CONFIG']['MICROSOFT_OAUTH_CLIENT_ID'] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG['MICROSOFT_OAUTH_CONFIG']['MICROSOFT_OAUTH_CLIENT_SECRET'] ?? null;
+        self::$MICROSOFT_OAUTH_REDIRECT_URL = self::$OAUTH_CONFIG['MICROSOFT_OAUTH_CONFIG']['MICROSOFT_OAUTH_REDIRECT_URL'] ?? null;
 
-        self::$FACEBOOK_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_ID' ] ?? null;
-        self::$FACEBOOK_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$FACEBOOK_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_ID = self::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_CLIENT_ID'] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_CLIENT_SECRET'] ?? null;
+        self::$FACEBOOK_OAUTH_REDIRECT_URL = self::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_REDIRECT_URL'] ?? null;
 
-        self::$GOOGLE_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
-        self::$GOOGLE_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$GOOGLE_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_ID = self::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG']['GOOGLE_OAUTH_CLIENT_ID'] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG']['GOOGLE_OAUTH_CLIENT_SECRET'] ?? null;
+        self::$GOOGLE_OAUTH_REDIRECT_URL = self::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG']['GOOGLE_OAUTH_REDIRECT_URL'] ?? null;
 
         # Drive
-        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
-        self::$GOOGLE_OAUTH_BROWSER_API_KEY = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = self::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG']['GOOGLE_OAUTH_CLIENT_APP_NAME'] ?? null;
+        self::$GOOGLE_OAUTH_BROWSER_API_KEY = self::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG']['GOOGLE_OAUTH_BROWSER_API_KEY'] ?? null;
 
         self::$MIME_TYPES = Mime2Extension::getMimeTypes();
-
     }
 
     public static array $SUPPORTED_FILE_TYPES = [
-            'Office'              => [
-                    'pages'   => [ '', '', 'extdoc' ],
-                    'doc'     => [ '', '', 'extdoc' ],
-                    'dot'     => [ '', '', 'extdoc' ],
-                    'docx'    => [ '', '', 'extdoc' ],
-                    'docm'    => [ '', '', 'extdoc' ],
-                    'dotx'    => [ '', '', 'extdoc' ],
-                    'dotm'    => [ '', '', 'extdoc' ],
-                    'rtf'     => [ '', '', 'extdoc' ],
-                    'odt'     => [ '', '', 'extdoc' ],
-                    'ott'     => [ '', '', 'extdoc' ],
-                    'pdf'     => [ '', '', 'extpdf' ],
-                    'numbers' => [ '', '', 'extxls' ],
-                    'txt'     => [ '', '', 'exttxt' ],
-                    'xls'     => [ '', '', 'extxls' ],
-                    'xlt'     => [ '', '', 'extxls' ],
-                    'xlsx'    => [ '', '', 'extxls' ],
-                    'xlsm'    => [ '', '', 'extxls' ],
-                    'xltx'    => [ '', '', 'extxls' ],
-                    'xltm'    => [ '', '', 'extxls' ],
-                    'ods'     => [ '', '', 'extxls' ],
-                    'ots'     => [ '', '', 'extxls' ],
-                //'csv'  => array( '', '', 'extxls' ),
-                    'tsv'     => [ '', '', 'extxls' ],
-                    'key'     => [ '', '', 'extppt' ],
-                    'ppt'     => [ '', '', 'extppt' ],
-                    'pps'     => [ '', '', 'extppt' ],
-                    'pot'     => [ '', '', 'extppt' ],
-                    'pptx'    => [ '', '', 'extppt' ],
-                    'pptm'    => [ '', '', 'extppt' ],
-                    'ppsx'    => [ '', '', 'extppt' ],
-                    'ppsm'    => [ '', '', 'extppt' ],
-                    'potx'    => [ '', '', 'extppt' ],
-                    'potm'    => [ '', '', 'extppt' ],
-                    'odp'     => [ '', '', 'extppt' ],
-                    'otp'     => [ '', '', 'extppt' ],
-                    'xml'     => [ '', '', 'extxml' ],
-                    'zip'     => [ '', '', 'extzip' ],
-            ],
-            'Web'                 => [
-                    'htm'    => [ '', '', 'exthtm' ],
-                    'html'   => [ '', '', 'exthtm' ],
-                    'xhtml'  => [ '', '', 'exthtm' ],
-                    'xml'    => [ '', '', 'extxml' ],
-                    'dtd'    => [ '', '', 'extxml' ],
+        'Office' => [
+            'pages' => ['', '', 'extdoc'],
+            'doc' => ['', '', 'extdoc'],
+            'dot' => ['', '', 'extdoc'],
+            'docx' => ['', '', 'extdoc'],
+            'docm' => ['', '', 'extdoc'],
+            'dotx' => ['', '', 'extdoc'],
+            'dotm' => ['', '', 'extdoc'],
+            'rtf' => ['', '', 'extdoc'],
+            'odt' => ['', '', 'extdoc'],
+            'ott' => ['', '', 'extdoc'],
+            'pdf' => ['', '', 'extpdf'],
+            'numbers' => ['', '', 'extxls'],
+            'txt' => ['', '', 'exttxt'],
+            'xls' => ['', '', 'extxls'],
+            'xlt' => ['', '', 'extxls'],
+            'xlsx' => ['', '', 'extxls'],
+            'xlsm' => ['', '', 'extxls'],
+            'xltx' => ['', '', 'extxls'],
+            'xltm' => ['', '', 'extxls'],
+            'ods' => ['', '', 'extxls'],
+            'ots' => ['', '', 'extxls'],
+            //'csv'  => array( '', '', 'extxls' ),
+            'tsv' => ['', '', 'extxls'],
+            'key' => ['', '', 'extppt'],
+            'ppt' => ['', '', 'extppt'],
+            'pps' => ['', '', 'extppt'],
+            'pot' => ['', '', 'extppt'],
+            'pptx' => ['', '', 'extppt'],
+            'pptm' => ['', '', 'extppt'],
+            'ppsx' => ['', '', 'extppt'],
+            'ppsm' => ['', '', 'extppt'],
+            'potx' => ['', '', 'extppt'],
+            'potm' => ['', '', 'extppt'],
+            'odp' => ['', '', 'extppt'],
+            'otp' => ['', '', 'extppt'],
+            'xml' => ['', '', 'extxml'],
+            'zip' => ['', '', 'extzip'],
+        ],
+        'Web' => [
+            'htm' => ['', '', 'exthtm'],
+            'html' => ['', '', 'exthtm'],
+            'xhtml' => ['', '', 'exthtm'],
+            'xml' => ['', '', 'extxml'],
+            'dtd' => ['', '', 'extxml'],
 //                    'php'   => array( '', '', 'extxml' ),
-                    'json'   => [ '', '', 'extxml' ],
-                    'jsont'  => [ '', '', 'extxml' ],
-                    'jsont2' => [ '', '', 'extxml' ],
-                    'yaml'   => [ '', '', 'extxml' ],
-                    'yml'    => [ '', '', 'extxml' ],
-                    'md'     => [ '', '', 'extxml' ],
-            ],
-            'Scanned Files'       => [
-                    'pdf'  => [ '', '', 'extpdf' ],
-                    'bmp'  => [ '', '', 'extimg' ],
-                    'png'  => [ '', '', 'extimg' ],
-                    'gif'  => [ '', '', 'extimg' ],
-                    'jpeg' => [ '', '', 'extimg' ],
-                    'jpg'  => [ '', '', 'extimg' ],
-                    'jfif' => [ '', '', 'extimg' ],
-                    'tiff' => [ '', '', 'extimg' ]
-            ],
-            "Interchange Formats" => [
-                    'xliff'    => [ 'default', '', 'extxif' ],
-                    'sdlxliff' => [ 'default', '', 'extxif' ],
-                    'tmx'      => [ '', '', 'exttmx' ],
-                    'ttx'      => [ '', '', 'extttx' ],
-                    'xlf'      => [ 'default', '', 'extxlf' ],
-            ],
-            "Desktop Publishing"  => [
-                    'mif'     => [ '', '', 'extmif' ],
-                    'idml'    => [ '', '', 'extidd' ],
-                    'icml'    => [ '', '', 'exticml' ],
-                    'xml'     => [ '', '', 'extxml' ],
-                    'dita'    => [ '', '', 'extdit' ],
-                    'ditamap' => [ '', '', 'extdit' ]
-            ],
-            "Localization"        => [
-                    'properties'  => [ '', '', 'extpro' ],
-                    'resx'        => [ '', '', 'extres' ],
-                    'xml'         => [ '', '', 'extxml' ],
-                    'sxml'        => [ '', '', 'extxml' ],
-                    'txml'        => [ '', '', 'extxml' ],
-                    'dita'        => [ '', '', 'extdit' ],
-                    'ditamap'     => [ '', '', 'extdit' ],
-                    'Android xml' => [ '', '', 'extxml' ],
-                    'strings'     => [ '', '', 'extstr' ],
-                    'sbv'         => [ '', '', 'extsbv' ],
-                    'srt'         => [ '', '', 'extsrt' ],
-                    'vtt'         => [ '', '', 'extvtt' ],
-                    'wix'         => [ '', '', 'extwix' ],
-                    'po'          => [ '', '', 'extpo' ],
-                    'g'           => [ '', '', 'extg' ],
-                    'ts'          => [ '', '', 'exts' ],
-            ]
+            'json' => ['', '', 'extxml'],
+            'jsont' => ['', '', 'extxml'],
+            'jsont2' => ['', '', 'extxml'],
+            'yaml' => ['', '', 'extxml'],
+            'yml' => ['', '', 'extxml'],
+            'md' => ['', '', 'extxml'],
+        ],
+        'Scanned Files' => [
+            'pdf' => ['', '', 'extpdf'],
+            'bmp' => ['', '', 'extimg'],
+            'png' => ['', '', 'extimg'],
+            'gif' => ['', '', 'extimg'],
+            'jpeg' => ['', '', 'extimg'],
+            'jpg' => ['', '', 'extimg'],
+            'jfif' => ['', '', 'extimg'],
+            'tiff' => ['', '', 'extimg']
+        ],
+        "Interchange Formats" => [
+            'xliff' => ['default', '', 'extxif'],
+            'sdlxliff' => ['default', '', 'extxif'],
+            'tmx' => ['', '', 'exttmx'],
+            'ttx' => ['', '', 'extttx'],
+            'xlf' => ['default', '', 'extxlf'],
+        ],
+        "Desktop Publishing" => [
+            'mif' => ['', '', 'extmif'],
+            'idml' => ['', '', 'extidd'],
+            'icml' => ['', '', 'exticml'],
+            'xml' => ['', '', 'extxml'],
+            'dita' => ['', '', 'extdit'],
+            'ditamap' => ['', '', 'extdit']
+        ],
+        "Localization" => [
+            'properties' => ['', '', 'extpro'],
+            'resx' => ['', '', 'extres'],
+            'xml' => ['', '', 'extxml'],
+            'sxml' => ['', '', 'extxml'],
+            'txml' => ['', '', 'extxml'],
+            'dita' => ['', '', 'extdit'],
+            'ditamap' => ['', '', 'extdit'],
+            'Android xml' => ['', '', 'extxml'],
+            'strings' => ['', '', 'extstr'],
+            'sbv' => ['', '', 'extsbv'],
+            'srt' => ['', '', 'extsrt'],
+            'vtt' => ['', '', 'extvtt'],
+            'wix' => ['', '', 'extwix'],
+            'po' => ['', '', 'extpo'],
+            'g' => ['', '', 'extg'],
+            'ts' => ['', '', 'exts'],
+        ]
     ];
 
     public static array $MIME_TYPES = [];
@@ -532,7 +554,7 @@ class AppConfig {
      */
     public static int $MAX_FILENAME_LENGTH = 210;
 
-    public static array $AUTOLOAD_PLUGINS = [ "second_pass_review" ];
+    public static array $AUTOLOAD_PLUGINS = ["second_pass_review"];
 
     /**
      * Definitions for the asynchronous task runner
@@ -548,12 +570,18 @@ class AppConfig {
      * @param string $rootPath
      * @param string $envName
      * @param string $matecatVersion
-     * @param array  $configuration
-     * @param array  $taskManagerConfiguration
+     * @param array $configuration
+     * @param array $taskManagerConfiguration
      */
-    public static function init( string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration ) {
-        if ( empty( self::$MYSELF ) ) {
-            self::$MYSELF = new self( $rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration );
+    public static function init(
+        string $rootPath,
+        string $envName,
+        string $matecatVersion,
+        array $configuration,
+        array $taskManagerConfiguration,
+    ): void {
+        if (empty(self::$MYSELF)) {
+            self::$MYSELF = new self($rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration);
         }
     }
 
@@ -562,10 +590,10 @@ class AppConfig {
      *
      * @return bool true if all mandatory keys are present, false otherwise
      */
-    public static function areMandatoryKeysPresent(): bool {
-
-        foreach ( self::$MANDATORY_KEYS as $key ) {
-            if ( !property_exists( self::class, $key ) || self::$$key === null ) {
+    public static function areMandatoryKeysPresent(): bool
+    {
+        foreach (self::$MANDATORY_KEYS as $key) {
+            if (!property_exists(self::class, $key) || self::$$key === null) {
                 return false;
             }
         }
@@ -583,8 +611,9 @@ class AppConfig {
      *
      * @return bool Returns `true` if both required properties are configured, `false` otherwise.
      */
-    public static function isGDriveConfigured(): bool {
-        if ( empty( self::$GOOGLE_OAUTH_CLIENT_ID ) || empty( self::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
+    public static function isGDriveConfigured(): bool
+    {
+        if (empty(self::$GOOGLE_OAUTH_CLIENT_ID) || empty(self::$GOOGLE_OAUTH_BROWSER_API_KEY)) {
             return false;
         }
 

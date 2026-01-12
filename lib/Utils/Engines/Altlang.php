@@ -13,7 +13,6 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.
- * @property string client_secret
  * @author egomez-prompsit egomez@prompsit.com
  * Date: 29/07/15
  * Time: 12.17
@@ -43,25 +42,24 @@ class Altlang extends AbstractEngine
     }
 
     /**
-     * @param $lang
+     * @param string $lang
      *
-     * @return mixed
-     * @throws Exception
+     * @return string
      */
-    protected function _fixLangCode($lang)
+    protected function _fixLangCode(string $lang): string
     {
         return $lang;
     }
 
     /**
-     * @param       $rawValue
+     * @param mixed $rawValue
      * @param array $parameters
      * @param null $function
      *
      * @return array
      * @throws Exception
      */
-    protected function _decode($rawValue, array $parameters = [], $function = null): array
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
     {
         $all_args = func_get_args();
 
@@ -105,7 +103,7 @@ class Altlang extends AbstractEngine
      */
     public function get(array $_config)
     {
-        // Fallback on Match in case of not supported source/target combination
+        // Fallback on MyMemory in case of not supported source/target combination
         if (!$this->checkLanguageCombination($_config['source'], $_config['target'])) {
             /** @var MyMemory $myMemory */
             $myMemory = EnginesFactory::getInstance(1);
@@ -122,12 +120,9 @@ class Altlang extends AbstractEngine
             "context" => "altlang",
             "src" => $this->convertLanguageCode($_config['source']),
             "trg" => $this->convertLanguageCode($_config['target']),
-            "text" => $_config['segment']
+            "text" => $_config['segment'],
+            'key' => $this->getEngineRecord()->getExtraParamsAsArray()['client_secret'] ?? null
         ];
-
-        if ($this->client_secret != '' && $this->client_secret != null) {
-            $parameters['key'] = $this->client_secret;
-        }
 
         $this->_setAdditionalCurlParams([
             CURLOPT_POST => true,
@@ -170,9 +165,9 @@ class Altlang extends AbstractEngine
     /**
      * @param string $code
      *
-     * @return mixed
+     * @return string
      */
-    private function convertLanguageCode(string $code)
+    private function convertLanguageCode(string $code): string
     {
         $code = str_replace("-", "_", $code);
         $code = str_replace("es_AR", "es_LA", $code);

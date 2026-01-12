@@ -11,40 +11,42 @@ namespace View\API\V2\Json;
 
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 
-class JobClientKeys {
+class JobClientKeys
+{
 
     /**
      * @var ClientTmKeyStruct[]
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Project constructor.
      *
      * @param ClientTmKeyStruct[] $data
      */
-    public function __construct( array $data = [] ) {
+    public function __construct(array $data = [])
+    {
         $this->data = $data;
     }
 
-    public static function renderItem( ClientTmKeyStruct $keyStruct ) {
-
+    public static function renderItem(ClientTmKeyStruct $keyStruct): array
+    {
         return [
-                "key"  => $keyStruct->key,
-                "r"    => ( $keyStruct->r ),
-                "w"    => ( $keyStruct->w ),
-                "name" => $keyStruct->name
+            "key" => $keyStruct->key,
+            "r" => ($keyStruct->r),
+            "w" => ($keyStruct->w),
+            "name" => $keyStruct->name
         ];
-
     }
 
     /**
      * @return array
      */
-    public function render() {
+    public function render(): array
+    {
         $out = [];
-        foreach ( $this->data as $keyStruct ) {
-            $out[] = $this->renderItem( $keyStruct );
+        foreach ($this->data as $keyStruct) {
+            $out[] = $this->renderItem($keyStruct);
         }
 
         return $out;

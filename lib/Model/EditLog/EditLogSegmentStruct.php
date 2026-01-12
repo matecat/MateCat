@@ -4,7 +4,7 @@ namespace Model\EditLog;
 
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
-use Utils\Tools\Matches;
+use Utils\Tools\PostEditing;
 
 /**
  * Created by PhpStorm.
@@ -12,10 +12,11 @@ use Utils\Tools\Matches;
  * Date: 05/10/15
  * Time: 11.33
  */
-class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
 
-    const EDIT_TIME_SLOW_CUT = 30;
-    const EDIT_TIME_FAST_CUT = 0.25;
+    const int   EDIT_TIME_SLOW_CUT = 30;
+    const float EDIT_TIME_FAST_CUT = 0.25;
 
     /**
      * @var int
@@ -45,53 +46,39 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
     /**
      * @var ?string
      */
-    public ?string $target_language_code = null;
+    public ?string $target_language = null;
 
     /**
      * @return float
      */
-    public function getSecsPerWord(): float {
-        $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+    public function getSecsPerWord(): float
+    {
+        $val = @round(($this->time_to_edit / 1000) / $this->raw_word_count, 1);
 
-        return ( $val != INF ? $val : 0 );
+        return ($val != INF ? $val : 0);
     }
 
     /**
      * Returns true if the number of seconds per word
      * @return bool
      */
-    public function isValidForEditLog(): bool {
+    public function isValidForEditLog(): bool
+    {
         $secsPerWord = $this->getSecsPerWord();
 
-        return ( $secsPerWord > self::EDIT_TIME_FAST_CUT ) &&
-                ( $secsPerWord < self::EDIT_TIME_SLOW_CUT );
+        return ($secsPerWord > self::EDIT_TIME_FAST_CUT) &&
+            ($secsPerWord < self::EDIT_TIME_SLOW_CUT);
     }
 
     /**
      * @return float
      */
-    public function getPEE(): float {
-
-        $post_editing_effort = round(
-                ( 1 - Matches::get(
-                                self::cleanSegmentForPee( $this->suggestion ),
-                                self::cleanSegmentForPee( $this->translation ),
-                                $this->target_language_code
-                        )
-                ) * 100
+    public function getPEE(): float
+    {
+        return PostEditing::getPee(
+            $this->suggestion,
+            $this->translation,
+            $this->target_language
         );
-
-        if ( $post_editing_effort < 0 ) {
-            $post_editing_effort = 0;
-        } elseif ( $post_editing_effort > 100 ) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-
-    }
-
-    private static function cleanSegmentForPee( $segment ): string {
-        return htmlspecialchars_decode( $segment, ENT_QUOTES );
     }
 }

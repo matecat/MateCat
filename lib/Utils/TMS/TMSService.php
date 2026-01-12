@@ -62,7 +62,7 @@ class TMSService
      */
     public function __construct(?FeatureSet $featureSet = null)
     {
-        //get Match service
+        //get MyMemory service
         /** @var $mymemory_engine MyMemory */
         $mymemory_engine = EnginesFactory::getInstance(1);
         $this->mymemory_engine = $mymemory_engine;
@@ -85,7 +85,7 @@ class TMSService
     /**
      * @param string $output_type
      */
-    public function setOutputType(string $output_type)
+    public function setOutputType(string $output_type): void
     {
         $this->output_type = $output_type;
     }
@@ -111,7 +111,7 @@ class TMSService
     }
 
     /**
-     * Create a new Match Key
+     * Create a new MyMemory Key
      *
      * @return CreateUserResponse
      * @throws Exception
@@ -131,19 +131,20 @@ class TMSService
     /**
      * Saves the uploaded file and returns the file info.
      *
+     * @param bool $disable_upload_limit
+     *
      * @return UploadElement
      * @throws Exception
      */
-    public function uploadFile(): UploadElement
+    public function uploadFile(?bool $disable_upload_limit = false): UploadElement
     {
         $uploadManager = new Upload();
 
-        return $uploadManager->uploadFiles($_FILES);
+        return $uploadManager->uploadFiles($_FILES, $disable_upload_limit);
     }
 
     /**
-     * Import TMX file in Match
-     * @return array{engine: string, message: string, file: string}[]
+     * Import TMX file in MyMemory
      * @throws Exception
      */
     public function addTmxInMyMemory(TMSFile $file, UserStruct $user): array
@@ -193,9 +194,8 @@ class TMSService
     }
 
     /**
+     * @param UserStruct $user
      * @return EngineInterface[]
-     * @throws ReflectionException
-     * @throws Exception
      */
     protected function getUserAdaptiveMTEngines(UserStruct $user): array
     {
@@ -229,13 +229,13 @@ class TMSService
     }
 
     /**
-     * Import TMX file in Match
+     * Import TMX file in MyMemory
      *
      * @param TMSFile $file
      *
      * @throws Exception
      */
-    public function addGlossaryInMyMemory(TMSFile $file)
+    public function addGlossaryInMyMemory(TMSFile $file): void
     {
         $this->checkCorrectKey($file->getTmKey());
 
@@ -262,7 +262,7 @@ class TMSService
                     throw new UnprocessableException($message, $importStatus->responseStatus);
                 }
 
-                $message = 'Invalid TM key provided, please provide a valid Match key.';
+                $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
                 throw new InvalidArgumentException($message, $importStatus->responseStatus);
 
             default:
@@ -478,10 +478,10 @@ class TMSService
                 }
                 $chunkPropString = '<prop type="x-MateCAT-id_chunk">' . $idChunk . '</prop>';
             }
-            $dateCreate = new DateTime($row['translation_date'], new DateTimeZone('UTC'));
+            $dateCreate = new DateTime($row['translation_date'] ?? 'now', new DateTimeZone('UTC'));
 
             $tmOrigin = "";
-            if (strpos($this->output_type, 'tm') !== false) {
+            if (str_contains($this->output_type, 'tm')) {
                 $suggestionsArray = json_decode($row['suggestions_array'], true);
                 $suggestionOrigin = Utils::changeMemorySuggestionSource($suggestionsArray[0], $row['tm_keys'], $uid);
                 $tmOrigin = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";

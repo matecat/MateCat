@@ -14,7 +14,8 @@ use Utils\Engines\NONE;
  * Date: 26/04/16
  * Time: 17.05
  */
-class MagicGetTest extends AbstractTest {
+class MagicGetTest extends AbstractTest
+{
     /**
      * @var EngineStruct
      */
@@ -25,41 +26,40 @@ class MagicGetTest extends AbstractTest {
      */
     protected $engine;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->engine_struct_param                   = new EngineStruct();
-        $this->engine_struct_param->type             = EngineConstants::MT;
-        $this->engine_struct_param->name             = "DeepLingoTestEngine";
-        $this->engine_struct_param->others           = [ 'alfa' => "one", 'beta' => "two" ];
-        $this->engine_struct_param->extra_parameters = [ 'gamma' => "three", 'delta' => "four" ];
+        $this->engine_struct_param = new EngineStruct();
+        $this->engine_struct_param->type = EngineConstants::MT;
+        $this->engine_struct_param->name = "DeepLingoTestEngine";
+        $this->engine_struct_param->others = ['alfa' => "one", 'beta' => "two"];
+        $this->engine_struct_param->extra_parameters = ['gamma' => "three", 'delta' => "four"];
 
 
-        $this->engine = new NONE( $this->engine_struct_param );
-
-
+        $this->engine = new NONE($this->engine_struct_param);
     }
 
     /**
      * @group   regression
      * @covers  AbstractEngine::__get
      */
-    public function test_magic__get() {
-
-        $this->assertEquals( "DeepLingoTestEngine", $this->engine->name );
-        $this->assertEquals( EngineConstants::MT, $this->engine->type );
-        $this->assertEquals( "one", $this->engine->alfa );
-        $this->assertEquals( "two", $this->engine->beta );
-        $this->assertEquals( "three", $this->engine->gamma );
-        $this->assertEquals( "four", $this->engine->delta );
+    public function test_magic__get()
+    {
+        $this->assertEquals("DeepLingoTestEngine", $this->engine->name);
+        $this->assertEquals(EngineConstants::MT, $this->engine->type);
+        $this->assertEquals("one", $this->engine->alfa);
+        $this->assertEquals("two", $this->engine->beta);
+        $this->assertEquals("three", $this->engine->gamma);
+        $this->assertEquals("four", $this->engine->delta);
     }
 
     /**
      * @group   regression
      * @covers  AbstractEngine::__get
      */
-    public function test_magic__get_with_not_existent_variable() {
-
-        $this->assertNull( $this->engine->notExistentVariable );
+    public function test_magic__get_with_not_existent_variable()
+    {
+        $this->assertNull($this->engine->notExistentVariable);
     }
 
 

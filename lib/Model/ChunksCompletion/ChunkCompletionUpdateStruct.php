@@ -4,22 +4,20 @@ namespace Model\ChunksCompletion;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 
-class ChunkCompletionUpdateStruct extends AbstractDaoSilentStruct {
+class ChunkCompletionUpdateStruct extends AbstractDaoSilentStruct
+{
 
-    const SOURCE_MERGE = 'merge';
-    const SOURCE_USER  = 'user';
-
-    public $id;
-    public $id_project;
-    public $id_job;
-    public $password;
-    public $uid;
-    public $source;
-    public $job_first_segment;
-    public $job_last_segment;
-    public $create_date;
-    public $last_update;
-    public $last_translation_at;
-    public $is_review;
+    public ?int $id = null;
+    public int $id_project;
+    public int $id_job;
+    public string $password;
+    public ?int $uid = null;
+    public string $source;
+    public int $job_first_segment;
+    public int $job_last_segment;
+    public string $create_date;
+    public string $last_update;
+    public string $last_translation_at;
+    public bool $is_review;
 
 }

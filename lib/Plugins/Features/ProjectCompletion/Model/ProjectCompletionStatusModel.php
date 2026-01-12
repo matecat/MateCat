@@ -21,17 +21,19 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\Utils;
 
-class ProjectCompletionStatusModel {
+class ProjectCompletionStatusModel
+{
 
     /**
      * @var ProjectStruct
      */
-    protected $project ;
+    protected ProjectStruct $project;
 
-    protected $cachedStatus;
+    protected array $cachedStatus = [];
 
-    public function __construct( ProjectStruct $project ) {
-        $this->project = $project ;
+    public function __construct(ProjectStruct $project)
+    {
+        $this->project = $project;
     }
 
     /**
@@ -41,11 +43,13 @@ class ProjectCompletionStatusModel {
      * @throws ValidationError
      * @throws AuthenticationError
      */
-    public function getStatus() {
-        if ( is_null( $this->cachedStatus ) ) {
+    public function getStatus(): array
+    {
+        if (empty($this->cachedStatus)) {
             $this->cachedStatus = $this->populateStatus();
         }
-        return $this->cachedStatus ;
+
+        return $this->cachedStatus;
     }
 
     /**
@@ -56,50 +60,54 @@ class ProjectCompletionStatusModel {
      * @throws AuthenticationError
      * @throws Exception
      */
-    private function populateStatus() {
-        $response = [] ;
-        $response['revise'] = [] ;
-        $response['translate'] = [] ;
+    private function populateStatus(): array
+    {
+        $response = [];
+        $response['revise'] = [];
+        $response['translate'] = [];
 
-        $response['id'] = $this->project->id ;
+        $response['id'] = $this->project->id;
 
         $any_uncomplete = false;
 
-        foreach( $this->project->getChunks() as $chunk ) {
-
-            $translate = $this->dataForChunkStatus($chunk, false) ;
-            $revise    = $this->dataForChunkStatus($chunk, true) ;
+        foreach ($this->project->getChunks() as $chunk) {
+            $translate = $this->dataForChunkStatus($chunk, false);
+            $revise = $this->dataForChunkStatus($chunk, true);
 
             $featureSet = new FeatureSet();
-            $featureSet->loadForProject( $this->project );
+            $featureSet->loadForProject($this->project);
 
-            $revise['password'] = $featureSet->filter('filter_job_password_to_review_password',
-                    $chunk->password,
-                    $chunk->id
+            $revise['password'] = $featureSet->filter(
+                'filter_job_password_to_review_password',
+                $chunk->password,
+                $chunk->id
             );
 
-            $response['translate'][] = $translate ;
-            $response['revise'][]    = $revise ;
+            $response['translate'][] = $translate;
+            $response['revise'][] = $revise;
 
-            if (! ( $revise['completed'] && $translate['completed'] ) ) $any_uncomplete = true;
+            if (!($revise['completed'] && $translate['completed'])) {
+                $any_uncomplete = true;
+            }
         }
 
-        $response['completed'] = !$any_uncomplete ;
+        $response['completed'] = !$any_uncomplete;
 
-        return $response ;
+        return $response;
     }
 
     /**
      * @throws Exception
      */
-    private function dataForChunkStatus ( JobStruct $chunk, $is_review ) {
-        $record = ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
-                'is_review' => $is_review
-        ) );
+    private function dataForChunkStatus(JobStruct $chunk, bool $is_review): array
+    {
+        $record = ChunkCompletionEventDao::lastCompletionRecord($chunk, [
+            'is_review' => $is_review
+        ]);
 
-        if ( $record ) {
+        if ($record) {
             $is_completed = true;
-            $completed_at = Utils::api_timestamp( $record['create_date'] );
+            $completed_at = Utils::api_timestamp($record['create_date']);
             $event_id = $record['id_event'];
         } else {
             $is_completed = false;
@@ -107,15 +115,14 @@ class ProjectCompletionStatusModel {
             $event_id = null;
         }
 
-        return array(
-                'id'       =>  $chunk->id,
-                'password' => $chunk->password,
-                'completed' => $is_completed,
-                'completed_at' => $completed_at,
-                'event_id' => $event_id
-        );
+        return [
+            'id' => $chunk->id,
+            'password' => $chunk->password,
+            'completed' => $is_completed,
+            'completed_at' => $completed_at,
+            'event_id' => $event_id
+        ];
     }
-
 
 
 }

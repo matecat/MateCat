@@ -1,7 +1,6 @@
 <?php
 
 
-use Model\DataAccess\Database;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use TestHelpers\AbstractTest;
@@ -13,7 +12,8 @@ use TestHelpers\AbstractTest;
  * Date: 13/06/16
  * Time: 10.34
  */
-class ConstructorTest extends AbstractTest {
+class ConstructorTest extends AbstractTest
+{
     /**
      * @var  \Model\DataAccess\Database
      */
@@ -30,51 +30,48 @@ class ConstructorTest extends AbstractTest {
     protected $word_count_struct;
 
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
 
         $this->word_count_struct = new WordCountStruct();
-        $this->word_count_struct->setIdJob( 1 );
-        $this->word_count_struct->setJobPassword( 'string');
-        $this->word_count_struct->setNewWords( 0 );
-        $this->word_count_struct->setDraftWords( 0 );
-        $this->word_count_struct->setTranslatedWords( 30 );
-        $this->word_count_struct->setApprovedWords( 0 );
-        $this->word_count_struct->setRejectedWords( 0 );
-        $this->word_count_struct->setIdSegment( $this->first_segment_id );
-        $this->word_count_struct->setOldStatus( "TRANSLATED" );
-        $this->word_count_struct->setNewStatus( "TRANSLATED" );
-
-
+        $this->word_count_struct->setIdJob(1);
+        $this->word_count_struct->setJobPassword('string');
+        $this->word_count_struct->setNewWords(0);
+        $this->word_count_struct->setDraftWords(0);
+        $this->word_count_struct->setTranslatedWords(30);
+        $this->word_count_struct->setApprovedWords(0);
+        $this->word_count_struct->setRejectedWords(0);
+        $this->word_count_struct->setIdSegment($this->first_segment_id);
+        $this->word_count_struct->setOldStatus("TRANSLATED");
+        $this->word_count_struct->setNewStatus("TRANSLATED");
     }
 
     /**
      * @group  regression
      * @covers CounterModel::__construct
      */
-    public function test__constructor_with_no_args() {
+    public function test__constructor_with_no_args()
+    {
+        $word_counter = new CounterModel();
+        $mirror_word_counter = new ReflectionClass($word_counter);
+        $constCache = $mirror_word_counter->getProperty('constCache');
 
 
-        $word_counter        = new CounterModel();
-        $mirror_word_counter = new ReflectionClass( $word_counter );
-        $constCache          = $mirror_word_counter->getProperty( 'constCache' );
-        $constCache->setAccessible( true );
-
-        $this->assertCount( 7, $constCache->getValue( $word_counter ) );
-        $this->assertEquals( "STATUS_NEW", $constCache->getValue( $word_counter )[ 'NEW' ] );
-        $this->assertEquals( "STATUS_DRAFT", $constCache->getValue( $word_counter )[ 'DRAFT' ] );
-        $this->assertEquals( "STATUS_TRANSLATED", $constCache->getValue( $word_counter )[ 'TRANSLATED' ] );
-        $this->assertEquals( "STATUS_APPROVED", $constCache->getValue( $word_counter )[ 'APPROVED' ] );
-        $this->assertEquals( "STATUS_APPROVED2", $constCache->getValue( $word_counter )[ 'APPROVED2' ] );
-        $this->assertEquals( "STATUS_REJECTED", $constCache->getValue( $word_counter )[ 'REJECTED' ] );
-        $this->assertEquals( "STATUS_FIXED", $constCache->getValue( $word_counter )[ 'FIXED' ] );
+        $this->assertCount(7, $constCache->getValue($word_counter));
+        $this->assertEquals("STATUS_NEW", $constCache->getValue($word_counter)['NEW']);
+        $this->assertEquals("STATUS_DRAFT", $constCache->getValue($word_counter)['DRAFT']);
+        $this->assertEquals("STATUS_TRANSLATED", $constCache->getValue($word_counter)['TRANSLATED']);
+        $this->assertEquals("STATUS_APPROVED", $constCache->getValue($word_counter)['APPROVED']);
+        $this->assertEquals("STATUS_APPROVED2", $constCache->getValue($word_counter)['APPROVED2']);
+        $this->assertEquals("STATUS_REJECTED", $constCache->getValue($word_counter)['REJECTED']);
+        $this->assertEquals("STATUS_FIXED", $constCache->getValue($word_counter)['FIXED']);
 
 
-        $old_w_count = $mirror_word_counter->getProperty( 'oldWCount' );
-        $old_w_count->setAccessible( true );
+        $old_w_count = $mirror_word_counter->getProperty('oldWCount');
 
-        $this->assertNull( $old_w_count->getValue( $word_counter ) );
 
+        $this->assertNull($old_w_count->getValue($word_counter));
     }
 
 

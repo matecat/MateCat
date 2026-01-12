@@ -126,7 +126,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: () => deleteGlossary.current(glossary),
           content:
-            'You are about to delete a resource linked to an DeepL license. If you confirm, it will be deleted permanently for you and any other user of the same license.',
+            'You are about to delete a resource linked to a DeepL license. If you confirm, it will be deleted permanently for you and any other user of the same license.',
           footerContent: '',
         },
         'Confirm deletion',
@@ -150,11 +150,15 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         )
         return [
           ...(createRow ? [createRow] : []),
-          {
-            id: DEEPL_GLOSSARY_ROW_NONE,
-            name: 'None',
-            isActive: newValueFiltered.every(({isActive}) => !isActive),
-          },
+          ...(!isCattoolPage
+            ? [
+                {
+                  id: DEEPL_GLOSSARY_ROW_NONE,
+                  name: 'None',
+                  isActive: newValueFiltered.every(({isActive}) => !isActive),
+                },
+              ]
+            : []),
           ...newValueFiltered,
         ].map((row) => ({
           ...row,
@@ -204,7 +208,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     let glossariesFromJobMetadata = []
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
       const rows = glossariesFromJobMetadata.filter(
-        ({glossary_id}) => project.deepl_id_glossary === glossary_id,
+        ({glossary_id}) => project.mt_extra.deepl_id_glossary === glossary_id,
       )
 
       updateRowsState(

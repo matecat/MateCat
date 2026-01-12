@@ -2,7 +2,8 @@
 
 namespace Model\LQA;
 
-interface QAModelInterface {
+interface QAModelInterface
+{
 
     /**
      * @return array

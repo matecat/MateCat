@@ -4,6 +4,7 @@ import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 export const TmGlossarySelect = () => {
   const {
@@ -32,7 +33,7 @@ export const TmGlossarySelect = () => {
         For confidential projects, we suggest adding a private TM and selecting the Update option in the Settings panel."
             tooltip-position="bottom"
           >
-            <span className="icon-info icon" />
+            <HelpCircle />
           </span>
         </div>
       }

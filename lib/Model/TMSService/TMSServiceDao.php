@@ -17,16 +17,17 @@ use RuntimeException;
 use Utils\Constants\TranslationStatus;
 use Utils\Logger\LoggerFactory;
 
-class TMSServiceDao {
+class TMSServiceDao
+{
 
     /**
-     * @param int    $jid
+     * @param int $jid
      * @param string $jPassword
      *
      * @return array
      */
-    public static function getTranslationsForTMXExport( int $jid, string $jPassword ): array {
-
+    public static function getTranslationsForTMXExport(int $jid, string $jPassword): array
+    {
         $db = Database::obtain();
 
         $sql = "
@@ -46,25 +47,24 @@ class TMSServiceDao {
             AND show_in_cattool = 1
 ";
 
-        $stmt = $db->getConnection()->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( [
-                'id_job'   => $jid,
-                'password' => $jPassword
-        ] );
+        $stmt = $db->getConnection()->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute([
+            'id_job' => $jid,
+            'password' => $jPassword
+        ]);
 
         return $stmt->fetchAll();
-
     }
 
     /**
-     * @param int    $jid
+     * @param int $jid
      * @param string $jPassword
      *
      * @return array
      */
-    public static function getMTForTMXExport( int $jid, string $jPassword ): array {
-
+    public static function getMTForTMXExport(int $jid, string $jPassword): array
+    {
         $db = Database::obtain();
 
         $sql = "
@@ -84,32 +84,32 @@ class TMSServiceDao {
 ";
 
         try {
-            $stmt = $db->getConnection()->prepare( $sql );
-            $stmt->setFetchMode( PDO::FETCH_ASSOC );
-            $stmt->execute( [
-                    'id_job'      => $jid,
-                    'password'    => $jPassword,
-                    '_translated' => TranslationStatus::STATUS_TRANSLATED,
-                    '_approved'   => TranslationStatus::STATUS_APPROVED
-            ] );
+            $stmt = $db->getConnection()->prepare($sql);
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
+            $stmt->execute([
+                'id_job' => $jid,
+                'password' => $jPassword,
+                '_translated' => TranslationStatus::STATUS_TRANSLATED,
+                '_approved' => TranslationStatus::STATUS_APPROVED
+            ]);
             $results = $stmt->fetchAll();
-        } catch ( PDOException $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
 
-            throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $results;
     }
 
     /**
-     * @param int    $jid
+     * @param int $jid
      * @param string $jPassword
      *
      * @return array
      */
-    public static function getTMForTMXExport( int $jid, string $jPassword ): array {
-
+    public static function getTMForTMXExport(int $jid, string $jPassword): array
+    {
         $db = Database::obtain();
 
         $sql = "
@@ -134,55 +134,51 @@ class TMSServiceDao {
 ";
 
         try {
-            $stmt = $db->getConnection()->prepare( $sql );
-            $stmt->setFetchMode( PDO::FETCH_ASSOC );
-            $stmt->execute( [
-                    'id_job'      => $jid,
-                    'password'    => $jPassword,
-                    '_translated' => TranslationStatus::STATUS_TRANSLATED,
-                    '_approved'   => TranslationStatus::STATUS_APPROVED
-            ] );
+            $stmt = $db->getConnection()->prepare($sql);
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
+            $stmt->execute([
+                'id_job' => $jid,
+                'password' => $jPassword,
+                '_translated' => TranslationStatus::STATUS_TRANSLATED,
+                '_approved' => TranslationStatus::STATUS_APPROVED
+            ]);
             $results = $stmt->fetchAll();
-        } catch ( PDOException $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
-            throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        foreach ( $results as $key => $value ) {
-
+        foreach ($results as $key => $value) {
             //we already extracted a 100% match by definition
-            if ( in_array( $value[ 'status' ], [
-                            TranslationStatus::STATUS_TRANSLATED,
-                            TranslationStatus::STATUS_APPROVED
-                    ]
+            if (in_array($value['status'], [
+                    TranslationStatus::STATUS_TRANSLATED,
+                    TranslationStatus::STATUS_APPROVED
+                ]
             )
             ) {
                 continue;
             }
 
-            $suggestions_array = json_decode( $value[ 'suggestions_array' ] );
-            foreach ( $suggestions_array as $_sugg ) {
-
+            $suggestions_array = json_decode($value['suggestions_array']);
+            foreach ($suggestions_array as $_sugg) {
                 //we want the highest value of TM and we must exclude the MT
-                if ( strpos( $_sugg->created_by, 'MT' ) !== false ) {
+                if (str_contains($_sugg->created_by, 'MT')) {
                     continue;
                 }
 
                 //override the content of the result with the fuzzy matches
-                $results[ $key ][ 'segment' ]     = $_sugg->segment;
-                $results[ $key ][ 'translation' ] = $_sugg->translation;
-                $results[ $key ][ '_created_by' ] = 'MateCat_OmegaT_Export';
+                $results[$key]['segment'] = $_sugg->segment;
+                $results[$key]['translation'] = $_sugg->translation;
+                $results[$key]['_created_by'] = 'MateCat_OmegaT_Export';
 
                 //stop, we found the first TM value in the list
                 break;
-
             }
 
             //if no TM found unset the result
-            if ( !isset( $results[ $key ][ '_created_by' ] ) ) {
-                unset( $results[ $key ] );
+            if (!isset($results[$key]['_created_by'])) {
+                unset($results[$key]);
             }
-
         }
 
         return $results;

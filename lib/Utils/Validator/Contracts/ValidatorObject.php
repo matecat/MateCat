@@ -11,6 +11,8 @@ class ValidatorObject implements ArrayAccess
 
     use ArrayAccessTrait;
 
+    protected array $store = [];
+
     /**
      * @param stdClass $object
      *
@@ -20,7 +22,7 @@ class ValidatorObject implements ArrayAccess
     {
         $that = new static();
         foreach (get_object_vars($object) as $key => $value) {
-            $that->$key = $value;
+            $that->store[$key] = $value;
         }
 
         return $that;
@@ -35,7 +37,7 @@ class ValidatorObject implements ArrayAccess
     {
         $that = new static();
         foreach ($array as $key => $value) {
-            $that->$key = $value;
+            $that->store[$key] = $value;
         }
 
         return $that;
@@ -47,9 +49,9 @@ class ValidatorObject implements ArrayAccess
      * @param string $name
      * @param mixed $value
      */
-    public function __set(string $name, $value)
+    public function __set(string $name, mixed $value)
     {
-        $this->$name = $value;
+        $this->store[$name] = $value;
     }
 
     /**
@@ -59,13 +61,13 @@ class ValidatorObject implements ArrayAccess
      *
      * @return mixed
      */
-    public function __get(string $name)
+    public function __get(string $name): mixed
     {
-        if (!property_exists($this, $name)) {
+        if (!array_key_exists($name, $this->store)) {
             return null;
         }
 
-        return $this->$name;
+        return $this->store[$name];
     }
 
     /**
@@ -74,7 +76,7 @@ class ValidatorObject implements ArrayAccess
      */
     public function __isset(string $name): bool
     {
-        return property_exists($this, $name);
+        return array_key_exists($name, $this->store);
     }
 
 }

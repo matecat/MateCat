@@ -7,7 +7,8 @@ use Model\Search\ReplaceEventIndexDAOInterface;
 use Model\Search\ReplaceEventStruct;
 use Model\Translations\SegmentTranslationDao;
 
-class ReplaceHistory {
+class ReplaceHistory
+{
 
     /**
      * @var int
@@ -27,45 +28,49 @@ class ReplaceHistory {
     /**
      * ReplaceHistory constructor.
      *
-     * @param                                      $idJob
-     * @param ReplaceEventDAOInterface             $replaceEventDAO
-     * @param ReplaceEventIndexDAOInterface        $replaceEventIndexDAO
-     * @param int                                  $ttl
+     * @param int $idJob
+     * @param ReplaceEventDAOInterface $replaceEventDAO
+     * @param ReplaceEventIndexDAOInterface $replaceEventIndexDAO
+     * @param int $ttl
      */
-    public function __construct( $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDAOInterface $replaceEventIndexDAO, int $ttl = 0 ) {
-        $this->idJob                = $idJob;
-        $this->replaceEventDAO      = $replaceEventDAO;
+    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDAOInterface $replaceEventIndexDAO, int $ttl = 0)
+    {
+        $this->idJob = $idJob;
+        $this->replaceEventDAO = $replaceEventDAO;
         $this->replaceEventIndexDAO = $replaceEventIndexDAO;
 
-        if ( $ttl ) {
-            $this->replaceEventDAO->setTtl( $ttl );
-            $this->replaceEventIndexDAO->setTtl( $ttl );
+        if ($ttl) {
+            $this->replaceEventDAO->setTtl($ttl);
+            $this->replaceEventIndexDAO->setTtl($ttl);
         }
     }
 
     /**
-     * @param $version
+     * @param int $version
      *
      * @return ReplaceEventStruct[]
      */
-    public function get( $version ): array {
-        return $this->replaceEventDAO->getEvents( $this->idJob, $version );
+    public function get(int $version): array
+    {
+        return $this->replaceEventDAO->getEvents($this->idJob, $version);
     }
 
     /**
      * @return int
      */
-    public function getCursor(): int {
-        return $this->replaceEventIndexDAO->getActualIndex( $this->idJob );
+    public function getCursor(): int
+    {
+        return $this->replaceEventIndexDAO->getActualIndex($this->idJob);
     }
 
     /**
      * @return int
      */
-    public function redo(): int {
+    public function redo(): int
+    {
         $versionToMove = $this->getCursor() + 1;
 
-        return $this->_moveToVersion( $versionToMove );
+        return $this->_moveToVersion($versionToMove);
     }
 
     /**
@@ -73,17 +78,19 @@ class ReplaceHistory {
      *
      * @return int
      */
-    public function save( ReplaceEventStruct $eventStruct ): int {
-        return $this->replaceEventDAO->save( $eventStruct );
+    public function save(ReplaceEventStruct $eventStruct): int
+    {
+        return $this->replaceEventDAO->save($eventStruct);
     }
 
     /**
      * @return int
      */
-    public function undo(): int {
+    public function undo(): int
+    {
         $versionToMove = $this->getCursor() - 1;
 
-        return $this->_moveToVersion( $versionToMove );
+        return $this->_moveToVersion($versionToMove);
     }
 
     /**
@@ -91,13 +98,14 @@ class ReplaceHistory {
      *
      * @return int
      */
-    private function _moveToVersion( $versionToMove ): int {
-        $events = $this->get( $versionToMove );
+    private function _moveToVersion($versionToMove): int
+    {
+        $events = $this->get($versionToMove);
 
-        if ( count( $events ) > 0 ) {
-            $replacedEvents = SegmentTranslationDao::rebuildFromReplaceEvents( $events );
+        if (count($events) > 0) {
+            $replacedEvents = SegmentTranslationDao::rebuildFromReplaceEvents($events);
 
-            $this->replaceEventIndexDAO->save( $this->idJob, $versionToMove );
+            $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
 
             return $replacedEvents;
         }
@@ -108,7 +116,8 @@ class ReplaceHistory {
     /**
      * @param $versionToMove
      */
-    public function updateIndex( $versionToMove ) {
-        $this->replaceEventIndexDAO->save( $this->idJob, $versionToMove );
+    public function updateIndex($versionToMove): void
+    {
+        $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
     }
 }

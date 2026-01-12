@@ -16,40 +16,43 @@ use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyStruct;
 
-class UserKeysModel {
+class UserKeysModel
+{
 
-    protected array $_user_keys = [ 'totals' => [], 'job_keys' => [] ];
+    protected array $_user_keys = ['totals' => [], 'job_keys' => []];
 
     protected UserStruct $user;
 
     protected string $userRole;
 
-    public function __construct( UserStruct $user, string $role = Filter::ROLE_TRANSLATOR ) {
-        $this->user     = $user;
+    public function __construct(UserStruct $user, string $role = Filter::ROLE_TRANSLATOR)
+    {
+        $this->user = $user;
         $this->userRole = $role;
     }
 
     /**
      * @param string $jobKeys
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return array
+     * @throws Exception
      */
-    public function getKeys( string $jobKeys, int $ttl = 0 ): array {
+    public function getKeys(string $jobKeys, int $ttl = 0): array
+    {
         /*
          * Take the keys of the user
          */
         try {
-            $_keyDao = new MemoryKeyDao( Database::obtain() );
-            $dh      = new MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
-            $keyList = $_keyDao->read( $dh, false, $ttl );
-
-        } catch ( Exception $e ) {
+            $_keyDao = new MemoryKeyDao(Database::obtain());
+            $dh = new MemoryKeyStruct(['uid' => $this->user->uid]);
+            $keyList = $_keyDao->read($dh, false, $ttl);
+        } catch (Exception $e) {
             $keyList = [];
-            LoggerFactory::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog($e->getMessage());
         }
 
-        $reverse_lookup_user_personal_keys = [ 'pos' => [], 'elements' => [] ];
+        $reverse_lookup_user_personal_keys = ['pos' => [], 'elements' => []];
 
         /**
          * Set these keys as editable for the client
@@ -57,24 +60,22 @@ class UserKeysModel {
          * @var $keyList MemoryKeyStruct[]
          */
 
-        foreach ( $keyList as $_j => $key ) {
-
+        foreach ($keyList as $_j => $key) {
             /**
              * @var $_client_tm_key TmKeyStruct
              */
 
             //create a reverse lookup
-            $reverse_lookup_user_personal_keys[ 'pos' ][ $_j ]      = $key->tm_key->key;
-            $reverse_lookup_user_personal_keys[ 'elements' ][ $_j ] = $key;
+            $reverse_lookup_user_personal_keys['pos'][$_j] = $key->tm_key->key;
+            $reverse_lookup_user_personal_keys['elements'][$_j] = $key;
 
-            $this->_user_keys[ 'totals' ][ $_j ] = new ClientTmKeyStruct( $key->tm_key );
-
+            $this->_user_keys['totals'][$_j] = new ClientTmKeyStruct($key->tm_key);
         }
 
         /*
          * Now take the JOB keys
          */
-        $job_keyList = json_decode( $jobKeys, true );
+        $job_keyList = json_decode($jobKeys, true);
 
         /**
          * Start this N^2 cycle from keys of the job,
@@ -82,74 +83,61 @@ class UserKeysModel {
          *
          * @var $keyList array
          */
-        foreach ( $job_keyList as $jobKey ) {
-
-            $jobKey                  = new ClientTmKeyStruct( $jobKey );
+        foreach ($job_keyList as $jobKey) {
+            $jobKey = new ClientTmKeyStruct($jobKey);
             $jobKey->complete_format = true;
 
-            if ( !is_null( $this->user->uid ) && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ) {
-
+            if (!is_null($this->user->uid) && count($reverse_lookup_user_personal_keys['pos'])) {
                 /*
                  * If user has some personal keys, check for the job keys if they are present, and obfuscate
                  * when they are not
                  */
-                $_index_position = array_search( $jobKey->key, $reverse_lookup_user_personal_keys[ 'pos' ] );
-                if ( $_index_position !== false ) {
-
+                $_index_position = array_search($jobKey->key, $reverse_lookup_user_personal_keys['pos']);
+                if ($_index_position !== false) {
                     //I FOUND A KEY IN THE JOB THAT IS PRESENT IN MY KEYRING
                     //i'm owner?? and the key is an owner type key?
-                    if ( !$jobKey->owner && $this->userRole != Filter::OWNER ) {
-                        $jobKey->r = $jobKey->{Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
-                        $jobKey->w = $jobKey->{Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
-                        $jobKey    = $jobKey->hideKey( $this->user->uid );
-                    } else {
-                        if ( $jobKey->owner && $this->userRole != Filter::OWNER ) {
-                            // I'm not the job owner, but i know the key because it is in my keyring
-                            // so, i can upload and download TMX, but i don't want it to be removed from job
-                            // in tm.html relaxed the control to "key.edit" to enable buttons
-                            // $jobKey = $jobKey->hideKey( $uid ); // enable editing
+                    if (!$jobKey->owner && $this->userRole != Filter::OWNER) {
+                        $jobKey->r = $jobKey->{Filter::$GRANTS_MAP[$this->userRole]['r']};
+                        $jobKey->w = $jobKey->{Filter::$GRANTS_MAP[$this->userRole]['w']};
+                        $jobKey = $jobKey->hideKey($this->user->uid);
+                    } elseif ($jobKey->owner && $this->userRole != Filter::OWNER) {
+                        // I'm not the job owner, but i know the key because it is in my keyring
+                        // so, i can upload and download TMX, but i don't want it to be removed from job
+                        // in tm.html relaxed the control to "key.edit" to enable buttons
+                        // $jobKey = $jobKey->hideKey( $uid ); // enable editing
 
-                        } else {
-                            if ( $jobKey->owner && $this->userRole == Filter::OWNER ) {
-                                //do Nothing
-                            }
-                        }
+                    } elseif ($jobKey->owner && $this->userRole == Filter::OWNER) {
+                        //do Nothing
                     }
 
                     //copy the is_shared value from the key inside the Keyring into the key coming from job
-                    $jobKey->setShared( $reverse_lookup_user_personal_keys[ 'elements' ][ $_index_position ]->tm_key->isShared() );
+                    $jobKey->setShared($reverse_lookup_user_personal_keys['elements'][$_index_position]->tm_key->isShared());
 
-                    unset( $this->_user_keys[ 'totals' ][ $_index_position ] );
-
+                    unset($this->_user_keys['totals'][$_index_position]);
                 } else {
-
                     /*
                      * This is not a key of that user, set right and obfuscate
                      */
-                    $jobKey->r     = true;
-                    $jobKey->w     = true;
+                    $jobKey->r = true;
+                    $jobKey->w = true;
                     $jobKey->owner = false;
-                    $jobKey        = $jobKey->hideKey( -1 );
-
+                    $jobKey = $jobKey->hideKey(-1);
                 }
 
-                $this->_user_keys[ 'job_keys' ][] = $jobKey;
-
+                $this->_user_keys['job_keys'][] = $jobKey;
             } else {
                 /*
                  * This user is anonymous or it has no keys in its keyring, obfuscate all
                  */
-                $jobKey->r                        = true;
-                $jobKey->w                        = true;
-                $jobKey->owner                    = false;
-                $this->_user_keys[ 'job_keys' ][] = $jobKey->hideKey( -1 );
-
+                $jobKey->r = true;
+                $jobKey->w = true;
+                $jobKey->owner = false;
+                $this->_user_keys['job_keys'][] = $jobKey->hideKey(-1);
             }
-
         }
 
         //clean unordered keys
-        $this->_user_keys[ 'totals' ] = array_values( $this->_user_keys[ 'totals' ] );
+        $this->_user_keys['totals'] = array_values($this->_user_keys['totals']);
 
         return $this->_user_keys;
     }

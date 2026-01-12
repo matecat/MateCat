@@ -119,7 +119,8 @@ section {
   }
   &.opened {
     .buttons {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       margin-right: 0;
       text-align: right;
       z-index: 0;

@@ -11,7 +11,8 @@ namespace Utils\TaskRunner\Commons;
 
 use Exception;
 
-class Configuration {
+class Configuration
+{
 
     /**
      * @var ContextList
@@ -19,42 +20,44 @@ class Configuration {
     protected ContextList $_contextList;
 
     protected string $_loggerName;
-    private array    $__raw;
+    private array $__raw;
 
     /**
-     * @param string      $rawConfig
+     * @param string $rawConfig
      * @param string|null $contextIndex
      *
      * @throws Exception
      */
-    public function __construct( string $rawConfig, ?string $contextIndex = null ) {
+    public function __construct(string $rawConfig, ?string $contextIndex = null)
+    {
+        $config = @parse_ini_file($rawConfig, true);
 
-        $config = @parse_ini_file( $rawConfig, true );
-
-        if ( empty( $rawConfig ) || empty( $config[ 'context_definitions' ] ) ) {
-            throw new Exception( 'Wrong configuration file provided.' );
+        if (empty($rawConfig) || empty($config['context_definitions'])) {
+            throw new Exception('Wrong configuration file provided.');
         }
 
-        if ( !isset( $contextIndex ) ) {
-            $this->_contextList = ContextList::get( $config[ 'context_definitions' ] );
+        if (!isset($contextIndex)) {
+            $this->_contextList = ContextList::get($config['context_definitions']);
         } else {
-            $this->_contextList = ContextList::get( $config[ 'context_definitions' ][ $contextIndex ] );
+            $this->_contextList = ContextList::get($config['context_definitions'][$contextIndex]);
         }
 
-        $this->_loggerName = $config[ 'loggerName' ];
-        $this->__raw       = $config;
-
+        $this->_loggerName = $config['loggerName'];
+        $this->__raw = $config;
     }
 
-    public function getContextList(): ContextList {
+    public function getContextList(): ContextList
+    {
         return $this->_contextList;
     }
 
-    public function getLoggerName(): string {
+    public function getLoggerName(): string
+    {
         return $this->_loggerName;
     }
 
-    public function getRaw(): array {
+    public function getRaw(): array
+    {
         return $this->__raw;
     }
 

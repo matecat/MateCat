@@ -9,7 +9,6 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import UserActions from '../actions/UserActions'
 import {v4 as uuidV4} from 'uuid'
 import Cookies from 'js-cookie'
-import useAuth from '../hooks/useAuth'
 
 const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)

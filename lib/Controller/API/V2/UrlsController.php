@@ -15,7 +15,8 @@ use Exception;
 use Model\Projects\ProjectDao;
 use View\API\V2\Json\ProjectUrls;
 
-class UrlsController extends KleinController {
+class UrlsController extends KleinController
+{
 
     /**
      * @var ProjectPasswordValidator
@@ -25,46 +26,46 @@ class UrlsController extends KleinController {
     /**
      * @throws Exception
      */
-    public function urls() {
+    public function urls(): void
+    {
+        $this->featureSet->loadForProject($this->validator->getProject());
 
-        $this->featureSet->loadForProject( $this->validator->getProject() );
-
-        // @TODO is correct here?
         $jobCheck = 0;
-        foreach ( $this->validator->getProject()->getJobs() as $job ) {
-            if ( !$job->isDeleted() ) {
+        foreach ($this->validator->getProject()->getJobs() as $job) {
+            if (!$job->isDeleted()) {
                 $jobCheck++;
             }
         }
 
-        if ( $jobCheck === 0 ) {
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
-                    'errors' => [
-                            'code'    => 0,
-                            'message' => 'No project found.'
-                    ]
-            ] );
+        if ($jobCheck === 0) {
+            $this->response->status()->setCode(404);
+            $this->response->json([
+                'errors' => [
+                    'code' => 0,
+                    'message' => 'No project found.'
+                ]
+            ]);
             exit();
         }
 
-        $projectData = ( new ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->validator->getProject()->id );
+        $projectData = (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($this->validator->getProject()->id);
 
-        $formatted = new ProjectUrls( $projectData );
+        $formatted = new ProjectUrls($projectData);
 
-        $formatted = $this->featureSet->filter( 'projectUrls', $formatted );
+        $formatted = $this->featureSet->filter('projectUrls', $formatted);
 
-        $this->response->json( [ 'urls' => $formatted->render() ] );
-
+        $this->response->json(['urls' => $formatted->render()]);
     }
 
-    protected function validateRequest() {
+    protected function validateRequest(): void
+    {
         $this->validator->validate();
     }
 
-    protected function afterConstruct() {
-        $this->validator = new ProjectPasswordValidator( $this );
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->validator = new ProjectPasswordValidator($this);
+        $this->appendValidator(new LoginValidator($this));
     }
 
 }

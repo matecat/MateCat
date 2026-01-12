@@ -19,11 +19,13 @@ use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Predis\PredisException;
+use ReflectionException;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
-class ForgotPasswordController extends AbstractStatefulKleinController {
+class ForgotPasswordController extends AbstractStatefulKleinController
+{
 
     use RateLimiterTrait;
     use PasswordRules;
@@ -37,53 +39,54 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
      * @throws PredisException
      * @throws Exception
      */
-    public function forgotPassword() {
+    public function forgotPassword(): void
+    {
+        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5);
+        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5);
 
-        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ) ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5 );
-        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5 );
-
-        if ( $checkRateLimitIp instanceof Response ) {
+        if ($checkRateLimitIp instanceof Response) {
             $this->response = $checkRateLimitIp;
 
             return;
         }
 
-        if ( $checkRateLimitEmail instanceof Response ) {
+        if ($checkRateLimitEmail instanceof Response) {
             $this->response = $checkRateLimitEmail;
 
             return;
         }
 
         $filtered = filter_var_array(
-                [
-                        'email'      => $this->request->param( 'email' ),
-                        'wanted_url' => $this->request->param( 'wanted_url' )
-                ],
-                [
-                        'email'      => FILTER_SANITIZE_EMAIL,
-                        'wanted_url' => [
-                                'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
-                                    $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
+            [
+                'email' => $this->request->param('email'),
+                'wanted_url' => $this->request->param('wanted_url')
+            ],
+            [
+                'email' => FILTER_SANITIZE_EMAIL,
+                'wanted_url' => [
+                    'filter' => FILTER_CALLBACK,
+                    'options' => function ($wanted_url) {
+                        $wanted_url = filter_var($wanted_url, FILTER_SANITIZE_URL);
 
-                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( AppConfig::$HTTPHOST )[ 'host' ] ? AppConfig::$HTTPHOST : $wanted_url;
-                                }
-                        ]
-                ] );
+                        return parse_url($wanted_url)['host'] != parse_url(AppConfig::$HTTPHOST)['host'] ? AppConfig::$HTTPHOST : $wanted_url;
+                    }
+                ]
+            ]
+        );
 
-        $signupModel = new SignupModel( $filtered, $_SESSION );
+        $signupModel = new SignupModel($filtered, $_SESSION);
 
-        $doForgotPassword = $this->doForgotPassword( $signupModel );
+        $doForgotPassword = $this->doForgotPassword($signupModel);
 
-        $this->incrementRateLimitCounter( $this->request->param( 'email' ) ?? "BLANK_EMAIL", '/api/app/user/forgot_password' );
-        $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password' );
+        $this->incrementRateLimitCounter($this->request->param('email') ?? "BLANK_EMAIL", '/api/app/user/forgot_password');
+        $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password');
 
-        $this->response->code( $doForgotPassword[ 'code' ] );
-        $this->response->json( [
-                'email'      => $signupModel->getParams()[ 'email' ],
-                'wanted_url' => $signupModel->getParams()[ 'wanted_url' ],
-                'errors'     => $doForgotPassword[ 'errors' ],
-        ] );
-
+        $this->response->code($doForgotPassword['code']);
+        $this->response->json([
+            'email' => $signupModel->getParams()['email'],
+            'wanted_url' => $signupModel->getParams()['wanted_url'],
+            'errors' => $doForgotPassword['errors'],
+        ]);
     }
 
     /**
@@ -100,27 +103,25 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
      * @throws PredisException
      * @throws Exception
      */
-    public function authForPasswordReset() {
+    public function authForPasswordReset(): void
+    {
         try {
-            $checkRateLimit = $this->checkRateLimitResponse( $this->response, $this->request->param( 'token' ), '/api/app/user/password_reset' );
-            if ( $checkRateLimit instanceof Response ) {
+            $checkRateLimit = $this->checkRateLimitResponse($this->response, $this->request->param('token'), '/api/app/user/password_reset');
+            if ($checkRateLimit instanceof Response) {
                 $this->response = $checkRateLimit;
 
                 return;
             }
 
-            $reset = new PasswordResetModel( $_SESSION, $this->request->param( 'token' ) );
+            $reset = new PasswordResetModel($_SESSION, $this->request->param('token'));
             $reset->validateUser();
-            $this->response->redirect( $reset->flushWantedURL() );
+            $this->response->redirect($reset->flushWantedURL());
 
-            FlashMessage::set( 'popup', 'passwordReset', FlashMessage::SERVICE );
-
-        } catch ( ValidationError $e ) {
-
-            $this->incrementRateLimitCounter( $this->request->param( 'token' ), '/api/app/user/password_reset' );
-            FlashMessage::set( 'passwordReset', $e->getMessage(), FlashMessage::ERROR );
-            $this->response->redirect( CanonicalRoutes::appRoot() );
-
+            FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE);
+        } catch (ValidationError $e) {
+            $this->incrementRateLimitCounter($this->request->param('token'), '/api/app/user/password_reset');
+            FlashMessage::set('passwordReset', $e->getMessage(), FlashMessage::ERROR);
+            $this->response->redirect(CanonicalRoutes::appRoot());
         }
     }
 
@@ -129,19 +130,19 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
      *
      * Set the new password
      * @throws ValidationError
+     * @throws ReflectionException
      */
-    public function setNewPassword() {
-
-        $reset                 = new PasswordResetModel( $_SESSION );
-        $new_password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
-        $password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
-        $this->validatePasswordRequirements( $new_password, $password_confirmation );
-        $reset->resetPassword( $new_password );
+    public function setNewPassword(): void
+    {
+        $reset = new PasswordResetModel($_SESSION);
+        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $password_confirmation = filter_var($this->request->param('password_confirmation'), FILTER_SANITIZE_SPECIAL_CHARS);
+        $this->validatePasswordRequirements($new_password, $password_confirmation);
+        $reset->resetPassword($new_password);
         $this->user = $reset->getUser();
         $this->broadcastLogout();
 
-        $this->response->code( 200 );
-
+        $this->response->code(200);
     }
 
     /**
@@ -150,44 +151,43 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
      * @return array
      * @throws Exception
      */
-    private function doForgotPassword( SignupModel $signupModel ): array {
-
+    private function doForgotPassword(SignupModel $signupModel): array
+    {
         $params = $signupModel->getParams();
 
-        $email      = $params[ 'email' ];
-        $wanted_url = $params[ 'wanted_url' ];
-        $errors     = [];
-        $code       = 200;
+        $email = $params['email'];
+        $wanted_url = $params['wanted_url'];
+        $errors = [];
+        $code = 200;
 
-        if ( !$email ) {
+        if (!$email) {
             $errors[] = 'email is a mandatory field.';
-            $code     = 400;
+            $code = 400;
         }
 
-        if ( !$wanted_url ) {
+        if (!$wanted_url) {
             $errors[] = 'wanted_url is a mandatory field.';
-            $code     = 400;
+            $code = 400;
         }
 
-        if ( !filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'email is not valid.';
-            $code     = 400;
+            $code = 400;
         }
 
-        if ( !filter_var( $wanted_url, FILTER_VALIDATE_URL ) ) {
+        if (!filter_var($wanted_url, FILTER_VALIDATE_URL)) {
             $errors[] = 'wanted_url is not a valid URL.';
-            $code     = 400;
+            $code = 400;
         }
 
-        if ( empty( $errors ) ) {
+        if (empty($errors)) {
             $signupModel->forgotPassword();
         }
 
         return [
-                'errors' => $errors,
-                'code'   => $code,
+            'errors' => $errors,
+            'code' => $code,
         ];
-
     }
 
 }

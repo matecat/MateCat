@@ -22,16 +22,17 @@ use Utils\Registry\AppConfig;
  * This class should return a warning
  *
  */
-class OCRCheck {
+class OCRCheck
+{
 
     /**
      * @see https://www.iana.org/assignments/media-types/media-types.xhtml#image
      * @var array
      */
     private array $mimeTypes = [
-            'image/',
-            'application/octet-stream', //bmp or binary files
-            'application/pdf',
+        'image/',
+        'application/octet-stream', //bmp or binary files
+        'application/pdf',
     ];
 
     /**
@@ -44,7 +45,8 @@ class OCRCheck {
      *
      * @param string $source_lang
      */
-    public function __construct( string $source_lang ) {
+    public function __construct(string $source_lang)
+    {
         $this->source_lang = $source_lang;
     }
 
@@ -53,26 +55,24 @@ class OCRCheck {
      *
      * @return bool
      */
-    public function thereIsWarning( string $filePath ): bool {
-
-        if ( !AppConfig::$FILTERS_OCR_CHECK ) {
+    public function thereIsWarning(string $filePath): bool
+    {
+        if (!AppConfig::$FILTERS_OCR_CHECK) {
             return false;
         }
 
         $languages = Languages::getInstance();
 
-        if ( !in_array( $this->source_lang, $languages::getLanguagesWithOcrSupported() ) ) {
-
-            $mimeType = ( new MimeTypes() )->guessMimeType( $filePath );
-            foreach ( $this->mimeTypes as $mType ) {
-                if ( stripos( $mimeType, $mType ) !== false ) {
+        if (!in_array($this->source_lang, $languages::getLanguagesWithOcrSupported())) {
+            $mimeType = (new MimeTypes())->guessMimeType($filePath);
+            foreach ($this->mimeTypes as $mType) {
+                if (stripos($mimeType, $mType) !== false) {
                     return true;
                 }
             }
         }
 
         return false;
-
     }
 
     /**
@@ -80,19 +80,18 @@ class OCRCheck {
      *
      * @return bool
      */
-    public function thereIsError( string $filePath ): bool {
-
-        if ( !AppConfig::$FILTERS_OCR_CHECK ) {
+    public function thereIsError(string $filePath): bool
+    {
+        if (!AppConfig::$FILTERS_OCR_CHECK) {
             return false;
         }
 
         $languages = Languages::getInstance();
 
-        if ( in_array( $this->source_lang, $languages::getLanguagesWithOcrNotSupported() ) ) {
-
-            $mimeType = ( new MimeTypes() )->guessMimeType( $filePath );
-            foreach ( $this->mimeTypes as $mType ) {
-                if ( stripos( $mimeType, $mType ) !== false ) {
+        if (in_array($this->source_lang, $languages::getLanguagesWithOcrNotSupported())) {
+            $mimeType = (new MimeTypes())->guessMimeType($filePath);
+            foreach ($this->mimeTypes as $mType) {
+                if (stripos($mimeType, $mType) !== false) {
                     return true;
                 }
             }

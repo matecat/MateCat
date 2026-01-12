@@ -13,25 +13,61 @@
 
 namespace Utils\Engines\Lara;
 
-use Lara\LaraCredentials;
+use Lara\AccessKey;
+use Lara\AuthToken;
+use Lara\Documents;
+use Lara\Glossaries;
+use Lara\Internal\HttpClient;
+use Lara\LaraException;
+use Lara\Memories;
 use Lara\Translator;
-use Lara\TranslatorOptions;
 use Utils\Registry\AppConfig;
 
-class LaraClient extends Translator {
+class LaraClient extends Translator
+{
 
     /**
      * Constructor for the LaraClient class.
      * Initializes the HTTP client and sets up memories, documents, and glossaries.
      *
-     * @param LaraCredentials        $credentials The credentials required for authentication.
-     * @param TranslatorOptions|null $options     Optional translator options, including the server URL.
+     * @param AccessKey $credentials The credentials required for authentication.
      *
+     * @throws LaraException
+     * @noinspection PhpMissingParentConstructorInspection
      */
-    public function __construct( LaraCredentials $credentials, TranslatorOptions $options = null ) {
-        parent::__construct( $credentials, $options );
+    public function __construct(AccessKey $credentials)
+    {
+        $this->client = new class('https://api.laratranslate.com', $credentials) extends HttpClient implements HttpClientInterface {
+
+            public function __construct(?string $baseUrl = null, AccessKey|AuthToken|null $credentials = null)
+            {
+                parent::__construct($baseUrl, $credentials);
+            }
+
+            public function authenticate(): string
+            {
+                return parent::authenticate();
+            }
+
+        };
+
+        $this->memories = new Memories($this->client);
+        $this->documents = new Documents($this->client);
+        $this->glossaries = new Glossaries($this->client);
+
         // Sets an extra header for the HTTP client using the pre-shared key.
-        $this->client->setExtraHeader( Headers::LARA_PRE_SHARED_KEY_HEADER, AppConfig::$LARA_PRE_SHARED_KEY_HEADER );
+        $this->client->setExtraHeader(Headers::LARA_PRE_SHARED_KEY_HEADER, AppConfig::$LARA_PRE_SHARED_KEY_HEADER);
+    }
+
+    /**
+     * Retrieves the HTTP client instance.
+     *
+     * @return HttpClientInterface & HttpClient
+     */
+    public function getHttpClient(): HttpClientInterface & HttpClient
+    {
+        /** @var HttpClientInterface & HttpClient */
+        return $this->client;
     }
 
 }

@@ -12,7 +12,6 @@ namespace Utils\Engines\Validators;
 use DomainException;
 use Exception;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Intento;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
@@ -59,11 +58,6 @@ class IntentoEngineValidator extends AbstractValidator
         }
 
         return null;
-    }
-
-    public static function validateRouting(Intento $engine) // TODO
-    {
-        $engine->getRoutingList();
     }
 
 }

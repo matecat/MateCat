@@ -1,6 +1,7 @@
 <?php
 
 use Model\PayableRates\CustomPayableRateStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Langs\Languages;
 
@@ -10,36 +11,41 @@ use Utils\Langs\Languages;
  * Date: 09/06/2017
  * Time: 16:51
  */
-class CustomPayableRateStructTest extends AbstractTest {
+class CustomPayableRateStructTest extends AbstractTest
+{
 
     /**
      * @test
      */
-    public function convertLanguageToIsoCode() {
+    #[Test]
+    public function convertLanguageToIsoCode()
+    {
         $languages = Languages::getInstance();
-        $langs     = [
-                'es-419' => 'es',
-                'es-ES'  => 'es',
-                'fr-FR'  => 'fr',
-                'fr-CA'  => 'fr',
+        $langs = [
+            'es-419' => 'es',
+            'es-ES' => 'es',
+            'fr-FR' => 'fr',
+            'fr-CA' => 'fr',
         ];
 
-        foreach ( $langs as $rfc3066 => $iso ) {
-            $isoCode = $languages->convertLanguageToIsoCode( $rfc3066 );
+        foreach ($langs as $rfc3066 => $iso) {
+            $isoCode = $languages->convertLanguageToIsoCode($rfc3066);
 
 
-            $this->assertEquals( $iso, $isoCode );
+            $this->assertEquals($iso, $isoCode);
         }
     }
 
     /**
      * @test
      */
-    public function getPayableRates() {
-        $model             = new CustomPayableRateStruct();
-        $model->id         = 12;
-        $model->name       = 'test';
-        $model->version    = 2;
+    #[Test]
+    public function getPayableRates()
+    {
+        $model = new CustomPayableRateStruct();
+        $model->id = 12;
+        $model->name = 'test';
+        $model->version = 2;
 
         $model->breakdowns = '
             {
@@ -92,24 +98,23 @@ class CustomPayableRateStructTest extends AbstractTest {
         ';
 
         $languageCombos = [
-                [ 'en-AU', 'fr-CA', 70 ],
-                [ 'en-AU', 'fr-CA', 70 ],
-                [ 'en-AU', 'fr-FR', 80 ],
-                [ 'en-US', 'fr-CA', 75 ],
-                [ 'en-US', 'fr', 80 ],
-                [ 'it', 'fr', 80 ],
+            ['en-AU', 'fr-CA', 70],
+            ['en-AU', 'fr-CA', 70],
+            ['en-AU', 'fr-FR', 80],
+            ['en-US', 'fr-CA', 75],
+            ['en-US', 'fr', 80],
+            ['it', 'fr', 80],
         ];
 
-        foreach ( $languageCombos as $languageCombo ) {
-            $payableRate  = $model->getPayableRates( $languageCombo[ 0 ], $languageCombo[ 1 ] );
-            $errorMessage = 'Error for language combination ' . $languageCombo[ 0 ] . '<->' . $languageCombo[ 1 ] . '. Exp. ' . $languageCombo[ 2 ] . ', got ' . $payableRate[ 'MT' ];
+        foreach ($languageCombos as $languageCombo) {
+            $payableRate = $model->getPayableRates($languageCombo[0], $languageCombo[1]);
+            $errorMessage = 'Error for language combination ' . $languageCombo[0] . '<->' . $languageCombo[1] . '. Exp. ' . $languageCombo[2] . ', got ' . $payableRate['MT'];
 
-            $this->assertEquals( $languageCombo[ 2 ], $payableRate[ 'MT' ], $errorMessage );
+            $this->assertEquals($languageCombo[2], $payableRate['MT'], $errorMessage);
 
             // NO ICE_MT set for en-AU -> fr-CA
-            $errorMessage = 'Error for language combination ' . $languageCombo[ 0 ] . '<->' . $languageCombo[ 1 ] . '. Exp. ' . $languageCombo[ 2 ] . ', got ' . $payableRate[ 'ICE_MT' ] ?? "null";
-            $this->assertEquals( $languageCombo[ 2 ], $payableRate[ 'ICE_MT' ], $errorMessage );
-
+            $errorMessage = 'Error for language combination ' . $languageCombo[0] . '<->' . $languageCombo[1] . '. Exp. ' . $languageCombo[2] . ', got ' . $payableRate['ICE_MT'] ?? "null";
+            $this->assertEquals($languageCombo[2], $payableRate['ICE_MT'], $errorMessage);
         }
     }
 }

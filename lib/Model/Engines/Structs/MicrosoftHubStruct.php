@@ -17,7 +17,8 @@ use Utils\Engines\MicrosoftHub;
  * This class contains the default parameters for a Microsoft Hub EnginesFactory CREATION
  *
  */
-class MicrosoftHubStruct extends EngineStruct {
+class MicrosoftHubStruct extends EngineStruct
+{
 
     /**
      * @var ?string
@@ -35,10 +36,10 @@ class MicrosoftHubStruct extends EngineStruct {
     public ?string $translate_relative_url = "Translate";
 
     /**
-     * @var array
+     * @var string|array
      */
-    public $others = [
-            'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
+    public string|array $others = [
+        'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
     ];
 
     /**
@@ -48,14 +49,14 @@ class MicrosoftHubStruct extends EngineStruct {
 
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
-            'token'         => null,
-            'token_endlife' => 0,
-            'client_id'     => "",
-            'client_secret' => "",
-            'category'      => "",
+    public string|array|null $extra_parameters = [
+        'token' => null,
+        'token_endlife' => 0,
+        'client_id' => "",
+        'client_secret' => "",
+        'category' => "",
     ];
 
     /**
@@ -71,10 +72,10 @@ class MicrosoftHubStruct extends EngineStruct {
     /**
      *  An empty struct
      *
-     * @template T
-     * @return T instance of EngineStruct
+     * @return static
      */
-    public static function getStruct(): MicrosoftHubStruct {
+    public static function getStruct(): static
+    {
         return new MicrosoftHubStruct();
     }
 

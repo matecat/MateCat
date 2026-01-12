@@ -11,42 +11,47 @@ namespace Utils\Files;
 
 use Model\FilesStorage\AbstractFilesStorage;
 
-class File {
+class File
+{
 
     /**
-     * @param $filepath
+     * @param string $filepath
      */
-    public static function create( $filepath ) {
-        if ( !self::exists( $filepath ) ) {
-            touch( $filepath );
+    public static function create(string $filepath): void
+    {
+        if (!self::exists($filepath)) {
+            touch($filepath);
         }
     }
 
     /**
-     * @param $filepath
+     * @param string $filepath
      */
-    public static function delete( $filepath ) {
-        if ( self::exists( $filepath ) ) {
-            unlink( $filepath );
+    public static function delete(string $filepath): void
+    {
+        if (self::exists($filepath)) {
+            unlink($filepath);
         }
     }
 
     /**
-     * @param $resource
+     * @param string $resource
      *
      * @return bool
      */
-    public static function exists( $resource ) {
-        return file_exists( $resource );
+    public static function exists(string $resource): bool
+    {
+        return file_exists($resource);
     }
 
     /**
      * @param      $filepath
-     * @param null $options
+     * @param int $options
      *
      * @return string|string[]
      */
-    public static function info( $filepath, $options = null ) {
-        return AbstractFilesStorage::pathinfo_fix( $filepath, $options );
+    public static function info($filepath, int $options = 15): array|string
+    {
+        return AbstractFilesStorage::pathinfo_fix($filepath, $options);
     }
 }

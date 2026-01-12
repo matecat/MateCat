@@ -24,13 +24,15 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
 
-class GetSegmentsController extends KleinController {
+class GetSegmentsController extends KleinController
+{
 
-    const DEFAULT_PER_PAGE = 40;
-    const MAX_PER_PAGE     = 200;
+    const int DEFAULT_PER_PAGE = 40;
+    const int MAX_PER_PAGE = 200;
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
@@ -43,151 +45,156 @@ class GetSegmentsController extends KleinController {
      * @throws NotFoundException
      * @throws Exception
      */
-    public function segments(): void {
+    public function segments(): void
+    {
+        $request = $this->validateTheRequest();
+        $jid = $request['jid'];
+        $step = $request['step'];
+        $id_segment = $request['id_segment'];
+        $password = $request['password'];
+        $where = $request['where'];
 
-        $request    = $this->validateTheRequest();
-        $jid        = $request[ 'jid' ];
-        $step       = $request[ 'step' ];
-        $id_segment = $request[ 'id_segment' ];
-        $password   = $request[ 'password' ];
-        $where      = $request[ 'where' ];
+        $job = ChunkDao::getByIdAndPassword($jid, $password);
 
-        $job = ChunkDao::getByIdAndPassword( $jid, $password );
-
-        $project    = $job->getProject();
+        $project = $job->getProject();
         $featureSet = $this->getFeatureSet();
-        $featureSet->loadForProject( $project );
+        $featureSet->loadForProject($project);
         $lang_handler = Languages::getInstance();
 
-        $parsedIdSegment = $this->parseIDSegment( $id_segment );
+        $parsedIdSegment = $this->parseIDSegment($id_segment);
 
-        if ( $parsedIdSegment[ 'id_segment' ] == '' ) {
-            $parsedIdSegment[ 'id_segment' ] = 0;
+        if ($parsedIdSegment['id_segment'] == '') {
+            $parsedIdSegment['id_segment'] = 0;
         }
 
         $sDao = new SegmentDao();
         $data = $sDao->getPaginationSegments(
-                $job,
-                min( $step, self::DEFAULT_PER_PAGE ),
-                $parsedIdSegment[ 'id_segment' ],
-                $where,
-                [
-                        'optional_fields' => [
-                                'st.edit_distance',
-                                'st.version_number'
-                        ]
+            $job,
+            min($step, self::DEFAULT_PER_PAGE),
+            $parsedIdSegment['id_segment'],
+            $where,
+            [
+                'optional_fields' => [
+                    'st.edit_distance',
+                    'st.version_number'
                 ]
+            ]
         );
 
-        $segment_notes = $this->prepareNotes( $data );
-        $contexts      = $this->getContextGroups( $data );
-        $res           = [];
+        $segment_notes = $this->prepareNotes($data);
+        $contexts = $this->getContextGroups($data);
+        $res = [];
 
-        foreach ( $data as $seg ) {
+        foreach ($data as $seg) {
+            $id_file = $seg['id_file'];
 
-            $id_file = $seg[ 'id_file' ];
-
-            if ( !isset( $res[ $id_file ] ) ) {
-                $res[ $id_file ][ 'jid' ]         = $seg[ 'jid' ];
-                $res[ $id_file ][ "filename" ]    = ZipArchiveHandler::getFileName( $seg[ 'filename' ] );
-                $res[ $id_file ][ 'source' ]      = $lang_handler->getLocalizedName( $job->source );
-                $res[ $id_file ][ 'target' ]      = $lang_handler->getLocalizedName( $job->target );
-                $res[ $id_file ][ 'source_code' ] = $job->source;
-                $res[ $id_file ][ 'target_code' ] = $job->target;
-                $res[ $id_file ][ 'segments' ]    = [];
+            if (!isset($res[$id_file])) {
+                $res[$id_file]['jid'] = $seg['jid'];
+                $res[$id_file]["filename"] = ZipArchiveHandler::getFileName($seg['filename']);
+                $res[$id_file]['source'] = $lang_handler->getLocalizedName($job->source);
+                $res[$id_file]['target'] = $lang_handler->getLocalizedName($job->target);
+                $res[$id_file]['source_code'] = $job->source;
+                $res[$id_file]['target_code'] = $job->target;
+                $res[$id_file]['segments'] = [];
             }
 
-            if ( isset( $seg[ 'edit_distance' ] ) ) {
-                $seg[ 'edit_distance' ] = round( $seg[ 'edit_distance' ] / 1000, 2 );
+            if (isset($seg['edit_distance'])) {
+                $seg['edit_distance'] = round($seg['edit_distance'] / 1000, 2);
             } else {
-                $seg[ 'edit_distance' ] = 0;
+                $seg['edit_distance'] = 0;
             }
 
-            $seg[ 'parsed_time_to_edit' ] = CatUtils::parse_time_to_edit( $seg[ 'time_to_edit' ] );
+            $seg['parsed_time_to_edit'] = CatUtils::parse_time_to_edit($seg['time_to_edit']);
 
-            ( $seg[ 'source_chunk_lengths' ] === null ? $seg[ 'source_chunk_lengths' ] = '[]' : null );
-            ( $seg[ 'target_chunk_lengths' ] === null ? $seg[ 'target_chunk_lengths' ] = '{"len":[0],"statuses":["DRAFT"]}' : null );
-            $seg[ 'source_chunk_lengths' ] = json_decode( $seg[ 'source_chunk_lengths' ], true );
-            $seg[ 'target_chunk_lengths' ] = json_decode( $seg[ 'target_chunk_lengths' ], true );
+            ($seg['source_chunk_lengths'] === null ? $seg['source_chunk_lengths'] = '[]' : null);
+            ($seg['target_chunk_lengths'] === null ? $seg['target_chunk_lengths'] = '{"len":[0],"statuses":["DRAFT"]}' : null);
+            $seg['source_chunk_lengths'] = json_decode($seg['source_chunk_lengths'], true);
+            $seg['target_chunk_lengths'] = json_decode($seg['target_chunk_lengths'], true);
 
             // inject original data ref map (FOR XLIFF 2.0)
-            $data_ref_map          = json_decode( $seg[ 'data_ref_map' ], true );
-            $seg[ 'data_ref_map' ] = $data_ref_map;
+            $data_ref_map = json_decode($seg['data_ref_map'] ?? '', true);
+            $seg['data_ref_map'] = $data_ref_map;
 
             /** @var MateCatFilter $Filter */
             $metadata = new MetadataDao();
-            $Filter   = MateCatFilter::getInstance( $featureSet, $job->source, $job->target, null !== $data_ref_map ? $data_ref_map : [], $metadata->getSubfilteringCustomHandlers( $job->id, $job->password ) );
-
-            $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
+            $Filter = MateCatFilter::getInstance(
+                $featureSet,
+                $job->source,
+                $job->target,
+                null !== $data_ref_map ? $data_ref_map : [],
+                $metadata->getSubfilteringCustomHandlers($job->id, $job->password)
             );
 
-            $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
+            $seg['segment'] = $Filter->fromLayer0ToLayer1(
+                CatUtils::reApplySegmentSplit($seg['segment'], $seg['source_chunk_lengths'])
+            );
+
+            $seg['translation'] = $Filter->fromLayer0ToLayer1(
             // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
-                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] ) ?? ''  // use the null coalescing operator
+                CatUtils::reApplySegmentSplit($seg['translation'], $seg['target_chunk_lengths']['len']) ?? ''  // use the null coalescing operator
             );
 
-            $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
-            $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
+            $seg['translation'] = $Filter->fromLayer1ToLayer2($Filter->realignIDInLayer1($seg['segment'], $seg['translation']));
+            $seg['segment'] = $Filter->fromLayer1ToLayer2($seg['segment']);
 
-            $seg[ 'metadata' ] = SegmentMetadataDao::getAll( $seg[ 'sid' ] );
+            $seg['metadata'] = SegmentMetadataDao::getAll($seg['sid']);
 
-            $this->attachNotes( $seg, $segment_notes );
-            $this->attachContexts( $seg, $contexts );
+            $this->attachNotes($seg, $segment_notes);
+            $this->attachContexts($seg, $contexts);
 
-            $res[ $id_file ][ 'segments' ][] = $seg;
+            $res[$id_file]['segments'][] = $seg;
         }
 
         $result = [
-                'errors' => [],
+            'errors' => [],
         ];
 
-        $result[ 'data' ][ 'files' ] = $res;
-        $result[ 'data' ][ 'where' ] = $where;
-        $result[ 'data' ]            = $featureSet->filter( 'filterGetSegmentsResult', $result[ 'data' ], $job );
+        $result['data']['files'] = $res;
+        $result['data']['where'] = $where;
+        $result['data'] = $featureSet->filter('filterGetSegmentsResult', $result['data'], $job);
 
-        $this->response->json( $result );
-
+        $this->response->json($result);
     }
 
     /**
      * @return array
      */
-    private function validateTheRequest(): array {
-        $jid        = filter_var( $this->request->param( 'jid' ), FILTER_SANITIZE_NUMBER_INT );
-        $step       = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_segment = filter_var( $this->request->param( 'segment' ), FILTER_SANITIZE_NUMBER_INT );
-        $password   = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $where      = filter_var( $this->request->param( 'where' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+    private function validateTheRequest(): array
+    {
+        $jid = filter_var($this->request->param('jid'), FILTER_SANITIZE_NUMBER_INT);
+        $step = filter_var($this->request->param('step'), FILTER_SANITIZE_NUMBER_INT);
+        $id_segment = filter_var($this->request->param('segment'), FILTER_SANITIZE_NUMBER_INT);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $where = filter_var($this->request->param('where'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
 
-        if ( empty( $jid ) ) {
-            throw new InvalidArgumentException( "No id job provided", -1 );
+        if (empty($jid)) {
+            throw new InvalidArgumentException("No id job provided", -1);
         }
 
-        if ( empty( $password ) ) {
-            throw new InvalidArgumentException( "No job password provided", -2 );
+        if (empty($password)) {
+            throw new InvalidArgumentException("No job password provided", -2);
         }
 
-        if ( empty( $id_segment ) ) {
-            throw new InvalidArgumentException( "No is segment provided", -3 );
+        if (empty($id_segment)) {
+            throw new InvalidArgumentException("No is segment provided", -3);
         }
 
-        if ( $step > self::MAX_PER_PAGE ) {
+        if ($step > self::MAX_PER_PAGE) {
             $step = self::MAX_PER_PAGE;
         }
 
         return [
-                'jid'        => $jid,
-                'id_segment' => $id_segment,
-                'password'   => $password,
-                'where'      => $where,
-                'step'       => $step,
+            'jid' => $jid,
+            'id_segment' => $id_segment,
+            'password' => $password,
+            'where' => $where,
+            'step' => $step,
         ];
     }
 
     /**
      * @param SegmentUIStruct $segment
-     * @param array           $segment_notes
+     * @param array $segment_notes
      *
      * @throws AuthenticationError
      * @throws EndQueueException
@@ -195,23 +202,24 @@ class GetSegmentsController extends KleinController {
      * @throws ValidationError
      * @throws \Model\Exceptions\NotFoundException
      */
-    private function attachNotes( SegmentUIStruct &$segment, array $segment_notes ) {
+    private function attachNotes(SegmentUIStruct &$segment, array $segment_notes): void
+    {
+        $notes = $segment_notes[(int)$segment['sid']] ?? null;
 
-        $notes = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;
-
-        if ( is_array( $notes ) ) {
-            $notes = $this->featureSet->filter( 'prepareNotesForRendering', $notes );
+        if (is_array($notes)) {
+            $notes = $this->featureSet->filter('prepareNotesForRendering', $notes);
         }
 
-        $segment[ 'notes' ] = $notes;
+        $segment['notes'] = $notes;
     }
 
     /**
      * @param SegmentUIStruct $segment
-     * @param array           $contexts
+     * @param array $contexts
      */
-    private function attachContexts( SegmentUIStruct &$segment, array $contexts ) {
-        $segment[ 'context_groups' ] = $contexts[ (int)$segment[ 'sid' ] ] ?? null;
+    private function attachContexts(SegmentUIStruct &$segment, array $contexts): void
+    {
+        $segment['context_groups'] = $contexts[(int)$segment['sid']] ?? null;
     }
 
     /**
@@ -224,22 +232,23 @@ class GetSegmentsController extends KleinController {
      * @throws EndQueueException
      * @throws ReQueueException
      */
-    private function prepareNotes( $segments ): array {
-        if ( !empty( $segments[ 0 ] ) ) {
-            $start = $segments[ 0 ][ 'sid' ];
-            $last  = end( $segments );
-            $stop  = $last[ 'sid' ];
+    private function prepareNotes($segments): array
+    {
+        if (!empty($segments[0])) {
+            $start = $segments[0]['sid'];
+            $last = end($segments);
+            $stop = $last['sid'];
 
-            if ( $this->featureSet->filter( 'prepareAllNotes', false ) ) {
-                $segment_notes = SegmentNoteDao::getAllAggregatedBySegmentIdInInterval( $start, $stop );
-                foreach ( $segment_notes as $k => $noteObj ) {
-                    $segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
+            if ($this->featureSet->filter('prepareAllNotes', false)) {
+                $segment_notes = SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
+                foreach ($segment_notes as $k => $noteObj) {
+                    $segment_notes[$k][0]['json'] = json_decode($noteObj[0]['json'], true);
                 }
 
-                return $this->featureSet->filter( 'processExtractedJsonNotes', $segment_notes );
+                return $this->featureSet->filter('processExtractedJsonNotes', $segment_notes);
             }
 
-            return SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop );
+            return SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
         }
 
         return [];
@@ -251,13 +260,14 @@ class GetSegmentsController extends KleinController {
      * @return array
      * @throws ReflectionException
      */
-    private function getContextGroups( $segments ): array {
-        if ( !empty( $segments[ 0 ] ) ) {
-            $start = $segments[ 0 ][ 'sid' ];
-            $last  = end( $segments );
-            $stop  = $last[ 'sid' ];
+    private function getContextGroups($segments): array
+    {
+        if (!empty($segments[0])) {
+            $start = $segments[0]['sid'];
+            $last = end($segments);
+            $stop = $last['sid'];
 
-            return ( new ContextGroupDao() )->getBySIDRange( $start, $stop );
+            return (new ContextGroupDao())->getBySIDRange($start, $stop);
         }
 
         return [];

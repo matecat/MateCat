@@ -15,7 +15,8 @@ use Utils\Email\WelcomeEmail;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
-class SignupModel {
+class SignupModel
+{
 
     /**
      * @var UserStruct
@@ -25,25 +26,28 @@ class SignupModel {
     protected array $params;
 
     protected ?string $error = null;
-    private array     $session;
+    private array $session;
 
-    public function __construct( array $params, array &$session ) {
-        $this->params  = $params;
+    public function __construct(array $params, array &$session)
+    {
+        $this->params = $params;
         $this->session =& $session;
-        $this->user    = new UserStruct( $this->params );
+        $this->user = new UserStruct($this->params);
     }
 
     /**
      * @return array
      */
-    public function getParams(): array {
+    public function getParams(): array
+    {
         return $this->params;
     }
 
     /**
-     * @return \Model\Users\UserStruct
+     * @return UserStruct
      */
-    public function getUser(): UserStruct {
+    public function getUser(): UserStruct
+    {
         return $this->user;
     }
 
@@ -51,24 +55,24 @@ class SignupModel {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function processSignup() {
-
-        if ( $this->__userAlreadyExists() ) {
+    public function processSignup(): void
+    {
+        if ($this->__userAlreadyExists()) {
             $this->__updatePersistedUser();
-            UserDao::updateStruct( $this->user, [
-                    'fields' => [
-                            'salt',
-                            'pass',
-                            'confirmation_token',
-                            'confirmation_token_created_at'
-                    ]
-            ] );
+            UserDao::updateStruct($this->user, [
+                'fields' => [
+                    'salt',
+                    'pass',
+                    'confirmation_token',
+                    'confirmation_token_created_at'
+                ]
+            ]);
         } else {
             $this->__prepareNewUser();
-            $this->user->uid = UserDao::insertStruct( $this->user );
+            $this->user->uid = UserDao::insertStruct($this->user);
 
             Database::obtain()->begin();
-            ( new TeamDao() )->createPersonalTeam( $this->user );
+            (new TeamDao())->createPersonalTeam($this->user);
             Database::obtain()->commit();
         }
 
@@ -77,65 +81,67 @@ class SignupModel {
         // send a confirmation email only if
         // the user is not active (with a user/password pair)
         // AND do not own an active Oauth login
-        if ( !$this->__userAlreadyExistsAndIsActive() ) {
+        if (!$this->__userAlreadyExistsAndIsActive()) {
             $this->__sendConfirmationRequestEmail();
         }
-
     }
 
     /**
      * @return string|null
      */
-    public function getError(): ?string {
+    public function getError(): ?string
+    {
         return $this->error;
     }
 
     /**
      * @throws Exception
      */
-    private function __sendConfirmationRequestEmail() {
-        $email = new SignupEmail( $this->getUser() );
+    private function __sendConfirmationRequestEmail(): void
+    {
+        $email = new SignupEmail($this->getUser());
         $email->send();
     }
 
-    private function __saveWantedUrl() {
-        $this->session[ 'wanted_url' ] = $this->params[ 'wanted_url' ];
+    private function __saveWantedUrl(): void
+    {
+        $this->session['wanted_url'] = $this->params['wanted_url'];
     }
 
     /**
      * @return string
      * @throws Exception
      */
-    public function flushWantedURL(): string {
-        $url = $this->session[ 'wanted_url' ] ?? CanonicalRoutes::appRoot();
-        unset( $this->session[ 'wanted_url' ] );
+    public function flushWantedURL(): string
+    {
+        $url = $this->session['wanted_url'] ?? CanonicalRoutes::appRoot();
+        unset($this->session['wanted_url']);
 
         return $url;
     }
 
-    private function __updatePersistedUser() {
-
+    private function __updatePersistedUser(): void
+    {
         /*
          * salt is empty when a user exists, and it's first login happened through external service providers (OAuth)
          * Check the salt before join the two accounts.
          */
-        if ( empty( $this->user->salt ) ) {
-            $this->user->salt = Utils::randomString( 15, true );
+        if (empty($this->user->salt)) {
+            $this->user->salt = Utils::randomString(15, true);
         }
 
-        $this->user->pass = Utils::encryptPass( $this->params[ 'password' ], $this->user->salt );
+        $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
 
         $this->user->initAuthToken();
     }
 
-    private function __prepareNewUser() {
-
-        $this->user->create_date = Utils::mysqlTimestamp( time() );
-        $this->user->salt        = Utils::randomString( 15, true );
-        $this->user->pass        = Utils::encryptPass( $this->params[ 'password' ], $this->user->salt );
+    private function __prepareNewUser(): void
+    {
+        $this->user->create_date = Utils::mysqlTimestamp(time());
+        $this->user->salt = Utils::randomString(15, true);
+        $this->user->pass = Utils::encryptPass($this->params['password'], $this->user->salt);
 
         $this->user->initAuthToken();
-
     }
 
     /**
@@ -144,16 +150,16 @@ class SignupModel {
      * @return bool
      * @throws ReflectionException
      */
-    private function __userAlreadyExists(): bool {
+    private function __userAlreadyExists(): bool
+    {
+        $dao = new UserDao();
+        $persisted = $dao->getByEmail($this->user->email);
 
-        $dao       = new UserDao();
-        $persisted = $dao->getByEmail( $this->user->email );
-
-        if ( $persisted ) {
+        if ($persisted) {
             $this->user = $persisted;
         }
 
-        return isset( $this->user->uid );
+        return isset($this->user->uid);
     }
 
     /**
@@ -165,80 +171,82 @@ class SignupModel {
      *
      * @return bool
      */
-    private function __userAlreadyExistsAndIsActive(): bool {
-        return ( isset( $this->user->uid ) && ( !empty( $this->user->email_confirmed_at ) || !empty( $this->user->oauth_access_token ) ) );
+    private function __userAlreadyExistsAndIsActive(): bool
+    {
+        return (isset($this->user->uid) && (!empty($this->user->email_confirmed_at) || !empty($this->user->oauth_access_token)));
     }
 
     /**
      * @throws ValidationError
      * @throws Exception
      */
-    public function confirm(): UserStruct {
-        $dao  = new UserDao();
-        $user = $dao->getByConfirmationToken( $this->params[ 'token' ] );
+    public function confirm(): UserStruct
+    {
+        $dao = new UserDao();
+        $user = $dao->getByConfirmationToken($this->params['token']);
 
-        if ( !$user ) {
-            throw new ValidationError( 'Confirmation token not found' );
+        if (!$user) {
+            throw new ValidationError('Confirmation token not found');
         }
 
-        if ( strtotime( $user->confirmation_token_created_at ) < strtotime( '3 days ago' ) ) {
-            throw new ValidationError( 'Confirmation token is too old, please contact support.' );
+        if (strtotime($user->confirmation_token_created_at) < strtotime('3 days ago')) {
+            throw new ValidationError('Confirmation token is too old, please contact support.');
         }
 
         $ever_signed_in = $user->everSignedIn();
 
-        $user = self::__updateUserFields( $user );
+        $user = self::__updateUserFields($user);
 
-        if ( !$ever_signed_in ) {
-            $email = new WelcomeEmail( $user );
+        if (!$ever_signed_in) {
+            $email = new WelcomeEmail($user);
             $email->send();
         }
 
         return $user;
-
     }
 
     /**
      * @return bool
      * @throws Exception
      */
-    public function forgotPassword(): bool {
-
+    public function forgotPassword(): bool
+    {
         $this->__saveWantedUrl();
 
-        $dao  = new UserDao();
-        $user = $dao->getByEmail( $this->params[ 'email' ] );
+        $dao = new UserDao();
+        $user = $dao->getByEmail($this->params['email']);
 
-        if ( $user ) {
+        if ($user) {
             $user->initAuthToken();
 
-            UserDao::updateStruct( $user, [ 'fields' => [ 'confirmation_token', 'confirmation_token_created_at' ] ] );
+            UserDao::updateStruct($user, ['fields' => ['confirmation_token', 'confirmation_token_created_at']]);
 
-            $delivery = new ForgotPasswordEmail( $user );
+            $delivery = new ForgotPasswordEmail($user);
             $delivery->send();
 
             return true;
         }
 
         return false;
-
     }
 
     /**
+     * @param string $email
+     *
      * @throws ReflectionException
      * @throws Exception
      */
-    public static function resendConfirmationEmail( $email ) {
-        $email = filter_var( $email, FILTER_SANITIZE_EMAIL );
+    public static function resendConfirmationEmail(string $email): void
+    {
+        $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-        $dao  = new UserDao();
-        $user = $dao->getByEmail( $email );
+        $dao = new UserDao();
+        $user = $dao->getByEmail($email);
 
-        if ( $user ) {
-            $delivery = new SignupEmail( $user );
+        if ($user) {
+            $delivery = new SignupEmail($user);
             $delivery->send();
         }
-
     }
 
     /**
@@ -247,14 +255,14 @@ class SignupModel {
      * @return UserStruct
      * @throws Exception
      */
-    private static function __updateUserFields( UserStruct $user ): UserStruct {
-
-        $user->email_confirmed_at = Utils::mysqlTimestamp( time() );
+    private static function __updateUserFields(UserStruct $user): UserStruct
+    {
+        $user->email_confirmed_at = Utils::mysqlTimestamp(time());
         $user->clearAuthToken();
 
-        UserDao::updateStruct( $user, [ 'fields' => [ 'confirmation_token', 'email_confirmed_at' ] ] );
-        ( new UserDao )->destroyCacheByEmail( $user->email );
-        ( new UserDao )->destroyCacheByUid( $user->uid );
+        UserDao::updateStruct($user, ['fields' => ['confirmation_token', 'email_confirmed_at']]);
+        (new UserDao)->destroyCacheByEmail($user->email);
+        (new UserDao)->destroyCacheByUid($user->uid);
 
         return $user;
     }

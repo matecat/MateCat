@@ -16,12 +16,13 @@ namespace Model\Translations;
  *
  * @package Translations
  */
-class WarningModel {
+class WarningModel
+{
 
-    const ERROR   = 1;
-    const WARNING = 2;
-    const NOTICE  = 4;
-    const INFO    = 8;
-    const DEBUG   = 16;
+    const int ERROR = 1;
+    const int WARNING = 2;
+    const int NOTICE = 4;
+    const int INFO = 8;
+    const int DEBUG = 16;
 
 }

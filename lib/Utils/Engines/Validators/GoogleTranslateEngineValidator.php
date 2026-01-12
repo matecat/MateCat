@@ -21,7 +21,7 @@ class GoogleTranslateEngineValidator extends AbstractValidator
 
     /**
      * @param $object EngineValidatorObject
-     * @return null
+     * @return ValidatorObject|null
      * @throws Exception
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
@@ -31,7 +31,7 @@ class GoogleTranslateEngineValidator extends AbstractValidator
         $config['segment'] = "Hello World";
         $config['source'] = "en-US";
         $config['target'] = "fr-FR";
-        $config['key'] = $newTestCreatedMT->client_secret ?? null;
+        $config['key'] = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray()['client_secret'] ?? null;
 
         $mt_result = $newTestCreatedMT->get($config);
 

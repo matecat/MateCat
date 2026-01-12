@@ -9,10 +9,12 @@
 namespace Plugins\Features\SegmentFilter\Model;
 
 use Exception;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
-use Model\Translations\SegmentTranslationStruct;
+use ReflectionException;
 
-class SegmentFilterModel {
+class SegmentFilterModel
+{
 
     /**
      * @var JobStruct
@@ -27,29 +29,29 @@ class SegmentFilterModel {
     /**
      * SegmentFilterModel constructor.
      *
-     * @param JobStruct        $chunk
+     * @param JobStruct $chunk
      * @param FilterDefinition $filter
      *
      * @throws Exception
      */
-    public function __construct( JobStruct $chunk, FilterDefinition $filter ) {
-        $this->chunk  = $chunk;
+    public function __construct(JobStruct $chunk, FilterDefinition $filter)
+    {
+        $this->chunk = $chunk;
         $this->filter = $filter;
     }
 
     /**
-     * @return null|SegmentTranslationStruct[]
+     * @return ShapelessConcreteStruct[]
+     * @throws ReflectionException
      * @throws Exception
      */
-    public function getSegmentList(): array {
-
-        if ( $this->filter->isSampled() ) {
-            $result = SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );
-        } else {
-            $result = SegmentFilterDao::findSegmentIdsBySimpleFilter( $this->chunk, $this->filter );
+    public function getSegmentList(): array
+    {
+        if ($this->filter->isSampled()) {
+            return SegmentFilterDao::findSegmentIdsForSample($this->chunk, $this->filter);
         }
 
-        return $result;
+        return SegmentFilterDao::findSegmentIdsBySimpleFilter($this->chunk, $this->filter);
     }
 
 }
