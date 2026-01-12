@@ -21,6 +21,13 @@ import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
 import {isEqual} from 'lodash'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 import {EditorOtherTab} from './Contents/EditorOtherTab'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import Close from '../../../img/icons/Close'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -368,7 +375,14 @@ export const SettingsPanel = ({
               <div className="settings-panel-header">
                 <div className="settings-panel-header-logo" />
                 <span>Settings</span>
-                <div onClick={close} className="close-matecat-modal x-popup" />
+                <Button
+                  type={BUTTON_TYPE.ICON}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  mode={BUTTON_MODE.GHOST}
+                  onClick={close}
+                >
+                  <Close size={20} />
+                </Button>
               </div>
               {isEnabledProjectTemplateComponent && <ProjectTemplate />}
               {currentProjectTemplate && <ContentWrapper />}

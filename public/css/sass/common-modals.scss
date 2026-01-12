@@ -203,7 +203,7 @@ a {
   .matecat-modal-header {
     text-align: left;
     min-height: 50px;
-    border-radius: 4px 4px 0 0;
+    border-radius: 16px 16px 0 0;
     overflow: visible;
     max-height: inherit;
     font-size: 23px;
@@ -213,9 +213,9 @@ a {
     color: #fff;
     margin: 0 !important;
     display: grid;
-    grid-template-columns: 40px 1fr 24px;
+    grid-template-columns: 40px 1fr 40px;
     position: relative;
-    grid-column-gap: 16px;
+    grid-column-gap: 8px;
     align-items: center;
 
     h2 {
@@ -244,7 +244,7 @@ a {
     height: 100%;
     /*color: #000;*/
     background-color: colors.$grey5;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 16px 16px;
     margin: 0 auto;
     overflow: hidden;
     text-align: left;
@@ -303,8 +303,8 @@ a {
   left: 6px;
   bottom: 48px;
   top: unset;
-  width: 325px;
-  height: 342px;
+  width: 380px;
+  height: 350px;
   overflow: auto;
   background-color: unset;
 
@@ -313,7 +313,7 @@ a {
   }
 
   .matecat-modal-content {
-    width: 320px;
+    width: 340px;
     min-width: unset;
     box-shadow:
       0 0 0 #e0e0e0,
@@ -333,9 +333,9 @@ a {
     color: #fff;
     margin: 0 !important;
     display: grid;
-    grid-template-columns: 35px 1fr 24px;
+    grid-template-columns: 35px 1fr 40px;
     position: relative;
-    grid-column-gap: 16px;
+    grid-column-gap: 8px;
 
     h2 {
       font-size: 21px;
@@ -357,7 +357,7 @@ a {
 
     .matecat-modal-top,
     .matecat-modal-bottom {
-      padding: 15px 17px;
+      padding: 15px 20px;
     }
   }
 
@@ -372,21 +372,6 @@ a {
   margin-top: 12px;
   display: flex;
   gap: 16px;
-}
-
-/* The Close Button */
-.close-matecat-modal {
-  color: #fff;
-  float: right;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.close-matecat-modal:hover,
-.close-matecat-modal:focus {
-  color: red;
-  text-decoration: none;
-  cursor: pointer;
 }
 
 /* buttons */
@@ -408,28 +393,6 @@ a {
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   background: #d6d6d6;
-}
-
-.x-popup,
-.x-popup2 {
-  font-family: 'icomoon';
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  &:hover {
-    color: colors.$darkBlueTransparent;
-  }
-}
-
-.x-popup:before,
-.x-popup2:before {
-  content: '\f057';
 }
 
 .matecat-modal-content,
@@ -612,6 +575,12 @@ a {
         }
       }
     }
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      gap: 16px;
+    }
   }
 
   .matecat-modal-text {
@@ -648,26 +617,6 @@ a {
 
 .pull-right {
   float: right !important;
-}
-
-.create-team-modal,
-.modify-team-modal,
-.shortcuts-modal {
-  .create-team {
-    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    padding: 11px 22px;
-    vertical-align: top;
-    font-size: 18px;
-    margin-right: 0px;
-    border-radius: 2px;
-
-    &.primary.button {
-      border-radius: 2px;
-    }
-  }
-}
-
-.modify-team-modal {
 }
 
 .ui.fluid.input > input {

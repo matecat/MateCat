@@ -322,3 +322,17 @@ a.button-component-container {
   --btnBgColorSemitrans: #{rgba(colors.$approved2Green, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$approved2Green, 0.24)};
 }
+
+.icon {
+  --btnAltTextColorDisabled: #{rgba(colors.$white, 0.12)};
+
+  --btnBorderColor: #{colors.$grey8};
+  --btnBorderColorHover: #{colors.$grey6};
+  --btnBorderColorActive: #{colors.$grey6};
+  --btnBorderColorDisabled: #{rgba(colors.$white, 0.12)};
+
+  --btnBgColor: #{colors.$white};
+  --btnBgColorAlt: #{colors.$grey9};
+  --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
+}

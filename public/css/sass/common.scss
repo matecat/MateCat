@@ -567,11 +567,6 @@ icon-iconmoon:before,
 .sorting_asc:after,
 .open-popup-addtm-tr:before,
 .sorting:after,
-.x-popup:before,
-.x-popup2:before,
-.popup .x-popup:before,
-.mgmt-panel .x-popup:before,
-.popup-tm .x-popup:before,
 td.actions a:before,
 a.archive-project:before,
 a.unarchive-project:before,
@@ -696,11 +691,6 @@ a.unarchive-project:after {
   left: -1px;
   top: 1px;
   transform: rotate(-45deg);
-}
-
-.x-popup:before,
-.x-popup2:before {
-  content: '\f057';
 }
 
 .open-popup-addtm-tr:before {

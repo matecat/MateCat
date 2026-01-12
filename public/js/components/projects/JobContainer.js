@@ -845,7 +845,7 @@ class JobContainer extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     var self = this
-    if (this.updated) {
+    if (this.updated && this.container?.classList) {
       this.container.classList.add('updated-job')
       setTimeout(function () {
         self.container.classList.remove('updated-job')
@@ -902,11 +902,11 @@ class JobContainer extends React.Component {
 
     return (
       <div className="sixteen wide column chunk-container">
-        <div
-          className="ui grid"
-          ref={(container) => (this.container = container)}
-        >
-          {!this.state.openOutsource ? (
+        {!this.state.openOutsource ? (
+          <div
+            className="ui grid"
+            ref={(container) => (this.container = container)}
+          >
             <div
               className="chunk wide column pad-right-10"
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
@@ -989,8 +989,8 @@ class JobContainer extends React.Component {
                 ''
               )}
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         <OutsourceContainer
           project={this.props.project}
           job={this.props.job}

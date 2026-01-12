@@ -27,6 +27,7 @@ export const BUTTON_TYPE = {
   WARNING: 'warning',
   CRITICAL: 'critical',
   PURPLE: 'purple',
+  ICON: 'icon',
 }
 export const BUTTON_MODE = {
   BASIC: 'basic',

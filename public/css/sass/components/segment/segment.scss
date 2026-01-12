@@ -127,6 +127,9 @@ section {
       position: relative;
       gap: 16px;
       justify-content: flex-end;
+      button {
+        text-transform: uppercase;
+      }
     }
     .segment-body-content {
       .warnings-block {
