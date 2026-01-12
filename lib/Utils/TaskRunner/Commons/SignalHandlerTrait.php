@@ -52,7 +52,7 @@ trait SignalHandlerTrait
      * @param int $sig_no
      * @param mixed $siginfo
      */
-    public function sigSwitch(int $sig_no, mixed $siginfo)
+    public function sigSwitch(int $sig_no, mixed $siginfo): void
     {
         switch ($sig_no) {
             case SIGTERM :
