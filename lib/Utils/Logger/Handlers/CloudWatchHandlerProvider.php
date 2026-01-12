@@ -48,7 +48,7 @@ class CloudWatchHandlerProvider implements ProviderInterface
         return array_merge(
             [
                 'client' => self::getClient(),
-                'group' => 'matecat-' . (getenv('ENV') ?: 'local') . '-' . (explode('-', gethostname())[0] ?? 'base') . '-node',
+                'group' => 'matecat-' . (AppConfig::$ENV ?: 'local') . '-' . (explode('-', gethostname())[0] ?? 'base') . '-node',
                 'stream' => pathinfo($name, PATHINFO_FILENAME),
                 'retention' => 30,
                 'batchSize' => AppConfig::$IS_DAEMON_INSTANCE ? 1 : 10000,
