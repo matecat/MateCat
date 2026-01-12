@@ -1754,12 +1754,18 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary() && translation) {
+      const cleanSource = DraftMatecatUtils.removeTagsFromText(updatedSource)
+      const cleanTranslation = DraftMatecatUtils.removeTagsFromText(translation)
+      if (
+        CatToolStore.getHaveKeysGlossary() &&
+        cleanSource &&
+        cleanTranslation
+      ) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: DraftMatecatUtils.removeTagsFromText(translation),
-          source: DraftMatecatUtils.removeTagsFromText(updatedSource),
+          target: cleanTranslation,
+          source: cleanSource,
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)

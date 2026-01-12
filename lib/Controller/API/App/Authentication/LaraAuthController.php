@@ -16,12 +16,19 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
 use DomainException;
 use Exception;
+use Klein\App;
+use Klein\Request;
 use Klein\Response;
+use Klein\ServiceProvider;
 use Lara\LaraException;
 use Model\Jobs\JobStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
+use Utils\Engines\Lara\Headers;
+use Utils\Logger\LoggerFactory;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Commons\ContextList;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\Tools\Utils;
 
@@ -31,6 +38,22 @@ class LaraAuthController extends AbstractStatefulKleinController
     use RateLimiterTrait;
 
     private JobStruct $chunk;
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param ServiceProvider|null $service
+     * @param App|null $app
+     *
+     * @throws Exception
+     */
+    public function __construct(Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null)
+    {
+        parent::__construct($request, $response, $service, $app);
+        $contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
+        $loggerName = $contextList->list['CONTRIBUTION_GET']->loggerName;
+        $this->logger = LoggerFactory::getLogger($loggerName,$loggerName);
+    }
 
     protected function afterConstruct(): void
     {
@@ -117,6 +140,16 @@ class LaraAuthController extends AbstractStatefulKleinController
 
             // Authenticate the client (likely producing an auth token for later requests).
             $token = $laraClient->authenticate();
+
+            $this->logger->debug([
+                'LARA AUTH REQUEST' => 'from browser',
+                'headers' => [
+                    Headers::LARA_PRE_SHARED_KEY_HEADER => substr(AppConfig::$LARA_PRE_SHARED_KEY_HEADER, 0, 16) . "...",
+                    'x-memory-ids' => $tm_keys
+                ],
+                'token' => $token
+            ]);
+
             $this->response->code(200);
             $this->response->json(['token' => $token]);
         } finally {
