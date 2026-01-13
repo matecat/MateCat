@@ -126,8 +126,11 @@ class Executor implements SplObserver
         $this->_executorPID = posix_getpid();
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
+        // Initialize the 'executor' logger using a specific filename from the context
         $this->logger = LoggerFactory::getLogger('executor', $_context->loggerName);
-        LoggerFactory::setAliases(['engines', 'project_manager', 'feature_set', 'files'], $this->logger); // overriding the default engine logger
+
+        // Map multiple component aliases to this logger instance for consistent logging across modules
+        LoggerFactory::setAliases(['engines', 'project_manager', 'feature_set', 'files'], $this->logger);
 
         $this->_executionContext = $_context;
 
