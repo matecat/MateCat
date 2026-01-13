@@ -442,7 +442,7 @@ test('Row Menu items', async () => {
   await act(async () => user.click(menuButton))
   await act(async () => user.click(screen.getByTestId('import-glossary')))
   expect(
-    screen.getByText('Select glossary in XLSX, XLS or ODS format'),
+    screen.getByText('Select termbase in XLSX, XLS or ODS format'),
   ).toBeInTheDocument()
 
   await act(async () => user.click(menuButton))
@@ -457,7 +457,7 @@ test('Row Menu items', async () => {
   await act(async () => user.click(screen.getByTestId('export-glossary')))
   expect(
     screen.getByText(
-      'We will send a link to download the exported Glossary to your email.',
+      'We will send a link to download the exported Termbase to your email.',
     ),
   ).toBeInTheDocument()
 

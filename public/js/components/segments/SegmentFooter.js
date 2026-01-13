@@ -48,7 +48,7 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.GLOSSARY]: {
-    label: 'Glossary',
+    label: 'Termbase',
     code: 'gl',
     tabClass: 'glossary',
     isLoading: false,
