@@ -46,7 +46,8 @@
         "ext-iconv": "*",
         "ext-openssl": "*",
         "ext-simplexml": "*",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "ext-redis": "*"
     },
     "config": {
         "use-include-path": true,
