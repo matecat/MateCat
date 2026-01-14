@@ -28,7 +28,7 @@
         "stevenmaguire/oauth2-microsoft": "^2.2",
         "stomp-php/stomp-php": "^5.0",
         "swaggest/json-schema": "^0.12.42",
-        "symfony/cache": "^7",
+        "symfony/cache": "~7.3.9",
         "symfony/console": "^5",
         "ext-curl": "*",
         "ext-pcntl": "*",
