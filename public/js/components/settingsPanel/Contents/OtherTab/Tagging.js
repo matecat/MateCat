@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useMemo} from 'react'
+import React, {useCallback, useContext, useMemo, useRef} from 'react'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -56,10 +56,12 @@ export const taggingTypes = [
   },
 ]
 
-export const Tagging = ({previousCurrentProjectTemplate}) => {
+export const Tagging = () => {
   const {SELECT_HEIGHT} = useContext(CreateProjectContext)
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
+
+  const previousSubfilteringHandlers = useRef()
 
   const setTagging = useCallback(
     ({options}) =>
@@ -105,16 +107,25 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
       setTagging({options: optionsIds})
     }
   }
-  const onClose = () => {
-    if (
-      config.is_cattool &&
-      previousCurrentProjectTemplate.current.subfilteringHandlers !==
-        currentProjectTemplate?.subfilteringHandlers
-    ) {
+
+  const onClose = useCallback(() => {
+    const shouldUpdateRender =
+      currentProjectTemplate?.subfilteringHandlers.length !==
+        previousSubfilteringHandlers.current?.length ||
+      !currentProjectTemplate?.subfilteringHandlers.every((value) =>
+        previousSubfilteringHandlers.current?.some(
+          (valueB) => value === valueB,
+        ),
+      )
+    if (config.is_cattool && shouldUpdateRender) {
       SegmentActions.removeAllSegments()
       CatToolActions.onRender({segmentToOpen: config.last_opened_segment})
     }
-  }
+
+    if (config.is_cattool)
+      previousSubfilteringHandlers.current =
+        currentProjectTemplate?.subfilteringHandlers
+  }, [currentProjectTemplate?.subfilteringHandlers])
 
   return (
     <div className="options-box">
@@ -137,7 +148,7 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
-          onCloseSelect={onClose}
+          onCloseSelect={() => onClose()}
         >
           {({name, code, html}) => ({
             row: (
