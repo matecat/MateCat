@@ -305,13 +305,16 @@ export const ModifyTeam = ({team}) => {
             onChange={onChangeAddMembers}
             placeholder="Add new members by entering their email addresses"
           />
-          <button
-            className="create-team ui primary button open button-invite"
-            onClick={inviteMembers}
-            disabled={!isValidEmails}
-          >
-            Invite members
-          </button>
+          <div className="modal-buttons">
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              className="button-invite"
+              onClick={inviteMembers}
+              disabled={!isValidEmails}
+            >
+              Invite members
+            </Button>
+          </div>
         </div>
       )}
 

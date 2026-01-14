@@ -1017,40 +1017,28 @@ const OutsourceButton = ({job, openOutsourceModal}) => {
     : undefined
   let label =
     !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
-      <div
-        className="open-outsource open-outsource-disabled buy-translation ui button"
+      <Button
+        // className="open-outsource open-outsource-disabled buy-translation"
         id="open-quote-request"
         data-testid="buy-translation-button"
+        disabled={true}
+        tooltip={
+          "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
+        }
       >
-        <Tooltip
-          content={
-            <div>
-              Jobs created with custom billing models cannot be outsourced to
-              Translated.
-              <br />
-              In order to outsource this job to Translated, please recreate it
-              using Matecat's standard billing model
-            </div>
-          }
-        >
-          <div ref={outsourceButton} className={'buy-translation-button'}>
-            <span className="buy-translation-span">Buy Translation</span>
-            <span>from</span>
-            <TranslatedIconSmall size={20} />
-          </div>
-        </Tooltip>
-      </div>
+        Buy Translation from
+        <TranslatedIconSmall size={20} />
+      </Button>
     ) : (
-      <a
-        className="open-outsource buy-translation ui button"
+      <Button
+        // className="open-outsource buy-translation "
         id="open-quote-request"
         onClick={openOutsourceModal.bind(this, false, true)}
         data-testid="buy-translation-button"
       >
-        <span className="buy-translation-span">Buy Translation</span>
-        <span>from</span>
+        Buy Translation from
         <TranslatedIconSmall size={20} />
-      </a>
+      </Button>
     )
   if (job.get('outsource')) {
     if (job.get('outsource').get('id_vendor') == '1') {

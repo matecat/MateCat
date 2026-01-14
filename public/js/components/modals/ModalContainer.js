@@ -84,6 +84,7 @@ export const ModalContainer = ({
                 size={BUTTON_SIZE.ICON_STANDARD}
                 mode={BUTTON_MODE.GHOST}
                 onClick={handleClose}
+                data-testid="close-button"
               >
                 <Close size={20} />
               </Button>
