@@ -89,19 +89,11 @@
   }
 }
 
+.upload-waiting-logged {
+  align-items: stretch;
+}
 .wrapper-upload .upload-box-not-logged,
 .upload-waiting-logged {
-  border: 1px dashed #ccc;
-  margin: 18px 0;
-  min-height: 200px;
-  border-radius: 8px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: stretch;
-  text-align: center;
-  gap: 12px;
   .upload-loading {
     background: url(/public/img/loading.gif) 47% 50% no-repeat !important;
     background-size: 24px !important;

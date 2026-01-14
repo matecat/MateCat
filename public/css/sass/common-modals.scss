@@ -674,12 +674,11 @@ a {
   .message-modal {
     padding: 25px 0;
   }
-  .matecat-modal-buttons {
+  .modal-buttons {
     display: flex;
-    gap: 8px;
     justify-content: flex-end;
-    padding: 20px;
     width: 100%;
+    gap: 16px;
   }
 
   .matecat-modal-middle {

@@ -109,7 +109,7 @@
       color: colors.$grey1;
     }
 
-    .button-remove {
+    .remove-user-button {
       margin-left: auto;
     }
 
@@ -123,23 +123,6 @@
         line-height: 1;
         border-radius: unset;
       }
-    }
-
-    .confirm-button {
-      height: 26px;
-      font-size: 14px !important;
-      min-width: unset;
-      gap: 5px !important;
-      border-radius: unset;
-      padding: 0 8px;
-      display: flex;
-    }
-
-    .close-button {
-      width: 30px;
-      padding: 0 !important;
-      display: flex !important;
-      justify-content: center !important;
     }
 
     .pending-member-remove {
@@ -189,11 +172,6 @@
       font-size: 14px;
       color: colors.$grey1;
     }
-  }
-
-  .button-close {
-    display: flex;
-    margin-left: auto;
   }
 }
 
