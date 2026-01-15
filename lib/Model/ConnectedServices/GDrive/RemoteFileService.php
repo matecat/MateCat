@@ -116,18 +116,22 @@ class RemoteFileService
      * @param Google_Service_Drive_DriveFile $gdriveFile
      * @param string $content
      * @param bool $canAddMyDriveParent
-     * @param array $parents
+     * @param array|null $parents
      *
+     * @return void
      * @throws \Google\Service\Exception
      */
-    private function updateFileOnGDrive(string $remoteId, Google_Service_Drive_DriveFile $gdriveFile, string $content, bool $canAddMyDriveParent, array $parents): void
+    private function updateFileOnGDrive(string $remoteId, Google_Service_Drive_DriveFile $gdriveFile, string $content, bool $canAddMyDriveParent, ?array $parents = []): void
     {
         $newGDriveFileInstance = new Google_Service_Drive_DriveFile();
         $newGDriveFileInstance->setDriveId($remoteId);
-        $newGDriveFileInstance->setMimeType(self::officeMimeFromGoogle($gdriveFile->mimeType));
         $newGDriveFileInstance->setName($gdriveFile->getName());
         $newGDriveFileInstance->setDescription($gdriveFile->getDescription());
         $newGDriveFileInstance->setKind($gdriveFile->getKind());
+
+        if(!empty($gdriveFile->getMimeType())){
+            $newGDriveFileInstance->setMimeType(self::officeMimeFromGoogle($gdriveFile->getMimeType()));
+        }
 
         $optParams = [
             'mimeType' => $gdriveFile->mimeType,
