@@ -135,6 +135,7 @@ class AuthenticationHelper
     {
         unset($session['user']);
         unset($session['user_profile']);
+        LoggerFactory::getLogger('login_exceptions')->alert( 'Session Destroy Phase 1', $session );
         AuthCookie::destroyAuthentication(new SessionTokenStoreHandler());
     }
 
