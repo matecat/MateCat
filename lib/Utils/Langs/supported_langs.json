@@ -5345,10 +5345,10 @@
             ],
             "isocode": "ur",
             "enabled": true,
-            "rtl": true,
+            "rtl": false,
             "rfc3066code": "ur-Latn-PK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
