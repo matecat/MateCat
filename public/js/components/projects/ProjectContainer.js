@@ -14,7 +14,6 @@ import UserActions from '../../actions/UserActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
-import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import UserStore from '../../stores/UserStore'
@@ -38,6 +37,10 @@ import Checkmark from '../../../img/icons/Checkmark'
 import IconClose from '../icons/IconClose'
 import {ProjectsBulkActionsContext} from './ProjectsBulkActions/ProjectsBulkActionsContext'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import FileLog from '../../../img/icons/FileLog'
+import Archive from '../../../img/icons/Archive'
+import Refresh from '../../../img/icons/Refresh'
+import Trash from '../../../img/icons/Trash'
 
 const ProjectContainer = ({
   project,
@@ -56,7 +59,7 @@ const ProjectContainer = ({
   const [lastAction, setLastAction] = useState()
   const [jobsActions, setJobsActions] = useState()
   const [idTeamSelected, setIdTeamSelected] = useState(idTeamProject)
-  const [shouldShowEditNameIcon, setShouldShowEditNameIcon] = useState(false)
+  const [shouldShowMoreActions, setShouldShowMoreActions] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
 
   const {handleSubmit, control, reset} = useForm()
@@ -172,7 +175,7 @@ const ProjectContainer = ({
       {
         label: (
           <>
-            <i className="icon-download-logs icon" />
+            <FileLog size={18} />
             Activity Log
           </>
         ),
@@ -183,7 +186,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer icon" />
+                  <Archive size={18} />
                   Archive project
                 </>
               ),
@@ -192,7 +195,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel project
                 </>
               ),
@@ -205,7 +208,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <Refresh size={18} />
                   Unarchive project
                 </>
               ),
@@ -214,7 +217,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel project
                 </>
               ),
@@ -227,7 +230,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <Refresh size={18} />
                   Resume Project
                 </>
               ),
@@ -236,7 +239,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <i className="icon-drawer icon-trash-o icon" />
+                  <Trash size={18} />
                   Delete project permanently
                 </>
               ),
@@ -291,6 +294,11 @@ const ProjectContainer = ({
     return date.toDateString()
   }
 
+  const jobsBulkForCurrentProject = project
+    .get('jobs')
+    .toJS()
+    .filter(({id}) => jobsBulk.some((value) => value === id))
+
   const getJobsList = (jobsLength) => {
     const jobsList = []
     let chunks = [],
@@ -320,6 +328,7 @@ const ProjectContainer = ({
 
       const lastAction = getLastJobAction(job.get('id'))
       const isChunkOutsourced = thereIsChunkOutsourced(job.get('id'))
+
       let item = (
         <JobContainer
           key={job.get('id') + '-' + i}
@@ -333,8 +342,11 @@ const ProjectContainer = ({
           lastAction={lastAction}
           isChunkOutsourced={isChunkOutsourced}
           activityLogUrl={getActivityLogUrl()}
-          /* isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
-          onCheckedJob={onCheckedJob} */
+          isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
+          onCheckedJob={onCheckedJob}
+          isCheckboxVisible={
+            shouldShowMoreActions || jobsBulkForCurrentProject.length
+          }
         />
       )
       chunks.push(item)
@@ -524,11 +536,6 @@ const ProjectContainer = ({
     ''
   )
 
-  /*  const jobsBulkForCurrentProject = project
-    .get('jobs')
-    .toJS()
-    .filter(({id}) => jobsBulk.some((value) => value === id)) */
-
   return (
     <div
       className="project ui column grid shadow-1"
@@ -537,8 +544,8 @@ const ProjectContainer = ({
     >
       <div
         className="sixteen wide column"
-        onMouseOver={() => setShouldShowEditNameIcon(true)}
-        onMouseLeave={() => setShouldShowEditNameIcon(false)}
+        onMouseOver={() => setShouldShowMoreActions(true)}
+        onMouseLeave={() => setShouldShowMoreActions(false)}
       >
         <div className="project-header ui grid">
           <div className="nine wide column">
@@ -547,8 +554,8 @@ const ProjectContainer = ({
                 className={`sixteen wide column project-title ${isEditingName ? 'project-title-editing-name-mode' : ``}`}
               >
                 <div className="ui ribbon label">
-                  {/* <Checkbox
-                    className="project-checkbox"
+                  <Checkbox
+                    className={`project-checkbox ${!shouldShowMoreActions && !jobsBulkForCurrentProject.length ? 'project-container-checkbox-hidden' : ''}`}
                     onChange={() => onCheckedProject(project.get('id'))}
                     value={
                       jobsBulkForCurrentProject.length === 0
@@ -558,7 +565,7 @@ const ProjectContainer = ({
                           ? CHECKBOX_STATE.CHECKED
                           : CHECKBOX_STATE.INDETERMINATE
                     }
-                  /> */}
+                  />
                   <div className="project-id" title="Project id">
                     {'(' + project.get('id') + ')'}
                   </div>
@@ -574,7 +581,7 @@ const ProjectContainer = ({
                     </div>
                   )}
                 </div>
-                {shouldShowEditNameIcon && !isEditingName && (
+                {shouldShowMoreActions && !isEditingName && (
                   <Button
                     className="project-container-button-edit-name"
                     mode={BUTTON_MODE.GHOST}

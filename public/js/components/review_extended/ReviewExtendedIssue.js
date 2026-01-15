@@ -8,6 +8,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import CommonUtils from '../../utils/commonUtils'
 import CatToolActions from '../../actions/CatToolActions'
 import classnames from 'classnames'
+import Trash from '../../../img/icons/Trash'
 
 class ReviewExtendedIssue extends React.Component {
   constructor(props) {
@@ -332,7 +333,7 @@ class ReviewExtendedIssue extends React.Component {
                       onClick={this.deleteIssue.bind(this)}
                       title="Delete issue card"
                     >
-                      <i className="icon-trash-o icon" />
+                      <Trash size={18} />
                     </button>
                   ) : null}
                 </div>

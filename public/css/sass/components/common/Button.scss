@@ -32,8 +32,6 @@ a.button-component-container {
     pointer-events: none;
   }
 
-
-
   // Mode modifiers
   &.basic {
     background-color: var(--btnBgColor);
@@ -96,10 +94,6 @@ a.button-component-container {
 
     &:disabled {
       color: var(--btnAltTextColorDisabled);
-
-      svg {
-        color: var(--btnAltTextColorDisabled);
-      }
     }
   }
   &.link {
@@ -116,10 +110,6 @@ a.button-component-container {
 
     &:disabled {
       color: var(--btnAltTextColorDisabled);
-
-      svg {
-        color: var(--btnAltTextColorDisabled);
-      }
     }
   }
 

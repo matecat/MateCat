@@ -1,6 +1,7 @@
-@use "../commons/colors";
+@use '../commons/colors';
 // rewrite semantic CSS
-html, body {
+html,
+body {
   height: 100%;
 }
 body.analyze {
@@ -261,7 +262,8 @@ body.analyze {
       background-color: colors.$grey5;
       margin: 0 -1rem 0;
       &.type-mtqe {
-        .title-total-words, .title-matecat-words {
+        .title-total-words,
+        .title-matecat-words {
           width: 50% !important;
         }
       }
@@ -546,6 +548,11 @@ body.analyze {
                 margin-left: 2px;
               }
             }
+          }
+          .split {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
           }
           .split,
           .merge {
@@ -952,7 +959,7 @@ body.analyze {
 
 @media only screen and (min-width: 1200px) {
   .ui.container:not(.fluid) {
-    width: 1140px !important;;
+    width: 1140px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -961,7 +968,7 @@ body.analyze {
 
 @media only screen and (min-width: 1380px) {
   .ui.container:not(.fluid) {
-    width: 1280px !important;;
+    width: 1280px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
