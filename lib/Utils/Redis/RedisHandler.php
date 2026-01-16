@@ -4,6 +4,7 @@ namespace Utils\Redis;
 
 use Exception;
 use Predis\Client;
+use Predis\Connection\ConnectionInterface;
 use ReflectionClass;
 use ReflectionException;
 use Utils\Registry\AppConfig;
@@ -61,7 +62,7 @@ class RedisHandler
         if (
             $this->redisClient === null
             || !$this->redisClient->getConnection()->isConnected()
-            || !is_resource($resource)
+            || !$resource
         ) {
             $this->redisClient = $this->getClient();
         }

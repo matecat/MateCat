@@ -227,6 +227,10 @@ class Lara extends AbstractEngine
 
             $_config = $this->configureContribution($_config);
 
+            // Send the selected memory IDs to Lara via a custom request header.
+            $laraClient = $client->getHttpClient();
+            $laraClient->setExtraHeader('x-memory-ids', implode(',', $_config['keys']));
+
             try {
                 // call lara
                 $translateOptions = new TranslateOptions();
@@ -454,6 +458,10 @@ class Lara extends AbstractEngine
 
             return true;
         }
+
+        // Send the selected memory IDs to Lara via a custom request header.
+        $laraClient = $client->getHttpClient();
+        $laraClient->setExtraHeader('x-memory-ids', implode(',', $_keys));
 
         try {
             $time_start = microtime(true);
