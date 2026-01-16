@@ -75,6 +75,10 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
      */
     public function getPEE(): float
     {
+        if(empty($this->suggestion) || empty($this->translation)){
+            return 0;
+        }
+
         return PostEditing::getPee(
             $this->suggestion,
             $this->translation,

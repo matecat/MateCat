@@ -16,6 +16,7 @@ use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EngineInterface;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\Lara\Headers;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -93,6 +94,11 @@ class SetContributionWorker extends AbstractWorker
          * @see AbstractEngine::$_isAdaptiveMT
          */
         if (!$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS()) {
+            return;
+        }
+
+        // temporary disable ur-Latn-PK
+        if($this->_engine instanceof Lara && $jobStruct->target === "ur-Latn-PK"){
             return;
         }
 

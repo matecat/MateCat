@@ -153,6 +153,21 @@
         {
             "localized": [
                 {
+                    "en": "Arabic (Tunisia)"
+                }
+            ],
+            "isocode": "ar",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ar-TN",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Aragonese"
                 }
             ],
@@ -1220,6 +1235,52 @@
         {
             "localized": [
                 {
+                    "en": "English (Austria)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-AU",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Bangladesh)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-BD",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Cambodia)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-KH",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+
+        {
+            "localized": [
+                {
                     "en": "English (Canada)"
                 }
             ],
@@ -1235,6 +1296,36 @@
         {
             "localized": [
                 {
+                    "en": "English (Czech Republic)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-CZ",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Finland)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-FI",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "English (Hong Kong)"
                 }
             ],
@@ -1242,6 +1333,21 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "en-HK",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Hungary)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-HU",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false
@@ -1280,6 +1386,51 @@
         {
             "localized": [
                 {
+                    "en": "English (Laos)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-LA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Malaysia)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-MY",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Myanmar)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-MM",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "English (New Zealand)"
                 }
             ],
@@ -1287,6 +1438,36 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "en-NZ",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Pakistan)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-PK",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Taiwan)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-TW",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false
@@ -1317,6 +1498,36 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "en-ZA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Sweden)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-SE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Turkey)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-TR",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false
@@ -5114,13 +5325,28 @@
         {
             "localized": [
                 {
-                    "en": "Urdu"
+                    "en": "Urdu (Perso-arabic script)"
                 }
             ],
             "isocode": "ur",
             "enabled": true,
             "rtl": true,
             "rfc3066code": "ur-PK",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Urdu (Latin script)"
+                }
+            ],
+            "isocode": "ur",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ur-Latn-PK",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false

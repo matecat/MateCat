@@ -214,6 +214,11 @@ class Lara extends AbstractEngine
      */
     public function get(array $_config): array
     {
+        // temporary disable ur-Latn-PK
+        if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
+            return [];
+        }
+
         if ($this->_isAnalysis && $this->_skipAnalysis) {
             return [];
         }
