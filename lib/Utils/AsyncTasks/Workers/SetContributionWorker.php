@@ -72,9 +72,13 @@ class SetContributionWorker extends AbstractWorker
 
         $this->_checkDatabaseConnection();
 
-        $this->_execContribution(
-            $this->toSetContributionRequest($queueElement)
+        $contributionStruct = $this->toSetContributionRequest($queueElement);
+
+        $this->setEngine(
+            $this->_loadEngine($contributionStruct->getJobStruct())
         );
+
+        $this->_execContribution($contributionStruct);
     }
 
     /**
@@ -88,8 +92,6 @@ class SetContributionWorker extends AbstractWorker
     {
         $jobStruct = $contributionStruct->getJobStruct();
 
-        $this->_loadEngine($jobStruct);
-
         /**
          * @see AbstractEngine::$_isAdaptiveMT
          */
@@ -98,7 +100,7 @@ class SetContributionWorker extends AbstractWorker
         }
 
         // temporary disable ur-Latn-PK
-        if($this->_engine instanceof Lara && $jobStruct->target === "ur-Latn-PK"){
+        if ($this->_engine instanceof Lara && $jobStruct->target === "ur-Latn-PK") {
             return;
         }
 
@@ -124,13 +126,15 @@ class SetContributionWorker extends AbstractWorker
      *
      * @param JobStruct $jobStruct
      *
+     * @return AbstractEngine
      * @throws Exception
-     * @throws ValidationError
      */
-    protected function _loadEngine(JobStruct $jobStruct): void
+    protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
     {
-        if (empty($this->_engine) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id) {
-            $this->_engine = EnginesFactory::getInstance($jobStruct->id_tms); //Load MyMemory
+        try {
+            return EnginesFactory::getInstance($jobStruct->id_tms); //Load MyMemory
+        } catch (Exception $e) {
+            throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
     }
 
