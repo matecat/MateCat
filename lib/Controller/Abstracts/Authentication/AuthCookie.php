@@ -152,13 +152,9 @@ class AuthCookie
             // Retrieve the payload data from the authentication cookie.
             $payload = self::getData();
 
-            LoggerFactory::getLogger('login_exceptions')->alert( 'Session Destroy Phase 2 Remove Cookie From Redis', $payload );
-
             // Remove the login cookie from the session token store if a valid payload exists.
             $sessionTokenStoreHandler->removeLoginCookieFromStore($payload['user']['uid'] ?? 0, $_COOKIE[AppConfig::$AUTHCOOKIENAME] ?? '');
         }
-
-        LoggerFactory::getLogger('login_exceptions')->alert( 'Session Destroy Phase 3 Unset Cookie', [ $_COOKIE[AppConfig::$AUTHCOOKIENAME] ] );
 
         // Unset the authentication cookie from the global $_COOKIE array.
         unset($_COOKIE[AppConfig::$AUTHCOOKIENAME]);
@@ -176,8 +172,6 @@ class AuthCookie
 
         // Destroy the current session.
         session_destroy();
-
-        LoggerFactory::getLogger('login_exceptions')->alert( 'Session Destroy Phase 4 Session Destroyed', $_COOKIE );
     }
 
     /**

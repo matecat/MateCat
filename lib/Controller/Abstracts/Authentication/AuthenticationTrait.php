@@ -108,7 +108,6 @@ trait AuthenticationTrait
      */
     public function logout(): void
     {
-        LoggerFactory::getLogger('login_exceptions')->alert( 'Session Destroy Init', $_SESSION );
         AuthenticationHelper::destroyAuthentication($_SESSION);
     }
 
