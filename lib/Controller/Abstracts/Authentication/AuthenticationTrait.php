@@ -8,6 +8,7 @@ use Model\Users\UserStruct;
 use ReflectionException;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 
 /**
@@ -107,6 +108,7 @@ trait AuthenticationTrait
      */
     public function logout(): void
     {
+        LoggerFactory::getLogger('login_exceptions')->alert( 'Session Destroy Init', $_SESSION );
         AuthenticationHelper::destroyAuthentication($_SESSION);
     }
 
