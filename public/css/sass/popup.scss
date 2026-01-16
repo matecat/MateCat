@@ -72,31 +72,6 @@
     font-family: 'calibri', Arial, Helvetica, sans-serif;
   }
 
-  .popup .x-popup {
-    color: #fff;
-    text-decoration: none;
-    display: block;
-    height: 30px;
-    font-size: 20px;
-    padding-top: 10px;
-    float: right;
-    margin: 0 10px 0 0;
-    background-size: 22px;
-    font-family: 'icomoon';
-    speak: none;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  .x-popup:before {
-    content: '\f057';
-  }
-
   .inner {
     width: 45px;
     border-right: 1px solid #003366;

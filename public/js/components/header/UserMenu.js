@@ -106,7 +106,6 @@ export const UserMenu = () => {
         <Button
           className={'header-button-signin'}
           mode={BUTTON_MODE.OUTLINE}
-          size={BUTTON_SIZE.MEDIUM}
           onClick={ModalsActions.openLoginModal}
         >
           Sign In
@@ -114,7 +113,6 @@ export const UserMenu = () => {
         <Button
           className={'header-button-signup'}
           onClick={ModalsActions.openRegisterModal}
-          size={BUTTON_SIZE.MEDIUM}
         >
           Sign Up
         </Button>

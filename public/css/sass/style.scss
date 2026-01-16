@@ -633,159 +633,12 @@ strong:first-child {
 .download {
   position: absolute;
 }
-
-/*done & draft*/
-.translated,
-.approved,
-.guesstags {
-  color: #fff !important;
-  font-weight: bold;
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 2px;
-  font-size: 18px;
-  background: colors.$translatedBlue;
-  background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
-  background: linear-gradient(top, colors.$translatedBlue, #119ec4);
-  text-transform: uppercase;
-  user-select: none;
-}
-
-.buttons .approved.disabled,
-.buttons .next-unapproved.disabled,
-.buttons .next-untranslated.disabled,
-.buttons .translated.disabled,
-.buttons .guesstags.disabled,
-.buttons .disabled {
-  pointer-events: none;
-  color: #666 !important;
-  border-color: #666;
-  background: #efefef;
-}
-
-.approved {
-  background: colors.$approvedGreen;
-}
-
-article .translated,
-.guesstags,
-article .draft,
-article .approved {
-  margin: 0 0px 5px 5px;
-}
-
-.buttons {
-  float: right;
-  padding: 0;
-  -webkit-transition: all 100ms ease-in;
-  -moz-transition: all 100ms ease-in; /*margin: -15px 2% 0 0;*/
-  margin: 0;
-  position: absolute;
-  right: 0;
-}
-
-.buttons p {
-  font-size: 11px;
-  font-weight: normal;
-  color: #666;
-  display: none;
-  position: absolute;
-  top: calc(50% + 18px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 200px;
-}
-
-.buttons li:hover p {
-  display: block;
-}
-
-.translated {
-  color: #fff !important;
-}
-
-article .translated,
-article .approved,
-.guesstags {
-  text-transform: uppercase;
-}
-
-article .translated:hover,
-article .next-untranslated:hover,
-.guesstags:hover,
-article .draft:hover,
-article .btn:hover,
-article .approved:hover,
-article .next-unapproved:hover,
-.search .btn:hover {
-  cursor: pointer;
-  //-webkit-box-shadow: 0 1px 2px #ccc;
-  //box-shadow: 0 1px 2px #ccc;
-  //border: 1px solid #000;
-}
-
-article .translated:active,
-.guesstags:active,
-article .draft:active,
-article .btn:active,
-article .approved:active {
-  -moz-box-shadow: none;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
-
-.translated:hover,
-.next-untranslated:hover,
-.guesstags:hover {
-  background-color: colors.$translatedBlueHover;
-  //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-}
-
-.draft:hover {
-  background: #eee;
-}
-
-.translated:active,
-.draft:active,
-.guesstags:active,
 .btn:active,
 .copysource:active {
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   box-shadow: none;
   /*   border: 1px solid #000*/
-}
-
-.next-untranslated,
-.next-unapproved {
-  width: 50px !important;
-  height: 27px !important;
-  background: colors.$translatedBlue;
-  font-weight: bold;
-  text-decoration: none;
-  padding: 5px 2px 3px 2px;
-  border-radius: 2px;
-  font-size: 18px;
-  color: #fff !important;
-  user-select: none;
-}
-
-.approved,
-.next-unapproved {
-  background: colors.$approvedGreen;
-  color: #fff !important;
-}
-
-.draft {
-  background: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    from(#f5f5f5),
-    to(#d3d4d5)
-  );
-  background: -moz-linear-gradient(top, #f5f5f5, #d3d4d5);
-  background: linear-gradient(top, #f5f5f5, #d3d4d5);
 }
 
 .btn {
@@ -795,10 +648,6 @@ article .approved:active {
   text-decoration: none;
   -moz-border-radius: 2px;
   border-radius: 2px;
-}
-
-.buttons .btn {
-  height: 33px;
 }
 
 .outersource .copy {
@@ -1556,11 +1405,6 @@ body.archived section .status-container a.status:hover {
   padding-left: 26px !important;
 }
 
-.buttons {
-  position: relative;
-  top: 0px;
-}
-
 /*tab rows */
 .graysmall li {
   width: 48%;
@@ -1970,7 +1814,6 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1380px) {
-  /*.buttons{margin:-15px 43px 0 0 !important;}*/
   .graysmall li {
     width: 45.5%;
   }
@@ -2054,13 +1897,6 @@ section.opened.editor .status {
   .editarea,
   .source {
     /* word-break: break-all */
-  }
-
-  .translated,
-  .draft,
-  .approved,
-  .guesstags {
-    padding: 8px 6px;
   }
 
   .meter {
@@ -2153,7 +1989,7 @@ section.ice-locked.rtl-target .target {
   text-align: right;
 }
 
-body.archived ul.buttons,
+body.archived .buttons,
 body.archived .footer {
   display: none !important;
 }
@@ -2548,14 +2384,6 @@ section .segment-side-buttons {
   margin-right: 0;
   z-index: 0;
   position: relative;
-}
-
-.buttons li {
-  text-align: center;
-  vertical-align: -webkit-baseline-middle;
-  display: inline-block;
-  position: relative;
-  margin-left: 16px;
 }
 
 /* Header/Footer Restyling */

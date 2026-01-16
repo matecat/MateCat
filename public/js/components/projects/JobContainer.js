@@ -15,7 +15,12 @@ import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
-import {BUTTON_SIZE} from '../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 class JobContainer extends React.Component {
@@ -448,39 +453,6 @@ class JobContainer extends React.Component {
     )
   }
 
-  getTMIcon() {
-    if (this.props.job.get('private_tm_key').size) {
-      let keys = this.props.job.get('private_tm_key')
-      const tooltipText = keys.map((key) => {
-        let descript = key.get('name') ? key.get('name') : 'Private resource'
-        return (
-          <div style={{textAlign: 'left'}} key={key.get('key')}>
-            <span style={{fontWeight: 'bold'}}> {descript}</span> ({' '}
-            {key.get('key')})
-          </div>
-        )
-      })
-      return (
-        <Popup
-          content={<>{tooltipText}</>}
-          size="tiny"
-          hoverable
-          trigger={
-            <a
-              className=" ui icon basic button tm-keys"
-              onClick={this.openTMPanel.bind(this)}
-              data-testid="tm-button"
-            >
-              <i className="icon-tm-matecat icon" />
-            </a>
-          }
-        />
-      )
-    } else {
-      return ''
-    }
-  }
-
   getCommentsIcon() {
     let icon = ''
     let openThreads = this.props.job.get('open_threads_count')
@@ -845,31 +817,9 @@ class JobContainer extends React.Component {
 
   getWarningsGroup() {
     const icons = this.getWarningsInfo()
-    const iconsBody =
-      icons.number > 1 ? (
-        <DropdownMenu
-          className="group-activity-icon"
-          toggleButtonProps={{
-            children: (
-              <div className="ui icon top right pointing dropdown group-activity-icon basic button">
-                <i className="icon-alarm icon" />
-              </div>
-            ),
-            size: BUTTON_SIZE.ICON_STANDARD,
-          }}
-          items={[
-            ...this.getQRMenuItem(),
-            ...this.getWarningsMenuItem(),
-            ...this.getCommentsMenuItem(),
-          ]}
-        />
-      ) : (
-        icons.icon
-      )
-
     return (
       <div className="job-activity-icons" data-testid="job-activity-icons">
-        {iconsBody}
+        {icons.icon}
       </div>
     )
   }
@@ -895,7 +845,7 @@ class JobContainer extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     var self = this
-    if (this.updated) {
+    if (this.updated && this.container?.classList) {
       this.container.classList.add('updated-job')
       setTimeout(function () {
         self.container.classList.remove('updated-job')
@@ -941,7 +891,6 @@ class JobContainer extends React.Component {
     let analysisUrl = this.getProjectAnalyzeUrl()
     let warningIcons = this.getWarningsGroup()
     let jobMenu = this.getJobMenu()
-    let tmIcon = this.getTMIcon()
     let outsourceClass = this.props.job.get('outsource')
       ? 'outsource'
       : 'translator'
@@ -953,13 +902,13 @@ class JobContainer extends React.Component {
 
     return (
       <div className="sixteen wide column chunk-container">
-        <div
-          className="ui grid"
-          ref={(container) => (this.container = container)}
-        >
-          {!this.state.openOutsource ? (
+        {!this.state.openOutsource ? (
+          <div
+            className="ui grid"
+            ref={(container) => (this.container = container)}
+          >
             <div
-              className="chunk wide column pad-right-10 shadow-1"
+              className="chunk wide column pad-right-10"
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
             >
               {/* <Checkbox
@@ -1004,9 +953,6 @@ class JobContainer extends React.Component {
                   <span id="words">{Math.round(stats.raw.total)}</span> words
                 </a>
               </div>
-              <div className="tm-job" data-testid="tm-container">
-                {tmIcon}
-              </div>
               {warningIcons}
               <div className="outsource-job">
                 <div className={'translated-outsourced ' + outsourceClass}>
@@ -1029,14 +975,12 @@ class JobContainer extends React.Component {
                 </div>
               </div>
               {outsourceButton}
-              <a
-                className="open-translate ui primary button open"
-                target="_blank"
-                href={translateUrl}
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                onClick={() => window.open(translateUrl, '_blank')}
               >
                 Open
-              </a>
+              </Button>
               {jobMenu}
 
               {this.state.showDownloadProgress ? (
@@ -1045,8 +989,8 @@ class JobContainer extends React.Component {
                 ''
               )}
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         <OutsourceContainer
           project={this.props.project}
           job={this.props.job}
@@ -1073,51 +1017,40 @@ const OutsourceButton = ({job, openOutsourceModal}) => {
     : undefined
   let label =
     !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
-      <div
-        className="open-outsource open-outsource-disabled buy-translation ui button"
+      <Button
+        // className="open-outsource open-outsource-disabled buy-translation"
         id="open-quote-request"
         data-testid="buy-translation-button"
+        disabled={true}
+        tooltip={
+          "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
+        }
       >
-        <Tooltip
-          content={
-            <div>
-              Jobs created with custom billing models cannot be outsourced to
-              Translated.
-              <br />
-              In order to outsource this job to Translated, please recreate it
-              using Matecat's standard billing model
-            </div>
-          }
-        >
-          <div ref={outsourceButton} className={'buy-translation-button'}>
-            <span className="buy-translation-span">Buy Translation</span>
-            <span>from</span>
-            <TranslatedIconSmall size={20} />
-          </div>
-        </Tooltip>
-      </div>
+        Buy Translation from
+        <TranslatedIconSmall size={20} />
+      </Button>
     ) : (
-      <a
-        className="open-outsource buy-translation ui button"
+      <Button
+        // className="open-outsource buy-translation "
         id="open-quote-request"
         onClick={openOutsourceModal.bind(this, false, true)}
         data-testid="buy-translation-button"
       >
-        <span className="buy-translation-span">Buy Translation</span>
-        <span>from</span>
+        Buy Translation from
         <TranslatedIconSmall size={20} />
-      </a>
+      </Button>
     )
   if (job.get('outsource')) {
     if (job.get('outsource').get('id_vendor') == '1') {
       label = (
-        <a
-          className="open-outsourced ui button "
+        <Button
+          type={BUTTON_TYPE.DEFAULT}
+          mode={BUTTON_MODE.OUTLINE}
           id="open-quote-request"
           onClick={openOutsourceModal.bind(this, false, true)}
         >
           View status
-        </a>
+        </Button>
       )
     }
   }

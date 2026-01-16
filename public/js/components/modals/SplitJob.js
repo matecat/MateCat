@@ -345,19 +345,11 @@ const SplitJobModal = ({job, project, callback}) => {
             </div>
           )}
           {showLoader && <div className="button-loader show" />}
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.MEDIUM}
-            onClick={closeModal}
-          >
+          <Button mode={BUTTON_MODE.OUTLINE} onClick={closeModal}>
             Cancel
           </Button>
           {!showSplitDiffError && splitChecked && (
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
-              onClick={confirmSplitJob}
-            >
+            <Button type={BUTTON_TYPE.PRIMARY} onClick={confirmSplitJob}>
               Confirm
             </Button>
           )}
