@@ -29,12 +29,10 @@ class SetContributionMTWorker extends SetContributionWorker
      */
     protected function _loadEngine(JobStruct $jobStruct): void
     {
-        if (empty($this->_engine) || $jobStruct->id_mt_engine != $this->_engine->getEngineRecord()->id) {
-            try {
-                $this->_engine = EnginesFactory::getInstance($jobStruct->id_mt_engine); //Load MT Adaptive EnginesFactory
-            } catch (Exception $e) {
-                throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
-            }
+        try {
+            $this->_engine = EnginesFactory::getInstance($jobStruct->id_mt_engine); //Load MT Adaptive EnginesFactory
+        } catch (Exception $e) {
+            throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
     }
 
