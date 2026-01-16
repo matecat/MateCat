@@ -156,6 +156,7 @@ class OAuthSignInModel
     }
 
     /**
+     * @throws Exception
      */
     protected function _authenticateUser(): void
     {

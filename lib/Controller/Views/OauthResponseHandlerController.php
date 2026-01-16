@@ -23,7 +23,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
      */
-    public function response()
+    public function response(): void
     {
         $params = filter_var_array($this->request->params(), [
             'provider' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS],
@@ -61,7 +61,7 @@ class OauthResponseHandlerController extends BaseKleinViewController
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
      */
-    protected function _processSuccessfulOAuth($code, $provider = null)
+    protected function _processSuccessfulOAuth($code, $provider = null): void
     {
         // OAuth2 authentication
         $this->_initRemoteUser($code, $provider);
@@ -86,14 +86,11 @@ class OauthResponseHandlerController extends BaseKleinViewController
      * @param      $code
      * @param null $provider
      */
-    protected function _initRemoteUser($code, $provider = null)
+    protected function _initRemoteUser($code, $provider = null): void
     {
         try {
             $client = OauthClient::getInstance($provider)->getProvider();
             $token = $client->getAccessTokenFromAuthCode($code);
-            $x = var_export(get_current_user(), true);
-            $y = var_export(getmyuid(), true);
-            $z = var_export(getmygid(), true);
             $this->remoteUser = $client->getResourceOwner($token);
         } catch (Exception $exception) {
             $this->render($exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400);
