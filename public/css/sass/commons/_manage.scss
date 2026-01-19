@@ -6,7 +6,7 @@ body {
   height: 100%;
 }
 body.manage {
-  min-width: 1024px;
+  min-width: 1200px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   background-color: colors.$grey5;
   overflow-y: hidden;
@@ -19,11 +19,12 @@ div#manage-container {
   overflow: auto;
   height: calc(100% - 60px);
   position: relative;
-  padding-top: 40px;
   scroll-behavior: smooth;
 }
 
 .ui.icon.button {
+  display: flex;
+  justify-content: center;
   padding: 0px;
   font-size: 18px;
   margin: 0px;
@@ -53,9 +54,6 @@ div#manage-container {
   .menu {
     .item.submenu {
       width: 180px;
-      i.icon-refresh.icon {
-        margin-right: 9px !important;
-      }
     }
     .item.submenu a {
       color: colors.$black;
@@ -82,6 +80,7 @@ div#manage-container {
 // Closing Shadow - Transitions for buttons
 
 .project-list {
+  padding-top: 40px;
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {
@@ -116,6 +115,7 @@ div#manage-container {
       border-radius: 0 2px 2px 0;
       display: inline-block;
       margin-right: -33px;
+      padding-left: 10px !important;
     }
     .project-header {
       background-color: colors.$grey4;
@@ -137,7 +137,7 @@ div#manage-container {
       .project-id {
         font-size: 14px;
         font-weight: normal;
-        margin-left: 10px;
+        margin-left: 8px;
         display: inline-block;
         vertical-align: text-bottom;
         min-width: 72px;
@@ -424,13 +424,14 @@ div#manage-container {
             .chunk {
               display: grid;
               grid-template-columns:
+                auto
                 70px
                 150px 120px 106px auto auto 1fr auto auto auto;
               align-items: center;
-              gap: 10px;
+              gap: 6px;
               transition: 0.3s ease;
               background-color: #ffffff;
-              padding: 8px 15px;
+              padding: 8px 10px !important;
 
               @media only screen and (max-width: 1200px) {
                 gap: 5px;
@@ -486,8 +487,11 @@ div#manage-container {
                 height: 30px;
               }
               .job-activity-icons {
-                width: 30px;
-                height: 30px;
+                display: flex;
+                justify-content: center;
+                min-width: 110px;
+                gap: 5px;
+
                 button.group-activity-icon {
                   height: 30px;
                   width: 30px;
@@ -529,6 +533,9 @@ div#manage-container {
               .outsource-job {
                 display: inline-block;
                 .translated-outsourced {
+                  display: flex;
+                  align-items: center;
+
                   .outsource-logo-box {
                     min-width: 123px;
                     display: inherit;
@@ -551,10 +558,11 @@ div#manage-container {
                   vertical-align: text-bottom;
                   color: #969696;
                   max-width: 150px;
+                  transition: 0.3s ease;
+                  min-width: 0px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
-                  transition: 0.3s ease;
 
                   @media only screen and (max-width: 1199px) and (min-width: 992px) {
                     width: fit-content;
@@ -611,6 +619,20 @@ div#manage-container {
                 }
                 &:hover .translator .job-delivery {
                   display: none;
+                }
+                .outsource-delivery-container {
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                }
+                .job-delivery-date {
+                  margin-left: 5px;
+                  color: colors.$grey7;
+
+                  > :nth-child(2) {
+                    font-weight: bold;
+                    color: black;
+                  }
                 }
                 .item {
                   margin-left: 10px;
@@ -702,6 +724,7 @@ div#manage-container {
                 }
                 &.buy-translation {
                   display: flex;
+                  justify-content: end;
                   align-items: center;
                   background: #fff;
                   color: colors.$black;
@@ -715,9 +738,16 @@ div#manage-container {
                   .buy-translation-span {
                     text-decoration: underline;
                     font-size: 14px;
+                    white-space: nowrap;
+                    overflow: hidden;
                   }
-                  &.open-outsource-disabled span {
-                    color: colors.$grey;
+                  &.open-outsource-disabled {
+                    cursor: default;
+
+                    span {
+                      text-decoration: none;
+                      color: colors.$grey;
+                    }
                   }
                   span {
                     color: #000;
@@ -880,18 +910,25 @@ div#manage-container {
     margin-right: auto !important;
     transition: 0.3s ease;
   }
+  .outsource-delivery-container {
+    max-width: 210px;
+  }
 }
 
-@media only screen and (min-width: 1380px) {
+@media only screen and (min-width: 1500px) {
   .ui.container {
     width: 1280px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
   }
+
+  .outsource-delivery-container {
+    max-width: unset;
+  }
 }
 
-@media only screen and (max-width: 1199px) and (min-width: 992px) {
+@media only screen and (max-width: 1360px) and (min-width: 992px) {
   .ui.container {
     width: 991px !important;
     margin-left: auto !important;
@@ -915,12 +952,6 @@ div#manage-container {
   }
   .project-list {
     padding-top: 50px;
-    .job-to-translator {
-      min-width: 0px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
   }
   .outsource-job {
     min-width: 20% !important;
@@ -1040,4 +1071,8 @@ div#manage-container {
 
 ul {
   padding: 0;
+}
+
+.project-container-checkbox-hidden {
+  opacity: 0;
 }

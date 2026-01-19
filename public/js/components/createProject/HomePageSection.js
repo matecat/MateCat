@@ -15,8 +15,8 @@ export const HomePageSection = () => {
               Matecat employs cutting-edge AI to help translators save time and
               deliver their best quality. Consistent terminology is guaranteed
               by matching words in all their forms, ensuring that translators
-              never miss glossary terms. Large Language Models help translators
-              with unfamiliar terms by providing context-specific definitions.
+              never miss a term. Large Language Models help translators with
+              unfamiliar terms by providing context-specific definitions.
               Locale-specific checks on punctuation, numbers, dates and other
               conventions make sure that translators can work without worrying
               about accidental slip-ups.
