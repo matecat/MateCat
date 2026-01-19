@@ -884,7 +884,8 @@ class ProjectManager
                 unset($hashFile);
 
                 try {
-                    if (count($_originalFileNames) === 0) {
+                    if (count($_originalFileNames ?: []) === 0) {
+                        $this->logger->error('No hash files found', [$linkFiles['conversionHashes']]);
                         throw new Exception('No hash files found', -6);
                     }
 
@@ -905,7 +906,8 @@ class ProjectManager
 
                     $filesStructure = $this->_insertFiles($_originalFileNames, $sha1_original, $cachedXliffFilePathName);
 
-                    if (count($filesStructure) === 0) {
+                    if (count($filesStructure ?: []) === 0) {
+                        $this->logger->error('No files inserted in DB', [$_originalFileNames, $sha1_original, $cachedXliffFilePathName]);
                         throw new Exception('Files could not be saved in database.', -6);
                     }
 
@@ -918,7 +920,7 @@ class ProjectManager
                             $this->filesMetadataDao->insert($this->projectStructure['id_project'], $fid, 'pdfAnalysis', json_encode($meta['pdfAnalysis']));
                         }
                     }
-                } catch (Exception $e) {
+                } catch (Throwable $e) {
                     if ($e->getCode() == -10) {
                         //Failed to store the original Zip
                         $this->projectStructure['result']['errors'][] = [
@@ -973,7 +975,7 @@ class ProjectManager
                     $this->__clearFailedProject($e);
 
                     //EXIT
-                    return false;
+                    throw new Exception("Caught Exception");
                 }
 
                 //this is an "array append" like array_merge, but it does not renumber the numeric keys, so we can preserve the files id
