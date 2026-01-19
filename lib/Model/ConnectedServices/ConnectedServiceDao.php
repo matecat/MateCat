@@ -10,42 +10,45 @@ use Model\Users\UserStruct;
 use PDO;
 use Utils\Tools\Utils;
 
-class ConnectedServiceDao extends AbstractDao {
+class ConnectedServiceDao extends AbstractDao
+{
 
-    const TABLE          = 'connected_services';
-    const GDRIVE_SERVICE = 'gdrive';
+    const string TABLE = 'connected_services';
+    const string GDRIVE_SERVICE = 'gdrive';
 
-    protected static array $primary_keys         = [ 'id' ];
-    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys = ['id'];
+    protected static array $auto_increment_field = ['id'];
 
     /**
      * @param $id
      *
-     * @return ConnectedServiceStruct
+     * @return ConnectedServiceStruct|false
      */
-    public function findById( $id ) {
+    public function findById($id): ConnectedServiceStruct|false
+    {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE id = :id"
+            "SELECT * FROM connected_services WHERE id = :id"
         );
-        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
-        $stmt->execute( [ 'id' => $id ] );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
+        $stmt->execute(['id' => $id]);
 
         return $stmt->fetch();
     }
 
     /**
-     * @param                        $token
+     * @param string $token
      * @param ConnectedServiceStruct $service
      *
      * @return ConnectedServiceStruct
      * @throws Exception
      */
-    public function updateOauthToken( $token, ConnectedServiceStruct $service ): ConnectedServiceStruct {
-        $service->updated_at = Utils::mysqlTimestamp( time() );
-        $service->setEncryptedAccessToken( $token );
+    public function updateOauthToken(string $token, ConnectedServiceStruct $service): ConnectedServiceStruct
+    {
+        $service->updated_at = Utils::mysqlTimestamp(time());
+        $service->setEncryptedAccessToken($token);
 
-        $this->updateStruct( $service, [ 'fields' => [ 'oauth_access_token', 'updated_at' ] ] );
+        $this->updateStruct($service, ['fields' => ['oauth_access_token', 'updated_at']]);
 
         return $service;
     }
@@ -57,54 +60,57 @@ class ConnectedServiceDao extends AbstractDao {
      * @return int
      * @throws Exception
      */
-    public function setServiceExpired( $time, ConnectedServiceStruct $service ): int {
-        $service->expired_at = Utils::mysqlTimestamp( $time );
+    public function setServiceExpired($time, ConnectedServiceStruct $service): int
+    {
+        $service->expired_at = Utils::mysqlTimestamp($time);
 
-        return $this->updateStruct( $service, [ 'fields' => [ 'expired_at' ] ] );
+        return $this->updateStruct($service, ['fields' => ['expired_at']]);
     }
 
     /**
      * Sets the default ConnectedService
+     * @throws ValidationError
      */
-    public function setDefaultService( ConnectedServiceStruct $service ) {
-        if ( empty( $service->uid ) || empty( $service->service ) ) {
-            throw  new ValidationError( 'Service is not valid for update' );
+    public function setDefaultService(ConnectedServiceStruct $service): void
+    {
+        if (empty($service->uid) || empty($service->service)) {
+            throw  new ValidationError('Service is not valid for update');
         }
 
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "UPDATE connected_services SET is_default = 0 WHERE uid = :uid AND service = :service"
+            "UPDATE connected_services SET is_default = 0 WHERE uid = :uid AND service = :service"
         );
-        $stmt->execute( [ 'uid' => $service->uid, 'service' => $service->service ] );
+        $stmt->execute(['uid' => $service->uid, 'service' => $service->service]);
 
         $stmt = $conn->prepare(
-                "UPDATE connected_services SET is_default = 1 WHERE uid = :uid AND service = :service AND id = :id"
+            "UPDATE connected_services SET is_default = 1 WHERE uid = :uid AND service = :service AND id = :id"
         );
-        $stmt->execute( [ 'uid' => $service->uid, 'service' => $service->service, 'id' => $service->id ] );
+        $stmt->execute(['uid' => $service->uid, 'service' => $service->service, 'id' => $service->id]);
     }
 
     /**
-     * @param UserStruct       $user
+     * @param UserStruct $user
      * @param                  $id_service
      *
      * @return ?ConnectedServiceStruct
      */
-    public function findServiceByUserAndId( UserStruct $user, $id_service ): ?ConnectedServiceStruct {
+    public function findServiceByUserAndId(UserStruct $user, $id_service): ?ConnectedServiceStruct
+    {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE " .
-                " uid = :uid AND id = :id "
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND id = :id "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute(
-                [ 'uid' => $user->uid, 'id' => $id_service ]
+            ['uid' => $user->uid, 'id' => $id_service]
         );
 
         return $stmt->fetch() ?: null;
-
     }
 
     /**
@@ -112,109 +118,73 @@ class ConnectedServiceDao extends AbstractDao {
      *
      * @return ConnectedServiceStruct[]
      */
-    public function findServicesByUser( UserStruct $user ): array {
+    public function findServicesByUser(UserStruct $user): array
+    {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE " .
-                " uid = :uid "
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute(
-                [ 'uid' => $user->uid ]
+            ['uid' => $user->uid]
         );
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param UserStruct       $user
-     * @param                  $name
-     *
-     * @return ConnectedServiceStruct[]
-     *
-     */
-    public function findServicesByUserAndName( UserStruct $user, $name ) {
-        $conn = $this->database->getConnection();
-
-        $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE " .
-                " uid = :uid AND service = :service "
-        );
-
-        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
-        $stmt->execute(
-                [ 'uid' => $user->uid, 'service' => $name ]
-        );
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param UserStruct       $user
-     * @param                  $name
+     * @param UserStruct $user
+     * @param string $name
      *
      * @return ConnectedServiceStruct|null
      */
 
-    public function findDefaultServiceByUserAndName( UserStruct $user, $name ): ?ConnectedServiceStruct {
+    public function findDefaultServiceByUserAndName(UserStruct $user, string $name): ?ConnectedServiceStruct
+    {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
-                "SELECT * FROM connected_services WHERE " .
-                " uid = :uid AND service = :service AND is_default LIMIT 1"
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND service = :service AND is_default LIMIT 1"
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
         $stmt->execute(
-                [ 'uid' => $user->uid, 'service' => $name ]
+            ['uid' => $user->uid, 'service' => $name]
         );
 
         return $stmt->fetch() ?: null;
-
     }
 
 
     /**
-     * @param UserStruct       $user
-     * @param                  $service
-     * @param                  $email
+     * @param UserStruct $user
+     * @param string $service
+     * @param string $email
      *
      * @return ?ConnectedServiceStruct
      */
-    public function findUserServicesByNameAndEmail( UserStruct $user, $service, $email ): ?ConnectedServiceStruct {
+    public function findUserServicesByNameAndEmail(UserStruct $user, string $service, string $email): ?ConnectedServiceStruct
+    {
         $stmt = $this->database->getConnection()->prepare(
-                " SELECT * FROM connected_services WHERE " .
-                " uid = :uid AND service = :service AND email = :email "
+            " SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND service = :service AND email = :email "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ConnectedServiceStruct::class );
-        $stmt->execute( [
-                'uid'     => $user->uid,
-                'service' => $service,
-                'email'   => $email
-        ] );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ConnectedServiceStruct::class);
+        $stmt->execute([
+            'uid' => $user->uid,
+            'service' => $service,
+            'email' => $email
+        ]);
 
         return $stmt->fetch() ?: null;
     }
 
-    public function findByRemoteIdAndCode( $remote_id, $service ) {
-        $stmt = $this->database->getConnection()->prepare(
-                " SELECT * FROM connected_services WHERE " .
-                " uid = :remote_id AND service = :service "
-        );
-
-        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
-        $stmt->execute( [
-                'service'   => $service,
-                'remote_id' => $remote_id
-        ] );
-
-        return $stmt->fetch();
-    }
-
-    protected function _buildResult( array $array_result ) {
-        // TODO: Implement _buildResult() method.
+    protected function _buildResult(array $array_result)
+    {
     }
 }

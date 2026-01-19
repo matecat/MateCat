@@ -8,6 +8,8 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import UserStore from '../../stores/UserStore'
 import ManageActions from '../../actions/ManageActions'
 import {fromJS} from 'immutable'
+import {ProjectsBulkActions} from './ProjectsBulkActions'
+
 class ProjectsContainer extends React.Component {
   constructor(props) {
     super(props)
@@ -293,9 +295,12 @@ class ProjectsContainer extends React.Component {
     }
 
     return (
-      <div>
-        <div className="project-list">
-          <div className="ui container">
+      <div className="project-list">
+        <div className="ui container">
+          <ProjectsBulkActions
+            projects={this.state.projects.toJS()}
+            teams={this.state.teams.toJS()}
+          >
             {this.props.fetchingProjects ? (
               <div className="ui active inverted dimmer">
                 <div className="ui massive text loader">Loading Projects</div>
@@ -307,7 +312,7 @@ class ProjectsContainer extends React.Component {
                 {spinner}
               </React.Fragment>
             )}
-          </div>
+          </ProjectsBulkActions>
         </div>
       </div>
     )

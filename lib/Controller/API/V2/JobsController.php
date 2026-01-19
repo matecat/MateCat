@@ -16,120 +16,113 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
-use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
+use ReflectionException;
+use Throwable;
 use Utils\Constants\JobStatus;
 use Utils\Tools\Utils;
 use View\API\V2\Json\Chunk;
 
-class JobsController extends KleinController {
+class JobsController extends KleinController
+{
     use ChunkNotFoundHandlerTrait;
 
     /**
      * @var ProjectStruct
      */
-    private $project;
+    private ProjectStruct $project;
 
-    /**
-     * @return ProjectStruct
-     */
-    public function getProject() {
-        return $this->project;
-    }
-
-    /**
-     * @param JobStruct $chunk
-     *
-     * @return $this
-     */
-    public function setChunk( $chunk ) {
-        $this->chunk = $chunk;
-
-        return $this;
-    }
 
     /**
      * @throws Exception
      * @throws NotFoundException
      */
-    public function show() {
-
+    public function show(): void
+    {
         $format = new Chunk();
-        $format->setUser( $this->user );
-        $format->setCalledFromApi( true );
+        $format->setUser($this->user);
+        $format->setCalledFromApi(true);
 
         $this->return404IfTheJobWasDeleted();
 
-        $this->response->json( $format->renderOne( $this->chunk ) );
-
+        $this->response->json($format->renderOne($this->chunk));
     }
 
     /**
-     * @throws Exception
+     * @throws ReflectionException
+     * @throws Throwable
      */
-    public function delete() {
+    public function delete(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( JobStatus::STATUS_DELETED );
+        $this->changeStatus(JobStatus::STATUS_DELETED);
     }
 
     /**
-     * @throws Exception
+     * @throws ReflectionException
+     * @throws Throwable
      */
-    public function cancel() {
+    public function cancel(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( JobStatus::STATUS_CANCELLED );
+        $this->changeStatus(JobStatus::STATUS_CANCELLED);
     }
 
     /**
-     * @throws Exception
+     * @throws ReflectionException
+     * @throws Throwable
      */
-    public function archive() {
+    public function archive(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus(JobStatus::STATUS_ARCHIVED);
     }
 
     /**
-     * @throws Exception
+     * @throws ReflectionException
+     * @throws Throwable
      */
-    public function active() {
+    public function active(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( JobStatus::STATUS_ACTIVE );
+        $this->changeStatus(JobStatus::STATUS_ACTIVE);
     }
 
     /**
-     * @throws Exception
+     * @param string $status
+     *
+     * @throws ReflectionException
+     * @throws Throwable
      */
-    protected function changeStatus( $status ) {
+    protected function changeStatus(string $status): void
+    {
+        (new ProjectAccessValidator($this, $this->project))->validate();
 
-        ( new ProjectAccessValidator( $this, $this->project ) )->validate();
-
-        JobDao::updateJobStatus( $this->chunk, $status );
-        $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
-        SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
-        $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
-
+        JobDao::updateJobStatus($this->chunk, $status);
+        $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($this->chunk);
+        SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
+        $this->response->json(['code' => 1, 'data' => "OK", 'status' => $status]);
     }
 
     /**
      * Perform actions after constructing an instance of the class.
      * This method sets up the necessary validators and performs further actions.
      *
-     * @throws Exception If an error occurs during the validation process.
-     * @throws NotFoundException If the chunk or project could not be found.
      */
-    protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this );
-        $Validator->onSuccess( function () use ( $Validator ) {
-            $this->chunk   = $Validator->getChunk();
-            $this->project = $Validator->getChunk()->getProject( 60 * 10 );
-        } );
-        $this->appendValidator( $Validator );
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $Validator = new ChunkPasswordValidator($this);
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk = $Validator->getChunk();
+            $this->project = $Validator->getChunk()->getProject(60 * 10);
+        });
+        $this->appendValidator($Validator);
     }
 
 }

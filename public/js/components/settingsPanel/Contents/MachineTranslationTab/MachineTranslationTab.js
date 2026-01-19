@@ -45,14 +45,14 @@ export const MachineTranslationTab = () => {
 
   const enginesList = [
     {
-      name: 'ModernMT',
-      id: 'mmt',
-      component: ModernMt,
-    },
-    {
       name: 'Lara',
       id: 'Lara',
       component: Lara,
+    },
+    {
+      name: 'ModernMT',
+      id: 'mmt',
+      component: ModernMt,
     },
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
@@ -264,7 +264,10 @@ export const MachineTranslationTab = () => {
   const disableMT = () => setActiveMTEngine.current()
 
   const activeMTEngineData =
-    !config.is_cattool || (config.is_cattool && config.ownerIsMe)
+    !config.is_cattool ||
+    (config.is_cattool &&
+      config.ownerIsMe &&
+      mtEngines.some(({id}) => id === activeMTEngine))
       ? mtEngines.find(({id}) => id === activeMTEngine)
       : config.active_engine
 

@@ -16,7 +16,8 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Plugins\Features\RevisionFactory;
 
-class ReviewsController extends KleinController {
+class ReviewsController extends KleinController
+{
     /**
      * @var ProjectStruct $project
      */
@@ -37,50 +38,49 @@ class ReviewsController extends KleinController {
     /**
      * @throws Exception
      */
-    public function createReview() {
-
+    public function createReview(): void
+    {
         // create a new chunk revision password
-        $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
-                [ $this->chunk ],
-                $this->project,
-                [
-                        'source_page' => $this->nextSourcePage
-                ]
+        $records = RevisionFactory::initFromProject($this->project)->getRevisionFeature()->createQaChunkReviewRecords(
+            [$this->chunk],
+            $this->project,
+            [
+                'source_page' => $this->nextSourcePage
+            ]
         );
 
         // destroy project data cache
-        ( new ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
+        (new ProjectDao())->destroyCacheForProjectData($this->project->id, $this->project->password);
 
         // destroy the 5 minutes chunk review cache
-        $chunk = ( new ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
-        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk );
-        ChunkReviewDao::destroyCacheByProjectId( $this->project->id );
+        $chunk = (new ChunkDao())->getByIdAndPassword($records[0]->id_job, $records[0]->password);
+        (new ChunkReviewDao())->destroyCacheForFindChunkReviews($chunk);
+        ChunkReviewDao::destroyCacheByProjectId($this->project->id);
 
-        $this->response->json( [
-                        'chunk_review' => [
-                                'id'              => $records[ 0 ]->id,
-                                'id_job'          => $records[ 0 ]->id_job,
-                                'review_password' => $records[ 0 ]->review_password
-                        ]
+        $this->response->json([
+                'chunk_review' => [
+                    'id' => $records[0]->id,
+                    'id_job' => $records[0]->id_job,
+                    'review_password' => $records[0]->review_password
                 ]
+            ]
         );
     }
 
-    protected function afterConstruct() {
+    protected function afterConstruct(): void
+    {
+        $Validator = new ProjectPasswordValidator($this);
 
-        $Validator = new ProjectPasswordValidator( $this );
-
-        $Validator->onSuccess( function () use ( $Validator ) {
+        $Validator->onSuccess(function () use ($Validator) {
             $this->project = $Validator->getProject();
-        } )->onSuccess( function () {
-            //add more specific validations, it's needed to append after the first validation run because we need the project struct
-            ( new TeamProjectValidator( $this ) )->setProject( $this->project )->validate();
-        } )->onSuccess( function () {
-            ( new ProjectAccessValidator( $this, $this->project ) )->validate();
-        } );
+        })->onSuccess(function () {
+            //Add more specific validations, it's necessary to append after the first validation run because we need the project struct
+            (new TeamProjectValidator($this))->setProject($this->project)->validate();
+        })->onSuccess(function () {
+            (new ProjectAccessValidator($this, $this->project))->validate();
+        });
 
-        $this->appendValidator( $Validator );
-
+        $this->appendValidator($Validator);
     }
 
     /**
@@ -88,42 +88,42 @@ class ReviewsController extends KleinController {
      *
      * @throws ValidationError
      */
-    protected function afterValidate() {
-
+    protected function afterValidate(): void
+    {
         $post = $this->request->paramsPost();
 
         $requiredParams = [
-                'id_job',
-                'password',
+            'id_job',
+            'password',
         ];
 
-        foreach ( $requiredParams as $requiredParam ) {
-            if ( !isset( $post[ $requiredParam ] ) ) {
-                throw new ValidationError( $requiredParam . ' param is not provided' );
+        foreach ($requiredParams as $requiredParam) {
+            if (!isset($post[$requiredParam])) {
+                throw new ValidationError($requiredParam . ' param is not provided');
             }
         }
 
-        $id_job          = $post[ 'id_job' ];
-        $password        = $post[ 'password' ];
+        $id_job = $post['id_job'];
+        $password = $post['password'];
         $revision_number = 2;
 
         $chunkReviewDao = new ChunkReviewDao();
 
         // check if the $revision_number exists
-        if ( false === $chunkReviewDao->exists( $id_job, $password, $revision_number ) ) {
-            throw new ValidationError( "Revision " . ( $revision_number - 1 ) . " link does not exists." );
+        if (false === $chunkReviewDao->exists($id_job, $password, $revision_number)) {
+            throw new ValidationError("Revision " . ($revision_number - 1) . " link does not exists.");
         }
 
         // check if the $revision_number + 1 exists
-        if ( true === $chunkReviewDao->exists( $id_job, $password, ( $revision_number + 1 ) ) ) {
-            throw new ValidationError( "Revision " . $revision_number . " link already exists." );
+        if (true === $chunkReviewDao->exists($id_job, $password, ($revision_number + 1))) {
+            throw new ValidationError("Revision " . $revision_number . " link already exists.");
         }
 
-        $this->nextSourcePage    = $revision_number + 1;
-        $this->latestChunkReview = $chunkReviewDao->findLastReviewByJobIdPasswordAndSourcePage( $id_job, $password, $revision_number );
+        $this->nextSourcePage = $revision_number + 1;
+        $this->latestChunkReview = $chunkReviewDao->findLastReviewByJobIdPasswordAndSourcePage($id_job, $password, $revision_number);
 
-        if ( $this->latestChunkReview && $this->latestChunkReview->id_project != $this->project->id ) {
-            throw new ValidationError( "Job id / password combination is not in projects list" );
+        if ($this->latestChunkReview && $this->latestChunkReview->id_project != $this->project->id) {
+            throw new ValidationError("Job id / password combination is not in projects list");
         }
 
         $this->chunk = $this->latestChunkReview->getChunk();

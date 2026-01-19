@@ -16,31 +16,34 @@ use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
 
-class PasswordResetModel {
+class PasswordResetModel
+{
 
     protected ?string $token;
     /**
      * @var ?UserStruct
      */
     protected ?UserStruct $user = null;
-    protected array       $session;
+    protected array $session;
 
     /**
-     * @param array       $session reference to global $_SESSSION var
+     * @param array $session reference to global $_SESSSION var
      * @param string|null $token
      */
-    public function __construct( array &$session, ?string $token = null ) {
-        $this->token   = $token;
+    public function __construct(array &$session, ?string $token = null)
+    {
+        $this->token = $token;
         $this->session =& $session;
-        if ( empty( $token ) ) {
-            $this->token = $session[ 'password_reset_token' ];
+        if (empty($token)) {
+            $this->token = $session['password_reset_token'];
         }
     }
 
     /**
      * @return UserStruct|null
      */
-    public function getUser(): ?UserStruct {
+    public function getUser(): ?UserStruct
+    {
         return $this->user;
     }
 
@@ -51,10 +54,11 @@ class PasswordResetModel {
      * @throws Exception If an error occurs while retrieving the user.
      *
      */
-    protected function getUserFromResetToken(): ?UserStruct {
-        if ( !isset( $this->user ) ) {
-            $dao        = new UserDao();
-            $this->user = $dao->getByConfirmationToken( $this->token );
+    protected function getUserFromResetToken(): ?UserStruct
+    {
+        if (!isset($this->user)) {
+            $dao = new UserDao();
+            $this->user = $dao->getByConfirmationToken($this->token);
         }
 
         return $this->user;
@@ -66,23 +70,22 @@ class PasswordResetModel {
      * @throws ValidationError if confirmation token not found or auth token expired
      * @throws Exception if an error occurs
      */
-    public function validateUser() {
-
+    public function validateUser(): void
+    {
         $this->getUserFromResetToken();
 
-        if ( !$this->user ) {
-            throw new ValidationError( 'Invalid authentication token' );
+        if (!$this->user) {
+            throw new ValidationError('Invalid authentication token');
         }
 
-        if ( strtotime( $this->user->confirmation_token_created_at ) < strtotime( '30 minutes ago' ) ) {
+        if (strtotime($this->user->confirmation_token_created_at) < strtotime('30 minutes ago')) {
             $this->user->clearAuthToken();
-            UserDao::updateStruct( $this->user, [ 'fields' => [ 'confirmation_token' ] ] );
+            UserDao::updateStruct($this->user, ['fields' => ['confirmation_token']]);
 
-            throw new ValidationError( 'Auth token expired, repeat the operation.' );
+            throw new ValidationError('Auth token expired, repeat the operation.');
         }
 
-        $this->session[ 'password_reset_token' ] = $this->user->confirmation_token;
-
+        $this->session['password_reset_token'] = $this->user->confirmation_token;
     }
 
     /**
@@ -92,48 +95,48 @@ class PasswordResetModel {
      * @throws ValidationError
      * @throws Exception
      */
-    public function resetPassword( string $new_password ) {
-
+    public function resetPassword(string $new_password): void
+    {
         $this->getUserFromResetToken();
 
-        if ( !$this->user ) {
-            throw new ValidationError( 'Invalid authentication token' );
+        if (!$this->user) {
+            throw new ValidationError('Invalid authentication token');
         }
 
-        unset( $this->session[ 'password_reset_token' ] );
+        unset($this->session['password_reset_token']);
 
-        $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt );
+        $this->user->pass = Utils::encryptPass($new_password, $this->user->salt);
 
         // reset token
         $this->user->clearAuthToken();
 
         $fieldsToUpdate = [
-                'fields' => [
-                        'pass',
-                        'confirmation_token',
-                        'confirmation_token_created_at'
-                ]
+            'fields' => [
+                'pass',
+                'confirmation_token',
+                'confirmation_token_created_at'
+            ]
         ];
 
         // update email_confirmed_at only if it's null
-        if ( null === $this->user->email_confirmed_at ) {
-            $this->user->email_confirmed_at = date( 'Y-m-d H:i:s' );
-            $fieldsToUpdate[ 'fields' ][]   = 'email_confirmed_at';
+        if (null === $this->user->email_confirmed_at) {
+            $this->user->email_confirmed_at = date('Y-m-d H:i:s');
+            $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
-        UserDao::updateStruct( $this->user, $fieldsToUpdate );
-        ( new UserDao )->destroyCacheByEmail( $this->user->email );
-        ( new UserDao )->destroyCacheByUid( $this->user->uid );
-
+        UserDao::updateStruct($this->user, $fieldsToUpdate);
+        (new UserDao)->destroyCacheByEmail($this->user->email);
+        (new UserDao)->destroyCacheByUid($this->user->uid);
     }
 
     /**
      * @return string
      * @throws Exception
      */
-    public function flushWantedURL(): string {
-        $url = $this->session[ 'wanted_url' ] ?? CanonicalRoutes::appRoot();
-        unset( $this->session[ 'wanted_url' ] );
+    public function flushWantedURL(): string
+    {
+        $url = $this->session['wanted_url'] ?? CanonicalRoutes::appRoot();
+        unset($this->session['wanted_url']);
 
         return $url;
     }

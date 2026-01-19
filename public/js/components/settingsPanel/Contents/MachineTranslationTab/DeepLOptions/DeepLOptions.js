@@ -104,6 +104,7 @@ export const DeepLOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
+      <h2>Glossaries</h2>
       <DeepLGlossary
         id={currentProjectTemplate.mt.id}
         {...{setGlossaries, isCattoolPage}}

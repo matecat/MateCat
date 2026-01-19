@@ -33,7 +33,7 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
         const items = Object.values(data)
         setRoutings(
           items
-            .map((item) => ({...item, id: item.name }))
+            .map((item) => ({...item, id: item.name}))
             .sort((a) => (a.id === 'smart_routing' ? -1 : 1)),
         )
       }
@@ -108,7 +108,6 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
                   : KEY_PROVIDER
 
                 setValue(actualKey, option.id)
-                setValue(actualKey === KEY_ROUTING ? KEY_PROVIDER : KEY_ROUTING)
               }}
               isPortalDropdown={true}
               isActiveOptionOnTop={false}

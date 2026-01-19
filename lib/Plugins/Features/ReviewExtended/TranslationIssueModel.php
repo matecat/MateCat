@@ -20,7 +20,8 @@ use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Utils\Tools\Utils;
 
-class TranslationIssueModel {
+class TranslationIssueModel
+{
 
     /**
      * @var ProjectStruct
@@ -49,15 +50,15 @@ class TranslationIssueModel {
      * @param             $password
      * @param EntryStruct $issue
      */
-    public function __construct( $id_job, $password, EntryStruct $issue ) {
+    public function __construct($id_job, $password, EntryStruct $issue)
+    {
         $this->issue = $issue;
 
-        $review = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
+        $review = ChunkReviewDao::findByReviewPasswordAndJobId($password, $id_job);
 
         $this->chunk_review = $review;
-        $this->chunk        = $this->chunk_review->getChunk();
-        $this->project      = $this->chunk->getProject();
-
+        $this->chunk = $this->chunk_review->getChunk();
+        $this->project = $this->chunk->getProject();
     }
 
     /**
@@ -65,7 +66,8 @@ class TranslationIssueModel {
      * This change was introduced for the new revision, in which issues have to come with a diff object because
      * selection is referred to the difference between segments.
      */
-    public function setDiff( ?array $diff = null ) {
+    public function setDiff(?array $diff = null): void
+    {
         $this->diff = $diff;
     }
 
@@ -77,17 +79,18 @@ class TranslationIssueModel {
      * @throws ValidationError
      * @throws Exception
      */
-    public function save(): EntryStruct {
+    public function save(): EntryStruct
+    {
         $this->setDefaultIssueValues();
 
-        if ( !empty( $this->diff ) ) {
+        if (!empty($this->diff)) {
             $this->saveDiff();
         }
 
-        EntryDao::createEntry( $this->issue );
+        EntryDao::createEntry($this->issue);
 
-        $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-        $chunk_review_model->addPenaltyPoints( $this->issue->penalty_points, $this->project );
+        $chunk_review_model = new ChunkReviewModel($this->chunk_review);
+        $chunk_review_model->addPenaltyPoints($this->issue->penalty_points, $this->project);
 
         return $this->issue;
     }
@@ -95,12 +98,13 @@ class TranslationIssueModel {
     /**
      *
      */
-    private function setDefaultIssueValues() {
-        if ( is_null( $this->issue->start_node ) ) {
+    private function setDefaultIssueValues(): void
+    {
+        if (is_null($this->issue->start_node)) {
             $this->issue->start_node = 0;
         }
 
-        if ( is_null( $this->issue->end_node ) ) {
+        if (is_null($this->issue->end_node)) {
             $this->issue->end_node = 0;
         }
     }
@@ -108,39 +112,42 @@ class TranslationIssueModel {
     /**
      * @throws Exception
      */
-    private function saveDiff() {
-        $string_to_save = json_encode( $this->diff );
+    private function saveDiff(): void
+    {
+        $string_to_save = json_encode($this->diff);
 
         /**
          * in order to save diff we need to lookup for current version in segment_translations.
          */
-        $struct                 = new TranslationVersionStruct();
-        $struct->id_job         = $this->issue->id_job;
-        $struct->id_segment     = $this->issue->id_segment;
-        $struct->creation_date  = Utils::mysqlTimestamp( time() );
-        $struct->is_review      = true;
+        $struct = new TranslationVersionStruct();
+        $struct->id_job = $this->issue->id_job;
+        $struct->id_segment = $this->issue->id_segment;
+        $struct->creation_date = Utils::mysqlTimestamp(time());
+        $struct->is_review = true;
         $struct->version_number = $this->issue->translation_version;
-        $struct->raw_diff       = $string_to_save;
+        $struct->raw_diff = $string_to_save;
 
-        $version_record = ( new TranslationVersionDao() )->getVersionNumberForTranslation(
-                $struct->id_job, $struct->id_segment, $struct->version_number
+        $version_record = (new TranslationVersionDao())->getVersionNumberForTranslation(
+            $struct->id_job,
+            $struct->id_segment,
+            $struct->version_number
         );
 
-        if ( !$version_record ) {
-            TranslationVersionDao::insertStruct( $struct );
+        if (!$version_record) {
+            TranslationVersionDao::insertStruct($struct);
         } else {
             // in case the record exists, we have to update it with the diff anyway
             $version_record->raw_diff = $string_to_save;
-            TranslationVersionDao::updateStruct( $version_record, [ 'fields' => [ 'raw_diff' ] ] );
+            TranslationVersionDao::updateStruct($version_record, ['fields' => ['raw_diff']]);
         }
-
     }
 
     /**
      * @throws Exception
      */
-    public function delete() {
-        EntryDao::deleteEntry( $this->issue );
+    public function delete(): void
+    {
+        EntryDao::deleteEntry($this->issue);
 
         //
         // ---------------------------------------------------
@@ -149,10 +156,10 @@ class TranslationIssueModel {
         //
         // $this->chunkReview may not refer to the chunk review associated to issue source page
         //
-        $chunkReview    = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $this->chunk->id, $this->chunk->password, $this->issue->source_page );
+        $chunkReview = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($this->chunk->id, $this->chunk->password, $this->issue->source_page);
 
-        $chunk_review_model = new ChunkReviewModel( $chunkReview );
-        $this->subtractPenaltyPoints( $chunk_review_model );
+        $chunk_review_model = new ChunkReviewModel($chunkReview);
+        $this->subtractPenaltyPoints($chunk_review_model);
     }
 
     /**
@@ -163,9 +170,10 @@ class TranslationIssueModel {
      *
      * @throws Exception
      */
-    protected function subtractPenaltyPoints( ChunkReviewModel $chunk_review_model ) {
-        if ( ( $chunk_review_model->getPenaltyPoints() - $this->issue->penalty_points ) >= 0 ) {
-            $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points, $this->project );
+    protected function subtractPenaltyPoints(ChunkReviewModel $chunk_review_model): void
+    {
+        if (($chunk_review_model->getPenaltyPoints() - $this->issue->penalty_points) >= 0) {
+            $chunk_review_model->subtractPenaltyPoints($this->issue->penalty_points, $this->project);
         }
     }
 }

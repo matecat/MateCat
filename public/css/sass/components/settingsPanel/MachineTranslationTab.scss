@@ -529,8 +529,8 @@
 }
 
 .create-glossary-button {
-  width: 132px;
-  gap: unset;
+  width: 200px;
+  gap: 5px;
   padding: 2px 8px 2px 4px;
 }
 
@@ -570,9 +570,15 @@
   flex-direction: column;
   text-align: left;
 
+  > :first-child {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   h4 {
     margin-bottom: 5px;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   p {
@@ -632,7 +638,7 @@
       display: flex;
       gap: 40px;
       align-items: center;
-      padding: 8px 0;
+      padding: 10px 0;
       text-align: left;
 
       h3 {
@@ -640,7 +646,7 @@
       }
 
       p {
-        font-size: 14px;
+        font-size: 16px;
       }
 
       > :first-child {

@@ -81,9 +81,9 @@ module.exports.Application = class {
             logger.error(['Authentication error invalid JWT', err])
             return next(new Error('Authentication error invalid JWT'));
           }
-          if (parseInt(auth['x-userid']) !== decoded.context.uid) {
-            logger.error(['Authentication error invalid user id', auth['x-userid'], decoded.context.uid]);
-            return next(new Error('Authentication error invalid user id'));
+            if (parseInt(auth['x-userid']) !== decoded[ decoded.iss ].uid) {
+                logger.error(['Authentication error invalid user id', auth['x-userid'], decoded[ decoded.iss ].uid]);
+                return next(new Error('Authentication error invalid user id'));
           }
           socket.user_id = auth['x-userid'].toString();
           socket.uuid = auth['x-uuid'].toString();
@@ -198,7 +198,7 @@ module.exports.Application = class {
             });
             this.logger.debug("Dispatched global message to user: " + uuid);
           } else {
-            this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY + id);
+            this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY, id);
           }
         });
       });

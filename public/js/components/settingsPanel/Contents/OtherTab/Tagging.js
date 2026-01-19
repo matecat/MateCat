@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useMemo} from 'react'
+import React, {useCallback, useContext, useMemo, useRef} from 'react'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -9,7 +9,7 @@ export const taggingTypes = [
   {id: 'markup', name: 'Markup', code: '<text>', default: true},
   {id: 'twig', name: 'Twig', code: '{{text}},{%text%}', default: true},
   {id: 'ruby_on_rails', name: 'Ruby on Rails', code: '%{text}', default: true},
-  {id: 'double_snail', name: 'Double Snails', code: '@@text@@', default: true},
+  {id: 'double_snail', name: 'Double snails', code: '@@text@@', default: true},
   {
     id: 'double_square',
     name: 'Double square brackets',
@@ -30,7 +30,7 @@ export const taggingTypes = [
   },
   {
     id: 'objective_c_ns',
-    name: 'Objective CNS',
+    name: 'Objective-C NSString',
     code: '%@,%1$@',
     default: true,
   },
@@ -43,23 +43,25 @@ export const taggingTypes = [
   {
     id: 'square_sprintf',
     name: 'Square bracket Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#square-bracket-sprintf">See guides page</a>',
     html: true,
     default: true,
   },
   {
     id: 'sprintf',
     name: 'Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#sprintf">See guides page</a>',
     html: true,
     default: true,
   },
 ]
 
-export const Tagging = ({previousCurrentProjectTemplate}) => {
+export const Tagging = () => {
   const {SELECT_HEIGHT} = useContext(CreateProjectContext)
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
+
+  const previousSubfilteringHandlers = useRef()
 
   const setTagging = useCallback(
     ({options}) =>
@@ -105,24 +107,32 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
       setTagging({options: optionsIds})
     }
   }
-  const onClose = () => {
-    if (
-      config.is_cattool &&
-      previousCurrentProjectTemplate.current.subfilteringHandlers !==
-        currentProjectTemplate?.subfilteringHandlers
-    ) {
+
+  const onClose = useCallback(() => {
+    const shouldUpdateRender =
+      currentProjectTemplate?.subfilteringHandlers.length !==
+        previousSubfilteringHandlers.current?.length ||
+      !currentProjectTemplate?.subfilteringHandlers.every((value) =>
+        previousSubfilteringHandlers.current?.some(
+          (valueB) => value === valueB,
+        ),
+      )
+    if (config.is_cattool && shouldUpdateRender) {
       SegmentActions.removeAllSegments()
       CatToolActions.onRender({segmentToOpen: config.last_opened_segment})
     }
-  }
+
+    if (config.is_cattool)
+      previousSubfilteringHandlers.current =
+        currentProjectTemplate?.subfilteringHandlers
+  }, [currentProjectTemplate?.subfilteringHandlers])
 
   return (
     <div className="options-box">
       <div className="option-description">
-        <h3>Tagging syntaxes</h3>
+        <h3>Tagged syntaxes</h3>
         <p>
-          Choose the syntaxes for tagging. For example, selecting the{' '}
-          {'{{tag}}'} syntax locks all text between {'{{and}}'} into a tag.
+          Choose which syntaxes to detect and lock in tags during translation.
         </p>
       </div>
       <div className="options-select-container">
@@ -138,7 +148,7 @@ export const Tagging = ({previousCurrentProjectTemplate}) => {
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
-          onCloseSelect={onClose}
+          onCloseSelect={() => onClose()}
         >
           {({name, code, html}) => ({
             row: (

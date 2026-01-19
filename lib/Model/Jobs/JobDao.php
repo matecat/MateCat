@@ -17,13 +17,14 @@ use ReflectionException;
 use Utils\Constants\JobStatus;
 use Utils\Constants\TranslationStatus;
 
-class JobDao extends AbstractDao {
+class JobDao extends AbstractDao
+{
 
-    const TABLE       = "jobs";
-    const STRUCT_TYPE = "JobStruct";
+    const string TABLE = "jobs";
+    const string STRUCT_TYPE = JobStruct::class;
 
-    protected static array $auto_increment_field = [ 'id' ];
-    protected static array $primary_keys         = [ 'id', 'password' ];
+    protected static array $auto_increment_field = ['id'];
+    protected static array $primary_keys = ['id', 'password'];
 
     protected static string $_sql_update_password = "UPDATE jobs SET password = :new_password, last_update = :last_update WHERE id = :id AND password = :old_password ";
 
@@ -46,19 +47,19 @@ class JobDao extends AbstractDao {
      *
      * @see \Utils\AsyncTasks\Workers\SetContributionWorker
      */
-    public function read( JobStruct $jobQuery ): array {
-
-        $stmt = $this->_getStatementForQuery( self::$_query_cache );
+    public function read(JobStruct $jobQuery): array
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_cache);
 
         /** @var JobStruct[] */
-        return $this->_fetchObjectMap( $stmt,
-                get_class( $jobQuery ),
-                [
-                        'id_job'   => $jobQuery->id,
-                        'password' => $jobQuery->password
-                ]
+        return $this->_fetchObjectMap(
+            $stmt,
+            get_class($jobQuery),
+            [
+                'id_job' => $jobQuery->id,
+                'password' => $jobQuery->password
+            ]
         );
-
     }
 
     /**
@@ -66,7 +67,8 @@ class JobDao extends AbstractDao {
      *
      * @return void
      */
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult(array $array_result)
+    {
     }
 
     /**
@@ -77,91 +79,93 @@ class JobDao extends AbstractDao {
      * @return bool
      * @throws Exception
      */
-    public function destroyCache( JobStruct $jobQuery ): bool {
+    public function destroyCache(JobStruct $jobQuery): bool
+    {
         /*
         * build the query
         */
-        $stmt = $this->_getStatementForQuery( self::$_query_cache );
+        $stmt = $this->_getStatementForQuery(self::$_query_cache);
 
-        return $this->_destroyObjectCache( $stmt,
-                JobStruct::class,
-                [
-                        'id_job'   => $jobQuery->id,
-                        'password' => $jobQuery->password
-                ]
+        return $this->_destroyObjectCache(
+            $stmt,
+            JobStruct::class,
+            [
+                'id_job' => $jobQuery->id,
+                'password' => $jobQuery->password
+            ]
         );
     }
 
     /**
      * @param SegmentTranslationStruct $translation
-     * @param int                      $ttl
+     * @param int $ttl
      *
      * @return JobStruct
      * @throws ReflectionException
      */
-    public static function getBySegmentTranslation( SegmentTranslationStruct $translation, int $ttl = 0 ): JobStruct {
-
+    public static function getBySegmentTranslation(SegmentTranslationStruct $translation, int $ttl = 0): JobStruct
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( static::$_sql_get_by_segment_translation );
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(static::$_sql_get_by_segment_translation);
 
         /**
          * @var JobStruct
          */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [
-                'id_job'     => $translation->id_job,
-                'id_segment' => $translation->id_segment
-        ] )[ 0 ];
-
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, JobStruct::class, [
+            'id_job' => $translation->id_job,
+            'id_segment' => $translation->id_segment
+        ])[0];
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return int
      * @throws ReflectionException
      */
-    public static function getSegmentsCount( int $id_job, string $password, int $ttl = 0 ): int {
-
+    public static function getSegmentsCount(int $id_job, string $password, int $ttl = 0): int
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( "
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+            "
             select count(st.id_segment) as total 
             from segment_translations st
             join jobs j on j.id=st.id_job and st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
-            where j.id = :id_job and j.password = :password" );
+            where j.id = :id_job and j.password = :password"
+        );
 
-        $struct = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
-                'id_job'   => $id_job,
-                'password' => $password
-        ] )[ 0 ] ?? null;
+        $struct = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+            'id_job' => $id_job,
+            'password' => $password
+        ])[0] ?? null;
 
-        if ( !empty( $struct->total ) ) {
+        if (!empty($struct->total)) {
             return (int)$struct->total;
         }
 
         return 0;
-
     }
 
     /**
      * Get the job's owner uid
      *
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return null|int
      * @throws ReflectionException
      */
-    public static function getOwnerUid( int $id_job, string $password, int $ttl = 86400 ): ?int {
-
+    public static function getOwnerUid(int $id_job, string $password, int $ttl = 86400): ?int
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare(
-                "
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+            "
                 SELECT uid FROM users u
                 join jobs j on j.owner = u.email
                 where j.id = :id_job and password = :password
@@ -169,12 +173,12 @@ class JobDao extends AbstractDao {
             "
         );
 
-        $data = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
-                'id_job'   => $id_job,
-                'password' => $password
-        ] )[ 0 ] ?? null;
+        $data = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+            'id_job' => $id_job,
+            'password' => $password
+        ])[0] ?? null;
 
-        if ( empty( $data ) ) {
+        if (empty($data)) {
             return null;
         }
 
@@ -182,29 +186,29 @@ class JobDao extends AbstractDao {
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return JobStruct|null
      * @throws ReflectionException
      */
-    public static function getByIdAndPassword( int $id_job, string $password, int $ttl = 0 ): ?JobStruct {
-
+    public static function getByIdAndPassword(int $id_job, string $password, int $ttl = 0): ?JobStruct
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare(
-                "SELECT * FROM jobs WHERE " .
-                " id = :id_job AND password = :password "
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+            "SELECT * FROM jobs WHERE " .
+            " id = :id_job AND password = :password "
         );
 
         /**
          * @var $res JobStruct
          */
-        $res = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [
-                'id_job'   => $id_job,
-                'password' => $password
-        ] )[ 0 ] ?? null;
+        $res = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, JobStruct::class, [
+            'id_job' => $id_job,
+            'password' => $password
+        ])[0] ?? null;
 
         return $res;
     }
@@ -215,13 +219,14 @@ class JobDao extends AbstractDao {
      * @return bool
      * @throws ReflectionException
      */
-    public function destroyCacheByProjectId( $project_id ): bool {
+    public function destroyCacheByProjectId($project_id): bool
+    {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
+        $stmt = $conn->prepare(self::$_sql_get_jobs_by_project);
 
-        $this->_destroyObjectCache( $stmt, JobStruct::class, [ $project_id, JobStatus::STATUS_DELETED ] );
+        $this->_destroyObjectCache($stmt, JobStruct::class, [$project_id, JobStatus::STATUS_DELETED]);
 
-        return $this->_destroyObjectCache( $stmt, JobStruct::class, [ $project_id, JobStatus::STATUS_DELETED ] );
+        return $this->_destroyObjectCache($stmt, JobStruct::class, [$project_id, JobStatus::STATUS_DELETED]);
     }
 
     /**
@@ -231,20 +236,19 @@ class JobDao extends AbstractDao {
      * @return JobStruct[]
      * @throws ReflectionException
      */
-    public static function getByProjectId( int $id_project, int $ttl = 0 ): array {
-
+    public static function getByProjectId(int $id_project, int $ttl = 0): array
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( self::$_sql_get_jobs_by_project );
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(self::$_sql_get_jobs_by_project);
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [ $id_project, JobStatus::STATUS_DELETED ] );
-
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, JobStruct::class, [$id_project, JobStatus::STATUS_DELETED]);
     }
 
     /**
-     * @param int    $id
+     * @param int $id
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
@@ -252,7 +256,8 @@ class JobDao extends AbstractDao {
      *
      * @internal param JobStruct $chunk
      */
-    public function getSplitData( int $id, string $password, int $ttl = 0 ): array {
+    public function getSplitData(int $id, string $password, int $ttl = 0): array
+    {
         $conn = $this->getDatabaseHandler()->getConnection();
 
         /**
@@ -272,7 +277,7 @@ class JobDao extends AbstractDao {
          *
          */
         $stmt = $conn->prepare(
-                "SELECT
+            "SELECT
                     SUM( raw_word_count ) AS raw_word_count,
                     SUM( eq_word_count ) AS eq_word_count,
                     SUM( st.standard_word_count ) AS standard_word_count,
@@ -291,9 +296,8 @@ class JobDao extends AbstractDao {
         );
 
         return $this
-                ->setCacheTTL( $ttl )
-                ->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [ 'id_job' => $id, 'password' => $password, 'deleted' => JobStatus::STATUS_DELETED ] );
-
+            ->setCacheTTL($ttl)
+            ->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, ['id_job' => $id, 'password' => $password, 'deleted' => JobStatus::STATUS_DELETED]);
     }
 
     /**
@@ -304,15 +308,14 @@ class JobDao extends AbstractDao {
      * @return JobStruct[]
      * @throws ReflectionException
      */
-    public static function getById( int $id_job, int $ttl = 0 ): array {
-
+    public static function getById(int $id_job, int $ttl = 0): array
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( "SELECT * FROM jobs WHERE id = ? AND status_owner != ? ORDER BY job_first_segment" );
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ? AND status_owner != ? ORDER BY job_first_segment");
 
         /** @var JobStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [ $id_job, JobStatus::STATUS_DELETED ] );
-
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, JobStruct::class, [$id_job, JobStatus::STATUS_DELETED]);
     }
 
     /**
@@ -323,12 +326,12 @@ class JobDao extends AbstractDao {
      * @return JobStruct[]
      * @throws ReflectionException
      */
-    public static function getByIdProjectAndIdJob( int $id_project, int $id_job, int $ttl = 0 ): array {
-
+    public static function getByIdProjectAndIdJob(int $id_project, int $id_job, int $ttl = 0): array
+    {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = :id_project AND id = :id_job" );
+        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id_project = :id_project AND id = :id_job");
 
-        return ( new self() )->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [ 'id_project' => $id_project, 'id_job' => $id_job ] );
+        return (new self())->setCacheTTL($ttl)->_fetchObjectMap($stmt, JobStruct::class, ['id_project' => $id_project, 'id_job' => $id_job]);
     }
 
     /**
@@ -337,95 +340,94 @@ class JobDao extends AbstractDao {
      * @return JobStruct
      * @throws ReflectionException
      */
-    public static function createFromStruct( JobStruct $jobStruct ): JobStruct {
-
+    public static function createFromStruct(JobStruct $jobStruct): JobStruct
+    {
         $conn = Database::obtain()->getConnection();
 
         $jobStructToArray = $jobStruct->toArray();
-        $columns          = array_keys( $jobStructToArray );
-        $values           = array_values( $jobStructToArray );
+        $columns = array_keys($jobStructToArray);
+        $values = array_values($jobStructToArray);
 
         //clean null values
-        foreach ( $values as $k => $val ) {
-            if ( is_null( $val ) ) {
-                unset( $values[ $k ] );
-                unset( $columns[ $k ] );
+        foreach ($values as $k => $val) {
+            if (is_null($val)) {
+                unset($values[$k]);
+                unset($columns[$k]);
             }
         }
 
         //reindex the array
-        $columns = array_values( $columns );
-        $values  = array_values( $values );
+        $columns = array_values($columns);
+        $values = array_values($values);
 
         Database::obtain()->begin();
 
         /** @noinspection SqlInsertValues */
-        $stmt = $conn->prepare( 'INSERT INTO `jobs` ( ' . implode( ',', $columns ) . ' ) VALUES ( ' . implode( ',', array_fill( 0, count( $values ), '?' ) ) . ' )' );
+        /** @noinspection DuplicatedCode */
+        $stmt = $conn->prepare('INSERT INTO `jobs` ( ' . implode(',', $columns) . ' ) VALUES ( ' . implode(',', array_fill(0, count($values), '?')) . ' )');
 
-        foreach ( $values as $k => $v ) {
-            $stmt->bindValue( $k + 1, $v ); //Columns/Parameters are 1-based
+        foreach ($values as $k => $v) {
+            $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
         }
 
         $stmt->execute();
 
-        $job = static::getById( $conn->lastInsertId() )[ 0 ];
+        $job = static::getById($conn->lastInsertId())[0];
 
         $conn->commit();
 
         return $job;
-
     }
 
     /**
      * @param ProjectStruct $project
-     * @param UserStruct    $user
+     * @param UserStruct $user
      *
      * @return int the number of rows affected by the statement
      */
-    public function updateOwner( ProjectStruct $project, UserStruct $user ): int {
+    public function updateOwner(ProjectStruct $project, UserStruct $user): int
+    {
         $sql = " UPDATE jobs SET owner = :email, last_update = :last_update WHERE id_project = :id_project ";
 
-        $stmt = $this->database->getConnection()->prepare( $sql );
-        $stmt->execute( [
-                'email'       => $user->email,
-                'id_project'  => $project->id,
-                'last_update' => date( "Y-m-d H:i:s" ),
-        ] );
+        $stmt = $this->database->getConnection()->prepare($sql);
+        $stmt->execute([
+            'email' => $user->email,
+            'id_project' => $project->id,
+            'last_update' => date("Y-m-d H:i:s"),
+        ]);
 
         return $stmt->rowCount();
     }
 
     /**
      * @param JobStruct $jStruct
-     * @param string    $new_password
+     * @param string $new_password
      *
      * @return JobStruct
      * @throws ReflectionException
      * @throws Exception
      */
-    public function changePassword( JobStruct $jStruct, string $new_password ): JobStruct {
-
-        if ( empty( $new_password ) ) {
-            throw new PDOException( "Invalid empty value: password." );
+    public function changePassword(JobStruct $jStruct, string $new_password): JobStruct
+    {
+        if (empty($new_password)) {
+            throw new PDOException("Invalid empty value: password.");
         }
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( self::$_sql_update_password );
-        $stmt->execute( [
-                'id'           => $jStruct->id,
-                'new_password' => $new_password,
-                'old_password' => $jStruct->password,
-                'last_update'  => date( "Y-m-d H:i:s" ),
-        ] );
+        $stmt = $conn->prepare(self::$_sql_update_password);
+        $stmt->execute([
+            'id' => $jStruct->id,
+            'new_password' => $new_password,
+            'old_password' => $jStruct->password,
+            'last_update' => date("Y-m-d H:i:s"),
+        ]);
 
         $jStruct->password = $new_password;
 
-        $this->destroyCache( $jStruct );
-        $this->destroyCacheByProjectId( $jStruct->id_project );
+        $this->destroyCache($jStruct);
+        $this->destroyCacheByProjectId($jStruct->id_project);
 
         return $jStruct;
-
-
     }
 
     /**
@@ -436,8 +438,8 @@ class JobDao extends AbstractDao {
      * @return EditLogSegmentStruct[]
      * @throws ReflectionException
      */
-    public function getAllModifiedSegmentsForPee( JobStruct $jStruct ): array {
-
+    public function getAllModifiedSegmentsForPee(JobStruct $jStruct): array
+    {
         $query = "
             SELECT
               s.id,
@@ -450,33 +452,32 @@ class JobDao extends AbstractDao {
             JOIN jobs j ON j.id = st.id_job
             WHERE id_job = :id_job 
                 AND show_in_cattool = 1
-                AND  password = :password
+                AND password = :password
                 AND st.status NOT IN( :status_new , :status_draft )
                 AND time_to_edit/raw_word_count BETWEEN :edit_time_fast_cut AND :edit_time_slow_cut
                 AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
         ";
 
-        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt = $this->database->getConnection()->prepare($query);
 
         /**
          * @var EditLogSegmentStruct[]
          */
-        return $this->_fetchObjectMap( $stmt, EditLogSegmentStruct::class, [
-                'id_job'             => $jStruct->id,
-                'password'           => $jStruct->password,
-                'status_new'         => TranslationStatus::STATUS_NEW,
-                'status_draft'       => TranslationStatus::STATUS_DRAFT,
-                'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
-                'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
-        ] );
-
+        return $this->_fetchObjectMap($stmt, EditLogSegmentStruct::class, [
+            'id_job' => $jStruct->id,
+            'password' => $jStruct->password,
+            'status_new' => TranslationStatus::STATUS_NEW,
+            'status_draft' => TranslationStatus::STATUS_DRAFT,
+            'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
+            'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
+        ]);
     }
 
     /**
      * @param JobStruct $jStruct
      */
-    public function updateJobWeightedPeeAndTTE( JobStruct $jStruct ) {
-
+    public function updateJobWeightedPeeAndTTE(JobStruct $jStruct): void
+    {
         $sql = " UPDATE jobs 
                     SET avg_post_editing_effort = :avg_post_editing_effort, 
                         total_time_to_edit = :total_time_to_edit,
@@ -484,27 +485,26 @@ class JobDao extends AbstractDao {
                     WHERE id = :id 
                     AND password = :password ";
 
-        $stmt = Database::obtain()->getConnection()->prepare( $sql );
-        $stmt->execute( [
-                'avg_post_editing_effort' => $jStruct->avg_post_editing_effort,
-                'total_time_to_edit'      => $jStruct->total_time_to_edit,
-                'last_update'             => date( "Y-m-d H:i:s" ),
-                'id'                      => $jStruct->id,
-                'password'                => $jStruct->password
-        ] );
+        $stmt = Database::obtain()->getConnection()->prepare($sql);
+        $stmt->execute([
+            'avg_post_editing_effort' => $jStruct->avg_post_editing_effort,
+            'total_time_to_edit' => $jStruct->total_time_to_edit,
+            'last_update' => date("Y-m-d H:i:s"),
+            'id' => $jStruct->id,
+            'password' => $jStruct->password
+        ]);
         $stmt->closeCursor();
-
     }
 
     /**
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
      *
      * @return ShapelessConcreteStruct
      * @throws ReflectionException
      */
-    public function getPeeStats( int $id_job, string $password ): ShapelessConcreteStruct {
-
+    public function getPeeStats(int $id_job, string $password): ShapelessConcreteStruct
+    {
         $query = "
             SELECT
                 avg_post_editing_effort / SUM( raw_word_count ) AS avg_pee
@@ -519,18 +519,17 @@ class JobDao extends AbstractDao {
                 AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
         ";
 
-        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt = $this->database->getConnection()->prepare($query);
 
         /** @var ShapelessConcreteStruct */
-        return $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
-                'id_job'             => $id_job,
-                'password'           => $password,
-                'status_new'         => TranslationStatus::STATUS_NEW,
-                'status_draft'       => TranslationStatus::STATUS_DRAFT,
-                'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
-                'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
-        ] )[ 0 ];
-
+        return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+            'id_job' => $id_job,
+            'password' => $password,
+            'status_new' => TranslationStatus::STATUS_NEW,
+            'status_draft' => TranslationStatus::STATUS_DRAFT,
+            'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
+            'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
+        ])[0];
     }
 
     /**
@@ -538,15 +537,15 @@ class JobDao extends AbstractDao {
      *
      * @return PDOStatement
      */
-    public function getSplitJobPreparedStatement( JobStruct $jobStruct ): PDOStatement {
-
+    public function getSplitJobPreparedStatement(JobStruct $jobStruct): PDOStatement
+    {
         $jobCopy = $jobStruct->getArrayCopy();
 
-        $columns      = implode( ", ", array_keys( $jobCopy ) );
-        $values       = array_values( $jobCopy );
-        $placeHolders = implode( ',', array_fill( 0, count( $values ), '?' ) );
+        $columns = implode(", ", array_keys($jobCopy));
+        $values = array_values($jobCopy);
+        $placeHolders = implode(',', array_fill(0, count($values), '?'));
 
-        $jobStruct->last_update = date( "Y-m-d H:i:s" );
+        $jobStruct->last_update = date("Y-m-d H:i:s");
 
         $values[] = $jobStruct->last_update;
         $values[] = $jobStruct->last_opened_segment;
@@ -565,14 +564,13 @@ class JobDao extends AbstractDao {
                 ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $query );
+        $stmt = $conn->prepare($query);
 
-        foreach ( $values as $k => $v ) {
-            $stmt->bindValue( $k + 1, $v ); //Columns/Parameters are 1-based
+        foreach ($values as $k => $v) {
+            $stmt->bindValue($k + 1, $v); //Columns/Parameters are 1-based
         }
 
         return $stmt;
-
     }
 
     /**
@@ -582,23 +580,23 @@ class JobDao extends AbstractDao {
      * @return ShapelessConcreteStruct
      * @throws ReflectionException
      */
-    public function getTimeToEdit( $id_job, $source_page ): ShapelessConcreteStruct {
-
+    public function getTimeToEdit($id_job, $source_page): ShapelessConcreteStruct
+    {
         $query = "SELECT sum(time_to_edit) as tte 
                     FROM segment_translation_events 
                     WHERE id_job=:id_job 
                     AND status=:status  
                     AND source_page=:source_page";
 
-        $status = ( $source_page == 1 ) ? TranslationStatus::STATUS_TRANSLATED : TranslationStatus::STATUS_APPROVED;
-        $stmt   = $this->database->getConnection()->prepare( $query );
+        $status = ($source_page == 1) ? TranslationStatus::STATUS_TRANSLATED : TranslationStatus::STATUS_APPROVED;
+        $stmt = $this->database->getConnection()->prepare($query);
 
         /** @var ShapelessConcreteStruct */
-        return $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
-                'id_job'      => $id_job,
-                'status'      => $status,
-                'source_page' => $source_page
-        ] )[ 0 ];
+        return $this->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+            'id_job' => $id_job,
+            'status' => $status,
+            'source_page' => $source_page
+        ])[0];
     }
 
     /**
@@ -608,7 +606,8 @@ class JobDao extends AbstractDao {
      *
      * @return int
      */
-    public function updateStdWcAndTotalWc( int $jobId, int $standard_analysis_wc, int $total_raw_wc ): int {
+    public function updateStdWcAndTotalWc(int $jobId, int $standard_analysis_wc, int $total_raw_wc): int
+    {
         $query = "UPDATE jobs 
                     SET 
                         last_update = :last_update,
@@ -618,48 +617,47 @@ class JobDao extends AbstractDao {
                 ";
 
         $values = [
-                'id'                   => $jobId,
-                'standard_analysis_wc' => $standard_analysis_wc,
-                'last_update'          => date( "Y-m-d H:i:s" ),
-                'total_raw_wc'         => $total_raw_wc,
+            'id' => $jobId,
+            'standard_analysis_wc' => $standard_analysis_wc,
+            'last_update' => date("Y-m-d H:i:s"),
+            'total_raw_wc' => $total_raw_wc,
         ];
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $query );
-        $stmt->execute( $values );
+        $stmt = $conn->prepare($query);
+        $stmt->execute($values);
 
         return $stmt->rowCount();
     }
 
     /**
      * @param JobStruct $first_job
-     * @param string    $newPass
+     * @param string $newPass
      *
      * @return JobStruct
      * @throws ReflectionException
      * @throws ValidationError
      * @throws Exception
      */
-    public static function updateForMerge( JobStruct $first_job, string $newPass ): JobStruct {
+    public static function updateForMerge(JobStruct $first_job, string $newPass): JobStruct
+    {
+        static::updateStruct($first_job);
 
-        static::updateStruct( $first_job );
-
-        if ( $newPass ) {
+        if ($newPass) {
             self::updateFields(
-                    [
-                            'password'    => $newPass,
-                            'last_update' => date( "Y-m-d H:i:s" ),
-                    ],
-                    [
-                            'id'       => $first_job->id,
-                            'password' => $first_job->password
-                    ]
+                [
+                    'password' => $newPass,
+                    'last_update' => date("Y-m-d H:i:s"),
+                ],
+                [
+                    'id' => $first_job->id,
+                    'password' => $first_job->password
+                ]
             );
             $first_job->password = $newPass;
         }
 
         return $first_job;
-
     }
 
     /**
@@ -667,28 +665,27 @@ class JobDao extends AbstractDao {
      *
      * @return bool
      */
-    public static function deleteOnMerge( JobStruct $first_job ): bool {
-
-        $conn  = Database::obtain()->getConnection();
+    public static function deleteOnMerge(JobStruct $first_job): bool
+    {
+        $conn = Database::obtain()->getConnection();
         $query = "DELETE FROM jobs WHERE id = :id AND password != :first_job_password "; //use the new password
-        $stmt  = $conn->prepare( $query );
+        $stmt = $conn->prepare($query);
 
-        return $stmt->execute( [
-                'id'                 => $first_job->id,
-                'first_job_password' => $first_job->password
-        ] );
-
+        return $stmt->execute([
+            'id' => $first_job->id,
+            'first_job_password' => $first_job->password
+        ]);
     }
 
     /**
      * @param JobStruct $chunkStruct
-     * @param int       $ttl
+     * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
      */
-    public static function getFirstSegmentOfFilesInJob( JobStruct $chunkStruct, int $ttl = 0 ): array {
-
+    public static function getFirstSegmentOfFilesInJob(JobStruct $chunkStruct, int $ttl = 0): array
+    {
         $thisDao = new self();
 
         $query = "SELECT 
@@ -709,13 +706,12 @@ class JobDao extends AbstractDao {
         GROUP BY id_file
         ORDER BY first_segment";
 
-        $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare( $query );
+        $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare($query);
 
         /** @var ShapelessConcreteStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
-                'id_job' => $chunkStruct->id
-        ] );
-
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+            'id_job' => $chunkStruct->id
+        ]);
     }
 
     /**
@@ -724,17 +720,17 @@ class JobDao extends AbstractDao {
      *
      * @throws ReflectionException
      */
-    public static function updateAllJobsStatusesByProjectId( $id_project, $new_status ) {
-        self::updateFields( [
-                'status_owner' => $new_status,
-                'last_update'  => date( "Y-m-d H:i:s" ),
+    public static function updateAllJobsStatusesByProjectId($id_project, $new_status): void
+    {
+        self::updateFields([
+            'status_owner' => $new_status,
+            'last_update' => date("Y-m-d H:i:s"),
         ],
-                [
-                        'id_project' => $id_project
-                ]
+            [
+                'id_project' => $id_project
+            ]
         );
-        ( new JobDao )->destroyCacheByProjectId( $id_project );
-
+        (new JobDao)->destroyCacheByProjectId($id_project);
     }
 
     /**
@@ -742,49 +738,51 @@ class JobDao extends AbstractDao {
      *
      * @return int
      */
-    public static function setJobComplete( JobStruct $jStruct ): int {
-        return self::updateFields( [
-                'completed'   => 1,
-                'last_update' => date( "Y-m-d H:i:s" ),
+    public static function setJobComplete(JobStruct $jStruct): int
+    {
+        return self::updateFields([
+            'completed' => 1,
+            'last_update' => date("Y-m-d H:i:s"),
         ],
-                [
-                        'id' => $jStruct->id
-                ] );
+            [
+                'id' => $jStruct->id
+            ]);
     }
 
     /**
      * @param JobStruct $jStruct
-     * @param string    $new_status
+     * @param string $new_status
      *
      * @throws ReflectionException
      */
-    public static function updateJobStatus( JobStruct $jStruct, string $new_status ) {
-        self::updateFields( [
-                'status_owner' => $new_status,
-                'last_update'  => date( "Y-m-d H:i:s" ),
+    public static function updateJobStatus(JobStruct $jStruct, string $new_status): void
+    {
+        self::updateFields([
+            'status_owner' => $new_status,
+            'last_update' => date("Y-m-d H:i:s"),
         ],
-                [
-                        'id' => $jStruct->id
-                ] );
-        ( new JobDao )->destroyCacheByProjectId( $jStruct->id_project );
+            [
+                'id' => $jStruct->id
+            ]);
+        (new JobDao)->destroyCacheByProjectId($jStruct->id_project);
     }
 
     /**
      * Get reviewed_words_count grouped by file parts
      *
-     * @param int    $id_job
+     * @param int $id_job
      * @param string $password
-     * @param int    $revisionNumber
-     * @param int    $ttl
+     * @param int $revisionNumber
+     * @param int $ttl
      *
      * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
      */
-    public static function getReviewedWordsCountGroupedByFileParts( int $id_job, string $password, int $revisionNumber, int $ttl = 0 ): array {
-
+    public static function getReviewedWordsCountGroupedByFileParts(int $id_job, string $password, int $revisionNumber, int $ttl = 0): array
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $query   = "SELECT 
+        $conn = Database::obtain()->getConnection();
+        $query = "SELECT 
                 f.filename,
                 s.id_file_part,
                 s.id_file,
@@ -810,41 +808,41 @@ class JobDao extends AbstractDao {
             GROUP BY s.id_file_part;
         ";
 
-        $stmt = $conn->prepare( $query );
+        $stmt = $conn->prepare($query);
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
-                'id_job'         => $id_job,
-                'password'       => $password,
-                'revisionNumber' => $revisionNumber
-        ] );
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+            'id_job' => $id_job,
+            'password' => $password,
+            'revisionNumber' => $revisionNumber
+        ]);
     }
 
     /**
      * @param array $idJobs
-     * @param int   $ttl
+     * @param int $ttl
      *
      * @return int|null
      * @throws ReflectionException
      */
-    public static function getSegmentTranslationsCount( array $idJobs, int $ttl = 0 ): ?int {
+    public static function getSegmentTranslationsCount(array $idJobs, int $ttl = 0): ?int
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
-        $query = "select count(*) as total from segment_translations where id_job IN ( " . implode( ', ', $idJobs ) . " );";
+        $query = "select count(*) as total from segment_translations where id_job IN ( " . implode(', ', $idJobs) . " );";
 
-        $stmt    = $conn->prepare( $query );
-        $records = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [] );
+        $stmt = $conn->prepare($query);
+        $records = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, []);
 
-        if ( empty( $records ) ) {
+        if (empty($records)) {
             return null;
         }
 
-        if ( !empty( $records[ 0 ]->total ) ) {
-            return (int)$records[ 0 ]->total;
+        if (!empty($records[0]->total)) {
+            return (int)$records[0]->total;
         }
 
         return null;
-
     }
 
     /**
@@ -854,20 +852,22 @@ class JobDao extends AbstractDao {
      * @return bool
      * @throws ReflectionException
      */
-    public static function hasACustomPayableRate( int $id_job, int $ttl = 86400 ): bool {
-
+    public static function hasACustomPayableRate(int $id_job, int $ttl = 86400): bool
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "
+        $stmt = $conn->prepare(
+            "
             SELECT * 
             FROM job_custom_payable_rates 
             where id_job = :id_job
-        " );
+        "
+        );
 
-        $object = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
-                'id_job' => $id_job,
-        ] )[ 0 ] ?? null;
+        $object = $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+            'id_job' => $id_job,
+        ])[0] ?? null;
 
         return $object !== null;
     }

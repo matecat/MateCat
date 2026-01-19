@@ -13,7 +13,8 @@ namespace View\API\V2\Json;
 use ArrayObject;
 use Utils\LQA\QA;
 
-class QAGlobalWarning extends QAWarning {
+class QAGlobalWarning extends QAWarning
+{
 
     protected array $tagIssues;
     protected array $translationMismatches;
@@ -25,68 +26,64 @@ class QAGlobalWarning extends QAWarning {
      *
      * from query: getWarning(id_job, password)
      *
-     * @param array $tagIssues             [ [ total_sources, translations_available, first_of_my_job ] ]
+     * @param array $tagIssues [ [ total_sources, translations_available, first_of_my_job ] ]
      * @param array $translationMismatches [ [ total_sources, translations_available, first_of_my_job ] ]
      */
-    public function __construct( array $tagIssues, array $translationMismatches ) {
-        $this->tagIssues             = $tagIssues;
+    public function __construct(array $tagIssues, array $translationMismatches)
+    {
+        $this->tagIssues = $tagIssues;
         $this->translationMismatches = $translationMismatches;
     }
 
     /**
      * @return array
      */
-    public function render(): array {
-
+    public function render(): array
+    {
         $this->structure = [
-                'ERROR'   => [
-                        'Categories' => new ArrayObject()
-                ],
-                'WARNING' => [
-                        'Categories' => new ArrayObject()
-                ],
-                'INFO'    => [
-                        'Categories' => new ArrayObject()
-                ]
+            'ERROR' => [
+                'Categories' => new ArrayObject()
+            ],
+            'WARNING' => [
+                'Categories' => new ArrayObject()
+            ],
+            'INFO' => [
+                'Categories' => new ArrayObject()
+            ]
         ];
 
 
-        foreach ( $this->tagIssues as $_item ) {
+        foreach ($this->tagIssues as $_item) {
+            $exceptionList = QA::JSONtoExceptionList($_item['serialized_errors_list']);
 
-            $exceptionList = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] );
-
-            if ( count( $exceptionList[ QA::ERROR ] ) > 0 ) {
-                foreach ( $exceptionList[ QA::ERROR ] as $exception_error ) {
-                    $this->pushErrorSegment( QA::ERROR, $exception_error->outcome, $_item[ 'id_segment' ] );
+            if (count($exceptionList[QA::ERROR]) > 0) {
+                foreach ($exceptionList[QA::ERROR] as $exception_error) {
+                    $this->pushErrorSegment(QA::ERROR, $exception_error->outcome, $_item['id_segment']);
                 }
             }
 
-            if ( count( $exceptionList[ QA::WARNING ] ) > 0 ) {
-                foreach ( $exceptionList[ QA::WARNING ] as $exception_error ) {
-                    $this->pushErrorSegment( QA::WARNING, $exception_error->outcome, $_item[ 'id_segment' ] );
+            if (count($exceptionList[QA::WARNING]) > 0) {
+                foreach ($exceptionList[QA::WARNING] as $exception_error) {
+                    $this->pushErrorSegment(QA::WARNING, $exception_error->outcome, $_item['id_segment']);
                 }
             }
 
-            if ( count( $exceptionList[ QA::INFO ] ) > 0 ) {
-                foreach ( $exceptionList[ QA::INFO ] as $exception_error ) {
-                    $this->pushErrorSegment( QA::INFO, $exception_error->outcome, $_item[ 'id_segment' ] );
+            if (count($exceptionList[QA::INFO]) > 0) {
+                foreach ($exceptionList[QA::INFO] as $exception_error) {
+                    $this->pushErrorSegment(QA::INFO, $exception_error->outcome, $_item['id_segment']);
                 }
             }
-
         }
 
-        foreach ( $this->translationMismatches as $row ) {
-
-            if ( !empty( $row[ 'first_of_my_job' ] ) ) {
-                $this->structure[ QA::WARNING ][ 'Categories' ][ 'MISMATCH' ][] = $row[ 'first_of_my_job' ];
+        foreach ($this->translationMismatches as $row) {
+            if (!empty($row['first_of_my_job'])) {
+                $this->structure[QA::WARNING]['Categories']['MISMATCH'][] = $row['first_of_my_job'];
             }
-
         }
 
-        $out[ 'details' ] = $this->structure;
+        $out['details'] = $this->structure;
 
         return $out;
-
     }
 
 

@@ -11,29 +11,33 @@ use PHPUnit\Framework\TestCase;
  * Time: 15.21
  *
  */
-abstract class AbstractTest extends TestCase {
+abstract class AbstractTest extends TestCase
+{
 
     protected $thisTest;
 
     protected $databaseInstance;
     protected $reflectedMethod;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->thisTest = microtime( true );
+        $this->thisTest = microtime(true);
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
-        $resultTime = microtime( true ) - $this->thisTest;
-        echo " " . str_pad( get_class( $this ) . " " . $this->getName( false ), 35, " ", STR_PAD_RIGHT ) . " - Did in " . $resultTime . " seconds.\n";
+        $resultTime = microtime(true) - $this->thisTest;
+        echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . $resultTime . " seconds.\n";
     }
 
     /**
      * @return mixed
      */
-    protected function getTheLastInsertIdByQuery( IDatabase $database_instance ) {
-        $stmt = $database_instance->getConnection()->query( "SELECT LAST_INSERT_ID()" );
+    protected function getTheLastInsertIdByQuery(IDatabase $database_instance)
+    {
+        $stmt = $database_instance->getConnection()->query("SELECT LAST_INSERT_ID()");
         $stmt->execute();
 
         return $stmt->fetchColumn();
@@ -63,14 +67,15 @@ abstract class AbstractTest extends TestCase {
      * @return string
      *
      */
-    protected function getRawQuery( array $preparedQuery ) {
-        $rawQuery = $preparedQuery[ 0 ];
-        foreach ( $preparedQuery[ 1 ] as $key => $value ) {
-            if ( is_string( $value ) ) {
+    protected function getRawQuery(array $preparedQuery)
+    {
+        $rawQuery = $preparedQuery[0];
+        foreach ($preparedQuery[1] as $key => $value) {
+            if (is_string($value)) {
                 $value = '\'' . $value . '\'';
             }
 
-            $rawQuery = str_replace( ':' . $key, $value, $rawQuery );
+            $rawQuery = str_replace(':' . $key, $value, $rawQuery);
         }
 
         return $rawQuery;

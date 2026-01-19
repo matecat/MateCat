@@ -13,46 +13,52 @@ use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use Utils\Constants\SourcePages;
 
-class ChunkReviewDao extends AbstractDao {
+class ChunkReviewDao extends AbstractDao
+{
 
-    const TABLE = "qa_chunk_reviews";
+    const string TABLE = "qa_chunk_reviews";
 
     public static array $primary_keys = [
-            'id'
+        'id'
     ];
 
-    const sql_for_get_by_project_id = "SELECT * FROM qa_chunk_reviews WHERE id_project = :id_project ORDER BY id";
+    const string sql_for_get_by_project_id = "SELECT * FROM qa_chunk_reviews WHERE id_project = :id_project ORDER BY id";
 
-    protected function _buildResult( array $array_result ) {
+    const string sql_get_from_review_password_and_id_job = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job";
+
+    protected function _buildResult(array $array_result)
+    {
     }
 
-    public function updatePassword( int $id_job, string $old_password, string $new_password ): int {
+    public function updatePassword(int $id_job, string $old_password, string $new_password): int
+    {
         $sql = "UPDATE qa_chunk_reviews SET password = :new_password
                WHERE id_job = :id_job AND password = :old_password ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_job'       => $id_job,
-                'old_password' => $old_password,
-                'new_password' => $new_password
-        ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'old_password' => $old_password,
+            'new_password' => $new_password
+        ]);
 
         return $stmt->rowCount();
     }
 
-    public function updateReviewPassword( int $id_job, string $old_review_password, string $new_review_password, int $source_page ): int {
+    public function updateReviewPassword(int $id_job, string $old_review_password, string $new_review_password, int $source_page): int
+    {
         $sql = "UPDATE qa_chunk_reviews SET review_password = :new_review_password
                WHERE id_job = :id_job AND review_password = :old_review_password AND source_page = :source_page";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_job'              => $id_job,
-                'old_review_password' => $old_review_password,
-                'new_review_password' => $new_review_password,
-                'source_page'         => $source_page
-        ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'old_review_password' => $old_review_password,
+            'new_review_password' => $new_review_password,
+            'source_page' => $source_page
+        ]);
 
         return $stmt->rowCount();
     }
@@ -62,41 +68,43 @@ class ChunkReviewDao extends AbstractDao {
      *
      * @return ChunkReviewStruct[]
      */
-    public static function findByIdJob( $id_job ): array {
-        $sql  = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE id_job = :id_job ORDER BY id";
+    public static function findByIdJob($id_job): array
+    {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+            " WHERE id_job = :id_job ORDER BY id";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
-        $stmt->execute( [ 'id_job' => $id_job ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
+        $stmt->execute(['id_job' => $id_job]);
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param int      $id_job
-     * @param string   $password
+     * @param int $id_job
+     * @param string $password
      * @param int|null $source_page
      *
-     * @return ChunkReviewStruct
+     * @return ChunkReviewStruct|null
      */
-    public static function findByIdJobAndPasswordAndSourcePage( int $id_job, string $password, ?int $source_page ): ?ChunkReviewStruct {
-        $sql  = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE id_job = :id_job 
+    public static function findByIdJobAndPasswordAndSourcePage(int $id_job, string $password, ?int $source_page): ?ChunkReviewStruct
+    {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+            " WHERE id_job = :id_job 
                 AND password = :password
                 AND source_page = :source_page ORDER BY id";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
-        $stmt->execute( [
-                'id_job'      => $id_job,
-                'password'    => $password,
-                'source_page' => $source_page,
-        ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'password' => $password,
+            'source_page' => $source_page,
+        ]);
 
         $results = $stmt->fetchAll();
 
-        return $results[ 0 ] ?? null;
+        return $results[0] ?? null;
     }
 
     /**
@@ -104,27 +112,28 @@ class ChunkReviewDao extends AbstractDao {
      *
      * @return ?ChunkReviewStruct
      */
-    public static function findById( int $id ): ?ChunkReviewStruct {
-        $sql  = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE id = :id ";
+    public static function findById(int $id): ?ChunkReviewStruct
+    {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+            " WHERE id = :id ";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
-        $stmt->execute( [ 'id' => $id ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
+        $stmt->execute(['id' => $id]);
 
         return $stmt->fetch() ?: null;
-
     }
 
     /**
      * @param JobStruct $chunk
      *
-     * @param int|null  $source_page
+     * @param int|null $source_page
      *
      * @return int
      */
-    public function getPenaltyPointsForChunk( JobStruct $chunk, ?int $source_page = null ): int {
-        if ( is_null( $source_page ) ) {
+    public function getPenaltyPointsForChunk(JobStruct $chunk, ?int $source_page = null): int
+    {
+        if (is_null($source_page)) {
             $source_page = SourcePages::SOURCE_PAGE_REVISION;
         }
 
@@ -139,19 +148,20 @@ class ChunkReviewDao extends AbstractDao {
         ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_job'      => $chunk->id,
-                'password'    => $chunk->password,
-                'source_page' => $source_page
-        ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'source_page' => $source_page
+        ]);
 
         $count = $stmt->fetch() ?: [];
 
-        return $count[ 0 ] ?? 0;
+        return $count[0] ?? 0;
     }
 
-    public function countTimeToEdit( JobStruct $chunk, $source_page ) {
+    public function countTimeToEdit(JobStruct $chunk, $source_page)
+    {
         $sql = "
             SELECT SUM( time_to_edit ) FROM jobs
                 JOIN segment_translation_events ste
@@ -166,27 +176,27 @@ class ChunkReviewDao extends AbstractDao {
         ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_job'      => $chunk->id,
-                'password'    => $chunk->password,
-                'source_page' => $source_page,
-        ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'source_page' => $source_page,
+        ]);
 
         $result = $stmt->fetch();
 
-        return ( !$result || $result[ 0 ] == null ) ? 0 : $result[ 0 ];
+        return (!$result || $result[0] == null) ? 0 : $result[0];
     }
 
     /**
-     * @param $chunk
-     * @param $source_page
+     * @param JobStruct $chunk
+     * @param int|null $source_page
      *
-     * @return mixed
+     * @return int
      */
-    public function getReviewedWordsCountForSecondPass( $chunk, $source_page ) {
-
-        $translationStatus = ReviewUtils::sourcePageToTranslationStatus( $source_page );
+    public function getReviewedWordsCountForSecondPass(JobStruct $chunk, ?int $source_page = null): int
+    {
+        $translationStatus = ReviewUtils::sourcePageToTranslationStatus($source_page);
 
         $sql = "SELECT SUM(raw_word_count) 
         FROM segments s 
@@ -202,60 +212,65 @@ class ChunkReviewDao extends AbstractDao {
         ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_job'             => $chunk->id,
-                'password'           => $chunk->password,
-                'translation_status' => $translationStatus
-        ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'translation_status' => $translationStatus
+        ]);
 
         $result = $stmt->fetch();
 
-        return $result[ 0 ] == null ? 0 : $result[ 0 ];
+        return $result[0] == null ? 0 : (int)$result[0];
     }
 
     /**
      * @param JobStruct $chunkStruct
-     * @param int|null  $ttl
+     * @param int|null $ttl
      *
      * @return ChunkReviewStruct[]
      * @throws ReflectionException
      */
-    public function findChunkReviews( JobStruct $chunkStruct, ?int $ttl = 0 ): array {
-        return $this->_findChunkReviews( [ $chunkStruct ], null, $ttl );
+    public function findChunkReviews(JobStruct $chunkStruct, ?int $ttl = 0): array
+    {
+        return $this->_findChunkReviews([$chunkStruct], null, $ttl);
     }
 
     /**
      * @param JobStruct $chunkStruct
-     * @param int       $source_page
-     * @param int       $ttl
+     * @param int $source_page
+     * @param int $ttl
      *
      * @return ChunkReviewStruct[]
      * @throws ReflectionException
      */
-    public function findChunkReviewsForSourcePage( JobStruct $chunkStruct, int $source_page = SourcePages::SOURCE_PAGE_REVISION, int $ttl = 60 ): array {
+    public function findChunkReviewsForSourcePage(JobStruct $chunkStruct, int $source_page = SourcePages::SOURCE_PAGE_REVISION, int $ttl = 60): array
+    {
         $sql_condition = " WHERE source_page = $source_page ";
 
-        return $this->_findChunkReviews( [ $chunkStruct ], $sql_condition, $ttl );
+        return $this->_findChunkReviews([$chunkStruct], $sql_condition, $ttl);
     }
 
     /**
      * @param JobStruct[] $chunksArray
      * @param string|null $default_condition
-     * @param int|null    $ttl
+     * @param int|null $ttl
      *
      * @return ChunkReviewStruct[]
      * @throws ReflectionException
      */
-    protected function _findChunkReviews( array $chunksArray, ?string $default_condition = ' WHERE 1 = 1 ', ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */ ): array {
-
-        $findChunkReviewsStatement = $this->_findChunkReviewsStatement( $chunksArray, $default_condition );
+    protected function _findChunkReviews(
+        array $chunksArray,
+        ?string $default_condition = ' WHERE 1 = 1 ',
+        ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */
+    ): array
+    {
+        $findChunkReviewsStatement = $this->_findChunkReviewsStatement($chunksArray, $default_condition);
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $findChunkReviewsStatement[ 'sql' ] );
+        $stmt = $conn->prepare($findChunkReviewsStatement['sql']);
 
-        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ChunkReviewStruct::class, $findChunkReviewsStatement[ 'parameters' ] );
-
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
     }
 
     /**
@@ -264,42 +279,42 @@ class ChunkReviewDao extends AbstractDao {
      * @return bool
      * @throws ReflectionException
      */
-    public function destroyCacheForFindChunkReviews( JobStruct $chunkStruct ): bool {
+    public function destroyCacheForFindChunkReviews(JobStruct $chunkStruct): bool
+    {
+        $findChunkReviewsStatement = $this->_findChunkReviewsStatement([$chunkStruct], null);
+        $stmt = $this->_getStatementForQuery($findChunkReviewsStatement['sql']);
 
-        $findChunkReviewsStatement = $this->_findChunkReviewsStatement( [ $chunkStruct ], null );
-        $stmt                      = $this->_getStatementForQuery( $findChunkReviewsStatement[ 'sql' ] );
-
-        return $this->_destroyObjectCache( $stmt, ChunkReviewStruct::class, $findChunkReviewsStatement[ 'parameters' ] );
-
+        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, $findChunkReviewsStatement['parameters']);
     }
 
     /**
-     * @param array       $chunksArray
+     * @param array $chunksArray
      * @param string|null $default_condition
      *
      * @return array
      */
-    private function _findChunkReviewsStatement( array $chunksArray, ?string $default_condition = ' WHERE 1 = 1 ' ): array {
+    private function _findChunkReviewsStatement(array $chunksArray, ?string $default_condition = ' WHERE 1 = 1 '): array
+    {
         $_conditions = [];
         $_parameters = [];
-        foreach ( $chunksArray as $chunk ) {
+        foreach ($chunksArray as $chunk) {
             $_conditions[] = " ( jobs.id = ? AND jobs.password = ? ) ";
             $_parameters[] = $chunk->id;
             $_parameters[] = $chunk->password;
         }
 
-        $default_condition .= " AND " . implode( ' OR ', $_conditions );
+        $default_condition .= " AND " . implode(' OR ', $_conditions);
 
         $sql =
-                "SELECT qa_chunk_reviews.* 
+            "SELECT qa_chunk_reviews.* 
                 FROM jobs 
                 INNER JOIN qa_chunk_reviews ON jobs.id = qa_chunk_reviews.id_job AND jobs.password = qa_chunk_reviews.password 
                 " . $default_condition . " 
                 ORDER BY source_page";
 
         return [
-                'sql'        => $sql,
-                'parameters' => $_parameters,
+            'sql' => $sql,
+            'parameters' => $_parameters,
         ];
     }
 
@@ -309,15 +324,15 @@ class ChunkReviewDao extends AbstractDao {
      * - r1
      * - r2
      *
-     * @param int    $jid
+     * @param int $jid
      * @param string $password
-     * @param int    $ttl
+     * @param int $ttl
      *
-     * @return IDaoStruct
+     * @return IDaoStruct|null
      * @throws ReflectionException
      */
-    public function isTOrR1OrR2( int $jid, string $password, int $ttl = 3600 ): ?IDaoStruct {
-
+    public function isTOrR1OrR2(int $jid, string $password, int $ttl = 3600): ?IDaoStruct
+    {
         $sql = "SELECT 
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.password=:password) as t,
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 2) as r1,
@@ -325,14 +340,14 @@ class ChunkReviewDao extends AbstractDao {
         from DUAL";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
 
         $parameters = [
-                'password' => $password,
-                'jid'      => $jid
+            'password' => $password,
+            'jid' => $jid
         ];
 
-        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $parameters )[ 0 ] ?? null;
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $parameters)[0] ?? null;
     }
 
     /**
@@ -342,48 +357,46 @@ class ChunkReviewDao extends AbstractDao {
      * @return array
      * @throws ReflectionException
      */
-    public static function findByProjectId( int $id_project, int $ttl = 60 * 60 ): array {
+    public static function findByProjectId(int $id_project, int $ttl = 60 * 60): array
+    {
         $self = new self();
-        $self->setCacheTTL( $ttl );
-        $stmt = $self->_getStatementForQuery( self::sql_for_get_by_project_id );
+        $self->setCacheTTL($ttl);
+        $stmt = $self->_getStatementForQuery(self::sql_for_get_by_project_id);
 
-        return $self->_fetchObjectMap( $stmt, ChunkReviewStruct::class, [ 'id_project' => $id_project ] );
-
+        return $self->_fetchObjectMap($stmt, ChunkReviewStruct::class, ['id_project' => $id_project]);
     }
 
     /**
      * @throws ReflectionException
      */
-    public static function destroyCacheByProjectId( int $id_project ): bool {
+    public static function destroyCacheByProjectId(int $id_project): bool
+    {
         $self = new self();
-        $stmt = $self->_getStatementForQuery( self::sql_for_get_by_project_id );
+        $stmt = $self->_getStatementForQuery(self::sql_for_get_by_project_id);
 
-        return $self->_destroyObjectCache( $stmt, ChunkReviewStruct::class, [ 'id_project' => $id_project ] );
+        return $self->_destroyObjectCache($stmt, ChunkReviewStruct::class, ['id_project' => $id_project]);
     }
 
     /**
-     * @param     $review_password
-     * @param     $id_job
-     *
+     * @param string $review_password
+     * @param int $id_job
+     * @param int $ttl
      * @return ?ChunkReviewStruct
+     * @throws ReflectionException
      */
-
-    public static function findByReviewPasswordAndJobId( $review_password, $id_job ): ?ChunkReviewStruct {
-        $sql = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE review_password = :review_password " .
-                " AND id_job = :id_job ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
-        $stmt->execute(
-                [
-                        'review_password' => $review_password,
-                        'id_job'          => $id_job
-                ]
-        );
-
-        return $stmt->fetch() ?: null;
+    public static function findByReviewPasswordAndJobId(string $review_password, int $id_job, int $ttl = 0): ?ChunkReviewStruct
+    {
+        $self = new self();
+        $self->setCacheTTL($ttl);
+        $stmt = $self->_getStatementForQuery(self::sql_get_from_review_password_and_id_job);
+        return $self->_fetchObjectMap(
+            $stmt,
+            ChunkReviewStruct::class,
+            [
+                'review_password' => $review_password,
+                'id_job' => $id_job
+            ]
+        )[0] ?? null;
     }
 
     /**
@@ -393,79 +406,86 @@ class ChunkReviewDao extends AbstractDao {
      *
      * @return ?ChunkReviewStruct
      */
-    public function findLastReviewByJobIdPasswordAndSourcePage( $id_job, $password, $source_page ): ?ChunkReviewStruct {
+    public function findLastReviewByJobIdPasswordAndSourcePage($id_job, $password, $source_page): ?ChunkReviewStruct
+    {
         $sql = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE password = :password " .
-                " AND id_job = :id_job " .
-                " AND source_page = :source_page ";
+            " WHERE password = :password " .
+            " AND id_job = :id_job " .
+            " AND source_page = :source_page ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkReviewStruct::class);
         $stmt->execute(
-                [
-                        'password'    => $password,
-                        'id_job'      => $id_job,
-                        'source_page' => $source_page
-                ]
+            [
+                'password' => $password,
+                'id_job' => $id_job,
+                'source_page' => $source_page
+            ]
         );
 
         return $stmt->fetch() ?: null;
     }
 
     /**
-     * @return ChunkReviewStruct
+     * @param int $id_job
+     * @param string $review_password
+     * @param int $source_page
+     * @param int $ttl
+     *
+     * @return ChunkReviewStruct|null
      * @throws ReflectionException
      */
-    public function findByJobIdReviewPasswordAndSourcePage( int $id_job, string $review_password, int $source_page, int $ttl = 60 * 60 ): ?ChunkReviewStruct {
+    public function findByJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page, int $ttl = 60 * 60): ?ChunkReviewStruct
+    {
         $sql = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE review_password = :review_password " .
-                " AND id_job = :id_job " .
-                " AND source_page = :source_page ";
+            " WHERE review_password = :review_password " .
+            " AND id_job = :id_job " .
+            " AND source_page = :source_page ";
 
-        $this->setCacheTTL( $ttl );
-        $stmt = $this->_getStatementForQuery( $sql );
+        $this->setCacheTTL($ttl);
+        $stmt = $this->_getStatementForQuery($sql);
         /** @var $retValue ChunkReviewStruct */
-        $retValue = $this->_fetchObjectMap( $stmt, ChunkReviewStruct::class, [
-                'review_password' => $review_password,
-                'id_job'          => $id_job,
-                'source_page'     => $source_page
-        ] )[ 0 ] ?? null;
+        $retValue = $this->_fetchObjectMap($stmt, ChunkReviewStruct::class, [
+            'review_password' => $review_password,
+            'id_job' => $id_job,
+            'source_page' => $source_page
+        ])[0] ?? null;
 
         return $retValue;
     }
 
 
     /**
-     * @param int      $id_job
-     * @param string   $password
+     * @param int $id_job
+     * @param string $password
      * @param int|null $source_page
      *
      * @return bool
      */
-    public function exists( int $id_job, string $password, ?int $source_page = null ): bool {
-
+    public function exists(int $id_job, string $password, ?int $source_page = null): bool
+    {
         $params = [
-                'id_job'   => $id_job,
-                'password' => $password,
+            'id_job' => $id_job,
+            'password' => $password,
         ];
 
         $query = " SELECT id FROM " . self::TABLE . " WHERE id_job = :id_job and password = :password ";
 
-        if ( $source_page ) {
-            $params[ 'source_page' ] = $source_page;
-            $query                   .= " AND source_page=:source_page";
+        if ($source_page) {
+            $params['source_page'] = $source_page;
+            $query .= " AND source_page=:source_page";
         }
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $query );
+        $stmt = $conn->prepare($query);
 
 
-        $stmt->execute( $params );
+        $stmt->execute($params);
 
-        $row = $stmt->fetch( PDO::FETCH_ASSOC );
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ( !$row ) {
+        if (!$row) {
             return false;
         }
 
@@ -478,25 +498,26 @@ class ChunkReviewDao extends AbstractDao {
      * @return ChunkReviewStruct
      * @internal param bool $setDefaults
      */
-    public static function createRecord( array $data ): ChunkReviewStruct {
-        $struct = new ChunkReviewStruct( $data );
+    public static function createRecord(array $data): ChunkReviewStruct
+    {
+        $struct = new ChunkReviewStruct($data);
 
         $struct->setDefaults();
 
-        $attrs = $struct->toArray( [
-                'id_project',
-                'id_job',
-                'password',
-                'review_password',
-                'source_page',
-                'total_tte',
-                'avg_pee'
-        ] );
+        $attrs = $struct->toArray([
+            'id_project',
+            'id_job',
+            'password',
+            'review_password',
+            'source_page',
+            'total_tte',
+            'avg_pee'
+        ]);
 
         $sql = "INSERT INTO " . self::TABLE .
-                " ( id_project, id_job, password, review_password, source_page, total_tte, avg_pee ) " .
-                " VALUES " .
-                " ( :id_project, :id_job, :password, :review_password, :source_page, :total_tte, :avg_pee ) 
+            " ( id_project, id_job, password, review_password, source_page, total_tte, avg_pee ) " .
+            " VALUES " .
+            " ( :id_project, :id_job, :password, :review_password, :source_page, :total_tte, :avg_pee ) 
                     ON DUPLICATE KEY UPDATE
                         id_project = :id_project,
                         id_job = :id_job,
@@ -510,36 +531,37 @@ class ChunkReviewDao extends AbstractDao {
 
         $conn = Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( $attrs );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($attrs);
 
         $struct->id = $conn->lastInsertId();
 
         return $struct;
     }
 
-    public static function deleteByJobId( int $id_job ): bool {
-        $sql  = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
+    public static function deleteByJobId(int $id_job): bool
+    {
+        $sql = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
 
-        return $stmt->execute( [ 'id_job' => $id_job ] );
+        return $stmt->execute(['id_job' => $id_job]);
     }
 
     /**
      *
-     * @param int   $chunkReviewID
+     * @param int $chunkReviewID
      * @param array $data
      *
      * @throws Exception
      */
-    public function passFailCountsAtomicUpdate( int $chunkReviewID, array $data = [] ) {
-
+    public function passFailCountsAtomicUpdate(int $chunkReviewID, array $data = []): void
+    {
         /**
          * @var $chunkReview ChunkReviewStruct
          */
-        $chunkReview             = $data[ 'chunkReview' ];
-        $data[ 'force_pass_at' ] = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+        $chunkReview = $data['chunkReview'];
+        $data['force_pass_at'] = ReviewUtils::filterLQAModelLimit($chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page);
 
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL, division by zero returns NULL, so we have to coalesce null values from is_pass division
@@ -567,18 +589,17 @@ class ChunkReviewDao extends AbstractDao {
 		);";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id'                   => $chunkReviewID,
-                'id_job'               => $chunkReview->id_job,
-                'id_project'           => $chunkReview->id_project,
-                'review_password'      => $chunkReview->review_password,
-                'password'             => $chunkReview->password,
-                'penalty_points'       => empty( $data[ 'penalty_points' ] ) ? 0 : $data[ 'penalty_points' ],
-                'reviewed_words_count' => $data[ 'reviewed_words_count' ],
-                'total_tte'            => $data[ 'total_tte' ],
-        ] );
-
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id' => $chunkReviewID,
+            'id_job' => $chunkReview->id_job,
+            'id_project' => $chunkReview->id_project,
+            'review_password' => $chunkReview->review_password,
+            'password' => $chunkReview->password,
+            'penalty_points' => empty($data['penalty_points']) ? 0 : $data['penalty_points'],
+            'reviewed_words_count' => $data['reviewed_words_count'],
+            'total_tte' => $data['total_tte'],
+        ]);
     }
 
 }

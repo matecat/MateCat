@@ -6,9 +6,10 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class QAModelTemplatePassfailStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
-    public ?int   $id          = null;
-    public ?int   $id_template = null;
+class QAModelTemplatePassfailStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
+{
+    public ?int $id = null;
+    public ?int $id_template = null;
     public string $passfail_type;
 
     /**
@@ -19,12 +20,13 @@ class QAModelTemplatePassfailStruct extends AbstractDaoSilentStruct implements I
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array
+    {
         return [
-                'id'          => (int)$this->id,
-                'id_template' => $this->id_template,
-                'type'        => $this->passfail_type,
-                'thresholds'  => $this->thresholds,
+            'id' => (int)$this->id,
+            'id_template' => $this->id_template,
+            'type' => $this->passfail_type,
+            'thresholds' => $this->thresholds,
         ];
     }
 }

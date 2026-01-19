@@ -2,12 +2,14 @@
 
 namespace Controller\API\Commons\Validators;
 
+use Closure;
 use Controller\Abstracts\KleinController;
 use Exception;
 use Klein\Request;
 use Throwable;
 
-abstract class Base {
+abstract class Base
+{
 
     /**
      * @var Request
@@ -17,18 +19,25 @@ abstract class Base {
     protected KleinController $controller;
 
     /**
-     * @var callable[]
+     * @var Closure[]
      */
     protected array $_validationCallbacks = [];
 
     /**
-     * @var callable
+     * @var Closure|null
      */
-    private $_failureCallback = null;
+    private ?Closure $_failureCallback = null;
 
-    public function __construct( KleinController $kleinController ) {
-        $this->request    = $kleinController->getRequest();
+    /**
+     * @var array
+     */
+    protected array $args = [];
+
+    public function __construct(KleinController $kleinController, ...$args)
+    {
+        $this->request = $kleinController->getRequest();
         $this->controller = $kleinController;
+        $this->args = $args;
     }
 
     /**
@@ -40,13 +49,14 @@ abstract class Base {
     /**
      * @throws Throwable
      */
-    public function validate() {
+    public function validate(): void
+    {
         try {
             $this->_validate();
             $this->_executeCallbacks();
-        } catch ( Throwable $exception ) {
-            if ( !empty( $this->_failureCallback ) ) {
-                ( $this->_failureCallback )( $exception ); // PHP7 closure call syntax: support operations on arbitrary (...) expressions
+        } catch (Throwable $exception) {
+            if (!empty($this->_failureCallback)) {
+                ($this->_failureCallback)($exception); // PHP7 closure call syntax: support operations on arbitrary (...) expressions
             } else {
                 throw $exception;
             }
@@ -56,21 +66,23 @@ abstract class Base {
     /**
      * @param callable|null $callable
      */
-    public function onSuccess( callable $callable = null ): Base {
-        if ( is_callable( $callable ) ) {
+    public function onSuccess(callable $callable = null): Base
+    {
+        if (is_callable($callable)) {
             $this->_validationCallbacks[] = $callable;
         } else {
-            trigger_error( "Invalid callback provided", E_USER_WARNING );
+            trigger_error("Invalid callback provided", E_USER_WARNING);
         }
 
         return $this;
     }
 
-    public function onFailure( callable $callable = null ): Base {
-        if ( is_callable( $callable ) ) {
+    public function onFailure(callable $callable = null): Base
+    {
+        if (is_callable($callable)) {
             $this->_failureCallback = $callable;
         } else {
-            trigger_error( "Invalid callback provided", E_USER_WARNING );
+            trigger_error("Invalid callback provided", E_USER_WARNING);
         }
 
         return $this;
@@ -80,8 +92,9 @@ abstract class Base {
      * Execute Callbacks in pipeline
      * @throws Exception
      */
-    protected function _executeCallbacks() {
-        foreach ( $this->_validationCallbacks as $callable ) {
+    protected function _executeCallbacks(): void
+    {
+        foreach ($this->_validationCallbacks as $callable) {
             $callable();
         }
     }
@@ -90,7 +103,8 @@ abstract class Base {
      * @return Request
      */
     public
-    function getRequest(): Request {
+    function getRequest(): Request
+    {
         return $this->request;
     }
 

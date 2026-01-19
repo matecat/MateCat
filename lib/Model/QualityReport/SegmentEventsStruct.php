@@ -13,12 +13,13 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 
 /**
- * @property int    $id_segment
+ * @property int $id_segment
  * @property string $translation
- * @property int    $version_number
- * @property int    $source_page
+ * @property int $version_number
+ * @property int $source_page
  */
-class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
 
     /**
      * @var int

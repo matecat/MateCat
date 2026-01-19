@@ -3,7 +3,6 @@
 namespace Utils\Validator\JSONSchema;
 
 use Exception;
-use stdClass;
 use Utils\Validator\Contracts\ValidatorObject;
 
 /**
@@ -22,7 +21,8 @@ use Utils\Validator\Contracts\ValidatorObject;
  * - Decoding is memoized; further calls to getValid() return the cached result.
  * - Type-introspection methods require prior validation via getValid(), otherwise an exception is thrown.
  */
-class JSONValidatorObject extends ValidatorObject {
+class JSONValidatorObject extends ValidatorObject
+{
 
     /**
      * Original JSON string to validate/decode.
@@ -36,7 +36,7 @@ class JSONValidatorObject extends ValidatorObject {
      *
      * @var ?mixed The decoded JSON value or NULL when the JSON is null or an empty string.
      */
-    protected $decoded;
+    protected mixed $decoded;
 
     /**
      * Whether getValid() has been called and $decoded is populated.
@@ -49,7 +49,8 @@ class JSONValidatorObject extends ValidatorObject {
      *
      * @param string $json The JSON string to be validated/decoded.
      */
-    public function __construct( string $json ) {
+    public function __construct(string $json)
+    {
         $this->json = $json;
     }
 
@@ -64,17 +65,17 @@ class JSONValidatorObject extends ValidatorObject {
      * @return mixed|null The decoded JSON value (array|object|scalar|null).
      * @throws Exception  If decoding fails or JSON is invalid.
      */
-    public function decode() {
-
+    public function decode(): mixed
+    {
         /**
          * If already validated, return the decoded value
          * Memoization pattern
          */
-        if ( $this->isDecoded ) {
+        if ($this->isDecoded) {
             return $this->decoded;
         }
 
-        $this->decoded   = json_decode( $this->json == '' ? 'null' : $this->json, false, 512, JSON_THROW_ON_ERROR );
+        $this->decoded = json_decode($this->json == '' ? 'null' : $this->json, false, 512, JSON_THROW_ON_ERROR);
         $this->isDecoded = true;
 
         return $this->decoded;
@@ -86,19 +87,19 @@ class JSONValidatorObject extends ValidatorObject {
      * @return mixed|null The decoded JSON value (array|object|scalar|null).
      * @throws Exception  If decoding fails or JSON is invalid.
      */
-    public function getValue( bool $associative = false ) {
+    public function getValue(bool $associative = false): mixed
+    {
         $val = $this->decode();
 
-        if ( $val === null ) {
+        if ($val === null) {
             return null;
         }
 
-        if ( $associative ) {
-            return $this->toArray( (object)$val );
+        if ($associative) {
+            return $this->toArray((object)$val);
         }
 
         return $val;
-
     }
 
     /**
@@ -114,19 +115,19 @@ class JSONValidatorObject extends ValidatorObject {
      *
      * @return array An associative array representing the structure and data of the input object.
      */
-    private function toArray( object $object ): array {
+    private function toArray(object $object): array
+    {
         $collector = [];
-        foreach ( $object as $key => $value ) {
-
+        foreach ($object as $key => $value) {
             // Determine if the value is structured (array or object).
-            $isStructured = is_array( $value ) || is_object( $value );
+            $isStructured = is_array($value) || is_object($value);
 
-            if ( $isStructured ) {
+            if ($isStructured) {
                 // Recursively convert structured values into arrays.
-                $collector[ $key ] = $this->toArray( (object)$value ); // Force cast to object to respect the function signature.
+                $collector[$key] = $this->toArray((object)$value); // Force cast to object to respect the function signature.
             } else {
                 // Add scalar values directly to the resulting array.
-                $collector[ $key ] = $value;
+                $collector[$key] = $value;
             }
         }
 

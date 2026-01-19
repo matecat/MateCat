@@ -18,56 +18,56 @@ use Utils\LQA\SizeRestriction\SizeRestriction;
 use Utils\Tools\CatUtils;
 
 
-class CountWordController extends KleinController {
+class CountWordController extends KleinController
+{
 
     protected string $language;
 
     /**
      * @throws ValidationError
      */
-    protected function afterConstruct() {
+    protected function afterConstruct(): void
+    {
+        $this->language = $this->request->param('language') ?: 'en-US';
 
-        $this->language = $this->request->param( 'language' ) ?: 'en-US';
-
-        if ( $this->request->param( 'text' ) === null or $this->request->param( 'text' ) === '' ) {
-            throw new ValidationError( "Invalid text field", 400 );
+        if ($this->request->param('text') === null or $this->request->param('text') === '') {
+            throw new ValidationError("Invalid text field", 400);
         }
 
         $langs = Languages::getInstance();
 
         try {
-            $langs->validateLanguage( $this->language );
-        } catch ( Exception $e ) {
-            throw new ValidationError( $e->getMessage(), 400, $e );
+            $langs->validateLanguage($this->language);
+        } catch (Exception $e) {
+            throw new ValidationError($e->getMessage(), 400, $e);
         }
 
-        $this->appendValidator( new LoginValidator( $this ) );
-
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * @throws Exception
      */
-    public function rawWords() {
-
-        $this->featureSet->loadFromUserEmail( $this->user->email );
-        $words_count = CatUtils::segment_raw_word_count( $this->request->param( 'text' ), $this->language );
-        $filter      = MateCatFilter::getInstance( $this->featureSet );
+    public function rawWords(): void
+    {
+        $this->featureSet->loadFromUserEmail($this->user->email);
+        $words_count = CatUtils::segment_raw_word_count($this->request->param('text'), $this->language);
+        $filter = MateCatFilter::getInstance($this->featureSet);
         /** @var $filter MateCatFilter */
-        $size_restriction = new SizeRestriction( $filter->fromLayer0ToLayer2( $this->request->param( 'text' ) ), $this->featureSet );
+        $size_restriction = new SizeRestriction($filter->fromLayer0ToLayer2($this->request->param('text')), $this->featureSet);
 
         $character_count = [
-                'length' => $size_restriction->getCleanedStringLength(),
+            'length' => $size_restriction->getCleanedStringLength(),
         ];
 
-        if ( isset( $this->request->limit ) and is_numeric( $this->request->limit ) ) {
-            $character_count[ 'valid' ]                = $size_restriction->checkLimit( $this->request->limit );
-            $character_count[ 'remaining_characters' ] = $size_restriction->getCharactersRemaining( $this->request->limit );
+        if (isset($this->request->limit) and is_numeric($this->request->limit)) {
+            $character_count['valid'] = $size_restriction->checkLimit($this->request->limit);
+            $character_count['remaining_characters'] = $size_restriction->getCharactersRemaining($this->request->limit);
         }
 
-        $this->response->json( [
-                'word_count'      => $words_count,
-                'character_count' => $character_count,
-        ] );
+        $this->response->json([
+            'word_count' => $words_count,
+            'character_count' => $character_count,
+        ]);
     }
 }

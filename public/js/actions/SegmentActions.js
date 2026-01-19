@@ -706,7 +706,7 @@ const SegmentActions = {
             'If you must edit it, click on the padlock icon to the left of the segment. ' +
             'The owner of the project will be notified of any edits.',
         },
-        'Ice Match',
+        'Ice Matches',
       )
       return
     }
@@ -1063,7 +1063,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'A glossary item has been deleted',
+      message: 'A termbase item has been deleted',
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
@@ -1181,9 +1181,11 @@ const SegmentActions = {
   },
 
   getContributions: function (sid, multiMatchLangs, force) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
-    TranslationMatches.getContribution(sid, 1, multiMatchLangs, force)
-    TranslationMatches.getContribution(sid, 2, multiMatchLangs, force)
+    TranslationMatches.getContributionsWithPrefetch({
+      sid,
+      crossLanguageSettings: multiMatchLangs,
+      force,
+    })
   },
 
   getContribution: function (sid, multiMatchLangs, force) {
@@ -1495,7 +1497,7 @@ const SegmentActions = {
         ModalsActions.showModalComponent(
           UnlockAllSegmentsModal,
           {},
-          'Unlock all ICE segments',
+          'Unlock all 101% segments',
         )
       }
     }
@@ -1752,12 +1754,18 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary() && translation) {
+      const cleanSource = DraftMatecatUtils.removeTagsFromText(updatedSource)
+      const cleanTranslation = DraftMatecatUtils.removeTagsFromText(translation)
+      if (
+        CatToolStore.getHaveKeysGlossary() &&
+        cleanSource &&
+        cleanTranslation
+      ) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: DraftMatecatUtils.removeTagsFromText(translation),
-          source: DraftMatecatUtils.removeTagsFromText(updatedSource),
+          target: cleanTranslation,
+          source: cleanSource,
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)

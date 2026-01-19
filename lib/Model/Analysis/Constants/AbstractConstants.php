@@ -11,7 +11,8 @@ namespace Model\Analysis\Constants;
 
 use RuntimeException;
 
-abstract class AbstractConstants implements ConstantsInterface {
+abstract class AbstractConstants implements ConstantsInterface
+{
 
     protected static array $forValue = [];
 
@@ -21,17 +22,17 @@ abstract class AbstractConstants implements ConstantsInterface {
      * @return string
      * @throws RuntimeException
      */
-    public static function validate( string $name ): string {
-
-        if ( !array_key_exists( $name, static::$forValue ) ) {
-            throw new RuntimeException( "Invalid match type: " . $name );
+    public static function validate(string $name): string
+    {
+        if (!array_key_exists($name, static::$forValue)) {
+            throw new RuntimeException("Invalid match type: " . $name);
         }
 
         return $name;
-
     }
 
-    public static function forValue(): array {
+    public static function forValue(): array
+    {
         return static::$forValue;
     }
 

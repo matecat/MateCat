@@ -17,7 +17,8 @@ use RuntimeException;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
-class TranslationEvent {
+class TranslationEvent
+{
 
     /**
      * @var SegmentTranslationStruct
@@ -84,25 +85,25 @@ class TranslationEvent {
     /**
      * @param SegmentTranslationStruct $old_translation
      * @param SegmentTranslationStruct $translation
-     * @param UserStruct|null          $user
-     * @param int                      $source_page_code
+     * @param UserStruct|null $user
+     * @param int $source_page_code
      *
      */
-    public function __construct( SegmentTranslationStruct $old_translation,
-                                 SegmentTranslationStruct $translation,
-                                 ?UserStruct              $user,
-                                 int                      $source_page_code
+    public function __construct(
+        SegmentTranslationStruct $old_translation,
+        SegmentTranslationStruct $translation,
+        ?UserStruct $user,
+        int $source_page_code
     ) {
-
-        $this->old_translation    = $old_translation;
+        $this->old_translation = $old_translation;
         $this->wanted_translation = $translation;
-        $this->user               = $user;
-        $this->source_page        = $source_page_code;
+        $this->user = $user;
+        $this->source_page = $source_page_code;
 
         try {
             $this->chunk = $this->wanted_translation->getChunk();
-        } catch ( Error $e ) {
-            throw new RuntimeException( "*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'" );
+        } catch (Error) {
+            throw new RuntimeException("*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'");
         }
 
         $this->getLatestEventForSegment();
@@ -112,7 +113,8 @@ class TranslationEvent {
     /**
      * @return SegmentTranslationStruct
      */
-    public function getWantedTranslation(): SegmentTranslationStruct {
+    public function getWantedTranslation(): SegmentTranslationStruct
+    {
         return $this->wanted_translation;
     }
 
@@ -120,16 +122,17 @@ class TranslationEvent {
      * @return UserStruct|null
      * @throws Exception
      */
-    public function getUser(): ?UserStruct {
-
-        if ( isset( $this->user ) && $this->user->uid ) {
+    public function getUser(): ?UserStruct
+    {
+        if (isset($this->user) && $this->user->uid) {
             return $this->user;
         }
 
         return null;
     }
 
-    public function getSourcePage(): int {
+    public function getSourcePage(): int
+    {
         return $this->source_page;
     }
 
@@ -137,46 +140,53 @@ class TranslationEvent {
      * @return SegmentTranslationStruct
      * @throws Exception
      */
-    public function getOldTranslation(): SegmentTranslationStruct {
+    public function getOldTranslation(): SegmentTranslationStruct
+    {
         return $this->old_translation;
     }
 
-    public function isADraftChange(): bool {
-        return $this->statusAsSourcePage( $this->wanted_translation->status ) == 0;
+    public function isADraftChange(): bool
+    {
+        return $this->statusAsSourcePage($this->wanted_translation->status) == 0;
     }
 
-    public function isChangingStatus(): bool {
+    public function isChangingStatus(): bool
+    {
         return $this->old_translation->status !== $this->wanted_translation->status;
     }
 
-    public function isIce(): bool {
+    public function isIce(): bool
+    {
         return $this->old_translation->isICE();
     }
 
-    public function isUnModifiedIce(): bool {
+    public function isUnModifiedIce(): bool
+    {
         return $this->isIce() &&
-                $this->old_translation->version_number == 0 &&
-                $this->wanted_translation->version_number == 0;
+            $this->old_translation->version_number == 0 &&
+            $this->wanted_translation->version_number == 0;
     }
 
     /**
-     * @return SegmentStruct
+     * @return SegmentStruct|null
      * @throws ReflectionException
      */
-    public function getSegmentStruct(): ?SegmentStruct {
-        $dao = new SegmentDao( Database::obtain() );
+    public function getSegmentStruct(): ?SegmentStruct
+    {
+        $dao = new SegmentDao(Database::obtain());
 
         return $dao->getByChunkIdAndSegmentId(
-                $this->chunk->id,
-                $this->chunk->password,
-                $this->wanted_translation->id_segment
+            $this->chunk->id,
+            $this->chunk->password,
+            $this->wanted_translation->id_segment
         );
     }
 
     /**
-     * @return JobStruct
+     * @return JobStruct|null
      */
-    public function getChunk(): ?JobStruct {
+    public function getChunk(): ?JobStruct
+    {
         return $this->chunk;
     }
 
@@ -186,7 +196,8 @@ class TranslationEvent {
      * @return bool
      * @throws Exception
      */
-    public function currentEventIsOnThisChunk( ChunkReviewStruct $chunkReview ): bool {
+    public function currentEventIsOnThisChunk(ChunkReviewStruct $chunkReview): bool
+    {
         return $this->getCurrentEventSourcePage() == $chunkReview->source_page;
     }
 
@@ -194,14 +205,16 @@ class TranslationEvent {
      * @return bool
      * @throws Exception
      */
-    public function isLowerTransition(): bool {
-        return $this->statusAsSourcePage( $this->old_translation->status ) > $this->statusAsSourcePage( $this->wanted_translation->status );
+    public function isLowerTransition(): bool
+    {
+        return $this->statusAsSourcePage($this->old_translation->status) > $this->statusAsSourcePage($this->wanted_translation->status);
     }
 
     /**
      * @return bool
      */
-    public function isPrepared(): bool {
+    public function isPrepared(): bool
+    {
         return $this->prepared;
     }
 
@@ -210,7 +223,8 @@ class TranslationEvent {
      *
      * @return $this
      */
-    public function setPrepared( bool $prepared ): TranslationEvent {
+    public function setPrepared(bool $prepared): TranslationEvent
+    {
         $this->prepared = $prepared;
 
         return $this;
@@ -221,11 +235,12 @@ class TranslationEvent {
      *
      * @return TranslationEventStruct|null
      */
-    private function getLatestEventForSegment(): ?TranslationEventStruct {
-        if ( empty( $this->previous_event ) ) {
-            $this->previous_event = ( new TranslationEventDao() )->getLatestEventForSegment(
-                    $this->old_translation->id_job,
-                    $this->old_translation->id_segment
+    private function getLatestEventForSegment(): ?TranslationEventStruct
+    {
+        if (empty($this->previous_event)) {
+            $this->previous_event = (new TranslationEventDao())->getLatestEventForSegment(
+                $this->old_translation->id_job,
+                $this->old_translation->id_segment
             );
         }
 
@@ -236,9 +251,10 @@ class TranslationEvent {
      * @return TranslationEventStruct
      * @throws Exception
      */
-    public function getTranslationEventStruct(): TranslationEventStruct {
-        if ( !isset( $this->translation_event_struct ) ) {
-            throw new Exception( 'The current segment was not prepared yet. Run TranslationEventsHandler::prepareEventStruct() first.' );
+    public function getTranslationEventStruct(): TranslationEventStruct
+    {
+        if (!isset($this->translation_event_struct)) {
+            throw new Exception('The current segment was not prepared yet. Run TranslationEventsHandler::prepareEventStruct() first.');
         }
 
         return $this->translation_event_struct;
@@ -249,7 +265,8 @@ class TranslationEvent {
      *
      * @return $this
      */
-    public function setTranslationEventStruct( TranslationEventStruct $translation_event_struct ): TranslationEvent {
+    public function setTranslationEventStruct(TranslationEventStruct $translation_event_struct): TranslationEvent
+    {
         $this->translation_event_struct = $translation_event_struct;
 
         return $this;
@@ -259,22 +276,25 @@ class TranslationEvent {
      * @return int
      * @throws Exception
      */
-    public function getPreviousEventSourcePage(): int {
-        if ( !$this->getLatestEventForSegment() ) {
+    public function getPreviousEventSourcePage(): int
+    {
+        if (!$this->getLatestEventForSegment()) {
             if (
-                    in_array( $this->getOldTranslation()->status,
-                            array_merge(
-                                    TranslationStatus::$TRANSLATION_STATUSES,
-                                    TranslationStatus::$INITIAL_STATUSES
-                            ) )
+                in_array(
+                    $this->getOldTranslation()->status,
+                    array_merge(
+                        TranslationStatus::$TRANSLATION_STATUSES,
+                        TranslationStatus::$INITIAL_STATUSES
+                    )
+                )
             ) {
                 $source_page = SourcePages::SOURCE_PAGE_TRANSLATE;
-            } elseif ( $this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED ) {
+            } elseif ($this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED) {
                 $source_page = SourcePages::SOURCE_PAGE_REVISION;
-            } elseif ( $this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED2 ) {
+            } elseif ($this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED2) {
                 $source_page = SourcePages::SOURCE_PAGE_REVISION_2;
             } else {
-                throw new Exception( 'Unable to guess source_page for missing prior event' );
+                throw new Exception('Unable to guess source_page for missing prior event');
             }
 
             return $source_page;
@@ -284,37 +304,34 @@ class TranslationEvent {
     }
 
     /**
-     * @param $status
+     * @param string $status
      *
      * @return int
      */
-    private function statusAsSourcePage( $status ): int {
-
-        switch ( $status ) {
-            case $status == TranslationStatus::STATUS_TRANSLATED:
-                return SourcePages::SOURCE_PAGE_TRANSLATE;
-            case $status == TranslationStatus::STATUS_APPROVED:
-                return SourcePages::SOURCE_PAGE_REVISION;
-            case $status == TranslationStatus::STATUS_APPROVED2:
-                return SourcePages::SOURCE_PAGE_REVISION_2;
-            default:
-                return 0;
-        }
-
+    private function statusAsSourcePage(string $status): int
+    {
+        return match ($status) {
+            TranslationStatus::STATUS_TRANSLATED => SourcePages::SOURCE_PAGE_TRANSLATE,
+            TranslationStatus::STATUS_APPROVED => SourcePages::SOURCE_PAGE_REVISION,
+            TranslationStatus::STATUS_APPROVED2 => SourcePages::SOURCE_PAGE_REVISION_2,
+            default => 0,
+        };
     }
 
     /**
      * @return int
      * @throws Exception
      */
-    public function getCurrentEventSourcePage(): int {
+    public function getCurrentEventSourcePage(): int
+    {
         return $this->getTranslationEventStruct()->source_page;
     }
 
     /**
      * @return bool
      */
-    public function isPropagationSource(): bool {
+    public function isPropagationSource(): bool
+    {
         return $this->_isPropagationSource;
     }
 
@@ -323,7 +340,8 @@ class TranslationEvent {
      *
      * @return void
      */
-    public function setPropagationSource( bool $value ): void {
+    public function setPropagationSource(bool $value): void
+    {
         $this->_isPropagationSource = $value;
     }
 
@@ -334,7 +352,8 @@ class TranslationEvent {
      *
      * @return bool
      */
-    public function isFinalRevisionFlagAllowed(): bool {
+    public function isFinalRevisionFlagAllowed(): bool
+    {
         return $this->revisionFlagAllowed;
     }
 
@@ -343,7 +362,8 @@ class TranslationEvent {
      *
      * @return $this
      */
-    public function setRevisionFlagAllowed( bool $revisionFlagAllowed ): TranslationEvent {
+    public function setRevisionFlagAllowed(bool $revisionFlagAllowed): TranslationEvent
+    {
         $this->revisionFlagAllowed = $revisionFlagAllowed;
 
         return $this;
@@ -352,46 +372,52 @@ class TranslationEvent {
     /**
      * @return int[]
      */
-    public function getUnsetFinalRevision(): array {
+    public function getUnsetFinalRevision(): array
+    {
         return $this->unsetFinalRevision;
     }
 
     /**
      * @param int $source_page
      */
-    public function setFinalRevisionToRemove( int $source_page ) {
+    public function setFinalRevisionToRemove(int $source_page): void
+    {
         $this->unsetFinalRevision[] = $source_page;
     }
 
     /**
      * @return ChunkReviewStruct[]
      */
-    public function getChunkReviewsPartials(): array {
+    public function getChunkReviewsPartials(): array
+    {
         return $this->chunk_reviews_partials_to_update;
     }
 
     /**
      * @param ChunkReviewStruct $chunk_review
      */
-    public function setChunkReviewForPassFailUpdate( ChunkReviewStruct $chunk_review ) {
-        if ( false === isset( $this->chunk_reviews_partials_to_update[ $chunk_review->id ] ) ) {
-            $this->chunk_reviews_partials_to_update[ $chunk_review->id ] = $chunk_review;
+    public function setChunkReviewForPassFailUpdate(ChunkReviewStruct $chunk_review): void
+    {
+        if (false === isset($this->chunk_reviews_partials_to_update[$chunk_review->id])) {
+            $this->chunk_reviews_partials_to_update[$chunk_review->id] = $chunk_review;
         }
     }
 
     /**
      * @return EntryWithCategoryStruct[]
      */
-    public function getIssuesToDelete(): array {
+    public function getIssuesToDelete(): array
+    {
         return $this->issues_to_delete;
     }
 
     /**
      * @param EntryWithCategoryStruct $issue
      */
-    public function addIssueToDelete( EntryWithCategoryStruct $issue ) {
-        if ( false === isset( $this->issues_to_delete[ $issue->id ] ) ) {
-            $this->issues_to_delete[ $issue->id ] = $issue;
+    public function addIssueToDelete(EntryWithCategoryStruct $issue): void
+    {
+        if (false === isset($this->issues_to_delete[$issue->id])) {
+            $this->issues_to_delete[$issue->id] = $issue;
         }
     }
 

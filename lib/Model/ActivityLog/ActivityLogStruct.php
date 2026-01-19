@@ -11,7 +11,8 @@ use Model\DataAccess\IDaoStruct;
  * Date: 13/06/16
  * Time: 12:30
  */
-class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
     /**
      * MAP to convert the values to the right string definition
@@ -21,31 +22,31 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     protected static array $actionsStrings = [
 
         /* DOWNLOADS */
-            self::DOWNLOAD_EDIT_LOG           => "Editing Log downloaded",
-            self::DOWNLOAD_ANALYSIS_REPORT    => "Analysis Report downloaded",
-            self::DOWNLOAD_PREVIEW            => "Preview downloaded",
-            self::DOWNLOAD_GDRIVE_PREVIEW     => "Preview opened in Google Drive",
-            self::DOWNLOAD_ORIGINAL           => "Original file downloaded",
-            self::DOWNLOAD_TRANSLATION        => "Translation downloaded",
-            self::DOWNLOAD_GDRIVE_TRANSLATION => "Translation opened in Google Drive",
-            self::DOWNLOAD_JOB_TMX            => "Job TMX exported",
-            self::DOWNLOAD_OMEGAT             => "OmegaT package exported",
-            self::DOWNLOAD_XLIFF              => "XLIFF file(s) downloaded",
-            self::DOWNLOAD_KEY_TMX            => "Private translation memory %s downloaded",
+        self::DOWNLOAD_EDIT_LOG => "Editing Log downloaded",
+        self::DOWNLOAD_ANALYSIS_REPORT => "Analysis Report downloaded",
+        self::DOWNLOAD_PREVIEW => "Preview downloaded",
+        self::DOWNLOAD_GDRIVE_PREVIEW => "Preview opened in Google Drive",
+        self::DOWNLOAD_ORIGINAL => "Original file downloaded",
+        self::DOWNLOAD_TRANSLATION => "Translation downloaded",
+        self::DOWNLOAD_GDRIVE_TRANSLATION => "Translation opened in Google Drive",
+        self::DOWNLOAD_JOB_TMX => "Job TMX exported",
+        self::DOWNLOAD_OMEGAT => "OmegaT package exported",
+        self::DOWNLOAD_XLIFF => "XLIFF file(s) downloaded",
+        self::DOWNLOAD_KEY_TMX => "Private translation memory %s downloaded",
 
         /* ACCESSES */
-            self::ACCESS_ANALYZE_PAGE         => "Access to the Analyze page",
-            self::ACCESS_EDITLOG_PAGE         => "Access to the Editing Log page",
-            self::ACCESS_TRANSLATE_PAGE       => "Access to the Translate page",
-            self::ACCESS_REVISE_PAGE          => "Access to the Revise page",
-            self::ACCESS_MANAGE_PAGE          => "Access to the Manage page",
-            self::ACCESS_REVISE_SUMMARY_PAGE  => "Access to the Revise Summary page",
+        self::ACCESS_ANALYZE_PAGE => "Access to the Analyze page",
+        self::ACCESS_EDITLOG_PAGE => "Access to the Editing Log page",
+        self::ACCESS_TRANSLATE_PAGE => "Access to the Translate page",
+        self::ACCESS_REVISE_PAGE => "Access to the Revise page",
+        self::ACCESS_MANAGE_PAGE => "Access to the Manage page",
+        self::ACCESS_REVISE_SUMMARY_PAGE => "Access to the Revise Summary page",
 
         /* OTHERS */
-            self::PROJECT_CREATED             => "Project created.",
-            self::JOB_UNARCHIVED              => "Job unarchived.",
+        self::PROJECT_CREATED => "Project created.",
+        self::JOB_UNARCHIVED => "Job unarchived.",
 
-            self::TRANSLATION_DELIVERED => 'Translation Delivered'
+        self::TRANSLATION_DELIVERED => 'Translation Delivered'
 
     ];
 
@@ -53,96 +54,97 @@ class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      * MAP for Database values
      */
     /* DOWNLOADS */
-    const DOWNLOAD_EDIT_LOG           = 1;
-    const DOWNLOAD_ANALYSIS_REPORT    = 2;
-    const DOWNLOAD_PREVIEW            = 3;
-    const DOWNLOAD_GDRIVE_PREVIEW     = 4;
-    const DOWNLOAD_ORIGINAL           = 5;
-    const DOWNLOAD_TRANSLATION        = 6;
-    const DOWNLOAD_GDRIVE_TRANSLATION = 7;
-    const DOWNLOAD_JOB_TMX            = 8;
-    const DOWNLOAD_OMEGAT             = 9;
-    const DOWNLOAD_XLIFF              = 10;
-    const DOWNLOAD_KEY_TMX            = 11;
+    const int DOWNLOAD_EDIT_LOG = 1;
+    const int DOWNLOAD_ANALYSIS_REPORT = 2;
+    const int DOWNLOAD_PREVIEW = 3;
+    const int DOWNLOAD_GDRIVE_PREVIEW = 4;
+    const int DOWNLOAD_ORIGINAL = 5;
+    const int DOWNLOAD_TRANSLATION = 6;
+    const int DOWNLOAD_GDRIVE_TRANSLATION = 7;
+    const int DOWNLOAD_JOB_TMX = 8;
+    const int DOWNLOAD_OMEGAT = 9;
+    const int DOWNLOAD_XLIFF = 10;
+    const int DOWNLOAD_KEY_TMX = 11;
 
     /* ACCESSES */
-    const ACCESS_ANALYZE_PAGE        = 12;
-    const ACCESS_EDITLOG_PAGE        = 13;
-    const ACCESS_TRANSLATE_PAGE      = 14;
-    const ACCESS_REVISE_PAGE         = 15;
-    const ACCESS_MANAGE_PAGE         = 16;
-    const ACCESS_REVISE_SUMMARY_PAGE = 17;
+    const int ACCESS_ANALYZE_PAGE = 12;
+    const int ACCESS_EDITLOG_PAGE = 13;
+    const int ACCESS_TRANSLATE_PAGE = 14;
+    const int ACCESS_REVISE_PAGE = 15;
+    const int ACCESS_MANAGE_PAGE = 16;
+    const int ACCESS_REVISE_SUMMARY_PAGE = 17;
 
     /* OTHERS */
-    const PROJECT_CREATED = 18;
-    const JOB_UNARCHIVED  = 19;
+    const int PROJECT_CREATED = 18;
+    const int JOB_UNARCHIVED = 19;
 
-    const TRANSLATION_DELIVERED = 101;
+    const int TRANSLATION_DELIVERED = 101;
 
     protected array $cached_results = [];
 
     /**
-     * @var int
+     * @var ?int
      */
-    public $id_project;
+    public ?int $id_project = null;
+
+    /**
+     * @var ?int
+     */
+    public ?int $ID = null;
+
+    /**
+     * @var ?int
+     */
+    public ?int $id_job = null;
 
     /**
      * @var int
      */
-    public $ID;
-
-    /**
-     * @var int
-     */
-    public $id_job;
-
-    /**
-     * @var int
-     */
-    public $action;
+    public int $action;
 
     /**
      * @var string
      */
-    public $ip;
+    public string $ip;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public $uid;
-
-    /**
-     * @var string
-     */
-    public $event_date;
+    public ?int $uid = null; //nullable for anonymous users. Backward compatibility
 
     /**
      * @var string
      */
-    public $memory_key;
+    public string $event_date;
+
+    /**
+     * @var ?string
+     */
+    public ?string $memory_key = null;
 
     /**
      * @var string
      */
-    public $email;
+    public string $email = '';
 
     /**
      * @var string
      */
-    public $first_name;
+    public string $first_name = '';
 
     /**
      * @var string
      */
-    public $last_name;
+    public string $last_name = '';
 
     /**
      * @param $actionID int
      *
      * @return string
      */
-    public static function getAction( $actionID ): string {
-        return self::$actionsStrings[ $actionID ];
+    public static function getAction(int $actionID): string
+    {
+        return self::$actionsStrings[$actionID];
     }
 
 }

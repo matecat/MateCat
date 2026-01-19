@@ -12,7 +12,8 @@ namespace View\API\App\Json\Analysis;
 use JsonSerializable;
 use Utils\Tools\Utils;
 
-class AnalysisFileMetadata implements JsonSerializable {
+class AnalysisFileMetadata implements JsonSerializable
+{
 
     /**
      * @var string
@@ -30,18 +31,20 @@ class AnalysisFileMetadata implements JsonSerializable {
      * @param string $key
      * @param string $value
      */
-    public function __construct( string $key, string $value ) {
-        $this->key   = $key;
+    public function __construct(string $key, string $value)
+    {
+        $this->key = $key;
         $this->value = $value;
     }
 
     /**
      * @return array
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
-                'key'   => $this->key,
-                'value' => Utils::formatStringValue( $this->value ),
+            'key' => $this->key,
+            'value' => Utils::formatStringValue($this->value),
         ];
     }
 }

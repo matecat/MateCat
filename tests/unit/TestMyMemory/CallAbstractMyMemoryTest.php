@@ -2,12 +2,14 @@
 //TODO:estendere
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use TestHelpers\AbstractTest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
-use Utils\Tools\Match;
+use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
 
 
 /**
@@ -17,12 +19,10 @@ use Utils\Tools\Match;
  * Date: 22/04/16
  * Time: 11.47
  */
-class CallAbstractMyMemoryTest extends AbstractTest {
+class CallAbstractMyMemoryTest extends AbstractTest
+{
 
-    /**
-     * @var PHPUnit_Framework_MockObject_MockObject | Match
-     */
-    protected $engine_MyMemory;
+    protected MyMemory|Stub|MockObject $engine_MyMemory;
 
 
     /**
@@ -51,20 +51,21 @@ class CallAbstractMyMemoryTest extends AbstractTest {
     /**
      * @throws Exception
      */
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
 
-        $engine_struct_MyMemory     = EngineStruct::getStruct();
+        $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
+        $engine_struct_MyMemory = (new EngineDAO())->read($engine_struct_MyMemory)[0];
 
-        /** @var $engine_MyMemory MyMemory */
-        $this->engine_MyMemory = @$this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $engine_struct_MyMemory ] )->onlyMethods( [ '_call' ] )->getMock();
+        /** @var $engine_MyMemory Stub|MockObject|MyMemory */
+        $this->engine_MyMemory = @$this->getStubBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory])->onlyMethods(['_call'])->getStub();
 
-        $reflector            = new ReflectionClass( $this->engine_MyMemory );
-        $this->resultProperty = $reflector->getProperty( "result" );
-        $this->resultProperty->setAccessible( true );
+        $reflector = new ReflectionClass($this->engine_MyMemory);
+        $this->resultProperty = $reflector->getProperty("result");
+
 
         $this->test_key = "a6043e606ac9b5d7ff24";
 
@@ -79,55 +80,57 @@ class CallAbstractMyMemoryTest extends AbstractTest {
         $this->prop = '{"project_id":"987654","project_name":"barfoo","job_id":"321"}';
 
         $this->response_data = '{"responseData":"OK","responseStatus":200,"responseDetails":["0a64b364-f4f0-d301-66c4-5a6c04c2a2bf"]}';
-
     }
 
     /**
      * @group   regression
      * @covers  AbstractEngine::call
      */
-    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_1() {
-
+    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_1()
+    {
         $params = [
-                'tnote'    => null,
-                'langpair' => 'it-IT|en-US',
-                'de'       => $this->param_de,
-                'prop'     => $this->prop,
-                'key'      => $this->test_key,
-                'seg'      => $this->str_seg_1,
-                'tra'      => $this->str_tra_1,
+            'tnote' => null,
+            'langpair' => 'it-IT|en-US',
+            'de' => $this->param_de,
+            'prop' => $this->prop,
+            'key' => $this->test_key,
+            'seg' => $this->str_seg_1,
+            'tra' => $this->str_tra_1,
         ];
 
         $curl_opts = [
-                CURLOPT_POSTFIELDS  => $params,
-                CURLINFO_HEADER_OUT => true,
-                CURLOPT_TIMEOUT     => 120
+            CURLOPT_POSTFIELDS => $params,
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120
         ];
 
-        $this->engine_MyMemory->expects( $this->once() )
-                ->method( '_call' )
-                ->with( $this->equalTo( "https://api.mymemory.translated.net/set" ), $this->equalTo( $curl_opts ) )
-                ->willReturn( $this->response_data );
+        $engine_struct_MyMemory = EngineStruct::getStruct();
+        $engine_struct_MyMemory->id = 1;
+        $engine_struct_MyMemory = (new EngineDAO())->read($engine_struct_MyMemory)[0];
+        $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory])->onlyMethods(['_call'])->getMock();
 
-        $this->engine_MyMemory->call( "contribute_relative_url", $params, true );
+        $MyMemory->expects($this->once())
+            ->method('_call')
+            ->with($this->equalTo("https://api.mymemory.translated.net/set"), $this->equalTo($curl_opts))
+            ->willReturn($this->response_data);
+
+        $MyMemory->call("contribute_relative_url", $params, true);
 
         /**
          * @var $actual_result SetContributionResponse
          */
-        $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
+        $actual_result = $this->resultProperty->getValue($MyMemory);
 
         /**
          * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof SetContributionResponse );
-        $this->assertFalse( property_exists( $actual_result, 'matches' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseData' ) );
-        $this->assertTrue( property_exists( $actual_result, 'error' ) );
-        $this->assertTrue( property_exists( $actual_result, '_rawResponse' ) );
-
-
+        $this->assertTrue($actual_result instanceof SetContributionResponse);
+        $this->assertFalse(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
     }
 
 
@@ -135,51 +138,56 @@ class CallAbstractMyMemoryTest extends AbstractTest {
      * @group   regression
      * @covers  AbstractEngine::call
      */
-    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_stubbed__call_with_mock_1() {
-
+    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_stubbed__call_with_mock_1()
+    {
         $params = [
-                'tnote'    => null,
-                'langpair' => 'it-IT|en-US',
-                'de'       => $this->param_de,
-                'prop'     => $this->prop,
-                'key'      => $this->test_key,
-                'seg'      => $this->str_seg_1,
-                'tra'      => $this->str_tra_1,
+            'tnote' => null,
+            'langpair' => 'it-IT|en-US',
+            'de' => $this->param_de,
+            'prop' => $this->prop,
+            'key' => $this->test_key,
+            'seg' => $this->str_seg_1,
+            'tra' => $this->str_tra_1,
         ];
 
         $curl_opts = [
-                CURLOPT_POSTFIELDS  => $params,
-                CURLINFO_HEADER_OUT => true,
-                CURLOPT_TIMEOUT     => 120
+            CURLOPT_POSTFIELDS => $params,
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120
         ];
 
-        $this->engine_MyMemory->expects( $this->once() )
-                ->method( '_call' )
-                ->with( $this->equalTo( "https://api.mymemory.translated.net/set" ), $this->equalTo( $curl_opts ) )
-                ->willReturn( $this->response_data );
+        $engine_struct_MyMemory = EngineStruct::getStruct();
+        $engine_struct_MyMemory->id = 1;
+        $engine_struct_MyMemory = (new EngineDAO())->read($engine_struct_MyMemory)[0];
+        $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory])->onlyMethods(['_call'])->getMock();
 
-        $this->engine_MyMemory->call( "contribute_relative_url", $params, true );
+        $MyMemory->expects($this->once())
+            ->method('_call')
+            ->with($this->equalTo("https://api.mymemory.translated.net/set"), $this->equalTo($curl_opts))
+            ->willReturn($this->response_data);
+
+        $MyMemory->call("contribute_relative_url", $params, true);
 
         /**
          * Test that the _decode method returns an object of type:
          * @var $returned_object SetContributionResponse
          */
-        $returned_object = $this->resultProperty->getValue( $this->engine_MyMemory );
+        $returned_object = $this->resultProperty->getValue($MyMemory);
 
-        $this->assertTrue( $returned_object instanceof SetContributionResponse );
-        $this->assertEquals( 200, $returned_object->responseStatus );
-        $this->assertEquals( [ '0' => "0a64b364-f4f0-d301-66c4-5a6c04c2a2bf" ], $returned_object->responseDetails );
-        $this->assertEquals( "OK", $returned_object->responseData );
-        $this->assertNull( $returned_object->error );
+        $this->assertTrue($returned_object instanceof SetContributionResponse);
+        $this->assertEquals(200, $returned_object->responseStatus);
+        $this->assertEquals(['0' => "0a64b364-f4f0-d301-66c4-5a6c04c2a2bf"], $returned_object->responseDetails);
+        $this->assertEquals("OK", $returned_object->responseData);
+        $this->assertNull($returned_object->error);
 
         /**
          * check of protected property
          */
-        $reflector = new ReflectionClass( $returned_object );
-        $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        $reflector = new ReflectionClass($returned_object);
+        $property = $reflector->getProperty('_rawResponse');
 
-        $this->assertEquals( "", $property->getValue( $returned_object ) );
+
+        $this->assertEquals("", $property->getValue($returned_object));
     }
 
 
@@ -188,87 +196,89 @@ class CallAbstractMyMemoryTest extends AbstractTest {
      * @covers  AbstractEngine::call
      * @throws Exception
      */
-    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_2() {
-
+    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_2()
+    {
         $params = [
-                'tnote'    => null,
-                'langpair' => 'it-IT|en-US',
-                'de'       => $this->param_de,
-                'prop'     => $this->prop,
-                'key'      => $this->test_key,
-                'seg'      => $this->str_seg_2,
-                'tra'      => $this->str_tra_2,
+            'tnote' => null,
+            'langpair' => 'it-IT|en-US',
+            'de' => $this->param_de,
+            'prop' => $this->prop,
+            'key' => $this->test_key,
+            'seg' => $this->str_seg_2,
+            'tra' => $this->str_tra_2,
         ];
 
         $curl_opts = [
-                CURLOPT_POSTFIELDS  => $params,
-                CURLINFO_HEADER_OUT => true,
-                CURLOPT_TIMEOUT     => 120
+            CURLOPT_POSTFIELDS => $params,
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120
         ];
 
-        $this->engine_MyMemory->expects( $this->once() )
-                ->method( '_call' )
-                ->with( $this->equalTo( "https://api.mymemory.translated.net/set" ), $this->equalTo( $curl_opts ) )
-                ->willReturn( $this->response_data );
+        $engine_struct_MyMemory = EngineStruct::getStruct();
+        $engine_struct_MyMemory->id = 1;
+        $engine_struct_MyMemory = (new EngineDAO())->read($engine_struct_MyMemory)[0];
+        $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory])->onlyMethods(['_call'])->getMock();
 
-        $this->engine_MyMemory->call( "contribute_relative_url", $params, true );
+        $MyMemory->expects($this->once())
+            ->method('_call')
+            ->with($this->equalTo("https://api.mymemory.translated.net/set"), $this->equalTo($curl_opts))
+            ->willReturn($this->response_data);
+
+        $MyMemory->call("contribute_relative_url", $params, true);
 
         /**
          * Test that the _decode method returns an object of type:
          * @var $actual_result SetContributionResponse
          */
-        $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
+        $actual_result = $this->resultProperty->getValue($MyMemory);
 
         /**
          * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof SetContributionResponse );
-        $this->assertFalse( property_exists( $actual_result, 'matches' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseData' ) );
-        $this->assertTrue( property_exists( $actual_result, 'error' ) );
-        $this->assertTrue( property_exists( $actual_result, '_rawResponse' ) );
+        $this->assertTrue($actual_result instanceof SetContributionResponse);
+        $this->assertFalse(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
 
-        $this->assertEquals( 200, $actual_result->responseStatus );
-        $this->assertEquals( [ '0' => "0a64b364-f4f0-d301-66c4-5a6c04c2a2bf" ], $actual_result->responseDetails );
-        $this->assertEquals( "OK", $actual_result->responseData );
-        $this->assertNull( $actual_result->error );
-
+        $this->assertEquals(200, $actual_result->responseStatus);
+        $this->assertEquals(['0' => "0a64b364-f4f0-d301-66c4-5a6c04c2a2bf"], $actual_result->responseDetails);
+        $this->assertEquals("OK", $actual_result->responseData);
+        $this->assertNull($actual_result->error);
     }
 
     /**
      * @group   regression
      * @covers  AbstractEngine::call
      */
-    public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_general_check() {
-
+    public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_general_check()
+    {
         $params = [
-                'langpair' => "IT|EN",
-                'de'       => $this->param_de,
-                'seg'      => $this->str_seg_3,
-                'tra'      => $this->str_tra_3,
+            'langpair' => "IT|EN",
+            'de' => $this->param_de,
+            'seg' => $this->str_seg_3,
+            'tra' => $this->str_tra_3,
         ];
 
 
-        $this->engine_MyMemory->call( "delete_relative_url", $params );
+        $this->engine_MyMemory->call("delete_relative_url", $params);
         /**
          * @var $actual_result GetMemoryResponse
          */
-        $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
+        $actual_result = $this->resultProperty->getValue($this->engine_MyMemory);
 
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
-        $this->assertTrue( property_exists( $actual_result, 'matches' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
-        $this->assertTrue( property_exists( $actual_result, 'responseData' ) );
-        $this->assertTrue( property_exists( $actual_result, 'error' ) );
-        $this->assertTrue( property_exists( $actual_result, '_rawResponse' ) );
-
-
+        $this->assertTrue($actual_result instanceof GetMemoryResponse);
+        $this->assertTrue(property_exists($actual_result, 'matches'));
+        $this->assertTrue(property_exists($actual_result, 'responseStatus'));
+        $this->assertTrue(property_exists($actual_result, 'responseDetails'));
+        $this->assertTrue(property_exists($actual_result, 'responseData'));
+        $this->assertTrue(property_exists($actual_result, 'error'));
+        $this->assertTrue(property_exists($actual_result, '_rawResponse'));
     }
 
 
@@ -276,52 +286,57 @@ class CallAbstractMyMemoryTest extends AbstractTest {
      * @group   regression
      * @covers  AbstractEngine::call
      */
-    public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_stubbed__call_with_mock() {
-
+    public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_stubbed__call_with_mock()
+    {
         $params = [
-                'langpair' => "IT|EN",
-                'de'       => $this->param_de,
-                'seg'      => $this->str_seg_3,
-                'tra'      => $this->str_tra_3,
+            'langpair' => "IT|EN",
+            'de' => $this->param_de,
+            'seg' => $this->str_seg_3,
+            'tra' => $this->str_tra_3,
         ];
 
         $url_mock_param = "https://api.mymemory.translated.net/delete_by_id";
 
-        /** @var array $url_mock_param */
-        $this->engine_MyMemory
-                ->expects( $this->once() )
-                ->method( '_call' )
-                ->with( $url_mock_param, [
-                        CURLOPT_POSTFIELDS  => $params,
-                        CURLINFO_HEADER_OUT => true,
-                        CURLOPT_TIMEOUT     => 120
-                ] )
-                ->willReturn( '{"responseStatus":200,"responseData":"Found and deleted 1 segments"}' );
+        $engine_struct_MyMemory = EngineStruct::getStruct();
+        $engine_struct_MyMemory->id = 1;
+        $engine_struct_MyMemory = (new EngineDAO())->read($engine_struct_MyMemory)[0];
+        $MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory])->onlyMethods(['_call'])->getMock();
 
-        $this->engine_MyMemory->call( "delete_relative_url", $params, true );
+        /** @var array $url_mock_param */
+        $MyMemory
+            ->expects($this->once())
+            ->method('_call')
+            ->with($url_mock_param, [
+                CURLOPT_POSTFIELDS => $params,
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT => 120
+            ])
+            ->willReturn('{"responseStatus":200,"responseData":"Found and deleted 1 segments"}');
+
+        $MyMemory->call("delete_relative_url", $params, true);
 
 
         /**
          * @var $actual_result GetMemoryResponse
          */
-        $actual_result = $this->resultProperty->getValue( $this->engine_MyMemory );
+        $actual_result = $this->resultProperty->getValue($MyMemory);
         /**
          * check on the values of TMS object returned
          */
-        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
-        $this->assertEquals( [], $actual_result->matches );
-        $this->assertEquals( 200, $actual_result->responseStatus );
-        $this->assertEquals( "", $actual_result->responseDetails );
-        $this->assertEquals( "Found and deleted 1 segments", $actual_result->responseData );
-        $this->assertNull( $actual_result->error );
+        $this->assertTrue($actual_result instanceof GetMemoryResponse);
+        $this->assertEquals([], $actual_result->matches);
+        $this->assertEquals(200, $actual_result->responseStatus);
+        $this->assertEquals("", $actual_result->responseDetails);
+        $this->assertEquals("Found and deleted 1 segments", $actual_result->responseData);
+        $this->assertNull($actual_result->error);
         /**
          * check of protected property
          */
-        $reflector = new ReflectionClass( $actual_result );
-        $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
 
-        $this->assertEquals( "", $property->getValue( $actual_result ) );
+
+        $this->assertEquals("", $property->getValue($actual_result));
     }
 
 
@@ -329,23 +344,22 @@ class CallAbstractMyMemoryTest extends AbstractTest {
      * @group   regression
      * @covers  AbstractEngine::call
      */
-    public function test_call_with_wrong_function_name_for_code_coverage_purpose() {
-
+    public function test_call_with_wrong_function_name_for_code_coverage_purpose()
+    {
         $function_param = "bar_and_foo_invalid";
-        $this->engine_MyMemory->call( $function_param, [
-                'langpair' => "IT|EN",
-                'de'       => $this->param_de,
-        ] );
+        $this->engine_MyMemory->call($function_param, [
+            'langpair' => "IT|EN",
+            'de' => $this->param_de,
+        ]);
 
         /**
-         * @var $result_object SetContributionResponse
+         * @var $result_object UpdateContributionResponse
          */
-        $result_object = $this->resultProperty->getValue( $this->engine_MyMemory );
-        $code          = $result_object[ 'error' ][ 'code' ];
-        $this->assertEquals( -43, $code );
-        $message = $result_object[ 'error' ][ 'message' ];
-        $this->assertEquals( " Bad Method Call. Requested method '" . $function_param . "' not Found.", $message );
-
+        $result_object = $this->resultProperty->getValue($this->engine_MyMemory);
+        $code = $result_object['error']['code'];
+        $this->assertEquals(-43, $code);
+        $message = $result_object['error']['message'];
+        $this->assertEquals(" Bad Method Call. Requested method '" . $function_param . "' not Found.", $message);
     }
 
     /**
@@ -353,49 +367,49 @@ class CallAbstractMyMemoryTest extends AbstractTest {
      * @covers  AbstractEngine::call
      * @throws Exception
      */
-    public function test_real_get() {
-
+    public function test_real_get()
+    {
         $params = [
-                'de'       => $this->param_de,
-                'key'      => $this->test_key,
-                'langpair' => "en-US|it-IT",
-                'q'        => 'Receipt Number:&#09;&#09; ciaone',
+            'de' => $this->param_de,
+            'key' => $this->test_key,
+            'langpair' => "en-US|it-IT",
+            'q' => 'Receipt Number:&#09;&#09; ciaone',
         ];
 
         $url_mock_param = 'https://api.mymemory.translated.net/get';
 
-        $engine_struct_MyMemory     = EngineStruct::getStruct();
+        $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
-        $engine_MyMemory        = new MyMemory( $engine_struct_MyMemory );
+        $engine_struct_MyMemory = (new EngineDAO())->read($engine_struct_MyMemory)[0];
+        $engine_MyMemory = new MyMemory($engine_struct_MyMemory);
 
-        $engine_MyMemory->call( "translate_relative_url", $params, true );
+        $engine_MyMemory->call("translate_relative_url", $params, true);
 
-        $reflector      = new ReflectionClass( $engine_MyMemory );
-        $resultProperty = $reflector->getProperty( "result" );
-        $resultProperty->setAccessible( true );
+        $reflector = new ReflectionClass($engine_MyMemory);
+        $resultProperty = $reflector->getProperty("result");
+
         /**
          * @var $actual_result GetMemoryResponse
          */
-        $actual_result = $resultProperty->getValue( $engine_MyMemory );
+        $actual_result = $resultProperty->getValue($engine_MyMemory);
 
         /**
          * check on the values of TMS object returned
          */
-        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
-        $this->assertCount( 3, $actual_result->matches );
-        $this->assertEquals( 200, $actual_result->responseStatus );
-        $this->assertEquals( "", $actual_result->responseDetails );
-        $this->assertTrue( is_array( $actual_result->responseData ) );
-        $this->assertNull( $actual_result->error );
+        $this->assertTrue($actual_result instanceof GetMemoryResponse);
+        $this->assertCount(3, $actual_result->matches);
+        $this->assertEquals(200, $actual_result->responseStatus);
+        $this->assertEquals("", $actual_result->responseDetails);
+        $this->assertTrue(is_array($actual_result->responseData));
+        $this->assertNull($actual_result->error);
         /**
          * check of protected property
          */
-        $reflector = new ReflectionClass( $actual_result );
-        $property  = $reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
 
-        $this->assertEquals( "", $property->getValue( $actual_result ) );
+
+        $this->assertEquals("", $property->getValue($actual_result));
     }
 }

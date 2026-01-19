@@ -11,17 +11,19 @@ namespace Controller\Abstracts\Authentication;
 
 use Exception;
 
-trait SessionStarter {
+trait SessionStarter
+{
 
     /**
      * @throws Exception
      */
-    protected static function sessionStart() {
+    protected static function sessionStart(): void
+    {
         $session_status = session_status();
-        if ( $session_status == PHP_SESSION_NONE ) {
+        if ($session_status == PHP_SESSION_NONE) {
             session_start();
-        } elseif ( $session_status == PHP_SESSION_DISABLED ) {
-            throw new Exception( "MateCat needs to have sessions. Sessions must be enabled." );
+        } elseif ($session_status == PHP_SESSION_DISABLED) {
+            throw new Exception("MateCat needs to have sessions. Sessions must be enabled.");
         }
     }
 

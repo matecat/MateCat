@@ -5,10 +5,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 
-function sig_handler( $signo ) {
-
-    echo "\n\033[41m" . str_pad( "Caught signal \033[1m$signo", 39, " ", STR_PAD_BOTH ) . "\033[0m\n";
-    switch ( $signo ) {
+function sig_handler($signo)
+{
+    echo "\n\033[41m" . str_pad("Caught signal \033[1m$signo", 39, " ", STR_PAD_BOTH) . "\033[0m\n";
+    switch ($signo) {
         case SIGHUP:
         case SIGTERM:
         case SIGINT:
@@ -19,11 +19,12 @@ function sig_handler( $signo ) {
     }
 }
 
-function setupSignalHandler() {
-    pcntl_signal( SIGTERM, "sig_handler" );
-    pcntl_signal( SIGHUP, "sig_handler" );
-    pcntl_signal( SIGINT, "sig_handler" );
-    echo "\033[0;30;42m" . str_pad( "Signal handler installed.", 35, " ", STR_PAD_BOTH ) . "\033[0m\n";
+function setupSignalHandler()
+{
+    pcntl_signal(SIGTERM, "sig_handler");
+    pcntl_signal(SIGHUP, "sig_handler");
+    pcntl_signal(SIGINT, "sig_handler");
+    echo "\033[0;30;42m" . str_pad("Signal handler installed.", 35, " ", STR_PAD_BOTH) . "\033[0m\n";
 }
 
 /**
@@ -37,14 +38,16 @@ function setupSignalHandler() {
  *
  * @return void
  */
-function disableAmqWorkerClientHelper() {
-    WorkerClient::$_HANDLER = @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
-            AMQHandler::class,
-            [], [], '', false
+function disableAmqWorkerClientHelper(): void
+{
+    WorkerClient::$_HANDLER = (new PHPUnit\Framework\MockObject\Generator\Generator())->testDouble(
+        AMQHandler::class,
+        true
     );
 }
 
-function route() {
+function route()
+{
     // fake function for router command in Matecat
 }
 
@@ -59,21 +62,23 @@ function route() {
  *
  * @return MockObject
  */
-function mockKleinFramework(): MockObject {
-    return @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
-            Klein::class,
-            [], [], '', false
+function mockKleinFramework(): MockObject
+{
+    return (new PHPUnit\Framework\MockObject\Generator\Generator())->testDouble(
+        Klein::class,
+        true
     );
 }
 
 /**
  * @throws Exception
  */
-function getResourcePath( string $relativePath, string $pluginName = null ): string {
-    if ( file_exists( realpath( TEST_DIR . '/resources/' . $relativePath ) ) ) {
-        return realpath( TEST_DIR . '/resources/' . $relativePath );
-    } elseif ( file_exists( realpath( TEST_DIR . "/../plugins/$pluginName/tests/resources/" . $relativePath ) ) ) {
-        return realpath( TEST_DIR . "/../plugins/$pluginName/tests/resources/" . $relativePath );
+function getResourcePath(string $relativePath, string $pluginName = null): string
+{
+    if (file_exists(realpath(TEST_DIR . '/resources/' . $relativePath))) {
+        return realpath(TEST_DIR . '/resources/' . $relativePath);
+    } elseif (file_exists(realpath(TEST_DIR . "/../plugins/$pluginName/tests/resources/" . $relativePath))) {
+        return realpath(TEST_DIR . "/../plugins/$pluginName/tests/resources/" . $relativePath);
     }
-    throw new Exception( "Resource not found: $relativePath " . ( $pluginName ? "in plugin $pluginName" : "" ) );
+    throw new Exception("Resource not found: $relativePath " . ($pluginName ? "in plugin $pluginName" : ""));
 }

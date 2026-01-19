@@ -7,6 +7,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {number} options.idSegment
  * @param {string} options.username
  * @param {string} options.sourcePage
+ * @param {string} options.isAnonymous
  * @param {string} [options.idClient=config.id_client]
  * @param {string} [options.idJob=config.id_job]
  * @param {string} [options.password=config.password]
@@ -15,6 +16,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const markAsResolvedThread = async ({
   idSegment,
   username,
+  isAnonymous,
   sourcePage,
   idJob = config.id_job,
   password = config.password,
@@ -24,6 +26,7 @@ export const markAsResolvedThread = async ({
     id_segment: idSegment,
     username,
     password,
+    is_anonymous: isAnonymous,
     source_page: sourcePage,
   }
   const formData = new FormData()

@@ -4,6 +4,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use Stomp\Transport\Frame;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
@@ -29,7 +30,8 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * Date: 07/05/16
  * Time: 23:42
  */
-class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
+class SetContributionMTWorkerTest extends AbstractTest implements SplObserver
+{
 
     protected $featureSet;
     /**
@@ -40,13 +42,13 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
     /**
      * @param SplSubject $subject
      */
-    public function update( SplSubject $subject ) {
+    public function update(SplSubject $subject): void
+    {
         // Do Nothing, should be used to log
         /**
          * @var $subject SetContributionWorker
          */
-        $this->assertNotEmpty( $subject->getLogMsg() );
-
+        $this->assertNotEmpty($subject->getLogMsg());
     }
 
     /**
@@ -78,43 +80,47 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @return void
      * @throws Exception
      */
-    public function setUp(): void {
-
+    public function setUp(): void
+    {
         parent::setUp();
 
         $this->featureSet = new FeatureSet();
-        $this->featureSet->loadFromString( "translation_versions,review_extended,mmt" );
+        $this->featureSet->loadFromString("translation_versions,review_extended,mmt");
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = MateCatFilter::getInstance( $this->featureSet, 'en-US', 'it-IT', [] );
+        $this->filter = MateCatFilter::getInstance($this->featureSet, 'en-US', 'it-IT', []);
 
         //Reference Queue object
-        $this->contributionStruct                       = new SetContributionRequest();
-        $this->contributionStruct->jobStruct            = new JobStruct();
-        $this->contributionStruct->fromRevision         = true;
-        $this->contributionStruct->id_file              = 1888888;
-        $this->contributionStruct->id_job               = 1999999;
-        $this->contributionStruct->id_mt                = 1999999;
-        $this->contributionStruct->job_password         = "1d7903464318";
-        $this->contributionStruct->id_segment           = 9876;
-        $this->contributionStruct->segment              = $this->filter->fromLayer2ToLayer0( '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>' );
-        $this->contributionStruct->translation          = $this->filter->fromLayer2ToLayer0( '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g>' );
-        $this->contributionStruct->api_key              = 'demo@matecat.com';
-        $this->contributionStruct->uid                  = 1234;
+        $this->contributionStruct = new SetContributionRequest();
+        $this->contributionStruct->jobStruct = new JobStruct();
+        $this->contributionStruct->fromRevision = true;
+        $this->contributionStruct->id_file = 1888888;
+        $this->contributionStruct->id_job = 1999999;
+        $this->contributionStruct->id_mt = 1999999;
+        $this->contributionStruct->job_password = "1d7903464318";
+        $this->contributionStruct->id_segment = 9876;
+        $this->contributionStruct->segment = $this->filter->fromLayer2ToLayer0(
+            '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>'
+        );
+        $this->contributionStruct->translation = $this->filter->fromLayer2ToLayer0(
+            '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g>'
+        );
+        $this->contributionStruct->api_key = 'demo@matecat.com';
+        $this->contributionStruct->uid = 1234;
         $this->contributionStruct->oldTranslationStatus = 'NEW';
-        $this->contributionStruct->oldSegment           = $this->contributionStruct->segment; //we do not change the segment source
-        $this->contributionStruct->oldTranslation       = $this->contributionStruct->translation . " TEST";
+        $this->contributionStruct->oldSegment = $this->contributionStruct->segment; //we do not change the segment source
+        $this->contributionStruct->oldTranslation = $this->contributionStruct->translation . " TEST";
 
 
-        $this->queueElement            = new QueueElement();
-        $this->queueElement->params    = new Params( $this->contributionStruct->getArrayCopy() );
+        $this->queueElement = new QueueElement();
+        $this->queueElement->params = new Params($this->contributionStruct->getArrayCopy());
         $this->queueElement->classLoad = SetContributionMTWorker::class;
 
-        $this->contextList = ContextList::get( AppConfig::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
-
+        $this->contextList = ContextList::get(AppConfig::$TASK_RUNNER_CONFIG['context_definitions']);
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
     }
 
@@ -123,85 +129,82 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws Exception
      */
-    public function test_ExecContribution_WillCall_MMT_With_single_tm_key() {
-
+    #[Test]
+    public function test_ExecContribution_WillCall_MMT_With_single_tm_key()
+    {
         /**
          * @var $_worker SetContributionMTWorker
          */
-        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
-        $_worker->attach( $this );
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
 
         //create a stub EnginesFactory MMT
-        $stubEngine = @$this->getMockBuilder( MMT::class )
-                ->disableOriginalConstructor()
-                ->onlyMethods( [ 'update', 'getEngineRecord' ] )
-                ->getMock();
+        $stubEngine = $this->getMockBuilder(MMT::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['update'])
+            ->getMock();
 
-        $engineStruct       = new EngineStruct();
-        $engineStruct->id   = 1111;
+        $stubEngine->expects($stubEngineParameterSpy = $this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(true);
+
+
+        $engineStruct = new EngineStruct();
+        $engineStruct->id = 1111;
         $engineStruct->type = EngineConstants::MT;
-        $stubEngine->expects( $this->once() )
-                ->method( 'getEngineRecord' )
-                ->willReturn( $engineStruct );
-
-        $stubEngine->expects( $stubEngineParameterSpy = $this->once() )
-                ->method( 'update' )
-                ->with( $this->anything() )
-                ->willReturn( true );
-
-        $_worker->setEngine( $stubEngine );
+        $_worker->setEngine($stubEngine);
 
         /**
          * @var $queueElement SetContributionRequest
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getJobStruct' )
-                ->willReturn(
-                        new JobStruct(
-                                [
-                                        'id'           => $this->contributionStruct->id_job,
-                                        'password'     => $this->contributionStruct->job_password,
-                                        'source'       => 'en-US',
-                                        'target'       => 'it-IT',
-                                        'id_tms'       => 1,
-                                        'id_mt_engine' => 1111,
-                                        'tm_keys'      => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"XXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]'
-                                ]
-                        )
-                );
+        $contributionMockQueueObject = @$this->getMockBuilder(SetContributionRequest::class)->getMock();
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getJobStruct')
+            ->willReturn(
+                new JobStruct(
+                    [
+                        'id' => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source' => 'en-US',
+                        'target' => 'it-IT',
+                        'id_tms' => 1,
+                        'id_mt_engine' => 1111,
+                        'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"XXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]'
+                    ]
+                )
+            );
 
         // check that this is the right mock object, by preparing a result for a successive assertion
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getSessionId' )
-                ->willReturn( md5( $this->contributionStruct->id_file . '-' . $this->contributionStruct->id_job . '-' . $this->contributionStruct->job_password ) );
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getSessionId')
+            ->willReturn(md5($this->contributionStruct->id_file . '-' . $this->contributionStruct->id_job . '-' . $this->contributionStruct->job_password));
 
-        $contributionMockQueueObject->fromRevision         = $this->contributionStruct->fromRevision;
-        $contributionMockQueueObject->id_job               = $this->contributionStruct->id_job;
-        $contributionMockQueueObject->id_file              = $this->contributionStruct->id_file;
-        $contributionMockQueueObject->job_password         = $this->contributionStruct->job_password;
-        $contributionMockQueueObject->id_segment           = $this->contributionStruct->id_segment;
-        $contributionMockQueueObject->segment              = $this->contributionStruct->segment;
-        $contributionMockQueueObject->translation          = $this->contributionStruct->translation;
-        $contributionMockQueueObject->api_key              = $this->contributionStruct->api_key;
-        $contributionMockQueueObject->uid                  = $this->contributionStruct->uid;
+        $contributionMockQueueObject->fromRevision = $this->contributionStruct->fromRevision;
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+        $contributionMockQueueObject->id_file = $this->contributionStruct->id_file;
+        $contributionMockQueueObject->job_password = $this->contributionStruct->job_password;
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+        $contributionMockQueueObject->api_key = $this->contributionStruct->api_key;
+        $contributionMockQueueObject->uid = $this->contributionStruct->uid;
         $contributionMockQueueObject->oldTranslationStatus = $this->contributionStruct->oldTranslationStatus;
-        $contributionMockQueueObject->oldSegment           = $this->contributionStruct->oldSegment;
-        $contributionMockQueueObject->oldTranslation       = $this->contributionStruct->oldTranslation;
+        $contributionMockQueueObject->oldSegment = $this->contributionStruct->oldSegment;
+        $contributionMockQueueObject->oldTranslation = $this->contributionStruct->oldTranslation;
 
 
-        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
-        $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
+        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
+        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
 
-        $inspector   = new InvocationInspector( $stubEngineParameterSpy );
+        $inspector = new InvocationInspector($stubEngineParameterSpy);
         $invocations = $inspector->getInvocations();
 
-        if ( !empty( $invocations ) ) {
-            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
-            $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
-            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
-            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
+        if (!empty($invocations)) {
+            $this->assertEquals($this->contributionStruct->segment, $invocations[0]->parameters()[0]['segment']);
+            $this->assertEquals(['XXXXXXXXXXXXXXXX'], $invocations[0]->parameters()[0]['keys']);
+            $this->assertEquals('1999999:9876', $invocations[0]->parameters()[0]['tuid']);
+            $this->assertEquals('ed1814ac9699c651fdfca4912b1b6729', $invocations[0]->parameters()[0]['session']);
         }
     }
 
@@ -209,83 +212,79 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws Exception
      */
-    public function test_ExecContribution_WillCall_MMT_With_multiple_tm_keys() {
-
+    #[Test]
+    public function test_ExecContribution_WillCall_MMT_With_multiple_tm_keys()
+    {
         /**
          * @var $_worker SetContributionMTWorker
          */
-        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
-        $_worker->attach( $this );
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
 
-        //create a stub EnginesFactory Match
-        $stubEngine = @$this->getMockBuilder( MMT::class )
-                ->onlyMethods( [ 'update', 'getEngineRecord' ] )
-                ->disableOriginalConstructor()
-                ->getMock();
+        //create a stub EnginesFactory Matches
+        $stubEngine = @$this->getMockBuilder(MMT::class)
+            ->onlyMethods(['update'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $engineStruct       = new EngineStruct();
-        $engineStruct->id   = 1111;
+        $stubEngine->expects($stubEngineParameterSpy = $this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(true);
+
+        $engineStruct = new EngineStruct();
+        $engineStruct->id = 1111;
         $engineStruct->type = EngineConstants::MT;
-        $stubEngine->expects( $this->once() )
-                ->method( 'getEngineRecord' )
-                ->willReturn( $engineStruct );
-
-        $stubEngine->expects( $stubEngineParameterSpy = $this->once() )
-                ->method( 'update' )
-                ->with( $this->anything() )
-                ->willReturn( true );
-
-        $_worker->setEngine( $stubEngine );
+        $_worker->setEngine($stubEngine);
 
         /**
          * @var $queueElement SetContributionRequest
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getJobStruct' )
-                ->willReturn(
-                        new JobStruct(
-                                [
-                                        'id'           => $this->contributionStruct->id_job,
-                                        'password'     => $this->contributionStruct->job_password,
-                                        'source'       => 'en-US',
-                                        'target'       => 'it-IT',
-                                        'id_tms'       => 1,
-                                        'id_mt_engine' => 1111,
-                                        'tm_keys'      => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"Test","key":"XXXXXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"E tre","key":"YYYYYYYYYYYYYYYYYYYY","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]'
-                                ]
-                        )
-                );
+        $contributionMockQueueObject = @$this->getMockBuilder(SetContributionRequest::class)->getMock();
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getJobStruct')
+            ->willReturn(
+                new JobStruct(
+                    [
+                        'id' => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source' => 'en-US',
+                        'target' => 'it-IT',
+                        'id_tms' => 1,
+                        'id_mt_engine' => 1111,
+                        'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"Test","key":"XXXXXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"E tre","key":"YYYYYYYYYYYYYYYYYYYY","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]'
+                    ]
+                )
+            );
 
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getSessionId' )
-                ->willReturn( md5( $this->contributionStruct->id_file . '-' . $this->contributionStruct->id_job . '-' . $this->contributionStruct->job_password ) );
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getSessionId')
+            ->willReturn(md5($this->contributionStruct->id_file . '-' . $this->contributionStruct->id_job . '-' . $this->contributionStruct->job_password));
 
-        $contributionMockQueueObject->fromRevision         = $this->contributionStruct->fromRevision;
-        $contributionMockQueueObject->id_job               = $this->contributionStruct->id_job;
-        $contributionMockQueueObject->id_file              = $this->contributionStruct->id_file;
-        $contributionMockQueueObject->job_password         = $this->contributionStruct->job_password;
-        $contributionMockQueueObject->id_segment           = $this->contributionStruct->id_segment;
-        $contributionMockQueueObject->segment              = $this->contributionStruct->segment;
-        $contributionMockQueueObject->translation          = $this->contributionStruct->translation;
-        $contributionMockQueueObject->api_key              = $this->contributionStruct->api_key;
-        $contributionMockQueueObject->uid                  = $this->contributionStruct->uid;
+        $contributionMockQueueObject->fromRevision = $this->contributionStruct->fromRevision;
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+        $contributionMockQueueObject->id_file = $this->contributionStruct->id_file;
+        $contributionMockQueueObject->job_password = $this->contributionStruct->job_password;
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+        $contributionMockQueueObject->api_key = $this->contributionStruct->api_key;
+        $contributionMockQueueObject->uid = $this->contributionStruct->uid;
         $contributionMockQueueObject->oldTranslationStatus = $this->contributionStruct->oldTranslationStatus;
-        $contributionMockQueueObject->oldSegment           = $this->contributionStruct->oldSegment;
-        $contributionMockQueueObject->oldTranslation       = $this->contributionStruct->oldTranslation;
+        $contributionMockQueueObject->oldSegment = $this->contributionStruct->oldSegment;
+        $contributionMockQueueObject->oldTranslation = $this->contributionStruct->oldTranslation;
 
-        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
-        $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
+        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
+        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
 
-        $inspector   = new InvocationInspector( $stubEngineParameterSpy );
+        $inspector = new InvocationInspector($stubEngineParameterSpy);
         $invocations = $inspector->getInvocations();
 
-        if ( !empty( $invocations ) ) {
-            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
-            $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
-            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
-            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
+        if (!empty($invocations)) {
+            $this->assertEquals($this->contributionStruct->segment, $invocations[0]->parameters()[0]['segment']);
+            $this->assertEquals(['XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY'], $invocations[0]->parameters()[0]['keys']);
+            $this->assertEquals('1999999:9876', $invocations[0]->parameters()[0]['tuid']);
+            $this->assertEquals('ed1814ac9699c651fdfca4912b1b6729', $invocations[0]->parameters()[0]['session']);
         }
     }
 
@@ -293,240 +292,214 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @test
      * @throws ReflectionException
      */
-    public function testWorker_WillCall_Engine_NONE_With_No_TM_Engine_Configured() {
-
+    #[Test]
+    public function testWorker_WillCall_Engine_NONE_With_No_TM_Engine_Configured()
+    {
         /**
          * @var $_worker SetContributionMTWorker
          */
-        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
-        $_worker->attach( $this );
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
 
-        /**
-         * @var $queueElement SetContributionRequest
-         */
-        $contributionMockQueueObject = @$this
-                ->getMockBuilder( SetContributionRequest::class )
-                ->onlyMethods( [ 'getJobStruct' ] )
-                ->getMock();
+        $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
 
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getJobStruct' )
-                ->willReturn(
-                        new JobStruct(
-                                [
-                                        'id'           => $this->contributionStruct->id_job,
-                                        'password'     => $this->contributionStruct->job_password,
-                                        'source'       => 'en-US',
-                                        'target'       => 'it-IT',
-                                        'id_tms'       => 0,
-                                        'id_mt_engine' => 0,
-                                        'tm_keys'      => '[]'
-                                ]
-                        )
-                );
+        $engine = $reflectedMethod->invokeArgs($_worker, [
 
-        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
-        $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
+            new JobStruct(
+                [
+                    'id' => $this->contributionStruct->id_job,
+                    'password' => $this->contributionStruct->job_password,
+                    'source' => 'en-US',
+                    'target' => 'it-IT',
+                    'id_tms' => 0,
+                    'id_mt_engine' => 0,
+                    'tm_keys' => '[]'
+                ]
+            )
 
-        $reflectionProperty = new ReflectionProperty( $_worker, '_engine' );
-        $reflectionProperty->setAccessible( true );
-        $engineLoaded = $reflectionProperty->getValue( $_worker );
+        ]);
 
-        $this->assertInstanceOf( NONE::class, $engineLoaded );
-
+        $this->assertInstanceOf(NONE::class, $engine);
     }
 
     /**
      * @test
      * @throws ReflectionException
      */
-    public function testExceptionForEngineSetFailure_MMT() {
-
+    #[Test]
+    public function testExceptionForEngineSetFailure_MMT()
+    {
         /**
          * @var $_worker SetContributionMTWorker
          */
-        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
-        $_worker->attach( $this );
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
 
-        //create a stub EnginesFactory Match
-        $stubEngine = @$this
-                ->getMockBuilder( MMT::class )
-                ->onlyMethods( [ 'update', 'getEngineRecord' ] )
-                ->disableOriginalConstructor()
-                ->getMock();
+        //create a stub EnginesFactory Matches
+        $stubEngine = $this
+            ->getMockBuilder(MMT::class)
+            ->onlyMethods(['update'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $engineStruct       = new EngineStruct();
-        $engineStruct->id   = 0;
+        $stubEngine->expects($this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(false);
+
+        $engineStruct = new EngineStruct();
+        $engineStruct->id = 0;
         $engineStruct->type = EngineConstants::MT;
-        $stubEngine->expects( $this->once() )
-                ->method( 'getEngineRecord' )
-                ->willReturn( $engineStruct );
-
-        $stubEngine->expects( $this->once() )
-                ->method( 'update' )
-                ->with( $this->anything() )
-                ->willReturn( false );
-
-        $_worker->setEngine( $stubEngine );
+        $_worker->setEngine($stubEngine);
 
         /**
          * @var $queueElement SetContributionRequest
          */
-        $contributionMockQueueObject             = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
-        $contributionMockQueueObject->id_job     = 1999999;
-        $contributionMockQueueObject->id_file    = 1999999;
-        $contributionMockQueueObject->id_mt      = 1999999;
+        $contributionMockQueueObject = $this->getMockBuilder(SetContributionRequest::class)->getMock();
+        $contributionMockQueueObject->id_job = 1999999;
+        $contributionMockQueueObject->id_file = 1999999;
+        $contributionMockQueueObject->id_mt = 1999999;
         $contributionMockQueueObject->id_segment = 1999999;
 
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getJobStruct' )
-                ->willReturn(
-                        new JobStruct(
-                                [
-                                        'id'           => $this->contributionStruct->id_job,
-                                        'password'     => $this->contributionStruct->job_password,
-                                        'source'       => 'en-US',
-                                        'target'       => 'it-IT',
-                                        'id_tms'       => 0,
-                                        'id_mt_engine' => 0,
-                                        'tm_keys'      => '[]'
-                                ]
-                        )
-                );
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getJobStruct')
+            ->willReturn(
+                new JobStruct(
+                    [
+                        'id' => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source' => 'en-US',
+                        'target' => 'it-IT',
+                        'id_tms' => 0,
+                        'id_mt_engine' => 0,
+                        'tm_keys' => '[]'
+                    ]
+                )
+            );
 
-        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
+        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
 
-        $this->expectException( ReQueueException::class );
-        $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
+        $this->expectException(ReQueueException::class);
+        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
     }
 
     /**
      * @test
      * @throws ReflectionException
      */
-    public function testExceptionForEngineSetFailure_Lara() {
-
+    #[Test]
+    public function testExceptionForEngineSetFailure_Lara()
+    {
         /**
          * @var $_worker SetContributionMTWorker
          */
-        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
-        $_worker->attach( $this );
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
 
-        //create a stub EnginesFactory Match
-        $stubEngine = @$this
-                ->getMockBuilder( Lara::class )
-                ->onlyMethods( [ 'update', 'getEngineRecord' ] )
-                ->disableOriginalConstructor()
-                ->getMock();
+        //create a stub EnginesFactory Matches
+        $stubEngine = $this
+            ->getMockBuilder(Lara::class)
+            ->onlyMethods(['update'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $engineStruct       = new EngineStruct();
-        $engineStruct->id   = 0;
+        $stubEngine->expects($this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(false); // set a failure in set on Lara engine
+
+        $engineStruct = new EngineStruct();
+        $engineStruct->id = 0;
         $engineStruct->type = EngineConstants::MT;
-        $stubEngine->expects( $this->once() )
-                ->method( 'getEngineRecord' )
-                ->willReturn( $engineStruct );
-
-        $stubEngine->expects( $this->once() )
-                ->method( 'update' )
-                ->with( $this->anything() )
-                ->willReturn( false ); // set a failure in set on Lara engine
-
-        $_worker->setEngine( $stubEngine );
+        $_worker->setEngine($stubEngine);
 
         /**
          * @var $queueElement SetContributionRequest
          */
-        $contributionMockQueueObject             = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
-        $contributionMockQueueObject->id_job     = 1999999;
-        $contributionMockQueueObject->id_file    = 1999999;
-        $contributionMockQueueObject->id_mt      = 1999999;
+        $contributionMockQueueObject = $this->getMockBuilder(SetContributionRequest::class)->getMock();
+        $contributionMockQueueObject->id_job = 1999999;
+        $contributionMockQueueObject->id_file = 1999999;
+        $contributionMockQueueObject->id_mt = 1999999;
         $contributionMockQueueObject->id_segment = 1999999;
 
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getJobStruct' )
-                ->willReturn(
-                        new JobStruct(
-                                [
-                                        'id'           => $this->contributionStruct->id_job,
-                                        'password'     => $this->contributionStruct->job_password,
-                                        'source'       => 'en-US',
-                                        'target'       => 'it-IT',
-                                        'id_tms'       => 0,
-                                        'id_mt_engine' => 0,
-                                        'tm_keys'      => '[]'
-                                ]
-                        )
-                );
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getJobStruct')
+            ->willReturn(
+                new JobStruct(
+                    [
+                        'id' => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source' => 'en-US',
+                        'target' => 'it-IT',
+                        'id_tms' => 0,
+                        'id_mt_engine' => 0,
+                        'tm_keys' => '[]'
+                    ]
+                )
+            );
 
-        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
-        $reflectedMethod->setAccessible( true );
+        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
 
-        $this->expectException( ReQueueException::class );
-        $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
+        $this->expectException(ReQueueException::class);
+        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
     }
 
     /**
      * @test
      * @throws ReflectionException
      */
-    public function should_load_the_correct_engine() {
-
+    #[Test]
+    public function should_load_the_correct_engine()
+    {
         /**
          * @var $_worker SetContributionMTWorker
          */
-        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
-        $_worker->attach( $this );
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
 
-        $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
-        $reflectedMethod->setAccessible( true );
-        $reflectedMethod->invokeArgs( $_worker, [
-                new JobStruct(
-                        [
-                                'id_tms'       => 1,
-                                'id_mt_engine' => 2,
-                        ]
-                )
-        ] );
+        $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
 
-        $reflectionProperty = new ReflectionProperty( $_worker, '_engine' );
-        $reflectionProperty->setAccessible( true );
-        $engineLoaded = $reflectionProperty->getValue( $_worker );
+        $engineLoaded = $reflectedMethod->invokeArgs($_worker, [
+            new JobStruct(
+                [
+                    'id_tms' => 1,
+                    'id_mt_engine' => 2,
+                ]
+            )
+        ]);
 
-        $this->assertInstanceOf( MMT::class, $engineLoaded );
-
+        $this->assertInstanceOf(MMT::class, $engineLoaded);
     }
 
     /**
      * @test
      * @throws ReflectionException
      */
-    public function should_throw_exception_with_wrong_engine() {
-
+    #[Test]
+    public function should_throw_exception_with_wrong_engine()
+    {
         /**
          * @var $_worker SetContributionMTWorker
          */
-        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
-        $_worker->attach( $this );
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker->attach($this);
 
-        $this->expectException( EndQueueException::class );
-        $this->expectExceptionMessage( "Engine 91827364 not found" );
-        $this->expectExceptionCode( SetContributionWorker::ERR_NO_TM_ENGINE );
+        $this->expectException(EndQueueException::class);
+        $this->expectExceptionMessage("Engine 91827364 not found");
+        $this->expectExceptionCode(SetContributionWorker::ERR_NO_TM_ENGINE);
 
-        $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
-        $reflectedMethod->setAccessible( true );
-        $reflectedMethod->invokeArgs( $_worker, [
-                new JobStruct(
-                        [
-                                'id_tms'       => 1,
-                                'id_mt_engine' => 91827364, // fake
-                        ]
-                )
-        ] );
+        $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
 
+        $reflectedMethod->invokeArgs($_worker, [
+            new JobStruct(
+                [
+                    'id_tms' => 1,
+                    'id_mt_engine' => 91827364, // fake
+                ]
+            )
+        ]);
     }
 
 }

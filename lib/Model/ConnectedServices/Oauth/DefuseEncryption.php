@@ -14,18 +14,20 @@ use Exception;
  * This class has the responsibility to encrypt and decrypt a text based on a Key
  * @see \Defuse\Crypto\Core
  */
-class DefuseEncryption {
+class DefuseEncryption
+{
 
-    private ?Key   $key = null;
+    private ?Key $key = null;
     private string $keyFilePath;
 
     /**
      * @throws Exception
      */
-    public function __construct( string $keyFilePath ) {
+    public function __construct(string $keyFilePath)
+    {
         $this->keyFilePath = $keyFilePath;
 
-        if ( $this->loadEncryptionKey() === false ) {
+        if ($this->loadEncryptionKey() === false) {
             $this->createEncryptionKey();
         }
     }
@@ -36,16 +38,17 @@ class DefuseEncryption {
      * @throws EnvironmentIsBrokenException
      * @throws BadFormatException
      */
-    public function loadEncryptionKey(): bool {
-        if ( file_exists( $this->keyFilePath ) ) {
-            $keyFile = fopen( $this->keyFilePath, 'r' );
+    public function loadEncryptionKey(): bool
+    {
+        if (file_exists($this->keyFilePath)) {
+            $keyFile = fopen($this->keyFilePath, 'r');
 
-            if ( $keyFile ) {
-                $keyFileContents = fread( $keyFile, filesize( $this->keyFilePath ) );
-                fclose( $keyFile );
+            if ($keyFile) {
+                $keyFileContents = fread($keyFile, filesize($this->keyFilePath));
+                fclose($keyFile);
 
-                if ( $keyFileContents ) {
-                    $this->key = Key::loadFromAsciiSafeString( $keyFileContents );
+                if ($keyFileContents) {
+                    $this->key = Key::loadFromAsciiSafeString($keyFileContents);
 
                     return true;
                 }
@@ -61,61 +64,61 @@ class DefuseEncryption {
      * Creates a new encryption key and saves in the file.
      * @throws Exception
      */
-    public function createEncryptionKey() {
-
+    public function createEncryptionKey(): void
+    {
         try {
+            $keyFile = fopen($this->keyFilePath, 'w');
 
-            $keyFile = fopen( $this->keyFilePath, 'w' );
-
-            if ( $keyFile === false ) {
-                throw new Exception( 'Failed to open the file.' );
+            if ($keyFile === false) {
+                throw new Exception('Failed to open the file.');
             }
 
-            if ( fwrite( $keyFile, $this->generateKey() ) === false ) {
-                throw new Exception( 'Failed to write in the file.' );
+            if (fwrite($keyFile, $this->generateKey()) === false) {
+                throw new Exception('Failed to write in the file.');
             }
-
         } finally {
-            if ( $keyFile ) {
-                fclose( $keyFile );
+            if ($keyFile) {
+                fclose($keyFile);
                 $this->loadEncryptionKey();
             }
         }
-
     }
 
     /**
      * Generates a new key.
      * @throws EnvironmentIsBrokenException
      */
-    public function generateKey(): string {
+    public function generateKey(): string
+    {
         return Key::createNewRandomKey()->saveToAsciiSafeString();
     }
 
     /**
      * Encrypts a text and returns the encrypted text
      *
-     * @param $text
+     * @param string $text
      *
      * @return string   Encrypted text
      * @throws EnvironmentIsBrokenException
      */
-    public function encrypt( $text ): string {
-        return Crypto::encrypt( $text, $this->key );
+    public function encrypt(string $text): string
+    {
+        return Crypto::encrypt($text, $this->key);
     }
 
     /**
      * Decrypts an encrypted text
      *
-     * @param $cipherText
+     * @param string $cipherText
      *
      * @return null|string  Decrypted text or FALSE when found an error in decryption
      * @throws EnvironmentIsBrokenException
      */
-    public function decrypt( $cipherText ): ?string {
+    public function decrypt(string $cipherText): ?string
+    {
         try {
-            return Crypto::decrypt( $cipherText, $this->key );
-        } catch ( WrongKeyOrModifiedCiphertextException $ex ) {
+            return Crypto::decrypt($cipherText, $this->key);
+        } catch (WrongKeyOrModifiedCiphertextException) {
             return null;
         }
     }

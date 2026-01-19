@@ -3,12 +3,12 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Match;
 
 
 /**
@@ -18,7 +18,8 @@ use Utils\Tools\Match;
  * Date: 02/05/16
  * Time: 18.22
  */
-class SetMyMemoryTest extends AbstractTest {
+class SetMyMemoryTest extends AbstractTest
+{
 
     /**
      * @var EngineStruct
@@ -26,9 +27,9 @@ class SetMyMemoryTest extends AbstractTest {
     protected $engine_struct_param;
 
     /**
-     * @var Match
+     * @var MyMemory
      */
-    protected $engine_MyMemory;
+    protected MyMemory $engine_MyMemory;
 
     protected $reflector;
     protected $property;
@@ -49,18 +50,19 @@ class SetMyMemoryTest extends AbstractTest {
     /**
      * @throws ReflectionException
      */
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
 
-        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $engine_struct     = EngineStruct::getStruct();
+        $engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
-        $eng               = $engineDAO->read( $engine_struct );
+        $eng = $engineDAO->read($engine_struct);
 
         /**
          * @var $engineRecord EngineStruct
          */
-        $this->engine_struct_param = $eng[ 0 ];
+        $this->engine_struct_param = $eng[0];
 
 
         /**
@@ -72,80 +74,75 @@ class SetMyMemoryTest extends AbstractTest {
 
         $this->str_tra_1 = "The system becomes bar and thinks foo.";
         $this->str_tra_2 = 'For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.';
-        $this->prop      = '{"project_id":"987654","project_name":"barfoo","job_id":"321"}';
+        $this->prop = '{"project_id":"987654","project_name":"barfoo","job_id":"321"}';
 
-        $this->engine_MyMemory = new MyMemory( $this->engine_struct_param );
-        $this->reflector       = new ReflectionClass( $this->engine_MyMemory );
-        $this->property        = $this->reflector->getProperty( "result" );
-        $this->property->setAccessible( true );
-
-
+        $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
+        $this->reflector = new ReflectionClass($this->engine_MyMemory);
+        $this->property = $this->reflector->getProperty("result");
     }
 
     /**
      * @group  regression
      * @covers MyMemory::set
      */
-    public function test_set_segment_1_general_check() {
-
+    public function test_set_segment_1_general_check()
+    {
         $params = [
-                'tnote'         => null,
-                'source'        => "it-IT",
-                'target'        => "en-US",
-                'email'         => "demo@matecat.com",
-                'prop'          => $this->prop,
-                'get_mt'        => 1,
-                'num_result'    => 3,
-                'mt_only'       => false,
-                'isConcordance' => false,
-                'isGlossary'    => false,
-                'id_user'       => [],
-                'segment'       => $this->str_seg_1,
-                'translation'   => $this->str_tra_1,
-                'key'           => 'a6043e606ac9b5d7ff24'
+            'tnote' => null,
+            'source' => "it-IT",
+            'target' => "en-US",
+            'email' => "demo@matecat.com",
+            'prop' => $this->prop,
+            'get_mt' => 1,
+            'num_result' => 3,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => false,
+            'id_user' => [],
+            'segment' => $this->str_seg_1,
+            'translation' => $this->str_tra_1,
+            'key' => 'a6043e606ac9b5d7ff24'
         ];
 
-        $result = $this->engine_MyMemory->set( $params );
+        $result = $this->engine_MyMemory->set($params);
 
-        $this->assertTrue( (bool)preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
+        $this->assertTrue((bool)preg_match('/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result->responseDetails[0]));
 
         /**
          *  general check of the SetContributionResponse object
          * @var $result_object SetContributionResponse
          */
-        $result_object = $this->property->getValue( $this->engine_MyMemory );
+        $result_object = $this->property->getValue($this->engine_MyMemory);
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
-        $this->assertFalse( property_exists( $result_object, 'matches' ) );
-        $this->assertTrue( property_exists( $result_object, 'responseStatus' ) );
-        $this->assertTrue( property_exists( $result_object, 'responseDetails' ) );
-        $this->assertTrue( property_exists( $result_object, 'responseData' ) );
-        $this->assertTrue( property_exists( $result_object, 'error' ) );
-        $this->assertTrue( property_exists( $result_object, '_rawResponse' ) );
-
-
+        $this->assertTrue($result_object instanceof SetContributionResponse);
+        $this->assertFalse(property_exists($result_object, 'matches'));
+        $this->assertTrue(property_exists($result_object, 'responseStatus'));
+        $this->assertTrue(property_exists($result_object, 'responseDetails'));
+        $this->assertTrue(property_exists($result_object, 'responseData'));
+        $this->assertTrue(property_exists($result_object, 'error'));
+        $this->assertTrue(property_exists($result_object, '_rawResponse'));
     }
 
     /**
      * @group  regression
      * @covers MyMemory::set
      */
-    public function test_set_segment_1_with_mock() {
-
+    public function test_set_segment_1_with_mock()
+    {
         $params = [
-                'tnote'         => null,
-                'source'        => "it-IT",
-                'target'        => "en-US",
-                'email'         => "demo@matecat.com",
-                'prop'          => $this->prop,
-                'get_mt'        => 1,
-                'num_result'    => 3,
-                'mt_only'       => false,
-                'isConcordance' => false,
-                'isGlossary'    => false,
-                'id_user'       => [ 'a6043e606ac9b5d7ff24' ],
-                'segment'       => $this->str_seg_1,
-                'translation'   => $this->str_tra_1
+            'tnote' => null,
+            'source' => "it-IT",
+            'target' => "en-US",
+            'email' => "demo@matecat.com",
+            'prop' => $this->prop,
+            'get_mt' => 1,
+            'num_result' => 3,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => false,
+            'id_user' => ['a6043e606ac9b5d7ff24'],
+            'segment' => $this->str_seg_1,
+            'translation' => $this->str_tra_1
         ];
 
         $mock_json_return = <<<'TAB'
@@ -153,115 +150,111 @@ class SetMyMemoryTest extends AbstractTest {
 TAB;
 
         $curl_params = [
-                CURLINFO_HEADER_OUT => true,
-                CURLOPT_TIMEOUT     => 120,
-                CURLOPT_POSTFIELDS  => [
-                        'seg'       => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
-                        'tra'       => 'The system becomes bar and thinks foo.',
-                        'tnote'     => null,
-                        'langpair'  => 'it-IT|en-US',
-                        'de'        => 'demo@matecat.com',
-                        'mt'        => true,
-                        'client_id' => 0,
-                        'prop'      => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
-                        'key'       => 'a6043e606ac9b5d7ff24'
-                ],
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120,
+            CURLOPT_POSTFIELDS => [
+                'seg' => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
+                'tra' => 'The system becomes bar and thinks foo.',
+                'tnote' => null,
+                'langpair' => 'it-IT|en-US',
+                'de' => 'demo@matecat.com',
+                'mt' => true,
+                'client_id' => 0,
+                'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
+                'key' => 'a6043e606ac9b5d7ff24'
+            ],
         ];
 
 
         /**
-         * @var Match
+         * @var $engine_MyMemory MockObject|MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
-        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $this->anything(), $curl_params )->willReturn( $mock_json_return );
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($this->anything(), $curl_params)->willReturn($mock_json_return);
 
-        $actual_result = $this->engine_MyMemory->set( $params );
+        $actual_result = $this->engine_MyMemory->set($params);
 
-        $this->assertEquals( 484525156, $actual_result );
+        $this->assertEquals(484525156, $actual_result->responseDetails[0]);
 
         /**
          * check of the SetContributionResponse object
          * @var $result_object SetContributionResponse
          */
-        $result_object = $this->property->getValue( $this->engine_MyMemory );
+        $result_object = $this->property->getValue($this->engine_MyMemory);
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
-        $this->assertEquals( 200, $result_object->responseStatus );
-        $this->assertEquals( [ '0' => 484525156 ], $result_object->responseDetails );
-        $this->assertEquals( "OK", $result_object->responseData );
-        $this->assertNull( $result_object->error );
+        $this->assertTrue($result_object instanceof SetContributionResponse);
+        $this->assertEquals(200, $result_object->responseStatus);
+        $this->assertEquals(['0' => 484525156], $result_object->responseDetails);
+        $this->assertEquals("OK", $result_object->responseData);
+        $this->assertNull($result_object->error);
         /**
          * check of protected property
          */
-        $this->reflector = new ReflectionClass( $result_object );
-        $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
-
-        $this->assertEquals( "", $property->getValue( $result_object ) );
+        $this->reflector = new ReflectionClass($result_object);
+        $property = $this->reflector->getProperty('_rawResponse');
 
 
+        $this->assertEquals("", $property->getValue($result_object));
     }
 
     /**
      * @group  regression
      * @covers MyMemory::set
      */
-    public function test_set_segment_2_general_check_with_id_user_not_in_array_coverage_purpose() {
-
+    public function test_set_segment_2_general_check_with_id_user_not_in_array_coverage_purpose()
+    {
         $params = [
-                'tnote'         => null,
-                'source'        => "it-IT",
-                'target'        => "en-US",
-                'email'         => "demo@matecat.com",
-                'prop'          => $this->prop,
-                'get_mt'        => 1,
-                'num_result'    => 3,
-                'mt_only'       => false,
-                'isConcordance' => false,
-                'isGlossary'    => false,
-                'id_user'       => [],
-                'segment'       => $this->str_seg_1,
-                'translation'   => $this->str_tra_1,
-                'key'           => 'a6043e606ac9b5d7ff24'
+            'tnote' => null,
+            'source' => "it-IT",
+            'target' => "en-US",
+            'email' => "demo@matecat.com",
+            'prop' => $this->prop,
+            'get_mt' => 1,
+            'num_result' => 3,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => false,
+            'id_user' => [],
+            'segment' => $this->str_seg_1,
+            'translation' => $this->str_tra_1,
+            'key' => 'a6043e606ac9b5d7ff24'
         ];
 
-        $result = $this->engine_MyMemory->set( $params );
+        $result = $this->engine_MyMemory->set($params);
 
-        $this->assertTrue( (bool)preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
+        $this->assertTrue((bool)preg_match('/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result->responseDetails[0]));
 
         /**
          *  general check of the SetContributionResponse object
          * @var $result_object SetContributionResponse
          */
-        $result_object = $this->property->getValue( $this->engine_MyMemory );
+        $result_object = $this->property->getValue($this->engine_MyMemory);
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
-        $this->assertFalse( property_exists( $result_object, 'matches' ) );
-        $this->assertTrue( property_exists( $result_object, 'responseStatus' ) );
-        $this->assertTrue( property_exists( $result_object, 'responseDetails' ) );
-        $this->assertTrue( property_exists( $result_object, 'responseData' ) );
-        $this->assertTrue( property_exists( $result_object, 'error' ) );
-        $this->assertTrue( property_exists( $result_object, '_rawResponse' ) );
-
-
+        $this->assertTrue($result_object instanceof SetContributionResponse);
+        $this->assertFalse(property_exists($result_object, 'matches'));
+        $this->assertTrue(property_exists($result_object, 'responseStatus'));
+        $this->assertTrue(property_exists($result_object, 'responseDetails'));
+        $this->assertTrue(property_exists($result_object, 'responseData'));
+        $this->assertTrue(property_exists($result_object, 'error'));
+        $this->assertTrue(property_exists($result_object, '_rawResponse'));
     }
 
-    public function test_set_segment_2_with_mock() {
-
+    public function test_set_segment_2_with_mock()
+    {
         $params = [
-                'tnote'         => null,
-                'source'        => "it-IT",
-                'target'        => "en-US",
-                'email'         => "demo@matecat.com",
-                'prop'          => $this->prop,
-                'get_mt'        => 1,
-                'num_result'    => 3,
-                'mt_only'       => false,
-                'isConcordance' => false,
-                'isGlossary'    => false,
-                'segment'       => $this->str_seg_2,
-                'translation'   => $this->str_tra_2,
-                'id_user'       => [ 'a6043e606ac9b5d7ff24' ]
+            'tnote' => null,
+            'source' => "it-IT",
+            'target' => "en-US",
+            'email' => "demo@matecat.com",
+            'prop' => $this->prop,
+            'get_mt' => 1,
+            'num_result' => 3,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => false,
+            'segment' => $this->str_seg_2,
+            'translation' => $this->str_tra_2,
+            'id_user' => ['a6043e606ac9b5d7ff24']
         ];
 
         $url_mock_param = "https://api.mymemory.translated.net/set";
@@ -271,144 +264,140 @@ TAB;
 TAB;
 
         $curl_params = [
-                CURLOPT_POSTFIELDS  => [
-                        'seg'       => 'Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.',
-                        'tra'       => 'For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.',
-                        'tnote'     => null,
-                        'langpair'  => 'it-IT|en-US',
-                        'de'        => 'demo@matecat.com',
-                        'mt'        => true,
-                        'client_id' => 0,
-                        'prop'      => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
-                        'key'       => 'a6043e606ac9b5d7ff24'
-                ],
-                CURLINFO_HEADER_OUT => true,
-                CURLOPT_TIMEOUT     => 120,
+            CURLOPT_POSTFIELDS => [
+                'seg' => 'Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.',
+                'tra' => 'For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.',
+                'tnote' => null,
+                'langpair' => 'it-IT|en-US',
+                'de' => 'demo@matecat.com',
+                'mt' => true,
+                'client_id' => 0,
+                'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
+                'key' => 'a6043e606ac9b5d7ff24'
+            ],
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120,
         ];
 
         /**
-         * @var Match
+         * @var $engine_MyMemory MockObject|MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
-        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(
-                $url_mock_param,
-                $curl_params
-        )->willReturn( $mock_json_return );
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with(
+            $url_mock_param,
+            $curl_params
+        )->willReturn($mock_json_return);
 
-        $actual_result = $this->engine_MyMemory->set( $params );
+        $actual_result = $this->engine_MyMemory->set($params);
 
-        $this->assertEquals( 484540480, $actual_result );
+        $this->assertEquals(484540480, $actual_result->responseDetails[0]);
 
 
         /**
          * check of the SetContributionResponse object
-         * @var SetContributionResponse
+         * @var SetContributionResponse $result_object
          */
-        $result_object = $this->property->getValue( $this->engine_MyMemory );
+        $result_object = $this->property->getValue($this->engine_MyMemory);
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
-        $this->assertEquals( 200, $result_object->responseStatus );
-        $this->assertEquals( [ '0' => 484540480 ], $result_object->responseDetails );
-        $this->assertEquals( "OK", $result_object->responseData );
-        $this->assertNull( $result_object->error );
+        $this->assertTrue($result_object instanceof SetContributionResponse);
+        $this->assertEquals(200, $result_object->responseStatus);
+        $this->assertEquals(['0' => 484540480], $result_object->responseDetails);
+        $this->assertEquals("OK", $result_object->responseData);
+        $this->assertNull($result_object->error);
         /**
          * check of protected property
          */
-        $this->reflector = new ReflectionClass( $result_object );
-        $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
-
-        $this->assertEquals( "", $property->getValue( $result_object ) );
+        $this->reflector = new ReflectionClass($result_object);
+        $property = $this->reflector->getProperty('_rawResponse');
 
 
+        $this->assertEquals("", $property->getValue($result_object));
     }
 
     /**
      * @group  regression
      * @covers MyMemory::set
      */
-    public function test_set_with_error_from_mocked__call() {
-
+    public function test_set_with_error_from_mocked__call()
+    {
         $params = [
-                'tnote'         => null,
-                'source'        => "it-IT",
-                'target'        => "en-US",
-                'email'         => "demo@matecat.com",
-                'prop'          => $this->prop,
-                'get_mt'        => 1,
-                'num_result'    => 3,
-                'mt_only'       => false,
-                'isConcordance' => false,
-                'isGlossary'    => false,
-                'segment'       => $this->str_seg_1,
-                'translation'   => $this->str_tra_1,
-                'id_user'       => [ 'a6043e606ac9b5d7ff24' ]
+            'tnote' => null,
+            'source' => "it-IT",
+            'target' => "en-US",
+            'email' => "demo@matecat.com",
+            'prop' => $this->prop,
+            'get_mt' => 1,
+            'num_result' => 3,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => false,
+            'segment' => $this->str_seg_1,
+            'translation' => $this->str_tra_1,
+            'id_user' => ['a6043e606ac9b5d7ff24']
         ];
 
         $url_mock_param = "https://api.mymemory.translated.net/set";
 
-        $rawValue_error = [
-                'error'          => [
-                        'code'     => -6,
-                        'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
-                        'response' => "",
+        $rawValue_error = json_encode([
+                'error' => [
+                    'code' => -6,
+                    'message' => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
+                    'response' => "",
                 ],
                 'responseStatus' => 401
-        ];
+            ]
+        );
 
         $curl_params = [
-                CURLOPT_POSTFIELDS  => [
-                        'seg'       => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
-                        'tra'       => 'The system becomes bar and thinks foo.',
-                        'tnote'     => null,
-                        'langpair'  => 'it-IT|en-US',
-                        'de'        => 'demo@matecat.com',
-                        'prop'      => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
-                        'key'       => 'a6043e606ac9b5d7ff24',
-                        'mt'        => true,
-                        'client_id' => 0
-                ],
-                CURLINFO_HEADER_OUT => true,
-                CURLOPT_TIMEOUT     => 120,
+            CURLOPT_POSTFIELDS => [
+                'seg' => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
+                'tra' => 'The system becomes bar and thinks foo.',
+                'tnote' => null,
+                'langpair' => 'it-IT|en-US',
+                'de' => 'demo@matecat.com',
+                'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
+                'key' => 'a6043e606ac9b5d7ff24',
+                'mt' => true,
+                'client_id' => 0
+            ],
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120,
         ];
 
 
         /**
-         * @var Match
+         * @var $engine_MyMemory MockObject|MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
-        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_params )->willReturn( $rawValue_error );
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_params)->willReturn($rawValue_error);
 
-        $actual_result = $this->engine_MyMemory->set( $params );
+        $actual_result = $this->engine_MyMemory->set($params);
 
-        $this->assertFalse( $actual_result );
-
+        $this->assertNotNull($actual_result);
 
         /**
          * check of the SetContributionResponse object
-         * @var SetContributionResponse
+         * @var SetContributionResponse $result_object
          */
-        $result_object = $this->property->getValue( $this->engine_MyMemory );
+        $result_object = $this->property->getValue($this->engine_MyMemory);
 
-        $this->assertTrue( $result_object instanceof SetContributionResponse );
-        $this->assertEquals( 401, $result_object->responseStatus );
-        $this->assertEquals( "", $result_object->responseDetails );
-        $this->assertEquals( "", $result_object->responseData );
-        $this->assertTrue( $result_object->error instanceof ErrorResponse );
+        $this->assertTrue($result_object instanceof SetContributionResponse);
+        $this->assertEquals(401, $result_object->responseStatus);
+        $this->assertEquals("", $result_object->responseDetails);
+        $this->assertEquals("", $result_object->responseData);
+        $this->assertTrue($result_object->error instanceof ErrorResponse);
 
-        $this->assertEquals( -6, $result_object->error->code );
-        $this->assertEquals( "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result_object->error->message );
+        $this->assertEquals(-6, $result_object->error->code);
+        $this->assertEquals("Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result_object->error->message);
 
         /**
          * check of protected property
          */
-        $this->reflector = new ReflectionClass( $result_object );
-        $property        = $this->reflector->getProperty( '_rawResponse' );
-        $property->setAccessible( true );
-
-        $this->assertEquals( "", $property->getValue( $result_object ) );
+        $this->reflector = new ReflectionClass($result_object);
+        $property = $this->reflector->getProperty('_rawResponse');
 
 
+        $this->assertEquals("", $property->getValue($result_object));
     }
 
 }

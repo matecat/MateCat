@@ -9,13 +9,14 @@
 
 namespace View\API\App\Json\Analysis;
 
-interface MatchContainerInterface {
+interface MatchContainerInterface
+{
 
     /**
      * @param string $matchName
      *
      * @return AnalysisMatch
      */
-    public function getMatch( string $matchName ): AnalysisMatch;
+    public function getMatch(string $matchName): AnalysisMatch;
 
 }
