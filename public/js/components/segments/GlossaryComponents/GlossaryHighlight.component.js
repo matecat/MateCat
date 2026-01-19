@@ -113,7 +113,7 @@ class GlossaryHighlight extends Component {
     return (
       <Tooltip
         stylePointerElement={{display: 'inline-block', position: 'relative'}}
-        content="Glossary term"
+        content="Termbase entry"
       >
         <div ref={this.contentRef} className="glossaryItem">
           <span onClick={() => this.onClickTerm()}>{children}</span>
