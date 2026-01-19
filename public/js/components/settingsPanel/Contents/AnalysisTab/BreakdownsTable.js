@@ -61,7 +61,7 @@ export const BreakdownsTable = ({saveValue}) => {
             <th>TM Partial 95-99%</th>
             <th>TM 100%</th>
             <th>Public TM 100%</th>
-            <th>TM 100% in context</th>
+            <th>TM 101%</th>
           </tr>
         </thead>
         <tbody>
