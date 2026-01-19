@@ -464,6 +464,11 @@ class Lara extends AbstractEngine
             return true;
         }
 
+        // temporary disable ur-Latn-PK
+        if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
+            return true;
+        }
+
         // Send the selected memory IDs to Lara via a custom request header.
         $laraClient = $client->getHttpClient();
         $laraClient->setExtraHeader('x-memory-ids', implode(',', $_keys));
