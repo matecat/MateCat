@@ -14,7 +14,7 @@ use DomainException;
 class UploadParams
 {
 
-    protected int $post_max_size       = -1;
+    protected int $post_max_size = -1;
     protected int $upload_max_filesize = -1;
 
     /**

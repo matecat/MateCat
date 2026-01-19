@@ -7,12 +7,12 @@ use JsonSerializable;
 class Json implements IDto, JsonSerializable
 {
 
-    private bool  $extract_arrays         = false;
-    private bool  $escape_forward_slashes = false;
-    private array $translate_keys         = [];
-    private array $do_not_translate_keys  = [];
-    private array $context_keys           = [];
-    private array $character_limit        = [];
+    private bool $extract_arrays = false;
+    private bool $escape_forward_slashes = false;
+    private array $translate_keys = [];
+    private array $do_not_translate_keys = [];
+    private array $context_keys = [];
+    private array $character_limit = [];
 
     /**
      * @param bool|null $extract_arrays
@@ -68,28 +68,28 @@ class Json implements IDto, JsonSerializable
      */
     public function fromArray(array $data): void
     {
-        if (isset($data[ 'extract_arrays' ])) {
-            $this->setExtractArrays($data[ 'extract_arrays' ]);
+        if (isset($data['extract_arrays'])) {
+            $this->setExtractArrays($data['extract_arrays']);
         }
 
-        if (isset($data[ 'escape_forward_slashes' ])) {
-            $this->setEscapeForwardSlashes($data[ 'escape_forward_slashes' ]);
+        if (isset($data['escape_forward_slashes'])) {
+            $this->setEscapeForwardSlashes($data['escape_forward_slashes']);
         }
 
-        if (isset($data[ 'translate_keys' ])) {
-            $this->setTranslateKeys($data[ 'translate_keys' ]);
+        if (isset($data['translate_keys'])) {
+            $this->setTranslateKeys($data['translate_keys']);
         }
 
-        if (isset($data[ 'do_not_translate_keys' ])) {
-            $this->setDoNotTranslateKeys($data[ 'do_not_translate_keys' ]);
+        if (isset($data['do_not_translate_keys'])) {
+            $this->setDoNotTranslateKeys($data['do_not_translate_keys']);
         }
 
-        if (isset($data[ 'context_keys' ])) {
-            $this->setContextKeys($data[ 'context_keys' ]);
+        if (isset($data['context_keys'])) {
+            $this->setContextKeys($data['context_keys']);
         }
 
-        if (isset($data[ 'character_limit' ])) {
-            $this->setCharacterLimit($data[ 'character_limit' ]);
+        if (isset($data['character_limit'])) {
+            $this->setCharacterLimit($data['character_limit']);
         }
     }
 
@@ -100,17 +100,17 @@ class Json implements IDto, JsonSerializable
     {
         $format = [];
 
-        $format[ 'extract_arrays' ]         = $this->extract_arrays;
-        $format[ 'escape_forward_slashes' ] = $this->escape_forward_slashes;
-        $format[ 'translate_keys' ]         = $this->translate_keys;
+        $format['extract_arrays'] = $this->extract_arrays;
+        $format['escape_forward_slashes'] = $this->escape_forward_slashes;
+        $format['translate_keys'] = $this->translate_keys;
 
         if (!empty($this->do_not_translate_keys)) {
-            $format[ 'do_not_translate_keys' ] = $this->do_not_translate_keys;
-            unset($format[ 'translate_keys' ]);
+            $format['do_not_translate_keys'] = $this->do_not_translate_keys;
+            unset($format['translate_keys']);
         }
 
-        $format[ 'context_keys' ]    = $this->context_keys;
-        $format[ 'character_limit' ] = $this->character_limit;
+        $format['context_keys'] = $this->context_keys;
+        $format['character_limit'] = $this->character_limit;
 
         return $format;
     }

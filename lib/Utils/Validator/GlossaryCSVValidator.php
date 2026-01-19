@@ -16,9 +16,8 @@ class GlossaryCSVValidator extends AbstractValidator
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
-
         /** @noinspection PhpUndefinedFieldInspection */
-        $headers          = $this->getHeaders($object->csv);
+        $headers = $this->getHeaders($object->csv);
         $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages
@@ -31,7 +30,7 @@ class GlossaryCSVValidator extends AbstractValidator
         // 2. Validate structure
         preg_match_all('/^(forbidden)?(domain)?(subdomain)?(definition)?(((' . $allowedLanguagesRegex . ')((notes)?(example of use)?){2,})+$)/', implode("", $headers), $headerMatches);
 
-        if (empty($headerMatches[ 0 ])) {
+        if (empty($headerMatches[0])) {
             $this->errors[] = 'The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.';
 
             return null;
@@ -60,14 +59,14 @@ class GlossaryCSVValidator extends AbstractValidator
      */
     public function getNumberOfLanguage(string $filePath): int
     {
-        $headers  = $this->getHeaders($filePath);
+        $headers = $this->getHeaders($filePath);
         $skipKeys = [
-                "forbidden",
-                "domain",
-                "subdomain",
-                "definition",
-                "notes",
-                "example of use"
+            "forbidden",
+            "domain",
+            "subdomain",
+            "definition",
+            "notes",
+            "example of use"
         ];
 
         $languages = array_diff($headers, $skipKeys);
@@ -80,7 +79,7 @@ class GlossaryCSVValidator extends AbstractValidator
     }
 
     /**
-     * @param array     $headers
+     * @param array $headers
      * @param Languages $languagesHandler
      *
      * @return bool
@@ -88,12 +87,12 @@ class GlossaryCSVValidator extends AbstractValidator
     private function validateLanguages(array $headers, Languages $languagesHandler): bool
     {
         $skipKeys = [
-                "forbidden",
-                "domain",
-                "subdomain",
-                "definition",
-                "notes",
-                "example of use"
+            "forbidden",
+            "domain",
+            "subdomain",
+            "definition",
+            "notes",
+            "example of use"
         ];
 
         $languages = array_diff($headers, $skipKeys);
@@ -106,16 +105,16 @@ class GlossaryCSVValidator extends AbstractValidator
 
         foreach ($languages as $language) {
             if (empty($language)) {
-                $error          = 'The file contains and empty column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
+                $error = 'The file contains and empty column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
 
                 return false;
             }
 
             if (!$languagesHandler->isValidLanguage($language)) {
-                $error          = str_contains(
-                        $language,
-                        '_'
+                $error = str_contains(
+                    $language,
+                    '_'
                 ) ? 'The column header <b>' . $language . '</b> contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : '<b>' . $language . '</b> is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
 

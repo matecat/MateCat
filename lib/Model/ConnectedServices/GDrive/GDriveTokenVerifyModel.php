@@ -18,8 +18,8 @@ class GDriveTokenVerifyModel
 {
 
     protected ConnectedServiceStruct $service;
-    protected bool                   $expired;
-    protected                        $refreshed;
+    protected bool $expired;
+    protected $refreshed;
 
     public function __construct(ConnectedServiceStruct $service)
     {
@@ -32,8 +32,8 @@ class GDriveTokenVerifyModel
      */
     public function validOrRefreshed(Google_Client $gClient): bool
     {
-        $this->refreshed           = false;
-        $this->expired             = false;
+        $this->refreshed = false;
+        $this->expired = false;
         $decryptedOauthAccessToken = $this->service->getDecryptedOauthAccessToken();
 
         if (false === $decryptedOauthAccessToken) {
@@ -78,7 +78,7 @@ class GDriveTokenVerifyModel
      */
     private function __updateToken(string $newToken): void
     {
-        $dao           = new ConnectedServiceDao();
+        $dao = new ConnectedServiceDao();
         $this->service = $dao->updateOauthToken($newToken, $this->service);
 
         $this->refreshed = true;

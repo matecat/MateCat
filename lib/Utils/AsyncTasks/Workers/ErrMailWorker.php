@@ -80,21 +80,23 @@ class ErrMailWorker extends AbstractWorker
             $mail = new PHPMailer();
 
             $mail->isSMTP();
-            $mail->Host     = $mailConf->server_configuration[ 'Host' ];
-            $mail->Port     = $mailConf->server_configuration[ 'Port' ];
-            $mail->Sender   = $mailConf->server_configuration[ 'Sender' ];
-            $mail->Hostname = $mailConf->server_configuration[ 'Hostname' ];
-            $mail->From     = $mailConf->server_configuration[ 'From' ];
-            $mail->FromName = $mailConf->server_configuration[ 'FromName' ];
+            $mail->Host = $mailConf->server_configuration['Host'];
+            $mail->Port = $mailConf->server_configuration['Port'];
+            $mail->Sender = $mailConf->server_configuration['Sender'];
+            $mail->Hostname = $mailConf->server_configuration['Hostname'];
+            $mail->From = $mailConf->server_configuration['From'];
+            $mail->FromName = $mailConf->server_configuration['FromName'];
 
-            $mail->addReplyTo($mailConf->server_configuration[ 'ReturnPath' ], $mail->FromName);
+            $mail->addReplyTo($mailConf->server_configuration['ReturnPath'], $mail->FromName);
 
             if (!empty($mailConf->email_list)) {
                 foreach ($mailConf->email_list as $email => $uName) {
                     $mail->addAddress($email, $uName);
                 }
             } else {
-                $this->_doLog("--- (Worker " . $this->_workerPid . ") : No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row.");
+                $this->_doLog(
+                    "--- (Worker " . $this->_workerPid . ") : No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row."
+                );
                 throw new EmptyElementException("No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row.");
             }
         }
@@ -129,7 +131,7 @@ class ErrMailWorker extends AbstractWorker
 
         $mail->Body = '<pre>' . $mailConf->body . '</pre>';
 
-        $txtContent    = preg_replace('|<br[\x{20}/]*>|ui', "\n\n", $mailConf->body);
+        $txtContent = preg_replace('|<br[\x{20}/]*>|ui', "\n\n", $mailConf->body);
         $mail->AltBody = strip_tags($txtContent);
 
         $mail->msgHTML($mail->Body);

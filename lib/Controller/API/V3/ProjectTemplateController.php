@@ -33,7 +33,7 @@ class ProjectTemplateController extends KleinController
     private function validateJSON($json): object
     {
         $validatorObject = new JSONValidatorObject($json);
-        $validator       = new JSONValidator('project_template.json', true);
+        $validator = new JSONValidator('project_template.json', true);
         $validator->validate($validatorObject);
 
         return $validatorObject->getValue();
@@ -46,7 +46,7 @@ class ProjectTemplateController extends KleinController
     {
         try {
             $currentPage = $this->request->param('page') ?? 1;
-            $pagination  = $this->request->param('perPage') ?? 20;
+            $pagination = $this->request->param('perPage') ?? 20;
 
             if ($pagination > 200) {
                 $pagination = 200;
@@ -61,7 +61,7 @@ class ProjectTemplateController extends KleinController
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -88,7 +88,7 @@ class ProjectTemplateController extends KleinController
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -107,7 +107,7 @@ class ProjectTemplateController extends KleinController
                 throw new Exception('Bad Get', 400);
             }
 
-            $json          = $this->request->body();
+            $json = $this->request->body();
             $decodedObject = $this->validateJSON($json);
 
             $struct = ProjectTemplateDao::createFromJSON($decodedObject, $this->getUser());
@@ -119,7 +119,7 @@ class ProjectTemplateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
-            if($exception instanceof JSONValidatorException){
+            if ($exception instanceof JSONValidatorException) {
                 return $this->response->json(['error' => $exception->getFormattedError("project-template")]);
             }
 
@@ -129,13 +129,13 @@ class ProjectTemplateController extends KleinController
                 $this->response->code(400);
 
                 return $this->response->json([
-                        'error' => "Invalid unique template name"
+                    'error' => "Invalid unique template name"
                 ]);
             } else {
                 $this->response->code(500);
 
                 return $this->response->json([
-                        'error' => $e->getMessage()
+                    'error' => $e->getMessage()
                 ]);
             }
         } catch (Exception $exception) {
@@ -143,7 +143,7 @@ class ProjectTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -162,9 +162,9 @@ class ProjectTemplateController extends KleinController
                 throw new Exception('Bad Get', 400);
             }
 
-            $id            = (int)$this->request->param('id');
-            $uid           = $this->getUser()->uid;
-            $json          = $this->request->body();
+            $id = (int)$this->request->param('id');
+            $uid = $this->getUser()->uid;
+            $json = $this->request->body();
             $decodedObject = $this->validateJSON($json);
 
             // mark all templates as not default
@@ -189,7 +189,7 @@ class ProjectTemplateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
-            if($exception instanceof JSONValidatorException){
+            if ($exception instanceof JSONValidatorException) {
                 return $this->response->json(['error' => $exception->getFormattedError("project-template")]);
             }
 
@@ -199,7 +199,7 @@ class ProjectTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -219,14 +219,14 @@ class ProjectTemplateController extends KleinController
             }
 
             return $this->response->json([
-                    'id' => $id
+                'id' => $id
             ]);
         } catch (Exception $exception) {
             $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -249,7 +249,7 @@ class ProjectTemplateController extends KleinController
         $this->response->status()->setCode(200);
 
         return $this->response->json(
-                ProjectTemplateDao::getDefaultTemplate($this->getUser()->uid)
+            ProjectTemplateDao::getDefaultTemplate($this->getUser()->uid)
         );
     }
 
@@ -258,8 +258,8 @@ class ProjectTemplateController extends KleinController
      */
     private function getProjectTemplateModelSchema(): string
     {
-        $skeletonSchema                                    = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/project_template.json'));
-        $contentSchema                                     = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/subfiltering_handlers.json'));
+        $skeletonSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/project_template.json'));
+        $contentSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/subfiltering_handlers.json'));
         $skeletonSchema->properties->subfiltering_handlers = $contentSchema;
 
         return $skeletonSchema;

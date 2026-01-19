@@ -118,8 +118,8 @@ class DeepL extends AbstractEngine
         $this->_setAdditionalCurlParams(
             [
                 CURLOPT_HTTPHEADER => [
-            'Authorization: DeepL-Auth-Key ' . $extraParams['DeepL-Auth-Key'],
-            'Content-Type: application/json'
+                    'Authorization: DeepL-Auth-Key ' . $extraParams['DeepL-Auth-Key'],
+                    'Content-Type: application/json'
                 ],
             ]
         );

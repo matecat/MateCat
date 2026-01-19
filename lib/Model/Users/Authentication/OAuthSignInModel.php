@@ -28,8 +28,8 @@ class OAuthSignInModel
 {
 
     protected UserStruct $user;
-    protected ?string    $profilePictureUrl = null;
-    protected string     $provider;
+    protected ?string $profilePictureUrl = null;
+    protected string $provider;
 
     public function __construct(string $email, ?string $firstName = null, ?string $lastName = null)
     {
@@ -42,9 +42,9 @@ class OAuthSignInModel
         }
 
         $this->user = new UserStruct([
-                'first_name' => $firstName,
-                'last_name'  => $lastName,
-                'email'      => $email
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email
         ]);
     }
 
@@ -57,7 +57,7 @@ class OAuthSignInModel
     public function setAccessToken(string $token): void
     {
         $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
-                json_encode($token)
+            json_encode($token)
         );
     }
 
@@ -72,7 +72,7 @@ class OAuthSignInModel
      */
     public function signIn(): bool
     {
-        $userDao      = new UserDao();
+        $userDao = new UserDao();
         $existingUser = $userDao->getByEmail($this->user->email);
 
         if ($existingUser) {
@@ -135,7 +135,7 @@ class OAuthSignInModel
     protected function _createNewUser(): void
     {
         $this->user->create_date = Utils::mysqlTimestamp(time());
-        $this->user->uid         = UserDao::insertStruct($this->user);
+        $this->user->uid = UserDao::insertStruct($this->user);
 
         $dao = new TeamDao();
         $dao->getDatabaseHandler()->begin();
@@ -150,12 +150,13 @@ class OAuthSignInModel
     {
         $this->user->uid = $existing_user->uid;
         UserDao::updateStruct($this->user, [
-                'fields' =>
-                        ['oauth_access_token']
+            'fields' =>
+                ['oauth_access_token']
         ]);
     }
 
     /**
+     * @throws Exception
      */
     protected function _authenticateUser(): void
     {

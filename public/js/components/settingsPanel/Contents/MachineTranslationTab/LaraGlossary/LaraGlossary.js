@@ -1,6 +1,5 @@
-import React, {useCallback, useContext, useEffect, useRef} from 'react'
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {useState} from 'react'
 import {SettingsPanelTable} from '../../../SettingsPanelTable'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import IconAdd from '../../../../icons/IconAdd'
@@ -59,9 +58,13 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const glossaries = activeGlossariesRef.current
     let memories = []
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
-      const rows = memories.filter(({id}) =>
-        project.mt_extra?.lara_glossaries?.some((value) => value === id),
-      )
+      const rows = memories.filter(({id}) => {
+        const laraGlossaries = project.mt_extra?.lara_glossaries
+            ? project.mt_extra.lara_glossaries
+          : []
+
+        return laraGlossaries.some((value) => value === id)
+      })
       updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
     }
 

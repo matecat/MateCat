@@ -38,14 +38,14 @@ class TeamMembersController extends KleinController
     {
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
 
-        $team      = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($this->request->param('id_team'));
+        $team = (new TeamDao())->setCacheTTL(60 * 60 * 24)->findById($this->request->param('id_team'));
         $teamModel = new TeamModel($team);
         $teamModel->updateMembersProjectsCount();
 
         $formatter = new Membership($team->getMembers());
         $this->response->json([
-                'members'             => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->hasPendingInvitation($this->request->param('id_team'))
+            'members' => $formatter->render(),
+            'pending_invitations' => $pendingInvitation->hasPendingInvitation($this->request->param('id_team'))
         ]);
     }
 
@@ -58,28 +58,28 @@ class TeamMembersController extends KleinController
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
         $params = filter_var_array($params, [
-                'members' => [
-                        'filter' => FILTER_SANITIZE_EMAIL,
-                        'flags'  => FILTER_REQUIRE_ARRAY
-                ]
+            'members' => [
+                'filter' => FILTER_SANITIZE_EMAIL,
+                'flags' => FILTER_REQUIRE_ARRAY
+            ]
         ]);
 
         $teamStruct = (new TeamDao())
-                ->findById($this->request->param('id_team'));
+            ->findById($this->request->param('id_team'));
 
         $model = new TeamModel($teamStruct);
         $model->setUser($this->user);
-        $model->addMemberEmails($params[ 'members' ]);
+        $model->addMemberEmails($params['members']);
         $full_members_list = $model->updateMembers();
 
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
-        $formatter         = new Membership($full_members_list);
+        $formatter = new Membership($full_members_list);
 
         $this->refreshClientSessionIfNotApi();
 
         $this->response->json([
-                'members'             => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
+            'members' => $formatter->render(),
+            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
         ]);
     }
 
@@ -92,7 +92,7 @@ class TeamMembersController extends KleinController
         Database::obtain()->begin();
 
         $teamStruct = (new TeamDao())
-                ->findById($this->request->param('id_team'));
+            ->findById($this->request->param('id_team'));
 
         $model = new TeamModel($teamStruct);
         $model->removeMemberUids([$this->request->param('uid_member')]);
@@ -100,13 +100,13 @@ class TeamMembersController extends KleinController
         $membersList = $model->updateMembers();
 
         $pendingInvitation = new PendingInvitations((new RedisHandler())->getConnection(), []);
-        $formatter         = new Membership($membersList);
+        $formatter = new Membership($membersList);
 
         $this->refreshClientSessionIfNotApi();
 
         $this->response->json([
-                'members'             => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
+            'members' => $formatter->render(),
+            'pending_invitations' => $pendingInvitation->hasPendingInvitation($teamStruct->id)
         ]);
     }
 

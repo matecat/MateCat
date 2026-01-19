@@ -23,16 +23,16 @@ use Utils\Tools\Utils;
 class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 {
 
-    public ?int    $uid                           = null;
-    public ?string $email                         = null;
-    public ?string $create_date                   = null;
-    public ?string $first_name                    = null;
-    public ?string $last_name                     = null;
-    public ?string $salt                          = null;
-    public ?string $pass                          = null;
-    public ?string $oauth_access_token            = null;
-    public ?string $email_confirmed_at            = null;
-    public ?string $confirmation_token            = null;
+    public ?int $uid = null;
+    public ?string $email = null;
+    public ?string $create_date = null;
+    public ?string $first_name = null;
+    public ?string $last_name = null;
+    public ?string $salt = null;
+    public ?string $pass = null;
+    public ?string $oauth_access_token = null;
+    public ?string $email_confirmed_at = null;
+    public ?string $confirmation_token = null;
     public ?string $confirmation_token_created_at = null;
 
     /**
@@ -49,20 +49,20 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
     public function isLogged(): bool
     {
         return !empty($this->uid) &&
-                !empty($this->email) &&
-                !empty($this->first_name) &&
-                !empty($this->last_name);
+            !empty($this->email) &&
+            !empty($this->first_name) &&
+            !empty($this->last_name);
     }
 
     public function clearAuthToken(): void
     {
-        $this->confirmation_token            = null;
+        $this->confirmation_token = null;
         $this->confirmation_token_created_at = null;
     }
 
     public function initAuthToken(): void
     {
-        $this->confirmation_token            = Utils::randomString(50, true);
+        $this->confirmation_token = Utils::randomString(50, true);
         $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
     }
 
@@ -145,9 +145,10 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      * @return bool
      * @throws ReflectionException
      */
-    public function belongsToTeam($teamId): bool {
-        foreach ( $this->getUserTeams() as $team ) {
-            if ( $team->id === $teamId ) {
+    public function belongsToTeam($teamId): bool
+    {
+        foreach ($this->getUserTeams() as $team) {
+            if ($team->id === $teamId) {
                 return true;
             }
         }
@@ -160,28 +161,28 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
      */
     public function getMetadataAsKeyValue(): array
     {
-        $dao        = new MetadataDao();
+        $dao = new MetadataDao();
         $collection = $dao->getAllByUid($this->uid);
-        $data       = [];
+        $data = [];
 
         /** @var MetadataStruct $record */
         foreach ($collection as $record) {
-            $data[ $record->key ] = $record->getValue();
+            $data[$record->key] = $record->getValue();
         }
 
         $mandatory = [
-                'dictation'              => 0,
-                'show_whitespace'        => 0,
-                'guess_tags'             => 1,
-                'lexiqa'                 => 1,
-                'character_counter'      => 0,
-                'ai_assistant'           => 0,
-                'cross_language_matches' => new stdClass(),
+            'dictation' => 0,
+            'show_whitespace' => 0,
+            'guess_tags' => 1,
+            'lexiqa' => 1,
+            'character_counter' => 0,
+            'ai_assistant' => 0,
+            'cross_language_matches' => new stdClass(),
         ];
 
         foreach ($mandatory as $key => $value) {
-            if (!isset($data[ $key ])) {
-                $data[ $key ] = is_numeric($value) ? (int)$value : $value;
+            if (!isset($data[$key])) {
+                $data[$key] = is_numeric($value) ? (int)$value : $value;
             }
         }
 
@@ -227,7 +228,7 @@ class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
         if ($field) {
             if (array_key_exists($field, $decoded)) {
-                return $decoded[ $field ];
+                return $decoded[$field];
             } else {
                 throw new Exception('key not found on token: ' . $field);
             }

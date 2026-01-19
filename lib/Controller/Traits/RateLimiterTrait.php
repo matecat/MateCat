@@ -12,16 +12,16 @@ trait RateLimiterTrait
 {
     /**
      * @param Response $response
-     * @param string   $identifier
-     * @param string   $route
-     * @param int      $maxRetries
+     * @param string $identifier
+     * @param string $route
+     * @param int $maxRetries
      *
      * @return Response|null
      * @throws Exception
      */
     public function checkRateLimitResponse(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
     {
-        $key   = $this->getKey($identifier, $route);
+        $key = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
         if ($redis->get($key) and $redis->get($key) > $maxRetries) {
@@ -45,7 +45,7 @@ trait RateLimiterTrait
      */
     public function incrementRateLimitCounter(string $identifier, string $route): void
     {
-        $key   = $this->getKey($identifier, $route);
+        $key = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
         if (!$redis->get($key)) {
@@ -91,7 +91,7 @@ trait RateLimiterTrait
     private function getTtl(): int
     {
         $date = new DateTime();
-        $ttl  = 60 - $date->format("s");
+        $ttl = 60 - $date->format("s");
 
         return 60 + $ttl;
     }

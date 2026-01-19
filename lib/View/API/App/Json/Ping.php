@@ -12,38 +12,38 @@ namespace View\API\App\Json;
 use Controller\Abstracts\KleinController;
 use Utils\Tools\Utils;
 
-class Ping {
+class Ping
+{
 
     protected KleinController $controller;
 
-    public function __construct( KleinController $kleinController ) {
+    public function __construct(KleinController $kleinController)
+    {
         $this->controller = $kleinController;
     }
 
     public function render(): array
     {
-
-        $_request_uri = parse_url( $this->controller->getRequest()->server()[ 'REQUEST_URI' ] );
-        if ( isset( $_request_uri[ 'query' ] ) ) {
-            parse_str( $_request_uri[ 'query' ], $str );
-            $_request_uri[ 'query' ] = $str;
+        $_request_uri = parse_url($this->controller->getRequest()->server()['REQUEST_URI']);
+        if (isset($_request_uri['query'])) {
+            parse_str($_request_uri['query'], $str);
+            $_request_uri['query'] = $str;
         }
 
         return [
-                'status'      => 'OK',
-                'message'     => 'Pong...',
-                "client_ip"   => Utils::getRealIpAddr(),
-                "user"        => ( $this->controller->isLoggedIn() ? [
-                        "uid"        => $this->controller->getUser()->getUid(),
-                        "email"      => $this->controller->getUser()->getEmail(),
-                        "first_name" => $this->controller->getUser()->getFirstName(),
-                        "lat_name"   => $this->controller->getUser()->getLastName()
-                ] : [ "uid" => 0 ] ),
-                "browser"     => Utils::getBrowser(),
-                "request_uri" => $_request_uri,
-                "took"        => $this->controller->getTimer()
+            'status' => 'OK',
+            'message' => 'Pong...',
+            "client_ip" => Utils::getRealIpAddr(),
+            "user" => ($this->controller->isLoggedIn() ? [
+                "uid" => $this->controller->getUser()->getUid(),
+                "email" => $this->controller->getUser()->getEmail(),
+                "first_name" => $this->controller->getUser()->getFirstName(),
+                "lat_name" => $this->controller->getUser()->getLastName()
+            ] : ["uid" => 0]),
+            "browser" => Utils::getBrowser(),
+            "request_uri" => $_request_uri,
+            "took" => $this->controller->getTimer()
         ];
-
     }
 
 }

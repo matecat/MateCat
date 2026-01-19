@@ -202,6 +202,10 @@ class MMT extends AbstractEngine
         }, $keyList);
     }
 
+    /**
+     * @param array $_config
+     * @return bool
+     */
     public function set($_config): bool
     {
         $client = $this->_getClient();
@@ -232,6 +236,7 @@ class MMT extends AbstractEngine
      * @param $_config
      *
      * @return bool
+     * @throws Exception
      */
     public function update($_config): bool
     {
@@ -417,6 +422,7 @@ class MMT extends AbstractEngine
      * @return array|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      * @internal param array $langPairs
      */
     protected function getContext(SplFileObject $file, string $source, array $targets): ?array
@@ -475,6 +481,7 @@ class MMT extends AbstractEngine
      * @return array|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      */
     public function connectKeys(array $keyList): ?array
     {
@@ -510,6 +517,7 @@ class MMT extends AbstractEngine
      * @return ?array
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      */
     public function createMemory(string $name, ?string $description = null, ?string $externalId = null): ?array
     {
@@ -526,6 +534,7 @@ class MMT extends AbstractEngine
      *
      * @return array
      * @throws MMTServiceApiException
+     * @throws Exception
      */
     public function deleteMemory(array $memoryKey): array
     {
@@ -549,7 +558,7 @@ class MMT extends AbstractEngine
     }
 
     /**
-     * Get a memory associated to an MMT account
+     * Get a memory associated with an MMT account
      * (id can be an external account)
      *
      * @param string $id
@@ -557,6 +566,7 @@ class MMT extends AbstractEngine
      * @return array|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
+     * @throws Exception
      */
     public function getMemory(string $id): ?array
     {
@@ -679,9 +689,9 @@ class MMT extends AbstractEngine
         $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
         $mt_context = array_pop($contextRs);
-            if (!empty($mt_context)) {
-                $config['mt_context'] = $mt_context->value;
-            }
+        if (!empty($mt_context)) {
+            $config['mt_context'] = $mt_context->value;
+        }
 
         // Common config values
         $config['secret_key'] = self::getG2FallbackSecretKey();

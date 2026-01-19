@@ -15,9 +15,9 @@ class SegmentsFilter extends React.Component {
   constructor(props) {
     super(props)
     this.moreFilters = [
-      {value: 'ice', label: 'ICE'},
-      {value: 'unlocked', label: 'Not ICE'},
-      {value: 'modified_ice', label: 'Modified ICE'},
+      {value: 'ice', label: '101%'},
+      {value: 'unlocked', label: 'Not 101%'},
+      {value: 'modified_ice', label: 'Modified 101%'},
       {value: 'repetitions', label: 'Repetitions'},
       {value: 'mt', label: 'MT'},
       {value: 'matches', label: '100% Matches'},
@@ -25,7 +25,7 @@ class SegmentsFilter extends React.Component {
       {value: 'fuzzies_75_84', label: 'Fuzzies 75-84'},
       {value: 'fuzzies_85_94', label: 'Fuzzies 85-94'},
       {value: 'fuzzies_95_99', label: 'Fuzzies 95-99'},
-      {value: 'todo', label: 'Todo'},
+      {value: 'todo', label: 'To do'},
     ]
     this.state = this.defaultState()
     this.setFilter = this.setFilter.bind(this)

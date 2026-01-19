@@ -36,7 +36,7 @@ class ClientTmKeyStruct extends TmKeyStruct
     public function hideKey(int $uid): ClientTmKeyStruct
     {
         if ($uid != $this->uid_transl && $uid != $this->uid_rev) {
-            $this->key  = $this->getCrypt();
+            $this->key = $this->getCrypt();
             $this->edit = false;
         }
 

@@ -32,10 +32,10 @@ class JobClientKeys
     public static function renderItem(ClientTmKeyStruct $keyStruct): array
     {
         return [
-                "key"  => $keyStruct->key,
-                "r"    => ($keyStruct->r),
-                "w"    => ($keyStruct->w),
-                "name" => $keyStruct->name
+            "key" => $keyStruct->key,
+            "r" => ($keyStruct->r),
+            "w" => ($keyStruct->w),
+            "name" => $keyStruct->name
         ];
     }
 

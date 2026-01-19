@@ -11,6 +11,7 @@ namespace Utils\AsyncTasks\Workers;
 
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
@@ -79,7 +80,7 @@ class GetContributionWorker extends AbstractWorker
 
         if (!$contributionStruct->concordanceSearch) {
             //execute these lines only in segment contribution search,
-            //in case of user concordance search skip these lines
+            //in case of user concordance search, skip these lines
             $this->updateAnalysisSuggestion($matches, $contributionStruct);
         }
 
@@ -93,7 +94,7 @@ class GetContributionWorker extends AbstractWorker
             $crossLangMatches = [];
 
             foreach ($contributionStruct->crossLangTargets as $lang) {
-                // double check for not black lang
+                // double-check for not black lang
                 if ($lang !== '') {
                     [, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $lang, $featureSet, true);
 
@@ -172,7 +173,7 @@ class GetContributionWorker extends AbstractWorker
         ];
 
         $this->publishToNodeJsClients($_object);
-        $this->_doLog(json_encode($_object));
+        $this->_doLog($_object);
     }
 
 
@@ -252,7 +253,7 @@ class GetContributionWorker extends AbstractWorker
         $_source = strip_tags(html_entity_decode($_source));
         $_source = preg_replace('#\x{20}{2,}#u', chr(0x20), $_source);
 
-        //Do something with &$match, tokenize strings and send to client
+        //Do something with &$match, tokenize strings and send to the client
         $_source = preg_replace(array_keys($regularExpressions), array_values($regularExpressions), $_source);
         $_target = strip_tags(html_entity_decode($_target));
 
@@ -313,7 +314,7 @@ class GetContributionWorker extends AbstractWorker
             }
         }
 
-        //sort by the len of the Keys ( regular expressions ) in desc ordering
+        //sort by the len of the Keys (regular expressions) in desc ordering
         /*
          *
 
@@ -396,7 +397,7 @@ class GetContributionWorker extends AbstractWorker
             $_config['mt_only'] = false;
             if ($jobStruct->id_mt_engine != 1) {
                 /**
-                 * Don't get MT contribution from MyMemory ( Custom MT )
+                 * Don't get MT contribution from MyMemory (Custom MT)
                  */
                 $_config['get_mt'] = false;
             }
@@ -408,7 +409,7 @@ class GetContributionWorker extends AbstractWorker
             $_TMS = true; /* MyMemory */
         } elseif ($jobStruct->id_tms == 0 && $jobStruct->id_mt_engine == 1) {
             /**
-             * MyMemory disabled but MT Enabled, and it is NOT a Custom one
+             * MyMemory disabled but MT Enabled, and it is NOT a custom engine (MT through MyMemory)
              * So tell to MyMemory to get MT only
              */
             $_config['get_mt'] = true;
@@ -482,6 +483,7 @@ class GetContributionWorker extends AbstractWorker
                 $config['context_list_after'] = $contributionStruct->context_list_after;
                 $config['user_id'] = $contributionStruct->getUser()->uid;
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
+                $config['translation'] = $contributionStruct->translation;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
                 $config['keys'] = array_map(function ($tm_key) {
@@ -553,44 +555,57 @@ class GetContributionWorker extends AbstractWorker
             $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($contributionStruct->segmentId, $contributionStruct->getJobStruct()->id);
 
             // Run updateFirstTimeOpenedContribution ONLY on translations in NEW status
-            if ($segmentTranslation->status === TranslationStatus::STATUS_NEW) {
-                foreach ($matches as $k => $m) {
-                    // normalize data for saving `suggestions_array`
-
-                    if ($m['created_by'] == 'MT!') {
-                        $matches[$k]['created_by'] = EngineConstants::MT; //MyMemory returns MT!
-                    } else {
-                        $user = new UserStruct();
-
-                        if (!$contributionStruct->getUser()->isAnonymous()) {
-                            $user = $contributionStruct->getUser();
-                        }
-
-                        $matches[$k]['created_by'] = Utils::changeMemorySuggestionSource(
-                            $m,
-                            $contributionStruct->getJobStruct()->tm_keys,
-                            $user->uid
-                        );
-                    }
-                }
-
-                $suggestions_json_array = json_encode($matches);
-                $match = $matches[0];
-
-                $data = [];
-                $data['suggestions_array'] = $suggestions_json_array;
-                $data['suggestion'] = $match['raw_translation']; // this is Layer 0
-                $data['translation'] = $match['raw_translation']; // this is Layer 0
-                $data['suggestion_match'] = str_replace('%', '', $match['match']);
-
-                $where = [
-                    'id_segment' => $contributionStruct->segmentId,
-                    'id_job' => $contributionStruct->getJobStruct()->id,
-                    'status' => TranslationStatus::STATUS_NEW
-                ];
-
-                SegmentTranslationDao::updateFirstTimeOpenedContribution($data, $where);
+            if ($segmentTranslation->status != TranslationStatus::STATUS_NEW) {
+                return;
             }
+
+            //copy the first match before we rewrite the created_by field
+            $match = $matches[0];
+
+            foreach ($matches as $k => $m) {
+                // normalize data for saving `suggestions_array`
+
+                if ($m['created_by'] == 'MT!') {
+                    $matches[$k]['created_by'] = EngineConstants::MT; //MyMemory returns MT!
+                } else {
+                    $user = new UserStruct();
+
+                    if (!$contributionStruct->getUser()->isAnonymous()) {
+                        $user = $contributionStruct->getUser();
+                    }
+
+                    $matches[$k]['created_by'] = Utils::changeMemorySuggestionSource(
+                        $m,
+                        $contributionStruct->getJobStruct()->tm_keys,
+                        $user->uid
+                    );
+                }
+            }
+
+            $suggestions_json_array = json_encode($matches);
+
+            $data = [];
+            $data['suggestions_array'] = $suggestions_json_array;
+            $data['suggestion'] = $match['raw_translation']; // this is Layer 0
+            $data['translation'] = $match['raw_translation']; // this is Layer 0
+            $data['suggestion_match'] = str_replace('%', '', $match['match']);
+
+            //If the analysis was not requested (engine not used), some database fields are not set, in particular suggestion_source
+            if (empty($segmentTranslation->suggestion_source)) {
+                if (!str_contains($match['created_by'], InternalMatchesConstants::MT)) {
+                    $data['suggestion_source'] = InternalMatchesConstants::TM;
+                } else {
+                    $data['suggestion_source'] = InternalMatchesConstants::MT;
+                }
+            }
+
+            $where = [
+                'id_segment' => $contributionStruct->segmentId,
+                'id_job' => $contributionStruct->getJobStruct()->id,
+                'status' => TranslationStatus::STATUS_NEW
+            ];
+
+            SegmentTranslationDao::updateFirstTimeOpenedContribution($data, $where);
         }
     }
 }

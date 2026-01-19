@@ -54,10 +54,10 @@ class MMTStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $others = [
-            "tmx_import_relative_url" => "memories/content",
-            "api_key_check_auth_url"  => "users/me",
-            "user_update_activate"    => "memories/connect",
-            "context_get"             => "context-vector",
+        "tmx_import_relative_url" => "memories/content",
+        "api_key_check_auth_url" => "users/me",
+        "user_update_activate" => "memories/connect",
+        "context_get" => "context-vector",
     ];
 
     /**
@@ -70,7 +70,7 @@ class MMTStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $extra_parameters = [
-            'MMT-License'      => "",
+        'MMT-License' => "",
     ];
 
     /**

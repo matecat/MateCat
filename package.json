@@ -19,6 +19,7 @@
   "dependencies": {
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@translated/lara": "1.8.0-beta.4",
     "classnames": "^2.2.6",
     "crypto-js": "^4.1.1",
     "diff-match-patch": "^1.0.5",
@@ -57,7 +58,7 @@
     "@babel/plugin-transform-runtime": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
-    "@sentry/webpack-plugin": "4.6.0",
+    "@sentry/webpack-plugin": "4.6.1",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
@@ -100,5 +101,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.4.24"
+  "version": "3.5.11"
 }

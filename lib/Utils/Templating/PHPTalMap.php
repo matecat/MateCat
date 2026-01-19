@@ -28,10 +28,10 @@ class PHPTalMap implements ArrayAccess, JsonSerializable, Stringable
                 if (is_numeric($key)) {
                     $this->storage[] = new PHPTalMap($value);
                 } else {
-                    $this->storage[ $key ] = new PHPTalMap($value);
+                    $this->storage[$key] = new PHPTalMap($value);
                 }
             } else {
-                $this->storage[ $key ] = $value;
+                $this->storage[$key] = $value;
             }
         }
     }

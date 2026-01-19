@@ -20,8 +20,7 @@
 
 .new_project__page {
   overflow-y: auto;
-  height: 100%;
-  padding-bottom: 60px;
+  height: calc(100% - 60px);
   .load-gdrive {
     float: right;
     display: flex;

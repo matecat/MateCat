@@ -4,6 +4,7 @@ namespace Utils\Redis;
 
 use Exception;
 use Predis\Client;
+use Predis\Connection\ConnectionInterface;
 use ReflectionClass;
 use ReflectionException;
 use Utils\Registry\AppConfig;
@@ -53,15 +54,15 @@ class RedisHandler
     {
         $resource = null;
         if ($this->redisClient != null) {
-            $reflectorClass    = new ReflectionClass($this->redisClient->getConnection());
+            $reflectorClass = new ReflectionClass($this->redisClient->getConnection());
             $reflectorProperty = $reflectorClass->getParentClass()->getProperty('resource');
-            $resource          = $reflectorProperty->getValue($this->redisClient->getConnection());
+            $resource = $reflectorProperty->getValue($this->redisClient->getConnection());
         }
 
         if (
-                $this->redisClient === null
-                || !$this->redisClient->getConnection()->isConnected()
-                || !is_resource($resource)
+            $this->redisClient === null
+            || !$this->redisClient->getConnection()->isConnected()
+            || !$resource
         ) {
             $this->redisClient = $this->getClient();
         }
@@ -90,7 +91,7 @@ class RedisHandler
         if (!is_null(AppConfig::$INSTANCE_ID)) {
             $conf = parse_url($dsnString);
 
-            if (isset($conf[ 'query' ])) {
+            if (isset($conf['query'])) {
                 $instanceID = "&database=" . AppConfig::$INSTANCE_ID;
             } else {
                 $instanceID = "?database=" . AppConfig::$INSTANCE_ID;
@@ -104,15 +105,15 @@ class RedisHandler
 
     /**
      * @param string $key
-     * @param int    $wait_time_seconds
+     * @param int $wait_time_seconds
      *
      * @throws Exception
      */
     public function tryLock(string $key, int $wait_time_seconds = 10): void
     {
-        $time      = microtime(true);
+        $time = microtime(true);
         $exit_time = $time + $wait_time_seconds;
-        $sleep     = 500000; // microseconds
+        $sleep = 500000; // microseconds
 
         do {
             // Lock Redis with NX and Expire

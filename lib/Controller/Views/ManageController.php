@@ -18,34 +18,35 @@ use Model\ActivityLog\ActivityLogStruct;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Tools\Utils;
 
-class ManageController extends BaseKleinViewController implements IController {
+class ManageController extends BaseKleinViewController implements IController
+{
 
     protected string $_outsource_login_API = '//signin.translated.net/';
 
-    protected function afterConstruct(): void {
-        $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new ViewLoginRedirectValidator($this));
     }
 
     /**
      * @throws Exception
      */
-    public function renderView() {
+    public function renderView()
+    {
+        $this->setView("manage.html", [
+            'outsource_service_login' => $this->_outsource_login_API,
+            'split_enabled' => new PHPTalBoolean(true),
+            'enable_outsource' => new PHPTalBoolean(true)
+        ]);
 
-        $this->setView( "manage.html", [
-                'outsource_service_login' => $this->_outsource_login_API,
-                'split_enabled'           => new PHPTalBoolean( true ),
-                'enable_outsource'        => new PHPTalBoolean( true )
-        ] );
-
-        $activity             = new ActivityLogStruct();
-        $activity->action     = ActivityLogStruct::ACCESS_MANAGE_PAGE;
-        $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->user->uid;
-        $activity->event_date = date( 'Y-m-d H:i:s' );
-        Activity::save( $activity );
+        $activity = new ActivityLogStruct();
+        $activity->action = ActivityLogStruct::ACCESS_MANAGE_PAGE;
+        $activity->ip = Utils::getRealIpAddr();
+        $activity->uid = $this->user->uid;
+        $activity->event_date = date('Y-m-d H:i:s');
+        Activity::save($activity);
 
         $this->render();
-
     }
 
 }

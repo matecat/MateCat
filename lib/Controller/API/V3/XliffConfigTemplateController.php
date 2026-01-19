@@ -31,7 +31,7 @@ class XliffConfigTemplateController extends KleinController
     private function validateJSON($json): void
     {
         $validatorObject = new JSONValidatorObject($json);
-        $validator       = new JSONValidator('xliff_parameters_rules_wrapper.json', true);
+        $validator = new JSONValidator('xliff_parameters_rules_wrapper.json', true);
         $validator->validate($validatorObject);
     }
 
@@ -42,7 +42,7 @@ class XliffConfigTemplateController extends KleinController
     {
         try {
             $currentPage = $this->request->param('page') ?? 1;
-            $pagination  = $this->request->param('perPage') ?? 20;
+            $pagination = $this->request->param('perPage') ?? 20;
 
             if ($pagination > 200) {
                 $pagination = 200;
@@ -58,7 +58,7 @@ class XliffConfigTemplateController extends KleinController
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -85,7 +85,7 @@ class XliffConfigTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -115,7 +115,7 @@ class XliffConfigTemplateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
-            if($exception instanceof JSONValidatorException){
+            if ($exception instanceof JSONValidatorException) {
                 return $this->response->json(['error' => $exception->getFormattedError("xliff-config-template")]);
             }
 
@@ -125,13 +125,13 @@ class XliffConfigTemplateController extends KleinController
                 $this->response->code(400);
 
                 return $this->response->json([
-                        'error' => "Invalid unique template name"
+                    'error' => "Invalid unique template name"
                 ]);
             } else {
                 $this->response->code(500);
 
                 return $this->response->json([
-                        'error' => $e->getMessage()
+                    'error' => $e->getMessage()
                 ]);
             }
         } catch (Exception $exception) {
@@ -139,7 +139,7 @@ class XliffConfigTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -158,7 +158,7 @@ class XliffConfigTemplateController extends KleinController
                 throw new Exception('Bad Get', 400);
             }
 
-            $id  = (int)$this->request->param('id');
+            $id = (int)$this->request->param('id');
             $uid = $this->getUser()->uid;
 
             $json = $this->request->body();
@@ -179,7 +179,7 @@ class XliffConfigTemplateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
-            if($exception instanceof JSONValidatorException){
+            if ($exception instanceof JSONValidatorException) {
                 return $this->response->json(['error' => $exception->getFormattedError("xliff-config-template")]);
             }
 
@@ -189,7 +189,7 @@ class XliffConfigTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -200,7 +200,7 @@ class XliffConfigTemplateController extends KleinController
     public function delete(): Response
     {
         try {
-            $id  = (int)$this->request->paramsNamed()->get('id');
+            $id = (int)$this->request->paramsNamed()->get('id');
             $uid = $this->getUser()->uid;
 
             $count = XliffConfigTemplateDao::remove($id, $uid);
@@ -210,14 +210,14 @@ class XliffConfigTemplateController extends KleinController
             }
 
             return $this->response->json([
-                    'id' => $id
+                'id' => $id
             ]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -236,10 +236,10 @@ class XliffConfigTemplateController extends KleinController
     private function getModelSchema(): object
     {
         $skeletonSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json'));
-        $contentSchema  = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json'));
+        $contentSchema = JSONValidator::getValidJSONSchema(file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json'));
 
         $skeletonSchema->properties->rules->properties = $contentSchema->properties;
-        $skeletonSchema->definitions                   = $contentSchema->definitions;
+        $skeletonSchema->definitions = $contentSchema->definitions;
 
         return $skeletonSchema;
     }

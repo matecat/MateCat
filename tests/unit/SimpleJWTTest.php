@@ -74,7 +74,6 @@ class SimpleJWTTest extends AbstractTest
 
         $this->expectException(UnexpectedValueException::class);
         $jwt->sign();
-
     }
 
     public function testIsValid_withValidToken(): void
@@ -154,9 +153,8 @@ class SimpleJWTTest extends AbstractTest
         );
 
         $signedToken = $jwt->sign();
-        $this->assertTrue( SimpleJWT::isValid($signedToken, $this->secretKey) );
-        $this->assertTrue( SimpleJWT::isValid((string)$jwt, $this->secretKey) );
-
+        $this->assertTrue(SimpleJWT::isValid($signedToken, $this->secretKey));
+        $this->assertTrue(SimpleJWT::isValid((string)$jwt, $this->secretKey));
     }
 
     public function testIsValid_withStringToken(): void
@@ -208,117 +206,121 @@ class SimpleJWTTest extends AbstractTest
         $this->assertTrue($isValid, "Tokens missing non-critical claims should still be valid.");
     }
 
-    public function testEncryption() {
+    public function testEncryption()
+    {
         $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
 
-        $x = new SimpleJWT( [
-                'invited_by_uid' => $invited_by_uid,
-                'email'          => $email,
-                'request_info'   => $request_info,
-        ] );
+        $x = new SimpleJWT([
+            'invited_by_uid' => $invited_by_uid,
+            'email' => $email,
+            'request_info' => $request_info,
+        ]);
 
         $result = $x->sign();
-        $this->assertArrayHasKey( 'signature', $result );
-        $this->assertArrayHasKey( 'payload', $result );
-        $this->assertArrayHasKey( 'exp', $result[ 'payload' ] );
-        $this->assertArrayHasKey( 'iat', $result[ 'payload' ] );
+        $this->assertArrayHasKey('signature', $result);
+        $this->assertArrayHasKey('payload', $result);
+        $this->assertArrayHasKey('exp', $result['payload']);
+        $this->assertArrayHasKey('iat', $result['payload']);
         $this->assertTrue($result['payload'][$result['payload']['iss']]['invited_by_uid'] == $invited_by_uid);
         $this->assertTrue($result['payload'][$result['payload']['iss']]['email'] == $email);
         $this->assertTrue($result['payload'][$result['payload']['iss']]['request_info'] == $request_info);
     }
 
-    public function testValidateTokenEncryption() {
+    public function testValidateTokenEncryption()
+    {
         $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
 
-        $x = new SimpleJWT( [
-                'invited_by_uid' => $invited_by_uid,
-                'email'          => $email,
-                'request_info'   => $request_info,
-        ] );
+        $x = new SimpleJWT([
+            'invited_by_uid' => $invited_by_uid,
+            'email' => $email,
+            'request_info' => $request_info,
+        ]);
 
         $result = $x->sign();
-        $this->assertTrue( $x->isValid( $result ) );
+        $this->assertTrue($x->isValid($result));
     }
 
-    public function testValidateTokenEncryptionByJWT() {
+    public function testValidateTokenEncryptionByJWT()
+    {
         $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
 
-        $x = new SimpleJWT( [
-                'invited_by_uid' => $invited_by_uid,
-                'email'          => $email,
-                'request_info'   => $request_info,
-        ] );
+        $x = new SimpleJWT([
+            'invited_by_uid' => $invited_by_uid,
+            'email' => $email,
+            'request_info' => $request_info,
+        ]);
 
-        $this->assertTrue( $x->isValid( $x->encode() ) );
+        $this->assertTrue($x->isValid($x->encode()));
     }
 
 
-    public function testInvalidToken_tamper_field() {
+    public function testInvalidToken_tamper_field()
+    {
         $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
 
-        $x = new SimpleJWT( [
-                'invited_by_uid' => $invited_by_uid,
-                'email'          => $email,
-                'request_info'   => $request_info,
-        ] );
-
-        $result = $x->sign();
-
-        //change a value param
-        $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] = 123;
-
-        //assert exception
-        $this->expectException( DomainException::class );
-        $x->isValid( $result );
-
-    }
-
-    public function testInvalidToken_tamper_hash() {
-        $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
-
-        $x = new SimpleJWT( [
-                'invited_by_uid' => $invited_by_uid,
-                'email'          => $email,
-                'request_info'   => $request_info,
-        ] );
+        $x = new SimpleJWT([
+            'invited_by_uid' => $invited_by_uid,
+            'email' => $email,
+            'request_info' => $request_info,
+        ]);
 
         $result = $x->sign();
 
         //change a value param
-        $result[ 'signature' ] = "376715df7403f293a019fab9d048e2a904216108fc85190dc824d35375f94bc9";
+        $result['payload']['context']['invited_by_uid'] = 123;
 
         //assert exception
-        $this->expectException( DomainException::class );
-        $x->isValid( $result );
-
+        $this->expectException(DomainException::class);
+        $x->isValid($result);
     }
 
-    public function testArrayAccess() {
+    public function testInvalidToken_tamper_hash()
+    {
         $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
 
-        $x = new SimpleJWT( [
-                'invited_by_uid' => $invited_by_uid,
-                'email'          => $email,
-                'request_info'   => $request_info,
-        ] );
+        $x = new SimpleJWT([
+            'invited_by_uid' => $invited_by_uid,
+            'email' => $email,
+            'request_info' => $request_info,
+        ]);
+
+        $result = $x->sign();
+
+        //change a value param
+        $result['signature'] = "376715df7403f293a019fab9d048e2a904216108fc85190dc824d35375f94bc9";
+
+        //assert exception
+        $this->expectException(DomainException::class);
+        $x->isValid($result);
+    }
+
+    public function testArrayAccess()
+    {
+        $invited_by_uid = 166;
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
+
+        $x = new SimpleJWT([
+            'invited_by_uid' => $invited_by_uid,
+            'email' => $email,
+            'request_info' => $request_info,
+        ]);
 
         $newEmail = "alex655321@a-clockwork-orange.net";
 
         //TEST ArrayAccess
-        $x[ 'email' ]      = $newEmail;
-        $x[ 'testAccess' ] = "a new key/value pair";
+        $x['email'] = $newEmail;
+        $x['testAccess'] = "a new key/value pair";
 
         $result = $x->sign();
         $this->assertTrue($result['payload'][$result['payload']['iss']]['invited_by_uid'] == $invited_by_uid);
@@ -332,21 +334,22 @@ class SimpleJWTTest extends AbstractTest
         $this->assertEquals("a new key/value pair", $result['payload'][$result['payload']['iss']]['testAccess']);
 
 
-        $this->assertTrue( $x->isValid( $result ) );
+        $this->assertTrue($x->isValid($result));
     }
 
-    public function testAssignmentRuntime() {
+    public function testAssignmentRuntime()
+    {
         $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
 
         $x = new SimpleJWT();
 
         //TEST ArrayAccess
-        $x[ 'email' ]          = $email;
-        $x[ 'invited_by_uid' ] = $invited_by_uid;
-        $x[ 'request_info' ]   = $request_info;
-        $x[ 'testAccess' ]     = "a new key/value pair";
+        $x['email'] = $email;
+        $x['invited_by_uid'] = $invited_by_uid;
+        $x['request_info'] = $request_info;
+        $x['testAccess'] = "a new key/value pair";
 
         $result = $x->sign();
         $this->assertTrue($result['payload'][$result['payload']['iss']]['invited_by_uid'] == $invited_by_uid);
@@ -358,35 +361,33 @@ class SimpleJWTTest extends AbstractTest
         $this->assertArrayHasKey('testAccess', $result['payload'][$result['payload']['iss']]);
         $this->assertEquals("a new key/value pair", $result['payload'][$result['payload']['iss']]['testAccess']);
 
-        $this->assertTrue( $x->isValid( $x->encode() ) );
-        $this->assertTrue( $x->isValid( $result ) );
-
+        $this->assertTrue($x->isValid($x->encode()));
+        $this->assertTrue($x->isValid($result));
     }
 
-    public function testTimeToLive() {
-
+    public function testTimeToLive()
+    {
         $invited_by_uid = 166;
-        $email          = "domenico@translated.net";
-        $request_info   = [ "team_id" => 1 ];
+        $email = "domenico@translated.net";
+        $request_info = ["team_id" => 1];
 
-        $x = new SimpleJWT( [
-                'invited_by_uid' => $invited_by_uid,
-                'email'          => $email,
-                'request_info'   => $request_info,
-        ] );
+        $x = new SimpleJWT([
+            'invited_by_uid' => $invited_by_uid,
+            'email' => $email,
+            'request_info' => $request_info,
+        ]);
 
-        $x->setTimeToLive( 1 );
+        $x->setTimeToLive(1);
 
         $result = $x->encode();
-        $this->assertTrue( $x->isValid( $result ) );
+        $this->assertTrue($x->isValid($result));
 
         //wait 2 seconds for token expire
-        sleep( 2 );
+        sleep(2);
 
         //assert exception
-        $this->expectException( UnexpectedValueException::class );
-        $x->isValid( $result );
-
+        $this->expectException(UnexpectedValueException::class);
+        $x->isValid($result);
     }
 
 

@@ -61,7 +61,7 @@ class FeatureSet implements FeatureSetInterface
             $_features = [];
             foreach ($features as $feature) {
                 if (property_exists($feature, 'feature_code')) {
-                    $_features[ $feature->feature_code ] = $feature;
+                    $_features[$feature->feature_code] = $feature;
                 } else {
                     throw new Exception('`feature_code` property not found on ' . var_export($feature, true));
                 }
@@ -101,7 +101,7 @@ class FeatureSet implements FeatureSetInterface
 
         if (!empty($feature_codes)) {
             foreach ($feature_codes as $code) {
-                $features [ $code ] = new BasicFeatureStruct(['feature_code' => $code]);
+                $features [$code] = new BasicFeatureStruct(['feature_code' => $code]);
             }
 
             $this->merge($features);
@@ -124,12 +124,13 @@ class FeatureSet implements FeatureSetInterface
      */
     public function loadForProject(ProjectStruct $project): void
     {
+        $featureStrings = $project->getMetadataValue(MetadataDao::FEATURES_KEY);
+        $featureCodes = (!empty($featureStrings)) ? FeatureSet::splitString($featureStrings) : [];
+
         $this->clear();
         $this->_setIgnoreDependencies(true);
         $this->loadForceableProjectFeatures();
-        $this->loadFromCodes(
-                FeatureSet::splitString($project->getMetadataValue(MetadataDao::FEATURES_KEY))
-        );
+        $this->loadFromCodes($featureCodes);
         $this->_setIgnoreDependencies(false);
     }
 
@@ -157,9 +158,9 @@ class FeatureSet implements FeatureSetInterface
     {
         $project_dependencies = [];
         $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata);
-        $features             = [];
+        $features = [];
         foreach ($project_dependencies as $dependency) {
-            $features [ $dependency ] = new BasicFeatureStruct(['feature_code' => $dependency]);
+            $features [$dependency] = new BasicFeatureStruct(['feature_code' => $dependency]);
         }
 
         $this->merge($features);
@@ -244,7 +245,7 @@ class FeatureSet implements FeatureSetInterface
      * Returns the filtered subject variable passed to all enabled features.
      *
      * @param string $method
-     * @param mixed  $filterable
+     * @param mixed $filterable
      *
      * @return mixed
      *
@@ -310,9 +311,9 @@ class FeatureSet implements FeatureSetInterface
      * Also, gives a last chance to plugins to define a custom decorator class to be
      * added to any call.
      *
-     * @param string      $name       name of the decorator to activate
+     * @param string $name name of the decorator to activate
      * @param IController $controller the controller to work on
-     * @param PHPTAL      $template   the PHPTAL view to add properties to
+     * @param PHPTAL $template the PHPTAL view to add properties to
      *
      * @throws Exception
      */
@@ -338,12 +339,12 @@ class FeatureSet implements FeatureSetInterface
      */
     public function sortFeatures(): FeatureSet
     {
-        $toBeSorted     = array_values($this->features);
+        $toBeSorted = array_values($this->features);
         $sortedFeatures = $this->quickSort($toBeSorted);
 
         $this->clear();
         foreach ($sortedFeatures as $value) {
-            $this->features[ $value->feature_code ] = $value;
+            $this->features[$value->feature_code] = $value;
         }
 
         return $this;
@@ -363,16 +364,16 @@ class FeatureSet implements FeatureSetInterface
             return $featureStructsList;
         }
 
-        $firstInList        = $featureStructsList[ 0 ];
+        $firstInList = $featureStructsList[0];
         $ObjectFeatureFirst = $firstInList->toNewObject();
 
         $leftBucket = $rightBucket = [];
 
         for ($i = 1; $i < $length; $i++) {
-            if (in_array($featureStructsList[ $i ]->feature_code, $ObjectFeatureFirst::getDependencies())) {
-                $leftBucket[] = $featureStructsList[ $i ];
+            if (in_array($featureStructsList[$i]->feature_code, $ObjectFeatureFirst::getDependencies())) {
+                $leftBucket[] = $featureStructsList[$i];
             } else {
-                $rightBucket[] = $featureStructsList[ $i ];
+                $rightBucket[] = $featureStructsList[$i];
             }
         }
 
@@ -387,12 +388,12 @@ class FeatureSet implements FeatureSetInterface
     {
         $codes = $this->getCodes();
         foreach ($this->features as $feature) {
-            $baseFeature          = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject();
             $missing_dependencies = array_diff($baseFeature::getDependencies(), $codes);
 
             if (!empty($missing_dependencies)) {
                 foreach ($missing_dependencies as $code) {
-                    $this->features [ $code ] = new BasicFeatureStruct(['feature_code' => $code]);
+                    $this->features [$code] = new BasicFeatureStruct(['feature_code' => $code]);
                 }
             }
         }
@@ -412,14 +413,14 @@ class FeatureSet implements FeatureSetInterface
             $this->loadFeatureDependencies();
         }
 
-        $all_features    = [];
+        $all_features = [];
         $conflictingDeps = [];
 
         foreach ($new_features as $feature) {
             // flat dependency management
             $baseFeature = $feature->toNewObject();
 
-            $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
+            $conflictingDeps[$feature->feature_code] = $baseFeature::getConflictingDependencies();
 
             $deps = [];
 
@@ -442,8 +443,8 @@ class FeatureSet implements FeatureSetInterface
                     throw new Exception("$feature->feature_code is conflicting with $key.");
                 }
             }
-            if (!isset($this->features[ $feature->feature_code ])) {
-                $this->features[ $feature->feature_code ] = $feature;
+            if (!isset($this->features[$feature->feature_code])) {
+                $this->features[$feature->feature_code] = $feature;
             }
         }
 
@@ -478,7 +479,7 @@ class FeatureSet implements FeatureSetInterface
 
         if (!empty(AppConfig::$AUTOLOAD_PLUGINS)) {
             foreach (AppConfig::$AUTOLOAD_PLUGINS as $plugin) {
-                $features[ $plugin ] = new BasicFeatureStruct(['feature_code' => $plugin]);
+                $features[$plugin] = new BasicFeatureStruct(['feature_code' => $plugin]);
             }
         }
 
@@ -488,9 +489,9 @@ class FeatureSet implements FeatureSetInterface
     /**
      * Runs a command on a single feautre
      *
-     * @param string             $method
+     * @param string $method
      * @param BasicFeatureStruct $feature
-     * @param array              $args
+     * @param array $args
      *
      * @return void
      */

@@ -34,11 +34,11 @@ class Engine
         $engine_type = explode("\\", $engine->class_load);
 
         return [
-                'id'          => $engine->id,
-                'name'        => $engine->name,
-                'type'        => $engine->type,
-                'description' => $engine->description,
-                'engine_type' => array_pop($engine_type)
+            'id' => $engine->id,
+            'name' => $engine->name,
+            'type' => $engine->type,
+            'description' => $engine->description,
+            'engine_type' => array_pop($engine_type)
         ];
     }
 

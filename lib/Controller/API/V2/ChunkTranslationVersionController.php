@@ -35,7 +35,7 @@ class ChunkTranslationVersionController extends KleinController
         $formatted = new SegmentVersion($this->chunk, $results, false, $this->featureSet);
 
         $this->response->json([
-                'versions' => $formatted->render()
+            'versions' => $formatted->render()
         ]);
     }
 

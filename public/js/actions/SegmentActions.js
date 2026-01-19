@@ -1,3 +1,4 @@
+import React from 'react'
 import {each, forEach, isUndefined} from 'lodash'
 import {debounce} from 'lodash/function'
 import $ from 'jquery'
@@ -28,7 +29,6 @@ import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
-import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
@@ -1054,8 +1054,31 @@ const SegmentActions = {
   deleteGlossaryItem: function (data) {
     deleteGlossaryItem(data)
       .then(() => {})
-      .catch(() => {
-        OfflineUtils.failedConnection()
+      .catch((errors) => {
+        if (errors.status === 403) {
+          const notification = {
+            title: 'Glossary edit failed',
+            text: (
+              <span>
+                This glossary is part of a resource that isn’t enabled for
+                updates.
+                <br />
+                To edit it, open the <b>Settings</b> panel, go to the{' '}
+                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>“Update”</b> checkbox next to the resource name.
+              </span>
+            ),
+            type: 'warning',
+            position: 'bl',
+          }
+          CatToolActions.addNotification(notification)
+        } else {
+          OfflineUtils.failedConnection()
+        }
+
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        })
       })
   },
 
@@ -1063,7 +1086,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'A glossary item has been deleted',
+      message: 'A termbase item has been deleted',
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
@@ -1089,7 +1112,24 @@ const SegmentActions = {
     addGlossaryItem(data)
       .then(() => {})
       .catch((errors) => {
-        if (errors.length > 0) {
+        if (errors.status === 403) {
+          const notification = {
+            title: 'Glossary edit failed',
+            text: (
+              <span>
+                This glossary is part of a resource that isn’t enabled for
+                updates.
+                <br />
+                To edit it, open the <b>Settings</b> panel, go to the{' '}
+                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>“Update”</b> checkbox next to the resource name.
+              </span>
+            ),
+            type: 'warning',
+            position: 'bl',
+          }
+          CatToolActions.addNotification(notification)
+        } else if (errors.length > 0) {
           AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
             sid: sid,
@@ -1098,6 +1138,10 @@ const SegmentActions = {
         } else {
           OfflineUtils.failedConnection()
         }
+
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        })
       })
   },
   addGlossaryItemToCache: (sid, payload) => {
@@ -1122,8 +1166,31 @@ const SegmentActions = {
   updateGlossaryItem: function (data) {
     updateGlossaryItem(data)
       .then(() => {})
-      .catch(() => {
-        OfflineUtils.failedConnection()
+      .catch((errors) => {
+        if (errors.status === 403) {
+          const notification = {
+            title: 'Glossary edit failed',
+            text: (
+              <span>
+                This glossary is part of a resource that isn’t enabled for
+                updates.
+                <br />
+                To edit it, open the <b>Settings</b> panel, go to the{' '}
+                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>“Update”</b> checkbox next to the resource name.
+              </span>
+            ),
+            type: 'warning',
+            position: 'bl',
+          }
+          CatToolActions.addNotification(notification)
+        } else {
+          OfflineUtils.failedConnection()
+        }
+
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        })
       })
   },
 
@@ -1181,9 +1248,11 @@ const SegmentActions = {
   },
 
   getContributions: function (sid, multiMatchLangs, force) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
-    TranslationMatches.getContribution(sid, 1, multiMatchLangs, force)
-    TranslationMatches.getContribution(sid, 2, multiMatchLangs, force)
+    TranslationMatches.getContributionsWithPrefetch({
+      sid,
+      crossLanguageSettings: multiMatchLangs,
+      force,
+    })
   },
 
   getContribution: function (sid, multiMatchLangs, force) {
@@ -1495,7 +1564,7 @@ const SegmentActions = {
         ModalsActions.showModalComponent(
           UnlockAllSegmentsModal,
           {},
-          'Unlock all ICE segments',
+          'Unlock all 101% segments',
         )
       }
     }
@@ -1752,12 +1821,18 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary() && translation) {
+      const cleanSource = DraftMatecatUtils.removeTagsFromText(updatedSource)
+      const cleanTranslation = DraftMatecatUtils.removeTagsFromText(translation)
+      if (
+        CatToolStore.getHaveKeysGlossary() &&
+        cleanSource &&
+        cleanTranslation
+      ) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: DraftMatecatUtils.removeTagsFromText(translation),
-          source: DraftMatecatUtils.removeTagsFromText(updatedSource),
+          target: cleanTranslation,
+          source: cleanSource,
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)

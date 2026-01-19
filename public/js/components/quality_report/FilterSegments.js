@@ -116,21 +116,25 @@ class FilterSegments extends React.Component {
   }
 
   render() {
-    let statusOptions = config.searchable_statuses.map((item) => {
-      return {
-        name: (
-          <>
-            <div
-              className={
-                'ui ' + item.label.toLowerCase() + '-color empty circular label'
-              }
-            />
-            {item.label}
-          </>
-        ),
-        id: item.value,
-      }
-    })
+    let statusOptions = config.searchable_statuses
+      .filter(({value}) => value !== 'REJECTED')
+      .map((item) => {
+        return {
+          name: (
+            <>
+              <div
+                className={
+                  'ui ' +
+                  item.label.toLowerCase() +
+                  '-color empty circular label'
+                }
+              />
+              {item.label}
+            </>
+          ),
+          id: item.value,
+        }
+      })
     if (config.secondRevisionsCount) {
       statusOptions.push({
         name: (
@@ -152,7 +156,7 @@ class FilterSegments extends React.Component {
         }
       })
       .unshift({
-        name: 'All',
+        name: 'Any',
         id: 'all',
       })
     let optionsSeverities = this.severities.map((item) => {

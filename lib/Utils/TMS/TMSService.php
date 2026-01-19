@@ -136,10 +136,11 @@ class TMSService
      * @return UploadElement
      * @throws Exception
      */
-    public function uploadFile(?bool $disable_upload_limit = false): UploadElement {
+    public function uploadFile(?bool $disable_upload_limit = false): UploadElement
+    {
         $uploadManager = new Upload();
 
-        return $uploadManager->uploadFiles( $_FILES, $disable_upload_limit );
+        return $uploadManager->uploadFiles($_FILES, $disable_upload_limit);
     }
 
     /**
@@ -289,8 +290,8 @@ class TMSService
                 //wait for the daemon to process it
                 //LOADING
                 $this->logger->debug("waiting for \"" . $this->name . "\" to be loaded into MyMemory");
-            $result['data'] = $allMemories->responseData;
-            $result['completed'] = false;
+                $result['data'] = $allMemories->responseData;
+                $result['completed'] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)

@@ -12,7 +12,8 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Utils\LQA\QA;
 
-class XliffReplacerCallback implements XliffReplacerCallbackInterface {
+class XliffReplacerCallback implements XliffReplacerCallbackInterface
+{
 
     /**
      * @var MateCatFilter
@@ -35,46 +36,47 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * XliffReplacerCallback constructor.
      *
-     * @param FeatureSet     $featureSet
-     * @param string         $sourceLang
-     * @param string         $targetLang
+     * @param FeatureSet $featureSet
+     * @param string $sourceLang
+     * @param string $targetLang
      * @param JobStruct|null $jobStruct
      */
-    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, ?JobStruct $jobStruct = null ) {
+    public function __construct(FeatureSet $featureSet, string $sourceLang, string $targetLang, ?JobStruct $jobStruct = null)
+    {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
 
         $subfilteringCustomHandlers = [];
-        if ( $jobStruct !== null ) {
-            $metadataDao                = new MetadataDao();
-            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers( $jobStruct->id, $jobStruct->password );
+        if ($jobStruct !== null) {
+            $metadataDao = new MetadataDao();
+            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password);
         }
 
-        $this->filter = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [], $subfilteringCustomHandlers );
+        $this->filter = MateCatFilter::getInstance($featureSet, $sourceLang, $targetLang, [], $subfilteringCustomHandlers);
     }
 
     /**
      * @inheritDoc
      * @throws Exception
      */
-    public function thereAreErrors( int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null ): bool {
-
+    public function thereAreErrors(int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null): bool
+    {
         // if there are ERR_SIZE_RESTRICTION errors, return true
-        if ( $error !== null ) {
-            $errors = json_decode( $error );
+        if ($error !== null) {
+            $errors = json_decode($error);
 
-            if ( $errors ) {
-                foreach ( $errors as $err ) {
-                    if ( isset( $err->outcome ) and $err->outcome === QA::ERR_SIZE_RESTRICTION ) {
+            if ($errors) {
+                foreach ($errors as $err) {
+                    if (isset($err->outcome) and $err->outcome === QA::ERR_SIZE_RESTRICTION) {
                         return true;
                     }
                 }
             }
         }
 
-        $segment     = $this->filter->fromLayer0ToLayer1( $segment );
-        $translation = $this->filter->fromLayer0ToLayer1( $translation );
+        $segment = $this->filter->fromLayer0ToLayer1($segment);
+        $translation = $this->filter->fromLayer0ToLayer1($translation);
 
         //
         // ------------------------------------
@@ -87,17 +89,17 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         //
         // To skip these characters QA class needs replaced version of segment and target for _addThisElementToDomMap() function
         //
-        if ( !empty( $dataRefMap ) ) {
-            $dataRefReplacer = new DataRefReplacer( $dataRefMap );
-            $segment         = $dataRefReplacer->replace( $segment );
-            $translation     = $dataRefReplacer->replace( $translation );
+        if (!empty($dataRefMap)) {
+            $dataRefReplacer = new DataRefReplacer($dataRefMap);
+            $segment = $dataRefReplacer->replace($segment);
+            $translation = $dataRefReplacer->replace($translation);
         }
 
-        $check = new QA ( $segment, $translation );
-        $check->setFeatureSet( $this->featureSet );
-        $check->setTargetSegLang( $this->targetLang );
-        $check->setSourceSegLang( $this->sourceLang );
-        $check->setIdSegment( $segmentId );
+        $check = new QA ($segment, $translation);
+        $check->setFeatureSet($this->featureSet);
+        $check->setTargetSegLang($this->targetLang);
+        $check->setSourceSegLang($this->sourceLang);
+        $check->setIdSegment($segmentId);
         $check->performConsistencyCheck();
 
         return $check->thereAreErrors();
@@ -108,7 +110,8 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      *
      * @return XliffReplacerCallback
      */
-    public function setFilter( AbstractFilter $filter ): XliffReplacerCallback {
+    public function setFilter(AbstractFilter $filter): XliffReplacerCallback
+    {
         $this->filter = $filter;
 
         return $this;

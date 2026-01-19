@@ -28,23 +28,23 @@ class UploadHandler
         $this->logger = LoggerFactory::getLogger("upload_handler");
 
         $this->options = [
-                'script_url'              => $this->getFullUrl() . '/',
-                'upload_token'            => $_COOKIE[ 'upload_token' ],
-                'upload_dir'              => Utils::uploadDirFromSessionCookie($_COOKIE[ 'upload_token' ]),
-                'upload_url'              => $this->getFullUrl() . '/files/',
-                'param_name'              => 'files',
+            'script_url' => $this->getFullUrl() . '/',
+            'upload_token' => $_COOKIE['upload_token'],
+            'upload_dir' => Utils::uploadDirFromSessionCookie($_COOKIE['upload_token']),
+            'upload_url' => $this->getFullUrl() . '/files/',
+            'param_name' => 'files',
             // Set the following option to 'POST', if your server does not support
             // DELETE requests. This is a parameter sent to the client:
-                'delete_type'             => 'DELETE',
+            'delete_type' => 'DELETE',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
-                'max_tmx_file_size'       => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
-                'max_file_size'           => AppConfig::$MAX_UPLOAD_FILE_SIZE,
-                'min_file_size'           => 1,
+            'max_tmx_file_size' => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
+            'max_file_size' => AppConfig::$MAX_UPLOAD_FILE_SIZE,
+            'min_file_size' => 1,
             // The maximum number of files for the upload directory:
-                'max_number_of_files'     => AppConfig::$MAX_NUM_FILES,
+            'max_number_of_files' => AppConfig::$MAX_NUM_FILES,
             // Set the following option to false, enable resumable uploads:
-                'discard_aborted_uploads' => true,
+            'discard_aborted_uploads' => true,
         ];
     }
 
@@ -54,19 +54,19 @@ class UploadHandler
 
         /** @noinspection HttpUrlsUsage */
         return
-                ($https ? 'https://' : 'http://') .
-                (!empty($_SERVER[ 'REMOTE_USER' ]) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '') .
-                ($_SERVER[ 'HTTP_HOST' ] ?? (
-                        ($_SERVER[ 'SERVER_NAME' ] ?? '') .
-                        ($https && ($_SERVER[ 'SERVER_PORT' ] ?? 0) === 443 || ($_SERVER[ 'SERVER_PORT' ] ?? 0) === 80 ? '' : ':' . $_SERVER[ 'SERVER_PORT' ]))) .
-                rtrim($_SERVER[ 'REQUEST_URI' ] ?? '', '/');
+            ($https ? 'https://' : 'http://') .
+            (!empty($_SERVER['REMOTE_USER']) ? $_SERVER['REMOTE_USER'] . '@' : '') .
+            ($_SERVER['HTTP_HOST'] ?? (
+                ($_SERVER['SERVER_NAME'] ?? '') .
+                ($https && ($_SERVER['SERVER_PORT'] ?? 0) === 443 || ($_SERVER['SERVER_PORT'] ?? 0) === 80 ? '' : ':' . $_SERVER['SERVER_PORT']))) .
+            rtrim($_SERVER['REQUEST_URI'] ?? '', '/');
     }
 
     protected function set_file_delete_url($file): void
     {
-        $file->delete_url  = $this->options[ 'script_url' ]
-                . '?file=' . rawurlencode($file->name);
-        $file->delete_type = $this->options[ 'delete_type' ];
+        $file->delete_url = $this->options['script_url']
+            . '?file=' . rawurlencode($file->name);
+        $file->delete_type = $this->options['delete_type'];
         if ($file->delete_type !== 'DELETE') {
             $file->delete_url .= '&_method=DELETE';
         }
@@ -74,12 +74,12 @@ class UploadHandler
 
     protected function get_file_object($file_name): ?stdClass
     {
-        $file_path = $this->options[ 'upload_dir' ] . $file_name;
-        if (is_file($file_path) && $file_name[ 0 ] !== '.') {
-            $file       = new stdClass();
+        $file_path = $this->options['upload_dir'] . $file_name;
+        if (is_file($file_path) && $file_name[0] !== '.') {
+            $file = new stdClass();
             $file->name = $file_name;
             $file->size = filesize($file_path);
-            $file->url  = $this->options[ 'upload_url' ] . rawurlencode($file->name);
+            $file->url = $this->options['upload_url'] . rawurlencode($file->name);
             $this->set_file_delete_url($file);
 
             return $file;
@@ -91,12 +91,12 @@ class UploadHandler
     protected function get_file_objects(): array
     {
         return array_values(
-                array_filter(
-                        array_map(
-                                [$this, 'get_file_object'],
-                                scandir($this->options[ 'upload_dir' ])
-                        )
+            array_filter(
+                array_map(
+                    [$this, 'get_file_object'],
+                    scandir($this->options['upload_dir'])
                 )
+            )
         );
     }
 
@@ -134,7 +134,7 @@ class UploadHandler
 
         try {
             self::_validateFileName($file->name);
-            self::_validateToken($this->options[ 'upload_token' ]);
+            self::_validateToken($this->options['upload_token']);
         } catch (Exception $e) {
             $file->error = $e->getMessage();
 
@@ -144,33 +144,33 @@ class UploadHandler
         if ($uploaded_file && is_uploaded_file($uploaded_file)) {
             $file_size = filesize($uploaded_file);
         } else {
-            $file_size = $_SERVER[ 'CONTENT_LENGTH' ];
+            $file_size = $_SERVER['CONTENT_LENGTH'];
         }
 
         // check if is a TMX
         // for TMX the limit is different (300Mb vs 100Mb)
         $file_pathinfo = pathinfo($file->name);
-        $max_file_size = ($file_pathinfo[ 'extension' ] === 'tmx') ? $this->options[ 'max_tmx_file_size' ] : $this->options[ 'max_file_size' ];
+        $max_file_size = ($file_pathinfo['extension'] === 'tmx') ? $this->options['max_tmx_file_size'] : $this->options['max_file_size'];
 
         if ($max_file_size && (
-                        $file_size > $max_file_size ||
-                        $file->size > $max_file_size)
+                $file_size > $max_file_size ||
+                $file->size > $max_file_size)
         ) {
             $file->error = 'maxFileSize';
 
             return false;
         }
 
-        if ($this->options[ 'min_file_size' ] &&
-                $file_size < $this->options[ 'min_file_size' ]
+        if ($this->options['min_file_size'] &&
+            $file_size < $this->options['min_file_size']
         ) {
             $file->error = 'minFileSize';
 
             return false;
         }
 
-        if (is_int($this->options[ 'max_number_of_files' ]) && (
-                        count($this->get_file_objects()) >= $this->options[ 'max_number_of_files' ])
+        if (is_int($this->options['max_number_of_files']) && (
+                count($this->get_file_objects()) >= $this->options['max_number_of_files'])
         ) {
             $file->error = 'maxNumberOfFiles';
 
@@ -207,8 +207,8 @@ class UploadHandler
 
     protected function up_count_name_callback($matches): string
     {
-        $index = isset($matches[ 1 ]) ? intval($matches[ 1 ]) + 1 : 1;
-        $ext   = $matches[ 2 ] ?? '';
+        $index = isset($matches[1]) ? intval($matches[1]) + 1 : 1;
+        $ext = $matches[2] ?? '';
 
         return '_(' . $index . ')' . $ext;
     }
@@ -216,10 +216,10 @@ class UploadHandler
     protected function up_count_name(string $name): string
     {
         return preg_replace_callback(
-                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/',
-                [$this, 'up_count_name_callback'],
-                $name,
-                1
+            '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/',
+            [$this, 'up_count_name_callback'],
+            $name,
+            1
         );
     }
 
@@ -248,8 +248,8 @@ class UploadHandler
 
         $file_name = trim($this->my_basename($name), ".\x00..\x20");
 
-        if ($this->options[ 'discard_aborted_uploads' ]) {
-            while (is_file($this->options[ 'upload_dir' ] . $file_name)) {
+        if ($this->options['discard_aborted_uploads']) {
+            while (is_file($this->options['upload_dir'] . $file_name)) {
                 $file_name = $this->up_count_name($file_name);
             }
         }
@@ -261,9 +261,9 @@ class UploadHandler
     {
         $this->logger->debug($uploaded_file);
 
-        $file           = new stdClass();
-        $file->name     = $this->trim_file_name($name);
-        $file->size     = $size;
+        $file = new stdClass();
+        $file->name = $this->trim_file_name($name);
+        $file->size = $size;
         $file->tmp_name = $uploaded_file;
 
         $file->type = $this->getMimeContentType($file->tmp_name);
@@ -273,17 +273,17 @@ class UploadHandler
         }
 
         if ($this->validate($uploaded_file, $file, $error)) {
-            $file_path   = $this->options[ 'upload_dir' ] . $file->name;
-            $append_file = !$this->options[ 'discard_aborted_uploads' ] &&
-                    is_file($file_path) && $file->size > filesize($file_path);
+            $file_path = $this->options['upload_dir'] . $file->name;
+            $append_file = !$this->options['discard_aborted_uploads'] &&
+                is_file($file_path) && $file->size > filesize($file_path);
             clearstatcache();
             if ($uploaded_file && is_uploaded_file($uploaded_file)) {
                 // multipart/formdata uploads (POST method uploads)
                 if ($append_file) {
                     $res = file_put_contents(
-                            $file_path,
-                            fopen($uploaded_file, 'r'),
-                            FILE_APPEND
+                        $file_path,
+                        fopen($uploaded_file, 'r'),
+                        FILE_APPEND
                     );
                 } else {
                     $res = move_uploaded_file($uploaded_file, $file_path);
@@ -291,9 +291,9 @@ class UploadHandler
             } else {
                 // Non-multipart uploads (PUT method support)
                 $res = file_put_contents(
-                        $file_path,
-                        fopen('php://input', 'r'),
-                        $append_file ? FILE_APPEND : 0
+                    $file_path,
+                    fopen('php://input', 'r'),
+                    $append_file ? FILE_APPEND : 0
                 );
             }
             $this->logger->debug($res);
@@ -301,8 +301,8 @@ class UploadHandler
             clearstatcache();
             $file_size = filesize($file_path);
             if ($file_size === $file->size) {
-                $file->url = $this->options[ 'upload_url' ] . rawurlencode($file->name);
-            } elseif ($this->options[ 'discard_aborted_uploads' ]) {
+                $file->url = $this->options['upload_url'] . rawurlencode($file->name);
+            } elseif ($this->options['discard_aborted_uploads']) {
                 unlink($file_path);
                 $file->error = 'abort';
             }
@@ -361,7 +361,7 @@ class UploadHandler
         }
 
         if (function_exists('finfo_open')) {
-            $finfo     = finfo_open(FILEINFO_MIME_TYPE);
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $finfoFile = finfo_file($finfo, $filename);
             finfo_close($finfo);
 
@@ -373,8 +373,8 @@ class UploadHandler
 
     public function get(): void
     {
-        $file_name = isset($_REQUEST[ 'file' ]) ?
-                basename(stripslashes($_REQUEST[ 'file' ])) : null;
+        $file_name = isset($_REQUEST['file']) ?
+            basename(stripslashes($_REQUEST['file'])) : null;
         if ($file_name) {
             $info = $this->get_file_object($file_name);
         } else {
@@ -389,50 +389,50 @@ class UploadHandler
      */
     public function post(): void
     {
-        if (isset($_REQUEST[ '_method' ]) && $_REQUEST[ '_method' ] === 'DELETE') {
+        if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {
             $this->delete();
 
             return;
         }
 
-        if (!Utils::isTokenValid($_COOKIE[ 'upload_token' ])) {
-            $info             = [new stdClass()];
-            $info[ 0 ]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
+        if (!Utils::isTokenValid($_COOKIE['upload_token'])) {
+            $info = [new stdClass()];
+            $info[0]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
             $this->flush($info);
         }
 
-        $upload = $_FILES[ $this->options[ 'param_name' ] ] ?? null;
+        $upload = $_FILES[$this->options['param_name']] ?? null;
 
         $info = [];
-        if ($upload && is_array($upload[ 'tmp_name' ])) {
+        if ($upload && is_array($upload['tmp_name'])) {
             // param_name is an array identifier like "files[]",
             // $_FILES is a multi-dimensional array:
-            foreach ($upload[ 'tmp_name' ] as $index => $value) {
+            foreach ($upload['tmp_name'] as $index => $value) {
                 $info[] = $this->handle_file_upload(
-                        $upload[ 'tmp_name' ][ $index ],
-                        $upload[ 'name' ][ $index ],
-                        $upload[ 'size' ][ $index ],
-                        $upload[ 'error' ][ $index ]
+                    $upload['tmp_name'][$index],
+                    $upload['name'][$index],
+                    $upload['size'][$index],
+                    $upload['error'][$index]
                 );
             }
-        } elseif ($upload || isset($_SERVER[ 'HTTP_X_FILE_NAME' ])) {
+        } elseif ($upload || isset($_SERVER['HTTP_X_FILE_NAME'])) {
             // param_name is a single object identifier like "file",
             // $_FILES is a one-dimensional array:
             $info[] = $this->handle_file_upload(
-                    $upload[ 'tmp_name' ] ?? null,
-                    $upload[ 'name' ] ?? null,
-                    $upload[ 'size' ] ?? null,
-                    $upload[ 'error' ] ?? null
+                $upload['tmp_name'] ?? null,
+                $upload['name'] ?? null,
+                $upload['size'] ?? null,
+                $upload['error'] ?? null
             );
         }
 
         //check for server misconfiguration
         $uploadParams = ServerCheck::getInstance()->getUploadParams();
 
-        if ($_SERVER[ 'CONTENT_LENGTH' ] >= $uploadParams->getPostMaxSize()) {
+        if ($_SERVER['CONTENT_LENGTH'] >= $uploadParams->getPostMaxSize()) {
             $fp = fopen("php://input", "r");
 
-            [, $boundary] = explode('boundary=', $_SERVER[ 'CONTENT_TYPE' ]);
+            [, $boundary] = explode('boundary=', $_SERVER['CONTENT_TYPE']);
 
             $regexp = '/' . $boundary . '.*?filename="(.*)".*?Content-Type:(.*)\x{0D}\x{0A}\x{0D}\x{0A}/sm';
 
@@ -442,21 +442,21 @@ class UploadHandler
             }
             fclose($fp);
 
-            $file        = new stdClass();
-            $file->name  = $this->trim_file_name($matches[ 1 ]);
-            $file->size  = null;
-            $file->type  = trim($matches[ 2 ]);
+            $file = new stdClass();
+            $file->name = $this->trim_file_name($matches[1]);
+            $file->size = null;
+            $file->type = trim($matches[2]);
             $file->error = "The file is too large. " .
-                    "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
-                    "\"The server configuration does not conform with Matecat configuration. " .
-                    "Check for max header post size value in the virtualhost configuration or php.ini.\"";
+                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
+                "\"The server configuration does not conform with Matecat configuration. " .
+                "Check for max header post size value in the virtualhost configuration or php.ini.\"";
 
             $info = [$file];
-        } elseif ($_SERVER[ 'CONTENT_LENGTH' ] >= $uploadParams->getUploadMaxFilesize()) {
-            $info[ 0 ]->error = "The file is too large.  " .
-                    "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
-                    "\"The server configuration does not conform with Matecat configuration. " .
-                    "Check for max file upload value in the virtualhost configuration or php.ini.\"";
+        } elseif ($_SERVER['CONTENT_LENGTH'] >= $uploadParams->getUploadMaxFilesize()) {
+            $info[0]->error = "The file is too large.  " .
+                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
+                "\"The server configuration does not conform with Matecat configuration. " .
+                "Check for max file upload value in the virtualhost configuration or php.ini.\"";
         }
         //check for server misconfiguration
 
@@ -465,8 +465,8 @@ class UploadHandler
 
     public function flush(mixed $info): void
     {
-        $json     = json_encode($info);
-        $redirect = isset($_REQUEST[ 'redirect' ]) ? stripslashes($_REQUEST[ 'redirect' ]) : null;
+        $json = json_encode($info);
+        $redirect = isset($_REQUEST['redirect']) ? stripslashes($_REQUEST['redirect']) : null;
 
         header('Vary: Accept');
         header('Content-type: application/json');
@@ -495,14 +495,14 @@ class UploadHandler
          * ----> basename is NOT UTF8 compliant
          */
         $file_name = null;
-        if (isset($_REQUEST[ 'file' ])) {
-            $raw_file  = explode(DIRECTORY_SEPARATOR, $_REQUEST[ 'file' ]);
+        if (isset($_REQUEST['file'])) {
+            $raw_file = explode(DIRECTORY_SEPARATOR, $_REQUEST['file']);
             $file_name = array_pop($raw_file);
         }
 
         try {
             self::_validateFileName($file_name);
-            self::_validateToken($this->options[ 'upload_token' ]);
+            self::_validateToken($this->options['upload_token']);
         } catch (Exception $e) {
             header('Content-type: application/json');
             echo json_encode(["code" => -1, "error" => $e->getMessage()]);
@@ -510,17 +510,17 @@ class UploadHandler
             return;
         }
 
-        $file_info        = AbstractFilesStorage::pathinfo_fix($file_name);
-        $source           = $_REQUEST[ 'source' ];
-        $segmentationRule = $_REQUEST[ 'segmentationRule' ];
-        $filtersTemplate  = $_REQUEST[ 'filtersTemplate' ];
+        $file_info = AbstractFilesStorage::pathinfo_fix($file_name);
+        $source = $_REQUEST['source'];
+        $segmentationRule = $_REQUEST['segmentationRule'];
+        $filtersTemplate = $_REQUEST['filtersTemplate'];
 
         //if it's a zip file, delete it and all its contained files.
-        if ($file_info[ 'extension' ] == 'zip') {
+        if ($file_info['extension'] == 'zip') {
             $success = $this->zipFileDelete($file_name, $source, $segmentationRule, $filtersTemplate);
         } //if it's a file in a zipped folder, delete it.
-        elseif (preg_match('#^[^\.]*\.zip/#', $_REQUEST[ 'file' ])) {
-            $file_name = ZipArchiveHandler::getInternalFileName($_REQUEST[ 'file' ]);
+        elseif (preg_match('#^[^\.]*\.zip/#', $_REQUEST['file'])) {
+            $file_name = ZipArchiveHandler::getInternalFileName($_REQUEST['file']);
 
             $success = $this->zipInternalFileDelete($file_name, $source, $segmentationRule, $filtersTemplate);
         } else {
@@ -536,11 +536,11 @@ class UploadHandler
      */
     private function normalFileDelete($file_name, $source, $segmentationRule = null, ?int $filtersTemplate = 0): array
     {
-        $file_path = $this->options[ 'upload_dir' ] . $file_name;
+        $file_path = $this->options['upload_dir'] . $file_name;
 
         CatUtils::deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
-        $success[ $file_name ] = is_file($file_path) && $file_name[ 0 ] !== '.' && unlink($file_path);
+        $success[$file_name] = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
 
         return $success;
     }
@@ -556,18 +556,18 @@ class UploadHandler
      */
     private function zipFileDelete($file_name, $source, $segmentationRule = null, int $filtersTemplate = 0): array
     {
-        $file_path = $this->options[ 'upload_dir' ] . $file_name;
+        $file_path = $this->options['upload_dir'] . $file_name;
 
         $out_file_name = ZipArchiveHandler::getFileName($file_name);
 
-        $success[ $out_file_name ] = is_file($file_path) && $file_name[ 0 ] !== '.' && unlink($file_path);
-        if ($success[ $out_file_name ]) {
-            $containedFiles = glob($this->options[ 'upload_dir' ] . $file_name . "*");
-            $k              = 0;
+        $success[$out_file_name] = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
+        if ($success[$out_file_name]) {
+            $containedFiles = glob($this->options['upload_dir'] . $file_name . "*");
+            $k = 0;
 
             while ($k < count($containedFiles)) {
-                $internalFileName = str_replace($this->options[ 'upload_dir' ], "", $containedFiles[ $k ]);
-                $success          = array_merge($success, $this->zipInternalFileDelete($internalFileName, $source, $segmentationRule, $filtersTemplate));
+                $internalFileName = str_replace($this->options['upload_dir'], "", $containedFiles[$k]);
+                $success = array_merge($success, $this->zipInternalFileDelete($internalFileName, $source, $segmentationRule, $filtersTemplate));
                 $k++;
             }
         }
@@ -580,12 +580,12 @@ class UploadHandler
      */
     private function zipInternalFileDelete($file_name, $source, $segmentationRule = null, ?int $filtersTemplate = 0): array
     {
-        $file_path = $this->options[ 'upload_dir' ] . $file_name;
+        $file_path = $this->options['upload_dir'] . $file_name;
         CatUtils::deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
         $out_file_name = ZipArchiveHandler::getFileName($file_name);
 
-        $success[ $out_file_name ] = is_file($file_path) && $file_name[ 0 ] !== '.' && unlink($file_path);
+        $success[$out_file_name] = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
 
         return $success;
     }
@@ -612,7 +612,7 @@ class UploadHandler
         $fileNameChunks = explode(".", $fileUp->name);
 
         //first Check the extension
-        if (in_array(strtolower($fileNameChunks[ count($fileNameChunks) - 1 ]), $acceptedExtensions)) {
+        if (in_array(strtolower($fileNameChunks[count($fileNameChunks) - 1]), $acceptedExtensions)) {
             return true;
         }
 

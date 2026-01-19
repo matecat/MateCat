@@ -25,22 +25,22 @@ class ConversionHandler
      */
     protected ConvertedFileModel $result;
 
-    protected string                       $file_name;
-    protected string                       $source_lang;
-    protected string                       $target_lang;
-    protected ?string                      $segmentation_rule             = null;
-    protected string                       $uploadDir;
-    protected string                       $errDir;
-    protected string                       $uploadTokenValue;
-    protected bool                         $stopOnFileException           = true;
-    protected array                        $zipExtractionErrorFiles       = [];
-    public bool                            $zipExtractionErrorFlag        = false;
+    protected string $file_name;
+    protected string $source_lang;
+    protected string $target_lang;
+    protected ?string $segmentation_rule = null;
+    protected string $uploadDir;
+    protected string $errDir;
+    protected string $uploadTokenValue;
+    protected bool $stopOnFileException = true;
+    protected array $zipExtractionErrorFiles = [];
+    public bool $zipExtractionErrorFlag = false;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
      * @var FeatureSet
      */
-    public FeatureSet     $features;
+    public FeatureSet $features;
     private MatecatLogger $logger;
 
     /**
@@ -73,7 +73,7 @@ class ConversionHandler
      */
     public function processConversion(): void
     {
-        $fs        = FilesStorageFactory::create();
+        $fs = FilesStorageFactory::create();
         $file_path = $this->getLocalFilePath();
 
         $isZipContent = !empty(ZipArchiveHandler::zipPathInfo($file_path));
@@ -104,7 +104,7 @@ class ConversionHandler
             unlink($file_path);
 
             $this->result->setErrorCode(ConversionHandlerStatus::MISCONFIGURATION);
-            $this->result->setErrorMessage('Matecat Open-Source does not support ' . ucwords(XliffProprietaryDetect::getInfo($file_path)[ 'proprietary_name' ]) . '. Use MatecatPro.');
+            $this->result->setErrorMessage('Matecat Open-Source does not support ' . ucwords(XliffProprietaryDetect::getInfo($file_path)['proprietary_name']) . '. Use MatecatPro.');
 
             return;
         }
@@ -113,11 +113,11 @@ class ConversionHandler
         $extraction_parameters = $this->getRightExtractionParameter($file_path);
 
         $hash_name_for_disk =
-                sha1_file($file_path)
-                . "_" .
-                sha1(($this->segmentation_rule ?? '') . ($extraction_parameters ? json_encode($extraction_parameters) : ''))
-                . "|" .
-                $this->source_lang;
+            sha1_file($file_path)
+            . "_" .
+            sha1(($this->segmentation_rule ?? '') . ($extraction_parameters ? json_encode($extraction_parameters) : ''))
+            . "|" .
+            $this->source_lang;
 
         $short_hash = sha1($hash_name_for_disk);
 
@@ -137,26 +137,26 @@ class ConversionHandler
 
         if (str_contains($this->target_lang, ',')) {
             $single_language = explode(',', $this->target_lang);
-            $single_language = $single_language[ 0 ];
+            $single_language = $single_language[0];
         } else {
             $single_language = $this->target_lang;
         }
 
         $convertResult = Filters::sourceToXliff(
-                $file_path,
-                $this->source_lang,
-                $single_language,
-                $this->segmentation_rule,
-                $extraction_parameters,
-                $this->legacy_icu
+            $file_path,
+            $this->source_lang,
+            $single_language,
+            $this->segmentation_rule,
+            $extraction_parameters,
+            $this->legacy_icu
         );
         Filters::logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters);
 
-        if ($convertResult[ 'successful' ] == 1) {
+        if ($convertResult['successful'] == 1) {
             //store converted content on a temporary path on disk (and off RAM)
             $cachedXliffPath = tempnam("/tmp", "MAT_XLF");
-            file_put_contents($cachedXliffPath, $convertResult[ 'xliff' ]);
-            unset($convertResult[ 'xliff' ]);
+            file_put_contents($cachedXliffPath, $convertResult['xliff']);
+            unset($convertResult['xliff']);
 
             /*
                Store the converted file in the cache
@@ -169,10 +169,10 @@ class ConversionHandler
 
                 if (!$res_insert) {
                     //custom error message passed directly to JavaScript client and displayed as is
-                    $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have Matecat running in multiple tabs. Please close all other Matecat tabs in your browser.";
+                    $convertResult['errorMessage'] = "Error: File upload failed because you have Matecat running in multiple tabs. Please close all other Matecat tabs in your browser.";
 
                     $this->result->setErrorCode(ConversionHandlerStatus::FILESYSTEM_ERROR);
-                    $this->result->setErrorMessage($convertResult[ 'errorMessage' ]);
+                    $this->result->setErrorMessage($convertResult['errorMessage']);
 
                     unset($cachedXliffPath);
 
@@ -195,7 +195,7 @@ class ConversionHandler
             }
         } else {
             $this->result->setErrorCode(ConversionHandlerStatus::GENERIC_ERROR);
-            $this->result->setErrorMessage($this->formatConversionFailureMessage($convertResult[ 'errorMessage' ]));
+            $this->result->setErrorMessage($this->formatConversionFailureMessage($convertResult['errorMessage']));
 
             return;
         }
@@ -209,9 +209,9 @@ class ConversionHandler
             if (is_file($file_path)) {
                 //put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForOriginalFiles(
-                        $hash_name_for_disk,
-                        $this->uploadTokenValue,
-                        AbstractFilesStorage::basename_fix($file_path)
+                    $hash_name_for_disk,
+                    $this->uploadTokenValue,
+                    AbstractFilesStorage::basename_fix($file_path)
                 );
             } else {
                 $this->logger->debug("File not found in path. linkSessionToCacheForOriginalFiles Skipped.");
@@ -219,20 +219,20 @@ class ConversionHandler
         }
 
         $this->result->addConversionHashes(
-                new InternalHashPaths([
-                        'cacheHash' => $short_hash,
-                        'diskHash'  => $hash_name_for_disk
-                ])
+            new InternalHashPaths([
+                'cacheHash' => $short_hash,
+                'diskHash' => $hash_name_for_disk
+            ])
         );
 
         $this->result->setSize(filesize($file_path));
 
-        if ( isset( $convertResult[ "pdfAnalysis" ] ) and !empty( $convertResult[ "pdfAnalysis" ] ) ) {
-            $this->result->setPdfAnalysis( $convertResult[ "pdfAnalysis" ] );
+        if (isset($convertResult["pdfAnalysis"]) and !empty($convertResult["pdfAnalysis"])) {
+            $this->result->setPdfAnalysis($convertResult["pdfAnalysis"]);
 
             // save pdfAnalysis.json
-            $redisKey = md5( $file_path . "__pdfAnalysis.json" );
-            ( new RedisHandler() )->getConnection()->set( $redisKey, serialize( $convertResult[ "pdfAnalysis" ] ), 'ex', 60 );
+            $redisKey = md5($file_path . "__pdfAnalysis.json");
+            (new RedisHandler())->getConnection()->set($redisKey, serialize($convertResult["pdfAnalysis"]), 'ex', 60);
         }
     }
 
@@ -305,11 +305,11 @@ class ConversionHandler
     private function formatConversionFailureMessage(string $message): string
     {
         $errorPatterns = [
-                '[8004C112 - FILE_LOCKVIOLATION_ERR]' => 'Temporary file conversion issue. Please retry upload.',
-                'WinConverter error 5'                => 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload',
-                'WinConverter'                        => 'File conversion issue, please contact us at support@matecat.com',
-                'java.lang.'                          => 'File conversion issue, please contact us at support@matecat.com',
-                '.okapi.'                             => 'File conversion issue, please contact us at support@matecat.com',
+            '[8004C112 - FILE_LOCKVIOLATION_ERR]' => 'Temporary file conversion issue. Please retry upload.',
+            'WinConverter error 5' => 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload',
+            'WinConverter' => 'File conversion issue, please contact us at support@matecat.com',
+            'java.lang.' => 'File conversion issue, please contact us at support@matecat.com',
+            '.okapi.' => 'File conversion issue, please contact us at support@matecat.com',
         ];
 
         foreach ($errorPatterns as $pattern => $response) {
@@ -321,7 +321,7 @@ class ConversionHandler
         if (str_contains($message, 'Exception:')) {
             $msg = explode('Exception:', $message);
 
-            return $msg[ 1 ];
+            return $msg[1];
         }
 
         return $message;
@@ -365,7 +365,7 @@ class ConversionHandler
                 $stdResult = $uploadFile->uploadFiles($filesArray);
 
                 if ($this->isZipExtractionFailed($stdResult)) {
-                    $this->zipExtractionErrorFlag  = true;
+                    $this->zipExtractionErrorFlag = true;
                     $this->zipExtractionErrorFiles = (array)$stdResult;
                 }
             } catch (Exception $e) {
@@ -444,8 +444,8 @@ class ConversionHandler
     {
         $decoded_filename = html_entity_decode($file_name, ENT_QUOTES);
 
-        if ( $decoded_filename !== $file_name ) {
-            throw new Exception( "Invalid file name: symbols (e.g. & ') are not allowed." );
+        if ($decoded_filename !== $file_name) {
+            throw new Exception("Invalid file name: symbols (e.g. & ') are not allowed.");
         }
 
         $this->file_name = $decoded_filename;

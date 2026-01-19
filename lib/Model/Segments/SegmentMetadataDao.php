@@ -23,20 +23,20 @@ class SegmentMetadataDao extends AbstractDao
     public static function getAll(int $id_segment, int $ttl = 604800): array
     {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment = ? ");
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment = ? ");
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
-                $stmt,
-                SegmentMetadataStruct::class,
-                [$id_segment]
+            $stmt,
+            SegmentMetadataStruct::class,
+            [$id_segment]
         );
     }
 
     /**
-     * @param array  $ids
+     * @param array $ids
      * @param string $key
-     * @param int    $ttl
+     * @param int $ttl
      *
      * @return SegmentMetadataStruct[]
      * @throws ReflectionException
@@ -44,22 +44,22 @@ class SegmentMetadataDao extends AbstractDao
     public static function getBySegmentIds(array $ids, string $key, int $ttl = 604800): array
     {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN (" . implode(', ', $ids) . ") and meta_key = ? ");
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN (" . implode(', ', $ids) . ") and meta_key = ? ");
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
-                $stmt,
-                SegmentMetadataStruct::class,
-                [$key]
+            $stmt,
+            SegmentMetadataStruct::class,
+            [$key]
         );
     }
 
     /**
      * get key
      *
-     * @param int    $id_segment
+     * @param int $id_segment
      * @param string $key
-     * @param int    $ttl
+     * @param int $ttl
      *
      * NOTE: 604,800 sec = 1 week
      *
@@ -69,13 +69,13 @@ class SegmentMetadataDao extends AbstractDao
     public static function get(int $id_segment, string $key, int $ttl = 604800): array
     {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment = ? and meta_key = ? ");
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment = ? and meta_key = ? ");
 
         return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
-                $stmt,
-                SegmentMetadataStruct::class,
-                [$id_segment, $key]
+            $stmt,
+            SegmentMetadataStruct::class,
+            [$id_segment, $key]
         );
     }
 
@@ -86,15 +86,15 @@ class SegmentMetadataDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "INSERT INTO segment_metadata " .
-                " ( id_segment, meta_key, meta_value  ) VALUES " .
-                " ( :id_segment, :key, :value ) "
+            "INSERT INTO segment_metadata " .
+            " ( id_segment, meta_key, meta_value  ) VALUES " .
+            " ( :id_segment, :key, :value ) "
         );
 
         $stmt->execute([
-                'id_segment' => $metadataStruct->id_segment,
-                'key'        => $metadataStruct->meta_key,
-                'value'      => $metadataStruct->meta_value,
+            'id_segment' => $metadataStruct->id_segment,
+            'key' => $metadataStruct->meta_key,
+            'value' => $metadataStruct->meta_value,
         ]);
     }
 }

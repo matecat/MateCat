@@ -29,17 +29,17 @@ class SegmentVersion
     /**
      * SegmentVersionController constructor.
      *
-     * @param JobStruct       $chunk
-     * @param IDaoStruct[]    $data
-     * @param bool            $with_issues
+     * @param JobStruct $chunk
+     * @param IDaoStruct[] $data
+     * @param bool $with_issues
      * @param FeatureSet|null $featureSet
      *
      */
     public function __construct(JobStruct $chunk, array $data, ?bool $with_issues = false, ?FeatureSet $featureSet = null)
     {
-        $this->data        = $data;
+        $this->data = $data;
         $this->with_issues = $with_issues;
-        $this->chunk       = $chunk;
+        $this->chunk = $chunk;
 
         if ($featureSet == null) {
             $featureSet = new FeatureSet();
@@ -66,11 +66,11 @@ class SegmentVersion
      */
     protected function renderItemsWithIssues(): array
     {
-        $out          = [];
+        $out = [];
         $issuesSubset = [];
 
         $versionId = null;
-        $version   = null;
+        $version = null;
 
         $issues_renderer = new SegmentTranslationIssue();
 
@@ -79,7 +79,7 @@ class SegmentVersion
             if (!is_null($versionId) && $versionId != $record->id) {
                 if (!empty($issuesSubset)) {
                     // attach issues to version
-                    $version[ 'issues' ] = array_map(function ($item) use ($issues_renderer) {
+                    $version['issues'] = array_map(function ($item) use ($issues_renderer) {
                         return $issues_renderer->renderItem($item);
                     }, $issuesSubset);
                 }
@@ -91,38 +91,38 @@ class SegmentVersion
 
             $version = $this->renderItem($record);
 
-            $version[ 'issues' ] = [];
+            $version['issues'] = [];
 
-            if (!isset($version[ 'diff' ])) {
-                $version[ 'diff' ] = json_decode($record->raw_diff ?? 'null', true);
+            if (!isset($version['diff'])) {
+                $version['diff'] = json_decode($record->raw_diff ?? 'null', true);
             }
 
             if (!is_null($record->qa_id_segment)) {
                 $issuesSubset[] = (new EntryStruct([
-                        'id'                  => $record->qa_id,
-                        'id_segment'          => $record->qa_id_segment,
-                        'id_job'              => $record->qa_id_job,
-                        'id_category'         => $record->qa_id_category,
-                        'severity'            => $record->qa_severity,
-                        'translation_version' => $record->qa_translation_version,
-                        'start_node'          => $record->qa_start_node,
-                        'start_offset'        => $record->qa_start_offset,
-                        'end_node'            => $record->qa_end_node,
-                        'end_offset'          => $record->qa_end_offset,
-                        'is_full_segment'     => $record->qa_is_full_segment,
-                        'penalty_points'      => $record->qa_penalty_points,
-                        'comment'             => $record->qa_comment,
-                        'create_date'         => $record->qa_create_date,
-                        'target_text'         => $record->qa_target_text,
-                        'source_page'         => $record->qa_source_page
-                ]))->setDiff($version[ 'diff' ]);
+                    'id' => $record->qa_id,
+                    'id_segment' => $record->qa_id_segment,
+                    'id_job' => $record->qa_id_job,
+                    'id_category' => $record->qa_id_category,
+                    'severity' => $record->qa_severity,
+                    'translation_version' => $record->qa_translation_version,
+                    'start_node' => $record->qa_start_node,
+                    'start_offset' => $record->qa_start_offset,
+                    'end_node' => $record->qa_end_node,
+                    'end_offset' => $record->qa_end_offset,
+                    'is_full_segment' => $record->qa_is_full_segment,
+                    'penalty_points' => $record->qa_penalty_points,
+                    'comment' => $record->qa_comment,
+                    'create_date' => $record->qa_create_date,
+                    'target_text' => $record->qa_target_text,
+                    'source_page' => $record->qa_source_page
+                ]))->setDiff($version['diff']);
             }
 
             $versionId = $record->id;
         }
 
         if (!empty($issuesSubset)) {
-            $version[ 'issues' ] = array_map(function ($item) use ($issues_renderer) {
+            $version['issues'] = array_map(function ($item) use ($issues_renderer) {
                 return $issues_renderer->renderItem($item);
             }, $issuesSubset);
         }
@@ -157,22 +157,22 @@ class SegmentVersion
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
         $metadataDao = new MetadataDao();
-        $Filter      = MateCatFilter::getInstance(
-                $featureSet,
-                $this->chunk->source,
-                $this->chunk->target,
-                [],
-                $metadataDao->getSubfilteringCustomHandlers($this->chunk->id, $this->chunk->password)
+        $Filter = MateCatFilter::getInstance(
+            $featureSet,
+            $this->chunk->source,
+            $this->chunk->target,
+            [],
+            $metadataDao->getSubfilteringCustomHandlers($this->chunk->id, $this->chunk->password)
         );
 
         return [
-                'id'              => (int)$version->id,
-                'id_segment'      => (int)$version->id_segment,
-                'id_job'          => (int)$version->id_job,
-                'translation'     => $Filter->fromLayer0ToLayer2($version->translation ?? ''),
-                'version_number'  => (int)$version->version_number,
-                'propagated_from' => (int)$version->propagated_from,
-                'created_at'      => $version->creation_date,
+            'id' => (int)$version->id,
+            'id_segment' => (int)$version->id_segment,
+            'id_job' => (int)$version->id_job,
+            'translation' => $Filter->fromLayer0ToLayer2($version->translation ?? ''),
+            'version_number' => (int)$version->version_number,
+            'propagated_from' => (int)$version->propagated_from,
+            'created_at' => $version->creation_date,
         ];
     }
 

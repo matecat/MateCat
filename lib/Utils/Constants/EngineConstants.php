@@ -23,32 +23,32 @@ use Utils\Engines\YandexTranslate;
 class EngineConstants
 {
 
-    const string MT   = "MT";
-    const string TM   = "TM";
+    const string MT = "MT";
+    const string TM = "TM";
     const string NONE = "NONE";
 
-    const MY_MEMORY        = 'Match';
-    const APERTIUM         = 'Apertium';
-    const ALTLANG          = 'Altlang';
-    const SMART_MATE       = 'SmartMATE';
+    const MY_MEMORY = 'Match';
+    const APERTIUM = 'Apertium';
+    const ALTLANG = 'Altlang';
+    const SMART_MATE = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
-    const MMT              = 'MMT';
-    const LARA             = 'Lara';
-    const DEEPL            = 'DeepL';
+    const MMT = 'MMT';
+    const LARA = 'Lara';
+    const DEEPL = 'DeepL';
     const GOOGLE_TRANSLATE = 'GoogleTranslate';
-    const INTENTO          = 'Intento';
+    const INTENTO = 'Intento';
 
     protected static array $ENGINES_LIST = [
-            MyMemory::class        => MyMemory::class,
-            Apertium::class        => Apertium::class,
-            Altlang::class         => Altlang::class,
-            SmartMATE::class       => SmartMATE::class,
-            YandexTranslate::class => YandexTranslate::class,
-            GoogleTranslate::class => GoogleTranslate::class,
-            Intento::class         => Intento::class,
-            MMT::class             => MMT::class,
-            DeepL::class           => DeepL::class,
-            Lara::class            => Lara::class, // new namespaced engine classes must be loaded by fully qualified class name
+        MyMemory::class => MyMemory::class,
+        Apertium::class => Apertium::class,
+        Altlang::class => Altlang::class,
+        SmartMATE::class => SmartMATE::class,
+        YandexTranslate::class => YandexTranslate::class,
+        GoogleTranslate::class => GoogleTranslate::class,
+        Intento::class => Intento::class,
+        MMT::class => MMT::class,
+        DeepL::class => DeepL::class,
+        Lara::class => Lara::class, // new namespaced engine classes must be loaded by fully qualified class name
     ];
 
     /**

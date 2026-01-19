@@ -9,21 +9,21 @@ use PDO;
 class RemoteFileDao extends AbstractDao
 {
     /**
-     * @param int    $id_file
-     * @param int    $id_job
+     * @param int $id_file
+     * @param int $id_job
      * @param string $remote_id
-     * @param int    $connected_service_id
-     * @param int    $is_original
+     * @param int $connected_service_id
+     * @param int $is_original
      */
     public static function insert(int $id_file, int $id_job, string $remote_id, int $connected_service_id, int $is_original = 0): void
     {
-        $data                  = [];
-        $data[ 'id_file' ]     = $id_file;
-        $data[ 'id_job' ]      = $id_job;
-        $data[ 'remote_id' ]   = $remote_id;
-        $data[ 'is_original' ] = $is_original;
+        $data = [];
+        $data['id_file'] = $id_file;
+        $data['id_job'] = $id_job;
+        $data['remote_id'] = $remote_id;
+        $data['is_original'] = $is_original;
 
-        $data[ 'connected_service_id' ] = $connected_service_id;
+        $data['connected_service_id'] = $connected_service_id;
 
         $db = Database::obtain();
         $db->insert('remote_files', $data);
@@ -38,9 +38,9 @@ class RemoteFileDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM remote_files " .
-                " WHERE id_job = :id_job " .
-                "   AND is_original = 0 "
+            "SELECT * FROM remote_files " .
+            " WHERE id_job = :id_job " .
+            "   AND is_original = 0 "
         );
 
         $stmt->execute(['id_job' => $id_job]);
@@ -59,12 +59,12 @@ class RemoteFileDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT r.* FROM remote_files r " .
-                " INNER JOIN files_job fj " .
-                "    ON r.id_file = fj.id_file " .
-                " WHERE fj.id_job = :id_job " .
-                "   AND r.is_original = 1 " .
-                " ORDER BY r.id_file "
+            "SELECT r.* FROM remote_files r " .
+            " INNER JOIN files_job fj " .
+            "    ON r.id_file = fj.id_file " .
+            " WHERE fj.id_job = :id_job " .
+            "   AND r.is_original = 1 " .
+            " ORDER BY r.id_file "
         );
 
         $stmt->execute(['id_job' => $id_job]);
@@ -83,9 +83,9 @@ class RemoteFileDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM remote_files " .
-                " WHERE id_file = :id_file " .
-                "   AND is_original = :is_original "
+            "SELECT * FROM remote_files " .
+            " WHERE id_file = :id_file " .
+            "   AND is_original = :is_original "
         );
 
         $stmt->execute(['id_file' => $id_file, 'is_original' => $is_original]);
@@ -104,10 +104,10 @@ class RemoteFileDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM remote_files " .
-                " WHERE id_file = :id_file " .
-                "   AND id_job = :id_job" .
-                "   AND is_original = 0 "
+            "SELECT * FROM remote_files " .
+            " WHERE id_file = :id_file " .
+            "   AND id_job = :id_job" .
+            "   AND is_original = 0 "
         );
 
         $stmt->execute(['id_file' => $id_file, 'id_job' => $id_job]);
@@ -125,17 +125,17 @@ class RemoteFileDao extends AbstractDao
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "  SELECT count(id) "
-                . "  FROM remote_files "
-                . " WHERE id_job = :id_job "
-                . "   AND is_original = 0 "
+            "  SELECT count(id) "
+            . "  FROM remote_files "
+            . " WHERE id_job = :id_job "
+            . "   AND is_original = 0 "
         );
         $stmt->setFetchMode(PDO::FETCH_NUM);
         $stmt->execute(['id_job' => $id_job]);
 
         $result = $stmt->fetch();
 
-        $countRemoteFiles = $result[ 0 ];
+        $countRemoteFiles = $result[0];
 
         if ($countRemoteFiles > 0) {
             return true;

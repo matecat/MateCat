@@ -14,22 +14,22 @@ use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 class NONE extends AbstractEngine
 {
 
-    public function get(array $_config)
+    public function get(array $_config): GetMemoryResponse
     {
         return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
     }
 
-    public function set($_config)
+    public function set($_config): GetMemoryResponse
     {
         return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
     }
 
-    public function update($_config)
+    public function update($_config): GetMemoryResponse
     {
         return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
     }
 
-    public function delete($_config)
+    public function delete($_config): GetMemoryResponse
     {
         return new GetMemoryResponse(['responseStatus' => 200, 'responseData' => []]);
     }

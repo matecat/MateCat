@@ -21,7 +21,7 @@ class ProjectCompletionStatus extends KleinController
     {
         $projectValidator = new ProjectValidator($this);
 
-        if ($this->request->paramsNamed()[ 'password' ]) {
+        if ($this->request->paramsNamed()['password']) {
             $projectPasswordValidator = new ProjectPasswordValidator($this);
             $projectPasswordValidator->onSuccess(function () use ($projectPasswordValidator, $projectValidator) {
                 $this->project = $projectPasswordValidator->getProject();
@@ -52,7 +52,7 @@ class ProjectCompletionStatus extends KleinController
     {
         $model = new ProjectCompletionStatusModel($this->project);
         $this->response->json([
-                'project_status' => $model->getStatus()
+            'project_status' => $model->getStatus()
         ]);
     }
 

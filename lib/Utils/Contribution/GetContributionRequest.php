@@ -24,8 +24,8 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
 {
 
     // Needed by getSessionId()
-    public ?int    $id_file  = null;
-    public ?int    $id_job   = null;
+    public ?int $id_file = null;
+    public ?int $id_job = null;
     public ?string $password = null;
 
     public ?array $jobStruct = [];
@@ -37,14 +37,16 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      */
     public ?array $projectStruct = [];
 
+    public ?string $translation = null; // is set in the case of Lara Think
+
     public array $contexts = [
-            'context_before' => null,
-            'segment'        => null,
-            'context_after'  => null
+        'context_before' => null,
+        'segment' => null,
+        'context_after' => null
     ];
 
     public ?array $context_list_before = null;
-    public ?array $context_list_after  = null;
+    public ?array $context_list_after = null;
 
     /**
      * @var string
@@ -87,10 +89,10 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
 
     public bool $tm_prioritization = false;
 
-    public bool    $mt_evaluation              = false;
-    public int     $mt_quality_value_in_editor = 86;
-    public bool    $mt_qe_workflow_enabled     = false;
-    public ?string $mt_qe_workflow_parameters  = null;
+    public bool $mt_evaluation = false;
+    public int $mt_quality_value_in_editor = 86;
+    public bool $mt_qe_workflow_enabled = false;
+    public ?string $mt_qe_workflow_parameters = null;
 
     public ?int $public_tm_penalty = null;
 

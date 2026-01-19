@@ -50,13 +50,13 @@ class ChangePasswordModel
         $this->user->pass = Utils::encryptPass($new_password, $this->user->salt);
 
         $fieldsToUpdate = [
-                'fields' => ['pass']
+            'fields' => ['pass']
         ];
 
         // update email_confirmed_at only if it's null
         if (null === $this->user->email_confirmed_at) {
             $this->user->email_confirmed_at = date('Y-m-d H:i:s');
-            $fieldsToUpdate[ 'fields' ][]   = 'email_confirmed_at';
+            $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
         UserDao::updateStruct($this->user, $fieldsToUpdate);

@@ -297,12 +297,7 @@ class MyMemory extends AbstractEngine
 
         $this->call('contribute_relative_url', $parameters, true);
 
-        if ($this->result->responseStatus != 200) {
-            return null;
-        }
-
         return $this->result;
-
     }
 
     public function update($_config): UpdateContributionResponse

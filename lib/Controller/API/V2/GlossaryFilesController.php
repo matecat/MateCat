@@ -53,33 +53,33 @@ class GlossaryFilesController extends KleinController
         parent::validateRequest();
 
         $filterArgs = [
-                'name'          => [
-                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                        'flags'  => FILTER_FLAG_STRIP_LOW
-                ],
-                'tm_key'        => [
-                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ],
-                'downloadToken' => [
-                        'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ]
+            'name' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW
+            ],
+            'tm_key' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+            'downloadToken' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ]
         ];
 
         $postInput = (object)filter_var_array(
-                $this->request->params(
-                        [
-                                'tm_key',
-                                'name',
-                                'downloadToken'
-                        ]
-                ),
-                $filterArgs
+            $this->request->params(
+                [
+                    'tm_key',
+                    'name',
+                    'downloadToken'
+                ]
+            ),
+            $filterArgs
         );
 
-        $this->name          = $postInput->name;
-        $this->tm_key        = $postInput->tm_key;
+        $this->name = $postInput->name;
+        $this->tm_key = $postInput->tm_key;
         $this->downloadToken = $postInput->downloadToken;
     }
 
@@ -105,14 +105,14 @@ class GlossaryFilesController extends KleinController
             $glossaryCsvValidator = $this->validateCSVFile($fileInfo->file_path);
 
             $results[] = [
-                    'name'              => $this->name,
-                    'tmKey'             => $this->tm_key,
-                    'numberOfLanguages' => $glossaryCsvValidator->getNumberOfLanguage($fileInfo->file_path),
+                'name' => $this->name,
+                'tmKey' => $this->tm_key,
+                'numberOfLanguages' => $glossaryCsvValidator->getNumberOfLanguage($fileInfo->file_path),
             ];
         }
 
         $this->response->json([
-                'results' => $results
+            'results' => $results
         ]);
     }
 
@@ -141,17 +141,17 @@ class GlossaryFilesController extends KleinController
                 // load it into MyMemory
 
                 $file = new TMSFile(
-                        $fileInfo->file_path,
-                        $this->tm_key,
-                        $this->name
+                    $fileInfo->file_path,
+                    $this->tm_key,
+                    $this->name
                 );
 
                 $this->TMService->addGlossaryInMyMemory($file);
 
                 $uuids[] = [
-                        "uuid"              => $file->getUuid(),
-                        "name"              => $file->getName(),
-                        "numberOfLanguages" => $glossaryCsvValidator->getNumberOfLanguage($fileInfo->file_path)
+                    "uuid" => $file->getUuid(),
+                    "name" => $file->getName(),
+                    "numberOfLanguages" => $glossaryCsvValidator->getNumberOfLanguage($fileInfo->file_path)
                 ];
             }
         } finally {
@@ -162,7 +162,7 @@ class GlossaryFilesController extends KleinController
 
         if (!$this->response->isLocked()) {
             $this->setSuccessResponse(202, [
-                    'uuids' => $uuids
+                'uuids' => $uuids
             ]);
         }
     }
@@ -178,11 +178,11 @@ class GlossaryFilesController extends KleinController
     {
         $validator = new GlossaryCSVValidator();
         $validator->validate(ValidatorObject::fromArray([
-                'csv' => $file
+            'csv' => $file
         ]));
 
         if (count($validator->getExceptions()) > 0) {
-            throw new ValidationError($validator->getExceptions()[ 0 ]);
+            throw new ValidationError($validator->getExceptions()[0]);
         }
 
         return $validator;
@@ -193,7 +193,7 @@ class GlossaryFilesController extends KleinController
      */
     public function importStatus(): void
     {
-        $uuid = $this->params[ 'uuid' ];
+        $uuid = $this->params['uuid'];
 
         $result = $this->TMService->glossaryUploadStatus($uuid);
 
@@ -205,10 +205,10 @@ class GlossaryFilesController extends KleinController
     /**
      * @throws Exception
      */
-    public function download(): void {
-
-        if ( !isset( $this->tm_key ) or $this->tm_key === "" ) {
-            throw new InvalidArgumentException( "`TM key` field is mandatory" );
+    public function download(): void
+    {
+        if (!isset($this->tm_key) or $this->tm_key === "") {
+            throw new InvalidArgumentException("`TM key` field is mandatory");
         }
 
         $result = $this->TMService->glossaryExport($this->tm_key, $this->name, $this->getUser()->getEmail(), $this->getUser()->fullName());
@@ -224,9 +224,9 @@ class GlossaryFilesController extends KleinController
     {
         $this->response->code($code);
         $this->response->json([
-                'errors'  => [],
-                "data"    => $data,
-                "success" => true
+            'errors' => [],
+            "data" => $data,
+            "success" => true
         ]);
     }
 
@@ -244,10 +244,10 @@ class GlossaryFilesController extends KleinController
                 $objReader = IOFactory::createReaderForFile($fileInfo->file_path);
 
                 $objPHPExcel = $objReader->load($fileInfo->file_path);
-                $objWriter   = new Csv($objPHPExcel);
+                $objWriter = new Csv($objPHPExcel);
                 $objWriter->save($tmpFileName);
 
-                $oldPath             = $fileInfo->file_path;
+                $oldPath = $fileInfo->file_path;
                 $fileInfo->file_path = $tmpFileName;
 
                 unlink($oldPath);

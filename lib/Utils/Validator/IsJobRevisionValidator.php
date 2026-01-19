@@ -25,16 +25,16 @@ class IsJobRevisionValidator extends AbstractValidator
      */
     public function validate(ValidatorObject $object): ?ValidatorObject
     {
-        if (!isset($object[ 'jid' ])) {
+        if (!isset($object['jid'])) {
             throw new ValidationError('Missing jid parameter');
         }
 
-        if (!isset($object[ 'password' ])) {
+        if (!isset($object['password'])) {
             throw new ValidationError('Missing password parameter');
         }
 
         /** @var ShapelessConcreteStruct $data */
-        $data = (new ChunkReviewDao())->isTOrR1OrR2($object[ 'jid' ], $object[ 'password' ]);
+        $data = (new ChunkReviewDao())->isTOrR1OrR2($object['jid'], $object['password']);
 
         if (empty($data) || ($data->t == 0 and $data->r1 == 0 and $data->r2 == 0)) {
             throw new DomainException('Invalid combination jid/password');

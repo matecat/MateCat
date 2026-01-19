@@ -20,12 +20,14 @@ class EnginesFactory
 {
 
     /**
-     * @param $id
+     * @template T of AbstractEngine
+     * @param int $id
+     * @param ?class-string<T> $engineClass
      *
-     * @return AbstractEngine
+     * @return T
      * @throws Exception
      */
-    public static function getInstance($id): AbstractEngine
+    public static function getInstance(int $id, ?string $engineClass = null): AbstractEngine
     {
         if (!is_numeric($id)) {
             throw new Exception("Missing id engineRecord", -1);
@@ -47,8 +49,13 @@ class EnginesFactory
         }
 
         $className = self::getFullyQualifiedClassName($engineRecord->class_load);
+        $engine = new $className($engineRecord);
 
-        return new $className($engineRecord);
+        if ($engineClass !== null and !is_a($engine, $engineClass, true)) {
+            throw new Exception("Engine Id " . $id . " is not the expected $engineClass engine instance");
+        }
+
+        return $engine;
     }
 
     /**
@@ -93,7 +100,7 @@ class EnginesFactory
      */
     public static function getInstanceByIdAndUser(int $engineId, int $uid, ?string $engineClass = null): AbstractEngine
     {
-        $engine = self::getInstance($engineId);
+        $engine = self::getInstance($engineId, $engineClass);
         $engineRecord = $engine->getEngineRecord();
 
         if ($engineRecord->uid != $uid) {
@@ -102,10 +109,6 @@ class EnginesFactory
 
         if ($engineRecord->active == 0) {
             throw new DomainException("Engine is no longer active");
-        }
-
-        if ($engineClass !== null and !is_a($engine, $engineClass, true)) {
-            throw new Exception($engineId . " is not the expected $engineClass engine instance");
         }
 
         return $engine;

@@ -62,7 +62,7 @@ export const ImportGlossary = ({row, onClose}) => {
       >
         <div>
           <span>
-            Select glossary in XLSX, XLS or ODS format{' '}
+            Select termbase in XLSX, XLS or ODS format{' '}
             <a
               href="https://guides.matecat.com/how-to-add-a-glossary"
               target="_blank"

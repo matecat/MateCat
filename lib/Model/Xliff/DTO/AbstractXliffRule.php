@@ -13,37 +13,37 @@ use Utils\Constants\TranslationStatus;
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 {
     protected static array $_STATE_QUALIFIERS = [];
-    protected static array $_STATES           = [];
+    protected static array $_STATES = [];
 
     // analysis behavior
     const string _ANALYSIS_PRE_TRANSLATED = "pre-translated";
-    const string _ANALYSIS_NEW            = "new";
+    const string _ANALYSIS_NEW = "new";
 
     // editor states
-    const string _DRAFT      = "draft";
+    const string _DRAFT = "draft";
     const string _TRANSLATED = "translated";
-    const string _APPROVED   = "approved";
-    const string _APPROVED2  = "approved2";
+    const string _APPROVED = "approved";
+    const string _APPROVED2 = "approved2";
 
     const array ALLOWED_ANALYSIS_VALUES = [
-            self::_ANALYSIS_PRE_TRANSLATED,
-            self::_ANALYSIS_NEW
+        self::_ANALYSIS_PRE_TRANSLATED,
+        self::_ANALYSIS_NEW
     ];
 
     const array ALLOWED_EDITOR_VALUES = [
-            null,
-            self::_DRAFT,
-            self::_TRANSLATED,
-            self::_APPROVED,
-            self::_APPROVED2
+        null,
+        self::_DRAFT,
+        self::_TRANSLATED,
+        self::_APPROVED,
+        self::_APPROVED2
     ];
 
     /**
      * @var string[]
      */
     protected array $states = [
-            'states'           => [],
-            'state-qualifiers' => []
+        'states' => [],
+        'state-qualifiers' => []
     ];
 
     /**
@@ -62,8 +62,8 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * AbstractXliffRule constructor.
      *
-     * @param array       $states
-     * @param string      $analysis
+     * @param array $states
+     * @param string $analysis
      * @param string|null $editor
      * @param string|null $matchCategory
      */
@@ -87,12 +87,12 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             }
 
             if (in_array($state, static::$_STATES)) {
-                $this->states[ 'states' ][] = strtolower($state);
+                $this->states['states'][] = strtolower($state);
                 continue;
             }
 
             if (in_array($state, static::$_STATE_QUALIFIERS)) {
-                $this->states[ 'state-qualifiers' ][] = strtolower($state);
+                $this->states['state-qualifiers'][] = strtolower($state);
             }
         }
     }
@@ -148,7 +148,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      */
     public static function fromArrayObject(RecursiveArrayobject $structure): AbstractXliffRule
     {
-        return new static($structure[ 'states' ]->getArrayCopy(), $structure[ 'analysis' ], $structure[ 'editor' ] ?? null, $structure[ 'match_category' ] ?? null);
+        return new static($structure['states']->getArrayCopy(), $structure['analysis'], $structure['editor'] ?? null, $structure['match_category'] ?? null);
     }
 
     /**
@@ -157,16 +157,16 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     public function jsonSerialize(): array
     {
         $result = [
-                'states'   => array_merge($this->states[ 'states' ], $this->states[ 'state-qualifiers' ]),
-                'analysis' => $this->analysis
+            'states' => array_merge($this->states['states'], $this->states['state-qualifiers']),
+            'analysis' => $this->analysis
         ];
 
         if ($this->analysis == self::_ANALYSIS_PRE_TRANSLATED) {
             if (!empty($this->editor)) {
-                $result[ 'editor' ] = $this->editor;
+                $result['editor'] = $this->editor;
             }
 
-            $result[ 'match_category' ] = $this->matchCategory;
+            $result['match_category'] = $this->matchCategory;
         }
 
         return $result;
@@ -185,9 +185,9 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     public function getStates(?string $type = null): array
     {
         return match ($type) {
-            'states' => $this->states[ 'states' ],
-            'state-qualifiers' => $this->states[ 'state-qualifiers' ],
-            default => array_merge($this->states[ 'states' ], $this->states[ 'state-qualifiers' ]),
+            'states' => $this->states['states'],
+            'state-qualifiers' => $this->states['state-qualifiers'],
+            default => array_merge($this->states['states'], $this->states['state-qualifiers']),
         };
     }
 
@@ -258,7 +258,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float
@@ -274,7 +274,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float
@@ -286,7 +286,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             throw new LogicException("Invalid call for rule. A `new` analysis rule do not have a defined word count.", 500);
         }
 
-        return floatval($raw_word_count / 100 * ($payable_rates[ $this->asMatchType() ] ?? 0));
+        return floatval($raw_word_count / 100 * ($payable_rates[$this->asMatchType()] ?? 0));
     }
 
 }

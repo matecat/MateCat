@@ -31,21 +31,21 @@ class SetChunkCompletedController extends KleinController
         $request = $this->validateTheRequest();
 
         $struct = new CompletionEventStruct([
-                'uid'               => $this->user->getUid(),
-                'remote_ip_address' => Utils::getRealIpAddr() ?? '',
-                'source'            => ChunkCompletionEventStruct::SOURCE_USER,
-                'is_review'         => $this->isRevision()
+            'uid' => $this->user->getUid(),
+            'remote_ip_address' => Utils::getRealIpAddr() ?? '',
+            'source' => ChunkCompletionEventStruct::SOURCE_USER,
+            'is_review' => $this->isRevision()
         ]);
 
-        $model = new EventModel($request[ 'job' ], $struct);
+        $model = new EventModel($request['job'], $struct);
         $model->save();
 
         $this->response->json([
-                'data' => [
-                        'event' => [
-                                'id' => (int)$model->getChunkCompletionEventId()
-                        ]
+            'data' => [
+                'event' => [
+                    'id' => (int)$model->getChunkCompletionEventId()
                 ]
+            ]
         ]);
     }
 
@@ -55,8 +55,8 @@ class SetChunkCompletedController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $id_job            = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
-        $password          = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $id_job = filter_var($this->request->param('id_job'), FILTER_SANITIZE_NUMBER_INT);
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
         if (empty($id_job)) {
@@ -73,14 +73,14 @@ class SetChunkCompletedController extends KleinController
             throw new InvalidArgumentException("wrong password", -10);
         }
 
-        $this->id_job           = $id_job;
+        $this->id_job = $id_job;
         $this->request_password = $received_password;
 
         return [
-                'id_job'            => $id_job,
-                'password'          => $password,
-                'received_password' => $received_password,
-                'job'               => $job,
+            'id_job' => $id_job,
+            'password' => $password,
+            'received_password' => $received_password,
+            'job' => $job,
         ];
     }
 }

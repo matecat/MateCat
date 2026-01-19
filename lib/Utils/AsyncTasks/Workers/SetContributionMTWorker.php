@@ -12,6 +12,7 @@ namespace Utils\AsyncTasks\Workers;
 use Exception;
 use Model\Jobs\JobStruct;
 use Utils\Contribution\SetContributionRequest;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -27,19 +28,17 @@ class SetContributionMTWorker extends SetContributionWorker
      * @see SetContributionWorker::_loadEngine
      *
      */
-    protected function _loadEngine(JobStruct $jobStruct): void
+    protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
     {
-        if (empty($this->_engine) || $jobStruct->id_mt_engine != $this->_engine->getEngineRecord()->id) {
-            try {
-                $this->_engine = EnginesFactory::getInstance($jobStruct->id_mt_engine); //Load MT Adaptive EnginesFactory
-            } catch (Exception $e) {
-                throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
-            }
+        try {
+            return EnginesFactory::getInstance($jobStruct->id_mt_engine); //Load MT Adaptive EnginesFactory
+        } catch (Exception $e) {
+            throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
     }
 
     /**
-     * @param array                  $config
+     * @param array $config
      * @param SetContributionRequest $contributionStruct
      *
      * @throws Exception
@@ -48,11 +47,11 @@ class SetContributionMTWorker extends SetContributionWorker
     {
         $jobStruct = $contributionStruct->getJobStruct();
 
-        $config[ 'segment' ]     = $contributionStruct->segment;
-        $config[ 'translation' ] = $contributionStruct->translation;
-        $config[ 'session' ]     = $contributionStruct->getSessionId();
-        $config[ 'uid' ]         = $contributionStruct->uid;
-        $config[ 'set_mt' ]      = $jobStruct->id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
+        $config['segment'] = $contributionStruct->segment;
+        $config['translation'] = $contributionStruct->translation;
+        $config['session'] = $contributionStruct->getSessionId();
+        $config['uid'] = $contributionStruct->uid;
+        $config['set_mt'] = $jobStruct->id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set($config);
@@ -63,22 +62,22 @@ class SetContributionMTWorker extends SetContributionWorker
     }
 
     /**
-     * @param array                  $config
+     * @param array $config
      * @param SetContributionRequest $contributionStruct
-     * @param int                    $id_mt_engine
+     * @param int $id_mt_engine
      *
      * @throws ReQueueException
      */
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 0): void
     {
-        $config[ 'segment' ]            = $contributionStruct->segment;
-        $config[ 'translation' ]        = $contributionStruct->translation;
-        $config[ 'tuid' ]               = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
-        $config[ 'session' ]            = $contributionStruct->getSessionId();
-        $config[ 'set_mt' ]             = $id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
-        $config[ 'context_before' ]     = $contributionStruct->context_before;
-        $config[ 'context_after' ]      = $contributionStruct->context_after;
-        $config[ 'translation_origin' ] = $contributionStruct->translation_origin;
+        $config['segment'] = $contributionStruct->segment;
+        $config['translation'] = $contributionStruct->translation;
+        $config['tuid'] = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
+        $config['session'] = $contributionStruct->getSessionId();
+        $config['set_mt'] = $id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
+        $config['context_before'] = $contributionStruct->context_before;
+        $config['context_after'] = $contributionStruct->context_after;
+        $config['translation_origin'] = $contributionStruct->translation_origin;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update($config);
@@ -93,8 +92,8 @@ class SetContributionMTWorker extends SetContributionWorker
         //find all the job's TMs with write grants and make a contribution to them
         $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys], 'w');
 
-        $config           = [];
-        $config[ 'keys' ] = array_map(function ($tm_key) {
+        $config = [];
+        $config['keys'] = array_map(function ($tm_key) {
             return $tm_key->key;
         }, $tm_keys);
 

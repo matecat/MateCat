@@ -21,8 +21,8 @@ class RecursiveArrayObject extends ArrayObject implements Stringable
      * is an array, it creates another static() instead
      * of an array
      *
-     * @param array  $array
-     * @param int    $flag
+     * @param array $array
+     * @param int $flag
      * @param string $iteratorClass
      */
     public function __construct(array $array = [], int $flag = 0, string $iteratorClass = ArrayIterator::class)
@@ -60,9 +60,9 @@ class RecursiveArrayObject extends ArrayObject implements Stringable
                 continue;
             }
             if ($value instanceof RecursiveArrayObject) {
-                $collector[ $key ] = $value->toArray();
+                $collector[$key] = $value->toArray();
             } else {
-                $collector[ $key ] = $value;
+                $collector[$key] = $value;
             }
         }
 

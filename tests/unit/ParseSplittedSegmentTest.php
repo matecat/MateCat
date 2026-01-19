@@ -12,7 +12,8 @@ use Matecat\SubFiltering\MateCatFilter;
 use TestHelpers\AbstractTest;
 
 
-class ParseSplittedSegmentTest extends AbstractTest {
+class ParseSplittedSegmentTest extends AbstractTest
+{
 
     /**
      * @var MateCatFilter
@@ -22,29 +23,29 @@ class ParseSplittedSegmentTest extends AbstractTest {
     /**
      * @throws \Exception
      */
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
     }
 
     /**
      * Test for MarkAllSegmentStatusController/BulkSegmentStatusChangeWorker
      */
-    public function testInputSplitted() {
+    public function testInputSplitted()
+    {
+        $request = ["123-1", "123-2", "234", "ciao", "567", "536", "244"];
 
-        $request = [ "123-1", "123-2", "234", "ciao", "567", "536", "244" ];
-
-        foreach ( $request as $pos => $integer ) {
+        foreach ($request as $pos => $integer) {
             $result = (int)$integer;
-            if ( empty( $result ) ) {
-                unset( $request[ $pos ] );
+            if (empty($result)) {
+                unset($request[$pos]);
                 continue;
             }
-            $request[ $pos ] = $result;
+            $request[$pos] = $result;
         }
-        $segments_id = array_unique( $request );
+        $segments_id = array_unique($request);
 
-        $this->assertEquals( [ 123, 234, 567, 536, 244 ], array_values( $segments_id ) );
-
+        $this->assertEquals([123, 234, 567, 536, 244], array_values($segments_id));
     }
 
 }
