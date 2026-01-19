@@ -1,78 +1,99 @@
-import moment from 'moment'
-import React from 'react'
-import $ from 'jquery'
 import {isUndefined} from 'lodash'
-import SegmentActions from '../../actions/SegmentActions'
-import SegmentConstants from '../../constants/SegmentConstants'
-import SegmentStore from '../../stores/SegmentStore'
-import CommonUtils from '../../utils/commonUtils'
+import React, {useEffect, useRef, useState} from 'react'
+import $ from 'jquery'
 import CatToolActions from '../../actions/CatToolActions'
-import classnames from 'classnames'
+import SegmentActions from '../../actions/SegmentActions'
+import CommonUtils from '../../utils/commonUtils'
+import moment from 'moment'
+import SegmentStore from '../../stores/SegmentStore'
+import SegmentConstants from '../../constants/SegmentConstants'
+import classNames from 'classnames'
+import IconEdit from '../icons/IconEdit'
+import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
 
-class ReviewExtendedIssue extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      commentView: false,
-      sendDisabled: true,
-      visible:
-        isUndefined(this.props.issue.visible) || this.props.issue.visible,
-    }
-    this.issueCategories = config.lqa_nested_categories.categories
+export const ReviewExtendedIssue = ({
+  sid,
+  issue,
+  changeVisibility,
+  actions,
+  isReview,
+  currentReview,
+  issueEditing,
+  setIssueEditing,
+  selectionObj,
+  versionNumber,
+}) => {
+  const [commentView, setCommentView] = useState(false)
+  const [visible, setVisible] = useState(
+    isUndefined(issue.visible) || issue.visible,
+  )
+  const [commentText, setCommentText] = useState('')
+
+  const containerRef = useRef()
+
+  const issueCategories = config.lqa_nested_categories.categories
+
+  const getCategory = () => {
+    const id_category = issue.id_category
+    return issueCategories.find((cat) => parseInt(cat.id) == id_category)
   }
 
-  getCategory() {
-    const id_category = this.props.issue.id_category
-    return this.issueCategories.find((cat) => parseInt(cat.id) == id_category)
-  }
-  getSeverity() {
-    const id_category = this.props.issue.id_category
-    const {severity} = this.props.issue
-    return this.issueCategories
+  const getSeverity = () => {
+    const id_category = issue.id_category
+    const {severity} = issue
+    return issueCategories
       .find((cat) => parseInt(cat.id) == id_category)
       .severities.find((sev) => sev.label === severity)
   }
 
-  deleteIssue(event) {
+  const editIssue = () => {
+    setIssueEditing(
+      !issueEditing || (issueEditing && issueEditing.id !== issue.id)
+        ? issue
+        : undefined,
+    )
+    setCommentView(false)
+  }
+
+  const deleteIssue = (event) => {
     event.preventDefault()
     event.stopPropagation()
-    this.props.changeVisibility(this.props.issue.id, false)
-    this.setState({
-      visible: false,
-    })
-    let self = this
+    changeVisibility(issue.id, false)
+
+    setVisible(false)
+
+    if (issue.id === issueEditing?.id) setIssueEditing(undefined)
+
     CatToolActions.removeAllNotifications()
-    let notification = {
+    const notification = {
       title: 'Issue deleted',
       text:
         'The selected issue has been deleted. <a class="undo-issue-deleted undo-issue-deleted-' +
-        self.props.issue.id +
+        issue.id +
         '">Undo</a>',
       type: 'warning',
       position: 'bl',
       allowHtml: true,
       timer: 10000,
       closeCallback: function () {
-        if (!self.state.visible) {
-          SegmentActions.deleteIssue(self.props.issue, self.props.sid)
+        if (!visible) {
+          SegmentActions.deleteIssue(issue, sid)
         }
       },
     }
     CatToolActions.addNotification(notification)
     window.onbeforeunload = function () {
-      SegmentActions.deleteIssue(self.props.issue, self.props.sid)
+      SegmentActions.deleteIssue(issue, sid)
     }
     setTimeout(function () {
-      let $button = $('.undo-issue-deleted-' + self.props.issue.id)
+      const $button = $('.undo-issue-deleted-' + issue.id)
       $button.off('click')
       $button.on('click', function () {
-        self.setState({
-          visible: true,
-        })
-        self.props.changeVisibility(self.props.issue.id, true)
+        setVisible(true)
+        changeVisibility(issue.id, true)
         CatToolActions.removeAllNotifications()
-        notification = {
+        const notification = {
           title: 'Issue deleted',
           text: 'The issue has been restored.',
           type: 'warning',
@@ -84,91 +105,54 @@ class ReviewExtendedIssue extends React.Component {
       })
     }, 500)
   }
-  confirmDeletedIssue(sid, issue_id) {
-    if (
-      sid === this.props.issue.id_segment &&
-      issue_id === this.props.issue.id
-    ) {
-      this.el.style.transition =
-        'transform 1s ease-in-out, opacity 1s ease-in-out'
-      this.el.style.transform = 'translateX(-200px)'
-      this.el.style.opacity = '0'
-    }
-  }
 
-  openCommentsAfterCreation(sid, id) {
-    if (
-      sid === this.props.sid &&
-      id === this.props.issue.id &&
-      this.props.issue.target_text
-    ) {
-      this.setState({
-        commentView: true,
-      })
-    } else {
-      this.setState({
-        commentView: false,
-      })
-    }
-  }
-  setCommentView(event) {
+  const setCommentViewCallback = (event) => {
     event.preventDefault()
     event.stopPropagation()
 
-    if (!this.state.commentView) {
+    if (!commentView) {
       setTimeout(() => {
-        const input = this.el && $(this.el).find('.re-comment-input')
+        const input =
+          containerRef.current &&
+          $(containerRef.current).find('.re-comment-input')
         input && input.length && input[0].focus()
       }, 100)
     }
-    this.setState({
-      commentView: !this.state.commentView,
-    })
+    setCommentView((prevState) => !prevState)
+    setIssueEditing(undefined)
   }
 
-  handleCommentChange(event) {
-    var text = event.target.value,
-      disabled = true
+  const handleCommentChange = (event) => {
+    const text = event.target.value
 
-    if (text.length > 0) {
-      disabled = false
-    }
-    this.setState({
-      comment_text: text,
-      sendDisabled: disabled,
-    })
+    setCommentText(text)
   }
 
-  addComment(e) {
+  const addComment = (e) => {
     e.preventDefault()
-    let self = this
-    if (!this.state.comment_text || this.state.comment_text.length === 0) {
+    if (!commentText || commentText.length === 0) {
       return
     }
 
-    var data = {
-      message: this.state.comment_text,
+    const data = {
+      message: commentText,
       source_page: config.isReview ? config.revisionNumber + 1 : 1, // TODO: move this to UI property
     }
 
-    this.setState({sendDisabled: true})
-
-    SegmentActions.submitIssueComment(this.props.sid, this.props.issue.id, data)
+    SegmentActions.submitIssueComment(sid, issue.id, data)
       .then(function () {
-        self.setState({
-          comment_text: '',
-        })
+        setCommentText('')
       })
-      .catch(() => this.handleFail())
+      .catch(() => handleFail())
   }
 
-  handleFail() {
+  const handleFail = () => {
     CommonUtils.genericErrorAlertMessage()
-    this.setState({sendDisabled: false})
   }
-  generateHtmlCommentLines() {
+
+  const generateHtmlCommentLines = () => {
     let array = []
-    let comments = this.props.issue.comments,
+    let comments = issue.comments,
       comment_date
     for (let n in comments) {
       let comment = comments[n]
@@ -211,143 +195,170 @@ class ReviewExtendedIssue extends React.Component {
     }
     return array
   }
-  componentDidMount() {
-    SegmentStore.addListener(
-      SegmentConstants.ISSUE_DELETED,
-      this.confirmDeletedIssue.bind(this),
-    )
-    SegmentStore.addListener(
-      SegmentConstants.OPEN_ISSUE_COMMENT,
-      this.openCommentsAfterCreation.bind(this),
-    )
-  }
 
-  componentWillUnmount() {
-    SegmentStore.removeListener(
-      SegmentConstants.ISSUE_DELETED,
-      this.confirmDeletedIssue,
-    )
-    SegmentStore.removeListener(
-      SegmentConstants.OPEN_ISSUE_COMMENT,
-      this.openCommentsAfterCreation,
-    )
-  }
-
-  render() {
-    if (this.state.visible) {
-      const category = this.getCategory()
-      const severity = this.getSeverity()
-      // let formatted_date = moment(this.props.issue.created_at).format('lll');
-
-      let commentViewButtonClass = this.state.commentView ? 're-active' : ''
-      commentViewButtonClass =
-        this.props.issue.comments.length > 0 || this.props.issue.target_text
-          ? commentViewButtonClass + ' re-message'
-          : commentViewButtonClass
-      let iconCommentClass =
-        this.props.issue.comments.length > 0 || this.props.issue.target_text
-          ? 'icon-uniE96B icon'
-          : 'icon-uniE96E icon'
-      //START comments html section
-      let htmlCommentLines = this.generateHtmlCommentLines()
-
-      let renderHtmlCommentLines = ''
-      if (htmlCommentLines.length > 0 || this.props.issue.target_text) {
-        renderHtmlCommentLines = (
-          <div className="re-comment-list">
-            {this.props.issue.target_text ? (
-              <div className="re-highlighted">
-                <span className="re-selected-text">
-                  <b>Selected text:</b>
-                </span>
-                {this.props.issue.target_text}
-              </div>
-            ) : null}
-            {htmlCommentLines}
-          </div>
-        )
+  useEffect(() => {
+    const confirmDeletedIssue = (sid, issue_id) => {
+      if (sid === issue.id_segment && issue_id === issue.id) {
+        containerRef.current.style.transition =
+          'transform 1s ease-in-out, opacity 1s ease-in-out'
+        containerRef.current.style.transform = 'translateX(-200px)'
+        containerRef.current.style.opacity = '0'
       }
+    }
 
-      let containerClass = classnames({
-        're-item': true,
-        'issue-comments-open': this.state.commentView,
-      })
+    const openCommentsAfterCreation = (sidCompare, id) => {
+      setCommentView(sidCompare === sid && id === issue.id && issue.target_text)
+    }
 
-      let commentSection = (
-        <div className="comments-view shadow-1">
-          {renderHtmlCommentLines}
-          <div className="re-add-comment">
-            <form className="ui form" onSubmit={this.addComment.bind(this)}>
-              <div className="field">
-                <input
-                  className="re-comment-input"
-                  autoComplete="off"
-                  value={this.state.comment_text}
-                  type="text"
-                  name="first-name"
-                  placeholder="Add a comment + press Enter"
-                  onChange={this.handleCommentChange.bind(this)}
-                />
-              </div>
-            </form>
-          </div>
+    SegmentStore.addListener(
+      SegmentConstants.ISSUE_DELETED,
+      confirmDeletedIssue,
+    )
+    SegmentStore.addListener(
+      SegmentConstants.OPEN_ISSUE_COMMENT,
+      openCommentsAfterCreation,
+    )
+
+    return () => {
+      SegmentStore.removeListener(
+        SegmentConstants.ISSUE_DELETED,
+        confirmDeletedIssue,
+      )
+      SegmentStore.removeListener(
+        SegmentConstants.OPEN_ISSUE_COMMENT,
+        openCommentsAfterCreation,
+      )
+    }
+  }, [issue.id, issue.id_segment, issue.target_text, sid])
+
+  const view = () => {
+    const category = getCategory()
+    const severity = getSeverity()
+
+    let commentViewButtonClass = commentView ? 're-active' : ''
+    commentViewButtonClass =
+      issue.comments.length > 0 || issue.target_text
+        ? +' re-message'
+        : commentViewButtonClass
+    let iconCommentClass =
+      issue.comments.length > 0 || issue.target_text
+        ? 'icon-uniE96B icon'
+        : 'icon-uniE96E icon'
+    //START comments html section
+    let htmlCommentLines = generateHtmlCommentLines()
+
+    let renderHtmlCommentLines = ''
+    if (htmlCommentLines.length > 0 || issue.target_text) {
+      renderHtmlCommentLines = (
+        <div className="re-comment-list">
+          {issue.target_text && (
+            <div className="re-highlighted">
+              <span className="re-selected-text">
+                <b>Selected text:</b>
+              </span>
+              {issue.target_text}
+            </div>
+          )}
+          {htmlCommentLines}
         </div>
       )
-      //END comments html section
+    }
 
-      return (
-        <div className={containerClass} ref={(node) => (this.el = node)}>
-          <div className="re-item-box re-issue shadow-1">
-            <div className="issue-head pad-right-10">
-              <span className="re-category-issue-head" title={category.label}>
-                {category.label}
-              </span>
-              <b>
-                <span title={severity.label}>
-                  [
-                  {severity.code
-                    ? severity.code
-                    : severity.label.substring(0, 3)}
-                  ]
-                </span>
-              </b>
+    let containerClass = classNames({
+      're-item': true,
+      'issue-comments-open': commentView || issueEditing,
+    })
+
+    let commentSection = (
+      <div className="comments-view shadow-1">
+        {renderHtmlCommentLines}
+        <div className="re-add-comment">
+          <form className="ui form" onSubmit={addComment}>
+            <div className="field">
+              <input
+                className="re-comment-input"
+                autoComplete="off"
+                value={commentText}
+                type="text"
+                name="first-name"
+                placeholder="Add a comment + press Enter"
+                onChange={handleCommentChange}
+              />
             </div>
-            <div className="issue-activity-icon">
-              {this.props.actions && (
-                <div className="icon-buttons">
-                  <button
-                    className={
-                      'ui icon basic tiny button issue-note ' +
-                      commentViewButtonClass
-                    }
-                    onClick={this.setCommentView.bind(this)}
-                    title="Comments"
-                  >
-                    <i className={iconCommentClass} />
-                  </button>
-                  {this.props.isReview &&
-                  this.props.issue.revision_number <=
-                    this.props.currentReview ? (
+          </form>
+        </div>
+      </div>
+    )
+
+    return (
+      <div className={containerClass} ref={containerRef}>
+        <div
+          className={`re-item-box re-issue shadow-1 re-item-issue-value ${issueEditing?.id === issue.id || commentView ? 'editing-highlight' : ''}`}
+        >
+          <div className="issue-head pad-right-10">
+            <span className="re-category-issue-head" title={category.label}>
+              {category.label}
+            </span>
+            <b>
+              <span title={severity.label}>
+                [
+                {severity.code ? severity.code : severity.label.substring(0, 3)}
+                ]
+              </span>
+            </b>
+          </div>
+          <div className="issue-activity-icon">
+            {actions && (
+              <div className="icon-buttons">
+                <button
+                  className={
+                    'ui icon basic tiny button issue-note ' +
+                    commentViewButtonClass
+                  }
+                  onClick={setCommentViewCallback}
+                  title="Comments"
+                >
+                  <i className={iconCommentClass} />
+                </button>
+                {isReview && issue.revision_number <= currentReview && (
+                  <>
+                    <button
+                      className={`ui icon basic tiny button issue-delete ${issueEditing?.id === issue.id ? 'active' : ''}`}
+                      onClick={editIssue}
+                      title="Edit issue card"
+                    >
+                      <IconEdit size={14} />
+                    </button>
                     <button
                       className="ui icon basic tiny button issue-delete"
-                      onClick={this.deleteIssue.bind(this)}
+                      onClick={deleteIssue}
                       title="Delete issue card"
                     >
                       <Trash size={18} />
                     </button>
-                  ) : null}
-                </div>
-              )}
-            </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
-
-          {this.state.commentView ? commentSection : null}
         </div>
-      )
-    } else {
-      return null
-    }
-  }
-}
 
-export default ReviewExtendedIssue
+        {commentView && commentSection}
+        {issueEditing && issueEditing.id === issue.id && (
+          <div className="issue-panel-edit-mode">
+            <ReviewExtendedIssuePanel
+              selection={selectionObj}
+              segmentVersion={versionNumber}
+              submitIssueCallback={() => false}
+              setCreationIssueLoader={() => false}
+              issueEditing={issueEditing}
+              setIssueEditing={setIssueEditing}
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return visible && view()
+}
