@@ -365,7 +365,7 @@ export const ProjectTemplate = ({portalTarget}) => {
               {isActiveSetAsDefault && (
                 <Button
                   className="template-button-white"
-                  size={BUTTON_SIZE.MEDIUM}
+                  size={BUTTON_SIZE.STANDARD}
                   mode={BUTTON_MODE.OUTLINE}
                   testId="set-as-default-template"
                   disabled={isRequestInProgress}
@@ -379,7 +379,7 @@ export const ProjectTemplate = ({portalTarget}) => {
                 <Button
                   testId="save-as-changes"
                   className="template-button-white button-save-changes"
-                  size={BUTTON_SIZE.MEDIUM}
+                  size={BUTTON_SIZE.STANDARD}
                   mode={BUTTON_MODE.OUTLINE}
                   disabled={isRequestInProgress}
                   onClick={() => updateTemplate()}
@@ -392,7 +392,7 @@ export const ProjectTemplate = ({portalTarget}) => {
                 <Button
                   testId="save-as-new-template"
                   className="template-button-white"
-                  size={BUTTON_SIZE.MEDIUM}
+                  size={BUTTON_SIZE.STANDARD}
                   mode={BUTTON_MODE.OUTLINE}
                   disabled={isRequestInProgress}
                   onClick={() => setTemplateModifier(TEMPLATE_MODIFIERS.CREATE)}

@@ -20,6 +20,7 @@ import {METADATA_KEY} from '../../../../constants/Constants'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
 import IconAdd from '../../../icons/IconAdd'
 import UsersPlus from '../../../../../img/icons/UsersPlus'
+import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -496,21 +497,21 @@ export const TranslationMemoryGlossaryTab = () => {
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Active Resources</h2>
             <div className="translation-memory-glossary-tab-buttons-group">
-              <button
-                className="ui primary button settings-panel-button-icon"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
                 onClick={onAddSharedResource}
-                data-testid="add-shared-resource-tm"
+                testId="add-shared-resource-tm"
               >
                 <UsersPlus size={18} /> Add shared resource
-              </button>
+              </Button>
 
-              <button
-                className="ui primary button settings-panel-button-icon"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
                 onClick={onNewResource}
-                data-testid="new-resource-tm"
+                testId="new-resource-tm"
               >
                 <IconAdd size={16} /> New resource
-              </button>
+              </Button>
             </div>
           </div>
           <SettingsPanelTable

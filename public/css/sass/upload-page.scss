@@ -1,4 +1,4 @@
-@use "commons/colors";
+@use 'commons/colors';
 
 body {
   margin: 0;
@@ -7,7 +7,6 @@ body {
   overflow-y: hidden;
   min-height: 100%;
 }
-
 
 .translate-box a.tooltip {
   text-align: center;
@@ -138,7 +137,6 @@ body {
     gap: 8px;
     .select {
       padding: 9px 46px 9px 12px;
-      border-radius: 8px;
       border: 1px solid rgba(34, 36, 38, 0.15);
       box-shadow: inset 0 1px 3px #ddd;
 
@@ -893,7 +891,6 @@ select:focus {
     position: absolute;
     bottom: 0;
   }
-
 }
 
 .error-message,

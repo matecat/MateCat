@@ -217,6 +217,7 @@
     height: 38px;
     font-size: 16px;
     padding: 9px 0 9px 12px;
+    border-radius: 8px;
     border: none;
     position: absolute;
     margin-top: 37px;
@@ -239,7 +240,6 @@
   }
 
   button.template-button-white {
-    border-radius: unset;
     font-weight: normal;
     color: white !important;
     box-shadow: inset 0 0 0 1px colors.$white;
@@ -262,7 +262,7 @@
   }
 
   .button-more-items {
-    border-radius: unset;
+    border-radius: 8px;
     font-weight: normal;
     color: black;
     box-shadow: inset 0 0 0 1px colors.$grey8;
@@ -280,6 +280,20 @@
       transform: rotate(90deg);
       width: 40px;
       height: 40px;
+    }
+
+    .menu-button-wrapper {
+      > button {
+        svg {
+          color: white;
+        }
+
+        &:hover,
+        &:focus {
+          background-color: unset;
+          color: unset;
+        }
+      }
     }
   }
 
