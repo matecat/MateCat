@@ -9,10 +9,13 @@
 namespace Model\QualityReport;
 
 use Exception;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
+use Model\Segments\SegmentOriginalDataDao;
 use Utils\LQA\QA;
 use Utils\Tools\PostEditing;
 use View\API\V2\Json\QALocalWarning;
@@ -164,15 +167,21 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
             return [];
         }
 
-        $QA = new QA($this->segment, $this->translation);
+        $metadata = new MetadataDao();
+        $dataRefMap = (!empty($this->sid)) ? SegmentOriginalDataDao::getSegmentDataRefMap($this->sid) : [];
+
+        $Filter = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $chunk->password));
+
+        $src_content = $Filter->fromLayer0ToLayer2($this->segment);
+        $trg_content = $Filter->fromLayer0ToLayer2($this->translation);
+
+        $QA = new QA($src_content, $trg_content);
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
         $QA->setChunk($chunk);
         $QA->setFeatureSet($featureSet);
         $QA->performConsistencyCheck();
 
-        $local_warning = new QALocalWarning($QA, $this->sid, $chunk->id_project);
-
-        return $local_warning->render();
+        return (new QALocalWarning($QA, $this->sid, $chunk->id_project))->render();
     }
 }

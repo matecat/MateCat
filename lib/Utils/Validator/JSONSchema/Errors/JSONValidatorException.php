@@ -33,6 +33,7 @@ class JSONValidatorException extends Exception implements JsonSerializable
     {
         return [
             'node' => $this->error->dataPointer,
+            'schemaPointers' => $this->error->schemaPointers,
             'schema' => '/api/v3/' . $context . '/schema',
             'error' => $this->error->error,
         ];
