@@ -1,6 +1,7 @@
 import React, {useContext} from 'react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
+import InfoIcon from '../../../../../img/icons/InfoIcon'
 
 export const ApplicationThreshold = () => {
   const {modifyingCurrentTemplate, currentProjectTemplate} =
@@ -17,19 +18,21 @@ export const ApplicationThreshold = () => {
     typeof mtQualityValue === 'number' && (
       <div className="mt-quality-value">
         <div className="mt-quality-value-label">
-          <h4>Application threshold</h4>
-          <p>
-            Defines the value and position of MT compared to TM matches. At 85%,
-            MT pre-populates segments unless TM matches
-            <br />
-            exceed this value.{' '}
+          <div>
+            <h4>Application threshold</h4>
             <a
               href="https://guides.matecat.com/mt-settings#MT-application-threshold"
               target="_blank"
               rel="noreferrer"
             >
-              Learn more
+              <InfoIcon />
             </a>
+          </div>
+          <p>
+            Defines the value of MT compared to TM matches.
+            <br />
+            At 85%, MT pre-populates segments unless available TM matches exceed
+            this value.
           </p>
         </div>
         <NumericStepper

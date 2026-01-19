@@ -9,16 +9,20 @@
 namespace Model\QualityReport;
 
 use Exception;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
+use Model\Segments\SegmentOriginalDataDao;
 use Utils\LQA\QA;
-use Utils\Tools\Match;
+use Utils\Tools\PostEditing;
 use View\API\V2\Json\QALocalWarning;
 
 
-class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
+{
 
 
     public int $sid;
@@ -94,102 +98,90 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     /**
      * @return string
      */
-    public function getTmAnalysisStatus(): string {
+    public function getTmAnalysisStatus(): string
+    {
         return $this->tm_analysis_status;
     }
 
     /**
      * @return float
      */
-    public function getSecsPerWord() {
-        $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+    public function getSecsPerWord(): float
+    {
+        $val = @round(($this->time_to_edit / 1000) / $this->raw_word_count, 1);
 
-        return ( $val != INF ? $val : 0 );
+        return ($val != INF ? $val : 0.0);
     }
 
-    public function isICEModified(): bool {
-        return ( $this->version_number != 0 && $this->isICE() );
+    public function isICEModified(): bool
+    {
+        return ($this->version_number != 0 && $this->isICE());
     }
 
-    public function isICE(): bool {
-        return ( $this->match_type == 'ICE' && $this->locked );
+    public function isICE(): bool
+    {
+        return ($this->match_type == 'ICE' && $this->locked);
     }
 
     /**
      * @return int
      */
-    public function getPEE(): int {
-        if ( empty( $this->translation ) || empty( $this->suggestion ) ) {
+    public function getPEE(): int
+    {
+        if (empty($this->translation) || empty($this->suggestion)) {
             return 0;
         }
 
-        return self::calculatePEE( $this->suggestion, $this->translation, $this->target );
+        return PostEditing::getPee($this->suggestion, $this->translation, $this->target);
     }
 
-    public function getPEEBwtTranslationSuggestion(): int {
-        if ( empty( $this->last_translation ) ) {
+    public function getPEEBwtTranslationSuggestion(): int
+    {
+        if (empty($this->last_translation)) {
             return 0;
         }
 
-        return self::calculatePEE( $this->suggestion, $this->last_translation, $this->target );
+        return PostEditing::getPee($this->suggestion, $this->last_translation, $this->target);
     }
 
-    public function getPEEBwtTranslationRevise(): int {
-        if ( empty( $this->last_translation ) or empty( $this->last_revisions ) ) {
+    public function getPEEBwtTranslationRevise(): int
+    {
+        if (empty($this->last_translation) or empty($this->last_revisions)) {
             return 0;
         }
 
-        $last_revision_record = end( $this->last_revisions );
-        $last_revision        = $last_revision_record[ 'translation' ];
+        $last_revision_record = end($this->last_revisions);
+        $last_revision = $last_revision_record['translation'];
 
-        return self::calculatePEE( $this->last_translation, $last_revision, $this->target );
-    }
-
-    static function calculatePEE( $str_1, $str_2, $target ): int {
-        $post_editing_effort = round(
-                ( 1 - Match::get(
-                                self::cleanSegmentForPee( $str_1 ),
-                                self::cleanSegmentForPee( $str_2 ),
-                                $target
-                        )
-                ) * 100
-        );
-
-        if ( $post_editing_effort < 0 ) {
-            $post_editing_effort = 0;
-        } elseif ( $post_editing_effort > 100 ) {
-            $post_editing_effort = 100;
-        }
-
-        return $post_editing_effort;
-
-    }
-
-
-    private static function cleanSegmentForPee( $segment ): string {
-        return htmlspecialchars_decode( $segment, ENT_QUOTES );
+        return PostEditing::getPee($this->last_translation, $last_revision, $this->target);
     }
 
     /**
      * @throws Exception
      */
-    public function getLocalWarning( FeatureSet $featureSet, JobStruct $chunk ): array {
-
+    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk): array
+    {
         // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
         // so that the local warning check is not displayed/needed
-        if ( is_null( $this->translation ) ) {
+        if (is_null($this->translation)) {
             return [];
         }
 
-        $QA = new QA( $this->segment, $this->translation );
-        $QA->setSourceSegLang( $chunk->source );
-        $QA->setTargetSegLang( $chunk->target );
-        $QA->setChunk( $chunk );
-        $QA->setFeatureSet( $featureSet );
+        $metadata = new MetadataDao();
+        $dataRefMap = (!empty($this->sid)) ? SegmentOriginalDataDao::getSegmentDataRefMap($this->sid) : [];
+
+        $Filter = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $chunk->password));
+
+        $src_content = $Filter->fromLayer0ToLayer2($this->segment);
+        $trg_content = $Filter->fromLayer0ToLayer2($this->translation);
+
+        $QA = new QA($src_content, $trg_content);
+        $QA->setSourceSegLang($chunk->source);
+        $QA->setTargetSegLang($chunk->target);
+        $QA->setChunk($chunk);
+        $QA->setFeatureSet($featureSet);
         $QA->performConsistencyCheck();
 
-        $local_warning = new QALocalWarning( $QA, $this->sid, $chunk->id_project );
-
-        return $local_warning->render();
+        return (new QALocalWarning($QA, $this->sid, $chunk->id_project))->render();
     }
 }

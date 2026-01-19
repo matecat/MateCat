@@ -50,7 +50,7 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.GLOSSARY]: {
-    label: 'Glossary',
+    label: 'Termbase',
     code: 'gl',
     tabClass: 'glossary',
     isLoading: false,
@@ -559,7 +559,7 @@ function SegmentFooter() {
 
           {tab.isEnableCloseButton && (
             <span className="icon-close" onClick={onClickRemoveTab}>
-              <IconCloseCircle />
+              <IconCloseCircle size={16} />
             </span>
           )}
         </a>

@@ -14,43 +14,33 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Model\Comments\CommentDao;
-use Model\Jobs\JobStruct;
 
-class CommentsController extends KleinController {
+class CommentsController extends KleinController
+{
     use ChunkNotFoundHandlerTrait;
-    /**
-     * @param JobStruct $chunk
-     *
-     * @return $this
-     */
-    public function setChunk( JobStruct $chunk ): CommentsController {
-        $this->chunk = $chunk;
-
-        return $this;
-    }
 
     /**
      * @throws Exception
      */
-    public function index() {
-
+    public function index(): void
+    {
         $this->return404IfTheJobWasDeleted();
 
-        $comments = CommentDao::getCommentsForChunk( $this->chunk, [
-                'from_id' => $this->request->param( 'from_id' )
-        ] );
+        $comments = CommentDao::getCommentsForChunk($this->chunk, [
+            'from_id' => $this->request->param('from_id')
+        ]);
 
-        $this->response->json( [ 'comments' => $comments ] );
+        $this->response->json(['comments' => $comments]);
     }
 
-    protected function afterConstruct() {
-        $Validator  = new ChunkPasswordValidator( $this );
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setChunk( $Validator->getChunk() );
-        } );
-        $this->appendValidator( $Validator );
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $Validator = new ChunkPasswordValidator($this);
+        $Validator->onSuccess(function () use ($Validator) {
+            $this->chunk = $Validator->getChunk();
+        });
+        $this->appendValidator($Validator);
     }
 
 }

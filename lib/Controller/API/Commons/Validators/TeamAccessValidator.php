@@ -15,7 +15,8 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Utils\Constants\Teams;
 
-class TeamAccessValidator extends Base {
+class TeamAccessValidator extends Base
+{
 
     /**
      * @var TeamStruct|null
@@ -23,31 +24,30 @@ class TeamAccessValidator extends Base {
     public ?TeamStruct $team = null;
 
 
-    public function _validate(): void {
+    public function _validate(): void
+    {
+        $id_team = $this->request->param('id_team');
+        $name = (!empty($this->request->param('team_name'))) ? base64_decode($this->request->param('team_name')) : null;
 
-        $id_team = $this->request->param( 'id_team' );
-        $name    = ( !empty( $this->request->param( 'team_name' ) ) ) ? base64_decode( $this->request->param( 'team_name' ) ) : null;
-
-        if ( $name !== null and strtolower( $name ) !== Teams::PERSONAL ) {
-            $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndName(
-                    $id_team,
-                    $name
+        if ($name !== null and strtolower($name) !== Teams::PERSONAL) {
+            $this->team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndName(
+                $id_team,
+                $name
             );
         } else {
-            $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndUser(
-                    $id_team,
-                    $this->controller->getUser()
+            $this->team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndUser(
+                $id_team,
+                $this->controller->getUser()
             );
         }
 
-        if ( empty( $this->team ) ) {
-            throw new AuthorizationError( "Not Authorized", 401 );
+        if (empty($this->team)) {
+            throw new AuthorizationError("Not Authorized", 401);
         }
 
-        if ( method_exists( $this->controller, 'setTeam' ) ) {
-            $this->controller->setTeam( $this->team );
+        if (method_exists($this->controller, 'setTeam')) {
+            $this->controller->setTeam($this->team);
         }
-
     }
 
 }

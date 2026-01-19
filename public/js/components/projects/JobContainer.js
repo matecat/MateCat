@@ -16,6 +16,12 @@ import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_SIZE} from '../common/Button/Button'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import Download from '../../../img/icons/Download'
+import QR from '../../../img/icons/QR'
+import InfoIcon from '../../../img/icons/InfoIcon'
+import AlertIcon from '../../../img/icons/AlertIcon'
+import CommentsIcon from '../../../img/icons/CommentsIcon'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -339,7 +345,7 @@ class JobContainer extends React.Component {
     let remoteService = this.props.project.get('remote_file_service')
     let label = (
       <>
-        <i className="icon-eye icon" /> Draft
+        <Download size={18} /> Draft
       </>
     )
     let action = () => {
@@ -352,21 +358,21 @@ class JobContainer extends React.Component {
     if (jobTranslated && !remoteService) {
       label = (
         <>
-          <i className="icon-download icon" /> Download Translation
+          <Download size={18} /> Download Translation
         </>
       )
       action = this.downloadTranslation
     } else if (jobTranslated && remoteService === 'gdrive') {
       label = (
         <>
-          <i className="icon-download icon" /> Open in Google Drive
+          <Download size={18} /> Open in Google Drive
         </>
       )
       action = this.downloadTranslation
     } else if (remoteService && remoteService === 'gdrive') {
       label = (
         <>
-          <i className="icon-eye icon" /> Preview in Google Drive
+          <Download size={18} /> Preview in Google Drive
         </>
       )
       action = this.downloadTranslation
@@ -447,39 +453,6 @@ class JobContainer extends React.Component {
     )
   }
 
-  getTMIcon() {
-    if (this.props.job.get('private_tm_key').size) {
-      let keys = this.props.job.get('private_tm_key')
-      const tooltipText = keys.map((key) => {
-        let descript = key.get('name') ? key.get('name') : 'Private resource'
-        return (
-          <div style={{textAlign: 'left'}} key={key.get('key')}>
-            <span style={{fontWeight: 'bold'}}> {descript}</span> ({' '}
-            {key.get('key')})
-          </div>
-        )
-      })
-      return (
-        <Popup
-          content={<>{tooltipText}</>}
-          size="tiny"
-          hoverable
-          trigger={
-            <a
-              className=" ui icon basic button tm-keys"
-              onClick={this.openTMPanel.bind(this)}
-              data-testid="tm-button"
-            >
-              <i className="icon-tm-matecat icon" />
-            </a>
-          }
-        />
-      )
-    } else {
-      return ''
-    }
-  }
-
   getCommentsIcon() {
     let icon = ''
     let openThreads = this.props.job.get('open_threads_count')
@@ -506,7 +479,7 @@ class JobContainer extends React.Component {
                 target="_blank"
                 rel="noreferrer"
               >
-                <i className="icon-uniE96B icon" />
+                <CommentsIcon />
               </a>
             }
           />
@@ -535,8 +508,9 @@ class JobContainer extends React.Component {
                 href={url}
                 target="_blank"
                 rel="noreferrer"
+                style={{...(classQuality && {color: classQuality})}}
               >
-                <i className={'icon-qr-matecat icon ' + classQuality} />
+                <QR />
               </a>
             }
           />
@@ -564,112 +538,14 @@ class JobContainer extends React.Component {
                 href={url}
                 target="_blank"
                 rel="noreferrer"
+                style={{color: 'red'}}
               >
-                <i className="icon-notice icon red" />
+                <AlertIcon />
               </a>
             }
           />
         </div>
       )
-    }
-    return icon
-  }
-
-  getWarningsMenuItem() {
-    var icon = []
-    var warnings = this.props.job.get('warnings_count')
-    if (warnings > 0) {
-      var url = this.getTranslateUrl() + '?action=warnings'
-      let tooltipText = 'Click to see issues'
-      icon = [
-        {
-          label: (
-            <>
-              <i className="icon-notice icon red" />
-              {tooltipText}
-            </>
-          ),
-          onClick: () => {
-            window.open(url, '_blank')
-          },
-        },
-      ]
-    }
-    return icon
-  }
-
-  getCommentsMenuItem() {
-    let icon = []
-    let openThreads = this.props.job.get('open_threads_count')
-    if (openThreads > 0) {
-      var translatedUrl = this.getTranslateUrl() + '?action=openComments'
-      if (this.props.job.get('open_threads_count') === 1) {
-        icon = [
-          {
-            label: (
-              <>
-                <i className="icon-uniE96B icon" />
-                There is an open thread
-              </>
-            ),
-            onClick: () => {
-              window.open(translatedUrl, '_blank')
-            },
-          },
-        ]
-      } else {
-        icon = [
-          {
-            label: (
-              <>
-                <i className="icon-uniE96B icon" />
-                There are{' '}
-                <span style={{fontWeight: 'bold'}}>{openThreads}</span> open
-                threads
-              </>
-            ),
-            onClick: () => {
-              window.open(translatedUrl, '_blank')
-            },
-          },
-        ]
-      }
-    }
-    return icon
-  }
-
-  getQRMenuItem() {
-    var icon = []
-    var quality = this.props.job.get('quality_summary').get('quality_overall')
-    if (quality === 'poor' || quality === 'fail') {
-      var url = this.getQAReport()
-      let tooltipText = 'Overall quality: ' + quality.toUpperCase()
-      var classQuality = quality === 'poor' ? 'yellow' : 'red'
-      icon = [
-        {
-          label: (
-            <>
-              <i className={'icon-qr-matecat icon ' + classQuality} />
-              {tooltipText}
-            </>
-          ),
-          onClick: () => {
-            window.open(url, '_blank')
-          },
-        },
-      ]
-      /*icon = (
-        <a
-          className="ui icon basic button"
-          href={url}
-          target="_blank"
-          data-position="top center"
-          rel="noreferrer"
-        >
-          <i className={'icon-qr-matecat icon ' + classQuality} />
-          {tooltipText}
-        </a>
-      )*/
     }
     return icon
   }
@@ -735,19 +611,7 @@ class JobContainer extends React.Component {
         )
       }
     } else if (this.props.job.get('translator')) {
-      let email = this.props.job.get('translator').get('email')
-
-      outsourceJobLabel = (
-        <div
-          id="open-quote-request"
-          className="job-to-translator"
-          data-variation="tiny"
-          ref={(tooltip) => (this.emailTooltip = tooltip)}
-          onClick={this.openOutsourceModal.bind(this, true, false)}
-        >
-          {email}
-        </div>
-      )
+      outsourceJobLabel = undefined
     } else {
       outsourceJobLabel = (
         <div className="job-to-translator not-assigned" data-variation="tiny">
@@ -764,37 +628,34 @@ class JobContainer extends React.Component {
   }
 
   getOutsourceDelivery() {
-    let outsourceDelivery = ''
+    const gmtDate =
+      this.props.job.get('outsource') &&
+      this.props.job.get('outsource').get('id_vendor') == '1'
+        ? CommonUtils.getGMTDate(
+            this.props.job.get('outsource').get('delivery_timestamp') * 1000,
+          )
+        : this.props.job.get('translator') &&
+          CommonUtils.getGMTDate(
+            this.props.job.get('translator').get('delivery_timestamp') * 1000,
+          )
 
-    if (this.props.job.get('outsource')) {
-      if (this.props.job.get('outsource').get('id_vendor') == '1') {
-        let gmtDate = CommonUtils.getGMTDate(
-          this.props.job.get('outsource').get('delivery_timestamp') * 1000,
-        )
-        outsourceDelivery = (
-          <div className="job-delivery" title="Delivery date">
-            <div className="outsource-day-text">{gmtDate.day}</div>
-            <div className="outsource-month-text">{gmtDate.month}</div>
-            <div className="outsource-time-text">{gmtDate.time}</div>
-            <div className="outsource-gmt-text"> ({gmtDate.gmt})</div>
-          </div>
-        )
-      }
-    } else if (this.props.job.get('translator')) {
-      let gmtDate = CommonUtils.getGMTDate(
-        this.props.job.get('translator').get('delivery_timestamp') * 1000,
-      )
-      outsourceDelivery = (
-        <div className="job-delivery" title="Delivery date">
-          <div className="outsource-day-text">{gmtDate.day}</div>
-          <div className="outsource-month-text">{gmtDate.month}</div>
-          <div className="outsource-time-text">{gmtDate.time}</div>
-          <div className="outsource-gmt-text"> ({gmtDate.gmt})</div>
+    return (
+      gmtDate && (
+        <div className="outsource-delivery-container">
+          <span className="job-delivery-date" title="Delivery date">
+            {this.props.job.get('translator') && (
+              <span onClick={this.openOutsourceModal.bind(this, true, false)}>
+                {this.props.job.get('translator').get('email')}
+              </span>
+            )}{' '}
+            <span>
+              {gmtDate.day} {gmtDate.month} {gmtDate.time}
+            </span>{' '}
+            {gmtDate.gmt}
+          </span>
         </div>
       )
-    }
-
-    return outsourceDelivery
+    )
   }
 
   getOutsourceDeliveryPrice() {
@@ -843,28 +704,13 @@ class JobContainer extends React.Component {
   }
 
   getWarningsGroup() {
-    const icons = this.getWarningsInfo()
-    const iconsBody =
-      icons.number > 1 ? (
-        <DropdownMenu
-          className="group-activity-icon"
-          toggleButtonProps={{
-            children: (
-              <div className="ui icon top right pointing dropdown group-activity-icon basic button">
-                <i className="icon-alarm icon" />
-              </div>
-            ),
-            size: BUTTON_SIZE.ICON_STANDARD,
-          }}
-          items={[
-            ...this.getQRMenuItem(),
-            ...this.getWarningsMenuItem(),
-            ...this.getCommentsMenuItem(),
-          ]}
-        />
-      ) : (
-        icons.icon
-      )
+    const iconsBody = (
+      <>
+        {this.getQRIcon()}
+        {this.getWarningsIcon()}
+        {this.getCommentsIcon()}
+      </>
+    )
 
     return (
       <div className="job-activity-icons" data-testid="job-activity-icons">
@@ -887,7 +733,9 @@ class JobContainer extends React.Component {
       nextProps.lastAction !== this.props.lastAction ||
       nextState.showDownloadProgress !== this.state.showDownloadProgress ||
       nextState.openOutsource !== this.state.openOutsource ||
-      nextState.showTranslatorBox !== this.state.showTranslatorBox
+      nextState.showTranslatorBox !== this.state.showTranslatorBox ||
+      nextProps.isChecked !== this.props.isChecked ||
+      nextProps.isCheckboxVisible !== this.props.isCheckboxVisible
     )
   }
 
@@ -939,7 +787,6 @@ class JobContainer extends React.Component {
     let analysisUrl = this.getProjectAnalyzeUrl()
     let warningIcons = this.getWarningsGroup()
     let jobMenu = this.getJobMenu()
-    let tmIcon = this.getTMIcon()
     let outsourceClass = this.props.job.get('outsource')
       ? 'outsource'
       : 'translator'
@@ -948,6 +795,7 @@ class JobContainer extends React.Component {
       ? this.props.job.get('id')
       : this.props.job.get('id') + '-' + this.props.index
     const stats = this.props.job.get('stats').toJS()
+
     return (
       <div className="sixteen wide column chunk-container">
         <div
@@ -959,6 +807,21 @@ class JobContainer extends React.Component {
               className="chunk wide column pad-right-10 shadow-1"
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
             >
+              <Checkbox
+                className={
+                  !this.props.isCheckboxVisible
+                    ? 'project-container-checkbox-hidden'
+                    : ''
+                }
+                onChange={() =>
+                  this.props.onCheckedJob(this.props.job.get('id'))
+                }
+                value={
+                  this.props.isChecked
+                    ? CHECKBOX_STATE.CHECKED
+                    : CHECKBOX_STATE.UNCHECKED
+                }
+              />
               <div className="job-id" title="Job Id">
                 ID: {idJobLabel}
               </div>
@@ -991,9 +854,6 @@ class JobContainer extends React.Component {
                   <span id="words">{Math.round(stats.raw.total)}</span> words
                 </a>
               </div>
-              <div className="tm-job" data-testid="tm-container">
-                {tmIcon}
-              </div>
               {warningIcons}
               <div className="outsource-job">
                 <div className={'translated-outsourced ' + outsourceClass}>
@@ -1015,8 +875,7 @@ class JobContainer extends React.Component {
                   )}
                 </div>
               </div>
-
-              {jobMenu}
+              {outsourceButton}
               <a
                 className="open-translate ui primary button open"
                 target="_blank"
@@ -1025,7 +884,7 @@ class JobContainer extends React.Component {
               >
                 Open
               </a>
-              {outsourceButton}
+              {jobMenu}
 
               {this.state.showDownloadProgress ? (
                 <div className="chunk-download-progress" />

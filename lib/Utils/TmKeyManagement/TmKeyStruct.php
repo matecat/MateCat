@@ -12,7 +12,8 @@ use stdClass;
  * Date: 02/09/14
  * Time: 13.35
  */
-class TmKeyStruct extends stdClass implements JsonSerializable {
+class TmKeyStruct extends stdClass implements JsonSerializable
+{
 
     /**
      * @var bool This key is for tm. 0 or 1
@@ -129,16 +130,18 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
      *
      * @return bool
      */
-    public function isEncryptedKey(): bool {
-        return strrpos( $this->key, '*' ) !== false;
+    public function isEncryptedKey(): bool
+    {
+        return strrpos($this->key, '*') !== false;
     }
 
-    public function isShared(): bool {
+    public function isShared(): bool
+    {
         return $this->is_shared;
     }
 
     /**
-     * @param array|TmKeyStruct|null $params                 An associative array with the following keys:<br/>
+     * @param array|TmKeyStruct|null $params An associative array with the following keys:<br/>
      *                                                       <pre>
      *                                                       tm         : boolean - Tm key
      *                                                       glos       : boolean - Glossary key
@@ -157,19 +160,21 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
      *                                                       target     : string  - Target languages
      *                                                       </pre>
      */
-    public function __construct( $params = null ) {
-        if ( $params != null ) {
-            foreach ( $params as $property => $value ) {
-                if ( property_exists( $this, $property ) ) {
+    public function __construct(array|TmKeyStruct|null $params = null)
+    {
+        if ($params != null) {
+            foreach ($params as $property => $value) {
+                if (property_exists($this, $property)) {
                     $this->$property = $value;
                 }
             }
         }
     }
 
-    public function __set( $name, $value ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Unknown property ' . $name );
+    public function __set($name, $value)
+    {
+        if (!property_exists($this, $name)) {
+            throw new DomainException('Unknown property ' . $name);
         }
     }
 
@@ -177,7 +182,8 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
      * Converts the current object into an associative array
      * @return array
      */
-    public function toArray(): array {
+    public function toArray(): array
+    {
         return $this->jsonSerialize();
     }
 
@@ -186,54 +192,54 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
      *
      * @return bool
      */
-    public function equals( TmKeyStruct $obj ): bool {
+    public function equals(TmKeyStruct $obj): bool
+    {
         return $this->key == $obj->key;
     }
 
 
-    public function getCrypt(): string {
+    public function getCrypt(): string
+    {
+        $keyLength = strlen($this->key);
+        $last_digits = substr($this->key, -$this->readable_chars);
 
-        $keyLength   = strlen( $this->key );
-        $last_digits = substr( $this->key, -$this->readable_chars );
-
-        return str_repeat( "*", $keyLength - $this->readable_chars ) . $last_digits;
-
+        return str_repeat("*", $keyLength - $this->readable_chars) . $last_digits;
     }
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
-
-        if ( $this->complete_format ) {
+    public function jsonSerialize(): array
+    {
+        if ($this->complete_format) {
             return [
-                    'tm'         => $this->tm,
-                    'glos'       => $this->glos,
-                    'owner'      => $this->owner,
-                    'uid_transl' => $this->uid_transl,
-                    'uid_rev'    => $this->uid_rev,
-                    'name'       => $this->name,
-                    'key'        => $this->key,
-                    'r'          => (int)$this->r,
-                    'w'          => (int)$this->w,
-                    'r_transl'   => $this->r_transl,
-                    'w_transl'   => $this->w_transl,
-                    'r_rev'      => $this->r_rev,
-                    'w_rev'      => $this->w_rev,
-                    'penalty'    => $this->penalty ?? 0,
-                    'is_shared'  => $this->is_shared,
-                    'is_private' => $this->isEncryptedKey()
+                'tm' => $this->tm,
+                'glos' => $this->glos,
+                'owner' => $this->owner,
+                'uid_transl' => $this->uid_transl,
+                'uid_rev' => $this->uid_rev,
+                'name' => $this->name,
+                'key' => $this->key,
+                'r' => (int)$this->r,
+                'w' => (int)$this->w,
+                'r_transl' => $this->r_transl,
+                'w_transl' => $this->w_transl,
+                'r_rev' => $this->r_rev,
+                'w_rev' => $this->w_rev,
+                'penalty' => $this->penalty ?? 0,
+                'is_shared' => $this->is_shared,
+                'is_private' => $this->isEncryptedKey()
             ];
         }
 
         return [
-                'tm'        => $this->tm,
-                'glos'      => $this->glos,
-                'owner'     => $this->owner,
-                'name'      => $this->name,
-                'key'       => $this->key,
-                'penalty'   => $this->penalty ?? 0,
-                'is_shared' => $this->is_shared,
+            'tm' => $this->tm,
+            'glos' => $this->glos,
+            'owner' => $this->owner,
+            'name' => $this->name,
+            'key' => $this->key,
+            'penalty' => $this->penalty ?? 0,
+            'is_shared' => $this->is_shared,
         ];
     }
 }

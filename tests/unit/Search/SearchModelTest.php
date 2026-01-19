@@ -29,7 +29,8 @@ use TestHelpers\AbstractTest;
  * - Anche questa unità ha un &quot;commento&quot;;
  * - Ciao mondo
  */
-class SearchModelTest extends AbstractTest {
+class SearchModelTest extends AbstractTest
+{
 
     /**
      * @var string
@@ -41,7 +42,8 @@ class SearchModelTest extends AbstractTest {
      */
     private $jobPwd;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
 
         $conn = Database::obtain()->getConnection();
@@ -49,92 +51,94 @@ class SearchModelTest extends AbstractTest {
         // job id pre-filled in import sql
         $query = "SELECT id,password FROM unittest_matecat_local.jobs WHERE id = 1886428338 ORDER BY id desc LIMIT 1;";
 
-        $res = $conn->query( $query )->fetchAll();
+        $res = $conn->query($query)->fetchAll();
 
-        $this->jobId  = $res[ 0 ][ 'id' ];
-        $this->jobPwd = $res[ 0 ][ 'password' ];
+        $this->jobId = $res[0]['id'];
+        $this->jobPwd = $res[0]['password'];
     }
 
     /**
      * @throws Exception
      */
-    public function testSearchSource() {
-        $this->_launchSearchAndVerifyResults( 'source', 'Hello', 4, [ 1, 2, 4 ] );
-        $this->_launchSearchAndVerifyResults( 'source', '%', 2, [ 1 ] );
-        $this->_launchSearchAndVerifyResults( 'source', '"comment"', 1, [ 3 ] );
-        $this->_launchSearchAndVerifyResults( 'source', '&', 2, [ 1, 4 ] );
-        $this->_launchSearchAndVerifyResults( 'source', 'amp', 1, [ 1 ] );
-        $this->_launchSearchAndVerifyResults( 'source', 'ampoule', 1, [ 1 ] );
-        $this->_launchSearchAndVerifyResults( 'source', '#', 0, [] );
-        $this->_launchSearchAndVerifyResults( 'source', ';', 1, [ 3 ] );
-        $this->_launchSearchAndVerifyResults( 'source', '$', 0, [] );
-        $this->_launchSearchAndVerifyResults( 'source', 'faturës', 1, [ 4 ] );
-        $this->_launchSearchAndVerifyResults( 'source', 'fatur', 1, [ 4 ] );
-        $this->_launchSearchAndVerifyResults( 'source', 'qarkullimit”', 1, [ 4 ] );
-        $this->_launchSearchAndVerifyResults( 'source', 'qarkullimit', 1, [ 4 ] );
+    public function testSearchSource()
+    {
+        $this->_launchSearchAndVerifyResults('source', 'Hello', 4, [1, 2, 4]);
+        $this->_launchSearchAndVerifyResults('source', '%', 2, [1]);
+        $this->_launchSearchAndVerifyResults('source', '"comment"', 1, [3]);
+        $this->_launchSearchAndVerifyResults('source', '&', 2, [1, 4]);
+        $this->_launchSearchAndVerifyResults('source', 'amp', 1, [1]);
+        $this->_launchSearchAndVerifyResults('source', 'ampoule', 1, [1]);
+        $this->_launchSearchAndVerifyResults('source', '#', 0, []);
+        $this->_launchSearchAndVerifyResults('source', ';', 1, [3]);
+        $this->_launchSearchAndVerifyResults('source', '$', 0, []);
+        $this->_launchSearchAndVerifyResults('source', 'faturës', 1, [4]);
+        $this->_launchSearchAndVerifyResults('source', 'fatur', 1, [4]);
+        $this->_launchSearchAndVerifyResults('source', 'qarkullimit”', 1, [4]);
+        $this->_launchSearchAndVerifyResults('source', 'qarkullimit', 1, [4]);
     }
 
     /**
      * @throws Exception
      */
-    public function testSearchTarget() {
-        $this->_launchSearchAndVerifyResults( 'target', 'Ciao', 4, [ 1, 2, 4 ] );
-        $this->_launchSearchAndVerifyResults( 'target', '%', 2, [ 1 ] );
-        $this->_launchSearchAndVerifyResults( 'target', '&', 1, [ 1 ] );
-        $this->_launchSearchAndVerifyResults( 'target', ';', 1, [ 3 ] );
+    public function testSearchTarget()
+    {
+        $this->_launchSearchAndVerifyResults('target', 'Ciao', 4, [1, 2, 4]);
+        $this->_launchSearchAndVerifyResults('target', '%', 2, [1]);
+        $this->_launchSearchAndVerifyResults('target', '&', 1, [1]);
+        $this->_launchSearchAndVerifyResults('target', ';', 1, [3]);
     }
 
     /**
      * @throws Exception
      */
-    public function testWholeWordSearch() {
-        $this->_launchSearchAndVerifyResults( 'source', 'is', 1, [ 3 ] );
-        $this->_launchSearchAndVerifyResults( 'source', 'is', 0, [], true );
-        $this->_launchSearchAndVerifyResults( 'source', 'IS', 0, [], false, true ); //  test match case
-        $this->_launchSearchAndVerifyResults( 'source', 'too', 1, [ 3 ], true );
+    public function testWholeWordSearch()
+    {
+        $this->_launchSearchAndVerifyResults('source', 'is', 1, [3]);
+        $this->_launchSearchAndVerifyResults('source', 'is', 0, [], true);
+        $this->_launchSearchAndVerifyResults('source', 'IS', 0, [], false, true); //  test match case
+        $this->_launchSearchAndVerifyResults('source', 'too', 1, [3], true);
     }
 
     /**
      * @param string $key
      * @param string $word
-     * @param int    $expectedCount
-     * @param array  $expectedIds
-     * @param bool   $wholeWord
+     * @param int $expectedCount
+     * @param array $expectedIds
+     * @param bool $wholeWord
      *
      * @throws Exception
      */
-    private function _launchSearchAndVerifyResults( $key, $word, $expectedCount, array $expectedIds = [], $wholeWord = false, $isMatchCaseRequested = false ) {
-
-
+    private function _launchSearchAndVerifyResults($key, $word, $expectedCount, array $expectedIds = [], $wholeWord = false, $isMatchCaseRequested = false): void
+    {
         // build $queryParamsStruct
-        $queryParamsStruct                                          = new SearchQueryParamsStruct();
-        $queryParamsStruct->job                                     = $this->jobId;
-        $queryParamsStruct->password                                = $this->jobPwd;
-        $queryParamsStruct->status                                  = 'all';
-        $queryParamsStruct->isExactMatchRequested                   = $wholeWord;
-        $queryParamsStruct->isMatchCaseRequested                    = $isMatchCaseRequested;
-        $queryParamsStruct[ 'key' ]                                 = $key;
-        $queryParamsStruct[ ( $key === 'target' ) ? 'trg' : 'src' ] = $word;
+        $queryParamsStruct = new SearchQueryParamsStruct();
+        $queryParamsStruct->job = $this->jobId;
+        $queryParamsStruct->password = $this->jobPwd;
+        $queryParamsStruct->status = 'all';
+        $queryParamsStruct->isExactMatchRequested = $wholeWord;
+        $queryParamsStruct->isMatchCaseRequested = $isMatchCaseRequested;
+        $queryParamsStruct['key'] = $key;
+        $queryParamsStruct[($key === 'target') ? 'trg' : 'src'] = $word;
 
         // jobData
-        $jobData = JobDao::getByIdAndPassword( $this->jobId, $this->jobPwd );
+        $jobData = JobDao::getByIdAndPassword($this->jobId, $this->jobPwd);
 
         // instantiate the filters
         $featureSet = new FeatureSet();
-        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        $featureSet->loadFromString("translation_versions,review_extended,mmt,airbnb");
 
         /** @var MateCatFilter $filters */
-        $filters = MateCatFilter::getInstance( $featureSet, $jobData->source, $jobData->target, [] );
+        $filters = MateCatFilter::getInstance($featureSet, $jobData->source, $jobData->target, []);
 
         // instantiate the searchModel
-        $searchModel = new SearchModel( $queryParamsStruct, $filters );
+        $searchModel = new SearchModel($queryParamsStruct, $filters);
 
         // make assertions
         $expected = [
-                'sid_list' => $expectedIds,
-                'count'    => $expectedCount,
+            'sid_list' => $expectedIds,
+            'count' => $expectedCount,
         ];
 
-        $this->assertEquals( $expected, $searchModel->search( true ) );
+        $this->assertEquals($expected, $searchModel->search(true));
     }
 }

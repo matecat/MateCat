@@ -267,9 +267,11 @@ class Dashboard extends React.Component {
       continueDownloadFunction = function () {
         ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
-        DownloadFileUtils.downloadFile(job.id, job.password, callback)
+        DownloadFileUtils.downloadFile(job.id, job.password, false, callback)
       }
     }
+    const continueDownloadFunctionWithoutErrors = () =>
+      continueDownloadFunction({checkErrors: false})
 
     const openUrl = function () {
       ModalsActions.onCloseModal()
@@ -279,7 +281,11 @@ class Dashboard extends React.Component {
 
     //the translation mismatches are not a server Error, but only a warn, so don't display Error Popup
     if (job.warnings_count > 0) {
-      ModalsActions.showDownloadWarningsModal(continueDownloadFunction, openUrl)
+      ModalsActions.showDownloadWarningsModal(
+        continueDownloadFunction,
+        continueDownloadFunctionWithoutErrors,
+        openUrl,
+      )
     } else {
       continueDownloadFunction()
     }

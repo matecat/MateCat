@@ -10,7 +10,8 @@ use Utils\Engines\YandexTranslate;
  * This class contains the default parameters for a Yandex.Translate EnginesFactory CREATION
  *
  */
-class YandexTranslateStruct extends EngineStruct {
+class YandexTranslateStruct extends EngineStruct
+{
 
     /**
      * @var ?string
@@ -28,10 +29,10 @@ class YandexTranslateStruct extends EngineStruct {
     public ?string $translate_relative_url = "translate";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
-            'client_secret' => ""
+    public string|array|null $extra_parameters = [
+        'client_secret' => ""
     ];
 
     /**
@@ -52,9 +53,10 @@ class YandexTranslateStruct extends EngineStruct {
 
     /**
      * An empty struct
-     * @return EngineStruct
+     * @return YandexTranslateStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new YandexTranslateStruct();
     }
 

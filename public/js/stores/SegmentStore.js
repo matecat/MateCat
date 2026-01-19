@@ -1031,6 +1031,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
    * @param revisionNumber
    * @param autopropagated
    * @param alsoMutedSegment
+   * @param lockedSegments
    */
   getNextSegment({
     current_sid = null,
@@ -1038,6 +1039,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     revisionNumber = null,
     autopropagated = false,
     alsoMutedSegment = false,
+    lockedSegments = true,
   } = {}) {
     let currentSegment = this.getCurrentSegment()
     if (!current_sid && !currentSegment) return null
@@ -1057,7 +1059,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.get('status').toUpperCase() ===
                   SEGMENTS_STATUS.TRANSLATED &&
                 segment.get('autopropagated_from') != 0)) &&
-            (alsoMutedSegment || (!alsoMutedSegment && !segment.get('muted')))
+            (alsoMutedSegment ||
+              (!alsoMutedSegment && !segment.get('muted'))) &&
+            (lockedSegments || (!lockedSegments && !segment.get('ice_locked')))
           ) {
             result = segment.toJS()
             return false
@@ -1083,7 +1087,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           } else if (
             ((status && segment.get('status').toUpperCase() === status) ||
               !status) &&
-            (alsoMutedSegment || (!alsoMutedSegment && !segment.get('muted')))
+            (alsoMutedSegment ||
+              (!alsoMutedSegment && !segment.get('muted'))) &&
+            (lockedSegments || (!lockedSegments && !segment.get('ice_locked')))
           ) {
             result = segment.toJS()
             return false
@@ -1115,7 +1121,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let currentSegment = this.getCurrentSegment()
     if (!sid && !currentSegment) return null
     sid = !sid ? this.getCurrentSegment().sid : sid
-    var index = this.getSegmentIndex(sid)
+    const index = this.getSegmentIndex(sid)
     let segment = index > 0 ? this._segments.get(index - 1).toJS() : null
     if (
       (segment && !alsoMutedSegments && !segment.muted) ||
@@ -1147,6 +1153,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     return this._segments.find(function (seg) {
       return seg.get('sid') == sid
     })
+  },
+  getSegmentByIndex(index) {
+    return this._segments.get(index)
   },
   getSegmentIndex(sid) {
     const index = this._segments.findIndex(function (segment) {

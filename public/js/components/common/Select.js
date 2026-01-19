@@ -13,7 +13,6 @@ import ChevronDown from '../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
 import IconClose from '../icons/IconClose'
-import qaCheckGlossaryHighlightComponent from '../segments/GlossaryComponents/QaCheckGlossaryHighlight.component'
 
 const mergeClassNames = (...args) => {
   return (
@@ -50,12 +49,14 @@ export const Select = ({
   offsetParent,
   onSelect = () => {},
   onToggleOption = () => {},
+  onCloseSelect = () => {},
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
   maxHeightDroplist = 128,
   isPortalDropdown,
+  isActiveOptionOnTop,
   dropdownClassName,
   showResetButton = false,
   resetFunction = () => {},
@@ -100,7 +101,9 @@ export const Select = ({
     ownerDocument.addEventListener('keydown', checkIfShouldHideDropdown)
     setDropdownVisibility(true)
   }
-  const hideDropdown = () => {
+
+  const hideDropdown = useRef()
+  hideDropdown.current = () => {
     if (!wrapperRef.current) return
     const {ownerDocument} = wrapperRef.current
     ownerDocument.removeEventListener('mousedown', checkIfShouldHideDropdown)
@@ -109,11 +112,12 @@ export const Select = ({
     setDropdownVisibility(false)
     setDropdownReversed(false)
     setPortalCoords()
+    onCloseSelect?.()
   }
   const toggleDropdown = () => {
     if (!isDisabled) {
       if (isDropdownVisible) {
-        hideDropdown()
+        hideDropdown.current()
       } else {
         showDropdown()
       }
@@ -202,25 +206,28 @@ export const Select = ({
     }
   }, [isDropdownVisible, isPortalDropdown])
 
-  const checkIfShouldHideDropdown = (event) => {
-    const isTabPressed = event.keyCode === 9
-    const isEscPressed = event.keyCode === 27
+  const checkIfShouldHideDropdown = useCallback(
+    (event) => {
+      const isTabPressed = event.keyCode === 9
+      const isEscPressed = event.keyCode === 27
 
-    const containsTarget = isPortalDropdown
-      ? wrapperDropDownRef.current &&
-        !wrapperDropDownRef.current.contains(event.target) &&
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target)
-      : wrapperRef.current && !wrapperRef.current.contains(event.target)
+      const containsTarget = isPortalDropdown
+        ? wrapperDropDownRef.current &&
+          !wrapperDropDownRef.current.contains(event.target) &&
+          wrapperRef.current &&
+          !wrapperRef.current.contains(event.target)
+        : wrapperRef.current && !wrapperRef.current.contains(event.target)
 
-    if (
-      (multipleSelect === 'modal' && (isTabPressed || isEscPressed)) ||
-      (multipleSelect !== 'modal' &&
-        (isTabPressed || isEscPressed || containsTarget))
-    ) {
-      hideDropdown()
-    }
-  }
+      if (
+        (multipleSelect === 'modal' && (isTabPressed || isEscPressed)) ||
+        (multipleSelect !== 'modal' &&
+          (isTabPressed || isEscPressed || containsTarget))
+      ) {
+        hideDropdown.current()
+      }
+    },
+    [isPortalDropdown, multipleSelect],
+  )
 
   const handleFocus = () => {
     if (!isDisabled) showDropdown()
@@ -234,7 +241,7 @@ export const Select = ({
       onSelect(activeOptions)
     }
 
-    hideDropdown()
+    hideDropdown.current()
   }
 
   const getInputClassName = () => {
@@ -298,10 +305,11 @@ export const Select = ({
           onToggleOption,
           multipleSelect,
           tooltipPosition,
+          isActiveOptionOnTop,
           optionsSelectedCopySingular,
           optionsSelectedCopyPlural,
           resetSelectedOptions,
-          onClose: hideDropdown,
+          onClose: hideDropdown.current,
         }}
       >
         {children}
@@ -405,6 +413,7 @@ Select.propTypes = {
   checkSpaceToReverse: PropTypes.bool,
   maxHeightDroplist: PropTypes.number,
   isPortalDropdown: PropTypes.bool,
+  isActiveOptionOnTop: PropTypes.bool,
   dropdownClassName: PropTypes.string,
   showResetButton: PropTypes.bool,
   resetFunction: PropTypes.func,

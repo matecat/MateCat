@@ -8,27 +8,28 @@ use Klein\Response;
 use Predis\Client;
 use Utils\Redis\RedisHandler;
 
-trait RateLimiterTrait {
+trait RateLimiterTrait
+{
     /**
      * @param Response $response
-     * @param string   $identifier
-     * @param string   $route
-     * @param int      $maxRetries
+     * @param string $identifier
+     * @param string $route
+     * @param int $maxRetries
      *
-     * @return Response
+     * @return Response|null
      * @throws Exception
      */
-    public function checkRateLimitResponse( Response $response, string $identifier, string $route, int $maxRetries = 10 ): ?Response {
-
-        $key   = $this->getKey( $identifier, $route );
+    public function checkRateLimitResponse(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
+    {
+        $key = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
-        if ( $redis->get( $key ) and $redis->get( $key ) > $maxRetries ) {
-            $response->code( 429 );
-            $response->header( "Retry-After", $redis->ttl( $key ) );
+        if ($redis->get($key) and $redis->get($key) > $maxRetries) {
+            $response->code(429);
+            $response->header("Retry-After", $redis->ttl($key));
 
             // PENALTY: reset ttl
-            $redis->expire( $key, $this->getTtl() );
+            $redis->expire($key, $this->getTtl());
 
             return $response;
         }
@@ -42,15 +43,16 @@ trait RateLimiterTrait {
      *
      * @throws Exception
      */
-    public function incrementRateLimitCounter( string $identifier, string $route ) {
-        $key   = $this->getKey( $identifier, $route );
+    public function incrementRateLimitCounter(string $identifier, string $route): void
+    {
+        $key = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
-        if ( !$redis->get( $key ) ) {
-            $redis->set( $key, 1 );
-            $redis->expire( $key, $this->getTtl() );
+        if (!$redis->get($key)) {
+            $redis->set($key, 1);
+            $redis->expire($key, $this->getTtl());
         } else {
-            $redis->incr( $key );
+            $redis->incr($key);
         }
     }
 
@@ -59,7 +61,8 @@ trait RateLimiterTrait {
      *
      * @throws Exception
      */
-    private function getRedis(): Client {
+    private function getRedis(): Client
+    {
         $redisHandler = new RedisHandler();
 
         return $redisHandler->getConnection();
@@ -71,8 +74,9 @@ trait RateLimiterTrait {
      *
      * @return string
      */
-    private function getKey( string $identifier, string $route ): string {
-        return md5( $identifier . $route );
+    private function getKey(string $identifier, string $route): string
+    {
+        return md5($identifier . $route);
     }
 
     /**
@@ -84,9 +88,10 @@ trait RateLimiterTrait {
      *
      * @return int
      */
-    private function getTtl(): int {
+    private function getTtl(): int
+    {
         $date = new DateTime();
-        $ttl  = 60 - $date->format( "s" );
+        $ttl = 60 - $date->format("s");
 
         return 60 + $ttl;
     }

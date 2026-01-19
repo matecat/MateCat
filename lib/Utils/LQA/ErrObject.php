@@ -10,6 +10,8 @@
 namespace Utils\LQA;
 
 
+use Stringable;
+
 /**
  * Class ErrObject
  * Object vector for error reporting.
@@ -18,11 +20,12 @@ namespace Utils\LQA;
  * __toString method are used for array_count_values and array_unique over container
  *
  */
-class ErrObject {
+class ErrObject implements Stringable
+{
 
     public ?int $outcome = null;
-    public ?string $debug   = null;
-    public string  $tip     = "";
+    public ?string $debug = null;
+    public string $tip = "";
 
     protected string $orig_debug;
 
@@ -30,7 +33,8 @@ class ErrObject {
      * Output externally the original debug string, needed for occurrence count
      * @return string
      */
-    public function getOrigDebug(): string {
+    public function getOrigDebug(): string
+    {
         return $this->orig_debug;
     }
 
@@ -38,7 +42,8 @@ class ErrObject {
      * Outputs externally the error tip
      * @return string
      */
-    public function getTip() {
+    public function getTip()
+    {
         return $this->tip;
     }
 
@@ -49,13 +54,14 @@ class ErrObject {
      *
      * @return ErrObject
      */
-    public static function get( array $errors ): ErrObject {
-        $errObj             = new self();
-        $errObj->outcome    = $errors[ 'outcome' ];
-        $errObj->orig_debug = $errors[ 'debug' ];
-        $errObj->debug      = $errors[ 'debug' ];
+    public static function get(array $errors): ErrObject
+    {
+        $errObj = new self();
+        $errObj->outcome = $errors['outcome'];
+        $errObj->orig_debug = $errors['debug'];
+        $errObj->debug = $errors['debug'];
 
-        ( !empty( $errors[ 'tip' ] ) ) ? $errObj->tip = $errors[ 'tip' ] : null;
+        (!empty($errors['tip'])) ? $errObj->tip = $errors['tip'] : null;
 
         return $errObj;
     }
@@ -64,7 +70,8 @@ class ErrObject {
      * Return string id
      * @return string
      */
-    public function __toString() {
+    public function __toString(): string
+    {
         return (string)$this->outcome;
     }
 

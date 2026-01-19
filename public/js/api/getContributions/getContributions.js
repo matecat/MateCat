@@ -17,6 +17,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const getContributions = async ({
   idSegment,
   target,
+  translation,
   crossLanguages,
   idJob = config.id_job,
   password = config.password,
@@ -35,6 +36,7 @@ export const getContributions = async ({
     is_concordance: 0,
     id_segment: idSegment,
     text: target,
+    translation,
     id_job: idJob,
     num_results: NUM_CONTRIBUTION_RESULTS,
     context_before: contextBefore ? contextBefore : '',

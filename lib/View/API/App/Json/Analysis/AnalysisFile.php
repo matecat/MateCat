@@ -12,7 +12,8 @@ namespace View\API\App\Json\Analysis;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
 
-class AnalysisFile implements MatchContainerInterface, JsonSerializable {
+class AnalysisFile implements MatchContainerInterface, JsonSerializable
+{
 
     /**
      * @var int
@@ -48,40 +49,43 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
 
     protected array $metadata = [];
 
-    public function __construct( $id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass, array $metadata = [] ) {
-        $this->id            = (int)$id;
-        $this->id_file_part  = $id_file_part;
-        $this->name          = $name;
+    public function __construct($id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass, array $metadata = [])
+    {
+        $this->id = (int)$id;
+        $this->id_file_part = $id_file_part;
+        $this->name = $name;
         $this->original_name = $original_name;
 
-        foreach ( $matchConstantsClass::forValue() as $matchType ) {
-            $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType, $matchConstantsClass );
+        foreach ($matchConstantsClass::forValue() as $matchType) {
+            $this->matches[$matchType] = AnalysisMatch::forName($matchType, $matchConstantsClass);
         }
 
-        foreach ($metadata as $metadatum){
-            if(isset($metadatum->key) and isset($metadatum->value)){
+        foreach ($metadata as $metadatum) {
+            if (isset($metadatum->key) and isset($metadatum->value)) {
                 $this->metadata[] = new AnalysisFileMetadata($metadatum->key, $metadatum->value);
             }
         }
     }
 
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
-                'id'               => $this->id,
-                'id_file_part'     => $this->id_file_part,
-                'name'             => $this->name,
-                'original_name'    => $this->original_name,
-                'total_raw'        => $this->total_raw,
-                'total_equivalent' => round( $this->total_equivalent ),
-                'matches'          => array_values( $this->matches ),
-                'metadata'         => $this->metadata
+            'id' => $this->id,
+            'id_file_part' => $this->id_file_part,
+            'name' => $this->name,
+            'original_name' => $this->original_name,
+            'total_raw' => $this->total_raw,
+            'total_equivalent' => round($this->total_equivalent),
+            'matches' => array_values($this->matches),
+            'metadata' => $this->metadata
         ];
     }
 
     /**
      * @return int
      */
-    public function getId(): int {
+    public function getId(): int
+    {
         return $this->id;
     }
 
@@ -90,14 +94,16 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      *
      * @return AnalysisMatch
      */
-    public function getMatch( string $matchName ): AnalysisMatch {
-        return $this->matches[ $matchName ];
+    public function getMatch(string $matchName): AnalysisMatch
+    {
+        return $this->matches[$matchName];
     }
 
     /**
      * @return string
      */
-    public function getName(): string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
@@ -106,7 +112,8 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw(int $raw): void
+    {
         $this->total_raw += $raw;
     }
 
@@ -115,7 +122,8 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent(float $equivalent): void
+    {
         $this->total_equivalent += $equivalent;
     }
 

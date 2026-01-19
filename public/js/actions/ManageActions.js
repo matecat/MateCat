@@ -16,6 +16,7 @@ import CatToolActions from './CatToolActions'
 import {changeProjectStatus} from '../api/changeProjectStatus'
 import {changeJobStatus} from '../api/changeJobStatus'
 import UserActions from './UserActions'
+import {fromJS} from 'immutable'
 
 let ManageActions = {
   /********* Projects *********/
@@ -204,6 +205,24 @@ let ManageActions = {
             team: team.toJS(),
           })
         })
+
+        const name = user?.toJS
+          ? user.get('first_name') + ' ' + user.get('last_name')
+          : 'Not assigned'
+
+        const notification = {
+          title: 'Assignee changed',
+          text:
+            'The project ' +
+            project.get('name') +
+            ' has been assigned to ' +
+            name,
+          type: 'success',
+          position: 'bl',
+          allowHtml: true,
+          timer: 3000,
+        }
+        CatToolActions.addNotification(notification)
       })
       .catch(() => {
         ManageActions.showNotificationProjectsChanged()
@@ -211,6 +230,61 @@ let ManageActions = {
           actionType: ManageConstants.RELOAD_PROJECTS,
         })
       })
+  },
+
+  changeProjectAssigneeBulk: function (idAssignee, projects, teams) {
+    let team = teams.find((team) => team.id === projects[0].id_team)
+    const {user} = team.members.find(({id}) => id === idAssignee)
+
+    getTeamMembers(team.id).then((data) => {
+      team.members = data.members
+      team.pending_invitations = data.pending_invitations
+
+      AppDispatcher.dispatch({
+        actionType: UserConstants.UPDATE_TEAM,
+        team: team,
+      })
+
+      const promises = projects.map((project) => {
+        return changeProjectAssignee(team.id, project.id, user.uid)
+      })
+
+      Promise.allSettled(promises).then((result) => {
+        const fulfilledPromises = result
+          .filter(({status}) => status === 'fulfilled')
+          .map(({value}) => value)
+
+        fulfilledPromises.forEach((value) => {
+          AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+            project: fromJS(value.project),
+            user: fromJS(user),
+          })
+        })
+
+        if (fulfilledPromises.length) {
+          const notification = {
+            title: 'Change assignee project',
+            text: 'Change assignee project',
+            type: 'warning',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(notification)
+        } else if (fulfilledPromises.length < result.length) {
+          const errorNotification = {
+            title: 'Change assignee project',
+            text: 'Some projects failed',
+            type: 'error',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(errorNotification)
+        }
+      })
+    })
   },
 
   changeProjectName: function (project, newName) {
@@ -304,6 +378,88 @@ let ManageActions = {
           actionType: ManageConstants.RELOAD_PROJECTS,
         })
       })
+  },
+
+  changeProjectsTeamBulk: function (teamId, projects) {
+    let team = UserStore.teams.find(function (team) {
+      return team.get('id') == teamId
+    })
+    team = team.toJS()
+    const selectedTeam = UserStore.getSelectedTeam()
+
+    const teamObjectReference =
+      selectedTeam.type === 'personal' && team.type !== 'personal'
+        ? team
+        : selectedTeam
+
+    getTeamMembers(teamObjectReference.id).then((data) => {
+      teamObjectReference.members = data.members
+      teamObjectReference.pending_invitations = data.pending_invitations
+
+      AppDispatcher.dispatch({
+        actionType: UserConstants.UPDATE_TEAM,
+        team: teamObjectReference,
+      })
+
+      const promises = projects.map((project) =>
+        changeProjectTeam(teamId, project),
+      )
+
+      Promise.allSettled(promises).then((result) => {
+        const fulfilledPromises = result
+          .filter(({status}) => status === 'fulfilled')
+          .map(({value}) => value)
+
+        fulfilledPromises.forEach((value) => {
+          const project = fromJS(value.project)
+          if (teamId !== selectedTeam.id && selectedTeam.type !== 'personal') {
+            setTimeout(function () {
+              AppDispatcher.dispatch({
+                actionType: ManageConstants.HIDE_PROJECT,
+                project,
+              })
+            }, 500)
+
+            setTimeout(function () {
+              AppDispatcher.dispatch({
+                actionType: ManageConstants.REMOVE_PROJECT,
+                project,
+              })
+            }, 1000)
+          }
+
+          setTimeout(function () {
+            AppDispatcher.dispatch({
+              actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+              project,
+              teamId: teamObjectReference.id,
+            })
+          })
+        })
+
+        if (fulfilledPromises.length) {
+          const notification = {
+            title: 'Change projects team',
+            text: 'Selected projects team has been changed',
+            type: 'warning',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(notification)
+        } else if (fulfilledPromises.length < result.length) {
+          const errorNotification = {
+            title: 'Change projects team',
+            text: 'Some projects failed',
+            type: 'error',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          }
+          CatToolActions.addNotification(errorNotification)
+        }
+      })
+    })
   },
 
   assignTranslator: function (projectId, jobId, jobPassword, translator) {

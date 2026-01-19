@@ -340,7 +340,7 @@ class Editarea extends React.Component {
       let contentState = editorState.getCurrentContent()
       let plainText = removeZeroWidthSpace(contentState.getPlainText())
 
-      // Match tag without compute tag id
+      // Matches tag without compute tag id
       const currentTagRange = DraftMatecatUtils.matchTagInEditor(
         editorState,
         entitiesRange,

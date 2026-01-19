@@ -16,7 +16,6 @@ use UnexpectedValueException;
 use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
-use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
 /**
@@ -33,15 +32,16 @@ use Utils\Tools\Utils;
  *
  * @package FilesStorage
  */
-class S3FilesStorage extends AbstractFilesStorage {
+class S3FilesStorage extends AbstractFilesStorage
+{
 
-    const ORIGINAL_ZIP_PLACEHOLDER = "__originalZip";
+    const string ORIGINAL_ZIP_PLACEHOLDER = "__originalZip";
 
-    const CACHE_PACKAGE_FOLDER = 'cache-package';
-    const FILES_FOLDER         = 'files';
-    const QUEUE_FOLDER         = 'queue-projects';
-    const ZIP_FOLDER           = 'originalZip';
-    const FAST_ANALYSIS_FOLDER = 'fast-analysis';
+    const string CACHE_PACKAGE_FOLDER = 'cache-package';
+    const string FILES_FOLDER = 'files';
+    const string QUEUE_FOLDER = 'queue-projects';
+    const string ZIP_FOLDER = 'originalZip';
+    const string FAST_ANALYSIS_FOLDER = 'fast-analysis';
 
     /**
      * @var Client
@@ -66,7 +66,8 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @throws Exception
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->s3Client = self::getStaticS3Client();
         self::setFilesStorageBucket();
@@ -80,35 +81,35 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return Client
      * @throws ReflectionException
      */
-    public static function getStaticS3Client(): Client {
-
-        if ( empty( self::$CLIENT ) ) {
+    public static function getStaticS3Client(): Client
+    {
+        if (empty(self::$CLIENT)) {
             // init the S3Client
             $awsVersion = AppConfig::$AWS_VERSION;
-            $awsRegion  = AppConfig::$AWS_REGION;
+            $awsRegion = AppConfig::$AWS_REGION;
 
             $config = [
-                    'version' => $awsVersion,
-                    'region'  => $awsRegion,
+                'version' => $awsVersion,
+                'region' => $awsRegion,
             ];
 
-            if ( null !== AppConfig::$AWS_ACCESS_KEY_ID and null !== AppConfig::$AWS_SECRET_KEY ) {
-                $config[ 'credentials' ] = [
-                        'key'    => AppConfig::$AWS_ACCESS_KEY_ID,
-                        'secret' => AppConfig::$AWS_SECRET_KEY,
+            if (null !== AppConfig::$AWS_ACCESS_KEY_ID and null !== AppConfig::$AWS_SECRET_KEY) {
+                $config['credentials'] = [
+                    'key' => AppConfig::$AWS_ACCESS_KEY_ID,
+                    'secret' => AppConfig::$AWS_SECRET_KEY,
                 ];
             }
 
-            self::$CLIENT = new Client( $config );
+            self::$CLIENT = new Client($config);
 
             // add caching
-            if ( AppConfig::$AWS_CACHING ) {
+            if (AppConfig::$AWS_CACHING) {
                 $redis = new RedisHandler();
-                self::$CLIENT->addCache( new RedisCache( $redis->getConnection() ) );
+                self::$CLIENT->addCache(new RedisCache($redis->getConnection()));
             }
 
             // disable SSL verify from configuration
-            if ( false === AppConfig::$AWS_SSL_VERIFY ) {
+            if (false === AppConfig::$AWS_SSL_VERIFY) {
                 self::$CLIENT->disableSslVerify();
             }
         }
@@ -121,9 +122,10 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * set $FILES_STORAGE_BUCKET
      */
-    protected static function setFilesStorageBucket() {
-        if ( null === AppConfig::$AWS_STORAGE_BASE_BUCKET ) {
-            throw new DomainException( '$AWS_STORAGE_BASE_BUCKET param is missing in AppConfig.php.' );
+    protected static function setFilesStorageBucket(): void
+    {
+        if (null === AppConfig::$AWS_STORAGE_BASE_BUCKET) {
+            throw new DomainException('$AWS_STORAGE_BASE_BUCKET param is missing in AppConfig.php.');
         }
 
         static::$FILES_STORAGE_BUCKET = AppConfig::$AWS_STORAGE_BASE_BUCKET;
@@ -134,7 +136,8 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return string
      */
-    public static function getFilesStorageBucket(): string {
+    public static function getFilesStorageBucket(): string
+    {
         return static::$FILES_STORAGE_BUCKET;
     }
 
@@ -147,36 +150,36 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * Create the cache folder on S3 and store the files
      *
-     * @param             $hash
-     * @param             $lang
+     * @param string $hash
+     * @param string $lang
      * @param string|null $originalPath
-     * @param             $xliffPath
+     * @param string $xliffPath
      *
      * @return bool
      * @throws Exception
      */
-    public function makeCachePackage( $hash, $lang, ?string $originalPath, $xliffPath ): bool {
-
+    public function makeCachePackage(string $hash, string $lang, ?string $originalPath, string $xliffPath): bool
+    {
         // get the prefix
-        $prefix   = $this->getCachePackageHashFolder( $hash, $lang );
-        $fileName = $this->getTheLastPartOfKey( $xliffPath );
+        $prefix = $this->getCachePackageHashFolder($hash, $lang);
+        $fileName = $this->getTheLastPartOfKey($xliffPath);
 
         // encode the file name (fix name too longs)
-        $file_info = AbstractFilesStorage::pathinfo_fix( $fileName );
+        $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
 
-        if ( !empty( $file_info[ 'filename' ] ) and !empty( $file_info[ 'extension' ] ) ) {
-            $encodedFileName = self::createFileName( $prefix . '/work/', $file_info );
+        if (!empty($file_info['filename']) and !empty($file_info['extension'])) {
+            $encodedFileName = self::createFileName($prefix . '/work/', $file_info);
         } else {
-            $encodedFileName = $file_info[ 'basename' ];
+            $encodedFileName = $file_info['basename'];
         }
 
-        $xliffPath = str_replace( $fileName, $encodedFileName, $xliffPath );
-        $fileName  = $encodedFileName;
+        $xliffPath = str_replace($fileName, $encodedFileName, $xliffPath);
+        $fileName = $encodedFileName;
 
-        $file  = $prefix . '/work/' . $fileName;
-        $valid = $this->s3Client->hasItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file ] );
+        $file = $prefix . '/work/' . $fileName;
+        $valid = $this->s3Client->hasItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file]);
 
-        if ( AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $valid ) {
+        if (AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $valid) {
             return true;
         }
 
@@ -185,39 +188,37 @@ class S3FilesStorage extends AbstractFilesStorage {
         // Example: حديث_أمني_ريف_حلب_الغربي.docx (OK) -----> حديث_أمني_ريف_حلب_الغربي.docx.xliff (TOO LONG)
         //
         try {
-            $xliffDestination = $this->storeOriginalFileAndGetXliffDestination( $prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath );
-            $fileName         = $this->getTheLastPartOfKey( $xliffDestination );
+            $xliffDestination = $this->storeOriginalFileAndGetXliffDestination($prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath);
+            $fileName = $this->getTheLastPartOfKey($xliffDestination);
 
             // encode the file name (fix name too longs)
-            $file_info        = AbstractFilesStorage::pathinfo_fix( $fileName );
-            $fileName         = self::createFileName( $prefix . '/work/', $file_info );
-            $xliffDestination = str_replace( $file_info[ 'filename' ] . "." . $file_info[ 'extension' ], $fileName, $xliffDestination );
+            $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
+            $fileName = self::createFileName($prefix . '/work/', $file_info);
+            $xliffDestination = str_replace($file_info['filename'] . "." . $file_info['extension'], $fileName, $xliffDestination);
 
-            $this->s3Client->uploadItem( [
-                    'bucket' => static::$FILES_STORAGE_BUCKET,
-                    'key'    => $xliffDestination,
-                    'source' => $xliffPath
-            ] );
+            $this->s3Client->uploadItem([
+                'bucket' => static::$FILES_STORAGE_BUCKET,
+                'key' => $xliffDestination,
+                'source' => $xliffPath
+            ]);
 
-            $this->logger->info( 'Successfully uploaded file ' . $xliffDestination . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
+            $this->logger->info('Successfully uploaded file ' . $xliffDestination . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.');
 
-            unlink( $xliffPath );
+            unlink($xliffPath);
 
             return true;
-
             // If $xliffDestination is too long, delete $origDestination item
-        } catch ( Exception $e ) {
-
-            $raw_file_path   = explode( DIRECTORY_SEPARATOR, $originalPath );
-            $file_name       = array_pop( $raw_file_path );
+        } catch (Exception $e) {
+            $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
+            $file_name = array_pop($raw_file_path);
             $origDestination = $prefix . DIRECTORY_SEPARATOR . 'orig' . DIRECTORY_SEPARATOR . $file_name;
 
-            $this->s3Client->deleteItem( [
-                    'bucket' => static::$FILES_STORAGE_BUCKET,
-                    'key'    => $origDestination,
-            ] );
+            $this->s3Client->deleteItem([
+                'bucket' => static::$FILES_STORAGE_BUCKET,
+                'key' => $origDestination,
+            ]);
 
-            $this->logger->info( 'Deleting original cache file ' . $origDestination . ' from ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
+            $this->logger->info('Deleting original cache file ' . $origDestination . ' from ' . static::$FILES_STORAGE_BUCKET . ' bucket.');
 
             throw $e;
         }
@@ -229,48 +230,50 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return string
      */
-    public function getCachePackageHashFolder( string $hash, string $lang ): string {
-        $hashTree = self::composeCachePath( $hash );
+    public function getCachePackageHashFolder(string $hash, string $lang): string
+    {
+        $hashTree = self::composeCachePath($hash);
 
-        return self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] .
-                self::OBJECTS_SAFE_DELIMITER . $lang;
+        return self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $hashTree['firstLevel'] . DIRECTORY_SEPARATOR . $hashTree['secondLevel'] . DIRECTORY_SEPARATOR . $hashTree['thirdLevel'] .
+            self::OBJECTS_SAFE_DELIMITER . $lang;
     }
 
     /**
-     * @param string      $prefix
-     * @param string      $xliffPath
-     * @param string      $bucketName
+     * @param string $prefix
+     * @param string $xliffPath
+     * @param string $bucketName
      * @param string|null $originalPath
      *
      * @return string
      */
-    private function storeOriginalFileAndGetXliffDestination( string $prefix, string $xliffPath, string $bucketName, ?string $originalPath = null ): string {
-        if ( !$originalPath ) {
+    private function storeOriginalFileAndGetXliffDestination(string $prefix, string $xliffPath, string $bucketName, ?string $originalPath = null): string
+    {
+        if (!$originalPath) {
             $force_extension = "";
-            $fileType        = XliffProprietaryDetect::getInfo( $xliffPath );
-            if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
+            $fileType = XliffProprietaryDetect::getInfo($xliffPath);
+            if (!$fileType['proprietary'] && $fileType['info']['extension'] != 'sdlxliff') {
                 $force_extension = '.sdlxliff';
             }
 
-            return $prefix . DIRECTORY_SEPARATOR . 'work' . DIRECTORY_SEPARATOR . static::basename_fix( $xliffPath ) . $force_extension;
+            return $prefix . DIRECTORY_SEPARATOR . 'work' . DIRECTORY_SEPARATOR . static::basename_fix($xliffPath) . $force_extension;
         }
 
-        $raw_file_path = explode( DIRECTORY_SEPARATOR, $originalPath );
-        $file_name     = array_pop( $raw_file_path );
+        $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
+        $file_name = array_pop($raw_file_path);
 
         // encode filename
-        $file_info = AbstractFilesStorage::pathinfo_fix( $file_name );
-        $file_name = self::createFileName( $prefix . '/orig/', $file_info );
+        $file_info = AbstractFilesStorage::pathinfo_fix($file_name);
+        $file_name = self::createFileName($prefix . '/orig/', $file_info);
 
         $origDestination = $prefix . DIRECTORY_SEPARATOR . 'orig' . DIRECTORY_SEPARATOR . $file_name;
 
-        $this->s3Client->uploadItem( [
-                'bucket' => $bucketName,
-                'key'    => $origDestination,
-                'source' => $originalPath
-        ] );
+        $this->s3Client->uploadItem([
+            'bucket' => $bucketName,
+            'key' => $origDestination,
+            'source' => $originalPath
+        ]);
 
-        $this->logger->info( 'Successfully uploaded file ' . $origDestination . ' into ' . $bucketName . ' bucket.' );
+        $this->logger->info('Successfully uploaded file ' . $origDestination . ' into ' . $bucketName . ' bucket.');
 
         $file_extension = '.sdlxliff';
 
@@ -278,40 +281,38 @@ class S3FilesStorage extends AbstractFilesStorage {
     }
 
     /**
-     * @param $hash
-     * @param $lang
+     * @param string $hash
+     * @param string $lang
      *
-     * @return mixed
-     * @throws Exception
+     * @return bool|string
      */
-    public function getOriginalFromCache( $hash, $lang ) {
-
-        if(empty($lang)){
-            return null;
+    public function getOriginalFromCache(string $hash, string $lang): false|string
+    {
+        if (empty($lang)) {
+            return false;
         }
 
-        return $this->findAKeyInCachePackageBucket( $hash, $lang, 'orig' );
+        return $this->findAKeyInCachePackageBucket($hash, $lang, 'orig');
     }
 
     /**
-     * @param $hash
-     * @param $lang
+     * @param string $hash
+     * @param string $lang
      *
-     * @return mixed
-     * @throws Exception
+     * @return bool|string
      */
 
     // $sha1_original = $hashFile[ 0 ]; 6981e08bc467f8af85fd686c54287ac755408e89
     // $lang          = $hashFile[ 1 ]; it-it
     // $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang ); cache-package/69/81/e08bc467f8af85fd686c54287ac755408e89__it-it/work/os.odt.sdlxliff
 
-    public function getXliffFromCache( $hash, $lang ) {
-
-        if(empty($lang)){
-            return null;
+    public function getXliffFromCache(string $hash, string $lang): false|string
+    {
+        if (empty($lang)) {
+            return false;
         }
 
-        return $this->findAKeyInCachePackageBucket( $hash, $lang, 'work' );
+        return $this->findAKeyInCachePackageBucket($hash, $lang, 'work');
     }
 
     /**
@@ -319,13 +320,14 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @param string $lang
      * @param string $keyToSearch
      *
-     * @return mixed
+     * @return false|string
      */
-    private function findAKeyInCachePackageBucket( string $hash, string $lang, string $keyToSearch ) {
-        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . DIRECTORY_SEPARATOR . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-IT/work
-        $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
+    private function findAKeyInCachePackageBucket(string $hash, string $lang, string $keyToSearch): false|string
+    {
+        $prefix = $this->getCachePackageHashFolder($hash, $lang) . DIRECTORY_SEPARATOR . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-IT/work
+        $items = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix]);
 
-        return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
+        return (isset($items[0])) ? $items[0] : false;
     }
 
     /**
@@ -337,69 +339,70 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * Copies the files from cache bucket package to project bucket identified by $idFile
      *
-     * @param      $dateHashPath
-     * @param      $lang
-     * @param      $idFile
-     * @param null $newFileName
+     * @param string $dateHashPath
+     * @param string $lang
+     * @param string $idFile
+     * @param string|null $newFileName
      *
      * @return bool
      * @throws Exception
      */
-    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ): bool {
-        $hashes   = explode( DIRECTORY_SEPARATOR, $dateHashPath );
-        $datePath = $hashes[ 0 ];
-        $hash     = $hashes[ 1 ];
+    public function moveFromCacheToFileDir(string $dateHashPath, string $lang, string $idFile, ?string $newFileName = null): bool
+    {
+        $hashes = explode(DIRECTORY_SEPARATOR, $dateHashPath);
+        $datePath = $hashes[0];
+        $hash = $hashes[1];
 
-        $origPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig';
-        $workPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/work';
+        $origPrefix = $this->getCachePackageHashFolder($hash, $lang) . '/orig';
+        $workPrefix = $this->getCachePackageHashFolder($hash, $lang) . '/work';
 
         // get records from S3 cache
-        $origItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix ] );
-        $workItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix ] );
-        $sourceItems = array_merge( $origItems, $workItems );
+        $origItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix]);
+        $workItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix]);
+        $sourceItems = array_merge($origItems, $workItems);
 
         // if $sourceItems is empty, try to get the records from S3, skipping the cache
-        if ( empty( $sourceItems ) ) {
-            $origItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix, 'exclude-cache' => true ] );
-            $workItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix, 'exclude-cache' => true ] );
-            $sourceItems = array_merge( $origItems, $workItems );
+        if (empty($sourceItems)) {
+            $origItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix, 'exclude-cache' => true]);
+            $workItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix, 'exclude-cache' => true]);
+            $sourceItems = array_merge($origItems, $workItems);
         }
 
         // if $sourceItems is still empty, return false and then throw an Exception
-        if ( empty( $sourceItems ) ) {
+        if (empty($sourceItems)) {
             return false;
         }
 
         $destItems = [];
-        foreach ( $sourceItems as $key ) {
-            if ( strpos( $key, '/orig/' ) !== false ) {
+        foreach ($sourceItems as $key) {
+            if (str_contains($key, '/orig/')) {
                 $folder = '/orig/';
             } else {
                 $folder = '/xliff/';
             }
 
-            $destItems[] = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . $folder . $this->getTheLastPartOfKey( $key );
+            $destItems[] = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . $folder . $this->getTheLastPartOfKey($key);
         }
 
         try {
-            $copied = $this->s3Client->copyInBatch( [
-                    'source_bucket' => static::$FILES_STORAGE_BUCKET,
-                    'files'         => [
-                            'source' => $sourceItems,
-                            'target' => $destItems,
-                    ],
-            ] );
+            $copied = $this->s3Client->copyInBatch([
+                'source_bucket' => static::$FILES_STORAGE_BUCKET,
+                'files' => [
+                    'source' => $sourceItems,
+                    'target' => $destItems,
+                ],
+            ]);
 
 
-            LoggerFactory::getLogger( 'project_manager' )->debug( $this->getArrayMessageForLogs( $idFile, $datePath, $sourceItems, $destItems, $copied ) );
+            LoggerFactory::getLogger('project_manager')->debug($this->getArrayMessageForLogs($idFile, $datePath, $sourceItems, $destItems, $copied));
 
             return $copied;
-        } catch ( Exception $e ) {
-            foreach ( $sourceItems as $item ) {
-                $this->s3Client->deleteItem( [
-                        'bucket' => static::$FILES_STORAGE_BUCKET,
-                        'key'    => $item,
-                ] );
+        } catch (Exception $e) {
+            foreach ($sourceItems as $item) {
+                $this->s3Client->deleteItem([
+                    'bucket' => static::$FILES_STORAGE_BUCKET,
+                    'key' => $item,
+                ]);
             }
 
             throw $e;
@@ -409,50 +412,51 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * @param string $idFile
      * @param string $datePath
-     * @param array  $sourceItems
-     * @param array  $destItems
-     * @param bool   $copied
+     * @param array $sourceItems
+     * @param array $destItems
+     * @param bool $copied
      *
      * @return array
      */
-    private function getArrayMessageForLogs( string $idFile, string $datePath, array $sourceItems, array $destItems, bool $copied ): array {
+    private function getArrayMessageForLogs(string $idFile, string $datePath, array $sourceItems, array $destItems, bool $copied): array
+    {
         $log = [
-                'id_file'   => $idFile,
-                'date_path' => $datePath,
-                'files'     => [
-                        'source' => $sourceItems,
-                        'target' => $destItems,
-                ]
+            'id_file' => $idFile,
+            'date_path' => $datePath,
+            'files' => [
+                'source' => $sourceItems,
+                'target' => $destItems,
+            ]
         ];
 
-        $message = ( $copied === true ) ? 'Successfully copied files from cache package to files directory.' : 'Error during copying files from cache package to files directory.';
+        $message = ($copied === true) ? 'Successfully copied files from cache package to files directory.' : 'Error during copying files from cache package to files directory.';
 
-        $log[ 'message' ] = $message;
-        $log[ 'copied' ]  = $copied;
+        $log['message'] = $message;
+        $log['copied'] = $copied;
 
         return $log;
     }
 
     /**
-     * @param $id
-     * @param $dateHashPath
+     * @param string $id
+     * @param string $dateHashPath
      *
-     * @return bool|mixed|string
-     * @throws Exception
+     * @return bool|string
      */
-    public function getOriginalFromFileDir( $id, $dateHashPath ) {
-        return $this->findAKeyInProjectBucket( $id, $dateHashPath, 'orig' );
+    public function getOriginalFromFileDir(string $id, string $dateHashPath): false|string
+    {
+        return $this->findAKeyInProjectBucket($id, $dateHashPath, 'orig');
     }
 
     /**
-     * @param $id
-     * @param $dateHashPath
+     * @param string $id
+     * @param string $dateHashPath
      *
-     * @return mixed
-     * @throws Exception
+     * @return bool|string
      */
-    public function getXliffFromFileDir( $id, $dateHashPath ) {
-        return $this->findAKeyInProjectBucket( $id, $dateHashPath, 'xliff' );
+    public function getXliffFromFileDir(string $id, string $dateHashPath): false|string
+    {
+        return $this->findAKeyInProjectBucket($id, $dateHashPath, 'xliff');
     }
 
     /**
@@ -460,16 +464,17 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @param $dateHashPath
      * @param $keyToSearch
      *
-     * @return mixed
+     * @return false|string
      */
-    private function findAKeyInProjectBucket( $id, $dateHashPath, $keyToSearch ) {
-        $hashes   = explode( DIRECTORY_SEPARATOR, $dateHashPath );
-        $datePath = $hashes[ 0 ];
+    private function findAKeyInProjectBucket($id, $dateHashPath, $keyToSearch): false|string
+    {
+        $hashes = explode(DIRECTORY_SEPARATOR, $dateHashPath);
+        $datePath = $hashes[0];
 
         $prefix = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . $keyToSearch; // example: 20181212/13/work
-        $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
+        $items = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix]);
 
-        return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
+        return (isset($items[0])) ? $items[0] : false;
     }
 
     /**
@@ -479,13 +484,13 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
 
     /**
-     * @param $uploadSession
+     * @param string $uploadSession
      *
      * @return void
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
-
+    public static function moveFileFromUploadSessionToQueuePath(string $uploadSession): void
+    {
         $s3Client = self::getStaticS3Client();
 
         $hasSet = [];
@@ -493,70 +498,66 @@ class S3FilesStorage extends AbstractFilesStorage {
         /** @var DirectoryIterator $item */
         /** @var RecursiveDirectoryIterator $iterator */
         foreach (
-                $iterator = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator( AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
-                        RecursiveIteratorIterator::SELF_FIRST ) as $item
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            ) as $item
         ) {
-
-            if ( !$item->isDir() ) {
-
+            if (!$item->isDir()) {
                 $subPathName = $iterator->getSubPathName();
 
                 // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
-                $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $uploadSession );
+                $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName($uploadSession);
 
-                if ( stripos( $subPathName, "|" ) !== false ) {
+                if (stripos($subPathName, "|") !== false) {
                     // Example: aad03b600_3dc4bf3a2d|it-IT → abc12de006__it-IT - where abc12de006 == sha1(aad03b600_3dc4bf3a2d|it-IT)
-                    $short_hash  = sha1( $iterator->getSubPathName() );
-                    $pathParts   = explode( "|", $iterator->getSubPathName() );
-                    $lang        = array_pop( $pathParts );
+                    $short_hash = sha1($iterator->getSubPathName());
+                    $pathParts = explode("|", $iterator->getSubPathName());
+                    $lang = array_pop($pathParts);
                     $subPathName = $short_hash . self::OBJECTS_SAFE_DELIMITER . $lang;
                 }
 
                 $subPathName = $prefix . DIRECTORY_SEPARATOR . $subPathName;
 
-                $file_info          = AbstractFilesStorage::pathinfo_fix( $subPathName );
-                $encodedSubPathName = self::createFileName( $prefix . "/", $file_info );
+                $file_info = AbstractFilesStorage::pathinfo_fix($subPathName);
+                $encodedSubPathName = self::createFileName($prefix . "/", $file_info);
                 $encodedSubPathName = $prefix . DIRECTORY_SEPARATOR . $encodedSubPathName;
 
                 // upload file
-                $s3Client->uploadItem( [
-                        'bucket' => static::$FILES_STORAGE_BUCKET,
-                        'key'    => $encodedSubPathName, // encode filename
-                        'source' => $item->getPathName()
-                ] );
+                $s3Client->uploadItem([
+                    'bucket' => static::$FILES_STORAGE_BUCKET,
+                    'key' => $encodedSubPathName, // encode filename
+                    'source' => $item->getPathName()
+                ]);
 
                 // save on redis the hash map files
-                if ( strpos( $subPathName, '.' ) === false ) {
-                    $hasSet[ $subPathName ] = file( $item->getPathname(), FILE_IGNORE_NEW_LINES );
+                if (!str_contains($subPathName, '.')) {
+                    $hasSet[$subPathName] = file($item->getPathname(), FILE_IGNORE_NEW_LINES);
                 }
-
             }
-
         }
 
-        ( new RedisHandler() )->getConnection()->hset( self::getUploadSessionSafeName( $uploadSession ), 'file_map', serialize( $hasSet ) );
-        Utils::deleteDir( AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
-
+        (new RedisHandler())->getConnection()->hset(self::getUploadSessionSafeName($uploadSession), 'file_map', serialize($hasSet));
+        Utils::deleteDir(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession);
     }
 
     /**
-     * @param $dirToScan
+     * @param string $dirToScan
      *
      * @return array
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public function getHashesFromDir( $dirToScan ): array {
-        $zipFilesHash  = [];
+    public function getHashesFromDir(string $dirToScan): array
+    {
+        $zipFilesHash = [];
         $filesHashInfo = [];
 
-        $redisPosition = self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $dirToScan ) );
-        $fileMap       = unserialize( ( new RedisHandler() )->getConnection()->hget( $redisPosition, 'file_map' ) );
+        $redisPosition = self::getUploadSessionSafeName($this->getTheLastPartOfKey($dirToScan));
+        $fileMap = unserialize((new RedisHandler())->getConnection()->hget($redisPosition, 'file_map'));
 
-        foreach ( $fileMap as $hashName => $fileNameList ) {
-
-            if ( strpos( $hashName, $this->getOriginalZipPlaceholder() ) !== false ) {
-                $zipFilesHash[] = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . "cache" . DIRECTORY_SEPARATOR . $this->getTheLastPartOfKey( $hashName );
+        foreach ($fileMap as $hashName => $fileNameList) {
+            if (str_contains($hashName, $this->getOriginalZipPlaceholder())) {
+                $zipFilesHash[] = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . "cache" . DIRECTORY_SEPARATOR . $this->getTheLastPartOfKey($hashName);
             } else {
                 // this method get the content from the hashes map file and convert it into an array of original file names
                 // Example:
@@ -568,37 +569,38 @@ class S3FilesStorage extends AbstractFilesStorage {
                 //     0 => 'file.txt',
                 //     1 => 'file2.txt'
                 // ]
-                $filesHashInfo[ 'sha' ][]                 = $hashName;
-                $filesHashInfo[ 'fileName' ][ $hashName ] = $fileNameList;
+                $filesHashInfo['sha'][] = $hashName;
+                $filesHashInfo['fileName'][$hashName] = $fileNameList;
             }
-
         }
 
         return [
-                'conversionHashes' => $filesHashInfo,
-                'zipHashes'        => $zipFilesHash
+            'conversionHashes' => $filesHashInfo,
+            'zipHashes' => $zipFilesHash
         ];
     }
 
     /**
-     * @param $uploadSession
+     * @param string $uploadSession
      *
      * @return string
      */
-    public static function getUploadSessionSafeName( $uploadSession ): string {
-        return str_replace( [ '{', '}' ], '', strtolower( $uploadSession ) );
+    public static function getUploadSessionSafeName(string $uploadSession): string
+    {
+        return str_replace(['{', '}'], '', strtolower($uploadSession));
     }
 
     /**
      * Delete the entire queue folder
      *
-     * @param $uploadDir
+     * @param string $uploadDir
      */
-    public function deleteQueue( $uploadDir ) {
-        $this->s3Client->deleteFolder( [
-                'bucket' => static::$FILES_STORAGE_BUCKET,
-                'prefix' => self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $uploadDir ) )
-        ] );
+    public function deleteQueue(string $uploadDir): void
+    {
+        $this->s3Client->deleteFolder([
+            'bucket' => static::$FILES_STORAGE_BUCKET,
+            'prefix' => self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName($this->getTheLastPartOfKey($uploadDir))
+        ]);
     }
 
     /**
@@ -608,48 +610,50 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
 
     /**
-     * @param       $id_project
+     * @param string $id_project
      * @param array $segments_metadata
      *
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public static function storeFastAnalysisFile( $id_project, array $segments_metadata = [] ) {
+    public static function storeFastAnalysisFile(string $id_project, array $segments_metadata = []): void
+    {
+        $upload = self::getStaticS3Client()->uploadItemFromBody([
+            'bucket' => static::$FILES_STORAGE_BUCKET,
+            'key' => self::getFastAnalysisFileName($id_project),
+            'body' => serialize($segments_metadata)
+        ]);
 
-        $upload = self::getStaticS3Client()->uploadItemFromBody( [
-                'bucket' => static::$FILES_STORAGE_BUCKET,
-                'key'    => self::getFastAnalysisFileName( $id_project ),
-                'body'   => serialize( $segments_metadata )
-        ] );
-
-        if ( false === $upload ) {
-            throw new UnexpectedValueException( 'Internal Error: Failed to store segments for fast analysis on Amazon S3 bucket.', -14 );
+        if (false === $upload) {
+            throw new UnexpectedValueException('Internal Error: Failed to store segments for fast analysis on Amazon S3 bucket.', -14);
         }
     }
 
     /**
-     * @param $id_project
+     * @param int $id_project
      *
-     * @return mixed
-     * @throws Exception
+     * @return array
+     * @throws ReflectionException
      */
-    public static function getFastAnalysisData( $id_project ) {
+    public static function getFastAnalysisData(int $id_project): array
+    {
+        $analysisData = unserialize(self::getStaticS3Client()->openItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => self::getFastAnalysisFileName($id_project)]));
 
-        $analysisData = unserialize( self::getStaticS3Client()->openItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => self::getFastAnalysisFileName( $id_project ) ] ) );
-
-        if ( false === $analysisData ) {
-            throw new UnexpectedValueException( 'Internal Error: Failed to retrieve analysis information from Amazon S3 bucket.', -15 );
+        if (false === $analysisData) {
+            throw new UnexpectedValueException('Internal Error: Failed to retrieve analysis information from Amazon S3 bucket.', -15);
         }
 
         return $analysisData;
     }
 
     /**
-     * @param $id_project
+     * @param string $id_project
      *
-     * @throws Exception
+     * @return bool
+     * @throws ReflectionException
      */
-    public static function deleteFastAnalysisFile( $id_project ) {
-        self::getStaticS3Client()->deleteItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => self::getFastAnalysisFileName( $id_project ) ] );
+    public static function deleteFastAnalysisFile(string $id_project): bool
+    {
+        return self::getStaticS3Client()->deleteItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => self::getFastAnalysisFileName($id_project)]);
     }
 
     /**
@@ -657,7 +661,8 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return string
      */
-    private static function getFastAnalysisFileName( $id_project ): string {
+    private static function getFastAnalysisFileName($id_project): string
+    {
         return self::FAST_ANALYSIS_FOLDER . DIRECTORY_SEPARATOR . 'waiting_analysis_' . $id_project . '.ser';
     }
 
@@ -675,60 +680,60 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return bool
      */
-    public function cacheZipArchive( string $hash, string $zipPath ): bool {
+    public function cacheZipArchive(string $hash, string $zipPath): bool
+    {
+        $prefix = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder();
+        $outcome = $this->s3Client->uploadItem([
+            'bucket' => static::$FILES_STORAGE_BUCKET,
+            'key' => $prefix . DIRECTORY_SEPARATOR . static::basename_fix($zipPath),
+            'source' => $zipPath
+        ]);
 
-        $prefix  = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder();
-        $outcome = $this->s3Client->uploadItem( [
-                'bucket' => static::$FILES_STORAGE_BUCKET,
-                'key'    => $prefix . DIRECTORY_SEPARATOR . static::basename_fix( $zipPath ),
-                'source' => $zipPath
-        ] );
-
-        if ( !$outcome ) {
+        if (!$outcome) {
             //Original directory deleted!!!
             //CLEAR ALL CACHE
-            Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder() );
+            Utils::deleteDir($this->zipDir . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder());
 
             return $outcome;
         }
 
-        unlink( $zipPath );
+        unlink($zipPath);
 
         //link this zip to the upload directory by creating a file name as the ash of the zip file
-        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder() );
+        touch(dirname($zipPath) . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder());
 
         return true;
     }
 
     /**
-     * @param $create_date
-     * @param $zipHash
-     * @param $projectID
+     * @param string $create_date
+     * @param string $zipHash
+     * @param string $projectID
      *
      * @return bool
      */
-    public function linkZipToProject( $create_date, $zipHash, $projectID ): bool {
+    public function linkZipToProject(string $create_date, string $zipHash, string $projectID): bool
+    {
         $cacheZipPackage = $zipHash;
 
-        foreach ( $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $cacheZipPackage ] ) as $key ) {
+        foreach ($this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $cacheZipPackage]) as $key) {
+            $destination = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath($create_date) . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $this->getTheLastPartOfKey($key);
 
-            $destination = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath( $create_date ) . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $this->getTheLastPartOfKey( $key );
+            $copied = $this->s3Client->copyItem([
+                'source_bucket' => static::$FILES_STORAGE_BUCKET,
+                'source' => $key,
+                'target_bucket' => static::$FILES_STORAGE_BUCKET,
+                'target' => $destination
+            ]);
 
-            $copied = $this->s3Client->copyItem( [
-                    'source_bucket' => static::$FILES_STORAGE_BUCKET,
-                    'source'        => $key,
-                    'target_bucket' => static::$FILES_STORAGE_BUCKET,
-                    'target'        => $destination
-            ] );
-
-            if ( !$copied ) {
-                return $copied;
+            if (!$copied) {
+                return false;
             }
 
-            $delete = $this->s3Client->deleteItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $key ] );
+            $delete = $this->s3Client->deleteItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $key]);
 
-            if ( !$delete ) {
-                return $delete;
+            if (!$delete) {
+                return false;
             }
         }
 
@@ -736,24 +741,26 @@ class S3FilesStorage extends AbstractFilesStorage {
     }
 
     /**
-     * @param $projectDate
-     * @param $projectID
-     * @param $zipName
+     * @param string $projectDate
+     * @param string $projectID
+     * @param string $zipName
      *
      * @return string
      */
-    public function getOriginalZipPath( $projectDate, $projectID, $zipName ): string {
-        return self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath( $projectDate ) . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
+    public function getOriginalZipPath(string $projectDate, string $projectID, string $zipName): string
+    {
+        return self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath($projectDate) . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
     }
 
     /**
-     * @param $projectDate
-     * @param $projectID
+     * @param string $projectDate
+     * @param string $projectID
      *
      * @return string
      */
-    public function getOriginalZipDir( $projectDate, $projectID ): string {
-        return 'work' . DIRECTORY_SEPARATOR . $this->getDatePath( $projectDate ) . DIRECTORY_SEPARATOR . $projectID;
+    public function getOriginalZipDir(string $projectDate, string $projectID): string
+    {
+        return 'work' . DIRECTORY_SEPARATOR . $this->getDatePath($projectDate) . DIRECTORY_SEPARATOR . $projectID;
     }
 
     /**
@@ -768,14 +775,15 @@ class S3FilesStorage extends AbstractFilesStorage {
      * Example:
      * c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9.it-IT/orig/hello.txt --> hello.txt
      *
-     * @param $key
+     * @param string $key
      *
-     * @return mixed
+     * @return false|string
      */
-    public function getTheLastPartOfKey( $key ) {
-        $explode = explode( DIRECTORY_SEPARATOR, $key );
+    public function getTheLastPartOfKey(string $key): false|string
+    {
+        $explode = explode(DIRECTORY_SEPARATOR, $key);
 
-        return end( $explode );
+        return end($explode);
     }
 
     /**
@@ -783,32 +791,32 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return string
      */
-    private function getOriginalZipPlaceholder(): string {
-        return str_replace( '#', '', self::ORIGINAL_ZIP_PLACEHOLDER );
+    private function getOriginalZipPlaceholder(): string
+    {
+        return str_replace('#', '', self::ORIGINAL_ZIP_PLACEHOLDER);
     }
 
     /**
      * @param string $prefix
-     * @param array  $file_info
+     * @param array $file_info
      *
      * @return string
      */
-    public static function createFileName( string $prefix, array $file_info ): string {
-
-        if ( !empty( $file_info[ 'filename' ] ) and !empty( $file_info[ 'extension' ] ) ) {
-
+    public static function createFileName(string $prefix, array $file_info): string
+    {
+        if (!empty($file_info['filename']) and !empty($file_info['extension'])) {
             // check if prefixed filename if is too long
-            $filename  = $file_info[ 'filename' ];
-            $extension = $file_info[ 'extension' ];
+            $filename = $file_info['filename'];
+            $extension = $file_info['extension'];
 
-            if ( strlen( urlencode( $prefix . $filename ) ) > 221 ) {
-                return sha1( $filename ) . "." . $extension;
+            if (strlen(urlencode($prefix . $filename)) > 221) {
+                return sha1($filename) . "." . $extension;
             }
 
             return $filename . "." . $extension;
         }
 
-        return $file_info[ 'basename' ];
+        return $file_info['basename'];
     }
 
     /**
@@ -824,10 +832,11 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return bool
      * @throws Exception
      */
-    public function transferFiles( $source, $destination ): bool {
-        return $this->s3Client->transfer( [
-                'source' => $source,
-                'dest'   => $destination,
-        ] );
+    public function transferFiles(string $source, string $destination): bool
+    {
+        return $this->s3Client->transfer([
+            'source' => $source,
+            'dest' => $destination,
+        ]);
     }
 }

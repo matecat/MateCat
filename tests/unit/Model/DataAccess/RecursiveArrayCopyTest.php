@@ -3,84 +3,91 @@
 namespace unit\Model\DataAccess;
 
 use Model\DataAccess\RecursiveArrayCopy;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 
-class RecursiveArrayCopyTest extends TestCase {
+class RecursiveArrayCopyTest extends AbstractTest
+{
     use RecursiveArrayCopy;
 
-    public function testToArrayWithPublicProperties() {
+    public function testToArrayWithPublicProperties()
+    {
         $testObject = new class {
             use RecursiveArrayCopy;
 
             public string $name = 'John';
-            public int    $age  = 30;
+            public int $age = 30;
         };
 
         $expected = [
-                'name' => 'John',
-                'age'  => 30,
+            'name' => 'John',
+            'age' => 30,
         ];
 
-        $this->assertEquals( $expected, $testObject->toArray() );
+        $this->assertEquals($expected, $testObject->toArray());
     }
 
-    public function testToArrayWithArrayProperties() {
+    public function testToArrayWithArrayProperties()
+    {
         $testObject = new class {
             use RecursiveArrayCopy;
 
-            public array $items = [ 'item1', 'item2' ];
+            public array $items = ['item1', 'item2'];
         };
 
         $expected = [
-                'items' => [ 'item1', 'item2' ],
+            'items' => ['item1', 'item2'],
         ];
 
-        $this->assertEquals( $expected, $testObject->toArray() );
+        $this->assertEquals($expected, $testObject->toArray());
     }
 
-    public function testToArrayWithNestedObjectProperties() {
+    public function testToArrayWithNestedObjectProperties()
+    {
         $nestedObject = new class {
             use RecursiveArrayCopy;
 
             public string $title = 'Nested';
         };
 
-        $testObject = new class ( $nestedObject ) {
+        $testObject = new class ($nestedObject) {
             use RecursiveArrayCopy;
 
             public object $nested;
 
-            public function __construct( $nested ) {
+            public function __construct($nested)
+            {
                 $this->nested = $nested;
             }
         };
 
         $expected = [
-                'nested' => [
-                        'title' => 'Nested',
-                ],
+            'nested' => [
+                'title' => 'Nested',
+            ],
         ];
 
-        $this->assertEquals( $expected, $testObject->toArray() );
+        $this->assertEquals($expected, $testObject->toArray());
     }
 
-    public function testToArrayWithMask() {
+    public function testToArrayWithMask()
+    {
         $testObject = new class {
             use RecursiveArrayCopy;
 
-            public int    $id    = 1;
-            public string $name  = 'John';
+            public int $id = 1;
+            public string $name = 'John';
             public string $email = 'john@example.com';
         };
 
         $expected = [
-                'name' => 'John',
+            'name' => 'John',
         ];
 
-        $this->assertEquals( $expected, $testObject->toArray( [ 'name' ] ) );
+        $this->assertEquals($expected, $testObject->toArray(['name']));
     }
 
-    public function testToArrayWithNullPublicProperty() {
+    public function testToArrayWithNullPublicProperty()
+    {
         $testObject = new class {
             use RecursiveArrayCopy;
 
@@ -88,35 +95,37 @@ class RecursiveArrayCopyTest extends TestCase {
         };
 
         $expected = [
-                'name' => null,
+            'name' => null,
         ];
 
-        $this->assertEquals( $expected, $testObject->toArray() );
+        $this->assertEquals($expected, $testObject->toArray());
     }
 
-    public function testToArrayWithNonPublicProperties() {
+    public function testToArrayWithNonPublicProperties()
+    {
         $testObject = new class {
             use RecursiveArrayCopy;
 
-            private int      $id     = 1;
+            private int $id = 1;
             protected string $secret = 'hidden';
-            public string    $email  = 'public@example.com';
+            public string $email = 'public@example.com';
         };
 
         $expected = [
-                'email' => 'public@example.com',
+            'email' => 'public@example.com',
         ];
 
-        $this->assertEquals( $expected, $testObject->toArray() );
+        $this->assertEquals($expected, $testObject->toArray());
     }
 
-    public function testToArrayWithEmptyObject() {
+    public function testToArrayWithEmptyObject()
+    {
         $testObject = new class {
             use RecursiveArrayCopy;
         };
 
         $expected = [];
 
-        $this->assertEquals( $expected, $testObject->toArray() );
+        $this->assertEquals($expected, $testObject->toArray());
     }
 }

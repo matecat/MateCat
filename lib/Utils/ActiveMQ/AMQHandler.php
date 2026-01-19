@@ -25,9 +25,9 @@ use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\QueueElement;
-use Utils\Tools\Utils;
 
-class AMQHandler {
+class AMQHandler
+{
 
     /**
      * @var RedisHandler
@@ -42,10 +42,10 @@ class AMQHandler {
      * @var Connection
      */
     protected static Connection $staticStompConnection;
-    protected ?string           $clientType = null;
+    protected ?string $clientType = null;
 
-    const CLIENT_TYPE_PUBLISHER  = 'Publisher';
-    const CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
+    const string CLIENT_TYPE_PUBLISHER = 'Publisher';
+    const string CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
 
     public string $persistent = 'true';
 
@@ -61,59 +61,57 @@ class AMQHandler {
      *
      * @throws ConnectionException
      */
-    public function __construct( $brokerUri = null, $usePersistentConnection = true ) {
-
-        if ( $usePersistentConnection ) {
-
-            if ( !isset( self::$staticStompConnection ) ) {
-                if ( !is_null( $brokerUri ) ) {
-                    self::$staticStompConnection = new Connection( $brokerUri, 2 );
+    public function __construct($brokerUri = null, $usePersistentConnection = true)
+    {
+        if ($usePersistentConnection) {
+            if (!isset(self::$staticStompConnection)) {
+                if (!is_null($brokerUri)) {
+                    self::$staticStompConnection = new Connection($brokerUri, 2);
                 } else {
-                    self::$staticStompConnection = new Connection( AppConfig::$QUEUE_BROKER_ADDRESS, 2 );
+                    self::$staticStompConnection = new Connection(AppConfig::$QUEUE_BROKER_ADDRESS, 2);
                 }
             }
 
             $connection = self::$staticStompConnection;
-
+        } elseif (!is_null($brokerUri)) {
+            $connection = new Connection($brokerUri, 2);
         } else {
-
-            if ( !is_null( $brokerUri ) ) {
-                $connection = new Connection( $brokerUri, 2 );
-            } else {
-                $connection = new Connection( AppConfig::$QUEUE_BROKER_ADDRESS, 2 );
-            }
-
+            $connection = new Connection(AppConfig::$QUEUE_BROKER_ADDRESS, 2);
         }
 
-        $connection->setReadTimeout( 2, 500000 );
+        $connection->setReadTimeout(2, 500000);
 
-        $this->statefulStomp = new StatefulStomp( new Client( $connection ) );
-
+        $this->statefulStomp = new StatefulStomp(new Client($connection));
     }
 
-    public static function getNewInstanceForDaemons(): AMQHandler {
-        return new self( null, false );
+    public static function getNewInstanceForDaemons(): AMQHandler
+    {
+        return new self(null, false);
     }
 
     /**
      * @return Client
      */
-    public function getClient(): Client {
+    public function getClient(): Client
+    {
         return $this->statefulStomp->getClient();
     }
 
-    public function ack( Frame $frame ) {
-        $this->statefulStomp->ack( $frame );
+    public function ack(Frame $frame): void
+    {
+        $this->statefulStomp->ack($frame);
     }
 
-    public function nack( Frame $frame ) {
-        $this->statefulStomp->nack( $frame );
+    public function nack(Frame $frame): void
+    {
+        $this->statefulStomp->nack($frame);
     }
 
     /**
      * @return false|Frame
      */
-    public function read() {
+    public function read(): Frame|false
+    {
         return $this->statefulStomp->read();
     }
 
@@ -125,8 +123,9 @@ class AMQHandler {
      * @return Predis\Client
      * @throws ReflectionException
      */
-    public function getRedisClient(): Predis\Client {
-        if ( empty( $this->redisHandler ) ) {
+    public function getRedisClient(): Predis\Client
+    {
+        if (empty($this->redisHandler)) {
             $this->redisHandler = new RedisHandler();
         }
 
@@ -136,61 +135,60 @@ class AMQHandler {
     /**
      *
      * @param string $destination
-     * @param ?mixed $selector
+     * @param ?string $selector
      * @param string $ack
-     * @param array  $header
+     * @param array $header
      *
      * @return int
      */
-    public function subscribe( string $destination, $selector = null, string $ack = 'client-individual', array $header = [] ): int {
-
+    public function subscribe(string $destination, ?string $selector = null, string $ack = 'client-individual', array $header = []): int
+    {
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
-        $this->queueName  = $destination;
+        $this->queueName = $destination;
 
-        return $this->statefulStomp->subscribe( '/queue/' . AppConfig::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header );
-
+        return $this->statefulStomp->subscribe('/queue/' . AppConfig::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header);
     }
 
     /**
-     * @param string  $destination
+     * @param string $destination
      * @param Message $message
      *
      * @return bool
      */
-    public function publishToQueues( string $destination, Message $message ): bool {
-
+    public function publishToQueues(string $destination, Message $message): bool
+    {
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
-        return $this->statefulStomp->send( '/queue/' . AppConfig::$INSTANCE_ID . "_" . $destination, $message );
-
+        return $this->statefulStomp->send('/queue/' . AppConfig::$INSTANCE_ID . "_" . $destination, $message);
     }
 
     /**
      * Clean connections
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->close();
     }
 
     /**
      * Clean connections
      */
-    public function close() {
+    public function close(): void
+    {
         $this->statefulStomp->getClient()->disconnect();
     }
 
     /**
-     * @param string  $destination
+     * @param string $destination
      * @param Message $message
      *
      * @return bool
      */
-    public function publishToNodeJsClients( string $destination, Message $message ): bool {
-
+    public function publishToNodeJsClients(string $destination, Message $message): bool
+    {
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
-        return $this->statefulStomp->send( $destination, $message );
-
+        return $this->statefulStomp->send($destination, $message);
     }
 
     /**
@@ -198,23 +196,22 @@ class AMQHandler {
      *
      * @param string|null $queueName
      *
-     * @return mixed
+     * @return int
      * @throws Exception
      */
-    public function getQueueLength( ?string $queueName = null ) {
-
-        if ( !empty( $queueName ) ) {
+    public function getQueueLength(?string $queueName = null): int
+    {
+        if (!empty($queueName)) {
             $queue = $queueName;
-        } elseif ( !empty( $this->queueName ) ) {
+        } elseif (!empty($this->queueName)) {
             $queue = $this->queueName;
         } else {
-            throw new Exception( 'No queue name provided.' );
+            throw new Exception('No queue name provided.');
         }
 
         $queue_interface_url = AppConfig::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . AppConfig::$INSTANCE_ID . "_" . $queue . "/QueueSize";
 
-        return $this->callAmqJmx( $queue_interface_url );
-
+        return (int)$this->callAmqJmx($queue_interface_url);
     }
 
     /**
@@ -222,23 +219,22 @@ class AMQHandler {
      *
      * @param string|null $queueName
      *
-     * @return mixed
+     * @return int
      * @throws Exception
      */
-    public function getConsumerCount( ?string $queueName = null ) {
-
-        if ( !empty( $queueName ) ) {
+    public function getConsumerCount(?string $queueName = null): int
+    {
+        if (!empty($queueName)) {
             $queue = $queueName;
-        } elseif ( !empty( $this->queueName ) ) {
+        } elseif (!empty($this->queueName)) {
             $queue = $this->queueName;
         } else {
-            throw new Exception( 'No queue name provided.' );
+            throw new Exception('No queue name provided.');
         }
 
         $queue_interface_url = AppConfig::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . AppConfig::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
 
-        return $this->callAmqJmx( $queue_interface_url );
-
+        return (int)$this->callAmqJmx($queue_interface_url);
     }
 
     /**
@@ -249,22 +245,22 @@ class AMQHandler {
      * @return string|null
      * @throws Exception
      */
-    public function getActualForQID( $qid = null ): ?string {
-
-        if ( empty( $qid ) ) {
-            throw new Exception( 'Can Not get values without a Queue ID. Use ' . AMQHandler::class . '::setQueueID  or pass a queue id to this method' );
+    public function getActualForQID($qid = null): ?string
+    {
+        if (empty($qid)) {
+            throw new Exception('Can Not get values without a Queue ID. Use ' . AMQHandler::class . '::setQueueID  or pass a queue id to this method');
         }
 
-        return $this->getRedisClient()->get( RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $qid );
-
+        return $this->getRedisClient()->get(RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $qid);
     }
 
     /**
      * @throws Exception
      */
-    public function reQueue( QueueElement $failed_segment, Context $queueInfo, MatecatLogger $logger ) {
-        $logger->debug( "Message ReQueue. Failed.", $failed_segment->toArray() );
-        $this->publishToQueues( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
+    public function reQueue(QueueElement $failed_segment, Context $queueInfo, MatecatLogger $logger): void
+    {
+        $logger->debug("Message ReQueue. Failed.", $failed_segment->toArray());
+        $this->publishToQueues($queueInfo->queue_name, new Message(strval($failed_segment), ['persistent' => $this->persistent]));
     }
 
     /**
@@ -273,26 +269,27 @@ class AMQHandler {
      * @return mixed
      * @throws Exception
      */
-    public function callAmqJmx( $queue_interface_url ) {
+    public function callAmqJmx($queue_interface_url): mixed
+    {
         $mHandler = new MultiCurlHandler();
 
         $options = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( AppConfig::$QUEUE_CREDENTIALS ) ]
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER => ['Authorization: Basic ' . base64_encode(AppConfig::$QUEUE_CREDENTIALS)]
         ];
 
-        $resource = $mHandler->createResource( $queue_interface_url, $options );
+        $resource = $mHandler->createResource($queue_interface_url, $options);
         $mHandler->multiExec();
-        $result = $mHandler->getSingleContent( $resource );
+        $result = $mHandler->getSingleContent($resource);
         $mHandler->multiCurlCloseAll();
-        $result = json_decode( $result, true, 512, JSON_THROW_ON_ERROR );
+        $result = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
 
-        return $result[ 'value' ];
+        return $result['value'];
     }
 
 }

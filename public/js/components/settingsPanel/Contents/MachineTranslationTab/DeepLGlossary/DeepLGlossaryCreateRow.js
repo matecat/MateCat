@@ -155,7 +155,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           />
           {!file ? (
             <label htmlFor="file-import" className={fileNameClasses}>
-              <Upload size={14} />
+              <Upload size={18} />
               Choose file
             </label>
           ) : (

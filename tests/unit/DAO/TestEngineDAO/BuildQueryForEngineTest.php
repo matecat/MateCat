@@ -15,19 +15,20 @@ use Utils\Registry\AppConfig;
  * Date: 14/04/16
  * Time: 19.40
  */
-class BuildQueryForEngineTest extends AbstractTest {
+class BuildQueryForEngineTest extends AbstractTest
+{
 
     protected $reflector;
     protected $method;
     protected $engine_struct;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->engine_struct    = new EngineStruct();
-        $this->method           = $this->reflector->getMethod( "_buildQueryForEngine" );
-        $this->method->setAccessible( true );
+        $this->databaseInstance = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->engine_struct = new EngineStruct();
+        $this->method = $this->reflector->getMethod("_buildQueryForEngine");
     }
 
     /**
@@ -35,11 +36,12 @@ class BuildQueryForEngineTest extends AbstractTest {
      * @group  regression
      * @covers EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_with_ID_initialized() {
+    public function test__buildQueryForEngine_with_given_engine_struct_with_ID_initialized()
+    {
         $this->engine_struct->id = 10;
-        $sql_query_result        = $this->method->invoke( $this->databaseInstance, $this->engine_struct );
-        $sql_query_expected      = "SELECT * FROM engines WHERE id = 10";
-        $this->assertEquals( $sql_query_expected, $this->getRawQuery( $sql_query_result ) );
+        $sql_query_result = $this->method->invoke($this->databaseInstance, $this->engine_struct);
+        $sql_query_expected = "SELECT * FROM engines WHERE id = 10";
+        $this->assertEquals($sql_query_expected, $this->getRawQuery($sql_query_result));
     }
 
     /**
@@ -47,12 +49,12 @@ class BuildQueryForEngineTest extends AbstractTest {
      * @group  regression
      * @covers EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_with_UID_inizialized() {
-
+    public function test__buildQueryForEngine_with_given_engine_struct_with_UID_inizialized()
+    {
         $this->engine_struct->uid = 1;
-        $sql_query_result         = $this->method->invoke( $this->databaseInstance, $this->engine_struct );
-        $sql_query_expected       = "SELECT * FROM engines WHERE uid = 1";
-        $this->assertEquals( $sql_query_expected, $this->getRawQuery( $sql_query_result ) );
+        $sql_query_result = $this->method->invoke($this->databaseInstance, $this->engine_struct);
+        $sql_query_expected = "SELECT * FROM engines WHERE uid = 1";
+        $this->assertEquals($sql_query_expected, $this->getRawQuery($sql_query_result));
     }
 
     /**
@@ -60,12 +62,12 @@ class BuildQueryForEngineTest extends AbstractTest {
      * @group  regression
      * @covers EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_with_active_inizialized() {
-
+    public function test__buildQueryForEngine_with_given_engine_struct_with_active_inizialized()
+    {
         $this->engine_struct->active = 88;
-        $sql_query_result            = $this->method->invoke( $this->databaseInstance, $this->engine_struct );
-        $sql_query_expected          = "SELECT * FROM engines WHERE active = 1";
-        $this->assertEquals( $sql_query_expected, $this->getRawQuery( $sql_query_result ) );
+        $sql_query_result = $this->method->invoke($this->databaseInstance, $this->engine_struct);
+        $sql_query_expected = "SELECT * FROM engines WHERE active = 1";
+        $this->assertEquals($sql_query_expected, $this->getRawQuery($sql_query_result));
     }
 
     /**
@@ -73,12 +75,12 @@ class BuildQueryForEngineTest extends AbstractTest {
      * @group  regression
      * @covers EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_with_type_inizialized() {
-
+    public function test__buildQueryForEngine_with_given_engine_struct_with_type_inizialized()
+    {
         $this->engine_struct->type = EngineConstants::MT;
-        $sql_query_result          = $this->method->invoke( $this->databaseInstance, $this->engine_struct );
-        $sql_query_expected        = "SELECT * FROM engines WHERE type = 'MT'";
-        $this->assertEquals( $sql_query_expected, $this->getRawQuery( $sql_query_result ) );
+        $sql_query_result = $this->method->invoke($this->databaseInstance, $this->engine_struct);
+        $sql_query_expected = "SELECT * FROM engines WHERE type = 'MT'";
+        $this->assertEquals($sql_query_expected, $this->getRawQuery($sql_query_result));
     }
 
     /**
@@ -86,11 +88,12 @@ class BuildQueryForEngineTest extends AbstractTest {
      * @group  regression
      * @covers EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_with_uid_fake_null() {
+    public function test__buildQueryForEngine_with_given_engine_struct_with_uid_fake_null()
+    {
         $this->engine_struct->uid = null;
-        $this->expectException( Exception::class );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct );
-        $this->expectExceptionMessage( "Where condition needed." );
+        $this->expectException(Exception::class);
+        $this->method->invoke($this->databaseInstance, $this->engine_struct);
+        $this->expectExceptionMessage("Where condition needed.");
     }
 
     /**
@@ -98,9 +101,9 @@ class BuildQueryForEngineTest extends AbstractTest {
      * @group  regression
      * @covers EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_without_properties_inizialized() {
-
-        $this->expectException( '\Exception' );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct );
+    public function test__buildQueryForEngine_with_given_engine_struct_without_properties_inizialized()
+    {
+        $this->expectException('\Exception');
+        $this->method->invoke($this->databaseInstance, $this->engine_struct);
     }
 }

@@ -20,7 +20,6 @@ import {updateTmKey} from '../../../../api/updateTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
-import Earth from '../../../../../img/icons/Earth'
 import Lock from '../../../../../img/icons/Lock'
 import Users from '../../../../../img/icons/Users'
 import Upload from '../../../../../img/icons/Upload'
@@ -38,6 +37,7 @@ import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 import IconClose from '../../../icons/IconClose'
 import {getTmKeyEnginesInfo} from '../../../../api/getTmKeyEnginesInfo/getTmKeyEnginesInfo'
+import Globe from '../../../../../img/icons/Globe'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -280,7 +280,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const iconDetails = isMMSharedKey
     ? {
         title: 'Public translation memory',
-        icon: <Earth size={16} />,
+        icon: <Globe size={16} />,
       }
     : !row.is_shared
       ? {
@@ -561,7 +561,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               data-testid="import-glossary"
             >
               <div>
-                <Upload size={20} /> Import Glossary
+                <Upload size={20} /> Import Termbase
               </div>
             </MenuButtonItem>
             <MenuButtonItem
@@ -579,7 +579,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               data-testid="export-glossary"
             >
               <div>
-                <Download size={20} /> Export Glossary
+                <Download size={20} /> Export Termbase
               </div>
             </MenuButtonItem>
             <MenuButtonItem

@@ -15,7 +15,8 @@ use Utils\Registry\AppConfig;
  * Date: 19/04/16
  * Time: 16.07
  */
-class SanitizeInputTest extends AbstractTest {
+class SanitizeInputTest extends AbstractTest
+{
     protected $reflector;
     protected $method;
     /**
@@ -23,14 +24,12 @@ class SanitizeInputTest extends AbstractTest {
      */
     protected $struct_input;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->method           = $this->reflector->getMethod( "_sanitizeInput" );
-        $this->method->setAccessible( true );
-
-
+        $this->databaseInstance = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->method = $this->reflector->getMethod("_sanitizeInput");
     }
 
     /**
@@ -40,15 +39,15 @@ class SanitizeInputTest extends AbstractTest {
      * @group  regression
      * @covers Model\DataAccess\AbstractDao::_sanitizeInput
      */
-    public function test__sanitizeInput_with_correct_type_and_param() {
-
-        $this->struct_input       = new EngineStruct();
+    public function test__sanitizeInput_with_correct_type_and_param()
+    {
+        $this->struct_input = new EngineStruct();
         $this->struct_input->name = <<<LABEL
 ba""r/foo'
 LABEL;
-        $type                     = EngineStruct::class;
-        $this->assertEquals( $this->struct_input, $this->method->invoke( $this->databaseInstance, $this->struct_input, $type ) );
-        $this->assertTrue( $this->method->invoke( $this->databaseInstance, $this->struct_input, $type ) instanceof EngineStruct );
+        $type = EngineStruct::class;
+        $this->assertEquals($this->struct_input, $this->method->invoke($this->databaseInstance, $this->struct_input, $type));
+        $this->assertTrue($this->method->invoke($this->databaseInstance, $this->struct_input, $type) instanceof EngineStruct);
     }
 
 
@@ -59,18 +58,17 @@ LABEL;
      * @group  regression
      * @covers Model\DataAccess\AbstractDao::_sanitizeInput
      */
-    public function test__sanitizeInput_with_wrong_param_not_instance_of_type() {
-
-
+    public function test__sanitizeInput_with_wrong_param_not_instance_of_type()
+    {
         $this->struct_input = new JobStruct();
 
         $this->struct_input->owner = <<<LABEL
 ba""r/foo'
 LABEL;
-        $type                      = EngineStruct::class;
-        $this->expectException( "Exception" );
-        $invoke = $this->method->invoke( $this->databaseInstance, $this->struct_input, $type );
-        $this->assertFalse( $invoke instanceof EngineStruct );
+        $type = EngineStruct::class;
+        $this->expectException("Exception");
+        $invoke = $this->method->invoke($this->databaseInstance, $this->struct_input, $type);
+        $this->assertFalse($invoke instanceof EngineStruct);
     }
 
 }

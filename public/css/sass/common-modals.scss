@@ -725,6 +725,13 @@ a {
   .message-modal {
     padding: 25px 0;
   }
+  .matecat-modal-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 20px;
+    width: 100%;
+  }
 
   .matecat-modal-middle {
     padding: 0 25px;

@@ -4,7 +4,8 @@ namespace Model\Xliff\DTO;
 
 use Exception;
 
-interface XliffRuleInterface {
+interface XliffRuleInterface
+{
 
     /**
      * @param string|null $type
@@ -12,7 +13,7 @@ interface XliffRuleInterface {
      * @return string[]
      * @throws Exception
      */
-    public function getStates( ?string $type = null ): array;
+    public function getStates(?string $type = null): array;
 
     /**
      * @return string
@@ -26,7 +27,7 @@ interface XliffRuleInterface {
      *
      * @return bool
      */
-    public function isTranslated( string $source, string $target ): bool;
+    public function isTranslated(string $source, string $target): bool;
 
     /**
      * @return string
@@ -35,21 +36,21 @@ interface XliffRuleInterface {
     public function asMatchType(): string;
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float
      * @throws Exception
      */
-    public function asStandardWordCount( int $raw_word_count, array $payable_rates ): float;
+    public function asStandardWordCount(int $raw_word_count, array $payable_rates): float;
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float
      * @throws Exception
      */
-    public function asEquivalentWordCount( int $raw_word_count, array $payable_rates ): float;
+    public function asEquivalentWordCount(int $raw_word_count, array $payable_rates): float;
 
 }

@@ -17,7 +17,8 @@ use Utils\Engines\SmartMATE;
  * This class contains the default parameters for a Moses Engine CREATION
  *
  */
-class SmartMATEStruct extends EngineStruct {
+class SmartMATEStruct extends EngineStruct
+{
 
     /**
      * @var ?string
@@ -35,10 +36,10 @@ class SmartMATEStruct extends EngineStruct {
     public ?string $translate_relative_url = "translate";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $others = [
-            'oauth_url' => 'https://api.smartmate.co/translate/oauth/token'
+    public string|array|null $others = [
+        'oauth_url' => 'https://api.smartmate.co/translate/oauth/token'
     ];
 
     /**
@@ -47,13 +48,13 @@ class SmartMATEStruct extends EngineStruct {
     public ?string $contribute_relative_url = "";
 
     /**
-     * @var array
+     * @var string|array|null
      */
-    public $extra_parameters = [
-            'token'         => null,
-            'token_endlife' => 0,
-            'client_id'     => "",
-            'client_secret' => ""
+    public string|array|null $extra_parameters = [
+        'token' => null,
+        'token_endlife' => 0,
+        'client_id' => "",
+        'client_secret' => ""
     ];
 
     /**
@@ -76,7 +77,8 @@ class SmartMATEStruct extends EngineStruct {
      * An empty struct
      * @return SmartMATEStruct
      */
-    public static function getStruct(): SmartMATEStruct {
+    public static function getStruct(): static
+    {
         return new SmartMATEStruct();
     }
 

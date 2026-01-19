@@ -1,0 +1,79 @@
+@use '../commons/colors';
+
+.project-bulk-actions-background {
+  position: fixed;
+  z-index: 3;
+  top: 80px;
+  margin-left: -100px;
+  background: colors.$grey5;
+  background: linear-gradient(
+    180deg,
+    rgba(colors.$grey5, 1) 0%,
+    rgba(colors.$grey5, 1) 84%,
+    rgba(colors.$grey5, 0) 100%
+  );
+
+  &.project-bulk-actions-background-hidden {
+    display: none;
+  }
+}
+
+.project-bulk-actions-container {
+  display: flex;
+  width: 100%;
+  padding: 5px;
+  justify-content: center;
+  align-items: center;
+  background-color: colors.$grey4;
+  border-radius: 24px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .project-bulk-actions-buttons {
+    .jobs-selected {
+      width: 25px;
+      height: 25px;
+      font-size: 12px;
+      background-color: colors.$grey6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      margin-top: 10px;
+    }
+
+    > span:not(:first-of-type) {
+      color: colors.$grey6;
+    }
+
+    > div {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .button-component-container:disabled {
+    color: colors.$grey7 !important;
+  }
+}
+
+.content-bulk-modal {
+  padding: 40px;
+
+  .content-bulk-modal-control {
+    display: flex;
+    margin-top: 50px;
+    justify-content: end;
+    gap: 20px;
+  }
+}
+
+.bulk-actions-circle-button {
+  border-radius: 50% !important;
+}

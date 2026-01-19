@@ -14,7 +14,8 @@ use Utils\Registry\AppConfig;
  * Date: 14/04/16
  * Time: 20.28
  */
-class SanitizeEngineTest extends AbstractTest {
+class SanitizeEngineTest extends AbstractTest
+{
     /**
      * @var EngineDAO
      */
@@ -22,12 +23,12 @@ class SanitizeEngineTest extends AbstractTest {
     protected $engine_struct_input;
     protected $engine_struct_expected;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->engine_Dao             = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
-        $this->engine_struct_input    = new EngineStruct();
+        $this->engine_Dao = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $this->engine_struct_input = new EngineStruct();
         $this->engine_struct_expected = new EngineStruct();
-
     }
 
     /**
@@ -35,18 +36,19 @@ class SanitizeEngineTest extends AbstractTest {
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_name_field() {
-        $this->engine_struct_input->name    = <<<LABEL
+    public function test_sanitize_name_field()
+    {
+        $this->engine_struct_input->name = <<<LABEL
 ba""r/foo'
 LABEL;
         $this->engine_struct_expected->name = <<<LABEL
 ba""r/foo'
 LABEL;
 
-        $this->engine_struct_expected->others           = "{}";
+        $this->engine_struct_expected->others = "{}";
         $this->engine_struct_expected->extra_parameters = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
     /**
@@ -54,17 +56,18 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_description_field() {
-        $this->engine_struct_input->description         = <<<LABEL
+    public function test_sanitize_description_field()
+    {
+        $this->engine_struct_input->description = <<<LABEL
 ba""r/foo'
 LABEL;
-        $this->engine_struct_expected->description      = <<<LABEL
+        $this->engine_struct_expected->description = <<<LABEL
 ba""r/foo'
 LABEL;
-        $this->engine_struct_expected->others           = "{}";
+        $this->engine_struct_expected->others = "{}";
         $this->engine_struct_expected->extra_parameters = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 
@@ -73,17 +76,18 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_base_url_field() {
-        $this->engine_struct_input->base_url            = <<<LABEL
+    public function test_sanitize_base_url_field()
+    {
+        $this->engine_struct_input->base_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
-        $this->engine_struct_expected->base_url         = <<<LABEL
+        $this->engine_struct_expected->base_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
-        $this->engine_struct_expected->others           = "{}";
+        $this->engine_struct_expected->others = "{}";
         $this->engine_struct_expected->extra_parameters = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 
@@ -92,17 +96,18 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_translate_relative_url_field() {
-        $this->engine_struct_input->translate_relative_url    = <<<LABEL
+    public function test_sanitize_translate_relative_url_field()
+    {
+        $this->engine_struct_input->translate_relative_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->translate_relative_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
-        $this->engine_struct_expected->others                 = "{}";
-        $this->engine_struct_expected->extra_parameters       = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_struct_expected->others = "{}";
+        $this->engine_struct_expected->extra_parameters = "{}";
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 
@@ -111,17 +116,18 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_contribute_relative_url_field() {
-        $this->engine_struct_input->contribute_relative_url    = <<<LABEL
+    public function test_sanitize_contribute_relative_url_field()
+    {
+        $this->engine_struct_input->contribute_relative_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->contribute_relative_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
-        $this->engine_struct_expected->others                  = "{}";
-        $this->engine_struct_expected->extra_parameters        = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_struct_expected->others = "{}";
+        $this->engine_struct_expected->extra_parameters = "{}";
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 
@@ -130,17 +136,18 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_delete_relative_url_field() {
-        $this->engine_struct_input->delete_relative_url    = <<<LABEL
+    public function test_sanitize_delete_relative_url_field()
+    {
+        $this->engine_struct_input->delete_relative_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->delete_relative_url = <<<LABEL
 www.ba""r/foo'.com
 LABEL;
-        $this->engine_struct_expected->others              = "{}";
-        $this->engine_struct_expected->extra_parameters    = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_struct_expected->others = "{}";
+        $this->engine_struct_expected->extra_parameters = "{}";
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 
@@ -149,16 +156,17 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_others_field() {
-        $this->engine_struct_input->others              = <<<LABEL
+    public function test_sanitize_others_field()
+    {
+        $this->engine_struct_input->others = <<<LABEL
 ba""r/foo'
 LABEL;
-        $this->engine_struct_expected->others           = <<<LABEL
+        $this->engine_struct_expected->others = <<<LABEL
 "ba\"\"r\/foo'"
 LABEL;
         $this->engine_struct_expected->extra_parameters = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 
@@ -167,17 +175,18 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_class_load_field() {
-        $this->engine_struct_input->class_load          = <<<LABEL
+    public function test_sanitize_class_load_field()
+    {
+        $this->engine_struct_input->class_load = <<<LABEL
 ba""r/foo'
 LABEL;
-        $this->engine_struct_expected->class_load       = <<<LABEL
+        $this->engine_struct_expected->class_load = <<<LABEL
 ba""r/foo'
 LABEL;
-        $this->engine_struct_expected->others           = "{}";
+        $this->engine_struct_expected->others = "{}";
         $this->engine_struct_expected->extra_parameters = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 
@@ -186,16 +195,17 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_extra_parameters_field() {
-        $this->engine_struct_input->extra_parameters    = <<<LABEL
+    public function test_sanitize_extra_parameters_field()
+    {
+        $this->engine_struct_input->extra_parameters = <<<LABEL
 ba""r/foo'
 LABEL;
         $this->engine_struct_expected->extra_parameters = <<<LABEL
 "ba\"\"r\/foo'"
 LABEL;
-        $this->engine_struct_expected->others           = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_struct_expected->others = "{}";
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
     /**
@@ -203,16 +213,17 @@ LABEL;
      * @group  regression
      * @covers EngineDAO::sanitize
      */
-    public function test_sanitize_realistic_others_field() {
-        $this->engine_struct_input->others              = <<<'LAB'
+    public function test_sanitize_realistic_others_field()
+    {
+        $this->engine_struct_input->others = <<<'LAB'
 {"gloss_get_relative_url":"glossary/get","gloss_set_relative_url":"glossary/set","gloss_update_relative_url":"glossary/update","gloss_delete_relative_url":"glossary/delete","tmx_import_relative_url":"tmx/import","tmx_status_relative_url":"tmx/status","tmx_export_create_url":"tmx/export/create","tmx_export_check_url":"tmx/export/check","tmx_export_download_url":"tmx/export/download","tmx_export_list_url":"tmx/export/list","api_key_create_user_url":"createranduser","api_key_check_auth_url":"authkey","analyze_url":"analyze","detect_language_url":"langdetect.php"}
 LAB;
-        $this->engine_struct_expected->others           = <<<'LAB'
+        $this->engine_struct_expected->others = <<<'LAB'
 "{\"gloss_get_relative_url\":\"glossary\/get\",\"gloss_set_relative_url\":\"glossary\/set\",\"gloss_update_relative_url\":\"glossary\/update\",\"gloss_delete_relative_url\":\"glossary\/delete\",\"tmx_import_relative_url\":\"tmx\/import\",\"tmx_status_relative_url\":\"tmx\/status\",\"tmx_export_create_url\":\"tmx\/export\/create\",\"tmx_export_check_url\":\"tmx\/export\/check\",\"tmx_export_download_url\":\"tmx\/export\/download\",\"tmx_export_list_url\":\"tmx\/export\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}"
 LAB;
         $this->engine_struct_expected->extra_parameters = "{}";
-        $this->engine_Dao->sanitize( $this->engine_struct_input );
-        $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
+        $this->engine_Dao->sanitize($this->engine_struct_input);
+        $this->assertEquals($this->engine_struct_expected, $this->engine_struct_input);
     }
 
 }

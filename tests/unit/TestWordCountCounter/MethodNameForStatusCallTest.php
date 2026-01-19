@@ -11,17 +11,19 @@ use TestHelpers\AbstractTest;
  * Date: 13/06/16
  * Time: 12.34
  */
-class MethodNameForStatusCallTest extends AbstractTest {
+class MethodNameForStatusCallTest extends AbstractTest
+{
 
     protected $word_counter;
     protected $mirror_word_counter;
     protected $method_methodNameForStatusCall;
 
-    public function setUp(): void {
-        $this->word_counter                   = new CounterModel();
-        $this->mirror_word_counter            = new ReflectionClass( $this->word_counter );
-        $this->method_methodNameForStatusCall = $this->mirror_word_counter->getMethod( 'methodNameForStatusCall' );
-        $this->method_methodNameForStatusCall->setAccessible( true );
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->word_counter = new CounterModel();
+        $this->mirror_word_counter = new ReflectionClass($this->word_counter);
+        $this->method_methodNameForStatusCall = $this->mirror_word_counter->getMethod('methodNameForStatusCall');
     }
 
     /**
@@ -30,9 +32,9 @@ class MethodNameForStatusCallTest extends AbstractTest {
      *
      * @param "NEW"
      */
-    public function test_methodNameForStatusCall_NEW() {
-
-        $this->assertEquals( "NewWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "NEW" ) );
+    public function test_methodNameForStatusCall_NEW()
+    {
+        $this->assertEquals("NewWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "NEW"));
     }
 
     /**
@@ -41,9 +43,9 @@ class MethodNameForStatusCallTest extends AbstractTest {
      *
      * @param "DRAFT"
      */
-    public function test_methodNameForStatusCall_DRAFT() {
-
-        $this->assertEquals( "DraftWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "DRAFT" ) );
+    public function test_methodNameForStatusCall_DRAFT()
+    {
+        $this->assertEquals("DraftWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "DRAFT"));
     }
 
     /**
@@ -52,9 +54,9 @@ class MethodNameForStatusCallTest extends AbstractTest {
      *
      * @param "TRANSLATED"
      */
-    public function test_methodNameForStatusCall_TRANSLATED() {
-
-        $this->assertEquals( "TranslatedWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "TRANSLATED" ) );
+    public function test_methodNameForStatusCall_TRANSLATED()
+    {
+        $this->assertEquals("TranslatedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "TRANSLATED"));
     }
 
     /**
@@ -63,9 +65,9 @@ class MethodNameForStatusCallTest extends AbstractTest {
      *
      * @param "APPROVED"
      */
-    public function test_methodNameForStatusCall_APPROVED() {
-
-        $this->assertEquals( "ApprovedWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "APPROVED" ) );
+    public function test_methodNameForStatusCall_APPROVED()
+    {
+        $this->assertEquals("ApprovedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "APPROVED"));
     }
 
     /**
@@ -74,9 +76,9 @@ class MethodNameForStatusCallTest extends AbstractTest {
      *
      * @param "REJECTED"
      */
-    public function test_methodNameForStatusCall_REJECTED() {
-
-        $this->assertEquals( "RejectedWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "REJECTED" ) );
+    public function test_methodNameForStatusCall_REJECTED()
+    {
+        $this->assertEquals("RejectedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "REJECTED"));
     }
 
     /**
@@ -85,8 +87,8 @@ class MethodNameForStatusCallTest extends AbstractTest {
      *
      * @param "BARANDFOO"
      */
-    public function test_methodNameForStatusCall_BARANDFOO() {
-
-        $this->assertEquals( "BarandfooWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "BARANDFOO" ) );
+    public function test_methodNameForStatusCall_BARANDFOO()
+    {
+        $this->assertEquals("BarandfooWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "BARANDFOO"));
     }
 }

@@ -11,50 +11,50 @@ namespace Utils\TaskRunner\Commons;
 
 use RuntimeException;
 
-trait SignalHandlerTrait {
+trait SignalHandlerTrait
+{
 
     /**
      * Singleton Pattern, Unique Instance of This  ( Concrete class )
      *
      * @return void
      */
-    public function installHandler(): void {
-
-        if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
-            die ( "This script can be run only in CLI Mode.\n\n" );
+    public function installHandler(): void
+    {
+        if (PHP_SAPI != 'cli' || isset ($_SERVER ['HTTP_HOST'])) {
+            die ("This script can be run only in CLI Mode.\n\n");
         }
 
-        pcntl_async_signals( true );
-        set_time_limit( 0 );
+        pcntl_async_signals(true);
+        set_time_limit(0);
 
-        if ( !extension_loaded( "pcntl" ) && ini_get( "enable_dl" ) ) {
-            dl( "pcntl.so" );
+        if (!extension_loaded("pcntl") && ini_get("enable_dl")) {
+            dl("pcntl.so");
         }
-        if ( !function_exists( 'pcntl_signal' ) ) {
-            throw new RuntimeException( "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******" );
+        if (!function_exists('pcntl_signal')) {
+            throw new RuntimeException("****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******");
         }
 
-        pcntl_signal( SIGTERM, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGINT, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGHUP, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGPIPE, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGQUIT, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGSEGV, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGTSTP, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGUSR1, [ $this, 'sigSwitch' ] );
-        pcntl_signal( SIGUSR2, [ $this, 'sigSwitch' ] );
-
+        pcntl_signal(SIGTERM, [$this, 'sigSwitch']);
+        pcntl_signal(SIGINT, [$this, 'sigSwitch']);
+        pcntl_signal(SIGHUP, [$this, 'sigSwitch']);
+        pcntl_signal(SIGPIPE, [$this, 'sigSwitch']);
+        pcntl_signal(SIGQUIT, [$this, 'sigSwitch']);
+        pcntl_signal(SIGSEGV, [$this, 'sigSwitch']);
+        pcntl_signal(SIGTSTP, [$this, 'sigSwitch']);
+        pcntl_signal(SIGUSR1, [$this, 'sigSwitch']);
+        pcntl_signal(SIGUSR2, [$this, 'sigSwitch']);
     }
 
     /**
      * Posix Signal handling method
      *
-     * @param $sig_no
-     * @param $siginfo
+     * @param int $sig_no
+     * @param mixed $siginfo
      */
-    public function sigSwitch( $sig_no, $siginfo ) {
-
-        switch ( $sig_no ) {
+    public function sigSwitch(int $sig_no, mixed $siginfo): void
+    {
+        switch ($sig_no) {
             case SIGTERM :
             case SIGINT :
             case SIGHUP :
@@ -69,7 +69,6 @@ trait SignalHandlerTrait {
             default :
                 break;
         }
-
     }
 
 }

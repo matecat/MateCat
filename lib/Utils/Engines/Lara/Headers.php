@@ -20,7 +20,8 @@ use Iterator;
  * This class implements the Iterator interface to manage HTTP headers for the LARA engine.
  * It provides methods to set and retrieve specific headers, such as the TUID and translation origin.
  */
-class Headers implements Iterator {
+class Headers implements Iterator
+{
 
     /**
      * Header name for the LARA pre-shared key.
@@ -28,7 +29,7 @@ class Headers implements Iterator {
      *
      * @var string
      */
-    const LARA_PRE_SHARED_KEY_HEADER = 'X-Lara-Engine-Pre-Shared-Key'; //TODO: to be removed when Lara will read directly from the internal queue
+    const string LARA_PRE_SHARED_KEY_HEADER = 'X-Lara-Engine-Pre-Shared-Key'; //TODO: to be removed when Lara will read directly from the internal queue
 
     /**
      * Header name for the LARA TUID.
@@ -36,7 +37,7 @@ class Headers implements Iterator {
      *
      * @var string
      */
-    const LARA_TUID_HEADER = 'X-Lara-Engine-Tuid';
+    const string LARA_TUID_HEADER = 'X-Lara-Engine-Tuid';
 
     /**
      * Header name for the LARA translation origin.
@@ -44,7 +45,7 @@ class Headers implements Iterator {
      *
      * @var string
      */
-    const LARA_TRANSLATION_ORIGIN_HEADER = 'X-Lara-Engine-Translation-Origin';
+    const string LARA_TRANSLATION_ORIGIN_HEADER = 'X-Lara-Engine-Translation-Origin';
 
     /**
      * Stores the headers as an associative array.
@@ -71,22 +72,21 @@ class Headers implements Iterator {
      * Constructor for the Headers class.
      * Initializes the pre-shared key, TUID, and translation origin.
      *
-     * @param string|null $tuid              The TUID value.
+     * @param string|null $tuid The TUID value.
      * @param string|null $translationOrigin The translation origin value (optional).
      */
-    public function __construct( ?string $tuid = null, ?string $translationOrigin = null ) {
-
-        if ( $tuid ) {
-            $this->headers[ self::LARA_TUID_HEADER ] = new HeaderField( self::LARA_TUID_HEADER, $tuid );
+    public function __construct(?string $tuid = null, ?string $translationOrigin = null)
+    {
+        if ($tuid) {
+            $this->headers[self::LARA_TUID_HEADER] = new HeaderField(self::LARA_TUID_HEADER, $tuid);
         }
 
-        if ( $translationOrigin ) {
-            $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] = new HeaderField( self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin );
+        if ($translationOrigin) {
+            $this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER] = new HeaderField(self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin);
         }
 
-        $this->keys     = array_keys( $this->headers );
+        $this->keys = array_keys($this->headers);
         $this->position = 0;
-
     }
 
     /**
@@ -94,9 +94,10 @@ class Headers implements Iterator {
      *
      * @return ?HeaderField An object with 'key' and 'value' properties.
      */
-    public function getTuid(): ?HeaderField {
-        if ( isset( $this->headers[ self::LARA_TUID_HEADER ] ) ) {
-            return clone $this->headers[ self::LARA_TUID_HEADER ];
+    public function getTuid(): ?HeaderField
+    {
+        if (isset($this->headers[self::LARA_TUID_HEADER])) {
+            return clone $this->headers[self::LARA_TUID_HEADER];
         }
 
         return null;
@@ -107,9 +108,10 @@ class Headers implements Iterator {
      *
      * @return ?HeaderField An object with 'key' and 'value' properties.
      */
-    public function getTranslationOrigin(): ?HeaderField {
-        if ( isset( $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] ) ) {
-            return clone $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ];
+    public function getTranslationOrigin(): ?HeaderField
+    {
+        if (isset($this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER])) {
+            return clone $this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER];
         }
 
         return null;
@@ -122,9 +124,10 @@ class Headers implements Iterator {
      *
      * @return $this Returns the current instance for method chaining.
      */
-    public function setTuid( string $tuid ): Headers {
-        $this->headers[ self::LARA_TUID_HEADER ] = new HeaderField( self::LARA_TUID_HEADER, $tuid );
-        $this->keys                              = array_keys( $this->headers );
+    public function setTuid(string $tuid): Headers
+    {
+        $this->headers[self::LARA_TUID_HEADER] = new HeaderField(self::LARA_TUID_HEADER, $tuid);
+        $this->keys = array_keys($this->headers);
 
         return $this;
     }
@@ -136,9 +139,10 @@ class Headers implements Iterator {
      *
      * @return $this Returns the current instance for method chaining.
      */
-    public function setTranslationOrigin( string $translationOrigin ): Headers {
-        $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] = new HeaderField( self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin );
-        $this->keys                                            = array_keys( $this->headers );
+    public function setTranslationOrigin(string $translationOrigin): Headers
+    {
+        $this->headers[self::LARA_TRANSLATION_ORIGIN_HEADER] = new HeaderField(self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin);
+        $this->keys = array_keys($this->headers);
 
         return $this;
     }
@@ -148,8 +152,9 @@ class Headers implements Iterator {
      *
      * @return HeaderField The current header field.
      */
-    public function current(): HeaderField {
-        return $this->headers[ $this->keys[ $this->position ] ];
+    public function current(): HeaderField
+    {
+        return $this->headers[$this->keys[$this->position]];
     }
 
     /**
@@ -157,8 +162,9 @@ class Headers implements Iterator {
      *
      * @return string The key of the current header field.
      */
-    public function key(): string {
-        return $this->keys[ $this->position ];
+    public function key(): string
+    {
+        return $this->keys[$this->position];
     }
 
     /**
@@ -166,7 +172,8 @@ class Headers implements Iterator {
      *
      * @return void
      */
-    public function next(): void {
+    public function next(): void
+    {
         ++$this->position;
     }
 
@@ -175,7 +182,8 @@ class Headers implements Iterator {
      *
      * @return void
      */
-    public function rewind(): void {
+    public function rewind(): void
+    {
         $this->position = 0;
     }
 
@@ -184,8 +192,9 @@ class Headers implements Iterator {
      *
      * @return bool True if the current position is valid, false otherwise.
      */
-    public function valid(): bool {
-        return isset( $this->keys[ $this->position ] );
+    public function valid(): bool
+    {
+        return isset($this->keys[$this->position]);
     }
 
     /**
@@ -197,12 +206,13 @@ class Headers implements Iterator {
      *
      * @return array An associative array of header keys and their non-empty values.
      */
-    public function getArrayCopy(): array {
+    public function getArrayCopy(): array
+    {
         $headers = [];
 
-        foreach ( $this->headers as $header ) {
-            if ( !empty( $header->getValue() ) ) {
-                $headers[ $header->getKey() ] = $header->getValue();
+        foreach ($this->headers as $header) {
+            if (!empty($header->getValue())) {
+                $headers[$header->getKey()] = $header->getValue();
             }
         }
 

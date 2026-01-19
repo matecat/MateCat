@@ -3,14 +3,16 @@
 namespace Model\Search;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
 use Predis\Client;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
 
-class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface {
+class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface
+{
 
-    const TABLE = 'replace_events';
+    const string TABLE = 'replace_events';
 
     /**
      * @var Client
@@ -25,14 +27,15 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
     /**
      * RedisReplaceEventDAO constructor.
      *
-     * @param null $con
+     * @param IDatabase|null $con
      *
      * @throws ReflectionException
      */
-    public function __construct( $con = null ) {
-        parent::__construct( $con );
+    public function __construct(?IDatabase $con = null)
+    {
+        parent::__construct($con);
 
-        $this->redis = ( new RedisHandler() )->getConnection();
+        $this->redis = (new RedisHandler())->getConnection();
     }
 
     /**
@@ -41,11 +44,12 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      *
      * @return ReplaceEventStruct[]
      */
-    public function getEvents( int $id_job, int $version ): array {
+    public function getEvents(int $id_job, int $version): array
+    {
         $results = [];
 
-        foreach ( $this->redis->hgetAll( $this->getRedisKey( $id_job, $version ) ) as $value ) {
-            $results[] = unserialize( $value );
+        foreach ($this->redis->hgetAll($this->getRedisKey($id_job, $version)) as $value) {
+            $results[] = unserialize($value);
         }
 
         return $results;
@@ -56,22 +60,23 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      *
      * @return int
      */
-    public function save( ReplaceEventStruct $eventStruct ): int {
+    public function save(ReplaceEventStruct $eventStruct): int
+    {
         // if not directly passed
         // try to assign the current version of the segment if it exists
-        if ( null === $eventStruct->segment_version ) {
-            $segment                      = ( new SegmentTranslationDao() )->getByJobId( $eventStruct->id_job )[ 0 ];
+        if (null === $eventStruct->segment_version) {
+            $segment = (new SegmentTranslationDao())->getByJobId($eventStruct->id_job)[0];
             $eventStruct->segment_version = $segment->version_number;
         }
 
-        $eventStruct->created_at = date( 'Y-m-d H:i:s' );
+        $eventStruct->created_at = date('Y-m-d H:i:s');
 
         // insert
-        $redisKey = $this->getRedisKey( $eventStruct->id_job, $eventStruct->replace_version );
-        $index    = ( count( $this->getEvents( $eventStruct->id_job, $eventStruct->replace_version ) ) > 0 ) ? ( count( $this->getEvents( $eventStruct->id_job, $eventStruct->replace_version ) ) + 1 ) : 0;
+        $redisKey = $this->getRedisKey($eventStruct->id_job, $eventStruct->replace_version);
+        $index = (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) > 0) ? (count($this->getEvents($eventStruct->id_job, $eventStruct->replace_version)) + 1) : 0;
 
-        $result = $this->redis->hset( $redisKey, $index, serialize( $eventStruct ) );
-        $this->redis->expire( $redisKey, $this->ttl );
+        $result = $this->redis->hset($redisKey, $index, serialize($eventStruct));
+        $this->redis->expire($redisKey, $this->ttl);
 
         return $result ? 1 : 0;
     }
@@ -82,8 +87,9 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      *
      * @return string
      */
-    private function getRedisKey( int $idJob, int $version ): string {
-        return md5( self::TABLE . '::' . $idJob . '::' . $version );
+    private function getRedisKey(int $idJob, int $version): string
+    {
+        return md5(self::TABLE . '::' . $idJob . '::' . $version);
     }
 
     /**
@@ -91,7 +97,8 @@ class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      *
      * @return void
      */
-    public function setTtl( $ttl ) {
+    public function setTtl(int $ttl): void
+    {
         $this->ttl = $ttl;
     }
 }

@@ -18,6 +18,8 @@ import Users from '../../../../../img/icons/Users'
 import AddWide from '../../../../../img/icons/AddWide'
 import {METADATA_KEY} from '../../../../constants/Constants'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
+import IconAdd from '../../../icons/IconAdd'
+import UsersPlus from '../../../../../img/icons/UsersPlus'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -479,14 +481,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 type="checkbox"
                 data-testid="dialect-strict-checkbox"
               />
-              Activate variant-strict matching.{' '}
-              <a
-                href="https://guides.matecat.com/activ#:~:text=In%20order%20to%20maximize%20TM%20leverage%2C%20Matecat%2C%20by%20default%2C%20returns%20TM%20matches%20for%20all%20the%20variants%20of%20your%20project%27s%20languages.%20Matches%20from%20language%20variants%20other%20than%20those%20specified%20for%20the%20project%20incur%20a%201%25%20penalty%20to%20prevent%20them%20from%20being%20used%20for%20pre%2Dtranslation"
-                rel="noreferrer"
-                target="_blank"
-              >
-                More details
-              </a>
+              Activate variant-strict matching
             </div>
           </div>
         )}
@@ -499,7 +494,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 onClick={onAddSharedResource}
                 data-testid="add-shared-resource-tm"
               >
-                <Users size={18} /> Add shared resource
+                <UsersPlus size={18} /> Add shared resource
               </button>
 
               <button
@@ -507,7 +502,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 onClick={onNewResource}
                 data-testid="new-resource-tm"
               >
-                <AddWide size={18} /> New resource
+                <IconAdd size={16} /> New resource
               </button>
             </div>
           </div>

@@ -18,61 +18,65 @@ use Model\WordCount\WordCountStruct;
 use Utils\Tools\CatUtils;
 use Utils\Url\CanonicalRoutes;
 
-class ProjectAssignedEmail extends AbstractEmail {
+class ProjectAssignedEmail extends AbstractEmail
+{
 
-    protected UserStruct    $user;
+    protected UserStruct $user;
     protected ProjectStruct $project;
-    protected UserStruct    $assignee;
-    protected ?string       $title;
+    protected UserStruct $assignee;
+    protected ?string $title;
     /**
      * @var JobStruct[]
      */
     private array $jobs;
 
-    public function __construct( UserStruct $user, ProjectStruct $project, UserStruct $assignee ) {
-        $this->user     = $user;
-        $this->project  = $project;
+    public function __construct(UserStruct $user, ProjectStruct $project, UserStruct $assignee)
+    {
+        $this->user = $user;
+        $this->project = $project;
         $this->assignee = $assignee;
 
         $this->jobs = $project->getJobs();
 
         $this->title = "You've been assigned a project";
 
-        $this->_setLayout( 'skeleton.html' );
-        $this->_setTemplate( 'Project/project_assigned_content.html' );
+        $this->_setLayout('skeleton.html');
+        $this->_setTemplate('Project/project_assigned_content.html');
     }
 
-    protected function _getTemplateVariables(): array {
+    protected function _getTemplateVariables(): array
+    {
         $words_count = [];
-        foreach ( $this->jobs as $job ) {
-            $jStruct  = new JobStruct( $job->getArrayCopy() );
+        foreach ($this->jobs as $job) {
+            $jStruct = new JobStruct($job->getArrayCopy());
             $jobStats = new WordCountStruct();
-            $jobStats->setIdJob( $jStruct->id );
-            $jobStats->setJobPassword( $jStruct->password );
-            $jobStats->setDraftWords( $jStruct->draft_words + $jStruct->new_words ); // (draft_words + new_words) AS DRAFT
-            $jobStats->setRejectedWords( $jStruct->rejected_words );
-            $jobStats->setTranslatedWords( $jStruct->translated_words );
-            $jobStats->setApprovedWords( $jStruct->approved_words );
-            $stats         = CatUtils::getFastStatsForJob( $jobStats, false );
-            $words_count[] = $stats[ MetadataDao::WORD_COUNT_RAW ][ 'total' ];
+            $jobStats->setIdJob($jStruct->id);
+            $jobStats->setJobPassword($jStruct->password);
+            $jobStats->setDraftWords($jStruct->draft_words + $jStruct->new_words); // (draft_words + new_words) AS DRAFT
+            $jobStats->setRejectedWords($jStruct->rejected_words);
+            $jobStats->setTranslatedWords($jStruct->translated_words);
+            $jobStats->setApprovedWords($jStruct->approved_words);
+            $stats = CatUtils::getFastStatsForJob($jobStats, false);
+            $words_count[] = $stats[MetadataDao::WORD_COUNT_RAW]['total'];
         }
 
         return [
-                'user'        => $this->assignee->toArray(),
-                'sender'      => $this->user->toArray(),
-                'project'     => $this->project->toArray(),
-                'words_count' => number_format( array_sum( $words_count ) ),
-                'project_url' => CanonicalRoutes::analyze( [
-                        'project_name' => $this->project->name,
-                        'id_project'   => $this->project->id,
-                        'password'     => $this->project->password
-                ] )
+            'user' => $this->assignee->toArray(),
+            'sender' => $this->user->toArray(),
+            'project' => $this->project->toArray(),
+            'words_count' => number_format(array_sum($words_count)),
+            'project_url' => CanonicalRoutes::analyze([
+                'project_name' => $this->project->name,
+                'id_project' => $this->project->id,
+                'password' => $this->project->password
+            ])
         ];
     }
 
-    protected function _getLayoutVariables( $messageBody = null ): array {
-        $vars            = parent::_getLayoutVariables();
-        $vars[ 'title' ] = $this->title;
+    protected function _getLayoutVariables($messageBody = null): array
+    {
+        $vars = parent::_getLayoutVariables();
+        $vars['title'] = $this->title;
 
         return $vars;
     }
@@ -80,12 +84,15 @@ class ProjectAssignedEmail extends AbstractEmail {
     /**
      * @throws Exception
      */
-    public function send() {
-        $recipient = [ $this->assignee->email, $this->assignee->fullName() ];
+    public function send(): void
+    {
+        $recipient = [$this->assignee->email, $this->assignee->fullName()];
 
-        $this->doSend( $recipient, $this->title,
-                $this->_buildHTMLMessage(),
-                $this->_buildTxtMessage( $this->_buildMessageContent() )
+        $this->doSend(
+            $recipient,
+            $this->title,
+            $this->_buildHTMLMessage(),
+            $this->_buildTxtMessage($this->_buildMessageContent())
         );
     }
 

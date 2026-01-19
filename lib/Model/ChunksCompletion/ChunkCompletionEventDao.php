@@ -11,90 +11,98 @@ use Model\Jobs\JobStruct;
 use PDO;
 use Utils\Tools\Utils;
 
-class ChunkCompletionEventDao extends AbstractDao {
+class ChunkCompletionEventDao extends AbstractDao
+{
 
-    const REVISE    = 'revise';
-    const TRANSLATE = 'translate';
+    const string REVISE = 'revise';
+    const string TRANSLATE = 'translate';
 
-    public static function validSources() {
+    public static function validSources(): array
+    {
         return [
-                'user'  => ChunkCompletionEventStruct::SOURCE_USER,
-                'merge' => ChunkCompletionEventStruct::SOURCE_MERGE
+            'user' => ChunkCompletionEventStruct::SOURCE_USER,
+            'merge' => ChunkCompletionEventStruct::SOURCE_MERGE
         ];
     }
 
-    public function deleteEvent( ChunkCompletionEventStruct $event ) {
-        $sql  = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
-        $stmt = $this->database->getConnection()->prepare( $sql );
+    public function deleteEvent(ChunkCompletionEventStruct $event): int
+    {
+        $sql = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
+        $stmt = $this->database->getConnection()->prepare($sql);
 
-        $stmt->execute( [ 'id_event' => $event->id ] );
+        $stmt->execute(['id_event' => $event->id]);
 
         return $stmt->rowCount();
     }
 
-    public function getByIdAndChunk( $id_event, JobStruct $chunk ) {
+    public function getByIdAndChunk(int $id_event, JobStruct $chunk)
+    {
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
                AND id_job = :id_job AND password = :password ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkCompletionEventStruct::class );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ChunkCompletionEventStruct::class);
 
-        $stmt->execute( [
-                'id_event' => $id_event,
-                'password' => $chunk->password,
-                'id_job'   => $chunk->id
-        ] );
+        $stmt->execute([
+            'id_event' => $id_event,
+            'password' => $chunk->password,
+            'id_job' => $chunk->id
+        ]);
 
         return $stmt->fetch();
     }
 
-    public function updatePassword( $id_job, $password, $old_password ) {
+    public function updatePassword(int $id_job, string $password, string $old_password): int
+    {
         $sql = "UPDATE chunk_completion_events SET password = :new_password
                WHERE id_job = :id_job AND password = :password ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_job'       => $id_job,
-                'password'     => $old_password,
-                'new_password' => $password
-        ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'id_job' => $id_job,
+            'password' => $old_password,
+            'new_password' => $password
+        ]);
 
         return $stmt->rowCount();
     }
 
     /**
-     * @param       $chunk
-     * @param array $params
+     * @param JobStruct $chunk
+     * @param CompletionEventStruct $params
      *
      * @return string
      */
-    public static function createFromChunk( $chunk, CompletionEventStruct $params ) {
+    public static function createFromChunk(JobStruct $chunk, CompletionEventStruct $params): string
+    {
         $conn = Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "INSERT INTO chunk_completion_events " .
-                " ( " .
-                " id_project, id_job, password, job_first_segment, job_last_segment, " .
-                " source, create_date, remote_ip_address, uid, is_review " .
-                " ) VALUES ( " .
-                " :id_project, :id_job, :password, :job_first_segment, :job_last_segment, " .
-                " :source, :create_date, :remote_ip_address, :uid, :is_review " .
-                " ); " );
+        $stmt = $conn->prepare(
+            "INSERT INTO chunk_completion_events " .
+            " ( " .
+            " id_project, id_job, password, job_first_segment, job_last_segment, " .
+            " source, create_date, remote_ip_address, uid, is_review " .
+            " ) VALUES ( " .
+            " :id_project, :id_job, :password, :job_first_segment, :job_last_segment, " .
+            " :source, :create_date, :remote_ip_address, :uid, :is_review " .
+            " ); "
+        );
 
         $validSources = self::validSources();
-        $stmt->execute( [
-                'id_project'        => $chunk->getProject()->id,
-                'id_job'            => $chunk->id,
-                'password'          => $chunk->password,
-                'job_first_segment' => $chunk->job_first_segment,
-                'job_last_segment'  => $chunk->job_last_segment,
-                'source'            => $validSources[ $params->source ],
-                'create_date'       => Utils::mysqlTimestamp( time() ),
-                'remote_ip_address' => $params->remote_ip_address,
-                'uid'               => $params->uid,
-                'is_review'         => $params->is_review
-        ] );
+        $stmt->execute([
+            'id_project' => $chunk->getProject()->id,
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'job_first_segment' => $chunk->job_first_segment,
+            'job_last_segment' => $chunk->job_last_segment,
+            'source' => $validSources[$params->source],
+            'create_date' => Utils::mysqlTimestamp(time()),
+            'remote_ip_address' => $params->remote_ip_address,
+            'uid' => $params->uid,
+            'is_review' => $params->is_review
+        ]);
 
         return $conn->lastInsertId();
     }
@@ -103,11 +111,12 @@ class ChunkCompletionEventDao extends AbstractDao {
     /**
      * @throws Exception
      */
-    public function currentPhase( JobStruct $chunk ): string {
-        $lastTranslate = $this->lastCompletionRecord( $chunk, [ 'is_review' => false ] );
-        if ( $lastTranslate ) {
-            $lastRevise = $this->lastCompletionRecord( $chunk, [ 'is_review' => true ] );
-            if ( $lastRevise && new DateTime( $lastTranslate[ 'create_date' ] ) < new DateTime( $lastRevise[ 'create_date' ] ) ) {
+    public function currentPhase(JobStruct $chunk): string
+    {
+        $lastTranslate = $this->lastCompletionRecord($chunk, ['is_review' => false]);
+        if ($lastTranslate) {
+            $lastRevise = $this->lastCompletionRecord($chunk, ['is_review' => true]);
+            if ($lastRevise && new DateTime($lastTranslate['create_date']) < new DateTime($lastRevise['create_date'])) {
                 return self::TRANSLATE;
             } else {
                 return self::REVISE;
@@ -138,9 +147,10 @@ class ChunkCompletionEventDao extends AbstractDao {
      *
      * @throws Exception
      */
-    public static function lastCompletionRecord( JobStruct $chunk, array $params = [] ): array {
-        $params    = Utils::ensure_keys( $params, [ 'is_review' ] );
-        $is_review = $params[ 'is_review' ];
+    public static function lastCompletionRecord(JobStruct $chunk, array $params = []): array
+    {
+        $params = Utils::ensure_keys($params, ['is_review']);
+        $is_review = $params['is_review'];
 
         /**
          * This query takes into account the fact that completion records are never deleted.
@@ -162,17 +172,18 @@ class ChunkCompletionEventDao extends AbstractDao {
             ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                        'id_job'    => $chunk->id,
-                        'password'  => $chunk->password,
-                        'is_review' => $is_review
-                ]
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+                'id_job' => $chunk->id,
+                'password' => $chunk->password,
+                'is_review' => $is_review
+            ]
         );
 
         return $stmt->fetch() ?: [];
     }
 
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult(array $array_result)
+    {
     }
 }

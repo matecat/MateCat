@@ -15,24 +15,17 @@ namespace Utils\TaskRunner\Commons;
  *
  * @package TaskRunner\Commons
  */
-class Params extends AbstractElement {
-
-    /**
-     * Magic to string method
-     *
-     * @return string
-     */
-    public function __toString() {
-        return json_encode( $this );
-    }
+class Params extends AbstractElement
+{
 
     /**
      * __set() is run when writing data to inaccessible (or not existent) properties
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
      */
-    public function __set( $name, $value ) {
+    public function __set(string $name, mixed $value): void
+    {
         $this->$name = $value;
     }
 

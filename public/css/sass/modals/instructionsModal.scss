@@ -4,6 +4,7 @@
   h2 {
     padding-top: 16px;
   }
+
   span.fileFormat {
     padding: 4px 5px 4px 47px;
     background-size: 25px !important;
@@ -19,6 +20,16 @@
     box-shadow: unset;
     border-radius: 0px;
     margin-bottom: 20px;
+    ul {
+      list-style: disc;
+      padding-left: 30px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      li {
+        margin-bottom: 4px;
+        line-height: 24px;
+      }
+    }
     .title {
       display: flex;
       align-items: center;
@@ -195,6 +206,12 @@
   &:has(.accordion-expanded) {
     .accordion-component-title > :first-child {
       color: black;
+    }
+  }
+
+  &:first-child:nth-last-child(1) {
+    .accordion-component-title:not(.accordion-expanded) {
+      border-radius: 8px !important;
     }
   }
 }

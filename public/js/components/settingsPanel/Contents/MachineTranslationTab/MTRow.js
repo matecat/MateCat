@@ -1,7 +1,6 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import Trash from '../../../../../img/icons/Trash'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
@@ -43,7 +42,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
         )}
         {row.engine_type === 'DeepL' && (
           <a
-            href="https://guides.matecat.com/machine-translation-engines#DeepL"
+            href="https://guides.matecat.com/deepl"
             target="_blank"
             rel="noreferrer"
           >
@@ -59,6 +58,15 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             <InfoIcon />
           </a>
         )}
+        {row.engine_type === 'Intento' && (
+          <a
+            href="https://guides.matecat.com/intento"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <InfoIcon />
+          </a>
+        )}
       </div>
       <div className="settings-panel-mt-row-description">{row.description}</div>
       {!row.default && !config.is_cattool && (
@@ -68,7 +76,6 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             data-testid="delete-mt"
             onClick={deleteMT}
           >
-            <Trash size={12} />
             Delete
           </button>
         </div>

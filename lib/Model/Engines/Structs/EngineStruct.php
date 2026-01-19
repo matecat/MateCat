@@ -5,6 +5,7 @@ namespace Model\Engines\Structs;
 use ArrayAccess;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Stringable;
 
 /**
  * Created by PhpStorm.
@@ -13,8 +14,9 @@ use Model\DataAccess\IDaoStruct;
  * Time: 14.54
  */
 class EngineStruct
-        extends AbstractDaoObjectStruct
-        implements IDaoStruct, ArrayAccess {
+    extends AbstractDaoObjectStruct
+    implements IDaoStruct, ArrayAccess, Stringable
+{
 
     /**
      * @var int|null
@@ -64,9 +66,9 @@ class EngineStruct
     public ?string $delete_relative_url = null;
 
     /**
-     * @var array|string
+     * @var string|array|null
      */
-    public $others;
+    public string|array|null $others = [];
 
     /**
      * @var string|null
@@ -75,9 +77,9 @@ class EngineStruct
 
 
     /**
-     * @var array|string
+     * @var string|array|null
      */
-    public $extra_parameters;
+    public string|array|null $extra_parameters = [];
 
     /**
      * @var int|null
@@ -103,9 +105,10 @@ class EngineStruct
      *  An empty struct
      *
      * @template T
-     * @return T instance of EngineStruct
+     * @return EngineStruct instance of EngineStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): static
+    {
         return new EngineStruct();
     }
 
@@ -123,8 +126,9 @@ class EngineStruct
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      */
-    public function offsetExists( $offset ): bool {
-        return property_exists( $this, $offset );
+    public function offsetExists(mixed $offset): bool
+    {
+        return property_exists($this, $offset);
     }
 
     /**
@@ -138,7 +142,8 @@ class EngineStruct
      *
      * @return mixed Can return all value types.
      */
-    public function offsetGet( $offset ) {
+    public function offsetGet(mixed $offset): mixed
+    {
         return $this->$offset;
     }
 
@@ -150,13 +155,14 @@ class EngineStruct
      * @param mixed $offset <p>
      *                      The offset to assign the value to.
      *                      </p>
-     * @param mixed $value  <p>
+     * @param mixed $value <p>
      *                      The value to set.
      *                      </p>
      *
      * @return void
      */
-    public function offsetSet( $offset, $value ) {
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
         $this->$offset = $value;
     }
 
@@ -171,14 +177,16 @@ class EngineStruct
      *
      * @return void
      */
-    public function offsetUnset( $offset ) {
+    public function offsetUnset(mixed $offset): void
+    {
         $this->$offset = null;
     }
 
     /**
      * Cast an EnginesFactory to String. Useful for engine comparison inside a list ( catController )
      */
-    public function __toString() {
+    public function __toString(): string
+    {
         return $this->id . $this->name . $this->description;
     }
 
@@ -189,16 +197,17 @@ class EngineStruct
      *
      * @return array|mixed
      */
-    public function getExtraParamsAsArray() {
-        if ( is_array( $this->extra_parameters ) ) {
+    public function getExtraParamsAsArray(): mixed
+    {
+        if (is_array($this->extra_parameters)) {
             return $this->extra_parameters;
         }
 
-        if ( empty( $this->extra_parameters ) ) {
+        if (empty($this->extra_parameters)) {
             return [];
         }
 
-        return json_decode( $this->extra_parameters, true );
+        return json_decode($this->extra_parameters, true);
     }
 
 }

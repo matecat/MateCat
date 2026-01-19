@@ -15,7 +15,8 @@ use stdClass;
 use Utils\Langs\Languages;
 use Utils\Tools\CatUtils;
 
-class AnalysisJob implements JsonSerializable {
+class AnalysisJob implements JsonSerializable
+{
 
     /**
      * @var int
@@ -71,37 +72,39 @@ class AnalysisJob implements JsonSerializable {
     /**
      * @return array
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
-                'id'                  => $this->id,
-                'source'              => $this->source,
-                'source_name'         => $this->sourceName,
-                'target'              => $this->target,
-                'target_name'         => $this->targetName,
-                'chunks'              => array_values( $this->chunks ),
-                'total_raw'           => $this->total_raw,
-                'total_equivalent'    => round( $this->total_equivalent ),
-                'total_industry'      => max( round( $this->total_industry ), round( $this->total_equivalent ) ),
-                'outsource_available' => $this->outsourceAvailable,
-                'payable_rates'       => $this->payable_rates,
-                'count_unit'          => $this->getCountUnit( $this->source ),
+            'id' => $this->id,
+            'source' => $this->source,
+            'source_name' => $this->sourceName,
+            'target' => $this->target,
+            'target_name' => $this->targetName,
+            'chunks' => array_values($this->chunks),
+            'total_raw' => $this->total_raw,
+            'total_equivalent' => round($this->total_equivalent),
+            'total_industry' => max(round($this->total_industry), round($this->total_equivalent)),
+            'outsource_available' => $this->outsourceAvailable,
+            'payable_rates' => $this->payable_rates,
+            'count_unit' => $this->getCountUnit($this->source),
         ];
     }
 
     /**
-     * @param int    $id
+     * @param int $id
      * @param string $source
      * @param string $target
      *
      * @throws Exception
      */
-    public function __construct( int $id, string $source, string $target ) {
-        $this->id            = $id;
-        $this->source        = $source;
-        $this->target        = $target;
-        $lang_handler        = Languages::getInstance();
-        $this->sourceName    = $lang_handler->getLocalizedName( $source ) ?? '';
-        $this->targetName    = $lang_handler->getLocalizedName( $target ) ?? '';
+    public function __construct(int $id, string $source, string $target)
+    {
+        $this->id = $id;
+        $this->source = $source;
+        $this->target = $target;
+        $lang_handler = Languages::getInstance();
+        $this->sourceName = $lang_handler->getLocalizedName($source) ?? '';
+        $this->targetName = $lang_handler->getLocalizedName($target) ?? '';
         $this->payable_rates = new stdClass();
     }
 
@@ -110,8 +113,9 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return $this
      */
-    public function setChunk( AnalysisChunk $chunk ): AnalysisJob {
-        $this->chunks [ $chunk->getPassword() ] = $chunk;
+    public function setChunk(AnalysisChunk $chunk): AnalysisJob
+    {
+        $this->chunks [$chunk->getPassword()] = $chunk;
 
         return $this;
     }
@@ -119,7 +123,8 @@ class AnalysisJob implements JsonSerializable {
     /**
      * @return AnalysisChunk[]
      */
-    public function getChunks(): array {
+    public function getChunks(): array
+    {
         return $this->chunks;
     }
 
@@ -128,14 +133,16 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return bool
      */
-    public function hasChunk( string $password ): bool {
-        return array_key_exists( $password, $this->chunks );
+    public function hasChunk(string $password): bool
+    {
+        return array_key_exists($password, $this->chunks);
     }
 
     /**
      * @return int
      */
-    public function getId(): int {
+    public function getId(): int
+    {
         return $this->id;
     }
 
@@ -144,7 +151,8 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ) {
+    public function incrementRaw(int $raw): void
+    {
         $this->total_raw += $raw;
     }
 
@@ -153,7 +161,8 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ) {
+    public function incrementEquivalent(float $equivalent): void
+    {
         $this->total_equivalent += $equivalent;
     }
 
@@ -162,28 +171,32 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementIndustry( float $industry ) {
+    public function incrementIndustry(float $industry): void
+    {
         $this->total_industry += $industry;
     }
 
     /**
      * @return string
      */
-    public function getSource(): string {
+    public function getSource(): string
+    {
         return $this->source;
     }
 
     /**
      * @return string
      */
-    public function getTarget(): string {
+    public function getTarget(): string
+    {
         return $this->target;
     }
 
     /**
      * @return string
      */
-    public function getLangPair(): string {
+    public function getLangPair(): string
+    {
         return $this->source . "|" . $this->target;
     }
 
@@ -192,7 +205,8 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return $this
      */
-    public function setOutsourceAvailable( bool $outsourceAvailable ): AnalysisJob {
+    public function setOutsourceAvailable(bool $outsourceAvailable): AnalysisJob
+    {
         $this->outsourceAvailable = $outsourceAvailable;
 
         return $this;
@@ -203,13 +217,15 @@ class AnalysisJob implements JsonSerializable {
      *
      * @return $this
      */
-    public function setPayableRates( object $payable_rates ): AnalysisJob {
+    public function setPayableRates(object $payable_rates): AnalysisJob
+    {
         $this->payable_rates = $payable_rates;
 
         return $this;
     }
 
-    private function getCountUnit( string $languageCode ): string {
-        return array_key_exists( explode( "-", $languageCode )[ 0 ], CatUtils::$cjk ) ? 'characters' : 'words';
+    private function getCountUnit(string $languageCode): string
+    {
+        return array_key_exists(explode("-", $languageCode)[0], CatUtils::$cjk) ? 'characters' : 'words';
     }
 }

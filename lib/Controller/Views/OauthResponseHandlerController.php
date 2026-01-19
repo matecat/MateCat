@@ -11,7 +11,8 @@ use Model\Users\Authentication\OAuthSignInModel;
 use ReflectionException;
 use Utils\Registry\AppConfig;
 
-class OauthResponseHandlerController extends BaseKleinViewController {
+class OauthResponseHandlerController extends BaseKleinViewController
+{
 
     /**
      * @var ProviderUser
@@ -22,33 +23,33 @@ class OauthResponseHandlerController extends BaseKleinViewController {
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
      */
-    public function response() {
+    public function response(): void
+    {
+        $params = filter_var_array($this->request->params(), [
+            'provider' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS],
+            'state' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS],
+            'code' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS],
+            'error' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS]
+        ]);
 
-        $params = filter_var_array( $this->request->params(), [
-                'provider' => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'state'    => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'code'     => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'error'    => [ 'filter' => FILTER_SANITIZE_STRING ]
-        ] );
-
-        if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . AppConfig::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
-            $this->render( 401 );
+        if (empty($params['state']) || $_SESSION[$params['provider'] . '-' . AppConfig::$XSRF_TOKEN] !== $params['state']) {
+            $this->render(401);
         }
 
-        if ( !empty( $params[ 'code' ] ) ) {
-            $this->_processSuccessfulOAuth( $params[ 'code' ], $params[ 'provider' ] );
+        if (!empty($params['code'])) {
+            $this->_processSuccessfulOAuth($params['code'], $params['provider']);
         }
 
-        $this->render( 200 );
-
+        $this->render(200);
     }
 
     /**
      * @return void
      * @throws Exception
      */
-    protected function afterConstruct() {
-        $this->setView( 'oauth_response_handler.html', [ 'wanted_url' => $_SESSION[ 'wanted_url' ] ?? null ] ); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
+    protected function afterConstruct(): void
+    {
+        $this->setView('oauth_response_handler.html', ['wanted_url' => $_SESSION['wanted_url'] ?? null]); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
     }
 
     /**
@@ -60,20 +61,20 @@ class OauthResponseHandlerController extends BaseKleinViewController {
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
      */
-    protected function _processSuccessfulOAuth( $code, $provider = null ) {
-
+    protected function _processSuccessfulOAuth($code, $provider = null): void
+    {
         // OAuth2 authentication
-        $this->_initRemoteUser( $code, $provider );
+        $this->_initRemoteUser($code, $provider);
 
         $model = new OAuthSignInModel(
-                $this->remoteUser->email,
-                $this->remoteUser->name,
-                $this->remoteUser->lastName
+            $this->remoteUser->email,
+            $this->remoteUser->name,
+            $this->remoteUser->lastName
         );
 
-        $model->setProvider( $this->remoteUser->provider );
-        $model->setProfilePicture( $this->remoteUser->picture );
-        $model->setAccessToken( $this->remoteUser->authToken );
+        $model->setProvider($this->remoteUser->provider);
+        $model->setProfilePicture($this->remoteUser->picture);
+        $model->setAccessToken($this->remoteUser->authToken);
 
         $model->signIn();
     }
@@ -85,14 +86,14 @@ class OauthResponseHandlerController extends BaseKleinViewController {
      * @param      $code
      * @param null $provider
      */
-    protected function _initRemoteUser( $code, $provider = null ) {
-
+    protected function _initRemoteUser($code, $provider = null): void
+    {
         try {
-            $client           = OauthClient::getInstance( $provider )->getProvider();
-            $token            = $client->getAccessTokenFromAuthCode( $code );
-            $this->remoteUser = $client->getResourceOwner( $token );
-        } catch ( Exception $exception ) {
-            $this->render( $exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400 );
+            $client = OauthClient::getInstance($provider)->getProvider();
+            $token = $client->getAccessTokenFromAuthCode($code);
+            $this->remoteUser = $client->getResourceOwner($token);
+        } catch (Exception $exception) {
+            $this->render($exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400);
         }
     }
 

@@ -47,6 +47,8 @@ import {
 } from '../utils/charsSizeCounterUtil'
 import {CatToolInterface} from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
+import ModalsActions from '../actions/ModalsActions'
+import FatalErrorModal from '../components/modals/FatalErrorModal'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -224,7 +226,7 @@ function CatTool() {
     const checkAnalysisState = ({analysis_complete}) => {
       setIsAnalysisCompleted(analysis_complete)
 
-      /*if (!analysis_complete)
+      if (!analysis_complete)
         ModalsActions.showModalComponent(
           FatalErrorModal,
           {
@@ -249,7 +251,9 @@ function CatTool() {
           undefined,
           undefined,
           true,
-        )*/
+          undefined,
+          true,
+        )
     }
     window.onbeforeunload = function (e) {
       return CommonUtils.goodbye(e)

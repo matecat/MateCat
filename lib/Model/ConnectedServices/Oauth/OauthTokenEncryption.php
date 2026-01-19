@@ -10,7 +10,8 @@ use Utils\Registry\AppConfig;
  * Class OauthTokenEncryption.
  * This class is a singleton for DefuseEncryption to encrypt the user's OAuth Token
  */
-class OauthTokenEncryption extends DefuseEncryption {
+class OauthTokenEncryption extends DefuseEncryption
+{
 
     /**
      * @var OauthTokenEncryption|null
@@ -22,10 +23,11 @@ class OauthTokenEncryption extends DefuseEncryption {
      * @return null|OauthTokenEncryption
      * @throws Exception
      */
-    public static function getInstance(): ?OauthTokenEncryption {
-        if ( self::$instance === null ) {
+    public static function getInstance(): ?OauthTokenEncryption
+    {
+        if (self::$instance === null) {
             self::$instance = new OauthTokenEncryption(
-                    AppConfig::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
+                AppConfig::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
             );
         }
 

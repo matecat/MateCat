@@ -11,11 +11,16 @@ namespace View\API\V2\Json;
 
 use Model\Engines\Structs\EngineStruct;
 
-class Engine {
+class Engine
+{
 
-    private $data;
+    /**
+     * @var EngineStruct[]
+     */
+    private array $data;
 
-    public function __construct( $data = null ) {
+    public function __construct(array $data = [])
+    {
         $this->data = $data;
     }
 
@@ -24,29 +29,37 @@ class Engine {
      *
      * @return array
      */
-    public function renderItem( EngineStruct $engine ) {
-        $engine_type = explode( "\\", $engine->class_load );
+    public function renderItem(EngineStruct $engine): array
+    {
+        $engine_type = explode("\\", $engine->class_load);
+
         return [
-                'id'          => $engine->id,
-                'name'        => $engine->name,
-                'type'        => $engine->type,
-                'description' => $engine->description,
-                'engine_type' => array_pop( $engine_type )
+            'id' => $engine->id,
+            'name' => $engine->name,
+            'type' => $engine->type,
+            'description' => $engine->description,
+            'engine_type' => array_pop($engine_type)
         ];
     }
 
-    public function render( $data = null ) {
+    /**
+     * @param EngineStruct[] $data
+     *
+     * @return array
+     */
+    public function render(array $data = []): array
+    {
         $out = [];
 
-        if ( empty( $data ) ) {
+        if (empty($data)) {
             $data = $this->data;
         }
 
         /**
          * @var $data EngineStruct[]
          */
-        foreach ( $data as $k => $engine ) {
-            $out[] = $this->renderItem( $engine );
+        foreach ($data as $engine) {
+            $out[] = $this->renderItem($engine);
         }
 
         return $out;

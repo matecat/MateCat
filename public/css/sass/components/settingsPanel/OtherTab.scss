@@ -16,7 +16,7 @@
   }
 
   .options-box h3 {
-    font-size: 19px;
+    font-size: 18px;
     margin-bottom: 0;
   }
 
@@ -28,6 +28,11 @@
     line-height: 22px;
     align-items: start;
     text-align: left;
+
+    > p {
+      font-size: 16px;
+      color: colors.$grey6;
+    }
   }
 
   .options-box.option-unavailable p,
@@ -170,7 +175,7 @@
   padding: 30px 0;
 
   &:first-child {
-    padding: 0 0 15px;
+    padding: 0 0 10px;
   }
 }
 
@@ -193,14 +198,14 @@
 .characters-counter-box {
   display: flex;
   flex-direction: column;
-  padding: 30px 0;
+  padding: 10px 0;
 
   > :last-child {
     padding-bottom: 0;
   }
 }
 
-.option-characters-counter-rule-dropdown {
+.option-dropdown-with-descrition {
   .dropdown__option span {
     white-space: unset;
     overflow: unset;
@@ -212,7 +217,7 @@
   }
 }
 
-.option-characters-counter-rule-select-option-content {
+.option-dropdown-with-descrition-select-content {
   display: flex;
   flex-direction: column;
   text-align: left;
