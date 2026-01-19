@@ -111,6 +111,7 @@ class NewController extends KleinController
             $uploadDir,
             $errDir,
             $uploadTokenValue,
+            $request['icu_enabled'],
             $request['segmentation_rule'],
             $this->featureSet,
             $request['filters_extraction_parameters'],

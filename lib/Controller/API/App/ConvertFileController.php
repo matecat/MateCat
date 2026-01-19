@@ -52,6 +52,7 @@ class ConvertFileController extends KleinController
             $uploadDir,
             $errDir,
             $uploadTokenValue,
+            $data['icu_enabled'],
             $data['segmentation_rule'],
             $this->featureSet,
             $data['filters_extraction_parameters'],
