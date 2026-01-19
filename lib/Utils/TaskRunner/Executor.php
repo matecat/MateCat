@@ -123,11 +123,14 @@ class Executor implements SplObserver
      */
     protected function __construct(Context $_context)
     {
-        $this->_executorPID          = posix_getpid();
+        $this->_executorPID = posix_getpid();
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
+        // Initialize the 'executor' logger using a specific filename from the context
         $this->logger = LoggerFactory::getLogger('executor', $_context->loggerName);
-        LoggerFactory::setAliases(['engines', 'project_manager', 'feature_set', 'files'], $this->logger); // overriding the default engine logger
+
+        // Map multiple component aliases to this logger instance for consistent logging across modules
+        LoggerFactory::setAliases(['engines', 'project_manager', 'feature_set', 'files'], $this->logger);
 
         $this->_executionContext = $_context;
 
@@ -219,18 +222,20 @@ class Executor implements SplObserver
 
                 //set/increment the reQueue number
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
-                $amqHandlerPublisher      = AMQHandler::getNewInstanceForDaemons();
+                $amqHandlerPublisher = AMQHandler::getNewInstanceForDaemons();
                 $amqHandlerPublisher->reQueue($queueElement, $this->_executionContext, $this->logger);
                 $amqHandlerPublisher->getClient()->disconnect();
             } catch (EmptyElementException) {
 //                $this->_logMsg( $e->getMessage() );
 
             } catch (PDOException $e) {
-                $this->_logMsg("************* (Executor " . $this->_executor_instance_id . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage());
+                $this->_logMsg(
+                    "************* (Executor " . $this->_executor_instance_id . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage()
+                );
                 $this->_logMsg("************* (Executor " . $this->_executor_instance_id . ") " . $e->getTraceAsString());
 
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
-                $amqHandlerPublisher      = AMQHandler::getNewInstanceForDaemons();
+                $amqHandlerPublisher = AMQHandler::getNewInstanceForDaemons();
                 $amqHandlerPublisher->reQueue($queueElement, $this->_executionContext, $this->logger);
                 $amqHandlerPublisher->getClient()->disconnect();
                 sleep(2);
@@ -306,8 +311,8 @@ class Executor implements SplObserver
         Database::obtain()->close();
 
         $this->_queueHandler->getRedisClient()->srem(
-                $this->_executionContext->pid_set_name,
-                $this->_executor_instance_id
+            $this->_executionContext->pid_set_name,
+            $this->_executor_instance_id
         );
 
         $this->_queueHandler->getRedisClient()->disconnect();
@@ -369,4 +374,4 @@ class Executor implements SplObserver
 
 /** @var array $argv */
 /** @noinspection PhpUnhandledExceptionInspection */
-Executor::getInstance(Context::buildFromArray(json_decode($argv[ 1 ], true)))->main();
+Executor::getInstance(Context::buildFromArray(json_decode($argv[1], true)))->main();

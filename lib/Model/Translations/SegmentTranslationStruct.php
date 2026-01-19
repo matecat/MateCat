@@ -16,29 +16,29 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
 
     use ArrayAccessTrait;
 
-    public int     $id_segment;
-    public int     $id_job;
-    public string  $segment_hash;
-    public ?int    $autopropagated_from    = null;
-    public string  $status;
-    public ?string $translation            = null;
-    public ?string $translation_date       = null;
-    public int     $time_to_edit           = 0;
-    public ?string $match_type             = null;
-    public ?string $context_hash           = null;
-    public float   $eq_word_count          = 0;
-    public float   $standard_word_count    = 0;
-    public ?string $suggestions_array      = null;
-    public ?string $suggestion             = null;
-    public ?string $suggestion_match       = null;
-    public ?string $suggestion_source      = null;
-    public ?int    $suggestion_position    = null;
-    public int     $mt_qe                  = 0;
-    public ?string $tm_analysis_status     = null;
-    public bool    $locked                 = false;
-    public bool    $warning                = false;
+    public int $id_segment;
+    public int $id_job;
+    public string $segment_hash;
+    public ?int $autopropagated_from = null;
+    public string $status;
+    public ?string $translation = null;
+    public ?string $translation_date = null;
+    public int $time_to_edit = 0;
+    public ?string $match_type = null;
+    public ?string $context_hash = null;
+    public float $eq_word_count = 0;
+    public float $standard_word_count = 0;
+    public ?string $suggestions_array = null;
+    public ?string $suggestion = null;
+    public ?string $suggestion_match = null;
+    public ?string $suggestion_source = null;
+    public ?int $suggestion_position = null;
+    public int $mt_qe = 0;
+    public ?string $tm_analysis_status = null;
+    public bool $locked = false;
+    public bool $warning = false;
     public ?string $serialized_errors_list = null;
-    public ?int    $version_number         = 0; // this value should be not null
+    public ?int $version_number = 0; // this value should be not null
 
     public function isReviewedStatus(): bool
     {
@@ -70,7 +70,7 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     public function getJob(): ?JobStruct
     {
         return $this->cachable(__METHOD__, function () {
-            return JobDao::getById($this->id_job)[ 0 ] ?? null;
+            return JobDao::getById($this->id_job)[0] ?? null;
         });
     }
 
@@ -80,7 +80,7 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     public function getChunk(): ?JobStruct
     {
         return $this->cachable(__METHOD__, function () {
-            return JobDao::getById($this->id_job)[ 0 ] ?? null;
+            return JobDao::getById($this->id_job)[0] ?? null;
         });
     }
 

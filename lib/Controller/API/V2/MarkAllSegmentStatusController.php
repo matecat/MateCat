@@ -48,7 +48,7 @@ class MarkAllSegmentStatusController extends KleinController
         $this->return404IfTheJobWasDeleted();
 
         $segments_id = $this->sanitizeSegmentIDs($this->request->param('segments_id'));
-        $status      = strtoupper($this->request->param('status'));
+        $status = strtoupper($this->request->param('status'));
         $source_page = null;
 
         if ($this->request->param('revision_number')) {
@@ -60,32 +60,32 @@ class MarkAllSegmentStatusController extends KleinController
         }
 
         if (in_array($status, [
-                TranslationStatus::STATUS_TRANSLATED,
-                TranslationStatus::STATUS_APPROVED,
-                TranslationStatus::STATUS_APPROVED2
+            TranslationStatus::STATUS_TRANSLATED,
+            TranslationStatus::STATUS_APPROVED,
+            TranslationStatus::STATUS_APPROVED2
         ])) {
             $unchangeable_segments = SegmentTranslationDao::getUnchangeableStatus(
-                    $this->chunk,
-                    $segments_id,
-                    $status,
-                    $source_page
+                $this->chunk,
+                $segments_id,
+                $status,
+                $source_page
             );
-            $segments_id           = array_diff($segments_id, $unchangeable_segments);
+            $segments_id = array_diff($segments_id, $unchangeable_segments);
 
             if (!empty($segments_id)) {
                 try {
                     WorkerClient::enqueue(
-                            'JOBS',
-                            BulkSegmentStatusChangeWorker::class,
-                            [
-                                    'segment_ids' => $segments_id,
-                                    'client_id' => $this->request->param('client_id'),
-                                    'chunk' => $this->chunk,
-                                    'destination_status' => $status,
-                                    'id_user' => ($this->isLoggedIn() ? $this->getUser()->uid : null),
-                                    'is_review' => ($status == TranslationStatus::STATUS_APPROVED),
-                                    'revision_number' => $this->request->param('revision_number')
-                            ], ['persistent' => true]
+                        'JOBS',
+                        BulkSegmentStatusChangeWorker::class,
+                        [
+                            'segment_ids' => $segments_id,
+                            'client_id' => $this->request->param('client_id'),
+                            'chunk' => $this->chunk,
+                            'destination_status' => $status,
+                            'id_user' => ($this->isLoggedIn() ? $this->getUser()->uid : null),
+                            'is_review' => ($status == TranslationStatus::STATUS_APPROVED),
+                            'revision_number' => $this->request->param('revision_number')
+                        ], ['persistent' => true]
                     );
                 } catch (Exception $e) {
                     $this->response->json(['error_message' => $e->getMessage(), 'data' => true, 'unchangeble_segments' => $segments_id]);
@@ -103,10 +103,10 @@ class MarkAllSegmentStatusController extends KleinController
         foreach ($segment_list as $pos => $integer) {
             $result = (int)$integer;
             if (empty($result)) {
-                unset($segment_list[ $pos ]);
+                unset($segment_list[$pos]);
                 continue;
             }
-            $segment_list[ $pos ] = $result;
+            $segment_list[$pos] = $result;
         }
 
         return array_unique($segment_list);

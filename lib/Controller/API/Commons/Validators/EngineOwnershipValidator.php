@@ -20,7 +20,7 @@ class EngineOwnershipValidator extends Base
 {
 
 
-    private int     $engineId;
+    private int $engineId;
     private ?string $engineClass;
 
     /**
@@ -30,13 +30,13 @@ class EngineOwnershipValidator extends Base
 
     /**
      * @param KleinController $controller
-     * @param int             $engineId
+     * @param int $engineId
      * @param class-string<T> $engineClass
      */
     public function __construct(KleinController $controller, int $engineId, string $engineClass)
     {
         parent::__construct($controller);
-        $this->engineId    = $engineId;
+        $this->engineId = $engineId;
         $this->engineClass = $engineClass;
     }
 

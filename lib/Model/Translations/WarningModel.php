@@ -19,10 +19,10 @@ namespace Model\Translations;
 class WarningModel
 {
 
-    const int ERROR   = 1;
+    const int ERROR = 1;
     const int WARNING = 2;
-    const int NOTICE  = 4;
-    const int INFO    = 8;
-    const int DEBUG   = 16;
+    const int NOTICE = 4;
+    const int INFO = 8;
+    const int DEBUG = 16;
 
 }

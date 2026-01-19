@@ -28,9 +28,9 @@ class Propagation
     public function render(): array
     {
         return [
-                'totals'                   => $this->propagation_PropagationTotalStruct->getTotals(),
-                'propagated_ids'           => $this->propagation_PropagationTotalStruct->getPropagatedIds(),
-                'segments_for_propagation' => $this->propagation_PropagationTotalStruct->getSegmentsForPropagation(),
+            'totals' => $this->propagation_PropagationTotalStruct->getTotals(),
+            'propagated_ids' => $this->propagation_PropagationTotalStruct->getPropagatedIds(),
+            'segments_for_propagation' => $this->propagation_PropagationTotalStruct->getSegmentsForPropagation(),
         ];
     }
 }

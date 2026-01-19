@@ -62,7 +62,7 @@ class TaskManager extends AbstractDaemon
      */
     protected function __construct(string $configFile = null, ?string $contextIndex = null)
     {
-        $this->_configFile   = $configFile;
+        $this->_configFile = $configFile;
         $this->_contextIndex = $contextIndex;
 
         parent::__construct();
@@ -119,7 +119,7 @@ class TaskManager extends AbstractDaemon
             foreach ($this->_queueContextList->list as $context) {
 //                $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . ") : queue " . gethostname() . ":" . $context->queue_name . " contains $context->pid_list_len processes" );
 
-                $numProcessesDiff             = $context->pid_list_len - $context->max_executors;
+                $numProcessesDiff = $context->pid_list_len - $context->max_executors;
                 $numProcessesToLaunchOrDelete = abs($numProcessesDiff);
 
                 if ($this->RUNNING) {
@@ -198,7 +198,7 @@ class TaskManager extends AbstractDaemon
     /**
      * Launch a single process over a queue and register it's pid in the right processes queue
      *
-     * @param int     $numProcesses
+     * @param int $numProcesses
      *
      * @param Context $context
      *
@@ -215,7 +215,7 @@ class TaskManager extends AbstractDaemon
                 throw new Exception("(parent " . gethostname() . ":" . AppConfig::$INSTANCE_ID . ") : ERROR OCCURRED : cannot fork. PARENT EXITING !!", static::ERR_NOT_FORK);
             } elseif ($pid) {
                 // parent process continues running
-                $processLaunched    += 1;
+                $processLaunched += 1;
                 $this->_runningPids += 1;
                 $context->pid_list_len++;
                 $msg = str_pad("(parent " . gethostname() . ":" . AppConfig::$INSTANCE_ID . " spawned 1 new child in " . $context->pid_set_name, 50, "-", STR_PAD_BOTH);
@@ -262,8 +262,8 @@ class TaskManager extends AbstractDaemon
      * </ul>
      *
      * @param ?Context $queueInfo
-     * @param int      $pid
-     * @param int      $num
+     * @param int $pid
+     * @param int $num
      *
      * @throws ReflectionException
      */
@@ -296,8 +296,8 @@ class TaskManager extends AbstractDaemon
         } elseif (!empty($num) && !empty($queueInfo)) {
             $this->_logTimeStampedMsg("Killing $num pid from " . $queueInfo->pid_set_name);
             $queueBefore = $this->queueHandler->getRedisClient()->scard($queueInfo->pid_set_name);
-            $pNameList   = $this->queueHandler->getRedisClient()->smembers($queueInfo->pid_set_name);
-            $i           = 0;
+            $pNameList = $this->queueHandler->getRedisClient()->smembers($queueInfo->pid_set_name);
+            $i = 0;
             foreach ($pNameList as $pidName) {
                 /** @noinspection PhpUnusedLocalVariableInspection */
                 [$pid, $hostName, $instanceID] = explode(":", $pidName);
@@ -317,7 +317,7 @@ class TaskManager extends AbstractDaemon
         } elseif (!empty($queueInfo)) {
             $this->_logTimeStampedMsg("Killing all processes from " . $queueInfo->pid_set_name);
             $numDeleted = $this->queueHandler->getRedisClient()->scard($queueInfo->pid_set_name);
-            $pNameList  = $this->queueHandler->getRedisClient()->smembers($queueInfo->pid_set_name);
+            $pNameList = $this->queueHandler->getRedisClient()->smembers($queueInfo->pid_set_name);
             foreach ($pNameList as $pidName) {
                 /** @noinspection PhpUnusedLocalVariableInspection */
                 [$pid, $hostName, $instanceId] = explode(":", $pidName);
@@ -402,7 +402,7 @@ class TaskManager extends AbstractDaemon
     protected function _updateConfiguration(): void
     {
         $configuration = $this->getConfiguration();
-        $this->logger  = LoggerFactory::getLogger('task_manager', $configuration->getLoggerName());
+        $this->logger = LoggerFactory::getLogger('task_manager', $configuration->getLoggerName());
 
         if (empty($this->_queueContextList->list)) {
             //First Execution, load build object
@@ -426,18 +426,18 @@ class TaskManager extends AbstractDaemon
         if ($diff = array_diff_key($this->_queueContextList->list, $configuration->getContextList()->list)) {
             //remove no more present contexts
             foreach ($diff as $_key => $_cont) {
-                unset($this->_queueContextList->list[ $_key ]);
+                unset($this->_queueContextList->list[$_key]);
                 $this->_destroyContext[] = $_cont;
             }
         }
 
         foreach ($configuration->getContextList()->list as $contextName => $context) {
-            if (isset($this->_queueContextList->list[ $contextName ])) {
+            if (isset($this->_queueContextList->list[$contextName])) {
                 //update the max executor number for this element
-                $this->_queueContextList->list[ $contextName ]->max_executors = $context->max_executors;
+                $this->_queueContextList->list[$contextName]->max_executors = $context->max_executors;
             } else {
                 //create a new Object execution context
-                $this->_queueContextList->list[ $contextName ] = $context;
+                $this->_queueContextList->list[$contextName] = $context;
             }
         }
     }

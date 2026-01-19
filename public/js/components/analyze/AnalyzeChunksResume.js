@@ -222,7 +222,7 @@ class AnalyzeChunksResume extends React.Component {
                       ref={(el) => (this.jobLinkRef[jidChunk] = el)}
                       type="text"
                       readOnly
-                      value={chunkAnalysis.urls.t}
+                      value={encodeURI(chunkAnalysis.urls.t)}
                       onClick={(e) => e.stopPropagation()}
                     />
                     <Popup
@@ -387,7 +387,7 @@ class AnalyzeChunksResume extends React.Component {
                       <input
                         type="text"
                         readOnly
-                        value={chunkAnalysis.urls.t}
+                        value={encodeURI(chunkAnalysis.urls.t)}
                         ref={(el) =>
                           (this.jobLinkRef[jobsAnalysis[indexJob].id] = el)
                         }

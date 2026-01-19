@@ -251,6 +251,8 @@ function CatTool() {
           undefined,
           undefined,
           true,
+          undefined,
+          true,
         )
     }
     window.onbeforeunload = function (e) {

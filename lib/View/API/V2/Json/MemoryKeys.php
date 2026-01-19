@@ -32,8 +32,8 @@ class MemoryKeys
     public static function renderItem(MemoryKeyStruct $keyStruct): array
     {
         return [
-                'key'  => $keyStruct->tm_key->key,
-                'name' => $keyStruct->tm_key->name
+            'key' => $keyStruct->tm_key->key,
+            'name' => $keyStruct->tm_key->name
         ];
     }
 
@@ -46,7 +46,7 @@ class MemoryKeys
                 $keyType = 'shared_keys';
             }
 
-            $out[ $keyType ][] = $this->renderItem($keyStruct);
+            $out[$keyType][] = $this->renderItem($keyStruct);
         }
 
         return $out;

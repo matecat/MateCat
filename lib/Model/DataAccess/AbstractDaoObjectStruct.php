@@ -70,7 +70,7 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * This method makes it possible to define methods on child classes
      * whose result is cached on the instance.
      *
-     * @param string   $cache_key_name
+     * @param string $cache_key_name
      * @param callable $function
      *
      * @return mixed
@@ -79,10 +79,10 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
     protected function cachable(string $cache_key_name, callable $function)
     {
         /** @var  $resultset ?T */
-        $resultset = $this->cached_results[ $cache_key_name ] ?? null;
+        $resultset = $this->cached_results[$cache_key_name] ?? null;
         if ($resultset == null) {
             /** @var  $resultset ?T */
-            $resultset = $this->cached_results[ $cache_key_name ] = call_user_func($function);
+            $resultset = $this->cached_results[$cache_key_name] = call_user_func($function);
         }
 
         return $resultset;

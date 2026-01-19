@@ -32,7 +32,7 @@ class YandexTranslateStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $extra_parameters = [
-            'client_secret' => ""
+        'client_secret' => ""
     ];
 
     /**

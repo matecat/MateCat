@@ -19,7 +19,8 @@ use Utils\TmKeyManagement\Filter;
 use Utils\Url\JobUrlBuilder;
 use View\API\V2\Json\Engine;
 
-class AnalysisChunk implements JsonSerializable {
+class AnalysisChunk implements JsonSerializable
+{
 
     /**
      * @var AnalysisJobSummary
@@ -56,11 +57,12 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected float $total_industry = 0;
 
-    public function __construct( JobStruct $chunkStruct, $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass ) {
+    public function __construct(JobStruct $chunkStruct, $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass)
+    {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
-        $this->user        = $user;
-        $this->summary     = new AnalysisJobSummary( $matchConstantsClass );
+        $this->user = $user;
+        $this->summary = new AnalysisJobSummary($matchConstantsClass);
     }
 
     /**
@@ -68,8 +70,9 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return $this
      */
-    public function setFile( AnalysisFile $file ): AnalysisChunk {
-        $this->files[ $file->getId() ] = $file;
+    public function setFile(AnalysisFile $file): AnalysisChunk
+    {
+        $this->files[$file->getId()] = $file;
 
         return $this;
     }
@@ -77,32 +80,35 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @throws Exception
      */
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
-                'password'         => $this->chunkStruct->password,
-                'status'           => $this->chunkStruct->status,
-                'engines'          => $this->getEngines(),
-                'memory_keys'      => $this->getMemoryKeys(),
-                'urls'             => JobUrlBuilder::createFromJobStructAndProjectName( $this->chunkStruct, $this->projectName )->getUrls(),
-                'files'            => array_values( $this->files ),
-                'summary'          => $this->summary,
-                'total_raw'        => $this->total_raw,
-                'total_equivalent' => round( $this->total_equivalent ),
-                'total_industry'   => max( round( $this->total_industry ), round( $this->total_equivalent ) ),
+            'password' => $this->chunkStruct->password,
+            'status' => $this->chunkStruct->status,
+            'engines' => $this->getEngines(),
+            'memory_keys' => $this->getMemoryKeys(),
+            'urls' => JobUrlBuilder::createFromJobStructAndProjectName($this->chunkStruct, $this->projectName)->getUrls(),
+            'files' => array_values($this->files),
+            'summary' => $this->summary,
+            'total_raw' => $this->total_raw,
+            'total_equivalent' => round($this->total_equivalent),
+            'total_industry' => max(round($this->total_industry), round($this->total_equivalent)),
         ];
     }
 
     /**
      * @return JobStruct
      */
-    public function getChunkStruct(): JobStruct {
+    public function getChunkStruct(): JobStruct
+    {
         return $this->chunkStruct;
     }
 
     /**
      * @return string
      */
-    public function getPassword(): string {
+    public function getPassword(): string
+    {
         return $this->chunkStruct->password;
     }
 
@@ -111,42 +117,44 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return bool
      */
-    public function hasFile( $id ): bool {
-        return array_key_exists( $id, $this->files );
+    public function hasFile($id): bool
+    {
+        return array_key_exists($id, $this->files);
     }
 
     /**
      * @return AnalysisFile[]
      */
-    public function getFiles(): array {
+    public function getFiles(): array
+    {
         return $this->files;
     }
 
     /**
      * @throws Exception
      */
-    private function getEngines(): array {
-
+    private function getEngines(): array
+    {
         // this can happen even when fast analysis is not completed
-        if ( !is_numeric( $this->chunkStruct->id_tms ) || !is_numeric( $this->chunkStruct->id_mt_engine ) ) {
+        if (!is_numeric($this->chunkStruct->id_tms) || !is_numeric($this->chunkStruct->id_mt_engine)) {
             return [];
         }
 
         try {
-            $tmEngine = EnginesFactory::getInstance( $this->chunkStruct->id_tms );
-        } catch ( Exception) {
+            $tmEngine = EnginesFactory::getInstance($this->chunkStruct->id_tms);
+        } catch (Exception) {
             $tmEngine = null;
         }
 
         try {
-            $mtEngine = EnginesFactory::getInstance( $this->chunkStruct->id_mt_engine );
-        } catch ( Exception) {
+            $mtEngine = EnginesFactory::getInstance($this->chunkStruct->id_mt_engine);
+        } catch (Exception) {
             $mtEngine = null;
         }
 
         return [
-                'tm' => $tmEngine !== null ? ( new Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
-                'mt' => $mtEngine !== null ? ( new Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
+            'tm' => $tmEngine !== null ? (new Engine())->renderItem($tmEngine->getEngineRecord()) : null,
+            'mt' => $mtEngine !== null ? (new Engine())->renderItem($mtEngine->getEngineRecord()) : null,
         ];
     }
 
@@ -154,18 +162,19 @@ class AnalysisChunk implements JsonSerializable {
      * @return array
      * @throws Exception
      */
-    private function getMemoryKeys(): array {
+    private function getMemoryKeys(): array
+    {
         $tmKeys = [];
 
         // this can happen even when fast analysis is not completed
-        if ( empty( $this->chunkStruct->tm_keys ) ) {
+        if (empty($this->chunkStruct->tm_keys)) {
             return $tmKeys;
         }
 
-        $jobKeys = $this->chunkStruct->getClientKeys( $this->user, Filter::OWNER )[ 'job_keys' ];
+        $jobKeys = $this->chunkStruct->getClientKeys($this->user, Filter::OWNER)['job_keys'];
 
-        foreach ( $jobKeys as $tmKey ) {
-            $tmKeys[][ trim( $tmKey->name ) ] = trim( $tmKey->key );
+        foreach ($jobKeys as $tmKey) {
+            $tmKeys[][trim($tmKey->name)] = trim($tmKey->key);
         }
 
         return $tmKeys;
@@ -174,7 +183,8 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @return AnalysisJobSummary
      */
-    public function getSummary(): AnalysisJobSummary {
+    public function getSummary(): AnalysisJobSummary
+    {
         return $this->summary;
     }
 
@@ -183,7 +193,7 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ): void
+    public function incrementRaw(int $raw): void
     {
         $this->total_raw += $raw;
     }
@@ -193,7 +203,7 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ): void
+    public function incrementEquivalent(float $equivalent): void
     {
         $this->total_equivalent += $equivalent;
     }
@@ -203,7 +213,7 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementIndustry( float $industry ): void
+    public function incrementIndustry(float $industry): void
     {
         $this->total_industry += $industry;
     }

@@ -7,12 +7,12 @@ use JsonSerializable;
 class MSWord implements IDto, JsonSerializable
 {
 
-    private bool  $extract_doc_properties   = false;
-    private bool  $extract_comments         = false;
-    private bool  $extract_headers_footers  = false;
-    private bool  $extract_hidden_text      = false;
-    private bool  $accept_revisions         = false;
-    private array $exclude_styles           = [];
+    private bool $extract_doc_properties = false;
+    private bool $extract_comments = false;
+    private bool $extract_headers_footers = false;
+    private bool $extract_hidden_text = false;
+    private bool $accept_revisions = false;
+    private array $exclude_styles = [];
     private array $exclude_highlight_colors = [];
 
     /**
@@ -76,32 +76,32 @@ class MSWord implements IDto, JsonSerializable
      */
     public function fromArray(array $data): void
     {
-        if (isset($data[ 'extract_doc_properties' ])) {
-            $this->setExtractDocProperties($data[ 'extract_doc_properties' ]);
+        if (isset($data['extract_doc_properties'])) {
+            $this->setExtractDocProperties($data['extract_doc_properties']);
         }
 
-        if (isset($data[ 'extract_comments' ])) {
-            $this->setExtractComments($data[ 'extract_comments' ]);
+        if (isset($data['extract_comments'])) {
+            $this->setExtractComments($data['extract_comments']);
         }
 
-        if (isset($data[ 'accept_revisions' ])) {
-            $this->setAcceptRevisions($data[ 'accept_revisions' ]);
+        if (isset($data['accept_revisions'])) {
+            $this->setAcceptRevisions($data['accept_revisions']);
         }
 
-        if (isset($data[ 'exclude_highlight_colors' ])) {
-            $this->setExcludeHighlightColors($data[ 'exclude_highlight_colors' ]);
+        if (isset($data['exclude_highlight_colors'])) {
+            $this->setExcludeHighlightColors($data['exclude_highlight_colors']);
         }
 
-        if (isset($data[ 'extract_headers_footers' ])) {
-            $this->setExtractHeadersFooters($data[ 'extract_headers_footers' ]);
+        if (isset($data['extract_headers_footers'])) {
+            $this->setExtractHeadersFooters($data['extract_headers_footers']);
         }
 
-        if (isset($data[ 'exclude_styles' ])) {
-            $this->setExcludeStyles($data[ 'exclude_styles' ]);
+        if (isset($data['exclude_styles'])) {
+            $this->setExcludeStyles($data['exclude_styles']);
         }
 
-        if (isset($data[ 'extract_hidden_text' ])) {
-            $this->setExtractHiddenText($data[ 'extract_hidden_text' ]);
+        if (isset($data['extract_hidden_text'])) {
+            $this->setExtractHiddenText($data['extract_hidden_text']);
         }
     }
 
@@ -112,13 +112,13 @@ class MSWord implements IDto, JsonSerializable
     {
         $format = [];
 
-        $format[ 'extract_doc_properties' ]   = $this->extract_doc_properties;
-        $format[ 'extract_comments' ]         = $this->extract_comments;
-        $format[ 'extract_headers_footers' ]  = $this->extract_headers_footers;
-        $format[ 'extract_hidden_text' ]      = $this->extract_hidden_text;
-        $format[ 'accept_revisions' ]         = $this->accept_revisions;
-        $format[ 'exclude_styles' ]           = $this->exclude_styles;
-        $format[ 'exclude_highlight_colors' ] = $this->exclude_highlight_colors;
+        $format['extract_doc_properties'] = $this->extract_doc_properties;
+        $format['extract_comments'] = $this->extract_comments;
+        $format['extract_headers_footers'] = $this->extract_headers_footers;
+        $format['extract_hidden_text'] = $this->extract_hidden_text;
+        $format['accept_revisions'] = $this->accept_revisions;
+        $format['exclude_styles'] = $this->exclude_styles;
+        $format['exclude_highlight_colors'] = $this->exclude_highlight_colors;
 
         return $format;
     }

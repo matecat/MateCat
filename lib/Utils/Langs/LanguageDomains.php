@@ -12,9 +12,9 @@ use Utils\Registry\AppConfig;
 class LanguageDomains
 {
 
-    private static ?LanguageDomains $instance       = null; //singleton instance
-    private static array            $subjectMap;
-    private static array            $subjectHashMap = [];
+    private static ?LanguageDomains $instance = null; //singleton instance
+    private static array $subjectMap;
+    private static array $subjectHashMap = [];
 
     //access singleton
     public static function getInstance(): LanguageDomains
@@ -45,7 +45,7 @@ class LanguageDomains
         self::$subjectMap = $subjects;
 
         array_walk(self::$subjectMap, function ($element) {
-            self::$subjectHashMap[ $element[ 'key' ] ] = $element[ 'display' ];
+            self::$subjectHashMap[$element['key']] = $element['display'];
         });
     }
 

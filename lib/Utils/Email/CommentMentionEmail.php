@@ -15,10 +15,10 @@ class CommentMentionEmail extends BaseCommentEmail
 
     protected function _getTemplateVariables(): array
     {
-        $vars                 = parent::_getTemplateVariables();
-        $vars[ 'title' ]      = $this->title;
-        $vars[ 'action' ]     = "mentioned you in a comment on";
-        $vars[ 'id_segment' ] = $this->comment->id_segment;
+        $vars = parent::_getTemplateVariables();
+        $vars['title'] = $this->title;
+        $vars['action'] = "mentioned you in a comment on";
+        $vars['id_segment'] = $this->comment->id_segment;
 
         return $vars;
     }

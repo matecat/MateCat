@@ -9,7 +9,6 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Utils\Logger\LoggerFactory;
-use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 
@@ -83,7 +82,7 @@ abstract class BaseFeature implements IBaseFeature
         if (empty($fCode)) {
             throw new LogicException("Plugin code not defined.");
         }
-        $this->feature     = $feature;
+        $this->feature = $feature;
         $this->logger_name = $this->feature->feature_code . '_plugin';
     }
 

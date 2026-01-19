@@ -44,10 +44,10 @@ trait ChunkNotFoundHandlerTrait
         if ($this->chunk->isDeleted()) {
             $this->response->status()->setCode(404);
             $this->response->json([
-                    'errors' => [
-                            'code'    => 0,
-                            'message' => 'No job found.'
-                    ]
+                'errors' => [
+                    'code' => 0,
+                    'message' => 'No job found.'
+                ]
             ]);
             exit();
         }

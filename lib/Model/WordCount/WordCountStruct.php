@@ -16,23 +16,23 @@ use Model\Projects\MetadataDao;
 class WordCountStruct implements JsonSerializable
 {
 
-    protected int    $id_job;
+    protected int $id_job;
     protected string $job_password;
-    protected float  $new_words        = 0;
-    protected float  $draft_words      = 0;
-    protected float  $translated_words = 0;
-    protected float  $approved_words   = 0;
-    protected float  $rejected_words   = 0;
-    protected float  $approved2_words  = 0;
+    protected float $new_words = 0;
+    protected float $draft_words = 0;
+    protected float $translated_words = 0;
+    protected float $approved_words = 0;
+    protected float $rejected_words = 0;
+    protected float $approved2_words = 0;
 
-    protected float $new_raw_words        = 0;
-    protected float $draft_raw_words      = 0;
+    protected float $new_raw_words = 0;
+    protected float $draft_raw_words = 0;
     protected float $translated_raw_words = 0;
-    protected float $approved_raw_words   = 0;
-    protected float $approved2_raw_words  = 0;
-    protected float $rejected_raw_words   = 0;
+    protected float $approved_raw_words = 0;
+    protected float $approved2_raw_words = 0;
+    protected float $rejected_raw_words = 0;
 
-    protected ?int    $id_segment = null;
+    protected ?int $id_segment = null;
     protected ?string $old_status = null;
     protected ?string $new_status = null;
 
@@ -45,21 +45,21 @@ class WordCountStruct implements JsonSerializable
      */
     public static function loadFromJob(JobStruct $jobOrChunk): WordCountStruct
     {
-        $wordCountStruct                       = new WordCountStruct();
-        $wordCountStruct->id_job               = (int)$jobOrChunk->id;
-        $wordCountStruct->job_password         = $jobOrChunk->password;
-        $wordCountStruct->new_words            = (float)$jobOrChunk->new_words;
-        $wordCountStruct->draft_words          = (float)$jobOrChunk->draft_words;
-        $wordCountStruct->translated_words     = (float)$jobOrChunk->translated_words;
-        $wordCountStruct->approved_words       = (float)$jobOrChunk->approved_words;
-        $wordCountStruct->rejected_words       = (float)$jobOrChunk->rejected_words;
-        $wordCountStruct->approved2_words      = (float)$jobOrChunk->approved2_words;
-        $wordCountStruct->new_raw_words        = (float)$jobOrChunk->new_raw_words;
-        $wordCountStruct->draft_raw_words      = (float)$jobOrChunk->draft_raw_words;
+        $wordCountStruct = new WordCountStruct();
+        $wordCountStruct->id_job = (int)$jobOrChunk->id;
+        $wordCountStruct->job_password = $jobOrChunk->password;
+        $wordCountStruct->new_words = (float)$jobOrChunk->new_words;
+        $wordCountStruct->draft_words = (float)$jobOrChunk->draft_words;
+        $wordCountStruct->translated_words = (float)$jobOrChunk->translated_words;
+        $wordCountStruct->approved_words = (float)$jobOrChunk->approved_words;
+        $wordCountStruct->rejected_words = (float)$jobOrChunk->rejected_words;
+        $wordCountStruct->approved2_words = (float)$jobOrChunk->approved2_words;
+        $wordCountStruct->new_raw_words = (float)$jobOrChunk->new_raw_words;
+        $wordCountStruct->draft_raw_words = (float)$jobOrChunk->draft_raw_words;
         $wordCountStruct->translated_raw_words = (float)$jobOrChunk->translated_raw_words;
-        $wordCountStruct->approved_raw_words   = (float)$jobOrChunk->approved_raw_words;
-        $wordCountStruct->approved2_raw_words  = (float)$jobOrChunk->approved2_raw_words;
-        $wordCountStruct->rejected_raw_words   = (float)$jobOrChunk->rejected_raw_words;
+        $wordCountStruct->approved_raw_words = (float)$jobOrChunk->approved_raw_words;
+        $wordCountStruct->approved2_raw_words = (float)$jobOrChunk->approved2_raw_words;
+        $wordCountStruct->rejected_raw_words = (float)$jobOrChunk->rejected_raw_words;
 
         return $wordCountStruct;
     }
@@ -412,12 +412,12 @@ class WordCountStruct implements JsonSerializable
     public function getTotal(): float
     {
         $this->total = (
-                $this->new_words +
-                $this->draft_words +
-                $this->translated_words +
-                $this->rejected_words +
-                $this->approved_words +
-                $this->approved2_words
+            $this->new_words +
+            $this->draft_words +
+            $this->translated_words +
+            $this->rejected_words +
+            $this->approved_words +
+            $this->approved2_words
         );
 
         return $this->total;
@@ -426,12 +426,12 @@ class WordCountStruct implements JsonSerializable
     public function getRawTotal(): float
     {
         $this->total = (
-                $this->new_raw_words +
-                $this->draft_raw_words +
-                $this->translated_raw_words +
-                $this->rejected_raw_words +
-                $this->approved_raw_words +
-                $this->approved2_raw_words
+            $this->new_raw_words +
+            $this->draft_raw_words +
+            $this->translated_raw_words +
+            $this->rejected_raw_words +
+            $this->approved_raw_words +
+            $this->approved2_raw_words
         );
 
         return $this->total;
@@ -443,22 +443,22 @@ class WordCountStruct implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-                MetadataDao::WORD_COUNT_EQUIVALENT => [
-                        'new'        => $this->new_words,
-                        'draft'      => $this->draft_words,
-                        'translated' => $this->translated_words,
-                        'approved'   => $this->approved_words,
-                        'approved2'  => $this->approved2_words,
-                        'total'      => $this->getTotal()
-                ],
-                MetadataDao::WORD_COUNT_RAW        => [
-                        'new'        => $this->new_raw_words,
-                        'draft'      => $this->draft_raw_words,
-                        'translated' => $this->translated_raw_words,
-                        'approved'   => $this->approved_raw_words,
-                        'approved2'  => $this->approved2_raw_words,
-                        'total'      => $this->getRawTotal()
-                ]
+            MetadataDao::WORD_COUNT_EQUIVALENT => [
+                'new' => $this->new_words,
+                'draft' => $this->draft_words,
+                'translated' => $this->translated_words,
+                'approved' => $this->approved_words,
+                'approved2' => $this->approved2_words,
+                'total' => $this->getTotal()
+            ],
+            MetadataDao::WORD_COUNT_RAW => [
+                'new' => $this->new_raw_words,
+                'draft' => $this->draft_raw_words,
+                'translated' => $this->translated_raw_words,
+                'approved' => $this->approved_raw_words,
+                'approved2' => $this->approved2_raw_words,
+                'total' => $this->getRawTotal()
+            ]
         ];
     }
 
@@ -468,22 +468,22 @@ class WordCountStruct implements JsonSerializable
     public function toArray(): array
     {
         return [
-                MetadataDao::WORD_COUNT_EQUIVALENT => [
-                        'new'        => $this->new_words,
-                        'draft'      => $this->draft_words,
-                        'translated' => $this->translated_words,
-                        'approved'   => $this->approved_words,
-                        'approved2'  => $this->approved2_words,
-                        'total'      => $this->getTotal()
-                ],
-                MetadataDao::WORD_COUNT_RAW        => [
-                        'new'        => $this->new_raw_words,
-                        'draft'      => $this->draft_raw_words,
-                        'translated' => $this->translated_raw_words,
-                        'approved'   => $this->approved_raw_words,
-                        'approved2'  => $this->approved2_raw_words,
-                        'total'      => $this->getRawTotal()
-                ]
+            MetadataDao::WORD_COUNT_EQUIVALENT => [
+                'new' => $this->new_words,
+                'draft' => $this->draft_words,
+                'translated' => $this->translated_words,
+                'approved' => $this->approved_words,
+                'approved2' => $this->approved2_words,
+                'total' => $this->getTotal()
+            ],
+            MetadataDao::WORD_COUNT_RAW => [
+                'new' => $this->new_raw_words,
+                'draft' => $this->draft_raw_words,
+                'translated' => $this->translated_raw_words,
+                'approved' => $this->approved_raw_words,
+                'approved2' => $this->approved2_raw_words,
+                'total' => $this->getRawTotal()
+            ]
         ];
     }
 

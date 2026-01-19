@@ -12,37 +12,37 @@ namespace Model\Pagination;
 class PaginationParameters
 {
 
-    protected string  $fetchClass;
-    protected int     $current;
-    protected int     $pagination;
-    protected string  $baseRoute;
+    protected string $fetchClass;
+    protected int $current;
+    protected int $pagination;
+    protected string $baseRoute;
     protected ?string $cacheKeyMap;
-    protected ?int    $ttl;
-    protected array   $bindParams;
-    protected string  $query;
+    protected ?int $ttl;
+    protected array $bindParams;
+    protected string $query;
 
     /**
-     * @param string   $query
-     * @param array    $bindParams
-     * @param string   $fetchClass
-     * @param string   $baseRoute
+     * @param string $query
+     * @param array $bindParams
+     * @param string $fetchClass
+     * @param string $baseRoute
      * @param int|null $current
      * @param int|null $pagination
      */
     public function __construct(string $query, array $bindParams, string $fetchClass, string $baseRoute, ?int $current = 1, ?int $pagination = 20)
     {
-        $this->query      = $query;
+        $this->query = $query;
         $this->bindParams = $bindParams;
         $this->fetchClass = $fetchClass;
-        $this->current    = $current;
+        $this->current = $current;
         $this->pagination = $pagination;
-        $this->baseRoute  = $baseRoute;
+        $this->baseRoute = $baseRoute;
     }
 
     public function setCache(string $cacheKeyMap, ?int $ttl = 60 * 60 * 24): void
     {
         $this->cacheKeyMap = $cacheKeyMap;
-        $this->ttl         = $ttl;
+        $this->ttl = $ttl;
     }
 
     public function getQuery(): string

@@ -17,27 +17,27 @@ use ReflectionException;
 use View\API\V2\Json\Team;
 use View\API\V2\Json\User;
 
-class UserProfile {
+class UserProfile
+{
 
     /**
-     * @param UserStruct                    $user
-     * @param TeamStruct[]                  $teams
+     * @param UserStruct $user
+     * @param TeamStruct[] $teams
      * @param ConnectedServiceStruct[]|null $servicesStruct
-     * @param array                         $userMetadata
+     * @param array $userMetadata
      *
      * @return array
      * @throws ReflectionException
      * @throws EnvironmentIsBrokenException
      */
-    public function renderItem( UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = [] ): array {
-
+    public function renderItem(UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = []): array
+    {
         return [
-                'user'               => User::renderItem( $user ),
-                'connected_services' => ( new ConnectedService( $servicesStruct ) )->render(),
-                'teams'              => ( new Team() )->render( $teams ),
-                'metadata'           => ( empty( $userMetadata ) ? null : $userMetadata ),
+            'user' => User::renderItem($user),
+            'connected_services' => (new ConnectedService($servicesStruct))->render(),
+            'teams' => (new Team())->render($teams),
+            'metadata' => (empty($userMetadata) ? null : $userMetadata),
         ];
-
     }
 
 }

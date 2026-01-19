@@ -33,10 +33,10 @@ class PluginsLoader
     protected static PluginsLoader $_INSTANCE;
 
     protected array $VALID_CODES = [
-            FeatureCodes::PROJECT_COMPLETION,
-            FeatureCodes::TRANSLATION_VERSIONS,
-            FeatureCodes::REVIEW_EXTENDED,
-            FeatureCodes::SECOND_PASS_REVIEW
+        FeatureCodes::PROJECT_COMPLETION,
+        FeatureCodes::TRANSLATION_VERSIONS,
+        FeatureCodes::REVIEW_EXTENDED,
+        FeatureCodes::SECOND_PASS_REVIEW
     ];
 
     protected array $PLUGIN_CLASSES = [];
@@ -58,7 +58,7 @@ class PluginsLoader
             $iterator = new DirectoryIterator(AppConfig::$ROOT . DIRECTORY_SEPARATOR . 'plugins');
 
             foreach ($iterator as $fileInfo) {
-                if ($fileInfo->isDir() && $fileInfo->getBasename()[ 0 ] != '.') {
+                if ($fileInfo->isDir() && $fileInfo->getBasename()[0] != '.') {
                     $manifest = @include_once($fileInfo->getPathname() . DIRECTORY_SEPARATOR . 'manifest.php');
                     if (!empty($manifest)) { //Autoload external plugins
                         if (array_key_exists('FEATURE_CODE', $manifest)) {
@@ -78,10 +78,10 @@ class PluginsLoader
 
     public static function populateVars(array $manifest, string $pathName): void
     {
-        static::$_INSTANCE->PLUGIN_PATHS[ $manifest[ 'FEATURE_CODE' ] ] = $pathName . DIRECTORY_SEPARATOR . "lib";
-        static::$_INSTANCE->VALID_CODES[]                               = $manifest[ 'FEATURE_CODE' ];
+        static::$_INSTANCE->PLUGIN_PATHS[$manifest['FEATURE_CODE']] = $pathName . DIRECTORY_SEPARATOR . "lib";
+        static::$_INSTANCE->VALID_CODES[] = $manifest['FEATURE_CODE'];
         //load class for autoloading
-        static::$_INSTANCE->PLUGIN_CLASSES[ $manifest[ 'FEATURE_CODE' ] ] = $manifest[ 'PLUGIN_CLASS' ];
+        static::$_INSTANCE->PLUGIN_CLASSES[$manifest['FEATURE_CODE']] = $manifest['PLUGIN_CLASS'];
     }
 
     /**
@@ -91,11 +91,11 @@ class PluginsLoader
      */
     public static function getPluginDirectoryName(string $code): string
     {
-        $instance     = static::getInstance();
-        $path         = $instance->PLUGIN_PATHS[ $code ];
+        $instance = static::getInstance();
+        $path = $instance->PLUGIN_PATHS[$code];
         $pathExploded = explode(DIRECTORY_SEPARATOR, $path);
 
-        return $pathExploded[ count($pathExploded) - 2 ];
+        return $pathExploded[count($pathExploded) - 2];
     }
 
 
@@ -106,8 +106,8 @@ class PluginsLoader
      */
     public static function getPluginClass(string $code): ?string
     {
-        $instance  = static::getInstance();
-        $className = $instance->PLUGIN_CLASSES[ $code ] ?? null;
+        $instance = static::getInstance();
+        $className = $instance->PLUGIN_CLASSES[$code] ?? null;
         if (!$className) {
             //try default autoloading for internal plugins
             $className = '\\Plugins\\Features\\' . Utils::underscoreToCamelCase($code);
@@ -118,7 +118,7 @@ class PluginsLoader
 
     /**
      * @param BasicFeatureStruct $feature
-     * @param string             $decoratorName
+     * @param string $decoratorName
      *
      * @return bool|string
      */
@@ -126,11 +126,11 @@ class PluginsLoader
     {
         $instance = static::getInstance();
 
-        if (!isset($instance->PLUGIN_CLASSES[ $feature->feature_code ])) {
+        if (!isset($instance->PLUGIN_CLASSES[$feature->feature_code])) {
             //try default autoloading for internal plugins
             $baseClass = '\\Plugins\\Features\\' . Utils::underscoreToCamelCase($feature->feature_code);
         } else {
-            $baseClass = $instance->PLUGIN_CLASSES[ $feature->feature_code ];
+            $baseClass = $instance->PLUGIN_CLASSES[$feature->feature_code];
         }
 
         //convention for decorators
@@ -169,7 +169,7 @@ class PluginsLoader
 
         $instance = static::getInstance();
 
-        if (in_array($path[ 2 ] ?? null, $instance->VALID_CODES)) {
+        if (in_array($path[2] ?? null, $instance->VALID_CODES)) {
             /**
              * Try to load external plugins classes and fallback to internal plugin code in case of failure
              *
@@ -181,9 +181,9 @@ class PluginsLoader
              *             should be something like
              *             http://xxxx/review_extended/quality_report/xxx/xxxxxxx
              */
-            $cls = static::getPluginClass($path[ 2 ]);
+            $cls = static::getPluginClass($path[2]);
             if ($cls) {
-                $klein->with("/plugins/" . $path[ 2 ], function () use ($cls, $klein) {
+                $klein->with("/plugins/" . $path[2], function () use ($cls, $klein) {
                     /**
                      * @var $cls BaseFeature
                      */

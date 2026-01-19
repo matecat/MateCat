@@ -21,7 +21,7 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     /**
      * @var int|object|string
      */
-    public string|int|object $value;
+    public string|int|object|array $value;
 
     /**
      * @inheritDoc
@@ -29,10 +29,10 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     public function jsonSerialize(): array
     {
         return [
-                'id'    => (int)$this->id,
-                'uid'   => (int)$this->uid,
-                'key'   => $this->key,
-                'value' => $this->getValue()
+            'id' => (int)$this->id,
+            'uid' => (int)$this->uid,
+            'key' => $this->key,
+            'value' => $this->getValue()
         ];
     }
 
@@ -44,6 +44,11 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
         // in case of numeric value, return a integer
         if (is_numeric($this->value)) {
             return (int)$this->value;
+        }
+
+        // in case of array, return an object
+        if(is_array($this->value)){
+            return (object)$this->value;
         }
 
         // in case of serialized data, return an object

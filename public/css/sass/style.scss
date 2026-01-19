@@ -45,18 +45,13 @@ header .wrapper {
   width: 45%;
   table-layout: fixed;
   float: left;
-  padding: 3px 1%;
+  padding: 3px 16px;
   text-align: left;
   list-style: none;
   height: 95%;
   outline: none;
   line-height: 23px;
   word-break: break-word;
-}
-
-.text .source.item {
-  padding-bottom: 10px;
-  padding-top: 11px !important;
 }
 
 .text a {
@@ -1968,7 +1963,8 @@ section.opened.editor .status {
 @media screen and (min-width: 1600px) {
   .text .source.item,
   .text .target.item,
-  .white li {
+  .white li,
+  .splitContainer{
     width: 48% !important;
   }
 }
@@ -2089,7 +2085,8 @@ section.opened.editor .status {
 
   .text .source.item,
   .text .target.item,
-  .white li {
+  .white li,
+  .splitContainer {
     width: 44% !important;
   }
 
@@ -2421,7 +2418,10 @@ section.editor .toolbar {
 .splitContainer {
   position: relative;
   float: left;
-  width: 45.2%;
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  padding-right: 42px;
   .splitArea {
     width: 100%;
     padding: 3px 0px 5px 3px;
@@ -2438,13 +2438,6 @@ section.editor .toolbar {
     word-break: normal !important;
     cursor: col-resize;
     float: left;
-  }
-  .splitBar {
-    position: relative;
-    clear: both;
-    margin-top: 100px;
-    width: 100%;
-    margin-left: 19px;
   }
   .cancel {
     margin-right: 4px;
@@ -2470,8 +2463,8 @@ section.editor .toolbar {
 }
 
 .splitBar .buttons {
-  float: right;
-  margin: 0;
+  gap: 16px;
+  margin-left: 16px;
 }
 
 .splitBar .buttons a {

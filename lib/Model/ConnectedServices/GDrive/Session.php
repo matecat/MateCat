@@ -43,19 +43,19 @@ use Utils\Tools\Utils;
 class Session
 {
 
-    const string FILE_LIST             = 'gdriveFileList';
-    const string FILE_NAME             = 'fileName';
-    const string FILE_HASH             = 'fileHash';
+    const string FILE_LIST = 'gdriveFileList';
+    const string FILE_NAME = 'fileName';
+    const string FILE_HASH = 'fileHash';
     const string CONNNECTED_SERVICE_ID = 'connectedServiceId';
 
-    protected string                       $guid;
-    protected string                       $source_lang;
-    protected string                       $target_lang;
-    protected ?string                      $seg_rule                      = null;
-    protected array                        $session                       = [];
+    protected string $guid;
+    protected string $source_lang;
+    protected string $target_lang;
+    protected ?string $seg_rule = null;
+    protected array $session = [];
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
-    protected ?Google_Service_Drive        $service                       = null;
-    protected ?array                       $token                         = null;
+    protected ?Google_Service_Drive $service = null;
+    protected ?array $token = null;
 
     /**
      * @var ?ConnectedServiceStruct
@@ -80,7 +80,7 @@ class Session
      */
     public function __construct()
     {
-        if (!isset($_SESSION[ 'uid' ])) {
+        if (!isset($_SESSION['uid'])) {
             return;
         }
 
@@ -116,27 +116,27 @@ class Session
     }
 
     /**
-     * @param string                           $newSourceLang
-     * @param string|null                      $newSegmentationRule
+     * @param string $newSourceLang
+     * @param string|null $newSegmentationRule
      * @param FiltersConfigTemplateStruct|null $filtersExtractionParameters
      *
      * @return bool
      */
     public function reConvert(string $newSourceLang, ?string $newSegmentationRule = null, ?FiltersConfigTemplateStruct $filtersExtractionParameters = null): bool
     {
-        $this->setConversionParams($this->session[ "upload_token" ], $newSourceLang, 'en-US', $newSegmentationRule, $filtersExtractionParameters);
+        $this->setConversionParams($this->session["upload_token"], $newSourceLang, 'en-US', $newSegmentationRule, $filtersExtractionParameters);
 
-        $fileList = $this->session[ self::FILE_LIST ];
+        $fileList = $this->session[self::FILE_LIST];
 
         foreach ($fileList as $fileId => $file) {
             try {
-                $generatedSha = $this->doConversion($file[ self::FILE_NAME ]);
+                $generatedSha = $this->doConversion($file[self::FILE_NAME]);
 
                 if (empty($generatedSha)) {
                     throw new Exception('Error when converting file.');
                 }
 
-                $this->session[ self::FILE_LIST ][ $fileId ][ self::FILE_HASH ] = $generatedSha;
+                $this->session[self::FILE_LIST][$fileId][self::FILE_HASH] = $generatedSha;
             } catch (Exception) {
                 return false;
             }
@@ -153,27 +153,27 @@ class Session
     {
         $response = [];
 
-        if (empty($this->session[ self::FILE_LIST ])) {
+        if (empty($this->session[self::FILE_LIST])) {
             return $response;
         }
 
-        foreach ($this->session[ self::FILE_LIST ] as $fileId => $file) {
-            $fileName = $file[ self::FILE_NAME ];
+        foreach ($this->session[self::FILE_LIST] as $fileId => $file) {
+            $fileName = $file[self::FILE_NAME];
 
             if (AbstractFilesStorage::isOnS3()) {
-                $path     = $this->getGDriveFilePathForS3($file);
+                $path = $this->getGDriveFilePathForS3($file);
                 $s3Client = S3FilesStorage::getStaticS3Client();
-                $s3       = $s3Client->getItem([
-                                'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                                'key'    => $path
-                        ]
+                $s3 = $s3Client->getItem([
+                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                        'key' => $path
+                    ]
                 );
 
-                $response[ 'files' ][] = [
-                        'fileId'        => $fileId,
-                        'fileName'      => $fileName,
-                        'fileSize'      => $s3[ 'ContentLength' ],
-                        'fileExtension' => AppConfig::$MIME_TYPES[ $s3[ 'ContentType' ] ][ 0 ]
+                $response['files'][] = [
+                    'fileId' => $fileId,
+                    'fileName' => $fileName,
+                    'fileSize' => $s3['ContentLength'],
+                    'fileExtension' => AppConfig::$MIME_TYPES[$s3['ContentType']][0]
                 ];
             } else {
                 $path = $this->getGDriveFilePath($file);
@@ -182,14 +182,14 @@ class Session
 
                     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
 
-                    $response[ 'files' ][] = [
-                            'fileId'        => $fileId,
-                            'fileName'      => $fileName,
-                            'fileSize'      => $fileSize,
-                            'fileExtension' => $fileExtension
+                    $response['files'][] = [
+                        'fileId' => $fileId,
+                        'fileName' => $fileName,
+                        'fileSize' => $fileSize,
+                        'fileExtension' => $fileExtension
                     ];
                 } else {
-                    unset($this->session[ self::FILE_LIST ][ $fileId ]);
+                    unset($this->session[self::FILE_LIST][$fileId]);
                 }
             }
         }
@@ -203,8 +203,8 @@ class Session
     public function cleanupSessionFiles(): void
     {
         if ($this->sessionHasFiles()) {
-            unset($this->session[ self::FILE_LIST ]);
-            unset($_SESSION[ self::FILE_LIST ]);
+            unset($this->session[self::FILE_LIST]);
+            unset($_SESSION[self::FILE_LIST]);
         }
     }
 
@@ -215,11 +215,11 @@ class Session
     public function getToken(): ?array
     {
         if (is_null($this->token)) {
-            if ($this->session[ 'user' ] !== null) {
-                if ($this->session[ 'user' ] instanceof ArrayObject) { // comes from CLI (ProjectManager)
-                    $this->session[ 'user' ] = new UserStruct($this->session[ 'user' ]->getArrayCopy());
+            if ($this->session['user'] !== null) {
+                if ($this->session['user'] instanceof ArrayObject) { // comes from CLI (ProjectManager)
+                    $this->session['user'] = new UserStruct($this->session['user']->getArrayCopy());
                 }
-                $this->token = $this->getTokenByUser($this->session[ 'user' ]);
+                $this->token = $this->getTokenByUser($this->session['user']);
             }
         }
 
@@ -234,7 +234,7 @@ class Session
      */
     public function getTokenByUser(UserStruct $user): ?array
     {
-        $serviceDao          = new ConnectedServiceDao();
+        $serviceDao = new ConnectedServiceDao();
         $this->serviceStruct = $serviceDao->findDefaultServiceByUserAndName($user, 'gdrive');
 
         return $this->serviceStruct?->getDecodedOauthAccessToken();
@@ -245,19 +245,19 @@ class Session
      *
      * @param string $fileId
      * @param string $fileName
-     * @param array  $fileHash
+     * @param array $fileHash
      */
     public function addFiles(string $fileId, string $fileName, array $fileHash): void
     {
-        if (!isset($this->session[ self::FILE_LIST ])
-                || !is_array($this->session[ self::FILE_LIST ])) {
-            $this->session[ self::FILE_LIST ] = [];
+        if (!isset($this->session[self::FILE_LIST])
+            || !is_array($this->session[self::FILE_LIST])) {
+            $this->session[self::FILE_LIST] = [];
         }
 
-        $this->session[ self::FILE_LIST ][ $fileId ] = [
-                self::FILE_NAME             => $fileName,
-                self::FILE_HASH             => $fileHash,
-                self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
+        $this->session[self::FILE_LIST][$fileId] = [
+            self::FILE_NAME => $fileName,
+            self::FILE_HASH => $fileHash,
+            self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
         ];
     }
 
@@ -266,7 +266,7 @@ class Session
      */
     public function hasFiles(): bool
     {
-        return (isset($this->session[ self::FILE_LIST ]) and count($this->session[ self::FILE_LIST ]) > 0);
+        return (isset($this->session[self::FILE_LIST]) and count($this->session[self::FILE_LIST]) > 0);
     }
 
     /**
@@ -274,8 +274,8 @@ class Session
      */
     public function sessionHasFiles(): bool
     {
-        if (isset($this->session[ self::FILE_LIST ])
-                && !empty($this->session[ self::FILE_LIST ])) {
+        if (isset($this->session[self::FILE_LIST])
+            && !empty($this->session[self::FILE_LIST])) {
             return true;
         }
 
@@ -290,8 +290,8 @@ class Session
     public function findFileIdByName(string $fileName): ?string
     {
         if ($this->hasFiles()) {
-            foreach ($this->session[ self::FILE_LIST ] as $singleFileId => $file) {
-                if ($file[ self::FILE_NAME ] === $fileName) {
+            foreach ($this->session[self::FILE_LIST] as $singleFileId => $file) {
+                if ($file[self::FILE_NAME] === $fileName) {
                     return $singleFileId;
                 }
             }
@@ -345,14 +345,14 @@ class Session
 
     public function clearFileListFromSession(): void
     {
-        unset($this->session[ self::FILE_LIST ]);
+        unset($this->session[self::FILE_LIST]);
     }
 
     /**
-     * @param string      $fileId
-     * @param string      $source
+     * @param string $fileId
+     * @param string $source
      * @param string|null $segmentationRule
-     * @param int         $filtersTemplate
+     * @param int $filtersTemplate
      *
      * @return bool
      * @throws ReflectionException
@@ -361,40 +361,40 @@ class Session
     {
         $success = false;
 
-        if (isset($this->session[ self::FILE_LIST ][ $fileId ])) {
-            $file      = $this->session[ self::FILE_LIST ][ $fileId ];
+        if (isset($this->session[self::FILE_LIST][$fileId])) {
+            $file = $this->session[self::FILE_LIST][$fileId];
             $pathCache = $this->getCacheFileDir($file);
 
             if (S3FilesStorage::isOnS3()) {
                 $s3Client = S3FilesStorage::getStaticS3Client();
                 $s3Client->deleteFolder([
-                                'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                                'key'    => $pathCache
-                        ]
+                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                        'key' => $pathCache
+                    ]
                 );
             } else {
                 $this->deleteDirectory($pathCache);
             }
 
-            $tempUploadedFileDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
+            $tempUploadedFileDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_token'];
 
             /** @var DirectoryIterator $item */
             foreach (
-                    new RecursiveIteratorIterator(
-                            new RecursiveDirectoryIterator($tempUploadedFileDir, FilesystemIterator::SKIP_DOTS),
-                            RecursiveIteratorIterator::SELF_FIRST
-                    ) as $item
+                new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($tempUploadedFileDir, FilesystemIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::SELF_FIRST
+                ) as $item
             ) {
-                $target   = explode('__', $pathCache);
-                $hashFile = $file[ 'fileHash' ] . "|" . end($target);
+                $target = explode('__', $pathCache);
+                $hashFile = $file['fileHash'] . "|" . end($target);
 
-                if ($item->getFilename() === $file[ 'fileName' ] or $item->getFilename() === $hashFile) {
-                    CatUtils::deleteSha($tempUploadedFileDir . "/" . $file[ 'fileName' ], $source, $segmentationRule, $filtersTemplate);
+                if ($item->getFilename() === $file['fileName'] or $item->getFilename() === $hashFile) {
+                    CatUtils::deleteSha($tempUploadedFileDir . "/" . $file['fileName'], $source, $segmentationRule, $filtersTemplate);
                     unlink($item);
                 }
             }
 
-            unset($this->session[ self::FILE_LIST ] [ $fileId ]);
+            unset($this->session[self::FILE_LIST] [$fileId]);
 
             $success = true;
         }
@@ -403,19 +403,19 @@ class Session
     }
 
     /**
-     * @param string      $source
+     * @param string $source
      * @param string|null $segmentationRule
-     * @param int         $filtersTemplate
+     * @param int $filtersTemplate
      *
      * @throws ReflectionException
      */
     public function removeAllFiles(string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): void
     {
-        foreach ($this->session[ self::FILE_LIST ] as $singleFileId => $file) {
+        foreach ($this->session[self::FILE_LIST] as $singleFileId => $file) {
             $this->removeFile($singleFileId, $source, $segmentationRule, $filtersTemplate);
         }
 
-        unset($this->session[ self::FILE_LIST ]);
+        unset($this->session[self::FILE_LIST]);
     }
 
     /**
@@ -423,7 +423,7 @@ class Session
      */
     private function deleteDirectory(string $dir): void
     {
-        $it    = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
+        $it = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
         $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
 
         foreach ($files as $file) {
@@ -444,11 +444,11 @@ class Session
      */
     private function getCacheFileDir(array $file): string
     {
-        $sourceLang = $this->session[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
+        $sourceLang = $this->session[Constants::SESSION_ACTUAL_SOURCE_LANG];
 
-        $fileHash = $file[ self::FILE_HASH ][ 'cacheHash' ];
+        $fileHash = $file[self::FILE_HASH]['cacheHash'];
 
-        $fs          = $this->files_storage;
+        $fs = $this->files_storage;
         $cacheTreeAr = $fs::composeCachePath($fileHash);
 
         $cacheTree = implode(DIRECTORY_SEPARATOR, $cacheTreeAr);
@@ -463,7 +463,7 @@ class Session
      */
     private function getGDriveFilePath(array $file): string
     {
-        $fileName     = $file[ self::FILE_NAME ];
+        $fileName = $file[self::FILE_NAME];
         $cacheFileDir = $this->getCacheFileDir($file);
 
         return $cacheFileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
@@ -476,31 +476,31 @@ class Session
      */
     private function getGDriveFilePathForS3(array $file): string
     {
-        $fileName     = $file[ self::FILE_NAME ];
+        $fileName = $file[self::FILE_NAME];
         $cacheFileDir = $this->getCacheFileDir($file);
 
         return $cacheFileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
     }
 
     /**
-     * @param string                           $guid
-     * @param string                           $source_lang
-     * @param string                           $target_lang
-     * @param string|null                      $seg_rule
+     * @param string $guid
+     * @param string $source_lang
+     * @param string $target_lang
+     * @param string|null $seg_rule
      * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
      */
     public function setConversionParams(string $guid, string $source_lang, string $target_lang, ?string $seg_rule = null, ?FiltersConfigTemplateStruct $filters_extraction_parameters = null): void
     {
-        $this->guid                          = $guid;
-        $this->source_lang                   = $source_lang;
-        $this->target_lang                   = $target_lang;
-        $this->seg_rule                      = $seg_rule;
+        $this->guid = $guid;
+        $this->source_lang = $source_lang;
+        $this->target_lang = $target_lang;
+        $this->seg_rule = $seg_rule;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 
     /**
-     * @param int           $fileId
-     * @param string        $remoteFileId
+     * @param int $fileId
+     * @param string $remoteFileId
      * @param Google_Client $gClient
      *
      * @throws Exception
@@ -515,8 +515,8 @@ class Session
      *
      * Creates copies of the original remote file there the translation will be saved.
      *
-     * @param int           $id_file
-     * @param int           $id_job
+     * @param int $id_file
+     * @param int $id_job
      * @param Google_Client $gClient
      *
      * @throws Exception
@@ -530,16 +530,16 @@ class Session
         }
 
         $listRemoteFiles = RemoteFileDao::getByFileId($id_file, 1);
-        $remoteFile      = $listRemoteFiles[ 0 ];
+        $remoteFile = $listRemoteFiles[0];
 
         $gdriveFile = $service->files->get($remoteFile->remote_id);
-        $fileTitle  = $gdriveFile->getName();
+        $fileTitle = $gdriveFile->getName();
 
-        $job                 = JobDao::getById($id_job)[ 0 ];
+        $job = JobDao::getById($id_job)[0];
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
         $remoteFileService = $this->buildRemoteFile($gClient);
-        $copiedFile        = $remoteFileService->copyFile($remoteFile->remote_id, $translatedFileTitle);
+        $copiedFile = $remoteFileService->copyFile($remoteFile->remote_id, $translatedFileTitle);
 
         RemoteFileDao::insert($id_file, $id_job, $copiedFile->id, $this->serviceStruct->id);
 
@@ -547,7 +547,7 @@ class Session
     }
 
     /**
-     * @param string        $googleFileId
+     * @param string $googleFileId
      * @param Google_Client $gClient
      *
      * @return Google_Service_Drive_Permission
@@ -555,7 +555,7 @@ class Session
      */
     public function grantFileAccessByUrl(string $googleFileId, Google_Client $gClient): Google_Service_Drive_Permission
     {
-        if (!$this->session[ 'user' ]) {
+        if (!$this->session['user']) {
             throw new Exception('Cannot proceed without a User');
         }
 
@@ -573,7 +573,7 @@ class Session
     }
 
     /**
-     * @param string        $googleFileId
+     * @param string $googleFileId
      * @param Google_Client $gClient
      *
      * @throws Exception
@@ -595,7 +595,7 @@ class Session
         $mime = RemoteFileService::officeMimeFromGoogle($meta->mimeType);
 
         // get filename
-        $fileName       = $this->sanitizeFileName($meta->getName());
+        $fileName = $this->sanitizeFileName($meta->getName());
         $file_extension = RemoteFileService::officeExtensionFromMime($mime);
 
         // add the extension to filename
@@ -605,7 +605,7 @@ class Session
 
         // export the file
         $optParams = [
-                'alt' => 'media'
+            'alt' => 'media'
         ];
         /** @var Response $file */
         $file = $service->files->export($googleFileId, $mime, $optParams);
@@ -619,9 +619,9 @@ class Session
 
             $filePath = Utils::uploadDirFromSessionCookie($this->guid, $fileName);
 
-            $size    = $file->getBody()->getSize();
+            $size = $file->getBody()->getSize();
             $content = $file->getBody()->read($size);
-            $saved   = file_put_contents($filePath, $content);
+            $saved = file_put_contents($filePath, $content);
 
             if ($saved !== false) {
                 $generatedSha = $this->doConversion($fileName);
@@ -658,26 +658,26 @@ class Session
         $uploadTokenValue = $this->guid;
 
         $uploadDir = AppConfig::$UPLOAD_REPOSITORY .
-                DIRECTORY_SEPARATOR . $uploadTokenValue;
+            DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $errDir = AppConfig::$STORAGE_DIR .
-                DIRECTORY_SEPARATOR .
-                'conversion_errors' .
-                DIRECTORY_SEPARATOR . $uploadTokenValue;
+            DIRECTORY_SEPARATOR .
+            'conversion_errors' .
+            DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $this->featureSet = new FeatureSet();
-        $this->featureSet->loadFromUserEmail($this->session[ 'user' ]->email);
+        $this->featureSet->loadFromUserEmail($this->session['user']->email);
 
         $converter = new FilesConverter(
-                [$file_name],
-                $this->source_lang,
-                $this->target_lang,
-                $uploadDir,
-                $errDir,
-                $uploadTokenValue,
-                $this->seg_rule,
-                $this->featureSet,
-                $this->filters_extraction_parameters,
+            [$file_name],
+            $this->source_lang,
+            $this->target_lang,
+            $uploadDir,
+            $errDir,
+            $uploadTokenValue,
+            $this->seg_rule,
+            $this->featureSet,
+            $this->filters_extraction_parameters,
         );
 
         $converter->convertFiles();
@@ -685,7 +685,7 @@ class Session
         $result = $converter->getResult();
 
         if ($result->hasErrors()) {
-            throw new RuntimeException($result->getErrors()[ 0 ]);
+            throw new RuntimeException($result->getErrors()[0]);
         }
 
         $data = [];

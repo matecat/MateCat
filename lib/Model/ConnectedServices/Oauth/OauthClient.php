@@ -37,11 +37,11 @@ class OauthClient
     private AbstractProvider $provider;
 
     private static array $providers = [
-            GoogleProvider::PROVIDER_NAME    => GoogleProvider::class,
-            GithubProvider::PROVIDER_NAME    => GithubProvider::class,
-            LinkedInProvider::PROVIDER_NAME  => LinkedInProvider::class,
-            MicrosoftProvider::PROVIDER_NAME => MicrosoftProvider::class,
-            FacebookProvider::PROVIDER_NAME  => FacebookProvider::class,
+        GoogleProvider::PROVIDER_NAME => GoogleProvider::class,
+        GithubProvider::PROVIDER_NAME => GithubProvider::class,
+        LinkedInProvider::PROVIDER_NAME => LinkedInProvider::class,
+        MicrosoftProvider::PROVIDER_NAME => MicrosoftProvider::class,
+        FacebookProvider::PROVIDER_NAME => FacebookProvider::class,
     ];
 
     /**
@@ -69,7 +69,7 @@ class OauthClient
      */
     private function __construct(?string $provider = null, ?string $redirectUrl = null)
     {
-        $className      = self::$providers[ $provider ] ?? GoogleProvider::class;
+        $className = self::$providers[$provider] ?? GoogleProvider::class;
         $this->provider = new $className($redirectUrl);
     }
 
@@ -83,7 +83,7 @@ class OauthClient
 
     /**
      * @param string|null $suffixKey
-     * @param array|null  $_session
+     * @param array|null $_session
      *
      * @return string
      * @throws Exception
@@ -91,11 +91,11 @@ class OauthClient
     public function getAuthorizationUrl(?array &$_session = [], ?string $suffixKey = ''): string
     {
         $session =& $_session;
-        if (!isset($session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ])) {
-            $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ] = Utils::uuid4();
+        if (!isset($session[$this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN])) {
+            $session[$this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN] = Utils::uuid4();
         }
 
-        return $this->provider->getAuthorizationUrl($session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ]);
+        return $this->provider->getAuthorizationUrl($session[$this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN]);
     }
 
 }

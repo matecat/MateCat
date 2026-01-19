@@ -35,7 +35,7 @@ class GetVolumeAnalysisController extends KleinController
      */
     public function analysis(): Response
     {
-        $_project_data = ProjectDao::getProjectAndJobData($this->params[ 'id_project' ]);
+        $_project_data = ProjectDao::getProjectAndJobData($this->params['id_project']);
 
         $analysisStatus = new Status($_project_data, $this->featureSet, $this->user);
 

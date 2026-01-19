@@ -39,7 +39,7 @@ class MicrosoftHubStruct extends EngineStruct
      * @var string|array
      */
     public string|array $others = [
-            'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
+        'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
     ];
 
     /**
@@ -52,11 +52,11 @@ class MicrosoftHubStruct extends EngineStruct
      * @var string|array|null
      */
     public string|array|null $extra_parameters = [
-            'token'         => null,
-            'token_endlife' => 0,
-            'client_id'     => "",
-            'client_secret' => "",
-            'category'      => "",
+        'token' => null,
+        'token_endlife' => 0,
+        'client_id' => "",
+        'client_secret' => "",
+        'category' => "",
     ];
 
     /**

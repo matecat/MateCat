@@ -33,7 +33,7 @@ class QAModelTemplateController extends KleinController
     private function validateJSON($json): void
     {
         $validatorObject = new JSONValidatorObject($json);
-        $validator       = new JSONValidator('qa_model.json', true);
+        $validator = new JSONValidator('qa_model.json', true);
         $validator->validate($validatorObject);
     }
 
@@ -47,7 +47,7 @@ class QAModelTemplateController extends KleinController
     {
         try {
             $currentPage = $this->request->param('page') ?? 1;
-            $pagination  = $this->request->param('perPage') ?? 20;
+            $pagination = $this->request->param('perPage') ?? 20;
 
             if ($pagination > 200) {
                 $pagination = 200;
@@ -61,7 +61,7 @@ class QAModelTemplateController extends KleinController
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -92,13 +92,17 @@ class QAModelTemplateController extends KleinController
         } catch (JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception) {
             $this->response->code(400);
 
+            if ($exception instanceof JSONValidatorException) {
+                return $this->response->json(['error' => $exception->getFormattedError("qa_model_template")]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -118,14 +122,14 @@ class QAModelTemplateController extends KleinController
             }
 
             return $this->response->json([
-                    'id' => $id
+                'id' => $id
             ]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -141,8 +145,8 @@ class QAModelTemplateController extends KleinController
             $id = (int)$this->request->param('id');
 
             $model = QAModelTemplateDao::get([
-                    'id'  => $id,
-                    'uid' => $this->getUser()->uid
+                'id' => $id,
+                'uid' => $this->getUser()->uid
             ]);
 
             if (empty($model)) {
@@ -162,13 +166,17 @@ class QAModelTemplateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
+            if ($exception instanceof JSONValidatorException) {
+                return $this->response->json(['error' => $exception->getFormattedError("qa_model_template")]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -185,8 +193,8 @@ class QAModelTemplateController extends KleinController
             (int)$id = $this->request->param('id');
 
             $model = QAModelTemplateDao::get([
-                    'id'  => $id,
-                    'uid' => $this->getUser()->uid
+                'id' => $id,
+                'uid' => $this->getUser()->uid
             ]);
 
             if (empty($model)) {
@@ -201,7 +209,7 @@ class QAModelTemplateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -227,22 +235,22 @@ class QAModelTemplateController extends KleinController
             $json = $this->request->body();
 
             $validatorObject = new JSONValidatorObject($json);
-            $validator       = new JSONValidator($this->getQaModelSchema());
+            $validator = new JSONValidator($this->getQaModelSchema());
             $validator->validate($validatorObject);
 
             $errors = $validator->getExceptions();
-            $code   = ($validator->isValid()) ? 200 : 500;
+            $code = ($validator->isValid()) ? 200 : 500;
 
             $this->response->code($code);
 
             return $this->response->json([
-                    'errors' => $errors
+                'errors' => $errors
             ]);
         } catch (Exception $exception) {
             $this->response->code(500);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -263,7 +271,7 @@ class QAModelTemplateController extends KleinController
         $this->response->status()->setCode(200);
 
         return $this->response->json(
-                QAModelTemplateDao::getDefaultTemplate($this->getUser()->uid)
+            QAModelTemplateDao::getDefaultTemplate($this->getUser()->uid)
         );
     }
 

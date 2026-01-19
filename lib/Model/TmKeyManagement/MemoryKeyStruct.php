@@ -47,7 +47,7 @@ class MemoryKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
              * we use toArray() because TmKeyStruct implements JsonSerializable were we control the output result by filtering the fields we want to return.
              * @see TmKeyStruct::$complete_format
              */
-            $result[ 'tm_key' ] = $this->tm_key->toArray();
+            $result['tm_key'] = $this->tm_key->toArray();
         }
 
         return $result;

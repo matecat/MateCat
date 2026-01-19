@@ -21,9 +21,9 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct
 
     public string $feature_code;
     /**
-     * @var array|string
+     * @var array|string|null
      */
-    public $options;
+    public string|array|null $options;
 
     public function getFullyQualifiedClassName(): ?string
     {

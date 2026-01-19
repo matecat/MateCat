@@ -355,8 +355,11 @@ abstract class AbstractEngine implements EngineInterface
         return $this->engineRecord->name;
     }
 
-    public function getMTName(): string
+    public function getMTName(string $forceName = ''): string
     {
+        if (!empty($forceName)) {
+            return "MT-" . $forceName;
+        }
         return "MT-" . $this->getName();
     }
 
@@ -399,7 +402,7 @@ abstract class AbstractEngine implements EngineInterface
             $newEngineStruct->name = "Generic";
             $newEngineStruct->uid = 0;
             $newEngineStruct->type = EngineConstants::MT;
-            $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'];
+            $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
             $newEngineStruct->others = [];
 
             $gtEngine = EnginesFactory::createTempInstance($newEngineStruct);

@@ -25,7 +25,7 @@ class EngineDAO extends AbstractDao
     const string STRUCT_TYPE = EngineStruct::class;
 
     protected static array $auto_increment_field = ['id'];
-    protected static array $primary_keys         = ['id'];
+    protected static array $primary_keys = ['id'];
 
     /**
      * Build the query,
@@ -39,13 +39,13 @@ class EngineDAO extends AbstractDao
     protected function _buildQueryForEngine(EngineStruct $obj): array
     {
         $where_conditions = [];
-        $query            = "SELECT * FROM " . self::TABLE . " WHERE %s";
+        $query = "SELECT * FROM " . self::TABLE . " WHERE %s";
 
         $bind_values = [];
 
         if ($obj->id !== null) {
-            $bind_values[ 'id' ] = $obj->id;
-            $where_conditions[]  = "id = :id";
+            $bind_values['id'] = $obj->id;
+            $where_conditions[] = "id = :id";
         }
 
         if ($obj->uid !== null) {
@@ -54,19 +54,19 @@ class EngineDAO extends AbstractDao
             } elseif (empty($obj->uid) || $obj->uid <= 0) {
                 throw new DomainException("Anonymous User."); //do not perform any query on anonymous user requests
             } elseif (is_numeric($obj->uid)) {
-                $bind_values[ 'uid' ] = (int)$obj->uid;
-                $where_conditions[]   = "uid = :uid";
+                $bind_values['uid'] = (int)$obj->uid;
+                $where_conditions[] = "uid = :uid";
             }
         }
 
         if ($obj->active) {
-            $bind_values[ 'active' ] = $obj->active;
-            $where_conditions[]      = "active = :active";
+            $bind_values['active'] = $obj->active;
+            $where_conditions[] = "active = :active";
         }
 
         if ($obj->type !== null) {
-            $bind_values[ 'type' ] = $obj->type;
-            $where_conditions[]    = "type = :type";
+            $bind_values['type'] = $obj->type;
+            $where_conditions[] = "type = :type";
         }
 
         if (count($where_conditions)) {
@@ -91,12 +91,12 @@ class EngineDAO extends AbstractDao
         $this->_validateNotNullFields($obj);
 
         $query = "INSERT INTO " . self::TABLE .
-                " ( name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url,
+            " ( name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url,
                 delete_relative_url, others, extra_parameters, class_load, google_api_compliant_version, penalty, active, uid)
                     VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
             ";
 
-        $bind_values   = [];
+        $bind_values = [];
         $bind_values[] = $obj->name;
         $bind_values[] = $obj->type;
         $bind_values[] = $obj->description;
@@ -123,7 +123,7 @@ class EngineDAO extends AbstractDao
         $obj->id = $this->database->last_insert();
 
         // revert internal JSON fields to arrays
-        $obj->others           = json_decode($obj->others, true);
+        $obj->others = json_decode($obj->others, true);
         $obj->extra_parameters = json_decode($obj->extra_parameters, true);
 
         return $obj;
@@ -137,8 +137,6 @@ class EngineDAO extends AbstractDao
      */
     public function read(EngineStruct $obj): array
     {
-        $obj = $this->sanitize($obj);
-
         /*
          * build the query
          */
@@ -151,7 +149,7 @@ class EngineDAO extends AbstractDao
         [$query, $bind_values] = $query_and_bindValues;
 
 
-        $stmt      = $this->database->getConnection()->prepare($query);
+        $stmt = $this->database->getConnection()->prepare($query);
         $resultSet = $this->_fetchObjectMap($stmt, EngineStruct::class, $bind_values);
 
         return $this->_buildResult($resultSet);
@@ -167,8 +165,6 @@ class EngineDAO extends AbstractDao
      */
     public function destroyCache(EngineStruct $obj): bool
     {
-        $obj = $this->sanitize($obj);
-
         /*
         * build the query
         */
@@ -226,8 +222,8 @@ class EngineDAO extends AbstractDao
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
-                'id'  => $obj->id,
-                'uid' => $obj->uid
+            'id' => $obj->id,
+            'uid' => $obj->uid
         ]);
 
 
@@ -251,12 +247,12 @@ class EngineDAO extends AbstractDao
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
-                'id'  => $obj->id,
-                'uid' => $obj->uid
+            'id' => $obj->id,
+            'uid' => $obj->uid
         ]);
 
         if ($stmt->rowCount() > 0) {
-            $tmpEng         = $this->setCacheTTL(60 * 60 * 5)->read($obj)[ 0 ];
+            $tmpEng = $this->setCacheTTL(60 * 60 * 5)->read($obj)[0];
             $tmpEng->active = 0; // avoid slave replication delay
 
             return $tmpEng;
@@ -278,8 +274,8 @@ class EngineDAO extends AbstractDao
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
-                $obj->id,
-                $obj->uid
+            $obj->id,
+            $obj->uid
         ]);
 
         if ($stmt->rowCount() > 0) {
@@ -302,29 +298,29 @@ class EngineDAO extends AbstractDao
 
         foreach ($array_result as $item) {
             try {
-                EnginesFactory::getFullyQualifiedClassName($item[ 'class_load' ]);
+                EnginesFactory::getFullyQualifiedClassName($item['class_load']);
             } catch (Exception) {
                 $result[] = new NONEStruct();
                 continue;
             }
 
             $build_arr = [
-                    'id'                           => (int)$item[ 'id' ],
-                    'name'                         => $item[ 'name' ],
-                    'type'                         => $item[ 'type' ],
-                    'description'                  => $item[ 'description' ],
-                    'base_url'                     => $item[ 'base_url' ],
-                    'translate_relative_url'       => $item[ 'translate_relative_url' ],
-                    'contribute_relative_url'      => $item[ 'contribute_relative_url' ],
-                    'update_relative_url'          => $item[ 'update_relative_url' ],
-                    'delete_relative_url'          => $item[ 'delete_relative_url' ],
-                    'others'                       => json_decode($item[ 'others' ], true),
-                    'extra_parameters'             => json_decode($item[ 'extra_parameters' ], true),
-                    'class_load'                   => $item[ 'class_load' ],
-                    'google_api_compliant_version' => $item[ 'google_api_compliant_version' ],
-                    'penalty'                      => $item[ 'penalty' ],
-                    'active'                       => $item[ 'active' ],
-                    'uid'                          => $item[ 'uid' ]
+                'id' => (int)$item['id'],
+                'name' => $item['name'],
+                'type' => $item['type'],
+                'description' => $item['description'],
+                'base_url' => $item['base_url'],
+                'translate_relative_url' => $item['translate_relative_url'],
+                'contribute_relative_url' => $item['contribute_relative_url'],
+                'update_relative_url' => $item['update_relative_url'],
+                'delete_relative_url' => $item['delete_relative_url'],
+                'others' => json_decode($item['others'], true),
+                'extra_parameters' => json_decode($item['extra_parameters'], true),
+                'class_load' => $item['class_load'],
+                'google_api_compliant_version' => $item['google_api_compliant_version'],
+                'penalty' => $item['penalty'],
+                'active' => $item['active'],
+                'uid' => $item['uid']
             ];
 
             $obj = new EngineStruct($build_arr);
@@ -345,19 +341,19 @@ class EngineDAO extends AbstractDao
     {
         parent::_sanitizeInput($input, self::STRUCT_TYPE);
 
-        $input->name                    = ($input->name !== null) ? $input->name : null;
-        $input->description             = ($input->description !== null) ? $input->description : null;
-        $input->base_url                = ($input->base_url !== null) ? $input->base_url : null;
-        $input->translate_relative_url  = ($input->translate_relative_url !== null) ? $input->translate_relative_url : null;
+        $input->name = ($input->name !== null) ? $input->name : null;
+        $input->description = ($input->description !== null) ? $input->description : null;
+        $input->base_url = ($input->base_url !== null) ? $input->base_url : null;
+        $input->translate_relative_url = ($input->translate_relative_url !== null) ? $input->translate_relative_url : null;
         $input->contribute_relative_url = ($input->contribute_relative_url !== null) ? $input->contribute_relative_url : null;
-        $input->update_relative_url     = ($input->update_relative_url !== null) ? $input->update_relative_url : null;
-        $input->delete_relative_url     = ($input->delete_relative_url !== null) ? $input->delete_relative_url : null;
-        $input->others                  = ($input->others !== '{}') ? json_encode($input->others) : '{}';
-        $input->class_load              = ($input->class_load !== null) ? $input->class_load : null;
-        $input->extra_parameters        = ($input->extra_parameters !== '{}') ? json_encode($input->extra_parameters) : '{}';
-        $input->penalty                 = ($input->penalty !== null) ? $input->penalty : null;
-        $input->active                  = ($input->active !== null) ? $input->active : null;
-        $input->uid                     = ($input->uid !== null) ? $input->uid : null;
+        $input->update_relative_url = ($input->update_relative_url !== null) ? $input->update_relative_url : null;
+        $input->delete_relative_url = ($input->delete_relative_url !== null) ? $input->delete_relative_url : null;
+        $input->others = !empty($input->others) ? json_encode($input->others) : '{}';
+        $input->class_load = ($input->class_load !== null) ? $input->class_load : null;
+        $input->extra_parameters = !empty($input->extra_parameters) ? json_encode($input->extra_parameters) : '{}';
+        $input->penalty = ($input->penalty !== null) ? $input->penalty : null;
+        $input->active = ($input->active !== null) ? $input->active : null;
+        $input->uid = ($input->uid !== null) ? $input->uid : null;
 
         return $input;
     }
@@ -409,9 +405,9 @@ class EngineDAO extends AbstractDao
 
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute([
-                'engine_name' => $obj->name,
-                'uid'         => $obj->uid,
-                'active'      => 1
+            'engine_name' => $obj->name,
+            'uid' => $obj->uid,
+            'active' => 1
         ]);
 
         if ($stmt->rowCount() > 0) {

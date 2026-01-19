@@ -95,8 +95,8 @@ class SegmentTranslationIssueValidator extends Base
             // No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
             // are set, and reviewed words are set during setTranslation triggered callbacks.
             throw new ValidationError(
-                    "Trying access segment issue for revision number " .
-                    $this->request->param('revision_number') . " but segment is not in same revision state."
+                "Trying access segment issue for revision number " .
+                $this->request->param('revision_number') . " but segment is not in same revision state."
             );
         } elseif (!$latestSegmentEvent) {
             throw new Exception('Unable to find the current state of this segment. Please report this issue to support.');

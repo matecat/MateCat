@@ -40,8 +40,8 @@ class Database implements IDatabase
     const string SEQ_ID_PROJECT = 'id_project';
 
     protected static array $SEQUENCES = [
-            Database::SEQ_ID_SEGMENT,
-            Database::SEQ_ID_PROJECT,
+        Database::SEQ_ID_SEGMENT,
+        Database::SEQ_ID_PROJECT,
     ];
 
     /**
@@ -55,8 +55,8 @@ class Database implements IDatabase
     protected function __construct(string $server, string $user, string $password, string $database)
     {
         // Set fields
-        $this->server   = $server;
-        $this->user     = $user;
+        $this->server = $server;
+        $this->user = $user;
         $this->password = $password;
         $this->database = $database;
     }
@@ -90,13 +90,13 @@ class Database implements IDatabase
     {
         if (empty($this->connection)) {
             $this->connection = new PDO(
-                    "mysql:host=$this->server;dbname=$this->database",
-                    $this->user,
-                    $this->password,
-                    [
-                            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
-                            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                    ]
+                "mysql:host=$this->server;dbname=$this->database",
+                $this->user,
+                $this->password,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
+                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                ]
             );
             $this->connection->exec("SET names utf8");
         }
@@ -190,12 +190,17 @@ class Database implements IDatabase
     {
         // Prepare the statement
         $valuesToBind = [];
-        $query        = "UPDATE $table SET ";
+        $query = "UPDATE $table SET ";
         $currentIndex = 0;
 
         foreach ($data as $key => $value) {
-            $query                                 .= "$key = :value$currentIndex, ";
-            $valuesToBind[ ":value$currentIndex" ] = $value;
+            $query .= "$key = :value$currentIndex, ";
+
+            if (is_array($value) || is_object($value)) {
+                $value = json_encode($value);
+            }
+
+            $valuesToBind[":value$currentIndex"] = $value;
             ++$currentIndex;
         }
 
@@ -209,7 +214,7 @@ class Database implements IDatabase
                 $query .= $k . " IS :" . $k . " AND ";
             }
 
-            $valuesToBind[ $k ] = $v;
+            $valuesToBind[$k] = $v;
         }
 
         $query = substr($query, 0, -5);
@@ -219,7 +224,7 @@ class Database implements IDatabase
         // Execute it
         $stmt->execute($valuesToBind);
 
-        $affected            = $stmt->rowCount();
+        $affected = $stmt->rowCount();
         $this->affected_rows = $affected;
 
         return $affected;
@@ -237,7 +242,7 @@ class Database implements IDatabase
         $preparedStatement = $this->getConnection()->prepare($query);
 
         $valuesToBind = array_filter($data, function ($key) use ($mask) {
-            return isset($mask[ $key ]);
+            return isset($mask[$key]);
         }, ARRAY_FILTER_USE_KEY);
 
 
@@ -252,13 +257,13 @@ class Database implements IDatabase
      * Returns a string suitable for insert of the fields
      * provided by the attribute array.
      *
-     * @param string $table    the table on which perform the insert
-     * @param array  $attrs    array of full attributes to update
-     * @param array  $mask     array of attributes to include in the update
-     * @param bool   $ignore   Use INSERT IGNORE query type
-     * @param bool   $no_nulls Exclude NULL fields when build the sql
+     * @param string $table the table on which perform the insert
+     * @param array $attrs array of full attributes to update
+     * @param array $mask array of attributes to include in the update
+     * @param bool $ignore Use INSERT IGNORE query type
+     * @param bool $no_nulls Exclude NULL fields when build the sql
      *
-     * @param array  $on_duplicate_fields
+     * @param array $on_duplicate_fields
      *
      * @return string
      * @throws Exception
@@ -274,7 +279,7 @@ class Database implements IDatabase
             throw new Exception('INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.');
         }
 
-        $first  = [];
+        $first = [];
         $second = [];
 
         $sql_ignore = $ignore ? " IGNORE " : "";
@@ -283,7 +288,7 @@ class Database implements IDatabase
         if (!empty($on_duplicate_fields)) {
             $duplicate_statement = " ON DUPLICATE KEY UPDATE ";
             foreach ($on_duplicate_fields as $key => $value) {
-                if ($no_nulls && is_null($attrs[ $key ])) {
+                if ($no_nulls && is_null($attrs[$key])) {
                     /*
                      *
                      * if NO NULLS flag is set and there is an ON DUPLICATE entry "value"
@@ -310,8 +315,8 @@ class Database implements IDatabase
                     $duplicate_statement .= "VALUES( $key )";
                 } else {
                     //bind to PDO
-                    $duplicate_statement                  .= ":dupUpdate_" . $key;
-                    $valuesToBind[ ":dupUpdate_" . $key ] = $value; //TODO this is a bug: bind values are not returned and not inserted in the mask
+                    $duplicate_statement .= ":dupUpdate_" . $key;
+                    $valuesToBind[":dupUpdate_" . $key] = $value; //TODO this is a bug: bind values are not returned and not inserted in the mask
                 }
                 $duplicate_statement .= ", ";
             }
@@ -327,20 +332,20 @@ class Database implements IDatabase
         foreach ($attrs as $key => $value) {
             if (array_key_exists($key, $mask)) {
                 if ($no_nulls && is_null($value)) {
-                    unset($mask[ $key ]);
+                    unset($mask[$key]);
                     continue;
                 }
-                $first[]  = "`$key`";
+                $first[] = "`$key`";
                 $second[] = ":$key";
             }
         }
 
         return "INSERT $sql_ignore INTO " . $table .
-                " (" .
-                implode(', ', $first) .
-                ") VALUES (" .
-                implode(', ', $second) .
-                ")
+            " (" .
+            implode(', ', $first) .
+            ") VALUES (" .
+            implode(', ', $second) .
+            ")
                 $duplicate_statement ;
         ";
     }
@@ -368,7 +373,7 @@ class Database implements IDatabase
 
     /**
      * @param string $sequence_name
-     * @param int    $seqIncrement
+     * @param int $seqIncrement
      *
      * @return array
      */

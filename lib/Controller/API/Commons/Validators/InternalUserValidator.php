@@ -25,8 +25,8 @@ class InternalUserValidator extends LoginValidator
     {
         parent::_validate();
         $this->controller->getFeatureSet()->filter(
-                "isAnInternalUser",
-                $this->controller->getUser()->email
+            "isAnInternalUser",
+            $this->controller->getUser()->email
         ) ?: throw new AuthorizationError('Forbidden, please contact support for generating a valid API key');
     }
 

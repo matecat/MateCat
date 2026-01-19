@@ -28,12 +28,12 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     public function index(): void {
         $result = EntryDao::findAllByTranslationVersion(
-                $this->validator->translation->id_segment,
-                $this->validator->translation->id_job,
-                $this->getVersionNumber()
+            $this->validator->translation->id_segment,
+            $this->validator->translation->id_job,
+            $this->getVersionNumber()
         );
 
-        $json     = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter();
         $rendered = $json->render( $result );
 
         $this->response->json( [ 'issues' => $rendered ] );
@@ -44,20 +44,20 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      */
     public function create(): void {
         $data = [
-                'id_segment'          => $this->request->param( 'id_segment' ),
-                'id_job'              => $this->request->param( 'id_job' ),
-                'id_category'         => $this->request->param( 'id_category' ),
-                'severity'            => $this->request->param( 'severity' ),
-                'translation_version' => $this->validator->translation->version_number,
-                'target_text'         => $this->request->param( 'target_text' ),
-                'start_node'          => $this->request->param( 'start_node' ),
-                'start_offset'        => $this->request->param( 'start_offset' ),
-                'end_node'            => $this->request->param( 'end_node' ),
-                'end_offset'          => $this->request->param( 'end_offset' ),
-                'is_full_segment'     => false,
-                'comment'             => $this->request->param( 'comment' ),
-                'uid'                 => $this->user->uid ?? null,
-                'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ),
+            'id_segment' => $this->request->param( 'id_segment' ),
+            'id_job' => $this->request->param( 'id_job' ),
+            'id_category' => $this->request->param( 'id_category' ),
+            'severity' => $this->request->param( 'severity' ),
+            'translation_version' => $this->validator->translation->version_number,
+            'target_text' => $this->request->param( 'target_text' ),
+            'start_node' => $this->request->param( 'start_node' ),
+            'start_offset' => $this->request->param( 'start_offset' ),
+            'end_node' => $this->request->param( 'end_node' ),
+            'end_offset' => $this->request->param( 'end_offset' ),
+            'is_full_segment' => false,
+            'comment' => $this->request->param( 'comment' ),
+            'uid' => $this->user->uid ?? null,
+            'source_page' => ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ),
         ];
 
         Database::obtain()->begin();
@@ -65,9 +65,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $struct = new EntryStruct( $data );
 
         $model = $this->_getSegmentTranslationIssueModel(
-                $this->request->param( 'id_job' ),
-                $this->request->param( 'password' ),
-                $struct
+            $this->request->param( 'id_job' ),
+            $this->request->param( 'password' ),
+            $struct
         );
 
         $struct = $model->save();
@@ -128,7 +128,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         Database::obtain()->commit();
 
-        $json     = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter();
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( [ 'issue' => $rendered ] );
@@ -140,9 +140,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     public function delete(): void {
         Database::obtain()->begin();
         $model = $this->_getSegmentTranslationIssueModel(
-                $this->request->param( 'id_job' ),
-                $this->request->param( 'password' ),
-                $this->validator->issue
+            $this->request->param( 'id_job' ),
+            $this->request->param( 'password' ),
+            $this->validator->issue
         );
 
         $this->checkUserId($this->validator->issue->uid);
@@ -157,10 +157,10 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $dao = new EntryCommentDao();
 
         $comments = $dao->findByIssueId(
-                $this->validator->issue->id
+            $this->validator->issue->id
         );
 
-        $json     = new TranslationIssueComment();
+        $json = new TranslationIssueComment();
         $rendered = $json->render( $comments );
         $this->response->json( [ 'comments' => $rendered ] );
     }
@@ -171,13 +171,13 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      */
     public function createComment(): void {
         $data = [
-                'comment'     => $this->request->param( 'message' ),
-                'id_qa_entry' => $this->validator->issue->id,
-                'source_page' => $this->request->param( 'source_page' ),
-                'uid'         => $this->user->uid
+            'comment' => $this->request->param( 'message' ),
+            'id_qa_entry' => $this->validator->issue->id,
+            'source_page' => $this->request->param( 'source_page' ),
+            'uid' => $this->user->uid
         ];
 
-        $dao   = new EntryCommentDao();
+        $dao = new EntryCommentDao();
         $entry = EntryDao::findById( $this->validator->issue->id );
 
         if ( empty( $entry ) ) {
@@ -188,7 +188,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $dao->createComment( $data );
 
-        $json     = new TranslationIssueFormatter();
+        $json = new TranslationIssueFormatter();
         $rendered = $json->renderItem( $entry );
 
         $response = [ 'comment' => $rendered ];
@@ -197,8 +197,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     /**
-     * @param int         $id_job
-     * @param string      $password
+     * @param int $id_job
+     * @param string $password
      * @param EntryStruct $issue
      *
      * @return TranslationIssueModel

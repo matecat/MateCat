@@ -78,7 +78,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
   const continueDownloadWithGoogleDrive = ({
     checkErrors = true,
     originalFiles,
-  }) => {
+  } = {}) => {
     if (downloadDisabled) {
       return
     }

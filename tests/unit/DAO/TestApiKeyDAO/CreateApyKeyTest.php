@@ -15,7 +15,8 @@ use Utils\Registry\AppConfig;
  * Date: 16/06/16
  * Time: 18.57
  */
-class CreateApyKeyTest extends AbstractTest {
+class CreateApyKeyTest extends AbstractTest
+{
     /**
      * @var Client
      */
@@ -37,30 +38,30 @@ class CreateApyKeyTest extends AbstractTest {
     protected $database_instance;
     protected $actual_apikey;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+        $this->database_instance = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
-        $this->apikey_Dao          = new ApiKeyDao( $this->database_instance );
+        $this->apikey_Dao = new ApiKeyDao($this->database_instance);
         $this->apikey_struct_param = new ApiKeyStruct();
 
 
-        $this->apikey_struct_param->uid         = '1999';
-        $this->apikey_struct_param->api_key     = 'c4ca4238bar92382fake509a6f758foo';
-        $this->apikey_struct_param->api_secret  = 'api_secret';
+        $this->apikey_struct_param->uid = '1999';
+        $this->apikey_struct_param->api_key = 'c4ca4238bar92382fake509a6f758foo';
+        $this->apikey_struct_param->api_secret = 'api_secret';
         $this->apikey_struct_param->create_date = '2016-06-16 18:06:29';
         $this->apikey_struct_param->last_update = '2016-06-16 19:06:30';
-        $this->apikey_struct_param->enabled     = '1';
+        $this->apikey_struct_param->enabled = '1';
 
-        $this->database_instance->getConnection()->query( "DELETE FROM `api_keys` WHERE 1" );
-
+        $this->database_instance->getConnection()->query("DELETE FROM `api_keys` WHERE 1");
     }
 
 
-    public function tearDown(): void {
-
-        $this->database_instance->getConnection()->query( $this->sql_delete_apikey );
-        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
+    public function tearDown(): void
+    {
+        $this->database_instance->getConnection()->query($this->sql_delete_apikey);
+        $this->flusher = new Predis\Client(AppConfig::$REDIS_SERVERS);
         $this->flusher->flushdb();
         parent::tearDown();
     }
@@ -69,27 +70,25 @@ class CreateApyKeyTest extends AbstractTest {
      * @group  regression
      * @covers ApiKeyDao::create
      */
-    public function test_create_with_success() {
-
-        $this->actual_apikey     = $this->apikey_Dao->create( $this->apikey_struct_param );
-        $this->apikey_id         = $this->actual_apikey->id;
+    public function test_create_with_success()
+    {
+        $this->actual_apikey = $this->apikey_Dao->create($this->apikey_struct_param);
+        $this->apikey_id = $this->actual_apikey->id;
         $this->sql_select_apikey = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
         $this->sql_delete_apikey = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
 
         $this->apikey_struct_param->id = $this->apikey_id;
-        $this->assertEquals( $this->apikey_struct_param, $this->actual_apikey );
+        $this->assertEquals($this->apikey_struct_param, $this->actual_apikey);
 
-        $wrapped_result = $this->database_instance->getConnection()->query( $this->sql_select_apikey )->fetchAll( PDO::FETCH_ASSOC );
-        $result         = $wrapped_result[ '0' ];
-        $this->assertCount( 7, $result );
-        $this->assertEquals( $this->apikey_id, $result[ 'id' ] );
-        $this->assertEquals( "1999", $result[ 'uid' ] );
-        $this->assertEquals( "c4ca4238bar92382fake509a6f758foo", $result[ 'api_key' ] );
-        $this->assertEquals( "api_secret", $result[ 'api_secret' ] );
-        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'create_date' ] );
-        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'last_update' ] );
-        $this->assertEquals( '1', $result[ 'enabled' ] );
-
-
+        $wrapped_result = $this->database_instance->getConnection()->query($this->sql_select_apikey)->fetchAll(PDO::FETCH_ASSOC);
+        $result = $wrapped_result['0'];
+        $this->assertCount(7, $result);
+        $this->assertEquals($this->apikey_id, $result['id']);
+        $this->assertEquals("1999", $result['uid']);
+        $this->assertEquals("c4ca4238bar92382fake509a6f758foo", $result['api_key']);
+        $this->assertEquals("api_secret", $result['api_secret']);
+        $this->assertMatchesRegularExpression('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result['create_date']);
+        $this->assertMatchesRegularExpression('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result['last_update']);
+        $this->assertEquals('1', $result['enabled']);
     }
 }

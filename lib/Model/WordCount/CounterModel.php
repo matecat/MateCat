@@ -23,8 +23,8 @@ class CounterModel
      * @var WordCountStruct|null
      */
     protected ?WordCountStruct $oldWCount = null;
-    protected string           $newStatus;
-    protected string           $oldStatus;
+    protected string $newStatus;
+    protected string $oldStatus;
 
     protected static array $constCache = [];
     /**
@@ -45,7 +45,7 @@ class CounterModel
      */
     public function __construct(WordCountStruct $oldWCount = null)
     {
-        $reflect          = new ReflectionClass(TranslationStatus::class);
+        $reflect = new ReflectionClass(TranslationStatus::class);
         self::$constCache = array_flip($reflect->getConstants());
 
         if ($oldWCount !== null) {
@@ -88,7 +88,7 @@ class CounterModel
 
     /**
      * @param float $weighted_words_amount the new status
-     * @param int   $raw_words_amount
+     * @param int $raw_words_amount
      *
      * @return WordCountStruct
      */
@@ -207,35 +207,35 @@ class CounterModel
         $_details = $wordCounterDao->getStatsForJob($id_job, null, $jPassword);
 
         $_job_details = array_pop($_details); //get the row
-        $job_details  = [];
+        $job_details = [];
 
         foreach ($_job_details as $key => $value) {
             $k = explode("_", $key); // EX: split TOTAL_RAW
-            if (!empty($k[ 1 ])) {
-                $job_details[ $k[ 0 ] ][ 'raw' ] = $value;
-            } elseif ($k[ 0 ] != 'id') {
-                $job_details[ $k[ 0 ] ][ 'weighted' ] = $value;
+            if (!empty($k[1])) {
+                $job_details[$k[0]]['raw'] = $value;
+            } elseif ($k[0] != 'id') {
+                $job_details[$k[0]]['weighted'] = $value;
             } else {
-                $job_details[ $key ] = $value;
+                $job_details[$key] = $value;
             }
         }
 
         $wStruct = new WordCountStruct();
-        $wStruct->setIdJob($job_details[ 'id' ]);
+        $wStruct->setIdJob($job_details['id']);
         $wStruct->setJobPassword($jPassword);
-        $wStruct->setNewWords($job_details[ TranslationStatus::STATUS_NEW ][ 'weighted' ]);
-        $wStruct->setDraftWords($job_details[ TranslationStatus::STATUS_DRAFT ][ 'weighted' ]);
-        $wStruct->setTranslatedWords($job_details[ TranslationStatus::STATUS_TRANSLATED ][ 'weighted' ]);
-        $wStruct->setApprovedWords($job_details[ TranslationStatus::STATUS_APPROVED ][ 'weighted' ]);
-        $wStruct->setApproved2Words($job_details[ TranslationStatus::STATUS_APPROVED2 ][ 'weighted' ]);
-        $wStruct->setRejectedWords($job_details[ TranslationStatus::STATUS_REJECTED ][ 'weighted' ]);
+        $wStruct->setNewWords($job_details[TranslationStatus::STATUS_NEW]['weighted']);
+        $wStruct->setDraftWords($job_details[TranslationStatus::STATUS_DRAFT]['weighted']);
+        $wStruct->setTranslatedWords($job_details[TranslationStatus::STATUS_TRANSLATED]['weighted']);
+        $wStruct->setApprovedWords($job_details[TranslationStatus::STATUS_APPROVED]['weighted']);
+        $wStruct->setApproved2Words($job_details[TranslationStatus::STATUS_APPROVED2]['weighted']);
+        $wStruct->setRejectedWords($job_details[TranslationStatus::STATUS_REJECTED]['weighted']);
 
-        $wStruct->setNewRawWords($job_details[ TranslationStatus::STATUS_NEW ][ 'raw' ]);
-        $wStruct->setDraftRawWords($job_details[ TranslationStatus::STATUS_DRAFT ][ 'raw' ]);
-        $wStruct->setTranslatedRawWords($job_details[ TranslationStatus::STATUS_TRANSLATED ][ 'raw' ]);
-        $wStruct->setApprovedRawWords($job_details[ TranslationStatus::STATUS_APPROVED ][ 'raw' ]);
-        $wStruct->setApproved2RawWords($job_details[ TranslationStatus::STATUS_APPROVED2 ][ 'raw' ]);
-        $wStruct->setRejectedRawWords($job_details[ TranslationStatus::STATUS_REJECTED ][ 'raw' ]);
+        $wStruct->setNewRawWords($job_details[TranslationStatus::STATUS_NEW]['raw']);
+        $wStruct->setDraftRawWords($job_details[TranslationStatus::STATUS_DRAFT]['raw']);
+        $wStruct->setTranslatedRawWords($job_details[TranslationStatus::STATUS_TRANSLATED]['raw']);
+        $wStruct->setApprovedRawWords($job_details[TranslationStatus::STATUS_APPROVED]['raw']);
+        $wStruct->setApproved2RawWords($job_details[TranslationStatus::STATUS_APPROVED2]['raw']);
+        $wStruct->setRejectedRawWords($job_details[TranslationStatus::STATUS_REJECTED]['raw']);
 
         $wordCounterDao->initializeWordCount($wStruct);
 
@@ -261,8 +261,8 @@ class CounterModel
     private function equivalentStatuses(): bool
     {
         return (
-                $this->methodNameForStatusCall($this->newStatus) ==
-                $this->methodNameForStatusCall($this->oldStatus)
+            $this->methodNameForStatusCall($this->newStatus) ==
+            $this->methodNameForStatusCall($this->oldStatus)
         );
     }
 

@@ -26,18 +26,18 @@ class FilesController extends AbstractStatefulKleinController
     public function segments(): void
     {
         // `file_part_id` has the priority
-        if (isset($_POST[ 'file_part_id' ])) {
-            $filePartId = $_POST[ 'file_part_id' ];
+        if (isset($_POST['file_part_id'])) {
+            $filePartId = $_POST['file_part_id'];
             $this->validateInteger($filePartId);
             $this->getFirstAndLastSegmentFromFilePartId($filePartId);
-        } elseif (isset($_POST[ 'file_id' ])) {
-            $fileId = $_POST[ 'file_id' ];
+        } elseif (isset($_POST['file_id'])) {
+            $fileId = $_POST['file_id'];
             $this->validateInteger($fileId);
             $this->getFirstAndLastSegmentFromFileId($fileId);
         } else {
             $this->response->status()->setCode(500);
             $this->response->json([
-                    'error' => 'Missing parameters. `file_part_id` or `file_id` must be provided'
+                'error' => 'Missing parameters. `file_part_id` or `file_id` must be provided'
             ]);
         }
     }
@@ -50,7 +50,7 @@ class FilesController extends AbstractStatefulKleinController
      */
     private function getFirstAndLastSegmentFromFilePartId(int $filePartId): void
     {
-        $filePartsDao        = new FilesPartsDao();
+        $filePartsDao = new FilesPartsDao();
         $firstAndLastSegment = $filePartsDao->getFirstAndLastSegment($filePartId);
 
         if (null === $firstAndLastSegment->first_segment) {
@@ -58,8 +58,8 @@ class FilesController extends AbstractStatefulKleinController
         }
 
         $this->response->json([
-                'first_segment' => (int)$firstAndLastSegment->first_segment,
-                'last_segment'  => (int)$firstAndLastSegment->last_segment,
+            'first_segment' => (int)$firstAndLastSegment->first_segment,
+            'last_segment' => (int)$firstAndLastSegment->last_segment,
         ]);
     }
 
@@ -79,11 +79,11 @@ class FilesController extends AbstractStatefulKleinController
 
         $firstAndLastSegment = array_filter($fileInfo, function ($item) use ($fileId) {
             return $item->id_file == $fileId;
-        })[ 0 ];
+        })[0];
 
         $this->response->json([
-                'fist_segment' => (int)$firstAndLastSegment->first_segment,
-                'last_segment' => (int)$firstAndLastSegment->last_segment,
+            'fist_segment' => (int)$firstAndLastSegment->first_segment,
+            'last_segment' => (int)$firstAndLastSegment->last_segment,
         ]);
     }
 

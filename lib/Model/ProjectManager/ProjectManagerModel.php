@@ -36,34 +36,34 @@ class ProjectManagerModel
      */
     public static function createProjectRecord(ArrayObject $projectStructure): ProjectStruct
     {
-        $data                        = [];
-        $data[ 'id' ]                = $projectStructure[ 'id_project' ];
-        $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
-        $data[ 'id_team' ]           = $projectStructure[ 'id_team' ];
-        $data[ 'name' ]              = $projectStructure[ 'project_name' ];
-        $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
-        $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
-        $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
-        $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
-        $data[ 'remote_ip_address' ] = empty($projectStructure[ 'user_ip' ]) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
-        $data[ 'id_assignee' ]       = $projectStructure[ 'id_assignee' ];
-        $data[ 'instance_id' ]       = !is_null($projectStructure[ 'instance_id' ]) ? $projectStructure[ 'instance_id' ] : null;
-        $data[ 'due_date' ]          = !is_null($projectStructure[ 'due_date' ]) ? $projectStructure[ 'due_date' ] : null;
+        $data = [];
+        $data['id'] = $projectStructure['id_project'];
+        $data['id_customer'] = $projectStructure['id_customer'];
+        $data['id_team'] = $projectStructure['id_team'];
+        $data['name'] = $projectStructure['project_name'];
+        $data['create_date'] = $projectStructure['create_date'];
+        $data['status_analysis'] = $projectStructure['status'];
+        $data['password'] = $projectStructure['ppassword'];
+        $data['pretranslate_100'] = $projectStructure['pretranslate_100'];
+        $data['remote_ip_address'] = empty($projectStructure['user_ip']) ? 'UNKNOWN' : $projectStructure['user_ip'];
+        $data['id_assignee'] = $projectStructure['id_assignee'];
+        $data['instance_id'] = !is_null($projectStructure['instance_id']) ? $projectStructure['instance_id'] : null;
+        $data['due_date'] = !is_null($projectStructure['due_date']) ? $projectStructure['due_date'] : null;
 
         $db = Database::obtain();
         $db->begin();
         $projectId = $db->insert('projects', $data);
-        $project   = ProjectDao::findById($projectId);
+        $project = ProjectDao::findById($projectId);
         $db->commit();
 
         return $project;
     }
 
     /**
-     * @param ArrayObject      $projectStructure
-     * @param string           $file_name
-     * @param string           $mime_type
-     * @param string           $fileDateSha1Path
+     * @param ArrayObject $projectStructure
+     * @param string $file_name
+     * @param string $mime_type
+     * @param string $fileDateSha1Path
      * @param ArrayObject|null $meta
      *
      * @return string
@@ -71,13 +71,13 @@ class ProjectManagerModel
      */
     public static function insertFile(ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null): string
     {
-        $data                         = [];
-        $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
-        $data[ 'filename' ]           = $file_name;
-        $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
-        $data[ 'mime_type' ]          = $mime_type;
-        $data[ 'sha1_original_file' ] = $fileDateSha1Path;
-        $data[ 'is_converted' ]       = isset($meta[ 'mustBeConverted' ]) ? (int)$meta[ 'mustBeConverted' ] : 0;
+        $data = [];
+        $data['id_project'] = $projectStructure['id_project'];
+        $data['filename'] = $file_name;
+        $data['source_language'] = $projectStructure['source_language'];
+        $data['mime_type'] = $mime_type;
+        $data['sha1_original_file'] = $fileDateSha1Path;
+        $data['is_converted'] = isset($meta['mustBeConverted']) ? (int)$meta['mustBeConverted'] : 0;
 
         $db = Database::obtain();
 
@@ -93,6 +93,7 @@ class ProjectManagerModel
 
     /**
      * @param $query_translations_values
+     * @throws Exception
      */
     public static function insertPreTranslations(&$query_translations_values): void
     {
@@ -131,7 +132,7 @@ class ProjectManagerModel
         foreach ($query_translations_values as $i => $chunk) {
             try {
                 $query = $baseQuery . rtrim(str_repeat($tuple_marks . ", ", count($chunk)), ", ");
-                $stmt  = $dbHandler->getConnection()->prepare($query);
+                $stmt = $dbHandler->getConnection()->prepare($query);
                 $stmt->execute(iterator_to_array(new RecursiveIteratorIterator(new RecursiveArrayIterator($chunk)), false));
 
                 LoggerFactory::getLogger('project_manager')->debug("Pre-Translations: Executed Query " . ($i + 1));
@@ -152,15 +153,15 @@ class ProjectManagerModel
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES ";
 
         $insert_values = [];
-        $chunk_size    = 30;
+        $chunk_size = 30;
 
         foreach ($notes as $internal_id => $v) {
-            $attributes = $v[ 'from' ];
-            $entries    = $v[ 'entries' ];
-            $segments   = $v[ 'segment_ids' ];
+            $attributes = $v['from'];
+            $entries = $v['entries'];
+            $segments = $v['segment_ids'];
 
-            $json_entries     = $v[ 'json' ];
-            $json_segment_ids = $v[ 'json_segment_ids' ];
+            $json_entries = $v['json'];
+            $json_segment_ids = $v['json_segment_ids'];
 
             foreach ($segments as $id_segment) {
                 foreach ($entries as $index => $note) {
@@ -169,8 +170,8 @@ class ProjectManagerModel
                     // to prevent possible xss attacks
                     // from the UI
 
-                    if (isset($attributes[ 'entries' ][ $index ])) {
-                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes[ 'entries' ][ $index ]));
+                    if (isset($attributes['entries'][$index])) {
+                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes['entries'][$index]));
 
                         // check for metaKey is `notes`
                         if (!self::isAMetadata($metaKey)) {
@@ -184,8 +185,8 @@ class ProjectManagerModel
 
             foreach ($json_segment_ids as $id_segment) {
                 foreach ($json_entries as $index => $json) {
-                    if (isset($attributes[ 'json' ][ $index ])) {
-                        $metaKey = $attributes[ 'json' ][ $index ];
+                    if (isset($attributes['json'][$index])) {
+                        $metaKey = $attributes['json'][$index];
 
                         if (!self::isAMetadata($metaKey)) {
                             $insert_values[] = [$id_segment, $internal_id, null, $json];
@@ -205,7 +206,7 @@ class ProjectManagerModel
         try {
             foreach ($chunked as $i => $chunk) {
                 $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ?, ? ) ");
-                $stmt             = $conn->prepare($template . implode(', ', $values_sql_array));
+                $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
                 LoggerFactory::getLogger('project_manager')->debug("Notes: Executed Query " . ($i + 1));
@@ -229,20 +230,20 @@ class ProjectManagerModel
         $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
 
         $insert_values = [];
-        $chunk_size    = 30;
+        $chunk_size = 30;
 
         foreach ($notes as $v) {
-            $attributes = $v[ 'from' ];
-            $entries    = $v[ 'entries' ];
-            $segments   = $v[ 'segment_ids' ];
+            $attributes = $v['from'];
+            $entries = $v['entries'];
+            $segments = $v['segment_ids'];
 
-            $json_entries     = $v[ 'json' ];
-            $json_segment_ids = $v[ 'json_segment_ids' ];
+            $json_entries = $v['json'];
+            $json_segment_ids = $v['json_segment_ids'];
 
             foreach ($segments as $id_segment) {
                 foreach ($entries as $index => $note) {
-                    if (isset($attributes[ 'entries' ][ $index ])) {
-                        $metaKey   = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes[ 'entries' ][ $index ]));
+                    if (isset($attributes['entries'][$index])) {
+                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes['entries'][$index]));
                         $metaValue = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
 
                         if (self::isAMetadata($metaKey)) {
@@ -254,8 +255,8 @@ class ProjectManagerModel
 
             foreach ($json_segment_ids as $id_segment) {
                 foreach ($json_entries as $index => $json) {
-                    if (isset($attributes[ 'json' ][ $index ])) {
-                        $metaKey   = $attributes[ 'json' ][ $index ];
+                    if (isset($attributes['json'][$index])) {
+                        $metaKey = $attributes['json'][$index];
                         $metaValue = $json;
 
                         if (self::isAMetadata($metaKey)) {
@@ -274,7 +275,7 @@ class ProjectManagerModel
         try {
             foreach ($chunked as $i => $chunk) {
                 $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ? ) ");
-                $stmt             = $conn->prepare($template . implode(', ', $values_sql_array));
+                $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
                 LoggerFactory::getLogger('project_manager')->debug("Notes attributes: Executed Query " . ($i + 1));
@@ -296,11 +297,11 @@ class ProjectManagerModel
     private static function isAMetadata($metaKey): bool
     {
         $metaDataKeys = [
-                'id_request',
-                'id_content',
-                'id_order',
-                'id_order_group',
-                'screenshot'
+            'id_request',
+            'id_content',
+            'id_order',
+            'id_order_group',
+            'screenshot'
         ];
 
         return in_array($metaKey, $metaDataKeys);
@@ -316,13 +317,13 @@ class ProjectManagerModel
         $template = " INSERT INTO context_groups ( id_project, id_segment, context_json ) VALUES ";
 
         $insert_values = [];
-        $chunk_size    = 30;
+        $chunk_size = 30;
 
-        $id_project = $projectStructure[ 'id_project' ];
+        $id_project = $projectStructure['id_project'];
 
-        foreach ($projectStructure[ 'context-group' ] as $v) {
-            $context_json = json_encode($v[ 'context_json' ]);
-            $segments     = $v[ 'context_json_segment_ids' ];
+        foreach ($projectStructure['context-group'] as $v) {
+            $context_json = json_encode($v['context_json']);
+            $segments = $v['context_json_segment_ids'];
 
             foreach ($segments as $id_segment) {
                 $insert_values[] = [$id_project, $id_segment, $context_json];
@@ -337,7 +338,7 @@ class ProjectManagerModel
         try {
             foreach ($chunked as $i => $chunk) {
                 $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ? ) ");
-                $stmt             = $conn->prepare($template . implode(', ', $values_sql_array));
+                $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
                 LoggerFactory::getLogger('project_manager')->debug("Notes: Executed Query " . ($i + 1));

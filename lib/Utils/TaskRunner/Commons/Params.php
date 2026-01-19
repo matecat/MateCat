@@ -22,7 +22,7 @@ class Params extends AbstractElement
      * __set() is run when writing data to inaccessible (or not existent) properties
      *
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function __set(string $name, mixed $value): void
     {

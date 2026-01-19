@@ -28,9 +28,9 @@ class TMXFileController extends KleinController
      */
     public function import(): void
     {
-        $request   = $this->validateTheRequest();
+        $request = $this->validateTheRequest();
         $TMService = new TMSService();
-        $file      = $TMService->uploadFile($request['disable_upload_limit']);
+        $file = $TMService->uploadFile($request['disable_upload_limit']);
 
         $uuids = [];
 
@@ -40,9 +40,9 @@ class TMXFileController extends KleinController
             }
 
             $file = new TMSFile(
-                    $fileInfo->file_path,
-                    $request[ 'tm_key' ],
-                    $fileInfo->name
+                $fileInfo->file_path,
+                $request['tm_key'],
+                $fileInfo->name
             );
 
             $TMService->addTmxInMyMemory($file, $this->user);
@@ -53,31 +53,31 @@ class TMXFileController extends KleinController
              *
              * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
              */
-            if ($request[ 'tm_key' ] != AppConfig::$DEFAULT_TM_KEY) {
+            if ($request['tm_key'] != AppConfig::$DEFAULT_TM_KEY) {
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
                  */
-                $mkDao           = new MemoryKeyDao(Database::obtain());
+                $mkDao = new MemoryKeyDao(Database::obtain());
                 $searchMemoryKey = new MemoryKeyStruct();
-                $key             = new TmKeyStruct();
-                $key->key        = $request[ 'tm_key' ];
+                $key = new TmKeyStruct();
+                $key->key = $request['tm_key'];
 
-                $searchMemoryKey->uid    = $this->user->uid;
+                $searchMemoryKey->uid = $this->user->uid;
                 $searchMemoryKey->tm_key = $key;
-                $userMemoryKey           = $mkDao->read($searchMemoryKey);
+                $userMemoryKey = $mkDao->read($searchMemoryKey);
 
-                if (empty($userMemoryKey[ 0 ]->tm_key->name) && !empty($userMemoryKey)) {
-                    $userMemoryKey[ 0 ]->tm_key->name = $fileInfo->name;
-                    $mkDao->atomicUpdate($userMemoryKey[ 0 ]);
+                if (empty($userMemoryKey[0]->tm_key->name) && !empty($userMemoryKey)) {
+                    $userMemoryKey[0]->tm_key->name = $fileInfo->name;
+                    $mkDao->atomicUpdate($userMemoryKey[0]);
                 }
             }
         }
 
         $this->response->json([
-                'errors' => [],
-                'data'   => [
-                        'uuids' => $uuids
-                ]
+            'errors' => [],
+            'data' => [
+                'uuids' => $uuids
+            ]
         ]);
     }
 
@@ -86,13 +86,13 @@ class TMXFileController extends KleinController
      */
     public function importStatus(): void
     {
-        $uuid      = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
+        $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $TMService = new TMSService();
-        $status    = $TMService->tmxUploadStatus($uuid);
+        $status = $TMService->tmxUploadStatus($uuid);
 
         $this->response->json([
-                'errors' => [],
-                'data'   => $status[ 'data' ],
+            'errors' => [],
+            'data' => $status['data'],
         ]);
     }
 
@@ -100,16 +100,16 @@ class TMXFileController extends KleinController
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest(): array {
+    private function validateTheRequest(): array
+    {
         $name = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $tm_key = filter_var($this->request->param('tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
         $uuid = filter_var($this->request->param('uuid'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
-        $disable_upload_limit = filter_var( $this->request->param( 'disable_upload_limit' ), FILTER_VALIDATE_BOOLEAN );
+        $disable_upload_limit = filter_var($this->request->param('disable_upload_limit'), FILTER_VALIDATE_BOOLEAN);
 
-        if ( empty( $tm_key ) ) {
-
-            if ( empty( AppConfig::$DEFAULT_TM_KEY ) ) {
-                throw new InvalidArgumentException( "Please specify a TM key.", -2 );
+        if (empty($tm_key)) {
+            if (empty(AppConfig::$DEFAULT_TM_KEY)) {
+                throw new InvalidArgumentException("Please specify a TM key.", -2);
             }
 
             /*
@@ -120,10 +120,10 @@ class TMXFileController extends KleinController
         }
 
         return [
-                'name'                 => $name,
-                'tm_key'               => $tm_key,
-                'uuid'                 => $uuid,
-                'disable_upload_limit' => $disable_upload_limit ?? false,
+            'name' => $name,
+            'tm_key' => $tm_key,
+            'uuid' => $uuid,
+            'disable_upload_limit' => $disable_upload_limit ?? false,
         ];
     }
 }

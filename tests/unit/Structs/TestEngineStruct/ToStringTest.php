@@ -11,17 +11,19 @@ use TestHelpers\AbstractTest;
  * Date: 20/04/16
  * Time: 19.22
  */
-class ToStringTest extends AbstractTest {
+class ToStringTest extends AbstractTest
+{
     /**
      * @var EngineStruct
      */
     protected $engine_struct_param;
 
-    public function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
-        $this->engine_struct_param              = new EngineStruct();
-        $this->engine_struct_param->id          = 999; //sample value
-        $this->engine_struct_param->name        = "Moses_bar_and_foo";
+        $this->engine_struct_param = new EngineStruct();
+        $this->engine_struct_param->id = 999; //sample value
+        $this->engine_struct_param->name = "Moses_bar_and_foo";
         $this->engine_struct_param->description = "Machine translation from bar and foo.";
     }
 
@@ -31,9 +33,10 @@ class ToStringTest extends AbstractTest {
      * @group  regression
      * @covers EngineStruct::offsetUnset
      */
-    public function test_toString_field() {
+    public function test_toString_field()
+    {
         $expected_string = '999Moses_bar_and_fooMachine translation from bar and foo.';
 
-        $this->assertEquals( $expected_string, $this->engine_struct_param->__toString() );
+        $this->assertEquals($expected_string, $this->engine_struct_param->__toString());
     }
 }

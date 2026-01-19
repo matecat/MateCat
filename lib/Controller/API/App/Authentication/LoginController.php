@@ -17,6 +17,7 @@ use Exception;
 use Klein\Response;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
+use ReflectionException;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
@@ -27,7 +28,7 @@ class LoginController extends AbstractStatefulKleinController
     use RateLimiterTrait;
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function directLogout(): void
     {
@@ -41,12 +42,12 @@ class LoginController extends AbstractStatefulKleinController
     public function login(): void
     {
         $params = filter_var_array($this->request->params(), [
-                'email'    => FILTER_SANITIZE_EMAIL,
-                'password' => FILTER_SANITIZE_SPECIAL_CHARS
+            'email' => FILTER_SANITIZE_EMAIL,
+            'password' => FILTER_SANITIZE_SPECIAL_CHARS
         ]);
 
-        $checkRateLimitResponse = $this->checkRateLimitResponse($this->response, $params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login', 5);
-        $checkRateLimitIp       = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5);
+        $checkRateLimitResponse = $this->checkRateLimitResponse($this->response, $params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login', 5);
+        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5);
 
         if ($checkRateLimitResponse instanceof Response) {
             $this->response = $checkRateLimitResponse;
@@ -64,7 +65,7 @@ class LoginController extends AbstractStatefulKleinController
         $xsrfToken = $this->request->headers()->get(AppConfig::$XSRF_TOKEN);
 
         if ($xsrfToken === null) {
-            $this->incrementRateLimitCounter($params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login');
+            $this->incrementRateLimitCounter($params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login');
             $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login');
             $this->response->code(403);
 
@@ -72,19 +73,22 @@ class LoginController extends AbstractStatefulKleinController
         }
 
         try {
-            SimpleJWT::getValidPayload($xsrfToken);
+            SimpleJWT::isValid(
+                $xsrfToken,
+                AppConfig::$AUTHSECRET
+            );
         } catch (Exception) {
-            $this->incrementRateLimitCounter($params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login');
+            $this->incrementRateLimitCounter($params['email'] ?? 'BLANK_EMAIL', '/api/app/user/login');
             $this->incrementRateLimitCounter(Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login');
             $this->response->code(403);
 
             return;
         }
 
-        $dao  = new UserDao();
-        $user = $dao->getByEmail($params[ 'email' ]);
+        $dao = new UserDao();
+        $user = $dao->getByEmail($params['email']);
 
-        if ($user && $user->passwordMatch($params[ 'password' ]) && !is_null($user->email_confirmed_at)) {
+        if ($user && $user->passwordMatch($params['password']) && !is_null($user->email_confirmed_at)) {
             $user->clearAuthToken();
 
             $dao->updateUser($user);
@@ -98,7 +102,7 @@ class LoginController extends AbstractStatefulKleinController
 
             $this->response->code(200);
         } else {
-            $this->incrementRateLimitCounter($params[ 'email' ], '/api/app/user/login');
+            $this->incrementRateLimitCounter($params['email'], '/api/app/user/login');
             $this->incrementRateLimitCounter(Utils::getRealIpAddr(), '/api/app/user/login');
             $this->response->code(404);
         }
@@ -110,8 +114,14 @@ class LoginController extends AbstractStatefulKleinController
      */
     public function token(): void
     {
-        $jwt = new SimpleJWT(["csrf" => Utils::uuid4()]);
-        $jwt->setTimeToLive(60);
+        $jwt = new SimpleJWT(
+            [
+                "csrf" => Utils::uuid4()
+            ],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60
+        );
         $this->response->header(AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize());
         $this->response->code(200);
     }
@@ -122,14 +132,21 @@ class LoginController extends AbstractStatefulKleinController
      */
     public function socketToken(): void
     {
-        if (empty($_SESSION[ 'user' ])) {
+        if (empty($_SESSION['user'])) {
             $this->response->code(406);
 
             return;
         }
 
-        $jwt = new SimpleJWT(["uid" => $_SESSION[ 'user' ]->uid]);
-        $jwt->setTimeToLive(60);
+        $jwt = new SimpleJWT(
+            [
+                "uid" => $_SESSION['user']->uid
+            ],
+            AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            AppConfig::$AUTHSECRET,
+            60
+        );
+
         $this->response->header(AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize());
         $this->response->code(200);
     }

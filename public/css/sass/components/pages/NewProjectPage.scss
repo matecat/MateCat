@@ -20,8 +20,7 @@
 
 .new_project__page {
   overflow-y: auto;
-  height: 100%;
-  padding-bottom: 60px;
+  height: calc(100% - 60px);
   .load-gdrive {
     float: right;
     display: flex;
@@ -64,6 +63,7 @@
   }
 
   .label-tmx-select > span:last-of-type {
+    color: colors.$linkBlue;
     &[aria-label]::after {
       min-width: 260px;
       white-space: normal;

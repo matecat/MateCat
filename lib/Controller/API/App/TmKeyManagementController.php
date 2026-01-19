@@ -33,10 +33,11 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      * AND the all keys of the user
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getByJob(): void
     {
-        $idJob    = $this->request->param('id_job');
+        $idJob = $this->request->param('id_job');
         $password = $this->request->param('password');
 
         $chunk = CatUtils::getJobFromIdAndAnyPassword($idJob, $password);
@@ -44,9 +45,9 @@ class TmKeyManagementController extends AbstractStatefulKleinController
         if (empty($chunk)) {
             $this->response->status()->setCode(404);
             $this->response->json([
-                    'errors' => [
-                            'The job was not found'
-                    ]
+                'errors' => [
+                    'The job was not found'
+                ]
             ]);
             exit();
         }
@@ -57,33 +58,33 @@ class TmKeyManagementController extends AbstractStatefulKleinController
             $tmKeys = [];
 
             foreach ($job_keyList as $jobKey) {
-                $jobKey                  = new ClientTmKeyStruct($jobKey);
+                $jobKey = new ClientTmKeyStruct($jobKey);
                 $jobKey->complete_format = true;
-                $jobKey->r               = true;
-                $jobKey->w               = true;
-                $jobKey->owner           = false;
-                $tmKeys[]                = $jobKey->hideKey(-1);
+                $jobKey->r = true;
+                $jobKey->w = true;
+                $jobKey->owner = false;
+                $tmKeys[] = $jobKey->hideKey(-1);
             }
 
             $this->response->json([
-                    'tm_keys' => $tmKeys
+                'tm_keys' => $tmKeys
             ]);
             exit();
         }
 
-        if (CatUtils::isRevisionFromIdJobAndPassword($idJob, $password)) {
-            $userRole = Filter::ROLE_REVISOR;
-        } elseif ($this->getUser()->email == $chunk->status_owner) {
+        if ($this->getUser()->email == $chunk->status_owner) {
             $userRole = Filter::OWNER;
+        } elseif (CatUtils::isRevisionFromIdJobAndPassword($idJob, $password)) {
+            $userRole = Filter::ROLE_REVISOR;
         } else {
             $userRole = Filter::ROLE_TRANSLATOR;
         }
 
         $userKeys = new UserKeysModel($this->getUser(), $userRole);
-        $keys     = $userKeys->getKeys($chunk->tm_keys);
+        $keys = $userKeys->getKeys($chunk->tm_keys);
 
         $this->response->json([
-                'tm_keys' => $this->sortKeysInTheRightOrder($keys[ 'job_keys' ], $job_keyList)
+            'tm_keys' => $this->sortKeysInTheRightOrder($keys['job_keys'], $job_keyList)
         ]);
     }
 
@@ -102,16 +103,16 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
         foreach ($jobKeyList as $jobKey) {
             $filter = array_filter($keys, function ($key) use ($jobKey) {
-                if ($jobKey[ 'key' ] === $key->key) {
+                if ($jobKey['key'] === $key->key) {
                     return true;
                 }
 
                 // compare only the last 5 chars (hidden keys)
-                return substr($jobKey[ 'key' ], -5) === substr($key->key, -5);
+                return substr($jobKey['key'], -5) === substr($key->key, -5);
             });
 
             if (!empty($filter)) {
-                $sortedKeys[] = array_values($filter)[ 0 ];
+                $sortedKeys[] = array_values($filter)[0];
             }
             // owner a true solo se sono l'owner del job
 
@@ -130,19 +131,20 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getByUserAndKey(): void
     {
         $_keyDao = new MemoryKeyDao(Database::obtain());
-        $dh      = new MemoryKeyStruct([
-                'uid'    => $this->getUser()->uid,
-                'tm_key' => new TmKeyStruct([
-                                'key' => $this->request->param('key')
-                        ]
-                )
+        $dh = new MemoryKeyStruct([
+            'uid' => $this->getUser()->uid,
+            'tm_key' => new TmKeyStruct([
+                    'key' => $this->request->param('key')
+                ]
+            )
         ]);
 
-        if (!empty($_keyDao->read($dh)[ 0 ])) {
+        if (!empty($_keyDao->read($dh)[0])) {
             $this->response->json($this->_checkForAdaptiveEngines($dh));
 
             return;
@@ -156,6 +158,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
      * @param MemoryKeyStruct $memoryKey
      *
      * @return array
+     * @throws Exception
      */
     private function _checkForAdaptiveEngines(MemoryKeyStruct $memoryKey): array
     {
@@ -166,10 +169,10 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
         foreach ($engineList as $engineName) {
             try {
-                $struct             = EngineStruct::getStruct();
+                $struct = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
-                $struct->type       = EngineConstants::MT;
-                $engine             = EnginesFactory::createTempInstance($struct);
+                $struct->type = EngineConstants::MT;
+                $engine = EnginesFactory::createTempInstance($struct);
 
                 if ($engine->isAdaptiveMT()) {
                     //retrieve OWNER EnginesFactory License
@@ -178,7 +181,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                         $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
                         if ($engine->getMemoryIfMine($memoryKey)) {
                             $engine_type = explode("\\", $engine->getEngineRecord()->class_load);
-                            $response[]  = array_pop($engine_type);
+                            $response[] = array_pop($engine_type);
                         }
                     }
                 }

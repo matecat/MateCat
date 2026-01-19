@@ -55,37 +55,37 @@ class PropagationWorker extends AbstractWorker
         /**
          * @var $propagationTotalStruct ?PropagationTotalStruct
          */
-        $propagationTotalStruct = $structures[ 'propagationAnalysis' ];
+        $propagationTotalStruct = $structures['propagationAnalysis'];
 
         /**
          * @var $propagatorSegment SegmentTranslationStruct
          */
-        $propagatorSegment = $structures[ 'translationStructTemplate' ];
+        $propagatorSegment = $structures['translationStructTemplate'];
 
-        if (true === $structures[ 'execute_update' ] and !empty($propagationTotalStruct->getSegmentsForPropagation())) {
+        if (true === $structures['execute_update'] and !empty($propagationTotalStruct->getSegmentsForPropagation())) {
             try {
                 $static_field_values = [
-                        'id_segment'             => $structures[ 'id_segment' ],
-                        'id_job'                 => $propagatorSegment[ 'id_job' ],
-                        'segment_hash'           => $propagatorSegment[ 'segment_hash' ],
+                    'id_segment' => $structures['id_segment'],
+                    'id_job' => $propagatorSegment['id_job'],
+                    'segment_hash' => $propagatorSegment['segment_hash'],
                     // UPDATE ONLY THESE FIELDS
-                        'translation'            => $propagatorSegment[ 'translation' ],
-                        'status'                 => $propagatorSegment[ 'status' ],
-                        'translation_date'       => $propagatorSegment[ 'translation_date' ],
-                        'autopropagated_from'    => $propagatorSegment[ 'autopropagated_from' ],
-                        'serialized_errors_list' => $propagatorSegment[ 'serialized_errors_list' ],
-                        'warning'                => $propagatorSegment[ 'warning' ],
+                    'translation' => $propagatorSegment['translation'],
+                    'status' => $propagatorSegment['status'],
+                    'translation_date' => $propagatorSegment['translation_date'],
+                    'autopropagated_from' => $propagatorSegment['autopropagated_from'],
+                    'serialized_errors_list' => $propagatorSegment['serialized_errors_list'],
+                    'warning' => $propagatorSegment['warning'],
                 ];
 
                 $chunked_segments = array_chunk($propagationTotalStruct->getAllToPropagate(), 20, true);
 
                 foreach ($chunked_segments as $segments) {
-                    $updateValues               = $static_field_values;
+                    $updateValues = $static_field_values;
                     $propagated_ids_placeholder = [];
 
                     foreach ($segments as $i => $segment) {
-                        $propagated_ids_placeholder[]          = ':propagated_id_' . $i;
-                        $updateValues[ 'propagated_id_' . $i ] = $segment[ 'id_segment' ];
+                        $propagated_ids_placeholder[] = ':propagated_id_' . $i;
+                        $updateValues['propagated_id_' . $i] = $segment['id_segment'];
                     }
 
                     $propagationSql = "
@@ -102,7 +102,7 @@ class PropagationWorker extends AbstractWorker
                               AND id_segment IN ( " . implode(",", $propagated_ids_placeholder) . " )
                         ";
 
-                    $pdo  = Database::obtain()->getConnection();
+                    $pdo = Database::obtain()->getConnection();
                     $stmt = $pdo->prepare($propagationSql);
 
                     $stmt->execute($updateValues);
@@ -111,11 +111,11 @@ class PropagationWorker extends AbstractWorker
 
                     // update related versions only if the parent translation has changed
                     if (!empty($propagationTotalStruct->getPropagatedIdsToUpdateVersion())) {
-                        $filteredIds                      = [];
+                        $filteredIds = [];
                         $segmentIdsForVersionIncrementMap = $propagationTotalStruct->getPropagatedIdsToUpdateVersion();
-                        $segmentsToIncrementMap           = array_filter($segments, function ($segment) use ($segmentIdsForVersionIncrementMap, &$filteredIds) {
-                            if (array_key_exists($segment[ 'id_segment' ], $segmentIdsForVersionIncrementMap)) {
-                                $filteredIds[] = $segment[ 'id_segment' ];
+                        $segmentsToIncrementMap = array_filter($segments, function ($segment) use ($segmentIdsForVersionIncrementMap, &$filteredIds) {
+                            if (array_key_exists($segment['id_segment'], $segmentIdsForVersionIncrementMap)) {
+                                $filteredIds[] = $segment['id_segment'];
 
                                 return true;
                             }
@@ -124,10 +124,10 @@ class PropagationWorker extends AbstractWorker
                         });
 
                         $translationVersionsDao->savePropagationVersions(
-                                $propagatorSegment,
-                                $structures[ 'id_segment' ],
-                                $structures[ 'job' ],
-                                $segmentsToIncrementMap,
+                            $propagatorSegment,
+                            $structures['id_segment'],
+                            $structures['job'],
+                            $segmentsToIncrementMap,
                         );
 
                         $increaseVersionSql = "
@@ -141,9 +141,9 @@ class PropagationWorker extends AbstractWorker
                         $stmt = $pdo->prepare($increaseVersionSql);
 
                         $stmt->execute([
-                                'id_segment'   => $structures[ 'id_segment' ],
-                                'id_job'       => $propagatorSegment[ 'id_job' ],
-                                'segment_hash' => $propagatorSegment[ 'segment_hash' ]
+                            'id_segment' => $structures['id_segment'],
+                            'id_job' => $propagatorSegment['id_job'],
+                            'segment_hash' => $propagatorSegment['segment_hash']
                         ]);
 
                         $stmt->closeCursor();
@@ -151,15 +151,15 @@ class PropagationWorker extends AbstractWorker
                 }
             } catch (PDOException $e) {
                 throw new EndQueueException(
-                        "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
-                        . "\n"
-                        . $propagationSql
-                        . "\n"
-                        . ($increaseVersionSql ?? '')
-                        . "\n"
-                        . var_export($propagatorSegment, true)
-                        . "\n"
-                        . var_export($propagationTotalStruct->getPropagatedIds(), true)
+                    "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
+                    . "\n"
+                    . $propagationSql
+                    . "\n"
+                    . ($increaseVersionSql ?? '')
+                    . "\n"
+                    . var_export($propagatorSegment, true)
+                    . "\n"
+                    . var_export($propagationTotalStruct->getPropagatedIds(), true)
                 );
             }
         }
@@ -173,12 +173,12 @@ class PropagationWorker extends AbstractWorker
         $paramsArray = $params->toArray();
 
         return [
-                'translationStructTemplate' => new SegmentTranslationStruct($paramsArray[ 'translationStructTemplate' ]),
-                'id_segment'                => $params->id_segment,
-                'job'                       => new JobStruct($paramsArray[ 'job' ]),
-                'project'                   => new ProjectStruct($paramsArray[ 'project' ]),
-                'propagationAnalysis'       => new PropagationTotalStruct($paramsArray[ 'propagationAnalysis' ]),
-                'execute_update'            => $params->execute_update
+            'translationStructTemplate' => new SegmentTranslationStruct($paramsArray['translationStructTemplate']),
+            'id_segment' => $params->id_segment,
+            'job' => new JobStruct($paramsArray['job']),
+            'project' => new ProjectStruct($paramsArray['project']),
+            'propagationAnalysis' => new PropagationTotalStruct($paramsArray['propagationAnalysis']),
+            'execute_update' => $params->execute_update
         ];
     }
 

@@ -23,9 +23,9 @@ class StatsController extends KleinController
      */
     public function stats(): void
     {
-        $wStruct                          = WordCountStruct::loadFromJob($this->chunk);
-        $job_stats                        = CatUtils::getFastStatsForJob($wStruct);
-        $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
+        $wStruct = WordCountStruct::loadFromJob($this->chunk);
+        $job_stats = CatUtils::getFastStatsForJob($wStruct);
+        $job_stats['analysis_complete'] = $this->chunk->getProject()->analysisComplete();
 
         $this->response->json($job_stats);
     }

@@ -30,7 +30,7 @@ class PayableRateController extends KleinController
     {
         try {
             $currentPage = $this->request->param('page') ?? 1;
-            $pagination  = $this->request->param('perPage') ?? 20;
+            $pagination = $this->request->param('perPage') ?? 20;
 
             if ($pagination > 200) {
                 $pagination = 200;
@@ -44,7 +44,7 @@ class PayableRateController extends KleinController
             $this->response->status()->setCode($code);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -73,13 +73,17 @@ class PayableRateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
+            if ($exception instanceof JSONValidatorException) {
+                return $this->response->json(['error' => $exception->getFormattedError("payable_rate")]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -99,14 +103,14 @@ class PayableRateController extends KleinController
             }
 
             return $this->response->json([
-                    'id' => (int)$id
+                'id' => (int)$id
             ]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -141,13 +145,17 @@ class PayableRateController extends KleinController
             $errorCode = max($exception->getCode(), 400);
             $this->response->code($errorCode);
 
+            if ($exception instanceof JSONValidatorException) {
+                return $this->response->json(['error' => $exception->getFormattedError("payable_rate")]);
+            }
+
             return $this->response->json(['error' => $exception->getMessage()]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -158,7 +166,7 @@ class PayableRateController extends KleinController
     public function view(): Response
     {
         try {
-            $id    = $this->request->param('id');
+            $id = $this->request->param('id');
             $model = CustomPayableRateDao::getByIdAndUser($id, $this->getUser()->uid);
 
             if (empty($model)) {
@@ -171,7 +179,7 @@ class PayableRateController extends KleinController
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -197,7 +205,7 @@ class PayableRateController extends KleinController
             $json = $this->request->body();
 
             $validatorObject = new JSONValidatorObject($json);
-            $validator       = new JSONValidator($this->getPayableRateModelSchema());
+            $validator = new JSONValidator($this->getPayableRateModelSchema());
             $validator->validate($validatorObject);
 
             $errors = $validator->getExceptions();
@@ -212,14 +220,14 @@ class PayableRateController extends KleinController
             $this->response->code($code);
 
             return $this->response->json([
-                    'errors' => $errors
+                'errors' => $errors
             ]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code($errorCode);
 
             return $this->response->json([
-                    'error' => $exception->getMessage()
+                'error' => $exception->getMessage()
             ]);
         }
     }
@@ -239,7 +247,7 @@ class PayableRateController extends KleinController
     {
         $this->response->status()->setCode(200);
         $this->response->json(
-                CustomPayableRateDao::getDefaultTemplate($this->getUser()->uid)
+            CustomPayableRateDao::getDefaultTemplate($this->getUser()->uid)
         );
     }
 
@@ -252,7 +260,7 @@ class PayableRateController extends KleinController
     private static function validateJSON(string $json): void
     {
         $validatorObject = new JSONValidatorObject($json);
-        $validator       = new JSONValidator('payable_rate.json', true);
+        $validator = new JSONValidator('payable_rate.json', true);
         $validator->validate($validatorObject);
     }
 

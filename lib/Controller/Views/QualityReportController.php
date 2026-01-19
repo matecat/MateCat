@@ -23,99 +23,101 @@ use Utils\Tools\Utils;
  * Quality Report Controller
  *
  */
-class QualityReportController extends BaseKleinViewController implements IController {
+class QualityReportController extends BaseKleinViewController implements IController
+{
 
-    protected function afterConstruct(): void {
-        $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new ViewLoginRedirectValidator($this));
     }
 
     /**
      * @throws Exception
      */
-    public function renderView() {
-
+    public function renderView()
+    {
         $request = $this->validateTheRequest();
 
-        $jobStruct = JobDao::getByIdAndPassword( $request[ 'jid' ], $request[ 'password' ] );
+        $jobStruct = JobDao::getByIdAndPassword($request['jid'], $request['password']);
 
-        if ( empty( $jobStruct ) ) {
-            $this->setView( "project_not_found.html", [], 404 );
+        if (empty($jobStruct)) {
+            $this->setView("project_not_found.html", [], 404);
             $this->render();
         }
 
-        $this->setView( "revise_summary.html", [
+        $this->setView("revise_summary.html", [
 
-                'jid'      => $jobStruct->id,
-                'password' => $jobStruct->password,
+            'jid' => $jobStruct->id,
+            'password' => $jobStruct->password,
 
-                'brPlaceholdEnabled'   => true,
-                'lfPlaceholder'        => CatUtils::lfPlaceholder,
-                'crPlaceholder'        => CatUtils::crPlaceholder,
-                'crlfPlaceholder'      => CatUtils::crlfPlaceholder,
-                'lfPlaceholderClass'   => CatUtils::lfPlaceholderClass,
-                'crPlaceholderClass'   => CatUtils::crPlaceholderClass,
-                'crlfPlaceholderClass' => CatUtils::crlfPlaceholderClass,
-                'lfPlaceholderRegex'   => CatUtils::lfPlaceholderRegex,
-                'crPlaceholderRegex'   => CatUtils::crPlaceholderRegex,
-                'crlfPlaceholderRegex' => CatUtils::crlfPlaceholderRegex,
-                'tabPlaceholder'       => CatUtils::tabPlaceholder,
-                'tabPlaceholderClass'  => CatUtils::tabPlaceholderClass,
-                'tabPlaceholderRegex'  => CatUtils::tabPlaceholderRegex,
-                'nbspPlaceholder'      => CatUtils::nbspPlaceholder,
-                'nbspPlaceholderClass' => CatUtils::nbspPlaceholderClass,
-                'nbspPlaceholderRegex' => CatUtils::nbspPlaceholderRegex,
+            'brPlaceholdEnabled' => true,
+            'lfPlaceholder' => CatUtils::lfPlaceholder,
+            'crPlaceholder' => CatUtils::crPlaceholder,
+            'crlfPlaceholder' => CatUtils::crlfPlaceholder,
+            'lfPlaceholderClass' => CatUtils::lfPlaceholderClass,
+            'crPlaceholderClass' => CatUtils::crPlaceholderClass,
+            'crlfPlaceholderClass' => CatUtils::crlfPlaceholderClass,
+            'lfPlaceholderRegex' => CatUtils::lfPlaceholderRegex,
+            'crPlaceholderRegex' => CatUtils::crPlaceholderRegex,
+            'crlfPlaceholderRegex' => CatUtils::crlfPlaceholderRegex,
+            'tabPlaceholder' => CatUtils::tabPlaceholder,
+            'tabPlaceholderClass' => CatUtils::tabPlaceholderClass,
+            'tabPlaceholderRegex' => CatUtils::tabPlaceholderRegex,
+            'nbspPlaceholder' => CatUtils::nbspPlaceholder,
+            'nbspPlaceholderClass' => CatUtils::nbspPlaceholderClass,
+            'nbspPlaceholderRegex' => CatUtils::nbspPlaceholderRegex,
 
-                'source_code'         => $jobStruct[ 'source' ],
-                'target_code'         => $jobStruct[ 'target' ],
-                'source_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'source' ] ) ),
-                'target_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'target' ] ) ),
-                'searchable_statuses' => new PHPTalMap( $this->searchableStatuses() ),
+            'source_code' => $jobStruct['source'],
+            'target_code' => $jobStruct['target'],
+            'source_rtl' => new PHPTalBoolean(Languages::getInstance()->isRTL($jobStruct['source'])),
+            'target_rtl' => new PHPTalBoolean(Languages::getInstance()->isRTL($jobStruct['target'])),
+            'searchable_statuses' => new PHPTalMap($this->searchableStatuses()),
 
-        ] );
+        ]);
 
-        if ( $jobStruct->isArchived() || $jobStruct->isCanceled() ) {
-            $this->addParamsToView( [
-                    'job_archived'    => true,
-                    'job_owner_email' => $jobStruct[ 'job_owner' ],
-            ] );
+        if ($jobStruct->isArchived() || $jobStruct->isCanceled()) {
+            $this->addParamsToView([
+                'job_archived' => true,
+                'job_owner_email' => $jobStruct['job_owner'],
+            ]);
         }
 
-        $activity             = new ActivityLogStruct();
-        $activity->id_job     = $jobStruct->id;
+        $activity = new ActivityLogStruct();
+        $activity->id_job = $jobStruct->id;
         $activity->id_project = $jobStruct->id_project;
-        $activity->action     = ActivityLogStruct::ACCESS_REVISE_SUMMARY_PAGE;
-        $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $this->getUser()->uid;
-        $activity->event_date = date( 'Y-m-d H:i:s' );
-        Activity::save( $activity );
+        $activity->action = ActivityLogStruct::ACCESS_REVISE_SUMMARY_PAGE;
+        $activity->ip = Utils::getRealIpAddr();
+        $activity->uid = $this->getUser()->uid;
+        $activity->event_date = date('Y-m-d H:i:s');
+        Activity::save($activity);
 
         $this->render();
-
     }
 
-    protected function validateTheRequest(): array {
-
+    protected function validateTheRequest(): array
+    {
         $filterArgs = [
-                'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'password' => [ 'filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+            'jid' => ['filter' => FILTER_SANITIZE_NUMBER_INT],
+            'password' => ['filter' => FILTER_SANITIZE_SPECIAL_CHARS, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH],
         ];
 
-        return filter_var_array( $this->request->paramsNamed()->all(), $filterArgs );
+        return filter_var_array($this->request->paramsNamed()->all(), $filterArgs);
     }
 
     /**
      * @return array
      */
-    private function searchableStatuses(): array {
+    private function searchableStatuses(): array
+    {
         $statuses = array_merge(
-                TranslationStatus::$INITIAL_STATUSES,
-                TranslationStatus::$TRANSLATION_STATUSES,
-                TranslationStatus::$REVISION_STATUSES
+            TranslationStatus::$INITIAL_STATUSES,
+            TranslationStatus::$TRANSLATION_STATUSES,
+            TranslationStatus::$REVISION_STATUSES
         );
 
-        return array_map( function ( $item ) {
-            return (object)[ 'value' => $item, 'label' => $item ];
-        }, $statuses );
+        return array_map(function ($item) {
+            return (object)['value' => $item, 'label' => $item];
+        }, $statuses);
     }
 }
 

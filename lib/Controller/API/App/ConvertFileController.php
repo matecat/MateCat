@@ -34,10 +34,10 @@ class ConvertFileController extends KleinController
      */
     public function handle(): void
     {
-        $data             = $this->validateTheRequest();
-        $uploadTokenValue = $_COOKIE[ 'upload_token' ];
-        $uploadDir        = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
-        $errDir           = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $data = $this->validateTheRequest();
+        $uploadTokenValue = $_COOKIE['upload_token'];
+        $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         if (!Utils::isTokenValid($uploadTokenValue)) {
             throw new RuntimeException("Invalid Upload Token.");
@@ -46,15 +46,15 @@ class ConvertFileController extends KleinController
         $this->featureSet->loadFromUserEmail($this->user->email);
 
         $converter = new FilesConverter(
-                [$data[ 'file_name' ]],
-                $data[ 'source_lang' ],
-                $data[ 'target_lang' ],
-                $uploadDir,
-                $errDir,
-                $uploadTokenValue,
-                $data[ 'segmentation_rule' ],
-                $this->featureSet,
-                $data[ 'filters_extraction_parameters' ],
+            [$data['file_name']],
+            $data['source_lang'],
+            $data['target_lang'],
+            $uploadDir,
+            $errDir,
+            $uploadTokenValue,
+            $data['segmentation_rule'],
+            $this->featureSet,
+            $data['filters_extraction_parameters'],
         );
 
         $converter->convertFiles();
@@ -85,13 +85,26 @@ class ConvertFileController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $file_name                                 = filter_var($this->request->param('file_name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $source_lang                               = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $target_lang                               = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $segmentation_rule                         = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $filters_extraction_parameters_template    = filter_var($this->request->param('filters_extraction_parameters_template'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $filters_extraction_parameters_template_id = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_SANITIZE_NUMBER_INT);
-        $restarted_conversion                      = filter_var($this->request->param('restarted_conversion'), FILTER_VALIDATE_BOOLEAN);
+        $file_name = filter_var($this->request->param('file_name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $filters_extraction_parameters_template = filter_var(
+            $this->request->param('filters_extraction_parameters_template'),
+            FILTER_SANITIZE_SPECIAL_CHARS,
+            ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]
+        );
+        $filters_extraction_parameters_template_id = filter_var($this->request->param('filters_extraction_parameters_template_id'), FILTER_VALIDATE_INT, [
+                'options' => [
+                    'default' => 0,
+                    'min_range' => 0,
+                ],
+                [
+                    'flags' => FILTER_REQUIRE_SCALAR
+                ]
+            ]
+        );
+        $restarted_conversion = filter_var($this->request->param('restarted_conversion'), FILTER_VALIDATE_BOOLEAN);
 
         if (empty($file_name)) {
             throw new InvalidArgumentException("Missing file name.");
@@ -113,19 +126,19 @@ class ConvertFileController extends KleinController
             throw new InvalidArgumentException("Invalid file name.");
         }
 
-        $segmentation_rule             = Constants::validateSegmentationRules($segmentation_rule);
+        $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule);
         $filters_extraction_parameters = $this->validateFiltersExtractionParametersTemplateId($filters_extraction_parameters_template, $filters_extraction_parameters_template_id);
-        $source_lang                   = $this->validateSourceLang($source_lang);
-        $target_lang                   = $this->validateTargetLangs($target_lang);
+        $source_lang = $this->validateSourceLang($source_lang);
+        $target_lang = $this->validateTargetLangs($target_lang);
 
         return [
-                'file_name'                                 => $file_name,
-                'source_lang'                               => $source_lang,
-                'target_lang'                               => $target_lang,
-                'segmentation_rule'                         => $segmentation_rule,
-                'filters_extraction_parameters'             => $filters_extraction_parameters,
-                'filters_extraction_parameters_template_id' => (int)$filters_extraction_parameters_template_id,
-                'restarted_conversion'                      => $restarted_conversion,
+            'file_name' => $file_name,
+            'source_lang' => $source_lang,
+            'target_lang' => $target_lang,
+            'segmentation_rule' => $segmentation_rule,
+            'filters_extraction_parameters' => $filters_extraction_parameters,
+            'filters_extraction_parameters_template_id' => (int)$filters_extraction_parameters_template_id,
+            'restarted_conversion' => $restarted_conversion,
         ];
     }
 
@@ -157,7 +170,7 @@ class ConvertFileController extends KleinController
 
     /**
      * @param string|null $filters_extraction_parameters_template
-     * @param int|null    $filters_extraction_parameters_template_id
+     * @param int|null $filters_extraction_parameters_template_id
      *
      * @return FiltersConfigTemplateStruct|null
      * @throws JSONValidatorException
@@ -165,12 +178,14 @@ class ConvertFileController extends KleinController
      * @throws ReflectionException
      * @throws Exception
      */
-    private function validateFiltersExtractionParametersTemplateId(?string $filters_extraction_parameters_template = null, ?int $filters_extraction_parameters_template_id = null): ?FiltersConfigTemplateStruct
-    {
+    private function validateFiltersExtractionParametersTemplateId(
+        ?string $filters_extraction_parameters_template = null,
+        ?int $filters_extraction_parameters_template_id = null
+    ): ?FiltersConfigTemplateStruct {
         if (!empty($filters_extraction_parameters_template)) {
-            $json            = html_entity_decode($filters_extraction_parameters_template);
+            $json = html_entity_decode($filters_extraction_parameters_template);
             $validatorObject = new JSONValidatorObject($json);
-            $validator       = new JSONValidator('filters_extraction_parameters.json', true);
+            $validator = new JSONValidator('filters_extraction_parameters.json', true);
             $validator->validate($validatorObject);
 
             $filtersTemplate = new FiltersConfigTemplateStruct();

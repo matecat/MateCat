@@ -39,11 +39,11 @@ class SegmentVersionController extends KleinController
     public function index(): void
     {
         $results = TranslationVersionDao::getVersionsForTranslation(
-                $this->request->param('id_job'),
-                $this->request->param('id_segment')
+            $this->request->param('id_job'),
+            $this->request->param('id_segment')
         );
 
-        $chunk = ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+        $chunk = ChunkDao::getByIdAndPassword($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
@@ -51,7 +51,7 @@ class SegmentVersionController extends KleinController
         $formatted = new SegmentVersion($chunk, $results);
 
         $this->response->json([
-                'versions' => $formatted->render()
+            'versions' => $formatted->render()
         ]);
     }
 
@@ -63,12 +63,12 @@ class SegmentVersionController extends KleinController
     public function detail(): void
     {
         $results = TranslationVersionDao::getVersionsForTranslation(
-                $this->request->param('id_job'),
-                $this->request->param('id_segment'),
-                $this->request->param('version_number')
+            $this->request->param('id_job'),
+            $this->request->param('id_segment'),
+            $this->request->param('version_number')
         );
 
-        $chunk = ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+        $chunk = ChunkDao::getByIdAndPassword($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
@@ -76,7 +76,7 @@ class SegmentVersionController extends KleinController
         $formatted = new SegmentVersion($chunk, $results);
 
         $this->response->json([
-                'versions' => $formatted->render()
+            'versions' => $formatted->render()
         ]);
         //https://www.matecat.com/api/v2/jobs/4316371/0ef859019079/segments/2017797016/translation-versions/0
     }

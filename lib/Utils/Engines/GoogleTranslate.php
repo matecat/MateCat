@@ -49,33 +49,19 @@ class GoogleTranslate extends AbstractEngine
             if (isset($decoded["data"])) {
                 return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
             } else {
-                $decoded = [
-                    'error' => [
-                        'code' => $decoded["code"],
-                        'message' => $decoded["message"]
-                    ]
-                ];
+                $engineResponse = json_decode($decoded['error']['response'], true);
+                throw new Exception($engineResponse['error']['message'], $engineResponse['error']['code']);
             }
         } else {
-            $resp = json_decode($rawValue["error"]["response"], true);
-            if (isset($resp["error"]["code"]) && isset($resp["error"]["message"])) {
-                $rawValue["error"]["code"] = $resp["error"]["code"];
-                $rawValue["error"]["message"] = $resp["error"]["message"];
-            }
-            $decoded = $rawValue; // already decoded in case of error
+            throw new Exception($rawValue['error']['message'], 500);  // already decoded in case of error
         }
-
-        return $decoded;
     }
 
     public function get(array $_config)
     {
         $parameters = [];
 
-        if (isset($_config['key']) and !empty($_config['key'])) {
-            $parameters['key'] = $_config['key'];
-        }
-
+        $parameters['key'] = $this->getEngineRecord()->getExtraParamsAsArray()['client_secret'] ?? null;
         $parameters['target'] = $this->_fixLangCode($_config['target']);
         $parameters['source'] = $this->_fixLangCode($_config['source']);
         $parameters['q'] = $_config['segment'];

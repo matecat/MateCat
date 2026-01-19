@@ -14,17 +14,17 @@ class ChunkOptionsModel
     private JobStruct $chunk;
 
     public static array $valid_keys = [
-            'speech2text',
-            'tag_projection',
-            'lexiqa'
+        'speech2text',
+        'tag_projection',
+        'lexiqa'
     ];
 
     private array $received_options = [];
-    public array  $project_metadata = [];
+    public array $project_metadata = [];
 
     public function __construct(JobStruct $chunk)
     {
-        $this->chunk            = $chunk;
+        $this->chunk = $chunk;
         $this->project_metadata = $chunk->getProject()->getMetadataAsKeyValue();
     }
 
@@ -40,7 +40,7 @@ class ChunkOptionsModel
 
         $sanitized = $sanitizer->sanitize();
 
-        return $sanitized[ $key ];
+        return $sanitized[$key];
     }
 
     /**
@@ -56,8 +56,8 @@ class ChunkOptionsModel
         $sanitized = $sanitizer->sanitize();
 
         $this->received_options = array_merge(
-                $filtered,
-                $sanitized
+            $filtered,
+            $sanitized
         );
     }
 
@@ -87,7 +87,7 @@ class ChunkOptionsModel
         $out = [];
 
         foreach (static::$valid_keys as $name) {
-            $out[ $name ] = $this->isEnabled($name);
+            $out[$name] = $this->isEnabled($name);
         }
 
         return $out;
@@ -102,10 +102,10 @@ class ChunkOptionsModel
     {
         $chunk_key = MetadataDao::buildChunkKey($key, $this->chunk);
 
-        if (isset($this->project_metadata[ $chunk_key ])) {
-            return !!$this->project_metadata[ $chunk_key ];
-        } elseif (isset($this->project_metadata[ $key ])) {
-            return !!$this->project_metadata[ $key ];
+        if (isset($this->project_metadata[$chunk_key])) {
+            return !!$this->project_metadata[$chunk_key];
+        } elseif (isset($this->project_metadata[$key])) {
+            return !!$this->project_metadata[$key];
         } else {
             return false;
         }

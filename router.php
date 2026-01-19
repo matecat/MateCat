@@ -131,4 +131,5 @@ require './lib/Routes/oauth_routes.php';
 require './lib/Routes/app_routes.php';
 PluginsLoader::loadRoutes($klein);
 
+/** @noinspection PhpUnhandledExceptionInspection */
 $klein->dispatch();

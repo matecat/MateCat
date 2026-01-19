@@ -17,8 +17,8 @@ class XliffRulesModel implements JsonSerializable
      * @var array
      */
     private array $ruleSets = [
-            self::XLIFF_12 => [],
-            self::XLIFF_20 => [],
+        self::XLIFF_12 => [],
+        self::XLIFF_20 => [],
     ];
 
     /**
@@ -30,23 +30,23 @@ class XliffRulesModel implements JsonSerializable
     {
         if ($rule instanceof Xliff20Rule) {
             $this->validateDuplicatedStates($rule, self::XLIFF_20);
-            $this->ruleSets[ self::XLIFF_20 ][] = $rule;
+            $this->ruleSets[self::XLIFF_20][] = $rule;
         } elseif ($rule instanceof Xliff12Rule) {
             $this->validateDuplicatedStates($rule, self::XLIFF_12);
-            $this->ruleSets[ self::XLIFF_12 ][] = $rule;
+            $this->ruleSets[self::XLIFF_12][] = $rule;
         }
     }
 
     /**
      * @param XliffRuleInterface $rule
-     * @param string             $type
+     * @param string $type
      *
      * @return void
      * @throws Exception
      */
     public function validateDuplicatedStates(XliffRuleInterface $rule, string $type): void
     {
-        foreach ($this->ruleSets[ $type ] as $existentRule) {
+        foreach ($this->ruleSets[$type] as $existentRule) {
             $stateIntersect = array_intersect($existentRule->getStates(), $rule->getStates());
             if (!empty($stateIntersect)) {
                 throw new DomainException("The same state/state-qualifier cannot be used in two different rules: " . implode(", ", $stateIntersect), 400);
@@ -88,16 +88,16 @@ class XliffRulesModel implements JsonSerializable
     public function getRulesForVersion(int $versionNumber): array
     {
         if ($versionNumber == 1) {
-            return $this->ruleSets[ static::XLIFF_12 ];
+            return $this->ruleSets[static::XLIFF_12];
         } elseif ($versionNumber == 2) {
-            return $this->ruleSets[ static::XLIFF_20 ];
+            return $this->ruleSets[static::XLIFF_20];
         } else {
             throw new DomainException("Invalid Version: " . $versionNumber, 400);
         }
     }
 
     /**
-     * @param int         $versionNumber
+     * @param int $versionNumber
      * @param string|null $state
      * @param string|null $stateQualifier
      *
@@ -140,7 +140,7 @@ class XliffRulesModel implements JsonSerializable
         foreach ($this->ruleSets as $ruleType => $rules) {
             foreach ($rules as $rule) {
                 /** @var $rule AbstractXliffRule * */
-                $copy[ $ruleType ][] = $rule->getArrayCopy();
+                $copy[$ruleType][] = $rule->getArrayCopy();
             }
         }
 

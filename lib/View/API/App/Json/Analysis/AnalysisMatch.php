@@ -12,7 +12,8 @@ namespace View\API\App\Json\Analysis;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
 
-class AnalysisMatch implements JsonSerializable {
+class AnalysisMatch implements JsonSerializable
+{
 
     /**
      * @var int
@@ -28,27 +29,31 @@ class AnalysisMatch implements JsonSerializable {
      */
     protected string $type;
 
-    public static function forName( string $name, ConstantsInterface $matchConstantsClass ): AnalysisMatch {
-        return new static( $name, $matchConstantsClass );
+    public static function forName(string $name, ConstantsInterface $matchConstantsClass): AnalysisMatch
+    {
+        return new static($name, $matchConstantsClass);
     }
 
     /**
-     * @param string             $name
+     * @param string $name
      * @param ConstantsInterface $matchConstantsClass
      */
-    protected function __construct( string $name, ConstantsInterface $matchConstantsClass ) {
-        $this->type = $matchConstantsClass::validate( $name );
+    protected function __construct(string $name, ConstantsInterface $matchConstantsClass)
+    {
+        $this->type = $matchConstantsClass::validate($name);
     }
 
-    public function jsonSerialize(): array {
+    public function jsonSerialize(): array
+    {
         return [
-                'raw'        => $this->raw,
-                'equivalent' => round( $this->equivalent ),
-                'type'       => $this->type
+            'raw' => $this->raw,
+            'equivalent' => round($this->equivalent),
+            'type' => $this->type
         ];
     }
 
-    public function name(): string {
+    public function name(): string
+    {
         return $this->type;
     }
 
@@ -57,7 +62,8 @@ class AnalysisMatch implements JsonSerializable {
      *
      * @return $this
      */
-    public function setRaw( int $raw ): AnalysisMatch {
+    public function setRaw(int $raw): AnalysisMatch
+    {
         $this->raw = $raw;
 
         return $this;
@@ -68,7 +74,8 @@ class AnalysisMatch implements JsonSerializable {
      *
      * @return $this
      */
-    public function setEquivalent( float $equivalent ): AnalysisMatch {
+    public function setEquivalent(float $equivalent): AnalysisMatch
+    {
         $this->equivalent = $equivalent;
 
         return $this;
@@ -79,7 +86,7 @@ class AnalysisMatch implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementRaw( int $raw ): void
+    public function incrementRaw(int $raw): void
     {
         $this->raw += $raw;
     }
@@ -89,7 +96,7 @@ class AnalysisMatch implements JsonSerializable {
      *
      * @return void
      */
-    public function incrementEquivalent( float $equivalent ): void
+    public function incrementEquivalent(float $equivalent): void
     {
         $this->equivalent += $equivalent;
     }
@@ -97,14 +104,16 @@ class AnalysisMatch implements JsonSerializable {
     /**
      * @return int
      */
-    public function getRaw(): int {
+    public function getRaw(): int
+    {
         return $this->raw;
     }
 
     /**
      * @return float
      */
-    public function getEquivalent(): float {
+    public function getEquivalent(): float
+    {
         return $this->equivalent;
     }
 
