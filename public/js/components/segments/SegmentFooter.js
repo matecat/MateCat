@@ -24,6 +24,7 @@ import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
+import CatToolStore from '../../stores/CatToolStore'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -81,7 +82,7 @@ const TAB_ITEMS = {
     isEnableCloseButton: true,
   },
   [TAB.ICU]: {
-    label: 'ICU Validator',
+    label: 'ICU',
     code: 'icu',
     tabClass: 'icu-validator',
     isLoading: false,
@@ -95,19 +96,22 @@ function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
+  const projectTemplate = CatToolStore.getCurrentProjectTemplate()
   const [tabItems, setTabItems] = useState(
-    Object.entries(TAB_ITEMS).map(([key, value]) => ({
-      ...value,
-      name: key,
-      enabled: false,
-      visible: false,
-      open: false,
-      elements: [],
-      label:
-        value.code === 'tm'
-          ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
-          : value.label,
-    })),
+    Object.entries(TAB_ITEMS).map(([key, value]) => {
+      return {
+        ...value,
+        name: key,
+        enabled: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        visible: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        open: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        elements: [],
+        label:
+          value.code === 'tm'
+            ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
+            : value.label,
+      }
+    }),
   )
   const [tabStateChanges, setTabStateChanges] = useState(undefined)
   const [activeTab, setActiveTab] = useState(undefined)

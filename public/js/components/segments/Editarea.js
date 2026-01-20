@@ -110,7 +110,8 @@ class Editarea extends React.Component {
     this.isShiftPressedOnNavigation = createRef()
     this.wasTripleClickTriggered = createRef()
     this.compositionEventChecks = createRef()
-
+    const projectTemplate = CatToolStore.getCurrentProjectTemplate()
+    this.icuEnabled = projectTemplate.icuEnabled
     this.state = {
       editorState: editorState,
       editAreaClasses: ['targetarea'],
@@ -127,7 +128,7 @@ class Editarea extends React.Component {
         [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
-        [DraftMatecatConstants.ICU_DECORATOR]: true,
+        [DraftMatecatConstants.ICU_DECORATOR]: this.icuEnabled,
       },
       previousSourceTagMap: null,
     }
@@ -440,19 +441,22 @@ class Editarea extends React.Component {
       }
       const contentState = editorState.getCurrentContent()
       const plainText = contentState.getPlainText()
-      const icuTokens = createIcuTokens(
-        plainText,
-        editorState,
-        config.target_rfc,
-      )
-      if (
-        !prevProps ||
-        !this.prevIcuTokens ||
-        !isEqualICUTokens(icuTokens, this.prevIcuTokens)
-      ) {
-        this.prevIcuTokens = icuTokens
-        changedDecorator = true
-        this.addIcuDecorator(icuTokens)
+      if (this.icuEnabled) {
+        const icuTokens = createIcuTokens(
+          plainText,
+          editorState,
+          config.target_rfc,
+        )
+
+        if (
+          !prevProps ||
+          !this.prevIcuTokens ||
+          !isEqualICUTokens(icuTokens, this.prevIcuTokens)
+        ) {
+          this.prevIcuTokens = icuTokens
+          changedDecorator = true
+          this.addIcuDecorator(icuTokens)
+        }
       }
     } else {
       //Search

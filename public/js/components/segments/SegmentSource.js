@@ -34,6 +34,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
+import CatToolStore from '../../stores/CatToolStore'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -76,6 +77,8 @@ class SegmentSource extends React.Component {
       cleanSource,
     )
     const {editorState, tagRange} = contentEncoded
+    const projectTemplate = CatToolStore.getCurrentProjectTemplate()
+    this.icuEnabled = projectTemplate.icuEnabled
     this.state = {
       source: cleanSource,
       editorState: editorState,
@@ -88,7 +91,7 @@ class SegmentSource extends React.Component {
         [DraftMatecatConstants.GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
-        [DraftMatecatConstants.ICU_DECORATOR]: true,
+        [DraftMatecatConstants.ICU_DECORATOR]: this.icuEnabled,
       },
       isShowingOptionsToolbar: false,
     }
@@ -366,7 +369,7 @@ class SegmentSource extends React.Component {
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
       }
-      if (!this.firstIcuCheck) {
+      if (!this.firstIcuCheck && this.icuEnabled) {
         this.firstIcuCheck = true
         changedDecorator = true
         this.addIcuDecorator()

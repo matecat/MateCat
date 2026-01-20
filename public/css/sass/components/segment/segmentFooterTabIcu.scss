@@ -1,6 +1,8 @@
-.segment-footer-icu-container {
+.segment-footer-icu-container.open {
+  > div {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
+  }
 }
