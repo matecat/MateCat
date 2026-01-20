@@ -561,7 +561,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               data-testid="import-glossary"
             >
               <div>
-                <Upload size={20} /> Import Termbase
+                <Upload size={20} /> Import termbase
               </div>
             </MenuButtonItem>
             <MenuButtonItem
@@ -579,7 +579,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               data-testid="export-glossary"
             >
               <div>
-                <Download size={20} /> Export Termbase
+                <Download size={20} /> Export termbase
               </div>
             </MenuButtonItem>
             <MenuButtonItem
