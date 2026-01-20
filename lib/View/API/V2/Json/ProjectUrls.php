@@ -104,7 +104,7 @@ class ProjectUrls
                 'translate_url' => $this->translateUrl($record),
             ];
 
-            $reviews = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $record['jid'], 'password' => $record['jpassword']]));
+            $reviews = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $record['jid'], 'password' => $record['jpassword']]), 60 * 10);
 
             foreach ($reviews as $review) {
                 $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($review->source_page);
