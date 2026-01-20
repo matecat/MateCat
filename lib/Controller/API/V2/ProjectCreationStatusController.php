@@ -44,7 +44,7 @@ class ProjectCreationStatusController extends KleinController
             // project is created, find it with password
             try {
                 $project = ProjectDao::findByIdAndPassword($this->request->param('id_project'), $this->request->param('password'));
-            } catch (NotFoundException $e) {
+            } catch (NotFoundException) {
                 throw new AuthorizationError('Not Authorized.');
             }
 
