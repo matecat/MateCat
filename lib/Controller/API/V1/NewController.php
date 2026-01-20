@@ -111,6 +111,7 @@ class NewController extends KleinController
             $uploadDir,
             $errDir,
             $uploadTokenValue,
+            $request['icu_enabled'],
             $request['segmentation_rule'],
             $this->featureSet,
             $request['filters_extraction_parameters'],
@@ -376,6 +377,7 @@ class NewController extends KleinController
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
 
         // Strip tags from instructions
         $instructions = [];
@@ -518,6 +520,8 @@ class NewController extends KleinController
             $metadata[MetadataDao::MT_EVALUATION] = true;
         }
 
+        $metadata[MetadataDao::ICU_ENABLED] = $icu_enabled;
+
         return [
             'project_info' => $project_info,
             'project_name' => $project_name,
@@ -571,7 +575,8 @@ class NewController extends KleinController
             'target_language_mt_engine_association' => $target_language_mt_engine_association,
             'mt_qe_workflow_payable_rate' => $mt_qe_PayableRate ?? null,
             'legacy_icu' => $legacy_icu,
-            JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode($subfiltering_handlers)
+            JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode($subfiltering_handlers),
+            'icu_enabled' => $icu_enabled,
         ];
     }
 

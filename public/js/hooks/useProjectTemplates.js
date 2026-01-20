@@ -44,6 +44,7 @@ const STANDARD_TEMPLATE = {
   character_counter_mode: 'google_ads',
   dialect_strict: false,
   mt_quality_value_in_editor: null,
+  icu_enabled: false,
 }
 
 const CATTOOL_TEMPLATE = {
@@ -79,6 +80,7 @@ export const SCHEMA_KEYS = {
   dialectStrict: 'dialect_strict',
   mtQualityValueInEditor: 'mt_quality_value_in_editor',
   subfilteringHandlers: 'subfiltering_handlers',
+  icuEnabled: 'icu_enabled',
 }
 
 export class UseProjectTemplateInterface extends ComponentExtendInterface {
