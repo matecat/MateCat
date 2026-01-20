@@ -228,7 +228,7 @@ class Job
         $formatted = $featureSet->filter('projectUrls', $formatted);
 
         $urlsObject = $formatted->render(true);
-        $result['urls'] = $urlsObject['jobs'][$chunk->id]['chunks'][$chunk->password] ?? "";
+        $result['urls'] = $urlsObject['jobs'][$chunk->id]['chunks'][$chunk->password] ?? [];
 
         $result['urls']['original_download_url'] = $urlsObject['jobs'][$chunk->id]['original_download_url'] ?? "";
         $result['urls']['translation_download_url'] = $urlsObject['jobs'][$chunk->id]['translation_download_url'] ?? "";
