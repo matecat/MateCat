@@ -872,7 +872,11 @@ class ProjectManager
                 // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
                 // $hashFile[ 1 ] = it-it
                 $sha1_original = $hashFile[0];
-                $lang = $hashFile[1];
+                $lang = $hashFile[1] ?? '';
+
+                if (empty($lang)) {
+                    continue; //in some cases, the hash is not linked to a language, skip the file
+                }
 
                 //use hash and lang to fetch the file from the package
                 $cachedXliffFilePathName = $fs->getXliffFromCache($sha1_original, $lang);
