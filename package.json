@@ -75,7 +75,7 @@
     "eslint-plugin-testing-library": "^7.0.0",
     "fs-extra": "^11.1.1",
     "glob": "^11.1.0",
-    "html-webpack-plugin": "5.6.4",
+    "html-webpack-plugin": "5.6.5",
     "husky": ">=6",
     "ini": "^5.0.0",
     "jest": "^30.0.0",
@@ -101,5 +101,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.5.11"
+  "version": "3.5.12"
 }
