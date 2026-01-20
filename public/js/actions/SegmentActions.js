@@ -1255,7 +1255,11 @@ const SegmentActions = {
   },
 
   getContribution: function (sid, multiMatchLangs, force) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
+    TranslationMatches.getContribution({
+      sid,
+      crossLanguageSettings: multiMatchLangs,
+      force,
+    })
   },
 
   getContributionsSuccess: function (data, sid) {
