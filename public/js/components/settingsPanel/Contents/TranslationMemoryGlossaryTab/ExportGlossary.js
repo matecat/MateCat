@@ -42,7 +42,7 @@ export const ExportGlossary = ({row, onClose}) => {
       >
         <div>
           <span>
-            We will send a link to download the exported Termbase to your email.
+            We will send a link to download the exported termbase to your email.
           </span>
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">

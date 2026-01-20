@@ -224,7 +224,7 @@ export const SegmentFooterTabGlossary = ({
         sid: segment.sid,
         message: update
           ? 'A termbase item has been updated'
-          : 'A termbase item has been added',
+          : 'A termbase entry has been added',
       })
     }
     const addGlossaryItem = (payload, update) => {
