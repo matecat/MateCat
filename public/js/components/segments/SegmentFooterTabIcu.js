@@ -1,6 +1,6 @@
-import React, {useState, useMemo} from 'react'
+import React, {useState, useMemo, useCallback} from 'react'
 import parse from 'format-message-parse'
-import formatMessage from 'format-message'
+import formatMessage, {date, number, time} from 'format-message'
 import {
   removeTagsFromText,
   transformTagsToText,
@@ -97,84 +97,101 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   const onChangeValue = (e, name) => {
     const {type, value} = e.target
     setValues((v) => {
-      return [...v, {name, type, value}]
+      return {...v, [name]: {type, value}}
     })
   }
+  const preview = useMemo(() => {
+    try {
+      let valuesNew = []
+      Object.entries(values).forEach(([key, obj]) => {
+        let valueFormatted
+        const type = obj.type
+        const value = obj.value
+        switch (type) {
+          case 'number':
+            valueFormatted = number(value)
+            break
+          case 'date': {
+            const dateFormatted = new Date(value)
+            valueFormatted = +dateFormatted
+            break
+          }
+          case 'time': {
+            const [hours, minutes] = value.split(':')
+            let dateFormatted = new Date()
+            dateFormatted.setHours(hours)
+            dateFormatted.setMinutes(minutes)
+            valueFormatted = +dateFormatted
+            break
+          }
+          case 'text':
+            valueFormatted = value
+            break
 
-  let preview = ''
+          default:
+            valueFormatted = value
+        }
+        valuesNew[key] = valueFormatted
+      })
+      formatMessage.setup({
+        locale: config.target_code.split('-')[0],
+      })
+      return formatMessage(
+        transformTagsToText(removeTagsFromText(segment.translation)),
+        valuesNew,
+      )
+    } catch {
+      return 'Error in ICU message'
+    }
+  }, [values, segment.translation])
 
-  try {
-    let valuesNew = []
-    values.forEach(({type, value, name}) => {
-      let valueFormatted
-      switch (type) {
-        case 'number':
-          valueFormatted = Number(value)
-          break
+  const renderRule = useCallback(
+    ({category, rule, example}) => (
+      <div key={category} className="segment-footer-icu-plurals-rule">
+        <div className="plural-title">
+          <span className="category">{category}</span>
+          <span className="rule">{rule}</span>
+        </div>
+        <div className="plural-example">{example}</div>
+      </div>
+    ),
+    [],
+  )
 
-        case 'date':
-          // Converte in oggetto Date
-          var date = new Date(value)
-          valueFormatted = +date + date.getTimezoneOffset() * 60 * 1000
-          break
-
-        case 'time':
-          // Valida il formato dell'ora (esempio: "HH:MM")
-          valueFormatted = value
-          break
-
-        case 'text':
-          valueFormatted = value
-          break
-
-        default:
-          valueFormatted = value
-      }
-      valuesNew[name] = valueFormatted
-    })
-    preview = formatMessage(
-      transformTagsToText(removeTagsFromText(segment.translation)),
-      valuesNew,
-    )
-  } catch {
-    preview = 'Error in ICU message'
-  }
   return (
     <div
       className={`tab sub-editor segment-footer-icu-container ${active_class} ${tab_class}`}
     >
       <div>
-        <div>
-          {analyzeICU.hasPlural && (
-            <div>
-              <h3>Plural Rules</h3>
-              {pluralRules[config.target_code.split('-')[0]]?.cardinal.map(
-                ({category, rule, example}) => (
-                  <div key={category} style={{marginBottom: '0.5rem'}}>
-                    <strong>{category}</strong>: {rule}
-                    <br />
-                    <em>Example: {example}</em>
-                  </div>
-                ),
-              )}
-            </div>
-          )}
-          {analyzeICU.hasSelectOrdinal && (
-            <div>
-              <h3>SelectOrdinal Rules</h3>
-              {pluralRules[config.target_code.split('-')[0]]?.ordinal.map(
-                ({category, rule, example}) => (
-                  <div key={category} style={{marginBottom: '0.5rem'}}>
-                    <strong>{category}</strong>: {rule}
-                    <br />
-                    <em>Example: {example}</em>
-                  </div>
-                ),
-              )}
-            </div>
-          )}
-        </div>
-        <div>
+        {(analyzeICU.hasPlural || analyzeICU.hasSelectOrdinal) && (
+          <div className="segment-footer-icu-plurals">
+            {analyzeICU.hasPlural && (
+              <div className="segment-footer-icu-plurals-section">
+                <div>
+                  <h3>Plural Rules</h3>
+                </div>
+                <div>
+                  {pluralRules[config.target_code.split('-')[0]]?.cardinal.map(
+                    renderRule,
+                  )}
+                </div>
+              </div>
+            )}
+            {analyzeICU.hasSelectOrdinal && (
+              <div className="segment-footer-icu-plurals-section">
+                <div>
+                  <h3>SelectOrdinal Rules</h3>
+                </div>
+                <div>
+                  {pluralRules[config.target_code.split('-')[0]]?.ordinal.map(
+                    renderRule,
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        <div className="segment-footer-icu-editor">
           <h3>ICU Editor</h3>
 
           <h4>Variables</h4>
@@ -184,7 +201,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
               <label>
                 {name}:&nbsp;
                 <input
-                  value={values.find(({n}) => n === name) || ''}
+                  value={values[name]?.value || ''}
                   onChange={(e) => onChangeValue(e, name)}
                   style={{width: '10rem'}}
                   type={inputTypes[type]}
