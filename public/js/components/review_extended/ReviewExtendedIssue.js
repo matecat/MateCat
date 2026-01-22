@@ -32,7 +32,6 @@ export const ReviewExtendedIssue = ({
     (!config.ownerIsMe &&
       userInfo.teams.some(({id}) => id === config.id_team)) ||
     userInfo.user.uid === issue.uid
-  console.log('isUserAuthorizedToEditIssue', isUserAuthorizedToEditIssue, issue)
 
   const [commentView, setCommentView] = useState(false)
   const [visible, setVisible] = useState(
