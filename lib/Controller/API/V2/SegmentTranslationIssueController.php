@@ -164,7 +164,12 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->validator->issue
         );
 
-        $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param('id_job'), $this->request->param( 'password' ) );
+        if($this->request->param( 'revision_number' ) > 0){
+            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+            $jobStruct = $chunkReviewStruct->getChunk();
+        } else {
+            $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
+        }
 
         if ( empty( $jobStruct ) ) {
             throw new NotFoundException( "Job not found", 404 );
