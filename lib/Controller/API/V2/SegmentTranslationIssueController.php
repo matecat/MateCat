@@ -14,6 +14,7 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
@@ -116,7 +117,12 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Issue not found", 404 );
         }
 
-        $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
+        if($this->request->param( 'revision_number' ) > 0){
+            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+            $jobStruct = $chunkReviewStruct->getChunk();
+        } else {
+            $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
+        }
 
         if ( empty( $jobStruct ) ) {
             throw new NotFoundException( "Job not found", 404 );
@@ -277,7 +283,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $mDao = new MembershipDao();
 
         foreach ($mDao->findUserTeams($owner) as $team){
-            if($team->hasUser($entry->uid)){
+            if($team->hasUser($entry->uid) || $team->created_by === $loggerUser->uid){
                 return;
             }
         }
