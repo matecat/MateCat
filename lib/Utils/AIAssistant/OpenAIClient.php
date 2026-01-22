@@ -6,7 +6,7 @@ use Exception;
 use Orhanerday\OpenAi\OpenAi;
 use Utils\Registry\AppConfig;
 
-class Client
+class OpenAIClient implements AIClientInterface
 {
     /**
      * @var OpenAi

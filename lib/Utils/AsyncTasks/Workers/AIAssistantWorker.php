@@ -7,7 +7,7 @@ use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\AIAssistant\Client as AIAssistantClient;
+use Utils\AIAssistant\OpenAIClient as AIAssistantClient;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -42,7 +42,6 @@ class AIAssistantWorker extends AbstractWorker
         $timeOut = (AppConfig::$OPEN_AI_TIMEOUT) ?: 30;
         $this->openAi = new OpenAi(AppConfig::$OPENAI_API_KEY);
         $this->openAi->setTimeout($timeOut);
-
         $this->redis = $queueHandler->getRedisClient();
     }
 
