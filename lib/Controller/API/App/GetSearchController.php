@@ -423,7 +423,7 @@ class GetSearchController extends AbstractStatefulKleinController
             $new_translation->translation_date = date("Y-m-d H:i:s");
 
             $version_number = $old_translation->version_number;
-            if (false === Utils::stringsAreEqual($new_translation->translation, $old_translation->translation)) {
+            if ($new_translation->translation != $old_translation->translation) {
                 $version_number++;
             }
 

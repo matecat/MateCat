@@ -46,7 +46,7 @@ trait Oauth
 
         $rawValue = $this->_call($url, $curl_opt);
 
-        if (Utils::isJson($rawValue)) {
+        if (json_validate($rawValue)) {
             $objResponse = json_decode($rawValue, true);
         } else {
             $objResponse = $rawValue;

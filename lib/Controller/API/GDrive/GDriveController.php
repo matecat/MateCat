@@ -330,8 +330,8 @@ class GDriveController extends AbstractStatefulKleinController
                 'msg' => $this->formatErrorMessage($this->getExceptionMessage($e))
             ]);
         } catch (Exception $e) {
-            $errorCode = $e->getCode() >= 400 ? $e->getCode() : 500;
-            $this->response->code($errorCode);
+            $errorCode = (int)$e->getCode() >= 400 ? $e->getCode() : 500;
+            $this->response->code((int)$errorCode);
             $this->response->json([
                 'code' => $errorCode,
                 'class' => get_class($e),

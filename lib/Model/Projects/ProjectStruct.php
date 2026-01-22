@@ -97,9 +97,9 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      *
      * @return array
      */
-    public function getMetadataAsKeyValue(): array
+    public function getAllMetadataAsKeyValue(): array
     {
-        $collection = $this->getMetadata();
+        $collection = $this->getAllMetadata();
         $data = [];
         foreach ($collection as $record) {
             $data[$record->key] = $record->value;
@@ -110,24 +110,23 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
 
 
     /**
-     * @param $key
+     * @param string $key
      *
      * @return ?string
      */
-    public function getMetadataValue($key): ?string
+    public function getMetadataValue(string $key): ?string
     {
-        $meta = $this->getMetadataAsKeyValue();
-        if (array_key_exists($key, $meta)) {
-            return $meta[$key];
-        }
+        return $this->cachable(__METHOD__ . ":" . $key, function () use ($key) {
+            $mDao = new MetadataDao();
 
-        return null;
+            return $mDao->setCacheTTL(60 * 60)->get($this->id, $key)?->value;
+        });
     }
 
     /**
      * @return MetadataStruct[]
      */
-    public function getMetadata(): array
+    public function getAllMetadata(): array
     {
         return $this->cachable(__METHOD__, function () {
             $mDao = new MetadataDao();

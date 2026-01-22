@@ -852,7 +852,7 @@ class NewController extends KleinController
         try {
             if (!empty($private_tm_key_json)) {
                 // first check if `private_tm_key_json` is a valid JSON
-                if (!Utils::isJson($private_tm_key_json)) {
+                if (!json_validate($private_tm_key_json)) {
                     throw new Exception("private_tm_key_json is not a valid JSON");
                 }
 
@@ -1162,7 +1162,7 @@ class NewController extends KleinController
             $targets = explode(',', trim($target_languages));
 
             // first check if `dialect_strict` is a valid JSON
-            if (!Utils::isJson($dialect_strict)) {
+            if (!json_validate($dialect_strict)) {
                 throw new InvalidArgumentException("dialect_strict is not a valid JSON");
             }
 
@@ -1239,7 +1239,7 @@ class NewController extends KleinController
     ): MTQEWorkflowParams {
         if (!empty($mt_qe_workflow_template_raw_parameters)) {
             // first check if `mt_qe_workflow_template_raw_parameters` is a valid JSON
-            if (!Utils::isJson($mt_qe_workflow_template_raw_parameters)) {
+            if (!json_validate($mt_qe_workflow_template_raw_parameters)) {
                 throw new InvalidArgumentException("mt_qe_workflow_template_raw_parameters is not a valid JSON");
             }
 
@@ -1300,7 +1300,7 @@ class NewController extends KleinController
     {
         if (!empty($xliff_parameters)) {
             // first check if `xliff_parameters` is a valid JSON
-            if (!Utils::isJson($xliff_parameters)) {
+            if (!json_validate($xliff_parameters)) {
                 throw new InvalidArgumentException("xliff_parameters is not a valid JSON");
             }
 

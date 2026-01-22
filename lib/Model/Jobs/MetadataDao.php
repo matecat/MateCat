@@ -54,17 +54,23 @@ class MetadataDao extends AbstractDao
      * @param string $password
      * @param int $ttl
      *
-     * @return ?array|?MetadataStruct[]
+     * @return MetadataStruct[]
      * @throws ReflectionException
      */
-    public function getByJobIdAndPassword(int $id_job, string $password, int $ttl = 0): ?array
+    public function getByJobIdAndPassword(int $id_job, string $password, int $ttl = 0): array
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
+        $list = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_job' => $id_job,
             'password' => $password,
-        ]) ?? null;
+        ]) ?? [];
+
+        foreach ($list as $metadata) {
+            $metadata->value = JobsMetadataMarshaller::unMarshall($metadata);
+        }
+
+        return $list;
     }
 
     /**

@@ -690,10 +690,12 @@ class Utils
      * @param $string
      *
      * @return bool
+     * @throws Exception
+     * @deprecated use json_validate PHP8 native function
      */
     public static function isJson($string): bool
     {
-        return json_validate($string);
+        throw new Exception('Deprecated function');
     }
 
     public static function mysqlTimestamp($time): string
@@ -976,6 +978,7 @@ class Utils
 
     /**
      * @param $dirPath
+     * @throws Exception
      */
     public static function deleteDir($dirPath): void
     {
@@ -1170,19 +1173,6 @@ class Utils
     }
 
     /**
-     * stringsAreEqual
-     *
-     * @param string $stringA
-     * @param string $stringB
-     *
-     * @return bool
-     */
-    public static function stringsAreEqual(string $stringA, string $stringB): bool
-    {
-        return $stringA == $stringB;
-    }
-
-    /**
      * shortcut to htmlentities (UTF-8 charset)
      * avoiding double-encoding
      *
@@ -1284,58 +1274,4 @@ class Utils
         return array_keys($aValid);
     }
 
-    /**
-     * @param array $arr
-     *
-     * @return bool
-     */
-    public static function arrayIsList(array $arr): bool
-    {
-        if ($arr === []) {
-            return true;
-        }
-
-        return array_keys($arr) === range(0, count($arr) - 1);
-    }
-
-    /**
-     * @param string $nameString
-     *
-     * @return bool|string
-     */
-    public static function sanitizeName(string $nameString)
-    {
-        $nameString = preg_replace('/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString);
-        $nameString = preg_replace('/_{2,}/', "_", $nameString);
-        $nameString = str_replace('_.', ".", $nameString);
-
-        // project name validation
-        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
-
-        if (!preg_match($pattern, $nameString)) {
-            return false;
-        }
-
-        return $nameString;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return int|mixed
-     */
-    public static function formatStringValue(string $value = ""): mixed
-    {
-        $value = html_entity_decode($value);
-
-        if (is_numeric($value)) {
-            return (int)$value;
-        }
-
-        if (Utils::isJson($value)) {
-            return json_decode($value);
-        }
-
-        return $value;
-    }
 }
