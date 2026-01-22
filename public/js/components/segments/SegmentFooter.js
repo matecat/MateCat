@@ -102,9 +102,9 @@ function SegmentFooter() {
       return {
         ...value,
         name: key,
-        enabled: !!(key === TAB.ICU && projectTemplate?.icuEnabled),
-        visible: !!(key === TAB.ICU && projectTemplate?.icuEnabled),
-        open: !!(key === TAB.ICU && projectTemplate?.icuEnabled),
+        enabled: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        visible: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        open: !!(key === TAB.ICU && projectTemplate.icuEnabled),
         elements: [],
         label:
           value.code === 'tm'
