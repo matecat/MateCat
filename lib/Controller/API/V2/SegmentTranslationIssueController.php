@@ -11,10 +11,14 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Teams\MembershipDao;
+use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
@@ -112,8 +116,14 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Issue not found", 404 );
         }
 
+        $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
+
+        if ( empty( $jobStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
         $this->checkUserId($oldStruct->uid);
-        $this->checkLoggedUserPermissions($oldStruct, $this->user);
+        $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
         $oldStruct->setDefaults();
 
@@ -148,8 +158,14 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->validator->issue
         );
 
+        $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param('id_job'), $this->request->param( 'password' ) );
+
+        if ( empty( $jobStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
         $this->checkUserId($this->validator->issue->uid);
-        $this->checkLoggedUserPermissions($this->validator->issue, $this->user);
+        $this->checkLoggedUserPermissions($this->validator->issue, $jobStruct, $this->user);
 
         $model->delete();
         Database::obtain()->commit();
@@ -241,19 +257,26 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         }
     }
 
-    /**
-     * @throws \ReflectionException
-     * @throws AuthorizationError
-     */
-    private function checkLoggedUserPermissions(EntryStruct $entry, UserStruct $user): void
+
+    private function checkLoggedUserPermissions(EntryStruct $entry, JobStruct $job, UserStruct $loggerUser): void
     {
-        if($entry->uid === $user->uid){
+        if($entry->uid === $loggerUser->uid){
+            return;
+        }
+
+        $owner = (new UserDao())->getByEmail($job->owner);
+
+        if($owner === null){
+            throw new AuthorizationError( "Job owner not found. Not Authorized", 401 );
+        }
+
+        if($owner->uid === $loggerUser->uid){
             return;
         }
 
         $mDao = new MembershipDao();
 
-        foreach ($mDao->findUserTeams($user) as $team){
+        foreach ($mDao->findUserTeams($owner) as $team){
             if($team->hasUser($entry->uid)){
                 return;
             }
