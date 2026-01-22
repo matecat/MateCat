@@ -245,7 +245,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @throws \ReflectionException
      * @throws AuthorizationError
      */
-    private function checkLoggedUserPermissions(EntryStruct $entry, UserStruct $user)
+    private function checkLoggedUserPermissions(EntryStruct $entry, UserStruct $user): void
     {
         if($entry->uid === $user->uid){
             return;
