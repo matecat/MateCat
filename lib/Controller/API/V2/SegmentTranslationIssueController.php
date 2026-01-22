@@ -14,6 +14,8 @@ use Model\Exceptions\ValidationError;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
+use Model\Teams\MembershipDao;
+use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
@@ -111,6 +113,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         }
 
         $this->checkUserId($oldStruct->uid);
+        $this->checkLoggedUserPermissions($oldStruct, $this->user);
 
         $oldStruct->setDefaults();
 
@@ -146,6 +149,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         );
 
         $this->checkUserId($this->validator->issue->uid);
+        $this->checkLoggedUserPermissions($this->validator->issue, $this->user);
 
         $model->delete();
         Database::obtain()->commit();
@@ -235,5 +239,26 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         if ( $this->user->uid !== $uid ) {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
+    }
+
+    /**
+     * @throws \ReflectionException
+     * @throws AuthorizationError
+     */
+    private function checkLoggedUserPermissions(EntryStruct $entry, UserStruct $user)
+    {
+        if($entry->uid === $user->uid){
+            return;
+        }
+
+        $mDao = new MembershipDao();
+
+        foreach ($mDao->findUserTeams($user) as $team){
+            if($team->hasUser($entry->uid)){
+                return;
+            }
+        }
+
+        throw new AuthorizationError( "Not Authorized", 401 );
     }
 }
