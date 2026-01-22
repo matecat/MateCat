@@ -117,17 +117,13 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Issue not found", 404 );
         }
 
-        if($this->request->param( 'revision_number' ) > 0){
-            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+        $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
-            if ( empty( $chunkReviewStruct ) ) {
-                throw new NotFoundException( "Job not found", 404 );
-            }
-
-            $jobStruct = $chunkReviewStruct->getChunk();
-        } else {
-            $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
+        if ( empty( $chunkReviewStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
         }
+
+        $jobStruct = $chunkReviewStruct->getChunk();
 
         if ( empty( $jobStruct ) ) {
             throw new NotFoundException( "Job not found", 404 );
@@ -169,17 +165,13 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->validator->issue
         );
 
-        if($this->request->param( 'revision_number' ) > 0){
-            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+        $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
-            if ( empty( $chunkReviewStruct ) ) {
-                throw new NotFoundException( "Job not found", 404 );
-            }
-
-            $jobStruct = $chunkReviewStruct->getChunk();
-        } else {
-            $jobStruct = ChunkDao::getByIdAndPassword( $this->request->param( 'id_job' ), $this->request->param( 'password' ) );
+        if ( empty( $chunkReviewStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
         }
+
+        $jobStruct = $chunkReviewStruct->getChunk();
 
         if ( empty( $jobStruct ) ) {
             throw new NotFoundException( "Job not found", 404 );
