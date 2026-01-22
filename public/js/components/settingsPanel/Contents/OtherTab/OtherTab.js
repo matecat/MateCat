@@ -5,6 +5,7 @@ import {TargetLanguages} from './TargetLanguages'
 import {Subject} from './Subject'
 import {CharacterCounterRules} from './CharacterCounterRules'
 import {Tagging} from './Tagging'
+import {IcuSyntax} from './IcuSyntax'
 
 export const OtherTab = () => {
   return (
@@ -16,6 +17,7 @@ export const OtherTab = () => {
         <TargetLanguages />
         <Subject />
         <Tagging />
+        <IcuSyntax />
       </div>
       <div className="settings-panel-contentwrapper-tab-subcategories">
         <h2>Character counter settings</h2>

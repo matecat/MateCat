@@ -32,11 +32,13 @@ const AnalyzePage = () => {
           (chunk) => chunk.password === config.job_password,
         )
         const volumeAnalysis = {...response, jobs: [filteredJob]}
-        getProjectByToken(config.id_project, config.project_access_token).then((response) => {
-          const project = response.project
-          setProject(project)
-          setVolumeAnalysis(volumeAnalysis)
-        })
+        getProjectByToken(config.id_project, config.project_access_token).then(
+          (response) => {
+            const project = response.project
+            setProject(project)
+            setVolumeAnalysis(volumeAnalysis)
+          },
+        )
         pollData(response)
       })
     } else {

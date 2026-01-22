@@ -23,7 +23,7 @@ import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import LexiqaUtils from '../../utils/lxq.main'
-import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
+import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
@@ -38,6 +38,11 @@ import {
   isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {
+  createICUDecorator,
+  createIcuTokens,
+  isEqualICUTokens,
+} from './utils/DraftMatecatUtils/createICUDecorator'
 import {isMacOS} from '../../utils/Utils'
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 
@@ -68,6 +73,15 @@ class Editarea extends React.Component {
     super(props)
     const {onEntityClick, getUpdatedSegmentInfo} = this
 
+    const translation = this.props.translation
+
+    // If GuessTag is Enabled, clean translation from tags
+    const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
+      this.props.segment,
+    )
+      ? DraftMatecatUtils.removeTagsFromText(translation)
+      : translation
+
     this.decoratorsStructure = [
       {
         name: 'tags',
@@ -84,16 +98,7 @@ class Editarea extends React.Component {
       },
     ]
     const decorator = new CompositeDecorator(this.decoratorsStructure)
-    //const decorator = new CompoundDecorator(this.decoratorsStructure);
-    // Escape html
-    const translation = this.props.translation
 
-    // If GuessTag is Enabled, clean translation from tags
-    const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
-      this.props.segment,
-    )
-      ? DraftMatecatUtils.removeTagsFromText(translation)
-      : translation
     // Inizializza Editor State con solo testo
     const plainEditorState = EditorState.createEmpty(decorator)
     const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -105,7 +110,8 @@ class Editarea extends React.Component {
     this.isShiftPressedOnNavigation = createRef()
     this.wasTripleClickTriggered = createRef()
     this.compositionEventChecks = createRef()
-
+    const projectTemplate = CatToolStore.getCurrentProjectTemplate()
+    this.icuEnabled = projectTemplate.icuEnabled
     this.state = {
       editorState: editorState,
       editAreaClasses: ['targetarea'],
@@ -122,6 +128,7 @@ class Editarea extends React.Component {
         [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
+        [DraftMatecatConstants.ICU_DECORATOR]: this.icuEnabled,
       },
       previousSourceTagMap: null,
     }
@@ -183,6 +190,15 @@ class Editarea extends React.Component {
     }
   }
 
+  addIcuDecorator = (tokens) => {
+    const newDecorator = createICUDecorator(tokens)
+    remove(
+      this.decoratorsStructure,
+      (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
+    )
+    this.decoratorsStructure.push(newDecorator)
+  }
+
   addSearchDecorator = () => {
     let {tagRange} = this.state
     let {searchParams, occurrencesInSearch, currentInSearchIndex} =
@@ -226,7 +242,10 @@ class Editarea extends React.Component {
       lxqDecodedTranslation,
       false,
     )
-    const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges)
+    const updatedLexiqaWarnings = updateOffsetBasedOnEditorState(
+      editorState,
+      ranges,
+    )
     if (updatedLexiqaWarnings.length > 0) {
       const newDecorator = DraftMatecatUtils.activateLexiqa(
         editorState,
@@ -419,6 +438,25 @@ class Editarea extends React.Component {
         activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
+      }
+      const contentState = editorState.getCurrentContent()
+      const plainText = contentState.getPlainText()
+      if (this.icuEnabled) {
+        const icuTokens = createIcuTokens(
+          plainText,
+          editorState,
+          config.target_rfc,
+        )
+
+        if (
+          !prevProps ||
+          !this.prevIcuTokens ||
+          !isEqualICUTokens(icuTokens, this.prevIcuTokens)
+        ) {
+          this.prevIcuTokens = icuTokens
+          changedDecorator = true
+          this.addIcuDecorator(icuTokens)
+        }
       }
     } else {
       //Search

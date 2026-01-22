@@ -12,7 +12,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import SegmentConstants from '../../constants/SegmentConstants'
 import LexiqaUtils from '../../utils/lxq.main'
-import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
+import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
@@ -20,6 +20,10 @@ import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {
+  createICUDecorator,
+  createIcuTokens,
+} from './utils/DraftMatecatUtils/createICUDecorator'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import {flushSync} from 'react-dom'
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
@@ -30,6 +34,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
+import CatToolStore from '../../stores/CatToolStore'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -72,6 +77,8 @@ class SegmentSource extends React.Component {
       cleanSource,
     )
     const {editorState, tagRange} = contentEncoded
+    const projectTemplate = CatToolStore.getCurrentProjectTemplate()
+    this.icuEnabled = projectTemplate.icuEnabled
     this.state = {
       source: cleanSource,
       editorState: editorState,
@@ -84,6 +91,7 @@ class SegmentSource extends React.Component {
         [DraftMatecatConstants.GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
+        [DraftMatecatConstants.ICU_DECORATOR]: this.icuEnabled,
       },
       isShowingOptionsToolbar: false,
     }
@@ -92,6 +100,8 @@ class SegmentSource extends React.Component {
       : 0
 
     this.delayAiAssistant
+
+    this.firstIcuCheck = false
 
     this.wasTripleClickTriggered = createRef()
   }
@@ -217,7 +227,10 @@ class SegmentSource extends React.Component {
       lxqDecodedSource,
       true,
     )
-    const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges)
+    const updatedLexiqaWarnings = updateOffsetBasedOnEditorState(
+      editorState,
+      ranges,
+    )
     if (updatedLexiqaWarnings.length > 0) {
       const newDecorator = DraftMatecatUtils.activateLexiqa(
         editorState,
@@ -235,6 +248,18 @@ class SegmentSource extends React.Component {
     } else {
       this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
     }
+  }
+  addIcuDecorator = () => {
+    const {editorState} = this.state
+    const contentState = editorState.getCurrentContent()
+    const plainText = contentState.getPlainText()
+    const tokens = createIcuTokens(plainText, editorState, config.source_rfc)
+    const newDecorator = createICUDecorator(tokens, false)
+    remove(
+      this.decoratorsStructure,
+      (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
+    )
+    this.decoratorsStructure.push(newDecorator)
   }
 
   updateSourceInStore = () => {
@@ -343,6 +368,11 @@ class SegmentSource extends React.Component {
         activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
+      }
+      if (!this.firstIcuCheck && this.icuEnabled) {
+        this.firstIcuCheck = true
+        changedDecorator = true
+        this.addIcuDecorator()
       }
     } else {
       //Search

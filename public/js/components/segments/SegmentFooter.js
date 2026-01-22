@@ -17,12 +17,14 @@ import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
+import CatToolStore from '../../stores/CatToolStore'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -32,6 +34,7 @@ export const TAB = {
   MESSAGES: 'messages',
   MULTIMATCHES: 'multiMatches',
   AI_ASSISTANT: 'AiAssistant',
+  ICU: 'icu',
 }
 
 const TAB_ITEMS = {
@@ -78,6 +81,12 @@ const TAB_ITEMS = {
     isLoading: false,
     isEnableCloseButton: true,
   },
+  [TAB.ICU]: {
+    label: 'ICU',
+    code: 'icu',
+    tabClass: 'icu-validator',
+    isLoading: false,
+  },
 }
 const DELAY_MESSAGE = 7000
 
@@ -87,19 +96,22 @@ function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
+  const projectTemplate = CatToolStore.getCurrentProjectTemplate()
   const [tabItems, setTabItems] = useState(
-    Object.entries(TAB_ITEMS).map(([key, value]) => ({
-      ...value,
-      name: key,
-      enabled: false,
-      visible: false,
-      open: false,
-      elements: [],
-      label:
-        value.code === 'tm'
-          ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
-          : value.label,
-    })),
+    Object.entries(TAB_ITEMS).map(([key, value]) => {
+      return {
+        ...value,
+        name: key,
+        enabled: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        visible: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        open: !!(key === TAB.ICU && projectTemplate.icuEnabled),
+        elements: [],
+        label:
+          value.code === 'tm'
+            ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
+            : value.label,
+      }
+    }),
   )
   const [tabStateChanges, setTabStateChanges] = useState(undefined)
   const [activeTab, setActiveTab] = useState(undefined)
@@ -484,6 +496,16 @@ function SegmentFooter() {
       case 'ai':
         return (
           <SegmentFooterTabAiAssistant
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'icu':
+        return (
+          <SegmentFooterTabIcu
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}

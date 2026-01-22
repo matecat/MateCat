@@ -21,9 +21,12 @@ const fakeData = {
 test('Works fine with correct project id and token', async () => {
   mswServer.use(
     ...[
-      http.get(config.basepath + 'api/app/projects/:id/token/:project_access_token', () => {
-        return HttpResponse.json(fakeData.successfull)
-      }),
+      http.get(
+        config.basepath + 'api/app/projects/:id/token/:project_access_token',
+        () => {
+          return HttpResponse.json(fakeData.successfull)
+        },
+      ),
     ],
   )
   const response = await getProjectByToken(19, 'abcdefghijklmnxxx')
@@ -33,13 +36,18 @@ test('Works fine with correct project id and token', async () => {
 test('Error with wrong project id or token', async () => {
   mswServer.use(
     ...[
-      http.get(config.basepath + 'api/app/projects/:id/token/:project_access_token', () => {
-        return HttpResponse.json(fakeData.wrong)
-      }),
+      http.get(
+        config.basepath + 'api/app/projects/:id/token/:project_access_token',
+        () => {
+          return HttpResponse.json(fakeData.wrong)
+        },
+      ),
     ],
   )
 
-  const result = await getProjectByToken(19, 'abcdefghijklmnxxx').catch((error) => error)
+  const result = await getProjectByToken(19, 'abcdefghijklmnxxx').catch(
+    (error) => error,
+  )
 
   expect(result.errors).toEqual(fakeData.wrong.errors)
 })
