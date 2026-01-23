@@ -9,9 +9,6 @@ class GeminiClient implements AIClientInterface
 {
     private Client $gemini;
 
-    /**
-     *
-     */
     public function __construct(Client $gemini)
     {
         $this->gemini = $gemini;
@@ -82,8 +79,7 @@ You are an expert {$sourceLanguage} to {$targetLanguage} translator.
 PROMPT;
 
         $result = $this->gemini->generativeModel(model: AppConfig::$GEMINI_API_MODEL)->generateContent($prompt);
-        $result->text();
 
-
+        return $result->text();
     }
 }
