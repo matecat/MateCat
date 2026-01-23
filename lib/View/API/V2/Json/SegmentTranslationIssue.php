@@ -29,6 +29,7 @@ class SegmentTranslationIssue
         $record = new EntryStruct($record->getArrayCopy());
 
         return [
+            'uid' => $record->uid,
             'comment' => $record->comment,
             'created_at' => date('c', strtotime($record->create_date ?? 'now')),
             'id' => $record->id,

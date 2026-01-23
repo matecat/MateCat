@@ -11,9 +11,16 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
+use Model\Teams\MembershipDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
@@ -110,7 +117,19 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Issue not found", 404 );
         }
 
-        $this->checkUserId($oldStruct->uid);
+        $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+
+        if ( empty( $chunkReviewStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
+        $jobStruct = $chunkReviewStruct->getChunk();
+
+        if ( empty( $jobStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
+        $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
         $oldStruct->setDefaults();
 
@@ -145,7 +164,19 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->validator->issue
         );
 
-        $this->checkUserId($this->validator->issue->uid);
+        $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+
+        if ( empty( $chunkReviewStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
+        $jobStruct = $chunkReviewStruct->getChunk();
+
+        if ( empty( $jobStruct ) ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
+        $this->checkLoggedUserPermissions($this->validator->issue, $jobStruct, $this->user);
 
         $model->delete();
         Database::obtain()->commit();
@@ -185,7 +216,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         }
 
         $this->checkUserId($this->validator->issue->uid);
-
         $dao->createComment( $data );
 
         $json = new TranslationIssueFormatter();
@@ -235,5 +265,33 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         if ( $this->user->uid !== $uid ) {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
+    }
+
+
+    private function checkLoggedUserPermissions(EntryStruct $entry, JobStruct $job, UserStruct $loggerUser): void
+    {
+        if($entry->uid === $loggerUser->uid){
+            return;
+        }
+
+        $owner = (new UserDao())->getByEmail($job->owner);
+
+        if($owner === null){
+            throw new AuthorizationError( "Job owner not found. Not Authorized", 401 );
+        }
+
+        if($owner->uid === $loggerUser->uid){
+            return;
+        }
+
+        $mDao = new MembershipDao();
+
+        foreach ($mDao->findUserTeams($owner) as $team){
+            if($team->hasUser($entry->uid) || $team->created_by === $loggerUser->uid){
+                return;
+            }
+        }
+
+        throw new AuthorizationError( "Not Authorized", 401 );
     }
 }
