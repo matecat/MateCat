@@ -199,7 +199,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
               <label>
                 <h3>
                   {name}
-                  <span>{type}</span>
+                  <span>{inputTypes[type]}</span>
                 </h3>
                 <input
                   value={values[name]?.value || ''}
