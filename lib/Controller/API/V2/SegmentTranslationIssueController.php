@@ -129,7 +129,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $this->checkUserId($oldStruct->uid);
         $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
         $oldStruct->setDefaults();
@@ -177,7 +176,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Job not found", 404 );
         }
 
-        $this->checkUserId($this->validator->issue->uid);
         $this->checkLoggedUserPermissions($this->validator->issue, $jobStruct, $this->user);
 
         $model->delete();
@@ -218,7 +216,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         }
 
         $this->checkUserId($this->validator->issue->uid);
-
         $dao->createComment( $data );
 
         $json = new TranslationIssueFormatter();
