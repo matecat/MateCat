@@ -7,6 +7,7 @@ use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\AIAssistant\AIClientFactory;
 use Utils\AIAssistant\OpenAIClient as AIAssistantClient;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
@@ -17,6 +18,8 @@ use Utils\Tools\Utils;
 class AIAssistantWorker extends AbstractWorker
 {
     const string EXPLAIN_MEANING_ACTION = 'explain_meaning';
+    const string FEEDBACK_ACTION = 'feedback';
+    const string ALTERNATIVE_TRANSLATIONS_ACTION = 'alternative_translations';
 
     /**
      * @var OpenAi
@@ -57,6 +60,8 @@ class AIAssistantWorker extends AbstractWorker
 
         $allowedActions = [
             self::EXPLAIN_MEANING_ACTION,
+            self::FEEDBACK_ACTION,
+            self::ALTERNATIVE_TRANSLATIONS_ACTION,
         ];
 
         if (false === in_array($action, $allowedActions)) {
@@ -68,6 +73,42 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog('AI ASSISTANT: ' . $action . ' action was executed with payload ' . json_encode($payload));
 
         $this->{$action}($payload);
+    }
+
+    private function alternative_translations(array $payload)
+    {
+        try {
+            $gemini = AIClientFactory::create("gemini");
+            $message = $gemini->manageAlternativeTranslations(
+                $payload['localized_source'],
+                $payload['localized_target'],
+                $payload['source_sentence'],
+                $payload['target_sentence'],
+                $payload['source_context_sentences_string'],
+                $payload['target_context_sentences_string'],
+                $payload['excerpt'],
+                $payload['style_instructions']
+            );
+
+            $this->emitErrorMessage($message, $payload);
+        } catch (Exception $exception){}
+    }
+
+    private function feedback(array $payload)
+    {
+        try {
+            $openAi = AIClientFactory::create("openai");
+            $message = $openAi->evaluateTranslation(
+                $payload['localized_source'],
+                $payload['localized_target'],
+                $payload['text'],
+                $payload['translation'],
+                $payload['context'],
+                $payload['style']
+            );
+
+            $this->emitErrorMessage($message, $payload);
+        } catch (Exception $e) {}
     }
 
     /**
@@ -89,7 +130,8 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         try {
-            (new AIAssistantClient($this->openAi))->findContextForAWord($payload['word'], $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
+            $openAi = AIClientFactory::create("openai");
+            $openAi->findContextForAWord($payload['word'], $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
                 $currentLockValue = $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']);
                 if ($currentLockValue !== $lockValue) {
                     $this->_doLog("Current lock invalid. Current value is: " . $currentLockValue . ", " . $lockValue . " was expected for id_segment " . $payload['id_segment']);
