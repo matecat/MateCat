@@ -348,6 +348,8 @@ class Lara extends AbstractEngine
                         $t->getCode(),
                         $t
                     );
+                } else {
+                    $this->logger->error(["Lara API Exception.", $t->getMessage(), $t->getCode(), $t->getTrace()]);
                 }
 
                 // mmt fallback
