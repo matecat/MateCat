@@ -114,7 +114,8 @@ div#manage-container {
       color: colors.$black;
       height: 38px;
       border-radius: 0 2px 2px 0;
-      display: inline-block;
+      display: flex;
+      align-items: center;
       margin-right: -33px;
       padding-left: 10px !important;
     }
@@ -427,9 +428,7 @@ div#manage-container {
             .chunk {
               display: grid;
               grid-template-columns:
-                auto
-                70px
-                150px 120px 106px auto auto 1fr auto auto auto;
+                20px 70px 150px 120px 106px 100px auto 180px 65px 40px;
               align-items: center;
               gap: 6px;
               transition: 0.3s ease;
@@ -493,7 +492,6 @@ div#manage-container {
               .job-activity-icons {
                 display: flex;
                 justify-content: center;
-                min-width: 110px;
                 gap: 5px;
 
                 button.group-activity-icon {
@@ -558,27 +556,11 @@ div#manage-container {
                   }
                 }
                 .job-to-translator {
-                  display: inline-block;
-                  vertical-align: text-bottom;
-                  color: #969696;
-                  max-width: 150px;
-                  transition: 0.3s ease;
-                  min-width: 0px;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-
-                  @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                    width: fit-content;
-                    &:hover {
-                    }
-                  }
+                  width: 100%;
+                  text-align: center;
                   a {
                     text-decoration: underline;
                     font-weight: 700;
-                  }
-                  &.not-assigned {
-                    width: fit-content;
                   }
                 }
                 &:hover .job-to-translator {
@@ -624,15 +606,17 @@ div#manage-container {
                 &:hover .translator .job-delivery {
                   display: none;
                 }
-                .outsource-delivery-container {
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                }
                 .job-delivery-date {
                   margin-left: 5px;
                   color: colors.$grey7;
-
+                  display: flex;
+                  gap: 4px;
+                  .job-delivery-email {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 200px;
+                  }
                   > :nth-child(2) {
                     font-weight: bold;
                     color: black;
@@ -907,12 +891,12 @@ div#manage-container {
     margin-right: auto !important;
     transition: 0.3s ease;
   }
-  .outsource-delivery-container {
-    max-width: 210px;
+  .job-delivery-email {
+    display: none;
   }
 }
 
-@media only screen and (min-width: 1500px) {
+@media only screen and (min-width: 1501px) {
   .ui.container {
     width: 1280px !important;
     margin-left: auto !important;
@@ -920,8 +904,9 @@ div#manage-container {
     transition: 0.3s ease;
   }
 
-  .outsource-delivery-container {
-    max-width: unset;
+  .job-delivery-email {
+    max-width: 130px;
+    display: block;
   }
 }
 

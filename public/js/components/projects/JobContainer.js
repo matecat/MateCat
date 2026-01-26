@@ -647,17 +647,20 @@ class JobContainer extends React.Component {
     return (
       gmtDate && (
         <div className="outsource-delivery-container">
-          <span className="job-delivery-date" title="Delivery date">
+          <div className="job-delivery-date" title="Delivery date">
             {this.props.job.get('translator') && (
-              <span onClick={this.openOutsourceModal.bind(this, true, false)}>
+              <div
+                className="job-delivery-email"
+                onClick={this.openOutsourceModal.bind(this, true, false)}
+              >
                 {this.props.job.get('translator').get('email')}
-              </span>
+              </div>
             )}{' '}
             <span>
               {gmtDate.day} {gmtDate.month} {gmtDate.time}
             </span>{' '}
             {gmtDate.gmt}
-          </span>
+          </div>
         </div>
       )
     )
@@ -896,28 +899,32 @@ const OutsourceButton = ({job, openOutsourceModal}) => {
     : undefined
   let label =
     !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
-      <Button
-        // className="open-outsource open-outsource-disabled buy-translation"
-        id="open-quote-request"
-        data-testid="buy-translation-button"
-        disabled={true}
-        tooltip={
-          "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
-        }
-      >
-        Buy Translation from
-        <TranslatedIconSmall size={20} />
-      </Button>
+      <div>
+        <Button
+          // className="open-outsource open-outsource-disabled buy-translation"
+          id="open-quote-request"
+          data-testid="buy-translation-button"
+          disabled={true}
+          tooltip={
+            "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
+          }
+        >
+          Buy Translation from
+          <TranslatedIconSmall size={20} />
+        </Button>
+      </div>
     ) : (
-      <Button
-        // className="open-outsource buy-translation "
-        id="open-quote-request"
-        onClick={openOutsourceModal.bind(this, false, true)}
-        data-testid="buy-translation-button"
-      >
-        Buy Translation from
-        <TranslatedIconSmall size={20} />
-      </Button>
+      <div>
+        <Button
+          // className="open-outsource buy-translation "
+          id="open-quote-request"
+          onClick={openOutsourceModal.bind(this, false, true)}
+          data-testid="buy-translation-button"
+        >
+          Buy Translation from
+          <TranslatedIconSmall size={20} />
+        </Button>
+      </div>
     )
   if (job.get('outsource')) {
     if (job.get('outsource').get('id_vendor') == '1') {
