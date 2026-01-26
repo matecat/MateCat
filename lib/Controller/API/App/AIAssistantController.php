@@ -13,7 +13,6 @@ use Utils\Registry\AppConfig;
 
 class AIAssistantController extends KleinController
 {
-
     const string AI_ASSISTANT_EXPLAIN_MEANING = 'AI_ASSISTANT_EXPLAIN_MEANING';
 
     /**
@@ -91,6 +90,9 @@ class AIAssistantController extends KleinController
         $this->response->json($json);
     }
 
+    /**
+     * Provide a feedback on a translation
+     */
     public function feedback(): void
     {
         if (empty(AppConfig::$OPENAI_API_KEY)) {
@@ -121,7 +123,7 @@ class AIAssistantController extends KleinController
             throw new InvalidLanguageException($json['target_language'] . ' is not a valid language');
         }
 
-        // id_segment
+        // text
         if (!isset($json['text'])) {
             throw new InvalidArgumentException('Missing `text` parameter');
         }
@@ -161,6 +163,9 @@ class AIAssistantController extends KleinController
         $this->response->json($json);
     }
 
+    /**
+     * Provide alternative translations
+     */
     public function alternative_translations(): void
     {
         if (empty(AppConfig::$GEMINI_API_KEY)) {

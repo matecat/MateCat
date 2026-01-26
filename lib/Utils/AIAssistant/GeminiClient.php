@@ -79,7 +79,9 @@ You are an expert {$sourceLanguage} to {$targetLanguage} translator.
 PROMPT;
 
         $result = $this->gemini->generativeModel(model: AppConfig::$GEMINI_API_MODEL)->generateContent($prompt);
+        $text = $result->text();
+        $text = str_replace(["```json", "```"], "", $text);
 
-        return $result->text();
+        return json_decode($text);
     }
 }
