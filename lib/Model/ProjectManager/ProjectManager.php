@@ -685,10 +685,11 @@ class ProjectManager
     }
 
     /**
-     * @return bool|void
+     * @return void
      * @throws Exception
+     * @throws Throwable
      */
-    public function createProject()
+    public function createProject(): void
     {
         $this->sanitizeProjectStructure();
 
@@ -714,7 +715,7 @@ class ProjectManager
         if ($this->projectStructure['result']['errors']->count()) {
             $this->_log($this->projectStructure['result']['errors']);
 
-            return false;
+            throw new EndQueueException("Invalid Project found.");
         }
 
         //sort files to process TMX first
@@ -754,7 +755,7 @@ class ProjectManager
 
             if (count($this->projectStructure['result']['errors']) > 0) {
                 // This return value was introduced after a refactoring
-                return;
+                throw new EndQueueException("Invalid Project found.");
             }
         }
 
@@ -777,7 +778,7 @@ class ProjectManager
             $this->_log($e->getMessage(), $e);
 
             //exit project creation
-            return false;
+            throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
         //TMX Management
 
@@ -854,6 +855,7 @@ class ProjectManager
                 "code" => $e->getCode(),
                 "message" => $e->getMessage()
             ];
+            throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
 
         //now, upload dir contains only hash-links
@@ -870,7 +872,11 @@ class ProjectManager
                 // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
                 // $hashFile[ 1 ] = it-it
                 $sha1_original = $hashFile[0];
-                $lang = $hashFile[1];
+                $lang = $hashFile[1] ?? '';
+
+                if (empty($lang)) {
+                    continue; //in some cases, the hash is not linked to a language, skip the file
+                }
 
                 //use hash and lang to fetch the file from the package
                 $cachedXliffFilePathName = $fs->getXliffFromCache($sha1_original, $lang);
@@ -975,7 +981,7 @@ class ProjectManager
                     $this->__clearFailedProject($e);
 
                     //EXIT
-                    throw new Exception("Caught Exception");
+                    throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
                 }
 
                 //this is an "array append" like array_merge, but it does not renumber the numeric keys, so we can preserve the files id
@@ -1029,7 +1035,7 @@ class ProjectManager
 
             $this->_createJobs($this->projectStructure);
             $this->writeFastAnalysisData();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if ($e->getCode() == -1) {
                 $this->projectStructure['result']['errors'][] = [
                     "code" => -1,
@@ -1062,7 +1068,7 @@ class ProjectManager
             $this->_log("Exception", $e);
 
             //EXIT
-            return false;
+            throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
 
         $this->projectStructure['status'] = (AppConfig::$VOLUME_ANALYSIS_ENABLED) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
@@ -1925,7 +1931,7 @@ class ProjectManager
             $xliff = $xliffParser->xliffToArray($xliff_file_content);
             $xliffInfo = XliffProprietaryDetect::getInfoByStringData($xliff_file_content);
             $this->projectStructure['current-xliff-info'][$fid] = $xliffInfo;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             throw new Exception("Failed to parse " . $file_info['original_filename'], ($e->getCode() != 0 ? $e->getCode() : -4), $e);
         }
 

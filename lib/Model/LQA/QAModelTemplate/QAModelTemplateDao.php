@@ -276,7 +276,7 @@ class QAModelTemplateDao extends AbstractDao
     /**
      * @param array $meta
      *
-     * @return QAModelTemplateStruct
+     * @return QAModelTemplateStruct|null
      * @throws Exception
      */
     public static function get(array $meta = []): ?QAModelTemplateStruct

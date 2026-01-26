@@ -10,10 +10,14 @@
 namespace Utils\AsyncTasks\Workers;
 
 
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\ProjectManager\ProjectManager;
 use PDOException;
 use ReflectionException;
+use Throwable;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\TaskRunner\Commons\AbstractElement;
@@ -31,8 +35,12 @@ class ProjectCreationWorker extends AbstractWorker
      * @param AbstractElement $queueElement
      *
      * @return void
+     * @throws AuthenticationError
      * @throws EndQueueException
-     * @throws Exception
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws ValidationError
      */
     public function process(AbstractElement $queueElement): void
     {
@@ -74,7 +82,11 @@ class ProjectCreationWorker extends AbstractWorker
     /**
      * @param QueueElement $queueElement
      *
-     * @throws Exception
+     * @throws EndQueueException
+     * @throws Throwable
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
      */
     protected function _createProject(QueueElement $queueElement): void
     {

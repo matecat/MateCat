@@ -58,19 +58,19 @@ class QAGlobalWarning extends QAWarning
 
             if (count($exceptionList[QA::ERROR]) > 0) {
                 foreach ($exceptionList[QA::ERROR] as $exception_error) {
-                    $this->pushErrorSegment(QA::ERROR, $exception_error->outcome, $_item['id_segment']);
+                    $this->pushErrorSegment(QA::ERROR, $exception_error->outcome, (string)$_item['id_segment']);
                 }
             }
 
             if (count($exceptionList[QA::WARNING]) > 0) {
                 foreach ($exceptionList[QA::WARNING] as $exception_error) {
-                    $this->pushErrorSegment(QA::WARNING, $exception_error->outcome, $_item['id_segment']);
+                    $this->pushErrorSegment(QA::WARNING, $exception_error->outcome, (string)$_item['id_segment']);
                 }
             }
 
             if (count($exceptionList[QA::INFO]) > 0) {
                 foreach ($exceptionList[QA::INFO] as $exception_error) {
-                    $this->pushErrorSegment(QA::INFO, $exception_error->outcome, $_item['id_segment']);
+                    $this->pushErrorSegment(QA::INFO, $exception_error->outcome, (string)$_item['id_segment']);
                 }
             }
         }

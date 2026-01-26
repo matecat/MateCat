@@ -216,4 +216,5 @@ route('/api/app/convert-file', 'POST', ['Controller\API\App\ConvertFileControlle
 route('/api/app/set-chunk-completed', 'POST', ['Controller\API\App\SetChunkCompletedController', 'complete']);
 route('/api/app/download-analysis-report', 'POST', ['Controller\API\App\DownloadAnalysisReportController', 'download']);
 
-
+// TODO remove. This endpoint is deprecated
+route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET', [ 'Controller\API\App\QualityFrameworkController', 'project' ] );
