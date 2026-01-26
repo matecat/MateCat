@@ -30,6 +30,7 @@ export const laraTranslate = async ({
     {
       multiline: false,
       contentType: 'application/xliff+xml',
+      style: 'fluid',
       headers: {'X-Lara-Engine-Tuid': `${jobId}:${sid}`},
       glossaries: glossaries,
       reasoning: true,
