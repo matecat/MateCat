@@ -236,12 +236,15 @@ class Lara extends AbstractEngine
             $laraClient = $client->getHttpClient();
             $laraClient->setExtraHeader('x-memory-ids', implode(',', $_config['keys']));
 
+            $style = "fluid";
+
             try {
                 // call lara
                 $translateOptions = new TranslateOptions();
                 $translateOptions->setAdaptTo($_config['keys']);
                 $translateOptions->setMultiline(false);
                 $translateOptions->setContentType('application/xliff+xml');
+                $translateOptions->setStyle($style);
                 $headers = new Headers();
 
                 if (!empty($_config['tuid']) and is_string($_config['tuid'])) {
@@ -314,6 +317,7 @@ class Lara extends AbstractEngine
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
+                    'style' => $style,
                     'extra_headers' => $headers->getArrayCopy(),
                 ]);
             } catch (LaraException $t) {
@@ -478,6 +482,7 @@ class Lara extends AbstractEngine
         try {
             $time_start = microtime(true);
             $headers = new Headers($_config['tuid'], $_config['translation_origin']);
+
             // call lara
             $client->memories->addTranslation(
                 $_keys,
