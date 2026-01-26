@@ -99,7 +99,7 @@ class SegmentVersion
 
             if (!is_null($record->qa_id_segment)) {
                 $issuesSubset[] = (new EntryStruct([
-                    'uid' => $record->uid,
+                    'uid' => $record->qa_uid,
                     'id' => $record->qa_id,
                     'id_segment' => $record->qa_id_segment,
                     'id_job' => $record->qa_id_job,

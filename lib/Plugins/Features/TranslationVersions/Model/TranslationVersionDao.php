@@ -159,6 +159,7 @@ class TranslationVersionDao extends AbstractDao
     st.time_to_edit,
     stv.raw_diff,
 
+    qa.uid as qa_uid,
     qa.id as qa_id,
     qa.comment as qa_comment,
     qa.create_date as qa_create_date,
@@ -203,6 +204,7 @@ class TranslationVersionDao extends AbstractDao
     stv.time_to_edit,
     stv.raw_diff,
 
+     qa.uid as qa_uid,
      qa.id as qa_id,
      qa.comment as qa_comment,
      qa.create_date as qa_create_date ,
