@@ -3,9 +3,11 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use Utils\ICU\ArgType;
 use Utils\ICU\MessagePattern;
+use Utils\ICU\Part;
 use Utils\ICU\Type;
 
 /**
@@ -424,9 +426,644 @@ MSG;
     public function testAutoQuoteApostropheWithQuotedLiterals(): void
     {
         $pattern = new MessagePattern();
-        $pattern->parse("He said '{name}' and it's ok");
+        $pattern->parse("He said it's(?!) '{name}' and it's ok");
 
-        self::assertSame("He said '{name}' and it''s ok", $pattern->autoQuoteApostropheDeep());
+        self::assertSame("He said it''s(?!) '{name}' and it''s ok", $pattern->autoQuoteApostropheDeep());
+    }
+
+    public function testClear(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {0}');
+        self::assertGreaterThan(0, $pattern->countParts());
+
+        $pattern->clear();
+        self::assertSame(0, $pattern->countParts());
+        self::assertSame('', $pattern->getPatternString());
+        self::assertFalse($pattern->hasNamedArguments());
+        self::assertFalse($pattern->hasNumberedArguments());
+    }
+
+    public function testClearPatternAndSetApostropheMode(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {0}');
+
+        $pattern->clearPatternAndSetApostropheMode(MessagePattern::APOSTROPHE_DOUBLE_REQUIRED);
+        self::assertSame(0, $pattern->countParts());
+        self::assertSame(MessagePattern::APOSTROPHE_DOUBLE_REQUIRED, $pattern->getApostropheMode());
+    }
+
+    public function testGetApostropheModeDoubleRequired(): void
+    {
+        $pattern = new MessagePattern(null, MessagePattern::APOSTROPHE_DOUBLE_REQUIRED);
+        self::assertSame(MessagePattern::APOSTROPHE_DOUBLE_REQUIRED, $pattern->getApostropheMode());
+    }
+
+    public function testPartSubstringMatches(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('{name}');
+
+        $part = $pattern->getPart(2);
+        self::assertTrue($pattern->partSubstringMatches($part, 'name'));
+        self::assertFalse($pattern->partSubstringMatches($part, 'other'));
+        self::assertFalse($pattern->partSubstringMatches($part, 'names'));
+    }
+
+    public function testGetNumericValueWithNonNumeric(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('{name}');
+
+        $part = $pattern->getPart(1);
+        self::assertSame(MessagePattern::NO_NUMERIC_VALUE, $pattern->getNumericValue($part));
+    }
+
+    public function testGetPluralOffsetWithoutOffset(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('one{# item} other{# items}');
+
+        self::assertSame(0.0, $pattern->getPluralOffset(0));
+    }
+
+    public function testGetPatternIndex(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {0}');
+
+        self::assertSame(0, $pattern->getPatternIndex(0));
+    }
+
+    public function testGetPartOutOfBounds(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi');
+        $pattern->getPart(999);
+    }
+
+    public function testUnmatchedOpeningBrace(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Unmatched '{'");
+
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {name');
+    }
+
+    public function testBadArgumentSyntaxNoCommaOrBrace(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad argument syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {name?}');
+    }
+
+    public function testBadArgumentSyntaxInvalidChar(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad argument syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {na me}');
+    }
+
+    public function testArgumentNumberTooLarge(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Argument number too large');
+
+        $pattern = new MessagePattern();
+        $pattern->parse('{99999999999999999999}');
+    }
+
+    public function testArgumentNameTooLong(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Argument name too long');
+
+        $pattern = new MessagePattern();
+        $longName = str_repeat('a', Part::MAX_LENGTH + 1);
+        $pattern->parse("{{$longName}}");
+    }
+
+    public function testArgumentTypeNameTooLong(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Argument type name too long');
+
+        $pattern = new MessagePattern();
+        $longType = str_repeat('a', Part::MAX_LENGTH + 1);
+        $pattern->parse("{name, {$longType}}");
+    }
+
+    public function testNoStyleForComplexArgument(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('No style field for complex argument');
+
+        $pattern = new MessagePattern();
+        $pattern->parse('{name, plural}');
+    }
+
+    public function testSimpleStyleQuotedLiteralUnterminated(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Quoted literal argument style text reaches to the end');
+
+        $pattern = new MessagePattern();
+        $pattern->parse("{name, number, '#.00}");
+    }
+
+    public function testSimpleStyleTooLong(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Argument style text too long');
+
+        $pattern = new MessagePattern();
+        $longStyle = str_repeat('a', Part::MAX_LENGTH + 1);
+        $pattern->parse("{name, number, {$longStyle}}");
+    }
+
+    public function testChoiceStyleMissingPattern(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing choice argument pattern');
+
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('');
+    }
+
+    public function testChoiceStyleBadSyntax(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad choice pattern syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('abc#test');
+    }
+
+    public function testChoiceNumberTooLong(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Choice number too long');
+
+        $pattern = new MessagePattern();
+        $longNumber = str_repeat('9', Part::MAX_LENGTH + 1);
+        $pattern->parseChoiceStyle("{$longNumber}#test");
+    }
+
+    public function testChoiceStyleInvalidSeparator(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected choice separator');
+
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('0?test');
+    }
+
+    public function testPluralStyleMissingOther(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Missing 'other' keyword");
+
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('one{# item}');
+    }
+
+    public function testPluralStyleExplicitSelectorBadSyntax(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad plural pattern syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('={none} other{items}');
+    }
+
+    public function testPluralStyleOffsetNotFirst(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Plural argument 'offset:' (if present) must precede");
+
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('one{# item} offset:1 other{# items}');
+    }
+
+    public function testPluralStyleOffsetMissingValue(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Missing value for plural 'offset:'");
+
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('offset: other{# items}');
+    }
+
+    public function testPluralStyleOffsetValueTooLong(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Plural offset value too long');
+
+        $pattern = new MessagePattern();
+        $longNumber = str_repeat('9', Part::MAX_LENGTH + 1);
+        $pattern->parsePluralStyle("offset:{$longNumber} other{# items}");
+    }
+
+    public function testPluralStyleSelectorTooLong(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Argument selector too long');
+
+        $pattern = new MessagePattern();
+        $longSelector = str_repeat('a', Part::MAX_LENGTH + 1);
+        $pattern->parsePluralStyle("{$longSelector}{test} other{items}");
+    }
+
+    public function testSelectStyleNoMessageAfterSelector(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('No message fragment after select selector');
+
+        $pattern = new MessagePattern();
+        $pattern->parseSelectStyle('male other{They}');
+    }
+
+    public function testAppendReducedApostrophes(): void
+    {
+        $out = '';
+        MessagePattern::appendReducedApostrophes("test''test", 0, 10, $out);
+        self::assertSame("test'test", $out);
+
+        $out = '';
+        MessagePattern::appendReducedApostrophes("no apostrophe", 0, 13, $out);
+        self::assertSame("no apostrophe", $out);
+
+        $out = '';
+        MessagePattern::appendReducedApostrophes("end''", 0, 5, $out);
+        self::assertSame("end'", $out);
+    }
+
+    public function testIterator(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {0}');
+
+        $count = 0;
+        foreach ($pattern as $key => $part) {
+            self::assertIsInt($key);
+            self::assertInstanceOf(Part::class, $part);
+            $count++;
+        }
+
+        self::assertSame($pattern->countParts(), $count);
+    }
+
+    public function testAutoQuoteApostropheDeepNoChanges(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('Hi {name} test');
+
+        self::assertSame('Hi {name} test', $pattern->autoQuoteApostropheDeep());
+    }
+
+    public function testParseDoubleRequiredModeWithQuoting(): void
+    {
+        $pattern = new MessagePattern(null, MessagePattern::APOSTROPHE_DOUBLE_REQUIRED);
+        $pattern->parse("It's 'quoted'");
+
+        self::assertGreaterThan(2, $pattern->countParts());
+    }
+
+    public function testParseSimpleArgWithType(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('{name, number, #.00}');
+
+        $hasArgType = false;
+        $hasArgStyle = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $type = $pattern->getPartType($i);
+            if ($type === Type::ARG_TYPE) {
+                $hasArgType = true;
+            }
+            if ($type === Type::ARG_STYLE) {
+                $hasArgStyle = true;
+            }
+        }
+
+        self::assertTrue($hasArgType);
+        self::assertTrue($hasArgStyle);
+    }
+
+    public function testParseNestedBracesInSimpleStyle(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('{name, number, {nested}}');
+
+        $styleFound = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            if ($pattern->getPartType($i) === Type::ARG_STYLE) {
+                $styleFound = true;
+                break;
+            }
+        }
+
+        self::assertTrue($styleFound);
+    }
+
+    public function testParseNegativeDoubleInChoice(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('-5.5#negative|0#zero|5.5#positive');
+
+        $numericValues = [];
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType()->hasNumericValue()) {
+                $numericValues[] = $pattern->getNumericValue($part);
+            }
+        }
+
+        self::assertContains(-5.5, $numericValues);
+        self::assertContains(0.0, $numericValues);
+        self::assertContains(5.5, $numericValues);
+    }
+
+    public function testParseLargeIntegerValue(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('999999999999999#huge');
+
+        $hasDouble = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            if ($pattern->getPartType($i) === Type::ARG_DOUBLE) {
+                $hasDouble = true;
+                break;
+            }
+        }
+
+        self::assertTrue($hasDouble);
+    }
+
+    public function testParseNegativeInfinity(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('-∞#negative infinity|0#zero');
+
+        $hasNegInf = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType() === Type::ARG_DOUBLE) {
+                $value = $pattern->getNumericValue($part);
+                if ($value === -INF) {
+                    $hasNegInf = true;
+                    break;
+                }
+            }
+        }
+
+        self::assertTrue($hasNegInf);
+    }
+
+    public function testBadSyntaxInfinity(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad syntax for numeric value');
+
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('∞5#bad');
+    }
+
+    public function testValidateArgumentNameLeadingZero(): void
+    {
+        self::assertSame(MessagePattern::ARG_NAME_NOT_VALID, MessagePattern::validateArgumentName('01'));
+        self::assertSame(MessagePattern::ARG_NAME_NOT_VALID, MessagePattern::validateArgumentName('0123'));
+    }
+
+    public function testValidateArgumentNameEmpty(): void
+    {
+        self::assertSame(MessagePattern::ARG_NAME_NOT_VALID, MessagePattern::validateArgumentName(''));
+    }
+
+    public function testValidateArgumentNameMixed(): void
+    {
+        self::assertSame(MessagePattern::ARG_NAME_NOT_NUMBER, MessagePattern::validateArgumentName('test123'));
+        self::assertSame(MessagePattern::ARG_NAME_NOT_NUMBER, MessagePattern::validateArgumentName('a1'));
+    }
+
+    public function testParsePluralWithPositiveExplicitNumber(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('=5{exactly five} other{not five}');
+
+        $found = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType()->hasNumericValue() && $pattern->getNumericValue($part) === 5.0) {
+                $found = true;
+                break;
+            }
+        }
+
+        self::assertTrue($found);
+    }
+
+    public function testExcessiveNesting(): void
+    {
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Nesting level exceeds maximum value');
+
+        $pattern = new MessagePattern();
+        $nested = str_repeat('{a,select,other{', 300) . 'text' . str_repeat('}}', 300);
+        $pattern->parse($nested);
+    }
+
+    public function testUnmatchedNestedBraces(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Unmatched '{' braces in message ");
+
+        $pattern = new MessagePattern();
+        $nested = str_repeat('{a,select,other{', 10) . 'text' . str_repeat('}}', 9);
+        $pattern->parse($nested);
+    }
+
+    public function testChoiceInMessageFormat(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('{num, choice, 0#none|1#one|2#many}');
+
+        $hasChoice = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType() === Type::ARG_START && $part->getArgType() === ArgType::CHOICE) {
+                $hasChoice = true;
+                break;
+            }
+        }
+
+        self::assertTrue($hasChoice);
+    }
+
+    public function testParsePluralExplicitDecimal(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('=1.5{one and half} other{not one and half}');
+
+        $found = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType()->hasNumericValue() && $pattern->getNumericValue($part) === 1.5) {
+                $found = true;
+                break;
+            }
+        }
+
+        self::assertTrue($found);
+    }
+
+    public function testChoiceStyleBadSyntaxEndingCurly(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad choice pattern syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('0#test}');
+    }
+
+    public function testParseWithLeadingZeroNumber(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad argument syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parse('{01}');
+    }
+
+    public function testParsePluralStyleWithDecimalOffset(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('offset:2.5 one{# item} other{# items}');
+
+        self::assertSame(2.5, $pattern->getPluralOffset(0));
+    }
+
+
+    public function testTooManyNumericValues(): void
+    {
+        $this->markTestSkipped(
+            'This test is very expensive with a running code coverage',
+        );
+
+        $this->expectException(OutOfBoundsException::class);
+        $this->expectExceptionMessage('Too many numeric values');
+
+        $pattern = new MessagePattern();
+        $choices = "";
+        for ($i = 0; $i <= (Part::MAX_VALUE + 1); $i++) {
+            $choices .= "$i.5#value$i|";
+        }
+        $choices = rtrim($choices, '|');
+        $pattern->parseChoiceStyle($choices);
+    }
+
+    public function testParseArgTypeUnsupportedLength(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('{name, date, short}');
+
+        $hasSimple = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType() === Type::ARG_START && $part->getArgType() === ArgType::SIMPLE) {
+                $hasSimple = true;
+                break;
+            }
+        }
+
+        self::assertTrue($hasSimple);
+    }
+
+    public function testUnterminatedQuoteAtEndWithDoubleOptional(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse("test 'quoted");
+
+        $hasInsertChar = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            if ($pattern->getPartType($i) === Type::INSERT_CHAR) {
+                $hasInsertChar = true;
+                break;
+            }
+        }
+
+        self::assertTrue($hasInsertChar);
+    }
+
+    public function testUnterminatedApostropheAtEnd(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse("test'");
+
+        $result = $pattern->autoQuoteApostropheDeep();
+        self::assertStringContainsString("'", $result);
+    }
+
+    public function testParsePluralBadSyntaxEmptySelector(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad plural pattern syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('{test} other{items}');
+    }
+
+    public function testParseSelectorBadSyntaxClosingBrace(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Bad plural pattern syntax');
+
+        $pattern = new MessagePattern();
+        $pattern->parsePluralStyle('}');
+    }
+
+    public function testChoiceWithScientificNotation(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parseChoiceStyle('1e10#large|0#small');
+
+        $hasLargeNumber = false;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType()->hasNumericValue()) {
+                $value = $pattern->getNumericValue($part);
+                if ($value === 1e10) {
+                    $hasLargeNumber = true;
+                    break;
+                }
+            }
+        }
+
+        self::assertTrue($hasLargeNumber);
+    }
+
+    public function testParseComplexNestedChoice(): void
+    {
+        $pattern = new MessagePattern();
+        $pattern->parse('{a,choice,0#zero|1#{b,choice,0#sub-zero|1#sub-one}}');
+
+        $choiceCount = 0;
+        for ($i = 0; $i < $pattern->countParts(); $i++) {
+            $part = $pattern->getPart($i);
+            if ($part->getType() === Type::ARG_START && $part->getArgType() === ArgType::CHOICE) {
+                $choiceCount++;
+            }
+        }
+
+        self::assertSame(2, $choiceCount);
     }
 
 }

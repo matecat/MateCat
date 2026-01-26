@@ -14,7 +14,6 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
-use Utils\Tools\Utils;
 
 trait Oauth
 {
@@ -94,7 +93,8 @@ trait Oauth
      */
     public function get(array $_config)
     {
-        $cycle = (int)func_get_arg(1) ?? 0;
+        $numArgs = func_num_args();
+        $cycle = $numArgs > 0 ? ((int)func_get_arg(1) ?? 0) : 0;
 
         if ($cycle == 10) {
             return $this->_formatRecursionError();
@@ -124,7 +124,7 @@ trait Oauth
             }
 
             /**
-             * Warning this is a recursion!!!
+             * Warning, this is a recursion!!!
              *
              */
             return $this->get($_config, $cycle + 1); //do this request again!

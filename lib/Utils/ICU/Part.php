@@ -26,8 +26,8 @@ final class Part
         // e.g., ArgType::NONE, ArgType::SOME_TYPE, ...
     ];
 
-    public static int $MAX_LENGTH = 0xffff;
-    public static int $MAX_VALUE = 32767;
+    const int MAX_LENGTH = 0xffff;
+    const int MAX_VALUE = 32767;
 
     public function __construct(
         private readonly Type $type,
@@ -97,8 +97,7 @@ final class Part
     }
 
     /**
-     * @return a string representation of this part.
-     * @stable ICU 4.8
+     * @return string representation of this part.
      */
     public function __toString(): string
     {

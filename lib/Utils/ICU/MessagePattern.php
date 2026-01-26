@@ -82,6 +82,12 @@ final class MessagePattern implements Iterator
      */
     public const int ARG_NAME_NOT_VALID = -2;
     /**
+     * Return value indicating that the argument value exceeds
+     * the allowed or expected range.
+     */
+    public const int ARG_VALUE_OVERFLOW = -3;
+
+    /**
      * Special value that is returned by getNumericValue(Part) when no
      * numeric value is defined for a part.
      * @see getNumericValue()
@@ -128,6 +134,13 @@ final class MessagePattern implements Iterator
 
     private const string Pattern_White_Space = '\x{0009}-\x{000D}\x{0020}\x{0085}\x{200E}\x{200F}\x{2028}\x{2029}';
     private const string Pattern_Identifier = '\x{0021}-\x{002F}\x{003A}-\x{0040}\x{005B}-\x{005E}\x{0060}\x{007B}-\x{007E}\x{00A1}-\x{00A7}\x{00A9}\x{00AB}\x{00AC}\x{00AE}\x{00B0}\x{00B1}\x{00B6}\x{00BB}\x{00BF}\x{00D7}\x{00F7}\x{2010}-\x{2027}\x{2030}-\x{203E}\x{2041}-\x{2053}\x{2055}-\x{205E}\x{2190}-\x{245F}\x{2500}-\x{2775}\x{2794}-\x{2BFF}\x{2E00}-\x{2E7F}\x{3001}-\x{3003}\x{3008}-\x{3020}\x{3030}\x{FD3E}\x{FD3F}\x{FE45}\x{FE46}';
+    /**
+     * @var string[]
+     */
+    private array $chars = [];
+
+    private int $msgLength = 0;
+
 
     public function __construct(?string $pattern = null, string $apostropheMode = self::APOSTROPHE_DOUBLE_OPTIONAL)
     {
@@ -318,7 +331,7 @@ final class MessagePattern implements Iterator
      */
     public function getSubstring(Part $part): string
     {
-        return mb_substr($this->msg, $part->getIndex(), $part->getLength());
+        return implode('', array_slice($this->chars, $part->getIndex(), $part->getLength()));
     }
 
     /**
@@ -330,7 +343,7 @@ final class MessagePattern implements Iterator
     public function partSubstringMatches(Part $part, string $s): bool
     {
         return $part->getLength() === mb_strlen($s)
-            && mb_substr($this->msg, $part->getIndex(), $part->getLength()) === $s;
+            && implode('', array_slice($this->chars, $part->getIndex(), $part->getLength())) === $s;
     }
 
     /**
@@ -389,20 +402,26 @@ final class MessagePattern implements Iterator
      */
     public function autoQuoteApostropheDeep(): string
     {
+        // Fast path: nothing to auto-quote, return original message.
         if (!$this->needsAutoQuoting) {
             return $this->msg;
         }
 
+        // Start from the original message and apply insertions.
         $modified = $this->msg;
-        for ($i = $this->countParts() - 1; $i >= 0; $i--) {
-            $part = $this->getPart($i);
+
+        // Walk parts in reverse so earlier insertions don't shift later indices.
+        foreach (array_reverse(iterator_to_array($this, false)) as $part) {
             if ($part->getType() === Type::INSERT_CHAR) {
                 $index = $part->getIndex();
                 $char = mb_chr($part->getValue());
+
+                // Insert the character at the recorded index (multibyte-safe).
                 $modified = mb_substr($modified, 0, $index) . $char . mb_substr($modified, $index);
             }
         }
 
+        // Return the fully auto-quoted message.
         return $modified;
     }
 
@@ -472,6 +491,8 @@ final class MessagePattern implements Iterator
         $this->parts = [];
         $this->numericValues = [];
         $this->limitPartIndexes = [];
+        $this->chars = preg_split('//u', $pattern, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $this->msgLength = mb_strlen($pattern);
     }
 
     /**
@@ -497,8 +518,8 @@ final class MessagePattern implements Iterator
     private function parseMessage(int $index, int $msgStartLength, int $nestingLevel, ArgType $parentType): int
     {
         // Guard against excessive nesting that would overflow stored part values.
-        if ($nestingLevel > Part::$MAX_VALUE) {
-            throw new OutOfBoundsException();
+        if ($nestingLevel > 100) {
+            throw new OutOfBoundsException("Nesting level exceeds maximum value");
         }
 
         // Record the start of this message fragment and advance past any prefix (e.g., '{').
@@ -506,13 +527,13 @@ final class MessagePattern implements Iterator
         $this->addPart(Type::MSG_START, $index, $msgStartLength, $nestingLevel);
         $index += $msgStartLength;
 
-        $length = mb_strlen($this->msg);
+        $length = $this->msgLength;
         while ($index < $length) {
             $c = $this->charAt($index++);
             if ($c === "'") {
                 // Handle apostrophe quoting rules and auto-quoting insertions.
                 if ($index === $length) {
-                    $this->addPart(Type::INSERT_CHAR, $index, 0, mb_ord("'"));
+                    $this->addPart(Type::INSERT_CHAR, $index, 0, 0x27 /* ord("'") */);
                     $this->needsAutoQuoting = true;
                 } else {
                     $c = $this->charAt($index);
@@ -528,25 +549,28 @@ final class MessagePattern implements Iterator
                         // Start quoted literal section; skip the opening quote and scan to closing quote.
                         $this->addPart(Type::SKIP_SYNTAX, $index - 1, 1, 0);
                         while (true) {
-                            $index = mb_strpos($this->msg, "'", $index + 1);
-                            if ($index !== false) {
-                                if (($index + 1) < $length && $this->charAt($index + 1) === "'") {
-                                    $this->addPart(Type::SKIP_SYNTAX, ++$index, 1, 0);
-                                } else {
-                                    $this->addPart(Type::SKIP_SYNTAX, $index++, 1, 0);
-                                    break;
+                            // Seek for the next apostrophe using a pre-split chars array
+                            for ($i = $index + 1; $i < $length; $i++) {
+                                if ($this->charAt($i) === "'") {
+                                    $index = $i;
+                                    if (($index + 1) < $length && $this->charAt($index + 1) === "'") {
+                                        $this->addPart(Type::SKIP_SYNTAX, ++$index, 1, 0);
+                                        continue 2; // Continue outer while loop
+                                    } else {
+                                        $this->addPart(Type::SKIP_SYNTAX, $index++, 1, 0);
+                                        break 2; // Break outer while loop
+                                    }
                                 }
-                            } else {
-                                // Unterminated quote: auto-insert a closing apostrophe.
-                                $index = $length;
-                                $this->addPart(Type::INSERT_CHAR, $index, 0, mb_ord("'"));
-                                $this->needsAutoQuoting = true;
-                                break;
                             }
+                            // If the loop completes without finding apostrophe: unterminated quote
+                            $index = $length;
+                            $this->addPart(Type::INSERT_CHAR, $index, 0, 0x27 /* ord("'") */);
+                            $this->needsAutoQuoting = true;
+                            break;
                         }
                     } else {
                         // Apostrophe is literal text; mark for auto-quoting.
-                        $this->addPart(Type::INSERT_CHAR, $index, 0, mb_ord("'"));
+                        $this->addPart(Type::INSERT_CHAR, $index, 0, 0x27 /* ord("'") */);
                         $this->needsAutoQuoting = true;
                     }
                 }
@@ -599,7 +623,7 @@ final class MessagePattern implements Iterator
 
         // Skip whitespace after '{' and capture the argument name/number span.
         $nameIndex = $index = $this->skipWhiteSpace($index + 1);
-        if ($index === mb_strlen($this->msg)) {
+        if ($index === $this->msgLength) {
             throw new InvalidArgumentException("Unmatched '{' braces in message " . $this->prefix());
         }
 
@@ -610,24 +634,23 @@ final class MessagePattern implements Iterator
 
         // Validate and record an ARG_NUMBER or ARG_NAME part.
         if ($number >= 0) {
-            if ($length > Part::$MAX_LENGTH || $number > Part::$MAX_VALUE) {
-                throw new OutOfBoundsException("Argument number too large: " . $this->prefix($nameIndex));
-            }
             $this->hasArgNumbers = true;
             $this->addPart(Type::ARG_NUMBER, $nameIndex, $length, $number);
         } elseif ($number === self::ARG_NAME_NOT_NUMBER) {
-            if ($length > Part::$MAX_LENGTH) {
+            if ($length > Part::MAX_LENGTH) {
                 throw new OutOfBoundsException("Argument name too long: " . $this->prefix($nameIndex));
             }
             $this->hasArgNames = true;
             $this->addPart(Type::ARG_NAME, $nameIndex, $length, 0);
+        } elseif ($number === self::ARG_VALUE_OVERFLOW) {
+            throw new OutOfBoundsException("Argument number too large: " . $this->prefix($nameIndex));
         } else {
             throw new InvalidArgumentException("Bad argument syntax: " . $this->prefix($nameIndex));
         }
 
         // After name/number, expect either '}' or ',' for type/style.
         $index = $this->skipWhiteSpace($index);
-        if ($index === mb_strlen($this->msg)) {
+        if ($index === $this->msgLength) {
             throw new InvalidArgumentException("Unmatched '{' braces in message " . $this->prefix());
         }
 
@@ -640,21 +663,21 @@ final class MessagePattern implements Iterator
 
             // Read the type token (e.g., "number", "plural", "select").
             $typeIndex = $index = $this->skipWhiteSpace($index + 1);
-            while ($index < mb_strlen($this->msg) && $this->isArgTypeChar($this->charAt($index))) {
+            while ($index < $this->msgLength && $this->isArgTypeChar($this->charAt($index))) {
                 $index++;
             }
             $length = $index - $typeIndex;
 
             // Validate that the type is followed by ',' or '}'.
             $index = $this->skipWhiteSpace($index);
-            if ($index === mb_strlen($this->msg)) {
+            if ($index === $this->msgLength) {
                 throw new InvalidArgumentException("Unmatched '{' braces in message " . $this->prefix());
             }
             $c = $this->charAt($index);
             if ($length === 0 || ($c !== ',' && $c !== '}')) {
                 throw new InvalidArgumentException("Bad argument syntax: " . $this->prefix($nameIndex));
             }
-            if ($length > Part::$MAX_LENGTH) {
+            if ($length > Part::MAX_LENGTH) {
                 throw new OutOfBoundsException("Argument type name too long: " . $this->prefix($nameIndex));
             }
 
@@ -719,20 +742,27 @@ final class MessagePattern implements Iterator
         // Track nested braces inside the style.
         $nestedBraces = 0;
         // Cache total message length for loop bounds.
-        $length = mb_strlen($this->msg);
+        $length = $this->msgLength;
         while ($index < $length) {
             // Read the next character and advance the cursor.
             $c = $this->charAt($index++);
             if ($c === "'") {
-                // Skip over quoted literal text.
-                $index = mb_strpos($this->msg, "'", $index);
-                if ($index === false) {
+                // Skip over quoted literal text using pre-split chars array.
+                $found = false;
+                for ($i = $index; $i < $length; $i++) {
+                    if ($this->chars[$i] === "'") {
+                        $index = $i + 1;
+                        $found = true;
+                        break;
+                    }
+                }
+
+                if (!$found) {
                     // Unterminated quote is an error.
                     throw new InvalidArgumentException(
                         "Quoted literal argument style text reaches to the end of the message: " . $this->prefix($start)
                     );
                 }
-                $index++;
             } elseif ($c === '{') {
                 // Enter a nested brace.
                 $nestedBraces++;
@@ -743,7 +773,7 @@ final class MessagePattern implements Iterator
                 } else {
                     // Found the end of the simple style.
                     $len = --$index - $start;
-                    if ($len > Part::$MAX_LENGTH) {
+                    if ($len > Part::MAX_LENGTH) {
                         // Style segment too long.
                         throw new OutOfBoundsException("Argument style text too long: " . $this->prefix($start));
                     }
@@ -771,7 +801,7 @@ final class MessagePattern implements Iterator
     {
         $start = $index;
         $index = $this->skipWhiteSpace($index);
-        $length = mb_strlen($this->msg);
+        $length = $this->msgLength;
 
         // Ensure there is a choice pattern to parse (not end or immediate '}').
         if ($index === $length || $this->charAt($index) === '}') {
@@ -788,7 +818,7 @@ final class MessagePattern implements Iterator
             if ($len === 0) {
                 throw new InvalidArgumentException("Bad choice pattern syntax: " . $this->prefix($start));
             }
-            if ($len > Part::$MAX_LENGTH) {
+            if ($len > Part::MAX_LENGTH) {
                 throw new OutOfBoundsException("Choice number too long: " . $this->prefix($numberIndex));
             }
 
@@ -848,7 +878,7 @@ final class MessagePattern implements Iterator
         $start = $index;                 // remember the start position for the error context
         $isEmpty = true;                 // true until a selector/message pair is parsed
         $hasOther = false;               // track the required "other" selector
-        $length = mb_strlen($this->msg);
+        $length = $this->msgLength;
 
         while (true) {
             $index = $this->skipWhiteSpace($index); // skip leading whitespace
@@ -882,7 +912,7 @@ final class MessagePattern implements Iterator
                         "Bad " . strtolower($argType->name) . " pattern syntax: " . $this->prefix($start)
                     );
                 }
-                if ($len > Part::$MAX_LENGTH) {
+                if ($len > Part::MAX_LENGTH) {
                     throw new OutOfBoundsException("Argument selector too long: " . $this->prefix($selectorIndex));
                 }
                 $this->addPart(Type::ARG_SELECTOR, $selectorIndex, $len, 0);
@@ -910,7 +940,7 @@ final class MessagePattern implements Iterator
                     if ($index === $valueIndex) {
                         throw new InvalidArgumentException("Missing value for plural 'offset:' " . $this->prefix($start));
                     }
-                    if (($index - $valueIndex) > Part::$MAX_LENGTH) {
+                    if (($index - $valueIndex) > Part::MAX_LENGTH) {
                         throw new OutOfBoundsException("Plural offset value too long: " . $this->prefix($valueIndex));
                     }
                     $this->parseDouble($valueIndex, $index, false); // store offset value
@@ -918,7 +948,7 @@ final class MessagePattern implements Iterator
                     continue; // offset doesn't consume a message fragment
                 }
 
-                if ($len > Part::$MAX_LENGTH) {
+                if ($len > Part::MAX_LENGTH) {
                     throw new OutOfBoundsException("Argument selector too long: " . $this->prefix($selectorIndex));
                 }
                 $this->addPart(Type::ARG_SELECTOR, $selectorIndex, $len, 0);
@@ -971,9 +1001,6 @@ final class MessagePattern implements Iterator
             return self::ARG_NAME_NOT_VALID;
         }
 
-        $number = 0;
-        $badNumber = false;
-
         // Read the first character and decide how to start parsing.
         $c = $s[$start++];
         if ($c === '0') {
@@ -981,9 +1008,10 @@ final class MessagePattern implements Iterator
             if ($start === $limit) {
                 return 0;
             }
-            $badNumber = true;
-        } elseif (mb_ord($c) >= mb_ord('1') && mb_ord($c) <= mb_ord('9')) {
-            $number = mb_ord($c) - mb_ord('0');
+            return self::ARG_NAME_NOT_VALID;
+        } elseif (($ord = mb_ord($c)) >= 0x31 /* ord('1') */ && $ord <= 0x39 /* ord('9') */) {
+            /* 0x30 === ord('0') */
+            $number = $ord - 0x30;
         } else {
             // Non-digit start means “not a number”.
             return self::ARG_NAME_NOT_NUMBER;
@@ -992,19 +1020,19 @@ final class MessagePattern implements Iterator
         // Parse remaining digits, rejecting any non-digit.
         while ($start < $limit) {
             $c = $s[$start++];
-            if (mb_ord($c) >= mb_ord('0') && mb_ord($c) <= mb_ord('9')) {
+            if (($ord = mb_ord($c)) >= 0x30 /* ord('0') */ && $ord <= 0x39 /* ord('9') */) {
                 // Mark as invalid if it would overflow when extended.
-                if ($number >= intdiv(PHP_INT_MAX, 10)) {
-                    $badNumber = true;
+                if ($number >= intdiv(Part::MAX_VALUE, 10)) {
+                    return self::ARG_VALUE_OVERFLOW;
                 }
-                $number = $number * 10 + (mb_ord($c) - mb_ord('0'));
+                $number = $number * 10 + ($ord - 0x30 /* ord('0') */);
             } else {
                 return self::ARG_NAME_NOT_NUMBER;
             }
         }
 
         // Return number if valid, otherwise the invalid marker.
-        return $badNumber ? self::ARG_NAME_NOT_VALID : $number;
+        return $number;
     }
 
     /**
@@ -1044,8 +1072,8 @@ final class MessagePattern implements Iterator
         }
 
         // Special-case infinity symbol; only valid if allowed and consumes the whole token.
-        if ($this->startsWithAt("∞", $index - mb_strlen("∞"))) {
-            if ($allowInfinity && $index - 1 + mb_strlen("∞") === $limit) {
+        if ($this->startsWithAt("∞", $index - 1 /* mb_strlen("∞") */)) {
+            if ($allowInfinity && $index === $limit) {
                 $value = $isNegative ? -INF : INF;
                 $this->addArgDoublePart($value, $start, $limit - $start);
                 return;
@@ -1055,9 +1083,10 @@ final class MessagePattern implements Iterator
 
         // Fast-path: parse integer digits and keep within max storable int range.
         $value = 0;
-        while (mb_ord($c) >= mb_ord('0') && mb_ord($c) <= mb_ord('9')) {
-            $value = $value * 10 + (mb_ord($c) - mb_ord('0'));
-            if ($value > (Part::$MAX_VALUE + $isNegative)) {
+        $ord = ord($c);
+        while ($ord >= 0x30 /* ord('0') */ && $ord <= 0x39 /* ord('9') */) {
+            $value = $value * 10 + ($ord - 0x30 /* ord('0') */);
+            if ($value > (Part::MAX_VALUE + $isNegative)) {
                 break;
             }
             // If we consumed all chars, store as integer part and finish.
@@ -1065,11 +1094,13 @@ final class MessagePattern implements Iterator
                 $this->addPart(Type::ARG_INT, $start, $limit - $start, $isNegative ? -$value : $value);
                 return;
             }
-            $c = $this->charAt($index++);
+            $ord = ord($this->charAt($index++));
         }
 
         // Fallback: parse as float (handles decimals, exponent, overflow).
-        $numericValue = (float)mb_substr($this->msg, $start, $limit - $start);
+        // Optimized to use the pre-split chars array.
+        $length = $limit - $start;
+        $numericValue = (float)implode(array_slice($this->chars, $start, $length));
         $this->addArgDoublePart($numericValue, $start, $limit - $start);
     }
 
@@ -1080,7 +1111,7 @@ final class MessagePattern implements Iterator
      */
     private function skipWhiteSpace(int $index): int
     {
-        $length = mb_strlen($this->msg);
+        $length = $this->msgLength;
         while ($index < $length && preg_match('#\G[' . self::Pattern_White_Space . ']#xu', $this->msg, $m, 0, $index)) {
             $index += mb_strlen($m[0]);
         }
@@ -1112,13 +1143,13 @@ final class MessagePattern implements Iterator
      */
     private function skipDouble(int $index): int
     {
-        $length = mb_strlen($this->msg); // Cache message length for bounds.
+        $length = $this->msgLength; // Cache message length for bounds.
         while ($index < $length) { // Scan forward from the given index.
             $c = $this->charAt($index); // Current character.
             if (
                 // Stop if not a number-sign/decimal char OR, not digit/exponent/infinity.
-                (mb_ord($c) < mb_ord('0') && !str_contains("+-.", $c)) ||
-                (mb_ord($c) > mb_ord('9') && $c !== 'e' && $c !== 'E' && !$this->startsWithAt("∞", $index))
+                (mb_ord($c) < 0x30 /* ord('0') */ && !str_contains("+-.", $c)) ||
+                (mb_ord($c) > 0x39 /* ord('9') */ && $c !== 'e' && $c !== 'E' && !$this->startsWithAt("∞", $index))
             ) {
                 break; // End of numeric token.
             }
@@ -1133,7 +1164,7 @@ final class MessagePattern implements Iterator
      */
     private function inMessageFormatPattern(int $nestingLevel): bool
     {
-        return $nestingLevel > 0 || ($this->parts[0]->getType() ?? null) === Type::MSG_START;
+        return $nestingLevel > 0 || (isset($this->parts[0]) && $this->parts[0]->getType() === Type::MSG_START);
     }
 
     /**
@@ -1169,8 +1200,10 @@ final class MessagePattern implements Iterator
     private function addArgDoublePart(float $numericValue, int $start, int $length): void
     {
         $numericIndex = count($this->numericValues);
-        if ($numericIndex > Part::$MAX_VALUE) {
+        if ($numericIndex > Part::MAX_VALUE) {
+            // @codeCoverageIgnoreStart
             throw new OutOfBoundsException("Too many numeric values");
+            // @codeCoverageIgnoreEnd
         }
         $this->numericValues[] = $numericValue;
         $this->addPart(Type::ARG_DOUBLE, $start, $length, $numericIndex);
@@ -1187,11 +1220,15 @@ final class MessagePattern implements Iterator
     /**
      * Tests whether a character is valid for an argument type identifier.
      */
-    private function isArgTypeChar(string $c): bool
+    private function isArgTypeChar(?string $c): bool
     {
+        if (empty($c)) {
+            return false;
+        }
+
         // Returns true if the provided character is an alphabetic letter (A–Z / a–z).
         // mb_ord()/mb_chr() normalizes the input to a single ASCII character before the check.
-        return ctype_alpha(mb_chr(mb_ord($c)));
+        return ctype_alpha($c);
     }
 
     /**
@@ -1259,17 +1296,37 @@ final class MessagePattern implements Iterator
     /**
      * Returns the character at the given index.
      */
-    private function charAt(int $index): string
+    private function charAt(int $index): ?string
     {
-        return mb_substr($this->msg, $index, 1);
+        return $this->chars[$index] ?? null;
     }
 
     /**
      * Returns true if the pattern starts with the given string at index.
+     * Optimized for speed by leveraging the pre-split chars array and
+     * avoiding expensive string construction or regex calls.
+     *
+     * @param string $needle The string to look for at the start of the pattern.
+     * @param int $index The index at which to begin searching for the string.
+     * @return bool true if the pattern starts with the given string at the given index.
      */
     private function startsWithAt(string $needle, int $index): bool
     {
-        return mb_substr($this->msg, $index, mb_strlen($needle)) === $needle;
+        // Calculate length once. For the short constants used in this
+        // parser, mb_strlen is very fast.
+        $needleLen = mb_strlen($needle);
+
+        if ($index + $needleLen > $this->msgLength) {
+            return false;
+        }
+
+        // If the needle is a single character (very common in this parser),
+        // perform a direct comparison.
+        if ($needleLen === 1) {
+            return $this->chars[$index] === $needle;
+        }
+
+        return mb_substr($this->msg, $index, $needleLen) === $needle;
     }
 
     /**
@@ -1329,9 +1386,9 @@ final class MessagePattern implements Iterator
     /**
      * Returns the key of the current header field in the iteration.
      *
-     * @return string The key of the current header field.
+     * @return int The key of the current header field.
      */
-    public function key(): string
+    public function key(): int
     {
         return $this->position;
     }
