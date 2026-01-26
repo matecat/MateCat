@@ -478,14 +478,12 @@ class JobContainer extends React.Component {
             content={tooltipText}
             size="tiny"
             trigger={
-              <a
-                className=" ui icon basic button comments-tooltip"
-                href={translatedUrl}
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.ICON}
+                onClick={() => window.open(translatedUrl, '_blank')}
               >
                 <CommentsIcon />
-              </a>
+              </Button>
             }
           />
         </div>
@@ -508,15 +506,14 @@ class JobContainer extends React.Component {
             position="top center"
             size="tiny"
             trigger={
-              <a
-                className="ui icon basic button qr-tooltip "
-                href={url}
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.ICON}
+                size={BUTTON_SIZE.ICON_SMALL}
+                onClick={() => window.open(url, '_blank')}
                 style={{...(classQuality && {color: classQuality})}}
               >
                 <QR />
-              </a>
+              </Button>
             }
           />
         </div>
@@ -538,15 +535,14 @@ class JobContainer extends React.Component {
             position="top center"
             size="tiny"
             trigger={
-              <a
-                className="ui icon basic button warning-tooltip"
-                href={url}
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.ICON}
+                size={BUTTON_SIZE.ICON_SMALL}
+                onClick={() => window.open(url, '_blank')}
                 style={{color: 'red'}}
               >
                 <AlertIcon />
-              </a>
+              </Button>
             }
           />
         </div>

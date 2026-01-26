@@ -485,45 +485,10 @@ div#manage-container {
                 margin: unset !important;
                 min-width: unset !important;
               }
-              .activity-icon-single {
-                width: 30px;
-                height: 30px;
-              }
               .job-activity-icons {
                 display: flex;
                 justify-content: center;
                 gap: 5px;
-
-                button.group-activity-icon {
-                  height: 30px;
-                  width: 30px;
-                  i {
-                    width: 30px;
-                  }
-                }
-                .comments {
-                }
-                .group-activity-icons {
-                  .item {
-                    margin: 0;
-                    padding: 1px !important;
-                    a {
-                      padding: 0;
-                      width: 100%;
-                      border-radius: 0px;
-                      font-size: 15px;
-                      font-weight: normal;
-                      font-family: Calibri, Arial, Helvetica, sans-serif;
-                      text-align: left;
-                      margin: 0 15px 0 10px;
-                      background: transparent !important;
-                      box-shadow: none !important;
-                      i {
-                        margin-right: 10px !important;
-                      }
-                    }
-                  }
-                }
               }
               .tm-job.job-activity-icons {
                 a {

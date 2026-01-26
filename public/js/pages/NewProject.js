@@ -1209,9 +1209,13 @@ const NewProject = () => {
           desktop with the browser of your choice.
         </p>
         <div className="buttons">
-          <a href="https://site.matecat.com/" className="ui primary button">
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            onClick={() => window.open('https://site.matecat.com/', '_blank')}
+            className="ui primary button"
+          >
             Find out more about Matecat
-          </a>
+          </Button>
         </div>
       </div>
     </div>
