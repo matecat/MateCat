@@ -4,7 +4,6 @@ namespace Utils\AIAssistant;
 
 use Exception;
 use Gemini;
-use Gemini\Client;
 use Orhanerday\OpenAi\OpenAi;
 use Utils\Registry\AppConfig;
 
@@ -18,7 +17,7 @@ class AIClientFactory
     public static function create($agent): AIClientInterface
     {
         switch ($agent) {
-            case "open-ai":
+            case "openai":
                 return self::openAi();
 
             case "gemini":

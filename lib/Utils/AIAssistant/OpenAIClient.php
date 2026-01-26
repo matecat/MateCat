@@ -96,7 +96,10 @@ Return your classification and a brief explanation (2–3 lines).";
             "stream" => false,
         ];
 
-        return $this->openAi->chat($opts);
+        $response = $this->openAi->chat($opts);
+        $response = json_decode($response, true);
+
+        return $response['choices'][0]['message']['content'];
     }
 
     /**
