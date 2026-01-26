@@ -198,14 +198,7 @@ class QualityReportModel
 
     protected function getAndDecodePossiblyProjectMetadataJson(): array
     {
-        $metadata = $this->getProject()->getMetadataAsKeyValue();
-        foreach ($metadata as $key => $value) {
-            if (Utils::isJson($value)) {
-                $metadata[$key] = json_decode($value, true);
-            }
-        }
-
-        return $metadata;
+        return $this->getProject()->getAllMetadataAsKeyValue();
     }
 
     /**

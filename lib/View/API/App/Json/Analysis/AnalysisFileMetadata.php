@@ -10,7 +10,6 @@
 namespace View\API\App\Json\Analysis;
 
 use JsonSerializable;
-use Utils\Tools\Utils;
 
 class AnalysisFileMetadata implements JsonSerializable
 {
@@ -44,7 +43,7 @@ class AnalysisFileMetadata implements JsonSerializable
     {
         return [
             'key' => $this->key,
-            'value' => Utils::formatStringValue($this->value),
+            'value' => $this->value,
         ];
     }
 }

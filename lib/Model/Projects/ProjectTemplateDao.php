@@ -80,6 +80,7 @@ class ProjectTemplateDao extends AbstractDao
         $default->created_at = date("Y-m-d H:i:s");
         $default->modified_at = date("Y-m-d H:i:s");
         $default->subfiltering_handlers = json_encode(["markup", "twig", "double_snail", "double_square", "double_percent"]);
+        $default->icu_enabled = false;
 
         return $default;
     }
@@ -390,10 +391,62 @@ class ProjectTemplateDao extends AbstractDao
      */
     public static function save(ProjectTemplateStruct $projectTemplateStruct): ProjectTemplateStruct
     {
-        $sql = "INSERT INTO " . self::TABLE .
-            " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `public_tm_penalty`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `subfiltering_handlers`, `created_at` ) " .
-            " VALUES " .
-            " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :public_tm_penalty, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :subfiltering_handlers, :now ); ";
+
+        $sql = "INSERT INTO " . self::TABLE . " (
+                    `name`,
+                    `is_default`,
+                    `uid`,
+                    `id_team`,
+                    `segmentation_rule`,
+                    `tm`,
+                    `mt`,
+                    `payable_rate_template_id`,
+                    `qa_model_template_id`,
+                    `filters_template_id`,
+                    `xliff_config_template_id`,
+                    `pretranslate_100`,
+                    `pretranslate_101`,
+                    `tm_prioritization`,
+                    `dialect_strict`,
+                    `get_public_matches`,
+                    `public_tm_penalty`,
+                    `subject`,
+                    `source_language`,
+                    `target_language`,
+                    `character_counter_count_tags`,
+                    `character_counter_mode`,
+                    `mt_quality_value_in_editor`,
+                    `subfiltering_handlers`,
+                    `created_at`,
+                    `icu_enabled`
+                ) VALUES (
+                    :name,
+                    :is_default,
+                    :uid,
+                    :id_team,
+                    :segmentation_rule,
+                    :tm,
+                    :mt,
+                    :payable_rate_template_id,
+                    :qa_model_template_id,
+                    :filters_template_id,
+                    :xliff_config_template_id,
+                    :pretranslate_100,
+                    :pretranslate_101,
+                    :tm_prioritization,
+                    :dialect_strict,
+                    :get_public_matches,
+                    :public_tm_penalty,
+                    :subject,
+                    :source_language,
+                    :target_language,
+                    :character_counter_count_tags,
+                    :character_counter_mode,
+                    :mt_quality_value_in_editor,
+                    :subfiltering_handlers,
+                    :now,
+                    :icu_enabled
+                ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
@@ -425,6 +478,7 @@ class ProjectTemplateDao extends AbstractDao
             "character_counter_count_tags" => $projectTemplateStruct->character_counter_count_tags,
             "character_counter_mode" => $projectTemplateStruct->character_counter_mode,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
+            'icu_enabled' => $projectTemplateStruct->icu_enabled
         ]);
 
         $projectTemplateStruct->id = $conn->lastInsertId();
@@ -475,7 +529,8 @@ class ProjectTemplateDao extends AbstractDao
             `character_counter_count_tags` = :character_counter_count_tags,
             `character_counter_mode` = :character_counter_mode,
             `mt_quality_value_in_editor` = :mt_quality_value_in_editor,
-            `modified_at` = :now 
+            `modified_at` = :now,
+            `icu_enabled` = :icu_enabled
          WHERE id = :id;";
 
         $conn = Database::obtain()->getConnection();
@@ -507,6 +562,7 @@ class ProjectTemplateDao extends AbstractDao
             "source_language" => $projectTemplateStruct->source_language,
             "target_language" => $projectTemplateStruct->target_language,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
+            'icu_enabled' => $projectTemplateStruct->icu_enabled
         ]);
 
         self::destroyQueryByIdCache($conn, $projectTemplateStruct->id);

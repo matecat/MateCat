@@ -266,6 +266,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
+        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+
         $array_keys = json_decode($private_keys_list, true);
         $array_keys = array_values(array_merge($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous']));
 
@@ -393,7 +395,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode(
                 $this->validateSubfilteringOptions($this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]'))
             ),
-
+            'icu_enabled' => $icu_enabled,
         ];
 
         if ($disable_tms_engine_flag) {
@@ -519,6 +521,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         if (isset($data['mt_quality_value_in_editor'])) {
             $options[MetadataDao::MT_QUALITY_VALUE_IN_EDITOR] = $data['mt_quality_value_in_editor'];
         }
+
+        $options[MetadataDao::ICU_ENABLED] = $data['icu_enabled'];
 
         $this->metadata = $options;
     }

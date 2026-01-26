@@ -138,8 +138,8 @@ class Project
         }
 
         $metadataDao = new MetadataDao();
-        $projectInfo = $metadataDao->get((int)$project->id, 'project_info');
-        $fromApi = $metadataDao->get((int)$project->id, 'from_api');
+        $projectInfo = $metadataDao->setCacheTTL(60)->get((int)$project->id, 'project_info');
+        $fromApi = $metadataDao->setCacheTTL(60)->get((int)$project->id, 'from_api');
 
         $_project_data = ProjectDao::getProjectAndJobData($project->id);
         $analysisStatus = new Status($_project_data, $featureSet, $this->user);
