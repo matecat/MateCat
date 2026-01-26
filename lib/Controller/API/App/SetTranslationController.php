@@ -153,7 +153,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             $old_translation = $this->getOldTranslation();
 
             $client_suggestion_array = json_decode($this->data['suggestion_array'] ?? '[]', true);
-            $client_chosen_suggestion = new ShapelessConcreteStruct($this->data['chosen_suggestion_index'] !== null ? $client_suggestion_array[$this->data['chosen_suggestion_index'] - 1] : []);
+            $client_chosen_suggestion_params = ($this->data['chosen_suggestion_index'] !== null && isset($client_suggestion_array[$this->data['chosen_suggestion_index'] - 1])) ? $client_suggestion_array[$this->data['chosen_suggestion_index'] - 1] : [];
+            $client_chosen_suggestion = new ShapelessConcreteStruct($client_chosen_suggestion_params);
 
             $new_translation = new SegmentTranslationStruct();
             $new_translation->id_segment = $this->data['id_segment'];

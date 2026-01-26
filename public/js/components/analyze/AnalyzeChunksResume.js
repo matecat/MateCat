@@ -16,6 +16,8 @@ import {
 } from '../../constants/Constants'
 import UserStore from '../../stores/UserStore'
 import LabelWithTooltip from '../common/LabelWithTooltip'
+import Split from '../../../img/icons/Split'
+import Merge from '../../../img/icons/Merge'
 import {
   Button,
   BUTTON_MODE,
@@ -330,7 +332,7 @@ class AnalyzeChunksResume extends React.Component {
                       className="merge"
                       onClick={this.openMergeModal(jobsAnalysis[indexJob].id)}
                     >
-                      <i className="icon-compress icon" />
+                      <Merge size={18} />
                       Merge
                     </Button>
                   </div>
@@ -454,7 +456,7 @@ class AnalyzeChunksResume extends React.Component {
                             jobsAnalysis[indexJob].id,
                           )}
                         >
-                          <i className="icon-expand icon" />
+                          <Split size={18} />
                           Split
                         </Button>
                       ) : null}

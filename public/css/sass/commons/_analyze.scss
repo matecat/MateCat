@@ -1,7 +1,8 @@
 @use "../commons/colors";
 @use "../commons/variables";
 // rewrite semantic CSS
-html, body {
+html,
+body {
   height: 100%;
 }
 body.analyze {
@@ -265,7 +266,8 @@ body.analyze {
       margin: 0 -1rem 0;
       border-radius: variables.$border-radius-default;
       &.type-mtqe {
-        .title-total-words, .title-matecat-words {
+        .title-total-words,
+        .title-matecat-words {
           width: 50% !important;
         }
       }
@@ -910,7 +912,7 @@ body.analyze {
 
 @media only screen and (min-width: 1200px) {
   .ui.container:not(.fluid) {
-    width: 1140px !important;;
+    width: 1140px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -919,7 +921,7 @@ body.analyze {
 
 @media only screen and (min-width: 1380px) {
   .ui.container:not(.fluid) {
-    width: 1280px !important;;
+    width: 1280px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;

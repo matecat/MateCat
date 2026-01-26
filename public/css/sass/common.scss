@@ -375,7 +375,6 @@ section mark.searchMarker.currSearchItem {
   background: url(/public/img/matecat_file_icons.png) 6px -1107px no-repeat !important;
 }
 
-
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (min--moz-device-pixel-ratio: 2),
@@ -535,7 +534,6 @@ section mark.searchMarker.currSearchItem {
   /* Google Sheet */
 }
 
-
 @font-face {
   font-family: 'icomoon';
   src: url('/public/css/fonts/icomoon.eot?7sjwen');
@@ -650,7 +648,7 @@ header .filter:before {
 }
 
 .more:before,
-.more.minus:before{
+.more.minus:before {
   margin-right: 5px;
   position: relative;
   top: 2px;
@@ -735,10 +733,6 @@ a.unarchive-project:after {
   content: '\e602';
 }
 
-.icon-download:before {
-  content: '\e603';
-}
-
 .icon-stop:before {
   content: '\e604';
 }
@@ -747,20 +741,12 @@ a.unarchive-project:after {
   content: '\e605';
 }
 
-.icon-drawer:before {
-  content: '\e606';
-}
-
 .icon-minus:before {
   content: '\e607';
 }
 
 .icon-settings:before {
   content: '\e8b8';
-}
-
-.icon-download-logs:before {
-  content: '\e900';
 }
 
 .icon-zip:before {
@@ -795,16 +781,8 @@ a.unarchive-project:after {
   content: '\ea6c';
 }
 
-.icon-refresh:before {
-  content: '\f021';
-}
-
 .icon-split:before {
   content: '\f03d';
-}
-
-.icon-edit:before {
-  content: '\f044';
 }
 
 .icon-play:before {
@@ -898,10 +876,6 @@ a.unarchive-project:after {
   content: '\f013';
 }
 
-.icon-trash-o:before {
-  content: '\f014';
-}
-
 .icon-share-square-o:before {
   content: '\f045';
 }
@@ -928,14 +902,6 @@ a.unarchive-project:after {
 
 .icon-check-circle-o:before {
   content: '\f05d';
-}
-
-.icon-expand:before {
-  content: '\f065';
-}
-
-.icon-compress:before {
-  content: '\f066';
 }
 
 .icon-plus:before {
@@ -985,7 +951,6 @@ a.unarchive-project:after {
 .icon-minus-square-o:before {
   content: '\f147';
 }
-
 
 .icon-plus-square-o:before {
   content: '\f196';
@@ -1046,7 +1011,8 @@ a.unarchive-project:after {
     url('/public/css/fonts/calibri-webfont.woff') format('woff'),
     url('/public/css/fonts/calibri-webfont.ttf') format('truetype'),
     url('/public/css/fonts/calibri-webfont.eot'),
-    url('/public/css/fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri-webfont.eot?#iefix')
+      format('embedded-opentype');
 }
 
 @font-face {
@@ -1057,7 +1023,8 @@ a.unarchive-project:after {
     url('/public/css/fonts/calibri_bold-webfont.woff') format('woff'),
     url('/public/css/fonts/calibri_bold-webfont.ttf') format('truetype'),
     url('/public/css/fonts/calibri_bold-webfont.eot'),
-    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix')
+      format('embedded-opentype');
 }
 
 #menu-site li {

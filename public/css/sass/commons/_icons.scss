@@ -1,7 +1,8 @@
 @font-face {
   font-family: 'icomoon';
   src: url('/public/css/fonts/icomoon.eot?pz5eid');
-  src: url('/public/css/fonts/icomoon.eot?pz5eid#iefix')
+  src:
+    url('/public/css/fonts/icomoon.eot?pz5eid#iefix')
       format('embedded-opentype'),
     url('/public/css/fonts/icomoon.ttf?pz5eid') format('truetype'),
     url('/public/css/fonts/icomoon.woff?pz5eid') format('woff'),
@@ -69,26 +70,17 @@
 .icon-upload:before {
   content: '\e602';
 }
-.icon-download:before {
-  content: '\e603';
-}
 .icon-stop:before {
   content: '\e604';
 }
 .icon-info:before {
   content: '\e605';
 }
-.icon-drawer:before {
-  content: '\e606';
-}
 .icon-minus:before {
   content: '\e607';
 }
 .icon-settings:before {
   content: '\e8b8';
-}
-.icon-download-logs:before {
-  content: '\e906';
 }
 .icon-zip:before {
   content: '\e907';
@@ -114,14 +106,8 @@
 .icon-subscript2:before {
   content: '\ea6c';
 }
-.icon-refresh:before {
-  content: '\f021';
-}
 .icon-split:before {
   content: '\f03d';
-}
-.icon-edit:before {
-  content: '\f044';
 }
 .icon-play:before {
   content: '\f04b';
@@ -330,9 +316,6 @@
 .icon-inbox:before {
   content: '\e947';
 }
-.icon-download2:before {
-  content: '\e948';
-}
 .icon-upload2:before {
   content: '\e949';
 }
@@ -480,9 +463,6 @@
 .icon-location:before {
   content: '\e982';
 }
-.icon-download3:before {
-  content: '\e983';
-}
 .icon-basket:before {
   content: '\e984';
 }
@@ -518,9 +498,6 @@
 }
 .icon-map:before {
   content: '\e991';
-}
-.icon-trashcan:before {
-  content: '\e992';
 }
 .icon-vote:before {
   content: '\e993';
@@ -849,9 +826,6 @@
 .icon-resize3:before {
   content: '\ea02';
 }
-.icon-download4:before {
-  content: '\ea03';
-}
 .icon-calculator:before {
   content: '\ea04';
 }
@@ -893,9 +867,6 @@
 }
 .icon-discout:before {
   content: '\ea16';
-}
-.icon-edit2:before {
-  content: '\ea17';
 }
 .icon-scissors:before {
   content: '\ea18';
@@ -1061,9 +1032,6 @@
 }
 .icon-barcode2:before {
   content: '\ea52';
-}
-.icon-expand2:before {
-  content: '\ea53';
 }
 .icon-collapse:before {
   content: '\ea54';
@@ -1323,9 +1291,6 @@
 .icon-gear:before {
   content: '\f013';
 }
-.icon-trash-o:before {
-  content: '\f014';
-}
 .icon-share-square-o:before {
   content: '\f045';
 }
@@ -1346,12 +1311,6 @@
 }
 .icon-check-circle-o:before {
   content: '\f05d';
-}
-.icon-expand:before {
-  content: '\f065';
-}
-.icon-compress:before {
-  content: '\f066';
 }
 .icon-plus:before {
   content: '\f067';

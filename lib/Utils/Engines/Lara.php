@@ -214,6 +214,11 @@ class Lara extends AbstractEngine
      */
     public function get(array $_config): array
     {
+        // temporary disable ur-Latn-PK
+        if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
+            return [];
+        }
+
         if ($this->_isAnalysis && $this->_skipAnalysis) {
             return [];
         }
@@ -226,6 +231,10 @@ class Lara extends AbstractEngine
             $client = $this->_getClient();
 
             $_config = $this->configureContribution($_config);
+
+            // Send the selected memory IDs to Lara via a custom request header.
+            $laraClient = $client->getHttpClient();
+            $laraClient->setExtraHeader('x-memory-ids', implode(',', $_config['keys']));
 
             try {
                 // call lara
@@ -339,6 +348,8 @@ class Lara extends AbstractEngine
                         $t->getCode(),
                         $t
                     );
+                } else {
+                    $this->logger->error(["Lara API Exception.", $t->getMessage(), $t->getCode(), $t->getTrace()]);
                 }
 
                 // mmt fallback
@@ -454,6 +465,15 @@ class Lara extends AbstractEngine
 
             return true;
         }
+
+        // temporary disable ur-Latn-PK
+        if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
+            return true;
+        }
+
+        // Send the selected memory IDs to Lara via a custom request header.
+        $laraClient = $client->getHttpClient();
+        $laraClient->setExtraHeader('x-memory-ids', implode(',', $_keys));
 
         try {
             $time_start = microtime(true);

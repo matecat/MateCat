@@ -3,9 +3,12 @@
 namespace Utils\Logger\Handlers;
 
 use Aws\CloudWatchLogs\CloudWatchLogsClient;
+use Google\Auth\Cache\FileSystemCacheItemPool;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use PhpNexus\Cwh\Handler\CloudWatch;
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Utils\Registry\AppConfig;
 
 /**
@@ -44,16 +47,19 @@ class CloudWatchHandlerProvider implements ProviderInterface
          * bool $createGroup = true,
          * bool $createStream = true,
          * int $rpsLimit = 0
+         * ?CacheItemPoolInterface $cacheItemPool = null,
          */
         return array_merge(
             [
                 'client' => self::getClient(),
-                'group' => 'matecat-' . (getenv('ENV') ?: 'local') . '-' . (explode('-', gethostname())[0] ?? 'base') . '-node',
+                'group' => 'matecat-' . (AppConfig::$ENV ?: 'local') . '-' . (explode('-', gethostname())[0] ?? 'base') . '-node',
                 'stream' => pathinfo($name, PATHINFO_FILENAME),
                 'retention' => 30,
                 'batchSize' => AppConfig::$IS_DAEMON_INSTANCE ? 1 : 10000,
                 'tags' => ['Project' => 'matecat'],
                 'rpsLimit' => AppConfig::$IS_DAEMON_INSTANCE ? 50 : 0,
+                'cacheItemPool' => new FilesystemAdapter(),
+                'cacheItemTtl' => 60 * 60 * 24
             ],
             $configurationParams
         );
