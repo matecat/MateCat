@@ -263,7 +263,17 @@ class SegmentTarget extends React.Component {
             updateCounter={updateCounter}
           />
           {s2tMicro}
-          <SegmentTargetToolbar />
+          <SegmentTargetToolbar
+            {...{
+              editArea: this.editArea,
+              lockEditArea: this.lockEditArea.bind(this),
+              qrLink,
+              issuesLength: issues.length,
+              showFormatMenu,
+              textHasTags: textHasTags(translation),
+              removeTagsFromText: this.removeTagsFromText.bind(this),
+            }}
+          />
           <div className="toolbar">
             {config.isReview ? (
               <Button
