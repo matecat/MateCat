@@ -142,7 +142,7 @@ class JobContainer extends React.Component {
           .get('revise_passwords')
           .get(1)
           .get('password')
-        label = '2nd Revise'
+        label = 'Revise 2'
         break
       }
     }

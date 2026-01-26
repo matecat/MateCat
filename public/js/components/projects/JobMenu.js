@@ -139,7 +139,7 @@ class JobMenu extends React.Component {
                 this.props.job.get('revise_passwords').size > 1
                   ? [
                       {
-                        label: <>2nd Revise</>,
+                        label: <>Revise 2</>,
                         onClick: () => {
                           this.props.changePasswordFn(2)
                         },
