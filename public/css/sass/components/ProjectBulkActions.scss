@@ -48,6 +48,10 @@
       margin-top: 10px;
     }
 
+    .jobs-selected-reached-limit {
+      background-color: colors.$orangeDefaultHover;
+    }
+
     > span:not(:first-of-type) {
       color: colors.$grey6;
     }

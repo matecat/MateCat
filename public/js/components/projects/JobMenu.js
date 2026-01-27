@@ -15,6 +15,7 @@ import Merge from '../../../img/icons/Merge'
 import Download from '../../../img/icons/Download'
 import QR from '../../../img/icons/QR'
 import Revise from '../../../img/icons/Revise'
+import FlipBackward from '../icons/FlipBackward'
 class JobMenu extends React.Component {
   constructor(props) {
     super(props)
@@ -280,7 +281,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <Refresh size={18} />
+                  <FlipBackward size={18} />
                   Unarchive job
                 </>
               ),
@@ -306,7 +307,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <Refresh size={18} />
+                  <FlipBackward size={18} />
                   Resume job
                 </>
               ),

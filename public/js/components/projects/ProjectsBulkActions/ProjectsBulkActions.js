@@ -84,6 +84,8 @@ export const ProjectsBulkActions = ({
     startJob: undefined,
   })
 
+  const isReachedLimitJobsSelected = jobsBulk.length >= MAX_JOBS_SELECTABLE
+
   useEffect(() => {
     const onChangeProjectStatus = (userUid, name, status) => {
       setFilterStatusApplied(status)
@@ -174,6 +176,18 @@ export const ProjectsBulkActions = ({
           prevState.some((value) => value === id),
         )
 
+        if (
+          !isJobsInvolvedChecked &&
+          prevState.length + jobsInvolved.length > MAX_JOBS_SELECTABLE
+        ) {
+          if (shiftKeyRef.current.isPressed) {
+            const diff = MAX_JOBS_SELECTABLE - prevState.length
+            jobsInvolved = jobsInvolved.filter((item, index) => index <= diff)
+          } else {
+            return prevState
+          }
+        }
+
         return jobsInvolved.reduce((acc, cur) => {
           if (shiftKeyRef.current.isPressed) {
             return isJobsInvolvedChecked
@@ -214,6 +228,12 @@ export const ProjectsBulkActions = ({
 
           const isCheckedAllJobs =
             jobsBulkForCurrentProject.length === currentProject.jobs.length
+
+          if (
+            !isCheckedAllJobs &&
+            prevState.length + currentProject.jobs.length > MAX_JOBS_SELECTABLE
+          )
+            return prevState
 
           return isCheckedAllJobs
             ? prevState.filter(
@@ -361,7 +381,7 @@ export const ProjectsBulkActions = ({
 
         CatToolActions.addNotification({
           title: `Jobs ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
-          text: `The selected ${jobs.length > 1 ? 'jobs' : 'job'} job has been successfully${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
+          text: `The selected ${jobs.length > 1 ? 'jobs' : 'job'} has been successfully ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
           type: 'warning',
           position: 'bl',
           allowHtml: true,
@@ -559,8 +579,12 @@ export const ProjectsBulkActions = ({
         <div className="project-bulk-actions-container">
           <div className="project-bulk-actions-buttons">
             <span
-              className="jobs-selected"
-              aria-label={`${jobsBulk.length} ${jobsBulk.length > 1 ? 'jobs' : 'job'} selected`}
+              className={`jobs-selected ${isReachedLimitJobsSelected ? 'jobs-selected-reached-limit' : ''}`}
+              aria-label={
+                isReachedLimitJobsSelected
+                  ? 'Maximum number of selected jobs reached'
+                  : `${jobsBulk.length} ${jobsBulk.length > 1 ? 'jobs' : 'job'} selected`
+              }
               tooltip-position="right"
             >
               <span>{jobsBulk.length}</span>
