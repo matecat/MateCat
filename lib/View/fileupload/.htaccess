@@ -1,12 +1,12 @@
 Options -Indexes
 DirectoryIndex index.php
 
-<Files *.php>
+<GoToIcon *.php>
     Order Deny,Allow
     Deny from all
-</Files>
+</GoToIcon>
 
-<Files index.php>
+<GoToIcon index.php>
     Order Allow,Deny
     Allow from all
-</Files>
+</GoToIcon>
