@@ -144,6 +144,7 @@ class AIAssistantController extends KleinController
         }
 
         $json = [
+            'id_client' => $json['id_client'],
             'localized_source' => $localizedSource,
             'localized_target' => $localizedTarget,
             'text' => trim($json['text']),
@@ -227,6 +228,7 @@ class AIAssistantController extends KleinController
         }
 
         $json = [
+            'id_client' => $json['id_client'],
             'localized_source' => $localizedSource,
             'localized_target' => $localizedTarget,
             'source_sentence' => trim($json['source_sentence']),
