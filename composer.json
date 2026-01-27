@@ -47,7 +47,8 @@
         "ext-openssl": "*",
         "ext-simplexml": "*",
         "ext-intl": "*",
-        "ext-redis": "*"
+        "ext-redis": "*",
+        "google-gemini-php/client": "^2.7"
     },
     "config": {
         "use-include-path": true,
