@@ -117,27 +117,26 @@ export const FilesMenu = ({projectName}) => {
 
   return (
     <>
-      {files && (
-        <DropdownMenu
-          dropdownClassName={'files-menu-header'}
-          toggleButtonProps={{
-            children: (
-              <>
-                <Files size={20} />
-                <FilenameLabel cssClassName={'project-name'}>
-                  {projectName}
-                </FilenameLabel>
-              </>
-            ),
-            size: BUTTON_SIZE.STANDARD,
-            mode: BUTTON_MODE.LINK,
-            className: 'files-menu-button',
-          }}
-          items={getFilesMenu()}
-          onOpenChange={toggleMenu}
-          className={'file-list-item'}
-        />
-      )}
+      <DropdownMenu
+        dropdownClassName={'files-menu-header'}
+        toggleButtonProps={{
+          children: (
+            <>
+              <Files size={20} />
+              <FilenameLabel cssClassName={'project-name'}>
+                {projectName}
+              </FilenameLabel>
+            </>
+          ),
+          size: BUTTON_SIZE.STANDARD,
+          mode: BUTTON_MODE.LINK,
+          className: 'files-menu-button',
+        }}
+        items={files && getFilesMenu()}
+        onOpenChange={toggleMenu}
+        className={'file-list-item'}
+        disabled={!files}
+      />
     </>
   )
 }

@@ -34,10 +34,19 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    &:first-child {
+      justify-content: flex-start;
+    }
     > div {
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+    .file-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 350px;
     }
   }
 }
