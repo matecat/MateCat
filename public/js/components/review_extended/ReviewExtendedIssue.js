@@ -327,26 +327,26 @@ export const ReviewExtendedIssue = ({
                 >
                   <i className={iconCommentClass} />
                 </button>
-                {isReview && issue.revision_number <= currentReview && (
-                  <>
-                    <button
-                      className={`ui icon basic tiny button issue-delete ${issueEditing?.id === issue.id ? 'active' : ''}`}
-                      onClick={editIssue}
-                      title="Edit issue card"
-                      disabled={!isUserAuthorizedToEditIssue}
-                    >
-                      <IconEdit size={14} />
-                    </button>
-                    <button
-                      className="ui icon basic tiny button issue-delete"
-                      onClick={deleteIssue}
-                      title="Delete issue card"
-                      disabled={!isUserAuthorizedToEditIssue}
-                    >
-                      <Trash size={18} />
-                    </button>
-                  </>
-                )}
+                {isReview &&
+                  issue.revision_number <= currentReview &&
+                  isUserAuthorizedToEditIssue && (
+                    <>
+                      <button
+                        className={`ui icon basic tiny button issue-delete ${issueEditing?.id === issue.id ? 'active' : ''}`}
+                        onClick={editIssue}
+                        title="Edit issue card"
+                      >
+                        <IconEdit size={14} />
+                      </button>
+                      <button
+                        className="ui icon basic tiny button issue-delete"
+                        onClick={deleteIssue}
+                        title="Delete issue card"
+                      >
+                        <Trash size={18} />
+                      </button>
+                    </>
+                  )}
               </div>
             )}
           </div>

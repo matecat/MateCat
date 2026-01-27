@@ -78,7 +78,6 @@ class SegmentVersionController extends KleinController
         $this->response->json([
             'versions' => $formatted->render()
         ]);
-        //https://www.matecat.com/api/v2/jobs/4316371/0ef859019079/segments/2017797016/translation-versions/0
     }
 
 }
