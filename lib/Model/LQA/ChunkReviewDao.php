@@ -455,6 +455,28 @@ class ChunkReviewDao extends AbstractDao
         return $retValue;
     }
 
+    /**
+     * @param int $id_job
+     * @param string $review_password
+     * @param int $source_page
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function destroyCacheForJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page): bool
+    {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+            " WHERE review_password = :review_password " .
+            " AND id_job = :id_job " .
+            " AND source_page = :source_page ";
+        $stmt = $this->_getStatementForQuery($sql);
+
+        return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, [
+            'review_password' => $review_password,
+            'id_job' => $id_job,
+            'source_page' => $source_page
+        ]);
+    }
+
 
     /**
      * @param int $id_job
