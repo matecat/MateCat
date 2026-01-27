@@ -1212,7 +1212,6 @@ const NewProject = () => {
           <Button
             type={BUTTON_TYPE.PRIMARY}
             onClick={() => window.open('https://site.matecat.com/', '_blank')}
-            className="ui primary button"
           >
             Find out more about Matecat
           </Button>
