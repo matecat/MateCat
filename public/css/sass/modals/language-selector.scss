@@ -34,10 +34,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    .close-matecat-modal {
-      padding-bottom: 9px;
-    }
   }
 
   /* Modal Subheader */
@@ -311,56 +307,6 @@
             color: colors.$darkBlue;
           }
         }
-      }
-    }
-  }
-
-  /* Buttons */
-
-  .modal-btn {
-    padding: 8px 16px;
-    border-radius: 2px;
-    margin: 4px 8px;
-    cursor: pointer;
-
-    &:focus {
-      outline: none;
-    }
-
-    &.primary {
-      min-width: 128px;
-      //-webkit-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
-      //-moz-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
-      //box-shadow: 0 2px 8px 0 $btn-shadow-gray;
-    }
-
-    &.secondary {
-      min-width: 100px;
-    }
-
-    &.blue {
-      background: $light-blue;
-      border: 1px solid $light-blue;
-      color: #fff;
-      &:hover {
-        background-color: $btn-hover-blue;
-        //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-      }
-      &:focus {
-        box-shadow: none;
-        border: 1px solid $dark-blue;
-      }
-    }
-
-    &.gray {
-      background: #fff;
-      color: #000;
-      border: 1px solid $medium-gray;
-      &:focus {
-        border: 1px solid $light-blue;
-      }
-      &:hover {
-        background-color: colors.$grey3;
       }
     }
   }

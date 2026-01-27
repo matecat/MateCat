@@ -32,7 +32,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px dashed colors.$grey8;
   padding: 10px;
   margin-bottom: 20px;
@@ -205,7 +205,24 @@
 
 .tm-key-row-menu-button {
   .menu-button-wrapper {
-    > :first-child {
+    button {
+      color: #000 !important;
+      background: colors.$grey4 !important;
+      text-align: center;
+      border: 1px solid colors.$grey2 !important;
+      height: 32px !important;
+      font-size: 14px !important;
+
+      &:hover {
+        background-color: colors.$grey5 !important;
+      }
+    }
+
+    > :last-child {
+      padding: 4px 8px;
+    }
+
+    /* > :first-child {
       min-width: 140px;
       border-radius: 2px;
       height: 28px;
@@ -215,7 +232,7 @@
       border: none;
       background-color: unset;
       color: colors.$grey6;
-    }
+    } */
   }
 
   .just-button-import-tmx {
@@ -235,7 +252,7 @@
 }
 
 .tm-key-row-menu-button-dropdown {
-  margin-left: -10px;
+  margin-left: -35px;
 }
 
 .tm-key-row-icons {
@@ -443,17 +460,16 @@
   }
 }
 
+.tm-key-row-menu-button,
 .tm-row-penalty {
   .tm-row-penalty-button,
   .penalty-numeric-stepper-close-button {
-    border-radius: 2px;
-    font-size: 16px;
     color: #000 !important;
     background: colors.$grey4 !important;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid colors.$grey7 !important;
-    font-size: 16px !important;
+    border: 1px solid colors.$grey2 !important;
+    font-size: 14px !important;
 
     &:hover {
       background-color: colors.$grey5 !important;

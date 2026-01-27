@@ -108,7 +108,6 @@ export const UserProjectDropdown = ({
         testId="project-teams"
         className={`trigger-button user-project-dropdown${isDropdownVisible ? ' open' : ''}${isNotAssignee ? ' not-assignee' : ''}`}
         type={BUTTON_TYPE.BASIC}
-        size={BUTTON_SIZE.SMALL}
         onClick={toggleDropdown}
         disabled={isDisabled}
       >

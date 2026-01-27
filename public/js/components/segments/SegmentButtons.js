@@ -8,7 +8,7 @@ import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CommonUtils from '../../utils/commonUtils'
-import {SEGMENTS_STATUS} from '../../constants/Constants'
+import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../../constants/Constants'
 import {
   decodePlaceholdersToPlainText,
   removeTagsFromText,
@@ -18,6 +18,7 @@ import UserStore from '../../stores/UserStore'
 import {isMacOS} from '../../utils/Utils'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 export const SegmentButton = ({segment, disabled, isReview}) => {
   useHotkeys(
@@ -141,7 +142,6 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
   }
 
   const getReviewButtons = () => {
-    const classDisable = disabled ? 'disabled' : ''
     let nextButton, currentButton
     let nextSegment = SegmentStore.getNextSegment({
       current_sid: segment.sid,
@@ -167,9 +167,14 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         nextSegment.status === 'NEW' ||
         nextSegment.status === 'DRAFT')
     const filtering = SegmentFilter.enabled() && SegmentFilter.filtering()
-    const className = config.isReview
-      ? 'revise-button-' + config.revisionNumber
-      : ''
+    const type =
+      config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
+        ? BUTTON_TYPE.SUCCESS
+        : BUTTON_TYPE.PURPLE
+    const status =
+      config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
+        ? SEGMENTS_STATUS.APPROVED
+        : SEGMENTS_STATUS.APPROVED2
     enableGoToNext =
       enableGoToNext &&
       (isNull(nextSegment.revision_number) ||
@@ -180,78 +185,60 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
 
     nextButton = enableGoToNext ? (
-      <li>
-        <a
-          id={'segment-' + segment.sid + '-nexttranslated'}
-          onClick={(event) => clickOnApprovedButton(event, true)}
-          className={'btn next-unapproved ' + classDisable + ' ' + className}
-          data-segmentid={'segment-' + segment.sid}
-          title="Revise and go to next translated"
-        >
-          {' '}
-          A+>>
-        </a>
-        <p>
-          {isMac ? 'CMD' : 'CTRL'}
-          +SHIFT+ENTER
-        </p>
-      </li>
+      <Button
+        type={type}
+        onClick={(event) => clickOnApprovedButton(event, true)}
+        disabled={disabled}
+        title="Revise and go to next translated"
+        tooltip={`${isMac ? 'CMD' : 'CTRL'}+SHIFT+ENTER`}
+      >
+        A+&gt;&gt;
+      </Button>
     ) : null
     currentButton = getReviewButton()
 
     if (filtering) {
       nextButton = null
-      var data = SegmentFilter.getStoredState()
-      var filterinRepetitions =
+      const data = SegmentFilter.getStoredState()
+      const filterinRepetitions =
         data.reactState && data.reactState.samplingType === 'repetitions'
       if (filterinRepetitions) {
-        nextButton = (
-          <React.Fragment>
-            <li>
-              <a
-                id={'segment-' + segment.sid + '-nextrepetition'}
-                onClick={(e) => goToNextRepetition(e, 'approved')}
-                className={
-                  'next-review-repetition ui green button ' + className
-                }
-                data-segmentid={'segment-' + segment.sid}
-                title="Revise and go to next repetition"
-              >
-                REP &lt;
-              </a>
-            </li>
-            <li>
-              <a
-                id={'segment-' + segment.sid + '-nextgrouprepetition'}
-                onClick={(e) => goToNextRepetitionGroup(e, 'approved')}
-                className={
-                  'next-review-repetition-group ui green button ' + className
-                }
-                data-segmentid={'segment-' + segment.sid}
-                title="Revise and go to next repetition group"
-              >
-                REP &lt;&lt;
-              </a>
-            </li>
-          </React.Fragment>
+        nextButton = []
+        nextButton.push(
+          <Button
+            type={type}
+            onClick={(e) => goToNextRepetition(e, status)}
+            disabled={disabled}
+            title="Revise and go to next repetition"
+          >
+            REP &gt;
+          </Button>,
+        )
+        nextButton.push(
+          <Button
+            type={type}
+            onClick={(e) => goToNextRepetitionGroup(e, status)}
+            disabled={disabled}
+            title="Revise and go to next repetition group"
+          >
+            REP &gt;&gt;
+          </Button>,
         )
       }
     }
     return (
-      <ul
+      <div
         className="buttons"
         data-mount="main-buttons"
         id={'segment-' + segment.sid + '-buttons'}
       >
         {nextButton}
         {currentButton}
-      </ul>
+      </div>
     )
   }
 
   const getTranslateButtons = () => {
-    const classDisable = disabled ? 'disabled' : ''
-
     let nextButton, currentButton
     const filtering =
       SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open
@@ -272,127 +259,94 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     if (currentSegmentTPEnabled) {
       nextButton = ''
       currentButton = (
-        <li>
-          <a
-            id={'segment-' + segment.sid + '-button-guesstags'}
-            onClick={(e) => clickOnGuessTags(e)}
-            data-segmentid={'segment-' + segment.sid}
-            className={'guesstags ' + classDisable}
-          >
-            {' '}
-            GUESS TAGS
-          </a>
-          <p>
-            {isMac ? 'CMD' : 'CTRL'}
-            ENTER
-          </p>
-        </li>
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          onClick={clickOnGuessTags}
+          disabled={disabled}
+          tooltip={`${isMac ? 'CMD' : 'CTRL'} ENTER`}
+        >
+          Guess tags
+        </Button>
       )
     } else {
       nextButton = enableGoToNext ? (
-        <li>
-          <a
-            id={'segment-' + segment.sid + '-nextuntranslated'}
-            onClick={(e) => clickOnTranslatedButton(e, true)}
-            className={'btn next-untranslated ' + classDisable}
-            data-segmentid={'segment-' + segment.sid}
-            title="Translate and go to next untranslated"
-          >
-            {' '}
-            T+>>
-          </a>
-          <p>
-            {isMac ? 'CMD' : 'CTRL'}
-            +SHIFT+ENTER
-          </p>
-        </li>
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          onClick={(e) => clickOnTranslatedButton(e, true)}
+          disabled={disabled}
+          tooltip={`{isMac ? 'CMD' : 'CTRL'}+SHIFT+ENTER`}
+          title="Translate and go to next untranslated"
+        >
+          T+&gt;&gt;
+        </Button>
       ) : null
       currentButton = getTranslateButton()
     }
     if (filtering) {
       nextButton = null
-      var data = SegmentFilter.getStoredState()
-      var filterinRepetitions =
+      const data = SegmentFilter.getStoredState()
+      const filterinRepetitions =
         data.reactState && data.reactState.samplingType === 'repetitions'
       if (filterinRepetitions) {
-        nextButton = (
-          <React.Fragment>
-            <li>
-              <a
-                id={'segment-' + segment.sid + '-nextrepetition'}
-                onClick={(e) => goToNextRepetition(e, 'translated')}
-                className="next-repetition ui primary button"
-                data-segmentid={'segment-' + segment.sid}
-                title="Translate and go to next repetition"
-              >
-                REP >
-              </a>
-            </li>
-            <li>
-              <a
-                id={'segment-' + segment.sid + '-nextgrouprepetition'}
-                onClick={(e) => goToNextRepetitionGroup(e, 'translated')}
-                className="next-repetition-group ui primary button"
-                data-segmentid={'segment-' + segment.sid}
-                title="Translate and go to next repetition group"
-              >
-                REP >>
-              </a>
-            </li>
-          </React.Fragment>
+        nextButton = []
+        nextButton.push(
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            onClick={(e) => goToNextRepetition(e, 'translated')}
+            title="Translate and go to next repetition"
+          >
+            REP &gt;
+          </Button>,
+        )
+        nextButton.push(
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            onClick={(e) => goToNextRepetitionGroup(e, 'translated')}
+            title="Translate and go to next repetition group"
+          >
+            REP &gt;&gt;
+          </Button>,
         )
       }
     }
 
     return (
-      <ul
+      <div
         className="buttons"
         data-mount="main-buttons"
         id={'segment-' + segment.sid + '-buttons'}
       >
         {nextButton}
         {currentButton}
-      </ul>
+      </div>
     )
   }
 
   const getTranslateButton = () => {
-    const classDisable = disabled ? 'disabled' : ''
     return (
-      <li>
-        <a
-          id={'segment-' + segment.sid + '-button-translated'}
-          onClick={(e) => clickOnTranslatedButton(e, false)}
-          data-segmentid={'segment-' + segment.sid}
-          className={'translated ' + classDisable}
-        >
-          {' '}
-          {config.status_labels.TRANSLATED}{' '}
-        </a>
-        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
-      </li>
+      <Button
+        type={BUTTON_TYPE.PRIMARY}
+        onClick={(e) => clickOnTranslatedButton(e, false)}
+        tooltip={`${isMac ? 'CMD' : 'CTRL'}+ENTER`}
+      >
+        {config.status_labels.TRANSLATED}
+      </Button>
     )
   }
 
   const getReviewButton = () => {
-    const classDisable = disabled ? 'disabled' : ''
-    const className = config.isReview
-      ? 'revise-button-' + config.revisionNumber
-      : ''
-
+    const type =
+      config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
+        ? BUTTON_TYPE.SUCCESS
+        : BUTTON_TYPE.PURPLE
     return (
-      <li>
-        <a
-          id={'segment-' + segment.sid + '-button-translated'}
-          data-segmentid={'segment-' + segment.sid}
-          onClick={(event) => clickOnApprovedButton(event, false)}
-          className={'approved ' + classDisable + ' ' + className}
-        >
-          {' '}
-          {config.status_labels.APPROVED}{' '}
-        </a>
-        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
-      </li>
+      <Button
+        type={type}
+        onClick={(event) => clickOnApprovedButton(event, false)}
+        tooltip={`${isMac ? 'CMD' : 'CTRL'}+ENTER`}
+      >
+        {config.status_labels.APPROVED}
+      </Button>
     )
   }
 

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {MenuButtonItem} from './MenuButtonItem'
 import usePortal from '../../../hooks/usePortal'
 import IconDown from '../../icons/IconDown'
+import {Button, BUTTON_MODE} from '../Button/Button'
 
 export const MenuButton = ({
   label,
@@ -101,23 +102,19 @@ export const MenuButton = ({
     <div className={`menu-button ${className}`}>
       <div ref={ref} className="menu-button-wrapper">
         {label && (
-          <button
-            className="label"
-            disabled={disabled}
-            onClick={onClick}
-            data-testid="menu-button"
-          >
+          <Button onClick={onClick} disabled={disabled} testId="menu-button">
             {label}
-          </button>
+          </Button>
         )}
-        <button
+        <Button
+          mode={BUTTON_MODE.GHOST}
           className={`icon ${itemsCoords ? 'active' : ''}`}
-          data-testid="menu-button-show-items"
-          disabled={disabled}
           onMouseUp={onShowingItems}
+          disabled={disabled}
+          testId="menu-button-show-items"
         >
           {icon}
-        </button>
+        </Button>
       </div>
       {itemsCoords && (
         <ItemsPortal>

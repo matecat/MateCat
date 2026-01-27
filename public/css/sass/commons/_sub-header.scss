@@ -1,5 +1,5 @@
 @use '../commons/colors';
-
+@use '../commons/variables';
 .sub-head {
   color: white;
   .ui.container.equal.width.grid {
@@ -30,7 +30,7 @@
   .search-state-filters {
     input.search-projects {
       height: 40px;
-      border-radius: 2px;
+      border-radius: variables.$border-radius-default;
       background-color: #fff;
       color: #002b5c;
       transition: 0.2s ease-in;
@@ -40,14 +40,12 @@
       padding: 12px 16px;
       box-shadow: none;
       border: none;
-      opacity: 0.4;
       &::placeholder {
         color: #002b5c;
       }
 
       &:focus {
         border: none !important;
-        opacity: 1;
         & + .dropdown {
           background-color: #ffffff;
         }
@@ -67,11 +65,10 @@
       display: grid;
       grid-template-columns: 36px auto;
       align-items: center;
-      opacity: 0.4;
       &:hover,
       &:active,
       &:focus {
-        opacity: 1;
+        //opacity: 1;
       }
       .text {
         svg {
@@ -117,14 +114,13 @@
 
 .filter-project-status-dropdown-trigger {
   gap: 0 !important;
-  border-radius: 0 !important;
-  opacity: 0.4;
+  border-radius: 0 8px 8px 0 !important;
   margin-left: 1px;
 
-  &:hover,
-  &[data-state='open'] {
-    opacity: 1;
-  }
+  //&:hover,
+  //&[data-state='open'] {
+  //  opacity: 1;
+  //}
 }
 .filter-project-status-dropdown {
   min-width: 140px;
