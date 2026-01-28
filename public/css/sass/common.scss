@@ -570,18 +570,15 @@ a.archive-project:before,
 a.unarchive-project:before,
 a.unarchive-project:after,
 .splitpoint:before,
-.notific:before,
 #swaplang:after,
 .more:before,
 .more.minus:before,
 .close:before,
-.notific.error:before,
 .breadcrumbs #pname:before,
 .delete button:before,
 .cancel button:before,
 .graysmall:hover .trash:before,
 .splitpoint-delete:after,
-#point2seg:after,
 .warnings:before,
   /* mbc chat */
 .mbc-warnings:before,
@@ -620,27 +617,12 @@ header .filter:before {
   vertical-align: middle;
 }
 
-.notific:before {
-  content: '\f058';
-  font-size: 25px;
-}
-
-.notific.error:before {
-  content: '\f071';
-  font-size: 25px;
-}
-
 .warnings:before,
 .mbc-warnings:before,
 .text .alternatives:before {
   content: '\f071';
   color: #d65959;
   margin-right: 10px;
-}
-
-#point2seg:after {
-  content: '\e903';
-  font-size: 24px;
 }
 
 #swaplang:after {

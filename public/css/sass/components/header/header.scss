@@ -84,8 +84,18 @@ header {
       top: -4px;
       background-color: white;
       border-radius: 999px;
+      font-size: 12px;
+      line-height: 14px;
       &.button-badge-warning {
         background-color: colors.$orangeDefault;
+        color: colors.$white;
+      }
+      &.button-badge-info {
+        background-color: colors.$translatedBlue;
+        color: colors.$white;
+      }
+      &.button-badge-error {
+        background-color: colors.$redDefault;
         color: colors.$white;
       }
     }
