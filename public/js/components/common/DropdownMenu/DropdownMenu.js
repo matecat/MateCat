@@ -129,11 +129,20 @@ export const DropdownMenu = ({
             item.selected ? 'selected' : ''
           }`}
           onMouseDown={preventBubbling}
-          onClick={() => {
-            item.onClick()
+          onClick={(e) => {
+            if (item.disabled) {
+              e.preventDefault()
+              e.stopPropagation()
+            } else {
+              item.onClick()
+            }
             setOpen(false)
           }}
-          disabled={item.disabled}
+          style={{
+            cursor: item.disabled ? 'not-allowed' : 'pointer',
+            opacity: item.disabled ? 0.4 : 1,
+            pointerEvents: item.disabled ? 'none' : undefined,
+          }}
           data-testid={item.testId}
           aria-label={item.tooltip}
         >
