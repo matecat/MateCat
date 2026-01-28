@@ -138,11 +138,7 @@ export const DropdownMenu = ({
             }
             setOpen(false)
           }}
-          style={{
-            cursor: item.disabled ? 'not-allowed' : 'pointer',
-            opacity: item.disabled ? 0.4 : 1,
-            pointerEvents: item.disabled ? 'none' : undefined,
-          }}
+          data-disabled={item.disabled}
           data-testid={item.testId}
           aria-label={item.tooltip}
         >
