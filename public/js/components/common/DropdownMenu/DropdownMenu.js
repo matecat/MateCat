@@ -1,6 +1,8 @@
 import React, {useCallback, useState} from 'react'
 
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu'
+import * as Popover from '@radix-ui/react-popover'
+
 import PropTypes from 'prop-types'
 
 import {Button, BUTTON_MODE, BUTTON_SIZE, BUTTON_TYPE} from '../Button/Button'
@@ -33,6 +35,7 @@ export const DropdownMenu = ({
   items = [],
   portalTarget,
   triggerMode = DROPDOWN_MENU_TRIGGER_MODE.CLICK,
+  sideOffset = 0,
 }) => {
   const [open, setOpen] = useState(false)
 
@@ -44,16 +47,6 @@ export const DropdownMenu = ({
     ...toggleButtonProps,
     className: `${toggleButtonProps.className || ''} ${className}`,
   }
-
-  const handleOpenChange = useCallback(
-    (value) => {
-      if (triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER) {
-        setOpen(value)
-      }
-      onOpenChange(value)
-    },
-    [triggerMode, onOpenChange],
-  )
 
   // FUNCTIONS
   const preventBubbling = (e) => {
@@ -128,6 +121,23 @@ export const DropdownMenu = ({
           </RadixDropdownMenu.Portal>
         </RadixDropdownMenu.Sub>
       )
+    } else if (triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER) {
+      return (
+        <div
+          key={`${level}-${index}`}
+          className={`dropdownmenu-item ${item.type ? item.type : ''} ${
+            item.selected ? 'selected' : ''
+          }`}
+          onMouseDown={preventBubbling}
+          onClick={preventBubbling}
+          onSelect={item.onClick}
+          disabled={item.disabled}
+          data-testid={item.testId}
+          aria-label={item.tooltip}
+        >
+          {item.label}
+        </div>
+      )
     } else {
       // Default item
       return (
@@ -149,44 +159,46 @@ export const DropdownMenu = ({
     }
   }
 
-  return (
-    <RadixDropdownMenu.Root
-      {...(triggerMode === DROPDOWN_MENU_TRIGGER_MODE.CLICK
-        ? {onOpenChange: onOpenChange}
-        : {open, onOpenChange: handleOpenChange})}
-    >
-      <div {...wrapperHandlers} style={{display: 'inline-block'}}>
-        <RadixDropdownMenu.Trigger
-          asChild
-          onMouseDown={(e) =>
-            triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER &&
-            e.preventDefault()
-          }
-          onClick={(e) =>
-            triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER
-              ? e.preventDefault()
-              : undefined
-          }
-        >
+  if (triggerMode === DROPDOWN_MENU_TRIGGER_MODE.CLICK) {
+    return (
+      <RadixDropdownMenu.Root onOpenChange={onOpenChange}>
+        <RadixDropdownMenu.Trigger asChild>
           <Button {...defaultToggleButtonProps} />
         </RadixDropdownMenu.Trigger>
 
         <RadixDropdownMenu.Portal container={portalTarget ?? document.body}>
           <RadixDropdownMenu.Content
+            sideOffset={sideOffset}
             align={align}
             className={`dropdownmenu ${dropdownClassName}`}
-            onOpenAutoFocus={(e) =>
-              triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER
-                ? e.preventDefault()
-                : undefined
-            }
           >
             {items.map(renderItem)}
             <RadixDropdownMenu.Arrow className="dropdownMenuArrow" />
           </RadixDropdownMenu.Content>
         </RadixDropdownMenu.Portal>
+      </RadixDropdownMenu.Root>
+    )
+  }
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <div style={{display: 'inline-block'}} {...wrapperHandlers}>
+        <Popover.Trigger asChild>
+          <Button {...defaultToggleButtonProps} />
+        </Popover.Trigger>
+        <Popover.Portal container={portalTarget ?? document.body}>
+          <Popover.Content
+            sideOffset={sideOffset}
+            className={`dropdownmenu ${dropdownClassName}`}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            {items.map(renderItem)}
+            <Popover.Arrow className="dropdownMenuArrow" />
+          </Popover.Content>
+        </Popover.Portal>
       </div>
-    </RadixDropdownMenu.Root>
+    </Popover.Root>
   )
 }
 
@@ -236,4 +248,5 @@ DropdownMenu.propTypes = {
   items: itemPropTypes,
   portalTarget: PropTypes.any,
   triggerMode: PropTypes.oneOf([...Object.values(DROPDOWN_MENU_TRIGGER_MODE)]),
+  sideOffset: PropTypes.number,
 }
