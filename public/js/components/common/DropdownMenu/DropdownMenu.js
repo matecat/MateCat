@@ -177,7 +177,7 @@ export const DropdownMenu = ({
           <RadixDropdownMenu.Content
             sideOffset={sideOffset}
             align={align}
-            className={`dropdownmenu dropdownmenu-popover ${dropdownClassName}`}
+            className={`dropdownmenu ${dropdownClassName}`}
           >
             {items.map(renderItem)}
             <RadixDropdownMenu.Arrow className="dropdownMenuArrow" />
@@ -196,7 +196,7 @@ export const DropdownMenu = ({
         <Popover.Portal container={portalTarget ?? document.body}>
           <Popover.Content
             sideOffset={sideOffset}
-            className={`dropdownmenu ${dropdownClassName}`}
+            className={`dropdownmenu dropdownmenu-popover ${dropdownClassName}`}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
