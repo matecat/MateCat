@@ -769,6 +769,12 @@ class CreateProjectController extends AbstractStatefulKleinController
     {
         if (!empty($dialect_strict)) {
             $dialect_strict = trim(html_entity_decode($dialect_strict));
+
+            // first check if `dialect_strict` is a valid JSON
+            if (!Utils::isJson($dialect_strict)) {
+                throw new InvalidArgumentException("dialect_strict is not a valid JSON");
+            }
+
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
