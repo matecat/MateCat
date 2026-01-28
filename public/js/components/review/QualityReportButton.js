@@ -107,7 +107,14 @@ export const QualityReportButton = ({
     <DropdownMenu
       triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
       toggleButtonProps={{
-        children: <QualityReportIcon size={20} />,
+        children: (
+          <>
+            <QualityReportIcon size={20} />
+            {!feedback && progress && (
+              <div className="button-badge button-badge-warning" />
+            )}
+          </>
+        ),
         size: BUTTON_SIZE.ICON_STANDARD,
         mode:
           is_pass || revisionStarted ? BUTTON_MODE.BASIC : BUTTON_MODE.GHOST,
@@ -152,4 +159,55 @@ export const QualityReportButton = ({
       <QualityReportIcon size={20} />
     </Button>
   )
+  // <div
+  //   className={'action-submenu ui floating'}
+  //   id="quality-report-button"
+  //   title="Quality Report"
+  // >
+  //   <div
+  //     id="quality-report"
+  //     className={
+  //       progress && isReview && (revisionNumber === 1 || revisionNumber === 2)
+  //         ? 'ui simple pointing top center floating dropdown'
+  //         : ''
+  //     }
+  //     data-vote={vote}
+  //     data-testid="report-button"
+  //     onClick={() => {
+  //       window.open(quality_report_href.current, '_blank')
+  //     }}
+  //   >
+  //     <QualityReportIcon size={20} />
+  //
+  //     {isReview && !feedback && progress && (
+  //       <div className="feedback-alert" />
+  //     )}
+  //
+  //     <div className="dropdown-menu-overlay" />
+  //     {progress &&
+  //     isReview &&
+  //     (revisionNumber === 1 || revisionNumber === 2) ? (
+  //       <ul className="menu" id="qualityReportMenu">
+  //         <li className="item">
+  //           <a
+  //             title="Open QR"
+  //             onClick={(event) => {
+  //               event.stopPropagation()
+  //               window.open(quality_report_href.current, '_blank')
+  //             }}
+  //           >
+  //             Open QR
+  //           </a>
+  //         </li>
+  //         <li className="item">
+  //           <a title="Revision Feedback" onClick={openFeedbackModal}>
+  //             {!feedback
+  //               ? `Write feedback (R${revisionNumber})`
+  //               : `Edit feedback (R${revisionNumber})`}
+  //           </a>
+  //         </li>
+  //       </ul>
+  //     ) : null}
+  //   </div>
+  // </div>
 }
