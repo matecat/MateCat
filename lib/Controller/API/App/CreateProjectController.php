@@ -431,7 +431,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['payable_rate_template'],
             $data['payable_rate_template_id']
         );
-        $data['dialect_strict'] = $this->validateDialectStrictParam($data['target_lang'], $data['dialect_strict']);
+        $data['dialect_strict'] = $this->validateDialectStrictParam(Languages::getInstance(), $data['dialect_strict']);
         $data['filters_extraction_parameters'] = $this->validateFiltersExtractionParameters(
             $data['filters_extraction_parameters']
         );
@@ -756,27 +756,28 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * Validate `dialect_strict` param vs target languages
+     * Validate `dialect_strict` param
      *
      * Example: {"it-IT": true, "en-US": false, "fr-FR": false}
      *
-     * @param      $target_lang
+     * @param Languages $lang_handler
      * @param null $dialect_strict
      *
      * @return string|null
      */
-    private function validateDialectStrictParam($target_lang, $dialect_strict = null): ?string
+    private function validateDialectStrictParam(Languages $lang_handler, $dialect_strict = null): ?string
     {
         if (!empty($dialect_strict)) {
             $dialect_strict = trim(html_entity_decode($dialect_strict));
-            $target_languages = preg_replace('/\s+/', '', $target_lang);
-            $targets = explode(',', trim($target_languages));
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
-                if (!in_array($lang, $targets)) {
+
+                try {
+                    $lang_handler->validateLanguage($lang);
+                } catch (Exception $e) {
                     throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages'
+                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not supported'
                     );
                 }
 
