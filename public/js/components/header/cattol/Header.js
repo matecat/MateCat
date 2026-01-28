@@ -27,7 +27,6 @@ export const Header = ({
   projectCompletionEnabled,
   isReview,
   secondRevisionsCount,
-  overallQualityClass,
   qualityReportHref,
   allowLinkToAnalysis,
   analysisEnabled,
@@ -85,7 +84,6 @@ export const Header = ({
               <QualityReportButton
                 isReview={isReview}
                 revisionNumber={revisionNumber}
-                overallQualityClass={overallQualityClass}
                 qualityReportHref={qualityReportHref}
                 secondRevisionsCount={secondRevisionsCount}
               />

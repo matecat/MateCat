@@ -281,7 +281,7 @@ class SegmentTarget extends React.Component {
                 target="_blank"
                 onClick={() => window.open(qrLink, '_blank')}
               >
-                <QualityReportIcon />
+                <QualityReportIcon size={16} />
               </Button>
             ) : null}
             {removeTagsButton}
