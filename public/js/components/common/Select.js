@@ -101,7 +101,9 @@ export const Select = ({
     ownerDocument.addEventListener('keydown', checkIfShouldHideDropdown)
     setDropdownVisibility(true)
   }
-  const hideDropdown = () => {
+
+  const hideDropdown = useRef()
+  hideDropdown.current = () => {
     if (!wrapperRef.current) return
     const {ownerDocument} = wrapperRef.current
     ownerDocument.removeEventListener('mousedown', checkIfShouldHideDropdown)
@@ -115,7 +117,7 @@ export const Select = ({
   const toggleDropdown = () => {
     if (!isDisabled) {
       if (isDropdownVisible) {
-        hideDropdown()
+        hideDropdown.current()
       } else {
         showDropdown()
       }
@@ -204,25 +206,28 @@ export const Select = ({
     }
   }, [isDropdownVisible, isPortalDropdown])
 
-  const checkIfShouldHideDropdown = (event) => {
-    const isTabPressed = event.keyCode === 9
-    const isEscPressed = event.keyCode === 27
+  const checkIfShouldHideDropdown = useCallback(
+    (event) => {
+      const isTabPressed = event.keyCode === 9
+      const isEscPressed = event.keyCode === 27
 
-    const containsTarget = isPortalDropdown
-      ? wrapperDropDownRef.current &&
-        !wrapperDropDownRef.current.contains(event.target) &&
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target)
-      : wrapperRef.current && !wrapperRef.current.contains(event.target)
+      const containsTarget = isPortalDropdown
+        ? wrapperDropDownRef.current &&
+          !wrapperDropDownRef.current.contains(event.target) &&
+          wrapperRef.current &&
+          !wrapperRef.current.contains(event.target)
+        : wrapperRef.current && !wrapperRef.current.contains(event.target)
 
-    if (
-      (multipleSelect === 'modal' && (isTabPressed || isEscPressed)) ||
-      (multipleSelect !== 'modal' &&
-        (isTabPressed || isEscPressed || containsTarget))
-    ) {
-      hideDropdown()
-    }
-  }
+      if (
+        (multipleSelect === 'modal' && (isTabPressed || isEscPressed)) ||
+        (multipleSelect !== 'modal' &&
+          (isTabPressed || isEscPressed || containsTarget))
+      ) {
+        hideDropdown.current()
+      }
+    },
+    [isPortalDropdown, multipleSelect],
+  )
 
   const handleFocus = () => {
     if (!isDisabled) showDropdown()
@@ -236,7 +241,7 @@ export const Select = ({
       onSelect(activeOptions)
     }
 
-    hideDropdown()
+    hideDropdown.current()
   }
 
   const getInputClassName = () => {
@@ -304,7 +309,7 @@ export const Select = ({
           optionsSelectedCopySingular,
           optionsSelectedCopyPlural,
           resetSelectedOptions,
-          onClose: hideDropdown,
+          onClose: hideDropdown.current,
         }}
       >
         {children}

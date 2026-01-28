@@ -124,12 +124,13 @@ class FeatureSet implements FeatureSetInterface
      */
     public function loadForProject(ProjectStruct $project): void
     {
+        $featureStrings = $project->getMetadataValue(MetadataDao::FEATURES_KEY);
+        $featureCodes = (!empty($featureStrings)) ? FeatureSet::splitString($featureStrings) : [];
+
         $this->clear();
         $this->_setIgnoreDependencies(true);
         $this->loadForceableProjectFeatures();
-        $this->loadFromCodes(
-            FeatureSet::splitString($project->getMetadataValue(MetadataDao::FEATURES_KEY))
-        );
+        $this->loadFromCodes($featureCodes);
         $this->_setIgnoreDependencies(false);
     }
 

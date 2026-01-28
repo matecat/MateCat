@@ -122,22 +122,15 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad(@$this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
         $_worker->attach($this);
 
         //create a stub EnginesFactory Matches
         $stubEngine = $this
             ->getMockBuilder(MyMemory::class)
-            ->onlyMethods(['update', 'getEngineRecord'])
+            ->onlyMethods(['update'])
             ->disableOriginalConstructor()
             ->getMock();
-
-        $engineStruct = new EngineStruct();
-        $engineStruct->id = 1;
-        $engineStruct->type = EngineConstants::TM;
-        $stubEngine->expects($this->once())
-            ->method('getEngineRecord')
-            ->willReturn($engineStruct);
 
         $stubEngine->expects($stubEngineParameterSpy = $this->once())
             ->method('update')
@@ -148,6 +141,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
                 )
             );
 
+        $engineStruct = new EngineStruct();
+        $engineStruct->id = 1;
+        $engineStruct->type = EngineConstants::TM;
         $_worker->setEngine($stubEngine);
 
         /**
@@ -206,22 +202,15 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad(@$this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
         $_worker->attach($this);
 
         //create a stub EnginesFactory Matches
         $stubEngine = $this
             ->getMockBuilder(MyMemory::class)
-            ->onlyMethods(['update', 'getEngineRecord'])
+            ->onlyMethods(['update'])
             ->disableOriginalConstructor()
             ->getMock();
-
-        $engineStruct = new EngineStruct();
-        $engineStruct->id = 1;
-        $engineStruct->type = EngineConstants::TM;
-        $stubEngine->expects($this->once())
-            ->method('getEngineRecord')
-            ->willReturn($engineStruct);
 
         $stubEngine->expects($stubEngineParameterSpy = $this->once())
             ->method('update')
@@ -232,6 +221,9 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
                 )
             );
 
+        $engineStruct = new EngineStruct();
+        $engineStruct->id = 1;
+        $engineStruct->type = EngineConstants::TM;
         $_worker->setEngine($stubEngine);
 
         /**
@@ -291,38 +283,22 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad(@$this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
         $_worker->attach($this);
 
-        /**
-         * @var $queueElement SetContributionRequest
-         */
-        $contributionMockQueueObject = $this
-            ->getStubBuilder(SetContributionRequest::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getProp', 'getJobStruct'])
-            ->getStub();
-
-        $contributionMockQueueObject
-            ->method('getJobStruct')
-            ->willReturn(
-                new JobStruct(
-                    [
-                        'id' => $this->contributionStruct->id_job,
-                        'password' => $this->contributionStruct->job_password,
-                        'source' => 'en-US',
-                        'target' => 'it-IT',
-                        'id_tms' => 0,
-                        'tm_keys' => '[]'
-                    ]
-                )
-            );
-
-        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
-        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
-
-        $reflectionProperty = new ReflectionProperty($_worker, '_engine');
-        $engineLoaded = $reflectionProperty->getValue($_worker);
+        $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
+        $engineLoaded = $reflectedMethod->invokeArgs($_worker, [
+            new JobStruct(
+                [
+                    'id' => $this->contributionStruct->id_job,
+                    'password' => $this->contributionStruct->job_password,
+                    'source' => 'en-US',
+                    'target' => 'it-IT',
+                    'id_tms' => 0,
+                    'tm_keys' => '[]'
+                ]
+            )
+        ]);
 
         $this->assertInstanceOf(NONE::class, $engineLoaded);
     }
@@ -337,27 +313,24 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad(@$this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
         $_worker->attach($this);
 
         //create a stub EnginesFactory Matches
         $stubEngine = $this
             ->getMockBuilder(MyMemory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['update', 'getEngineRecord'])
+            ->onlyMethods(['update'])
             ->getMock();
-        $engineStruct = new EngineStruct();
-        $engineStruct->id = 1;
-        $engineStruct->type = EngineConstants::TM;
-        $stubEngine->expects($this->once())
-            ->method('getEngineRecord')
-            ->willReturn($engineStruct);
 
         $stubEngine->expects($this->once())
             ->method('update')
             ->with($this->anything())
             ->willReturn(new UpdateContributionResponse(['responseStatus' => 500, 'responseData' => []]));
 
+        $engineStruct = new EngineStruct();
+        $engineStruct->id = 1;
+        $engineStruct->type = EngineConstants::TM;
         $_worker->setEngine($stubEngine);
 
         /**
@@ -407,11 +380,11 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad(@$this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
         $_worker->attach($this);
 
         $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
-        $reflectedMethod->invokeArgs($_worker, [
+        $engineLoaded = $reflectedMethod->invokeArgs($_worker, [
             new JobStruct(
                 [
                     'id_tms' => 1,
@@ -419,9 +392,6 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
                 ]
             )
         ]);
-
-        $reflectionProperty = new ReflectionProperty($_worker, '_engine');
-        $engineLoaded = $reflectionProperty->getValue($_worker);
 
         $this->assertInstanceOf(MyMemory::class, $engineLoaded);
     }
@@ -438,7 +408,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         /**
          * @var $_worker SetContributionWorker
          */
-        $_worker = new $this->queueElement->classLoad(@$this->getStubBuilder(AMQHandler::class)->getStub());
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub());
         $_worker->attach($this);
 
         //create an empty engine
@@ -446,16 +416,13 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
 
 
         $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
-        $reflectedMethod->invokeArgs($_worker, [
+        $engineLoaded = $reflectedMethod->invokeArgs($_worker, [
             new JobStruct(
                 [
                     'id_tms' => 1
                 ]
             )
         ]);
-
-        $reflectionProperty = new ReflectionProperty($_worker, '_engine');
-        $engineLoaded = $reflectionProperty->getValue($_worker);
 
         $this->assertInstanceOf(MyMemory::class, $engineLoaded);
     }

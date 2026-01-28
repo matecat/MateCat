@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback, useState} from 'react'
 
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu'
 import PropTypes from 'prop-types'
@@ -19,16 +19,23 @@ export const DROPDOWN_MENU_ITEM_TYPE = {
   DEFAULT: 'default',
   CRITICAL: 'critical',
 }
+export const DROPDOWN_MENU_TRIGGER_MODE = {
+  CLICK: 'click',
+  HOVER: 'hover',
+}
 
 export const DropdownMenu = ({
   className = '',
   dropdownClassName = '',
   toggleButtonProps = {},
   align = DROPDOWN_MENU_ALIGN.LEFT,
-  onOpenChange,
+  onOpenChange = () => {},
   items = [],
   portalTarget,
+  triggerMode = DROPDOWN_MENU_TRIGGER_MODE.CLICK,
 }) => {
+  const [open, setOpen] = useState(false)
+
   const defaultToggleButtonProps = {
     type: BUTTON_TYPE.DEFAULT,
     mode: BUTTON_MODE.GHOST,
@@ -38,11 +45,27 @@ export const DropdownMenu = ({
     className: `${toggleButtonProps.className || ''} ${className}`,
   }
 
+  const handleOpenChange = useCallback(
+    (value) => {
+      if (triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER) {
+        setOpen(value)
+      }
+      onOpenChange(value)
+    },
+    [triggerMode, onOpenChange],
+  )
+
   // FUNCTIONS
   const preventBubbling = (e) => {
     e.stopPropagation()
   }
-
+  const wrapperHandlers =
+    triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER
+      ? {
+          onMouseEnter: () => setOpen(true),
+          onMouseLeave: () => setOpen(false),
+        }
+      : {}
   // RENDER
   const renderItem = (item, index, level = '1') => {
     if (item === DROPDOWN_SEPARATOR) {
@@ -127,20 +150,42 @@ export const DropdownMenu = ({
   }
 
   return (
-    <RadixDropdownMenu.Root onOpenChange={onOpenChange}>
-      <RadixDropdownMenu.Trigger asChild>
-        <Button {...defaultToggleButtonProps} />
-      </RadixDropdownMenu.Trigger>
-
-      <RadixDropdownMenu.Portal container={portalTarget ?? document.body}>
-        <RadixDropdownMenu.Content
-          align={align}
-          className={`dropdownmenu ${dropdownClassName}`}
+    <RadixDropdownMenu.Root
+      {...(triggerMode === DROPDOWN_MENU_TRIGGER_MODE.CLICK
+        ? {onOpenChange: onOpenChange}
+        : {open, onOpenChange: handleOpenChange})}
+    >
+      <div {...wrapperHandlers} style={{display: 'inline-block'}}>
+        <RadixDropdownMenu.Trigger
+          asChild
+          onMouseDown={(e) =>
+            triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER &&
+            e.preventDefault()
+          }
+          onClick={(e) =>
+            triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER
+              ? e.preventDefault()
+              : undefined
+          }
         >
-          {items.map(renderItem)}
-          <RadixDropdownMenu.Arrow className="dropdownMenuArrow" />
-        </RadixDropdownMenu.Content>
-      </RadixDropdownMenu.Portal>
+          <Button {...defaultToggleButtonProps} />
+        </RadixDropdownMenu.Trigger>
+
+        <RadixDropdownMenu.Portal container={portalTarget ?? document.body}>
+          <RadixDropdownMenu.Content
+            align={align}
+            className={`dropdownmenu ${dropdownClassName}`}
+            onOpenAutoFocus={(e) =>
+              triggerMode === DROPDOWN_MENU_TRIGGER_MODE.HOVER
+                ? e.preventDefault()
+                : undefined
+            }
+          >
+            {items.map(renderItem)}
+            <RadixDropdownMenu.Arrow className="dropdownMenuArrow" />
+          </RadixDropdownMenu.Content>
+        </RadixDropdownMenu.Portal>
+      </div>
     </RadixDropdownMenu.Root>
   )
 }
@@ -190,4 +235,5 @@ DropdownMenu.propTypes = {
   onOpenChange: PropTypes.func,
   items: itemPropTypes,
   portalTarget: PropTypes.any,
+  triggerMode: PropTypes.oneOf([...Object.values(DROPDOWN_MENU_TRIGGER_MODE)]),
 }

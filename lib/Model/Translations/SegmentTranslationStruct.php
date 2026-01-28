@@ -26,8 +26,8 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     public int $time_to_edit = 0;
     public ?string $match_type = null;
     public ?string $context_hash = null;
-    public float $eq_word_count = 0;
-    public float $standard_word_count = 0;
+    public ?float $eq_word_count = 0; //set nullable for backward compatibility
+    public ?float $standard_word_count = 0; //set nullable for backward compatibility
     public ?string $suggestions_array = null;
     public ?string $suggestion = null;
     public ?string $suggestion_match = null;
