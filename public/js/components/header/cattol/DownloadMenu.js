@@ -156,7 +156,9 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
                 label: (
                   <>
                     <Download size={20} />
-                    {isGDriveProject ? 'Preview in Google Drive' : 'Draft'}
+                    {isGDriveProject
+                      ? 'Open preview in Google Drive'
+                      : 'Download Draft'}
                   </>
                 ),
                 onClick: () => runDownload(),
@@ -168,7 +170,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
                 label: (
                   <>
                     <Download size={20} />
-                    Original
+                    Download Original
                   </>
                 ),
                 onClick: () => {
@@ -181,7 +183,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
                 label: (
                   <>
                     <Download size={20} />
-                    Original in Google Drive
+                    Open original in Google Drive
                   </>
                 ),
                 onClick: () =>
