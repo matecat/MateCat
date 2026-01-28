@@ -129,8 +129,7 @@ export const DropdownMenu = ({
             item.selected ? 'selected' : ''
           }`}
           onMouseDown={preventBubbling}
-          onClick={preventBubbling}
-          onSelect={item.onClick}
+          onClick={item.onClick}
           disabled={item.disabled}
           data-testid={item.testId}
           aria-label={item.tooltip}
