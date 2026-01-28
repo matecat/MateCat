@@ -177,7 +177,7 @@ export const DropdownMenu = ({
           <RadixDropdownMenu.Content
             sideOffset={sideOffset}
             align={align}
-            className={`dropdownmenu dropdownmenu-popover ${dropdownClassName}`}
+            className={`dropdownmenu ${dropdownClassName}`}
           >
             {items.map(renderItem)}
             <RadixDropdownMenu.Arrow className="dropdownMenuArrow" />
