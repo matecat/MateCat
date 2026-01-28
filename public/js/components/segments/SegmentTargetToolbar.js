@@ -1,16 +1,20 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
-import Checkmark from '../../../img/icons/Checkmark'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import ReviseLockIcon from '../../../img/icons/ReviseLockIcon'
 import QualityReportIcon from '../../../img/icons/QualityReportIcon'
-import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
+import {
+  DROPDOWN_MENU_TRIGGER_MODE,
+  DropdownMenu,
+} from '../common/DropdownMenu/DropdownMenu'
 import DotsHorizontal from '../../../img/icons/DotsHorizontal'
 import UpperCaseIcon from '../../../img/icons/UpperCaseIcon'
 import LowerCaseIcon from '../../../img/icons/LowerCaseIcon'
 import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'
 import {Shortcuts} from '../../utils/shortcuts'
 import RemoveTagsIcon from '../../../img/icons/RemoveTagsIcon'
+import Palette from '../icons/Palette'
+import IconDown from '../icons/IconDown'
 
 export const SegmentTargetToolbar = ({
   editArea,
@@ -29,13 +33,13 @@ export const SegmentTargetToolbar = ({
       title: 'Lara styles',
       label: (
         <>
-          <Checkmark />
+          <Palette size={16} />
           {isIconsBundled && 'Lara styles'}
         </>
       ),
       onClick: () => console.log('we'),
     },
-    ...(config.isReview
+    ...(!config.isReview
       ? [
           {
             title: 'Highlight text and assign an issue to the selected text.',
@@ -68,8 +72,16 @@ export const SegmentTargetToolbar = ({
           {
             component: (
               <DropdownMenu
+                triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
                 toggleButtonProps={{
-                  children: <DotsHorizontal size={18} />,
+                  className: 'segment-target-toolbar-dropdown-trigger',
+                  mode: BUTTON_MODE.OUTLINE,
+                  children: (
+                    <>
+                      Tt
+                      <IconDown size={16} />
+                    </>
+                  ),
                 }}
                 items={[
                   {
@@ -150,6 +162,7 @@ export const SegmentTargetToolbar = ({
         return (
           <Button
             key={index}
+            className="segment-target-toolbar-icon"
             size={BUTTON_SIZE.ICON_SMALL}
             mode={BUTTON_MODE.OUTLINE}
             {...props}
