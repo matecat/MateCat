@@ -28,6 +28,10 @@ header {
     display: block;
   }
 }
+
+.markAsCompleteButton {
+  width: 40px !important;
+}
 /* Header/Footer Restyling */
 
 $icon-scale: 30px;
@@ -64,12 +68,14 @@ header {
     display: grid;
     /*grid-template-columns: repeat(9, auto);*/
     grid-auto-flow: column;
-    grid-template-rows: $icon-scale;
     align-items: center;
     justify-content: right;
-    column-gap: 15px;
+    column-gap: 16px;
     z-index: 4;
-
+    color: colors.$white ;
+    button:not(.success) {
+      color: colors.$white !important;
+    }
     #previewDropdown[data-download='false'] li.downloadTranslation,
     #previewDropdown[data-download='true'] li.previewLink {
       display: none;
