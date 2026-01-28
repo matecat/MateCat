@@ -218,7 +218,7 @@ class Languages
      *
      * @return string
      */
-    public function getLocalizedName(string $code, ?string $lang = 'en'): string
+    public function getLocalizedName(string $code, ?string $lang = 'en'): ?string
     {
         $code = $this->normalizeLanguageCode($code);
 
