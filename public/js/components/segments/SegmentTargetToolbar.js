@@ -99,7 +99,10 @@ export const SegmentTargetToolbar = ({
                         Uppercase
                       </>
                     ),
-                    onClick: () => editArea.formatSelection('uppercase'),
+                    onClick: () => {
+                      console.log('we')
+                      editArea.formatSelection('uppercase')
+                    },
                   },
                   {
                     label: (
@@ -127,7 +130,7 @@ export const SegmentTargetToolbar = ({
       : []),
   ]
 
-  const buttons = items.reduce((acc, cur, index, arr) => {
+  const buttons = items /* items.reduce((acc, cur, index, arr) => {
     if (
       typeof cur.group === 'number' &&
       acc.find(
@@ -159,7 +162,7 @@ export const SegmentTargetToolbar = ({
     } else {
       return [...acc, cur]
     }
-  }, [])
+  }, []) */
 
   return (
     <div className="segment-target-toolbar">

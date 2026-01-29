@@ -1,14 +1,15 @@
 import React, {useContext} from 'react'
 import {LARA_STYLES} from '../../../settingsPanel/Contents/MachineTranslationTab/LaraOptions/LaraOptions'
-import {Popover, POPOVER_VERTICAL_ALIGN} from '../../../common/Popover/Popover'
-import {BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
+import {BUTTON_MODE} from '../../../common/Button/Button'
 import Palette from '../../../icons/Palette'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {SegmentContext} from '../../SegmentContext'
 import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
 
 export const LaraStyles = ({sid}) => {
-  const {multiMatchLangs} = useContext(SegmentContext)
+  const {multiMatchLangs, segImmutable} = useContext(SegmentContext)
+
+  const isDisabled = typeof segImmutable.get('contributions') === 'undefined'
 
   const options = [
     {
@@ -37,45 +38,15 @@ export const LaraStyles = ({sid}) => {
     SegmentActions.getContribution(sid, multiMatchLangs)
   }
 
-  // return (
-  //   <Popover
-  //     className="lara-styles-popover"
-  //     toggleButtonProps={{
-  //       title: 'Lara styles',
-  //       size: BUTTON_SIZE.ICON_SMALL,
-  //       mode: BUTTON_MODE.OUTLINE,
-  //       className: 'segment-target-toolbar-icon',
-  //       children: (
-  //         <>
-  //           <Palette size={16} />
-  //         </>
-  //       ),
-  //     }}
-  //     verticalAlign={POPOVER_VERTICAL_ALIGN.BOTTOM}
-  //   >
-  //     <ul className="lara-styles-popover-list">
-  //       {options.map((option, index) => (
-  //         <li key={index}>
-  //           <div
-  //             className="lara-styles-popover-item"
-  //             onClick={() => setStyle(option.id)}
-  //           >
-  //             <span>{option.label}</span>
-  //             <p>{option.description}</p>
-  //           </div>
-  //         </li>
-  //       ))}
-  //     </ul>
-  //   </Popover>
-  // )
-
   return (
     <DropdownMenu
       dropdownClassName="lara-styles-dropdown"
       toggleButtonProps={{
+        title: 'Lara style',
         className: 'segment-target-toolbar-icon',
         mode: BUTTON_MODE.OUTLINE,
         children: <Palette size={16} />,
+        disabled: isDisabled,
       }}
       items={options.map((option) => {
         return {

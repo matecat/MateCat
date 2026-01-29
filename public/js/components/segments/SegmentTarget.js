@@ -42,6 +42,8 @@ class SegmentTarget extends React.Component {
       charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
+
+    this.tmOutShowFormatMenu
   }
 
   selectIssueText(event) {
@@ -449,9 +451,19 @@ class SegmentTarget extends React.Component {
   }
   toggleFormatMenu = (show) => {
     // Show/Hide Edit Toolbar
-    this.setState({
-      showFormatMenu: show,
-    })
+    clearTimeout(this.tmOutShowFormatMenu)
+
+    if (!show) {
+      this.tmOutShowFormatMenu = setTimeout(() => {
+        this.setState({
+          showFormatMenu: false,
+        })
+      }, 200)
+    } else {
+      this.setState({
+        showFormatMenu: show,
+      })
+    }
   }
 }
 

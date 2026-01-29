@@ -149,6 +149,15 @@ body.cattool {
     width: 32px !important;
     height: 32px !important;
     padding: 0 !important;
+
+    &:disabled {
+      color: colors.$grey8 !important;
+      box-shadow: inset 0 0 0 1px colors.$grey8 !important;
+
+      svg {
+        color: colors.$grey8 !important;
+      }
+    }
   }
 
   .segment-target-toolbar-dropdown-trigger {
@@ -158,40 +167,6 @@ body.cattool {
     font-size: 14px !important;
   }
 }
-
-/* .lara-styles-popover {
-  width: 320px;
-
-  .popover-component-body {
-    padding: 8px;
-  }
-
-  .lara-styles-popover-list {
-    li {
-      font-size: 14px;
-      color: colors.$grey7;
-    }
-  }
-
-  .lara-styles-popover-item {
-    padding: 12px;
-    border-radius: 6px;
-    cursor: pointer;
-
-    > span {
-      font-weight: 500;
-      color: black;
-    }
-
-    &:hover {
-      background-color: rgba(#0588f9, 0.16);
-      color: #017cac;
-      > span {
-        color: #017cac;
-      }
-    }
-  }
-} */
 
 .lara-styles-dropdown {
   width: 320px;
@@ -211,7 +186,7 @@ body.cattool {
 
     &:hover {
       background-color: rgba(#0588f9, 0.16);
-      color: #017cac;
+      color: #0099cc;
       > span {
         color: #017cac;
       }
