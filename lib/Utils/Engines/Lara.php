@@ -719,7 +719,7 @@ class Lara extends AbstractEngine
     {
         $allowedValues = [
             'faithful',
-            'fluid ',
+            'fluid',
             'creative',
         ];
 
