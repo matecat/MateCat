@@ -25,24 +25,6 @@ class Engine
     }
 
     /**
-     * @param EngineStruct $engine
-     *
-     * @return array
-     */
-    public function renderItem(EngineStruct $engine): array
-    {
-        $engine_type = explode("\\", $engine->class_load);
-
-        return [
-            'id' => $engine->id,
-            'name' => $engine->name,
-            'type' => $engine->type,
-            'description' => $engine->description,
-            'engine_type' => array_pop($engine_type)
-        ];
-    }
-
-    /**
      * @param EngineStruct[] $data
      *
      * @return array
@@ -59,7 +41,7 @@ class Engine
          * @var $data EngineStruct[]
          */
         foreach ($data as $engine) {
-            $out[] = $this->renderItem($engine);
+            $out[] = $engine->arrayRepresentation();
         }
 
         return $out;

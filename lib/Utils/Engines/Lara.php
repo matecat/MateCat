@@ -334,9 +334,7 @@ class Lara extends AbstractEngine
             } catch (LaraException $t) {
                 if ($t->getCode() == 429) {
                     $this->logger->debug("Lara quota exceeded. You have exceeded your 'api_translation_chars' quota");
-
-                    $engine_type = explode("\\", self::class);
-                    $engine_type = array_pop($engine_type);
+                    $engine_type = $this->getEngineRecord()->getEngineType();
                     $message = json_encode([
                         '_type' => 'quota_exceeded',
                         'data' => [
