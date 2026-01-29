@@ -8,6 +8,9 @@ import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'
 import SegmentActions from '../../../actions/SegmentActions'
 import {getTeamUsers} from '../../../api/getTeamUsers'
+import {Popover} from '../../common/Popover/Popover'
+import CommentsIcon from '../../../../img/icons/CommentsIcon'
+import {BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
 
 const commentsTypes = {sticky: 3, resolve: 2, comment: 1}
 export const CommentsButton = ({}) => {
@@ -139,6 +142,15 @@ export const CommentsButton = ({}) => {
   }, [comments])
   return (
     <>
+      {config.comments_enabled && (
+        <Popover
+          toggleButtonProps={{
+            children: <CommentsIcon size={24} />,
+            size: BUTTON_SIZE.ICON_STANDARD,
+            mode: BUTTON_MODE.BASIC,
+          }}
+        ></Popover>
+      )}
       {config.comments_enabled && (
         <div
           id="mbc-history"

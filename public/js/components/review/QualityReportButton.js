@@ -106,6 +106,7 @@ export const QualityReportButton = ({
     (revisionNumber === 1 || revisionNumber === 2) ? (
     <DropdownMenu
       triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
+      data-testid="report-button"
       toggleButtonProps={{
         children: (
           <>
@@ -157,6 +158,7 @@ export const QualityReportButton = ({
       }
       size={BUTTON_SIZE.ICON_STANDARD}
       onClick={() => window.open(quality_report_href.current, '_blank')}
+      data-testid="report-button"
     >
       <QualityReportIcon size={20} />
     </Button>
