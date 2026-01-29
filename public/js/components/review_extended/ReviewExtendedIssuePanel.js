@@ -26,10 +26,9 @@ class ReviewExtendedIssuePanel extends React.Component {
       enableArrows: false,
       severityIndex: 0,
     }
-    this.issueCategories = orderBy(
-      config.lqa_nested_categories.categories,
-      ['id'],
-    )
+    this.issueCategories = orderBy(config.lqa_nested_categories.categories, [
+      'id',
+    ])
 
     this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this)
     this.handleShortcutsKeyUp = this.handleShortcutsKeyUp.bind(this)
@@ -117,9 +116,9 @@ class ReviewExtendedIssuePanel extends React.Component {
 
   thereAreSubcategories() {
     return (
-      (this.issueCategories[0].subcategories &&
+      (this.issueCategories[0]?.subcategories &&
         this.issueCategories[0].subcategories.length > 0) ||
-      (this.issueCategories[1].subcategories &&
+      (this.issueCategories[1]?.subcategories &&
         this.issueCategories[1].subcategories.length > 0)
     )
   }
