@@ -103,11 +103,26 @@ let ManageActions = {
 
   changeJobStatus: function (project, job, status) {
     changeJobStatus(job.get('id'), job.get('password'), status).then(() => {
-      AppDispatcher.dispatch({
-        actionType: ManageConstants.REMOVE_JOB,
-        project: project,
-        job: job,
-      })
+      if (project.get('jobs').size === 1) {
+        AppDispatcher.dispatch({
+          actionType: ManageConstants.HIDE_PROJECT,
+          project,
+        })
+
+        setTimeout(() => {
+          AppDispatcher.dispatch({
+            actionType: ManageConstants.REMOVE_JOB,
+            project: project,
+            job: job,
+          })
+        }, 1000)
+      } else {
+        AppDispatcher.dispatch({
+          actionType: ManageConstants.REMOVE_JOB,
+          project: project,
+          job: job,
+        })
+      }
     })
   },
 

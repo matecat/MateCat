@@ -16,6 +16,7 @@ import Download from '../../../img/icons/Download'
 import QR from '../../../img/icons/QR'
 import Revise from '../../../img/icons/Revise'
 import {BUTTON_SIZE} from '../common/Button/Button'
+import FlipBackward from '../icons/FlipBackward'
 class JobMenu extends React.Component {
   constructor(props) {
     super(props)
@@ -140,7 +141,7 @@ class JobMenu extends React.Component {
                 this.props.job.get('revise_passwords').size > 1
                   ? [
                       {
-                        label: <>2nd Revise</>,
+                        label: <>Revise 2</>,
                         onClick: () => {
                           this.props.changePasswordFn(2)
                         },
@@ -281,7 +282,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <Refresh size={18} />
+                  <FlipBackward size={18} />
                   Unarchive job
                 </>
               ),
@@ -307,7 +308,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <Refresh size={18} />
+                  <FlipBackward size={18} />
                   Resume job
                 </>
               ),
