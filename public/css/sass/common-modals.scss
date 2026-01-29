@@ -77,8 +77,6 @@ a {
 .login-container-left input,
 .register-form-container input[type='text'],
 .register-form-container input[type='password'],
-.forgot-password-modal input,
-.reset-password-modal input,
 .user-info-form input {
   margin-top: 5px;
   font-size: 14px;
@@ -123,31 +121,6 @@ a {
 
 .login-form-container {
   width: 245px;
-}
-
-.forgot-password-modal,
-.reset-password-modal {
-  width: 100%;
-  margin: 0 auto;
-  padding: 20px 0;
-}
-
-.forgot-password-modal {
-  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px
-    136px;
-  background-size: 23%;
-  /*width: 385px;*/
-  padding: 25px 96px;
-  text-align: right;
-}
-
-.forgot-password-modal p {
-  text-align: left;
-}
-
-.reset-password-modal {
-  padding: 5% 10%;
-  width: 80%;
 }
 
 .preference-modal-message {

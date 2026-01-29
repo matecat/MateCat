@@ -556,18 +556,12 @@ a {
 }
 
 .close {
-  background: url(/public/img/x.png) center 1px no-repeat;
   width: 22px;
   height: 20px;
   display: block;
   position: absolute;
   right: 0;
   top: 0;
-}
-
-.close:hover,
-.close:focus {
-  background: url(/public/img/x.png) center -30px no-repeat;
 }
 
 .popup .header input {

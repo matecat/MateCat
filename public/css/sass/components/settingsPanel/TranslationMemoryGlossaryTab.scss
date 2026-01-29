@@ -132,8 +132,7 @@
   .settings-panel-table {
     .settings-panel-row-content:not(.row-content-create-resource):not(
         .row-content-default-memory
-      ):not(.row-content-tm-from-file)
-      > :last-child {
+      ):not(.row-content-tm-from-file) > :last-child {
       grid-column: 7;
     }
   }

@@ -347,9 +347,7 @@ section {
 
   &:hover .translation-issues-button .revise-button,
   .translation-issues-button:hover .revise-button,
-  .segment-side-buttons:hover
-    .translation-issues-button
-    .revise-button.no-object {
+  .segment-side-buttons:hover .translation-issues-button .revise-button.no-object {
     display: block !important;
   }
 

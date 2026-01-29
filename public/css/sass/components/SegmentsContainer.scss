@@ -69,11 +69,6 @@
   }
 }
 
-#file
-  .virtual-list
-  > :first-child
-  > :not(:first-child)
-  > div
-  > :first-child:not(.editor) {
+#file .virtual-list > :first-child > :not(:first-child) > div > :first-child:not(.editor) {
   border-top-color: colors.$grey3;
 }
