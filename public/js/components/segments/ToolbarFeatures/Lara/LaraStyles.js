@@ -1,11 +1,15 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import {LARA_STYLES} from '../../../settingsPanel/Contents/MachineTranslationTab/LaraOptions/LaraOptions'
 import {Popover, POPOVER_VERTICAL_ALIGN} from '../../../common/Popover/Popover'
 import {BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import Palette from '../../../icons/Palette'
 import SegmentActions from '../../../../actions/SegmentActions'
+import {SegmentContext} from '../../SegmentContext'
+import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
 
 export const LaraStyles = ({sid}) => {
+  const {multiMatchLangs} = useContext(SegmentContext)
+
   const options = [
     {
       id: LARA_STYLES.FAITHFUL,
@@ -27,37 +31,63 @@ export const LaraStyles = ({sid}) => {
     },
   ]
 
-  const setStyle = (style) => SegmentActions.setLaraStyle({sid, style})
+  const setStyle = (style) => {
+    SegmentActions.setLaraStyle({sid, style})
+    SegmentActions.setSegmentContributions(sid)
+    SegmentActions.getContribution(sid, multiMatchLangs)
+  }
+
+  // return (
+  //   <Popover
+  //     className="lara-styles-popover"
+  //     toggleButtonProps={{
+  //       title: 'Lara styles',
+  //       size: BUTTON_SIZE.ICON_SMALL,
+  //       mode: BUTTON_MODE.OUTLINE,
+  //       className: 'segment-target-toolbar-icon',
+  //       children: (
+  //         <>
+  //           <Palette size={16} />
+  //         </>
+  //       ),
+  //     }}
+  //     verticalAlign={POPOVER_VERTICAL_ALIGN.BOTTOM}
+  //   >
+  //     <ul className="lara-styles-popover-list">
+  //       {options.map((option, index) => (
+  //         <li key={index}>
+  //           <div
+  //             className="lara-styles-popover-item"
+  //             onClick={() => setStyle(option.id)}
+  //           >
+  //             <span>{option.label}</span>
+  //             <p>{option.description}</p>
+  //           </div>
+  //         </li>
+  //       ))}
+  //     </ul>
+  //   </Popover>
+  // )
 
   return (
-    <Popover
-      className="lara-styles-popover"
+    <DropdownMenu
+      dropdownClassName="lara-styles-dropdown"
       toggleButtonProps={{
-        title: 'Lara styles',
-        size: BUTTON_SIZE.ICON_SMALL,
-        mode: BUTTON_MODE.OUTLINE,
         className: 'segment-target-toolbar-icon',
-        children: (
-          <>
-            <Palette size={16} />
-          </>
-        ),
+        mode: BUTTON_MODE.OUTLINE,
+        children: <Palette size={16} />,
       }}
-      verticalAlign={POPOVER_VERTICAL_ALIGN.BOTTOM}
-    >
-      <ul className="lara-styles-popover-list">
-        {options.map((option, index) => (
-          <li key={index}>
-            <div
-              className="lara-styles-popover-item"
-              onClick={() => setStyle(option.id)}
-            >
+      items={options.map((option) => {
+        return {
+          label: (
+            <div className="lara-styles-dropdown-item">
               <span>{option.label}</span>
               <p>{option.description}</p>
             </div>
-          </li>
-        ))}
-      </ul>
-    </Popover>
+          ),
+          onClick: () => setStyle(option.id),
+        }
+      })}
+    />
   )
 }

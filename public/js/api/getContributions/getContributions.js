@@ -25,6 +25,7 @@ export const getContributions = async ({
   currentPassword = config.currentPassword,
   contextListBefore,
   contextListAfter,
+  laraStyle,
 }) => {
   const contextBefore = globalFunctions.getContextBefore(idSegment)
   const idBefore = globalFunctions.getIdBefore(idSegment)
@@ -48,6 +49,7 @@ export const getContributions = async ({
     current_password: currentPassword,
     context_list_before: JSON.stringify(contextListBefore),
     context_list_after: JSON.stringify(contextListAfter),
+    ...(typeof laraStyle === 'string' && {lara_style: laraStyle}),
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),

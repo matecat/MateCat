@@ -567,10 +567,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'contributions'],
-      fromJS({
-        matches: contributions,
-        errors: errors,
-      }),
+      Array.isArray(contributions)
+        ? fromJS({
+            matches: contributions,
+            errors: errors,
+          })
+        : undefined,
     )
   },
   setAlternatives: function (sid, alternatives) {

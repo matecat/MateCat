@@ -159,7 +159,7 @@ body.cattool {
   }
 }
 
-.lara-styles-popover {
+/* .lara-styles-popover {
   width: 320px;
 
   .popover-component-body {
@@ -190,5 +190,36 @@ body.cattool {
         color: #017cac;
       }
     }
+  }
+} */
+
+.lara-styles-dropdown {
+  width: 320px;
+
+  .lara-styles-dropdown-item {
+    font-size: 14px;
+    color: colors.$grey7;
+    padding: 12px;
+    border-radius: 6px;
+    text-wrap: auto;
+    text-align: left;
+
+    > span {
+      font-weight: 500;
+      color: black;
+    }
+
+    &:hover {
+      background-color: rgba(#0588f9, 0.16);
+      color: #017cac;
+      > span {
+        color: #017cac;
+      }
+    }
+  }
+
+  .dropdownmenu-item {
+    padding: 0;
+    gap: 0;
   }
 }

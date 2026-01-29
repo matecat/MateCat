@@ -273,6 +273,7 @@ class SegmentTarget extends React.Component {
               showFormatMenu,
               textHasTags: textHasTags(translation),
               removeTagsFromText: this.removeTagsFromText.bind(this),
+              missingTagsInTarget: segment.missingTagsInTarget,
             }}
           />
           <div className="toolbar">

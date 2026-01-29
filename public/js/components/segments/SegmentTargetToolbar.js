@@ -25,15 +25,20 @@ export const SegmentTargetToolbar = ({
   showFormatMenu,
   textHasTags,
   removeTagsFromText,
+  missingTagsInTarget,
 }) => {
   const [isIconsBundled, setIsIconsBundled] = useState(false)
 
   const items = [
-    {
-      group: 0,
-      component: <LaraStyles {...{sid}} />,
-    },
-    ...(!config.isReview
+    ...(config.active_engine?.engine_type === 'Lara'
+      ? [
+          {
+            group: 0,
+            component: <LaraStyles {...{sid}} />,
+          },
+        ]
+      : []),
+    ...(config.isReview
       ? [
           {
             title: 'Highlight text and assign an issue to the selected text.',
@@ -61,10 +66,19 @@ export const SegmentTargetToolbar = ({
           },
         ]
       : []),
+    /* ...(missingTagsInTarget &&
+        missingTagsInTarget.length > 0 && editArea ? 
+        [
+          {
+            title: `Remove all tags (${Shortcuts.cattol.events.removeTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`,
+            label: <RemoveTagsIcon />,
+            onClick: removeTagsFromText,
+          }
+        ] : []), */
     ...(showFormatMenu
       ? [
           {
-            dropdownGroup: (
+            component: (
               <DropdownMenu
                 triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
                 toggleButtonProps={{
@@ -179,4 +193,5 @@ SegmentTargetToolbar.propTypes = {
   showFormatMenu: PropTypes.bool,
   textHasTags: PropTypes.bool,
   removeTagsFromText: PropTypes.func,
+  missingTagsInTarget: PropTypes.array,
 }
