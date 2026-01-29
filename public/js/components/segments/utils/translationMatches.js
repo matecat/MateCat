@@ -195,8 +195,8 @@ let TranslationMatches = {
   }) {
     const currentSegment = SegmentStore.getSegmentByIdToJS(sid)
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(segment.sid, 'loaded')
-      SegmentActions.getSegmentsQa(segment)
+      SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
+      SegmentActions.getSegmentsQa(currentSegment)
       return Promise.resolve()
     }
 

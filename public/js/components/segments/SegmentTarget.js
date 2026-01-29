@@ -268,9 +268,9 @@ class SegmentTarget extends React.Component {
               editArea: this.editArea,
               lockEditArea: this.lockEditArea.bind(this),
               qrLink,
-              issuesLength: 1,
-              showFormatMenu: true,
-              textHasTags: true,
+              issuesLength: issues.length,
+              showFormatMenu,
+              textHasTags: textHasTags(translation),
               removeTagsFromText: this.removeTagsFromText.bind(this),
             }}
           />

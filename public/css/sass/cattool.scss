@@ -142,6 +142,8 @@ body.cattool {
 .segment-target-toolbar {
   display: flex;
   gap: 8px;
+  margin-left: -11px;
+  margin-top: 8px;
 
   .segment-target-toolbar-icon {
     width: 32px !important;
