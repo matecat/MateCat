@@ -1288,6 +1288,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   getStartEditTime: function () {
     return SegmentStore.editStart
   },
+  setLaraStyle: function (sid, style) {
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    this._segments = this._segments.setIn([index, 'laraStyle'], style)
+  },
 })
 
 // Register callback to handle all updates
@@ -2019,6 +2024,12 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES:
       SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
+      break
+    case SegmentConstants.SET_LARA_STYLE:
+      SegmentStore.setLaraStyle(action.sid, action.style)
+      SegmentStore.emitChange(SegmentConstants.SET_LARA_STYLE, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

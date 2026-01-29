@@ -13,10 +13,11 @@ import LowerCaseIcon from '../../../img/icons/LowerCaseIcon'
 import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'
 import {Shortcuts} from '../../utils/shortcuts'
 import RemoveTagsIcon from '../../../img/icons/RemoveTagsIcon'
-import Palette from '../icons/Palette'
 import IconDown from '../icons/IconDown'
+import {LaraStyles} from './ToolbarFeatures/Lara/LaraStyles'
 
 export const SegmentTargetToolbar = ({
+  sid,
   editArea,
   lockEditArea,
   qrLink,
@@ -30,14 +31,7 @@ export const SegmentTargetToolbar = ({
   const items = [
     {
       group: 0,
-      title: 'Lara styles',
-      label: (
-        <>
-          <Palette size={16} />
-          {isIconsBundled && 'Lara styles'}
-        </>
-      ),
-      onClick: () => console.log('we'),
+      component: <LaraStyles {...{sid}} />,
     },
     ...(!config.isReview
       ? [
@@ -70,7 +64,7 @@ export const SegmentTargetToolbar = ({
     ...(showFormatMenu
       ? [
           {
-            component: (
+            dropdownGroup: (
               <DropdownMenu
                 triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
                 toggleButtonProps={{
@@ -124,18 +118,18 @@ export const SegmentTargetToolbar = ({
       typeof cur.group === 'number' &&
       acc.find(
         (item) =>
-          item.group === cur.group && typeof item.component !== 'undefined',
+          item.group === cur.group && typeof item.dropdownGroup !== 'undefined',
       )
     )
       return acc
 
-    if (typeof cur.group === 'number' && isIconsBundled && !cur.component) {
+    if (typeof cur.group === 'number' && isIconsBundled && !cur.dropdownGroup) {
       const groups = arr.filter(({group}) => group === cur.group)
       return [
         ...acc,
         {
           group: cur.group,
-          component: (
+          dropdownGroup: (
             <DropdownMenu
               toggleButtonProps={{
                 children: <DotsHorizontal size={18} />,
@@ -156,6 +150,7 @@ export const SegmentTargetToolbar = ({
   return (
     <div className="segment-target-toolbar">
       {buttons.map((button, index) => {
+        if (button.dropdownGroup) return button.dropdownGroup
         if (button.component) return button.component
 
         const {label, ...props} = button
@@ -176,6 +171,7 @@ export const SegmentTargetToolbar = ({
 }
 
 SegmentTargetToolbar.propTypes = {
+  sid: PropTypes.string.isRequired,
   editArea: PropTypes.object.isRequired,
   lockEditArea: PropTypes.func,
   qrLink: PropTypes.string,

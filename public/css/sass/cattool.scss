@@ -158,3 +158,37 @@ body.cattool {
     font-size: 14px !important;
   }
 }
+
+.lara-styles-popover {
+  width: 320px;
+
+  .popover-component-body {
+    padding: 8px;
+  }
+
+  .lara-styles-popover-list {
+    li {
+      font-size: 14px;
+      color: colors.$grey7;
+    }
+  }
+
+  .lara-styles-popover-item {
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    > span {
+      font-weight: 500;
+      color: black;
+    }
+
+    &:hover {
+      background-color: rgba(#0588f9, 0.16);
+      color: #017cac;
+      > span {
+        color: #017cac;
+      }
+    }
+  }
+}

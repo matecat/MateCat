@@ -265,6 +265,7 @@ class SegmentTarget extends React.Component {
           {s2tMicro}
           <SegmentTargetToolbar
             {...{
+              sid: this.props.segment.sid,
               editArea: this.editArea,
               lockEditArea: this.lockEditArea.bind(this),
               qrLink,

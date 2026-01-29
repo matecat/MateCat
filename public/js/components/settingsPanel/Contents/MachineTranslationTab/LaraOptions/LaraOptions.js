@@ -110,6 +110,7 @@ export const LaraOptions = ({isCattoolPage}) => {
               checkSpaceToReverse={true}
               onSelect={(option) => onChange(option.id)}
               isDisabled={disabled}
+              maxHeightDroplist={300}
             />
           )}
         />
