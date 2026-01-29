@@ -485,6 +485,7 @@ class GetContributionWorker extends AbstractWorker
                 $config['user_id'] = $contributionStruct->getUser()->uid;
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
                 $config['translation'] = $contributionStruct->translation;
+                $config['lara_style'] = $contributionStruct->lara_style;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
                 $config['keys'] = array_map(function ($tm_key) {
