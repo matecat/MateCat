@@ -117,7 +117,7 @@ export const QualityReportButton = ({
         ),
         size: BUTTON_SIZE.ICON_STANDARD,
         mode:
-          is_pass || revisionStarted ? BUTTON_MODE.BASIC : BUTTON_MODE.GHOST,
+          is_pass || revisionStarted ? BUTTON_MODE.OUTLINE : BUTTON_MODE.GHOST,
         type: is_pass
           ? BUTTON_TYPE.SUCCESS
           : revisionStarted
@@ -152,7 +152,9 @@ export const QualityReportButton = ({
             ? BUTTON_TYPE.CRITICAL
             : BUTTON_TYPE.ICON
       }
-      mode={is_pass && revisionStarted ? BUTTON_MODE.BASIC : BUTTON_MODE.GHOST}
+      mode={
+        is_pass && revisionStarted ? BUTTON_MODE.OUTLINE : BUTTON_MODE.GHOST
+      }
       size={BUTTON_SIZE.ICON_STANDARD}
       onClick={() => window.open(quality_report_href.current, '_blank')}
     >

@@ -68,7 +68,7 @@ header {
     column-gap: 16px;
     z-index: 4;
     color: colors.$white ;
-    button:not(.success) {
+    button.default {
       color: colors.$white !important;
     }
     .button-badge {
@@ -163,17 +163,6 @@ header {
       }
       .mbc-thread-wrap {
         border-top: none;
-      }
-    }
-    #action-search {
-      svg {
-        circle {
-          fill: #fff;
-        }
-
-        .st1 {
-          fill: #002b5c;
-        }
       }
     }
     #action-filter {

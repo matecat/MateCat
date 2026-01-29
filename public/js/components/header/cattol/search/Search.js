@@ -370,9 +370,7 @@ class Search extends React.Component {
           })
         }
       }
-      $('body').addClass('search-open')
     } else {
-      $('body').removeClass('search-open')
       if (!this.state.focus) {
         this.setState({
           focus: true,

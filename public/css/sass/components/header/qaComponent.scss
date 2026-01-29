@@ -27,6 +27,7 @@
     .label-issues {
       font-weight: 700;
       margin-right: 5px;
+
       &.labl {
         margin-left: 70px;
       }
@@ -49,7 +50,9 @@
       display: flex;
       flex-grow: 3;
       align-items: center;
-      .qa-issue {
+      > div {
+        display: flex;
+        gap: 8px;
       }
       .icon-cancel-circle {
         color: #e1565a;
@@ -102,9 +105,17 @@
         flex-direction: row;
         justify-content: flex-end;
         align-items: center;
+        .qa-arrows {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+        }
         .info-navigation-issues {
-          display: inline-block;
-          margin: 0 15px 0 10px;
+          display: flex;
+          align-items: center;
+          b {
+            margin-right: 2px;
+          }
         }
       }
     }

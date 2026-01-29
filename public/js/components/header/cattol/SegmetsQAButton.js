@@ -2,7 +2,12 @@ import React, {useEffect, useState} from 'react'
 import CatToolActions from '../../../actions/CatToolActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
-import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
 import QAICon from '../../../../img/icons/QAICon'
 
 export const SegmentsQAButton = () => {
@@ -43,7 +48,16 @@ export const SegmentsQAButton = () => {
   return (
     <Button
       size={BUTTON_SIZE.ICON_STANDARD}
-      mode={BUTTON_MODE.GHOST}
+      mode={numberClass != '' ? BUTTON_MODE.OUTLINE : BUTTON_MODE.GHOST}
+      type={
+        numberClass === 'error'
+          ? BUTTON_TYPE.CRITICAL
+          : numberClass === 'warning'
+            ? BUTTON_TYPE.WARNING
+            : numberClass === 'info'
+              ? BUTTON_TYPE.INFO
+              : BUTTON_TYPE.ICON
+      }
       tooltip={
         totalIssues > 0
           ? 'Click to see the segments with potential issues'

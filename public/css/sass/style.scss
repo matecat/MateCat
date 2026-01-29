@@ -58,18 +58,6 @@ header .wrapper {
   text-color: #000;
 }
 
-body.search-open header .header-menu #action-search {
-  opacity: 1;
-  svg {
-    circle {
-      fill: #002b5c;
-    }
-    .st1 {
-      fill: #fff;
-    }
-  }
-}
-
 .error a {
   display: block !important;
 }
