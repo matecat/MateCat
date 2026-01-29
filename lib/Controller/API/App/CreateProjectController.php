@@ -343,7 +343,6 @@ class CreateProjectController extends AbstractStatefulKleinController
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
-
             'file_name' => $file_name,
             'project_name' => $project_name,
             'source_lang' => $source_lang,
