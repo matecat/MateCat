@@ -15,12 +15,23 @@ export const deleteSegmentIssue = async ({
   idIssue,
   idJob = config.id_job,
   reviewPassword = config.review_password,
+  revisionNumber = config.revisionNumber,
 }) => {
+  const dataParams = {
+    revision_number: revisionNumber,
+  }
+  const formData = new FormData()
+
+  Object.keys(dataParams).forEach((key) => {
+    formData.append(key, dataParams[key])
+  })
+
   const response = await fetch(
     `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues/${idIssue}`,
     {
       method: 'DELETE',
       credentials: 'include',
+      body: formData,
     },
   )
   if (!response.ok) {

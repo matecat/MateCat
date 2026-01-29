@@ -10,13 +10,13 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {number} [revisionNumber=config.revisionNumber]
  * @returns {Promise<object>}
  */
-export const sendSegmentVersionIssue = async (
+export const sendSegmentVersionIssue = async ({
   idSegment,
   issueDetails,
   idJob = config.id_job,
   reviewPassword = config.review_password,
   revisionNumber = config.revisionNumber,
-) => {
+}) => {
   const dataParams = {
     ...issueDetails,
     revision_number: revisionNumber,

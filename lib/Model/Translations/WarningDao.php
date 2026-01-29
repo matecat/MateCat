@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\Jobs\WarningsCountStruct;
+use Model\Warnings\GlobalWarningStruct;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
 
@@ -102,12 +103,10 @@ class WarningDao extends AbstractDao
 
         $stmt = $db->getConnection()->prepare($query);
 
-        return $thisDao->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, [
+        return $thisDao->_fetchObjectMap($stmt, GlobalWarningStruct::class, [
             'id_job' => $jid,
             'password' => $jpassword,
             'segment_status' => TranslationStatus::STATUS_NEW
         ]);
     }
-
-
 }

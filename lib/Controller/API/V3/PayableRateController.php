@@ -219,8 +219,14 @@ class PayableRateController extends KleinController
 
             $this->response->code($code);
 
+            $formattedErrors = [];
+
+            foreach ($errors as $error) {
+                $formattedErrors[] = $error->getFormattedError("payable_rate");
+            }
+
             return $this->response->json([
-                'errors' => $errors
+                'errors' => $formattedErrors
             ]);
         } catch (Exception $exception) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;

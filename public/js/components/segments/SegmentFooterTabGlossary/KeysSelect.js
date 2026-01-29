@@ -19,12 +19,12 @@ export const KeysSelect = ({
     <Select
       className={`glossary-select ${className}`}
       name="glossary-term-tm"
-      label="Glossary*"
-      placeholder="Select a glossary"
+      label="Termbase*"
+      placeholder="Select a termbase"
       multipleSelect="dropdown"
       showSearchBar={!isEmptyKeys}
-      searchPlaceholder="Find a glossary"
-      options={keys.length ? keys : [{id: '0', name: '+ Create glossary key'}]}
+      searchPlaceholder="Find a termbase"
+      options={keys.length ? keys : [{id: '0', name: '+ Create termbase key'}]}
       activeOptions={selectsActive.keys}
       checkSpaceToReverse={false}
       isDisabled={!!modifyElement || disabled}

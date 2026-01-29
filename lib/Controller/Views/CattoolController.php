@@ -396,11 +396,7 @@ class CattoolController extends BaseKleinViewController
 
     protected function _saveActivity(int $job_id, int $project_id, bool $isRevision): void
     {
-        if ($isRevision) {
-            $action = ActivityLogStruct::ACCESS_REVISE_PAGE;
-        } else {
-            $action = ActivityLogStruct::ACCESS_TRANSLATE_PAGE;
-        }
+        $action = $isRevision ? ActivityLogStruct::ACCESS_REVISE_PAGE : ActivityLogStruct::ACCESS_TRANSLATE_PAGE;
 
         $activity = new ActivityLogStruct();
         $activity->id_job = $job_id;
@@ -408,7 +404,7 @@ class CattoolController extends BaseKleinViewController
         $activity->action = $action;
         $activity->ip = Utils::getRealIpAddr();
         $activity->uid = $this->user->uid;
-        $activity->event_date = date('Y - m - d H:i:s');
+        $activity->event_date = date('Y-m-d H:i:s');
         Activity::save($activity);
     }
 

@@ -12,6 +12,7 @@ namespace Utils\AsyncTasks\Workers;
 use Exception;
 use Model\Jobs\JobStruct;
 use Utils\Contribution\SetContributionRequest;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -27,14 +28,12 @@ class SetContributionMTWorker extends SetContributionWorker
      * @see SetContributionWorker::_loadEngine
      *
      */
-    protected function _loadEngine(JobStruct $jobStruct): void
+    protected function _loadEngine(JobStruct $jobStruct): AbstractEngine
     {
-        if (empty($this->_engine) || $jobStruct->id_mt_engine != $this->_engine->getEngineRecord()->id) {
-            try {
-                $this->_engine = EnginesFactory::getInstance($jobStruct->id_mt_engine); //Load MT Adaptive EnginesFactory
-            } catch (Exception $e) {
-                throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
-            }
+        try {
+            return EnginesFactory::getInstance($jobStruct->id_mt_engine); //Load MT Adaptive EnginesFactory
+        } catch (Exception $e) {
+            throw new EndQueueException($e->getMessage(), self::ERR_NO_TM_ENGINE);
         }
     }
 

@@ -28,6 +28,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {Shortcuts} from '../../utils/shortcuts'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
+import {SegmentTargetToolbar} from './SegmentTargetToolbar'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -262,6 +263,17 @@ class SegmentTarget extends React.Component {
             updateCounter={updateCounter}
           />
           {s2tMicro}
+          <SegmentTargetToolbar
+            {...{
+              editArea: this.editArea,
+              lockEditArea: this.lockEditArea.bind(this),
+              qrLink,
+              issuesLength: 1,
+              showFormatMenu: true,
+              textHasTags: true,
+              removeTagsFromText: this.removeTagsFromText.bind(this),
+            }}
+          />
           <div className="toolbar">
             {config.isReview ? (
               <Button

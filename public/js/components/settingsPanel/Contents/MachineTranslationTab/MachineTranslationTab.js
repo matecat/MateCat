@@ -45,14 +45,14 @@ export const MachineTranslationTab = () => {
 
   const enginesList = [
     {
-      name: 'ModernMT',
-      id: 'mmt',
-      component: ModernMt,
-    },
-    {
       name: 'Lara',
       id: 'Lara',
       component: Lara,
+    },
+    {
+      name: 'ModernMT',
+      id: 'mmt',
+      component: ModernMt,
     },
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},

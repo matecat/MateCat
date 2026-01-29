@@ -27,7 +27,7 @@
   flex-grow: 1;
 }
 
-.option-characters-counter-rule-dropdown {
+.option-dropdown-with-descrition {
   .dropdown__option span {
     white-space: unset;
     overflow: unset;
@@ -38,7 +38,7 @@
     padding-top: 0;
   }
 }
-.option-characters-counter-rule-select-option-content {
+.option-dropdown-with-descrition-select-content {
   display: flex;
   flex-direction: column;
   text-align: left;
