@@ -40,7 +40,7 @@ header {
       auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
     align-items: center;
 
-    .popover-component-container {
+    .user-menu-popover {
       margin-left: 15px;
     }
   }
@@ -70,6 +70,9 @@ header {
     color: colors.$white ;
     button.default {
       color: colors.$white !important;
+      &:disabled {
+      color: #{rgba(colors.$white, 0.5)} !important;
+      }
     }
     .button-badge {
       display: flex;
@@ -86,6 +89,10 @@ header {
       border-radius: 999px;
       font-size: 12px;
       line-height: 14px;
+      &.button-badge-left {
+        right: unset;
+        left: -4px;
+      }
       &.button-badge-warning {
         background-color: colors.$orangeDefault;
         color: colors.$white;
@@ -98,71 +105,9 @@ header {
         background-color: colors.$redDefault;
         color: colors.$white;
       }
-    }
-
-
-    #action-comments,
-    #mbc-history {
-      width: $icon-scale !important;
-      height: $icon-scale;
-      padding: 0 !important;
-      background-position: center;
-
-      svg {
-        opacity: 0.8;
-        &:hover {
-          opacity: 1;
-        }
-      }
-      &.open svg {
-        opacity: 1;
-      }
-
-      .badge {
-        position: absolute;
-        margin: 0;
-        top: 0;
-        padding: 1px 6px;
-        right: -4px;
-        /*background: #e02020;*/
-        background: #0bbeec;
-        color: #fff;
-        font-size: 10px;
-        text-align: center;
-        border-radius: 25px;
-        vertical-align: middle;
-        line-height: 16px;
-        height: 17px;
-      }
-
-      .mbc-history-balloon-outer {
-        background: #fff;
-        margin-top: 5px;
-        border-radius: 3px;
-        right: -136px;
-        z-index: 2;
-        .mbc-triangle-top {
-          border-left: 6px solid transparent;
-          border-right: 6px solid transparent;
-          border-bottom: 6px solid #ffffff;
-          bottom: 100%;
-          left: 50%;
-          right: auto;
-          transform: translate(-90%, 0) !important;
-          position: absolute;
-          pointer-events: none;
-        }
-
-        .mbc-thread-wrap-active {
-          border: none;
-        }
-      }
-      .mbc-history-balloon {
-        background: #fff;
-        border-radius: 3px;
-      }
-      .mbc-thread-wrap {
-        border-top: none;
+      &.button-badge-success {
+        background-color: colors.$approvedGreen;
+        color: colors.$white;
       }
     }
     #action-filter {

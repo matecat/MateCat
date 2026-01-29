@@ -326,23 +326,7 @@ button#exec-replace {
           display: flex;
           justify-content: flex-end;
           align-items: flex-start;
-          margin-top: 4px;
-          button {
-            border-radius: 2px;
-            &:hover,
-            &.active {
-              box-shadow: 0 0 0 1px #0055b8 inset;
-              color: #0055b8 !important;
-              background: #fff !important;
-            }
-
-            &:last-child {
-              width: max-content;
-            }
-            &.disabled {
-              box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
-            }
-          }
+          gap: 8px;
         }
         .find-option {
           display: flex;

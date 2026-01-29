@@ -54,6 +54,7 @@ export const UserMenu = () => {
         }}
         align={POPOVER_ALIGN.RIGHT}
         verticalAlign={POPOVER_VERTICAL_ALIGN.BOTTOM}
+        className={'user-menu-popover'}
       >
         <div className="user-menu-popover-content">
           <div className="user-info">

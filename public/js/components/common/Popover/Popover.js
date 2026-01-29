@@ -27,6 +27,7 @@ export const Popover = ({
   align = POPOVER_ALIGN.LEFT,
   verticalAlign = POPOVER_VERTICAL_ALIGN.BOTTOM,
   onClose = () => {},
+  disabled = false,
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -101,6 +102,7 @@ export const Popover = ({
           active={isOpen}
           onClick={togglePopover}
           {...defaultToggleButtonProps}
+          disabled={disabled}
         />
       ) : (
         <button

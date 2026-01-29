@@ -199,12 +199,12 @@ a.button-component-container {
   --btnTextColorDisabled: #{colors.$grey8};
   --btnAltTextColor: #{colors.$grey6};
   --btnAltTextColorHover: #{colors.$grey};
-  --btnAltTextColorDisabled: #{rgba(colors.$white, 0.12)};
+  --btnAltTextColorDisabled: #{rgba(colors.$grey6, 0.12)};
 
   --btnBorderColor: #{colors.$grey8};
   --btnBorderColorHover: #{colors.$grey6};
   --btnBorderColorActive: #{colors.$grey6};
-  --btnBorderColorDisabled: #{rgba(colors.$white, 0.12)};
+  --btnBorderColorDisabled: #{rgba(colors.$grey6, 0.12)};
 
   --btnBgColor: #{colors.$white};
   --btnBgColorAlt: #{colors.$grey9};
