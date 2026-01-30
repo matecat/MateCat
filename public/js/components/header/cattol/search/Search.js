@@ -23,7 +23,9 @@ import {
 } from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
 import {segmentTranslation} from '../../../../setTranslationUtil'
-import {Button, BUTTON_MODE} from '../../../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
+import ChevronLeft from '../../../../../img/icons/ChevronLeft'
+import ChevronRight from '../../../../../img/icons/ChevronRight'
 
 class Search extends React.Component {
   constructor(props) {
@@ -496,21 +498,22 @@ class Search extends React.Component {
           {this.state.searchResults.length > 0 ? (
             <div className="search-result-buttons">
               <p>{segmentIndex + 1 + ' of ' + totalResults + ' segments'}</p>
-
-              <button
-                className="ui basic tiny button"
+              <Button
+                size={BUTTON_SIZE.ICON_STANDARD}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={this.goToPrev.bind(this)}
+                tooltip={'Find Previous (Shift + F3)'}
               >
-                <i className="icon-chevron-left" />
-                <span> Find Previous (Shift + F3)</span>
-              </button>
-              <button
-                className="ui basic tiny button"
+                <ChevronLeft />
+              </Button>
+              <Button
                 onClick={this.goToNext.bind(this)}
+                mode={BUTTON_MODE.OUTLINE}
+                size={BUTTON_SIZE.ICON_STANDARD}
+                tooltip={'Find Next (F3)'}
               >
-                <i className="icon-chevron-right" />
-                <span> Find Next (F3)</span>
-              </button>
+                <ChevronRight />
+              </Button>
             </div>
           ) : null}
         </div>

@@ -364,7 +364,6 @@ class QAComponent extends React.Component {
                 <div className="qa-actions">
                   <div className={'qa-arrows qa-arrows-enabled'}>
                     <Button
-                      /*disabled={this.state.navigationIndex - 1 < 0}*/
                       size={BUTTON_SIZE.ICON_STANDARD}
                       mode={BUTTON_MODE.OUTLINE}
                       onClick={this.scrollToSegment.bind(this, -1)}

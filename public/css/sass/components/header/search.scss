@@ -360,6 +360,9 @@ button#exec-replace {
         }
         .search-result-buttons {
           display: flex;
+          justify-content: center;
+          gap: 8px;
+          align-items: center;
           p {
             padding: 8px 5px;
             margin-bottom: 0;
