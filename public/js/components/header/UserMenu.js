@@ -37,14 +37,14 @@ export const UserMenu = () => {
           size: BUTTON_SIZE.ICON_STANDARD,
           children: avatarImg ? (
             <img
-              className="user-menu-popover-avatar"
+              className="user-menu-popover-avatar user-menu-popover"
               src={`${avatarImg}`}
               title="Personal settings"
               alt="Profile picture"
             />
           ) : (
             <div
-              className="ui user circular image ui-user-top-image"
+              className="ui user circular image ui-user-top-image user-menu-popover"
               data-testid="user-menu-metadata"
               title="Personal settings"
             >
@@ -54,7 +54,7 @@ export const UserMenu = () => {
         }}
         align={POPOVER_ALIGN.RIGHT}
         verticalAlign={POPOVER_VERTICAL_ALIGN.BOTTOM}
-        className={'user-menu-popover'}
+        buttonContainerClassName={'user-menu-popover'}
       >
         <div className="user-menu-popover-content">
           <div className="user-info">

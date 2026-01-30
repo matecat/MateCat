@@ -12,7 +12,7 @@ import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
-import More from '../../img/icons/More'
+import SettingsIcon from '../../img/icons/SettingsIcon'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
@@ -1044,7 +1044,7 @@ const NewProject = () => {
                 disabled={isLoadingTemplates}
                 onClick={openTmPanel}
               >
-                <More />
+                <SettingsIcon />
                 <span className="text">More settings</span>
               </Button>
             </div>

@@ -8,7 +8,7 @@ import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'
 import SegmentActions from '../../../actions/SegmentActions'
 import {getTeamUsers} from '../../../api/getTeamUsers'
-import {Popover} from '../../common/Popover/Popover'
+import {Popover, POPOVER_ALIGN} from '../../common/Popover/Popover'
 import CommentsIcon from '../../../../img/icons/CommentsIcon'
 import {
   Button,
@@ -73,20 +73,30 @@ export const CommentsButton = ({}) => {
         return (
           <div
             key={'comment' + comment.timestamp}
-            className={`${comment.thread_id == null ? 'active' : 'resolved'}`}
+            className={`popover-comments-item ${comment.thread_id == null ? 'active' : 'resolved'}`}
           >
-            <div>
-              <div>Segment {comment.id_segment}</div>
-              <div>{comment.full_name}</div>
+            <div className={'popover-comments-item-header'}>
+              <span className={'popover-comments-item-name'}>
+                Segment {comment.id_segment}
+              </span>
+              <span>{comment.full_name}</span>
+            </div>
+            <div className={'popover-comments-item-text'}>
               <p dangerouslySetInnerHTML={{__html: message}} />
-              <div>
-                <Button
-                  mode={BUTTON_MODE.LINK}
-                  onClick={() => openSegmentComment(comment.id_segment)}
-                >
-                  View thread
-                </Button>
-              </div>
+            </div>
+            <div>
+              <Button
+                mode={BUTTON_MODE.OUTLINE}
+                type={
+                  comment.thread_id == null
+                    ? BUTTON_TYPE.PRIMARY
+                    : BUTTON_TYPE.SUCCESS
+                }
+                size={BUTTON_SIZE.SMALL}
+                onClick={() => openSegmentComment(comment.id_segment)}
+              >
+                View thread
+              </Button>
             </div>
           </div>
         )
@@ -135,6 +145,9 @@ export const CommentsButton = ({}) => {
     <>
       {config.comments_enabled && (
         <Popover
+          align={POPOVER_ALIGN.CENTER}
+          className={'comments-popover'}
+          closeOnClickInside={true}
           toggleButtonProps={{
             children: (
               <>
@@ -166,10 +179,7 @@ export const CommentsButton = ({}) => {
           }}
           disabled={counterOpenComments + counterResolvedComments === 0}
         >
-          <div className="">
-            <div className="" />
-            <div className="">{renderComments()}</div>
-          </div>
+          <div className="popover-comments-container">{renderComments()}</div>
         </Popover>
       )}
     </>

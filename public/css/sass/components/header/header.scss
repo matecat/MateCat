@@ -39,10 +39,9 @@ header {
       208px minmax(0, 48px) minmax(120px, max-content)
       auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
     align-items: center;
-
-    .user-menu-popover {
-      margin-left: 15px;
-    }
+  }
+  .user-menu-popover {
+    height: 40px;
   }
 
   .logo-menu {
@@ -67,13 +66,16 @@ header {
     justify-content: right;
     column-gap: 16px;
     z-index: 4;
-    color: colors.$white ;
+    color: colors.$white;
+    margin-right: 16px;
     button.default {
       color: colors.$white !important;
+
       &:disabled {
-      color: #{rgba(colors.$white, 0.5)} !important;
+        color: #{rgba(colors.$white, 0.5)} !important;
       }
     }
+
     .button-badge {
       display: flex;
       width: 16px;
@@ -89,33 +91,91 @@ header {
       border-radius: 999px;
       font-size: 12px;
       line-height: 14px;
+
       &.button-badge-left {
         right: unset;
         left: -4px;
       }
+
       &.button-badge-warning {
         background-color: colors.$orangeDefault;
         color: colors.$white;
       }
+
       &.button-badge-info {
         background-color: colors.$translatedBlue;
         color: colors.$white;
       }
+
       &.button-badge-error {
         background-color: colors.$redDefault;
         color: colors.$white;
       }
+
       &.button-badge-success {
         background-color: colors.$approvedGreen;
         color: colors.$white;
       }
     }
+
     #action-filter {
       &.active,
       &.open {
         opacity: 1;
+
         #filter {
           fill: #fff;
+        }
+      }
+    }
+
+    .comments-popover {
+      width: 300px;
+      max-height: 600px;
+      overflow: auto;
+      .popover-comments-container {
+        padding: 8px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .popover-comments-item {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 8px;
+          border-radius: 8px;
+          background-color: #{rgba(colors.$grey9, 0.5)};
+          &.resolved {
+            background-color: #{rgba(colors.$greenDefaultTransparent, 0.15)};
+            &:hover {
+              background-color: #{rgba(colors.$greenDefaultTransparent, 0.25)};
+            }
+          }
+          &:hover {
+            background-color: colors.$grey9;
+          }
+
+          .popover-comments-item-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: colors.$grey1300;
+
+            .popover-comments-item-name {
+              color: colors.$grey;
+            }
+
+          }
+
+          .popover-comments-item-text {
+            padding: 4px;
+          }
         }
       }
     }

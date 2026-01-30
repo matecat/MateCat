@@ -10,10 +10,16 @@ import {SegmentsQAButton} from './SegmetsQAButton'
 import {SearchButton} from './SearchButton'
 import {CommentsButton} from './CommentsButton'
 import {SegmentsFilterButton} from './SegmentsFilterButton'
-import {SettingsButton} from './SettingsButton'
 import {ActionMenu} from '../ActionMenu'
 import {UserMenu} from '../UserMenu'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
+import SettingsIcon from '../../../../img/icons/SettingsIcon'
 
 export const Header = ({
   jid,
@@ -101,7 +107,14 @@ export const Header = ({
               <SegmentsFilterButton />
 
               {/*Settings Icon*/}
-              <SettingsButton openTmPanel={openTmPanel} />
+              <Button
+                type={BUTTON_TYPE.ICON}
+                mode={BUTTON_MODE.GHOST}
+                onClick={openTmPanel}
+                size={BUTTON_SIZE.ICON_STANDARD}
+              >
+                <SettingsIcon size={20} />
+              </Button>
 
               {/*Dropdown menu*/}
               <ActionMenu

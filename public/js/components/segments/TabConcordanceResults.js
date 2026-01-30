@@ -159,7 +159,7 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
 
   const moreButton = results?.length > MAX_ITEMS_TO_DISPLAY && (
     <a className="more" onClick={toggleExtendend}>
-      {isExtended ? 'Fewer' : 'More'}
+      {isExtended ? 'Fewer' : 'SettingsIcon'}
     </a>
   )
 

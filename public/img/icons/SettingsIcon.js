@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const More = ({size = 16}) => {
+const SettingsIcon = ({size = 16}) => {
   return (
     <svg
       width={size}
@@ -20,8 +20,8 @@ const More = ({size = 16}) => {
   )
 }
 
-More.propTypes = {
+SettingsIcon.propTypes = {
   size: PropTypes.number,
 }
 
-export default More
+export default SettingsIcon
