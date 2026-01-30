@@ -520,6 +520,7 @@ class JobContainer extends React.Component {
             trigger={
               <Button
                 type={BUTTON_TYPE.ICON}
+                size={BUTTON_SIZE.ICON_STANDARD}
                 onClick={() => window.open(translatedUrl, '_blank')}
               >
                 <CommentsIcon />
@@ -548,7 +549,7 @@ class JobContainer extends React.Component {
             trigger={
               <Button
                 type={BUTTON_TYPE.ICON}
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_STANDARD}
                 onClick={() => window.open(url, '_blank')}
                 style={{...(classQuality && {color: classQuality})}}
               >
@@ -577,7 +578,7 @@ class JobContainer extends React.Component {
             trigger={
               <Button
                 type={BUTTON_TYPE.ICON}
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_STANDARD}
                 onClick={() => window.open(url, '_blank')}
                 style={{color: 'red'}}
               >
