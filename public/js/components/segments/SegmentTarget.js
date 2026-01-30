@@ -276,66 +276,10 @@ class SegmentTarget extends React.Component {
               textHasTags: textHasTags(translation),
               removeTagsFromText: this.removeTagsFromText.bind(this),
               missingTagsInTarget: segment.missingTagsInTarget,
+              addMissingSourceTagsToTarget:
+                this.editArea?.addMissingSourceTagsToTarget,
             }}
           />
-          <div className="toolbar">
-            {config.isReview ? (
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onClick={this.lockEditArea.bind(this)}
-                title="Highlight text and assign an issue to the selected text."
-              >
-                <ReviseLockIcon />
-              </Button>
-            ) : null}
-            {issues.length > 0 || config.isReview ? (
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                title="Segment Quality Report."
-                target="_blank"
-                onClick={() => window.open(qrLink, '_blank')}
-              >
-                <QualityReportIcon />
-              </Button>
-            ) : null}
-            {removeTagsButton}
-            {tagCopyButton}
-            <div
-              className="editToolbar"
-              style={
-                showFormatMenu
-                  ? {visibility: 'visible'}
-                  : {visibility: 'hidden'}
-              }
-            >
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onMouseDown={() => this.editArea.formatSelection('uppercase')}
-                title="Uppercase"
-              >
-                <UpperCaseIcon />
-              </Button>
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onMouseDown={() => this.editArea.formatSelection('lowercase')}
-                title="Lowercase"
-              >
-                <LowerCaseIcon />
-              </Button>
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onMouseDown={() => this.editArea.formatSelection('capitalize')}
-                title="Capitalize"
-              >
-                <CapitalizeIcon />
-              </Button>
-            </div>
-          </div>
         </div>
       )
     }

@@ -200,6 +200,8 @@ let TranslationMatches = {
       return Promise.resolve()
     }
 
+    const {laraStyle} = currentSegment
+
     let callNewContributions = force
     //Check similar segments
     if (
@@ -277,8 +279,7 @@ let TranslationMatches = {
         contextListAfter,
         ...(isLaraEngine && {
           laraStyle:
-            currentSegment.laraStyle ??
-            CatToolStore.getJobMetadata().project.lara_style,
+            laraStyle ?? CatToolStore.getJobMetadata().project.lara_style,
         }),
       })
         .then(() => {
@@ -305,7 +306,7 @@ let TranslationMatches = {
     const jobLanguages = [config.source_code, config.target_code]
     let allowed =
       jobLanguages.filter((x) => ['en', 'it'].includes(x.split('-')[0]))
-        .length === 2
+        .length === 2 && typeof laraStyle === 'undefined'
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
@@ -341,8 +342,7 @@ let TranslationMatches = {
             jobId: config.id_job,
             glossaries,
             style:
-              currentSegment.laraStyle ??
-              CatToolStore.getJobMetadata().project.lara_style,
+              laraStyle ?? CatToolStore.getJobMetadata().project.lara_style,
           })
             .then((response) => {
               // console.log('Lara Translate response:', response)
