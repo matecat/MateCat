@@ -153,7 +153,9 @@ export const CommentsButton = ({}) => {
               <>
                 <CommentsIcon size={24} />
                 {counterResolvedComments > 0 && (
-                  <div className="button-badge button-badge-success button-badge-left">
+                  <div
+                    className={`button-badge button-badge-success ${counterOpenComments > 0 ? 'button-badge-left' : ''}`}
+                  >
                     {counterResolvedComments}
                   </div>
                 )}
