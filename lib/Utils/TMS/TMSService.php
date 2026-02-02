@@ -180,8 +180,7 @@ class TMSService
                 } catch (Exception $e) {
                     //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
                     $this->logger->debug($e->getMessage());
-                    $engineName = explode("\\", get_class($engine));
-                    $engineName = end($engineName);
+                    $engineName = $engine->getEngineRecord()->getEngineType();
                     $warnings[] = ['engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName()];
                 }
             }

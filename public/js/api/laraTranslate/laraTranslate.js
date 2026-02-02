@@ -8,11 +8,13 @@ export const laraTranslate = async ({
   sid,
   jobId,
   glossaries,
+  style,
 }) => {
   const credentials = new AuthToken(token, null)
 
   const lara = new Translator(credentials, {
     connectionTimeoutMs: 30000,
+    style,
   })
   let textBlocks = [
     ...contextListBefore.map((item) => {

@@ -195,10 +195,12 @@ let TranslationMatches = {
   }) {
     const currentSegment = SegmentStore.getSegmentByIdToJS(sid)
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(segment.sid, 'loaded')
-      SegmentActions.getSegmentsQa(segment)
+      SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
+      SegmentActions.getSegmentsQa(currentSegment)
       return Promise.resolve()
     }
+
+    const {laraStyle} = currentSegment
 
     let callNewContributions = force
     //Check similar segments
@@ -254,6 +256,9 @@ let TranslationMatches = {
     }
     const {contextListBefore, contextListAfter} =
       SegmentUtils.getSegmentContext(id_segment_original)
+
+    const isLaraEngine = config.active_engine?.engine_type === 'Lara'
+
     const getContributionRequest = (translation = null) => {
       if (!translation) {
         console.log(
@@ -262,6 +267,7 @@ let TranslationMatches = {
           this.segmentsWaitingForContributions,
         )
       }
+
       return getContributions({
         idSegment: id_segment_original,
         target: currentSegment.segment,
@@ -271,6 +277,10 @@ let TranslationMatches = {
           : [],
         contextListBefore,
         contextListAfter,
+        ...(isLaraEngine && {
+          laraStyle:
+            laraStyle ?? CatToolStore.getJobMetadata().project.lara_style,
+        }),
       })
         .then(() => {
           // Remove from waiting list
@@ -296,19 +306,14 @@ let TranslationMatches = {
     const jobLanguages = [config.source_code, config.target_code]
     let allowed =
       jobLanguages.filter((x) => ['en', 'it'].includes(x.split('-')[0]))
-        .length === 2
+        .length === 2 && typeof laraStyle === 'undefined'
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
     ) {
       return Promise.resolve()
     }
-    if (
-      config.active_engine?.name === 'Lara' &&
-      allowed &&
-      !fastFetch &&
-      !callNewContributions
-    ) {
+    if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
       this.segmentsWaitingForContributions.push(id_segment_original)
       console.log(
         'Call Lara for segment:',
@@ -336,6 +341,8 @@ let TranslationMatches = {
             sid: id_segment_original,
             jobId: config.id_job,
             glossaries,
+            style:
+              laraStyle ?? CatToolStore.getJobMetadata().project.lara_style,
           })
             .then((response) => {
               // console.log('Lara Translate response:', response)
