@@ -394,6 +394,7 @@ class Lara extends AbstractEngine
         }
 
         return (new Matches([
+            'style' => $laraStyle ?? null,
             'source' => $_config['source'],
             'target' => $_config['target'],
             'raw_segment' => $_config['segment'],
