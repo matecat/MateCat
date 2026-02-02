@@ -5,8 +5,11 @@ import Palette from '../../../icons/Palette'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {SegmentContext} from '../../SegmentContext'
 import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
+import CommonUtils from '../../../../utils/commonUtils'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const LaraStyles = ({sid}) => {
+  const {userInfo} = useContext(ApplicationWrapperContext)
   const {multiMatchLangs, segImmutable} = useContext(SegmentContext)
 
   const isDisabled = typeof segImmutable.get('contributions') === 'undefined'
@@ -22,7 +25,7 @@ export const LaraStyles = ({sid}) => {
       id: LARA_STYLES.FLUID,
       label: 'Fluid',
       description:
-        'Smooth translation, emphasizing readability and natural language flow. For general content.',
+        'Smooth translation, emphasizing readabiity and natural language flow. For general content.',
     },
     {
       id: LARA_STYLES.CREATIVE,
@@ -36,6 +39,16 @@ export const LaraStyles = ({sid}) => {
     SegmentActions.setLaraStyle({sid, style})
     SegmentActions.setSegmentContributions(sid)
     SegmentActions.getContribution(sid, multiMatchLangs)
+    SegmentActions.setLaraStyle({sid, style: undefined}) // reset lara style from SegmentStore
+
+    //Track Event
+    const message = {
+      user: userInfo.user.uid,
+      jobId: config.id_job,
+      segmentId: sid,
+      style,
+    }
+    CommonUtils.dispatchTrackingEvents('LaraStyle', message)
   }
 
   return (
