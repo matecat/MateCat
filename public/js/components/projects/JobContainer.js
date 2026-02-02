@@ -142,7 +142,7 @@ class JobContainer extends React.Component {
           .get('revise_passwords')
           .get(1)
           .get('password')
-        label = '2nd Revise'
+        label = 'Revise 2'
         break
       }
     }
@@ -266,14 +266,44 @@ class JobContainer extends React.Component {
 
   archiveJob() {
     ManageActions.changeJobStatus(this.props.project, this.props.job, 'archive')
+    if (this.props.project.get('jobs').size > 1) {
+      CatToolActions.addNotification({
+        title: `Jobs archived`,
+        text: `The selected job has been successfully archived`,
+        type: 'warning',
+        position: 'bl',
+        allowHtml: true,
+        timer: 10000,
+      })
+    }
   }
 
   cancelJob() {
     ManageActions.changeJobStatus(this.props.project, this.props.job, 'cancel')
+    if (this.props.project.get('jobs').size > 1) {
+      CatToolActions.addNotification({
+        title: `Jobs canceled`,
+        text: `The selected job has been successfully canceled`,
+        type: 'warning',
+        position: 'bl',
+        allowHtml: true,
+        timer: 10000,
+      })
+    }
   }
 
   activateJob() {
     ManageActions.changeJobStatus(this.props.project, this.props.job, 'active')
+    if (this.props.project.get('jobs').size > 1) {
+      CatToolActions.addNotification({
+        title: `Jobs unarchived`,
+        text: `The selected job has been successfully unarchived`,
+        type: 'warning',
+        position: 'bl',
+        allowHtml: true,
+        timer: 10000,
+      })
+    }
   }
 
   deleteJob() {
@@ -288,6 +318,16 @@ class JobContainer extends React.Component {
           this.props.job,
           'delete',
         )
+        if (this.props.project.get('jobs').size > 1) {
+          CatToolActions.addNotification({
+            title: `Jobs deleted permanently`,
+            text: `The selected job has been successfully deleted permanently`,
+            type: 'warning',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          })
+        }
       },
       cancelCallback: () => {},
     }

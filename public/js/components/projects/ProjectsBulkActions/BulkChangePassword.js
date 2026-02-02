@@ -19,7 +19,7 @@ export const BulkChangePassword = ({jobs, successCallback}) => {
   const options = [
     {id: '0', name: 'Translate'},
     {id: '1', name: 'Revise'},
-    ...(jobsWithRevisePassword.length ? [{id: '2', name: '2nd Revise'}] : []),
+    ...(jobsWithRevisePassword.length ? [{id: '2', name: 'Revise 2'}] : []),
   ]
 
   const onSelect = (option) => setTypeSelected(option)

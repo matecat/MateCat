@@ -461,7 +461,7 @@ class NewController extends KleinController
             $lara_style = Lara::validateLaraStyle($lara_style);
         }
 
-        $dialect_strict = $this->validateDialectStrictParam($target_lang, $dialect_strict);
+        $dialect_strict = $this->validateDialectStrictParam($lang_handler, $dialect_strict);
         $filters_extraction_parameters = $this->validateFiltersExtractionParameters(
             $filters_extraction_parameters,
             $filters_extraction_parameters_template_id
@@ -1153,21 +1153,19 @@ class NewController extends KleinController
     }
 
     /**
-     * Validate `dialect_strict` param vs target languages
+     * Validate `dialect_strict` param
      *
      * Example: {"it-IT": true, "en-US": false, "fr-FR": false}
      *
-     * @param      $target_lang
+     * @param Languages $lang_handler
      * @param null $dialect_strict
      *
      * @return string|null
      */
-    private function validateDialectStrictParam($target_lang, $dialect_strict = null): ?string
+    private function validateDialectStrictParam(Languages $lang_handler, $dialect_strict = null): ?string
     {
         if (!empty($dialect_strict)) {
             $dialect_strict = trim(html_entity_decode($dialect_strict));
-            $target_languages = preg_replace('/\s+/', '', $target_lang);
-            $targets = explode(',', trim($target_languages));
 
             // first check if `dialect_strict` is a valid JSON
             if (!Utils::isJson($dialect_strict)) {
@@ -1177,9 +1175,12 @@ class NewController extends KleinController
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
-                if (!in_array($lang, $targets)) {
+
+                try {
+                    $lang_handler->validateLanguage($lang);
+                } catch (Exception $e) {
                     throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages'
+                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not supported'
                     );
                 }
 
