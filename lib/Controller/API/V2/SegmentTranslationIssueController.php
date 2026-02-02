@@ -284,10 +284,11 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             return;
         }
 
+        $teamId = $job->getProject()->getTeam()->id;
         $mDao = new MembershipDao();
 
-        foreach ($mDao->findUserTeams($owner) as $team){
-            if($team->hasUser($entry->uid) || $team->created_by === $loggerUser->uid){
+        foreach ($mDao->getMemberListByTeamId($teamId) as $member){
+            if($member->uid === $loggerUser->uid){
                 return;
             }
         }
