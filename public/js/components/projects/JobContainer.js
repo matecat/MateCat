@@ -153,11 +153,12 @@ class JobContainer extends React.Component {
     ).then(function (data) {
       const notification = {
         uid: 'change-password',
-        title: 'Change job ' + label + ' password',
-        text:
-          'The ' +
-          label +
-          ' password has been changed. <a class="undo-password">Undo</a>',
+        title: revision_number
+          ? `${revision_number === 1 ? 'Revise' : 'Revise 2'} password changed`
+          : 'Translate password changed',
+        text: revision_number
+          ? `${revision_number === 1 ? 'Revise' : 'Revise 2'} password has been changed. <a class="undo-password">Undo</a>`
+          : 'The Translate password has been changed. <a class="undo-password">Undo</a>',
         type: 'warning',
         position: 'bl',
         allowHtml: true,
@@ -269,7 +270,7 @@ class JobContainer extends React.Component {
     if (this.props.project.get('jobs').size > 1) {
       CatToolActions.addNotification({
         title: `Jobs archived`,
-        text: `The selected job has been successfully archived`,
+        text: `The selected jobs has been successfully archived.`,
         type: 'warning',
         position: 'bl',
         allowHtml: true,
@@ -283,7 +284,7 @@ class JobContainer extends React.Component {
     if (this.props.project.get('jobs').size > 1) {
       CatToolActions.addNotification({
         title: `Jobs canceled`,
-        text: `The selected job has been successfully canceled`,
+        text: `The selected jobs has been successfully canceled.`,
         type: 'warning',
         position: 'bl',
         allowHtml: true,
@@ -297,7 +298,7 @@ class JobContainer extends React.Component {
     if (this.props.project.get('jobs').size > 1) {
       CatToolActions.addNotification({
         title: `Jobs unarchived`,
-        text: `The selected job has been successfully unarchived`,
+        text: `The selected jobs has been successfully unarchived.`,
         type: 'warning',
         position: 'bl',
         allowHtml: true,
@@ -321,7 +322,7 @@ class JobContainer extends React.Component {
         if (this.props.project.get('jobs').size > 1) {
           CatToolActions.addNotification({
             title: `Jobs deleted permanently`,
-            text: `The selected job has been successfully deleted permanently`,
+            text: `The selected jobs has been successfully deleted permanently.`,
             type: 'warning',
             position: 'bl',
             allowHtml: true,
