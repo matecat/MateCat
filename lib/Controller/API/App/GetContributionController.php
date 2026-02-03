@@ -22,6 +22,7 @@ use Model\Users\UserDao;
 use ReflectionException;
 use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Engines\Lara;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -55,6 +56,7 @@ class GetContributionController extends KleinController
         $concordance_search = $request['concordance_search'];
         $switch_languages = $request['switch_languages'];
         $cross_language = $request['cross_language'];
+        $lara_style = $request['lara_style'];
 
         if (empty($num_results)) {
             $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
@@ -113,6 +115,7 @@ class GetContributionController extends KleinController
         $contributionRequest->setUser($owner);
         $contributionRequest->setJobStruct($jobStruct);
         $contributionRequest->setProjectStruct($projectStruct);
+        $contributionRequest->lara_style = $lara_style;
         $contributionRequest->segmentId = $id_segment;
         $contributionRequest->id_client = $id_client;
         $contributionRequest->concordanceSearch = $concordance_search;
@@ -179,6 +182,7 @@ class GetContributionController extends KleinController
                     'dialect_strict' => $contributionRequest->dialect_strict,
                     'segmentId' => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
                     'resultNum' => (int)$contributionRequest->resultNum,
+                    'lara_style' => $contributionRequest->lara_style,
                     'concordanceSearch' => $contributionRequest->concordanceSearch,
                 ]
             ]
@@ -220,6 +224,7 @@ class GetContributionController extends KleinController
         $cross_language = filter_var($this->request->param('cross_language'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FORCE_ARRAY]);
         $text = trim($text);
         $translation = trim($translation);
+        $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
         if (!$concordance_search) {
             //execute these lines only in segment contribution search,
@@ -247,6 +252,11 @@ class GetContributionController extends KleinController
             throw new InvalidArgumentException("missing id_client", -5);
         }
 
+        // validate Lara style
+        if(!empty($lara_style)){
+            $lara_style = Lara::validateLaraStyle($lara_style);
+        }
+
         $this->id_job = $id_job;
         $this->request_password = $received_password;
 
@@ -266,6 +276,7 @@ class GetContributionController extends KleinController
             'id_before' => $id_before,
             'id_after' => $id_after,
             'cross_language' => $cross_language,
+            'lara_style' => $lara_style,
             'context_list_after' => json_decode($context_list_after, true),
             'context_list_before' => json_decode($context_list_before, true),
         ];

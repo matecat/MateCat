@@ -1,5 +1,5 @@
 import {isUndefined} from 'lodash'
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import $ from 'jquery'
 import CatToolActions from '../../actions/CatToolActions'
 import SegmentActions from '../../actions/SegmentActions'
@@ -11,6 +11,7 @@ import classNames from 'classnames'
 import IconEdit from '../icons/IconEdit'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const ReviewExtendedIssue = ({
   sid,
@@ -24,6 +25,14 @@ export const ReviewExtendedIssue = ({
   selectionObj,
   versionNumber,
 }) => {
+  const {userInfo} = useContext(ApplicationWrapperContext)
+
+  const isUserAuthorizedToEditIssue =
+    config.ownerIsMe ||
+    (!config.ownerIsMe &&
+      userInfo.teams.some(({id}) => id === config.id_team)) ||
+    userInfo.user.uid === issue.uid
+
   const [commentView, setCommentView] = useState(false)
   const [visible, setVisible] = useState(
     isUndefined(issue.visible) || issue.visible,
@@ -77,9 +86,7 @@ export const ReviewExtendedIssue = ({
       allowHtml: true,
       timer: 10000,
       closeCallback: function () {
-        if (!visible) {
-          SegmentActions.deleteIssue(issue, sid)
-        }
+        SegmentActions.deleteIssue(issue, sid)
       },
     }
     CatToolActions.addNotification(notification)
@@ -320,24 +327,26 @@ export const ReviewExtendedIssue = ({
                 >
                   <i className={iconCommentClass} />
                 </button>
-                {isReview && issue.revision_number <= currentReview && (
-                  <>
-                    <button
-                      className={`ui icon basic tiny button issue-delete ${issueEditing?.id === issue.id ? 'active' : ''}`}
-                      onClick={editIssue}
-                      title="Edit issue card"
-                    >
-                      <IconEdit size={14} />
-                    </button>
-                    <button
-                      className="ui icon basic tiny button issue-delete"
-                      onClick={deleteIssue}
-                      title="Delete issue card"
-                    >
-                      <Trash size={18} />
-                    </button>
-                  </>
-                )}
+                {isReview &&
+                  issue.revision_number <= currentReview &&
+                  isUserAuthorizedToEditIssue && (
+                    <>
+                      <button
+                        className={`ui icon basic tiny button issue-delete ${issueEditing?.id === issue.id ? 'active' : ''}`}
+                        onClick={editIssue}
+                        title="Edit issue card"
+                      >
+                        <IconEdit size={14} />
+                      </button>
+                      <button
+                        className="ui icon basic tiny button issue-delete"
+                        onClick={deleteIssue}
+                        title="Delete issue card"
+                      >
+                        <Trash size={18} />
+                      </button>
+                    </>
+                  )}
               </div>
             )}
           </div>

@@ -28,6 +28,7 @@ use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\DeeplFormalityValidator;
@@ -262,6 +263,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -297,7 +299,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         $only_private = (!is_null($get_public_matches) && !$get_public_matches);
         $due_date = (empty($due_date) ? null : Utils::mysqlTimestamp($due_date));
 
-
         $engineStruct = null;
         // any other engine than Match
         if ($mt_engine !== null and $mt_engine > 1) {
@@ -329,6 +330,10 @@ class CreateProjectController extends AbstractStatefulKleinController
             )
         );
 
+        // validate Lara style
+        if(!empty($lara_style)){
+            $lara_style = Lara::validateLaraStyle($lara_style);
+        }
 
         /**
          * Represents a generic data variable that can hold a variety of information.
@@ -340,7 +345,6 @@ class CreateProjectController extends AbstractStatefulKleinController
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
-
             'file_name' => $file_name,
             'project_name' => $project_name,
             'source_lang' => $source_lang,
@@ -357,6 +361,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             'intento_provider' => (!empty($intento_provider)) ? $intento_provider : null,
             'intento_routing' => (!empty($intento_routing)) ? $intento_routing : null,
             'lara_glossaries' => (!empty($lara_glossaries)) ? $lara_glossaries : null,
+            'lara_style' => (!empty($lara_style)) ? $lara_style : null,
             'deepl_id_glossary' => (!empty($deepl_id_glossary)) ? $deepl_id_glossary : null,
             'deepl_formality' => (!empty($deepl_formality)) ? $deepl_formality : null,
             'deepl_engine_type' => (!empty($deepl_engine_type)) ? $deepl_engine_type : null,
@@ -433,7 +438,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['payable_rate_template'],
             $data['payable_rate_template_id']
         );
-        $data['dialect_strict'] = $this->validateDialectStrictParam($data['target_lang'], $data['dialect_strict']);
+        $data['dialect_strict'] = $this->validateDialectStrictParam(Languages::getInstance(), $data['dialect_strict']);
         $data['filters_extraction_parameters'] = $this->validateFiltersExtractionParameters(
             $data['filters_extraction_parameters']
         );
@@ -760,27 +765,34 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * Validate `dialect_strict` param vs target languages
+     * Validate `dialect_strict` param
      *
      * Example: {"it-IT": true, "en-US": false, "fr-FR": false}
      *
-     * @param      $target_lang
+     * @param Languages $lang_handler
      * @param null $dialect_strict
      *
      * @return string|null
      */
-    private function validateDialectStrictParam($target_lang, $dialect_strict = null): ?string
+    private function validateDialectStrictParam(Languages $lang_handler, $dialect_strict = null): ?string
     {
         if (!empty($dialect_strict)) {
             $dialect_strict = trim(html_entity_decode($dialect_strict));
-            $target_languages = preg_replace('/\s+/', '', $target_lang);
-            $targets = explode(',', trim($target_languages));
+
+            // first check if `dialect_strict` is a valid JSON
+            if (!Utils::isJson($dialect_strict)) {
+                throw new InvalidArgumentException("dialect_strict is not a valid JSON");
+            }
+
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
-                if (!in_array($lang, $targets)) {
+
+                try {
+                    $lang_handler->validateLanguage($lang);
+                } catch (Exception $e) {
                     throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages'
+                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not supported'
                     );
                 }
 

@@ -116,9 +116,11 @@ class ChangePasswordController extends KleinController
                 $source_page = ReviewUtils::revisionNumberToSourcePage($revision_number);
                 $dao = new ChunkReviewDao();
                 $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
+                $dao->destroyCacheForJobIdReviewPasswordAndSourcePage($id, $actual_pwd, $source_page);
                 $jStruct->getProject()
                     ->getFeaturesSet()
                     ->run('review_password_changed', $id, $actual_pwd, $new_password, $revision_number);
+
             } else { // change job password
                 $jStruct = JobDao::getByIdAndPassword($id, $actual_pwd);
                 $jDao = new JobDao();

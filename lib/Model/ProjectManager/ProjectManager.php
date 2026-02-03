@@ -255,6 +255,7 @@ class ProjectManager
                     'enable_mt_analysis' => null,
                     'mmt_activate_context_analyzer' => null,
                     'lara_glossaries' => null,
+                    'lara_style' => null,
                     'deepl_engine_type' => null,
                     'intento_routing' => null,
                     'intento_provider' => null,
@@ -565,6 +566,15 @@ class ProjectManager
                 $this->projectStructure['id_project'],
                 'mmt_glossaries',
                 $this->projectStructure['mmt_glossaries']
+            );
+        }
+
+        // add Lara Style here
+        if (!empty($this->projectStructure['lara_style']) && $this->projectStructure['lara_style']) {
+            $dao->set(
+                $this->projectStructure['id_project'],
+                'lara_style',
+                $this->projectStructure['lara_style']
             );
         }
 

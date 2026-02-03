@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use InvalidArgumentException;
 use Lara\AccessKey;
 use Lara\Glossary;
 use Lara\Internal\HttpClient;
@@ -250,15 +251,27 @@ class Lara extends AbstractEngine
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
 
+                $laraStyle = $_config['lara_style'] ?? null;
+                $laraGlossariesArray = [];
+
                 if (!empty($_config['project_id'])) {
                     $metadataDao = new MetadataDao();
-                    $metadata = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
 
-                    if ($metadata !== null) {
-                        $metadata = html_entity_decode($metadata->value);
-                        $laraGlossariesArray = json_decode($metadata, true);
+                    if($laraStyle === null){
+                        $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
+                        $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
+                    }
+
+                    if ($laraGlossaries !== null) {
+                        $laraGlossaries = html_entity_decode($laraGlossaries->value);
+                        $laraGlossariesArray = json_decode($laraGlossaries, true);
                         $translateOptions->setGlossaries($laraGlossariesArray);
                     }
+                }
+
+                if ($laraStyle !== null) {
+                    $translateOptions->setStyle($laraStyle);
                 }
 
                 $request_translation = [];
@@ -311,6 +324,8 @@ class Lara extends AbstractEngine
                     'source' => $_config['source'],
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
+                    'style' => $laraStyle,
+                    'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
@@ -319,9 +334,7 @@ class Lara extends AbstractEngine
             } catch (LaraException $t) {
                 if ($t->getCode() == 429) {
                     $this->logger->debug("Lara quota exceeded. You have exceeded your 'api_translation_chars' quota");
-
-                    $engine_type = explode("\\", self::class);
-                    $engine_type = array_pop($engine_type);
+                    $engine_type = $this->getEngineRecord()->getEngineType();
                     $message = json_encode([
                         '_type' => 'quota_exceeded',
                         'data' => [
@@ -381,6 +394,7 @@ class Lara extends AbstractEngine
         }
 
         return (new Matches([
+            'style' => $laraStyle ?? null,
             'source' => $_config['source'],
             'target' => $_config['target'],
             'raw_segment' => $_config['segment'],
@@ -693,7 +707,27 @@ class Lara extends AbstractEngine
     {
         return [
             'enable_mt_analysis',
+            'lara_style',
             'lara_glossaries',
         ];
+    }
+
+    /**
+     * @param string $lara_style
+     * @return string
+     */
+    public static function validateLaraStyle(string $lara_style): string
+    {
+        $allowedValues = [
+            'faithful',
+            'fluid',
+            'creative',
+        ];
+
+        if(!in_array($lara_style, $allowedValues)) {
+            throw new InvalidArgumentException("Invalid lara style.", -1);
+        }
+
+        return $lara_style;
     }
 }

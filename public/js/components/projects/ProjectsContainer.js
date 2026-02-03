@@ -300,6 +300,7 @@ class ProjectsContainer extends React.Component {
           <ProjectsBulkActions
             projects={this.state.projects.toJS()}
             teams={this.state.teams.toJS()}
+            isSelectedTeamPersonal={this.state.team.get('type') === 'personal'}
           >
             {this.props.fetchingProjects ? (
               <div className="ui active inverted dimmer">

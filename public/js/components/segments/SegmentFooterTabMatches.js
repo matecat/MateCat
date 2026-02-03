@@ -39,7 +39,7 @@ class SegmentFooterTabMatches extends React.Component {
       var item = {}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
-      item.cb = this.created_by.split("MT-").pop();
+      item.cb = this.created_by.split('MT-').pop()
       item.segment = this.segment
       item.translation = this.translation
       item.target = this.target

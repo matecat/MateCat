@@ -20,12 +20,12 @@ import {TOOLTIP_POSITION} from '../../common/Tooltip'
 import SwitchHorizontal from '../../../../img/icons/SwitchHorizontal'
 import AssignToMember from '../../../../img/icons/AssignToMember'
 import Archive from '../../../../img/icons/Archive'
-import Refresh from '../../../../img/icons/Refresh'
 import Trash from '../../../../img/icons/Trash'
 import ChangePassword from '../../../../img/icons/ChangePassword'
 import Revise from '../../../../img/icons/Revise'
 import IconCloseCircle from '../../icons/IconCloseCircle'
 import CheckDone from '../../../../img/icons/CheckDone'
+import FlipBackward from '../../icons/FlipBackward'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -48,10 +48,10 @@ const JOBS_ACTIONS = {
 
 const ACTIONS_BY_FILTER = {
   active: [
-    JOBS_ACTIONS.ARCHIVE,
-    JOBS_ACTIONS.CANCEL,
     JOBS_ACTIONS.CHANGE_PASSWORD,
     JOBS_ACTIONS.GENERATE_REVISE_2,
+    JOBS_ACTIONS.ARCHIVE,
+    JOBS_ACTIONS.CANCEL,
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
     JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
@@ -62,15 +62,20 @@ const ACTIONS_BY_FILTER = {
     JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
   cancelled: [
+    JOBS_ACTIONS.ARCHIVE,
     JOBS_ACTIONS.RESUME,
     JOBS_ACTIONS.DELETE_PERMANENTLY,
-    JOBS_ACTIONS.ARCHIVE,
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
     JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
 }
 
-export const ProjectsBulkActions = ({projects, teams, children}) => {
+export const ProjectsBulkActions = ({
+  projects,
+  teams,
+  isSelectedTeamPersonal,
+  children,
+}) => {
   const [jobsBulk, setJobsBulk] = useState([])
   const [filterStatusApplied, setFilterStatusApplied] = useState('active')
 
@@ -78,6 +83,8 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
     isPressed: false,
     startJob: undefined,
   })
+
+  const isReachedLimitJobsSelected = jobsBulk.length >= MAX_JOBS_SELECTABLE
 
   useEffect(() => {
     const onChangeProjectStatus = (userUid, name, status) => {
@@ -169,6 +176,18 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
           prevState.some((value) => value === id),
         )
 
+        if (
+          !isJobsInvolvedChecked &&
+          prevState.length + jobsInvolved.length > MAX_JOBS_SELECTABLE
+        ) {
+          if (shiftKeyRef.current.isPressed) {
+            const diff = MAX_JOBS_SELECTABLE - prevState.length
+            jobsInvolved = jobsInvolved.filter((item, index) => index <= diff)
+          } else {
+            return prevState
+          }
+        }
+
         return jobsInvolved.reduce((acc, cur) => {
           if (shiftKeyRef.current.isPressed) {
             return isJobsInvolvedChecked
@@ -209,6 +228,12 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
 
           const isCheckedAllJobs =
             jobsBulkForCurrentProject.length === currentProject.jobs.length
+
+          if (
+            !isCheckedAllJobs &&
+            prevState.length + currentProject.jobs.length > MAX_JOBS_SELECTABLE
+          )
+            return prevState
 
           return isCheckedAllJobs
             ? prevState.filter(
@@ -355,8 +380,8 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         })
 
         CatToolActions.addNotification({
-          title: 'Jobs status',
-          text: `The selected ${jobs.length > 1 ? 'jobs' : 'job'} job has been ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
+          title: `Jobs ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
+          text: `The selected jobs has been successfully ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
           type: 'warning',
           position: 'bl',
           allowHtml: true,
@@ -381,8 +406,8 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         })
 
         CatToolActions.addNotification({
-          title: 'Generate revise 2',
-          text: `Revision 2 links for the selected ${jobs.length > 1 ? 'jobs' : 'job'} have been created`,
+          title: 'Revise 2 links generated',
+          text: 'The Revise 2 links for the selected jobs have been generated successfully.',
           type: 'warning',
           position: 'bl',
           allowHtml: true,
@@ -414,11 +439,15 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               rest.revision_number,
             )
           })
-
+          console.log('rest.revision_number', rest.revision_number)
           if (fulfilledPromises.length) {
             const notification = {
-              title: 'Change jobs password',
-              text: 'Selected jobs password has been changed',
+              title: rest.revision_number
+                ? `${rest.revision_number === 1 ? 'Revise' : 'Revise 2'} passwords changed`
+                : 'Translate passwords changed',
+              text: rest.revision_number
+                ? `The ${rest.revision_number === 1 ? 'Revise' : 'Revise 2'} passwords for the selected jobs have been changed successfully.`
+                : 'The Translate passwords for the selected jobs have been changed successfully',
               type: 'warning',
               position: 'bl',
               allowHtml: true,
@@ -493,7 +522,7 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
             <Archive size={20} />
           ) : action.id === JOBS_ACTIONS.UNARCHIVE.id ||
             action.id === JOBS_ACTIONS.RESUME.id ? (
-            <Refresh size={20} />
+            <FlipBackward size={20} />
           ) : action.id === JOBS_ACTIONS.CANCEL.id ||
             action.id === JOBS_ACTIONS.DELETE.id ||
             action.id === JOBS_ACTIONS.DELETE_PERMANENTLY.id ? (
@@ -520,9 +549,11 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
                   }),
                 }),
                 ...(action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id && {
-                  disabled,
-                  ...(disabled && {
-                    tooltip: `${action.label} - ${tooltip}`,
+                  disabled: disabled || isSelectedTeamPersonal,
+                  ...((disabled || isSelectedTeamPersonal) && {
+                    tooltip: isSelectedTeamPersonal
+                      ? 'Assign to member - Open a different team to enable this action.'
+                      : `${action.label} - ${tooltip}`,
                   }),
                 }),
                 onClick: () => onClickAction(action),
@@ -546,16 +577,19 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         <div className="project-bulk-actions-container">
           <div className="project-bulk-actions-buttons">
             <span
-              className="jobs-selected"
-              aria-label={`${jobsBulk.length} ${jobsBulk.length > 1 ? 'jobs' : 'job'} selected`}
+              className={`jobs-selected ${isReachedLimitJobsSelected ? 'jobs-selected-reached-limit' : ''}`}
+              aria-label={
+                isReachedLimitJobsSelected
+                  ? 'Maximum number of selected jobs reached'
+                  : `${jobsBulk.length} ${jobsBulk.length > 1 ? 'jobs' : 'job'} selected`
+              }
               tooltip-position="right"
             >
               <span>{jobsBulk.length}</span>
             </span>
-            {actions}
             <Button
               {...buttonProps}
-              tooltip="Select all"
+              tooltip="Select all visible jobs"
               onClick={selectAll}
               disabled={!projects.length}
             >
@@ -563,12 +597,14 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
             </Button>
             <Button
               {...buttonProps}
-              tooltip="Clear all"
+              tooltip="Clear selection"
               onClick={clearAll}
               disabled={!projects.length}
             >
               <IconCloseCircle size={20} />
             </Button>
+            <span className="project-bulk-spacer"></span>
+            {actions}
           </div>
         </div>
       </div>
@@ -580,5 +616,6 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
 ProjectsBulkActions.propTypes = {
   projects: PropTypes.array.isRequired,
   teams: PropTypes.array.isRequired,
+  isSelectedTeamPersonal: PropTypes.bool.isRequired,
   children: PropTypes.node,
 }

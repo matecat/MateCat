@@ -48,6 +48,10 @@
       margin-top: 10px;
     }
 
+    .jobs-selected-reached-limit {
+      background-color: colors.$orangeDefaultHover;
+    }
+
     > span:not(:first-of-type) {
       color: colors.$grey6;
     }
@@ -76,4 +80,14 @@
 
 .bulk-actions-circle-button {
   border-radius: 50% !important;
+}
+
+.project-bulk-spacer {
+  &::after {
+    content: '';
+    width: 30px;
+    height: 1px;
+    display: block;
+    background: colors.$grey7;
+  }
 }

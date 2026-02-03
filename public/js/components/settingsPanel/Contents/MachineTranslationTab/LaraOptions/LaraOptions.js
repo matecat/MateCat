@@ -5,6 +5,46 @@ import useOptions from '../useOptions'
 import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {LaraGlossary} from '../LaraGlossary/LaraGlossary'
+import {Select} from '../../../../common/Select'
+
+export const LARA_STYLES = {
+  FAITHFUL: 'faithful',
+  FLUID: 'fluid',
+  CREATIVE: 'creative',
+}
+
+const STYLES = [
+  {
+    id: LARA_STYLES.FAITHFUL,
+    name: 'Faithful',
+    description: (
+      <>
+        Precise translation, maintaining the text’s original structure and
+        meaning accurately. For manuals, legal, etc.
+      </>
+    ),
+  },
+  {
+    id: LARA_STYLES.FLUID,
+    name: 'Fluid',
+    description: (
+      <>
+        Smooth translation, emphasizing readability and natural language flow.
+        For general content.
+      </>
+    ),
+  },
+  {
+    id: LARA_STYLES.CREATIVE,
+    name: 'Creative',
+    description: (
+      <>
+        Imaginative translation, capturing the text’s essence with vivid and
+        engaging language. For marketing, literature, etc.
+      </>
+    ),
+  },
+]
 
 export const LaraOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
@@ -37,6 +77,40 @@ export const LaraOptions = ({isCattoolPage}) => {
               active={value}
               onChange={onChange}
               disabled={disabled}
+            />
+          )}
+        />
+      </div>
+      <div className="mt-params-option">
+        <div>
+          <h3>Style</h3>
+          <p>Content...</p>
+        </div>
+        <Controller
+          control={control}
+          name="lara_style"
+          disabled={isCattoolPage}
+          render={({field: {onChange, value, name, disabled}}) => (
+            <Select
+              name={name}
+              isPortalDropdown={true}
+              dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
+              options={STYLES.map((option) => ({
+                ...option,
+                name: (
+                  <div className="option-dropdown-with-descrition-select-content">
+                    {option.name}
+                    <p>{option.description}</p>
+                  </div>
+                ),
+              }))}
+              activeOption={STYLES.find(
+                ({id}) => id === (value ?? LARA_STYLES.FAITHFUL),
+              )}
+              checkSpaceToReverse={true}
+              onSelect={(option) => onChange(option.id)}
+              isDisabled={disabled}
+              maxHeightDroplist={300}
             />
           )}
         />

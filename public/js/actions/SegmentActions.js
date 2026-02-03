@@ -1964,6 +1964,13 @@ const SegmentActions = {
       sid,
     })
   },
+  setLaraStyle: ({sid, style}) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_LARA_STYLE,
+      sid,
+      style,
+    })
+  },
 }
 
 export default SegmentActions

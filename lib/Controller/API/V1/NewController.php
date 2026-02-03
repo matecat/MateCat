@@ -44,6 +44,7 @@ use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
@@ -185,6 +186,11 @@ class NewController extends KleinController
         // Lara glossaries
         if ($request['lara_glossaries']) {
             $projectStructure['lara_glossaries'] = $request['lara_glossaries'];
+        }
+
+        // Lara style
+        if($request['lara_style']){
+            $projectStructure['lara_style'] = $request['lara_style'];
         }
 
         // mmtGlossaries
@@ -374,6 +380,7 @@ class NewController extends KleinController
         $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $lara_style = filter_var($this->request->param('lara_style'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -451,7 +458,12 @@ class NewController extends KleinController
             )
         );
 
-        $dialect_strict = $this->validateDialectStrictParam($target_lang, $dialect_strict);
+        // validate Lara style
+        if(!empty($lara_style)){
+            $lara_style = Lara::validateLaraStyle($lara_style);
+        }
+
+        $dialect_strict = $this->validateDialectStrictParam($lang_handler, $dialect_strict);
         $filters_extraction_parameters = $this->validateFiltersExtractionParameters(
             $filters_extraction_parameters,
             $filters_extraction_parameters_template_id
@@ -540,6 +552,7 @@ class NewController extends KleinController
             'intento_routing' => $intento_routing ?? null,
             'intento_provider' => $intento_provider ?? null,
             'lara_glossaries' => $lara_glossaries ?? null,
+            'lara_style' => $lara_style ?? null,
             'deepl_id_glossary' => $deepl_id_glossary ?? null,
             'deepl_formality' => $deepl_formality ?? null,
             'deepl_engine_type' => $deepl_engine_type ?? null,
@@ -1145,21 +1158,19 @@ class NewController extends KleinController
     }
 
     /**
-     * Validate `dialect_strict` param vs target languages
+     * Validate `dialect_strict` param
      *
      * Example: {"it-IT": true, "en-US": false, "fr-FR": false}
      *
-     * @param      $target_lang
+     * @param Languages $lang_handler
      * @param null $dialect_strict
      *
      * @return string|null
      */
-    private function validateDialectStrictParam($target_lang, $dialect_strict = null): ?string
+    private function validateDialectStrictParam(Languages $lang_handler, $dialect_strict = null): ?string
     {
         if (!empty($dialect_strict)) {
             $dialect_strict = trim(html_entity_decode($dialect_strict));
-            $target_languages = preg_replace('/\s+/', '', $target_lang);
-            $targets = explode(',', trim($target_languages));
 
             // first check if `dialect_strict` is a valid JSON
             if (!json_validate($dialect_strict)) {
@@ -1169,9 +1180,12 @@ class NewController extends KleinController
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
-                if (!in_array($lang, $targets)) {
+
+                try {
+                    $lang_handler->validateLanguage($lang);
+                } catch (Exception $e) {
                     throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages'
+                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not supported'
                     );
                 }
 
