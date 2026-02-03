@@ -3,6 +3,7 @@ import $ from 'jquery'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
 import {Popup} from 'semantic-ui-react'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 class AnalyzeHeader extends React.Component {
   constructor(props) {
@@ -263,11 +264,17 @@ class AnalyzeHeader extends React.Component {
     return Math.round(wcTime) + ' work ' + wcUnit
   }
   getWordscount() {
-    let tooltipText =
-      'Matecat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to ' +
-      'offer machine translation suggestions or translation memory matches thanks to the millions ' +
-      'of words corrected by the Matecat community.<br> This data is also used to define a fair pricing ' +
-      'scheme that splits the benefits of the technology between the customer and the translator.'
+    const tooltipText = (
+      <span>
+        Matecat suggests MT only when it helps thanks to a dynamic penalty
+        system. We learn when to offer machine translation suggestions or
+        translation memory matches thanks to the millions of words corrected by
+        the Matecat community.
+        <br /> This data is also used to define a fair pricing scheme that
+        splits the benefits of the technology between the customer and the
+        translator.
+      </span>
+    )
 
     let status = this.props.data.get('status')
     let raw_words = this.props.data.get('total_raw'),
@@ -323,15 +330,15 @@ class AnalyzeHeader extends React.Component {
                 content={tooltipText}
                 position="bottom center"
                 trigger={
-                  <span style={{marginLeft: '2px'}}>
-                    <span
-                      className="icon-info icon"
-                      style={{
-                        position: 'relative',
-                        top: '2px',
-                        color: '#a7a7a7',
-                      }}
-                    />
+                  <span
+                    style={{
+                      marginLeft: '2px',
+                      color: '#4184c4',
+                      cursor: 'pointer',
+                      verticalAlign: '-2px',
+                    }}
+                  >
+                    <HelpCircle />
                   </span>
                 }
               />
