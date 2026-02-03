@@ -7,7 +7,6 @@ import {
   DROPDOWN_MENU_TRIGGER_MODE,
   DropdownMenu,
 } from '../common/DropdownMenu/DropdownMenu'
-import DotsHorizontal from '../../../img/icons/DotsHorizontal'
 import UpperCaseIcon from '../../../img/icons/UpperCaseIcon'
 import LowerCaseIcon from '../../../img/icons/LowerCaseIcon'
 import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'

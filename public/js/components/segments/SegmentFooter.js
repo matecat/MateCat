@@ -23,6 +23,7 @@ import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
+import {SegmentFooterTabLaraStyle} from './SegmentFooterTabLaraStyle'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -32,6 +33,7 @@ export const TAB = {
   MESSAGES: 'messages',
   MULTIMATCHES: 'multiMatches',
   AI_ASSISTANT: 'AiAssistant',
+  LARA_STYLE: 'LaraStyle',
 }
 
 const TAB_ITEMS = {
@@ -75,6 +77,13 @@ const TAB_ITEMS = {
     label: 'AI Assistant',
     code: 'ai',
     tabClass: 'ai-assistant',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
+  [TAB.LARA_STYLE]: {
+    label: 'Lara style',
+    code: 'larastyle',
+    tabClass: 'lara-style',
     isLoading: false,
     isEnableCloseButton: true,
   },
@@ -491,6 +500,17 @@ function SegmentFooter() {
             segment={segment}
           />
         )
+      case 'larastyle':
+        return (
+          <SegmentFooterTabLaraStyle
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+            notifyLoadingStatus={setTabLoadingStatus}
+          />
+        )
       default:
         return ''
     }
@@ -503,9 +523,9 @@ function SegmentFooter() {
         ? true
         : false
     const countResult = !isLoading && getTabIndex(tab)
-    const onClickRemoveTab = (event) => {
+    const onClickRemoveTab = ({event, tabName}) => {
       setTabStateChanges({
-        name: TAB.AI_ASSISTANT,
+        name: tabName,
         visible: false,
         enabled: false,
       })
@@ -540,7 +560,10 @@ function SegmentFooter() {
           )}
 
           {tab.isEnableCloseButton && (
-            <span className="icon-close" onClick={onClickRemoveTab}>
+            <span
+              className="icon-close"
+              onClick={(event) => onClickRemoveTab({event, tabName: tab.name})}
+            >
               <IconCloseCircle size={16} />
             </span>
           )}

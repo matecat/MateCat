@@ -48,7 +48,7 @@ const STYLES = [
 
 export const LaraOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
-
+  console.log('currentProjectTemplate', currentProjectTemplate)
   const {control, setValue} = useOptions()
 
   const setGlossaries = useCallback(

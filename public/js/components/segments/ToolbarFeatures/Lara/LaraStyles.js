@@ -3,16 +3,13 @@ import {LARA_STYLES} from '../../../settingsPanel/Contents/MachineTranslationTab
 import {BUTTON_MODE} from '../../../common/Button/Button'
 import Palette from '../../../icons/Palette'
 import SegmentActions from '../../../../actions/SegmentActions'
-import {SegmentContext} from '../../SegmentContext'
 import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
 import CommonUtils from '../../../../utils/commonUtils'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
+import CatToolStore from '../../../../stores/CatToolStore'
 
 export const LaraStyles = ({sid}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
-  const {multiMatchLangs, segImmutable} = useContext(SegmentContext)
-
-  const isDisabled = typeof segImmutable.get('contributions') === 'undefined'
 
   const options = [
     {
@@ -36,10 +33,10 @@ export const LaraStyles = ({sid}) => {
   ]
 
   const setStyle = (style) => {
-    SegmentActions.setLaraStyle({sid, style})
-    SegmentActions.setSegmentContributions(sid)
-    SegmentActions.getContribution(sid, multiMatchLangs)
-    SegmentActions.setLaraStyle({sid, style: undefined}) // reset lara style from SegmentStore
+    SegmentActions.laraStyleTab({
+      sid,
+      value: style,
+    })
 
     //Track Event
     const message = {
@@ -59,12 +56,13 @@ export const LaraStyles = ({sid}) => {
         className: 'segment-target-toolbar-icon',
         mode: BUTTON_MODE.OUTLINE,
         children: <Palette size={16} />,
-        disabled: isDisabled,
       }}
       items={options.map((option) => {
         return {
           label: (
-            <div className="lara-styles-dropdown-item">
+            <div
+              className={`lara-styles-dropdown-item ${option.id === CatToolStore.getJobMetadata().project.lara_style ? 'lara-styles-dropdown-item-active' : ''}`}
+            >
               <span>{option.label}</span>
               <p>{option.description}</p>
             </div>
