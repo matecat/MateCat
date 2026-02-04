@@ -136,6 +136,7 @@ class GetSegmentsController extends KleinController
                 $string_contains_icu ?? false
             );
 
+            $seg['icu'] = $string_contains_icu ?? false;
 
             $seg['segment'] = $Filter->fromLayer0ToLayer1(
                 CatUtils::reApplySegmentSplit($seg['segment'], $seg['source_chunk_lengths'])
