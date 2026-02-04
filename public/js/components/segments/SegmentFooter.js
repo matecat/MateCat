@@ -23,7 +23,7 @@ import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
-import {SegmentFooterTabLaraStyle} from './SegmentFooterTabLaraStyle'
+import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -33,7 +33,7 @@ export const TAB = {
   MESSAGES: 'messages',
   MULTIMATCHES: 'multiMatches',
   AI_ASSISTANT: 'AiAssistant',
-  LARA_STYLE: 'LaraStyle',
+  LARA_STYLES: 'LaraStyles',
 }
 
 const TAB_ITEMS = {
@@ -80,10 +80,10 @@ const TAB_ITEMS = {
     isLoading: false,
     isEnableCloseButton: true,
   },
-  [TAB.LARA_STYLE]: {
-    label: 'Lara style',
-    code: 'larastyle',
-    tabClass: 'lara-style',
+  [TAB.LARA_STYLES]: {
+    label: 'Lara styles',
+    code: 'larastyles',
+    tabClass: 'lara-styles',
     isLoading: false,
     isEnableCloseButton: true,
   },
@@ -139,6 +139,15 @@ function SegmentFooter() {
       prevState.map((tab) => ({
         ...tab,
         isLoading: tab.code === code ? isLoading : tab.isLoading,
+      })),
+    )
+  }, [])
+
+  const setTabLabel = useCallback(({code, label}) => {
+    setTabItems((prevState) =>
+      prevState.map((tab) => ({
+        ...tab,
+        label: tab.code === code ? label : tab.label,
       })),
     )
   }, [])
@@ -500,15 +509,14 @@ function SegmentFooter() {
             segment={segment}
           />
         )
-      case 'larastyle':
+      case 'larastyles':
         return (
-          <SegmentFooterTabLaraStyle
+          <SegmentFooterTabLaraStyles
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}
             tab_class={tab.tabClass}
             segment={segment}
-            notifyLoadingStatus={setTabLoadingStatus}
           />
         )
       default:

@@ -2022,8 +2022,8 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES:
       SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
       break
-    case SegmentConstants.LARA_STYLE:
-      SegmentStore.emitChange(SegmentConstants.LARA_STYLE, {
+    case SegmentConstants.LARA_STYLES:
+      SegmentStore.emitChange(SegmentConstants.LARA_STYLES, {
         ...action,
       })
       break

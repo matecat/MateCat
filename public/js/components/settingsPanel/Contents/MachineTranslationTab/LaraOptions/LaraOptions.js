@@ -13,7 +13,7 @@ export const LARA_STYLES = {
   CREATIVE: 'creative',
 }
 
-const STYLES = [
+export const LARA_STYLES_OPTIONS = [
   {
     id: LARA_STYLES.FAITHFUL,
     name: 'Faithful',
@@ -95,7 +95,7 @@ export const LaraOptions = ({isCattoolPage}) => {
               name={name}
               isPortalDropdown={true}
               dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
-              options={STYLES.map((option) => ({
+              options={LARA_STYLES_OPTIONS.map((option) => ({
                 ...option,
                 name: (
                   <div className="option-dropdown-with-descrition-select-content">
@@ -104,7 +104,7 @@ export const LaraOptions = ({isCattoolPage}) => {
                   </div>
                 ),
               }))}
-              activeOption={STYLES.find(
+              activeOption={LARA_STYLES_OPTIONS.find(
                 ({id}) => id === (value ?? LARA_STYLES.FAITHFUL),
               )}
               checkSpaceToReverse={true}
