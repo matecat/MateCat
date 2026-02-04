@@ -391,7 +391,7 @@ class CatUtils
             $ctype = str_replace('"', '', $ctype);
             $ctype = str_replace('ctype=', '', $ctype);
 
-            if (in_array($ctype, [CTypeEnum::HTML, CTypeEnum::XML])) {
+            if (in_array($ctype, [CTypeEnum::HTML->value, CTypeEnum::XML->value])) {
                 $string = str_replace($match[0], '', $string); // count html snippets as zero words
             } else {
                 $string = str_replace($match[0], $variables_placeholder, $string); // count variables as one word
