@@ -1,4 +1,4 @@
-import React, {useCallback, useContext} from 'react'
+import React, {useCallback, useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import useOptions from '../useOptions'
@@ -48,13 +48,21 @@ export const LARA_STYLES_OPTIONS = [
 
 export const LaraOptions = ({isCattoolPage}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
-  console.log('currentProjectTemplate', currentProjectTemplate)
+
   const {control, setValue} = useOptions()
 
   const setGlossaries = useCallback(
     (value) => setValue('lara_glossaries', value),
     [setValue],
   )
+
+  useEffect(() => {
+    if (
+      typeof currentProjectTemplate?.mt?.extra === 'object' &&
+      !currentProjectTemplate?.mt?.extra.lara_style
+    )
+      setValue('lara_style', LARA_STYLES.FAITHFUL)
+  }, [currentProjectTemplate?.mt?.extra, setValue])
 
   return (
     <div className="options-container-content">

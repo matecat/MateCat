@@ -145,7 +145,7 @@ export const SegmentTargetToolbar = ({
                     label: (
                       <>
                         <UpperCaseIcon />
-                        Uppercase
+                        UPPERCASE
                       </>
                     ),
                     onClick: () => editArea.formatSelection('uppercase'),
@@ -154,7 +154,7 @@ export const SegmentTargetToolbar = ({
                     label: (
                       <>
                         <LowerCaseIcon />
-                        Lowercase
+                        lowercase
                       </>
                     ),
                     onClick: () => editArea.formatSelection('lowercase'),

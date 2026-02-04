@@ -57,6 +57,10 @@
       h4 {
         font-size: 16px;
         margin: 0;
+
+        > span {
+          color: colors.$grey7;
+        }
       }
 
       .lara-styles-options {
@@ -66,12 +70,17 @@
         > div {
           width: 50%;
           display: flex;
-          flex-direction: column;
+          gap: 16px;
           padding: 8px 12px 8px 16px;
           border: 1px solid colors.$grey3;
           border-radius: 6px;
         }
       }
+    }
+
+    .lara-style-switch-button {
+      padding: 0 8px;
+      height: 32px;
     }
   }
 }

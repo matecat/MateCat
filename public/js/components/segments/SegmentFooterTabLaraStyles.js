@@ -9,8 +9,8 @@ import {laraAuth} from '../../api/laraAuth'
 import SegmentUtils from '../../utils/segmentUtils'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
-import {LARA_STYLES_OPTIONS} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions/LaraOptions'
+import {Button, BUTTON_MODE} from '../common/Button/Button'
+import SwitchHorizontal from '../../../img/icons/SwitchHorizontal'
 
 export const SegmentFooterTabLaraStyles = ({
   code,
@@ -53,8 +53,14 @@ export const SegmentFooterTabLaraStyles = ({
             reasoning: false,
           }
 
-          const promises = styles.map(({id}) =>
-            laraTranslate({...requestLaraParams, style: id}),
+          const promises = styles.map(({id, isDefault}) =>
+            !isDefault
+              ? laraTranslate({...requestLaraParams, style: id})
+              : Promise.resolve({
+                  translation: [
+                    {text: segment.original_translation, translatable: true},
+                  ],
+                }),
           )
 
           Promise.all(promises)
@@ -90,14 +96,12 @@ export const SegmentFooterTabLaraStyles = ({
       SegmentStore.removeListener(SegmentConstants.LARA_STYLES, requestStyle)
   }, [segment])
 
-  const suggestionDblClick = () => {
+  const switchStyle = (translation) => {
     SegmentActions.setFocusOnEditArea()
     SegmentActions.disableTPOnSegment(segment)
+
     setTimeout(() => {
-      SegmentActions.replaceEditAreaTextContent(
-        segment.sid,
-        result.targetOriginal,
-      )
+      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
     }, 200)
   }
 
@@ -113,31 +117,24 @@ export const SegmentFooterTabLaraStyles = ({
     >
       {translationStyles?.length ? (
         <div className="lara-styles-content">
-          <div>
-            <h4>
-              Original style:{' '}
-              {
-                LARA_STYLES_OPTIONS.find(
-                  ({id}) =>
-                    id === CatToolStore.getJobMetadata().project.lara_style,
-                ).name
-              }
-            </h4>
-            <p
-              dangerouslySetInnerHTML={allowHTML(
-                DraftMatecatUtils.transformTagsToHtml(
-                  segment.original_translation,
-                  config.isTargetRTL,
-                ),
-              )}
-            ></p>
-          </div>
           <div className="lara-styles-options">
             {translationStyles.map(
               ({style, translation, translationOriginal}) => (
                 <div key={style.id}>
-                  <h4>Style: {style.name}</h4>
-                  <p dangerouslySetInnerHTML={allowHTML(translation)}></p>
+                  <div>
+                    <h4>
+                      {style.name}{' '}
+                      {style.isDefault ? <span>(Original)</span> : ''}
+                    </h4>
+                    <p dangerouslySetInnerHTML={allowHTML(translation)}></p>
+                  </div>
+                  <Button
+                    className="lara-style-switch-button"
+                    mode={BUTTON_MODE.OUTLINE}
+                    onClick={() => switchStyle(translationOriginal)}
+                  >
+                    <SwitchHorizontal size={16} />
+                  </Button>
                 </div>
               ),
             )}
