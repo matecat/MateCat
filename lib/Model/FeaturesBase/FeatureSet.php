@@ -255,7 +255,7 @@ class FeatureSet implements FeatureSetInterface
      * @throws ReQueueException
      * @throws EndQueueException
      */
-    public function filter($method, $filterable): mixed
+    public function filter(string $method, mixed $filterable): mixed
     {
         $args = array_slice(func_get_args(), 1);
 
@@ -269,12 +269,12 @@ class FeatureSet implements FeatureSetInterface
                 try {
                     /**
                      * There may be the need to avoid a filter to be executed before or after other ones.
-                     * To solve this problem we could always pass last argument to call_user_func_array which
+                     * To solve this problem, we could always pass the last argument to call_user_func_array which
                      * contains a list of executed feature codes.
                      *
                      * Example: $args + [ $executed_features ]
                      *
-                     * This way plugins have the chance to decide wether to change the value, throw an exception or
+                     * This way plugins have the chance to decide whether to change the value, throw an exception or
                      * do whatever they need to based on the behaviour of the other features.
                      *
                      */

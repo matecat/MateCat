@@ -8,11 +8,13 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePattern;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Segments\ContextGroupDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
@@ -85,6 +87,9 @@ class GetSegmentsController extends KleinController
         $contexts = $this->getContextGroups($data);
         $res = [];
 
+        $projectMetadata = new ProjectMetadataDao();
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($job->id, ProjectMetadataDao::ICU_ENABLED)?->value ?? false;
+
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];
 
@@ -115,15 +120,22 @@ class GetSegmentsController extends KleinController
             $data_ref_map = json_decode($seg['data_ref_map'] ?? '', true);
             $seg['data_ref_map'] = $data_ref_map;
 
+            if ($icu_enabled) {
+                $pattern = new MessagePattern($seg['segment']);
+                $string_contains_icu = $pattern->countParts() > 2;
+            }
+
             /** @var MateCatFilter $Filter */
-            $metadata = new MetadataDao();
+            $jobMetadata = new MetadataDao();
             $Filter = MateCatFilter::getInstance(
                 $featureSet,
                 $job->source,
                 $job->target,
                 null !== $data_ref_map ? $data_ref_map : [],
-                $metadata->getSubfilteringCustomHandlers($job->id, $job->password)
+                $jobMetadata->getSubfilteringCustomHandlers($job->id, $job->password),
+                $string_contains_icu ?? false
             );
+
 
             $seg['segment'] = $Filter->fromLayer0ToLayer1(
                 CatUtils::reApplySegmentSplit($seg['segment'], $seg['source_chunk_lengths'])
