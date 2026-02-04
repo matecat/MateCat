@@ -157,7 +157,7 @@ class JobContainer extends React.Component {
           ? `${revision_number === 1 ? 'Revise' : 'Revise 2'} password changed`
           : 'Translate password changed',
         text: revision_number
-          ? `${revision_number === 1 ? 'Revise' : 'Revise 2'} password has been changed. <a class="undo-password">Undo</a>`
+          ? `The ${revision_number === 1 ? 'Revise' : 'Revise 2'} password has been changed. <a class="undo-password">Undo</a>`
           : 'The Translate password has been changed. <a class="undo-password">Undo</a>',
         type: 'warning',
         position: 'bl',

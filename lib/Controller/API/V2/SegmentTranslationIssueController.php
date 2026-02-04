@@ -106,12 +106,12 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'is_full_segment'     => false,
                 'comment'             => $this->request->param( 'comment' ),
                 'uid'                 => $this->user->uid ?? null,
-                'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ),
         ];
 
         Database::obtain()->begin();
 
         $oldStruct = EntryDao::findById( $data[ 'id_issue' ] );
+        $data['source_page'] =  $oldStruct->source_page ;
 
         if ( empty( $oldStruct ) ) {
             throw new NotFoundException( "Issue not found", 404 );
@@ -215,7 +215,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Issue not found", 404 );
         }
 
-        $this->checkUserId($this->validator->issue->uid);
         $dao->createComment( $data );
 
         $json = new TranslationIssueFormatter();
@@ -255,18 +254,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         return (int)$this->validator->translation->version_number;
     }
-
-    /**
-     * @param $uid
-     *
-     * @throws AuthorizationError
-     */
-    private function checkUserId( $uid ) {
-        if ( $this->user->uid !== $uid ) {
-            throw new AuthorizationError( "Not Authorized", 401 );
-        }
-    }
-
 
     private function checkLoggedUserPermissions(EntryStruct $entry, JobStruct $job, UserStruct $loggerUser): void
     {
