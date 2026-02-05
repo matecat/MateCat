@@ -5,9 +5,13 @@ import Palette from '../../../icons/Palette'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CatToolStore from '../../../../stores/CatToolStore'
+import SegmentStore from '../../../../stores/SegmentStore'
+import CommonUtils from '../../../../utils/commonUtils'
 
 export const LaraStyles = ({sid}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
+
+  const contributions = SegmentStore.getSegmentByIdToJS(sid)?.contributions
 
   const openTabStyles = () => {
     const styles = LARA_STYLES_OPTIONS.map((style) =>
@@ -43,6 +47,7 @@ export const LaraStyles = ({sid}) => {
       mode={BUTTON_MODE.OUTLINE}
       title="Lara styles"
       onClick={openTabStyles}
+      disabled={!contributions}
     >
       <Palette size={16} />
     </Button>
