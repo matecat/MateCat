@@ -329,8 +329,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         );
 
         // validate Lara style
-        if(!empty($lara_style)){
-            $lara_style = Lara::validateLaraStyle($lara_style);
+        if($engineStruct instanceof Lara){
+            $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
         }
 
         /**

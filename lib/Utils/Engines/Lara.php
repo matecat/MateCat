@@ -45,6 +45,13 @@ use Utils\TmKeyManagement\TmKeyStruct;
  */
 class Lara extends AbstractEngine
 {
+    public const DEFAULT_STYLE = "faithful";
+
+    private const ALLOWED_STYLES = [
+        'faithful',
+        'fluid',
+        'creative',
+    ];
 
     /**
      * @inheritdoc
@@ -718,13 +725,7 @@ class Lara extends AbstractEngine
      */
     public static function validateLaraStyle(string $lara_style): string
     {
-        $allowedValues = [
-            'faithful',
-            'fluid',
-            'creative',
-        ];
-
-        if(!in_array($lara_style, $allowedValues)) {
+        if(!in_array($lara_style, self::ALLOWED_STYLES)) {
             throw new InvalidArgumentException("Invalid lara style.", -1);
         }
 

@@ -9,12 +9,12 @@ export const laraTranslate = async ({
   jobId,
   glossaries,
   style,
+  reasoning = true,
 }) => {
   const credentials = new AuthToken(token, null)
 
   const lara = new Translator(credentials, {
     connectionTimeoutMs: 30000,
-    style,
   })
   let textBlocks = [
     ...contextListBefore.map((item) => {
@@ -34,7 +34,8 @@ export const laraTranslate = async ({
       contentType: 'application/xliff+xml',
       headers: {'X-Lara-Engine-Tuid': `${jobId}:${sid}`},
       glossaries: glossaries,
-      reasoning: true,
+      reasoning,
+      style,
     },
   )
 }
