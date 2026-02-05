@@ -167,6 +167,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         Database::obtain()->commit();
 
+        $msg = "[AUDIT][ISSUE_UPDATE] issue_id={$struct->id}; segment_id={$struct->id_segment}; user={$this->user->email}; new_severity={$struct->severity}";
+        $this->logger->debug($msg);
+
         $json = new TranslationIssueFormatter();
         $rendered = $json->renderItem( $struct );
 
