@@ -1,8 +1,8 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
-export const laraAuth = async ({idJob, password}) => {
+export const laraAuth = async ({idJob, password, reasoning = true}) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/lara/auth`,
+    `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/lara/auth?reasoning=${reasoning}`,
     {
       credentials: 'include',
     },

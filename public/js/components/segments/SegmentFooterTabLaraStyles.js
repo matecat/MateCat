@@ -1,8 +1,11 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
-import {decodePlaceholdersToPlainText} from './utils/DraftMatecatUtils/tagUtils'
+import {
+  decodePlaceholdersToPlainText,
+  encodePlaceholdersToTags,
+} from './utils/DraftMatecatUtils/tagUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {laraTranslate} from '../../api/laraTranslate'
 import {laraAuth} from '../../api/laraAuth'
@@ -11,6 +14,10 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
 import SwitchHorizontal from '../../../img/icons/SwitchHorizontal'
+import TranslationMatches from './utils/translationMatches'
+import {getContributions} from '../../api/getContributions'
+import {SegmentContext} from './SegmentContext'
+import CatToolActions from '../../actions/CatToolActions'
 
 export const SegmentFooterTabLaraStyles = ({
   code,
@@ -18,6 +25,8 @@ export const SegmentFooterTabLaraStyles = ({
   tab_class,
   segment,
 }) => {
+  const {multiMatchLangs} = useContext(SegmentContext)
+
   const [translationStyles, setTranslationStyles] = useState()
 
   useEffect(() => {
@@ -29,65 +38,64 @@ export const SegmentFooterTabLaraStyles = ({
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(sid)
 
-      laraAuth({idJob: config.id_job, password: config.password}).then(
-        (response) => {
-          const jobMetadata = CatToolStore.getJobMetadata()
-          const glossaries =
-            jobMetadata?.project?.mt_extra?.lara_glossaries || []
-          const decodedSource = decodePlaceholdersToPlainText(
-            currentSegment.segment,
-          )
+      laraAuth({
+        idJob: config.id_job,
+        password: config.password,
+        reasoning: false,
+      }).then((response) => {
+        const jobMetadata = CatToolStore.getJobMetadata()
+        const glossaries = jobMetadata?.project?.mt_extra?.lara_glossaries || []
+        const decodedSource = decodePlaceholdersToPlainText(
+          currentSegment.segment,
+        )
 
-          const requestLaraParams = {
-            token: response.token,
-            source: decodedSource,
-            contextListBefore: contextListBefore.map((t) =>
-              decodePlaceholdersToPlainText(t),
-            ),
-            contextListAfter: contextListAfter.map((t) =>
-              decodePlaceholdersToPlainText(t),
-            ),
-            sid,
-            jobId: config.id_job,
-            glossaries,
-            reasoning: false,
-          }
+        const requestLaraParams = {
+          token: response.token,
+          source: decodedSource,
+          contextListBefore: contextListBefore.map((t) =>
+            decodePlaceholdersToPlainText(t),
+          ),
+          contextListAfter: contextListAfter.map((t) =>
+            decodePlaceholdersToPlainText(t),
+          ),
+          sid,
+          jobId: config.id_job,
+          glossaries,
+          reasoning: false,
+        }
 
-          const promises = styles.map(({id, isDefault}) =>
-            !isDefault
-              ? laraTranslate({...requestLaraParams, style: id})
-              : Promise.resolve({
-                  translation: [
-                    {text: segment.original_translation, translatable: true},
-                  ],
-                }),
-          )
+        const promises = styles.map(({id, isDefault}) =>
+          isDefault && segment.translation
+            ? Promise.resolve({
+                translation: [{text: segment.translation, translatable: true}],
+              })
+            : laraTranslate({...requestLaraParams, style: id}),
+        )
 
-          Promise.all(promises)
-            .then((values) => {
-              const translations = values.map(
-                ({translation}) =>
-                  translation.find(({translatable}) => translatable).text,
-              )
+        Promise.all(promises)
+          .then((values) => {
+            const translations = values.map(
+              ({translation}) =>
+                translation.find(({translatable}) => translatable).text,
+            )
 
-              setTranslationStyles(
-                translations.map((value, index) => {
-                  return {
-                    translation: DraftMatecatUtils.transformTagsToHtml(
-                      value,
-                      config.isTargetRTL,
-                    ),
-                    translationOriginal: value,
-                    style: styles[index],
-                  }
-                }),
-              )
-            })
-            .catch((e) => {
-              console.error('Lara Translate error:', e)
-            })
-        },
-      )
+            setTranslationStyles(
+              translations.map((value, index) => {
+                return {
+                  translation: DraftMatecatUtils.transformTagsToHtml(
+                    value,
+                    config.isTargetRTL,
+                  ),
+                  translationOriginal: value,
+                  style: styles[index],
+                }
+              }),
+            )
+          })
+          .catch((e) => {
+            console.error('Lara Translate error:', e)
+          })
+      })
     }
 
     SegmentStore.addListener(SegmentConstants.LARA_STYLES, requestStyle)
@@ -96,13 +104,48 @@ export const SegmentFooterTabLaraStyles = ({
       SegmentStore.removeListener(SegmentConstants.LARA_STYLES, requestStyle)
   }, [segment])
 
-  const switchStyle = (translation) => {
+  const switchStyle = ({style, translation}) => {
     SegmentActions.setFocusOnEditArea()
     SegmentActions.disableTPOnSegment(segment)
 
     setTimeout(() => {
       SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
     }, 200)
+
+    const {contextListBefore, contextListAfter} =
+      SegmentUtils.getSegmentContext(segment.sid)
+
+    getContributions({
+      idSegment: segment.sid,
+      target: segment.segment,
+      translation: encodePlaceholdersToTags(translation),
+      crossLanguages: multiMatchLangs
+        ? [multiMatchLangs.primary, multiMatchLangs.secondary]
+        : [],
+      contextListBefore,
+      contextListAfter,
+      laraStyle: style.id,
+      reasoning: false,
+    })
+      .then(() => {
+        // Remove from waiting list
+        if (
+          TranslationMatches.segmentsWaitingForContributions.indexOf(
+            segment.sid,
+          ) > -1
+        ) {
+          TranslationMatches.segmentsWaitingForContributions.splice(
+            TranslationMatches.segmentsWaitingForContributions.indexOf(
+              segment.sid,
+            ),
+            1,
+          )
+        }
+      })
+      .catch((errors) => {
+        CatToolActions.processErrors(errors, 'getContribution')
+        TranslationMatches.renderContributionErrors(errors, segment.sid)
+      })
   }
 
   const allowHTML = (string) => {
@@ -131,7 +174,7 @@ export const SegmentFooterTabLaraStyles = ({
                   <Button
                     className="lara-style-switch-button"
                     mode={BUTTON_MODE.OUTLINE}
-                    onClick={() => switchStyle(translationOriginal)}
+                    onClick={() => switchStyle({style, translationOriginal})}
                   >
                     <SwitchHorizontal size={16} />
                   </Button>

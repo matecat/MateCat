@@ -47,26 +47,28 @@ class GetContributionController extends KleinController
     {
         $request = $this->validateTheRequest();
 
-        $id_client = $request['id_client'];
         $id_job = $request['id_job'];
         $id_segment = $request['id_segment'];
-        $num_results = $request['num_results'];
         $password = $request['password'];
-        $received_password = $request['received_password'];
-        $concordance_search = $request['concordance_search'];
-        $switch_languages = $request['switch_languages'];
-        $cross_language = $request['cross_language'];
-        $lara_style = $request['lara_style'];
-
-        if (empty($num_results)) {
-            $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
-        }
 
         $jobStruct = ChunkDao::getByIdAndPassword($id_job, $password);
         $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($id_segment);
 
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject($projectStruct);
+
+        $id_client = $request['id_client'];
+        $num_results = $request['num_results'];
+        $received_password = $request['received_password'];
+        $concordance_search = $request['concordance_search'];
+        $switch_languages = $request['switch_languages'];
+        $cross_language = $request['cross_language'];
+
+        $lara_style = $request['lara_style'] ?: $projectStruct->getMetadataValue('lara_style');
+
+        if (empty($num_results)) {
+            $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
+        }
 
         $contributionRequest = new GetContributionRequest();
         $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
