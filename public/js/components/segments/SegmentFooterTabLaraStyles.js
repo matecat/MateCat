@@ -104,12 +104,15 @@ export const SegmentFooterTabLaraStyles = ({
       SegmentStore.removeListener(SegmentConstants.LARA_STYLES, requestStyle)
   }, [segment])
 
-  const switchStyle = ({style, translation}) => {
+  const switchStyle = ({style, translationOriginal}) => {
     SegmentActions.setFocusOnEditArea()
     SegmentActions.disableTPOnSegment(segment)
 
     setTimeout(() => {
-      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
+      SegmentActions.replaceEditAreaTextContent(
+        segment.sid,
+        translationOriginal,
+      )
     }, 200)
 
     const {contextListBefore, contextListAfter} =
@@ -118,7 +121,7 @@ export const SegmentFooterTabLaraStyles = ({
     getContributions({
       idSegment: segment.sid,
       target: segment.segment,
-      translation: encodePlaceholdersToTags(translation),
+      translation: encodePlaceholdersToTags(translationOriginal),
       crossLanguages: multiMatchLangs
         ? [multiMatchLangs.primary, multiMatchLangs.secondary]
         : [],
