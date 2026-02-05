@@ -231,6 +231,14 @@ class Lara extends AbstractEngine
             return [];
         }
 
+        $metadataDao = new MetadataDao();
+        $laraStyle = $_config['lara_style'] ?? null;
+
+        if($laraStyle === null && !empty($_config['project_id'])){
+            $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
+            $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
+        }
+
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
             $reasoning = false;
@@ -257,18 +265,10 @@ class Lara extends AbstractEngine
                 }
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
-
-                $laraStyle = $_config['lara_style'] ?? null;
                 $laraGlossariesArray = [];
 
                 if (!empty($_config['project_id'])) {
-                    $metadataDao = new MetadataDao();
                     $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
-
-                    if($laraStyle === null){
-                        $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
-                        $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
-                    }
 
                     if ($laraGlossaries !== null) {
                         $laraGlossaries = html_entity_decode($laraGlossaries->value);
