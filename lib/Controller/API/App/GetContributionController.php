@@ -185,6 +185,7 @@ class GetContributionController extends KleinController
                     'segmentId' => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
                     'resultNum' => (int)$contributionRequest->resultNum,
                     'lara_style' => $contributionRequest->lara_style,
+                    'reasoning' => $contributionRequest->reasoning,
                     'concordanceSearch' => $contributionRequest->concordanceSearch,
                 ]
             ]
@@ -216,6 +217,7 @@ class GetContributionController extends KleinController
         $password = filter_var($this->request->param('password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $received_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $concordance_search = filter_var($this->request->param('is_concordance'), FILTER_VALIDATE_BOOLEAN);
+        $reasoning = filter_var($this->request->param('reasoning'), FILTER_VALIDATE_BOOLEAN);
         $switch_languages = filter_var($this->request->param('from_target'), FILTER_VALIDATE_BOOLEAN);
         $context_before = filter_var($this->request->param('context_before'), FILTER_UNSAFE_RAW);
         $context_after = filter_var($this->request->param('context_after'), FILTER_UNSAFE_RAW);
@@ -279,6 +281,7 @@ class GetContributionController extends KleinController
             'id_after' => $id_after,
             'cross_language' => $cross_language,
             'lara_style' => $lara_style,
+            'reasoning' => $reasoning,
             'context_list_after' => json_decode($context_list_after, true),
             'context_list_before' => json_decode($context_list_before, true),
         ];

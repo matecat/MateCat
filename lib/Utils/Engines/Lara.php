@@ -376,7 +376,7 @@ class Lara extends AbstractEngine
                 return $this->mmt_GET_Fallback->get($_config);
             }
         } else {
-            $reasoning = true;
+            $reasoning = $_config['reasoning'] ?? true;
             $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
             if (isset($_config['include_score']) && $_config['include_score']) {
@@ -397,6 +397,8 @@ class Lara extends AbstractEngine
                 'multiline' => false,
                 'translation' => $translation,
                 'score' => $score ?? null,
+                'reasoning' => $reasoning,
+                'style' => $laraStyle ?? null,
             ]);
         }
 
