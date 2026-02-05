@@ -8,11 +8,10 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Exception;
+use Model\Comments\CommentDao;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\Jobs\ChunkDao;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
@@ -137,13 +136,34 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $newStruct->id = $data[ 'id_issue' ];
         $newStruct->setDefaults();
 
+        // remove old issue
+        $model = $this->_getSegmentTranslationIssueModel(
+            $this->request->param( 'id_job' ),
+            $this->request->param( 'password' ),
+            $oldStruct
+        );
+
+        $model->delete();
+
+        // create new issue
         $model = $this->_getSegmentTranslationIssueModel(
                 $this->request->param( 'id_job' ),
                 $this->request->param( 'password' ),
                 $newStruct
         );
 
-        $struct = $model->editFrom( $oldStruct );
+        $struct = $model->save();
+
+        // move comments from old issue to new one
+        $commentDao = new EntryCommentDao();
+        $commentDao->move(
+            (int)$oldStruct->id,
+            (int)$struct->id
+        );
+
+        // update replies count
+        $entryDao = new EntryDao();
+        $entryDao->updateRepliesCount($struct->id);
 
         Database::obtain()->commit();
 
