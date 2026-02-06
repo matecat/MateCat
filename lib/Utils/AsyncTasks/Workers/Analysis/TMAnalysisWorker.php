@@ -724,7 +724,7 @@ class TMAnalysisWorker extends AbstractWorker
             $config['all_job_tm_keys'] = $queueElement->params->tm_keys;
             $config['include_score'] = $queueElement->params->mt_evaluation ?? false;
             $config['tuid'] = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
-            $config['lara_style'] = $lara_style;
+            $config['lara_style'] = (!empty($lara_style)) ? $lara_style->value : null;
 
             if (!isset($config['job_id'])) {
                 $config['job_id'] = $queueElement->params->id_job;
