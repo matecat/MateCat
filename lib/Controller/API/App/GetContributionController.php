@@ -63,6 +63,7 @@ class GetContributionController extends KleinController
         $concordance_search = $request['concordance_search'];
         $switch_languages = $request['switch_languages'];
         $cross_language = $request['cross_language'];
+        $reasoning = $request['reasoning'];
 
         $lara_style = $request['lara_style'] ?: $projectStruct->getMetadataValue('lara_style');
 
@@ -146,6 +147,9 @@ class GetContributionController extends KleinController
 
         if ($dialect_strict !== null) {
             $contributionRequest->dialect_strict = $dialect_strict->value == 1;
+        }
+        if ($reasoning !== null) {
+            $contributionRequest->reasoning = $reasoning;
         }
 
         if ($mt_evaluation !== null) {

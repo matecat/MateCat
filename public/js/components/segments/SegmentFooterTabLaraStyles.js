@@ -78,7 +78,6 @@ export const SegmentFooterTabLaraStyles = ({
               ({translation}) =>
                 translation.find(({translatable}) => translatable).text,
             )
-
             setTranslationStyles(
               translations.map((value, index) => {
                 return {
@@ -94,6 +93,14 @@ export const SegmentFooterTabLaraStyles = ({
           })
           .catch((e) => {
             console.error('Lara Translate error:', e)
+            setTranslationStyles({
+              error: (
+                <>
+                  Lara couldn't generate translations in different styles for
+                  this segment. Please try again in a moment.
+                </>
+              ),
+            })
           })
       })
     }
@@ -185,6 +192,10 @@ export const SegmentFooterTabLaraStyles = ({
               ),
             )}
           </div>
+        </div>
+      ) : translationStyles?.error ? (
+        <div className="lara-styles-content">
+          <p>{translationStyles.error}</p>
         </div>
       ) : (
         <div className="loading-container">

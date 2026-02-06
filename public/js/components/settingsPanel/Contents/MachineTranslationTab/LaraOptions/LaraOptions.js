@@ -92,7 +92,13 @@ export const LaraOptions = ({isCattoolPage}) => {
       <div className="mt-params-option">
         <div>
           <h3>Style</h3>
-          <p>Content...</p>
+          <p>
+            Select the style for Lara’s suggestions.
+            <br />
+            This setting will be applied to all segments in the project by
+            default. You can still view and select alternative styles for
+            individual segments directly in the editor.
+          </p>
         </div>
         <Controller
           control={control}

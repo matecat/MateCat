@@ -11,7 +11,8 @@ import CommonUtils from '../../../../utils/commonUtils'
 export const LaraStyles = ({sid}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
-  const contributions = SegmentStore.getSegmentByIdToJS(sid)?.contributions
+  const segment = SegmentStore.getSegmentByIdToJS(sid)
+  const contributions = segment?.contributions
 
   const openTabStyles = () => {
     const styles = LARA_STYLES_OPTIONS.map((style) =>
@@ -37,19 +38,28 @@ export const LaraStyles = ({sid}) => {
           '',
         ),
     }
-    // CommonUtils.dispatchTrackingEvents('LaraStyle', message)
+    CommonUtils.dispatchTrackingEvents('LaraStyle', message)
   }
 
+  const isDisabled =
+    !contributions || (segment.status !== 'NEW' && segment.status !== 'DRAFT')
+
   return (
-    <Button
-      className="segment-target-toolbar-icon"
-      size={BUTTON_SIZE.ICON_SMALL}
-      mode={BUTTON_MODE.OUTLINE}
-      title="Lara styles"
-      onClick={openTabStyles}
-      disabled={!contributions}
-    >
-      <Palette size={16} />
-    </Button>
+    !config.isReview && (
+      <Button
+        className="segment-target-toolbar-icon"
+        size={BUTTON_SIZE.ICON_SMALL}
+        mode={BUTTON_MODE.OUTLINE}
+        title={
+          isDisabled
+            ? 'Lara styles - Available for unconfirmed segments only'
+            : 'Lara styles - Click to see translations in different styles'
+        }
+        onClick={openTabStyles}
+        disabled={isDisabled}
+      >
+        <Palette size={16} />
+      </Button>
+    )
   )
 }
