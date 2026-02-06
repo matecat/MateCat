@@ -703,7 +703,7 @@ class TMAnalysisWorker extends AbstractWorker
             // Disable analysis if enable_mt_analysis
             // is not set to true
             $metadataDao = new ProjectsMetadataDao();
-            $lara_style = $metadataDao->get($queueElement->params->pid, 'lata_style') ?? null;
+            $lara_style = $metadataDao->get($queueElement->params->pid, 'lara_style') ?? null;
             $enable_mt_analysis = $metadataDao->get($queueElement->params->pid, 'enable_mt_analysis');
             $mtEngine->setSkipAnalysis(!($enable_mt_analysis->value ?? false)); //double negation to have the default as true
 
