@@ -95,6 +95,28 @@ class EntryCommentDao extends AbstractDao
         return $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Moves comments from one QA entry to another by updating the database.
+     *
+     * @param int $from The ID of the QA entry from which the comments are to be moved.
+     * @param int $to The ID of the QA entry to which the comments are to be moved.
+     * @return int The number of rows affected by the operation.
+     */
+    public function move(int $from, int $to): int
+    {
+        $sql = "UPDATE qa_entry_comments SET id_qa_entry = :to
+               WHERE id_qa_entry = :from ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'from' => $from,
+            'to' => $to
+        ]);
+
+        return $stmt->rowCount();
+    }
+
     protected function _buildResult(array $array_result)
     {
     }

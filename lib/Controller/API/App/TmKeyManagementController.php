@@ -180,8 +180,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController
                     if (!empty($ownerMmtEngineMetaData)) {
                         $engine = EnginesFactory::getInstance($ownerMmtEngineMetaData->value);
                         if ($engine->getMemoryIfMine($memoryKey)) {
-                            $engine_type = explode("\\", $engine->getEngineRecord()->class_load);
-                            $response[] = array_pop($engine_type);
+                            $response[] = $engine->getEngineRecord()->getEngineType();
                         }
                     }
                 }

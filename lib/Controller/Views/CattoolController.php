@@ -295,13 +295,9 @@ class CattoolController extends BaseKleinViewController
         $engineQuery = new EngineStruct();
         $engineQuery->id = $mt_engine_id;
         $active_mt_engine = $engine->setCacheTTL(60 * 10)->read($engineQuery);
+
         if (!empty($active_mt_engine)) {
-            return [
-                "id" => $active_mt_engine[0]->id,
-                "name" => $active_mt_engine[0]->name,
-                "type" => $active_mt_engine[0]->type,
-                "description" => $active_mt_engine[0]->description,
-            ];
+            return $active_mt_engine[0]->arrayRepresentation();
         }
 
         return [];

@@ -8,6 +8,8 @@ export const laraTranslate = async ({
   sid,
   jobId,
   glossaries,
+  style,
+  reasoning = true,
 }) => {
   const credentials = new AuthToken(token, null)
 
@@ -32,7 +34,8 @@ export const laraTranslate = async ({
       contentType: 'application/xliff+xml',
       headers: {'X-Lara-Engine-Tuid': `${jobId}:${sid}`},
       glossaries: glossaries,
-      reasoning: true,
+      reasoning,
+      style,
     },
   )
 }
