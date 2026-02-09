@@ -116,7 +116,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             throw new NotFoundException( "Issue not found", 404 );
         }
 
-        $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
+        $chunkReviewDao = new ChunkReviewDao();
+        $chunkReviewStruct = $chunkReviewDao::findByReviewPasswordAndJobId($this->request->param( 'password' ), $this->request->param( 'id_job' ));
 
         if ( empty( $chunkReviewStruct ) ) {
             throw new NotFoundException( "Job not found", 404 );
@@ -130,6 +131,13 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $this->checkLoggedUserPermissions($oldStruct, $jobStruct, $this->user);
 
+        // This is the chunk review that will be updated
+        $chunkReviewToBeUpdated = $chunkReviewDao->findByIdJobAndPasswordAndSourcePage($jobStruct->id, $jobStruct->password, $oldStruct->source_page);
+
+        if ( empty( $chunkReviewToBeUpdated ) ) {
+            throw new NotFoundException( "Job not found", 404 );
+        }
+
         $oldStruct->setDefaults();
 
         $newStruct     = new EntryStruct( $data );
@@ -138,8 +146,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         // remove old issue
         $model = $this->_getSegmentTranslationIssueModel(
-            $this->request->param( 'id_job' ),
-            $this->request->param( 'password' ),
+            $chunkReviewToBeUpdated->id_job,
+            $chunkReviewToBeUpdated->review_password,
             $oldStruct
         );
 
@@ -147,9 +155,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         // create new issue
         $model = $this->_getSegmentTranslationIssueModel(
-                $this->request->param( 'id_job' ),
-                $this->request->param( 'password' ),
-                $newStruct
+            $chunkReviewToBeUpdated->id_job,
+            $chunkReviewToBeUpdated->review_password,
+            $newStruct
         );
 
         $struct = $model->save();
