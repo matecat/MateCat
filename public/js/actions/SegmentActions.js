@@ -1964,12 +1964,17 @@ const SegmentActions = {
       sid,
     })
   },
-  setLaraStyle: ({sid, style}) => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SET_LARA_STYLE,
-      sid,
-      style,
-    })
+  laraStylesTab: ({sid, styles}) => {
+    SegmentActions.modifyTabVisibility('LaraStyles', true)
+    SegmentActions.activateTab(sid, 'LaraStyles')
+
+    setTimeout(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.LARA_STYLES,
+        sid,
+        styles,
+      })
+    }, 100)
   },
 }
 

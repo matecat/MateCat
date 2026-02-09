@@ -17,14 +17,13 @@ import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
-import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
-import CatToolStore from '../../stores/CatToolStore'
+import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -34,7 +33,7 @@ export const TAB = {
   MESSAGES: 'messages',
   MULTIMATCHES: 'multiMatches',
   AI_ASSISTANT: 'AiAssistant',
-  ICU: 'icu',
+  LARA_STYLES: 'LaraStyles',
 }
 
 const TAB_ITEMS = {
@@ -81,11 +80,12 @@ const TAB_ITEMS = {
     isLoading: false,
     isEnableCloseButton: true,
   },
-  [TAB.ICU]: {
-    label: 'ICU',
-    code: 'icu',
-    tabClass: 'icu-validator',
+  [TAB.LARA_STYLES]: {
+    label: 'Lara styles',
+    code: 'larastyles',
+    tabClass: 'lara-styles',
     isLoading: false,
+    isEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -96,22 +96,19 @@ function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
-  const projectTemplate = CatToolStore.getCurrentProjectTemplate()
   const [tabItems, setTabItems] = useState(
-    Object.entries(TAB_ITEMS).map(([key, value]) => {
-      return {
-        ...value,
-        name: key,
-        enabled: !!(key === TAB.ICU && projectTemplate?.icuEnabled),
-        visible: !!(key === TAB.ICU && projectTemplate?.icuEnabled),
-        open: !!(key === TAB.ICU && projectTemplate?.icuEnabled),
-        elements: [],
-        label:
-          value.code === 'tm'
-            ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
-            : value.label,
-      }
-    }),
+    Object.entries(TAB_ITEMS).map(([key, value]) => ({
+      ...value,
+      name: key,
+      enabled: false,
+      visible: false,
+      open: false,
+      elements: [],
+      label:
+        value.code === 'tm'
+          ? `Translation Matches ${!config.mt_enabled ? ' (No MT) ' : ''}`
+          : value.label,
+    })),
   )
   const [tabStateChanges, setTabStateChanges] = useState(undefined)
   const [activeTab, setActiveTab] = useState(undefined)
@@ -142,6 +139,15 @@ function SegmentFooter() {
       prevState.map((tab) => ({
         ...tab,
         isLoading: tab.code === code ? isLoading : tab.isLoading,
+      })),
+    )
+  }, [])
+
+  const setTabLabel = useCallback(({code, label}) => {
+    setTabItems((prevState) =>
+      prevState.map((tab) => ({
+        ...tab,
+        label: tab.code === code ? label : tab.label,
       })),
     )
   }, [])
@@ -503,9 +509,9 @@ function SegmentFooter() {
             segment={segment}
           />
         )
-      case 'icu':
+      case 'larastyles':
         return (
-          <SegmentFooterTabIcu
+          <SegmentFooterTabLaraStyles
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}
@@ -525,9 +531,9 @@ function SegmentFooter() {
         ? true
         : false
     const countResult = !isLoading && getTabIndex(tab)
-    const onClickRemoveTab = (event) => {
+    const onClickRemoveTab = ({event, tabName}) => {
       setTabStateChanges({
-        name: TAB.AI_ASSISTANT,
+        name: tabName,
         visible: false,
         enabled: false,
       })
@@ -562,7 +568,10 @@ function SegmentFooter() {
           )}
 
           {tab.isEnableCloseButton && (
-            <span className="icon-close" onClick={onClickRemoveTab}>
+            <span
+              className="icon-close"
+              onClick={(event) => onClickRemoveTab({event, tabName: tab.name})}
+            >
               <IconCloseCircle size={16} />
             </span>
           )}

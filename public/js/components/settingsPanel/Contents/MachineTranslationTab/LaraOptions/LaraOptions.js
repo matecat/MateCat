@@ -1,4 +1,4 @@
-import React, {useCallback, useContext} from 'react'
+import React, {useCallback, useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import useOptions from '../useOptions'
@@ -13,7 +13,7 @@ export const LARA_STYLES = {
   CREATIVE: 'creative',
 }
 
-const STYLES = [
+export const LARA_STYLES_OPTIONS = [
   {
     id: LARA_STYLES.FAITHFUL,
     name: 'Faithful',
@@ -56,6 +56,14 @@ export const LaraOptions = ({isCattoolPage}) => {
     [setValue],
   )
 
+  useEffect(() => {
+    if (
+      typeof currentProjectTemplate?.mt?.extra === 'object' &&
+      !currentProjectTemplate?.mt?.extra.lara_style
+    )
+      setValue('lara_style', LARA_STYLES.FAITHFUL)
+  }, [currentProjectTemplate?.mt?.extra, setValue])
+
   return (
     <div className="options-container-content">
       <div className="mt-params-option">
@@ -84,7 +92,13 @@ export const LaraOptions = ({isCattoolPage}) => {
       <div className="mt-params-option">
         <div>
           <h3>Style</h3>
-          <p>Content...</p>
+          <p>
+            Select the style for Lara’s suggestions.
+            <br />
+            This setting will be applied to all segments in the project by
+            default. You can still view and select alternative styles for
+            individual segments directly in the editor.
+          </p>
         </div>
         <Controller
           control={control}
@@ -95,7 +109,7 @@ export const LaraOptions = ({isCattoolPage}) => {
               name={name}
               isPortalDropdown={true}
               dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
-              options={STYLES.map((option) => ({
+              options={LARA_STYLES_OPTIONS.map((option) => ({
                 ...option,
                 name: (
                   <div className="option-dropdown-with-descrition-select-content">
@@ -104,7 +118,7 @@ export const LaraOptions = ({isCattoolPage}) => {
                   </div>
                 ),
               }))}
-              activeOption={STYLES.find(
+              activeOption={LARA_STYLES_OPTIONS.find(
                 ({id}) => id === (value ?? LARA_STYLES.FAITHFUL),
               )}
               checkSpaceToReverse={true}

@@ -45,6 +45,13 @@ use Utils\TmKeyManagement\TmKeyStruct;
  */
 class Lara extends AbstractEngine
 {
+    public const DEFAULT_STYLE = "faithful";
+
+    private const ALLOWED_STYLES = [
+        'faithful',
+        'fluid',
+        'creative',
+    ];
 
     /**
      * @inheritdoc
@@ -224,6 +231,14 @@ class Lara extends AbstractEngine
             return [];
         }
 
+        $metadataDao = new MetadataDao();
+        $laraStyle = $_config['lara_style'] ?? null;
+
+        if($laraStyle === null && !empty($_config['project_id'])){
+            $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
+            $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
+        }
+
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
             $reasoning = false;
@@ -250,18 +265,10 @@ class Lara extends AbstractEngine
                 }
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
-
-                $laraStyle = $_config['lara_style'] ?? null;
                 $laraGlossariesArray = [];
 
                 if (!empty($_config['project_id'])) {
-                    $metadataDao = new MetadataDao();
                     $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
-
-                    if($laraStyle === null){
-                        $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
-                        $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
-                    }
 
                     if ($laraGlossaries !== null) {
                         $laraGlossaries = html_entity_decode($laraGlossaries->value);
@@ -369,7 +376,7 @@ class Lara extends AbstractEngine
                 return $this->mmt_GET_Fallback->get($_config);
             }
         } else {
-            $reasoning = true;
+            $reasoning = is_bool($_config['reasoning']) ? $_config['reasoning'] : true;
             $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
             if (isset($_config['include_score']) && $_config['include_score']) {
@@ -390,6 +397,8 @@ class Lara extends AbstractEngine
                 'multiline' => false,
                 'translation' => $translation,
                 'score' => $score ?? null,
+                'reasoning' => $reasoning,
+                'style' => $laraStyle ?? null,
             ]);
         }
 
@@ -718,13 +727,7 @@ class Lara extends AbstractEngine
      */
     public static function validateLaraStyle(string $lara_style): string
     {
-        $allowedValues = [
-            'faithful',
-            'fluid',
-            'creative',
-        ];
-
-        if(!in_array($lara_style, $allowedValues)) {
+        if(!in_array($lara_style, self::ALLOWED_STYLES)) {
             throw new InvalidArgumentException("Invalid lara style.", -1);
         }
 

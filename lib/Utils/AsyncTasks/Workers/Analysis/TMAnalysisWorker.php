@@ -703,7 +703,8 @@ class TMAnalysisWorker extends AbstractWorker
             // Disable analysis if enable_mt_analysis
             // is not set to true
             $metadataDao = new ProjectsMetadataDao();
-            $enable_mt_analysis = $metadataDao->setCacheTTL(86400)->get($queueElement->params->pid, 'enable_mt_analysis');
+            $lara_style = $metadataDao->get($queueElement->params->pid, 'lara_style') ?? null;
+            $enable_mt_analysis = $metadataDao->get($queueElement->params->pid, 'enable_mt_analysis');
             $mtEngine->setSkipAnalysis(!($enable_mt_analysis->value ?? false)); //double negation to have the default as true
 
             // If mt_qe_workflow_enabled is true, force set EnginesFactory.skipAnalysis to `false` to allow the Lara engine to perform the analysis.
@@ -723,6 +724,7 @@ class TMAnalysisWorker extends AbstractWorker
             $config['all_job_tm_keys'] = $queueElement->params->tm_keys;
             $config['include_score'] = $queueElement->params->mt_evaluation ?? false;
             $config['tuid'] = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
+            $config['lara_style'] = (!empty($lara_style)) ? $lara_style->value : null;
 
             if (!isset($config['job_id'])) {
                 $config['job_id'] = $queueElement->params->id_job;
