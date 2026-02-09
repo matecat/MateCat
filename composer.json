@@ -32,7 +32,6 @@
         "symfony/console": "^5",
         "ext-curl": "*",
         "ext-pcntl": "*",
-        "ext-json": "*",
         "ext-libxml": "*",
         "ext-dom": "*",
         "ext-pdo": "*",
