@@ -34,6 +34,7 @@ export const BUTTON_MODE = {
   OUTLINE: 'outline',
   GHOST: 'ghost',
   LINK: 'link',
+  OUTLINE_BG: 'outlineBg',
 }
 export const BUTTON_SIZE = {
   SMALL: 'small',

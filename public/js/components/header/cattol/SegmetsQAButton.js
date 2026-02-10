@@ -8,7 +8,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../common/Button/Button'
-import QAICon from '../../../../img/icons/QAICon'
+import ClipboardCheck from '../../../../img/icons/ClipboardCheck'
 
 export const SegmentsQAButton = () => {
   const [warnings, setWarnings] = useState()
@@ -48,16 +48,8 @@ export const SegmentsQAButton = () => {
   return (
     <Button
       size={BUTTON_SIZE.ICON_STANDARD}
-      mode={numberClass != '' ? BUTTON_MODE.OUTLINE : BUTTON_MODE.GHOST}
-      type={
-        numberClass === 'error'
-          ? BUTTON_TYPE.CRITICAL
-          : numberClass === 'warning'
-            ? BUTTON_TYPE.WARNING
-            : numberClass === 'info'
-              ? BUTTON_TYPE.INFO
-              : BUTTON_TYPE.ICON
-      }
+      mode={BUTTON_MODE.GHOST}
+      type={BUTTON_TYPE.ICON}
       tooltip={
         totalIssues > 0
           ? 'Click to see the segments with potential issues'
@@ -67,7 +59,7 @@ export const SegmentsQAButton = () => {
       disabled={!totalIssues}
       onClick={openQA}
     >
-      <QAICon size={20} />
+      <ClipboardCheck size={24} />
       {warnings && totalIssues > 0 && (
         <div className={`button-badge button-badge-${numberClass}`}>
           {totalIssues}

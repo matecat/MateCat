@@ -79,6 +79,32 @@ a.button-component-container {
       }
     }
   }
+  &.outlineBg {
+    box-shadow: inset 0 0 0 1px var(--btnBorderColor);
+    background-color: var(--btnBgColorSemitransAlt);
+    color: var(--btnAltTextColor);
+
+    &:not(:disabled):global(.button--active) {
+      box-shadow: inset 0 0 0 1px var(--btnBorderColorActive);
+      background-color: var(--btnBgColorSemitransAlt);
+    }
+
+    &:not(:disabled):hover,
+    &:not(:disabled):focus {
+      box-shadow: inset 0 0 0 1px var(--btnBorderColorHover);
+      background-color: var(--btnBgColorSemitrans);
+      color: var(--btnAltTextColorHover);
+    }
+
+    &:disabled {
+      box-shadow: inset 0 0 0 1px var(--btnBorderColorDisabled);
+      color: var(--btnAltTextColorDisabled);
+      background-color: var(--btnBgColorSemitrans);
+      svg {
+        color: var(--btnAltTextColorDisabled);
+      }
+    }
+  }
   &.ghost {
     color: var(--btnAltTextColor);
 

@@ -90,7 +90,7 @@ export const JobMetadata = ({metadata}) => {
         onClick={openModal}
         size={BUTTON_SIZE.ICON_STANDARD}
       >
-        <FileAttachment size={20} />
+        <FileAttachment size={24} />
       </Button>
     )
   )

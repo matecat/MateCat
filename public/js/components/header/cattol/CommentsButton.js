@@ -167,16 +167,8 @@ export const CommentsButton = ({}) => {
               </>
             ),
             size: BUTTON_SIZE.ICON_STANDARD,
-            mode:
-              counterOpenComments > 0 || counterResolvedComments > 0
-                ? BUTTON_MODE.OUTLINE
-                : BUTTON_MODE.GHOST,
-            type:
-              counterOpenComments > 0
-                ? BUTTON_TYPE.INFO
-                : counterResolvedComments > 0
-                  ? BUTTON_TYPE.SUCCESS
-                  : BUTTON_TYPE.ICON,
+            mode: BUTTON_MODE.GHOST,
+            type: BUTTON_TYPE.ICON,
             disabled: counterOpenComments + counterResolvedComments === 0,
           }}
           disabled={counterOpenComments + counterResolvedComments === 0}

@@ -214,7 +214,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
           className="markAsCompleteButton"
           onClick={clickMarkAsComplete}
         >
-          <Check size={20} />
+          <Check size={24} />
         </Button>
       )}
     </>

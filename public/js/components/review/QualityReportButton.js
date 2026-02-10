@@ -110,7 +110,7 @@ export const QualityReportButton = ({
       toggleButtonProps={{
         children: (
           <>
-            <QualityReportIcon size={20} />
+            <QualityReportIcon size={24} />
             {!feedback && progress && (
               <div className="button-badge button-badge-warning" />
             )}
@@ -118,7 +118,9 @@ export const QualityReportButton = ({
         ),
         size: BUTTON_SIZE.ICON_STANDARD,
         mode:
-          is_pass || revisionStarted ? BUTTON_MODE.OUTLINE : BUTTON_MODE.GHOST,
+          is_pass || revisionStarted
+            ? BUTTON_MODE.OUTLINE_BG
+            : BUTTON_MODE.GHOST,
         type: is_pass
           ? BUTTON_TYPE.SUCCESS
           : revisionStarted
@@ -154,64 +156,13 @@ export const QualityReportButton = ({
             : BUTTON_TYPE.ICON
       }
       mode={
-        is_pass && revisionStarted ? BUTTON_MODE.OUTLINE : BUTTON_MODE.GHOST
+        is_pass && revisionStarted ? BUTTON_MODE.OUTLINE_BG : BUTTON_MODE.GHOST
       }
       size={BUTTON_SIZE.ICON_STANDARD}
       onClick={() => window.open(quality_report_href.current, '_blank')}
       data-testid="report-button"
     >
-      <QualityReportIcon size={20} />
+      <QualityReportIcon size={24} />
     </Button>
   )
-  // <div
-  //   className={'action-submenu ui floating'}
-  //   id="quality-report-button"
-  //   title="Quality Report"
-  // >
-  //   <div
-  //     id="quality-report"
-  //     className={
-  //       progress && isReview && (revisionNumber === 1 || revisionNumber === 2)
-  //         ? 'ui simple pointing top center floating dropdown'
-  //         : ''
-  //     }
-  //     data-vote={vote}
-  //     data-testid="report-button"
-  //     onClick={() => {
-  //       window.open(quality_report_href.current, '_blank')
-  //     }}
-  //   >
-  //     <QualityReportIcon size={20} />
-  //
-  //     {isReview && !feedback && progress && (
-  //       <div className="feedback-alert" />
-  //     )}
-  //
-  //     <div className="dropdown-menu-overlay" />
-  //     {progress &&
-  //     isReview &&
-  //     (revisionNumber === 1 || revisionNumber === 2) ? (
-  //       <ul className="menu" id="qualityReportMenu">
-  //         <li className="item">
-  //           <a
-  //             title="Open QR"
-  //             onClick={(event) => {
-  //               event.stopPropagation()
-  //               window.open(quality_report_href.current, '_blank')
-  //             }}
-  //           >
-  //             Open QR
-  //           </a>
-  //         </li>
-  //         <li className="item">
-  //           <a title="Revision Feedback" onClick={openFeedbackModal}>
-  //             {!feedback
-  //               ? `Write feedback (R${revisionNumber})`
-  //               : `Edit feedback (R${revisionNumber})`}
-  //           </a>
-  //         </li>
-  //       </ul>
-  //     ) : null}
-  //   </div>
-  // </div>
 }

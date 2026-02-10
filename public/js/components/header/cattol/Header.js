@@ -85,6 +85,17 @@ export const Header = ({
                 jid={jid}
                 isGDriveProject={isGDriveProject}
               />
+              {/*Search*/}
+              <SearchButton />
+
+              {/*Segments filter*/}
+              <SegmentsFilterButton />
+
+              {/*Comments*/}
+              <CommentsButton />
+
+              {/*Segments Issues*/}
+              <SegmentsQAButton />
 
               {/*Quality Report*/}
               <QualityReportButton
@@ -94,18 +105,6 @@ export const Header = ({
                 secondRevisionsCount={secondRevisionsCount}
               />
 
-              {/*Segments Issues*/}
-              <SegmentsQAButton />
-
-              {/*Search*/}
-              <SearchButton />
-
-              {/*Comments*/}
-              <CommentsButton />
-
-              {/*Segments filter*/}
-              <SegmentsFilterButton />
-
               {/*Settings Icon*/}
               <Button
                 type={BUTTON_TYPE.ICON}
@@ -113,7 +112,7 @@ export const Header = ({
                 onClick={openTmPanel}
                 size={BUTTON_SIZE.ICON_STANDARD}
               >
-                <SettingsIcon size={20} />
+                <SettingsIcon size={24} />
               </Button>
 
               {/*Dropdown menu*/}
