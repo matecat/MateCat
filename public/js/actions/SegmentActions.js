@@ -51,6 +51,7 @@ import {
   segmentTranslation,
   translationIsToSaveBeforeClose,
 } from '../setTranslationUtil'
+import {TAB} from '../components/segments/SegmentFooter'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -1965,14 +1966,26 @@ const SegmentActions = {
     })
   },
   laraStylesTab: ({sid, styles}) => {
-    SegmentActions.modifyTabVisibility('LaraStyles', true)
-    SegmentActions.activateTab(sid, 'LaraStyles')
+    SegmentActions.modifyTabVisibility(TAB.LARA_STYLES, true)
+    SegmentActions.activateTab(sid, TAB.LARA_STYLES)
 
     setTimeout(() => {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.LARA_STYLES,
         sid,
         styles,
+      })
+    }, 100)
+  },
+  laraAlternativeTab: ({sid, text}) => {
+    SegmentActions.modifyTabVisibility(TAB.AI_ALTERNATIVES, true)
+    SegmentActions.activateTab(sid, TAB.AI_ALTERNATIVES)
+
+    setTimeout(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.AI_ALTERNATIVES,
+        sid,
+        text,
       })
     }, 100)
   },

@@ -45,8 +45,9 @@
     }
   }
 
-  &.lara-styles {
-    .lara-styles-content {
+  &.lara-styles,
+  &.ai-alternatives {
+    .ai-feature-content {
       padding: 24px;
       display: flex;
       flex-direction: column;
@@ -63,7 +64,7 @@
         }
       }
 
-      .lara-styles-options {
+      .ai-feature-options {
         display: flex;
         gap: 8px;
 
@@ -79,7 +80,7 @@
       }
     }
 
-    .lara-style-switch-button {
+    .ai-feature-button {
       padding: 0 8px;
       height: 32px;
     }
