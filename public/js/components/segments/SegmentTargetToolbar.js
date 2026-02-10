@@ -13,9 +13,10 @@ import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'
 import {Shortcuts} from '../../utils/shortcuts'
 import RemoveTagsIcon from '../../../img/icons/RemoveTagsIcon'
 import IconDown from '../icons/IconDown'
-import {LaraStyles} from './ToolbarFeatures/Lara/LaraStyles'
+import {LaraStyles} from './ToolbarFeatures/Ai/LaraStyles'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
+import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -52,6 +53,12 @@ export const SegmentTargetToolbar = ({
           {
             group: 0,
             component: <LaraStyles {...{key: 'larastyle', sid}} />,
+          },
+          {
+            group: 0,
+            component: (
+              <AiAlternatives {...{key: 'aialternatives', sid, editArea}} />
+            ),
           },
         ]
       : []),

@@ -2030,7 +2030,8 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
       break
     case SegmentConstants.LARA_STYLES:
-      SegmentStore.emitChange(SegmentConstants.LARA_STYLES, {
+    case SegmentConstants.AI_ALTERNATIVES:
+      SegmentStore.emitChange(action.actionType, {
         ...action,
       })
       break

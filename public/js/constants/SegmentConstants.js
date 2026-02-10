@@ -117,5 +117,6 @@ const SegmentConstants = keyMirror({
   CHANGE_CHARACTERS_COUNTER_RULES: null,
   SET_CURRENT_SEGMENT_ID: null,
   LARA_STYLES: null,
+  AI_ALTERNATIVES: null,
 })
 export default SegmentConstants

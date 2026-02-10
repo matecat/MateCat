@@ -25,7 +25,7 @@ import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
 import SegmentFooterTabIcu from './SegmentFooterTabIcu'
-import CatToolStore from '../../stores/CatToolStore'
+import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -37,6 +37,8 @@ export const TAB = {
   AI_ASSISTANT: 'AiAssistant',
   LARA_STYLES: 'LaraStyles',
   ICU: 'icu',
+  LARA_STYLES: 'laraStyles',
+  AI_ALTERNATIVES: 'aiAlternatives',
 }
 
 const TAB_ITEMS = {
@@ -95,6 +97,13 @@ const TAB_ITEMS = {
     code: 'icu',
     tabClass: 'icu-validator',
     isLoading: false,
+  },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'Ai alternatives',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
+    isLoading: false,
+    isEnableCloseButton: true,
   },
 }
 const DELAY_MESSAGE = 7000
@@ -532,6 +541,16 @@ function SegmentFooter() {
       case 'icu':
         return (
           <SegmentFooterTabIcu
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'aialternatives':
+        return (
+          <SegmentFooterTabAiAlternatives
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}
