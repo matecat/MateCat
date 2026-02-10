@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import SegmentFilter from './segment_filter/segment_filter'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
-import SearchFilled from '../../../../img/icons/SearchFilled'
-import Search from '../../../../img/icons/Search'
 import CatToolStore from '../../../stores/CatToolStore'
 import CatToolConstants from '../../../constants/CatToolConstants'
 import FilterFilledIcon from '../../../../img/icons/FilterFilledIcon'
@@ -22,8 +20,10 @@ export const SegmentsFilterButton = () => {
   }
   useEffect(() => {
     const closeFilter = (container) => {
-      if ((container && container === 'segmentFilter') || !container) {
+      if (container && container === 'segmentFilter') {
         setFilterOpen((prevState) => !prevState)
+      } else {
+        setFilterOpen(false)
       }
     }
     CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, closeFilter)

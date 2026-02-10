@@ -20,8 +20,10 @@ export const SearchButton = () => {
   }
   useEffect(() => {
     const closeSearch = (container) => {
-      if ((container && container === 'search') || !container) {
+      if (container && container === 'search') {
         setSearchOpen((prevState) => !prevState)
+      } else {
+        setSearchOpen(false)
       }
     }
     CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, closeSearch)
