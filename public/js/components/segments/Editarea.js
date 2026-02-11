@@ -110,8 +110,7 @@ class Editarea extends React.Component {
     this.isShiftPressedOnNavigation = createRef()
     this.wasTripleClickTriggered = createRef()
     this.compositionEventChecks = createRef()
-    const projectTemplate = CatToolStore.getCurrentProjectTemplate()
-    this.icuEnabled = projectTemplate.icuEnabled
+    this.icuEnabled = this.props.segment.icu
     this.state = {
       editorState: editorState,
       editAreaClasses: ['targetarea'],

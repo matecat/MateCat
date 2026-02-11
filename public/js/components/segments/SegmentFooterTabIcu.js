@@ -19,6 +19,18 @@ const inputTypes = {
   '<>': 'text',
   '': 'text',
 }
+const inputDefaultValue = {
+  number: '1',
+  duration: '1',
+  spellout: '1',
+  select: '',
+  plural: '1',
+  selectordinal: 1,
+  date: new Date(),
+  time: +new Date(),
+  '<>': '',
+  '': '',
+}
 const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   const [values, setValues] = useState([])
 
@@ -52,6 +64,19 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
       }
       if (Array.isArray(tree)) tree.forEach((n) => walk(n))
       else walk(tree)
+      vars.forEach(({name, type}) => {
+        setValues((v) => {
+          return {
+            ...v,
+            [name]: {
+              type,
+              value: values[name]
+                ? values[name].value
+                : inputDefaultValue[type],
+            },
+          }
+        })
+      })
       return Array.from(vars)
     } catch {
       return []
@@ -194,22 +219,24 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         <div className="segment-footer-icu-editor">
           <h3>Live preview</h3>
           {variableNames.length === 0 && <h3>No variables</h3>}
-          {variableNames.map(({name, type}) => (
-            <div key={name}>
-              <label>
-                <h3>
-                  {name}
-                  <span>{inputTypes[type]}</span>
-                </h3>
-                <input
-                  value={values[name]?.value || ''}
-                  onChange={(e) => onChangeValue(e, name)}
-                  style={{width: '10rem'}}
-                  type={inputTypes[type]}
-                />
-              </label>
-            </div>
-          ))}
+          <div className="segment-footer-icu-inputs">
+            {variableNames.map(({name, type}) => (
+              <div key={name}>
+                <label>
+                  <h3>
+                    {name}
+                    <span>{inputTypes[type]}</span>
+                  </h3>
+                  <input
+                    value={values[name]?.value}
+                    onChange={(e) => onChangeValue(e, name)}
+                    style={{width: '10rem'}}
+                    type={inputTypes[type]}
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
           <div className="segment-footer-icu-preview-container">
             <h3>Rendered output</h3>
             <div

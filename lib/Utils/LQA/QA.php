@@ -2612,7 +2612,7 @@ class QA
             $complaints = $this->icuPluralsValidator->validatePluralCompliance();
             foreach ($complaints?->getArgumentWarnings() ?? [] as $complaint) {
                 //change the error code to a more specific one for ICU Message Pattern compliance
-                $this->_errorMap[self::ERR_ICU_VALIDATION] = implode('<br/>', $complaint->getMessages());
+                $this->_errorMap[self::ERR_ICU_VALIDATION] = implode('<br/><br/>', $complaint->getMessages());
                 $this->addError(self::ERR_ICU_VALIDATION);
             }
         } catch (Exception $e) {

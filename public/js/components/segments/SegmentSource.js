@@ -77,8 +77,7 @@ class SegmentSource extends React.Component {
       cleanSource,
     )
     const {editorState, tagRange} = contentEncoded
-    const projectTemplate = CatToolStore.getCurrentProjectTemplate()
-    this.icuEnabled = projectTemplate.icuEnabled
+    this.icuEnabled = this.props.segment.icu
     this.state = {
       source: cleanSource,
       editorState: editorState,

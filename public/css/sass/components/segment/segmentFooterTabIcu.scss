@@ -100,6 +100,11 @@
         }
       }
     }
+    .segment-footer-icu-inputs {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
     .segment-footer-icu-preview-container {
       display: flex;
       flex-direction: column;
@@ -112,7 +117,7 @@
     .segment-footer-icu-preview {
       display: flex;
       padding: 6px 16px;
-      height: 20px;
+      min-height: 20px;
       align-items: center;
       justify-content: flex-start;
       gap: 8px;
