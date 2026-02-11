@@ -67,7 +67,10 @@ class LaraAuthController extends AbstractStatefulKleinController
                 }
             )->onSuccess(
                 function () use ($chunkValidator) {
-                    (new IsOwnerInternalUserValidator($this, $chunkValidator->getChunk()))->validate();
+                    $reasoning = (bool)filter_var($this->getParams()['reasoning'], FILTER_VALIDATE_BOOLEAN);
+                    if($reasoning){
+                        (new IsOwnerInternalUserValidator($this, $chunkValidator->getChunk()))->validate();
+                    }                
                 }
             )
         );

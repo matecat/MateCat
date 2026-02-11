@@ -12,7 +12,6 @@
   box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
-
 /*
  ******
  Past comments wrap
@@ -59,7 +58,9 @@
     align-items: center;
   }
 }
-.mbc-comments-wrap .mbc-thread-wrap-resolved .mbc-show-comment:not(:last-of-type) {
+.mbc-comments-wrap
+  .mbc-thread-wrap-resolved
+  .mbc-show-comment:not(:last-of-type) {
   background-color: rgba(colors.$greenDefaultTransparent, 0.2);
   border-radius: 4px;
 }
@@ -321,6 +322,7 @@ a.mbc-view-link:visited {
   border-radius: 8px;
   width: 18px;
   height: 18px;
+  color: black;
 }
 
 /*
@@ -346,7 +348,6 @@ a.mbc-view-link:visited {
   color: colors.$grey3;
   position: absolute;
 }
-
 
 /*
  ******
@@ -552,7 +553,6 @@ section:hover .mbc-comment-icon-button,
     color: colors.$grey7;
     font-size: 14px;
   }
-
 }
 .mbc-thread-wrap-bottom {
   display: flex;

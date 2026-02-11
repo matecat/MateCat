@@ -381,7 +381,7 @@ export const ProjectsBulkActions = ({
 
         CatToolActions.addNotification({
           title: `Jobs ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
-          text: `The selected ${jobs.length > 1 ? 'jobs' : 'job'} has been successfully ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
+          text: `The selected jobs have been successfully ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}.`,
           type: 'warning',
           position: 'bl',
           allowHtml: true,
@@ -439,17 +439,15 @@ export const ProjectsBulkActions = ({
               rest.revision_number,
             )
           })
-
+          console.log('rest.revision_number', rest.revision_number)
           if (fulfilledPromises.length) {
             const notification = {
-              title:
-                rest.revision_number !== 2
-                  ? 'Translate/Revise passwords changed'
-                  : 'Revise 2 passwords changed',
-              text:
-                rest.revision_number !== 2
-                  ? 'The Translate/Revise passwords for the selected jobs have been changed successfully'
-                  : 'Passwords for the selected jobs with an existing Revise 2 link have been successfully changed.',
+              title: rest.revision_number
+                ? `${rest.revision_number === 1 ? 'Revise' : 'Revise 2'} passwords changed`
+                : 'Translate passwords changed',
+              text: rest.revision_number
+                ? `The ${rest.revision_number === 1 ? 'Revise' : 'Revise 2'} passwords for the selected jobs have been changed successfully.`
+                : 'The Translate passwords for the selected jobs have been changed successfully',
               type: 'warning',
               position: 'bl',
               allowHtml: true,

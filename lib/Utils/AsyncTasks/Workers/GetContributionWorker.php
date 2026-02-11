@@ -367,6 +367,8 @@ class GetContributionWorker extends AbstractWorker
         $_config['id_user'] = $this->_extractAvailableKeysForUser($contributionStruct);
         $_config['num_result'] = $contributionStruct->resultNum;
         $_config['isConcordance'] = $contributionStruct->concordanceSearch;
+        $_config['lara_style'] = $contributionStruct->lara_style;
+        $_config['reasoning'] = $contributionStruct->reasoning;
 
         $_config['dialect_strict'] = $contributionStruct->dialect_strict;
         $_config['priority_key'] = $contributionStruct->tm_prioritization;
@@ -484,6 +486,8 @@ class GetContributionWorker extends AbstractWorker
                 $config['user_id'] = $contributionStruct->getUser()->uid;
                 $config['tuid'] = $jobStruct->id . ":" . $contributionStruct->segmentId;
                 $config['translation'] = $contributionStruct->translation;
+                $config['lara_style'] = $contributionStruct->lara_style;
+                $config['reasoning'] = $contributionStruct->reasoning;
 
                 $tm_keys = TmKeyManager::getOwnerKeys([$jobStruct->tm_keys ?? '[]'], 'r');
                 $config['keys'] = array_map(function ($tm_key) {

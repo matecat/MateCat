@@ -26,6 +26,8 @@ class ChunkReviewDao extends AbstractDao
 
     const string sql_get_from_review_password_and_id_job = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job";
 
+    const string sql_get_from_review_password_and_id_job_and_source_page = "SELECT * FROM qa_chunk_reviews WHERE review_password = :review_password AND id_job = :id_job  AND source_page = :source_page";
+
     protected function _buildResult(array $array_result)
     {
     }
@@ -438,13 +440,8 @@ class ChunkReviewDao extends AbstractDao
      */
     public function findByJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page, int $ttl = 60 * 60): ?ChunkReviewStruct
     {
-        $sql = "SELECT * FROM qa_chunk_reviews " .
-            " WHERE review_password = :review_password " .
-            " AND id_job = :id_job " .
-            " AND source_page = :source_page ";
-
         $this->setCacheTTL($ttl);
-        $stmt = $this->_getStatementForQuery($sql);
+        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job_and_source_page);
         /** @var $retValue ChunkReviewStruct */
         $retValue = $this->_fetchObjectMap($stmt, ChunkReviewStruct::class, [
             'review_password' => $review_password,
@@ -464,11 +461,7 @@ class ChunkReviewDao extends AbstractDao
      */
     public function destroyCacheForJobIdReviewPasswordAndSourcePage(int $id_job, string $review_password, int $source_page): bool
     {
-        $sql = "SELECT * FROM qa_chunk_reviews " .
-            " WHERE review_password = :review_password " .
-            " AND id_job = :id_job " .
-            " AND source_page = :source_page ";
-        $stmt = $this->_getStatementForQuery($sql);
+        $stmt = $this->_getStatementForQuery(self::sql_get_from_review_password_and_id_job_and_source_page);
 
         return $this->_destroyObjectCache($stmt, ChunkReviewStruct::class, [
             'review_password' => $review_password,

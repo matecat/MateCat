@@ -1,4 +1,4 @@
-@use "commons/colors";
+@use 'commons/colors';
 body {
   transition: padding-top 200ms ease-out;
   -webkit-transition: padding-top 200ms ease-out;
@@ -1674,7 +1674,7 @@ section.opened.editor .status {
   .text .source.item,
   .text .target.item,
   .white li,
-  .splitContainer{
+  .splitContainer {
     width: 48% !important;
   }
 }

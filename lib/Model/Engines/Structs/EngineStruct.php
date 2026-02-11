@@ -210,4 +210,29 @@ class EngineStruct
         return json_decode($this->extra_parameters, true);
     }
 
+    /**
+     * @return array
+     */
+    public function arrayRepresentation(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'type' => $this->type,
+            'extra' => $this->extra_parameters,
+            'engine_type' => $this->getEngineType(),
+        ];
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEngineType(): ?string
+    {
+        $engine_type = explode("\\", $this->class_load);
+
+        return array_pop($engine_type);
+    }
+
 }

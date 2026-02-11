@@ -195,8 +195,8 @@ let TranslationMatches = {
   }) {
     const currentSegment = SegmentStore.getSegmentByIdToJS(sid)
     if (!config.translation_matches_enabled) {
-      SegmentActions.addClassToSegment(segment.sid, 'loaded')
-      SegmentActions.getSegmentsQa(segment)
+      SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
+      SegmentActions.getSegmentsQa(currentSegment)
       return Promise.resolve()
     }
 
@@ -254,6 +254,9 @@ let TranslationMatches = {
     }
     const {contextListBefore, contextListAfter} =
       SegmentUtils.getSegmentContext(id_segment_original)
+
+    const isLaraEngine = config.active_engine?.engine_type === 'Lara'
+
     const getContributionRequest = (translation = null) => {
       if (!translation) {
         console.log(
@@ -262,6 +265,7 @@ let TranslationMatches = {
           this.segmentsWaitingForContributions,
         )
       }
+
       return getContributions({
         idSegment: id_segment_original,
         target: currentSegment.segment,
@@ -303,12 +307,7 @@ let TranslationMatches = {
     ) {
       return Promise.resolve()
     }
-    if (
-      config.active_engine?.name === 'Lara' &&
-      allowed &&
-      !fastFetch &&
-      !callNewContributions
-    ) {
+    if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
       this.segmentsWaitingForContributions.push(id_segment_original)
       console.log(
         'Call Lara for segment:',

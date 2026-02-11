@@ -93,7 +93,7 @@
     "thread-loader": "^4.0.4",
     "undici": "^5.28.2",
     "web-streams-polyfill": "^4.1.0",
-    "webpack": "5.102.1",
+    "webpack": "5.104.1",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "6.0.1",
     "webpack-concat-files-plugin": "^0.5.2",

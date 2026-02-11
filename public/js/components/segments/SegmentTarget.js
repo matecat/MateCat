@@ -28,6 +28,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {Shortcuts} from '../../utils/shortcuts'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
+import {SegmentTargetToolbar} from './SegmentTargetToolbar'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -41,6 +42,8 @@ class SegmentTarget extends React.Component {
       charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
+
+    this.tmOutShowFormatMenu
   }
 
   selectIssueText(event) {
@@ -262,64 +265,21 @@ class SegmentTarget extends React.Component {
             updateCounter={updateCounter}
           />
           {s2tMicro}
-          <div className="toolbar">
-            {config.isReview ? (
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onClick={this.lockEditArea.bind(this)}
-                title="Highlight text and assign an issue to the selected text."
-              >
-                <ReviseLockIcon />
-              </Button>
-            ) : null}
-            {issues.length > 0 || config.isReview ? (
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                title="Segment Quality Report."
-                target="_blank"
-                onClick={() => window.open(qrLink, '_blank')}
-              >
-                <QualityReportIcon size={16} />
-              </Button>
-            ) : null}
-            {removeTagsButton}
-            {tagCopyButton}
-            <div
-              className="editToolbar"
-              style={
-                showFormatMenu
-                  ? {visibility: 'visible'}
-                  : {visibility: 'hidden'}
-              }
-            >
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onMouseDown={() => this.editArea.formatSelection('uppercase')}
-                title="Uppercase"
-              >
-                <UpperCaseIcon />
-              </Button>
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onMouseDown={() => this.editArea.formatSelection('lowercase')}
-                title="Lowercase"
-              >
-                <LowerCaseIcon />
-              </Button>
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                mode={BUTTON_MODE.OUTLINE}
-                onMouseDown={() => this.editArea.formatSelection('capitalize')}
-                title="Capitalize"
-              >
-                <CapitalizeIcon />
-              </Button>
-            </div>
-          </div>
+          <SegmentTargetToolbar
+            {...{
+              sid: this.props.segment.sid,
+              editArea: this.editArea,
+              lockEditArea: this.lockEditArea.bind(this),
+              qrLink,
+              issuesLength: issues.length,
+              showFormatMenu,
+              textHasTags: textHasTags(translation),
+              removeTagsFromText: this.removeTagsFromText.bind(this),
+              missingTagsInTarget: segment.missingTagsInTarget,
+              addMissingSourceTagsToTarget:
+                this.editArea?.addMissingSourceTagsToTarget,
+            }}
+          />
         </div>
       )
     }
@@ -435,9 +395,19 @@ class SegmentTarget extends React.Component {
   }
   toggleFormatMenu = (show) => {
     // Show/Hide Edit Toolbar
-    this.setState({
-      showFormatMenu: show,
-    })
+    clearTimeout(this.tmOutShowFormatMenu)
+
+    if (!show) {
+      this.tmOutShowFormatMenu = setTimeout(() => {
+        this.setState({
+          showFormatMenu: false,
+        })
+      }, 200)
+    } else {
+      this.setState({
+        showFormatMenu: show,
+      })
+    }
   }
 }
 
