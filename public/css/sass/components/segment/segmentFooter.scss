@@ -64,6 +64,10 @@
         }
       }
 
+      p {
+        margin: 0;
+      }
+
       .ai-feature-options {
         display: flex;
         gap: 8px;
@@ -83,6 +87,15 @@
     .ai-feature-button {
       padding: 0 8px;
       height: 32px;
+    }
+
+    .ai-feature-option-alternative-highlight {
+      font-weight: bold;
+    }
+
+    .ai-feature-option-alternative-description {
+      font-size: 12px;
+      color: colors.$grey7;
     }
   }
 }

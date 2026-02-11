@@ -1977,7 +1977,7 @@ const SegmentActions = {
       })
     }, 100)
   },
-  laraAlternativeTab: ({sid, text}) => {
+  aiAlternativeTab: ({sid, text}) => {
     SegmentActions.modifyTabVisibility(TAB.AI_ALTERNATIVES, true)
     SegmentActions.activateTab(sid, TAB.AI_ALTERNATIVES)
 

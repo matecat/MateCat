@@ -273,7 +273,7 @@ class SegmentTarget extends React.Component {
               qrLink,
               issuesLength: issues.length,
               showFormatMenu,
-              textHasTags: textHasTags(translation),
+              textHasTags: Boolean(textHasTags(translation)),
               removeTagsFromText: this.removeTagsFromText.bind(this),
               missingTagsInTarget: segment.missingTagsInTarget,
               addMissingSourceTagsToTarget:

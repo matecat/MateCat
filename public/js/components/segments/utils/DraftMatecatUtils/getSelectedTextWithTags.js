@@ -58,6 +58,13 @@ export const getSelectedTextWithTags = (editorState) => {
         }
         return [...updateAccumulator, item]
       }, [])
+      .map((item) => ({
+        ...item,
+        value: item.value.replace(
+          new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'),
+          '',
+        ),
+      }))
       .filter((item) => item.value)
 
     return result

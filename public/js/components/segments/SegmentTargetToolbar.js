@@ -123,6 +123,7 @@ export const SegmentTargetToolbar = ({
               callback={addMissingSourceTagsToTarget}
             />
             {getIconButton({
+              key: 'copymissingtags',
               title: `Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`,
               children: <AddTagsIcon />,
               onClick: addMissingSourceTagsToTarget,

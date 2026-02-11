@@ -19,23 +19,18 @@ export const AiAlternatives = ({sid, editArea}) => {
   }, [editArea?.state?.editorState])
 
   const openTab = () => {
-    SegmentActions.laraAlternativeTab({
+    SegmentActions.aiAlternativeTab({
       sid,
       text: selectedText,
     })
 
     //Track Event
-    // const message = {
-    //   user: userInfo.user.uid,
-    //   jobId: config.id_job,
-    //   segmentId: sid,
-    //   style: styles
-    //     .filter(({isDefault}) => !isDefault)
-    //     .reduce(
-    //       (acc, cur, index) => `${acc}${index > 0 ? ',' : ''}${cur.name}`,
-    //       '',
-    //     ),
-    // }
+    const message = {
+      user: userInfo.user.uid,
+      jobId: config.id_job,
+      segmentId: sid,
+      selectedText,
+    }
     // CommonUtils.dispatchTrackingEvents('LaraStyle', message)
   }
 
