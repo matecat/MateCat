@@ -110,9 +110,9 @@ function SegmentFooter() {
     Object.entries(TAB_ITEMS).map(([key, value]) => ({
       ...value,
       name: key,
-      enabled: !!(key === TAB.ICU && currentSegment.icu),
-      visible: !!(key === TAB.ICU && currentSegment.icu),
-      open: !!(key === TAB.ICU && currentSegment.icu),
+      enabled: !!(key === TAB.ICU && currentSegment?.icu),
+      visible: !!(key === TAB.ICU && currentSegment?.icu),
+      open: !!(key === TAB.ICU && currentSegment?.icu),
       elements: [],
       label:
         value.code === 'tm'
