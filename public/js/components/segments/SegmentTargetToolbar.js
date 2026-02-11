@@ -113,22 +113,26 @@ export const SegmentTargetToolbar = ({
       : []),
     ...(missingTagsInTarget && missingTagsInTarget.length > 0 && editArea
       ? [
-          <>
-            <UseHotKeysComponent
-              shortcut={
-                Shortcuts.cattol.events.addTags.keystrokes[
-                  Shortcuts.shortCutsKeyType
-                ]
-              }
-              callback={addMissingSourceTagsToTarget}
-            />
-            {getIconButton({
-              key: 'copymissingtags',
-              title: `Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`,
-              children: <AddTagsIcon />,
-              onClick: addMissingSourceTagsToTarget,
-            })}
-          </>,
+          {
+            component: (
+              <>
+                <UseHotKeysComponent
+                  shortcut={
+                    Shortcuts.cattol.events.addTags.keystrokes[
+                      Shortcuts.shortCutsKeyType
+                    ]
+                  }
+                  callback={addMissingSourceTagsToTarget}
+                />
+                {getIconButton({
+                  key: 'copymissingtags',
+                  title: `Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`,
+                  children: <AddTagsIcon />,
+                  onClick: addMissingSourceTagsToTarget,
+                })}
+              </>
+            ),
+          },
         ]
       : []),
     ...(showFormatMenu
