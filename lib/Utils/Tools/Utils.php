@@ -949,25 +949,73 @@ class Utils
 
 
     /**
-     * Check if a file name is valid to prevent directory traversal attacks.
+     * Validates if the given file name is valid according to various rules, including
+     * checks for empty names, control characters, invalid characters in file systems,
+     * reserved names, and length limitations.
      *
-     * @param string $fileUpName The file name to check.
+     * @param string $fileName The file name to validate.
      *
-     * @return bool Returns true if the file name is valid, false otherwise.
+     * @return bool Returns true if the file name is valid, otherwise false.
      */
-    public static function isValidFileName(string $fileUpName): bool
+    public static function isValidFileName(string $fileName): bool
     {
-        if (
-            stripos($fileUpName, '../') !== false ||
-            stripos($fileUpName, '/../') !== false ||
-            stripos($fileUpName, '/..') !== false ||
-            stripos($fileUpName, '%2E%2E%2F') !== false ||
-            stripos($fileUpName, '%2F%2E%2E%2F') !== false ||
-            stripos($fileUpName, '%2F%2E%2E') !== false ||
-            stripos($fileUpName, '.') === 0 ||
-            stripos($fileUpName, '%2E') === 0
-        ) {
-            //Directory Traversal!
+        // Decode URL to capture multiple encodings
+        $decoded = urldecode(urldecode($fileName));
+
+        // Blocks empty names or only spaces
+        if (trim($fileName) === '' || trim($decoded) === '') {
+            return false;
+        }
+
+        // Block of null byte
+        if (strpos($fileName, "\0") !== false || strpos($decoded, "\0") !== false) {
+            return false;
+        }
+
+        // Block of control chars (0x00-0x1F, 0x7F)
+        if (preg_match('/[\x00-\x1F\x7F]/', $fileName)) {
+            return false;
+        }
+
+        // Block of newline/carriage return
+        if (preg_match('/[\r\n]/', $fileName)) {
+            return false;
+        }
+
+        // Directory traversal
+        $patterns = [
+            '/\.\.[\\/]/',           // ../ or ..\
+            '/[\\/]\.\./',           // /.. or \..
+            '/^\.\.?$/',             // . or .. like complete name
+            '/^\./',                 // starts with point
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $fileName) || preg_match($pattern, $decoded)) {
+                return false;
+            }
+        }
+
+        // Block of not allowed chars in Windows/Linux filesystems
+        $invalidChars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', "\0"];
+        foreach ($invalidChars as $char) {
+            if (strpos($fileName, $char) !== false) {
+                return false;
+            }
+        }
+
+        // Block of Windows riserved names (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
+        $reserved = ['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4',
+            'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2',
+            'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'];
+
+        $nameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
+        if (in_array(strtoupper($nameWithoutExt), $reserved, true)) {
+            return false;
+        }
+
+        // Max 255 chars
+        if (strlen($fileName) > 255) {
             return false;
         }
 
