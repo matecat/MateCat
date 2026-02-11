@@ -5,6 +5,7 @@ namespace Model\Conversion;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
@@ -12,7 +13,6 @@ use ReflectionException;
 use RuntimeException;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
-use Utils\Langs\Languages;
 use Utils\Tools\Utils;
 
 class FilesConverter

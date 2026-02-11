@@ -7,13 +7,13 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
 use Google_Service_Exception;
+use Matecat\Locales\InvalidLanguageException;
+use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\Constants;
-use Utils\Langs\InvalidLanguageException;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 

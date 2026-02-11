@@ -12,8 +12,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
-use Utils\Langs\Languages;
 use Utils\LQA\SizeRestriction\SizeRestriction;
 use Utils\Tools\CatUtils;
 

@@ -2,8 +2,8 @@
 
 namespace Model\Conversion;
 
+use Matecat\Locales\Languages;
 use Model\Conversion\MimeTypes\MimeTypes;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 
 /**

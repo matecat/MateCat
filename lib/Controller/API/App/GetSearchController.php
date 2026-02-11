@@ -22,6 +22,7 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
+use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\TranslationStatus;

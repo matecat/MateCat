@@ -4,6 +4,7 @@ namespace Model\Projects;
 
 use DateTime;
 use Exception;
+use Matecat\Locales\Languages;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -21,7 +22,6 @@ use PDO;
 use ReflectionException;
 use stdClass;
 use Utils\Engines\EnginesFactory;
-use Utils\Langs\Languages;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
 

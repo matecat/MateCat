@@ -4,11 +4,11 @@ namespace Model\Conversion;
 
 use CURLFile;
 use Exception;
+use Matecat\Locales\Languages;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
-use Utils\Langs\Languages;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;

@@ -13,7 +13,6 @@ namespace View\API\V2\Json;
 use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Segments\SegmentOriginalDataDao;
 use Utils\LQA\QA;
 
 class QALocalWarning extends QAWarning
@@ -22,6 +21,7 @@ class QALocalWarning extends QAWarning
     protected QA $QA;
     protected int $id_segment;
     protected int $idProject;
+    private MateCatFilter $filter;
 
     /**
      * QALocalWarning constructor.
@@ -29,12 +29,14 @@ class QALocalWarning extends QAWarning
      * @param QA $QA
      * @param int $idSegment
      * @param int $idProject
+     * @param MateCatFilter $filter
      */
-    public function __construct(QA $QA, int $idSegment, int $idProject)
+    public function __construct(QA $QA, int $idSegment, int $idProject, MateCatFilter $filter)
     {
         $this->QA = $QA;
         $this->id_segment = $idSegment;
         $this->idProject = $idProject;
+        $this->filter = $filter;
     }
 
     /**
@@ -81,20 +83,12 @@ class QALocalWarning extends QAWarning
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
-            /** * @var MateCatFilter $Filter */
-            $Filter = MateCatFilter::getInstance(
-                $this->QA->getFeatureSet(),
-                $this->QA->getSourceSegLang(),
-                $this->QA->getTargetSegLang(),
-                SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment)
-            );
-
             foreach ($malformedStructs['source'] as $k => $rawSource) {
-                $malformedStructs['source'][$k] = $Filter->fromLayer1ToLayer2($rawSource);
+                $malformedStructs['source'][$k] = $this->filter->fromLayer1ToLayer2($rawSource);
             }
 
             foreach ($malformedStructs['target'] as $k => $rawTarget) {
-                $malformedStructs['target'][$k] = $Filter->fromLayer1ToLayer2($rawTarget);
+                $malformedStructs['target'][$k] = $this->filter->fromLayer1ToLayer2($rawTarget);
             }
 
             $targetTagPositionError = $this->QA->getTargetTagPositionError();

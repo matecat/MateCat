@@ -4,7 +4,6 @@ namespace Utils\Redis;
 
 use Exception;
 use Predis\Client;
-use Predis\Connection\ConnectionInterface;
 use ReflectionClass;
 use ReflectionException;
 use Utils\Registry\AppConfig;

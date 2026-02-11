@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
@@ -21,6 +22,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
@@ -33,6 +35,7 @@ use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
 use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\EngineConstants;
@@ -41,7 +44,6 @@ use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
-use Utils\Engines\Results\MyMemory\Matches;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -80,7 +82,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @var ?TranslationVersionsHandler
      */
-    protected ?TranslationVersionsHandler $VersionsHandler = null;
+    protected ?VersionHandlerInterface $VersionsHandler = null;
 
     protected function afterConstruct(): void
     {
@@ -102,7 +104,8 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         try {
             $this->data = $this->validateTheRequest();
-            $this->checkData();
+            $this->setSubFilteringBehavior();
+            $this->checkSegmentSplitData();
             $this->initVersionHandler();
             $this->getContexts();
 
@@ -115,17 +118,14 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $this->data['translation']
             ); // is_numeric check is needed to allow "0" strings
 
-            $check = new QA($segment, $translation); // Layer 1 here
-            $check->setChunk($this->data['chunk']);
-            $check->setFeatureSet($this->featureSet);
-            $check->setSourceSegLang($this->data['chunk']->source);
-            $check->setTargetSegLang($this->data['chunk']->target);
-            $check->setIdSegment($this->data['id_segment']);
-
-            if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
-                $check->setCharactersCount($this->data['characters_counter']);
-            }
-
+            $check = $this->setQaChecks(
+                $segment,
+                $translation,
+                new MessagePatternValidator(
+                    language: $this->data['chunk']->target,
+                    patternString: $translation
+                )
+            );
             $check->performConsistencyCheck();
 
             if ($check->thereAreWarnings()) {
@@ -529,22 +529,8 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @throws Exception
      */
-    protected function checkData(): void
+    protected function checkSegmentSplitData(): void
     {
-        $featureSet = $this->getFeatureSet();
-        $featureSet->loadForProject($this->data['project']);
-
-        /** @var MateCatFilter $filter */
-        $metadata = new JobsMetadataDao();
-        $filter = MateCatFilter::getInstance(
-            $featureSet,
-            $this->data['chunk']->source,
-            $this->data['chunk']->target,
-            SegmentOriginalDataDao::getSegmentDataRefMap((int)$this->data['id_segment']),
-            $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password)
-        );
-        $this->filter = $filter;
-
         [$__translation, $this->data['split_chunk_lengths']] = CatUtils::parseSegmentSplit($this->data['translation'], '', $this->filter);
 
         if (is_null($__translation) || $__translation === '') {
@@ -565,6 +551,62 @@ class SetTranslationController extends AbstractStatefulKleinController
         }
 
         $this->checkStatus($this->data['status']);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function setSubFilteringBehavior(): void
+    {
+        /** @var $projectStruct ProjectStruct */
+        $projectStruct = $this->data['project'];
+        $featureSet = $this->getFeatureSet();
+        $featureSet->loadForProject($projectStruct);
+
+        $icu_enabled = $projectStruct->getMetadataValue(ProjectMetadataDao::ICU_ENABLED) ?? false;
+        $string_contains_icu = false;
+        if ($icu_enabled) {
+            $icuValidator = new MessagePatternValidator(
+                $this->data['chunk']->target,
+                $this->data['translation'],
+            );
+            $string_contains_icu = $icuValidator->containsComplexSyntax();
+        }
+
+        /** @var MateCatFilter $filter */
+        $metadata = new JobsMetadataDao();
+        $filter = MateCatFilter::getInstance(
+            $featureSet,
+            $this->data['chunk']->source,
+            $this->data['chunk']->target,
+            SegmentOriginalDataDao::getSegmentDataRefMap((int)$this->data['id_segment']),
+            $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password),
+            $string_contains_icu
+        );
+        $this->filter = $filter;
+    }
+
+    /**
+     * @param string $segment
+     * @param string $translation
+     * @param MessagePatternValidator|null $validator
+     * @return QA
+     */
+    protected function setQaChecks(string $segment, string $translation, ?MessagePatternValidator $validator = null): QA
+    {
+        $check = new QA($segment, $translation, $validator); // Layer 1 here
+        $check->setChunk($this->data['chunk']);
+        $check->setFeatureSet($this->featureSet);
+        $check->setSourceSegLang($this->data['chunk']->source);
+        $check->setTargetSegLang($this->data['chunk']->target);
+        $check->setIdSegment($this->data['id_segment']);
+
+        if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
+            $check->setCharactersCount($this->data['characters_counter']);
+        }
+
+        return $check;
     }
 
     /**
@@ -652,6 +694,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $translation->serialized_errors_list = '';
             $translation->suggestion_position = 0;
             $translation->warning = false;
+            $translation->translation_date = date("Y-m-d H:i:s");
             $translation->translation_date = date("Y-m-d H:i:s");
 
             try {

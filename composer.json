@@ -18,7 +18,7 @@
         "matecat/subfiltering": "~v3.0.0",
         "matecat/whole-text-finder": "^1.0",
         "matecat/xliff-parser": "^2.2",
-        "matecat/icu-message-pattern": "^v1",
+        "matecat/icu-intl": "^v1",
         "monolog/monolog": "^3",
         "orhanerday/open-ai": "^4.7",
         "phpmailer/phpmailer": "~6.1",

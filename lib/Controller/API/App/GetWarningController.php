@@ -7,12 +7,14 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Translations\WarningDao;
@@ -106,8 +108,6 @@ class GetWarningController extends KleinController
         $src_content = $request['src_content'];
         $trg_content = $request['trg_content'];
         $password = $request['password'];
-//        $logs               = $request[ 'logs' ];
-//        $segment_status     = $request[ 'segment_status' ];
         $characters_counter = $request['characters_counter'];
 
         $chunk = $this->getChunk($id_job, $password);
@@ -115,19 +115,47 @@ class GetWarningController extends KleinController
         $metadata = new MetadataDao();
         $dataRefMap = (!empty($id)) ? SegmentOriginalDataDao::getSegmentDataRefMap($id) : [];
 
-        $Filter = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $password));
+        $projectMetadata = new ProjectMetadataDao();
+        // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($chunk->getProject()->id, ProjectMetadataDao::ICU_ENABLED)?->value ?? false;
+
+        // Detect if the translation content contains ICU MessageFormat syntax
+        $string_contains_icu = false;
+        if ($icu_enabled) {
+                // Validate the ICU syntax in the target content
+                $icuSyntaxValidator = new MessagePatternValidator(
+                    language: $chunk->target,
+                    patternString: $trg_content
+                );
+                // Check if complex ICU patterns (plurals, selects, etc.) are present
+                $string_contains_icu = $icuSyntaxValidator->containsComplexSyntax();
+        }
+
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance(
+            $featureSet,
+            $chunk->source,
+            $chunk->target,
+            $dataRefMap,
+            $metadata->getSubfilteringCustomHandlers($chunk->id, $password),
+            $string_contains_icu
+        );
 
         $src_content = $Filter->fromLayer2ToLayer1($src_content);
         $trg_content = $Filter->fromLayer2ToLayer1($trg_content);
 
-        $QA = new QA($src_content, $trg_content);
+        $QA = new QA(
+            $src_content,
+            $trg_content,
+            $icuSyntaxValidator ?? null
+        );
         $QA->setFeatureSet($featureSet);
         $QA->setChunk($chunk);
         $QA->setIdSegment($id);
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
 
-        if (isset($characters_counter)) {
+        if (!$string_contains_icu && isset($characters_counter)) {
             $QA->setCharactersCount($characters_counter);
         }
 
@@ -139,7 +167,12 @@ class GetWarningController extends KleinController
                 'errors' => []
             ],
             $this->invokeLocalWarningsOnFeatures($chunk, $src_content, $trg_content),
-            (new QALocalWarning($QA, $id, $chunk->id_project))->render()
+            (new QALocalWarning(
+                $QA,
+                $id,
+                $chunk->id_project,
+                $Filter
+            ))->render()
         );
 
         $this->response->json($result);

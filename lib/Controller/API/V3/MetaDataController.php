@@ -15,7 +15,6 @@ use ReflectionException;
 use stdClass;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MyMemory;
-use Utils\Tools\Utils;
 
 class MetaDataController extends KleinController
 {

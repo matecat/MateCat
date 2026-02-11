@@ -4,6 +4,7 @@ namespace Model\Analysis;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Matecat\Locales\LanguageDomains;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\NotFoundException;
@@ -19,7 +20,6 @@ use Model\Users\UserStruct;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\ProjectStatus;
-use Utils\Langs\LanguageDomains;
 use Utils\OutsourceTo\OutsourceAvailable;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
