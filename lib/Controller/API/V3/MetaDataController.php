@@ -67,6 +67,7 @@ class MetaDataController extends KleinController
             'mmt_glossaries',
             'mmt_activate_context_analyzer',
             'mmt_ignore_glossary_case',
+            'lara_style',
             'lara_glossaries',
             'deepl_formality',
             'deepl_id_glossary',

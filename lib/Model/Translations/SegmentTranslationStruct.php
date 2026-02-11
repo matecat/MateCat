@@ -35,7 +35,7 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     public ?int $suggestion_position = null;
     public int $mt_qe = 0;
     public ?string $tm_analysis_status = null;
-    public bool $locked = false;
+    public ?bool $locked = false;
     public bool $warning = false;
     public ?string $serialized_errors_list = null;
     public ?int $version_number = 0; // this value should be not null

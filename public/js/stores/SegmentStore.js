@@ -567,10 +567,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'contributions'],
-      fromJS({
-        matches: contributions,
-        errors: errors,
-      }),
+      Array.isArray(contributions)
+        ? fromJS({
+            matches: contributions,
+            errors: errors,
+          })
+        : undefined,
     )
   },
   setAlternatives: function (sid, alternatives) {
@@ -2019,6 +2021,11 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES:
       SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
+      break
+    case SegmentConstants.LARA_STYLES:
+      SegmentStore.emitChange(SegmentConstants.LARA_STYLES, {
+        ...action,
+      })
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

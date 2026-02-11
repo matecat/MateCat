@@ -6,6 +6,16 @@ import {
   DropdownMenu,
 } from '../common/DropdownMenu/DropdownMenu'
 import DotsHorizontal from '../../../img/icons/DotsHorizontal'
+import ChangePassword from '../../../img/icons/ChangePassword'
+import Archive from '../../../img/icons/Archive'
+import Refresh from '../../../img/icons/Refresh'
+import Trash from '../../../img/icons/Trash'
+import Split from '../../../img/icons/Split'
+import Merge from '../../../img/icons/Merge'
+import Download from '../../../img/icons/Download'
+import QR from '../../../img/icons/QR'
+import Revise from '../../../img/icons/Revise'
+import FlipBackward from '../icons/FlipBackward'
 class JobMenu extends React.Component {
   constructor(props) {
     super(props)
@@ -56,7 +66,7 @@ class JobMenu extends React.Component {
           {
             label: (
               <>
-                <i className="icon-edit icon" />
+                <Revise size={18} />
                 Revise 2
               </>
             ),
@@ -70,7 +80,7 @@ class JobMenu extends React.Component {
           {
             label: (
               <>
-                <i className="icon-edit icon" />
+                <Revise size={18} />
                 Generate Revise 2
               </>
             ),
@@ -109,7 +119,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-refresh icon" />
+                  <ChangePassword size={18} />
                   Change Password
                 </>
               ),
@@ -130,7 +140,7 @@ class JobMenu extends React.Component {
                 this.props.job.get('revise_passwords').size > 1
                   ? [
                       {
-                        label: <>2nd Revise</>,
+                        label: <>Revise 2</>,
                         onClick: () => {
                           this.props.changePasswordFn(2)
                         },
@@ -148,7 +158,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-expand icon" />
+                  <Split size={18} />
                   Split
                 </>
               ),
@@ -164,7 +174,7 @@ class JobMenu extends React.Component {
               {
                 label: (
                   <>
-                    <i className="icon-compress icon" />
+                    <Merge size={18} />
                     Merge
                   </>
                 ),
@@ -178,7 +188,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <i className="icon-edit icon" />
+            <Revise size={18} />
             Revise
           </>
         ),
@@ -190,7 +200,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <i className="icon-qr-matecat icon" /> QA Report
+            <QR /> QA Report
           </>
         ),
         onClick: () => {
@@ -212,7 +222,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <i className="icon-download icon" /> Download Original
+            <Download size={18} /> Original
           </>
         ),
         onClick: () => {
@@ -222,7 +232,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <i className="icon-download icon" /> Export XLIFF
+            <Download size={18} /> Export XLIFF
           </>
         ),
         onClick: () => {
@@ -232,7 +242,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <i className="icon-download icon" /> Export TMX
+            <Download size={18} /> Export TMX
           </>
         ),
         onClick: () => {
@@ -245,7 +255,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-drawer icon" />
+                  <Archive size={18} />
                   Archive job
                 </>
               ),
@@ -256,7 +266,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel job
                 </>
               ),
@@ -271,7 +281,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <FlipBackward size={18} />
                   Unarchive job
                 </>
               ),
@@ -282,7 +292,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Cancel job
                 </>
               ),
@@ -297,7 +307,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-drawer unarchive-project icon" />
+                  <FlipBackward size={18} />
                   Resume job
                 </>
               ),
@@ -308,7 +318,7 @@ class JobMenu extends React.Component {
             {
               label: (
                 <>
-                  <i className="icon-trash-o icon" />
+                  <Trash size={18} />
                   Delete job permanently
                 </>
               ),

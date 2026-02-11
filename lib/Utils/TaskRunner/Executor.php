@@ -17,6 +17,7 @@ use ReflectionException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Frame;
+use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -239,7 +240,7 @@ class Executor implements SplObserver
                 $amqHandlerPublisher->reQueue($queueElement, $this->_executionContext, $this->logger);
                 $amqHandlerPublisher->getClient()->disconnect();
                 sleep(2);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $this->_logMsg("************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************");
                 $this->_logMsg("Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() . " " . $e->getTraceAsString());
             }

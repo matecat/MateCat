@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use InvalidArgumentException;
 use Lara\AccessKey;
 use Lara\Glossary;
 use Lara\Internal\HttpClient;
@@ -44,6 +45,13 @@ use Utils\TmKeyManagement\TmKeyStruct;
  */
 class Lara extends AbstractEngine
 {
+    public const DEFAULT_STYLE = "faithful";
+
+    private const ALLOWED_STYLES = [
+        'faithful',
+        'fluid',
+        'creative',
+    ];
 
     /**
      * @inheritdoc
@@ -223,6 +231,14 @@ class Lara extends AbstractEngine
             return [];
         }
 
+        $metadataDao = new MetadataDao();
+        $laraStyle = $_config['lara_style'] ?? null;
+
+        if($laraStyle === null && !empty($_config['project_id'])){
+            $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
+            $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
+        }
+
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
             $reasoning = false;
@@ -249,16 +265,20 @@ class Lara extends AbstractEngine
                 }
 
                 $translateOptions->setHeaders($headers->getArrayCopy());
+                $laraGlossariesArray = [];
 
                 if (!empty($_config['project_id'])) {
-                    $metadataDao = new MetadataDao();
-                    $metadata = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
 
-                    if ($metadata !== null) {
-                        $metadata = html_entity_decode($metadata->value);
-                        $laraGlossariesArray = json_decode($metadata, true);
+                    if ($laraGlossaries !== null) {
+                        $laraGlossaries = html_entity_decode($laraGlossaries->value);
+                        $laraGlossariesArray = json_decode($laraGlossaries, true);
                         $translateOptions->setGlossaries($laraGlossariesArray);
                     }
+                }
+
+                if ($laraStyle !== null) {
+                    $translateOptions->setStyle($laraStyle);
                 }
 
                 $request_translation = [];
@@ -311,6 +331,8 @@ class Lara extends AbstractEngine
                     'source' => $_config['source'],
                     'target' => $_config['target'],
                     'content_type' => 'application/xliff+xml',
+                    'style' => $laraStyle,
+                    'glossaries' => !empty($laraGlossariesArray) ? implode(",", $laraGlossariesArray) : null,
                     'multiline' => false,
                     'translation' => $translation,
                     'score' => $score ?? null,
@@ -319,9 +341,7 @@ class Lara extends AbstractEngine
             } catch (LaraException $t) {
                 if ($t->getCode() == 429) {
                     $this->logger->debug("Lara quota exceeded. You have exceeded your 'api_translation_chars' quota");
-
-                    $engine_type = explode("\\", self::class);
-                    $engine_type = array_pop($engine_type);
+                    $engine_type = $this->getEngineRecord()->getEngineType();
                     $message = json_encode([
                         '_type' => 'quota_exceeded',
                         'data' => [
@@ -356,7 +376,7 @@ class Lara extends AbstractEngine
                 return $this->mmt_GET_Fallback->get($_config);
             }
         } else {
-            $reasoning = true;
+            $reasoning = is_bool($_config['reasoning']) ? $_config['reasoning'] : true;
             $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
             if (isset($_config['include_score']) && $_config['include_score']) {
@@ -377,10 +397,13 @@ class Lara extends AbstractEngine
                 'multiline' => false,
                 'translation' => $translation,
                 'score' => $score ?? null,
+                'reasoning' => $reasoning,
+                'style' => $laraStyle ?? null,
             ]);
         }
 
         return (new Matches([
+            'style' => $laraStyle ?? null,
             'source' => $_config['source'],
             'target' => $_config['target'],
             'raw_segment' => $_config['segment'],
@@ -463,6 +486,11 @@ class Lara extends AbstractEngine
         if (empty($_keys)) {
             $this->logger->debug(["LARA: update skipped. No keys provided."]);
 
+            return true;
+        }
+
+        // temporary disable ur-Latn-PK
+        if (isset($_config['target']) && $_config['target'] === "ur-Latn-PK") {
             return true;
         }
 
@@ -688,7 +716,21 @@ class Lara extends AbstractEngine
     {
         return [
             'enable_mt_analysis',
+            'lara_style',
             'lara_glossaries',
         ];
+    }
+
+    /**
+     * @param string $lara_style
+     * @return string
+     */
+    public static function validateLaraStyle(string $lara_style): string
+    {
+        if(!in_array($lara_style, self::ALLOWED_STYLES)) {
+            throw new InvalidArgumentException("Invalid lara style.", -1);
+        }
+
+        return $lara_style;
     }
 }

@@ -5,13 +5,11 @@ import SegmentActions from '../../actions/SegmentActions'
 import {setTranslation} from '../../api/setTranslation'
 import {orderBy} from 'lodash'
 import {SegmentContext} from '../segments/SegmentContext'
-import {
-  JOB_WORD_CONT_TYPE,
-  REVISE_STEP_NUMBER,
-  SEGMENTS_STATUS,
-} from '../../constants/Constants'
+import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../../constants/Constants'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolActions from '../../actions/CatToolActions'
+import {editSegmentIssue} from '../../api/editSegmentIssue/editSegmentIssue'
+import {sendSegmentVersionIssue} from '../../api/sendSegmentVersionIssue'
 
 class ReviewExtendedIssuePanel extends React.Component {
   static contextType = SegmentContext
@@ -64,13 +62,26 @@ class ReviewExtendedIssuePanel extends React.Component {
 
     const deferredSubmit = () => {
       SegmentActions.setStatus(segment.sid, segment.fid, segment.status)
-      SegmentActions.submitIssue(this.context.segment.sid, issue)
+
+      const {issueEditing} = this.props
+
+      const promise = issueEditing ? editSegmentIssue : sendSegmentVersionIssue
+
+      promise({
+        idSegment: this.context.segment.sid,
+        issueDetails: issue,
+        issueId: this.props.issueEditing?.id,
+      })
         .then((data) => {
+          SegmentActions.getSegmentVersionsIssues(this.context.segment.sid)
+          CatToolActions.reloadQualityReport()
+
           this.setState({
             submitDisabled: false,
           })
           this.props.submitIssueCallback()
           this.props.setCreationIssueLoader(false)
+          if (issueEditing) this.props.setIssueEditing(undefined)
           setTimeout(() => {
             SegmentActions.issueAdded(this.context.segment.sid, data.issue.id)
           })
@@ -124,11 +135,11 @@ class ReviewExtendedIssuePanel extends React.Component {
   }
 
   getCategoriesHtml() {
+    const {issueEditing} = this.props
     let categoryComponents = []
     this.issueCategories.forEach(
       function (category, i) {
         let selectedValue = ''
-
         categoryComponents.push(
           <ReviewExtendedCategorySelector
             key={'category-selector-' + i}
@@ -138,14 +149,23 @@ class ReviewExtendedIssuePanel extends React.Component {
             category={category}
             sid={this.context.segment.sid}
             active={
-              this.state.enableArrows &&
-              parseInt(this.state.categorySelectedId) === parseInt(category.id)
+              (this.state.enableArrows &&
+                parseInt(this.state.categorySelectedId) ===
+                  parseInt(category.id)) ||
+              (issueEditing &&
+                parseInt(issueEditing.id_category) === parseInt(category.id))
             }
             severityActiveIndex={
-              this.state.enableArrows &&
+              (this.state.enableArrows &&
               parseInt(this.state.categorySelectedId) === parseInt(category.id)
                 ? this.state.severityIndex
-                : null
+                : null) ||
+              (issueEditing &&
+              parseInt(issueEditing.id_category) === parseInt(category.id)
+                ? category.severities.findIndex(
+                    ({label}) => label === issueEditing.severity,
+                  )
+                : null)
             }
           />,
         )
@@ -154,7 +174,9 @@ class ReviewExtendedIssuePanel extends React.Component {
 
     return (
       <div>
-        <div className="re-item-head pad-left-10">Type of issue</div>
+        {!this.props.issueEditing && (
+          <div className="re-item-head pad-left-10">New issue</div>
+        )}
         {categoryComponents}
       </div>
     )
@@ -166,6 +188,8 @@ class ReviewExtendedIssuePanel extends React.Component {
       function (category, i) {
         let selectedValue = ''
         let subcategoriesComponents = []
+
+        const {issueEditing} = this.props
 
         if (category.subcategories.length > 0) {
           category.subcategories.forEach((category, ii) => {
@@ -182,16 +206,25 @@ class ReviewExtendedIssuePanel extends React.Component {
                 category={category}
                 sid={this.context.segment.sid}
                 active={
-                  this.state.enableArrows &&
-                  parseInt(this.state.categorySelectedId) ===
-                    parseInt(category.id)
+                  (this.state.enableArrows &&
+                    parseInt(this.state.categorySelectedId) ===
+                      parseInt(category.id)) ||
+                  (issueEditing &&
+                    parseInt(issueEditing.id_category) ===
+                      parseInt(category.id))
                 }
                 severityActiveIndex={
-                  this.state.enableArrows &&
+                  (this.state.enableArrows &&
                   parseInt(this.state.categorySelectedId) ===
                     parseInt(category.id)
                     ? this.state.severityIndex
-                    : null
+                    : null) ||
+                  (issueEditing &&
+                  parseInt(issueEditing.id_category) === parseInt(category.id)
+                    ? category.severities.findIndex(
+                        ({label}) => label === issueEditing.severity,
+                      )
+                    : null)
                 }
               />,
             )
@@ -206,16 +239,24 @@ class ReviewExtendedIssuePanel extends React.Component {
               category={category}
               sid={this.context.segment.sid}
               active={
-                this.state.enableArrows &&
-                parseInt(this.state.categorySelectedId) ===
-                  parseInt(category.id)
+                (this.state.enableArrows &&
+                  parseInt(this.state.categorySelectedId) ===
+                    parseInt(category.id)) ||
+                (issueEditing &&
+                  parseInt(issueEditing.id_category) === parseInt(category.id))
               }
               severityActiveIndex={
-                this.state.enableArrows &&
+                (this.state.enableArrows &&
                 parseInt(this.state.categorySelectedId) ===
                   parseInt(category.id)
                   ? this.state.severityIndex
-                  : null
+                  : null) ||
+                (issueEditing &&
+                parseInt(issueEditing.id_category) === parseInt(category.id)
+                  ? category.severities.findIndex(
+                      ({label}) => label === issueEditing.severity,
+                    )
+                  : null)
               }
             />,
           )

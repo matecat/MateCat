@@ -16,6 +16,16 @@ import UserStore from '../../../stores/UserStore'
 import UserConstants from '../../../constants/UserConstants'
 import {changeJobPassword} from '../../../api/changeJobPassword'
 import {BulkAssignToMember} from './BulkAssignToMember'
+import {TOOLTIP_POSITION} from '../../common/Tooltip'
+import SwitchHorizontal from '../../../../img/icons/SwitchHorizontal'
+import AssignToMember from '../../../../img/icons/AssignToMember'
+import Archive from '../../../../img/icons/Archive'
+import Trash from '../../../../img/icons/Trash'
+import ChangePassword from '../../../../img/icons/ChangePassword'
+import Revise from '../../../../img/icons/Revise'
+import IconCloseCircle from '../../icons/IconCloseCircle'
+import CheckDone from '../../../../img/icons/CheckDone'
+import FlipBackward from '../../icons/FlipBackward'
 
 const MAX_JOBS_SELECTABLE = 100
 
@@ -30,7 +40,7 @@ const JOBS_ACTIONS = {
   CHANGE_PASSWORD: {id: 'change_password', label: 'Change password'},
   GENERATE_REVISE_2: {
     id: 'generate_second_pass',
-    label: 'Generate revise 2 link',
+    label: 'Generate revise 2',
   },
   ASSIGN_TO_MEMBER: {id: 'assign_to_member', label: 'Assign to member'},
   ASSIGN_TO_TEAM: {id: 'assign_to_team', label: 'Move to team'},
@@ -38,10 +48,10 @@ const JOBS_ACTIONS = {
 
 const ACTIONS_BY_FILTER = {
   active: [
-    JOBS_ACTIONS.ARCHIVE,
-    JOBS_ACTIONS.CANCEL,
     JOBS_ACTIONS.CHANGE_PASSWORD,
     JOBS_ACTIONS.GENERATE_REVISE_2,
+    JOBS_ACTIONS.ARCHIVE,
+    JOBS_ACTIONS.CANCEL,
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
     JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
@@ -52,15 +62,20 @@ const ACTIONS_BY_FILTER = {
     JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
   cancelled: [
+    JOBS_ACTIONS.ARCHIVE,
     JOBS_ACTIONS.RESUME,
     JOBS_ACTIONS.DELETE_PERMANENTLY,
-    JOBS_ACTIONS.ARCHIVE,
     JOBS_ACTIONS.ASSIGN_TO_TEAM,
     JOBS_ACTIONS.ASSIGN_TO_MEMBER,
   ],
 }
 
-export const ProjectsBulkActions = ({projects, teams, children}) => {
+export const ProjectsBulkActions = ({
+  projects,
+  teams,
+  isSelectedTeamPersonal,
+  children,
+}) => {
   const [jobsBulk, setJobsBulk] = useState([])
   const [filterStatusApplied, setFilterStatusApplied] = useState('active')
 
@@ -68,6 +83,8 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
     isPressed: false,
     startJob: undefined,
   })
+
+  const isReachedLimitJobsSelected = jobsBulk.length >= MAX_JOBS_SELECTABLE
 
   useEffect(() => {
     const onChangeProjectStatus = (userUid, name, status) => {
@@ -159,6 +176,18 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
           prevState.some((value) => value === id),
         )
 
+        if (
+          !isJobsInvolvedChecked &&
+          prevState.length + jobsInvolved.length > MAX_JOBS_SELECTABLE
+        ) {
+          if (shiftKeyRef.current.isPressed) {
+            const diff = MAX_JOBS_SELECTABLE - prevState.length
+            jobsInvolved = jobsInvolved.filter((item, index) => index <= diff)
+          } else {
+            return prevState
+          }
+        }
+
         return jobsInvolved.reduce((acc, cur) => {
           if (shiftKeyRef.current.isPressed) {
             return isJobsInvolvedChecked
@@ -199,6 +228,12 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
 
           const isCheckedAllJobs =
             jobsBulkForCurrentProject.length === currentProject.jobs.length
+
+          if (
+            !isCheckedAllJobs &&
+            prevState.length + currentProject.jobs.length > MAX_JOBS_SELECTABLE
+          )
+            return prevState
 
           return isCheckedAllJobs
             ? prevState.filter(
@@ -268,12 +303,34 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
     )
 
     switch (id) {
+      case JOBS_ACTIONS.ARCHIVE.id:
+      case JOBS_ACTIONS.UNARCHIVE.id:
+      case JOBS_ACTIONS.RESUME.id:
+      case JOBS_ACTIONS.CANCEL.id:
       case JOBS_ACTIONS.DELETE_PERMANENTLY.id:
-        openConfirmModal({
-          action: id,
-          text: `You are about to delete ${jobsBulk.length} jobs permanently, this action cannot be undone. Are you sure you want to proceed?`,
-          successCallback: () => submit({id}),
-        })
+      case JOBS_ACTIONS.GENERATE_REVISE_2.id:
+        if (jobsBulk.length >= 10) {
+          const text =
+            id === JOBS_ACTIONS.ARCHIVE.id
+              ? `You are about to archive ${jobsBulk.length} jobs. Are you sure you want to proceed?`
+              : id === JOBS_ACTIONS.UNARCHIVE.id
+                ? `You are about to unarchive ${jobsBulk.length} jobs. Are you sure you want to proceed?`
+                : id === JOBS_ACTIONS.RESUME.id
+                  ? `You are about to resume ${jobsBulk.length} jobs. Are you sure you want to proceed?`
+                  : id === JOBS_ACTIONS.CANCEL.id
+                    ? `You are about to delete ${jobsBulk.length} jobs. Are you sure you want to proceed?`
+                    : id === JOBS_ACTIONS.DELETE_PERMANENTLY.id
+                      ? `You are about to delete ${jobsBulk.length} jobs permanently, this action cannot be undone. Are you sure you want to proceed?`
+                      : `You are about to generate revise 2 of ${jobsBulk.length} jobs. Are you sure you want to proceed?`
+
+          openConfirmModal({
+            action: id,
+            text,
+            successCallback: () => submit({id}),
+          })
+        } else {
+          submit({id})
+        }
         break
       case JOBS_ACTIONS.CHANGE_PASSWORD.id:
       case JOBS_ACTIONS.ASSIGN_TO_TEAM.id:
@@ -321,6 +378,15 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               : id,
           )
         })
+
+        CatToolActions.addNotification({
+          title: `Jobs ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}`,
+          text: `The selected jobs have been successfully ${id === JOBS_ACTIONS.ARCHIVE.id ? 'archived' : id === JOBS_ACTIONS.UNARCHIVE.id ? 'unarchived' : id === JOBS_ACTIONS.CANCEL.id ? 'canceled' : id === JOBS_ACTIONS.RESUME.id ? 'resumed' : 'deleted permanently'}.`,
+          type: 'warning',
+          position: 'bl',
+          allowHtml: true,
+          timer: 10000,
+        })
         break
       case JOBS_ACTIONS.GENERATE_REVISE_2.id:
         jobs.forEach((job) => {
@@ -337,6 +403,15 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               job.id,
               job.password,
             )
+        })
+
+        CatToolActions.addNotification({
+          title: 'Revise 2 links generated',
+          text: 'The Revise 2 links for the selected jobs have been generated successfully.',
+          type: 'warning',
+          position: 'bl',
+          allowHtml: true,
+          timer: 10000,
         })
         break
       case JOBS_ACTIONS.CHANGE_PASSWORD.id:
@@ -364,11 +439,15 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
               rest.revision_number,
             )
           })
-
+          console.log('rest.revision_number', rest.revision_number)
           if (fulfilledPromises.length) {
             const notification = {
-              title: 'Change jobs password',
-              text: 'Selected jobs password has been changed',
+              title: rest.revision_number
+                ? `${rest.revision_number === 1 ? 'Revise' : 'Revise 2'} passwords changed`
+                : 'Translate passwords changed',
+              text: rest.revision_number
+                ? `The ${rest.revision_number === 1 ? 'Revise' : 'Revise 2'} passwords for the selected jobs have been changed successfully.`
+                : 'The Translate passwords for the selected jobs have been changed successfully',
               type: 'warning',
               position: 'bl',
               allowHtml: true,
@@ -400,46 +479,91 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
         )
         break
     }
+
+    clearAll()
   }
 
   const buttonProps = {
-    mode: BUTTON_MODE.LINK,
-    size: BUTTON_SIZE.LINK_SMALL,
-    tooltip: 'Tooltip info',
+    mode: BUTTON_MODE.GHOST,
+    size: BUTTON_SIZE.ICON_STANDARD,
+    tooltipPosition: TOOLTIP_POSITION.RIGHT,
+    className: 'bulk-actions-circle-button',
   }
   const buttonActionsProps = {disabled: !jobsBulk.length}
 
   const actions = (
     <>
-      {ACTIONS_BY_FILTER[filterStatusApplied].map((action, index) => (
-        <div key={index}>
-          <Button
-            {...{
-              ...buttonProps,
-              ...buttonActionsProps,
-              ...(action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id && {
-                disabled: !jobsBulk.length || !isSelectedAllJobsByProjects,
-              }),
-              ...(action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id && {
-                disabled:
-                  !jobsBulk.length ||
-                  !isSelectedAllJobsByProjects ||
-                  projectsSelected.some(
-                    (project) =>
-                      teams.find(({id}) => id === project.id_team).type ===
-                      'personal',
-                  ) ||
-                  !projectsSelected.every(
-                    ({id_team}) => id_team === projectsSelected[0].id_team,
-                  ),
-              }),
-              onClick: () => onClickAction(action),
-            }}
-          >
-            {action.label}
-          </Button>
-        </div>
-      ))}
+      {ACTIONS_BY_FILTER[filterStatusApplied].map((action, index) => {
+        const disabled =
+          action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id
+            ? !jobsBulk.length || !isSelectedAllJobsByProjects
+            : action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id
+              ? !jobsBulk.length ||
+                !isSelectedAllJobsByProjects ||
+                projectsSelected.some(
+                  (project) =>
+                    teams.find(({id}) => id === project.id_team).type ===
+                    'personal',
+                ) ||
+                !projectsSelected.every(
+                  ({id_team}) => id_team === projectsSelected[0].id_team,
+                )
+              : false
+
+        const tooltip =
+          'Some projects are only partially selected. Select all jobs to enable this action.'
+
+        const icon =
+          action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id ? (
+            <SwitchHorizontal size={20} />
+          ) : action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id ? (
+            <AssignToMember size={20} />
+          ) : action.id === JOBS_ACTIONS.ARCHIVE.id ? (
+            <Archive size={20} />
+          ) : action.id === JOBS_ACTIONS.UNARCHIVE.id ||
+            action.id === JOBS_ACTIONS.RESUME.id ? (
+            <FlipBackward size={20} />
+          ) : action.id === JOBS_ACTIONS.CANCEL.id ||
+            action.id === JOBS_ACTIONS.DELETE.id ||
+            action.id === JOBS_ACTIONS.DELETE_PERMANENTLY.id ? (
+            <Trash size={20} />
+          ) : action.id === JOBS_ACTIONS.CHANGE_PASSWORD.id ? (
+            <ChangePassword size={20} />
+          ) : (
+            action.id === JOBS_ACTIONS.GENERATE_REVISE_2.id && (
+              <Revise size={20} />
+            )
+          )
+
+        return (
+          <div key={index}>
+            <Button
+              {...{
+                ...buttonProps,
+                ...buttonActionsProps,
+                tooltip: action.label,
+                ...(action.id === JOBS_ACTIONS.ASSIGN_TO_TEAM.id && {
+                  disabled,
+                  ...(disabled && {
+                    tooltip: `${action.label} - ${tooltip}`,
+                  }),
+                }),
+                ...(action.id === JOBS_ACTIONS.ASSIGN_TO_MEMBER.id && {
+                  disabled: disabled || isSelectedTeamPersonal,
+                  ...((disabled || isSelectedTeamPersonal) && {
+                    tooltip: isSelectedTeamPersonal
+                      ? 'Assign to member - Open a different team to enable this action.'
+                      : `${action.label} - ${tooltip}`,
+                  }),
+                }),
+                onClick: () => onClickAction(action),
+              }}
+            >
+              {icon}
+            </Button>
+          </div>
+        )
+      })}
     </>
   )
 
@@ -447,29 +571,40 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
     <ProjectsBulkActionsContext.Provider
       value={{jobsBulk, onCheckedProject, onCheckedJob}}
     >
-      <div className="project-bulk-actions-background">
+      <div
+        className={`project-bulk-actions-background ${!jobsBulk.length ? 'project-bulk-actions-background-hidden' : ''}`}
+      >
         <div className="project-bulk-actions-container">
           <div className="project-bulk-actions-buttons">
-            <span>
-              <span>{jobsBulk.length}</span> entries selected
+            <span
+              className={`jobs-selected ${isReachedLimitJobsSelected ? 'jobs-selected-reached-limit' : ''}`}
+              aria-label={
+                isReachedLimitJobsSelected
+                  ? 'Maximum number of selected jobs reached'
+                  : `${jobsBulk.length} ${jobsBulk.length > 1 ? 'jobs' : 'job'} selected`
+              }
+              tooltip-position="right"
+            >
+              <span>{jobsBulk.length}</span>
             </span>
-            {actions}
-          </div>
-          <div>
             <Button
               {...buttonProps}
+              tooltip="Select all visible jobs"
               onClick={selectAll}
               disabled={!projects.length}
             >
-              Select all projects
+              <CheckDone size={20} />
             </Button>
             <Button
               {...buttonProps}
+              tooltip="Clear selection"
               onClick={clearAll}
               disabled={!projects.length}
             >
-              Clear all
+              <IconCloseCircle size={20} />
             </Button>
+            <span className="project-bulk-spacer"></span>
+            {actions}
           </div>
         </div>
       </div>
@@ -481,5 +616,6 @@ export const ProjectsBulkActions = ({projects, teams, children}) => {
 ProjectsBulkActions.propTypes = {
   projects: PropTypes.array.isRequired,
   teams: PropTypes.array.isRequired,
+  isSelectedTeamPersonal: PropTypes.bool.isRequired,
   children: PropTypes.node,
 }

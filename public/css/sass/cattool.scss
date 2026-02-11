@@ -48,8 +48,8 @@ body.cattool {
   .pointer-first-segment {
     height: 36px;
     width: 36px;
-    background: colors.$darkBlue url('/public/img/icons/arrow-up.svg') no-repeat center
-      center;
+    background: colors.$darkBlue url('/public/img/icons/arrow-up.svg') no-repeat
+      center center;
     background-size: 24px;
     border-radius: 50%;
     position: absolute;
@@ -63,7 +63,6 @@ body.cattool {
     }
   }
 }
-
 
 .segment-side-buttons {
   /* styles based on .sid line 376 style.css */
@@ -113,16 +112,16 @@ body.cattool {
     font-weight: bold;
     line-height: 12px;
     &.badge-red {
-        color: colors.$white;
-        background-color: colors.$red800;
+      color: colors.$white;
+      background-color: colors.$red800;
     }
     &.badge-orange {
-        color: colors.$black;
-        background-color: colors.$orange600;
+      color: colors.$black;
+      background-color: colors.$orange600;
     }
     &.badge-blue {
-        color: colors.$white;
-        background-color: colors.$blue800;
+      color: colors.$white;
+      background-color: colors.$blue800;
     }
   }
 }
@@ -137,5 +136,66 @@ body.cattool {
   .warnings,
   .toolbar {
     display: none !important;
+  }
+}
+
+.segment-target-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-left: -11px;
+  margin-top: 8px;
+
+  .segment-target-toolbar-icon {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+
+    &:disabled {
+      color: colors.$grey8 !important;
+      box-shadow: inset 0 0 0 1px colors.$grey8 !important;
+
+      svg {
+        color: colors.$grey8 !important;
+      }
+    }
+  }
+
+  .segment-target-toolbar-dropdown-trigger {
+    height: 32px !important;
+    padding: 0 16px !important;
+    font-weight: bold;
+    font-size: 14px !important;
+  }
+}
+
+.lara-styles-dropdown {
+  width: 320px;
+
+  .lara-styles-dropdown-item {
+    font-size: 14px;
+    color: colors.$grey7;
+    padding: 12px;
+    border-radius: 6px;
+    text-wrap: auto;
+    text-align: left;
+
+    > span {
+      font-weight: 500;
+      color: black;
+    }
+
+    &.lara-styles-dropdown-item-active,
+    &:hover {
+      background-color: rgba(#0588f9, 0.16);
+      color: #0099cc;
+      > span {
+        color: #017cac;
+      }
+    }
+  }
+
+  .dropdownmenu-item {
+    padding: 0;
+    gap: 0;
   }
 }

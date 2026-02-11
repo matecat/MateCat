@@ -205,9 +205,10 @@ const SegmentUtils = {
       translation: translation,
       segment: segmentSource,
       time_to_edit: new Date() - SegmentStore.getStartEditTime(),
-      chosen_suggestion_index: !config.isReview
-        ? segment.choosenSuggestionIndex
-        : undefined,
+      chosen_suggestion_index:
+        !config.isReview && segment.contributions
+          ? segment.choosenSuggestionIndex
+          : undefined,
       propagate: propagate,
       context_before: contextBefore,
       id_before: idBefore,
@@ -224,7 +225,9 @@ const SegmentUtils = {
         : null,
       characters_counter: segment.charactersCounter,
       suggestion_array:
-        segment.contributions && !config.isReview
+        segment.contributions &&
+        !config.isReview &&
+        segment.choosenSuggestionIndex
           ? JSON.stringify(segment.contributions.matches)
           : undefined,
     }

@@ -97,6 +97,9 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public ?int $public_tm_penalty = null;
 
     public ?array $subfiltering_handlers = [];
+    public ?string $lara_style = null;
+
+    public ?bool $reasoning = false;
 
     ### NOT SERIALIZABLE Private members ###
 

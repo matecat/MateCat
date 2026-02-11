@@ -297,22 +297,23 @@ class ProjectsContainer extends React.Component {
     return (
       <div className="project-list">
         <div className="ui container">
-          {/* <ProjectsBulkActions
+          <ProjectsBulkActions
             projects={this.state.projects.toJS()}
             teams={this.state.teams.toJS()}
-          > */}
-          {this.props.fetchingProjects ? (
-            <div className="ui active inverted dimmer">
-              <div className="ui massive text loader">Loading Projects</div>
-            </div>
-          ) : (
-            <React.Fragment>
-              {spinnerReloadProjects}
-              {items}
-              {spinner}
-            </React.Fragment>
-          )}
-          {/* </ProjectsBulkActions> */}
+            isSelectedTeamPersonal={this.state.team.get('type') === 'personal'}
+          >
+            {this.props.fetchingProjects ? (
+              <div className="ui active inverted dimmer">
+                <div className="ui massive text loader">Loading Projects</div>
+              </div>
+            ) : (
+              <React.Fragment>
+                {spinnerReloadProjects}
+                {items}
+                {spinner}
+              </React.Fragment>
+            )}
+          </ProjectsBulkActions>
         </div>
       </div>
     )

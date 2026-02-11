@@ -1,3 +1,4 @@
+import React from 'react'
 import {each, forEach, isUndefined} from 'lodash'
 import {debounce} from 'lodash/function'
 import $ from 'jquery'
@@ -28,7 +29,6 @@ import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
-import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
@@ -36,7 +36,6 @@ import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentI
 import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
 import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../constants/Constants'
 import {getSegmentsIssues} from '../api/getSegmentsIssues'
-import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
 import {
@@ -1054,8 +1053,31 @@ const SegmentActions = {
   deleteGlossaryItem: function (data) {
     deleteGlossaryItem(data)
       .then(() => {})
-      .catch(() => {
-        OfflineUtils.failedConnection()
+      .catch((errors) => {
+        if (errors.status === 403) {
+          const notification = {
+            title: 'Glossary edit failed',
+            text: (
+              <span>
+                This glossary is part of a resource that isn’t enabled for
+                updates.
+                <br />
+                To edit it, open the <b>Settings</b> panel, go to the{' '}
+                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>“Update”</b> checkbox next to the resource name.
+              </span>
+            ),
+            type: 'warning',
+            position: 'bl',
+          }
+          CatToolActions.addNotification(notification)
+        } else {
+          OfflineUtils.failedConnection()
+        }
+
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        })
       })
   },
 
@@ -1063,7 +1085,7 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'A glossary item has been deleted',
+      message: 'A termbase item has been deleted',
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
@@ -1089,7 +1111,24 @@ const SegmentActions = {
     addGlossaryItem(data)
       .then(() => {})
       .catch((errors) => {
-        if (errors.length > 0) {
+        if (errors.status === 403) {
+          const notification = {
+            title: 'Glossary edit failed',
+            text: (
+              <span>
+                This glossary is part of a resource that isn’t enabled for
+                updates.
+                <br />
+                To edit it, open the <b>Settings</b> panel, go to the{' '}
+                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>“Update”</b> checkbox next to the resource name.
+              </span>
+            ),
+            type: 'warning',
+            position: 'bl',
+          }
+          CatToolActions.addNotification(notification)
+        } else if (errors.length > 0) {
           AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
             sid: sid,
@@ -1098,6 +1137,10 @@ const SegmentActions = {
         } else {
           OfflineUtils.failedConnection()
         }
+
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        })
       })
   },
   addGlossaryItemToCache: (sid, payload) => {
@@ -1122,8 +1165,31 @@ const SegmentActions = {
   updateGlossaryItem: function (data) {
     updateGlossaryItem(data)
       .then(() => {})
-      .catch(() => {
-        OfflineUtils.failedConnection()
+      .catch((errors) => {
+        if (errors.status === 403) {
+          const notification = {
+            title: 'Glossary edit failed',
+            text: (
+              <span>
+                This glossary is part of a resource that isn’t enabled for
+                updates.
+                <br />
+                To edit it, open the <b>Settings</b> panel, go to the{' '}
+                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>“Update”</b> checkbox next to the resource name.
+              </span>
+            ),
+            type: 'warning',
+            position: 'bl',
+          }
+          CatToolActions.addNotification(notification)
+        } else {
+          OfflineUtils.failedConnection()
+        }
+
+        AppDispatcher.dispatch({
+          actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
+        })
       })
   },
 
@@ -1273,23 +1339,6 @@ const SegmentActions = {
       sid: sid,
       data: type,
     })
-  },
-
-  submitIssue: function (sid, data) {
-    const promise = sendSegmentVersionIssue(sid, {
-      ...data,
-    })
-    promise
-      .then(() => {
-        this.getSegmentVersionsIssues(sid)
-        CatToolActions.reloadQualityReport()
-      })
-      .catch(() => {
-        //todo Capture Error
-        console.log('Error creating issue')
-      })
-
-    return promise
   },
 
   getSegmentVersionsIssues: function (segmentId) {
@@ -1501,7 +1550,7 @@ const SegmentActions = {
         ModalsActions.showModalComponent(
           UnlockAllSegmentsModal,
           {},
-          'Unlock all ICE segments',
+          'Unlock all 101% segments',
         )
       }
     }
@@ -1914,6 +1963,18 @@ const SegmentActions = {
       actionType: SegmentConstants.SET_CURRENT_SEGMENT_ID,
       sid,
     })
+  },
+  laraStylesTab: ({sid, styles}) => {
+    SegmentActions.modifyTabVisibility('LaraStyles', true)
+    SegmentActions.activateTab(sid, 'LaraStyles')
+
+    setTimeout(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.LARA_STYLES,
+        sid,
+        styles,
+      })
+    }, 100)
   },
 }
 

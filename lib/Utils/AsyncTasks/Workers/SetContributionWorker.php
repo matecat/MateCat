@@ -99,11 +99,6 @@ class SetContributionWorker extends AbstractWorker
             return;
         }
 
-        // temporary disable ur-Latn-PK
-        if ($this->_engine instanceof Lara && $jobStruct->target === "ur-Latn-PK") {
-            return;
-        }
-
         $config = $this->_engine->getConfigStruct();
         $config['source'] = $jobStruct->source;
         $config['target'] = $jobStruct->target;

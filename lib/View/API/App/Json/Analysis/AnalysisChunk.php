@@ -153,8 +153,8 @@ class AnalysisChunk implements JsonSerializable
         }
 
         return [
-            'tm' => $tmEngine !== null ? (new Engine())->renderItem($tmEngine->getEngineRecord()) : null,
-            'mt' => $mtEngine !== null ? (new Engine())->renderItem($mtEngine->getEngineRecord()) : null,
+            'tm' => $tmEngine?->getEngineRecord()->arrayRepresentation(),
+            'mt' => $mtEngine?->getEngineRecord()->arrayRepresentation(),
         ];
     }
 
