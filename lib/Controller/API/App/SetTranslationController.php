@@ -706,7 +706,6 @@ class SetTranslationController extends AbstractStatefulKleinController
             $translation->suggestion_position = 0;
             $translation->warning = false;
             $translation->translation_date = date("Y-m-d H:i:s");
-            $translation->translation_date = date("Y-m-d H:i:s");
 
             try {
                 CatUtils::addSegmentTranslation($translation, $this->isRevision());
