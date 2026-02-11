@@ -81,27 +81,27 @@ a.button-component-container {
   }
   &.outlineBg {
     box-shadow: inset 0 0 0 1px var(--btnBorderColor);
-    background-color: var(--btnBgColorSemitransAlt);
-    color: var(--btnAltTextColor);
+    background-color: var(--btnBgColorOutline);
+    color: var(--btnTextColor);
 
     &:not(:disabled):global(.button--active) {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorActive);
-      background-color: var(--btnBgColorSemitransAlt);
+      background-color: var(--btnBgColorOutline);
     }
 
     &:not(:disabled):hover,
     &:not(:disabled):focus {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorHover);
-      background-color: var(--btnBgColorSemitrans);
-      color: var(--btnAltTextColorHover);
+      background-color: var(--btnBgColorSemitransAlt);
+      color: var(--btnTextColor);
     }
 
     &:disabled {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorDisabled);
       color: var(--btnAltTextColorDisabled);
-      background-color: var(--btnBgColorSemitrans);
+      background-color: var(--btnBgColorSemitransAlt);
       svg {
-        color: var(--btnAltTextColorDisabled);
+        color: var(--btnTextColorDisabled);
       }
     }
   }
@@ -236,6 +236,7 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$grey9};
   --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
   --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
+  --btnBgColorOutline: #{rgba(colors.$white, 0.5)};
 }
 .primary {
   --btnTextColor: #{colors.$white};
@@ -253,6 +254,7 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$translatedBlueHover};
   --btnBgColorSemitrans: #{rgba(colors.$translatedBlue, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$translatedBlue, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$translatedBlue, 0.5)};
 }
 .info {
   --btnTextColor: #{colors.$white};
@@ -270,6 +272,7 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$linkBlueHover};
   --btnBgColorSemitrans: #{rgba(colors.$linkBlue, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$linkBlue, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$linkBlue, 0.5)};
 }
 .success {
   --btnTextColor: #{colors.$white};
@@ -287,6 +290,7 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$approvedGreenHover};
   --btnBgColorSemitrans: #{rgba(colors.$approvedGreen, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$approvedGreen, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$approvedGreen, 0.5)};
 }
 .warning {
   --btnTextColor: #{colors.$white};
@@ -304,6 +308,7 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$warningHover};
   --btnBgColorSemitrans: #{rgba(colors.$warning, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$warning, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$warning, 0.5)};
 }
 .critical {
   --btnTextColor: #{colors.$white};
@@ -321,6 +326,7 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$redDefaultHover};
   --btnBgColorSemitrans: #{rgba(colors.$redDefault, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$redDefault, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$redDefault, 0.5)};
 }
 .purple {
   --btnTextColor: #{colors.$white};
@@ -338,6 +344,7 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$approved2GreenHover};
   --btnBgColorSemitrans: #{rgba(colors.$approved2Green, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$approved2Green, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$approved2Green, 0.5)};
 }
 
 .icon {
@@ -352,4 +359,5 @@ a.button-component-container {
   --btnBgColorAlt: #{colors.$grey9};
   --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
   --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
+  --btnBgColorOutline: #{rgba(colors.$white, 0.5)};
 }

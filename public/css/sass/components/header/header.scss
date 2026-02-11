@@ -68,7 +68,7 @@ header {
     z-index: 4;
     color: colors.$white;
     margin-right: 16px;
-    button.default {
+    button {
       color: colors.$white !important;
 
       &:disabled {

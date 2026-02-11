@@ -209,7 +209,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
       {/*Mark as complete*/}
       {featureEnabled && (
         <Button
-          mode={BUTTON_MODE.OUTLINE}
+          mode={markedAsComplete ? BUTTON_MODE.OUTLINE_BG : BUTTON_MODE.GHOST}
           type={markedAsComplete ? BUTTON_TYPE.SUCCESS : BUTTON_TYPE.DEFAULT}
           className="markAsCompleteButton"
           onClick={clickMarkAsComplete}
