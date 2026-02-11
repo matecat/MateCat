@@ -118,14 +118,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $this->data['translation']
             ); // is_numeric check is needed to allow "0" strings
 
-            $check = $this->setQaChecks(
-                $segment,
-                $translation,
-                new MessagePatternValidator(
-                    language: $this->data['chunk']->target,
-                    patternString: $translation
-                )
-            );
+            $check = $this->setQaChecks($segment, $translation);
             $check->performConsistencyCheck();
 
             if ($check->thereAreWarnings()) {
@@ -493,7 +486,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             'split_statuses' => $split_statuses,
             'chunk' => $chunk,
             'project' => $chunk->getProject(),
-            'id_project' => $chunk->id_project
+            'id_project' => $chunk->id_project,
+            'segment_contains_icu' => $this->segmentContainsICU($chunk->getProject(), $chunk, $segment)
         ];
 
         $this->logger->debug($data);
@@ -553,6 +547,24 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->checkStatus($this->data['status']);
     }
 
+    protected function segmentContainsICU(ProjectStruct $projectStruct, JobStruct $chunk, string $segment): bool
+    {
+        $icu_enabled = $projectStruct->getMetadataValue(ProjectMetadataDao::ICU_ENABLED) ?? false;
+        $string_contains_icu = false;
+        if ($icu_enabled) {
+            $icuValidator = new MessagePatternValidator(
+                $chunk->target,
+                // Validate the ICU syntax in the segment to detect ICU patterns
+                $segment,
+            );
+            // Check if complex ICU patterns (plurals, selects, etc.) are present
+            //this method returns false even when validation fails, it's ok since when the source is invalid, we want not to enable icu validation
+            $string_contains_icu = $icuValidator->containsComplexSyntax();
+        }
+
+        return $string_contains_icu;
+    }
+
     /**
      * @throws ReflectionException
      * @throws Exception
@@ -564,16 +576,6 @@ class SetTranslationController extends AbstractStatefulKleinController
         $featureSet = $this->getFeatureSet();
         $featureSet->loadForProject($projectStruct);
 
-        $icu_enabled = $projectStruct->getMetadataValue(ProjectMetadataDao::ICU_ENABLED) ?? false;
-        $string_contains_icu = false;
-        if ($icu_enabled) {
-            $icuValidator = new MessagePatternValidator(
-                $this->data['chunk']->target,
-                $this->data['translation'],
-            );
-            $string_contains_icu = $icuValidator->containsComplexSyntax();
-        }
-
         /** @var MateCatFilter $filter */
         $metadata = new JobsMetadataDao();
         $filter = MateCatFilter::getInstance(
@@ -582,7 +584,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->data['chunk']->target,
             SegmentOriginalDataDao::getSegmentDataRefMap((int)$this->data['id_segment']),
             $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password),
-            $string_contains_icu
+            $this->data['segment_contains_icu']
         );
         $this->filter = $filter;
     }
@@ -590,12 +592,21 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @param string $segment
      * @param string $translation
-     * @param MessagePatternValidator|null $validator
      * @return QA
      */
-    protected function setQaChecks(string $segment, string $translation, ?MessagePatternValidator $validator = null): QA
+    protected function setQaChecks(string $segment, string $translation): QA
     {
-        $check = new QA($segment, $translation, $validator); // Layer 1 here
+        $check = new QA(
+            $segment,
+            $translation,
+            new MessagePatternValidator(
+                language: $this->data['chunk']->target,
+                // use the translation content for the validation
+                patternString: $translation
+            ),
+            // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
+            $this->data['segment_contains_icu']
+        ); // Layer 1 here
         $check->setChunk($this->data['chunk']);
         $check->setFeatureSet($this->featureSet);
         $check->setSourceSegLang($this->data['chunk']->source);

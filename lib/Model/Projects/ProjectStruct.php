@@ -114,7 +114,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      *
      * @return ?string
      */
-    public function getMetadataValue(string $key): ?string
+    public function getMetadataValue(string $key): mixed
     {
         return $this->cachable(__METHOD__ . ":" . $key, function () use ($key) {
             $mDao = new MetadataDao();

@@ -175,6 +175,10 @@ class QA
      * @var MessagePatternAnalyzer|null
      */
     protected ?MessagePatternValidator $icuPluralsValidator = null;
+    /**
+     * @var bool
+     */
+    protected bool $source_contains_icu = false;
 
     const int ERR_NONE = 0;
     const int ERR_COUNT = 1;
@@ -856,7 +860,7 @@ class QA
      * @param string $target_seg
      *
      */
-    public function __construct(?string $source_seg = null, ?string $target_seg = null, ?MessagePatternValidator $icuPluralsValidator = null)
+    public function __construct(?string $source_seg = null, ?string $target_seg = null, ?MessagePatternValidator $icuPluralsValidator = null, bool $string_contains_icu = false)
     {
         mb_regex_encoding('UTF-8');
         mb_internal_encoding("UTF-8");
@@ -911,6 +915,7 @@ class QA
         $this->_resetDOMMaps();
 
         $this->icuPluralsValidator = $icuPluralsValidator;
+        $this->source_contains_icu = $string_contains_icu;
     }
 
     /**
@@ -1554,7 +1559,7 @@ class QA
             return $this->getErrors();
         }
 
-        if (!$this->icuPluralsValidator || !$this->icuPluralsValidator->containsComplexSyntax()) {
+        if (!$this->icuPluralsValidator || !$this->source_contains_icu) {
             $this->_checkTagsBoundary();
             $this->_checkContentConsistency($srcNodeList, $trgNodeList);
             $this->_checkBxAndExInsideG();

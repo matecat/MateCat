@@ -122,13 +122,14 @@ class GetWarningController extends KleinController
         // Detect if the translation content contains ICU MessageFormat syntax
         $string_contains_icu = false;
         if ($icu_enabled) {
-                // Validate the ICU syntax in the target content
-                $icuSyntaxValidator = new MessagePatternValidator(
-                    language: $chunk->target,
-                    patternString: $trg_content
-                );
-                // Check if complex ICU patterns (plurals, selects, etc.) are present
-                $string_contains_icu = $icuSyntaxValidator->containsComplexSyntax();
+            $icuSyntaxValidator = new MessagePatternValidator(
+                language: $chunk->target,
+                // Validate the ICU syntax in the segment to detect ICU patterns
+                patternString: $src_content
+            );
+            // Check if complex ICU patterns (plurals, selects, etc.) are present
+            //this method returns false even when validation fails, it's ok since when the segment is invalid, we want not to enable icu validation
+            $string_contains_icu = $icuSyntaxValidator->containsComplexSyntax();
         }
 
         /** @var MateCatFilter $Filter */
@@ -147,7 +148,13 @@ class GetWarningController extends KleinController
         $QA = new QA(
             $src_content,
             $trg_content,
-            $icuSyntaxValidator ?? null
+            new MessagePatternValidator(
+                language: $chunk->target,
+                // use the translation content for the validation
+                patternString: $trg_content
+            ),
+            // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
+            $string_contains_icu
         );
         $QA->setFeatureSet($featureSet);
         $QA->setChunk($chunk);
