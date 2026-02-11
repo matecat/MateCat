@@ -8,12 +8,18 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../common/Button/Button'
-import ClipboardCheck from '../../../../img/icons/ClipboardCheck'
+import AlertIcon from '../../../../img/icons/AlertIcon'
+import CatToolStore from '../../../stores/CatToolStore'
+import CatToolConstants from '../../../constants/CatToolConstants'
+import SearchUtils from './search/searchUtils'
+import AlertIconFull from '../../../../img/icons/AlertIconFull'
 
 export const SegmentsQAButton = () => {
   const [warnings, setWarnings] = useState()
   const [totalIssues, setTotalIssues] = useState(0)
   const [numberClass, setNumberClass] = useState('')
+  const [qaOpen, setQaOpen] = useState(SearchUtils.searchOpen)
+
   const openQA = (event) => {
     event.preventDefault()
     CatToolActions.toggleQaIssues()
@@ -37,11 +43,24 @@ export const SegmentsQAButton = () => {
       SegmentConstants.UPDATE_GLOBAL_WARNINGS,
       updateWarnings,
     )
+    const closeQA = (container) => {
+      if (container && container === 'qaComponent') {
+        setQaOpen((prevState) => !prevState)
+      } else {
+        setQaOpen(false)
+      }
+    }
+    CatToolStore.addListener(CatToolConstants.TOGGLE_CONTAINER, closeQA)
+    CatToolStore.addListener(CatToolConstants.CLOSE_SUBHEADER, closeQA)
+    CatToolStore.addListener(CatToolConstants.SHOW_CONTAINER, closeQA)
     return () => {
       SegmentStore.removeListener(
         SegmentConstants.UPDATE_GLOBAL_WARNINGS,
         updateWarnings,
       )
+      CatToolStore.removeListener(CatToolConstants.TOGGLE_CONTAINER, closeQA)
+      CatToolStore.removeListener(CatToolConstants.CLOSE_SUBHEADER, closeQA)
+      CatToolStore.removeListener(CatToolConstants.SHOW_CONTAINER, closeQA)
     }
   }, [])
 
@@ -59,7 +78,7 @@ export const SegmentsQAButton = () => {
       disabled={!totalIssues}
       onClick={openQA}
     >
-      <ClipboardCheck size={24} />
+      {qaOpen ? <AlertIconFull size={24} /> : <AlertIcon size={24} />}
       {warnings && totalIssues > 0 && (
         <div className={`button-badge button-badge-${numberClass}`}>
           {totalIssues}
