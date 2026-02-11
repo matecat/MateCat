@@ -201,7 +201,7 @@ class MetadataDao extends AbstractDao
         try {
             $subfiltering = $this->setCacheTTL(86400)->get($id_project, MetadataDao::SUBFILTERING_HANDLERS);
 
-            return json_decode($subfiltering->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return $subfiltering?->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }
