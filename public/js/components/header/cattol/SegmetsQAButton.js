@@ -77,6 +77,7 @@ export const SegmentsQAButton = () => {
       tooltipPosition="bottom"
       disabled={!totalIssues}
       onClick={openQA}
+      className={'qaButton'}
     >
       {qaOpen ? <AlertIconFull size={24} /> : <AlertIcon size={24} />}
       {warnings && totalIssues > 0 && (
