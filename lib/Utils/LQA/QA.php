@@ -169,7 +169,7 @@ class QA
     /**
      * @var int
      */
-    protected ?int $characters_count;
+    protected ?int $characters_count = null;
 
     /**
      * @var MessagePatternAnalyzer|null
@@ -2570,11 +2570,10 @@ class QA
      * @param string $trgNodeContent
      *
      */
-    protected
-    function _checkTailCRNL(
+    protected function _checkTailCRNL(
         $srcNodeContent,
         $trgNodeContent
-    ) {
+    ): void {
         $headSrcCRNL = mb_split('[\r\n]+$', $srcNodeContent);
         $headTrgCRNL = mb_split('[\r\n]+$', $trgNodeContent);
         if ((count($headSrcCRNL) > 1 || count($headTrgCRNL) > 1) && end($headSrcCRNL) !== end($headTrgCRNL)) {
@@ -2582,8 +2581,7 @@ class QA
         }
     }
 
-    protected
-    function _checkNewLineConsistency()
+    protected function _checkNewLineConsistency(): void
     {
         $nrOfNewLinesInSource = mb_substr_count($this->source_seg, self::$asciiPlaceHoldMap['0A']['placeHold']);
         $nrOfNewLinesInTarget = mb_substr_count($this->target_seg, self::$asciiPlaceHoldMap['0A']['placeHold']);
@@ -2593,8 +2591,7 @@ class QA
         }
     }
 
-    protected
-    function _checkSizeRestriction()
+    protected function _checkSizeRestriction(): void
     {
         // check size restriction
         if ($this->id_segment) {
