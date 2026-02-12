@@ -82,7 +82,7 @@ export const UploadGdrive = () => {
 
   useEffect(() => {
     CreateProjectActions.enableAnalyzeButton(files.length > 0)
-    if (files.length >= config.maxNumberFiles) {
+    if (files.length > config.maxNumberFiles) {
       CreateProjectActions.showError(
         'No more files can be loaded (the limit of ' +
           config.maxNumberFiles +
