@@ -266,7 +266,7 @@ function CatTool() {
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
-    CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
+    // CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
     const getJobMetadata = ({jobMetadata}) => setJobMetadata(jobMetadata)
 
@@ -290,10 +290,10 @@ function CatTool() {
         SegmentConstants.GET_MORE_SEGMENTS,
         getMoreSegments,
       )
-      CatToolStore.removeListener(
-        CatToolConstants.SET_PROGRESS,
-        checkAnalysisState,
-      )
+      // CatToolStore.removeListener(
+      //   CatToolConstants.SET_PROGRESS,
+      //   checkAnalysisState,
+      // )
       CatToolStore.removeListener(
         CatToolConstants.GET_JOB_METADATA,
         getJobMetadata,
