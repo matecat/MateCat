@@ -110,7 +110,7 @@ export const Tagging = () => {
 
   const onClose = useCallback(() => {
     const shouldUpdateRender =
-      currentProjectTemplate?.subfilteringHandlers.length !==
+      currentProjectTemplate?.subfilteringHandlers?.length !==
         previousSubfilteringHandlers.current?.length ||
       !currentProjectTemplate?.subfilteringHandlers.every((value) =>
         previousSubfilteringHandlers.current?.some(
