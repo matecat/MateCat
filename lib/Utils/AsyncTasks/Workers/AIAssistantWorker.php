@@ -90,8 +90,10 @@ class AIAssistantWorker extends AbstractWorker
                 $payload['style_instructions']
             );
 
-            $this->emitErrorMessage($message, $payload);
-        } catch (Exception $exception){}
+            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $message, false, true);
+        } catch (Exception $exception){
+            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
+        }
     }
 
     private function feedback(array $payload)
@@ -107,8 +109,10 @@ class AIAssistantWorker extends AbstractWorker
                 $payload['style']
             );
 
-            $this->emitErrorMessage($message, $payload);
-        } catch (Exception $e) {}
+            $this->emitMessage("ai_assistant_feedback", $payload['id_client'], $payload['id_segment'], $message, false, true);
+        } catch (Exception $e) {
+            $this->emitErrorMessage("ai_assistant_feedback", $e->getMessage(), $payload);
+        }
     }
 
     /**
@@ -152,7 +156,7 @@ class AIAssistantWorker extends AbstractWorker
                     foreach ($_d as $clean) {
                         if (str_contains($data, "[DONE]\n\n")) {
                             $this->_doLog("Stream from Open Ai is terminated. Segment id:  " . $payload['id_segment']);
-                            $this->emitMessage($payload['id_client'], $payload['id_segment'], $txt, false, true);
+                            $this->emitMessage("ai_assistant_explain_meaning", $payload['id_client'], $payload['id_segment'], $txt, false, true);
                             $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
 
                             return 0; // exit
@@ -162,7 +166,7 @@ class AIAssistantWorker extends AbstractWorker
 
                             if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
                                 $txt .= $arr["choices"][0]["delta"]["content"];
-                                $this->emitMessage($payload['id_client'], $payload['id_segment'], $txt);
+                                $this->emitMessage("ai_assistant_explain_meaning", $payload['id_client'], $payload['id_segment'], $txt);
                                 // Trigger error only if $clean is not empty
                             } elseif (!empty($clean) and $clean !== '') {
                                 // Trigger real errors here
@@ -174,7 +178,7 @@ class AIAssistantWorker extends AbstractWorker
                                         isset($clean['error']["message"])
                                     ) {
                                         $message = "Received wrong JSON data from OpenAI for id_segment " . $payload['id_segment'] . ":" . $clean['error']["message"] . " was received";
-                                        $this->emitErrorMessage($message, $payload);
+                                        $this->emitErrorMessage("ai_assistant_explain_meaning", $message, $payload);
 
                                         return 0; // exit
                                     }
@@ -184,7 +188,7 @@ class AIAssistantWorker extends AbstractWorker
                     }
                 } else {
                     $message = "Data received from OpenAI is not as array: " . $_d . " was received for id_segment " . $payload['id_segment'];
-                    $this->emitErrorMessage($message, $payload);
+                    $this->emitErrorMessage("ai_assistant_explain_meaning", $message, $payload);
 
                     return 0; // exit
                 }
@@ -199,18 +203,20 @@ class AIAssistantWorker extends AbstractWorker
     }
 
     /**
+     * @param string $type
      * @param string $message
      * @param array $payload
      *
      * @throws Exception
      */
-    private function emitErrorMessage(string $message, array $payload): void
+    private function emitErrorMessage(string $type, string $message, array $payload): void
     {
         $this->_doLog($message);
-        $this->emitMessage($payload['id_client'], $payload['id_segment'], $message, true);
+        $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true);
     }
 
     /**
+     * @param string $type
      * @param string $idClient
      * @param string $idSegment
      * @param string $message
@@ -219,10 +225,10 @@ class AIAssistantWorker extends AbstractWorker
      *
      * @throws Exception
      */
-    private function emitMessage(string $idClient, string $idSegment, string $message, bool $hasError = false, bool $completed = false): void
+    private function emitMessage(string $type, string $idClient, string $idSegment, string $message, bool $hasError = false, bool $completed = false): void
     {
         $this->publishToNodeJsClients([
-            '_type' => 'ai_assistant_explain_meaning',
+            '_type' => $type,
             'data' => [
                 'id_client' => $idClient,
                 'payload' => [
