@@ -166,7 +166,7 @@ export const SegmentFooterTabAiAlternatives = ({
             <h4>Alternatives for:</h4>
             <p dangerouslySetInnerHTML={allowHTML(alternatives[0].text)}></p>
           </div>
-          <div className="ai-feature-options">
+          <div className="ai-alternative-options">
             {alternatives.map((alternative, index) => (
               <div key={index}>
                 <div>
