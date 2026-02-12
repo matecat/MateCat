@@ -24,6 +24,7 @@ import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
+import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -33,7 +34,8 @@ export const TAB = {
   MESSAGES: 'messages',
   MULTIMATCHES: 'multiMatches',
   AI_ASSISTANT: 'AiAssistant',
-  LARA_STYLES: 'LaraStyles',
+  LARA_STYLES: 'laraStyles',
+  AI_ALTERNATIVES: 'aiAlternatives',
 }
 
 const TAB_ITEMS = {
@@ -84,6 +86,13 @@ const TAB_ITEMS = {
     label: 'Lara styles',
     code: 'larastyles',
     tabClass: 'lara-styles',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'Ai alternatives',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
     isLoading: false,
     isEnableCloseButton: true,
   },
@@ -512,6 +521,16 @@ function SegmentFooter() {
       case 'larastyles':
         return (
           <SegmentFooterTabLaraStyles
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'aialternatives':
+        return (
+          <SegmentFooterTabAiAlternatives
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}

@@ -14,7 +14,7 @@ export const LaraStyles = ({sid}) => {
   const segment = SegmentStore.getSegmentByIdToJS(sid)
   const contributions = segment?.contributions
 
-  const openTabStyles = () => {
+  const openTab = () => {
     const styles = LARA_STYLES_OPTIONS.map((style) =>
       style.id !== CatToolStore.getJobMetadata().project.mt_extra.lara_style
         ? style
@@ -55,7 +55,7 @@ export const LaraStyles = ({sid}) => {
             ? 'Lara styles - Available for unconfirmed segments only'
             : 'Lara styles - Click to see translations in different styles'
         }
-        onClick={openTabStyles}
+        onClick={openTab}
         disabled={isDisabled}
       >
         <Palette size={16} />

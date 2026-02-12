@@ -137,6 +137,8 @@ $klein->with('/api/app/mymemory', function () {
 
 // AI Assistant
 route('/api/app/ai-assistant', 'POST', ['Controller\API\App\AIAssistantController', 'index']);
+route('/api/app/ai-assistant/feedback', 'POST', ['Controller\API\App\AIAssistantController', 'feedback']);
+route('/api/app/ai-assistant/alternative-translations', 'POST', ['Controller\API\App\AIAssistantController', 'alternative_translations']);
 
 $klein->with('/api/app/languages', function () {
     route('', 'GET', ['\Controller\API\App\SupportedLanguagesController', 'index']);

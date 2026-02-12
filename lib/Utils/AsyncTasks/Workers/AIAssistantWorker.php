@@ -7,7 +7,8 @@ use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\AIAssistant\Client as AIAssistantClient;
+use Utils\AIAssistant\AIClientFactory;
+use Utils\AIAssistant\OpenAIClient as AIAssistantClient;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -17,6 +18,8 @@ use Utils\Tools\Utils;
 class AIAssistantWorker extends AbstractWorker
 {
     const string EXPLAIN_MEANING_ACTION = 'explain_meaning';
+    const string FEEDBACK_ACTION = 'feedback';
+    const string ALTERNATIVE_TRANSLATIONS_ACTION = 'alternative_translations';
 
     /**
      * @var OpenAi
@@ -42,7 +45,6 @@ class AIAssistantWorker extends AbstractWorker
         $timeOut = (AppConfig::$OPEN_AI_TIMEOUT) ?: 30;
         $this->openAi = new OpenAi(AppConfig::$OPENAI_API_KEY);
         $this->openAi->setTimeout($timeOut);
-
         $this->redis = $queueHandler->getRedisClient();
     }
 
@@ -58,6 +60,8 @@ class AIAssistantWorker extends AbstractWorker
 
         $allowedActions = [
             self::EXPLAIN_MEANING_ACTION,
+            self::FEEDBACK_ACTION,
+            self::ALTERNATIVE_TRANSLATIONS_ACTION,
         ];
 
         if (false === in_array($action, $allowedActions)) {
@@ -69,6 +73,46 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog('AI ASSISTANT: ' . $action . ' action was executed with payload ' . json_encode($payload));
 
         $this->{$action}($payload);
+    }
+
+    private function alternative_translations(array $payload)
+    {
+        try {
+            $gemini = AIClientFactory::create("gemini");
+            $message = $gemini->manageAlternativeTranslations(
+                $payload['localized_source'],
+                $payload['localized_target'],
+                $payload['source_sentence'],
+                $payload['target_sentence'],
+                $payload['source_context_sentences_string'],
+                $payload['target_context_sentences_string'],
+                $payload['excerpt'],
+                $payload['style_instructions']
+            );
+
+            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $message, false, true);
+        } catch (Exception $exception){
+            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
+        }
+    }
+
+    private function feedback(array $payload)
+    {
+        try {
+            $openAi = AIClientFactory::create("openai");
+            $message = $openAi->evaluateTranslation(
+                $payload['localized_source'],
+                $payload['localized_target'],
+                $payload['text'],
+                $payload['translation'],
+                $payload['context'],
+                $payload['style']
+            );
+
+            $this->emitMessage("ai_assistant_feedback", $payload['id_client'], $payload['id_segment'], $message, false, true);
+        } catch (Exception $e) {
+            $this->emitErrorMessage("ai_assistant_feedback", $e->getMessage(), $payload);
+        }
     }
 
     /**
@@ -90,7 +134,8 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         try {
-            (new AIAssistantClient($this->openAi))->findContextForAWord($payload['word'], $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
+            $openAi = AIClientFactory::create("openai");
+            $openAi->findContextForAWord($payload['word'], $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
                 $currentLockValue = $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']);
                 if ($currentLockValue !== $lockValue) {
                     $this->_doLog("Current lock invalid. Current value is: " . $currentLockValue . ", " . $lockValue . " was expected for id_segment " . $payload['id_segment']);
@@ -111,7 +156,7 @@ class AIAssistantWorker extends AbstractWorker
                     foreach ($_d as $clean) {
                         if (str_contains($data, "[DONE]\n\n")) {
                             $this->_doLog("Stream from Open Ai is terminated. Segment id:  " . $payload['id_segment']);
-                            $this->emitMessage($payload['id_client'], $payload['id_segment'], $txt, false, true);
+                            $this->emitMessage("ai_assistant_explain_meaning", $payload['id_client'], $payload['id_segment'], $txt, false, true);
                             $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
 
                             return 0; // exit
@@ -121,7 +166,7 @@ class AIAssistantWorker extends AbstractWorker
 
                             if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
                                 $txt .= $arr["choices"][0]["delta"]["content"];
-                                $this->emitMessage($payload['id_client'], $payload['id_segment'], $txt);
+                                $this->emitMessage("ai_assistant_explain_meaning", $payload['id_client'], $payload['id_segment'], $txt);
                                 // Trigger error only if $clean is not empty
                             } elseif (!empty($clean) and $clean !== '') {
                                 // Trigger real errors here
@@ -133,7 +178,7 @@ class AIAssistantWorker extends AbstractWorker
                                         isset($clean['error']["message"])
                                     ) {
                                         $message = "Received wrong JSON data from OpenAI for id_segment " . $payload['id_segment'] . ":" . $clean['error']["message"] . " was received";
-                                        $this->emitErrorMessage($message, $payload);
+                                        $this->emitErrorMessage("ai_assistant_explain_meaning", $message, $payload);
 
                                         return 0; // exit
                                     }
@@ -143,7 +188,7 @@ class AIAssistantWorker extends AbstractWorker
                     }
                 } else {
                     $message = "Data received from OpenAI is not as array: " . $_d . " was received for id_segment " . $payload['id_segment'];
-                    $this->emitErrorMessage($message, $payload);
+                    $this->emitErrorMessage("ai_assistant_explain_meaning", $message, $payload);
 
                     return 0; // exit
                 }
@@ -158,18 +203,20 @@ class AIAssistantWorker extends AbstractWorker
     }
 
     /**
+     * @param string $type
      * @param string $message
      * @param array $payload
      *
      * @throws Exception
      */
-    private function emitErrorMessage(string $message, array $payload): void
+    private function emitErrorMessage(string $type, string $message, array $payload): void
     {
         $this->_doLog($message);
-        $this->emitMessage($payload['id_client'], $payload['id_segment'], $message, true);
+        $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true);
     }
 
     /**
+     * @param string $type
      * @param string $idClient
      * @param string $idSegment
      * @param string $message
@@ -178,10 +225,10 @@ class AIAssistantWorker extends AbstractWorker
      *
      * @throws Exception
      */
-    private function emitMessage(string $idClient, string $idSegment, string $message, bool $hasError = false, bool $completed = false): void
+    private function emitMessage(string $type, string $idClient, string $idSegment, string $message, bool $hasError = false, bool $completed = false): void
     {
         $this->publishToNodeJsClients([
-            '_type' => 'ai_assistant_explain_meaning',
+            '_type' => $type,
             'data' => [
                 'id_client' => $idClient,
                 'payload' => [
