@@ -82,6 +82,6 @@ PROMPT;
         $text = $result->text();
         $text = str_replace(["```json", "```"], "", $text);
 
-        return json_decode($text);
+        return $text;
     }
 }
