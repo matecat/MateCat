@@ -329,10 +329,8 @@ class MMT extends AbstractEngine
         $pid = $projectRow['id'];
 
         $metadataDao = new ProjectsMetadataDao();
-        $context_analyzer = $metadataDao->get($pid, "mmt_activate_context_analyzer") ? $metadataDao->get(
-            $pid,
-            "mmt_activate_context_analyzer"
-        )->value : $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
+        $context = $metadataDao->setCacheTTL(86400)->get($pid, "mmt_activate_context_analyzer");
+        $context_analyzer = $context?->value ?? $this->getEngineRecord()->getExtraParamsAsArray()['MMT-context-analyzer'];
 
         if (!empty($context_analyzer)) {
             $source = $segments[0]['source'];

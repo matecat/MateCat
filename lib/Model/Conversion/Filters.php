@@ -4,11 +4,11 @@ namespace Model\Conversion;
 
 use CURLFile;
 use Exception;
+use Matecat\Locales\Languages;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
-use Utils\Langs\Languages;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
@@ -152,11 +152,12 @@ class Filters
      * @param string $targetLang
      * @param string|null $segmentation
      * @param IDto|null $extractionParams
+     * @param bool $icu_enabled
      * @param bool|null $legacy_icu
      *
      * @return mixed
      */
-    public static function sourceToXliff(string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false): mixed
+    public static function sourceToXliff(string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, bool $icu_enabled = false, ?bool $legacy_icu = false): mixed
     {
         $basename = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_FILENAME);
         $extension = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_EXTENSION);
@@ -175,6 +176,12 @@ class Filters
             $extractionParams = [];
             $extractionParams['escape_icu'] = true;
         }
+
+        /*
+         * icu_enabled = true => segment_icu = false
+         * icu_enabled = false => segment_icu = true (default)
+         */
+        $extractionParams['segment_icu'] = !$icu_enabled;
 
         if ($extractionParams !== null) {
             $data['extractionParams'] = json_encode($extractionParams);

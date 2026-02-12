@@ -48,6 +48,8 @@ class ConversionHandler
      */
     protected ?bool $legacy_icu;
 
+    protected bool $icu_enabled = false;
+
     /**
      * ConversionHandler constructor.
      */
@@ -148,7 +150,8 @@ class ConversionHandler
             $single_language,
             $this->segmentation_rule,
             $extraction_parameters,
-            $this->legacy_icu
+            $this->icu_enabled,
+            $this->legacy_icu,
         );
         Filters::logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters);
 
@@ -534,4 +537,10 @@ class ConversionHandler
     {
         $this->legacy_icu = $legacy_icu;
     }
+
+    public function setIcuEnabled(bool $icu_enabled): void
+    {
+        $this->icu_enabled = $icu_enabled;
+    }
+
 }

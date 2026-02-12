@@ -5,11 +5,11 @@ namespace Model\PayableRates;
 use DomainException;
 use Exception;
 use JsonSerializable;
+use Matecat\Locales\Languages;
 use Model\Analysis\PayableRates;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Utils\Date\DateTimeUtil;
-use Utils\Langs\Languages;
 
 class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
 {

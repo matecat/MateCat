@@ -6,14 +6,14 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Matecat\Locales\InvalidLanguageException;
+use Matecat\Locales\Languages;
 use Model\Conversion\FilesConverter;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\Constants;
-use Utils\Langs\InvalidLanguageException;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
@@ -52,6 +52,7 @@ class ConvertFileController extends KleinController
             $uploadDir,
             $errDir,
             $uploadTokenValue,
+            $data['icu_enabled'],
             $data['segmentation_rule'],
             $this->featureSet,
             $data['filters_extraction_parameters'],
@@ -89,6 +90,7 @@ class ConvertFileController extends KleinController
         $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
         $filters_extraction_parameters_template = filter_var(
             $this->request->param('filters_extraction_parameters_template'),
             FILTER_SANITIZE_SPECIAL_CHARS,
@@ -139,6 +141,7 @@ class ConvertFileController extends KleinController
             'filters_extraction_parameters' => $filters_extraction_parameters,
             'filters_extraction_parameters_template_id' => (int)$filters_extraction_parameters_template_id,
             'restarted_conversion' => $restarted_conversion,
+            'icu_enabled' => $icu_enabled,
         ];
     }
 

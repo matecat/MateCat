@@ -13,6 +13,7 @@ use ArrayObject;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use DomainException;
 use Exception;
+use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
@@ -25,6 +26,7 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -68,10 +70,11 @@ use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
 use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Collections\RecursiveArrayObject;
+use Utils\Constants\EngineConstants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\XliffTranslationStatus;
 use Utils\Engines\EnginesFactory;
-use Utils\Langs\Languages;
+use Utils\Engines\MyMemory;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\LQA\QA;
@@ -493,25 +496,25 @@ class ProjectManager
         $dao = new ProjectsMetadataDao();
 
         // "From API" flag
-        if (isset($this->projectStructure['from_api']) and $this->projectStructure['from_api']) {
-            $options['from_api'] = 1;
+        if (isset($this->projectStructure[ProjectsMetadataDao::FROM_API]) and $this->projectStructure[ProjectsMetadataDao::FROM_API]) {
+            $options[ProjectsMetadataDao::FROM_API] = true;
         }
 
         // xliff_parameters
-        if (isset($this->projectStructure['xliff_parameters']) and $this->projectStructure['xliff_parameters'] instanceof XliffConfigTemplateStruct) {
-            $configModel = $this->projectStructure['xliff_parameters'];
-            $options['xliff_parameters'] = json_encode($configModel);
+        if (isset($this->projectStructure[ProjectsMetadataDao::XLIFF_PARAMETERS]) and $this->projectStructure[ProjectsMetadataDao::XLIFF_PARAMETERS] instanceof XliffConfigTemplateStruct) {
+            $configModel = $this->projectStructure[ProjectsMetadataDao::XLIFF_PARAMETERS];
+            $options[ProjectsMetadataDao::XLIFF_PARAMETERS] = json_encode($configModel);
         }
 
         // pretranslate_101
-        if (isset($this->projectStructure['pretranslate_101'])) {
-            $options['pretranslate_101'] = $this->projectStructure['pretranslate_101'];
+        if (isset($this->projectStructure[ProjectsMetadataDao::PRETRANSLATE_101])) {
+            $options[ProjectsMetadataDao::PRETRANSLATE_101] = $this->projectStructure[ProjectsMetadataDao::PRETRANSLATE_101];
         }
 
         // mt evaluation => ice_mt already in metadata
         // adds JSON parameters to the project metadata as JSON string
-        if ($options['mt_qe_workflow_enabled'] ?? false) {
-            $options['mt_qe_workflow_parameters'] = json_encode($options['mt_qe_workflow_parameters']);
+        if ($options[ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED] ?? false) {
+            $options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS] = json_encode($options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS]);
         }
 
         /**
@@ -520,28 +523,26 @@ class ProjectManager
          */
         $this->features->loadProjectDependenciesFromProjectMetadata($options);
 
-        if (isset($this->projectStructure['filters_extraction_parameters']) && $this->projectStructure['filters_extraction_parameters']) {
-            $options['filters_extraction_parameters'] = json_encode($this->projectStructure['filters_extraction_parameters']);
+        if (isset($this->projectStructure[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS]) && $this->projectStructure[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS]) {
+            $options[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS] = json_encode($this->projectStructure[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS]);
         }
 
         if ($this->projectStructure['sanitize_project_options']) {
             $options = $this->sanitizeProjectOptions($options);
         }
 
+        $extraKeys = [];
         // MT extra config parameters
-        $extraKeys = [
-            'enable_mt_analysis',
-            'mmt_glossaries',
-            'mmt_activate_context_analyzer',
-            'mmt_ignore_glossary_case',
-            'lara_glossaries',
-            'lara_style',
-            'deepl_formality',
-            'deepl_id_glossary',
-            'deepl_engine_type',
-            'intento_provider',
-            'intento_routing',
-        ];
+        foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
+            $extraKeys = array_merge(
+                $extraKeys,
+                (new $engineName(
+                    new EngineStruct([
+                        'type' => $engineName == MyMemory::class ? EngineConstants::TM : EngineConstants::MT,
+                    ])
+                ))->getConfigurationParameters()
+            );
+        }
 
         foreach ($extraKeys as $extraKey) {
             if (!empty($this->projectStructure[$extraKey]) && $this->projectStructure[$extraKey]) {

@@ -42,7 +42,7 @@ class ErrObject implements Stringable
      * Outputs externally the error tip
      * @return string
      */
-    public function getTip()
+    public function getTip(): string
     {
         return $this->tip;
     }

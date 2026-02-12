@@ -5,6 +5,7 @@ namespace Model\Conversion;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
@@ -12,7 +13,6 @@ use ReflectionException;
 use RuntimeException;
 use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
-use Utils\Langs\Languages;
 use Utils\Tools\Utils;
 
 class FilesConverter
@@ -49,6 +49,7 @@ class FilesConverter
      * @var bool|null
      */
     private ?bool $legacy_icu;
+    private bool $icu_enabled;
 
     /**
      * FilesConverter constructor.
@@ -71,6 +72,7 @@ class FilesConverter
         string $intDir,
         string $errDir,
         string $uploadTokenValue,
+        bool $icu_enabled,
         ?string $segmentation_rule,
         FeatureSet $featureSet,
         ?FiltersConfigTemplateStruct $filters_extraction_parameters = null,
@@ -87,6 +89,7 @@ class FilesConverter
         $this->featureSet = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
         $this->legacy_icu = $legacy_icu;
+        $this->icu_enabled = $icu_enabled;
         $this->resultStack = new ConvertedFileList();
     }
 
@@ -187,6 +190,7 @@ class FilesConverter
         $conversionHandler->setFeatures($this->featureSet);
         $conversionHandler->setFiltersExtractionParameters($this->filters_extraction_parameters);
         $conversionHandler->setFiltersLegacyIcu($this->legacy_icu);
+        $conversionHandler->setIcuEnabled($this->icu_enabled);
 
         return $conversionHandler;
     }

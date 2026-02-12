@@ -12,6 +12,8 @@ namespace View\API\V2\Json;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Matecat\Locales\LanguageDomains;
+use Matecat\Locales\Languages;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
@@ -25,8 +27,6 @@ use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use ReflectionException;
 use Utils\Constants\SourcePages;
-use Utils\Langs\LanguageDomains;
-use Utils\Langs\Languages;
 use Utils\OutsourceTo\OutsourceAvailable;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;

@@ -998,6 +998,9 @@ class TMAnalysisWorker extends AbstractWorker
                 ]);
             }
 
+            ProjectDao::destroyCacheById($_project_id);
+            (new JobDao)->destroyCacheByProjectId($_project_id);
+
             foreach ($_analyzed_report as $job_info) {
                 $counter = new CounterModel();
                 $counter->initializeJobWordCount($job_info['id_job'], $job_info['password']);

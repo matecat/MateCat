@@ -3,7 +3,7 @@
 use Model\PayableRates\CustomPayableRateStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Langs\Languages;
+use Matecat\Locales\Languages;
 
 /**
  * Created by PhpStorm.

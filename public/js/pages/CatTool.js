@@ -465,6 +465,7 @@ function CatTool() {
             ...(jobMetadata.project.mt_extra ?? {}),
           },
         },
+        icuEnabled: !!jobMetadata.project.icu_enabled ?? false,
       }))
     }
   }, [

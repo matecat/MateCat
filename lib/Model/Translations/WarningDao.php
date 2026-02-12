@@ -4,7 +4,6 @@
 namespace Model\Translations;
 
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\Jobs\WarningsCountStruct;
 use Model\Warnings\GlobalWarningStruct;
