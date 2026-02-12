@@ -113,7 +113,7 @@ class QaCheckGlossaryHighlight extends Component {
     return (
       <Tooltip
         stylePointerElement={{display: 'inline-block', position: 'relative'}}
-        content="Glossary translation not in target"
+        content="Termbase translation not found in target"
       >
         <div ref={this.contentRef} className="qaCheckGlossaryItem">
           <span onClick={() => this.onClickTerm()}>{children}</span>
