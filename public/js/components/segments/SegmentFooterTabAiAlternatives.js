@@ -5,6 +5,8 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
 import SwitchHorizontal from '../../../img/icons/SwitchHorizontal'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import Copy from '../icons/Copy'
+import {encodePlaceholdersToTags} from './utils/DraftMatecatUtils/tagUtils'
 
 export const SegmentFooterTabAiAlternatives = ({
   code,
@@ -82,8 +84,9 @@ export const SegmentFooterTabAiAlternatives = ({
       const wordsBeforeAndAfter = getWordsBeforeAndAfter(
         currentSegment.translation,
         text,
+        15,
       )
-
+      console.log('wordsBeforeAndAfter', wordsBeforeAndAfter)
       const begin = DraftMatecatUtils.transformTagsToHtml(
         wordsBeforeAndAfter.begin,
         config.isTargetRTL,
@@ -95,9 +98,12 @@ export const SegmentFooterTabAiAlternatives = ({
 
       setAlternatives([
         {
-          text,
-          alternative: text,
-          alternativeHtml: DraftMatecatUtils.transformTagsToHtml(
+          text: DraftMatecatUtils.transformTagsToHtml(text, config.isTargetRTL),
+          alternativeOriginal: DraftMatecatUtils.transformTagsToHtml(
+            text,
+            config.isTargetRTL,
+          ),
+          alternative: DraftMatecatUtils.transformTagsToHtml(
             text,
             config.isTargetRTL,
           ),
@@ -106,9 +112,8 @@ export const SegmentFooterTabAiAlternatives = ({
           description: 'Lorem ipsum bla bla',
         },
         {
-          text,
-          alternative: text,
-          alternativeHtml: DraftMatecatUtils.transformTagsToHtml(
+          alternativeOriginal: text,
+          alternative: DraftMatecatUtils.transformTagsToHtml(
             text,
             config.isTargetRTL,
           ),
@@ -117,9 +122,8 @@ export const SegmentFooterTabAiAlternatives = ({
           description: 'Lorem ipsum bla bla2',
         },
         {
-          text,
-          alternative: text,
-          alternativeHtml: DraftMatecatUtils.transformTagsToHtml(
+          alternativeOriginal: text,
+          alternative: DraftMatecatUtils.transformTagsToHtml(
             text,
             config.isTargetRTL,
           ),
@@ -142,7 +146,9 @@ export const SegmentFooterTabAiAlternatives = ({
       )
   }, [segment])
 
-  const copyAlternative = () => false
+  const copyAlternative = (alternative) => {
+    navigator.clipboard.writeText(encodePlaceholdersToTags(alternative))
+  }
 
   const allowHTML = (string) => {
     return {__html: string}
@@ -156,11 +162,11 @@ export const SegmentFooterTabAiAlternatives = ({
     >
       {alternatives?.length ? (
         <div className="ai-feature-content">
+          <div className="ai-feature-alternatives-for">
+            <h4>Alternatives for:</h4>
+            <p dangerouslySetInnerHTML={allowHTML(alternatives[0].text)}></p>
+          </div>
           <div className="ai-feature-options">
-            <div>
-              <h4>Alternatives for:</h4>
-              <p>{}</p>
-            </div>
             {alternatives.map((alternative, index) => (
               <div key={index}>
                 <div>
@@ -171,7 +177,7 @@ export const SegmentFooterTabAiAlternatives = ({
                     <span
                       className="ai-feature-option-alternative-highlight"
                       dangerouslySetInnerHTML={allowHTML(
-                        alternative.resultWithTags,
+                        alternative.alternative,
                       )}
                     ></span>
                     <span
@@ -185,9 +191,11 @@ export const SegmentFooterTabAiAlternatives = ({
                 <Button
                   className="ai-feature-button"
                   mode={BUTTON_MODE.OUTLINE}
-                  onClick={() => copyAlternative()}
+                  onClick={() =>
+                    copyAlternative(alternative.alternativeOriginal)
+                  }
                 >
-                  <SwitchHorizontal size={16} />
+                  <Copy size={16} />
                 </Button>
               </div>
             ))}
