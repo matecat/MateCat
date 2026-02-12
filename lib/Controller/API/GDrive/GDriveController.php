@@ -7,13 +7,13 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
 use Google_Service_Exception;
+use Matecat\Locales\InvalidLanguageException;
+use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\Constants;
-use Utils\Langs\InvalidLanguageException;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -330,8 +330,8 @@ class GDriveController extends AbstractStatefulKleinController
                 'msg' => $this->formatErrorMessage($this->getExceptionMessage($e))
             ]);
         } catch (Exception $e) {
-            $errorCode = $e->getCode() >= 400 ? $e->getCode() : 500;
-            $this->response->code($errorCode);
+            $errorCode = (int)$e->getCode() >= 400 ? $e->getCode() : 500;
+            $this->response->code((int)$errorCode);
             $this->response->json([
                 'code' => $errorCode,
                 'class' => get_class($e),

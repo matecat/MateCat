@@ -54,7 +54,7 @@ class AppConfig
     public static string $PHP_SESSION_NAME = 'PHPSESSID';
     public static int $AJAX_DOMAINS = 100;
     public static string $PROTOCOL = 'https';
-    public static bool $DEBUG = true;
+    public static bool $DEBUG = false;
     public static bool $PRINT_ERRORS = false;
     public static ?string $DB_SERVER = null;
     public static ?string $DB_DATABASE = null;

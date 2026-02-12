@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
@@ -21,6 +22,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
@@ -33,6 +35,7 @@ use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
 use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\EngineConstants;
@@ -41,7 +44,6 @@ use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
-use Utils\Engines\Results\MyMemory\Matches;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -80,7 +82,7 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @var ?TranslationVersionsHandler
      */
-    protected ?TranslationVersionsHandler $VersionsHandler = null;
+    protected ?VersionHandlerInterface $VersionsHandler = null;
 
     protected function afterConstruct(): void
     {
@@ -102,7 +104,8 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         try {
             $this->data = $this->validateTheRequest();
-            $this->checkData();
+            $this->setSubFilteringBehavior();
+            $this->checkSegmentSplitData();
             $this->initVersionHandler();
             $this->getContexts();
 
@@ -115,17 +118,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $this->data['translation']
             ); // is_numeric check is needed to allow "0" strings
 
-            $check = new QA($segment, $translation); // Layer 1 here
-            $check->setChunk($this->data['chunk']);
-            $check->setFeatureSet($this->featureSet);
-            $check->setSourceSegLang($this->data['chunk']->source);
-            $check->setTargetSegLang($this->data['chunk']->target);
-            $check->setIdSegment($this->data['id_segment']);
-
-            if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
-                $check->setCharactersCount($this->data['characters_counter']);
-            }
-
+            $check = $this->setQaChecks($segment, $translation);
             $check->performConsistencyCheck();
 
             if ($check->thereAreWarnings()) {
@@ -493,7 +486,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             'split_statuses' => $split_statuses,
             'chunk' => $chunk,
             'project' => $chunk->getProject(),
-            'id_project' => $chunk->id_project
+            'id_project' => $chunk->id_project,
+            'segment_contains_icu' => $this->segmentContainsICU($chunk->getProject(), $chunk, $segment)
         ];
 
         $this->logger->debug($data);
@@ -529,22 +523,8 @@ class SetTranslationController extends AbstractStatefulKleinController
     /**
      * @throws Exception
      */
-    protected function checkData(): void
+    protected function checkSegmentSplitData(): void
     {
-        $featureSet = $this->getFeatureSet();
-        $featureSet->loadForProject($this->data['project']);
-
-        /** @var MateCatFilter $filter */
-        $metadata = new JobsMetadataDao();
-        $filter = MateCatFilter::getInstance(
-            $featureSet,
-            $this->data['chunk']->source,
-            $this->data['chunk']->target,
-            SegmentOriginalDataDao::getSegmentDataRefMap((int)$this->data['id_segment']),
-            $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password)
-        );
-        $this->filter = $filter;
-
         [$__translation, $this->data['split_chunk_lengths']] = CatUtils::parseSegmentSplit($this->data['translation'], '', $this->filter);
 
         if (is_null($__translation) || $__translation === '') {
@@ -565,6 +545,79 @@ class SetTranslationController extends AbstractStatefulKleinController
         }
 
         $this->checkStatus($this->data['status']);
+    }
+
+    protected function segmentContainsICU(ProjectStruct $projectStruct, JobStruct $chunk, string $segment): bool
+    {
+        $icu_enabled = $projectStruct->getMetadataValue(ProjectMetadataDao::ICU_ENABLED) ?? false;
+        $string_contains_icu = false;
+        if ($icu_enabled) {
+            $icuValidator = new MessagePatternValidator(
+                $chunk->target,
+                // Validate the ICU syntax in the segment to detect ICU patterns
+                $segment,
+            );
+            // Check if complex ICU patterns (plurals, selects, etc.) are present
+            //this method returns false even when validation fails, it's ok since when the source is invalid, we want not to enable icu validation
+            $string_contains_icu = $icuValidator->containsComplexSyntax();
+        }
+
+        return $string_contains_icu;
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function setSubFilteringBehavior(): void
+    {
+        /** @var $projectStruct ProjectStruct */
+        $projectStruct = $this->data['project'];
+        $featureSet = $this->getFeatureSet();
+        $featureSet->loadForProject($projectStruct);
+
+        /** @var MateCatFilter $filter */
+        $metadata = new JobsMetadataDao();
+        $filter = MateCatFilter::getInstance(
+            $featureSet,
+            $this->data['chunk']->source,
+            $this->data['chunk']->target,
+            SegmentOriginalDataDao::getSegmentDataRefMap((int)$this->data['id_segment']),
+            $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password),
+            $this->data['segment_contains_icu']
+        );
+        $this->filter = $filter;
+    }
+
+    /**
+     * @param string $segment
+     * @param string $translation
+     * @return QA
+     */
+    protected function setQaChecks(string $segment, string $translation): QA
+    {
+        $check = new QA(
+            $segment,
+            $translation,
+            new MessagePatternValidator(
+                language: $this->data['chunk']->target,
+                // use the translation content for the validation
+                patternString: $translation
+            ),
+            // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
+            $this->data['segment_contains_icu']
+        ); // Layer 1 here
+        $check->setChunk($this->data['chunk']);
+        $check->setFeatureSet($this->featureSet);
+        $check->setSourceSegLang($this->data['chunk']->source);
+        $check->setTargetSegLang($this->data['chunk']->target);
+        $check->setIdSegment($this->data['id_segment']);
+
+        if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
+            $check->setCharactersCount($this->data['characters_counter']);
+        }
+
+        return $check;
     }
 
     /**

@@ -2,9 +2,9 @@
 
 
 use Controller\Views\CustomPageView;
+use Matecat\Locales\LanguageDomains;
+use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
-use Utils\Langs\LanguageDomains;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 

@@ -56,7 +56,7 @@ function UploadFileLocal() {
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
     currentProjectTemplate?.filters_template_id
-
+  const icuEnabled = currentProjectTemplate?.icuEnabled
   const currentFiltersExtractionParameters = useMemo(() => {
     const unsavedTemplate = fileImportFiltersParamsTemplates.templates
       .filter(
@@ -207,6 +207,7 @@ function UploadFileLocal() {
                     extractionParameterTemplateId,
                 }),
             restarted_conversion: false,
+            icu_enabled: icuEnabled,
           })
             .then(({data, warnings}) => {
               clearInterval(interval)
@@ -363,6 +364,7 @@ function UploadFileLocal() {
           source_lang: sourceLang.code,
           target_lang: targetLangs.map((lang) => lang.id).join(),
           segmentation_rule: segmentationRule,
+          icu_enabled: icuEnabled,
           ...(typeof currentFiltersExtractionParameters === 'object'
             ? {
                 filters_extraction_parameters_template: JSON.stringify(

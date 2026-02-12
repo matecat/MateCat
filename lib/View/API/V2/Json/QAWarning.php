@@ -19,6 +19,7 @@ class QAWarning
     const string TAGS_CATEGORY = "TAGS";
     const string SIZE_CATEGORY = "SIZE";
     const string MISMATCH_CATEGORY = "MISMATCH";
+    const string ICU_CATEGORY = "ICU";
 
     protected function pushErrorSegment($error_type, $error_category, $content): void
     {
@@ -33,6 +34,7 @@ class QAWarning
             QA::ERR_SPACE_MISMATCH_BEFORE_TAG,
             QA::ERR_SYMBOL_MISMATCH,
             QA::ERR_NEWLINE_MISMATCH => self::MISMATCH_CATEGORY,
+            QA::ERR_ICU_VALIDATION => self::ICU_CATEGORY,
             default => self::TAGS_CATEGORY,
         };
 

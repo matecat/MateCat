@@ -19,6 +19,7 @@ export const convertFileRequest = async ({
   filters_extraction_parameters_template_id,
   filters_extraction_parameters_template,
   restarted_conversion,
+  icu_enabled,
 }) => {
   const dataParams = {
     action: 'convertFile',
@@ -29,6 +30,7 @@ export const convertFileRequest = async ({
     filters_extraction_parameters_template_id,
     filters_extraction_parameters_template,
     restarted_conversion,
+    icu_enabled,
   }
   const formData = new FormData()
 

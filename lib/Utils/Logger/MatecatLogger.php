@@ -14,6 +14,7 @@
 namespace Utils\Logger;
 
 use Exception;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -81,6 +82,19 @@ class MatecatLogger implements LoggerInterface
     public function withName(string $name): MatecatLogger
     {
         return new MatecatLogger($this->logger->withName($name));
+    }
+
+
+    /**
+     * Adds a handler to the logger's handler stack.
+     *
+     * @param HandlerInterface $handler The handler to be added to the logger.
+     *
+     * @return void
+     */
+    public function pushHandler(HandlerInterface $handler): void
+    {
+        $this->logger->pushHandler($handler);
     }
 
     /**

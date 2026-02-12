@@ -24,7 +24,6 @@ use Plugins\Features\ReviewExtended\IChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\RevisionFactory;
 use ReflectionException;
-use Utils\Tools\Utils;
 
 
 class QualityReportModel
@@ -198,14 +197,7 @@ class QualityReportModel
 
     protected function getAndDecodePossiblyProjectMetadataJson(): array
     {
-        $metadata = $this->getProject()->getMetadataAsKeyValue();
-        foreach ($metadata as $key => $value) {
-            if (Utils::isJson($value)) {
-                $metadata[$key] = json_decode($value, true);
-            }
-        }
-
-        return $metadata;
+        return $this->getProject()->getAllMetadataAsKeyValue();
     }
 
     /**

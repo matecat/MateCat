@@ -109,20 +109,6 @@ abstract class AbstractDaemon
     }
 
     /**
-     * Log method
-     *
-     * @param mixed $msg
-     * @param array $context
-     */
-    protected function _logTimeStampedMsg(mixed $msg, array $context = []): void
-    {
-        if (AppConfig::$DEBUG) {
-            echo "[" . date(DATE_RFC822) . "] " . json_encode($msg) . "\n";
-        }
-        $this->logger->debug($msg, $context);
-    }
-
-    /**
      * The starting method
      *
      * @param array|null $args

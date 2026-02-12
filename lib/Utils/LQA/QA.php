@@ -10,6 +10,7 @@ use DOMNodeList;
 use DOMXPath;
 use Exception;
 use LogicException;
+use Matecat\ICU\MessagePatternValidator;
 use Model\FeaturesBase\FeatureSet;
 use Model\Segments\SegmentMetadataDao;
 use Utils\Logger\LoggerFactory;
@@ -168,7 +169,16 @@ class QA
     /**
      * @var int
      */
-    protected $characters_count;
+    protected ?int $characters_count = null;
+
+    /**
+     * @var MessagePatternAnalyzer|null
+     */
+    protected ?MessagePatternValidator $icuPluralsValidator = null;
+    /**
+     * @var bool
+     */
+    protected bool $source_contains_icu = false;
 
     const int ERR_NONE = 0;
     const int ERR_COUNT = 1;
@@ -200,6 +210,7 @@ class QA
     const int ERR_SPECIAL_ENTITY_MISMATCH = 27;
     const int ERR_EUROSIGN_MISMATCH = 28;
     const int ERR_UNCLOSED_G_TAG = 29;
+    const int ERR_ICU_VALIDATION = 30;
 
     const int ERR_TAG_MISMATCH = 1000;
     const int ERR_SPACE_MISMATCH = 1100;
@@ -272,6 +283,7 @@ class QA
         26 => 'Glossary mismatch',
         27 => 'Special char entity mismatch',
         29 => 'File-breaking tag issue',
+        30 => 'ICU message issue', // dynamically changed a runtime
 
         /*
          * grouping
@@ -506,6 +518,14 @@ class QA
                     'outcome' => $errCode,
                     'debug' => $this->_errorMap[self::ERR_SIZE_RESTRICTION],
                     'tip' => $this->_getTipValue(self::ERR_SIZE_RESTRICTION)
+                ]);
+                break;
+
+            case self::ERR_ICU_VALIDATION:
+                $this->exceptionList[self::ERROR][] = ErrObject::get([
+                    'outcome' => $errCode,
+                    'debug' => $this->_errorMap[self::ERR_ICU_VALIDATION],
+                    'tip' => $this->_getTipValue(self::ERR_ICU_VALIDATION)
                 ]);
                 break;
 
@@ -840,16 +860,16 @@ class QA
      * @param string $target_seg
      *
      */
-    public function __construct($source_seg, $target_seg)
+    public function __construct(?string $source_seg = null, ?string $target_seg = null, ?MessagePatternValidator $icuPluralsValidator = null, bool $string_contains_icu = false)
     {
         mb_regex_encoding('UTF-8');
         mb_internal_encoding("UTF-8");
 
-        $src_enc = mb_detect_encoding($source_seg);
-        $trg_enc = mb_detect_encoding($target_seg);
+        $src_enc = mb_detect_encoding($source_seg ?? '');
+        $trg_enc = mb_detect_encoding($target_seg ?? '');
 
-        $source_seg = mb_convert_encoding($source_seg, 'UTF-8', $src_enc);
-        $target_seg = mb_convert_encoding($target_seg, 'UTF-8', $trg_enc);
+        $source_seg = mb_convert_encoding($source_seg ?? '', 'UTF-8', $src_enc ?: false);
+        $target_seg = mb_convert_encoding($target_seg ?? '', 'UTF-8', $trg_enc ?: false);
 
         /**
          * Why i do this?? I'm replacing non printable chars with a placeholder.
@@ -893,6 +913,9 @@ class QA
         }
 
         $this->_resetDOMMaps();
+
+        $this->icuPluralsValidator = $icuPluralsValidator;
+        $this->source_contains_icu = $string_contains_icu;
     }
 
     /**
@@ -994,7 +1017,7 @@ class QA
         $this->id_segment = $id_segment;
     }
 
-    public function setCharactersCount($characters_count)
+    public function setCharactersCount(?int $characters_count)
     {
         $this->characters_count = (int)$characters_count;
     }
@@ -1051,9 +1074,8 @@ class QA
         return $this;
     }
 
-
     /**
-     * @param \Model\FeaturesBase\FeatureSet $featureSet
+     * @param FeatureSet $featureSet
      *
      * @return $this
      */
@@ -1065,7 +1087,7 @@ class QA
     }
 
     /**
-     * @return \Model\FeaturesBase\FeatureSet
+     * @return FeatureSet
      * @throws Exception
      */
     public function getFeatureSet()
@@ -1537,13 +1559,17 @@ class QA
             return $this->getErrors();
         }
 
-        $this->_checkTagsBoundary();
-        $this->_checkContentConsistency($srcNodeList, $trgNodeList);
-        $this->_checkBxAndExInsideG();
-        $this->_checkTagPositions();
-        $this->_checkNewLineConsistency();
-        $this->_checkSymbolConsistency();
-        $this->_checkSizeRestriction();
+        if (!$this->icuPluralsValidator || !$this->source_contains_icu) {
+            $this->_checkTagsBoundary();
+            $this->_checkContentConsistency($srcNodeList, $trgNodeList);
+            $this->_checkBxAndExInsideG();
+            $this->_checkTagPositions();
+            $this->_checkNewLineConsistency();
+            $this->_checkSymbolConsistency();
+            $this->_checkSizeRestriction();
+        } else {
+            $this->_checkICUMessageConsistency();
+        }
 
         // all checks completed
         return $this->getErrors();
@@ -2549,11 +2575,10 @@ class QA
      * @param string $trgNodeContent
      *
      */
-    protected
-    function _checkTailCRNL(
+    protected function _checkTailCRNL(
         $srcNodeContent,
         $trgNodeContent
-    ) {
+    ): void {
         $headSrcCRNL = mb_split('[\r\n]+$', $srcNodeContent);
         $headTrgCRNL = mb_split('[\r\n]+$', $trgNodeContent);
         if ((count($headSrcCRNL) > 1 || count($headTrgCRNL) > 1) && end($headSrcCRNL) !== end($headTrgCRNL)) {
@@ -2561,8 +2586,7 @@ class QA
         }
     }
 
-    protected
-    function _checkNewLineConsistency()
+    protected function _checkNewLineConsistency(): void
     {
         $nrOfNewLinesInSource = mb_substr_count($this->source_seg, self::$asciiPlaceHoldMap['0A']['placeHold']);
         $nrOfNewLinesInTarget = mb_substr_count($this->target_seg, self::$asciiPlaceHoldMap['0A']['placeHold']);
@@ -2572,14 +2596,28 @@ class QA
         }
     }
 
-    protected
-    function _checkSizeRestriction()
+    protected function _checkSizeRestriction(): void
     {
         // check size restriction
         if ($this->id_segment) {
             if (false === $this->_filterCheckSizeRestriction($this->id_segment)) {
                 $this->addError(self::ERR_SIZE_RESTRICTION);
             }
+        }
+    }
+
+    protected function _checkICUMessageConsistency()
+    {
+        try {
+            $complaints = $this->icuPluralsValidator->validatePluralCompliance();
+            foreach ($complaints?->getArgumentWarnings() ?? [] as $complaint) {
+                //change the error code to a more specific one for ICU Message Pattern compliance
+                $this->_errorMap[self::ERR_ICU_VALIDATION] = implode('<br/><br/>', $complaint->getMessages());
+                $this->addError(self::ERR_ICU_VALIDATION);
+            }
+        } catch (Exception $e) {
+            $this->_errorMap[self::ERR_ICU_VALIDATION] = $e->getMessage();
+            $this->addError(self::ERR_ICU_VALIDATION);
         }
     }
 

@@ -16,7 +16,6 @@ use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EngineInterface;
 use Utils\Engines\EnginesFactory;
-use Utils\Engines\Lara;
 use Utils\Engines\Lara\Headers;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;

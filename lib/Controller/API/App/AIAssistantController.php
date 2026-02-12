@@ -5,10 +5,10 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Exception;
 use InvalidArgumentException;
+use Matecat\Locales\InvalidLanguageException;
+use Matecat\Locales\Languages;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
-use Utils\Langs\InvalidLanguageException;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 
 class AIAssistantController extends KleinController
