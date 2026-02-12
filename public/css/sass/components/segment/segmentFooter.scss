@@ -71,15 +71,32 @@
       .ai-feature-options {
         display: flex;
         gap: 8px;
+      }
 
+      .ai-feature-options,
+      .ai-alternative-options {
         > div {
-          width: 33%;
           display: flex;
           justify-content: space-between;
           gap: 16px;
           padding: 8px 12px 8px 16px;
           border: 1px solid colors.$grey3;
           border-radius: 6px;
+        }
+      }
+
+      .ai-alternative-options {
+        display: grid;
+        gap: 8px;
+        grid-auto-flow: column;
+      }
+
+      @media screen and (max-width: 1399px) {
+        .ai-alternative-options {
+          &:has(> :nth-child(4)):not(:has(> :nth-child(5))) {
+            grid-auto-flow: unset;
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
       }
     }
