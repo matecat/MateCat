@@ -1,4 +1,4 @@
-@use "commons/colors";
+@use 'commons/colors';
 
 body {
   margin: 0;
@@ -7,7 +7,6 @@ body {
   overflow-y: hidden;
   min-height: 100%;
 }
-
 
 .translate-box a.tooltip {
   text-align: center;
@@ -114,10 +113,11 @@ body {
   }
 }
 .translate-box {
-  float: left;
   margin: 20px 0 0 0;
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .translate-box {
@@ -128,16 +128,15 @@ body {
 .translate-box {
   h2,
   .select-with-label__wrapper label {
-    color: colors.$grey1;
-    font-size: 18px;
+    color: colors.$grey1300;
+    font-size: 16px;
     font-weight: normal;
   }
 
   .select-with-label__wrapper {
+    gap: 8px;
     .select {
-      font-size: 16px;
       padding: 9px 46px 9px 12px;
-      border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
       box-shadow: inset 0 1px 3px #ddd;
 
@@ -269,7 +268,7 @@ body {
 
     .select-with-icon__wrapper {
       z-index: 2;
-      height: 36px;
+      height: 40px;
       .select {
         color: black;
       }
@@ -291,11 +290,8 @@ body {
 .translate-box.settings {
   display: flex;
   align-items: center;
-  margin: 44px 0 0 0;
+  margin: 51px 0 0 0;
   cursor: pointer;
-}
-.translate-box.settings-disabled {
-  opacity: 0.5;
 }
 
 .translate-box.qa-box {
@@ -329,10 +325,9 @@ body {
   min-width: 992px;
   max-width: 1600px;
   position: relative;
-  padding: 24px;
+  padding: 0 24px 24px;
   background: colors.$grey5;
-  padding-top: 0px;
-  border-radius: 4px;
+  border-radius: 16px;
 }
 
 .wrapper-upload h1 {
@@ -383,15 +378,10 @@ body {
 }
 
 .wrapper-bottom {
-  margin: 0 auto;
-  width: 94%;
-  min-width: 992px;
   position: relative;
-  padding: 12px 0;
+  padding: 12px 0 0;
   display: flex;
   justify-content: space-between;
-  max-width: 1600px;
-  align-items: center;
 }
 
 h2 {
@@ -453,10 +443,6 @@ a:hover {
 .translate-box a {
   display: block;
   font-size: 16px;
-}
-
-.translate-box label {
-  margin-left: 5px;
 }
 
 body {
@@ -570,18 +556,12 @@ a {
 }
 
 .close {
-  background: url(/public/img/x.png) center 1px no-repeat;
   width: 22px;
   height: 20px;
   display: block;
   position: absolute;
   right: 0;
   top: 0;
-}
-
-.close:hover,
-.close:focus {
-  background: url(/public/img/x.png) center -30px no-repeat;
 }
 
 .popup .header input {
@@ -680,6 +660,7 @@ ul.test li {
   margin: 52px 14px 0 5px;
   font-size: 20px;
   color: #ccc;
+  cursor: pointer;
 }
 
 #swaplang span {
@@ -875,8 +856,9 @@ select:focus {
   position: absolute;
   z-index: 2;
   width: 100%;
-  height: 36px;
-  top: 24px;
+  height: 40px;
+  border-radius: 8px;
+  top: 32px;
   background-color: rgba(255, 255, 255, 0.9);
 
   .project-template-select-loading-icon {
@@ -903,7 +885,6 @@ select:focus {
     position: absolute;
     bottom: 0;
   }
-
 }
 
 .error-message,

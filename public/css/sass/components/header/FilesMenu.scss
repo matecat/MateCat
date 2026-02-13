@@ -1,111 +1,52 @@
 @use "../../commons/colors";
-.breadcrumbs {
-  display: grid;
-  grid-template-columns: 25px auto;
-  padding: 14px 0 4px 0;
-  position: relative;
-  .icon-container {
-    position: relative;
 
-    span#project-badge {
-      position: absolute;
-      left: -10px;
-      top: -8px;
-      font-family: Calibri, Arial, Helvetica, sans-serif !important;
-      color: #fff;
-    }
+.files-menu-button {
+  color: colors.$white !important;
+  text-decoration: underline !important;
+  &:hover {
+    text-decoration: none !important;
   }
-  #pname-container {
-    margin: 0 10px 0 0;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  .project-name {
-    color: #fff;
-    display: block;
-    text-decoration: underline;
-    &:hover {
-      text-decoration: none;
-    }
+  .filename-label .name {
+    max-width: 200px;
   }
 }
-
-.job-menu-files {
-  top: 50px;
-  display: block;
-  width: 315px;
-  background: colors.$grey3;
-  box-shadow: 0px 1px 12px #999;
-  z-index: 2;
-  padding: 0;
-  font-size: 14px;
-  position: absolute;
-  border: solid 1px #cdd4de;
-  .to-current {
-    background: #fff;
-    padding: 12px 16px;
-    cursor: pointer;
-    display: flex;
-    border-bottom: 1px solid colors.$grey2;
-    .icon-iconmoon:before {
-      color: #acb3bd;
-      font-size: 16px;
-      margin-right: 10px;
-      padding-right: 2px;
-      font-size: 16px;
-      content: '\f112';
-      transform: rotate(180deg);
-      display: inline-block;
-    }
-
-    .current-shortcut {
-      visibility: hidden;
-      padding-left: 8px;
-    }
+.files-menu-header {
+  max-height: 340px;
+  .current-shortcut {
+    visibility: hidden;
     &:hover {
-      .current-shortcut {
-        visibility: visible;
-      }
+      visibility: visible;
     }
   }
-  .file-list-container {
-    overflow-y: auto;
-    max-height: 60vh;
-    .file-list-label {
-      padding: 6px 16px;
-      display: block;
+  .selected {
+    background: colors.$darkBlue;
+    color: colors.$white;
+  }
+  .file-icon {
+    height: 33px;
+    padding: 5px;
+    margin: 0 8px 0 0;
+    width: 30px;
+    float: left;
+    background-size: 25px !important;
+  }
+  .dropdownmenu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    &:first-child {
+      justify-content: flex-start;
     }
-    .file-list-item {
-      padding: 4px 6px;
+    > div {
       display: flex;
       align-items: center;
-      cursor: pointer;
-      .file-icon {
-        height: 33px;
-        padding: 5px;
-        margin: 0 8px 0 0;
-        width: 30px;
-        float: left;
-        background-size: 25px !important;
-      }
-      .file-name {
-        display: block;
-        max-width: 230px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      span.current-icon {
-        margin-left: auto;
-        svg {
-          display: block;
-          margin-right: 8px;
-        }
-      }
-      &.current {
-        background: colors.$darkBlue;
-        color: #ffffff;
-      }
+      gap: 10px;
+    }
+    .file-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 350px;
     }
   }
 }

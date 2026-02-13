@@ -7,31 +7,20 @@ import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {FilenameLabel} from '../../common/FilenameLabel'
 import {getFileSegments} from '../../../api/getFileSegments'
-
-function useOutsideAlerter(ref, fun) {
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (ref.current && !ref.current.contains(event.target)) {
-        fun()
-      }
-    }
-    // Bind the event listener
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [ref])
-}
+import {
+  DROPDOWN_SEPARATOR,
+  DropdownMenu,
+} from '../../common/DropdownMenu/DropdownMenu'
+import Files from '../../../../img/icons/Files'
+import {BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
+import GoToIcon from '../../../../img/icons/GoToIcon'
+import Check from '../../../../img/icons/Check'
 
 export const FilesMenu = ({projectName}) => {
   const [files, setFiles] = useState()
   const [currentFile, setCurrentFile] = useState()
-  const [menuVisible, setMenuVisible] = useState(false)
   const [currentSegment, setCurrentSegment] = useState()
   const firstJobSegment = useRef()
-  const containerRef = useRef()
-  useOutsideAlerter(containerRef, () => setMenuVisible(false))
 
   useEffect(() => {
     getJobFileInfo(config.id_job, config.password).then((response) => {
@@ -46,11 +35,11 @@ export const FilesMenu = ({projectName}) => {
     })
   }, [])
 
-  const toggleMenu = () => {
-    if (!menuVisible) {
+  const toggleMenu = (open) => {
+    if (open) {
       CatToolActions.closeSubHeader()
       const current = SegmentStore.getCurrentSegment()
-      if (current) {
+      if (current && current.opened) {
         setCurrentSegment(current.sid)
         // check if use id_file or id_file_part
         const idFileProp = files.find(
@@ -60,8 +49,9 @@ export const FilesMenu = ({projectName}) => {
           : 'id_file_part'
         setCurrentFile(parseInt(current[idFileProp]))
       }
+    } else {
+      setCurrentSegment()
     }
-    setMenuVisible(!menuVisible)
   }
 
   const goToCurrentSegment = () => {
@@ -82,93 +72,71 @@ export const FilesMenu = ({projectName}) => {
     }
   }
 
-  return (
-    <div
-      className="breadcrumbs file-list"
-      title="File list"
-      onClick={toggleMenu}
-      ref={containerRef}
-    >
-      {files && (
-        <>
-          <div className="icon-container">
-            <span id="project-badge">
-              <span>{files.length}</span>
-            </span>
-            <img src="/public/img/icons/icon-folder.svg" alt="" />
-          </div>
-          <div id="pname-container">
-            <FilenameLabel cssClassName={'project-name'}>
-              {projectName}
-            </FilenameLabel>
-          </div>
-        </>
-      )}
-      {menuVisible && (
-        <div className="job-menu-files">
-          <div
-            className="to-current"
-            onClick={goToCurrentSegment}
-            disabled={!currentSegment}
-          >
-            <div className="icon-iconmoon" />
-            <span>Go to current segment</span>
+  const getFilesMenu = () => {
+    return [
+      {
+        label: (
+          <>
+            <GoToIcon size={20} />
+            <div>Go to current segment</div>
             <span className={'current-shortcut'}>
               {Shortcuts.cattol.events.gotoCurrent.keystrokes[
                 Shortcuts.shortCutsKeyType
               ].toUpperCase()}
             </span>
-          </div>
-          <div className="file-list-container">
-            {/*<span className="file-list-label">*/}
-            {/*  Go to first segment of the file:*/}
-            {/*</span>*/}
-            {files.map((file) => {
-              return (
-                <div
-                  key={file.id}
-                  onClick={() => goToFirstSegment(file)}
-                  className={`file-list-item ${
-                    currentFile === file.id ? 'current' : ''
-                  }`}
-                  title={`${file.file_name} - Click to go to the first segment`}
-                >
-                  <span
-                    className={
-                      'file-icon ' +
-                      CommonUtils.getIconClass(
-                        file.file_name.split('.')[
-                          file.file_name.split('.').length - 1
-                        ],
-                      )
-                    }
-                  />
-                  <span className="file-name">{file.file_name}</span>
-                  {currentFile === file.id && (
-                    <span className="current-icon">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 16 12"
-                        width={16}
-                        height={16}
-                      >
-                        <path
-                          fill="#FFF"
-                          fillRule="evenodd"
-                          stroke="none"
-                          strokeWidth="1"
-                          d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z"
-                          transform="translate(-266 -10) translate(266 8) translate(0 2)"
-                        />
-                      </svg>
-                    </span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+          </>
+        ),
+        onClick: goToCurrentSegment,
+        disabled: !currentSegment,
+      },
+      DROPDOWN_SEPARATOR,
+      ...files.map((file) => ({
+        label: (
+          <>
+            <div>
+              <span
+                className={
+                  'file-icon ' +
+                  CommonUtils.getIconClass(
+                    file.file_name.split('.')[
+                      file.file_name.split('.').length - 1
+                    ],
+                  )
+                }
+              />
+              <span className="file-name">{file.file_name}</span>
+            </div>
+            {currentFile === file.id && <Check size={20} />}
+          </>
+        ),
+        onClick: () => goToFirstSegment(file),
+        selected: currentFile === file.id,
+      })),
+    ]
+  }
+
+  return (
+    <>
+      <DropdownMenu
+        dropdownClassName={'files-menu-header'}
+        toggleButtonProps={{
+          children: (
+            <>
+              <Files size={20} />
+              <FilenameLabel cssClassName={'project-name'}>
+                {projectName}
+              </FilenameLabel>
+            </>
+          ),
+          size: BUTTON_SIZE.STANDARD,
+          mode: BUTTON_MODE.LINK,
+          className: 'files-menu-button',
+        }}
+        items={files && getFilesMenu()}
+        onOpenChange={toggleMenu}
+        className={'file-list-item'}
+        disabled={!files}
+      />
+    </>
   )
 }

@@ -23,7 +23,7 @@
   bottom: 30px;
   margin: 0 auto;
   left: 50%;
-  margin-left: calc(-1 * (variables.$notifications-width / 2));
+  //margin-left: calc(-1 * (variables.$notifications-width / 2));
 }
 .notifications-position-br {
   @extend .notifications-position;
@@ -45,7 +45,7 @@
   bottom: auto;
   margin: 0 auto;
   left: 50%;
-  margin-left: calc(-1 * (variables.$notifications-width / 2));
+  //margin-left: calc(-1 * (variables.$notifications-width / 2));
 }
 .notifications-position-tr {
   @extend .notifications-position;

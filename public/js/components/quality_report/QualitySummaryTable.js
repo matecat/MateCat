@@ -14,6 +14,12 @@ class QualitySummaryTable extends React.Component {
     this.thereAreSubCategories = thereAreSubCategories
     this.severities = severities
     this.categoriesGroups = categoriesGroups
+    console.log('severities', severities)
+    console.log(
+      'categoriesGroups',
+      categoriesGroups.map((i) => i[0].toJS()),
+    )
+    console.log('Quality summary', this.props.qualitySummary.toJS())
   }
   analyzeQualityModel() {
     let severities = []
@@ -125,17 +131,16 @@ class QualitySummaryTable extends React.Component {
       )
       html.push(item)
     })
-    let totalScore = this.props.qualitySummary.get('total_issues_weight')
     return (
       <div className="qr-head">
-        <div className="qr-title qr-issue">Issues</div>
-        {html}
-        <div className="qr-title qr-total-severity">
-          <div className="qr-info">Total error points</div>
-          <div className="qr-info qr-info-total">
-            <b>{totalScore}</b>
-          </div>
-        </div>
+        <div className="qr-title qr-issue">Categories</div>
+        <div className="qr-title qr-severity">Severities</div>
+        {this.severities.map((sev, i) => {
+          if (i > 0) {
+            return <div className="qr-title qr-severity" key={sev.label + i} />
+          }
+        })}
+        <div className="qr-title qr-total-severity">Error Points</div>
       </div>
     )
   }
@@ -161,7 +166,8 @@ class QualitySummaryTable extends React.Component {
               className={`qr-element severity severity_weight`}
               key={'sev-weight-' + sev.label + i}
             >
-              Weight: {severityFind.get('penalty')}
+              {sev.label}{' '}
+              <span>(x{parseFloat(severityFind.get('penalty'))})</span>
             </div>,
           )
         } else {
@@ -256,7 +262,47 @@ class QualitySummaryTable extends React.Component {
         html.push(line)
       })
     })
-    return <div className="qr-body">{html}</div>
+    let severitiesTotal = []
+    this.severities.forEach((sev) => {
+      let totalSev = 0
+      this.categoriesGroups.forEach((cat, i) => {
+        const catJs = cat[0].toJS()
+        const totalIssues = this.getIssuesForCategory(catJs.id)?.toJS()
+        if (totalIssues?.founds[sev.label]) {
+          totalSev =
+            totalSev +
+            totalIssues.founds[sev.label] *
+              catJs.severities.find((s) => s.label === sev.label).penalty
+        }
+      })
+      severitiesTotal = [
+        ...severitiesTotal,
+        {label: sev.label, total: totalSev},
+      ]
+    })
+    let totalScore = this.props.qualitySummary.get('total_issues_weight')
+
+    const totalLines = (
+      <div className="qr-body-list qr-total-line">
+        <div className="qr-element qr-issue-name">Total</div>
+        {severitiesTotal.map((sev, i) => {
+          return (
+            <div className="qr-element severity" key={'total-sev-' + i}>
+              {sev.total}
+            </div>
+          )
+        })}
+        <div className="qr-element total-severity total-score">
+          {totalScore}
+        </div>
+      </div>
+    )
+    return (
+      <div className="qr-body">
+        {html}
+        {totalLines}
+      </div>
+    )
   }
   getBodyWithSubcategories() {
     let html = []
@@ -331,7 +377,7 @@ class QualitySummaryTable extends React.Component {
       htmlBody = this.getBody()
     }
     return (
-      <div className="qr-quality shadow-2">
+      <div className="qr-quality">
         {htmlHead}
         {htmlBody}
       </div>

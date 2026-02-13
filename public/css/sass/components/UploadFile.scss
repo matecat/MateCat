@@ -1,5 +1,5 @@
 @use '../commons/colors';
-.upload-files-container {
+.upload-files-container, .upload-box-not-logged, .upload-waiting-logged {
   border: 1px dashed #ccc;
   min-height: 200px;
   border-radius: 4px;
