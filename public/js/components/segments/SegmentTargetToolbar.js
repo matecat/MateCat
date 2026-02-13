@@ -17,6 +17,7 @@ import {LaraStyles} from './ToolbarFeatures/Ai/LaraStyles'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
 import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
+import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -50,6 +51,10 @@ export const SegmentTargetToolbar = ({
   const items = [
     ...(config.active_engine?.engine_type === 'Lara'
       ? [
+          {
+            group: 0,
+            component: <AiFeedback {...{key: 'aifeedback', sid}} />,
+          },
           {
             group: 0,
             component: <LaraStyles {...{key: 'larastyle', sid}} />,

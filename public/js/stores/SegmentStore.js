@@ -2024,6 +2024,7 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.LARA_STYLES:
     case SegmentConstants.AI_ALTERNATIVES:
+    case SegmentConstants.AI_FEEDBACK:
       SegmentStore.emitChange(action.actionType, {
         ...action,
       })

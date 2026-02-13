@@ -1989,6 +1989,29 @@ const SegmentActions = {
       })
     }, 100)
   },
+  aiFeedbackTab: ({sid}) => {
+    SegmentActions.modifyTabVisibility(TAB.AI_FEEDBACK, true)
+    SegmentActions.activateTab(sid, TAB.AI_FEEDBACK)
+
+    setTimeout(() => {
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.AI_FEEDBACK,
+        sid,
+      })
+    }, 100)
+  },
+  aiAlternativeSuggestion: (data) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.AI_ALTERNATIVES_SUGGESTION,
+      data,
+    })
+  },
+  aiFeedbackSuggestion: (data) => {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.AI_FEEDBACK_SUGGESTION,
+      data,
+    })
+  },
 }
 
 export default SegmentActions
