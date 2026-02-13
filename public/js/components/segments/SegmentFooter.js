@@ -26,6 +26,7 @@ import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
 import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
+import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -39,6 +40,7 @@ export const TAB = {
   ICU: 'icu',
   LARA_STYLES: 'laraStyles',
   AI_ALTERNATIVES: 'aiAlternatives',
+  AI_FEEDBACK: 'aiFeedback',
 }
 
 const TAB_ITEMS = {
@@ -102,6 +104,13 @@ const TAB_ITEMS = {
     label: 'Ai alternatives',
     code: 'aialternatives',
     tabClass: 'ai-alternatives',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
+  [TAB.AI_FEEDBACK]: {
+    label: 'Ai feedback',
+    code: 'aifeedback',
+    tabClass: 'ai-feedback',
     isLoading: false,
     isEnableCloseButton: true,
   },
@@ -551,6 +560,16 @@ function SegmentFooter() {
       case 'aialternatives':
         return (
           <SegmentFooterTabAiAlternatives
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'aifeedback':
+        return (
+          <SegmentFooterTabAiFeedback
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}

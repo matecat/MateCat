@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
-import SwitchHorizontal from '../../../img/icons/SwitchHorizontal'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import Copy from '../icons/Copy'
 import {encodePlaceholdersToTags} from './utils/DraftMatecatUtils/tagUtils'
@@ -17,10 +16,8 @@ export const SegmentFooterTabAiAlternatives = ({
   const [alternatives, setAlternatives] = useState()
 
   useEffect(() => {
-    const requestAlternatives = ({sid, text}) => {
+    const requestAlternatives = ({text}) => {
       setAlternatives()
-      console.log(text)
-      const currentSegment = segment
 
       const getWordsBeforeAndAfter = (html, textPortion, count = 30) => {
         const tokenRegex = /(<[^>]+>)|([^<]+)/g
@@ -82,11 +79,11 @@ export const SegmentFooterTabAiAlternatives = ({
       }
 
       const wordsBeforeAndAfter = getWordsBeforeAndAfter(
-        currentSegment.translation,
+        segment.translation,
         text,
         15,
       )
-      console.log('wordsBeforeAndAfter', wordsBeforeAndAfter)
+
       const begin = DraftMatecatUtils.transformTagsToHtml(
         wordsBeforeAndAfter.begin,
         config.isTargetRTL,
