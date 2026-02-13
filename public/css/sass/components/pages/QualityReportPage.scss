@@ -292,106 +292,81 @@ header {
             .qr-quality {
               margin-top: 20px;
               margin-bottom: 20px;
-              border-bottom: 2px solid colors.$grey4;
+              border: 1px solid colors.$grey3;
               position: relative;
               z-index: 1;
+              border-radius: 8px;
+              overflow: hidden;
               .qr-head {
                 display: flex;
                 align-items: center;
                 font-weight: 700;
-                background: colors.$grey4;
+                background: colors.$grey3;
+                height: 40px  ;
                 .qr-title {
-                  text-align: center;
-                  text-transform: capitalize;
-                  &:first-child {
-                    text-align: left;
-                  }
+                  padding-left: 24px;
                 }
               }
               .qr-body-list {
                 display: flex;
-                &:not(.severity_weight-line) {
-                  &:not(.qr-body-list-first) {
-                    border-left: 2px solid colors.$grey4;
-                    border-right: 2px solid colors.$grey4;
-                    border-top: 2px solid colors.$grey4;
-                  }
-
-                  .qr-element {
-                    border-left: 1px solid colors.$grey4;
-                  }
+                align-items: center;
+                background-color: colors.$white;
+                height: 40px;
+                border-bottom: 1px solid colors.$grey4;
+                &:last-child {
+                  border-bottom: none;
                 }
                 .qr-element {
-                  background: white;
                   position: relative;
-                  &.empty {
-                    background: colors.$grey4;
-                  }
-                  &:first-child {
-                    border: none;
-                    display: flex;
-                    justify-content: center;
-                    flex-direction: column;
-                  }
-                  &.severity_weight {
-                    background: colors.$grey5 !important;
-                  }
-                  span {
-                    top: 50%;
-                    position: absolute;
-                    transform: translateY(-50%);
-                  }
+                  padding-left: 24px;
+
                 }
                 &.severity_weight-line {
+                  background-color: colors.$grey5;
+                  height: 32px;
+                  font-weight: 700;
+                  span {
+                    font-weight: 400;
+                    color: colors.$grey6;
+                  }
                   .qr-element {
-                    padding: 2px 15px;
                     font-size: 14px;
+                    height: 100%;
+                    line-height: 32px;
+                  }
+                }
+                &.qr-total-line {
+                    background-color: colors.$grey3;
+                    height: 40px;
+                  .qr-issue-name, .total-score {
+                    font-weight: 700;
+                    line-height: 40px;
+                  }
+                  .total-score {
+                    background-color: colors.$grey2;
+                    height: 100%;
                   }
                 }
               }
 
-              .qr-title,
-              .qr-element {
-                padding: 10px 15px;
+              .qr-issue {
+                font-weight: 700;
               }
-              .qr-issue,
+              .qr-issue ,
               .qr-issue-name {
                 width: 56%;
-                font-weight: 500;
                 font-size: 15px;
               }
               .qr-severity,
               .severity {
                 width: 21%;
-                text-align: center;
+                text-align: left;
               }
               .qr-total-severity,
               .total-severity {
                 width: 20%;
-                background: colors.$grey1;
-              }
-              .qr-total-severity {
-                padding: 20px 15px;
-                &.job-not-passed {
-                  background-color: #fb590d;
-                }
-                &.job-passed {
-                  background-color: #83fd97;
-                  &.qr-old {
-                    background-color: #83fd97;
-                    display: unset;
-                  }
-                }
-                &.qr-old {
-                  background: inherit;
-                  display: unset;
-                }
-                .qr-info.qr-info-total {
-                  font-size: 20px;
-                }
               }
               .total-severity {
-                text-align: center;
                 &.job-not-passed {
                   background-color: rgba(255, 123, 35, 0.31);
                   text-align: center;
