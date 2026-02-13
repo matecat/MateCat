@@ -220,58 +220,6 @@ export const QualityReport = () => {
                               },
                             ]}
                           />
-                          {/*<div
-                            className="ui top left pointing dropdown basic tiny button right-0"
-                            style={{marginBottom: '12px'}}
-                            ref={reviewDropdownRef}
-                          >
-                            {revisionToShow === '1' ? (
-                              <div className="text">
-                                <div
-                                  className={
-                                    'ui revision-color empty circular label'
-                                  }
-                                />
-                                Revision
-                              </div>
-                            ) : (
-                              <div className="text">
-                                <div
-                                  className={
-                                    'ui second-revision-color empty circular label'
-                                  }
-                                />
-                                2nd Revision
-                              </div>
-                            )}
-
-                            <div className="menu">
-                              <div
-                                className="item"
-                                data-value="1"
-                                key={'option-revision'}
-                              >
-                                <div
-                                  className={
-                                    'ui revision-color empty circular label'
-                                  }
-                                />
-                                Revision
-                              </div>
-                              <div
-                                className="item"
-                                data-value="2"
-                                key={'option-revision-2'}
-                              >
-                                <div
-                                  className={
-                                    'ui second-revision-color empty circular label'
-                                  }
-                                />
-                                2nd Revision
-                              </div>
-                            </div>
-                          </div>*/}
                         </div>
                       </div>
                     </div>

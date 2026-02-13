@@ -148,7 +148,7 @@ header {
           max-width: 1366px;
           min-width: 1024px;
           margin: 0 auto;
-          padding: 20px 15px 0;
+          padding: 30px 0;
           h3 {
           }
           .qr-label {
@@ -158,16 +158,26 @@ header {
             padding-right: 9px;
           }
           .qr-production-quality {
+            .qr-production-container {
+              display: flex;
+              gap: 16px;
+            }
             .qr-production {
               display: flex;
               background: colors.$grey3;
-              justify-content: space-between;
-              width: 100%;
-              padding-left: 15px;
+              padding: 0 24px;
               align-items: center;
               position: relative;
+              height: 64px;
+              gap: 30px;
+              border-radius: 8px;
+              flex: 1 0 0;
               .job-id {
-                font-size: 14px;
+                font-size: 16px;
+                min-width: 90px;
+                color: colors.$grey6;
+                line-height: 24px;
+
               }
               .source-to-target {
                 display: flex;
@@ -184,76 +194,98 @@ header {
               .progress-percent {
                 display: flex;
                 align-items: center;
+                gap: 8px;
                 .progress-bar {
                   margin: 0;
-                  min-width: 130px;
+                  min-width: 210px;
+                  .meter {
+                    height: 10px;
+                  }
                 }
                 .percent {
                   padding-left: 5px;
                 }
               }
-              .qr-effort {
-                padding: 15px 0;
-                &:last-child {
-                  padding-right: 15px !important;
+              .qr-effort-container {
+                display: flex;
+                padding-left: 16px;
+                justify-content: flex-end;
+                align-items: center;
+                gap: 40px;
+              }
+            }
+            .qr-effort {
+              padding: 15px 0;
+              &:last-child {
+                padding-right: 15px !important;
+              }
+              &.translator {
+                max-width: 95px;
+                b {
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
                 }
-                &.translator {
-                  max-width: 15%;
-                  min-width: 30px;
-                  b {
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+              }
+              &.qr-score {
+                display: flex;
+                width: 200px;
+                height: 64px;
+                padding: 12px;
+                justify-content: space-between;
+                gap: 8px;
+                flex-shrink: 0;
+                background: colors.$grey3;
+                border-radius: 8px;
+                > div {
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: space-between;
+                  align-items: flex-start;
+                  align-self: stretch;
+                  &:last-child {
+                    align-items: flex-end;
                   }
                 }
-                &.qr-score {
-                  padding: 15px 25px;
-                  .qr-tolerated-score,
-                  .qr-pass-score {
-                    font-size: 20px;
-                  }
-                  .qr-info {
-                    flex-direction: column;
-                    align-items: unset;
-                  }
-                }
-
-                &.qr-pass {
-                  background: colors.$greenDefaultTransparent;
-                }
-                &.qr-fail {
-                  background: colors.$redDefaultTransparent;
-                }
-                &.qr-pass,
-                &.qr-fail,
-                &.qr-norevision {
-                  margin-right: -1px;
-                  .qr-info {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    .qr-tolerated-score {
-                      font-size: 42px;
-                      margin-right: 10px;
-                    }
-                  }
-                  .qr-label {
-                    text-decoration: underline;
-                    cursor: pointer;
-                    width: fit-content;
-                    padding-right: 8px;
-                    &:hover {
-                      text-decoration: none;
-                    }
-                    &:first-child {
-                      text-decoration: none;
-                    }
-                  }
-                }
-                .qr-info {
+                .qr-ept-info {
                   display: flex;
                   align-items: center;
-                  justify-content: space-between;
+                  gap: 4px;
+                  font-size: 12px;
+                  line-height: 12px;
+                  font-weight: 700;
+                }
+                .qr-tolerated-score {
+                  font-size: 24px;
+                  font-weight: 700;
+                  line-height: 14px;
+                }
+                .qr-info {
+                  flex-direction: column;
+                  align-items: unset;
+                }
+                .qr-pass-score {
+                  font-size: 16px;
+                  font-weight: 700;
+                  line-height: 16px;
+                }
+                .qr-threshold {
+                  font-size: 12px;
+                  line-height: 12px;
+                }
+                &.qr-pass {
+                  background: #{rgba(colors.$greenDefault, 0.2)};
+                  .qr-pass-score {
+                    color: colors.$greenDefault;
+                    font-weight: 700;
+                  }
+                }
+                &.qr-fail {
+                  background: #{rgba(colors.$redDefault, 0.2)};
+                  .qr-pass-score {
+                    color: colors.$redDefault;
+                    font-weight: 700;
+                  }
                 }
               }
             }
@@ -381,10 +413,11 @@ header {
             }
           }
           .qr-header {
-            height: 70px;
+            margin-bottom: 26px;
             h3 {
-              font-size: 22px;
+              font-size: 24px;
               font-weight: bold;
+              line-height: 24px;
             }
             .filter-dropdown .dropdown {
               font-size: 20px !important;
