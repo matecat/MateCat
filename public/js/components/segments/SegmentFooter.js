@@ -84,6 +84,13 @@ const TAB_ITEMS = {
     isLoading: false,
     isEnableCloseButton: true,
   },
+  [TAB.AI_FEEDBACK]: {
+    label: 'Ai feedback',
+    code: 'aifeedback',
+    tabClass: 'ai-feedback',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
   [TAB.LARA_STYLES]: {
     label: 'Lara styles',
     code: 'larastyles',
@@ -95,13 +102,6 @@ const TAB_ITEMS = {
     label: 'Ai alternatives',
     code: 'aialternatives',
     tabClass: 'ai-alternatives',
-    isLoading: false,
-    isEnableCloseButton: true,
-  },
-  [TAB.AI_FEEDBACK]: {
-    label: 'Ai feedback',
-    code: 'aifeedback',
-    tabClass: 'ai-feedback',
     isLoading: false,
     isEnableCloseButton: true,
   },

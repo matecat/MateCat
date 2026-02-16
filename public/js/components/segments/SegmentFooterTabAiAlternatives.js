@@ -5,7 +5,12 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import Copy from '../icons/Copy'
-import {encodePlaceholdersToTags} from './utils/DraftMatecatUtils/tagUtils'
+import {
+  decodePlaceholdersToPlainText,
+  encodePlaceholdersToTags,
+} from './utils/DraftMatecatUtils/tagUtils'
+import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
+import SegmentUtils from '../../utils/segmentUtils'
 
 export const SegmentFooterTabAiAlternatives = ({
   code,
@@ -93,42 +98,61 @@ export const SegmentFooterTabAiAlternatives = ({
         config.isTargetRTL,
       )
 
-      setAlternatives([
-        {
-          text: DraftMatecatUtils.transformTagsToHtml(text, config.isTargetRTL),
-          alternativeOriginal: DraftMatecatUtils.transformTagsToHtml(
-            text,
-            config.isTargetRTL,
-          ),
-          alternative: DraftMatecatUtils.transformTagsToHtml(
-            text,
-            config.isTargetRTL,
-          ),
-          begin,
-          after,
-          description: 'Lorem ipsum bla bla',
-        },
-        {
-          alternativeOriginal: text,
-          alternative: DraftMatecatUtils.transformTagsToHtml(
-            text,
-            config.isTargetRTL,
-          ),
-          begin,
-          after,
-          description: 'Lorem ipsum bla bla2',
-        },
-        {
-          alternativeOriginal: text,
-          alternative: DraftMatecatUtils.transformTagsToHtml(
-            text,
-            config.isTargetRTL,
-          ),
-          begin,
-          after,
-          description: 'Lorem ipsum bla bla3',
-        },
-      ])
+      const decodedSource = decodePlaceholdersToPlainText(segment.segment)
+      const decodedTarget = decodePlaceholdersToPlainText(segment.translation)
+
+      const {contextListBefore, contextListAfter} =
+        SegmentUtils.getSegmentContext(segment.sid)
+
+      aiAlternartiveTranslations({
+        sourceSentence: decodedSource,
+        sourceContextSentencesString: contextListBefore
+          .map((t) => decodePlaceholdersToPlainText(t))
+          .join('\n'),
+        targetSentence: decodedTarget,
+        targetContextSentencesString: contextListAfter
+          .map((t) => decodePlaceholdersToPlainText(t))
+          .join('\n'),
+        excerpt: decodePlaceholdersToPlainText(text),
+        styleInstructions: 'formal',
+      })
+
+      // setAlternatives([
+      //   {
+      //     text: DraftMatecatUtils.transformTagsToHtml(text, config.isTargetRTL),
+      //     alternativeOriginal: DraftMatecatUtils.transformTagsToHtml(
+      //       text,
+      //       config.isTargetRTL,
+      //     ),
+      //     alternative: DraftMatecatUtils.transformTagsToHtml(
+      //       text,
+      //       config.isTargetRTL,
+      //     ),
+      //     begin,
+      //     after,
+      //     description: 'Lorem ipsum bla bla',
+      //   },
+      //   {
+      //     alternativeOriginal: text,
+      //     alternative: DraftMatecatUtils.transformTagsToHtml(
+      //       text,
+      //       config.isTargetRTL,
+      //     ),
+      //     begin,
+      //     after,
+      //     description: 'Lorem ipsum bla bla2',
+      //   },
+      //   {
+      //     alternativeOriginal: text,
+      //     alternative: DraftMatecatUtils.transformTagsToHtml(
+      //       text,
+      //       config.isTargetRTL,
+      //     ),
+      //     begin,
+      //     after,
+      //     description: 'Lorem ipsum bla bla3',
+      //   },
+      // ])
     }
 
     SegmentStore.addListener(
