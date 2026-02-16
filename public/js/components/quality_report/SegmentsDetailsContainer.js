@@ -84,7 +84,7 @@ class SegmentsDetails extends React.Component {
     }
 
     return (
-      <div className="qr-segment-details-container shadow-2">
+      <div className="qr-segment-details-container">
         <div className="qr-segments-summary">
           <div className="qr-filter-container">
             <h3>Segment details</h3>

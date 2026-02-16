@@ -297,6 +297,7 @@ header {
               z-index: 1;
               border-radius: 8px;
               overflow: hidden;
+              font-size: 14px;
               .qr-head {
                 display: flex;
                 align-items: center;
@@ -355,7 +356,6 @@ header {
               .qr-issue ,
               .qr-issue-name {
                 width: 56%;
-                font-size: 15px;
               }
               .qr-severity,
               .severity {
@@ -399,14 +399,33 @@ header {
               max-width: 190px;
             }
           }
+          .qr-kudos {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            background-color: colors.$white;
+            padding: 0 24px;
+            height: 40px;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid colors.$grey3;
+            font-size: 14px;
+            .qr-kudos-value {
+              padding-right: 140px;
+            }
+          }
           .qr-feedback-container {
             min-height: 73px;
             position: relative;
             margin-bottom: 20px;
+            background-color: colors.$white;
+            border-radius: 8px;
+            overflow: hidden;
             .qr-feedback {
               .qr-head {
                 padding: 10px 20px;
-                background: colors.$grey4;
+                background: colors.$grey3;
                 .label.revision-color {
                   float: left;
 
@@ -435,7 +454,9 @@ header {
           }
           .qr-segment-details-container {
             background: colors.$grey4;
-            padding: 35px 15px 15px;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid colors.$grey3;
             .qr-segments-summary {
               h3 {
                 margin-bottom: 0;
@@ -447,22 +468,26 @@ header {
                 }
                 .qr-segments-list {
                   .qr-single-segment {
-                    padding-top: 30px;
+                    margin-top: 30px;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    border: 1px solid colors.$grey3;
                     &:first-child {
-                      padding-top: 15px;
+                      margin-top: 15px;
                     }
                     .qr-segment-head {
                       display: flex;
                       position: relative;
-                      background: #fff;
+                      background: colors.$grey5;
                       align-items: center;
+                      height: 48px;
+                      padding: 0 24px;
+                      font-size: 14px;
                       .segment-id {
-                        width: 18%;
-                        padding: 15px 0.78571429em;
+                        width: 20%;
                       }
                       .segment-production-container {
                         width: 68%;
-                        padding: 15px 0.78571429em;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
@@ -476,8 +501,10 @@ header {
                       }
                     }
                     .segment-status-container {
-                       width: 14%;
-                       padding: 15px 0.78571429em;
+                      width: 18%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: flex-end;
                        .status-new {
                          font-size: 20px;
                          color: #8b8e92;
@@ -507,12 +534,12 @@ header {
                        }
                      }
                     .qr-segment-body {
-                      border-bottom: 1px solid colors.$grey2;
-                      border-left: 1px solid colors.$grey2;
-                      border-right: 1px solid colors.$grey2;
                       .segment-container {
                         display: flex;
-                        background: colors.$grey3;
+                        background: colors.$white;
+                        border-bottom: 1px solid colors.$grey4;
+                        height: 40px;
+                        font-size: 14px;
                         &.qr-issues {
                           .qr-text {
                             width: 80%;
@@ -524,17 +551,29 @@ header {
                         .segment-content {
                           display: flex;
                           align-items: center;
-                          padding: 10px 0.78571429em;
-                          margin-top: 1px;
+
+                          padding: 0 24px;
+
+                          align-content: center;
                           .tte {
                             max-width: 110px;
                             font-weight: bold;
                           }
                         }
+                        &.qr-issues {
+                          background-color: colors.$grey5 !important;
+                          border-bottom: none !important;
+                          height: unset;
+                          .segment-content {
+                            background-color: colors.$grey5 !important;
+                          }
+                          .qr-text {
+                            padding: 8px 0;
+                          }
+                        }
 
                         .qr-segment-title {
                           width: 20%;
-                          background: colors.$grey5;
                           justify-content: space-between;
 
                           button {
@@ -603,7 +642,7 @@ header {
                           background: colors.$white;
                           margin-right: 1px;
                           display: inline-block;
-                          color: #5f5f5f;
+
                           .added {
                             background: rgba(158, 255, 0, 0.5);
                           }
@@ -622,8 +661,9 @@ header {
                               padding: 3px 10px;
                               margin-right: 5px;
                               margin-top: 5px;
-                              background: colors.$grey4;
-
+                              background: colors.$white;
+                              border: 1px solid colors.$grey4;
+                              border-radius: 4px;
                               &.automated {
                                 padding: 0;
                                 padding-right: 5px;
@@ -701,14 +741,10 @@ header {
                         .segment-container {
                           box-shadow: none !important;
                           .segment-content {
-                            background: colors.$grey5;
                             .qr-issues-list {
                               .qr-issue {
                                 background: #ffffff;
                               }
-                            }
-                            &.qr-text {
-                              border-left: 1px solid #e8e9ec;
                             }
                           }
                           &.shadow-1 {
@@ -757,6 +793,22 @@ header {
         }
       }
     }
+  }
+}
+.qr-reviewType-control {
+  width: 200px;
+  .segmented-control {
+    background-color: colors.$black100;
+  }
+  .segmented-control__cursor:before {
+    background-color: colors.$white;
+    border-radius: 12px;
+  }
+  .segmented-control input:checked + .segmented-control__label {
+    color: colors.$black;
+  }
+  .segmented-control__label {
+    line-height: 40px;
   }
 }
 .qr-reviewType-dropdown, .filter-reviewType  {

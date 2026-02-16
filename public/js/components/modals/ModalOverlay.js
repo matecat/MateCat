@@ -22,11 +22,7 @@ export const ModalOverlay = ({title, styleContainer, children, onClose}) => {
   }, [])
 
   return (
-    <div
-      id="matecat-modal-overlay"
-      className="matecat-modal-overlay"
-      onClick={handleClose}
-    >
+    <div id="matecat-modal-overlay" className="matecat-modal-overlay">
       <div className="matecat-modal-content" style={styleContainer}>
         <div className="matecat-modal-header">
           <div className="modal-logo" />

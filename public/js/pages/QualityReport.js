@@ -11,14 +11,34 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import SocketListener from '../sse/SocketListener'
-import {DropdownMenu} from '../components/common/DropdownMenu/DropdownMenu'
-import {BUTTON_SIZE} from '../components/common/Button/Button'
+import {SegmentedControl} from '../components/common/SegmentedControl'
 
 const getReviseUrlParameter = () => {
   const url = new URL(window.location.href)
   const revType = url.searchParams.get('revision_type')
   return revType ? revType : '1'
 }
+
+const SEGMENTED_CONTROL_OPTIONS = [
+  {
+    id: '1',
+    name: (
+      <>
+        <div className={'ui revision-color empty circular label'} />
+        Revise
+      </>
+    ),
+  },
+  {
+    id: '2',
+    name: (
+      <>
+        <div className={'ui second-revision-color empty circular label'} />
+        Revise 2
+      </>
+    ),
+  },
+]
 
 export const QualityReport = () => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -156,69 +176,12 @@ export const QualityReport = () => {
                     <div className="qr-filter-list">
                       <div className="filter-dropdown right-10">
                         <div className={'filter-reviewType active'}>
-                          <DropdownMenu
-                            dropdownClassName={'qr-reviewType-dropdown'}
-                            toggleButtonProps={{
-                              children: (
-                                <div
-                                  className="ui top left pointing dropdown basic tiny button right-0"
-                                  style={{marginBottom: '12px'}}
-                                >
-                                  {revisionToShow === '1' ? (
-                                    <div className="text">
-                                      <div
-                                        className={
-                                          'ui revision-color empty circular label'
-                                        }
-                                      />
-                                      Revision
-                                    </div>
-                                  ) : (
-                                    <div className="text">
-                                      <div
-                                        className={
-                                          'ui second-revision-color empty circular label'
-                                        }
-                                      />
-                                      2nd Revision
-                                    </div>
-                                  )}
-                                </div>
-                              ),
-                              size: BUTTON_SIZE.ICON_STANDARD,
-                            }}
-                            items={[
-                              {
-                                label: (
-                                  <>
-                                    <div
-                                      className={
-                                        'ui revision-color empty circular label'
-                                      }
-                                    />
-                                    Revision
-                                  </>
-                                ),
-                                onClick: () => {
-                                  setRevisionToShow('1')
-                                },
-                              },
-                              {
-                                label: (
-                                  <>
-                                    <div
-                                      className={
-                                        'ui second-revision-color empty circular label'
-                                      }
-                                    />
-                                    2nd Revision
-                                  </>
-                                ),
-                                onClick: () => {
-                                  setRevisionToShow('2')
-                                },
-                              },
-                            ]}
+                          <SegmentedControl
+                            name={'reviewType'}
+                            className="qr-reviewType-control"
+                            options={SEGMENTED_CONTROL_OPTIONS}
+                            selectedId={revisionToShow}
+                            onChange={(v) => setRevisionToShow(v)}
                           />
                         </div>
                       </div>

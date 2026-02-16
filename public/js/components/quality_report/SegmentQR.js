@@ -394,37 +394,27 @@ class SegmentQR extends React.Component {
     let suggestionClasses = classnames({
       'segment-container': true,
       'qr-suggestion': true,
-      'shadow-1':
-        this.state.translateDiffOn ||
-        (this.state.reviseDiffOn && !this.target) ||
-        (this.state.revise2DiffOn && !this.revise && !this.target),
       'rtl-lang': config.isTargetRTL,
     })
     let translateClasses = classnames({
       'segment-container': true,
       'qr-translated': true,
-      'shadow-1':
-        this.state.translateDiffOn ||
-        this.state.reviseDiffOn ||
-        (this.state.revise2DiffOn && !this.revise),
       'rtl-lang': config.isTargetRTL,
     })
     let revisedClasses = classnames({
       'segment-container': true,
       'qr-revised': true,
-      'shadow-1': this.state.reviseDiffOn || this.state.revise2DiffOn,
       'rtl-lang': config.isTargetRTL,
     })
     let revised2Classes = classnames({
       'segment-container': true,
       'qr-revised': true,
       'qr-revised-2ndpass': true,
-      'shadow-1': this.state.revise2DiffOn,
       'rtl-lang': config.isTargetRTL,
     })
     return (
       <div className="qr-single-segment">
-        <div className="qr-segment-head shadow-1">
+        <div className="qr-segment-head">
           <div className="segment-id">{this.props.segment.get('id')}</div>
           <div className="segment-production-container">
             <div className="segment-production">

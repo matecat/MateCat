@@ -146,6 +146,7 @@ class QualitySummaryTable extends React.Component {
   }
   getBody() {
     let html = []
+    let kudos
     this.categoriesGroups.forEach((group, i) => {
       let groupHtml = []
       const sevGroup = group[0].get('severities')
@@ -232,21 +233,7 @@ class QualitySummaryTable extends React.Component {
           </div>
         )
         if (cat.get('label') === 'Kudos') {
-          let issues = 0
-          if (totalIssues && totalIssues.size > 0) {
-            cat.get('severities').forEach((sev) => {
-              issues += totalIssues.get('founds').get(sev.get('label'))
-            })
-          }
-          catTotalWeightHtml = (
-            <div
-              className="qr-element total-severity kudos-total"
-              key={'total-' + index}
-            >
-              <div className={'kudos-total-label'}>Total Kudos Points</div>
-              <div className={'kudos-total-number'}>{issues}</div>
-            </div>
-          )
+          return
         }
         const line = (
           <div
@@ -259,7 +246,11 @@ class QualitySummaryTable extends React.Component {
             {catTotalWeightHtml}
           </div>
         )
-        html.push(line)
+        if (cat.get('label') === 'Kudos') {
+          kudos = line
+        } else {
+          html.push(line)
+        }
       })
     })
     let severitiesTotal = []
@@ -369,18 +360,37 @@ class QualitySummaryTable extends React.Component {
   }
 
   render() {
-    let htmlBody
+    let htmlBody, kudos
     let htmlHead = this.getHeader()
     if (this.thereAreSubCategories) {
       htmlBody = this.getBodyWithSubcategories()
     } else {
       htmlBody = this.getBody()
     }
+    if (this.categoriesGroups.find((cat) => cat[0].get('label') === 'Kudos')) {
+      kudos = (
+        <div className="qr-kudos">
+          <div className="qr-kudos-title">Kudos</div>
+          <div className="qr-kudos-value">
+            {this.props.qualitySummary
+              .get('revise_issues')
+              .find((item, key) => {
+                return item.get('name') === 'Kudos'
+              })
+              ?.get('founds')
+              ?.get('Neutral') || 0}
+          </div>
+        </div>
+      )
+    }
     return (
-      <div className="qr-quality">
-        {htmlHead}
-        {htmlBody}
-      </div>
+      <>
+        <div className="qr-quality">
+          {htmlHead}
+          {htmlBody}
+        </div>
+        {kudos}
+      </>
     )
   }
 }
