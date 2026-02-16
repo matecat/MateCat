@@ -1,7 +1,7 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Get alternative translations by AI (response will send socket channel)
+ * Get alternative translations by AI (will receive response socket channel)
  * @param {string} [sourceLanguage=config.source_code]
  * @param {string} [targetLanguage=config.target_code]
  * @param {string} [idClient=config.id_client]
@@ -18,6 +18,7 @@ export const aiAlternartiveTranslations = async ({
   sourceLanguage = config.source_code,
   targetLanguage = config.target_code,
   idClient = config.id_client,
+  idSegment,
   sourceSentence,
   sourceContextSentencesString,
   targetSentence,
@@ -29,6 +30,7 @@ export const aiAlternartiveTranslations = async ({
     source_language: sourceLanguage,
     target_language: targetLanguage,
     id_client: idClient,
+    id_segment: idSegment,
     source_sentence: sourceSentence,
     target_sentence: sourceContextSentencesString,
     source_context_sentences_string: targetSentence,
