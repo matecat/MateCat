@@ -90,7 +90,9 @@ class AIAssistantWorker extends AbstractWorker
                 $payload['style_instructions']
             );
 
-            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $message, false, true);
+            $hasError = !is_array($message);
+
+            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $message, $hasError, true);
         } catch (Exception $exception){
             $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
         }
