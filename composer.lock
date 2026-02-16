@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60fad8461f7debea08a02449a17d36e0",
+    "content-hash": "1ebabdea6f4c20dd4fdc354e7c806830",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1875,16 +1875,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.1",
+            "version": "v3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "68b5090d6a0db47944548a79e2958bdd8326d573"
+                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/68b5090d6a0db47944548a79e2958bdd8326d573",
-                "reference": "68b5090d6a0db47944548a79e2958bdd8326d573",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d0166a39b3604294082bf2eb846d15dc3b2f441c",
+                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c",
                 "shasum": ""
             },
             "require": {
@@ -1892,7 +1892,7 @@
                 "ext-libxml": "*",
                 "ext-xml": "*",
                 "matecat/emoji-to-entity-converter": "^1",
-                "matecat/xml-dom-parser": "^1",
+                "matecat/xml-dom-parser": "^2",
                 "php": ">=8.3",
                 "phpstan/phpstan": "^2"
             },
@@ -1931,9 +1931,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.1"
+                "source": "https://github.com/matecat/subfiltering/tree/v3.0.2"
             },
-            "time": "2026-02-04T13:48:20+00:00"
+            "time": "2026-02-16T17:41:26+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1990,16 +1990,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "3.0.0-beta",
+            "version": "v3.0.0-beta5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "0c4fa8eb48f2b237d5db0f70d4c3266d70750196"
+                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/0c4fa8eb48f2b237d5db0f70d4c3266d70750196",
-                "reference": "0c4fa8eb48f2b237d5db0f70d4c3266d70750196",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/02bd1f43c52d8a3336c07d287a85c437850c85ed",
+                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed",
                 "shasum": ""
             },
             "require": {
@@ -2010,7 +2010,7 @@
                 "ext-simplexml": "*",
                 "ext-xml": "*",
                 "matecat/emoji-to-entity-converter": "^1",
-                "matecat/xml-dom-parser": "^1",
+                "matecat/xml-dom-parser": "^2.0.0",
                 "php": ">=8.3",
                 "psr/log": "*"
             },
@@ -2050,32 +2050,33 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/3.0.0-beta"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.0-beta5"
             },
-            "time": "2026-02-13T17:43:20+00:00"
+            "time": "2026-02-16T17:30:40+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
-            "version": "v1.1.3",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xml-dom-parser.git",
-                "reference": "166d12604901938d25c79982d13ba8a1487201f4"
+                "reference": "0ddc8a4987619ee8a05e035d0c9c08278ced2c3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xml-dom-parser/zipball/166d12604901938d25c79982d13ba8a1487201f4",
-                "reference": "166d12604901938d25c79982d13ba8a1487201f4",
+                "url": "https://api.github.com/repos/matecat/xml-dom-parser/zipball/0ddc8a4987619ee8a05e035d0c9c08278ced2c3f",
+                "reference": "0ddc8a4987619ee8a05e035d0c9c08278ced2c3f",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
                 "ext-xml": "*",
-                "php": ">=5.6"
+                "php": ">=8.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7.27"
+                "phpstan/phpstan": "@stable",
+                "phpunit/phpunit": "^12"
             },
             "type": "library",
             "autoload": {
@@ -2108,9 +2109,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xml-dom-parser/issues",
-                "source": "https://github.com/matecat/xml-dom-parser/tree/v1.1.3"
+                "source": "https://github.com/matecat/xml-dom-parser/tree/v2.0.0"
             },
-            "time": "2025-10-24T15:51:55+00:00"
+            "time": "2026-02-16T15:01:27+00:00"
         },
         {
             "name": "monolog/monolog",
