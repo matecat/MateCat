@@ -225,8 +225,12 @@ class AIAssistantWorker extends AbstractWorker
      *
      * @throws Exception
      */
-    private function emitMessage(string $type, string $idClient, string $idSegment, array|string $message, bool $hasError = false, bool $completed = false): void
+    private function emitMessage(string $type, string $idClient, string $idSegment, null|array|string $message, bool $hasError = false, bool $completed = false): void
     {
+        if($message === null){
+            $hasError = true;
+        }
+
         $this->publishToNodeJsClients([
             '_type' => $type,
             'data' => [
