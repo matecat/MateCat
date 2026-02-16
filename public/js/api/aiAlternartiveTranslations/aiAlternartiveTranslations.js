@@ -1,0 +1,52 @@
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+
+/**
+ * Get alternative translations by AI
+ * @param {string} [sourceLanguage=config.source_code]
+ * @param {string} [targetLanguage=config.target_code]
+ * @param {string} sourceSentence
+ * @param {string} sourceContextSentencesString
+ * @param {string} targetSentence
+ * @param {string} targetContextSentencesString
+ * @param {string} excerpt
+ * @param {string} styleInstructions
+ * @returns {Promise<object>}
+ */
+
+export const aiAlternartiveTranslations = async ({
+  sourceLanguage = config.source_code,
+  targetLanguage = config.target_code,
+  sourceSentence,
+  sourceContextSentencesString,
+  targetSentence,
+  targetContextSentencesString,
+  excerpt,
+  styleInstructions,
+}) => {
+  const dataParams = {
+    source_language: sourceLanguage,
+    target_language: targetLanguage,
+    source_sentence: sourceSentence,
+    target_sentence: sourceContextSentencesString,
+    source_context_sentences_string: targetSentence,
+    target_context_sentences_string: targetContextSentencesString,
+    context: excerpt,
+    style_instructions: styleInstructions,
+  }
+
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/ai-assistant/alternative-translations`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify(dataParams),
+    },
+  )
+
+  if (!response.ok) return Promise.reject(response)
+
+  const {errors, ...data} = await response.json()
+  if (errors && errors.length > 0) return Promise.reject(errors)
+
+  return data
+}

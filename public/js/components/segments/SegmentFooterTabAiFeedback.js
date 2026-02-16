@@ -12,20 +12,17 @@ export const SegmentFooterTabAiFeedback = ({
   const [feedback, setFeedback] = useState()
 
   useEffect(() => {
-    const requestAlternatives = () => {
+    const requestFeedback = () => {
       setFeedback({
         content:
           'The translation accurately reflects all elements: the comparison with Venice, the historical reference, and the list of qualities. “Capitale olandese del XVII secolo” is a precise rendering of “17th century capital city of Holland.” Alternatives like “straordinari spazi verdi” (extraordinary green spaces) were possible, yet “meravigliosi” fits the tone naturally.',
       })
     }
 
-    SegmentStore.addListener(SegmentConstants.AI_FEEDBACK, requestAlternatives)
+    SegmentStore.addListener(SegmentConstants.AI_FEEDBACK, requestFeedback)
 
     return () =>
-      SegmentStore.removeListener(
-        SegmentConstants.AI_FEEDBACK,
-        requestAlternatives,
-      )
+      SegmentStore.removeListener(SegmentConstants.AI_FEEDBACK, requestFeedback)
   }, [segment])
 
   return (
@@ -34,7 +31,7 @@ export const SegmentFooterTabAiFeedback = ({
       className={`tab sub-editor ${active_class} ${tab_class}`}
       id={`segment-${segment.sid}-${tab_class}`}
     >
-      {feedback ? (
+      {feedback?.content ? (
         <div className="ai-feature-content">
           <h4>Score:</h4>
           <p>{feedback.content}</p>
