@@ -143,6 +143,16 @@ class AIAssistantController extends KleinController
             throw new InvalidArgumentException('Missing `style` parameter');
         }
 
+        // id_client
+        if (!isset($json['id_client'])) {
+            throw new InvalidArgumentException('Missing `id_client` parameter');
+        }
+
+        // id_segment
+        if (!isset($json['id_segment'])) {
+            throw new InvalidArgumentException('Missing `id_segment` parameter');
+        }
+
         $json = [
             'id_client' => $json['id_client'],
             'localized_source' => $localizedSource,
@@ -151,6 +161,7 @@ class AIAssistantController extends KleinController
             'translation' => trim($json['translation']),
             'context' => trim($json['context']),
             'style' => trim($json['style']),
+            'id_segment' => $json['id_segment'],
         ];
 
         $params = [
@@ -197,12 +208,12 @@ class AIAssistantController extends KleinController
             throw new InvalidLanguageException($json['target_language'] . ' is not a valid language');
         }
 
-        // id_segment
+        // source_sentence
         if (!isset($json['source_sentence'])) {
             throw new InvalidArgumentException('Missing `source_sentence` parameter');
         }
 
-        // translation
+        // target_sentence
         if (!isset($json['target_sentence'])) {
             throw new InvalidArgumentException('Missing `target_sentence` parameter');
         }
@@ -227,6 +238,16 @@ class AIAssistantController extends KleinController
             throw new InvalidArgumentException('Missing `style` parameter');
         }
 
+        // id_client
+        if (!isset($json['id_client'])) {
+            throw new InvalidArgumentException('Missing `id_client` parameter');
+        }
+
+        // id_segment
+        if (!isset($json['id_segment'])) {
+            throw new InvalidArgumentException('Missing `id_segment` parameter');
+        }
+
         $json = [
             'id_client' => $json['id_client'],
             'localized_source' => $localizedSource,
@@ -237,6 +258,7 @@ class AIAssistantController extends KleinController
             'target_context_sentences_string' => trim($json['target_context_sentences_string']),
             'excerpt' => trim($json['excerpt']),
             'style_instructions' => trim($json['style_instructions']),
+            'id_segment' => $json['id_segment'] ?? null,
         ];
 
         $params = [
