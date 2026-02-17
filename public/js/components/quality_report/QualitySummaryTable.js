@@ -1,32 +1,21 @@
-import React from 'react'
-
+import React, {useMemo, useCallback} from 'react'
 import {isUndefined} from 'lodash'
 import {isEqual} from 'lodash/lang'
 
-class QualitySummaryTable extends React.Component {
-  constructor(props) {
-    super(props)
-    this.lqaNestedCategories = this.props.qualitySummary
-      .get('categories')
-      .sortBy((cat) => cat.get('id'))
-    const {severities, thereAreSubCategories, categoriesGroups} =
-      this.analyzeQualityModel()
-    this.thereAreSubCategories = thereAreSubCategories
-    this.severities = severities
-    this.categoriesGroups = categoriesGroups
-    console.log('severities', severities)
-    console.log(
-      'categoriesGroups',
-      categoriesGroups.map((i) => i[0].toJS()),
-    )
-    console.log('Quality summary', this.props.qualitySummary.toJS())
-  }
-  analyzeQualityModel() {
+function QualitySummaryTable(props) {
+  // Memoize lqaNestedCategories and derived values
+  const lqaNestedCategories = useMemo(
+    () => props.qualitySummary.get('categories').sortBy((cat) => cat.get('id')),
+    [props.qualitySummary],
+  )
+
+  // Analyze quality model and memoize results
+  const {severities, thereAreSubCategories, categoriesGroups} = useMemo(() => {
     let severities = []
     let severitiesFounded = []
     let categoriesGroups = []
     let thereAreSubCategories = false
-    this.lqaNestedCategories.forEach((cat) => {
+    lqaNestedCategories.forEach((cat) => {
       if (cat.get('subcategories').size === 0) {
         let currentSeverities = cat.get('severities')
         let groupFound = false
@@ -57,11 +46,9 @@ class QualitySummaryTable extends React.Component {
         })
       }
     })
-
     const isSortProperyDefined = severities.every(
       ({sort}) => typeof sort === 'number',
     )
-
     return {
       severities: isSortProperyDefined
         ? severities.sort((a, b) => (a.sort > b.sort ? 1 : -1))
@@ -69,61 +56,73 @@ class QualitySummaryTable extends React.Component {
       thereAreSubCategories,
       categoriesGroups,
     }
-  }
-  getIssuesForCategory(categoryId) {
-    if (this.props.qualitySummary.size > 0) {
-      return this.props.qualitySummary
-        .get('revise_issues')
-        .find((item, key) => {
-          return parseInt(key) === parseInt(categoryId)
-        })
-    }
-  }
-  getIssuesForCategoryWithSubcategory(category, sevLabel) {
-    let total = 0
-    if (this.props.qualitySummary.size > 0) {
-      if (category.subcategories.length > 0) {
-        category.subcategories.forEach((sub) => {
-          if (
-            !isUndefined(
-              this.props.qualitySummary.get('revise_issues').get(sub.id),
-            ) &&
-            this.props.qualitySummary
+  }, [lqaNestedCategories])
+
+  // Methods
+  const getIssuesForCategory = useCallback(
+    (categoryId) => {
+      if (props.qualitySummary.size > 0) {
+        return props.qualitySummary
+          .get('revise_issues')
+          .find((item, key) => parseInt(key) === parseInt(categoryId))
+      }
+    },
+    [props.qualitySummary],
+  )
+
+  const getIssuesForCategoryWithSubcategory = useCallback(
+    (category, sevLabel) => {
+      let total = 0
+      if (props.qualitySummary.size > 0) {
+        if (category.subcategories.length > 0) {
+          category.subcategories.forEach((sub) => {
+            if (
+              !isUndefined(
+                props.qualitySummary.get('revise_issues').get(sub.id),
+              ) &&
+              props.qualitySummary
+                .get('revise_issues')
+                .get(sub.id)
+                .get('founds')
+                .get(sevLabel)
+            ) {
+              total += props.qualitySummary
+                .get('revise_issues')
+                .get(sub.id)
+                .get('founds')
+                .get(sevLabel)
+            }
+          })
+        } else {
+          if (props.qualitySummary.get('revise_issues').get(category.id)) {
+            total = props.qualitySummary
               .get('revise_issues')
-              .get(sub.id)
-              .get('founds')
-              .get(sevLabel)
-          ) {
-            total += this.props.qualitySummary
-              .get('revise_issues')
-              .get(sub.id)
+              .get(category.id)
               .get('founds')
               .get(sevLabel)
           }
-        })
-      } else {
-        if (this.props.qualitySummary.get('revise_issues').get(category.id)) {
-          total = this.props.qualitySummary
-            .get('revise_issues')
-            .get(category.id)
-            .get('founds')
-            .get(sevLabel)
         }
       }
-    }
-    return total
-  }
-  getCategorySeverities(categoryId) {
-    const cat = this.lqaNestedCategories.find(
-      (cat) => parseInt(categoryId) === parseInt(cat.get('id')),
-    )
-    return cat.get('severities')
-      ? cat.get('severities')
-      : cat.get('subcategories').get(0).get('severities')
-  }
-  getHeader() {
+      return total
+    },
+    [props.qualitySummary],
+  )
+
+  const getCategorySeverities = useCallback(
+    (categoryId) => {
+      const cat = lqaNestedCategories.find(
+        (cat) => parseInt(categoryId) === parseInt(cat.get('id')),
+      )
+      return cat.get('severities')
+        ? cat.get('severities')
+        : cat.get('subcategories').get(0).get('severities')
+    },
+    [lqaNestedCategories],
+  )
+
+  const getHeader = useCallback(() => {
     let html = []
-    this.severities.forEach((sev, index) => {
+    severities.forEach((sev, index) => {
       let item = (
         <div className="qr-title qr-severity" key={sev.label + index}>
           <div className="qr-info">{sev.label}</div>
@@ -135,7 +134,7 @@ class QualitySummaryTable extends React.Component {
       <div className="qr-head">
         <div className="qr-title qr-issue">Categories</div>
         <div className="qr-title qr-severity">Severities</div>
-        {this.severities.map((sev, i) => {
+        {severities.map((sev, i) => {
           if (i > 0) {
             return <div className="qr-title qr-severity" key={sev.label + i} />
           }
@@ -143,11 +142,11 @@ class QualitySummaryTable extends React.Component {
         <div className="qr-title qr-total-severity">Error Points</div>
       </div>
     )
-  }
-  getBody() {
+  }, [severities])
+
+  const getBody = useCallback(() => {
     let html = []
-    let kudos
-    this.categoriesGroups.forEach((group, i) => {
+    categoriesGroups.forEach((group, i) => {
       let groupHtml = []
       const sevGroup = group[0].get('severities')
       groupHtml.push(
@@ -157,7 +156,7 @@ class QualitySummaryTable extends React.Component {
         />,
       )
       //Some group can have not all severities
-      this.severities.forEach((sev) => {
+      severities.forEach((sev) => {
         let severityFind = sevGroup.find(
           (currSev) => currSev.get('label') === sev.label,
         )
@@ -197,9 +196,9 @@ class QualitySummaryTable extends React.Component {
             {cat.get('label')}
           </div>,
         )
-        const totalIssues = this.getIssuesForCategory(cat.get('id'))
+        const totalIssues = getIssuesForCategory(cat.get('id'))
         let catTotalWeightValue = 0
-        this.severities.forEach((currentSev, i) => {
+        severities.forEach((currentSev, i) => {
           let severityFound = cat.get('severities').filter((sev) => {
             return sev.get('label') === currentSev.label
           })
@@ -254,11 +253,11 @@ class QualitySummaryTable extends React.Component {
       })
     })
     let severitiesTotal = []
-    this.severities.forEach((sev) => {
+    severities.forEach((sev) => {
       let totalSev = 0
-      this.categoriesGroups.forEach((cat, i) => {
+      categoriesGroups.forEach((cat, i) => {
         const catJs = cat[0].toJS()
-        const totalIssues = this.getIssuesForCategory(catJs.id)?.toJS()
+        const totalIssues = getIssuesForCategory(catJs.id)?.toJS()
         if (totalIssues?.founds[sev.label]) {
           totalSev =
             totalSev +
@@ -271,7 +270,7 @@ class QualitySummaryTable extends React.Component {
         {label: sev.label, total: totalSev},
       ]
     })
-    let totalScore = this.props.qualitySummary.get('total_issues_weight')
+    let totalScore = props.qualitySummary.get('total_issues_weight')
 
     const totalLines = (
       <div className="qr-body-list qr-total-line">
@@ -294,10 +293,11 @@ class QualitySummaryTable extends React.Component {
         {totalLines}
       </div>
     )
-  }
-  getBodyWithSubcategories() {
+  }, [categoriesGroups, severities, getIssuesForCategory, props.qualitySummary])
+
+  const getBodyWithSubcategories = useCallback(() => {
     let html = []
-    this.lqaNestedCategories.forEach((cat, index) => {
+    lqaNestedCategories.forEach((cat, index) => {
       let catHtml = []
       catHtml.push(
         <div
@@ -308,12 +308,12 @@ class QualitySummaryTable extends React.Component {
         </div>,
       )
       let catTotalWeightValue = 0
-      this.severities.forEach((currentSev, i) => {
-        let catSeverities = this.getCategorySeverities(cat.get('id'))
+      severities.forEach((currentSev, i) => {
+        let catSeverities = getCategorySeverities(cat.get('id'))
         let severityFound = catSeverities.filter((sev) => {
           return sev.get('label') === currentSev.label
         })
-        let totalIssues = this.getIssuesForCategoryWithSubcategory(
+        let totalIssues = getIssuesForCategoryWithSubcategory(
           cat.toJS(),
           currentSev.label,
         )
@@ -357,42 +357,46 @@ class QualitySummaryTable extends React.Component {
       html.push(line)
     })
     return <div className="qr-body">{html}</div>
-  }
+  }, [
+    lqaNestedCategories,
+    severities,
+    getCategorySeverities,
+    getIssuesForCategoryWithSubcategory,
+  ])
 
-  render() {
-    let htmlBody, kudos
-    let htmlHead = this.getHeader()
-    if (this.thereAreSubCategories) {
-      htmlBody = this.getBodyWithSubcategories()
-    } else {
-      htmlBody = this.getBody()
-    }
-    if (this.categoriesGroups.find((cat) => cat[0].get('label') === 'Kudos')) {
-      kudos = (
-        <div className="qr-kudos">
-          <div className="qr-kudos-title">Kudos</div>
-          <div className="qr-kudos-value">
-            {this.props.qualitySummary
-              .get('revise_issues')
-              .find((item, key) => {
-                return item.get('name') === 'Kudos'
-              })
-              ?.get('founds')
-              ?.get('Neutral') || 0}
-          </div>
+  // Render logic
+  let htmlBody, kudos
+  let htmlHead = getHeader()
+  if (thereAreSubCategories) {
+    htmlBody = getBodyWithSubcategories()
+  } else {
+    htmlBody = getBody()
+  }
+  if (categoriesGroups.find((cat) => cat[0].get('label') === 'Kudos')) {
+    kudos = (
+      <div className="qr-kudos">
+        <div className="qr-kudos-title">Kudos</div>
+        <div className="qr-kudos-value">
+          {props.qualitySummary
+            .get('revise_issues')
+            .find((item, key) => {
+              return item.get('name') === 'Kudos'
+            })
+            ?.get('founds')
+            ?.get('Neutral') || 0}
         </div>
-      )
-    }
-    return (
-      <>
-        <div className="qr-quality">
-          {htmlHead}
-          {htmlBody}
-        </div>
-        {kudos}
-      </>
+      </div>
     )
   }
+  return (
+    <>
+      <div className="qr-quality">
+        {htmlHead}
+        {htmlBody}
+      </div>
+      {kudos}
+    </>
+  )
 }
 
 export default QualitySummaryTable

@@ -505,33 +505,37 @@ header {
                       display: flex;
                       align-items: center;
                       justify-content: flex-end;
-                       .status-new {
-                         font-size: 20px;
-                         color: #8b8e92;
-                       }
-                       .status-translated {
-                         font-size: 20px;
-                         color: colors.$translatedBlue;
-                       }
-                       .status-approved {
-                         font-size: 20px;
-                         color: colors.$approvedGreen;
-                         &.approved-r2 {
-                           color: colors.$approved2Green;
-                         }
-                       }
-                       .status-approved2 {
-                         color: colors.$approved2Green;
-                         font-size: 20px;
-                       }
-                       .status-draft {
-                         font-size: 20px;
-                         color: colors.$grey1;
-                       }
-                       .status-rejected {
-                         font-size: 20px;
-                         color: colors.$rebuttedRed;
-                       }
+                      .qr-info {
+                        font-size: 14px;
+                        text-transform: capitalize;
+                      }
+                       //.status-new {
+                       //  font-size: 20px;
+                       //  color: colors.$grey1;
+                       //}
+                       //.status-translated {
+                       //  font-size: 20px;
+                       //  color: colors.$translatedBlue;
+                       //}
+                       //.status-approved {
+                       //  font-size: 20px;
+                       //  color: colors.$approvedGreen;
+                       //  &.approved-r2 {
+                       //    color: colors.$approved2Green;
+                       //  }
+                       //}
+                       //.status-approved2 {
+                       //  color: colors.$approved2Green;
+                       //  font-size: 20px;
+                       //}
+                       //.status-draft {
+                       //  font-size: 20px;
+                       //  color: colors.$grey1;
+                       //}
+                       //.status-rejected {
+                       //  font-size: 20px;
+                       //  color: colors.$rebuttedRed;
+                       //}
                      }
                     .qr-segment-body {
                       .segment-container {
@@ -541,6 +545,7 @@ header {
                         height: 40px;
                         font-size: 14px;
                         &.qr-issues {
+                          min-height: 40px !important;
                           .qr-text {
                             width: 80%;
                           }
@@ -568,14 +573,16 @@ header {
                             background-color: colors.$grey5 !important;
                           }
                           .qr-text {
-                            padding: 8px 0;
+                            padding: 4px 0;
                           }
                         }
 
                         .qr-segment-title {
-                          width: 20%;
+                          min-width: 20%;
                           justify-content: space-between;
-
+                          .buttons.segment-production {
+                            margin-left: 16px;
+                          }
                           button {
                             width: 22px;
                             height: 22px;
@@ -663,13 +670,10 @@ header {
                               margin-top: 5px;
                               background: colors.$white;
                               border: 1px solid colors.$grey4;
-                              border-radius: 4px;
+                              border-radius: 8px;
                               &.automated {
-                                padding: 0;
-                                padding-right: 5px;
                                 .box-icon {
                                   display: flex;
-                                  padding: 5px 3px 5px 5px;
                                   background: colors.$grey5;
                                   margin-right: 6px;
                                   &.error {
@@ -725,15 +729,12 @@ header {
                           .spec-words {
                           }
                           .tm-percent {
-                            background: #0abeed;
-                            color: #ffffff;
                             padding: 0 3px;
                             font-size: 16px;
-                          }
-                          .per-yellow {
-                            padding: 0 3px;
-                            background: #ffcc00 !important;
-                            color: #333 !important;
+                            width: 100%;
+                            .badge-container {
+                              width: 100%;
+                            }
                           }
                         }
                       }
@@ -802,7 +803,7 @@ header {
   }
   .segmented-control__cursor:before {
     background-color: colors.$white;
-    border-radius: 12px;
+    border-radius: 8px;
   }
   .segmented-control input:checked + .segmented-control__label {
     color: colors.$black;
