@@ -61,7 +61,7 @@ You are an expert {$sourceLanguage} to {$targetLanguage} translator.
     - Always ensure that only the specified excerpt is altered, and all other parts of the sentence remain unchanged unless absolutely necessary for grammatical correctness with the new excerpt.
     - Golden Rule: If "{$excerpt}" has no meaning in the {$targetLanguage}, return nothing.
     
-    {$styleInstructions}
+    {$this->style($styleInstructions, $targetLanguage)}
 
     - *For each alternative translation proposal*:
       - *Golden rule*: always Return the full new target sentence in "alternative" schema field
@@ -83,5 +83,34 @@ PROMPT;
         $text = str_replace(["```json", "```"], "", $text);
 
         return json_decode($text, true);
+    }
+
+    /**
+     * Generates style instructions based on the provided translation style and target language.
+     *
+     * @param string $style The translation style, which can be 'faithful', 'fluid', or 'creative'.
+     * @param string $targetLanguage The target language for the translation instructions.
+     * @return string The style instructions corresponding to the provided style and target language.
+     */
+    private function style(string $style, string $targetLanguage): string
+    {
+        $styleInstructionsMap = [
+            'faithful' => '
+- Proposed alternative translation must be a literal and faithful translation of the source sentence.
+- Focus on accuracy and fidelity to the source text.
+',
+            'fluid' => '
+ - Ensure the sentence flows naturally in the target language, even if small shifts in structure or idiom are needed.
+ - Use alternatives that sound native while retaining the core meaning of the original.
+- Balance clarity with fidelity — prioritize reader comprehension in '.$targetLanguage.'.            
+',
+            'creative' => '
+- You may adapt, rephrase, or take stylistic liberties, as long as the spirit and function of the original are respected.
+- Alternatives can include idioms, cultural substitutions, or reimaginings — especially for effect or engagement.
+- Be creative.    
+',
+        ];
+
+        return $styleInstructionsMap[$style] ?? '';
     }
 }
