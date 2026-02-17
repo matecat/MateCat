@@ -235,7 +235,7 @@ class AIAssistantController extends KleinController
 
         // style
         if (!isset($json['style_instructions'])) {
-            throw new InvalidArgumentException('Missing `style` parameter');
+            throw new InvalidArgumentException('Missing `style_instructions` parameter');
         }
 
         // id_client
