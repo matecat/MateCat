@@ -11,6 +11,7 @@ import {
 } from './utils/DraftMatecatUtils/tagUtils'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
+import CatToolStore from '../../stores/CatToolStore'
 
 export const SegmentFooterTabAiAlternatives = ({
   code,
@@ -115,9 +116,9 @@ export const SegmentFooterTabAiAlternatives = ({
           .map((t) => decodePlaceholdersToPlainText(t))
           .join('\n'),
         excerpt: decodePlaceholdersToPlainText(text),
-        styleInstructions: 'formal',
+        styleInstructions:
+          CatToolStore.getJobMetadata().project.mt_extra.lara_style,
       })
-
       // setAlternatives([
       //   {
       //     text: DraftMatecatUtils.transformTagsToHtml(text, config.isTargetRTL),
@@ -156,16 +157,28 @@ export const SegmentFooterTabAiAlternatives = ({
       // ])
     }
 
+    const receiveAlternatives = (data) =>
+      console.log('receiveAlternatives', data)
+
     SegmentStore.addListener(
       SegmentConstants.AI_ALTERNATIVES,
       requestAlternatives,
     )
+    SegmentStore.addListener(
+      SegmentConstants.AI_ALTERNATIVES_SUGGESTION,
+      receiveAlternatives,
+    )
 
-    return () =>
+    return () => {
       SegmentStore.removeListener(
         SegmentConstants.AI_ALTERNATIVES,
         requestAlternatives,
       )
+      SegmentStore.addListener(
+        SegmentConstants.AI_ALTERNATIVES_SUGGESTION,
+        receiveAlternatives,
+      )
+    }
   }, [segment])
 
   const copyAlternative = (alternative) => {
