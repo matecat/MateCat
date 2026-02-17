@@ -7,6 +7,7 @@ use Exception;
 use InvalidArgumentException;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
+use Utils\Engines\Lara;
 use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
@@ -229,14 +230,16 @@ class AIAssistantController extends KleinController
         }
 
         // context
-        if (!isset($json['context'])) {
-            throw new InvalidArgumentException('Missing `context` parameter');
+        if (!isset($json['excerpt'])) {
+            throw new InvalidArgumentException('Missing `excerpt` parameter');
         }
 
         // style
         if (!isset($json['style_instructions'])) {
             throw new InvalidArgumentException('Missing `style_instructions` parameter');
         }
+
+        Lara::validateLaraStyle($json['style_instructions']);
 
         // id_client
         if (!isset($json['id_client'])) {

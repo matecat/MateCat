@@ -35,7 +35,7 @@ export const aiAlternartiveTranslations = async ({
     target_sentence: sourceContextSentencesString,
     source_context_sentences_string: targetSentence,
     target_context_sentences_string: targetContextSentencesString,
-    context: excerpt,
+    excerpt: excerpt,
     style_instructions: styleInstructions,
   }
 
