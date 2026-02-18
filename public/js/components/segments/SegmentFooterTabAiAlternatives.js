@@ -12,6 +12,7 @@ import {
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
+import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 
 const getWordsBeforeAndAfter = (html, textPortion, count = 30) => {
   const tokenRegex = /(<[^>]+>)|([^<]+)/g
@@ -87,7 +88,7 @@ export const SegmentFooterTabAiAlternatives = ({
         'bx',
         'ex',
         'x',
-      ])
+      ]).replace(/·/g, ' ')
 
     const requestAlternatives = ({text}) => {
       setAlternatives()
@@ -96,7 +97,7 @@ export const SegmentFooterTabAiAlternatives = ({
 
       const decodedSource = cleanTags(segment.segment)
       const decodedTarget = cleanTags(segment.translation)
-
+      console.log(decodedTarget)
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
 
@@ -118,6 +119,7 @@ export const SegmentFooterTabAiAlternatives = ({
 
     const receiveAlternatives = ({data}) => {
       console.log(data)
+      return
       if (!data.has_error && Array.isArray(data.message)) {
         const wordsBeforeAndAfter = getWordsBeforeAndAfter(
           segment.translation,
