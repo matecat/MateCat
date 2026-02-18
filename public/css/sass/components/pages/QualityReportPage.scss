@@ -772,6 +772,7 @@ header {
                 padding: 9px 46px 9px 12px;
                 border-radius: 40px;
                 height: 38px;
+                line-height: 20px;
               }
               li.dropdown__option {
                 padding: 8px;
@@ -785,6 +786,9 @@ header {
               .custom-dropdown.select__dropdown {
                 background-color: #fff;
                 min-width: 120px;
+              }
+              .filter-category {
+                max-width: 200px;
               }
               .filter-category .select__dropdown-wrapper {
                 width: unset;
@@ -850,9 +854,11 @@ header {
   display: flex;
   align-items: center;
   box-sizing: border-box;
+  gap: 8px;
   .filter-dropdown {
     display: flex;
     align-items: center;
+    gap: 8px;
     button {
       height: auto;
       width: auto;
@@ -860,9 +866,6 @@ header {
     }
     .dropdown {
       background: colors.$white !important;
-    }
-    &:nth-child(2) {
-      margin-left: 15px;
     }
     .ui.basic.button {
       font-family: 'calibri', Arial, Helvetica, sans-serif;
@@ -894,9 +897,6 @@ header {
       &:hover {
         background-color: #cccccc !important;
       }
-    }
-    .filter-category {
-      margin-left: 5px;
     }
     .not-filtered {
       .ui.basic.button {

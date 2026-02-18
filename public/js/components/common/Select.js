@@ -355,7 +355,7 @@ export const Select = ({
                 <IconClose size={8} />
               </div>
             ) : undefined}
-            {renderSelection()}
+            <span>{renderSelection()}</span>
           </div>
           <input
             name={name}
