@@ -652,8 +652,6 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->sourceContainsIcu
         ); // Layer 1 here
 
-        //$icuSourcePatternValidator
-
         $check->setChunk($this->data['chunk']);
         $check->setFeatureSet($this->featureSet);
         $check->setSourceSegLang($this->data['chunk']->source);
