@@ -163,6 +163,10 @@ PROMPT;
         return array_map(function (array $item) use ($targetLanguage, $originalSentence, $originalWords, $contextWindowSize) {
 
             $alternative = $this->restoreMissingWhiteSpace($originalSentence, $item['alternative']);
+            // Restore trailing newline from original sentence
+            if (str_ends_with($originalSentence, "\n") && !str_ends_with($alternative, "\n")) {
+                $alternative .= "\n";
+            }
             $modifiedWords = $this->splitWords($targetLanguage, $alternative);
             $context = $item['context'];
 
@@ -172,7 +176,7 @@ PROMPT;
             $endOriginal = $modifiedWordsRange['endOriginal'];
 
             $changed = array_slice($modifiedWords, $startModified, $endModified - $startModified + 1);
-            $before  = array_slice($modifiedWords, max(0, $startModified - $contextWindowSize), $contextWindowSize);
+            $before  = array_slice($modifiedWords, max(0, $startModified - $contextWindowSize), min($startModified, $contextWindowSize));
             $after   = array_slice($modifiedWords, $endModified + 1, $contextWindowSize);
 
             $originalDiff    = implode(' ', array_slice($originalWords, $startModified, $endOriginal - $startModified + 1));
@@ -180,13 +184,6 @@ PROMPT;
 
             $hasStartEllipsis = ($startModified - $contextWindowSize) > 0;
             $hasEndEllipsis   = ($endModified + 1 + $contextWindowSize) < count($modifiedWords);
-
-            // Restore trailing whitespace/newline from original sentence
-            if (str_ends_with($originalSentence, ' ') && !str_ends_with($alternative, ' ')) {
-                $alternative .= ' ';
-            } elseif (str_ends_with($originalSentence, "\n") && !str_ends_with($alternative, "\n")) {
-                $alternative .= "\n";
-            }
 
             return [
                 'alternative' => $alternative,
@@ -253,7 +250,7 @@ PROMPT;
     private function restoreMissingWhiteSpace(string $original, string $alternative)
     {
         if (str_ends_with($original, " ") && !str_ends_with($alternative, " ")) {
-            return $alternative;
+            return $alternative . " ";
         }
 
         return $alternative;
