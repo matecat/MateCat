@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
@@ -14,10 +15,11 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
-use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Translations\WarningDao;
+use Utils\LQA\ICUSourceSegmentChecker;
 use Utils\LQA\QA;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -26,6 +28,8 @@ use View\API\V2\Json\QALocalWarning;
 
 class GetWarningController extends KleinController
 {
+
+    use ICUSourceSegmentChecker;
 
     protected function afterConstruct(): void
     {
@@ -115,22 +119,9 @@ class GetWarningController extends KleinController
         $metadata = new MetadataDao();
         $dataRefMap = (!empty($id)) ? SegmentOriginalDataDao::getSegmentDataRefMap($id) : [];
 
-        $projectMetadata = new ProjectMetadataDao();
         // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
-        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($chunk->getProject()->id, ProjectMetadataDao::ICU_ENABLED)?->value ?? false;
-
         // Detect if the translation content contains ICU MessageFormat syntax
-        $string_contains_icu = false;
-        if ($icu_enabled) {
-            $icuSyntaxValidator = new MessagePatternValidator(
-                language: $chunk->target,
-                // Validate the ICU syntax in the segment to detect ICU patterns
-                patternString: $src_content
-            );
-            // Check if complex ICU patterns (plurals, selects, etc.) are present
-            //this method returns false even when validation fails, it's ok since when the segment is invalid, we want not to enable icu validation
-            $string_contains_icu = $icuSyntaxValidator->containsComplexSyntax();
-        }
+        $this->sourceContainsIcu($chunk->getProject(), $chunk, $src_content);
 
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
@@ -139,7 +130,7 @@ class GetWarningController extends KleinController
             $chunk->target,
             $dataRefMap,
             $metadata->getSubfilteringCustomHandlers($chunk->id, $password),
-            $string_contains_icu
+            $this->sourceContainsIcu
         );
 
         $src_content = $Filter->fromLayer2ToLayer1($src_content);
@@ -148,22 +139,23 @@ class GetWarningController extends KleinController
         $QA = new QA(
             $src_content,
             $trg_content,
-            new MessagePatternValidator(
-                language: $chunk->target,
-                // use the translation content for the validation
-                patternString: $trg_content
+            MessagePatternComparator::fromValidators(
+                $this->icuSourcePatternValidator,
+                new MessagePatternValidator(
+                    $chunk->target,
+                    $trg_content
+                )
             ),
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
-            $string_contains_icu
+            $this->sourceContainsIcu
         );
         $QA->setFeatureSet($featureSet);
         $QA->setChunk($chunk);
-        $QA->setIdSegment($id);
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
 
-        if (!$string_contains_icu && isset($characters_counter)) {
-            $QA->setCharactersCount($characters_counter);
+        if (!$this->sourceContainsIcu && isset($characters_counter)) {
+            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, QA::SIZE_RESTRICTION)[0] ?? null);
         }
 
         $QA->performConsistencyCheck();

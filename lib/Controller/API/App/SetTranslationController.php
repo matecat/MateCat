@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
@@ -22,9 +23,9 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
-use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationDao;
@@ -44,6 +45,7 @@ use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
+use Utils\LQA\ICUSourceSegmentChecker;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -56,9 +58,39 @@ class SetTranslationController extends AbstractStatefulKleinController
 {
 
     use APISourcePageGuesserTrait;
+    use ICUSourceSegmentChecker;
 
     /**
-     * @var array
+     * @var array{
+     *  id_job: numeric-string,
+     *  password: string,
+     *  received_password: string,
+     *  id_segment: string,
+     *  time_to_edit: int|numeric-string,
+     *  id_translator: string,
+     *  translation: string,
+     *  segment: ?SegmentStruct,
+     *  segmentString: string,
+     *  version: numeric-string|null,
+     *  chosen_suggestion_index: int|numeric-string|null,
+     *  suggestion_array: string|null,
+     *  splitStatuses: string|null,
+     *  context_before: string,
+     *  context_after: string,
+     *  id_before: numeric-string|null,
+     *  id_after: numeric-string|null,
+     *  revisionNumber: int|null,
+     *  guess_tag_used: bool|null,
+     *  characters_counter: numeric-string|null,
+     *  propagate: bool|null,
+     *  client_target_version: int|numeric-string,
+     *  status: string,
+     *  split_statuses: array<int, string>,
+     *  chunk: JobStruct,
+     *  project: ProjectStruct,
+     *  id_project: int,
+     *  segment_contains_icu: bool
+     * }
      */
     protected array $data;
 
@@ -108,10 +140,6 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->checkSegmentSplitData();
             $this->initVersionHandler();
             $this->getContexts();
-
-            //check tag mismatch
-            //get an original source segment, first
-            $this->data['segment'] = $this->segment;
 
             $segment = $this->filter->fromLayer0ToLayer1($this->data['segment']['segment']); // this segment comes from the database when getting contexts
             $translation = (empty($this->data['translation']) and !is_numeric($this->data['translation'])) ? "" : $this->filter->fromLayer2ToLayer1(
@@ -385,7 +413,36 @@ class SetTranslationController extends AbstractStatefulKleinController
     }
 
     /**
-     * @return array
+     * @return array{
+     *   id_job: numeric-string,
+     *   password: string,
+     *   received_password: string,
+     *   id_segment: string,
+     *   time_to_edit: int|numeric-string,
+     *   id_translator: string,
+     *   translation: string,
+     *   segment: ?SegmentStruct,
+     *   segmentString: string,
+     *   version: numeric-string|null,
+     *   chosen_suggestion_index: int|numeric-string|null,
+     *   suggestion_array: string|null,
+     *   splitStatuses: string|null,
+     *   context_before: string,
+     *   context_after: string,
+     *   id_before: numeric-string|null,
+     *   id_after: numeric-string|null,
+     *   revisionNumber: int|null,
+     *   guess_tag_used: bool|null,
+     *   characters_counter: numeric-string|null,
+     *   propagate: bool|null,
+     *   client_target_version: int|numeric-string,
+     *   status: string,
+     *   split_statuses: array<int, string>,
+     *   chunk: JobStruct,
+     *   project: ProjectStruct,
+     *   id_project: int,
+     *   segment_contains_icu: bool
+     * }
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -399,7 +456,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         ) ?? 0;
         $id_translator = filter_var($this->request->param('id_translator'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $translation = filter_var($this->request->param('translation'), FILTER_UNSAFE_RAW);
-        $segment = filter_var($this->request->param('segment'), FILTER_UNSAFE_RAW);
+        $segmentString = filter_var($this->request->param('segment'), FILTER_UNSAFE_RAW);
         $version = filter_var($this->request->param('version'), FILTER_SANITIZE_NUMBER_INT);
         $chosen_suggestion_index = filter_var(
             $this->request->param('chosen_suggestion_index'),
@@ -460,6 +517,8 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->password = $password;
         $this->request_password = $received_password;
 
+        $this->sourceContainsIcu($chunk->getProject(), $chunk, $segmentString);
+
         $data = [
             'id_job' => $id_job,
             'password' => $password,
@@ -468,7 +527,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             'time_to_edit' => $time_to_edit,
             'id_translator' => $id_translator,
             'translation' => $translation,
-            'segment' => $segment,
+            'segment' => $this->segment,
+            'segmentString' => $segmentString,
             'version' => $version,
             'chosen_suggestion_index' => $chosen_suggestion_index,
             'suggestion_array' => $suggestion_array,
@@ -487,7 +547,6 @@ class SetTranslationController extends AbstractStatefulKleinController
             'chunk' => $chunk,
             'project' => $chunk->getProject(),
             'id_project' => $chunk->id_project,
-            'segment_contains_icu' => $this->segmentContainsICU($chunk->getProject(), $chunk, $segment)
         ];
 
         $this->logger->debug($data);
@@ -547,24 +606,6 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->checkStatus($this->data['status']);
     }
 
-    protected function segmentContainsICU(ProjectStruct $projectStruct, JobStruct $chunk, string $segment): bool
-    {
-        $icu_enabled = $projectStruct->getMetadataValue(ProjectMetadataDao::ICU_ENABLED) ?? false;
-        $string_contains_icu = false;
-        if ($icu_enabled) {
-            $icuValidator = new MessagePatternValidator(
-                $chunk->target,
-                // Validate the ICU syntax in the segment to detect ICU patterns
-                $segment,
-            );
-            // Check if complex ICU patterns (plurals, selects, etc.) are present
-            //this method returns false even when validation fails, it's ok since when the source is invalid, we want not to enable icu validation
-            $string_contains_icu = $icuValidator->containsComplexSyntax();
-        }
-
-        return $string_contains_icu;
-    }
-
     /**
      * @throws ReflectionException
      * @throws Exception
@@ -584,7 +625,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $this->data['chunk']->target,
             SegmentOriginalDataDao::getSegmentDataRefMap((int)$this->data['id_segment']),
             $metadata->getSubfilteringCustomHandlers($this->id_job, $this->password),
-            $this->data['segment_contains_icu']
+            $this->sourceContainsIcu
         );
         $this->filter = $filter;
     }
@@ -593,28 +634,34 @@ class SetTranslationController extends AbstractStatefulKleinController
      * @param string $segment
      * @param string $translation
      * @return QA
+     * @throws Exception
      */
     protected function setQaChecks(string $segment, string $translation): QA
     {
         $check = new QA(
             $segment,
             $translation,
-            new MessagePatternValidator(
-                language: $this->data['chunk']->target,
-                // use the translation content for the validation
-                patternString: $translation
+            MessagePatternComparator::fromValidators(
+                $this->icuSourcePatternValidator,
+                new MessagePatternValidator(
+                    $this->data['chunk']->target,
+                    $translation
+                )
             ),
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
-            $this->data['segment_contains_icu']
+            $this->sourceContainsIcu
         ); // Layer 1 here
+
         $check->setChunk($this->data['chunk']);
         $check->setFeatureSet($this->featureSet);
         $check->setSourceSegLang($this->data['chunk']->source);
         $check->setTargetSegLang($this->data['chunk']->target);
-        $check->setIdSegment($this->data['id_segment']);
 
         if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
-            $check->setCharactersCount($this->data['characters_counter']);
+            $check->setCharactersCount(
+                $this->data['characters_counter'],
+                SegmentMetadataDao::get($this->data['id_segment'], QA::SIZE_RESTRICTION)[0] ?? null
+            );
         }
 
         return $check;
