@@ -182,9 +182,9 @@ class MetadataDao extends AbstractDao
      * @param int $id_job
      * @param string $password
      *
-     * @return array|null
+     * @return array
      */
-    public function getSubfilteringCustomHandlers(int $id_job, string $password): ?array
+    public function getSubfilteringCustomHandlers(int $id_job, string $password): array
     {
         try {
             $subfiltering = $this->get($id_job, $password, self::SUBFILTERING_HANDLERS, 86400);

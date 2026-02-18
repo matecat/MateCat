@@ -165,11 +165,6 @@ let TranslationMatches = {
         }
       }
     }
-    console.log(
-      'Segments to fetch contributions for:',
-      segmentsToFetch,
-      this.segmentsWaitingForContributions,
-    )
     segmentsToFetch.forEach((segmentSid, index) => {
       this.getContribution({
         sid: segmentSid,
@@ -250,7 +245,6 @@ let TranslationMatches = {
           fastFetch,
         })
       }, 3000)
-      // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
     }
     const {contextListBefore, contextListAfter} =
@@ -310,14 +304,8 @@ let TranslationMatches = {
     }
     if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
       this.segmentsWaitingForContributions.push(id_segment_original)
-      console.log(
-        'Call Lara for segment:',
-        id_segment_original,
-        this.segmentsWaitingForContributions,
-      )
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
-          // console.log('Text to translate via Lara:', currentSegment.segment)
           const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []
@@ -338,7 +326,6 @@ let TranslationMatches = {
             glossaries,
           })
             .then((response) => {
-              // console.log('Lara Translate response:', response)
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
@@ -347,7 +334,6 @@ let TranslationMatches = {
               )
             })
             .catch((e) => {
-              console.error('Lara Translate error:', e)
               return getContributionRequest()
             })
         })

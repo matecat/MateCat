@@ -45,6 +45,7 @@ import {
 } from './utils/DraftMatecatUtils/createICUDecorator'
 import {isMacOS} from '../../utils/Utils'
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
+import textUtils from '../../utils/textUtils'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -439,7 +440,9 @@ class Editarea extends React.Component {
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
       }
       const contentState = editorState.getCurrentContent()
-      const plainText = contentState.getPlainText()
+      const plainText = textUtils.removeWhitespacePlaceholders(
+        contentState.getPlainText(),
+      )
       if (this.icuEnabled) {
         const icuTokens = createIcuTokens(
           plainText,

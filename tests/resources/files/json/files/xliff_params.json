@@ -1,0 +1,45 @@
+{
+    "name": "pippo",
+    "rules": {
+        "xliff12": [
+            {
+                "analysis": "new",
+                "states": [
+                    "new",
+                    "translated",
+                    "needs-review-adaptation",
+                    "needs-review-l10n"
+                ]
+            },
+            {
+                "analysis": "pre-translated",
+                "editor": "translated",
+                "states": [
+                    "signed-off",
+                    "final"
+                ],
+                "match_category": "tm_50_74"
+            },
+            {
+                "analysis": "pre-translated",
+                "editor": "approved",
+                "states": [
+                    "x-ciao",
+                    "exact-match",
+                    "id-match",
+                    "leveraged-repository",
+                    "mt-suggestion"
+                ]
+            }
+        ],
+        "xliff20": [
+            {
+                "analysis": "new",
+                "states": [
+                    "final",
+                    "x-pippo"
+                ]
+            }
+        ]
+    }
+}

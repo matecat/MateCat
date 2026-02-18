@@ -23,11 +23,11 @@ class ChunkDao extends AbstractDao
     {
         $fetched = JobDao::getByIdAndPassword($id_job, $password, $ttl);
 
-        if (empty($fetched)) {
+        if ($fetched === null) {
             throw new NotFoundException('Job not found');
-        } else {
-            return $fetched;
         }
+
+        return $fetched;
     }
 
     /**
