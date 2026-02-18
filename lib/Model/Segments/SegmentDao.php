@@ -234,6 +234,14 @@ class SegmentDao extends AbstractDao
             $union_ice = "";
         }
 
+        // this filter allows to get only the segments with issues in R1 or R2
+        if (isset($options['filter']['issues_in_r'])) {
+            if($options['filter']['issues_in_r'] == 1 || $options['filter']['issues_in_r'] == 2){
+                $options_join_query .= " INNER JOIN qa_entries en ON en.id_segment = st.id_segment AND en.source_page = :source_page AND en.id_job = st.id_job AND en.deleted_at IS NULL ";
+                $options_conditions_values['source_page'] = $options['filter']['issues_in_r']+1;
+            }
+        }
+
         if (
             (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != '') ||
             (isset($options['filter']['severity']) && $options['filter']['severity'] != '')
