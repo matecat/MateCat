@@ -2,15 +2,15 @@
 
 namespace Utils\AIAssistant;
 
-use Gemini\Client;
+use Gemini\Contracts\ClientContract;
 use IntlBreakIterator;
 use Utils\Registry\AppConfig;
 
 class GeminiClient implements AIClientInterface
 {
-    private Client $gemini;
+    private ClientContract $gemini;
 
-    public function __construct(Client $gemini)
+    public function __construct(ClientContract $gemini)
     {
         $this->gemini = $gemini;
     }
@@ -82,7 +82,7 @@ PROMPT;
         $result = $this->gemini->generativeModel(model: AppConfig::$GEMINI_API_MODEL)->generateContent($prompt);
         $text = $result->text();
 
-        return $this->formatResponse($targetLanguage, $sourceSentence, $text);
+        return $this->formatResponse($targetLanguage, $targetSentence, $text);
     }
 
     /**
@@ -262,23 +262,27 @@ PROMPT;
     /**
      * Identifies the range of modified words between an original sentence and an alternative sentence.
      *
-     * @param array $originalSentenceWords The original sentence to
-     * @param array $alternativeSentenceWords
+     * @param array $originalSentenceWords The original sentence splittd into words.
+     * @param array $alternativeSentenceWords The alternative sentence split into words.
      * @return array
      */
     private function getModifiedWordsRange(array $originalSentenceWords, array $alternativeSentenceWords)
     {
         $startModified = 0;
+
+        $originalCount    = count($originalSentenceWords);
+        $alternativeCount = count($alternativeSentenceWords);
+
         while (
-            $startModified < count($originalSentenceWords) &&
-            $startModified < count($alternativeSentenceWords) &&
+            $startModified < $originalCount &&
+            $startModified < $alternativeCount &&
             $originalSentenceWords[$startModified] === $alternativeSentenceWords[$startModified]
         ) {
             $startModified++;
         }
 
-        $endOriginal = count($originalSentenceWords) - 1;
-        $endModified = count($alternativeSentenceWords) - 1;
+        $endOriginal = $originalCount - 1;
+        $endModified = $alternativeCount - 1;
 
         while (
             $endOriginal >= $startModified &&
