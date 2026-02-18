@@ -2025,6 +2025,8 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.LARA_STYLES:
     case SegmentConstants.AI_ALTERNATIVES:
     case SegmentConstants.AI_FEEDBACK:
+    case SegmentConstants.AI_ALTERNATIVES_SUGGESTION:
+    case SegmentConstants.AI_FEEDBACK_SUGGESTION:
       SegmentStore.emitChange(action.actionType, {
         ...action,
       })

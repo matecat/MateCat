@@ -2000,15 +2000,17 @@ const SegmentActions = {
       })
     }, 100)
   },
-  aiAlternativeSuggestion: (data) => {
+  aiAlternativeSuggestion: ({sid, data}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.AI_ALTERNATIVES_SUGGESTION,
+      sid,
       data,
     })
   },
-  aiFeedbackSuggestion: (data) => {
+  aiFeedbackSuggestion: ({sid, data}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.AI_FEEDBACK_SUGGESTION,
+      sid,
       data,
     })
   },

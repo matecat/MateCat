@@ -84,6 +84,12 @@
           padding: 8px 12px 8px 16px;
           border: 1px solid colors.$grey3;
           border-radius: 6px;
+
+          > div {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+          }
         }
       }
 
