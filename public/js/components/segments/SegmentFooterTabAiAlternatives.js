@@ -81,13 +81,21 @@ export const SegmentFooterTabAiAlternatives = ({
   useEffect(() => {
     let selectedText = ''
 
+    const cleanTags = (value) =>
+      DraftMatecatUtils.excludeSomeTagsTransformToText(value, [
+        'g',
+        'bx',
+        'ex',
+        'x',
+      ])
+
     const requestAlternatives = ({text}) => {
       setAlternatives()
 
       selectedText = text
 
-      const decodedSource = decodePlaceholdersToPlainText(segment.segment)
-      const decodedTarget = decodePlaceholdersToPlainText(segment.translation)
+      const decodedSource = cleanTags(segment.segment)
+      const decodedTarget = cleanTags(segment.translation)
 
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
@@ -96,13 +104,13 @@ export const SegmentFooterTabAiAlternatives = ({
         idSegment: segment.sid,
         sourceSentence: decodedSource,
         sourceContextSentencesString: contextListBefore
-          .map((t) => decodePlaceholdersToPlainText(t))
+          .map((t) => cleanTags(t))
           .join('\n'),
         targetSentence: decodedTarget,
         targetContextSentencesString: contextListAfter
-          .map((t) => decodePlaceholdersToPlainText(t))
+          .map((t) => cleanTags(t))
           .join('\n'),
-        excerpt: decodePlaceholdersToPlainText(text),
+        excerpt: cleanTags(text),
         styleInstructions:
           CatToolStore.getJobMetadata().project.mt_extra.lara_style,
       })
