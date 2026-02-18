@@ -35,6 +35,7 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import CatToolStore from '../../stores/CatToolStore'
+import textUtils from '../../utils/textUtils'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -251,7 +252,9 @@ class SegmentSource extends React.Component {
   addIcuDecorator = () => {
     const {editorState} = this.state
     const contentState = editorState.getCurrentContent()
-    const plainText = contentState.getPlainText()
+    const plainText = textUtils.removeWhitespacePlaceholders(
+      contentState.getPlainText(),
+    )
     const tokens = createIcuTokens(plainText, editorState, config.source_rfc)
     const newDecorator = createICUDecorator(tokens, false)
     remove(

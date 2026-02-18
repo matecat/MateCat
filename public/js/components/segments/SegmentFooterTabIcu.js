@@ -6,6 +6,7 @@ import {
   transformTagsToText,
 } from './utils/DraftMatecatUtils/tagUtils'
 import pluralRules from '../../resources/pluralRules.json'
+import textUtils from '../../utils/textUtils'
 
 const inputTypes = {
   number: 'number',
@@ -37,7 +38,9 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   const variableNames = useMemo(() => {
     try {
       const tree = parse(
-        transformTagsToText(removeTagsFromText(segment.translation)),
+        textUtils.removeWhitespacePlaceholders(
+          transformTagsToText(removeTagsFromText(segment.translation)),
+        ),
       )
       const vars = new Set()
       const walk = (node) => {
@@ -84,7 +87,9 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   }, [segment.translation])
 
   const analyzeICU = useMemo(() => {
-    const text = transformTagsToText(removeTagsFromText(segment.segment))
+    const text = textUtils.removeWhitespacePlaceholders(
+      transformTagsToText(removeTagsFromText(segment.segment)),
+    )
 
     let ast
     try {
@@ -109,8 +114,8 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         }
 
         // Se ci sono sotto‐messaggi, analizzali ugualmente
-        if (node.value) {
-          Object.values(node.value).forEach(walk)
+        if (node[2] && typeof node[2] === 'object') {
+          Object.values(node[2]).forEach(walk)
         }
       }
     }
@@ -133,9 +138,9 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         const type = obj.type
         const value = obj.value
         switch (type) {
-          case 'number':
-            valueFormatted = number(value)
-            break
+          // case 'number':
+          //   valueFormatted = number(value)
+          //   break
           case 'date': {
             const dateFormatted = new Date(value)
             valueFormatted = +dateFormatted
@@ -161,12 +166,24 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
       formatMessage.setup({
         locale: config.target_code.split('-')[0],
       })
+      console.log(
+        'message',
+        formatMessage(
+          textUtils.removeWhitespacePlaceholders(
+            transformTagsToText(removeTagsFromText(segment.translation)),
+          ),
+          valuesNew,
+        ),
+        valuesNew,
+      )
       return formatMessage(
-        transformTagsToText(removeTagsFromText(segment.translation)),
+        textUtils.removeWhitespacePlaceholders(
+          transformTagsToText(removeTagsFromText(segment.translation)),
+        ),
         valuesNew,
       )
     } catch {
-      return 'Error in ICU message'
+      return 'Invalid ICU string, fix it to enable live preview'
     }
   }, [values, segment.translation])
 
@@ -175,7 +192,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
       <div key={category} className="segment-footer-icu-plurals-rule">
         <div className="plural-title">
           <span className="category">{category}</span>
-          <span className="rule">{rule}</span>
+          {/*<span className="rule">{rule}</span>*/}
         </div>
         <div className="plural-example">{example}</div>
       </div>

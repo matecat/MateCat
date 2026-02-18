@@ -1268,7 +1268,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.5",
+        "example": "0, 1, 0.0~1.5",
         "rule": "i = 0,1"
       },
       {
@@ -1398,7 +1398,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.0, 0.00~0.04",
+        "example": "0, 1, 0.0~1.0, 0.00~0.04",
         "rule": "i = 0 orn = 1"
       },
       {
@@ -1472,7 +1472,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "10.0~0.9, 0.00~0.05",
+        "example": "1, 0.0~0.9, 0.00~0.05",
         "rule": "i = 1 and v = 0 ori = 0 and v != 0"
       },
       {
@@ -1499,7 +1499,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.0, 0.00~0.04",
+        "example": "0, 1, 0.0~1.0, 0.00~0.04",
         "rule": "i = 0 orn = 1"
       },
       {
@@ -1838,7 +1838,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.5",
+        "example": "0, 1, 0.0~1.5",
         "rule": "i = 0,1"
       },
       {
@@ -1886,7 +1886,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.0, 0.00~0.04",
+        "example": "0, 1, 0.0~1.0, 0.00~0.04",
         "rule": "i = 0 orn = 1"
       },
       {
@@ -2675,7 +2675,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.0, 0.00~0.04",
+        "example": "0, 1, 0.0~1.0, 0.00~0.04",
         "rule": "i = 0 orn = 1"
       },
       {
@@ -2959,7 +2959,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.0, 0.00~0.04",
+        "example": "0, 1, 0.0~1.0, 0.00~0.04",
         "rule": "i = 0 orn = 1"
       },
       {
@@ -3013,7 +3013,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.5",
+        "example": "0, 1, 0.0~1.5",
         "rule": "i = 0..1"
       },
       {
@@ -3849,7 +3849,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.0, 0.00~0.04",
+        "example": "0, 1, 0.0~1.0, 0.00~0.04",
         "rule": "i = 0 orn = 1"
       },
       {
@@ -4537,7 +4537,7 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0~1.0, 0.00~0.04",
+        "example": "0, 1, 0.0~1.0, 0.00~0.04",
         "rule": "i = 0 orn = 1"
       },
       {
