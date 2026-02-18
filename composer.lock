@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "411ce63372cfa176a6003bfd5fecad7a",
+    "content-hash": "1ebabdea6f4c20dd4fdc354e7c806830",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.32",
+            "version": "3.369.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "4779292a30aa2d4a7ddfd519f80a94c2706ee64e"
+                "reference": "5db21cd0e5c8a5b5344596649033acf861a5e117"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/4779292a30aa2d4a7ddfd519f80a94c2706ee64e",
-                "reference": "4779292a30aa2d4a7ddfd519f80a94c2706ee64e",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5db21cd0e5c8a5b5344596649033acf861a5e117",
+                "reference": "5db21cd0e5c8a5b5344596649033acf861a5e117",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.32"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.34"
             },
-            "time": "2026-02-11T19:29:10+00:00"
+            "time": "2026-02-13T19:09:12+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -663,16 +663,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.432.0",
+            "version": "v0.433.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "c0d8b801cf615f8edf1b5b356a3d121d0c95ef92"
+                "reference": "feb9c13e54457a6f5e157b7eae78b41566df43b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/c0d8b801cf615f8edf1b5b356a3d121d0c95ef92",
-                "reference": "c0d8b801cf615f8edf1b5b356a3d121d0c95ef92",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/feb9c13e54457a6f5e157b7eae78b41566df43b5",
+                "reference": "feb9c13e54457a6f5e157b7eae78b41566df43b5",
                 "shasum": ""
             },
             "require": {
@@ -701,9 +701,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.432.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.433.0"
             },
-            "time": "2026-02-09T01:14:27+00:00"
+            "time": "2026-02-16T01:42:26+00:00"
         },
         {
             "name": "google/auth",
@@ -1875,16 +1875,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.1",
+            "version": "v3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "68b5090d6a0db47944548a79e2958bdd8326d573"
+                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/68b5090d6a0db47944548a79e2958bdd8326d573",
-                "reference": "68b5090d6a0db47944548a79e2958bdd8326d573",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d0166a39b3604294082bf2eb846d15dc3b2f441c",
+                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c",
                 "shasum": ""
             },
             "require": {
@@ -1892,7 +1892,7 @@
                 "ext-libxml": "*",
                 "ext-xml": "*",
                 "matecat/emoji-to-entity-converter": "^1",
-                "matecat/xml-dom-parser": "^1",
+                "matecat/xml-dom-parser": "^2",
                 "php": ">=8.3",
                 "phpstan/phpstan": "^2"
             },
@@ -1931,9 +1931,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.1"
+                "source": "https://github.com/matecat/subfiltering/tree/v3.0.2"
             },
-            "time": "2026-02-04T13:48:20+00:00"
+            "time": "2026-02-16T17:41:26+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1990,35 +1990,34 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v2.2.13",
+            "version": "v3.0.0-beta5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "84c35fa74a61edd1f2ff006eca5b92feed0b2ed6"
+                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/84c35fa74a61edd1f2ff006eca5b92feed0b2ed6",
-                "reference": "84c35fa74a61edd1f2ff006eca5b92feed0b2ed6",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/02bd1f43c52d8a3336c07d287a85c437850c85ed",
+                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
-                "ext-iconv": "*",
-                "ext-json": "*",
                 "ext-libxml": "*",
+                "ext-mbstring": "*",
                 "ext-openssl": "*",
                 "ext-simplexml": "*",
                 "ext-xml": "*",
                 "matecat/emoji-to-entity-converter": "^1",
-                "matecat/xml-dom-parser": "^1",
-                "php": ">=7.4",
+                "matecat/xml-dom-parser": "^2.0.0",
+                "php": ">=8.3",
                 "psr/log": "*"
             },
             "require-dev": {
                 "ext-curl": "*",
-                "fzaninotto/faker": "^1.9",
-                "phpunit/phpunit": "^5"
+                "phpstan/phpstan": "@stable",
+                "phpunit/phpunit": "^12"
             },
             "type": "library",
             "autoload": {
@@ -2051,32 +2050,33 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.13"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.0-beta5"
             },
-            "time": "2025-12-11T13:18:31+00:00"
+            "time": "2026-02-16T17:30:40+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
-            "version": "v1.1.3",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xml-dom-parser.git",
-                "reference": "166d12604901938d25c79982d13ba8a1487201f4"
+                "reference": "0ddc8a4987619ee8a05e035d0c9c08278ced2c3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xml-dom-parser/zipball/166d12604901938d25c79982d13ba8a1487201f4",
-                "reference": "166d12604901938d25c79982d13ba8a1487201f4",
+                "url": "https://api.github.com/repos/matecat/xml-dom-parser/zipball/0ddc8a4987619ee8a05e035d0c9c08278ced2c3f",
+                "reference": "0ddc8a4987619ee8a05e035d0c9c08278ced2c3f",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
                 "ext-xml": "*",
-                "php": ">=5.6"
+                "php": ">=8.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7.27"
+                "phpstan/phpstan": "@stable",
+                "phpunit/phpunit": "^12"
             },
             "type": "library",
             "autoload": {
@@ -2109,9 +2109,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xml-dom-parser/issues",
-                "source": "https://github.com/matecat/xml-dom-parser/tree/v1.1.3"
+                "source": "https://github.com/matecat/xml-dom-parser/tree/v2.0.0"
             },
-            "time": "2025-10-24T15:51:55+00:00"
+            "time": "2026-02-16T15:01:27+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -5750,16 +5750,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.11",
+            "version": "12.5.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "9b518cb40f9474572c9f0178e96ff3dc1cf02bf1"
+                "reference": "418e06b3b46b0d54bad749ff4907fc7dfb530199"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/9b518cb40f9474572c9f0178e96ff3dc1cf02bf1",
-                "reference": "9b518cb40f9474572c9f0178e96ff3dc1cf02bf1",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/418e06b3b46b0d54bad749ff4907fc7dfb530199",
+                "reference": "418e06b3b46b0d54bad749ff4907fc7dfb530199",
                 "shasum": ""
             },
             "require": {
@@ -5828,7 +5828,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.11"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.12"
             },
             "funding": [
                 {
@@ -5852,7 +5852,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-10T12:32:02+00:00"
+            "time": "2026-02-16T08:34:36+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -6857,7 +6857,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "matecat/lara-php": 10
+        "matecat/lara-php": 10,
+        "matecat/xliff-parser": 10
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -1723,10 +1723,10 @@
   dependencies:
     "@opentelemetry/semantic-conventions" "^1.29.0"
 
-"@opentelemetry/core@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-2.5.0.tgz#3b2ac6cf471ed9a85eea836048a4de77a2e549d3"
-  integrity sha512-ka4H8OM6+DlUhSAZpONu0cPBtPPTQKxbxVzC4CzVx5+K4JnroJVBtDzLAMx4/3CDTJXRvVFhpFjtl4SaiTNoyQ==
+"@opentelemetry/core@2.5.1":
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-2.5.1.tgz#b5d830ab499bc13e29f6efa88a165630f25d2ad2"
+  integrity sha512-Dwlc+3HAZqpgTYq0MUyZABjFkcrKTePwuiFVLjahGD8cx3enqihmpAmdgNFO1R4m/sIe5afjJrA25Prqy4NXlA==
   dependencies:
     "@opentelemetry/semantic-conventions" "^1.29.0"
 
@@ -1771,11 +1771,11 @@
     "@opentelemetry/semantic-conventions" "^1.29.0"
 
 "@opentelemetry/resources@^2.2.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-2.5.0.tgz#e7a575b2c534961a9db5153f9498931c786a607a"
-  integrity sha512-F8W52ApePshpoSrfsSk1H2yJn9aKjCrbpQF1M9Qii0GHzbfVeFUB+rc3X4aggyZD8x9Gu3Slua+s6krmq6Dt8g==
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-2.5.1.tgz#90ccc27cea02b543f20a7db9834852ec11784c1a"
+  integrity sha512-BViBCdE/GuXRlp9k7nS1w6wJvY5fnFX5XvuEtWsTAOQFIO89Eru7lGW3WbfbxtCuZ/GbrJfAziXG0w0dpxL7eQ==
   dependencies:
-    "@opentelemetry/core" "2.5.0"
+    "@opentelemetry/core" "2.5.1"
     "@opentelemetry/semantic-conventions" "^1.29.0"
 
 "@opentelemetry/sdk-logs@0.208.0", "@opentelemetry/sdk-logs@^0.208.0":
@@ -1925,10 +1925,10 @@
   dependencies:
     cross-spawn "^7.0.6"
 
-"@posthog/types@1.345.5":
-  version "1.345.5"
-  resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.345.5.tgz#656ee043130c2e2ab1ad1fb61be0a86d0d530614"
-  integrity sha512-nPQQ5QfVMmsKquXQkXfA8g1/2IrHO7npw8ezcC0v3xJaTpAKoqBqknqugP+RwTlIfkhCbHSGd6x00yRSwTGaBQ==
+"@posthog/types@1.347.1":
+  version "1.347.1"
+  resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.347.1.tgz#de763f863e3ae6f212491e2a4cdb940f51e80fa2"
+  integrity sha512-ovHPNb09il/jObIfja42Ldg8des6oYqo6RwaduEHkGgpwrxWo7XmjHIoQpL0Qh7WKSnOnkE3Mm7hz9860i2REg==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -2280,10 +2280,10 @@
     "@sentry/types" "7.120.4"
     "@sentry/utils" "7.120.4"
 
-"@sentry/babel-plugin-component-annotate@4.6.1":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@sentry/babel-plugin-component-annotate/-/babel-plugin-component-annotate-4.6.1.tgz#94eec0293be8289daa574e18783e64d29203c236"
-  integrity sha512-aSIk0vgBqv7PhX6/Eov+vlI4puCE0bRXzUG5HdCsHBpAfeMkI8Hva6kSOusnzKqs8bf04hU7s3Sf0XxGTj/1AA==
+"@sentry/babel-plugin-component-annotate@4.7.0":
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@sentry/babel-plugin-component-annotate/-/babel-plugin-component-annotate-4.7.0.tgz#46841deb27275b7d235f2fbce42c5156ad6c7ae6"
+  integrity sha512-MkyajDiO17/GaHHFgOmh05ZtOwF5hmm9KRjVgn9PXHIdpz+TFM5mkp1dABmR6Y75TyNU98Z1aOwPOgyaR5etJw==
 
 "@sentry/browser@^7.40.0":
   version "7.120.4"
@@ -2299,13 +2299,13 @@
     "@sentry/types" "7.120.4"
     "@sentry/utils" "7.120.4"
 
-"@sentry/bundler-plugin-core@4.6.1":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@sentry/bundler-plugin-core/-/bundler-plugin-core-4.6.1.tgz#d6013e6233bf663114f581bbd3c3a380ff9311d4"
-  integrity sha512-WPeRbnMXm927m4Kr69NTArPfI+p5/34FHftdCRI3LFPMyhZDzz6J3wLy4hzaVUgmMf10eLzmq2HGEMvpQmdynA==
+"@sentry/bundler-plugin-core@4.7.0":
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@sentry/bundler-plugin-core/-/bundler-plugin-core-4.7.0.tgz#00ab83727df34bbbe170f032fa948e6f21f43185"
+  integrity sha512-gFdEtiup/7qYhN3vp1v2f0WL9AG9OorWLtIpfSBYbWjtzklVNg1sizvNyZ8nEiwtnb25LzvvCUbOP1SyP6IodQ==
   dependencies:
     "@babel/core" "^7.18.5"
-    "@sentry/babel-plugin-component-annotate" "4.6.1"
+    "@sentry/babel-plugin-component-annotate" "4.7.0"
     "@sentry/cli" "^2.57.0"
     dotenv "^16.3.1"
     find-up "^5.0.0"
@@ -2413,12 +2413,12 @@
   dependencies:
     "@sentry/types" "7.120.4"
 
-"@sentry/webpack-plugin@4.6.1":
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/@sentry/webpack-plugin/-/webpack-plugin-4.6.1.tgz#8041ef27f302c3f63902bc4bb01e2ee53ea94c15"
-  integrity sha512-CJgT/t2pQWsPsMx9VJ86goU/orCQhL2HhDj5ZYBol6fPPoEGeTqKOPCnv/xsbCAfGSp1uHpyRLTA/Gx96u7VVA==
+"@sentry/webpack-plugin@4.7.0":
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@sentry/webpack-plugin/-/webpack-plugin-4.7.0.tgz#6738bf35f0cfaa235c51894643f0b9e110c9a0bb"
+  integrity sha512-SQd+VIWVIpSzFlklIysiTHdRc3qf8g+grRto+1I4c7+/eTAIBDE6PSviKtnryjVVudz5dCrpvR2f0JhkLCts5Q==
   dependencies:
-    "@sentry/bundler-plugin-core" "4.6.1"
+    "@sentry/bundler-plugin-core" "4.7.0"
     unplugin "1.0.1"
     uuid "^9.0.0"
 
@@ -3418,12 +3418,7 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-baseline-browser-mapping@^2.9.0:
-  version "2.9.19"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.19.tgz#3e508c43c46d961eb4d7d2e5b8d1dd0f9ee4f488"
-  integrity sha512-ipDqC8FrAl/76p2SSWKSI+H9tFwm7vYqXQrItCuiVPt26Km0jS+NzSsBWAaBusvSbQcfJG+JitdMm+wZAgTYqg==
-
-baseline-browser-mapping@^2.9.15:
+baseline-browser-mapping@^2.9.0, baseline-browser-mapping@^2.9.15:
   version "2.9.19"
   resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.19.tgz#3e508c43c46d961eb4d7d2e5b8d1dd0f9ee4f488"
   integrity sha512-ipDqC8FrAl/76p2SSWKSI+H9tFwm7vYqXQrItCuiVPt26Km0jS+NzSsBWAaBusvSbQcfJG+JitdMm+wZAgTYqg==
@@ -5113,10 +5108,10 @@ html-minifier-terser@^6.0.2:
     relateurl "^0.2.7"
     terser "^5.10.0"
 
-html-webpack-plugin@5.6.5:
-  version "5.6.5"
-  resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-5.6.5.tgz#d57defb83cabbf29bf56b2d4bf10b67b650066be"
-  integrity sha512-4xynFbKNNk+WlzXeQQ+6YYsH2g7mpfPszQZUi3ovKlj+pDmngQ7vRXjrrmGROabmKwyQkcgcX5hqfOwHbFmK5g==
+html-webpack-plugin@5.6.6:
+  version "5.6.6"
+  resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-5.6.6.tgz#5321b9579f4a1949318550ced99c2a4a4e60cbaf"
+  integrity sha512-bLjW01UTrvoWTJQL5LsMRo1SypHW80FTm12OJRSnr3v6YHNhfe+1r0MYUZJMACxnCHURVnBWRwAsWs2yPU9Ezw==
   dependencies:
     "@types/html-minifier-terser" "^6.0.0"
     html-minifier-terser "^6.0.2"
@@ -6937,9 +6932,9 @@ postcss@^8.4.33:
     source-map-js "^1.2.1"
 
 posthog-js@^1.57.2:
-  version "1.345.5"
-  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.345.5.tgz#d9c18ecb1bf74b87e3d5d15b25aa955487434d5e"
-  integrity sha512-Hplt/aRD3DQLTQl3NxmS7V0jZPF18nnKJ4rST0qinz/6tXNCMemYqOVb4C/HYAXXWrtVVzGSJeNCNKvECFHHoQ==
+  version "1.347.1"
+  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.347.1.tgz#cb28855245761c1d1608bff8750daeb1fec6c715"
+  integrity sha512-PBloBIlcIPuZywJQBzSsTxY7oJYMevr2SwOa8f7T1h1YjnHN6coyh0wZMAAhqqrsVHXQj/9qaj3NOCJPHoZJEg==
   dependencies:
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/api-logs" "^0.208.0"
@@ -6947,7 +6942,7 @@ posthog-js@^1.57.2:
     "@opentelemetry/resources" "^2.2.0"
     "@opentelemetry/sdk-logs" "^0.208.0"
     "@posthog/core" "1.22.0"
-    "@posthog/types" "1.345.5"
+    "@posthog/types" "1.347.1"
     core-js "^3.38.1"
     dompurify "^3.3.1"
     fflate "^0.4.8"
