@@ -30,7 +30,6 @@ import ModalsActions from './ModalsActions'
 import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import CatToolStore from '../stores/CatToolStore'
-import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
 import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
@@ -485,12 +484,9 @@ const SegmentActions = {
     })
   },
   changeTagProjectionStatus: function (enabled) {
-    //TODO: transform paremeter to bool
-    toggleTagProjectionJob({enabled}).then(() => {
-      AppDispatcher.dispatch({
-        actionType: SegmentConstants.SET_GUESS_TAGS,
-        enabled: enabled,
-      })
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_GUESS_TAGS,
+      enabled: enabled,
     })
   },
   /**
