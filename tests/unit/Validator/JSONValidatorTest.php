@@ -595,11 +595,10 @@ class JSONValidatorTest extends AbstractTest
     #[Test]
     public function testValidateRemoteReferenceInSchema(): void
     {
-        $jsonSchema = file_get_contents(__DIR__ . '/../../resources/files/json/schema/xliff_parameters_rules_wrapper.json');
         $invalidFile = file_get_contents(__DIR__ . '/../../resources/files/json/files/xliff_params.json');
 
         $validatorObject = new JSONValidatorObject($invalidFile);
-        $validator = new JSONValidator($jsonSchema, false);
+        $validator = new JSONValidator('xliff_parameters_rules_wrapper.json', false);
         $result = $validator->validate($validatorObject);
 
         $this->assertNotNull($result);

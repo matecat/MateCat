@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8024b6eb8787c11d4ea6b2b5cee35946",
+    "content-hash": "ad93b72ff333cc908853db24a2e07ec2",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.36",
+            "version": "3.369.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "2a69e7df5e03be9e08f9f73fb6a8cc9dd63b59c0"
+                "reference": "bc599ce989b101ee630d5e1a1aeda387632df47b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2a69e7df5e03be9e08f9f73fb6a8cc9dd63b59c0",
-                "reference": "2a69e7df5e03be9e08f9f73fb6a8cc9dd63b59c0",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/bc599ce989b101ee630d5e1a1aeda387632df47b",
+                "reference": "bc599ce989b101ee630d5e1a1aeda387632df47b",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.36"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.37"
             },
-            "time": "2026-02-17T19:45:01+00:00"
+            "time": "2026-02-18T19:16:34+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -1696,16 +1696,16 @@
         },
         {
             "name": "matecat/klein",
-            "version": "v3.2.0",
+            "version": "v3.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/klein.php.git",
-                "reference": "30054d94e472d3ccbbca8f35e6e579c85b671d60"
+                "reference": "ca6f61506d7bdb291c0b203c36a1a9cf1b9cdd05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/klein.php/zipball/30054d94e472d3ccbbca8f35e6e579c85b671d60",
-                "reference": "30054d94e472d3ccbbca8f35e6e579c85b671d60",
+                "url": "https://api.github.com/repos/matecat/klein.php/zipball/ca6f61506d7bdb291c0b203c36a1a9cf1b9cdd05",
+                "reference": "ca6f61506d7bdb291c0b203c36a1a9cf1b9cdd05",
                 "shasum": ""
             },
             "require": {
@@ -1759,9 +1759,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/klein.php/issues",
-                "source": "https://github.com/matecat/klein.php/tree/v3.2.0"
+                "source": "https://github.com/matecat/klein.php/tree/v3.2.2"
             },
-            "time": "2025-10-28T13:27:44+00:00"
+            "time": "2026-02-19T14:41:00+00:00"
         },
         {
             "name": "matecat/lara-php",
@@ -1990,7 +1990,7 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v3.0.0-beta5",
+            "version": "v3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
@@ -2050,7 +2050,7 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.0-beta5"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.0"
             },
             "time": "2026-02-16T17:30:40+00:00"
         },
@@ -5803,16 +5803,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.13",
+            "version": "12.5.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "89d94361ae5bc3244e7e769ee65267b2e4976749"
+                "reference": "47283cfd98d553edcb1353591f4e255dc1bb61f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/89d94361ae5bc3244e7e769ee65267b2e4976749",
-                "reference": "89d94361ae5bc3244e7e769ee65267b2e4976749",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/47283cfd98d553edcb1353591f4e255dc1bb61f0",
+                "reference": "47283cfd98d553edcb1353591f4e255dc1bb61f0",
                 "shasum": ""
             },
             "require": {
@@ -5881,7 +5881,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.13"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.14"
             },
             "funding": [
                 {
@@ -5905,7 +5905,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-18T08:58:58+00:00"
+            "time": "2026-02-18T12:38:40+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -6910,8 +6910,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "matecat/lara-php": 10,
-        "matecat/xliff-parser": 10
+        "matecat/lara-php": 10
     },
     "prefer-stable": false,
     "prefer-lowest": false,
