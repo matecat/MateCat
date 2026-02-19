@@ -5,70 +5,114 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import Copy from '../icons/Copy'
-import {
-  decodePlaceholdersToPlainText,
-  encodePlaceholdersToTags,
-} from './utils/DraftMatecatUtils/tagUtils'
+import {encodePlaceholdersToTags} from './utils/DraftMatecatUtils/tagUtils'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
-import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 
-const getWordsBeforeAndAfter = (html, textPortion, count = 30) => {
-  const tokenRegex = /(<[^>]+>)|([^<]+)/g
-  let tokens = []
-  let match
-  while ((match = tokenRegex.exec(html)) !== null) {
-    if (match[1]) tokens.push({type: 'tag', value: match[1]})
-    else tokens.push({type: 'text', value: match[2]})
+const restoreMissingWhiteSpace = (original, alternative) => {
+  if (original.endsWith(' ') && !alternative.endsWith(' ')) {
+    return `${alternative} `
+  }
+  return alternative
+}
+
+const splitWords = (languageCode, text) => {
+  if (['th', 'zh-CN', 'zh-TW', 'ja'].includes(languageCode)) {
+    const segmenter = new Intl.Segmenter(languageCode, {granularity: 'word'})
+    return [...segmenter.segment(text)]
+      .map((s) => s.segment)
+      .filter((segment) => segment.trim() !== '')
+  } else {
+    return text.trim().split(/\s+/)
+  }
+}
+
+const getModifiedWordsRange = ({
+  originalSentenceWords,
+  alternativeSentenceWords,
+}) => {
+  let startModified = 0
+  while (
+    startModified < originalSentenceWords.length &&
+    startModified < alternativeSentenceWords.length &&
+    originalSentenceWords[startModified] ===
+      alternativeSentenceWords[startModified]
+  ) {
+    startModified++
   }
 
-  let plainText = ''
-  let mapping = []
-  tokens.forEach((t, i) => {
-    if (t.type === 'text') {
-      for (let j = 0; j < t.value.length; j++) {
-        mapping.push({tokenIndex: i, charIndex: j})
-      }
-      plainText += t.value
-    }
-  })
+  let endOriginal = originalSentenceWords.length - 1
+  let endModified = alternativeSentenceWords.length - 1
 
-  const idx = plainText.indexOf(textPortion.replace(/<[^>]+>/g, ''))
-  if (idx === -1) return {begin: '', after: ''}
-
-  const beginIdx = Math.max(0, idx - count)
-  const afterIdx = Math.min(
-    plainText.length,
-    idx + textPortion.replace(/<[^>]+>/g, '').length + count,
-  )
-
-  function sliceTokens(start, end) {
-    if (start >= end) return ''
-    const tokenStart = mapping[start].tokenIndex
-    const charStart = mapping[start].charIndex
-    const tokenEnd = mapping[end - 1].tokenIndex
-    const charEnd = mapping[end - 1].charIndex + 1
-
-    let result = ''
-    for (let i = tokenStart; i <= tokenEnd; i++) {
-      const t = tokens[i]
-      if (t.type === 'tag') result += t.value
-      else if (i === tokenStart && i === tokenEnd)
-        result += t.value.slice(charStart, charEnd)
-      else if (i === tokenStart) result += t.value.slice(charStart)
-      else if (i === tokenEnd) result += t.value.slice(0, charEnd)
-      else result += t.value
-    }
-    return result
+  while (
+    endOriginal >= startModified &&
+    endModified >= startModified &&
+    originalSentenceWords[endOriginal] === alternativeSentenceWords[endModified]
+  ) {
+    endOriginal--
+    endModified--
   }
 
   return {
-    begin: (beginIdx > 0 ? '...' : '') + sliceTokens(beginIdx, idx),
-    after:
-      sliceTokens(idx + textPortion.replace(/<[^>]+>/g, '').length, afterIdx) +
-      (afterIdx < plainText.length ? '...' : ''),
+    startModified,
+    endModified,
+    endOriginal,
   }
+}
+
+const enrichAlternatives = ({
+  targetLanguage,
+  originalSentence,
+  alternatives,
+  contextWindowSize = 3,
+}) => {
+  const originalWords = splitWords(targetLanguage, originalSentence)
+
+  return alternatives.map(({alternative: _alternative, context}) => {
+    const alternative = restoreMissingWhiteSpace(originalSentence, _alternative)
+    const modifiedWords = splitWords(targetLanguage, alternative)
+
+    const {startModified, endModified, endOriginal} = getModifiedWordsRange({
+      originalSentenceWords: originalWords,
+      alternativeSentenceWords: modifiedWords,
+    })
+    const changed = modifiedWords.slice(startModified, endModified + 1)
+    const before = modifiedWords.slice(
+      Math.max(0, startModified - contextWindowSize),
+      startModified,
+    )
+    const after = modifiedWords.slice(
+      endModified + 1,
+      endModified + 1 + contextWindowSize,
+    )
+
+    const originalDiff = originalWords
+      .slice(startModified, endOriginal + 1)
+      .join(' ')
+    const replacementDiff = changed.join(' ')
+
+    const hasStartEllipsis = startModified - contextWindowSize > 0
+    const hasEndEllipsis =
+      endModified + 1 + contextWindowSize < modifiedWords.length
+
+    return {
+      alternative:
+        originalSentence.endsWith(' ') && !alternative.endsWith(' ')
+          ? `${alternative} `
+          : originalSentence.endsWith('\n') && !alternative.endsWith('\n')
+            ? `${alternative}\n`
+            : alternative,
+      highlighted: {
+        before: hasStartEllipsis ? ` ...${before.join(' ')}` : before.join(' '),
+        changed: replacementDiff,
+        after: hasEndEllipsis ? `${after.join(' ')}... ` : after.join(' '),
+      },
+      context,
+      original: originalDiff,
+      replacement: replacementDiff,
+    }
+  })
 }
 
 export const SegmentFooterTabAiAlternatives = ({
@@ -80,8 +124,6 @@ export const SegmentFooterTabAiAlternatives = ({
   const [alternatives, setAlternatives] = useState()
 
   useEffect(() => {
-    let selectedText = ''
-
     const cleanTags = (value) =>
       DraftMatecatUtils.excludeSomeTagsTransformToText(value, [
         'g',
@@ -93,11 +135,9 @@ export const SegmentFooterTabAiAlternatives = ({
     const requestAlternatives = ({text}) => {
       setAlternatives()
 
-      selectedText = text
-
       const decodedSource = cleanTags(segment.segment)
       const decodedTarget = cleanTags(segment.translation)
-      console.log(decodedTarget)
+
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
 
@@ -118,33 +158,28 @@ export const SegmentFooterTabAiAlternatives = ({
     }
 
     const receiveAlternatives = ({data}) => {
-      console.log(data)
-      return
       if (!data.has_error && Array.isArray(data.message)) {
-        const wordsBeforeAndAfter = getWordsBeforeAndAfter(
-          segment.translation,
-          selectedText,
-          15,
-        )
+        console.log(data.message)
+        const enrichedAlternatives = enrichAlternatives({
+          targetLanguage: config.target_code,
+          originalSentence: cleanTags(segment.translation),
+          alternatives: data.message,
+        })
 
-        const begin = DraftMatecatUtils.transformTagsToHtml(
-          wordsBeforeAndAfter.begin,
-          config.isTargetRTL,
-        )
-        const after = DraftMatecatUtils.transformTagsToHtml(
-          wordsBeforeAndAfter.after,
-          config.isTargetRTL,
-        )
+        return
 
         setAlternatives(
-          data.message.map(({alternative, context}) => ({
-            alternativeOriginal: alternative,
-            alternative: DraftMatecatUtils.transformTagsToHtml(
-              alternative,
-              config.isTargetRTL,
-            ),
-            begin,
-            after,
+          data.message.map(({alternative, context, highlighted}) => ({
+            alternative,
+            before:
+              highlighted.before.length > 0
+                ? `${highlighted.before} `
+                : highlighted.before,
+            after:
+              highlighted.after.length > 0
+                ? ` ${highlighted.after}`
+                : highlighted.after,
+            changed: highlighted.changed,
             context,
           })),
         )
@@ -196,17 +231,14 @@ export const SegmentFooterTabAiAlternatives = ({
           </div>
           <div className="ai-alternative-options">
             {alternatives.map(
-              (
-                {begin, after, alternative, context, alternativeOriginal},
-                index,
-              ) => (
+              ({before, after, changed, alternative, context}, index) => (
                 <div key={index}>
                   <div>
                     <p>
-                      <span dangerouslySetInnerHTML={allowHTML(begin)}></span>
+                      <span dangerouslySetInnerHTML={allowHTML(before)}></span>
                       <span
                         className="ai-feature-option-alternative-highlight"
-                        dangerouslySetInnerHTML={allowHTML(alternative)}
+                        dangerouslySetInnerHTML={allowHTML(changed)}
                       ></span>
                       <span dangerouslySetInnerHTML={allowHTML(after)}></span>
                     </p>
@@ -217,7 +249,7 @@ export const SegmentFooterTabAiAlternatives = ({
                   <Button
                     className="ai-feature-button"
                     mode={BUTTON_MODE.OUTLINE}
-                    onClick={() => copyAlternative(alternativeOriginal)}
+                    onClick={() => copyAlternative(alternative)}
                   >
                     <Copy size={16} />
                   </Button>
