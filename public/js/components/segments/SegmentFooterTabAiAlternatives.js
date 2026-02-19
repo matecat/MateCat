@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -14,17 +14,46 @@ const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
     return `${alternative} `
   }
+  if (original.endsWith('\n') && !alternative.endsWith('\n')) {
+    return `${alternative}\n`
+  }
   return alternative
+}
+
+const maskTags = (text) => {
+  const tagRegex = /<(?:[^"'<>]|"[^"]*"|'[^']*')+>/g
+
+  const tagMap = {}
+  let index = 0
+
+  const maskedText = text.replace(tagRegex, (match) => {
+    const key = `\uE000TAG_${index++}\uE001`
+    tagMap[key] = match
+    return key
+  })
+
+  return {maskedText, tagMap}
+}
+
+const unmaskTags = (text, tagMap) => {
+  let result = text
+  for (const key in tagMap) {
+    result = result.split(key).join(tagMap[key])
+  }
+  return result
 }
 
 const splitWords = (languageCode, text) => {
   if (['th', 'zh-CN', 'zh-TW', 'ja'].includes(languageCode)) {
-    const segmenter = new Intl.Segmenter(languageCode, {granularity: 'word'})
+    const segmenter = new Intl.Segmenter(languageCode, {
+      granularity: 'word',
+    })
+
     return [...segmenter.segment(text)]
       .map((s) => s.segment)
       .filter((segment) => segment.trim() !== '')
   } else {
-    return text.trim().split(/\s+/)
+    return text.trim().split(/\s+/).filter(Boolean)
   }
 }
 
@@ -33,6 +62,7 @@ const getModifiedWordsRange = ({
   alternativeSentenceWords,
 }) => {
   let startModified = 0
+
   while (
     startModified < originalSentenceWords.length &&
     startModified < alternativeSentenceWords.length &&
@@ -67,21 +97,30 @@ const enrichAlternatives = ({
   alternatives,
   contextWindowSize = 3,
 }) => {
-  const originalWords = splitWords(targetLanguage, originalSentence)
+  return alternatives.map(({alternative: rawAlternative, context}) => {
+    const alternative = restoreMissingWhiteSpace(
+      originalSentence,
+      rawAlternative,
+    )
 
-  return alternatives.map(({alternative: _alternative, context}) => {
-    const alternative = restoreMissingWhiteSpace(originalSentence, _alternative)
-    const modifiedWords = splitWords(targetLanguage, alternative)
+    const {maskedText: maskedOriginal} = maskTags(originalSentence)
+    const {maskedText: maskedAlternative, tagMap} = maskTags(alternative)
+
+    const originalWords = splitWords(targetLanguage, maskedOriginal)
+    const modifiedWords = splitWords(targetLanguage, maskedAlternative)
 
     const {startModified, endModified, endOriginal} = getModifiedWordsRange({
       originalSentenceWords: originalWords,
       alternativeSentenceWords: modifiedWords,
     })
+
     const changed = modifiedWords.slice(startModified, endModified + 1)
+
     const before = modifiedWords.slice(
       Math.max(0, startModified - contextWindowSize),
       startModified,
     )
+
     const after = modifiedWords.slice(
       endModified + 1,
       endModified + 1 + contextWindowSize,
@@ -90,27 +129,35 @@ const enrichAlternatives = ({
     const originalDiff = originalWords
       .slice(startModified, endOriginal + 1)
       .join(' ')
+
     const replacementDiff = changed.join(' ')
 
     const hasStartEllipsis = startModified - contextWindowSize > 0
     const hasEndEllipsis =
       endModified + 1 + contextWindowSize < modifiedWords.length
 
+    const beforeText = unmaskTags(
+      hasStartEllipsis ? ` ...${before.join(' ')}` : before.join(' '),
+      tagMap,
+    )
+
+    const changedText = unmaskTags(replacementDiff, tagMap)
+
+    const afterText = unmaskTags(
+      hasEndEllipsis ? `${after.join(' ')}... ` : after.join(' '),
+      tagMap,
+    )
+
     return {
-      alternative:
-        originalSentence.endsWith(' ') && !alternative.endsWith(' ')
-          ? `${alternative} `
-          : originalSentence.endsWith('\n') && !alternative.endsWith('\n')
-            ? `${alternative}\n`
-            : alternative,
+      alternative,
       highlighted: {
-        before: hasStartEllipsis ? ` ...${before.join(' ')}` : before.join(' '),
-        changed: replacementDiff,
-        after: hasEndEllipsis ? `${after.join(' ')}... ` : after.join(' '),
+        before: beforeText,
+        changed: changedText,
+        after: afterText,
       },
       context,
-      original: originalDiff,
-      replacement: replacementDiff,
+      original: unmaskTags(originalDiff, tagMap),
+      replacement: changedText,
     }
   })
 }
@@ -155,24 +202,33 @@ export const SegmentFooterTabAiAlternatives = ({
 
     const receiveAlternatives = ({data}) => {
       if (!data.has_error && Array.isArray(data.message)) {
+        console.log('@@@@@@@@@@@@', data.message)
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
           originalSentence: normalizeTags(segment.translation),
           alternatives: data.message,
         })
-
+        console.log('enrichedAlternatives', enrichedAlternatives)
         setAlternatives(
           enrichedAlternatives.map(({alternative, context, highlighted}) => ({
             alternative,
-            before:
+            before: DraftMatecatUtils.transformTagsToHtml(
               highlighted.before.length > 0
                 ? `${highlighted.before} `
                 : highlighted.before,
-            after:
+              config.isTargetRTL,
+            ),
+            after: DraftMatecatUtils.transformTagsToHtml(
               highlighted.after.length > 0
                 ? ` ${highlighted.after}`
                 : highlighted.after,
-            changed: highlighted.changed,
+              config.isTargetRTL,
+            ),
+
+            changed: DraftMatecatUtils.transformTagsToHtml(
+              highlighted.changed,
+              config.isTargetRTL,
+            ),
             context,
           })),
         )
