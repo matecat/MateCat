@@ -122,10 +122,12 @@ class AIAssistantWorker extends AbstractWorker
 
                     $result = $engine->getTagProjection($config);
 
-                    $alternativeTranslations[$i] = [
-                        'alternative' => $result->responseData,
-                        'context' => $alternativeTranslation['context'],
-                    ];
+                    if(!empty($result->responseData)){
+                        $alternativeTranslations[$i] = [
+                            'alternative' => $result->responseData,
+                            'context' => $alternativeTranslation['context'],
+                        ];
+                    }
                 }
             }
 
