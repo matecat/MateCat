@@ -15,6 +15,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 
 export const aiAlternartiveTranslations = async ({
+  id_job = config.id_job,
+  password = config.password,
   sourceLanguage = config.source_code,
   targetLanguage = config.target_code,
   idClient = config.id_client,
@@ -27,6 +29,8 @@ export const aiAlternartiveTranslations = async ({
   styleInstructions,
 }) => {
   const dataParams = {
+    id_job: id_job,
+    password: password,
     source_language: sourceLanguage,
     target_language: targetLanguage,
     id_client: idClient,

@@ -67,8 +67,7 @@ You are an expert {$sourceLanguage} to {$targetLanguage} translator.
       """
       {$excerpt}
       """
-
-
+      
   Suggest up to 4 alternative translations in {$targetLanguage} that replaces "{$excerpt}" in the target sentence.
 
   *Instructions to generate alternative translations*
@@ -154,6 +153,8 @@ PROMPT;
 
         // decode JSON
         $alternatives = str_replace(["```json", "```"], "", $response);
+
+        // call TAG PROJECTION
 
         return json_decode($alternatives, true);
     }

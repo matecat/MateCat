@@ -136,6 +136,8 @@ export const SegmentFooterTabAiAlternatives = ({
         SegmentUtils.getSegmentContext(segment.sid)
 
       aiAlternartiveTranslations({
+        id_job: segment.id_job,
+        password: segment.password,
         idSegment: segment.sid,
         sourceSentence: decodedSource,
         sourceContextSentencesString: contextListBefore
