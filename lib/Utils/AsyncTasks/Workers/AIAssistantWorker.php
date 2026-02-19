@@ -3,12 +3,17 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\ChunkDao;
+use Model\Segments\SegmentOriginalDataDao;
 use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\AIClientFactory;
 use Utils\AIAssistant\OpenAIClient as AIAssistantClient;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -79,20 +84,52 @@ class AIAssistantWorker extends AbstractWorker
     {
         try {
             $gemini = AIClientFactory::create("gemini");
-            $message = $gemini->manageAlternativeTranslations(
+            $alternativeTranslations = $gemini->manageAlternativeTranslations(
                 $payload['localized_source'],
                 $payload['localized_target'],
-                $payload['source_sentence'],
-                $payload['target_sentence'],
-                $payload['source_context_sentences_string'],
-                $payload['target_context_sentences_string'],
+                strip_tags($payload['source_sentence']),
+                strip_tags($payload['target_sentence']),
+                strip_tags($payload['source_context_sentences_string']),
+                strip_tags($payload['target_context_sentences_string']),
                 $payload['excerpt'],
                 $payload['style_instructions']
             );
 
-            $hasError = !is_array($message);
+            $hasError = !is_array($alternativeTranslations) || empty($alternativeTranslations);
 
-            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $message, $hasError, true);
+            // call TAG PROJECTION on every alternative translation
+            if(!$hasError){
+                $jobStruct = ChunkDao::getByIdAndPassword($payload['id_job'], $payload['password']);
+                $featureSet = new FeatureSet();
+                $featureSet->loadForProject($jobStruct->getProject());
+
+                /**
+                 * @var $engine MyMemory
+                 */
+                $engine = EnginesFactory::getInstance(1);
+                $engine->setFeatureSet($featureSet);
+
+                $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($payload['id_segment']);
+
+                foreach ($alternativeTranslations as $i => $alternativeTranslation) {
+                    $config = [];
+                    $config['dataRefMap'] = $dataRefMap;
+                    $config['source'] = $payload['source_sentence'];
+                    $config['target'] = $alternativeTranslation['alternative'];
+                    $config['source_lang'] = $payload['source_language'];
+                    $config['target_lang'] = $payload['target_language'];
+                    $config['suggestion'] = $payload['excerpt'];
+
+                    $result = $engine->getTagProjection($config);
+
+                    $alternativeTranslations[$i] = [
+                        'alternative' => $result->responseData,
+                        'context' => $alternativeTranslation['context'],
+                    ];
+                }
+            }
+
+            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, $hasError, true);
         } catch (Exception $exception){
             $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
         }

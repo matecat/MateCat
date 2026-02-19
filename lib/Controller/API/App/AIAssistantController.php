@@ -251,10 +251,24 @@ class AIAssistantController extends KleinController
             throw new InvalidArgumentException('Missing `id_segment` parameter');
         }
 
+        // id_job
+        if (!isset($json['id_job'])) {
+            throw new InvalidArgumentException('Missing `id_job` parameter');
+        }
+
+        // password
+        if (!isset($json['password'])) {
+            throw new InvalidArgumentException('Missing `password` parameter');
+        }
+
         $json = [
             'id_client' => $json['id_client'],
+            'id_job' => $json['id_job'],
+            'password' => $json['password'],
             'localized_source' => $localizedSource,
             'localized_target' => $localizedTarget,
+            'source_language' => $json['source_language'],
+            'target_language' => $json['target_language'],
             'source_sentence' => trim($json['source_sentence']),
             'target_sentence' => trim($json['target_sentence']),
             'source_context_sentences_string' => trim($json['source_context_sentences_string']),
