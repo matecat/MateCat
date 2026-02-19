@@ -791,6 +791,12 @@ const SegmentActions = {
       id: sid,
     })
   },
+  unlockEditArea: function (sid, fid) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.UNLOCK_EDIT_AREA,
+      id: sid,
+    })
+  },
   setFocusOnEditArea: function () {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.FOCUS_EDITAREA,
