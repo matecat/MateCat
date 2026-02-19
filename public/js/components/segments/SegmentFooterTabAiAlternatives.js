@@ -124,19 +124,13 @@ export const SegmentFooterTabAiAlternatives = ({
   const [alternatives, setAlternatives] = useState()
 
   useEffect(() => {
-    const cleanTags = (value) =>
-      DraftMatecatUtils.excludeSomeTagsTransformToText(value, [
-        'g',
-        'bx',
-        'ex',
-        'x',
-      ]).replace(/·/g, ' ')
+    const normalizeTags = (value) => value
 
     const requestAlternatives = ({text}) => {
       setAlternatives()
 
-      const decodedSource = cleanTags(segment.segment)
-      const decodedTarget = cleanTags(segment.translation)
+      const decodedSource = normalizeTags(segment.segment)
+      const decodedTarget = normalizeTags(segment.translation)
 
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
@@ -145,13 +139,13 @@ export const SegmentFooterTabAiAlternatives = ({
         idSegment: segment.sid,
         sourceSentence: decodedSource,
         sourceContextSentencesString: contextListBefore
-          .map((t) => cleanTags(t))
+          .map((t) => normalizeTags(t))
           .join('\n'),
         targetSentence: decodedTarget,
         targetContextSentencesString: contextListAfter
-          .map((t) => cleanTags(t))
+          .map((t) => normalizeTags(t))
           .join('\n'),
-        excerpt: cleanTags(text),
+        excerpt: normalizeTags(text),
         styleInstructions:
           CatToolStore.getJobMetadata().project.mt_extra.lara_style,
       })
@@ -159,17 +153,14 @@ export const SegmentFooterTabAiAlternatives = ({
 
     const receiveAlternatives = ({data}) => {
       if (!data.has_error && Array.isArray(data.message)) {
-        console.log(data.message)
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
-          originalSentence: cleanTags(segment.translation),
+          originalSentence: normalizeTags(segment.translation),
           alternatives: data.message,
         })
 
-        return
-
         setAlternatives(
-          data.message.map(({alternative, context, highlighted}) => ({
+          enrichedAlternatives.map(({alternative, context, highlighted}) => ({
             alternative,
             before:
               highlighted.before.length > 0
