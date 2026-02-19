@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ad93b72ff333cc908853db24a2e07ec2",
+    "content-hash": "89ddef1067282c7086d539b57f3757a3",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1587,26 +1587,28 @@
         },
         {
             "name": "matecat/emoji-to-entity-converter",
-            "version": "v1.0.12",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/emoji-to-entity-converter.git",
-                "reference": "9b1debd72762e5b201fa18e908c4c3d58287a5de"
+                "reference": "33ecdffbf49b3402be44215a6a8a56966201bafb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/9b1debd72762e5b201fa18e908c4c3d58287a5de",
-                "reference": "9b1debd72762e5b201fa18e908c4c3d58287a5de",
+                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/33ecdffbf49b3402be44215a6a8a56966201bafb",
+                "reference": "33ecdffbf49b3402be44215a6a8a56966201bafb",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": ">=7.0"
+                "php": ">=8.3"
             },
             "require-dev": {
-                "fzaninotto/faker": "^1.9",
-                "phpunit/phpunit": "^5.7.27",
-                "symfony/console": "^5.4"
+                "ext-curl": "*",
+                "fakerphp/faker": "^1",
+                "phpstan/phpstan": "@stable",
+                "phpunit/phpunit": "^12",
+                "symfony/console": "^7.2"
             },
             "type": "library",
             "autoload": {
@@ -1639,9 +1641,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/emoji-to-entity-converter/issues",
-                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.12"
+                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v2.0.0"
             },
-            "time": "2025-10-24T17:06:17+00:00"
+            "time": "2026-02-19T18:09:37+00:00"
         },
         {
             "name": "matecat/icu-intl",
@@ -1875,23 +1877,23 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.2",
+            "version": "v3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c"
+                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d0166a39b3604294082bf2eb846d15dc3b2f441c",
-                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d9def10c51c966a9a20a0ea940b614804ff8fbd8",
+                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
                 "ext-xml": "*",
-                "matecat/emoji-to-entity-converter": "^1",
+                "matecat/emoji-to-entity-converter": "^2",
                 "matecat/xml-dom-parser": "^2",
                 "php": ">=8.3",
                 "phpstan/phpstan": "^2"
@@ -1931,9 +1933,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.2"
+                "source": "https://github.com/matecat/subfiltering/tree/v3.0.3"
             },
-            "time": "2026-02-16T17:41:26+00:00"
+            "time": "2026-02-19T18:20:02+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1990,16 +1992,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v3.0.0",
+            "version": "v3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed"
+                "reference": "99e9faa2197f3c21ae0c2b816d42d465f4c4341f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/02bd1f43c52d8a3336c07d287a85c437850c85ed",
-                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/99e9faa2197f3c21ae0c2b816d42d465f4c4341f",
+                "reference": "99e9faa2197f3c21ae0c2b816d42d465f4c4341f",
                 "shasum": ""
             },
             "require": {
@@ -2009,7 +2011,7 @@
                 "ext-openssl": "*",
                 "ext-simplexml": "*",
                 "ext-xml": "*",
-                "matecat/emoji-to-entity-converter": "^1",
+                "matecat/emoji-to-entity-converter": "^2",
                 "matecat/xml-dom-parser": "^2.0.0",
                 "php": ">=8.3",
                 "psr/log": "*"
@@ -2050,9 +2052,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.0"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.1"
             },
-            "time": "2026-02-16T17:30:40+00:00"
+            "time": "2026-02-19T18:11:03+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
