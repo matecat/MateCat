@@ -3,7 +3,7 @@
 namespace Utils\AIAssistant;
 
 use Gemini\Contracts\ClientContract;
-use IntlBreakIterator;
+use Gemini\Data\GenerationConfig;
 use Utils\Registry\AppConfig;
 
 class GeminiClient implements AIClientInterface
@@ -73,11 +73,12 @@ You are an expert {$sourceLanguage} to {$targetLanguage} translator.
 
   *Instructions to generate alternative translations*
     - Always ensure that only the specified excerpt is altered, and all other parts of the sentence remain unchanged unless absolutely necessary for grammatical correctness with the new excerpt.
-    - Golden Rule: If "{$excerpt}" has no meaning in the {$targetLanguage}, return nothing.
+    - Golden Rule: If "{$excerpt}" has no meaning in {$targetLanguage}, return nothing.
     
     {$this->style($styleInstructions, $targetLanguage)}
 
     - *For each alternative translation proposal*:
+      - ALWAYS ANSWER IN JSON FORMAT
       - *Golden rule*: always Return the full new target sentence in "alternative" schema field
       - Never suggest the current translation or selected excerpt as an alternative.
       - At least the excerpt to replace should be replaced. If not, do not propose alternative.
@@ -92,7 +93,16 @@ You are an expert {$sourceLanguage} to {$targetLanguage} translator.
     - *Golden rule* if you don't have any reasonable alternative to suggest it's ok to return nothing.
 PROMPT;
 
-        $result = $this->gemini->generativeModel(model: AppConfig::$GEMINI_API_MODEL)->generateContent($prompt);
+        $generationConfig = new GenerationConfig(
+            temperature: 0.3
+        );
+
+        $result = $this
+            ->gemini
+            ->generativeModel(model: AppConfig::$GEMINI_API_MODEL)
+            ->withGenerationConfig($generationConfig)
+            ->generateContent($prompt)
+        ;
         $text = $result->text();
 
         return $this->formatResponse($text);
