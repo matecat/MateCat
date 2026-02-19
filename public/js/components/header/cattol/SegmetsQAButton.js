@@ -13,6 +13,8 @@ import CatToolStore from '../../../stores/CatToolStore'
 import CatToolConstants from '../../../constants/CatToolConstants'
 import SearchUtils from './search/searchUtils'
 import AlertIconFull from '../../../../img/icons/AlertIconFull'
+import QAICon from '../../../../img/icons/QAICon'
+import QAFilledIcon from '../../../../img/icons/QAFilledICon'
 
 export const SegmentsQAButton = () => {
   const [warnings, setWarnings] = useState()
@@ -79,7 +81,7 @@ export const SegmentsQAButton = () => {
       onClick={openQA}
       className={'qaButton'}
     >
-      {qaOpen ? <AlertIconFull size={24} /> : <AlertIcon size={24} />}
+      {qaOpen ? <QAFilledIcon /> : <QAICon />}
       {warnings && totalIssues > 0 && (
         <div className={`button-badge button-badge-${numberClass}`}>
           {totalIssues}
