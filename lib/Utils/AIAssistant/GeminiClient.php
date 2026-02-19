@@ -15,6 +15,19 @@ class GeminiClient implements AIClientInterface
         $this->gemini = $gemini;
     }
 
+    /**
+     * Manages the generation of alternative translations for a specific excerpt within a target sentence.
+     *
+     * @param string $sourceLanguage The source language of the translation.
+     * @param string $targetLanguage The target language of the translation.
+     * @param string $sourceSentence The original source sentence to be translated.
+     * @param string $sourceContextSentencesString Additional context sentences related to the source sentence.
+     * @param string $targetSentence The current translated target sentence.
+     * @param string $targetContextSentencesString Additional context sentences related to the target translation.
+     * @param string $excerpt The specific excerpt in the target sentence to be replaced with alternatives.
+     * @param string $styleInstructions The style instructions provided to guide the translation approach.
+     * @return mixed The formatted response containing alternative translations, or nothing if no alternatives can be reasonably suggested.
+     */
     public function manageAlternativeTranslations(
         $sourceLanguage,
         $targetLanguage,
@@ -82,7 +95,7 @@ PROMPT;
         $result = $this->gemini->generativeModel(model: AppConfig::$GEMINI_API_MODEL)->generateContent($prompt);
         $text = $result->text();
 
-        return $this->formatResponse($targetLanguage, $targetSentence, $text);
+        return $this->formatResponse($text);
     }
 
     /**
@@ -106,7 +119,7 @@ PROMPT;
 ',
             'creative' => '
 - You may adapt, rephrase, or take stylistic liberties, as long as the spirit and function of the original are respected.
-- Alternatives can include idioms, cultural substitutions, or reimaginings — especially for effect or engagement.
+- Alternatives can include idioms, cultural substitutions, or reimagining — especially for effect or engagement.
 - Be creative.    
 ',
         ];
@@ -119,7 +132,7 @@ PROMPT;
      *
      * @return array|string
      */
-    private function formatResponse($targetLanguage, $originalSentence, $response)
+    private function formatResponse($response)
     {
         if(!is_string($response)){
             return $response;
@@ -131,169 +144,7 @@ PROMPT;
 
         // decode JSON
         $alternatives = str_replace(["```json", "```"], "", $response);
-        $alternatives = json_decode($alternatives, true);
 
-        return $this->enrichAlternatives($targetLanguage, $originalSentence, $alternatives);
-    }
-
-    /**
-     * Enhances a list of alternative translations by providing additional context, word differences,
-     * and restored formatting based on the original sentence.
-     *
-     * @param string $targetLanguage The target language code, used to determine the word segmentation logic.
-     * @param string $originalSentence The original sentence for which alternatives are being enriched.
-     * @param array $alternatives A list of alternative translations. Each alternative is expected to be an
-     *                                     associative array with keys such as 'alternative' and 'context'.
-     * @param int $contextWindowSize The number of words to include before and after the modified section for
-     *                                     contextual inclusion, defaults to 3.
-     *
-     * @return array A transformed array of alternatives, where each alternative includes the enriched 'alternative' text,
-     *               highlighted context with 'before', 'changed', and 'after' segments, 'context' metadata, the
-     *               detected 'original' and 'replacement' word differences, and restored formatting from the original
-     *               sentence.
-     */
-    private function enrichAlternatives(
-        string $targetLanguage,
-        string $originalSentence,
-        array  $alternatives,
-        int    $contextWindowSize = 3
-    ): array {
-        $originalWords = $this->splitWords($targetLanguage, $originalSentence);
-
-        return array_map(function (array $item) use ($targetLanguage, $originalSentence, $originalWords, $contextWindowSize) {
-
-            $alternative = $this->restoreMissingWhiteSpace($originalSentence, $item['alternative']);
-            // Restore trailing newline from original sentence
-            if (str_ends_with($originalSentence, "\n") && !str_ends_with($alternative, "\n")) {
-                $alternative .= "\n";
-            }
-            $modifiedWords = $this->splitWords($targetLanguage, $alternative);
-            $context = $item['context'];
-
-            $modifiedWordsRange = $this->getModifiedWordsRange($originalWords, $modifiedWords);
-            $startModified = $modifiedWordsRange['startModified'];
-            $endModified = $modifiedWordsRange['endModified'];
-            $endOriginal = $modifiedWordsRange['endOriginal'];
-
-            $changed = array_slice($modifiedWords, $startModified, $endModified - $startModified + 1);
-            $before  = array_slice($modifiedWords, max(0, $startModified - $contextWindowSize), min($startModified, $contextWindowSize));
-            $after   = array_slice($modifiedWords, $endModified + 1, $contextWindowSize);
-
-            $originalDiff    = implode(' ', array_slice($originalWords, $startModified, $endOriginal - $startModified + 1));
-            $replacementDiff = implode(' ', $changed);
-
-            $hasStartEllipsis = ($startModified - $contextWindowSize) > 0;
-            $hasEndEllipsis   = ($endModified + 1 + $contextWindowSize) < count($modifiedWords);
-
-            return [
-                'alternative' => $alternative,
-                'highlighted' => [
-                    'before'  => $hasStartEllipsis ? ' ...' . implode(' ', $before) : implode(' ', $before),
-                    'changed' => $replacementDiff,
-                    'after'   => $hasEndEllipsis   ? implode(' ', $after) . '... '  : implode(' ', $after),
-                ],
-                'context'     => $context,
-                'original'    => $originalDiff,
-                'replacement' => $replacementDiff,
-            ];
-
-        }, $alternatives);
-    }
-
-    /**
-     * Splits a given text into an array of words based on the specified language code.
-     *
-     * @param string $languageCode The language code to determine the word segmentation logic. Certain languages
-     *                              such as Thai, Chinese, Japanese, and Traditional Chinese handle word splitting
-     *                              differently due to the lack of spaces between words.
-     * @param string $text The text to be split into words.
-     *
-     * @return array An array of words obtained from splitting the input text. Empty segments and non-word characters
-     *               are excluded from the result.
-     */
-    private function splitWords(string $languageCode, string $text): array
-    {
-        $noSpaceLanguages = ['th', 'zh-CN', 'zh-TW', 'ja'];
-
-        if (in_array($languageCode, $noSpaceLanguages)) {
-            // IntlBreakIterator is the PHP equivalent of Intl.Segmenter
-            $iterator = IntlBreakIterator::createWordInstance($languageCode);
-            $iterator->setText($text);
-
-            $words = [];
-            $parts = $iterator->getPartsIterator();
-
-            foreach ($parts as $part) {
-                $trimmed = trim($part);
-                // Filter out empty segments and punctuation/spaces
-                if ($trimmed !== '' && preg_match('/\p{L}/u', $trimmed)) {
-                    $words[] = $trimmed;
-                }
-            }
-
-            return $words;
-        }
-
-        // Standard whitespace split for other languages
-        return preg_split('/\s+/', trim($text), -1, PREG_SPLIT_NO_EMPTY);
-    }
-
-    /**
-     * Restores missing trailing whitespace in the alternative text based on the original text.
-     *
-     * @param string $original The original text used as a reference for whitespace comparison.
-     * @param string $alternative The alternative text to be checked and potentially modified.
-     *
-     * @return string The alternative text with restored trailing whitespace, if it was missing
-     *                while present in the original text; otherwise, the alternative text as is.
-     */
-    private function restoreMissingWhiteSpace(string $original, string $alternative)
-    {
-        if (str_ends_with($original, " ") && !str_ends_with($alternative, " ")) {
-            return $alternative . " ";
-        }
-
-        return $alternative;
-    }
-
-    /**
-     * Identifies the range of modified words between an original sentence and an alternative sentence.
-     *
-     * @param array $originalSentenceWords The original sentence splittd into words.
-     * @param array $alternativeSentenceWords The alternative sentence split into words.
-     * @return array
-     */
-    private function getModifiedWordsRange(array $originalSentenceWords, array $alternativeSentenceWords)
-    {
-        $startModified = 0;
-
-        $originalCount    = count($originalSentenceWords);
-        $alternativeCount = count($alternativeSentenceWords);
-
-        while (
-            $startModified < $originalCount &&
-            $startModified < $alternativeCount &&
-            $originalSentenceWords[$startModified] === $alternativeSentenceWords[$startModified]
-        ) {
-            $startModified++;
-        }
-
-        $endOriginal = $originalCount - 1;
-        $endModified = $alternativeCount - 1;
-
-        while (
-            $endOriginal >= $startModified &&
-            $endModified >= $startModified &&
-            $originalSentenceWords[$endOriginal] === $alternativeSentenceWords[$endModified]
-        ) {
-            $endOriginal--;
-            $endModified--;
-        }
-
-        return [
-            'startModified' => $startModified,
-            'endModified' => $endModified,
-            'endOriginal' => $endOriginal
-        ];
+        return json_decode($alternatives, true);
     }
 }
