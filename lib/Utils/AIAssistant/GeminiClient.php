@@ -76,7 +76,7 @@ You are an expert $sourceLanguage to $targetLanguage translator.
     
  Suggest up to 4 alternative translations in $targetLanguage that replaces "$excerpt" in the target sentence.
 
- *Tag Integrity Protocol**:
+ *Tag Integrity Protocol*
    - Every XML/HTML/XLIFF tag is a mandatory placeholder. 
    - If the original target sentence is "Hello <ex/> world" and the excerpt is "world", the alternative MUST contain "<ex/>".
    - Do not "fix" the spacing around tags; keep the original tag syntax (e.g., `<ex />` vs `<ex/>`) exactly as provided.
