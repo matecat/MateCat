@@ -17,7 +17,7 @@
         "matecat/lara-php": "^v2.0.0-beta.1",
         "matecat/simple-s3": "^v2.0.0",
         "matecat/subfiltering": "~v3.0",
-        "matecat/whole-text-finder": "^1.0",
+        "matecat/whole-text-finder": "^2.0",
         "matecat/xliff-parser": "~v3.0",
         "matecat/icu-intl": "^v1",
         "monolog/monolog": "^3",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "89ddef1067282c7086d539b57f3757a3",
+    "content-hash": "ee9fb4af56db50d8db1a33f48a360e05",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.37",
+            "version": "3.369.38",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "bc599ce989b101ee630d5e1a1aeda387632df47b"
+                "reference": "6b39dcc5284fae1a1f7e5d4fd64878092a56594b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/bc599ce989b101ee630d5e1a1aeda387632df47b",
-                "reference": "bc599ce989b101ee630d5e1a1aeda387632df47b",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6b39dcc5284fae1a1f7e5d4fd64878092a56594b",
+                "reference": "6b39dcc5284fae1a1f7e5d4fd64878092a56594b",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.37"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.38"
             },
-            "time": "2026-02-18T19:16:34+00:00"
+            "time": "2026-02-19T19:06:55+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -1939,26 +1939,26 @@
         },
         {
             "name": "matecat/whole-text-finder",
-            "version": "v1.0.16",
+            "version": "v2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/whole-text-finder.git",
-                "reference": "3e2d503333ff0cad9453d03c9e24a6c83f05476a"
+                "reference": "cc2d7d227ffc329dfe2890a788d5669b626d3353"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/3e2d503333ff0cad9453d03c9e24a6c83f05476a",
-                "reference": "3e2d503333ff0cad9453d03c9e24a6c83f05476a",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/cc2d7d227ffc329dfe2890a788d5669b626d3353",
+                "reference": "cc2d7d227ffc329dfe2890a788d5669b626d3353",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.4"
+                "php": ">=8.3"
             },
             "require-dev": {
+                "fakerphp/faker": "^1",
                 "friendsofphp/php-cs-fixer": "^2.15",
-                "fzaninotto/faker": "^1.8",
-                "phpstan/phpstan": "^0.11.12",
-                "phpunit/phpunit": "^8.2"
+                "phpstan/phpstan": "@stable",
+                "phpunit/phpunit": "^12"
             },
             "type": "library",
             "autoload": {
@@ -1986,9 +1986,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/whole-text-finder/issues",
-                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.16"
+                "source": "https://github.com/matecat/whole-text-finder/tree/v2.0.1"
             },
-            "time": "2025-02-14T11:12:39+00:00"
+            "time": "2026-02-20T16:55:18+00:00"
         },
         {
             "name": "matecat/xliff-parser",
