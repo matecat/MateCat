@@ -88,7 +88,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
 
   const analyzeICU = useMemo(() => {
     const text = textUtils.removeWhitespacePlaceholders(
-      transformTagsToText(removeTagsFromText(segment.segment)),
+      transformTagsToText(removeTagsFromText(segment.translation)),
     )
 
     let ast
@@ -116,6 +116,9 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         // Se ci sono sotto‐messaggi, analizzali ugualmente
         if (node[2] && typeof node[2] === 'object') {
           Object.values(node[2]).forEach(walk)
+        }
+        if (node[3] && typeof node[3] === 'object') {
+          Object.values(node[3]).forEach(walk)
         }
       }
     }
@@ -234,16 +237,16 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
           </div>
         )}
         <div className="segment-footer-icu-editor">
-          <h3>Live preview</h3>
-          {variableNames.length === 0 && <h3>No variables</h3>}
+          <h3>Test values</h3>
+          {variableNames.length === 0 && <div>No variables</div>}
           <div className="segment-footer-icu-inputs">
             {variableNames.map(({name, type}) => (
               <div key={name}>
                 <label>
-                  <h3>
+                  <div>
                     {name}
-                    <span>{inputTypes[type]}</span>
-                  </h3>
+                    <span>({inputTypes[type]})</span>
+                  </div>
                   <input
                     value={values[name]?.value}
                     onChange={(e) => onChangeValue(e, name)}
@@ -255,7 +258,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
             ))}
           </div>
           <div className="segment-footer-icu-preview-container">
-            <h3>Rendered output</h3>
+            <h3>Live preview</h3>
             <div
               className={`segment-footer-icu-preview ${config.isTargetRTL ? 'rtl' : ''}`}
             >
