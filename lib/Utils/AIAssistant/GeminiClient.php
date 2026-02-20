@@ -4,6 +4,9 @@ namespace Utils\AIAssistant;
 
 use Gemini\Contracts\ClientContract;
 use Gemini\Data\GenerationConfig;
+use Gemini\Data\Schema;
+use Gemini\Enums\DataType;
+use Gemini\Enums\ResponseMimeType;
 use Utils\Registry\AppConfig;
 
 class GeminiClient implements AIClientInterface
@@ -29,82 +32,92 @@ class GeminiClient implements AIClientInterface
      * @return mixed The formatted response containing alternative translations, or nothing if no alternatives can be reasonably suggested.
      */
     public function manageAlternativeTranslations(
-        $sourceLanguage,
-        $targetLanguage,
-        $sourceSentence,
-        $sourceContextSentencesString,
-        $targetSentence,
-        $targetContextSentencesString,
-        $excerpt,
-        $styleInstructions
-    )
-    {
+        string $sourceLanguage,
+        string $targetLanguage,
+        string $sourceSentence,
+        string $sourceContextSentencesString,
+        string $targetSentence,
+        string $targetContextSentencesString,
+        string $excerpt,
+        string $styleInstructions
+    ): array {
         $prompt = <<<PROMPT
-You are an expert {$sourceLanguage} to {$targetLanguage} translator.
+You are an expert $sourceLanguage to $targetLanguage translator.
 
   Given:
-    - Source sentence:
-      """
-      {$sourceSentence}
-      """
+   - Source sentence:
+     """
+     {$sourceSentence}
+     """
 
-    - Source sentence context:
-      """
-      {$sourceContextSentencesString}
-      """
 
-    - Target sentence:
-      """
-      {$targetSentence}
-      """
+   - Source sentence context:
+     """
+     {$sourceContextSentencesString}
+     """
 
-    - Target sentence context:
-      """
-      {$targetContextSentencesString}
-      """
 
-    - Target excerpt to be replaced:
-      """
-      {$excerpt}
-      """
-      
-  Suggest up to 4 alternative translations in {$targetLanguage} that replaces "{$excerpt}" in the target sentence.
+   - Target sentence:
+     """
+     {$targetSentence}
+     """
 
-  *Instructions to generate alternative translations*
-    - Always ensure that only the specified excerpt is altered, and all other parts of the sentence remain unchanged unless absolutely necessary for grammatical correctness with the new excerpt.
-    - Golden Rule: If "{$excerpt}" has no meaning in {$targetLanguage}, return nothing.
+
+   - Target sentence context:
+     """
+     {$targetContextSentencesString}
+     """
+
+
+   - Target excerpt to be replaced:
+     """
+     {$excerpt}
+     """
     
-    {$this->style($styleInstructions, $targetLanguage)}
+ Suggest up to 4 alternative translations in $targetLanguage that replaces "$excerpt" in the target sentence.
 
-    - *For each alternative translation proposal*:
-      - ALWAYS ANSWER IN JSON FORMAT
-      - *Golden rule*: always Return the full new target sentence in "alternative" schema field
-      - Never suggest the current translation or selected excerpt as an alternative.
-      - At least the excerpt to replace should be replaced. If not, do not propose alternative.
-      - Do not contain archaic or unnatural terms (e.g. on the morrow)
-      - Must be grammatically correct.
-      - When the source sentence allows it and no given precise contextual info about it, propose gender alternatives including neutral.
-      - Return a short context (max 8 words), written entirely in {$targetLanguage}, that explains when the alternative should be used only in terms of translation context, mood or style.
-      - Context must be understandable in {$targetLanguage} and the corresponding json key should always be called “context”
-      - Make sure it contains all not changed terms of the original target sentence
-    
-    - *Golden rule*: If "{$excerpt}" is proper noun, a brand, or part of it, return nothing.
-    - *Golden rule* if you don't have any reasonable alternative to suggest it's ok to return nothing.
+
+ *Instructions to generate alternative translations*
+   - Always ensure that only the specified excerpt is altered, and all other parts of the sentence remain unchanged unless absolutely necessary for grammatical correctness with the new excerpt.
+   - Golden Rule: If "$excerpt" has no meaning in the $targetLanguage, return an empty JSON.
+  
+   {$this->style($styleInstructions, $targetLanguage)}
+  
+   - *For each alternative translation proposal*:
+     - *Golden rule*: always Return the full new target sentence in "alternative" schema field
+     - Never suggest the current translation or selected excerpt as an alternative.
+     - If the source segment contains XML, HTML, or any other tag, you must keep them unchanged in the alternatives and maintain their exact original position unless absolutely necessary for grammatical correctness with the new excerpt.
+     - At least the excerpt to replace should be replaced. If not, do not propose alternatives.
+     - Do not contain archaic or unnatural terms (e.g. on the morrow)
+     - Must be grammatically correct.
+     - When the source sentence allows it and no precise contextual info about it is given, propose gender alternatives including neutral.
+     - Return a short context (max 8 words), written entirely in $targetLanguage, that explains when the alternative should be used only in terms of translation context, mood or style.
+     - Context must be understandable in $targetLanguage
+     - Make sure it contains all not changed terms of the original target sentence
+  
+   - *Golden rule*: If "$excerpt" is a proper noun, a brand, or part of it, return an empty JSON.
+   - *Golden rule* if you don't have any reasonable alternative to suggest it's ok to return an empty JSON.
 PROMPT;
 
         $generationConfig = new GenerationConfig(
-            temperature: 0.3
+            temperature: 0.3,
+            responseMimeType: ResponseMimeType::APPLICATION_JSON,
+            responseSchema: new Schema(
+                type: DataType::ARRAY,
+                items: new Schema(
+                    type: DataType::OBJECT,
+                    properties: [
+                        'alternative' => new Schema(DataType::STRING),
+                        'context' => new Schema(DataType::STRING)
+                    ]
+                )
+            )
         );
 
-        $result = $this
-            ->gemini
-            ->generativeModel(model: AppConfig::$GEMINI_API_MODEL)
+        return $this->gemini
+            ->generativeModel(model: 'gemini-2.5-flash-lite')
             ->withGenerationConfig($generationConfig)
-            ->generateContent($prompt)
-        ;
-        $text = $result->text();
-
-        return $this->formatResponse($text);
+            ->generateContent($prompt)->json();
     }
 
     /**
@@ -134,28 +147,5 @@ PROMPT;
         ];
 
         return $styleInstructionsMap[$style] ?? '';
-    }
-
-    /**
-     * Formats the response from the Gemini API into a more usable format.
-     *
-     * @return array|string
-     */
-    private function formatResponse($response)
-    {
-        if(!is_string($response)){
-            return $response;
-        }
-
-        if(!str_contains($response, "```json")){
-            return $response;
-        }
-
-        // decode JSON
-        $alternatives = str_replace(["```json", "```"], "", $response);
-
-        // call TAG PROJECTION
-
-        return json_decode($alternatives, true);
     }
 }

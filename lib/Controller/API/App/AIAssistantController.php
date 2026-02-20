@@ -269,12 +269,12 @@ class AIAssistantController extends KleinController
             'localized_target' => $localizedTarget,
             'source_language' => $json['source_language'],
             'target_language' => $json['target_language'],
-            'source_sentence' => trim($json['source_sentence']),
-            'target_sentence' => trim($json['target_sentence']),
-            'source_context_sentences_string' => trim($json['source_context_sentences_string']),
-            'target_context_sentences_string' => trim($json['target_context_sentences_string']),
-            'excerpt' => trim($json['excerpt']),
-            'style_instructions' => trim($json['style_instructions']),
+            'source_sentence' => $json['source_sentence'],
+            'target_sentence' => $json['target_sentence'],
+            'source_context_sentences_string' => $json['source_context_sentences_string'],
+            'target_context_sentences_string' => $json['target_context_sentences_string'],
+            'excerpt' => $json['excerpt'],
+            'style_instructions' => $json['style_instructions'],
             'id_segment' => $json['id_segment'] ?? null,
         ];
 
