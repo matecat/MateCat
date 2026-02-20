@@ -238,7 +238,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         )}
         <div className="segment-footer-icu-editor">
           <h3>Test values</h3>
-          {variableNames.length === 0 && <h3>No variables</h3>}
+          {variableNames.length === 0 && <div>No variables</div>}
           <div className="segment-footer-icu-inputs">
             {variableNames.map(({name, type}) => (
               <div key={name}>
