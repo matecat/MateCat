@@ -62,18 +62,22 @@ const getModifiedWordsRange = ({
   alternativeSentenceWords,
 }) => {
   let startModified = 0
+  const lenOriginal = originalSentenceWords.length
+  const lenAlternative = alternativeSentenceWords.length
 
+  // trova il primo cambiamento
   while (
-    startModified < originalSentenceWords.length &&
-    startModified < alternativeSentenceWords.length &&
+    startModified < lenOriginal &&
+    startModified < lenAlternative &&
     originalSentenceWords[startModified] ===
       alternativeSentenceWords[startModified]
   ) {
     startModified++
   }
 
-  let endOriginal = originalSentenceWords.length - 1
-  let endModified = alternativeSentenceWords.length - 1
+  // trova l'ultimo cambiamento
+  let endOriginal = lenOriginal - 1
+  let endModified = lenAlternative - 1
 
   while (
     endOriginal >= startModified &&
@@ -84,11 +88,17 @@ const getModifiedWordsRange = ({
     endModified--
   }
 
-  return {
-    startModified,
-    endModified,
-    endOriginal,
+  // **tag dopo il cambiamento non devono allargare il changed**
+  // se il tag compare subito dopo, escludilo
+  while (
+    endModified >= startModified &&
+    alternativeSentenceWords[endModified].startsWith('\uE000TAG_') &&
+    endModified > startModified
+  ) {
+    endModified--
   }
+
+  return {startModified, endModified, endOriginal}
 }
 
 const enrichAlternatives = ({
@@ -202,7 +212,7 @@ export const SegmentFooterTabAiAlternatives = ({
 
     const receiveAlternatives = ({data}) => {
       if (!data.has_error && Array.isArray(data.message)) {
-        console.log('@@@@@@@@@@@@', data.message)
+        console.log('@@@@@@@@@@@@', data.message, segment.translation)
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
           originalSentence: normalizeTags(segment.translation),
