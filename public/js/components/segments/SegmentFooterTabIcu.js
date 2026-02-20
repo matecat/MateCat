@@ -118,7 +118,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
           Object.values(node[2]).forEach(walk)
         }
         if (node[3] && typeof node[3] === 'object') {
-          Object.values(node[2]).forEach(walk)
+          Object.values(node[3]).forEach(walk)
         }
       }
     }
