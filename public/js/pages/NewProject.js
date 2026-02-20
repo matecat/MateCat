@@ -12,7 +12,7 @@ import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
-import More from '../../img/icons/More'
+import SettingsIcon from '../../img/icons/SettingsIcon'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
@@ -47,6 +47,7 @@ import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssarie
 import SocketListener from '../sse/SocketListener'
 import {
   Button,
+  BUTTON_MODE,
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../components/common/Button/Button'
@@ -1038,12 +1039,16 @@ const NewProject = () => {
               <TmGlossarySelect />
             </div>
 
-            <div
-              className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
-              {...(!isLoadingTemplates && {onClick: openTmPanel})}
-            >
-              <More size={24} />
-              <span className="text">More settings</span>
+            <div className="translate-box settings">
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                mode={BUTTON_MODE.OUTLINE}
+                disabled={isLoadingTemplates}
+                onClick={openTmPanel}
+              >
+                <SettingsIcon />
+                <span className="text">More settings</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -1062,79 +1067,80 @@ const NewProject = () => {
           </div>
         )}
         <UploadFile />
-      </div>
-      <div className="wrapper-bottom">
-        {conversionEnabled && (
-          <p className="supported-files">
-            Matecat supports{' '}
-            <a
-              className="supported-file-formats"
-              onClick={() => {
-                ModalsActions.showModalComponent(
-                  SupportedFilesModal,
-                  {supportedFiles: supportedFiles},
-                  'Supported file formats',
-                  {minWidth: '80%', height: '80%'},
-                )
-              }}
-            >
-              {formatsNumber} file formats{' '}
-            </a>
-            <span style={{float: 'right'}}>.</span>
-            {isGDriveEnabled &&
-              currentProjectTemplate &&
-              uploadedFilesNames.length === 0 && (
-                <span className="gdrive-addlink-container">
-                  and{' '}
-                  <a
-                    className="load-gdrive"
-                    onClick={() => setOpenGDrive(true)}
-                    href="#"
-                  >
-                    Google Drive files{'  '}
-                    <DriveIcon size={16} />
-                  </a>
-                </span>
-              )}
-          </p>
-        )}
-        <div className="uploadbtn-box">
-          {!projectSent ? (
-            <Button
-              size={BUTTON_SIZE.BIG}
-              type={BUTTON_TYPE.PRIMARY}
-              disabled={
-                !isFormReadyToSubmit ||
-                isImportTMXInProgress ||
-                projectTemplates.length === 0
-              }
-              className={`uploadbtn${
-                !isFormReadyToSubmit ||
-                isImportTMXInProgress ||
-                projectTemplates.length === 0
-                  ? ' disabled'
-                  : ''
-              }`}
-              onClick={createProject.current}
-            >
-              {' '}
-              Analyze
-            </Button>
-          ) : (
-            <>
+        <div className="wrapper-bottom">
+          {conversionEnabled && (
+            <p className="supported-files">
+              Matecat supports{' '}
+              <a
+                className="supported-file-formats"
+                onClick={() => {
+                  ModalsActions.showModalComponent(
+                    SupportedFilesModal,
+                    {supportedFiles: supportedFiles},
+                    'Supported file formats',
+                    {minWidth: '80%', height: '80%'},
+                  )
+                }}
+              >
+                {formatsNumber} file formats{' '}
+              </a>
+              <span style={{float: 'right'}}>.</span>
+              {isGDriveEnabled &&
+                currentProjectTemplate &&
+                uploadedFilesNames.length === 0 && (
+                  <span className="gdrive-addlink-container">
+                    and{' '}
+                    <a
+                      className="load-gdrive"
+                      onClick={() => setOpenGDrive(true)}
+                      href="#"
+                    >
+                      Google Drive files{'  '}
+                      <DriveIcon size={16} />
+                    </a>
+                  </span>
+                )}
+            </p>
+          )}
+          <div className="uploadbtn-box">
+            {!projectSent ? (
               <Button
                 size={BUTTON_SIZE.BIG}
                 type={BUTTON_TYPE.PRIMARY}
-                className={'uploadbtn disabled'}
-                disabled={true}
+                disabled={
+                  !isFormReadyToSubmit ||
+                  isImportTMXInProgress ||
+                  projectTemplates.length === 0
+                }
+                className={`uploadbtn${
+                  !isFormReadyToSubmit ||
+                  isImportTMXInProgress ||
+                  projectTemplates.length === 0
+                    ? ' disabled'
+                    : ''
+                }`}
+                onClick={createProject.current}
               >
-                <span className="uploadloader" />
-                Analyzing...
+                {' '}
+                Analyze
               </Button>
-            </>
-          )}
+            ) : (
+              <>
+                <Button
+                  size={BUTTON_SIZE.BIG}
+                  type={BUTTON_TYPE.PRIMARY}
+                  className={'uploadbtn disabled'}
+                  disabled={true}
+                >
+                  <span className="uploadloader" />
+                  Analyzing...
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
       {isOpenMultiselectLanguages && (
         <LanguageSelector
           selectedLanguagesFromDropdown={
@@ -1205,9 +1211,12 @@ const NewProject = () => {
           desktop with the browser of your choice.
         </p>
         <div className="buttons">
-          <a href="https://site.matecat.com/" className="ui primary button">
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            onClick={() => window.open('https://site.matecat.com/', '_blank')}
+          >
             Find out more about Matecat
-          </a>
+          </Button>
         </div>
       </div>
     </div>

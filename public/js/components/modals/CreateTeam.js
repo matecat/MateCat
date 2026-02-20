@@ -8,6 +8,7 @@ import {EMAIL_PATTERN} from '../../constants/Constants'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 export const CreateTeam = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)
@@ -83,13 +84,15 @@ export const CreateTeam = () => {
           </div>
         </div>
       </div>
-      <button
-        className="create-team ui primary button open button-close"
-        disabled={isDisabledCreation}
-        onClick={sendCreate}
-      >
-        Create
-      </button>
+      <div>
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          disabled={isDisabledCreation}
+          onClick={sendCreate}
+        >
+          Create
+        </Button>
+      </div>
     </div>
   )
 }

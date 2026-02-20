@@ -4,6 +4,7 @@ import $ from 'jquery'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
+import {Button} from '../common/Button/Button'
 
 const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   const [showAnalysis, setShowAnalysis] = useState(false)
@@ -57,6 +58,9 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
     }
   })
 
+  let showHideText = showAnalysis ? 'Hide Details' : 'Show Details'
+  let iconClass = showAnalysis ? 'open' : ''
+
   return (
     <div className="ui container">
       {volumeAnalysis && project ? (
@@ -78,6 +82,14 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
                   showAnalysis={showAnalysis}
                   openAnalysisReport={openAnalysisReport}
                 />
+                {volumeAnalysis.get('jobs') ? (
+                  <div className="analyze-report" onClick={openAnalysisReport}>
+                    <h3>{showHideText}</h3>
+                    <div className="rounded">
+                      <i className={'icon-sort-down icon ' + iconClass} />
+                    </div>
+                  </div>
+                ) : null}
                 {showAnalysis ? (
                   <div className="project-body ui grid">
                     {/*<TransitionGroup>
@@ -101,13 +113,13 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
             ) : null}
           </div>
           {scrollTop > 200 ? (
-            <button
+            <Button
               title="Back to top"
               className="scroll"
               onClick={() => scrollToTop()}
             >
               <i className="icon-sort-up icon"></i>
-            </button>
+            </Button>
           ) : null}
         </div>
       ) : (

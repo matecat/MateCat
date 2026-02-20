@@ -19,6 +19,7 @@ export const POPOVER_TOGGLE = {
 export const Popover = ({
   className = '',
   contentClassName = '',
+  buttonContainerClassName = '',
   title = '',
   toggleButtonVariant = POPOVER_TOGGLE.DEFAULT,
   toggleButtonProps,
@@ -27,7 +28,9 @@ export const Popover = ({
   align = POPOVER_ALIGN.LEFT,
   verticalAlign = POPOVER_VERTICAL_ALIGN.BOTTOM,
   onClose = () => {},
+  disabled = false,
   children,
+  closeOnClickInside = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -93,7 +96,7 @@ export const Popover = ({
   return (
     <div
       ref={containerRef}
-      className="popover-component-container"
+      className={`popover-component-container ${buttonContainerClassName}`}
       data-testid="popover-container"
     >
       {toggleButtonVariant === POPOVER_TOGGLE.DEFAULT ? (
@@ -101,6 +104,7 @@ export const Popover = ({
           active={isOpen}
           onClick={togglePopover}
           {...defaultToggleButtonProps}
+          disabled={disabled}
         />
       ) : (
         <button
@@ -126,7 +130,12 @@ export const Popover = ({
               <span className="popover-component-title">{title}</span>
             </div>
           )}
-          <div className={`popover-component-body ${contentClassName}`}>
+          <div
+            className={`popover-component-body ${contentClassName}`}
+            onClick={() => {
+              if (closeOnClickInside) setIsOpen(false)
+            }}
+          >
             {children}
           </div>
           {(cancelButtonProps || confirmButtonProps) && (

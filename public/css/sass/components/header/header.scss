@@ -13,8 +13,7 @@ header {
     line-height: 23px;
     color: white;
     text-align: center;
-    border-radius: 2px;
-    margin-top: 7px;
+    border-radius: 4px;
     border: 1px solid #ffffff;
 
     &.revision-r1 {
@@ -24,8 +23,161 @@ header {
       background: colors.$approved2Green;
     }
   }
+}
 
-  #files-instructions svg {
-    display: block;
+.markAsCompleteButton {
+  width: 40px !important;
+}
+
+$icon-scale: 30px;
+
+/* Default */
+
+header {
+  .wrapper {
+    grid-template-columns:
+      208px minmax(0, 48px) minmax(120px, max-content)
+      auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
+    align-items: center;
+  }
+  .user-menu-popover {
+    height: 40px;
+  }
+
+  .logo-menu {
+    display: grid;
+    align-items: center;
+
+    .logo {
+      margin: 0;
+      background: url(/public/img/logo_matecat_big_white.svg) 0 0 no-repeat;
+      width: 190px;
+      height: 40px;
+      top: 1px;
+      left: 6px;
+    }
+  }
+
+  .header-menu {
+    display: grid;
+    /*grid-template-columns: repeat(9, auto);*/
+    grid-auto-flow: column;
+    align-items: center;
+    justify-content: right;
+    column-gap: 16px;
+    z-index: 4;
+    color: colors.$white;
+    margin-right: 16px;
+    button.qaButton, .markAsCompleteButton, > button {
+      color: colors.$white !important;
+
+      &:disabled {
+        color: #{rgba(colors.$white, 0.5)} !important;
+      }
+    }
+
+    .button-badge {
+      display: flex;
+      width: 16px;
+      height: 16px;
+      padding: 2px 6px;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      position: absolute;
+      right: -6px;
+      top: -4px;
+      background-color: white;
+      border-radius: 999px;
+      font-size: 12px;
+      line-height: 14px;
+
+      &.button-badge-left {
+        right: unset;
+        left: -4px;
+      }
+
+      &.button-badge-warning {
+        background-color: colors.$orangeDefault;
+        color: colors.$white;
+      }
+
+      &.button-badge-info {
+        background-color: colors.$translatedBlue;
+        color: colors.$white;
+      }
+
+      &.button-badge-error {
+        background-color: colors.$redDefault;
+        color: colors.$white;
+      }
+
+      &.button-badge-success {
+        background-color: colors.$approvedGreen;
+        color: colors.$white;
+      }
+    }
+
+    #action-filter {
+      &.active,
+      &.open {
+        opacity: 1;
+
+        #filter {
+          fill: #fff;
+        }
+      }
+    }
+
+    .comments-popover {
+      width: 300px;
+      max-height: 600px;
+      overflow: auto;
+      .popover-comments-container {
+        padding: 8px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .popover-comments-item {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 8px;
+          border-radius: 8px;
+          background-color: #{rgba(colors.$grey9, 0.5)};
+          &.resolved {
+            background-color: #{rgba(colors.$greenDefaultTransparent, 0.15)};
+            &:hover {
+              background-color: #{rgba(colors.$greenDefaultTransparent, 0.25)};
+            }
+          }
+          &:hover {
+            background-color: colors.$grey9;
+          }
+
+          .popover-comments-item-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: colors.$grey1300;
+
+            .popover-comments-item-name {
+              color: colors.$grey;
+            }
+
+          }
+
+          .popover-comments-item-text {
+            padding: 4px;
+          }
+        }
+      }
+    }
   }
 }

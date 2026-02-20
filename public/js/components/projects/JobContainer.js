@@ -15,7 +15,12 @@ import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
-import {BUTTON_SIZE} from '../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import Download from '../../../img/icons/Download'
 import QR from '../../../img/icons/QR'
@@ -514,14 +519,13 @@ class JobContainer extends React.Component {
             content={tooltipText}
             size="tiny"
             trigger={
-              <a
-                className=" ui icon basic button comments-tooltip"
-                href={translatedUrl}
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.ICON}
+                size={BUTTON_SIZE.ICON_STANDARD}
+                onClick={() => window.open(translatedUrl, '_blank')}
               >
                 <CommentsIcon />
-              </a>
+              </Button>
             }
           />
         </div>
@@ -544,15 +548,14 @@ class JobContainer extends React.Component {
             position="top center"
             size="tiny"
             trigger={
-              <a
-                className="ui icon basic button qr-tooltip "
-                href={url}
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.ICON}
+                size={BUTTON_SIZE.ICON_STANDARD}
+                onClick={() => window.open(url, '_blank')}
                 style={{...(classQuality && {color: classQuality})}}
               >
                 <QR />
-              </a>
+              </Button>
             }
           />
         </div>
@@ -574,15 +577,14 @@ class JobContainer extends React.Component {
             position="top center"
             size="tiny"
             trigger={
-              <a
-                className="ui icon basic button warning-tooltip"
-                href={url}
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.ICON}
+                size={BUTTON_SIZE.ICON_STANDARD}
+                onClick={() => window.open(url, '_blank')}
                 style={{color: 'red'}}
               >
                 <AlertIcon />
-              </a>
+              </Button>
             }
           />
         </div>
@@ -683,17 +685,20 @@ class JobContainer extends React.Component {
     return (
       gmtDate && (
         <div className="outsource-delivery-container">
-          <span className="job-delivery-date" title="Delivery date">
+          <div className="job-delivery-date" title="Delivery date">
             {this.props.job.get('translator') && (
-              <span onClick={this.openOutsourceModal.bind(this, true, false)}>
+              <div
+                className="job-delivery-email"
+                onClick={this.openOutsourceModal.bind(this, true, false)}
+              >
                 {this.props.job.get('translator').get('email')}
-              </span>
+              </div>
             )}{' '}
             <span>
               {gmtDate.day} {gmtDate.month} {gmtDate.time}
             </span>{' '}
             {gmtDate.gmt}
-          </span>
+          </div>
         </div>
       )
     )
@@ -715,33 +720,6 @@ class JobContainer extends React.Component {
       }
     }
     return outsourceDeliveryPrice
-  }
-
-  getWarningsInfo() {
-    let n = {
-      number: 0,
-      icon: '',
-    }
-    let quality = this.props.job.get('quality_summary').get('quality_overall')
-    if ((quality && quality === 'poor') || quality === 'fail') {
-      n.number++
-      n.icon = this.getQRIcon()
-    }
-    if (
-      this.props.job.get('open_threads_count') &&
-      this.props.job.get('open_threads_count') > 0
-    ) {
-      n.number++
-      n.icon = this.getCommentsIcon()
-    }
-    if (
-      this.props.job.get('warnings_count') &&
-      this.props.job.get('warnings_count') > 0
-    ) {
-      n.number++
-      n.icon = this.getWarningsIcon()
-    }
-    return n
   }
 
   getWarningsGroup() {
@@ -782,7 +760,7 @@ class JobContainer extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     var self = this
-    if (this.updated) {
+    if (this.updated && this.container?.classList) {
       this.container.classList.add('updated-job')
       setTimeout(function () {
         self.container.classList.remove('updated-job')
@@ -839,13 +817,13 @@ class JobContainer extends React.Component {
 
     return (
       <div className="sixteen wide column chunk-container">
-        <div
-          className="ui grid"
-          ref={(container) => (this.container = container)}
-        >
-          {!this.state.openOutsource ? (
+        {!this.state.openOutsource ? (
+          <div
+            className="ui grid"
+            ref={(container) => (this.container = container)}
+          >
             <div
-              className="chunk wide column pad-right-10 shadow-1"
+              className="chunk wide column pad-right-10"
               ref={(chunkRow) => (this.chunkRow = chunkRow)}
             >
               <Checkbox
@@ -917,14 +895,12 @@ class JobContainer extends React.Component {
                 </div>
               </div>
               {outsourceButton}
-              <a
-                className="open-translate ui primary button open"
-                target="_blank"
-                href={translateUrl}
-                rel="noreferrer"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                onClick={() => window.open(translateUrl, '_blank')}
               >
                 Open
-              </a>
+              </Button>
               {jobMenu}
 
               {this.state.showDownloadProgress ? (
@@ -933,8 +909,8 @@ class JobContainer extends React.Component {
                 ''
               )}
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         <OutsourceContainer
           project={this.props.project}
           job={this.props.job}
@@ -961,51 +937,44 @@ const OutsourceButton = ({job, openOutsourceModal}) => {
     : undefined
   let label =
     !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
-      <div
-        className="open-outsource open-outsource-disabled buy-translation ui button"
-        id="open-quote-request"
-        data-testid="buy-translation-button"
-      >
-        <Tooltip
-          content={
-            <div>
-              Jobs created with custom billing models cannot be outsourced to
-              Translated.
-              <br />
-              In order to outsource this job to Translated, please recreate it
-              using Matecat's standard billing model
-            </div>
+      <div>
+        <Button
+          // className="open-outsource open-outsource-disabled buy-translation"
+          id="open-quote-request"
+          data-testid="buy-translation-button"
+          disabled={true}
+          tooltip={
+            "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
           }
         >
-          <div ref={outsourceButton} className={'buy-translation-button'}>
-            <span className="buy-translation-span">Buy Translation</span>
-            <span>from</span>
-            <TranslatedIconSmall size={20} />
-          </div>
-        </Tooltip>
+          Buy Translation from
+          <TranslatedIconSmall size={20} />
+        </Button>
       </div>
     ) : (
-      <a
-        className="open-outsource buy-translation ui button"
-        id="open-quote-request"
-        onClick={openOutsourceModal.bind(this, false, true)}
-        data-testid="buy-translation-button"
-      >
-        <span className="buy-translation-span">Buy Translation</span>
-        <span>from</span>
-        <TranslatedIconSmall size={20} />
-      </a>
+      <div>
+        <Button
+          // className="open-outsource buy-translation "
+          id="open-quote-request"
+          onClick={openOutsourceModal.bind(this, false, true)}
+          data-testid="buy-translation-button"
+        >
+          Buy Translation from
+          <TranslatedIconSmall size={20} />
+        </Button>
+      </div>
     )
   if (job.get('outsource')) {
     if (job.get('outsource').get('id_vendor') == '1') {
       label = (
-        <a
-          className="open-outsourced ui button "
+        <Button
+          type={BUTTON_TYPE.DEFAULT}
+          mode={BUTTON_MODE.OUTLINE}
           id="open-quote-request"
           onClick={openOutsourceModal.bind(this, false, true)}
         >
           View status
-        </a>
+        </Button>
       )
     }
   }

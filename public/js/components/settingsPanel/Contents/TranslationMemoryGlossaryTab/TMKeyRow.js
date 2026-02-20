@@ -549,7 +549,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           <MenuButton
             label="Import TMX"
             onClick={() => handleExpandeRow(ImportTMX)}
-            icon={<DotsHorizontal />}
+            icon={<DotsHorizontal size={18} />}
             className="tm-key-row-menu-button"
             dropdownClassName="tm-key-row-menu-button-dropdown"
             disabled={isImportTMXInProgress}
@@ -604,12 +604,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         </div>
       ) : isMMSharedKey && !config.not_empty_default_tm_key ? (
         <div className="tm-key-row-menu-button">
-          <button
-            className="just-button-import-tmx"
+          <Button
+            className="tm-row-penalty-button"
+            size={BUTTON_SIZE.SMALL}
             onClick={() => handleExpandeRow(ImportTMX)}
           >
             Import TMX
-          </button>
+          </Button>
         </div>
       ) : (
         <div />

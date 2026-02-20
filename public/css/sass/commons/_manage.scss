@@ -1,4 +1,5 @@
 @use 'colors';
+@use 'variables';
 
 // rewrite semantic CSS
 html,
@@ -90,7 +91,7 @@ div#manage-container {
 
   .project {
     margin-bottom: 30px !important;
-    //border: 1px solid $grey2;
+    border-radius: variables.$border-radius-default;
     .project-title {
       display: flex !important;
       gap: 10px;
@@ -108,12 +109,13 @@ div#manage-container {
       left: -33px;
       max-width: 540px;
       min-width: 0px;
-      line-height: 16px;
+      line-height: 24px;
       background-color: colors.$grey2;
       color: colors.$black;
-      height: 30px;
+      height: 38px;
       border-radius: 0 2px 2px 0;
-      display: inline-block;
+      display: flex;
+      align-items: center;
       margin-right: -33px;
       padding-left: 10px !important;
     }
@@ -421,12 +423,12 @@ div#manage-container {
         }
         .job-body {
           .chunks {
+            border-radius: variables.$border-radius-default;
+            overflow: hidden;
             .chunk {
               display: grid;
               grid-template-columns:
-                auto
-                70px
-                150px 120px 106px auto auto 1fr auto auto auto;
+                20px 100px 150px 120px 106px 100px auto 180px 65px 40px;
               align-items: center;
               gap: 6px;
               transition: 0.3s ease;
@@ -445,9 +447,11 @@ div#manage-container {
               .source-target {
                 font-weight: bold;
                 position: relative;
+                display: flex;
+                gap: 2px;
                 .source-box {
                   float: left;
-                  max-width: 60px;
+                  max-width: 120px;
                   min-width: 60px;
                   white-space: nowrap;
                   overflow: hidden;
@@ -467,7 +471,7 @@ div#manage-container {
                 }
                 .target-box {
                   float: left;
-                  width: 60px;
+                  max-width: 120px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
@@ -481,47 +485,10 @@ div#manage-container {
                 margin: unset !important;
                 min-width: unset !important;
               }
-              .tm-job,
-              .activity-icon-single {
-                width: 30px;
-                height: 30px;
-              }
               .job-activity-icons {
                 display: flex;
                 justify-content: center;
-                min-width: 110px;
                 gap: 5px;
-
-                button.group-activity-icon {
-                  height: 30px;
-                  width: 30px;
-                  i {
-                    width: 30px;
-                  }
-                }
-                .comments {
-                }
-                .group-activity-icons {
-                  .item {
-                    margin: 0;
-                    padding: 1px !important;
-                    a {
-                      padding: 0;
-                      width: 100%;
-                      border-radius: 0px;
-                      font-size: 15px;
-                      font-weight: normal;
-                      font-family: Calibri, Arial, Helvetica, sans-serif;
-                      text-align: left;
-                      margin: 0 15px 0 10px;
-                      background: transparent !important;
-                      box-shadow: none !important;
-                      i {
-                        margin-right: 10px !important;
-                      }
-                    }
-                  }
-                }
               }
               .tm-job.job-activity-icons {
                 a {
@@ -554,27 +521,11 @@ div#manage-container {
                   }
                 }
                 .job-to-translator {
-                  display: inline-block;
-                  vertical-align: text-bottom;
-                  color: #969696;
-                  max-width: 150px;
-                  transition: 0.3s ease;
-                  min-width: 0px;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-
-                  @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                    width: fit-content;
-                    &:hover {
-                    }
-                  }
+                  width: 100%;
+                  text-align: center;
                   a {
                     text-decoration: underline;
                     font-weight: 700;
-                  }
-                  &.not-assigned {
-                    width: fit-content;
                   }
                 }
                 &:hover .job-to-translator {
@@ -620,15 +571,17 @@ div#manage-container {
                 &:hover .translator .job-delivery {
                   display: none;
                 }
-                .outsource-delivery-container {
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                }
                 .job-delivery-date {
                   margin-left: 5px;
                   color: colors.$grey7;
-
+                  display: flex;
+                  gap: 4px;
+                  .job-delivery-email {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 200px;
+                  }
                   > :nth-child(2) {
                     font-weight: bold;
                     color: black;
@@ -679,15 +632,6 @@ div#manage-container {
                 &:hover {
                   text-decoration: none;
                 }
-              }
-              .open-translate {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                padding: 6px 15px;
-                vertical-align: top;
-                font-size: 16px;
-                //border: 1px solid #797979;
-                border-radius: 2px;
-                float: right;
               }
               .open-vendor {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -781,8 +725,6 @@ div#manage-container {
                 }
               }
               .job-menu {
-                width: 28px !important;
-                height: 28px !important;
                 &:hover {
                   background-color: rgba(colors.$grey8, 0.5) !important;
                 }
@@ -817,11 +759,15 @@ div#manage-container {
         }
       }
     }
+    .chunk-container {
+      border-radius: variables.$border-radius-default;
+    }
 
     .project-footer {
       padding: 0 30px 5px !important;
       text-align: right;
       background-color: colors.$grey4;
+      border-radius: 0 0 8px 8px;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;
@@ -910,12 +856,12 @@ div#manage-container {
     margin-right: auto !important;
     transition: 0.3s ease;
   }
-  .outsource-delivery-container {
-    max-width: 210px;
+  .job-delivery-email {
+    display: none;
   }
 }
 
-@media only screen and (min-width: 1500px) {
+@media only screen and (min-width: 1501px) {
   .ui.container {
     width: 1280px !important;
     margin-left: auto !important;
@@ -923,8 +869,9 @@ div#manage-container {
     transition: 0.3s ease;
   }
 
-  .outsource-delivery-container {
-    max-width: unset;
+  .job-delivery-email {
+    max-width: 130px;
+    display: block;
   }
 }
 
@@ -997,19 +944,20 @@ div#manage-container {
 
 .project-team-dropdown,
 .user-project-dropdown {
+  border-radius: 999px !important;
   line-height: 1;
-  border-radius: 15px !important;
   box-shadow:
     0 0 0 #e0e0e0,
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  height: 40px;
 }
 
 .project-menu-dropdown {
   border-radius: 50% !important;
-  width: 28px !important;
-  height: 28px !important;
-  background-color: rgba(colors.$grey8, 0.5) !important;
+  width: 40px !important;
+  height: 40px !important;
+  //background-color: rgba(colors.$grey8, 0.5) !important;
 
   &:hover {
     background-color: rgba(colors.$grey8, 1) !important;
@@ -1017,7 +965,6 @@ div#manage-container {
 }
 
 .project-activity-icon button.project-team-dropdown {
-  height: 30px;
   font-size: 14px;
   color: #000;
   padding: 5px 15px;
@@ -1025,7 +972,6 @@ div#manage-container {
 }
 
 .user-project-dropdown-container button.user-project-dropdown {
-  height: 30px !important;
   color: #000 !important;
   font-size: 14px;
 }
@@ -1049,7 +995,7 @@ div#manage-container {
     height: 28px;
     min-width: 250px;
     max-width: 400px;
-
+    border-radius: variables.$border-radius-default;
     &:active,
     &:focus {
       box-shadow: unset;

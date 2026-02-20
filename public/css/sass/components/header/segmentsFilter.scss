@@ -401,6 +401,12 @@ section.muted .segment-side-buttons {
             flex-direction: row;
             justify-content: flex-end;
             align-items: center;
+            .filter-arrows {
+              display: flex;
+              justify-content: center;
+              gap: 8px;
+              align-items: center;
+            }
             .info-navigation-filters {
               display: inline-block;
               margin: 0 15px 0 10px;

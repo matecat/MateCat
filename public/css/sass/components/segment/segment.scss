@@ -117,7 +117,7 @@ section {
       }
     }
   }
-  &.opened {
+  &.opened .target{
     .buttons {
       display: flex;
       align-items: center;
@@ -125,6 +125,11 @@ section {
       text-align: right;
       z-index: 0;
       position: relative;
+      gap: 16px;
+      justify-content: flex-end;
+      button {
+        text-transform: uppercase;
+      }
     }
     .segment-body-content {
       .warnings-block {

@@ -41,25 +41,6 @@
 
 /*
  ******
- Past comment thread wrap status active in history balloon
- ******
- */
-.mbc-history-balloon .mbc-thread-wrap-active {
-  border-bottom: 2px solid #dadada;
-}
-
-/*
- ******
- Past comment thread wrap status resolved
- ******
- */
-.mbc-thread-wrap-resolved {
-  background: rgba(124, 197, 118, 0.15);
-  border-bottom: 2px solid rgba(124, 197, 118, 0.6); /* $approvedGreen */
-}
-
-/*
- ******
  Show past comment
  ******
  */
@@ -408,97 +389,6 @@ article .mbc-comment-balloon-outer {
  ******
  */
 
-#mbc-history {
-  cursor: pointer;
-  font-size: 23px;
-  height: 27px;
-  padding-top: 12px;
-  position: relative;
-  text-align: center;
-  width: 45px;
-  &.open svg {
-    opacity: 1;
-  }
-  &.mbc-history-balloon-icon-has-no-comments {
-    opacity: 0.4;
-    cursor: default;
-    pointer-events: none;
-  }
-}
-
-#mbc-history:hover {
-  color: #ccc;
-}
-
-.mbc-badge-container {
-  position: absolute;
-  top: -3px;
-  right: -4px;
-  display: flex;
-  .mbc-badge,
-  .mbc-badge-resolved {
-    padding: 1px 6px;
-    background: #0bbeec;
-    color: #fff;
-    font-size: 10px;
-    text-align: center;
-    border-radius: 25px;
-    vertical-align: middle;
-    line-height: 16px;
-    height: 17px;
-    display: block;
-  }
-  .mbc-badge-resolved {
-    background-color: colors.$greenDefaultTransparent;
-  }
-}
-
-/*
- ******
- ******
- History ballon
- ******
- ******
- */
-
-.mbc-history-balloon-outer {
-  background-color: rgba(247, 247, 247, 1); /* #f7f77f */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  margin-top: 20px;
-  padding-top: 10px;
-  position: absolute;
-  right: 10px;
-  width: 300px;
-  text-align: left;
-}
-
-.mbc-view-comment-wrap {
-  margin-bottom: 10px;
-}
-
-.mbc-history-balloon {
-  background-color: rgba(247, 247, 247, 1); /* #ffffff */
-  padding: 0;
-  position: relative;
-}
-
-.mbc-history-balloon .mbc-thread-wrap {
-  padding: 14px 0;
-}
-
-.mbc-history-balloon .mbc-show-comment {
-  padding: 0 24px;
-}
-
-.mbc-history-balloon .mbc-thread-wrap:not(:last-of-type) .mbc-show-comment {
-  /*border-bottom: 1px solid #dadada;*/
-}
-
-.mbc-history-balloon-has-comment {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
 /*
   Truncate text in label
  */
@@ -511,8 +401,7 @@ article .mbc-comment-balloon-outer {
 /*
   Set box model to border and account for border's width
  */
-.mbc-comment-balloon-outer *,
-.mbc-history-balloon-outer * {
+.mbc-comment-balloon-outer *{
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;

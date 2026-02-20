@@ -13,7 +13,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
+  line-height: 24px;
+  justify-content: center;
   > svg {
     flex-shrink: 0;
   }
@@ -75,7 +76,7 @@
 .badge-yellow {
   &.badge-default {
     border: solid 1px colors.$orangeDefaultTransparent;
-    background-color: rgba(colors.$orangeDefaultTransparent, 0.24);
+    background-color: rgba(colors.$orangeDefaultTransparent, 0.15);
     color: colors.$orangeDefaultHover;
   }
 
@@ -93,7 +94,7 @@
 .badge-blue {
   &.badge-default {
     border: solid 1px colors.$linkBlue;
-    background-color: rgba(colors.$linkBlue, 0.24);
+    background-color: rgba(colors.$linkBlue, 0.15);
     color: colors.$linkBlue;
   }
 
@@ -111,7 +112,7 @@
 .badge-red {
   &.badge-default {
     border: solid 1px colors.$redDefault;
-    background-color: rgba(colors.$redDefault, 0.24);
+    background-color: rgba(colors.$redDefault, 0.15);
     color: colors.$redDefault;
   }
 
@@ -123,5 +124,59 @@
   &.badge-outline {
     border: solid 1px colors.$redDefault;
     color: colors.$redDefault;
+  }
+}
+
+.badge-purple {
+  &.badge-default {
+    border: solid 1px colors.$approved2Green;
+    background-color: rgba(colors.$approved2Green, 0.15);
+    color: colors.$approved2Green;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$approved2Green, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$approved2Green;
+    color: colors.$approved2Green;
+  }
+}
+
+.badge-orange {
+  &.badge-default {
+    border: solid 1px colors.$rebuttedRed;
+    background-color: rgba(colors.$rebuttedRed, 0.15);
+    color: colors.$rebuttedRed;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$rebuttedRed, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$rebuttedRed;
+    color: colors.$rebuttedRed;
+  }
+}
+
+.badge-grey {
+  &.badge-default {
+    border: solid 1px colors.$grey1;
+    background-color: rgba(colors.$grey1, 0.15);
+    color: colors.$grey1;
+  }
+
+  &.badge-full {
+    background-color: rgba(colors.$grey1, 0.72);
+    color: colors.$white;
+  }
+
+  &.badge-outline {
+    border: solid 1px colors.$grey1;
+    color: colors.$grey1;
   }
 }

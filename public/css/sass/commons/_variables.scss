@@ -1,8 +1,36 @@
-$approved-color: #639d5e;
-$translated-color: #0798bc;
-$rejected-color: #b02429;
-$disabled-color: #ebebeb;
-$disabled-border-color: #b3b3b3;
+@use 'sass:list';
+
+// Typography:
+$font-family: Calibri, Arial, Helvetica, sans-serif;
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+$font-size-big: 18px;
+$font-size-base: 16px;
+$font-size-small: 14px;
+$font-size-xsmall: 12px;
+
+$line-height-big: 26px;
+$line-height-base: 24px;
+$line-height-small: 20px;
+$line-height-xsmall: 16px;
+
+$font-style-big: $font-weight-regular list.slash($font-size-big, $line-height-big) $font-family; //500 16/24 Calibri, Arial, Helvetica, sans-serif
+$font-style-base: $font-weight-regular list.slash($font-size-base, $line-height-base) $font-family; //500 16/24 Calibri, Arial, Helvetica, sans-serif
+$font-style-small: $font-weight-regular list.slash($font-size-small, $line-height-small) $font-family; //400 14/20 Calibri, Arial, Helvetica, sans-serif
+$font-style-xsmall: $font-weight-regular list.slash($font-size-xsmall, $line-height-xsmall) $font-family; //400 12/16 Calibri, Arial, Helvetica, sans-serif
+
+$font-style-heading1: $font-weight-bold 68px/80px $font-family;
+$font-style-heading2: $font-weight-bold 48px/56px $font-family;
+$font-style-heading3: $font-weight-bold 34px/40px $font-family;
+$font-style-heading4: $font-weight-bold 24px/28px $font-family;
+$font-style-heading5: $font-weight-medium 20px/24px $font-family;
+$font-style-heading6: $font-weight-medium list.slash($font-size-base, $line-height-base) $font-family;
+
+$border-radius-default: 8px;
+$border-radius-big: 16px;
 
 /******* Notifications ***********/
 

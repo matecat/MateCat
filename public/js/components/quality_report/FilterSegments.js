@@ -1,252 +1,284 @@
-import React from 'react'
+/* global config */
+import React, {useState, useMemo, useCallback} from 'react'
 
 import InputField from '../common/InputField'
 import {Select} from '../common/Select'
+import FilterIcon from '../../../img/icons/FilterIcon'
 
-class FilterSegments extends React.Component {
-  constructor(props) {
-    super(props)
+const defaultState = (segmentToFilter) => ({
+  filter: {
+    status: '',
+    issue_category: null,
+    severity: null,
+    id_segment: segmentToFilter,
+  },
+})
 
-    this.state = this.defaultState()
-    this.lqaNestedCategories = this.props.categories
-    this.severities = this.getSeverities()
-  }
-
-  defaultState() {
-    return {
-      filter: {
-        status: '',
-        issue_category: null,
-        severity: null,
-        id_segment: this.props.segmentToFilter,
-      },
-    }
-  }
-
-  getSeverities() {
-    let severities = []
-    let severitiesNames = []
-    this.lqaNestedCategories.forEach((cat) => {
-      if (cat.get('subcategories').size === 0) {
-        cat.get('severities').forEach((sev) => {
+const getSeverities = (lqaNestedCategories) => {
+  const severities = []
+  const severitiesNames = []
+  lqaNestedCategories.forEach((cat) => {
+    if (cat.get('subcategories').size === 0) {
+      cat.get('severities').forEach((sev) => {
+        if (severitiesNames.indexOf(sev.get('label')) === -1) {
+          severities.push(sev)
+          severitiesNames.push(sev.get('label'))
+        }
+      })
+    } else {
+      cat.get('subcategories').forEach((subCat) => {
+        subCat.get('severities').forEach((sev) => {
           if (severitiesNames.indexOf(sev.get('label')) === -1) {
             severities.push(sev)
             severitiesNames.push(sev.get('label'))
           }
         })
+      })
+    }
+  })
+  return severities
+}
+
+const FilterSegments = ({
+  categories,
+  segmentToFilter,
+  applyFilter,
+  updateSegmentToFilter,
+  secondPassReviewEnabled,
+}) => {
+  const [state, setState] = useState(() => defaultState(segmentToFilter))
+  const lqaNestedCategories = categories
+  const severities = useMemo(
+    () => getSeverities(lqaNestedCategories),
+    [lqaNestedCategories],
+  )
+
+  const filterSelectChanged = useCallback(
+    (type, value) => {
+      const filter = {...state.filter}
+      filter[type] = value
+      if (type === 'status' && value === 'APPROVED-2') {
+        filter.revision_number = 2
+        filter[type] = 'APPROVED 2'
+      } else if (type === 'status' && value === 'APPROVED') {
+        filter.revision_number = 1
       } else {
-        cat.get('subcategories').forEach((subCat) => {
-          subCat.get('severities').forEach((sev) => {
-            if (severitiesNames.indexOf(sev.get('label')) === -1) {
-              severities.push(sev)
-              severitiesNames.push(sev.get('label'))
-            }
-          })
+        filter.revision_number = null
+      }
+      setState({filter})
+      applyFilter(filter)
+    },
+    [state.filter, applyFilter],
+  )
+
+  const resetStatusFilter = useCallback(() => {
+    const filter = {...state.filter, status: '', revision_number: null}
+    setState({filter})
+    setTimeout(() => {
+      applyFilter(filter)
+    })
+  }, [state.filter, applyFilter])
+
+  const resetCategoryFilter = useCallback(() => {
+    const filter = {...state.filter, issue_category: null}
+    setState({filter})
+    setTimeout(() => {
+      applyFilter(filter)
+    })
+  }, [state.filter, applyFilter])
+
+  const resetSeverityFilter = useCallback(() => {
+    const filter = {...state.filter, severity: null}
+    setState({filter})
+    setTimeout(() => {
+      applyFilter(filter)
+    })
+  }, [state.filter, applyFilter])
+
+  const filterIdSegmentChange = useCallback(
+    (value) => {
+      if (value && value !== '') {
+        filterSelectChanged('id_segment', value)
+      } else {
+        const filter = {...state.filter, id_segment: null}
+        setState({filter})
+        setTimeout(() => {
+          applyFilter(filter)
         })
       }
-    })
-    return severities
-  }
+      updateSegmentToFilter(value)
+    },
+    [state.filter, filterSelectChanged, applyFilter, updateSegmentToFilter],
+  )
 
-  filterSelectChanged(type, value) {
-    let filter = {...this.state.filter}
-    filter[type] = value
-    if (type === 'status' && value === 'APPROVED-2') {
-      filter.revision_number = 2
-      filter[type] = 'APPROVED2'
-    } else if (type === 'status' && value === 'APPROVED') {
-      filter.revision_number = 1
-    } else {
-      filter.revision_number = null
-    }
-    this.setState({
-      filter: filter,
-    })
-
-    this.props.applyFilter(filter)
-  }
-
-  resetStatusFilter() {
-    let filter = {...this.state.filter}
-    filter.status = ''
-    filter.revision_number = null
-    this.setState({
-      filter: filter,
-    })
-    setTimeout(() => {
-      this.props.applyFilter(this.state.filter)
-    })
-  }
-  resetCategoryFilter() {
-    let filter = {...this.state.filter}
-    filter.issue_category = null
-    this.setState({
-      filter: filter,
-    })
-    setTimeout(() => {
-      this.props.applyFilter(this.state.filter)
-    })
-  }
-
-  resetSeverityFilter() {
-    let filter = {...this.state.filter}
-    filter.severity = null
-    this.setState({
-      filter: filter,
-    })
-    setTimeout(() => {
-      this.props.applyFilter(this.state.filter)
-    })
-  }
-
-  filterIdSegmentChange(value) {
-    if (value && value !== '') {
-      this.filterSelectChanged('id_segment', value)
-    } else {
-      let filter = {...this.state.filter}
-      filter.id_segment = null
-      this.setState({
-        filter: filter,
-      })
-      setTimeout(() => {
-        this.props.applyFilter(this.state.filter)
-      })
-    }
-    this.props.updateSegmentToFilter(value)
-  }
-
-  render() {
-    let statusOptions = config.searchable_statuses
+  const statusOptions = useMemo(() => {
+    return config.searchable_statuses
       .filter(({value}) => value !== 'REJECTED')
-      .map((item) => {
-        return {
-          name: (
-            <>
-              <div
-                className={
-                  'ui ' +
-                  item.label.toLowerCase() +
-                  '-color empty circular label'
-                }
-              />
-              {item.label}
-            </>
-          ),
-          id: item.value,
-        }
-      })
-    if (config.secondRevisionsCount) {
-      statusOptions.push({
+      .map((item) => ({
         name: (
           <>
             <div
-              className={'ui ' + 'approved-2ndpass-color empty circular label'}
+              className={
+                'ui ' + item.label.toLowerCase() + '-color empty circular label'
+              }
             />
-            APPROVED
+            {item.label}
           </>
         ),
-        id: 'APPROVED-2',
-      })
-    }
-    let optionsCategory = this.lqaNestedCategories
-      .map((item) => {
-        return {
-          name: item.get('label'),
-          id: item.get('id'),
-        }
-      })
-      .unshift({
-        name: 'Any',
-        id: 'all',
-      })
-    let optionsSeverities = this.severities.map((item) => {
-      return {
-        name: item.get('label'),
-        id: item.get('label'),
-      }
-    })
-    let statusFilterClass =
-      this.state.filter.status && this.state.filter.status !== ''
-        ? 'filtered'
-        : 'not-filtered'
-    let categoryFilterClass =
-      this.state.filter.issue_category &&
-      this.state.filter.issue_category !== ''
-        ? 'filtered'
-        : 'not-filtered'
-    let severityFilterClass =
-      this.state.filter.severity && this.state.filter.severity !== ''
-        ? 'filtered'
-        : 'not-filtered'
-    return (
-      <div className="qr-filter-list">
-        Filters by
-        <div className="filter-dropdown left-10">
-          <div className={'filter-idSegment '}>
-            <InputField
-              placeholder="Id Segment"
-              name="id_segment"
-              onFieldChanged={this.filterIdSegmentChange.bind(this)}
-              tabindex={0}
-              showCancel={true}
-              value={this.state.filter.id_segment}
-            />
-          </div>
+        id: item.value,
+      }))
+  }, [])
+
+  const optionsCategory = useMemo(() => {
+    const arr = lqaNestedCategories.toJS().map((item) => ({
+      name: item.label.replace(/\s*\(.*?\)\s*/g, ''),
+      id: item.id,
+    }))
+    arr.unshift({name: 'Any', id: 'all'})
+    return arr
+  }, [lqaNestedCategories])
+
+  const optionsSeverities = useMemo(() => {
+    return severities.map((item) => ({
+      name: item.get('label'),
+      id: item.get('label'),
+    }))
+  }, [severities])
+
+  const statusFilterClass =
+    state.filter.status && state.filter.status !== ''
+      ? 'filtered'
+      : 'not-filtered'
+  const categoryFilterClass =
+    state.filter.issue_category && state.filter.issue_category !== ''
+      ? 'filtered'
+      : 'not-filtered'
+  const severityFilterClass =
+    state.filter.severity && state.filter.severity !== ''
+      ? 'filtered'
+      : 'not-filtered'
+
+  return (
+    <div className="qr-filter-list">
+      <FilterIcon size={18} />
+      <div className="filter-dropdown">
+        <div className={'filter-idSegment '}>
+          <InputField
+            placeholder="Id Segment"
+            name="id_segment"
+            onFieldChanged={filterIdSegmentChange}
+            tabindex={0}
+            showCancel={true}
+            value={state.filter.id_segment}
+          />
+        </div>
+        <div className={'filter-status ' + statusFilterClass}>
+          <Select
+            options={statusOptions}
+            onSelect={(value) => {
+              filterSelectChanged('status', value.id)
+            }}
+            activeOption={
+              statusOptions.find((item) => item.id === state.filter.status) ||
+              undefined
+            }
+            placeholder={'Segment status'}
+            checkSpaceToReverse={false}
+            showResetButton={true}
+            resetFunction={resetStatusFilter}
+          />
+        </div>
+        {secondPassReviewEnabled && (
           <div className={'filter-status ' + statusFilterClass}>
             <Select
-              options={statusOptions}
+              options={[
+                {
+                  id: '1',
+                  name: 'Revise 1',
+                },
+                ...(secondPassReviewEnabled
+                  ? [
+                      {
+                        id: '2',
+                        name: 'Revise 2',
+                      },
+                    ]
+                  : []),
+              ]}
               onSelect={(value) => {
-                this.filterSelectChanged('status', value.id)
+                filterSelectChanged('issues_in_r', value.id)
               }}
               activeOption={
-                statusOptions.find(
-                  (item) => item.id === this.state.filter.status,
-                ) || undefined
+                state.filter.issues_in_r
+                  ? {
+                      id: state.filter.issues_in_r,
+                      name:
+                        state.filter.issues_in_r === 1
+                          ? 'Revise 1'
+                          : 'Revise 2',
+                    }
+                  : undefined
               }
-              placeholder={'Segment status'}
+              placeholder={'Revision phase'}
               checkSpaceToReverse={false}
               showResetButton={true}
-              resetFunction={() => this.resetStatusFilter()}
-            />
-          </div>
-          <div className={'filter-category ' + categoryFilterClass}>
-            <Select
-              options={optionsCategory}
-              onSelect={(value) => {
-                this.filterSelectChanged('issue_category', value.id)
+              resetFunction={() => {
+                const filter = {...state.filter, issues_in_r: null}
+                setState({filter})
+                setTimeout(() => {
+                  applyFilter(filter)
+                })
               }}
-              activeOption={
-                optionsCategory.find(
-                  (item) => item.id == this.state.filter.issue_category,
-                ) || undefined
-              }
-              placeholder={'Issue category'}
-              checkSpaceToReverse={false}
-              showResetButton={true}
-              resetFunction={() => this.resetCategoryFilter()}
             />
           </div>
-          <div className={'filter-category ' + severityFilterClass}>
-            <Select
-              options={optionsSeverities}
-              onSelect={(value) => {
-                this.filterSelectChanged('severity', value.id)
-              }}
-              activeOption={
-                optionsSeverities.find(
-                  (item) => item.id == this.state.filter.severity,
-                ) || undefined
+        )}
+        <div className={'filter-category ' + categoryFilterClass}>
+          <Select
+            multipleSelect={'dropdown'}
+            options={optionsCategory}
+            onToggleOption={(value) => {
+              const optionsIds = state.filter.issue_category || []
+              if (optionsIds?.includes(value.id)) {
+                optionsIds.splice(optionsIds.indexOf(value.id), 1)
+              } else {
+                optionsIds.push(value.id)
               }
-              placeholder={'Issue severity'}
-              checkSpaceToReverse={false}
-              showResetButton={true}
-              resetFunction={() => this.resetSeverityFilter()}
-            />
-          </div>
+              filterSelectChanged('issue_category', optionsIds)
+            }}
+            activeOptions={
+              state.filter.issue_category?.length
+                ? optionsCategory.filter(
+                    (item) =>
+                      state.filter.issue_category?.indexOf(item.id) > -1,
+                  )
+                : undefined
+            }
+            placeholder={'Issue category'}
+            checkSpaceToReverse={false}
+            showResetButton={true}
+            resetFunction={resetCategoryFilter}
+          />
+        </div>
+        <div className={'filter-category ' + severityFilterClass}>
+          <Select
+            options={optionsSeverities}
+            onSelect={(value) => {
+              filterSelectChanged('severity', value.id)
+            }}
+            activeOption={
+              optionsSeverities.find(
+                (item) => item.id == state.filter.severity,
+              ) || undefined
+            }
+            placeholder={'Issue severity'}
+            checkSpaceToReverse={false}
+            showResetButton={true}
+            resetFunction={resetSeverityFilter}
+          />
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
 export default FilterSegments

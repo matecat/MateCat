@@ -10,6 +10,7 @@ import CatToolActions from '../../actions/CatToolActions'
 import ManageActions from '../../actions/ManageActions'
 import 'react-datepicker/dist/react-datepicker.css'
 import {Select} from '../common/Select'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 class AssignToTranslator extends React.Component {
   constructor(props) {
@@ -307,13 +308,13 @@ class AssignToTranslator extends React.Component {
                   />
                 </div>
                 <div className="field send-job-box">
-                  <button
-                    className="send-job ui primary button disabled"
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
                     onClick={this.shareJob.bind(this)}
                     ref={(send) => (this.sendButton = send)}
                   >
                     Send Job to Translator
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

@@ -34,7 +34,8 @@
   .translation-options,
   #additional-input-params {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .translation-options {
@@ -87,20 +88,11 @@
   }
 }
 
+.upload-waiting-logged {
+  align-items: stretch;
+}
 .wrapper-upload .upload-box-not-logged,
 .upload-waiting-logged {
-  border: 1px dashed #ccc;
-  margin: 18px 0;
-  min-height: 200px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: stretch;
-  text-align: center;
-  gap: 12px;
   .upload-loading {
     background: url(/public/img/loading.gif) 47% 50% no-repeat !important;
     background-size: 24px !important;
@@ -152,10 +144,9 @@
   .upload-input {
     padding: 3px 5px 3px 9px;
     font-size: 16px !important;
-    -moz-border-radius: 2px;
-    border-radius: 2px;
+    border-radius: 8px;
     border: 1px solid rgba(34, 36, 38, 0.15);
-    height: 36px;
+    height: 40px;
     box-shadow: inset 0 1px 3px #ddd;
   }
 }
@@ -264,7 +255,7 @@
   }
 }
 
-@media only screen and (max-width: 1320px) {
+@media only screen and (max-width: 1400px) {
   .translate-box.tmx-select,
   .translate-box.source,
   .translate-box.target,
@@ -377,9 +368,10 @@
   }
 }
 
-@media only screen and (max-width: 1279px) {
+@media only screen and (max-width: 1300px) {
   .translation-row .translation-options {
     flex-wrap: wrap;
+    justify-content: center;
   }
   .wrapper-upload {
     .translate-box {

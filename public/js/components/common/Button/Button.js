@@ -26,12 +26,15 @@ export const BUTTON_TYPE = {
   SUCCESS: 'success',
   WARNING: 'warning',
   CRITICAL: 'critical',
+  PURPLE: 'purple',
+  ICON: 'icon',
 }
 export const BUTTON_MODE = {
   BASIC: 'basic',
   OUTLINE: 'outline',
   GHOST: 'ghost',
   LINK: 'link',
+  OUTLINE_BG: 'outlineBg',
 }
 export const BUTTON_SIZE = {
   SMALL: 'small',

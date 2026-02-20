@@ -15,6 +15,7 @@ import Merge from '../../../img/icons/Merge'
 import Download from '../../../img/icons/Download'
 import QR from '../../../img/icons/QR'
 import Revise from '../../../img/icons/Revise'
+import {BUTTON_SIZE} from '../common/Button/Button'
 import FlipBackward from '../icons/FlipBackward'
 class JobMenu extends React.Component {
   constructor(props) {
@@ -336,6 +337,7 @@ class JobMenu extends React.Component {
         toggleButtonProps={{
           children: <DotsHorizontal size={18} />,
           testId: 'job-menu-button',
+          size: BUTTON_SIZE.ICON_STANDARD,
         }}
         align={DROPDOWN_MENU_ALIGN.RIGHT}
       />
