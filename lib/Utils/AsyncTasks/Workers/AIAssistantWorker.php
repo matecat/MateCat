@@ -80,64 +80,65 @@ class AIAssistantWorker extends AbstractWorker
         $this->{$action}($payload);
     }
 
-    private function alternative_translations(array $payload)
+    /**
+     * Manages the generation and processing of alternative translations for a given payload.
+     *
+     * @param array $payload The input data required to generate alternative translations, including:
+     *                       - localized_source: The localized source language code.
+     *                       - localized_target: The localized target language code.
+     *                       - source_sentence: The source sentence to translate.
+     *                       - target_sentence: The target sentence to verify or enhance.
+     *                       - source_context_sentences_string: Context sentences for the source language.
+     *                       - target_context_sentences_string: Context sentences for the target language.
+     *                       - excerpt: The text excerpt to assist in translation.
+     *                       - style_instructions: Guidelines for translation style.
+     *                       - id_segment: The identifier for the segment, used for logging and messaging.
+     *                       - id_client*/
+    private function alternative_translations(array $payload): void
     {
         try {
             $gemini = AIClientFactory::create("gemini");
             $alternativeTranslations = $gemini->manageAlternativeTranslations(
-                $payload['localized_source'],
-                $payload['localized_target'],
-                strip_tags($payload['source_sentence']),
-                strip_tags($payload['target_sentence']),
-                strip_tags($payload['source_context_sentences_string']),
-                strip_tags($payload['target_context_sentences_string']),
-                $payload['excerpt'],
-                $payload['style_instructions']
+                sourceLanguage: $payload['localized_source'],
+                targetLanguage:  $payload['localized_target'],
+                sourceSentence:  $payload['source_sentence'],
+                sourceContextSentencesString:  $payload['source_context_sentences_string'],
+                targetSentence:  $payload['target_sentence'],
+                targetContextSentencesString:  $payload['target_context_sentences_string'],
+                excerpt:   $payload['excerpt'],
+                styleInstructions:   $payload['style_instructions']
             );
 
-            $hasError = !is_array($alternativeTranslations) || empty($alternativeTranslations);
+            $this->_doLog("Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations));
 
-            // call TAG PROJECTION on every alternative translation
-            if(!$hasError){
-                $jobStruct = ChunkDao::getByIdAndPassword($payload['id_job'], $payload['password']);
-                $featureSet = new FeatureSet();
-                $featureSet->loadForProject($jobStruct->getProject());
-
-                /**
-                 * @var $engine MyMemory
-                 */
-                $engine = EnginesFactory::getInstance(1);
-                $engine->setFeatureSet($featureSet);
-
-                $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap($payload['id_segment']);
-
-                foreach ($alternativeTranslations as $i => $alternativeTranslation) {
-                    $config = [];
-                    $config['dataRefMap'] = $dataRefMap;
-                    $config['source'] = $payload['source_sentence'];
-                    $config['target'] = $alternativeTranslation['alternative'];
-                    $config['source_lang'] = $payload['source_language'];
-                    $config['target_lang'] = $payload['target_language'];
-                    $config['suggestion'] = $payload['excerpt'];
-
-                    $result = $engine->getTagProjection($config);
-
-                    if(!empty($result->responseData)){
-                        $alternativeTranslations[$i] = [
-                            'alternative' => $result->responseData,
-                            'context' => $alternativeTranslation['context'],
-                        ];
-                    }
-                }
+            if(empty($alternativeTranslations)){
+                throw new Exception("No alternative translations found.");
             }
 
-            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, $hasError, true);
+            $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
         } catch (Exception $exception){
             $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload);
         }
     }
 
-    private function feedback(array $payload)
+    /**
+     * Processes feedback by evaluating translation and emitting relevant messages.
+     *
+     * @param array $payload The data containing translation details, including:
+     *                       - localized_source: The source language.
+     *                       - localized_target: The target language.
+     *                       - text: The original text.
+     *                       - translation: The translated text.
+     *                       - context: The translation context.
+     *                       - style: The translation style.
+     *                       - id_client: The client identifier.
+     *                       - id_segment: The segment identifier.
+     *
+     * @return void
+     *
+     * @throws Exception If an error occurs during the feedback processing.
+     */
+    private function feedback(array $payload): void
     {
         try {
             $openAi = AIClientFactory::create("openai");
