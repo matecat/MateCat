@@ -143,11 +143,11 @@ class AIAssistantWorker extends AbstractWorker
         try {
             $openAi = AIClientFactory::create("openai");
             $message = $openAi->evaluateTranslation(
-                $payload['localized_source'],
-                $payload['localized_target'],
-                $payload['text'],
-                $payload['translation'],
-                $payload['style']
+                sourceLanguage: $payload['localized_source'],
+                targetLanguage: $payload['localized_target'],
+                text: $payload['text'],
+                translation: $payload['translation'],
+                style: $payload['style']
             );
 
             $this->emitMessage("ai_assistant_feedback", $payload['id_client'], $payload['id_segment'], $message, false, true);
