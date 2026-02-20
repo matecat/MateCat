@@ -136,15 +136,12 @@ class AIAssistantController extends KleinController
             throw new InvalidArgumentException('Missing `translation` parameter');
         }
 
-        // context
-        if (!isset($json['context'])) {
-            throw new InvalidArgumentException('Missing `context` parameter');
-        }
-
         // style
         if (!isset($json['style'])) {
             throw new InvalidArgumentException('Missing `style` parameter');
         }
+
+        Lara::validateLaraStyle($json['style']);
 
         // id_client
         if (!isset($json['id_client'])) {
@@ -162,7 +159,6 @@ class AIAssistantController extends KleinController
             'localized_target' => $localizedTarget,
             'text' => trim($json['text']),
             'translation' => trim($json['translation']),
-            'context' => trim($json['context']),
             'style' => trim($json['style']),
             'id_segment' => $json['id_segment'],
         ];

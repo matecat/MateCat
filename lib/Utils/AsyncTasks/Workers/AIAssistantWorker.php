@@ -147,7 +147,6 @@ class AIAssistantWorker extends AbstractWorker
                 $payload['localized_target'],
                 $payload['text'],
                 $payload['translation'],
-                $payload['context'],
                 $payload['style']
             );
 
