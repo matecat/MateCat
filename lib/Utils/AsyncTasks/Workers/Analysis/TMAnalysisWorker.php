@@ -312,6 +312,7 @@ class TMAnalysisWorker extends AbstractWorker
      * @param $target_lang
      *
      * @return PostProcess
+     * @throws Exception
      */
     private function initPostProcess($source_seg, $target_seg, $source_lang, $target_lang): PostProcess
     {

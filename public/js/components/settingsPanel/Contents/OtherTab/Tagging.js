@@ -112,11 +112,17 @@ export const Tagging = () => {
     const shouldUpdateRender =
       currentProjectTemplate?.subfilteringHandlers?.length !==
         previousSubfilteringHandlers.current?.length ||
-      !currentProjectTemplate?.subfilteringHandlers.every((value) =>
+      !currentProjectTemplate?.subfilteringHandlers?.every((value) =>
         previousSubfilteringHandlers.current?.some(
           (valueB) => value === valueB,
         ),
       )
+    console.log(
+      'shouldUpdateRender',
+      shouldUpdateRender,
+      currentProjectTemplate?.subfilteringHandlers,
+      previousSubfilteringHandlers.current,
+    )
     if (config.is_cattool && shouldUpdateRender) {
       SegmentActions.removeAllSegments()
       CatToolActions.onRender({segmentToOpen: config.last_opened_segment})

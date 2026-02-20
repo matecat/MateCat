@@ -70,8 +70,11 @@ class CatUtils
      *
      * @return bool
      */
-    public static function isCJ($langCode): bool
+    public static function isCJ(?string $langCode): bool
     {
+        if ($langCode === null) {
+            return false;
+        }
         return array_key_exists(explode('-', $langCode)[0], self::$cj);
     }
 

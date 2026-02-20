@@ -3,22 +3,26 @@
 namespace Utils\XliffReplacer;
 
 use Exception;
-use Matecat\SubFiltering\AbstractFilter;
+use Matecat\ICU\MessagePatternComparator;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Utils\LQA\ICUSourceSegmentChecker;
 use Utils\LQA\QA;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface
 {
+    use ICUSourceSegmentChecker;
+
 
     /**
-     * @var MateCatFilter
+     * @var array
      */
-    private $filter;
+    private array $subfilteringCustomHandlers;
 
 
     /**
@@ -32,6 +36,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
     private string $targetLang;
 
     private FeatureSet $featureSet;
+    private ?JobStruct $jobStruct;
 
     /**
      * XliffReplacerCallback constructor.
@@ -39,21 +44,18 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
      * @param FeatureSet $featureSet
      * @param string $sourceLang
      * @param string $targetLang
-     * @param JobStruct|null $jobStruct
+     * @param JobStruct $jobStruct
      */
-    public function __construct(FeatureSet $featureSet, string $sourceLang, string $targetLang, ?JobStruct $jobStruct = null)
+    public function __construct(FeatureSet $featureSet, string $sourceLang, string $targetLang, JobStruct $jobStruct)
     {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
+        $this->jobStruct = $jobStruct;
 
-        $subfilteringCustomHandlers = [];
-        if ($jobStruct !== null) {
-            $metadataDao = new MetadataDao();
-            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password);
-        }
+        $metadataDao = new MetadataDao();
+        $this->subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password);
 
-        $this->filter = MateCatFilter::getInstance($featureSet, $sourceLang, $targetLang, [], $subfilteringCustomHandlers);
     }
 
     /**
@@ -62,6 +64,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
      */
     public function thereAreErrors(int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null): bool
     {
+
         // if there are ERR_SIZE_RESTRICTION errors, return true
         if ($error !== null) {
             $errors = json_decode($error);
@@ -75,8 +78,17 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
             }
         }
 
-        $segment = $this->filter->fromLayer0ToLayer1($segment);
-        $translation = $this->filter->fromLayer0ToLayer1($translation);
+        $filter = MateCatFilter::getInstance(
+            $this->featureSet,
+            $this->sourceLang,
+            $this->targetLang,
+            $dataRefMap ?? [],
+            $this->subfilteringCustomHandlers,
+            $this->sourceContainsIcu($this->jobStruct->getProject(), $this->jobStruct, $segment)
+        );
+
+        $segment = $filter->fromLayer0ToLayer1($segment);
+        $translation = $filter->fromLayer0ToLayer1($translation);
 
         //
         // ------------------------------------
@@ -95,25 +107,26 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
             $translation = $dataRefReplacer->replace($translation);
         }
 
-        $check = new QA ($segment, $translation);
+        $check = new QA(
+            $segment,
+            $translation,
+            MessagePatternComparator::fromValidators(
+                $this->icuSourcePatternValidator,
+                new MessagePatternValidator(
+                    $this->jobStruct->target,
+                    $translation
+                )
+            ),
+            // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
+            $this->sourceContainsIcu
+        ); // Layer 1 here
+
         $check->setFeatureSet($this->featureSet);
         $check->setTargetSegLang($this->targetLang);
         $check->setSourceSegLang($this->sourceLang);
-        $check->setIdSegment($segmentId);
         $check->performConsistencyCheck();
 
         return $check->thereAreErrors();
     }
 
-    /**
-     * @param AbstractFilter $filter
-     *
-     * @return XliffReplacerCallback
-     */
-    public function setFilter(AbstractFilter $filter): XliffReplacerCallback
-    {
-        $this->filter = $filter;
-
-        return $this;
-    }
 }

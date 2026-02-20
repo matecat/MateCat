@@ -133,7 +133,7 @@ class SegmentDao extends AbstractDao
     /**
      * @param int $id_segment
      *
-     * @return SegmentStruct
+     * @return SegmentStruct|null
      */
     public function getById(int $id_segment): ?SegmentStruct
     {

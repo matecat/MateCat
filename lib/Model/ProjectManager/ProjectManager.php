@@ -2809,7 +2809,6 @@ class ProjectManager
                 $check->setFeatureSet($this->features);
                 $check->setSourceSegLang($chunk->source);
                 $check->setTargetSegLang($chunk->target);
-                $check->setIdSegment($translation_row [0]);
                 $check->performConsistencyCheck();
 
                 if (!$check->thereAreErrors()) {

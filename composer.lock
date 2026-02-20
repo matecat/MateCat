@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1ebabdea6f4c20dd4fdc354e7c806830",
+    "content-hash": "89ddef1067282c7086d539b57f3757a3",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.34",
+            "version": "3.369.37",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "5db21cd0e5c8a5b5344596649033acf861a5e117"
+                "reference": "bc599ce989b101ee630d5e1a1aeda387632df47b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5db21cd0e5c8a5b5344596649033acf861a5e117",
-                "reference": "5db21cd0e5c8a5b5344596649033acf861a5e117",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/bc599ce989b101ee630d5e1a1aeda387632df47b",
+                "reference": "bc599ce989b101ee630d5e1a1aeda387632df47b",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.34"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.37"
             },
-            "time": "2026-02-13T19:09:12+00:00"
+            "time": "2026-02-18T19:16:34+00:00"
         },
         {
             "name": "behat/transliterator",
@@ -1587,26 +1587,28 @@
         },
         {
             "name": "matecat/emoji-to-entity-converter",
-            "version": "v1.0.12",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/emoji-to-entity-converter.git",
-                "reference": "9b1debd72762e5b201fa18e908c4c3d58287a5de"
+                "reference": "33ecdffbf49b3402be44215a6a8a56966201bafb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/9b1debd72762e5b201fa18e908c4c3d58287a5de",
-                "reference": "9b1debd72762e5b201fa18e908c4c3d58287a5de",
+                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/33ecdffbf49b3402be44215a6a8a56966201bafb",
+                "reference": "33ecdffbf49b3402be44215a6a8a56966201bafb",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": ">=7.0"
+                "php": ">=8.3"
             },
             "require-dev": {
-                "fzaninotto/faker": "^1.9",
-                "phpunit/phpunit": "^5.7.27",
-                "symfony/console": "^5.4"
+                "ext-curl": "*",
+                "fakerphp/faker": "^1",
+                "phpstan/phpstan": "@stable",
+                "phpunit/phpunit": "^12",
+                "symfony/console": "^7.2"
             },
             "type": "library",
             "autoload": {
@@ -1639,22 +1641,22 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/emoji-to-entity-converter/issues",
-                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.12"
+                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v2.0.0"
             },
-            "time": "2025-10-24T17:06:17+00:00"
+            "time": "2026-02-19T18:09:37+00:00"
         },
         {
             "name": "matecat/icu-intl",
-            "version": "1.1.4",
+            "version": "1.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/icu-intl.git",
-                "reference": "77fd7bde287e4af951dbe6727b14fea7d451ee2b"
+                "reference": "154951292c4a78a98e31155aa83b7426b68c79af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/77fd7bde287e4af951dbe6727b14fea7d451ee2b",
-                "reference": "77fd7bde287e4af951dbe6727b14fea7d451ee2b",
+                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/154951292c4a78a98e31155aa83b7426b68c79af",
+                "reference": "154951292c4a78a98e31155aa83b7426b68c79af",
                 "shasum": ""
             },
             "require": {
@@ -1690,22 +1692,22 @@
             "description": "A PHP port of ICU4J's MessagePattern parser with locale utilities. Parses ICU MessageFormat patterns into an inspectable AST and provides locale data support for internationalization in PHP.",
             "support": {
                 "issues": "https://github.com/matecat/icu-intl/issues",
-                "source": "https://github.com/matecat/icu-intl/tree/1.1.4"
+                "source": "https://github.com/matecat/icu-intl/tree/1.1.7"
             },
-            "time": "2026-02-11T16:49:32+00:00"
+            "time": "2026-02-18T10:58:24+00:00"
         },
         {
             "name": "matecat/klein",
-            "version": "v3.2.0",
+            "version": "v3.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/klein.php.git",
-                "reference": "30054d94e472d3ccbbca8f35e6e579c85b671d60"
+                "reference": "ca6f61506d7bdb291c0b203c36a1a9cf1b9cdd05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/klein.php/zipball/30054d94e472d3ccbbca8f35e6e579c85b671d60",
-                "reference": "30054d94e472d3ccbbca8f35e6e579c85b671d60",
+                "url": "https://api.github.com/repos/matecat/klein.php/zipball/ca6f61506d7bdb291c0b203c36a1a9cf1b9cdd05",
+                "reference": "ca6f61506d7bdb291c0b203c36a1a9cf1b9cdd05",
                 "shasum": ""
             },
             "require": {
@@ -1759,9 +1761,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/klein.php/issues",
-                "source": "https://github.com/matecat/klein.php/tree/v3.2.0"
+                "source": "https://github.com/matecat/klein.php/tree/v3.2.2"
             },
-            "time": "2025-10-28T13:27:44+00:00"
+            "time": "2026-02-19T14:41:00+00:00"
         },
         {
             "name": "matecat/lara-php",
@@ -1875,23 +1877,23 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.2",
+            "version": "v3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c"
+                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d0166a39b3604294082bf2eb846d15dc3b2f441c",
-                "reference": "d0166a39b3604294082bf2eb846d15dc3b2f441c",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d9def10c51c966a9a20a0ea940b614804ff8fbd8",
+                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
                 "ext-xml": "*",
-                "matecat/emoji-to-entity-converter": "^1",
+                "matecat/emoji-to-entity-converter": "^2",
                 "matecat/xml-dom-parser": "^2",
                 "php": ">=8.3",
                 "phpstan/phpstan": "^2"
@@ -1931,9 +1933,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.2"
+                "source": "https://github.com/matecat/subfiltering/tree/v3.0.3"
             },
-            "time": "2026-02-16T17:41:26+00:00"
+            "time": "2026-02-19T18:20:02+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1990,16 +1992,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v3.0.0-beta5",
+            "version": "v3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed"
+                "reference": "99e9faa2197f3c21ae0c2b816d42d465f4c4341f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/02bd1f43c52d8a3336c07d287a85c437850c85ed",
-                "reference": "02bd1f43c52d8a3336c07d287a85c437850c85ed",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/99e9faa2197f3c21ae0c2b816d42d465f4c4341f",
+                "reference": "99e9faa2197f3c21ae0c2b816d42d465f4c4341f",
                 "shasum": ""
             },
             "require": {
@@ -2009,7 +2011,7 @@
                 "ext-openssl": "*",
                 "ext-simplexml": "*",
                 "ext-xml": "*",
-                "matecat/emoji-to-entity-converter": "^1",
+                "matecat/emoji-to-entity-converter": "^2",
                 "matecat/xml-dom-parser": "^2.0.0",
                 "php": ">=8.3",
                 "psr/log": "*"
@@ -2050,9 +2052,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.0-beta5"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.1"
             },
-            "time": "2026-02-16T17:30:40+00:00"
+            "time": "2026-02-19T18:11:03+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
@@ -5167,6 +5169,59 @@
     ],
     "packages-dev": [
         {
+            "name": "dg/bypass-finals",
+            "version": "v1.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dg/bypass-finals.git",
+                "reference": "920a7da2f3c1422fd83f9ec4df007af53dc4018b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dg/bypass-finals/zipball/920a7da2f3c1422fd83f9ec4df007af53dc4018b",
+                "reference": "920a7da2f3c1422fd83f9ec4df007af53dc4018b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "nette/tester": "^2.3",
+                "phpstan/phpstan": "^0.12"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause",
+                "GPL-2.0-only",
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "David Grudl",
+                    "homepage": "https://davidgrudl.com"
+                }
+            ],
+            "description": "Removes final keyword from source code on-the-fly and allows mocking of final methods and classes",
+            "keywords": [
+                "finals",
+                "mocking",
+                "phpunit",
+                "testing",
+                "unit"
+            ],
+            "support": {
+                "issues": "https://github.com/dg/bypass-finals/issues",
+                "source": "https://github.com/dg/bypass-finals/tree/v1.9.0"
+            },
+            "time": "2025-01-16T00:46:05+00:00"
+        },
+        {
             "name": "myclabs/deep-copy",
             "version": "1.13.4",
             "source": {
@@ -5750,16 +5805,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "12.5.12",
+            "version": "12.5.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "418e06b3b46b0d54bad749ff4907fc7dfb530199"
+                "reference": "47283cfd98d553edcb1353591f4e255dc1bb61f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/418e06b3b46b0d54bad749ff4907fc7dfb530199",
-                "reference": "418e06b3b46b0d54bad749ff4907fc7dfb530199",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/47283cfd98d553edcb1353591f4e255dc1bb61f0",
+                "reference": "47283cfd98d553edcb1353591f4e255dc1bb61f0",
                 "shasum": ""
             },
             "require": {
@@ -5828,7 +5883,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.12"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.14"
             },
             "funding": [
                 {
@@ -5852,7 +5907,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-16T08:34:36+00:00"
+            "time": "2026-02-18T12:38:40+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -6857,8 +6912,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "matecat/lara-php": 10,
-        "matecat/xliff-parser": 10
+        "matecat/lara-php": 10
     },
     "prefer-stable": false,
     "prefer-lowest": false,
