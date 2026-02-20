@@ -26,7 +26,13 @@ class OpenAIClient implements AIClientInterface
     /**
      * @throws Exception
      */
-    public function evaluateTranslation($sourceLanguage, $targetLanguage, $text, $translation, $context, $style): bool|string
+    public function evaluateTranslation(
+        string $sourceLanguage,
+        string $targetLanguage,
+        string $text,
+        string $translation,
+        string $style
+    ): bool|array
     {
         $promptTemplate = "You are Lara, the world's most trustworthy translation reviewer.
 Your task is to evaluate a user-edited translation from {sourceLanguage} to {targetLanguage}, based on the original source text. Use the definitions below to classify the edited translation into one of the four categories. Your evaluation should be concise, fair, and constructive.
@@ -61,7 +67,6 @@ Now evaluate the following:
 
 Source: {text}
 Edited Translation: {translation}
-context: {context}
 style: {style}
 
 Return your classification and a brief explanation (2–3 lines).";
@@ -72,7 +77,6 @@ Return your classification and a brief explanation (2–3 lines).";
             '{targetLanguage}' => $targetLanguage,
             '{text}'           => $text,
             '{translation}'    => $translation,
-            '{context}'        => $context,
             '{style}'          => $style
         ];
 
@@ -99,7 +103,17 @@ Return your classification and a brief explanation (2–3 lines).";
         $response = $this->openAi->chat($opts);
         $response = json_decode($response, true);
 
-        return $response['choices'][0]['message']['content'];
+        $message = $response['choices'][0]['message']['content'];
+        $feedback = explode(PHP_EOL, $message);
+
+        if(count($feedback) < 2){
+            return false;
+        }
+
+        return [
+            'category' => trim($feedback[0]),
+            'comment' => trim($feedback[1]),
+        ];
     }
 
     /**
