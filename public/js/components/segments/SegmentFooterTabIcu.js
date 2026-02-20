@@ -88,7 +88,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
 
   const analyzeICU = useMemo(() => {
     const text = textUtils.removeWhitespacePlaceholders(
-      transformTagsToText(removeTagsFromText(segment.segment)),
+      transformTagsToText(removeTagsFromText(segment.translation)),
     )
 
     let ast
@@ -115,6 +115,9 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
 
         // Se ci sono sotto‐messaggi, analizzali ugualmente
         if (node[2] && typeof node[2] === 'object') {
+          Object.values(node[2]).forEach(walk)
+        }
+        if (node[3] && typeof node[3] === 'object') {
           Object.values(node[2]).forEach(walk)
         }
       }
