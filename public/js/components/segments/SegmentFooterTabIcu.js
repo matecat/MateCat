@@ -234,16 +234,16 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
           </div>
         )}
         <div className="segment-footer-icu-editor">
-          <h3>Live preview</h3>
+          <h3>Test values</h3>
           {variableNames.length === 0 && <h3>No variables</h3>}
           <div className="segment-footer-icu-inputs">
             {variableNames.map(({name, type}) => (
               <div key={name}>
                 <label>
-                  <h3>
+                  <div>
                     {name}
-                    <span>{inputTypes[type]}</span>
-                  </h3>
+                    <span>({inputTypes[type]})</span>
+                  </div>
                   <input
                     value={values[name]?.value}
                     onChange={(e) => onChangeValue(e, name)}
@@ -255,7 +255,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
             ))}
           </div>
           <div className="segment-footer-icu-preview-container">
-            <h3>Rendered output</h3>
+            <h3>Live preview</h3>
             <div
               className={`segment-footer-icu-preview ${config.isTargetRTL ? 'rtl' : ''}`}
             >
