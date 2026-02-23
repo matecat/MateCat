@@ -12,6 +12,9 @@ import IconEdit from '../icons/IconEdit'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import CommentsIcon from '../../../img/icons/CommentsIcon'
+import CommentsIconFilled from '../../../img/icons/CommentsIconFilled'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 
 export const ReviewExtendedIssue = ({
   sid,
@@ -242,15 +245,12 @@ export const ReviewExtendedIssue = ({
     const category = getCategory()
     const severity = getSeverity()
 
-    let commentViewButtonClass = commentView ? 're-active' : ''
-    commentViewButtonClass =
-      issue.comments.length > 0 || issue.target_text
-        ? +' re-message'
-        : commentViewButtonClass
     let iconCommentClass =
-      issue.comments.length > 0 || issue.target_text
-        ? 'icon-uniE96B icon'
-        : 'icon-uniE96E icon'
+      issue.comments.length > 0 || issue.target_text ? (
+        <CommentsIconFilled size={18} />
+      ) : (
+        <CommentsIcon size={18} />
+      )
     //START comments html section
     let htmlCommentLines = generateHtmlCommentLines()
 
@@ -317,34 +317,39 @@ export const ReviewExtendedIssue = ({
           <div className="issue-activity-icon">
             {actions && (
               <div className="icon-buttons">
-                <button
-                  className={
-                    'ui icon basic tiny button issue-note ' +
-                    commentViewButtonClass
-                  }
+                <Button
+                  size={BUTTON_SIZE.ICON_MEDIUM}
+                  mode={BUTTON_MODE.OUTLINE}
                   onClick={setCommentViewCallback}
                   title="Comments"
                 >
-                  <i className={iconCommentClass} />
-                </button>
+                  {issue.comments.length > 0 || issue.target_text ? (
+                    <CommentsIconFilled size={18} />
+                  ) : (
+                    <CommentsIcon size={18} />
+                  )}
+                </Button>
                 {isReview &&
                   issue.revision_number <= currentReview &&
                   isUserAuthorizedToEditIssue && (
                     <>
-                      <button
-                        className={`ui icon basic tiny button issue-delete ${issueEditing?.id === issue.id ? 'active' : ''}`}
+                      <Button
+                        size={BUTTON_SIZE.ICON_MEDIUM}
+                        mode={BUTTON_MODE.OUTLINE}
                         onClick={editIssue}
                         title="Edit issue card"
+                        active={issueEditing?.id === issue.id}
                       >
-                        <IconEdit size={14} />
-                      </button>
-                      <button
-                        className="ui icon basic tiny button issue-delete"
+                        <IconEdit size={18} />
+                      </Button>
+                      <Button
+                        size={BUTTON_SIZE.ICON_MEDIUM}
+                        mode={BUTTON_MODE.OUTLINE}
                         onClick={deleteIssue}
                         title="Delete issue card"
                       >
                         <Trash size={18} />
-                      </button>
+                      </Button>
                     </>
                   )}
               </div>

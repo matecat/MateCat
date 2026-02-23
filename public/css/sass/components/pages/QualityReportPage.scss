@@ -671,6 +671,7 @@ header {
                               background: colors.$white;
                               border: 1px solid colors.$grey4;
                               border-radius: 8px;
+                              gap: 6px;
                               &.automated {
                                 .box-icon {
                                   display: flex;
@@ -683,11 +684,6 @@ header {
                                     color:  colors.$orangeDefault;
                                   }
                                 }
-                              }
-                              .qr-error {
-                              }
-                              .qr-severity {
-                                margin-left: 5px;
                               }
                               .qr-comment-list {
                                 padding: 5px 10px;

@@ -30,10 +30,6 @@ export const CommentsButton = ({}) => {
       CommentsActions.storeComments(resp.data.entries.comments, resp.data.user)
     })
   }
-  const toggleComments = () => {
-    CatToolActions.closeSubHeader()
-    setShowComments(!showComments)
-  }
   const updateComments = () => {
     setComments(CommentsStore.db.history)
   }
@@ -172,6 +168,7 @@ export const CommentsButton = ({}) => {
             disabled: counterOpenComments + counterResolvedComments === 0,
           }}
           disabled={counterOpenComments + counterResolvedComments === 0}
+          forceOpenMenu={showComments}
         >
           <div className="popover-comments-container">{renderComments()}</div>
         </Popover>

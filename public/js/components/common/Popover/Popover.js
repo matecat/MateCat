@@ -31,8 +31,9 @@ export const Popover = ({
   disabled = false,
   children,
   closeOnClickInside = false,
+  forceOpenMenu = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(forceOpenMenu)
 
   const containerRef = useRef()
 
@@ -162,4 +163,6 @@ Popover.propTypes = {
   verticalAlign: PropTypes.oneOf([...Object.values(POPOVER_VERTICAL_ALIGN)]),
   onClose: PropTypes.func,
   children: PropTypes.node,
+  forceOpenMenu: PropTypes.bool,
+  closeOnClickInside: PropTypes.bool,
 }

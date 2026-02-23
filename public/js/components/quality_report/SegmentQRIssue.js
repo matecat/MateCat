@@ -2,6 +2,8 @@ import React from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
 import {Popup} from 'semantic-ui-react'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import CommentsIconFilled from '../../../img/icons/CommentsIconFilled'
 
 class SegmentQRIssue extends React.Component {
   generateHtmlCommentLines(issue) {
@@ -80,18 +82,13 @@ class SegmentQRIssue extends React.Component {
               hoverable
               position="bottom right"
               trigger={
-                <div
-                  className="qr-issue-comments"
-                  style={{marginLeft: '10px'}}
-                  ref={(comments) => (this.comments = comments)}
+                <Button
+                  size={BUTTON_SIZE.ICON_SMALL}
+                  title="Comments"
+                  mode={BUTTON_MODE.OUTLINE}
                 >
-                  <button
-                    className="ui icon basic tiny button issue-note re-active re-message"
-                    title="Comments"
-                  >
-                    <i className="icon-uniE96B icon" />
-                  </button>
-                </div>
+                  <CommentsIconFilled size={18} />
+                </Button>
               }
             >
               <div

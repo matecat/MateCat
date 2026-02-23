@@ -42,6 +42,7 @@ export const BUTTON_SIZE = {
   MEDIUM: 'medium',
   BIG: 'big',
   ICON_SMALL: 'iconSmall',
+  ICON_MEDIUM: 'iconMedium',
   ICON_STANDARD: 'iconStandard',
   ICON_BIG: 'iconBig',
   LINK_SMALL: 'linkSmall',
