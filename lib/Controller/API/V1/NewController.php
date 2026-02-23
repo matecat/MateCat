@@ -171,7 +171,7 @@ class NewController extends KleinController
             $request['due_date']
         ));
         $projectStructure['target_language_mt_engine_association'] = $request['target_language_mt_engine_association'];
-        $projectStructure['instructions'] = mb_convert_encoding($request['instructions'], 'UTF-8', 'auto');
+        $projectStructure['instructions'] = mb_convert_encoding($request['instructions'], 'UTF-8', mb_list_encodings());
 
         $projectStructure['userIsLogged'] = true;
         $projectStructure['uid'] = $this->user->getUid();
