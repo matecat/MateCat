@@ -15,10 +15,7 @@ import CatToolActions from '../../../actions/CatToolActions'
 import {laraAuth} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
 import CatToolStore from '../../../stores/CatToolStore'
-import {
-  decodePlaceholdersToPlainText,
-  encodePlaceholdersToTags,
-} from './DraftMatecatUtils/tagUtils'
+import {decodePlaceholdersToPlainText, encodePlaceholdersToTags,} from './DraftMatecatUtils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -293,9 +290,13 @@ let TranslationMatches = {
     }
 
     const jobLanguages = [config.source_code, config.target_code]
-    let allowed =
-      jobLanguages.filter((x) => ['en', 'it'].includes(x.split('-')[0]))
-        .length === 2
+    // Keep only languages whose base code is 'en' or 'it'.
+    let allowed = jobLanguages.filter(
+        (x) => ['en', 'it'].includes(x.split('-')[0])
+    ).filter(
+        // Remove duplicates, then check we have exactly two distinct matches.
+        (value, index, array) => array.indexOf(value) === index
+    ).length === 2;
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
