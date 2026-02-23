@@ -170,7 +170,7 @@ export const QualityReport = () => {
             {jobInfo ? (
               <div className="qr-job-summary">
                 <div className="qr-header">
-                  <h3>QR Job summary</h3>
+                  <h3>Quality report</h3>
 
                   {secondPassReviewEnabled ? (
                     <div className="qr-filter-list">
