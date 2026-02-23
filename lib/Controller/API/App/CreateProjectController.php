@@ -331,7 +331,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         );
 
         // validate Lara style
-        if($engineStruct instanceof Lara){
+        if ($engineStruct instanceof Lara) {
             $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
         }
 
@@ -780,14 +780,13 @@ class CreateProjectController extends AbstractStatefulKleinController
             $dialect_strict = trim(html_entity_decode($dialect_strict));
 
             // first check if `dialect_strict` is a valid JSON
-            if (!Utils::isJson($dialect_strict)) {
+            if (!json_validate($dialect_strict)) {
                 throw new InvalidArgumentException("dialect_strict is not a valid JSON");
             }
 
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
-
                 try {
                     $lang_handler->validateLanguage($lang);
                 } catch (Exception $e) {

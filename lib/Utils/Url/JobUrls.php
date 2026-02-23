@@ -119,7 +119,7 @@ class JobUrls
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->getJobType($sourcePage);
                 $url .= DIRECTORY_SEPARATOR;
-                $url .= Utils::friendly_slug($this->projectName);
+                $url .= Utils::friendlySlug($this->projectName);
                 $url .= DIRECTORY_SEPARATOR;
                 $url .= $this->source . '-' . $this->target;
                 $url .= DIRECTORY_SEPARATOR;

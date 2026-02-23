@@ -59,7 +59,7 @@ class JSONValidatorObject extends ValidatorObject
      *
      * Behavior:
      * - Uses json_decode with the configured associative mode.
-     * - Delegates error detection to Utils::raiseJsonExceptionError(), which throws on JSON errors.
+     * - Delegates error detection to JSON_THROW_ON_ERROR flag, which throws on JSON errors.
      * - Memoizes the decoded result and sets type flags for later inspection.
      *
      * @return mixed|null The decoded JSON value (array|object|scalar|null).

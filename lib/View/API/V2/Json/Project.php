@@ -156,7 +156,7 @@ class Project
             'fast_analysis_wc' => (int)$project->fast_analysis_wc,
             'standard_analysis_wc' => (int)$project->standard_analysis_wc,
             'tm_analysis_wc' => $project->tm_analysis_wc,
-            'project_slug' => Utils::friendly_slug($project->name),
+            'project_slug' => Utils::friendlySlug($project->name),
             'jobs' => $jobJSONs,
             'features' => implode(",", $featureSet->getCodes()),
             'is_cancelled' => (in_array(JobStatus::STATUS_CANCELLED, $jobStatuses)),
