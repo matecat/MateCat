@@ -1,11 +1,10 @@
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import Copy from '../icons/Copy'
-import {encodePlaceholdersToTags} from './utils/DraftMatecatUtils/tagUtils'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
@@ -181,13 +180,20 @@ export const SegmentFooterTabAiAlternatives = ({
   const [alternatives, setAlternatives] = useState()
 
   useEffect(() => {
-    const normalizeTags = (value) => value
+    let selectedText = ''
 
     const requestAlternatives = ({text}) => {
+      selectedText = DraftMatecatUtils.excludeSomeTagsFromText(text, [
+        'g',
+        'bx',
+        'ex',
+        'x',
+      ])
+
       setAlternatives()
 
-      const decodedSource = normalizeTags(segment.segment)
-      const decodedTarget = normalizeTags(segment.translation)
+      const decodedSource = segment.segment
+      const decodedTarget = segment.translation
 
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
@@ -198,13 +204,11 @@ export const SegmentFooterTabAiAlternatives = ({
         idSegment: segment.sid,
         sourceSentence: decodedSource,
         sourceContextSentencesString: contextListBefore
-          .map((t) => normalizeTags(t))
+          .map((t) => t)
           .join('\n'),
         targetSentence: decodedTarget,
-        targetContextSentencesString: contextListAfter
-          .map((t) => normalizeTags(t))
-          .join('\n'),
-        excerpt: normalizeTags(text),
+        targetContextSentencesString: contextListAfter.map((t) => t).join('\n'),
+        excerpt: text,
         styleInstructions:
           CatToolStore.getJobMetadata().project.mt_extra.lara_style,
       })
@@ -212,16 +216,30 @@ export const SegmentFooterTabAiAlternatives = ({
 
     const receiveAlternatives = ({data}) => {
       if (!data.has_error && Array.isArray(data.message)) {
-        console.log('@@@@@@@@@@@@', data.message, segment.translation)
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
-          originalSentence: normalizeTags(segment.translation),
-          alternatives: data.message,
+          originalSentence: DraftMatecatUtils.excludeSomeTagsFromText(
+            segment.translation,
+            ['g', 'bx', 'ex', 'x'],
+          ),
+          alternatives: data.message.map((alternative) => ({
+            ...alternative,
+            alternative: DraftMatecatUtils.excludeSomeTagsFromText(
+              alternative.alternative,
+              ['g', 'bx', 'ex', 'x'],
+            ),
+          })),
         })
-        console.log('enrichedAlternatives', enrichedAlternatives)
+
         setAlternatives(
-          enrichedAlternatives.map(({alternative, context, highlighted}) => ({
-            alternative,
+          enrichedAlternatives.map(({context, highlighted}, index) => ({
+            ...(index === 0 && {
+              selectedText: DraftMatecatUtils.transformTagsToHtml(
+                `“${selectedText}”`,
+                config.isTargetRTL,
+              ),
+            }),
+            alternative: data.message[index].alternative,
             before: DraftMatecatUtils.transformTagsToHtml(
               highlighted.before.length > 0
                 ? `${highlighted.before} `
@@ -239,6 +257,7 @@ export const SegmentFooterTabAiAlternatives = ({
               highlighted.changed,
               config.isTargetRTL,
             ),
+            copyToClipboard: highlighted.changed,
             context,
           })),
         )
@@ -269,7 +288,7 @@ export const SegmentFooterTabAiAlternatives = ({
   }, [segment])
 
   const copyAlternative = (alternative) => {
-    navigator.clipboard.writeText(encodePlaceholdersToTags(alternative))
+    navigator.clipboard.writeText(alternative)
   }
 
   const allowHTML = (string) => {
@@ -286,11 +305,13 @@ export const SegmentFooterTabAiAlternatives = ({
         <div className="ai-feature-content">
           <div className="ai-feature-alternatives-for">
             <h4>Alternatives for:</h4>
-            <p dangerouslySetInnerHTML={allowHTML(alternatives[0].text)}></p>
+            <p
+              dangerouslySetInnerHTML={allowHTML(alternatives[0].selectedText)}
+            ></p>
           </div>
           <div className="ai-alternative-options">
             {alternatives.map(
-              ({before, after, changed, alternative, context}, index) => (
+              ({before, after, changed, copyToClipboard, context}, index) => (
                 <div key={index}>
                   <div>
                     <p>
@@ -308,7 +329,7 @@ export const SegmentFooterTabAiAlternatives = ({
                   <Button
                     className="ai-feature-button"
                     mode={BUTTON_MODE.OUTLINE}
-                    onClick={() => copyAlternative(alternative)}
+                    onClick={() => copyAlternative(copyToClipboard)}
                   >
                     <Copy size={16} />
                   </Button>
