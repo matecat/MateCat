@@ -357,7 +357,7 @@ class UtilsTest extends AbstractTest
 
     public function testRandomStringReturnsCorrectLength(): void
     {
-        $result = Utils::randomString(12);
+        $result = Utils::randomString();
         $this->assertEquals(12, strlen($result));
     }
 
@@ -523,7 +523,7 @@ class UtilsTest extends AbstractTest
         $params = ['key1' => 'value1', 'key2' => 'value2'];
         $required = ['key1', 'key2'];
         $result = Utils::ensure_keys($params, $required);
-        $this->assertEquals($params, $result);
+        $this->assertSame($params, $result);
     }
 
     public function testEnsureKeysThrowsExceptionWhenKeysMissing(): void
@@ -554,7 +554,7 @@ class UtilsTest extends AbstractTest
         $params = ['key1' => null, 'key2' => 'value2'];
         $required = ['key1', 'key2'];
         $result = Utils::ensure_keys($params, $required);
-        $this->assertEquals($params, $result);
+        $this->assertSame($params, $result);
     }
 
     // =========================================================================
@@ -673,7 +673,7 @@ class UtilsTest extends AbstractTest
 
     public function testIsTokenValidReturnsFalseForNullToken(): void
     {
-        $this->assertFalse(Utils::isTokenValid(null));
+        $this->assertFalse(Utils::isTokenValid());
     }
 
     public function testIsTokenValidReturnsFalseForEmptyToken(): void
@@ -719,7 +719,7 @@ class UtilsTest extends AbstractTest
         $testFile = $tempDir . '/test_file.txt';
         file_put_contents($testFile, 'test');
 
-        $result = Utils::fixFileName('test_file.txt', $tempDir, true);
+        $result = Utils::fixFileName('test_file.txt', $tempDir);
         $this->assertEquals('test_file_(1).txt', $result);
 
         unlink($testFile);
@@ -959,7 +959,7 @@ class UtilsTest extends AbstractTest
     public function testStripFileBOMRemovesUtf8Bom(): void
     {
         $stringWithBom = "\xEF\xBB\xBFHello";
-        $result = Utils::stripFileBOM($stringWithBom, 8);
+        $result = Utils::stripFileBOM($stringWithBom);
         $this->assertEquals('Hello', $result);
     }
 
@@ -1276,6 +1276,9 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(24, strlen($result));
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDeleteDirWithNestedHiddenFiles(): void
     {
         $tempDir = sys_get_temp_dir() . '/test_delete_nested_' . uniqid();
@@ -1358,7 +1361,7 @@ class UtilsTest extends AbstractTest
         file_put_contents($testFile1, 'test');
         file_put_contents($testFile2, 'test');
 
-        $result = Utils::fixFileName('test_increment.txt', $tempDir, true);
+        $result = Utils::fixFileName('test_increment.txt', $tempDir);
         $this->assertEquals('test_increment_(2).txt', $result);
 
         unlink($testFile1);
