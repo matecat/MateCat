@@ -171,8 +171,7 @@ class NewController extends KleinController
             $request['due_date']
         ));
         $projectStructure['target_language_mt_engine_association'] = $request['target_language_mt_engine_association'];
-        $projectStructure['instructions'] = mb_convert_encoding($request['instructions'], 'UTF-8', mb_list_encodings());
-
+        $projectStructure['instructions'] = $request['instructions'];
         $projectStructure['userIsLogged'] = true;
         $projectStructure['uid'] = $this->user->getUid();
         $projectStructure['id_customer'] = $this->user->getEmail();
@@ -189,7 +188,7 @@ class NewController extends KleinController
         }
 
         // Lara style
-        if($request['lara_style']){
+        if ($request['lara_style']) {
             $projectStructure['lara_style'] = $request['lara_style'];
         }
 
@@ -386,20 +385,20 @@ class NewController extends KleinController
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
 
-        // Strip tags from instructions
-        $instructions = [];
-        if (is_array($this->request->param('instructions'))) {
-            /** @var array $instructions */
-            $instructions = $this->request->param('instructions');
-            foreach ($instructions as $value) {
-                $instructions[] = Utils::stripTagsPreservingHrefs($value);
-            }
-
-            /**
-             * Uber plugin callback
-             */
-            $instructions = $this->featureSet->filter('encodeInstructions', $instructions ?? null);
-        }
+        $instructions = filter_var(
+            $this->request->param('instructions'),
+            FILTER_CALLBACK,
+            [
+                'flags' => FILTER_REQUIRE_ARRAY,
+                'options' => function ($value) {
+                    $value = Utils::stripTagsPreservingHrefs($value);
+                    /**
+                     * Uber plugin callback
+                     */
+                    return $this->featureSet->filter('encodeInstructions', $value);
+                }
+            ]
+        );
 
         if ($this->request->files()->isEmpty()) {
             throw new InvalidArgumentException("Missing file. Not Sent.");
@@ -459,7 +458,7 @@ class NewController extends KleinController
         );
 
         // validate Lara style
-        if($engineStruct instanceof Lara){
+        if ($engineStruct instanceof Lara) {
             $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
         }
 
@@ -1180,7 +1179,6 @@ class NewController extends KleinController
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
-
                 try {
                     $lang_handler->validateLanguage($lang);
                 } catch (Exception $e) {

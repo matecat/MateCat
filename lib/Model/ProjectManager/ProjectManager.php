@@ -1118,8 +1118,7 @@ class ProjectManager
             foreach ($array_files as $index => $filename) {
                 if ($file_info['original_filename'] === $filename) {
                     if (isset($this->projectStructure['instructions'][$index]) && !empty($this->projectStructure['instructions'][$index])) {
-                        $instructions = Utils::stripTagsPreservingHrefs($this->projectStructure['instructions'][$index]);
-                        $this->_insertInstructions($fid, $instructions);
+                        $this->_insertInstructions($fid, $this->projectStructure['instructions'][$index]);
                     }
                 }
             }
