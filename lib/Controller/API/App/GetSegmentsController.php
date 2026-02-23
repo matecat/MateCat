@@ -8,18 +8,20 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternValidator;
+use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Segments\ContextGroupDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Model\Segments\SegmentUIStruct;
 use ReflectionException;
-use Utils\Langs\Languages;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
@@ -85,6 +87,9 @@ class GetSegmentsController extends KleinController
         $contexts = $this->getContextGroups($data);
         $res = [];
 
+        $projectMetadata = new ProjectMetadataDao();
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectMetadataDao::ICU_ENABLED)?->value ?? false;
+
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];
 
@@ -115,15 +120,27 @@ class GetSegmentsController extends KleinController
             $data_ref_map = json_decode($seg['data_ref_map'] ?? '', true);
             $seg['data_ref_map'] = $data_ref_map;
 
+            $string_contains_icu = false;
+            if ($icu_enabled) {
+                $analyzer = new MessagePatternValidator(
+                    language: $job->source,
+                    patternString: $seg['segment']
+                );
+                $string_contains_icu = $analyzer->containsComplexSyntax();
+            }
+
             /** @var MateCatFilter $Filter */
-            $metadata = new MetadataDao();
+            $jobMetadata = new MetadataDao();
             $Filter = MateCatFilter::getInstance(
                 $featureSet,
                 $job->source,
                 $job->target,
                 null !== $data_ref_map ? $data_ref_map : [],
-                $metadata->getSubfilteringCustomHandlers($job->id, $job->password)
+                $jobMetadata->getSubfilteringCustomHandlers($job->id, $job->password),
+                $string_contains_icu
             );
+
+            $seg['icu'] = $string_contains_icu;
 
             $seg['segment'] = $Filter->fromLayer0ToLayer1(
                 CatUtils::reApplySegmentSplit($seg['segment'], $seg['source_chunk_lengths'])

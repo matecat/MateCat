@@ -163,8 +163,8 @@ class Intento extends AbstractEngine
             $metadataDao = new MetadataDao();
 
             // custom provider or custom routing
-            $customProvider = $metadataDao->get($_config['pid'], 'intento_provider', 86400);
-            $customRouting = $metadataDao->get($_config['pid'], 'intento_routing', 86400);
+            $customProvider = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'intento_provider');
+            $customRouting = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'intento_routing');
 
             if ($customProvider !== null) {
                 $parameters['service']['async'] = true;

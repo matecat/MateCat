@@ -7,6 +7,8 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Matecat\ICU\MessagePatternComparator;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -14,8 +16,10 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Translations\WarningDao;
+use Utils\LQA\ICUSourceSegmentChecker;
 use Utils\LQA\QA;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -24,6 +28,8 @@ use View\API\V2\Json\QALocalWarning;
 
 class GetWarningController extends KleinController
 {
+
+    use ICUSourceSegmentChecker;
 
     protected function afterConstruct(): void
     {
@@ -106,8 +112,6 @@ class GetWarningController extends KleinController
         $src_content = $request['src_content'];
         $trg_content = $request['trg_content'];
         $password = $request['password'];
-//        $logs               = $request[ 'logs' ];
-//        $segment_status     = $request[ 'segment_status' ];
         $characters_counter = $request['characters_counter'];
 
         $chunk = $this->getChunk($id_job, $password);
@@ -115,20 +119,43 @@ class GetWarningController extends KleinController
         $metadata = new MetadataDao();
         $dataRefMap = (!empty($id)) ? SegmentOriginalDataDao::getSegmentDataRefMap($id) : [];
 
-        $Filter = MateCatFilter::getInstance($featureSet, $chunk->source, $chunk->target, $dataRefMap, $metadata->getSubfilteringCustomHandlers($chunk->id, $password));
+        // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
+        // Detect if the translation content contains ICU MessageFormat syntax
+        $this->sourceContainsIcu($chunk->getProject(), $chunk, $src_content);
+
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance(
+            $featureSet,
+            $chunk->source,
+            $chunk->target,
+            $dataRefMap,
+            $metadata->getSubfilteringCustomHandlers($chunk->id, $password),
+            $this->sourceContainsIcu
+        );
 
         $src_content = $Filter->fromLayer2ToLayer1($src_content);
         $trg_content = $Filter->fromLayer2ToLayer1($trg_content);
 
-        $QA = new QA($src_content, $trg_content);
+        $QA = new QA(
+            $src_content,
+            $trg_content,
+            MessagePatternComparator::fromValidators(
+                $this->icuSourcePatternValidator,
+                new MessagePatternValidator(
+                    $chunk->target,
+                    $trg_content
+                )
+            ),
+            // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
+            $this->sourceContainsIcu
+        );
         $QA->setFeatureSet($featureSet);
         $QA->setChunk($chunk);
-        $QA->setIdSegment($id);
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
 
-        if (isset($characters_counter)) {
-            $QA->setCharactersCount($characters_counter);
+        if (!$this->sourceContainsIcu && isset($characters_counter)) {
+            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, QA::SIZE_RESTRICTION)[0] ?? null);
         }
 
         $QA->performConsistencyCheck();
@@ -139,7 +166,12 @@ class GetWarningController extends KleinController
                 'errors' => []
             ],
             $this->invokeLocalWarningsOnFeatures($chunk, $src_content, $trg_content),
-            (new QALocalWarning($QA, $id, $chunk->id_project))->render()
+            (new QALocalWarning(
+                $QA,
+                $id,
+                $chunk->id_project,
+                $Filter
+            ))->render()
         );
 
         $this->response->json($result);

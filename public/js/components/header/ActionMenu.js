@@ -1,5 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
-import $ from 'jquery'
+import React, {useState} from 'react'
 import Icon3Dots from '../icons/Icon3Dots'
 import {exportQualityReport} from '../../api/exportQualityReport'
 import CatToolActions from '../../actions/CatToolActions'
@@ -61,7 +60,7 @@ export const ActionMenu = ({
               },
             },
           ]
-        : null),
+        : []),
       {
         label: (
           <>

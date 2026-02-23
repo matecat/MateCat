@@ -8,7 +8,6 @@ use Model\Users\UserStruct;
 use ReflectionException;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 
 /**

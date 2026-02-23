@@ -4,7 +4,6 @@ namespace Utils\Autopropagation;
 
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
-use Utils\Tools\Utils;
 
 class PropagationAnalyser
 {
@@ -80,10 +79,7 @@ class PropagationAnalyser
                     $propagation->addPropagatedNotIce($segmentTranslation);
                     $propagation->addPropagatedId($segmentTranslation->id_segment);
 
-                    if (false === Utils::stringsAreEqual(
-                            $parentSegmentTranslation->translation,
-                            $segmentTranslation->translation ?? ''
-                        )) {
+                    if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
                         $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
                     }
 
@@ -97,10 +93,7 @@ class PropagationAnalyser
                     $propagation->addPropagatedIce($segmentTranslation);
                     $propagation->addPropagatedId($segmentTranslation->id_segment);
 
-                    if (false === Utils::stringsAreEqual(
-                            $parentSegmentTranslation->translation,
-                            $segmentTranslation->translation ?? ''
-                        )) {
+                    if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
                         $propagation->addPropagatedIdToUpdateVersion($segmentTranslation->id_segment);
                     }
 

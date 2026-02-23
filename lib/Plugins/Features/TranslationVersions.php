@@ -19,7 +19,6 @@ class TranslationVersions extends BaseFeature
      * @param UserStruct $userStruct
      * @param ProjectStruct $projectStruct
      * @param int|null $id_segment
-     *
      * @return VersionHandlerInterface
      */
     public static function getVersionHandlerNewInstance(JobStruct $chunkStruct, UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment = null): VersionHandlerInterface

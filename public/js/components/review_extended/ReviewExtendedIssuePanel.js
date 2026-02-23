@@ -127,9 +127,9 @@ class ReviewExtendedIssuePanel extends React.Component {
 
   thereAreSubcategories() {
     return (
-      (this.issueCategories[0].subcategories &&
+      (this.issueCategories[0]?.subcategories &&
         this.issueCategories[0].subcategories.length > 0) ||
-      (this.issueCategories[1].subcategories &&
+      (this.issueCategories[1]?.subcategories &&
         this.issueCategories[1].subcategories.length > 0)
     )
   }

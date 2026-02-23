@@ -3,14 +3,7 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\NotFoundException;
-use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Exception;
-use Model\Jobs\MetadataDao;
-use ReflectionException;
-use Utils\Validator\JSONSchema\JSONValidator;
-use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class LaraController extends KleinController
 {

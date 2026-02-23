@@ -78,3 +78,7 @@ certs
 /lib/View/*.html
 /lib/View/APIDoc.php
 /.phpunit.result.cache
+/.phpunit.cache
+/CallGraph
+/PHP-SQL-Parser
+/storage

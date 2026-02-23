@@ -12,6 +12,8 @@ namespace Utils\TaskRunner;
 use Bootstrap;
 use Exception;
 use Model\DataAccess\Database;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
 use PDOException;
 use ReflectionException;
 use SplObserver;
@@ -89,19 +91,6 @@ class Executor implements SplObserver
     public string $_executor_instance_id;
 
     /**
-     * Logging method
-     *
-     * @param      $_msg
-     */
-    protected function _logMsg($_msg): void
-    {
-        if (AppConfig::$DEBUG) {
-            echo "[" . date(DATE_RFC822) . "] " . json_encode($_msg) . "\n";
-            $this->logger->debug($_msg);
-        }
-    }
-
-    /**
      * Logger instance
      *
      * @var MatecatLogger
@@ -129,6 +118,9 @@ class Executor implements SplObserver
 
         // Initialize the 'executor' logger using a specific filename from the context
         $this->logger = LoggerFactory::getLogger('executor', $_context->loggerName);
+        if (AppConfig::$DEBUG) {
+            $this->logger->pushHandler((new StreamHandler('php://stdout'))->setFormatter(new LineFormatter("[%datetime%] %channel%.%level_name%: %message% %context%\n")));
+        }
 
         // Map multiple component aliases to this logger instance for consistent logging across modules
         LoggerFactory::setAliases(['engines', 'project_manager', 'feature_set', 'files'], $this->logger);
@@ -141,14 +133,14 @@ class Executor implements SplObserver
             if (!$this->_queueHandler->getRedisClient()->sadd($this->_executionContext->pid_set_name, [$this->_executor_instance_id])) {
                 throw new Exception("(Executor " . $this->_executor_instance_id . ") : FATAL !! cannot create my resource ID. Exiting!");
             } else {
-                $this->_logMsg("(Executor " . $this->_executor_instance_id . ") : spawned !!!");
+                $this->logger->debug("(Executor " . $this->_executor_instance_id . ") : spawned !!!");
             }
 
             $this->_queueHandler->subscribe($this->_executionContext->queue_name);
         } catch (Exception $ex) {
             $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
-            $this->_logMsg($msg);
-            $this->_logMsg($ex->getMessage());
+            $this->logger->debug($msg);
+            $this->logger->debug($ex->getMessage());
             die();
         }
     }
@@ -182,7 +174,7 @@ class Executor implements SplObserver
             try {
                 // PROCESS CONTROL FUNCTIONS
                 if (!self::_myProcessExists($this->_executor_instance_id)) {
-                    $this->_logMsg("(Executor " . $this->_executor_instance_id . ") :  EXITING! my pid does not exists anymore, my parent told me to die.");
+                    $this->logger->debug("(Executor " . $this->_executor_instance_id . ") :  EXITING! my pid does not exists anymore, my parent told me to die.");
                     $this->RUNNING = false;
                     break;
                 }
@@ -195,13 +187,12 @@ class Executor implements SplObserver
                  */
                 [$msgFrame, $queueElement] = $this->_readAMQFrame();
             } catch (Exception) {
-//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in the next cycle." );
-//                $this->_logMsg( $e->getMessage() );
+//                $this->logger->debug( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in the next cycle." );
+//                $this->logger->debug( $e->getMessage() );
                 continue;
             }
 
-//            $this->_logMsg( "--- (Worker " . $this->_executor_instance_id . ") - QueueElement found: " . var_export( $queueElement, true ) );
-            $this->_logMsg($queueElement);
+            $this->logger->debug("--- (Worker " . $this->_executor_instance_id . ") - QueueElement found", $queueElement->toArray());
 
             try {
                 /**
@@ -216,10 +207,10 @@ class Executor implements SplObserver
 
                 $this->_worker->process($queueElement);
             } catch (EndQueueException $e) {
-                $this->_logMsg("--- (Executor " . $this->_executor_instance_id . ") : End queue limit reached. Acknowledged. - " . $e->getMessage()); // ERROR End Queue
+                $this->logger->debug("--- (Executor " . $this->_executor_instance_id . ") : End queue limit reached. Acknowledged. - " . $e->getMessage()); // ERROR End Queue
 
             } catch (ReQueueException $e) {
-                $this->_logMsg("--- (Executor " . $this->_executor_instance_id . ") : Error executing task. Re-Queue - " . $e->getMessage()); // ERROR Re-queue
+                $this->logger->debug("--- (Executor " . $this->_executor_instance_id . ") : Error executing task. Re-Queue - " . $e->getMessage()); // ERROR Re-queue
 
                 //set/increment the reQueue number
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
@@ -227,13 +218,13 @@ class Executor implements SplObserver
                 $amqHandlerPublisher->reQueue($queueElement, $this->_executionContext, $this->logger);
                 $amqHandlerPublisher->getClient()->disconnect();
             } catch (EmptyElementException) {
-//                $this->_logMsg( $e->getMessage() );
+//                $this->logger->debug( $e->getMessage() );
 
             } catch (PDOException $e) {
-                $this->_logMsg(
+                $this->logger->debug(
                     "************* (Executor " . $this->_executor_instance_id . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage()
                 );
-                $this->_logMsg("************* (Executor " . $this->_executor_instance_id . ") " . $e->getTraceAsString());
+                $this->logger->debug("************* (Executor " . $this->_executor_instance_id . ") " . $e->getTraceAsString());
 
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher = AMQHandler::getNewInstanceForDaemons();
@@ -241,14 +232,15 @@ class Executor implements SplObserver
                 $amqHandlerPublisher->getClient()->disconnect();
                 sleep(2);
             } catch (Throwable $e) {
-                $this->_logMsg("************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************");
-                $this->_logMsg("Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() . " " . $e->getTraceAsString());
+                $this->logger->debug("************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************");
+                $this->logger->debug("Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() . " " . $e->getTraceAsString());
+                sleep(2);
             }
 
             //unlock frame
             $this->_queueHandler->ack($msgFrame);
 
-            $this->_logMsg("--- (Executor " . $this->_executor_instance_id . ") - QueueElement acknowledged.");
+            $this->logger->debug("--- (Executor " . $this->_executor_instance_id . ") - QueueElement acknowledged.");
         } while ($this->RUNNING);
 
         $this->cleanShutDown();
@@ -270,13 +262,13 @@ class Executor implements SplObserver
 
             if ($msgFrame instanceof Frame && ($msgFrame->getCommand() == "MESSAGE" || array_key_exists('MESSAGE', $msgFrame->getHeaders()))) {
                 $this->_frameID++;
-                $this->_logMsg("--- (Executor " . $this->_executor_instance_id . ") : processing frame $this->_frameID");
+                $this->logger->debug("--- (Executor " . $this->_executor_instance_id . ") : processing frame $this->_frameID");
 
                 $queueElement = json_decode($msgFrame->body, true);
 
                 if (empty($queueElement)) {
                     $this->_queueHandler->ack($msgFrame);
-                    $this->_logMsg(['ERROR' => "*** Failed to decode the json frame payload, reason: " . json_last_error_msg(), 'FRAME' => $msgFrame->body]);
+                    $this->logger->debug(['ERROR' => "*** Failed to decode the json frame payload, reason: " . json_last_error_msg(), 'FRAME' => $msgFrame->body]);
                     throw new FrameException("*** Failed to decode the json, reason: " . json_last_error_msg(), -1);
                 }
 
@@ -294,7 +286,7 @@ class Executor implements SplObserver
             throw new FrameException($e->getMessage());
             /* jump the ack */
         } catch (Exception $e) {
-            $this->_logMsg($e->getMessage());
+            $this->logger->debug($e->getMessage());
             throw new FrameException("*** \$this->amqHandler->read() Failed. Continue Execution. ***", -1, $e);
         }
 
@@ -321,7 +313,7 @@ class Executor implements SplObserver
 
         //SHUTDOWN
         $msg = str_pad(" Executor " . getmypid() . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH);
-        $this->_logMsg($msg);
+        $this->logger->debug($msg);
 
         die();
     }
@@ -351,7 +343,7 @@ class Executor implements SplObserver
         /**
          * @var $subject AbstractWorker
          */
-        $this->_logMsg($subject->getLogMsg());
+        $this->logger->debug($subject->getLogMsg());
     }
 
 }

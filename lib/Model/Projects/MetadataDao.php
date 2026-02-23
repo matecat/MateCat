@@ -29,72 +29,84 @@ class MetadataDao extends AbstractDao
     const string MT_QE_WORKFLOW_ENABLED = 'mt_qe_workflow_enabled';
     const string MT_QE_WORKFLOW_PARAMETERS = 'mt_qe_workflow_parameters';
     const string SUBFILTERING_HANDLERS = 'subfiltering_handlers';
+    const string ICU_ENABLED = 'icu_enabled';
+    const string FROM_API = 'from_api';
+    const string PRETRANSLATE_101 = 'pretranslate_101';
+    const string XLIFF_PARAMETERS = 'xliff_parameters';
+    const string FILTERS_EXTRACTION_PARAMETERS = 'filters_extraction_parameters';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
+    protected static string $_query_get_metadata_by_key = "SELECT * FROM project_metadata WHERE id_project = :id_project AND `key` = :key ";
 
     /**
-     * @param $id
-     *
+     * @param int $id
      * @return MetadataStruct[]
      * @throws ReflectionException
      */
-    public static function getByProjectId($id): array
-    {
-        $dao = new MetadataDao();
-
-        return $dao->setCacheTTL(60 * 60)->allByProjectId($id);
-    }
-
-    /**
-     * @param $id
-     *
-     * @return MetadataStruct[]
-     * @throws ReflectionException
-     */
-    public function allByProjectId($id): array
+    public function allByProjectId(int $id): array
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_query_get_metadata);
 
         /**
-         * @var MetadataStruct[]
+         * @var $list MetadataStruct[]
          */
-        return $this->_fetchObjectMap($stmt, MetadataStruct::class, ['id_project' => $id]);
+        $list = $this->_fetchObjectMap($stmt, MetadataStruct::class, ['id_project' => $id]);
+        foreach ($list as $metaStruct) {
+            $metaStruct->value = ProjectsMetadataMarshaller::unMarshall($metaStruct);
+        }
+
+        return $list;
     }
 
+
     /**
+     * @param int $project_id The ID of the project for which the metadata cache will be destroyed.
+     * @param string|null $metadataKey An optional metadata key to target specific metadata within the project's cache. If null, the entire project's metadata cache will be destroyed.
+     *
+     * @return bool Returns true if the metadata cache was successfully destroyed, otherwise false.
      * @throws ReflectionException
      */
-    public function destroyMetadataCache($id): bool
+    public function destroyMetadataCache(int $project_id, ?string $metadataKey = null): bool
     {
-        $stmt = $this->_getStatementForQuery(self::$_query_get_metadata);
+        $query = self::$_query_get_metadata;
+        $bindParams = [
+            'id_project' => $project_id
+        ];
 
-        return $this->_destroyObjectCache($stmt, MetadataStruct::class, ['id_project' => $id]);
+        if ($metadataKey !== null) {
+            $query = self::$_query_get_metadata_by_key;
+            $bindParams['key'] = $metadataKey;
+        }
+
+        $stmt = $this->_getStatementForQuery($query);
+
+        return $this->_destroyObjectCache($stmt, MetadataStruct::class, $bindParams);
     }
 
     /**
      * @param int $id_project
      * @param string $key
-     * @param int $ttl
-     *
      * @return MetadataStruct|null
      * @throws ReflectionException
      */
-    public function get(int $id_project, string $key, int $ttl = 0): ?MetadataStruct
+    public function get(int $id_project, string $key): ?MetadataStruct
     {
-        $stmt = $this->setCacheTTL($ttl)->_getStatementForQuery(
-            "SELECT * FROM project_metadata WHERE " .
-            " id_project = :id_project " .
-            " AND `key` = :key "
-        );
+        $stmt = $this->_getStatementForQuery(self::$_query_get_metadata_by_key);
 
         /**
-         * @var $result MetadataStruct[]
+         * @var $result MetadataStruct
          */
-        return $this->_fetchObjectMap($stmt, MetadataStruct::class, [
+        $result = $this->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_project' => $id_project,
             'key' => $key
         ])[0] ?? null;
+
+        if ($result) {
+            $result->value = ProjectsMetadataMarshaller::unMarshall($result);
+        }
+
+        return $result;
     }
 
     /**
@@ -122,6 +134,7 @@ class MetadataDao extends AbstractDao
         ]);
 
         $this->destroyMetadataCache($id_project);
+        $this->destroyMetadataCache($id_project, $key);
 
         return $conn->lastInsertId();
     }
@@ -144,6 +157,7 @@ class MetadataDao extends AbstractDao
         ]);
 
         $this->destroyMetadataCache($id_project);
+        $this->destroyMetadataCache($id_project, $key);
     }
 
     public static function buildChunkKey(string $key, JobStruct $chunk): string
@@ -185,9 +199,9 @@ class MetadataDao extends AbstractDao
     public function getProjectStaticSubfilteringCustomHandlers(int $id_project): ?array
     {
         try {
-            $subfiltering = $this->get($id_project, MetadataDao::SUBFILTERING_HANDLERS, 86400);
+            $subfiltering = $this->setCacheTTL(86400)->get($id_project, MetadataDao::SUBFILTERING_HANDLERS);
 
-            return json_decode($subfiltering->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return $subfiltering?->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }

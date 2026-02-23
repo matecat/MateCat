@@ -9,6 +9,8 @@
 namespace View\API\V3\Json;
 
 use Exception;
+use Matecat\Locales\LanguageDomains;
+use Matecat\Locales\Languages;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
@@ -20,8 +22,6 @@ use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use Utils\Constants\SourcePages;
-use Utils\Langs\LanguageDomains;
-use Utils\Langs\Languages;
 use Utils\Tools\Utils;
 use View\API\App\Json\OutsourceConfirmation;
 use View\API\V2\Json\JobTranslator;

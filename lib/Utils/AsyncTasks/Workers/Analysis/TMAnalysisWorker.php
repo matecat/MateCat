@@ -312,6 +312,7 @@ class TMAnalysisWorker extends AbstractWorker
      * @param $target_lang
      *
      * @return PostProcess
+     * @throws Exception
      */
     private function initPostProcess($source_seg, $target_seg, $source_lang, $target_lang): PostProcess
     {
@@ -997,6 +998,9 @@ class TMAnalysisWorker extends AbstractWorker
                     'id' => $job->id
                 ]);
             }
+
+            ProjectDao::destroyCacheById($_project_id);
+            (new JobDao)->destroyCacheByProjectId($_project_id);
 
             foreach ($_analyzed_report as $job_info) {
                 $counter = new CounterModel();

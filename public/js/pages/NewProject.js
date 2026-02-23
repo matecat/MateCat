@@ -476,6 +476,7 @@ const NewProject = () => {
       dialectStrict,
       mtQualityValueInEditor,
       subfilteringHandlers,
+      icuEnabled,
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
@@ -578,6 +579,7 @@ const NewProject = () => {
         ),
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
+      icu_enabled: icuEnabled,
     })
 
     if (!projectSent) {

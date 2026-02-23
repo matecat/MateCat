@@ -98,9 +98,9 @@ class DeepL extends AbstractEngine
         // glossaries (only for DeepL)
         $metadataDao = new MetadataDao();
         // null coalescing operator is used to avoid errors when validating the engine for the first time
-        $deepLFormality = $metadataDao->get($_config['pid'], 'deepl_formality', 86400);
-        $deepLIdGlossary = $metadataDao->get($_config['pid'], 'deepl_id_glossary', 86400);
-        $deepLEngineType = $metadataDao->get($_config['pid'], 'deepl_engine_type', 86400);
+        $deepLFormality = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_formality');
+        $deepLIdGlossary = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_id_glossary');
+        $deepLEngineType = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_engine_type');
 
         $parameters = [
             'text' => [

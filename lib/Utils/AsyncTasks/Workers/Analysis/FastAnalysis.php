@@ -15,6 +15,8 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -94,7 +96,7 @@ class FastAnalysis extends AbstractDaemon
             $db->ping();
 //            $this->_TimeStampMsg(  "--- Database connection active. " );
         } catch (PDOException $e) {
-            $this->_logTimeStampedMsg($e->getMessage() . " - Trying to close and reconnect.");
+            $this->logger->debug($e->getMessage() . " - Trying to close and reconnect.");
             $db->close();
             //reconnect
             $db->getConnection();
@@ -109,6 +111,9 @@ class FastAnalysis extends AbstractDaemon
         $this->_contextIndex = $contextIndex;
 
         $this->logger = LoggerFactory::getLogger('fast_analysis', 'fastAnalysis.log');
+        if (AppConfig::$DEBUG) {
+            $this->logger->pushHandler((new StreamHandler('php://stdout'))->setFormatter(new LineFormatter("[%datetime%] %channel%.%level_name%: %message% %context%\n")));
+        }
         LoggerFactory::setAliases(['engines'], $this->logger);
 
         try {
@@ -117,8 +122,8 @@ class FastAnalysis extends AbstractDaemon
 
             $this->_updateConfiguration();
         } catch (Exception $ex) {
-            $this->_logTimeStampedMsg(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
-            $this->_logTimeStampedMsg(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
+            $this->logger->debug(str_pad(" " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH));
+            $this->logger->debug(str_pad("EXIT", 60, " ", STR_PAD_BOTH));
             die();
         }
 
@@ -144,18 +149,18 @@ class FastAnalysis extends AbstractDaemon
                 $this->_checkDatabaseConnection();
                 $projects_list = $this->_getLockProjectForVolumeAnalysis(5);
             } catch (PDOException $e) {
-                $this->_logTimeStampedMsg($e->getMessage() . " - Error again. Try to reconnect in next cycle.");
+                $this->logger->debug($e->getMessage() . " - Error again. Try to reconnect in next cycle.");
                 sleep(3); // wait for reconnection
                 continue; // next cycle, reload projects.
             }
 
             if (empty($projects_list)) {
-//                $this->_logTimeStampedMsg( "No projects: wait 3 seconds." );
+//                $this->logger->debug( "No projects: wait 3 seconds." );
                 sleep(3);
                 continue;
             }
 
-            $this->_logTimeStampedMsg("Projects found", $projects_list);
+            $this->logger->debug("Projects found", $projects_list);
 
             $featureSet = new FeatureSet();
 
@@ -163,7 +168,7 @@ class FastAnalysis extends AbstractDaemon
                 $this->actual_project_row = $project_row;
 
                 $pid = $this->actual_project_row['id'];
-                $this->_logTimeStampedMsg("Analyzing $pid, querying data...");
+                $this->logger->debug("Analyzing $pid, querying data...");
 
                 $perform_Tms_Analysis = true;
                 $status = ProjectStatus::STATUS_FAST_OK;
@@ -182,12 +187,12 @@ class FastAnalysis extends AbstractDaemon
 
                     $featureSet->run('tmAnalysisDisabled', $pid);
 
-                    $this->_logTimeStampedMsg('Perform Analysis FALSE');
+                    $this->logger->debug('Perform Analysis FALSE');
                 }
 
                 try {
                     $fastReport = $this->_fetchMyMemoryFast($pid);
-                    $this->_logTimeStampedMsg("Fast $pid result: " . count($fastReport->responseData) . " segments.");
+                    $this->logger->debug("Fast $pid result: " . count($fastReport->responseData) . " segments.");
                 } catch (Exception $e) {
                     if ($e->getCode() == self::ERR_TOO_LARGE) {
                         self::_updateProject($pid, ProjectStatus::STATUS_NOT_TO_ANALYZE);
@@ -199,7 +204,7 @@ class FastAnalysis extends AbstractDaemon
                         continue;
                     } elseif ($e->getCode() == self::ERR_EMPTY_RESPONSE) {
                         // NOTE: This exception code is NO MORE used ( keep the code to remember how to reset the status )
-                        $this->_logTimeStampedMsg($e->getMessage());
+                        $this->logger->debug($e->getMessage());
                         self::_updateProject($pid, ProjectStatus::STATUS_NEW);
                         $this->queueHandler->getRedisClient()->del(['_fPid:' . $pid]);
                         sleep(3);
@@ -212,7 +217,7 @@ class FastAnalysis extends AbstractDaemon
                 if (isset($fastReport) && $fastReport->responseStatus == 200) {
                     $fastResultData = $fastReport->responseData;
                 } else {
-                    $this->_logTimeStampedMsg("Pid $pid failed fast analysis.");
+                    $this->logger->debug("Pid $pid failed fast analysis.");
                     $fastResultData = [];
                 }
 
@@ -230,7 +235,7 @@ class FastAnalysis extends AbstractDaemon
                 $this->segment_hashes = [];
 
                 // INSERT DATA
-                $this->_logTimeStampedMsg("Inserting segments...");
+                $this->logger->debug("Inserting segments...");
 
                 // define variable for the sake of the code, even if empty
                 $projectStruct = new ProjectStruct();
@@ -265,18 +270,18 @@ class FastAnalysis extends AbstractDaemon
                     //Logging done and email sent
                     //set to error
                     $insertReportRes = -1;
-                    $this->_logTimeStampedMsg($e->getMessage() . " " . $e->getTraceAsString());
+                    $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 }
 
                 if ($insertReportRes < 0) {
-                    $this->_logTimeStampedMsg("InsertFastAnalysis failed....");
-                    $this->_logTimeStampedMsg("Try next cycle....");
+                    $this->logger->debug("InsertFastAnalysis failed....");
+                    $this->logger->debug("Try next cycle....");
                     continue;
                 }
 
                 $featureSet->run('fastAnalysisComplete', $this->segments, $this->actual_project_row);
 
-                $this->_logTimeStampedMsg("done");
+                $this->logger->debug("done");
                 // INSERT DATA
 
                 self::_updateProject($pid, $status);
@@ -309,10 +314,10 @@ class FastAnalysis extends AbstractDaemon
         $fs = $this->files_storage;
 
         try {
-            $this->_logTimeStampedMsg("Fetching data from disk");
+            $this->logger->debug("Fetching data from disk");
             $this->segments = $fs::getFastAnalysisData($pid);
         } catch (UnexpectedValueException) {
-            $this->_logTimeStampedMsg("Error Fetching data from disk. Fallback to database.");
+            $this->logger->debug("Error Fetching data from disk. Fallback to database.");
 
             try {
                 $this->segments = self::_getSegmentsForFastVolumeAnalysis($pid);
@@ -324,7 +329,7 @@ class FastAnalysis extends AbstractDaemon
         if (count($this->segments) == 0) {
             //there is no analysis on that file, it is ALL Pre-Translated
             $exceptionMsg = 'There is no analysis on that file, it is ALL Pre-Translated';
-            $this->_logTimeStampedMsg($exceptionMsg);
+            $this->logger->debug($exceptionMsg);
             throw new Exception($exceptionMsg, self::ERR_NO_SEGMENTS);
         }
 
@@ -349,9 +354,9 @@ class FastAnalysis extends AbstractDaemon
             }
         }
 
-        $this->_logTimeStampedMsg("Done.");
-        $this->_logTimeStampedMsg("Pid $pid: " . count($this->segments) . " segments");
-        $this->_logTimeStampedMsg("Sending query to Matches analysis...");
+        $this->logger->debug("Done.");
+        $this->logger->debug("Pid $pid: " . count($this->segments) . " segments");
+        $this->logger->debug("Sending query to Matches analysis...");
 
         $result = $myMemory->fastAnalysis($fastSegmentsRequest);
 
@@ -378,7 +383,7 @@ class FastAnalysis extends AbstractDaemon
         $this->queueHandler->getRedisClient()->srem(RedisKeys::FAST_PID_SET, getmypid() . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID);
 
         $msg = str_pad(" FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH);
-        $this->_logTimeStampedMsg($msg);
+        $this->logger->debug($msg);
 
         $this->queueHandler->getRedisClient()->disconnect();
 
@@ -394,11 +399,11 @@ class FastAnalysis extends AbstractDaemon
         Database::obtain()->begin();
         $project = ProjectDao::findById($pid);
         if ($project->status_analysis != ProjectStatus::STATUS_DONE) { // avoid concurrency between fast and tm daemons ( they set DONE when complete )
-            $this->_logTimeStampedMsg("*** Project $pid: Changing status...");
+            $this->logger->debug("*** Project $pid: Changing status...");
             ProjectDao::changeProjectStatus($pid, $status);
-            $this->_logTimeStampedMsg("*** Project $pid: $status");
+            $this->logger->debug("*** Project $pid: $status");
         } else {
-            $this->_logTimeStampedMsg("*** Project $pid: TM Analysis already completed. Skip update...");
+            $this->logger->debug("*** Project $pid: TM Analysis already completed. Skip update...");
         }
         Database::obtain()->commit();
     }
@@ -427,7 +432,7 @@ class FastAnalysis extends AbstractDaemon
                         standard_word_count = IF( tm_analysis_status = 'SKIPPED', standard_word_count, VALUES( standard_word_count ) )
                 ";
 
-        $this->_logTimeStampedMsg("Executed " . (count($tuple_list)));
+        $this->logger->debug("Executed " . (count($tuple_list)));
         $stmt = $db->getConnection()->prepare($query_st);
         $stmt->execute($bind_values);
         $stmt->closeCursor();
@@ -526,7 +531,7 @@ class FastAnalysis extends AbstractDaemon
                     try {
                         $this->_executeInsert($tuple_list, $bind_values);
                     } catch (PDOException $e) {
-                        $this->_logTimeStampedMsg($e->getMessage());
+                        $this->logger->debug($e->getMessage());
 
                         return $e->getCode() * -1;
                     }
@@ -546,7 +551,7 @@ class FastAnalysis extends AbstractDaemon
             try {
                 $this->_executeInsert($tuple_list, $bind_values);
             } catch (PDOException $e) {
-                $this->_logTimeStampedMsg($e->getMessage());
+                $this->logger->debug($e->getMessage());
 
                 return $e->getCode() * -1;
             }
@@ -573,7 +578,7 @@ class FastAnalysis extends AbstractDaemon
             if (!$perform_Tms_Analysis) {
                 $_details = $this->getProjectSegmentsTranslationSummary($pid);
 
-                $this->_logTimeStampedMsg("--- trying to initialize job total word count.");
+                $this->logger->debug("--- trying to initialize job total word count.");
 
                 /** @noinspection PhpUnusedLocalVariableInspection */
                 $query_rollup = array_pop($_details); //Don't remove, needed to remove rollup row
@@ -589,7 +594,7 @@ class FastAnalysis extends AbstractDaemon
 
             $db->commit();
         } catch (PDOException $e) {
-            $this->_logTimeStampedMsg($e->getMessage());
+            $this->logger->debug($e->getMessage());
             $db->rollback();
 
             return $e->getCode() * -1;
@@ -609,14 +614,14 @@ class FastAnalysis extends AbstractDaemon
         $queueInfo = $this->_getQueueAddressesByPriority($totalSegmentsToAnalyze, $this->actual_project_row['id_mt_engine']);
 
         if ($totalSegmentsToAnalyze) {
-            $this->_logTimeStampedMsg("Publish Segment Translations to the queue --> $queueInfo->queue_name: $totalSegmentsToAnalyze");
-            $this->_logTimeStampedMsg("Elements: $totalSegmentsToAnalyze");
+            $this->logger->debug("Publish Segment Translations to the queue --> $queueInfo->queue_name: $totalSegmentsToAnalyze");
+            $this->logger->debug("Elements: $totalSegmentsToAnalyze");
 
             try {
                 $this->_setTotal(['pid' => $pid, 'queueInfo' => $queueInfo]);
             } catch (Exception $e) {
                 Utils::sendErrMailReport($e->getMessage() . " " . $e->getTraceAsString(), "Fast Analysis set Total values failed.");
-                $this->_logTimeStampedMsg($e->getMessage() . " " . $e->getTraceAsString());
+                $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                 throw $e;
             }
 
@@ -700,17 +705,17 @@ class FastAnalysis extends AbstractDaemon
                         $this->queueHandler->publishToQueues($queueInfo->queue_name, new Message($element, ['persistent' => $this->queueHandler->persistent]));
 
                         if ($k % 100 == 0 || ($k + 1) == count($this->segments)) {
-                            $this->_logTimeStampedMsg("AMQ Set Executed " . ($k + 1) . " Language: $language");
+                            $this->logger->debug("AMQ Set Executed " . ($k + 1) . " Language: $language");
                         }
                     }
                 } catch (Exception $e) {
                     Utils::sendErrMailReport($e->getMessage() . " " . $e->getTraceAsString(), "Fast Analysis set queue failed.");
-                    $this->_logTimeStampedMsg($e->getMessage() . " " . $e->getTraceAsString());
+                    $this->logger->debug($e->getMessage() . " " . $e->getTraceAsString());
                     throw $e;
                 }
             }
 
-            $this->_logTimeStampedMsg('Done in ' . (microtime(true) - $time_start) . " seconds.");
+            $this->logger->debug('Done in ' . (microtime(true) - $time_start) . " seconds.");
         }
 
         return $project_creation_success;
@@ -846,7 +851,7 @@ HD;
         try {
             $mtEngine = EnginesFactory::getInstance($id_mt_engine);
         } catch (Exception $e) {
-            $this->_logTimeStampedMsg("Caught Exception: " . $e->getMessage());
+            $this->logger->debug("Caught Exception: " . $e->getMessage());
         }
 
         //anyway, take the defaults

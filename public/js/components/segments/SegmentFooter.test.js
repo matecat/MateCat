@@ -6,6 +6,7 @@ import SegmentFooter from './SegmentFooter'
 import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../mocks/mswServer'
 import globalFunctions from '../../globalFunctions'
+import CatToolStore from '../../stores/CatToolStore'
 window.React = React
 
 window.config = {
@@ -291,6 +292,7 @@ jest.mock('../../actions/CatToolActions', () => ({
 beforeAll(() => {
   window.classnames = () => {}
   window.HTMLElement.prototype.scrollTo = () => {}
+  CatToolStore.setCurrentProjectTemplate({})
 })
 
 afterAll(() => {

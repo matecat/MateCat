@@ -15,10 +15,7 @@ import CatToolActions from '../../../actions/CatToolActions'
 import {laraAuth} from '../../../api/laraAuth'
 import {laraTranslate} from '../../../api/laraTranslate'
 import CatToolStore from '../../../stores/CatToolStore'
-import {
-  decodePlaceholdersToPlainText,
-  encodePlaceholdersToTags,
-} from './DraftMatecatUtils/tagUtils'
+import {decodePlaceholdersToPlainText, encodePlaceholdersToTags,} from './DraftMatecatUtils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -165,11 +162,6 @@ let TranslationMatches = {
         }
       }
     }
-    console.log(
-      'Segments to fetch contributions for:',
-      segmentsToFetch,
-      this.segmentsWaitingForContributions,
-    )
     segmentsToFetch.forEach((segmentSid, index) => {
       this.getContribution({
         sid: segmentSid,
@@ -194,6 +186,7 @@ let TranslationMatches = {
     fastFetch = false,
   }) {
     const currentSegment = SegmentStore.getSegmentByIdToJS(sid)
+    if (!currentSegment) return Promise.resolve()
     if (!config.translation_matches_enabled) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
       SegmentActions.getSegmentsQa(currentSegment)
@@ -249,7 +242,6 @@ let TranslationMatches = {
           fastFetch,
         })
       }, 3000)
-      // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
     }
     const {contextListBefore, contextListAfter} =
@@ -298,9 +290,13 @@ let TranslationMatches = {
     }
 
     const jobLanguages = [config.source_code, config.target_code]
-    let allowed =
-      jobLanguages.filter((x) => ['en', 'it'].includes(x.split('-')[0]))
-        .length === 2
+    // Keep only languages whose base code is 'en' or 'it'.
+    let allowed = jobLanguages.filter(
+        (x) => ['en', 'it'].includes(x.split('-')[0])
+    ).filter(
+        // Remove duplicates, then check we have exactly two distinct matches.
+        (value, index, array) => array.indexOf(value) === index
+    ).length === 2;
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
@@ -309,14 +305,8 @@ let TranslationMatches = {
     }
     if (isLaraEngine && allowed && !fastFetch && !callNewContributions) {
       this.segmentsWaitingForContributions.push(id_segment_original)
-      console.log(
-        'Call Lara for segment:',
-        id_segment_original,
-        this.segmentsWaitingForContributions,
-      )
       laraAuth({idJob: config.id_job, password: config.password})
         .then((response) => {
-          // console.log('Text to translate via Lara:', currentSegment.segment)
           const jobMetadata = CatToolStore.getJobMetadata()
           const glossaries =
             jobMetadata?.project?.mt_extra?.lara_glossaries || []
@@ -337,7 +327,6 @@ let TranslationMatches = {
             glossaries,
           })
             .then((response) => {
-              // console.log('Lara Translate response:', response)
               const translation =
                 response.translation.find((item) => item.translatable)?.text ||
                 ''
@@ -346,7 +335,6 @@ let TranslationMatches = {
               )
             })
             .catch((e) => {
-              console.error('Lara Translate error:', e)
               return getContributionRequest()
             })
         })

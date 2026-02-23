@@ -26,7 +26,9 @@
     "diff-match-patch": "^1.0.5",
     "draft-js": "^0.11.4",
     "file-saver": "^2.0.5",
-    "flux": "^4.0.1",
+    "flux": "^4.0.4",
+    "format-message": "^6.2.4",
+    "format-message-parse": "^6.2.4",
     "immutability-helper": "^3.1.1",
     "immutable": "^5.0.0",
     "jquery": "^3.7.1",
@@ -34,6 +36,7 @@
     "js-cookie": "^3.0.0",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.21",
+    "make-plural": "^8.1.0",
     "moment": "^2.29.4",
     "object-assign": "^4.1.1",
     "platform": "1.3.6",
@@ -59,12 +62,13 @@
     "@babel/plugin-transform-runtime": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
-    "@sentry/webpack-plugin": "4.6.1",
+    "@sentry/webpack-plugin": "4.7.0",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
     "babel-loader": "10.0.0",
+    "baseline-browser-mapping": "^2.9.15",
     "broadcast-channel": "^7.1.0",
     "css-loader": "7.1.2",
     "eslint": "^8.0.0",
@@ -76,7 +80,7 @@
     "eslint-plugin-testing-library": "^7.0.0",
     "fs-extra": "^11.1.1",
     "glob": "^11.1.0",
-    "html-webpack-plugin": "5.6.5",
+    "html-webpack-plugin": "5.6.6",
     "husky": ">=6",
     "ini": "^5.0.0",
     "jest": "^30.0.0",
@@ -102,5 +106,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.5.21"
+  "version": "3.5.26"
 }
