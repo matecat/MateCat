@@ -43,27 +43,30 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         ),
       )
       const vars = new Set()
+
       const walk = (node) => {
-        if (Array.isArray(node)) {
-          const [name, type] = node
-          if (typeof name === 'string') vars.add({name, type})
-          if (node[2]) {
-            Object.values(node[2]).forEach((childNode) => {
+        if (!Array.isArray(node)) return
+
+        const [name, type, options, children] = node
+
+        // Exclude variables with name '#' or already added
+        if (
+          typeof name === 'string' &&
+          name !== '#' &&
+          ![...vars].some((v) => v.name === name)
+        ) {
+          vars.add({name, type})
+        }
+
+        ;[options, children].forEach((obj) => {
+          if (obj && typeof obj === 'object') {
+            Object.values(obj).forEach((childNode) => {
               if (Array.isArray(childNode)) {
-                childNode.forEach((node) => {
-                  if (Array.isArray(node)) {
-                    walk(node)
-                  }
-                })
+                childNode.forEach(walk)
               }
             })
           }
-          /*if (options && typeof options === 'object') {
-            Object.values(options).forEach((child) =>
-              Array.isArray(child) ? handleChildren(child) : null,
-            )
-          }*/
-        }
+        })
       }
       if (Array.isArray(tree)) tree.forEach((n) => walk(n))
       else walk(tree)
