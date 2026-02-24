@@ -60,7 +60,7 @@
         font-size: 16px;
         margin: 0;
 
-        > span {
+        .ai-feature-grey-label {
           color: colors.$grey7;
         }
       }
@@ -121,6 +121,10 @@
       p {
         color: colors.$grey6;
       }
+    }
+
+    .ai-feature-button-retry {
+      width: 100px;
     }
   }
 

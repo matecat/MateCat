@@ -5,6 +5,8 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import {aiFeedback} from '../../api/aiFeedback/aiFeedback'
 import CatToolStore from '../../stores/CatToolStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 
 export const SegmentFooterTabAiFeedback = ({
   code,
@@ -16,19 +18,24 @@ export const SegmentFooterTabAiFeedback = ({
 
   useEffect(() => {
     const requestFeedback = () => {
-      // setFeedback({
-      //   content:
-      //     'The translation accurately reflects all elements: the comparison with Venice, the historical reference, and the list of qualities. “Capitale olandese del XVII secolo” is a precise rendering of “17th century capital city of Holland.” Alternatives like “straordinari spazi verdi” (extraordinary green spaces) were possible, yet “meravigliosi” fits the tone naturally.',
-      // })
+      setFeedback()
 
-      const decodedSource = DraftMatecatUtils.excludeSomeTagsFromText(
-        segment.segment,
-        ['g', 'bx', 'ex', 'x', 'ph'],
-      )
-      const decodedTarget = DraftMatecatUtils.excludeSomeTagsFromText(
-        segment.translation,
-        ['g', 'bx', 'ex', 'x', 'ph'],
-      )
+      const decodedSource = DraftMatecatUtils.transformTagsToText(
+        DraftMatecatUtils.excludeSomeTagsFromText(segment.segment, [
+          'g',
+          'bx',
+          'ex',
+          'x',
+        ]),
+      ).replace(/·/g, ' ')
+      const decodedTarget = DraftMatecatUtils.transformTagsToText(
+        DraftMatecatUtils.excludeSomeTagsFromText(segment.translation, [
+          'g',
+          'bx',
+          'ex',
+          'x',
+        ]),
+      ).replace(/·/g, ' ')
 
       aiFeedback({
         idSegment: segment.sid,
@@ -38,7 +45,22 @@ export const SegmentFooterTabAiFeedback = ({
       })
     }
 
-    const receiveFeedback = (data) => console.log(data)
+    const receiveFeedback = ({data}) => {
+      if (!data.has_error && data.message?.comment) {
+        setFeedback({
+          category: data.message.category,
+          content: data.message.comment,
+        })
+      } else {
+        setFeedback({
+          error:
+            typeof data.message === 'string' && data.message !== ''
+              ? data.message
+              : 'Service currently unavailable. Please try again in a moment.',
+          retryCallback: () => requestFeedback(),
+        })
+      }
+    }
 
     SegmentStore.addListener(SegmentConstants.AI_FEEDBACK, requestFeedback)
     SegmentStore.addListener(
@@ -55,6 +77,21 @@ export const SegmentFooterTabAiFeedback = ({
     }
   }, [segment])
 
+  const getBadgeType = (category) => {
+    let _type = BADGE_TYPE.GREEN
+
+    switch (category) {
+      case 'Could Be Improved':
+        _type = BADGE_TYPE.YELLOW
+        break
+      case 'Does Not Match Source':
+        _type = BADGE_TYPE.RED
+        break
+    }
+
+    return _type
+  }
+
   return (
     <div
       key={`container_${code}`}
@@ -63,12 +100,25 @@ export const SegmentFooterTabAiFeedback = ({
     >
       {feedback?.content ? (
         <div className="ai-feature-content">
-          <h4>Score:</h4>
+          <h4>
+            Score:{' '}
+            <Badge type={getBadgeType(feedback.category)}>
+              {feedback.category}
+            </Badge>
+          </h4>
           <p>{feedback.content}</p>
         </div>
       ) : feedback?.error ? (
         <div className="ai-feature-content">
           <p>{feedback.error}</p>
+          <Button
+            className="ai-feature-button-retry"
+            type={BUTTON_TYPE.DEFAULT}
+            mode={BUTTON_MODE.OUTLINE}
+            onClick={feedback.retryCallback}
+          >
+            Retry
+          </Button>
         </div>
       ) : (
         <div className="loading-container">
