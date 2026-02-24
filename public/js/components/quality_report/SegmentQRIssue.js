@@ -3,7 +3,7 @@ import moment from 'moment'
 import {isUndefined} from 'lodash'
 import {Popup} from 'semantic-ui-react'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
-import CommentsIconFilled from '../../../img/icons/CommentsIconFilled'
+import CommentsSquareIconFilled from '../../../img/icons/CommentsSquareIconFilled'
 
 class SegmentQRIssue extends React.Component {
   generateHtmlCommentLines(issue) {
@@ -87,7 +87,7 @@ class SegmentQRIssue extends React.Component {
                   title="Comments"
                   mode={BUTTON_MODE.OUTLINE}
                 >
-                  <CommentsIconFilled size={18} />
+                  <CommentsSquareIconFilled size={18} />
                 </Button>
               }
             >

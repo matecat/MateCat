@@ -12,9 +12,9 @@ import IconEdit from '../icons/IconEdit'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import CommentsIcon from '../../../img/icons/CommentsIcon'
-import CommentsIconFilled from '../../../img/icons/CommentsIconFilled'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import CommentsSquareIconFilled from '../../../img/icons/CommentsSquareIconFilled'
+import CommentsSquareIcon from '../../../img/icons/CommentsSquareIcon'
 
 export const ReviewExtendedIssue = ({
   sid,
@@ -245,12 +245,6 @@ export const ReviewExtendedIssue = ({
     const category = getCategory()
     const severity = getSeverity()
 
-    let iconCommentClass =
-      issue.comments.length > 0 || issue.target_text ? (
-        <CommentsIconFilled size={18} />
-      ) : (
-        <CommentsIcon size={18} />
-      )
     //START comments html section
     let htmlCommentLines = generateHtmlCommentLines()
 
@@ -324,9 +318,9 @@ export const ReviewExtendedIssue = ({
                   title="Comments"
                 >
                   {issue.comments.length > 0 || issue.target_text ? (
-                    <CommentsIconFilled size={18} />
+                    <CommentsSquareIconFilled size={18} />
                   ) : (
-                    <CommentsIcon size={18} />
+                    <CommentsSquareIcon size={18} />
                   )}
                 </Button>
                 {isReview &&
