@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
-import {Button, BUTTON_MODE} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import Copy from '../icons/Copy'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
@@ -262,7 +262,13 @@ export const SegmentFooterTabAiAlternatives = ({
           })),
         )
       } else {
-        setAlternatives({error: 'Error'})
+        setAlternatives({
+          error:
+            typeof data.message === 'string' && data.message !== ''
+              ? data.message
+              : 'Service currently unavailable. Please try again in a moment.',
+          retryCallback: () => requestAlternatives({text: selectedText}),
+        })
       }
     }
 
@@ -341,6 +347,16 @@ export const SegmentFooterTabAiAlternatives = ({
       ) : alternatives?.error ? (
         <div className="ai-feature-content">
           <p>{alternatives.error}</p>
+          {alternatives.error !== 'No alternative translations found.' && (
+            <Button
+              className="ai-feature-button-retry"
+              type={BUTTON_TYPE.DEFAULT}
+              mode={BUTTON_MODE.OUTLINE}
+              onClick={alternatives.retryCallback}
+            >
+              Retry
+            </Button>
+          )}
         </div>
       ) : (
         <div className="loading-container">

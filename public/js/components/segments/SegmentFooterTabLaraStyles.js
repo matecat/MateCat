@@ -177,7 +177,13 @@ export const SegmentFooterTabLaraStyles = ({
                   <div>
                     <h4>
                       {style.name}{' '}
-                      {style.isDefault ? <span>(Original)</span> : ''}
+                      {style.isDefault ? (
+                        <span className="ai-feature-grey-label">
+                          (Original)
+                        </span>
+                      ) : (
+                        ''
+                      )}
                     </h4>
                     <p dangerouslySetInnerHTML={allowHTML(translation)}></p>
                   </div>
