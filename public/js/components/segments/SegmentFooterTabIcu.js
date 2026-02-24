@@ -251,7 +251,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
                     <span>({inputTypes[type]})</span>
                   </div>
                   <input
-                    value={values[name]?.value}
+                    value={values[name]?.value ?? ''}
                     onChange={(e) => onChangeValue(e, name)}
                     style={{width: '10rem'}}
                     type={inputTypes[type]}
