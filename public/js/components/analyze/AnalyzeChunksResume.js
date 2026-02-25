@@ -18,6 +18,7 @@ import UserStore from '../../stores/UserStore'
 import LabelWithTooltip from '../common/LabelWithTooltip'
 import Split from '../../../img/icons/Split'
 import Merge from '../../../img/icons/Merge'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -573,8 +574,8 @@ class AnalyzeChunksResume extends React.Component {
                 <div className="title-standard-words">
                   <h5>
                     Industry weighted
-                    <span data-tooltip="As counted by other CAT tools: no discount applied for machine-translation words.">
-                      <i className="icon-info icon" />
+                    <span data-tooltip="No discount applied for machine-translated words">
+                      <HelpCircle />
                     </span>
                   </h5>
                 </div>

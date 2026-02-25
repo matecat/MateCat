@@ -1,6 +1,7 @@
 import React from 'react'
 import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 class ProductionSummary extends React.Component {
   getTimeToEdit = () => {
@@ -158,7 +159,7 @@ class ProductionSummary extends React.Component {
               wide="very"
               trigger={
                 <div className="qr-label">
-                  Threshold {limit} <i className="icon-info icon" />
+                  Threshold {limit} <HelpCircle />
                 </div>
               }
             />
