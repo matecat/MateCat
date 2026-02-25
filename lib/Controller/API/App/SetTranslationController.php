@@ -10,6 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
+use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
@@ -645,7 +646,9 @@ class SetTranslationController extends AbstractStatefulKleinController
                 $this->icuSourcePatternValidator,
                 new MessagePatternValidator(
                     $this->data['chunk']->target,
-                    $translation
+                    // Transform target content: convert control character placeholders back to ASCII control characters
+                    (new CtrlCharsPlaceHoldToAscii())->transform($translation)
+
                 )
             ),
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
