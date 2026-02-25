@@ -439,7 +439,6 @@ export const ProjectsBulkActions = ({
               rest.revision_number,
             )
           })
-          console.log('rest.revision_number', rest.revision_number)
           if (fulfilledPromises.length) {
             const notification = {
               title: rest.revision_number
