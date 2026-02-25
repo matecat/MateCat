@@ -43,27 +43,30 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         ),
       )
       const vars = new Set()
+
       const walk = (node) => {
-        if (Array.isArray(node)) {
-          const [name, type] = node
-          if (typeof name === 'string') vars.add({name, type})
-          if (node[2]) {
-            Object.values(node[2]).forEach((childNode) => {
+        if (!Array.isArray(node)) return
+
+        const [name, type, options, children] = node
+
+        // Exclude variables with name '#' or already added
+        if (
+          typeof name === 'string' &&
+          name !== '#' &&
+          ![...vars].some((v) => v.name === name)
+        ) {
+          vars.add({name, type})
+        }
+
+        ;[options, children].forEach((obj) => {
+          if (obj && typeof obj === 'object') {
+            Object.values(obj).forEach((childNode) => {
               if (Array.isArray(childNode)) {
-                childNode.forEach((node) => {
-                  if (Array.isArray(node)) {
-                    walk(node)
-                  }
-                })
+                childNode.forEach(walk)
               }
             })
           }
-          /*if (options && typeof options === 'object') {
-            Object.values(options).forEach((child) =>
-              Array.isArray(child) ? handleChildren(child) : null,
-            )
-          }*/
-        }
+        })
       }
       if (Array.isArray(tree)) tree.forEach((n) => walk(n))
       else walk(tree)
@@ -88,7 +91,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
 
   const analyzeICU = useMemo(() => {
     const text = textUtils.removeWhitespacePlaceholders(
-      transformTagsToText(removeTagsFromText(segment.segment)),
+      transformTagsToText(removeTagsFromText(segment.translation)),
     )
 
     let ast
@@ -116,6 +119,9 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         // Se ci sono sotto‐messaggi, analizzali ugualmente
         if (node[2] && typeof node[2] === 'object') {
           Object.values(node[2]).forEach(walk)
+        }
+        if (node[3] && typeof node[3] === 'object') {
+          Object.values(node[3]).forEach(walk)
         }
       }
     }
@@ -235,7 +241,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
         )}
         <div className="segment-footer-icu-editor">
           <h3>Test values</h3>
-          {variableNames.length === 0 && <h3>No variables</h3>}
+          {variableNames.length === 0 && <div>No variables</div>}
           <div className="segment-footer-icu-inputs">
             {variableNames.map(({name, type}) => (
               <div key={name}>
@@ -245,7 +251,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
                     <span>({inputTypes[type]})</span>
                   </div>
                   <input
-                    value={values[name]?.value}
+                    value={values[name]?.value ?? ''}
                     onChange={(e) => onChangeValue(e, name)}
                     style={{width: '10rem'}}
                     type={inputTypes[type]}

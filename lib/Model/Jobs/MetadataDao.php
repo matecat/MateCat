@@ -182,14 +182,15 @@ class MetadataDao extends AbstractDao
      * @param int $id_job
      * @param string $password
      *
-     * @return array
+     * @return ?array empty array if the subfiltering_handlers metadata is not set,
+     *                  null when all handlers are disabled
      */
-    public function getSubfilteringCustomHandlers(int $id_job, string $password): array
+    public function getSubfilteringCustomHandlers(int $id_job, string $password): ?array
     {
         try {
             $subfiltering = $this->get($id_job, $password, self::SUBFILTERING_HANDLERS, 86400);
 
-            return json_decode($subfiltering->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return json_decode($subfiltering->value ?? '[]') ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }
