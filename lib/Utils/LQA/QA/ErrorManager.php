@@ -463,11 +463,28 @@ class ErrorManager
      */
     public static function JSONtoExceptionList(string $jsonString): array
     {
+        // Create a new instance of the current class
         $manager = new self();
-        $jsonValue = json_decode($jsonString, true);
-        if (is_array($jsonValue)) {
-            foreach ($jsonValue as $errArray) {
-                $manager->addError($errArray['outcome']);
+
+        // If the JSON string is malformed, attempt to extract error codes via regex fallback
+        // This happens when the error JSON is longer than 512 bytes,
+        // which is the maximum allowed by the field in mysql table segment_translations
+        // Extract the first outcome code found in the JSON string
+        if (!json_validate($jsonString)) {
+            // Try to extract the "outcome" numeric value from the invalid JSON
+            preg_match('/"outcome":\s*?(\d+),/', $jsonString, $matches);
+            if (!empty($matches)) {
+                // Register the extracted error code, defaulting to ERR_TAG_MISMATCH if the capture group is missing (conservative)
+                $manager->addError((int)($matches[1] ?? self::ERR_TAG_MISMATCH));
+            }
+        } else {
+            // Parse valid JSON into an associative array
+            $jsonValue = json_decode($jsonString, true);
+            if (is_array($jsonValue)) {
+                // Iterate over each error entry and register its outcome code
+                foreach ($jsonValue as $errArray) {
+                    $manager->addError((int)($errArray['outcome'] ?? self::ERR_TAG_MISMATCH));
+                }
             }
         }
         return $manager->exceptionList;

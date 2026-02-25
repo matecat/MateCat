@@ -92,16 +92,16 @@ class ICUChecker
         }
 
         try {
-            $errorMessage = null;
+            $errorMessage = [];
             $complaints = $this->icuPatternComparator->validate(validateTarget: true);
             foreach ($complaints->targetWarnings?->getArgumentWarnings() ?? [] as $complaint) {
-                $errorMessage .= implode('<br/><br/>', $complaint->getMessages()) . '<br/><br/>';
+                $errorMessage[] = implode('<br/><br/>', $complaint->getMessages());
             }
 
             if ($errorMessage) {
                 $this->errorManager->setErrorMessage(
                     ErrorManager::ERR_ICU_VALIDATION,
-                    substr($errorMessage, 0, -10)
+                    implode('<br/><br/>', $errorMessage)
                 );
                 $this->errorManager->addError(ErrorManager::ERR_ICU_VALIDATION);
             }
