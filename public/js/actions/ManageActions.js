@@ -279,8 +279,8 @@ let ManageActions = {
 
         if (fulfilledPromises.length) {
           const notification = {
-            title: 'Change assignee project',
-            text: 'Change assignee project',
+            title: 'Assignee changed',
+            text: `The selected projects have been successfully assigned to ${user.first_name} ${user.last_name}.`,
             type: 'warning',
             position: 'bl',
             allowHtml: true,
@@ -451,11 +451,10 @@ let ManageActions = {
             })
           })
         })
-
         if (fulfilledPromises.length) {
           const notification = {
-            title: 'Change projects team',
-            text: 'Selected projects team has been changed',
+            title: 'Projects moved',
+            text: `The selected projects have been successfully moved to the ${team.name} team.`,
             type: 'warning',
             position: 'bl',
             allowHtml: true,

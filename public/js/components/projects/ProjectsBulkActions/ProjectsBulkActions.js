@@ -318,10 +318,10 @@ export const ProjectsBulkActions = ({
                 : id === JOBS_ACTIONS.RESUME.id
                   ? `You are about to resume ${jobsBulk.length} jobs. Are you sure you want to proceed?`
                   : id === JOBS_ACTIONS.CANCEL.id
-                    ? `You are about to delete ${jobsBulk.length} jobs. Are you sure you want to proceed?`
+                    ? `You are about to cancel ${jobsBulk.length} jobs. Are you sure you want to proceed?`
                     : id === JOBS_ACTIONS.DELETE_PERMANENTLY.id
                       ? `You are about to delete ${jobsBulk.length} jobs permanently, this action cannot be undone. Are you sure you want to proceed?`
-                      : `You are about to generate revise 2 of ${jobsBulk.length} jobs. Are you sure you want to proceed?`
+                      : `You are about to generate the revise 2 link for ${jobsBulk.length} jobs. Are you sure you want to proceed?`
 
           openConfirmModal({
             action: id,
