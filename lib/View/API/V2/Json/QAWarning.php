@@ -42,7 +42,7 @@ class QAWarning
             $this->structure[$error_type]['Categories'][$category] = [];
         }
 
-        if (!in_array($content, $this->structure[$error_type]['Categories'][$category])) {
+        if (!in_array($content, $this->structure[$error_type]['Categories'][$category], true)) {
             $this->structure[$error_type]['Categories'][$category][] = $content;
         }
     }
