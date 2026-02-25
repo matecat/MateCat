@@ -41,6 +41,7 @@ import FileLog from '../../../img/icons/FileLog'
 import Archive from '../../../img/icons/Archive'
 import Refresh from '../../../img/icons/Refresh'
 import Trash from '../../../img/icons/Trash'
+import FlipBackward from '../icons/FlipBackward'
 
 const ProjectContainer = ({
   project,
@@ -208,7 +209,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <Refresh size={18} />
+                  <FlipBackward size={18} />
                   Unarchive project
                 </>
               ),
@@ -230,7 +231,7 @@ const ProjectContainer = ({
             {
               label: (
                 <>
-                  <Refresh size={18} />
+                  <FlipBackward size={18} />
                   Resume Project
                 </>
               ),
