@@ -4,7 +4,7 @@
   display: inline-block;
   position: relative;
   background: rgba(255, 169, 2, 0.24);
-  border-bottom: 2px solid #ffa902;
+  border-bottom: 2px solid colors.$orangeDefaultHover;
   cursor: pointer;
 }
 
@@ -17,7 +17,7 @@
 
 .blacklistItem {
   background: rgba(255, 47, 34, 0.24);
-  border-bottom: 2px solid #ff2f22;
+  border-bottom: 2px solid colors.$redDefault;
   display: inline-block;
   position: relative;
 }

@@ -1,14 +1,15 @@
+@use './colors';
 #powerTip {
   cursor: default;
-  background-color: #fff;
+  background-color: colors.$white;
   border-radius: 6px;
-  color: #000;
+  color: colors.$black;
   display: none;
   padding: 8px !important;
   position: absolute;
   white-space: nowrap;
   z-index: 2147483647;
-  border: 1px solid #d4d4d5;
+  border: 1px solid colors.$grey8;
   border-radius: 0.28571429rem;
   box-shadow: 0px 2px 4px 0px rgba(34, 36, 38, 0.12),
     0px 2px 10px 0px rgba(34, 36, 38, 0.15);
@@ -19,11 +20,11 @@
   content: '';
   width: 0.71428571em;
   height: 0.71428571em;
-  background: #ffffff;
+  background: colors.$white;
   -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
   z-index: 2;
-  box-shadow: -1px -1px 0px 0px #d4d4d5;
+  box-shadow: -1px -1px 0px 0px colors.$grey8;
   top: -4px;
 }
 

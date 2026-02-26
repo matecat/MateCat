@@ -84,7 +84,7 @@
     line-height: 40px;
     margin-top: 13px;
     border: 1px solid colors.$greenDefault;
-    background-color: #f7fdf7;
+    background-color: colors.$white;
     border-radius: 4px;
     display: flex;
     justify-content: center;
@@ -177,10 +177,10 @@
   line-height: 50px;
   text-align: center;
   font-size: 21px;
-  color: #fff;
+  color: colors.$white;
   padding: 0;
-  background: #b7b7b7;
-  border: 1px solid #ccc;
+  background: colors.$grey7;
+  border: 1px solid colors.$grey8;
   -moz-border-radius: 50px;
   -webkit-border-radius: 50px;
   border-radius: 50px;
@@ -206,14 +206,14 @@
   .button {
     font-family: Calibri, Arial, Helvetica, sans-serif;
     vertical-align: top;
-    border: 1px solid #797979;
+    border: 1px solid colors.$grey;
     border-radius: 2px;
     font-size: 16px;
     margin-bottom: 15px;
     margin-left: 80%;
     background-color: colors.$translatedBlue;
     transition: 0.3s ease;
-    color: #ffffff;
+    color: colors.$white;
     text-shadow: none;
     background-image: none;
     cursor: pointer;
@@ -228,9 +228,9 @@
     text-decoration: none;
     user-select: none;
     &:hover {
-      background-color: #08b3de;
+      background-color: colors.$translatedBlueTransparent;
       box-shadow:
-        0 0 0 #e0e0e0,
+        0 0 0 colors.$grey8,
         0 0 2px rgba(0, 0, 0, 0.12),
         0 2px 4px rgba(0, 0, 0, 0.24) !important;
     }

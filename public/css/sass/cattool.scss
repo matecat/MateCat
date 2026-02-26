@@ -85,7 +85,7 @@ body.cattool {
   }
   .icon-warning-sign.qa-icon {
     background-color: colors.$red800;
-    color: #fff;
+    color: colors.$white;
     display: flex;
     padding: 3px;
     justify-content: center;
@@ -187,10 +187,10 @@ body.cattool {
 
     &.lara-styles-dropdown-item-active,
     &:hover {
-      background-color: rgba(#0588f9, 0.16);
-      color: #0099cc;
+      background-color: rgba(colors.$blue800, 0.16);
+      color: colors.$translatedBlue;
       > span {
-        color: #017cac;
+        color: colors.$translatedBlueHover;
       }
     }
   }

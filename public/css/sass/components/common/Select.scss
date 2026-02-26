@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+
 //selects
 .select {
   user-select: none;
@@ -176,7 +177,7 @@ label ~ .select__dropdown-wrapper:not(
 .select__dropdown-wrapper {
   .new-color {
     box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-    background: #ffffff;
+    background: colors.$white;
   }
   .draft-color {
     background: colors.$grey1;

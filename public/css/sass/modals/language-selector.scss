@@ -38,7 +38,7 @@
 
   /* Modal Subheader */
   .matecat-modal-subheader {
-    background: #fff;
+    background: colors.$white;
     border-bottom: 1px solid $medium-gray;
     /*height: $subheader-height;*/
     padding: 16px 16px 16px 32px;
@@ -152,8 +152,8 @@
           text-transform: capitalize;
           border-radius: 2px;
           margin: 0 2px;
-          background: #fff;
-          color: #000;
+          background: colors.$white;
+          color: colors.$black;
           border: 1px solid $medium-gray;
           &:hover {
             cursor: default;
@@ -166,9 +166,9 @@
           }
           &.highlightDelete {
             background: $light-blue;
-            color: #ffffff;
+            color: colors.$white;
             .react-tagsinput-remove {
-              color: #ffffff;
+              color: colors.$white;
             }
           }
         }
@@ -200,7 +200,7 @@
   .matecat-modal-footer {
     overflow: auto;
     height: 72px;
-    background: #fff;
+    background: colors.$white;
     border-top: 1px solid $medium-gray;
     padding: 8px 16px 8px 32px;
 
@@ -227,7 +227,7 @@
         background: colors.$translatedBlue;
         border-radius: 25px;
         font-size: 0.9rem;
-        color: #fff;
+        color: colors.$white;
         line-height: 1;
       }
 
@@ -268,7 +268,7 @@
 
         &.selected {
           background: $dark-blue;
-          color: #fff;
+          color: colors.$white;
         }
         &:not(.selected) .check {
           display: none;

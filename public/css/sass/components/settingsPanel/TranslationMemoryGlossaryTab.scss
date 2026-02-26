@@ -205,7 +205,7 @@
 .tm-key-row-menu-button {
   .menu-button-wrapper {
     button {
-      color: #000 !important;
+      color: colors.$black !important;
       background: colors.$grey4 !important;
       text-align: center;
       border: 1px solid colors.$grey2 !important;
@@ -238,7 +238,7 @@
     min-width: 140px;
     border-radius: 2px;
     font-size: 16px;
-    color: #000;
+    color: colors.$black;
     background: colors.$grey4;
     padding: 4px 8px;
     text-align: center;
@@ -401,7 +401,7 @@
 }
 
 .translation-memory-glossary-tab-delete {
-  border-top: 3px solid #ffcc01;
+  border-top: 3px solid colors.$orangeDefault;
   background-color: colors.$orangeDefaultTransparent2;
 }
 
@@ -463,7 +463,7 @@
 .tm-row-penalty {
   .tm-row-penalty-button,
   .penalty-numeric-stepper-close-button {
-    color: #000 !important;
+    color: colors.$black !important;
     background: colors.$grey4 !important;
     padding: 4px 8px;
     text-align: center;

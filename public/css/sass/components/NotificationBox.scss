@@ -1,4 +1,5 @@
 @use '../commons/variables';
+@use '../commons/colors';
 /******* Notifications ************/
 
 .notifications-position {
@@ -58,12 +59,12 @@
   position: relative;
   width: 100%;
   text-align: left;
-  background-color: #fff;
+  background-color: colors.$white;
   @include variables.border-radius(2px);
   font-size: 16px;
   margin: 10px 0 0;
   padding: 15px;
-  box-shadow: 0 1px 10px #666;
+  box-shadow: 0 1px 10px colors.$grey6;
   display: block;
   @include variables.box-sizing(border-box);
   opacity: 0;
@@ -99,7 +100,7 @@
     text-align: right;
     a {
       text-decoration: underline;
-      color: #4183c4;
+      color: colors.$linkBlue;
       font-weight: 700;
       &:hover {
         text-decoration: none;
@@ -114,8 +115,8 @@
   top: 10px;
   right: 10px;
   line-height: 14px;
-  background-color: #333;
-  color: #ffffff;
+  background-color: colors.$grey1300;
+  color: colors.$white;
   border-radius: 50%;
   width: 14px;
   height: 14px;
@@ -123,7 +124,7 @@
   text-align: center;
   cursor: pointer;
   &:hover {
-    background-color: #666;
+    background-color: colors.$grey6;
   }
 }
 
@@ -165,7 +166,7 @@
     font-weight: bold;
     line-height: 28px;
     span {
-      color: #4183c4;
+      color: colors.$linkBlue;
     }
   }
 }

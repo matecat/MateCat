@@ -14,7 +14,7 @@ header {
     color: white;
     text-align: center;
     border-radius: 4px;
-    border: 1px solid #ffffff;
+    border: 1px solid colors.$white;
 
     &.revision-r1 {
       background: colors.$approvedGreen;
@@ -124,7 +124,7 @@ header {
         opacity: 1;
 
         #filter {
-          fill: #fff;
+          fill: colors.$white;
         }
       }
     }

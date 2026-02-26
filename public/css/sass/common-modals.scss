@@ -83,18 +83,18 @@ a {
   width: 100%;
   padding: 0.7em 0.6em;
   display: inline-block;
-  border: 1px solid #ccc;
-  box-shadow: inset 0 1px 3px #ddd;
+  border: 1px solid colors.$grey8;
+  box-shadow: inset 0 1px 3px colors.$grey8;
   border-radius: 4px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   font-size: 15px;
-  color: #333;
+  color: colors.$grey1300;
 }
 
 .dqf-modal input[disabled] {
-  color: #999;
+  color: colors.$grey7;
   cursor: not-allowed;
   background: colors.$grey2;
 }
@@ -102,7 +102,7 @@ a {
 .user-info-form input {
   margin-top: 5px;
   width: 100%;
-  color: #000;
+  color: colors.$black;
 }
 
 .login-button,
@@ -124,9 +124,9 @@ a {
 }
 
 .preference-modal-message {
-  box-shadow: 0 2px 2px #e2e2e2;
+  box-shadow: 0 2px 2px colors.$grey4;
   border-radius: 2px;
-  border: 1px solid #ccc;
+  border: 1px solid colors.$grey8;
   line-height: 20px;
   padding: 10px 15px;
   background: rgb(195, 224, 195);
@@ -180,10 +180,10 @@ a {
     overflow: visible;
     max-height: inherit;
     font-size: 23px;
-    background: #002b5c;
+    background: colors.$darkBlue;
     padding: 7px 10px 7px 24px;
     background-size: 35px;
-    color: #fff;
+    color: colors.$white;
     margin: 0 !important;
     display: grid;
     grid-template-columns: 40px 1fr 40px;
@@ -289,7 +289,7 @@ a {
     width: 340px;
     min-width: unset;
     box-shadow:
-      0 0 0 #e0e0e0,
+      0 0 0 colors.$grey8,
       0 0 2px rgba(0, 0, 0, 0.12),
       0 2px 4px rgba(0, 0, 0, 0.24) !important;
   }
@@ -300,10 +300,10 @@ a {
     border-radius: 4px 4px 0 0;
     overflow: visible;
     max-height: inherit;
-    background: #002b5c;
+    background: colors.$darkBlue;
     padding: 6px 10px 3px 24px;
     background-size: 31px;
-    color: #fff;
+    color: colors.$white;
     margin: 0 !important;
     display: grid;
     grid-template-columns: 35px 1fr 40px;
@@ -356,7 +356,7 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  border: 1px solid #666;
+  border: 1px solid colors.$grey6;
 }
 
 .matecat-modal-content .disabled,
@@ -365,7 +365,7 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  background: #d6d6d6;
+  background: colors.$grey8;
 }
 
 .matecat-modal-content,
@@ -412,12 +412,12 @@ a {
       ::-webkit-scrollbar-thumb {
         -webkit-border-radius: 10px;
         border-radius: 10px;
-        background: #a7a5a5;
+        background: colors.$grey7;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
 
       ::-webkit-scrollbar-thumb:window-inactive {
-        background: #a7a5a5;
+        background: colors.$grey7;
       }
 
       &.team {
@@ -469,19 +469,19 @@ a {
 
           .mini.ui.button.right.floated {
             margin-top: 6px;
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey;
             display: inherit;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-size: 14px;
             padding: 6px 15px;
-            background-color: #f6f6f6;
+            background-color: colors.$grey5;
             white-space: nowrap;
 
             &:hover {
               box-shadow:
-                0 0 0 #e0e0e0,
+                0 0 0 colors.$grey8,
                 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             }
@@ -496,7 +496,7 @@ a {
           }
 
           .mini.ui.primary.button {
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -511,7 +511,7 @@ a {
           }
 
           .ui.primary.button {
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -523,7 +523,7 @@ a {
             line-height: 20px;
             text-align: center;
             vertical-align: bottom;
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey;
             border-radius: 2px;
           }
         }
@@ -594,13 +594,13 @@ a {
 
 .ui.fluid.input > input {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  box-shadow: inset 0 1px 3px #ddd;
+  box-shadow: inset 0 1px 3px colors.$grey8;
   font-size: 15px;
 }
 
 .ui.multiple.search.dropdown {
   width: 100%;
-  box-shadow: inset 0 1px 3px #ddd;
+  box-shadow: inset 0 1px 3px colors.$grey8;
   font-size: 15px;
 }
 
@@ -608,7 +608,7 @@ a {
   height: 16px;
 
   &:hover {
-    color: #333333;
+    color: colors.$grey1300;
   }
 }
 
@@ -630,7 +630,7 @@ a {
   .divider-line {
     height: 2px;
     width: 40%;
-    background-color: #c5c5c5;
+    background-color: colors.$grey8;
     margin-top: 10px;
     display: block;
     float: left;
@@ -639,7 +639,7 @@ a {
   span {
     float: left;
     width: 20%;
-    color: #656565;
+    color: colors.$grey6;
   }
 }
 
@@ -660,7 +660,7 @@ a {
     .ui.primary.button,
     .ui.red.button {
       font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      border: 1px solid #797979;
+      border: 1px solid colors.$grey;
       border-radius: 2px;
     }
   }
@@ -714,7 +714,7 @@ a {
 
     .no-result {
       font-size: 14px;
-      color: #666666;
+      color: colors.$grey6;
       padding: 7px;
     }
   }
@@ -724,7 +724,7 @@ a {
 
     .matecat-modal-top {
       .move-ribbon {
-        background: #e8e8e8;
+        background: colors.$grey4;
         padding: 8px 15px;
         border-radius: 4px;
 
@@ -763,16 +763,16 @@ a {
       ::-webkit-scrollbar-thumb {
         -webkit-border-radius: 10px;
         border-radius: 10px;
-        background: #a7a5a5;
+        background: colors.$grey7;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
 
       ::-webkit-scrollbar-thumb:window-inactive {
-        background: #a7a5a5;
+        background: colors.$grey7;
       }
 
       .default.text {
-        color: #000;
+        color: colors.$black;
       }
     }
   }
@@ -800,7 +800,7 @@ a {
       h2 {
         padding-left: 10px;
         padding-bottom: 10px;
-        border-bottom: 1px solid #dee7e8;
+        border-bottom: 1px solid colors.$grey4;
       }
 
       .shortcut-item-list {
@@ -813,7 +813,7 @@ a {
           }
 
           &:hover {
-            background: #f1f1f1;
+            background: colors.$grey9;
           }
 
           .shortcut-title,
@@ -825,7 +825,7 @@ a {
           .shortcut-keys {
             .shortcuts {
               text-align: right;
-              color: #03bdee;
+              color: colors.$translatedBlueTransparent;
             }
 
             .mac,
@@ -836,7 +836,7 @@ a {
                 display: inline-block;
                 margin-left: 5px;
                 margin-right: 5px;
-                background: #909798;
+                background: colors.$grey7;
                 padding: 0 5px;
                 line-height: 20px;
                 font-size: 12px;
@@ -1018,7 +1018,7 @@ a {
 
   .buttons-popup-container {
     padding: 25px 0 30px;
-    border-bottom: 1px solid #f2f4f7;
+    border-bottom: 1px solid colors.$grey5;
     display: flex;
     gap: 20px;
     align-items: center;

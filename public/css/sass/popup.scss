@@ -34,8 +34,8 @@
     max-height: inherit;
     font-size: 24px;
     padding: 10px 10px 7px 58px;
-    border-bottom: 1px solid #000;
-    color: #fff;
+    border-bottom: 1px solid colors.$black;
+    color: colors.$white;
     margin: 0 !important;
     text-align: left;
   }
@@ -66,7 +66,7 @@
     padding: 10px 10px 7px 64px;
     background-size: 40px;
     /* border-bottom: 1px solid #000; */
-    color: #fff;
+    color: colors.$white;
     margin: 0 !important;
     text-align: left;
     font-family: 'calibri', Arial, Helvetica, sans-serif;
@@ -74,13 +74,13 @@
 
   .inner {
     width: 45px;
-    border-right: 1px solid #003366;
+    border-right: 1px solid colors.$darkBlue;
     border-radius: 0 0 0 6px;
   }
 
   .btn-ok,
   .btn-cancel {
-    color: #fff;
+    color: colors.$white;
     background: colors.$translatedBlue;
     font-weight: bold;
     text-decoration: none;

@@ -19,7 +19,7 @@
     z-index: 1;
     border-radius: 8px 8px 0 0;
     .job-id {
-      color: #969696;
+      color: colors.$grey7;
     }
     .source-target {
       display: flex;
@@ -145,7 +145,7 @@
         min-width: 330px;
         height: 205px;
         .item {
-          border-top: 1px solid #fafafa;
+          border-top: 1px solid colors.$grey5;
           padding: 15px 5px 15px 10px !important;
           white-space: normal;
           word-wrap: normal;
@@ -189,7 +189,7 @@
     }
   }
   .confirm-delivery-box {
-    background: #daeddf;
+    background: colors.$greenDefaultTransparent2;
     padding: 9px 15px 3px;
     text-align: right;
     line-height: 20px;
@@ -203,7 +203,7 @@
   }
 
   .assign-job-translator {
-    background-color: #d7d8dc;
+    background-color: colors.$grey8;
     padding: 10px 15px 35px;
     width: 100%;
     .title {
@@ -242,16 +242,16 @@
               input[type='text'],
               input[type='email'],
               span.select {
-                box-shadow: inset 0 1px 3px #ddd;
-                border: 1px solid #ccc;
+                box-shadow: inset 0 1px 3px colors.$grey8;
+                border: 1px solid colors.$grey8;
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 border-radius: variables.$border-radius-default;
                 height: 40px;
                 &:focus {
-                  border-color: #85b7d9;
+                  border-color: colors.$linkBlueTransparent;
                 }
                 &:active {
-                  border-color: #85b7d9;
+                  border-color: colors.$linkBlueTransparent;
                 }
               }
               &.send-job-box {
@@ -281,8 +281,8 @@
                 .selection.dropdown {
                   width: 100%;
                   min-width: 91px !important;
-                  border: 1px solid #ccc;
-                  box-shadow: inset 0 1px 3px #ddd;
+                  border: 1px solid colors.$grey8;
+                  box-shadow: inset 0 1px 3px colors.$grey8;
                   font-size: 14px;
                   .menu {
                     height: 205px;
@@ -354,7 +354,7 @@
       text-align: center;
       line-height: 25px;
       border-radius: 50%;
-      color: #ffffff;
+      color: colors.$white;
       position: absolute;
       top: -14px;
       left: 90px;
@@ -423,7 +423,7 @@
         }
       }
       .payment-details-box {
-        background-color: #ffffff;
+        background-color: colors.$white;
         padding: 15px;
         position: relative;
         min-height: 232px;
@@ -449,7 +449,7 @@
                 .icon {
                   &.active {
                     background: transparent !important;
-                    color: #7eaf3e !important;
+                    color: colors.$greenDefaultTransparent !important;
                     text-shadow: none !important;
                   }
                 }
@@ -488,7 +488,7 @@
                   margin: 0;
                   font-weight: 100;
                   font-size: 13px;
-                  color: #545353;
+                  color: colors.$grey6;
                 }
               }
               .target-box {
@@ -560,8 +560,8 @@
             display: inline-block;
             font-size: 23px;
             span.select {
-              box-shadow: inset 0 1px 3px #ddd;
-              border: 1px solid #ccc;
+              box-shadow: inset 0 1px 3px colors.$grey8;
+              border: 1px solid colors.$grey8;
               font-family: Calibri, Arial, Helvetica, sans-serif;
             }
             .react-datepicker__input-container input {
@@ -608,14 +608,14 @@
                 color: red;
               }
               &.too-far-date {
-                color: #ffa038;
+                color: colors.$rebuttedRed;
                 .tip {
                   display: inline-block;
                   width: 5px;
                   margin-right: 20px;
                   i {
                     position: relative;
-                    color: #a7a7a7;
+                    color: colors.$grey7;
                     font-size: 16px;
                     top: 2px;
                   }
@@ -652,7 +652,7 @@
               top: 2px;
               font-size: 15px;
               background: colors.$grey2;
-              color: #000000;
+              color: colors.$black;
             }
           }
           .delivery-box {
@@ -671,14 +671,14 @@
                 }
                 input[type='text'],
                 input[type='email'] {
-                  box-shadow: inset 0 1px 3px #ddd;
-                  border: 1px solid #ccc;
+                  box-shadow: inset 0 1px 3px colors.$grey8;
+                  border: 1px solid colors.$grey8;
                   font-family: Calibri, Arial, Helvetica, sans-serif;
                   &:focus {
-                    border-color: #85b7d9;
+                    border-color: colors.$linkBlueTransparent;
                   }
                   &:active {
-                    border-color: #85b7d9;
+                    border-color: colors.$linkBlueTransparent;
                   }
                 }
                 &.input-time {
@@ -686,8 +686,8 @@
                   .selection.dropdown {
                     width: 100%;
                     min-width: 101px !important;
-                    border: 1px solid #ccc;
-                    box-shadow: inset 0 1px 3px #ddd;
+                    border: 1px solid colors.$grey8;
+                    box-shadow: inset 0 1px 3px colors.$grey8;
                     .text {
                       font-weight: 100 !important;
                     }
@@ -708,7 +708,7 @@
                   font-size: 18px;
                   border: 1px solid colors.$translatedBlue;
                   box-shadow: none !important;
-                  background-color: #ffffff !important;
+                  background-color: colors.$white !important;
                   font-weight: 700;
                   margin-top: 33px;
                   &:hover {
@@ -743,7 +743,7 @@
           width: 18%;
           min-width: 199px;
           .order-box {
-            background-color: #a7d7916b;
+            background-color: colors.$greenDefaultTransparent;
             height: 70px;
             text-align: center;
             margin-bottom: 5px;
@@ -766,7 +766,7 @@
               font-family: Calibri, Arial, Helvetica, sans-serif;
               font-size: 15px;
               a {
-                color: #000000;
+                color: colors.$black;
                 font-weight: 100;
                 margin-left: 10px;
               }
@@ -821,7 +821,7 @@
               .pointer {
                 width: 12px;
                 height: 12px;
-                background: #d5d8dc;
+                background: colors.$grey8;
                 display: inline-block;
                 border-radius: 50%;
                 margin-right: 5px;
@@ -836,7 +836,7 @@
           .slider-box {
             min-height: 110px;
             position: relative;
-            border: 1px solid #a8bbb2;
+            border: 1px solid colors.$grey7;
             padding: 15px 0px;
             border-radius: variables.$border-radius-default;
             .appendix {
@@ -846,9 +846,9 @@
               font-size: 28px;
               position: relative;
               top: -3px;
-              color: #a8bbb2;
+              color: colors.$grey7;
               right: 13px;
-              background: #f1f3f2;
+              background: colors.$grey9;
               padding: 6px 2px;
               text-align: center;
             }
@@ -916,7 +916,7 @@
             }
           }
           .request-info-box {
-            color: #909894;
+            color: colors.$grey7;
             position: absolute;
             bottom: 20px;
             right: 30px;
@@ -939,7 +939,7 @@
                     color: inherit;
                   }
                   a {
-                    color: #000000 !important;
+                    color: colors.$black !important;
                   }
                 }
               }
@@ -958,8 +958,8 @@
                 .content {
                   .button {
                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                    border: 1px solid #c1c1c1;
-                    background: #f3f3f3;
+                    border: 1px solid colors.$grey8;
+                    background: colors.$grey9;
                     position: relative;
                     top: 5px;
                     width: 100%;
@@ -1130,7 +1130,7 @@
           width: 18%;
           min-width: 200px;
           .order-box {
-            background-color: #a7d7916b;
+            background-color: colors.$greenDefaultTransparent;
             padding: 25px 5px 15px;
             margin-bottom: 5px;
             display: flex;
@@ -1151,7 +1151,7 @@
             .content {
               font-family: Calibri, Arial, Helvetica, sans-serif;
               a {
-                color: #000000;
+                color: colors.$black;
                 font-weight: 100;
                 font-size: 14px;
               }
@@ -1264,7 +1264,7 @@
       }
     }
     &.compact-background {
-      background: #ffffff;
+      background: colors.$white;
       padding-bottom: 25px;
       padding-top: 25px;
     }
@@ -1290,7 +1290,7 @@
       margin-right: 0 !important;
       &:hover {
         box-shadow:
-          0 0 0 #e0e0e0,
+          0 0 0 colors.$grey8,
           0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
       }

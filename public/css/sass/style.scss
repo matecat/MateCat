@@ -25,7 +25,7 @@ body.incomingMsg header {
 
 header .wrapper {
   width: 100%;
-  background: #002b5c;
+  background: colors.$darkBlue;
   height: 60px;
   display: grid;
   grid-template-columns: 170px auto auto 64px;
@@ -55,7 +55,7 @@ header .wrapper {
 }
 
 .text a {
-  text-color: #000;
+  text-color: colors.$black;
 }
 
 .error a {
@@ -69,7 +69,7 @@ header .wrapper {
 .warnings,
 .text .alternatives {
   clear: left;
-  color: #d65959;
+  color: colors.$red800;
   float: left;
   margin-left: -10px;
   font-size: 14px;
@@ -128,19 +128,19 @@ section.opened .warnings {
 .cattool #quality-report[data-vote='excellent'],
 .cattool #quality-report[data-vote='verygood'],
 .cattool #quality-report[data-vote='good'] {
-  background-color: #3c9423 !important;
+  background-color: colors.$greenDefaultHover !important;
 }
 
 .cattool #quality-report[data-vote='poor'] {
-  background-color: #ffa935 !important;
+  background-color: colors.$orange600 !important;
 }
 
 .cattool #quality-report[data-vote='acceptable'] {
-  background-color: #eaba22 !important;
+  background-color: colors.$orangeDefaultHover !important;
 }
 
 .cattool #quality-report[data-vote='fail'] {
-  background-color: #e7504d !important;
+  background-color: colors.$red800 !important;
 }
 
 .logo {
@@ -164,7 +164,7 @@ section.opened .warnings {
 }
 
 .projectbar {
-  color: #788190;
+  color: colors.$grey1;
   display: flex;
   justify-content: flex-start;
   padding: 40px 115px 10px 4.5%;
@@ -189,15 +189,15 @@ section.opened .warnings {
     max-width: 80%;
   }
   .button-notes {
-    color: #fff !important;
+    color: colors.$white !important;
     font-weight: bold;
     text-decoration: none;
     padding: 6px 12px;
     border-radius: 2px;
     font-size: 16px;
     background: colors.$translatedBlue;
-    background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
-    background: linear-gradient(top, colors.$translatedBlue, #119ec4);
+    background: -moz-linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
+    background: linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
     user-select: none;
     cursor: pointer;
     min-width: 95px;
@@ -229,7 +229,7 @@ section.opened .warnings {
   width: 15%;
   float: left;
   margin: 0 15px 5px 0 !important;
-  background: #fff;
+  background: colors.$white;
   overflow: hidden;
   -webkit-border-radius: 10px;
   -moz-border-radius: 10px;
@@ -248,7 +248,7 @@ section.opened .warnings {
 }
 
 .rejected-bar {
-  background-color: #ed1c24;
+  background-color: colors.$redDefault;
 }
 
 .translated-bar {
@@ -256,7 +256,7 @@ section.opened .warnings {
 }
 
 .rejected-background {
-  background-color: #ed1c24;
+  background-color: colors.$redDefault;
 }
 
 .approved-backgruond {
@@ -264,7 +264,7 @@ section.opened .warnings {
 }
 
 .rejected-foreground {
-  color: #ed1c24;
+  color: colors.$redDefault;
 }
 
 .approved-foreground {
@@ -356,7 +356,7 @@ section.opened .warnings {
   text-align: center;
   display: block;
   font-size: 11px;
-  color: #b6b8bb;
+  color: colors.$grey2;
   text-decoration: none;
   cursor: default;
   height: 100%;
@@ -395,10 +395,10 @@ section.editor .txt.segment-add-inBulk {
 }
 
 section.segment-selected-inBulk .body .text {
-  background: #edf4fd;
+  background: colors.$transparentBlue;
 }
 section.segment-selected-inBulk .body .text:hover {
-  background: #edf4fd !important;
+  background: colors.$transparentBlue !important;
 }
 
 p.split-shortcut {
@@ -546,7 +546,7 @@ strong:first-child {
 .outersource .copy p {
   visibility: hidden;
   font-size: 11px;
-  color: #666;
+  color: colors.$grey6;
   margin-top: 46px;
   margin-left: -4px;
 }
@@ -558,7 +558,7 @@ strong:first-child {
 article {
   //margin: 0px auto 100px auto;
   -moz-border-radius: 2px;
-  -moz-box-shadow: 0 1px 3px #ccc;
+  -moz-box-shadow: 0 1px 3px colors.$grey8;
   position: relative;
   width: 100%;
   float: left;
@@ -659,7 +659,7 @@ body #file section:not(.editor) {
   -webkit-box-shadow: none;
   box-shadow: none;
   padding: 5px 0 19px 0;
-  color: #000;
+  color: colors.$black;
 }
 
 .cl {
@@ -671,7 +671,7 @@ body #file section:not(.editor) {
   //background: #fff;
   float: left;
   position: relative;
-  color: #666;
+  color: colors.$grey6;
   -webkit-transition: all 100ms ease-in;
   transition: all 100ms ease-in;
   //border-bottom: 1px solid $grey2;
@@ -703,7 +703,7 @@ ul.suggestion-item.graysmall:last-child {
 
 /*submenu*/
 .submenu {
-  background: #fff;
+  background: colors.$white;
   text-align: left;
   width: 100%;
 }
@@ -766,7 +766,7 @@ section.loaded .submenu {
 }
 
 .submenu a:hover {
-  background: #f5f5f5;
+  background: colors.$grey5;
   color: colors.$grey1;
   -moz-box-shadow: none;
   //position: relative;
@@ -774,14 +774,14 @@ section.loaded .submenu {
 }
 
 .submenu .on {
-  background: #fff;
-  color: #000;
+  background: colors.$white;
+  color: colors.$black;
   font-size: 14px;
   text-shadow: none;
 }
 
 .tab-switcher.loading-tab a {
-  color: #929292;
+  color: colors.$grey7;
   padding-right: 36px;
 }
 
@@ -810,7 +810,7 @@ section.loaded .submenu {
 .submenu li.active a {
   //background: #fff !important;
   outline: none;
-  color: #000;
+  color: colors.$black;
 }
 
 .submenu li.modified a {
@@ -821,7 +821,7 @@ section.loaded .submenu {
   display: none;
   float: left;
   width: 100%;
-  background: #ffffff;
+  background: colors.$white;
 }
 
 .sub-editor.open {
@@ -842,11 +842,11 @@ section.loaded .submenu {
   bottom: -24px;
   right: 0px;
   border-radius: 0 0 0 2px;
-  color: #fff;
+  color: colors.$white;
   padding: 3px 10px 7px 4px;
   font-size: 12px;
   background: colors.$translatedBlue;
-  box-shadow: 0px 2px 4px 0px #868686;
+  box-shadow: 0px 2px 4px 0px colors.$grey;
   z-index: 2;
 }
 
@@ -858,9 +858,9 @@ section.loaded .submenu {
 .concordances .more {
   display: inline-block;
   text-decoration: none;
-  color: #fff;
+  color: colors.$white;
   padding: 0 10px;
-  background: #999;
+  background: colors.$grey7;
   font-size: 14px;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
@@ -889,7 +889,7 @@ section.loaded .submenu {
 
 .footer-message {
   margin-left: 20px;
-  background: #ffde33 !important;
+  background: colors.$orangeDefault !important;
   padding: 2px 10px;
 }
 
@@ -905,12 +905,12 @@ section.loaded .submenu {
 .filter {
   width: 24px;
   height: 24px;
-  box-shadow: 0px 0px 1px #aeaeae;
+  box-shadow: 0px 0px 1px colors.$grey7;
   display: block;
   float: right;
   margin: -5px 10px -2px 0;
-  border-left: 1px solid #333;
-  border-right: 1px solid #333;
+  border-left: 1px solid colors.$grey1300;
+  border-right: 1px solid colors.$grey1300;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
   position: relative;
@@ -918,7 +918,7 @@ section.loaded .submenu {
 }
 
 .search-display .found .warning {
-  color: #e60000;
+  color: colors.$redDefault;
 }
 
 .search .loader {
@@ -932,11 +932,11 @@ section.loaded .submenu {
 
 .filtering .filter,
 .filtering .filter:hover {
-  background-color: #434345;
+  background-color: colors.$grey1300;
 }
 
 .filter:hover {
-  background-color: #636567;
+  background-color: colors.$grey6;
 }
 
 .checkbox {
@@ -950,7 +950,7 @@ section.loaded .submenu {
   margin: 4px 10px 3px 0;
   padding: 2px 20px;
   height: 28px;
-  background: #dcdedf;
+  background: colors.$grey8;
   cursor: pointer;
   font-size: 14px;
   width: 120px;
@@ -966,7 +966,7 @@ section.loaded .submenu {
 
 .editor,
 .editor .text {
-  background: #fff;
+  background: colors.$white;
 }
 
 .loader:not(.ui) {
@@ -1017,13 +1017,13 @@ section.editor .loader_on {
   font-size: 15px;
   margin-top: 3px;
   border-radius: 20px;
-  background: #fff;
-  color: #aeaeae;
+  background: colors.$white;
+  color: colors.$grey7;
 }
 
 .close:hover {
   background: red;
-  color: #fff;
+  color: colors.$white;
   text-align: center;
 }
 
@@ -1036,7 +1036,7 @@ section .header .context {
 }
 
 section .header .context:hover {
-  color: #000;
+  color: colors.$black;
 }
 
 .percentuage.visible {
@@ -1044,17 +1044,17 @@ section .header .context:hover {
 }
 
 .qa {
-  background: #ffcc00;
+  background: colors.$orangeDefault;
   -moz-box-shadow: 0 1px 3px colors.$grey2;
   -webkit-box-shadow: 0 1px 3px colors.$grey2;
   padding: 0 2px;
 }
 
 section .text .warning {
-  background: #ffcc00;
+  background: colors.$orangeDefault;
   padding: 2px 7px;
   text-align: center;
-  border: 1px solid #333;
+  border: 1px solid colors.$grey1300;
   -moz-border-radius: 2px;
   border-radius: 2px;
   -moz-box-shadow: 0 1px 3px colors.$grey2;
@@ -1127,7 +1127,7 @@ section.opened {
   resize: none;
   margin: 2px 0 0px -11px;
   padding: 5px;
-  color: #4d4d4f;
+  color: colors.$grey6;
   border: 1px solid transparent;
   -moz-border-radius: 2px;
   border-radius: 2px;
@@ -1141,11 +1141,11 @@ section.readonly {
 
 section.ice-locked:not(.segment-selected) .text {
   cursor: no-drop !important;
-  background-color: #f2f4f7 !important;
+  background-color: colors.$grey5 !important;
 }
 
 body section:not(.editor).ice-locked {
-  background: #dde0e4 !important;
+  background: colors.$grey3 !important;
 }
 
 .ice-locked-icon > button {
@@ -1155,7 +1155,7 @@ body section:not(.editor).ice-locked {
   border: 1px solid transparent;
   border-radius: 2px;
   cursor: pointer;
-  color: #aaa;
+  color: colors.$grey7;
   position: relative;
   margin-bottom: 5px;
   top: 2px;
@@ -1172,12 +1172,12 @@ button.unlock-button.unlocked.icon-unlocked3:before {
 }
 
 section:hover .ice-locked-icon > button {
-  color: #6d6e71;
+  color: colors.$grey;
 }
 
 .ice-locked-icon > button:hover {
-  background-color: #9e9e9e;
-  border: 1px solid #5f5f5f;
+  background-color: colors.$grey7;
+  border: 1px solid colors.$grey6;
   color: white !important;
 }
 
@@ -1188,8 +1188,8 @@ body.archived section {
 
 section.readonly,
 body.archived section {
-  background: #f2f4f7;
-  color: #a4a6a9;
+  background: colors.$grey5;
+  color: colors.$grey7;
   cursor: not-allowed !important;
 }
 section.readonly .status-container a.status:hover,
@@ -1204,8 +1204,8 @@ body.archived section .status-container a.status:hover {
   word-break: normal;
   line-height: 25px;
   outline: none;
-  color: #000;
-  border: 1px solid #dedede;
+  color: colors.$black;
+  border: 1px solid colors.$grey8;
   box-shadow: inset 0 1px 2px colors.$grey2;
   -webkit-box-shadow: inset 0 1px 2px colors.$grey2;
   /*font-variant-ligatures: none;*/
@@ -1213,9 +1213,9 @@ body.archived section .status-container a.status:hover {
 }
 
 .editarea:focus {
-  border: 1px solid #96c8da;
-  box-shadow: inset 0px 0px 2px 2px #96c8da;
-  outline-color: #96c8da;
+  border: 1px solid colors.$grey2;
+  box-shadow: inset 0px 0px 2px 2px colors.$grey2;
+  outline-color: colors.$grey2;
 }
 
 .source {
@@ -1279,7 +1279,7 @@ body.archived section .status-container a.status:hover {
   margin: 2px 1px 0px 0;
   padding: 12px 20px 12px 34px;
   text-align: left;
-  color: #666;
+  color: colors.$grey6;
   list-style: none;
   font-size: 14px;
   line-height: 16px;
@@ -1367,7 +1367,7 @@ body.archived section .status-container a.status:hover {
 
 .trash:hover {
   margin-top: -2px;
-  color: #000;
+  color: colors.$black;
 }
 
 .trash {
@@ -1391,7 +1391,7 @@ body.archived section .status-container a.status:hover {
   position: absolute;
   font-size: 10px;
   display: none;
-  color: #999999;
+  color: colors.$grey7;
 }
 
 .graysmall:hover .graysmall-message {
@@ -1451,7 +1451,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .message:hover {
-  background: #fbfbfb !important;
+  background: colors.$white !important;
   cursor: auto;
 }
 
@@ -1460,7 +1460,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .error-img {
-  background: #c5351c url(/public/img/warning.png) no-repeat center;
+  background: colors.$redDefaultHover url(/public/img/warning.png) no-repeat center;
   background-size: 17px;
   width: 22px;
   height: 22px;
@@ -1473,7 +1473,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .warning-img {
-  background: #ff9900 url(/public/img/warning.png) no-repeat center;
+  background: colors.$rebuttedRed url(/public/img/warning.png) no-repeat center;
   background-size: 17px;
   width: 22px;
   height: 22px;
@@ -1496,7 +1496,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .engine-error-item.graysmall:hover {
-  background-color: #fff;
+  background-color: colors.$white;
   border-top: unset;
 }
 
@@ -1601,32 +1601,32 @@ section.opened.editor .status {
 
 .per-orange {
   background: colors.$rebuttedRed !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-blue {
   background: colors.$translatedBlue !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-green {
   background: colors.$approvedGreen !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-yellow {
   background: colors.$orangeDefault !important;
-  color: #333 !important;
+  color: colors.$grey1300 !important;
 }
 
 .per-red {
   background: colors.$redDefault !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-gray {
   background: colors.$grey3 !important;
-  color: #333 !important;
+  color: colors.$grey1300 !important;
 }
 
 .per-red-outline {
@@ -1852,11 +1852,11 @@ p.percent {
 }
 
 ins.diff {
-  background: #c3ffc3;
+  background: colors.$approvedGreenTransparent;
 }
 
 del.diff {
-  background: #ffcfcf;
+  background: colors.$redDefaultTransparent;
 }
 
 .editToolbar {
@@ -1871,12 +1871,12 @@ del.diff {
 }
 
 .split {
-  border: 1px solid #5f5f5f;
+  border: 1px solid colors.$grey6;
   cursor: pointer !important;
   font-size: 17px;
-  background-color: #9e9e9e;
+  background-color: colors.$grey7;
   border-radius: 2px;
-  color: #ffffff;
+  color: colors.$white;
   margin-bottom: 0px;
   top: 2px;
   padding: 0;
@@ -2065,12 +2065,12 @@ section.editor .toolbar {
 
 .addtmx-tr.white-tx .open-popup-addtm-tr {
   width: 130px;
-  color: #333;
-  background: #fff;
+  color: colors.$grey1300;
+  background: colors.$white;
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr:hover {
-  background: #ededed;
+  background: colors.$grey4;
 }
 
 .open-popup-addtm-tr {
@@ -2084,22 +2084,22 @@ section.editor .toolbar {
 }
 
 .addtmx-tr:active {
-  -moz-box-shadow: inset 0 0 1px 1px #888;
-  -webkit-box-shadow: inset 0 0 1px 1px #888;
-  box-shadow: inset 0 0 1px 1px #888;
+  -moz-box-shadow: inset 0 0 1px 1px colors.$grey7;
+  -webkit-box-shadow: inset 0 0 1px 1px colors.$grey7;
+  box-shadow: inset 0 0 1px 1px colors.$grey7;
 }
 
 .alternatives .deleted,
 .suggestion_source .deleted,
 .suggestion_source del {
-  background: #ffc7ca;
+  background: colors.$redDefaultTransparent;
   text-decoration: line-through;
 }
 
 .alternatives .added,
 .suggestion_source .added,
 .suggestion_source ins {
-  background: #b0ffb3;
+  background: colors.$greenDefaultTransparent;
   text-decoration: none;
 }
 
@@ -2114,15 +2114,15 @@ section.editor .toolbar {
     width: 100%;
     padding: 3px 0px 5px 3px;
     margin: 7px 1.7%;
-    background: #efefef;
+    background: colors.$grey9;
     font-size: 18px;
     min-height: 70px;
     outline: 0;
     text-align: left;
     border-radius: 2px;
     line-height: 27px;
-    color: #000;
-    border: 1px solid #727272;
+    color: colors.$black;
+    border: 1px solid colors.$grey;
     word-break: normal !important;
     cursor: col-resize;
     float: left;
@@ -2131,7 +2131,7 @@ section.editor .toolbar {
     margin-right: 4px;
     width: 108px;
     float: left;
-    color: #333;
+    color: colors.$grey1300;
   }
 }
 
@@ -2161,14 +2161,14 @@ section.editor .toolbar {
 }
 
 .splitBar .btn-ok:hover {
-  background: #12b4df;
+  background: colors.$translatedBlueTransparent;
 }
 
 .splitpoint {
   display: inline-block;
   width: 8px;
   height: 26px;
-  color: #767676;
+  color: colors.$grey;
   cursor: pointer;
   width: 19px;
   margin: 0px 5px;
@@ -2203,17 +2203,17 @@ section .segment-side-buttons {
 }
 
 .grey-button {
-  color: #333;
-  background: #f6f6f6;
+  color: colors.$grey1300;
+  background: colors.$grey5;
   background: -webkit-gradient(
     linear,
     left top,
     left bottom,
-    from(#f6f6f6),
-    to(#e2e3e5)
+    from(colors.$grey5),
+    to(colors.$grey4)
   );
-  background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
-  background: linear-gradient(top, #f6f6f6, #e2e3e5);
+  background: -moz-linear-gradient(top, colors.$grey5, colors.$grey4);
+  background: linear-gradient(top, colors.$grey5, colors.$grey4);
 }
 
 .edit-distance {
@@ -2222,7 +2222,7 @@ section .segment-side-buttons {
   top: 4px;
   right: 6px;
   font-size: 0.8rem;
-  color: #999;
+  color: colors.$grey7;
 }
 
 .ui.user.label {
@@ -2253,7 +2253,7 @@ section .segment-side-buttons {
     height: 24px;
     cursor: pointer;
     border-radius: 3px;
-    border: 1px solid #c6c6c6;
+    border: 1px solid colors.$grey8;
     color: colors.$grey1;
 
     &:hover:not(.disabled) {

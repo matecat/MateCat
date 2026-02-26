@@ -32,7 +32,7 @@
         text-align: left;
         line-height: 14px;
         .link {
-          color: #00aee4;
+          color: colors.$translatedBlue;
           text-decoration: underline;
         }
       }
@@ -58,7 +58,7 @@
         display: flex;
         align-items: center;
         &.email-link {
-          color: #fff;
+          color: colors.$white;
           background-color: colors.$grey1;
           padding: 6px 24px;
           border-radius: 2px;

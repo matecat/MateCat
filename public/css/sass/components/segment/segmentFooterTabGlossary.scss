@@ -168,7 +168,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    border: 1px solid #aebdcd;
+    border: 1px solid colors.$grey2;
     border-radius: 4px;
     padding: 4px;
 
@@ -201,7 +201,7 @@
   .glossary__button-add {
     display: flex;
     flex-direction: row;
-    color: #fff;
+    color: colors.$white;
     font-weight: bold;
     text-decoration: none;
     margin-left: 4px;
@@ -210,8 +210,8 @@
     font-size: 16px;
     line-height: 20px;
     background: colors.$translatedBlue;
-    background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
-    background: linear-gradient(top, colors.$translatedBlue, #119ec4);
+    background: -moz-linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
+    background: linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
     user-select: none;
     border: none;
     white-space: nowrap;

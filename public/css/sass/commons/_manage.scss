@@ -143,7 +143,7 @@ div#manage-container {
         display: inline-block;
         vertical-align: text-bottom;
         min-width: 72px;
-        color: #5a5a5a;
+        color: colors.$grey6;
       }
       .ui.form .field :disabled {
         opacity: 1 !important;
@@ -176,7 +176,7 @@ div#manage-container {
           .ui.icon.input input {
             font-family: Calibri, Arial, Helvetica, sans-serif;
             padding-right: 2.67142857em !important;
-            box-shadow: inset 0 1px 3px #ddd;
+            box-shadow: inset 0 1px 3px colors.$grey8;
           }
           &.project-menu.ui.button {
             box-shadow: none;
@@ -185,7 +185,7 @@ div#manage-container {
             margin-right: 8px;
             background-color: colors.$white;
             vertical-align: top;
-            border: 1px solid #bdbdbd;
+            border: 1px solid colors.$grey8;
             cursor: default;
             .text {
               border-radius: 15px;
@@ -193,8 +193,8 @@ div#manage-container {
               color: black;
               transition: 0.3s ease;
               .ui.circular.label {
-                background-color: #cecece;
-                color: #888888;
+                background-color: colors.$grey8;
+                color: colors.$grey7;
               }
             }
           }
@@ -242,7 +242,7 @@ div#manage-container {
             }
           }
           &.project-assignee {
-            background-color: #ffffff !important;
+            background-color: colors.$white !important;
             vertical-align: top;
             /*height: 30px !important;*/
             .text {
@@ -251,7 +251,7 @@ div#manage-container {
               min-width: 30px;
               border-radius: 15px;
               padding: 3px 15px 3px 3px;
-              color: #000000;
+              color: colors.$black;
               transition: 0.3s ease;
               height: 30px;
               img {
@@ -304,22 +304,22 @@ div#manage-container {
               display: none;
             }
             &:hover .text {
-              background-color: #ffffff !important;
+              background-color: colors.$white !important;
               padding-right: 5px;
               padding-right: 30px;
             }
             &.disabled {
-              background-color: #f4f4f4 !important;
-              box-shadow: 0px 0px 1px #666 !important;
+              background-color: colors.$grey9 !important;
+              box-shadow: 0px 0px 1px colors.$grey6 !important;
               opacity: 1;
               &.text {
-                color: #666 !important;
+                color: colors.$grey6 !important;
               }
             }
           }
 
           &.project-not-assigned {
-            border: 1px solid #868686;
+            border: 1px solid colors.$grey;
             padding: 0px 15px 0px 3px;
             trans\ition: 0.3s ease;
             color: rgba(0, 0, 0, 0.6);
@@ -367,7 +367,7 @@ div#manage-container {
           &.project-assignee {
             .ui.cancel.label {
               padding: 4px;
-              background-color: #d6d6d6;
+              background-color: colors.$grey8;
               margin: 0px;
               border-radius: 15px;
               position: absolute;
@@ -377,10 +377,10 @@ div#manage-container {
               visibility: hidden;
               i {
                 font-size: 15px;
-                color: #ffffff;
+                color: colors.$white;
               }
               &:hover {
-                background-color: #cccccc !important;
+                background-color: colors.$grey8 !important;
               }
             }
 
@@ -407,7 +407,7 @@ div#manage-container {
         padding: 0 15px;
         margin-bottom: 15px;
         .job-header {
-          background-color: #ffffff !important;
+          background-color: colors.$white !important;
           padding: 0 0 !important;
 
           .split-merge {
@@ -415,7 +415,7 @@ div#manage-container {
             .merge {
               font-family: Calibri, Arial, Helvetica, sans-serif;
               padding: 5px 17px;
-              border: 1px solid #797979;
+              border: 1px solid colors.$grey;
               font-size: 16px;
               transition: 0.3s ease !important;
             }
@@ -432,7 +432,7 @@ div#manage-container {
               align-items: center;
               gap: 6px;
               transition: 0.3s ease;
-              background-color: #ffffff;
+              background-color: colors.$white;
               padding: 8px 10px !important;
 
               @media only screen and (max-width: 1200px) {
@@ -440,7 +440,7 @@ div#manage-container {
               }
 
               .job-id {
-                color: #969696;
+                color: colors.$grey7;
                 font-size: 12px;
                 position: relative;
               }
@@ -461,7 +461,7 @@ div#manage-container {
                 .in-to {
                   float: left;
                   top: 4px;
-                  color: #5a5a5a;
+                  color: colors.$grey6;
                   line-height: 26px;
                   position: relative;
                   font-size: 12px;
@@ -552,7 +552,7 @@ div#manage-container {
                     font-weight: 700;
                   }
                   .outsource-gmt-text {
-                    color: #969696;
+                    color: colors.$grey7;
                     display: inherit;
                     margin-left: 5px;
                     font-size: 13px;
@@ -597,17 +597,17 @@ div#manage-container {
                   }
                   .ui.cancel {
                     padding: 4px;
-                    background-color: #d6d6d6;
+                    background-color: colors.$grey8;
                     margin-top: 3px;
                     margin-bottom: 2px;
                     position: relative;
                     line-height: 0;
                     right: 3px;
                     font-size: 15px;
-                    color: #ffffff;
+                    color: colors.$white;
                   }
                   &:hover .ui.cancel {
-                    background-color: #cccccc !important;
+                    background-color: colors.$grey8 !important;
                   }
                 }
                 &:hover .item {
@@ -640,10 +640,10 @@ div#manage-container {
                 border-radius: 2px;
                 font-weight: bold;
                 box-shadow: none !important;
-                color: #7eaf3e !important;
+                color: colors.$greenDefaultTransparent !important;
                 &:hover {
                   box-shadow:
-                    0 0 0 #e0e0e0,
+                    0 0 0 colors.$grey8,
                     0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
@@ -670,7 +670,7 @@ div#manage-container {
                   display: flex;
                   justify-content: end;
                   align-items: center;
-                  background: #fff;
+                  background: colors.$white;
                   color: colors.$black;
                   font-weight: normal;
                   border: none; // border: 1px solid #979797;
@@ -694,7 +694,7 @@ div#manage-container {
                     }
                   }
                   span {
-                    color: #000;
+                    color: colors.$black;
                     margin-left: 4px;
                     line-height: 1.6;
                   }
@@ -713,7 +713,7 @@ div#manage-container {
                 float: right;
                 &:hover {
                   box-shadow:
-                    0 0 0 #e0e0e0,
+                    0 0 0 colors.$grey8,
                     0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
@@ -732,7 +732,7 @@ div#manage-container {
 
               .chunk-download-progress {
                 height: 2px;
-                background-color: #ffffff;
+                background-color: colors.$white;
                 position: absolute;
                 bottom: 0px;
                 width: 100%;
@@ -745,14 +745,14 @@ div#manage-container {
                   left: 0;
                   right: 0;
                   bottom: 0;
-                  background: #000000;
+                  background: colors.$black;
                   border-radius: 0.28571429rem;
                   -webkit-animation: progress-active 1s ease infinite;
                   animation: progress-active 1s ease infinite;
                 }
               }
               &.updated-job {
-                background-color: #f9ffb5;
+                background-color: colors.$orangeDefaultTransparent2;
               }
             }
           }
@@ -831,7 +831,7 @@ div#manage-container {
         padding: 16px 25px;
         vertical-align: top;
         font-size: 20px;
-        border: 1px solid #797979;
+        border: 1px solid colors.$grey;
         border-radius: 2px;
         margin: 10px;
       }
@@ -925,10 +925,10 @@ div#manage-container {
   gap: 10px;
   .status-filter {
     display: inline-block;
-    background: #d8d8d8;
+    background: colors.$grey8;
     padding: 4px 5px 4px;
     border-radius: 2px;
-    color: #5d5d5d;
+    color: colors.$grey6;
     font-weight: 100;
     font-size: 12px;
   }
@@ -947,7 +947,7 @@ div#manage-container {
   border-radius: 999px !important;
   line-height: 1;
   box-shadow:
-    0 0 0 #e0e0e0,
+    0 0 0 colors.$grey8,
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
   height: 40px;
@@ -966,13 +966,13 @@ div#manage-container {
 
 .project-activity-icon button.project-team-dropdown {
   font-size: 14px;
-  color: #000;
+  color: colors.$black;
   padding: 5px 15px;
-  background-color: #fff;
+  background-color: colors.$white;
 }
 
 .user-project-dropdown-container button.user-project-dropdown {
-  color: #000 !important;
+  color: colors.$black !important;
   font-size: 14px;
 }
 

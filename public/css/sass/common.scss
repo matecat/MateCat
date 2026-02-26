@@ -81,11 +81,11 @@ ul {
   padding: 30px 0 30px 0;
   display: block;
   z-index: 999999;
-  background: #fff;
-  box-shadow: 0px 0px 5px #ccc;
+  background: colors.$white;
+  box-shadow: 0px 0px 5px colors.$grey8;
   border-radius: 2px;
   font-size: 18px;
-  border: 1px solid #ccc;
+  border: 1px solid colors.$grey8;
 }
 
 .iepopup img {
@@ -94,7 +94,7 @@ ul {
 
 .iepopup ul a {
   padding: 0px 0 0 0;
-  color: #39699a;
+  color: colors.$linkBlueHover;
   text-decoration: underline;
 }
 
@@ -140,7 +140,7 @@ section mark.searchMarker {
 }
 
 section mark.searchMarker.currSearchItem {
-  background: #f7d315;
+  background: colors.$orangeDefault;
   /*	background: #00c1e6; */
 }
 
@@ -163,8 +163,8 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline header {
-  background: #6d6e71;
-  border-bottom: 1px solid #333;
+  background: colors.$grey;
+  border-bottom: 1px solid colors.$grey1300;
   padding: 0px 0 2px 0;
   margin-bottom: 20px;
   height: 45px;
@@ -178,13 +178,13 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline h2 {
-  color: #999999 !important;
+  color: colors.$grey7 !important;
   font-weight: normal !important;
 }
 
 .claim span {
   font-weight: bold;
-  color: #39699a;
+  color: colors.$linkBlueHover;
 }
 
 .fileformat span {
@@ -621,7 +621,7 @@ header .filter:before {
 .mbc-warnings:before,
 .text .alternatives:before {
   content: '\f071';
-  color: #d65959;
+  color: colors.$red800;
   margin-right: 10px;
 }
 
@@ -1015,7 +1015,7 @@ a.unarchive-project:after {
 }
 
 #menu-site li a {
-  color: #fff;
+  color: colors.$white;
   text-decoration: none;
   -webkit-font-smoothing: antialiased;
   line-height: 22px;
@@ -1029,7 +1029,7 @@ a.unarchive-project:after {
   border: none !important;
   color: colors.$darkBlue !important;
   border-radius: 18px;
-  background-color: #fff;
+  background-color: colors.$white;
   padding: 4px 18px;
   font-weight: bold;
   margin-left: 5px;
@@ -1041,7 +1041,7 @@ a.unarchive-project:after {
 }
 
 #menu-site li a:hover {
-  color: #3aa9dd;
+  color: colors.$translatedBlue;
 }
 
 /*****************************/

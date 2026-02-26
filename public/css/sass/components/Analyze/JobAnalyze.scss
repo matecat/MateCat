@@ -1,5 +1,4 @@
-@use '../../commons/_colors';
-
+@use '../../commons/colors';
 .job-analyze-header {
   background-color: colors.$grey2;
   display: flex;
@@ -137,7 +136,7 @@
     }
     .chunk-analyze-info-header {
       height: 48px;
-      background-color: #f5f6f7;
+      background-color: colors.$grey5;
       border-radius: 4px;
       display: flex;
       flex-direction: column;

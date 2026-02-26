@@ -1,3 +1,4 @@
+@use './commons/colors';
 /*
  ==============================
         Tooltip STYLING
@@ -33,14 +34,14 @@
       }
     }
     .tooltip-error-ignore {
-      color: #757575;
+      color: colors.$grey;
       text-decoration: none;
       cursor: pointer;
       border-radius: 0 4px 4px 0;
       padding-left: 10px;
       height: 40px;
       &:hover {
-        color: #525252;
+        color: colors.$grey6;
       }
       .icon-cancel-circle:before {
         line-height: 40px;
@@ -81,27 +82,27 @@
   }
 
   .n0 {
-    background-color: #d08053;
+    background-color: colors.$rebuttedRedTransparent;
   }
 
   .p0 {
-    background-color: #65c783;
+    background-color: colors.$greenDefaultTransparent;
   }
 
   .c0 {
-    background-color: #65c783;
+    background-color: colors.$greenDefaultTransparent;
   }
 
   .u0 {
-    background-color: #b8a300;
+    background-color: colors.$orange600;
   }
 
   .s0 {
-    background-color: #38c0c5;
+    background-color: colors.$translatedBlueTransparent;
   }
 
   .l0 {
-    background-color: #b792e6;
+    background-color: colors.$approved2GreenTransparent;
   }
 
   .b0 {
@@ -117,11 +118,11 @@
   }
 
   .o0 {
-    background-color: rgba(#209faa, 0.75);
+    background-color: rgba(colors.$translatedBlueTransparent, 0.75);
   }
 
   .m {
-    background-color: #ea92b8;
+    background-color: colors.$redDefaultTransparent;
   }
 
   .m,

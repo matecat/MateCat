@@ -1,11 +1,12 @@
+@use '../../commons/colors';
 .target {
   .tags-auto-complete-menu {
-    background: #fff;
+    background: colors.$white;
     box-sizing: border-box;
     max-width: 300px;
     border-radius: 2px;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    border: 1px solid #dadada;
+    border: 1px solid colors.$grey8;
     .ui.vertical.menu {
       -webkit-box-shadow: none;
       -moz-box-shadow: none;
@@ -21,10 +22,10 @@
         padding: 1rem 1.14rem;
         font-weight: bold;
         line-height: 17px;
-        border-top: 1px solid #e9e3e8;
-        border-bottom: 1px solid #e0e3e8;
+        border-top: 1px solid colors.$grey4;
+        border-bottom: 1px solid colors.$grey3;
         z-index: 1;
-        background: #fff;
+        background: colors.$white;
         pointer-events: none;
         display: flex;
         align-items: center;
@@ -32,7 +33,7 @@
           padding: 4px 7px;
           margin: 0 5px;
           &.mismatch {
-            color: #e1565a;
+            color: colors.$red800;
           }
         }
       }
@@ -46,27 +47,27 @@
         cursor: pointer;
 
         &:before {
-          background: #fff;
+          background: colors.$white;
         }
         &:hover {
           background: rgba(0, 0, 0, 0.05) !important;
         }
         &.added-tag {
-          color: #767676 !important;
+          color: colors.$grey !important;
 
           & a {
-            color: #767676 !important;
+            color: colors.$grey !important;
           }
         }
         &.missing-tag {
-          color: #000 !important;
+          color: colors.$black !important;
           font-size: 16px;
           & a {
-            color: #000 !important;
+            color: colors.$black !important;
           }
         }
         mark {
-          background: #ffff00;
+          background: colors.$orangeDefault;
         }
         &.no-results {
           cursor: default;
@@ -78,9 +79,9 @@
     }
   }
   .head-tag-list .locked.mismatch {
-    background-color: #fdeae2;
-    color: #e1595d;
-    box-shadow: inset 0 0px 0 2px #e1565a;
+    background-color: colors.$grey9;
+    color: colors.$red800;
+    box-shadow: inset 0 0px 0 2px colors.$red800;
     font-weight: 100;
     padding: 4px 6px;
     position: relative;
@@ -90,11 +91,11 @@
 
 .style-tag {
   display: inline-flex;
-  background: #f2f4f7;
-  box-shadow: inset 0 0 0 2px #e5e9f1;
+  background: colors.$grey5;
+  box-shadow: inset 0 0 0 2px colors.$grey4;
   border-radius: 7px;
   font-size: 15px;
-  color: #767676;
+  color: colors.$grey;
   font-style: italic;
   padding: 0 6px 0 3px;
   vertical-align: middle;
@@ -105,31 +106,31 @@
     background: transparent !important;
   }
   &:hover {
-    background: #e5e9f1;
+    background: colors.$grey4;
     cursor: pointer;
   }
   a {
-    color: #3b4a5c;
+    color: colors.$grey1300;
     font-weight: 700;
   }
   &.mismatch {
-    background-color: #fdeae2;
-    box-shadow: inset 0 0 0 2px #f9dcd1;
+    background-color: colors.$grey9;
+    box-shadow: inset 0 0 0 2px colors.$redDefaultTransparent;
     &:hover {
-      background-color: #f9dcd1;
+      background-color: colors.$redDefaultTransparent;
     }
     &.selected {
-      box-shadow: inset 0 0 0 2px #e1565a;
-      background: #f9d7ca;
+      box-shadow: inset 0 0 0 2px colors.$red800;
+      background: colors.$redDefaultTransparent;
     }
     &,
     a {
-      color: #e1565a;
+      color: colors.$red800;
     }
   }
   &.highlight {
-    box-shadow: inset 0 0 0 2px #3b4a5c96;
-    color: #424242;
+    box-shadow: inset 0 0 0 2px colors.$grey1300;
+    color: colors.$grey1300;
   }
   &.selected {
     cursor: grab;

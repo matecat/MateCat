@@ -2,7 +2,7 @@
 .bulk-approve-bar {
   position: relative;
   z-index: 2;
-  background: #edf4fd;
+  background: colors.$transparentBlue;
   padding: 8px 10px;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.43);
   float: left;
@@ -55,7 +55,7 @@
       vertical-align: bottom;
       margin-right: 0;
       &:hover {
-        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+        box-shadow: 0 0 0 colors.$grey8, 0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
       }
       &.translated-all-bulked {

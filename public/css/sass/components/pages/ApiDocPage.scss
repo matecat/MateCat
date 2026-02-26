@@ -1,3 +1,4 @@
+@use '../../commons/colors';
 ﻿/*API DOC page*/
 
 
@@ -33,36 +34,36 @@ h3 {
   margin: 0px 0 0 0;
   padding: 0;
   font-size: 18px;
-  color: #999999 !important;
+  color: colors.$grey7 !important;
   font-weight: normal !important;
 }
 
 .tablestats {
-  border-right: 1px solid #ccc;
+  border-right: 1px solid colors.$grey8;
 }
 
 .tablestats th {
-  background-color: #efefef;
+  background-color: colors.$grey9;
 }
 
 .tablestats td,
 .tablestats th {
-  border-bottom: 1px solid #ccc;
-  border-left: 1px solid #ccc;
+  border-bottom: 1px solid colors.$grey8;
+  border-left: 1px solid colors.$grey8;
   padding: 6px 8px;
   margin: 1px 0;
   text-align: center;
 }
 
 .tablestats tr:hover {
-  background: #f7f8f9;
+  background: colors.$grey5;
 }
 
 .tablestats {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid colors.$grey8;
   margin-bottom: 40px;
-  -moz-box-shadow: 0 1px 2px #ccc;
-  background: #fff;
+  -moz-box-shadow: 0 1px 2px colors.$grey8;
+  background: colors.$white;
 }
 
 .tablestats.continue {
@@ -82,7 +83,7 @@ h3 {
   font-weight: bold !important;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   font-size: 18px;
-  color: #000 !important;
+  color: colors.$black !important;
 }
 
 .searchbox {
@@ -95,7 +96,7 @@ h3 {
 
 .api .block-swagger {
   margin-top: -20px;
-  background: #fafafa;
+  background: colors.$grey5;
 }
 
 /* Bruteforce Override style.css and legacy.min.css */
@@ -114,7 +115,7 @@ section {
 /* Bruteforce Override style.css and legacy.min.css */
 
 .api a {
-  color: #39699a;
+  color: colors.$linkBlueHover;
 }
 
 .api .menu {
@@ -137,7 +138,7 @@ section {
 .api dt {
   float: left;
   text-align: left;
-  color: #666666;
+  color: colors.$grey6;
   width: 100px;
   padding-right: 20px;
 }
@@ -170,12 +171,12 @@ section {
 
 .api h1,
 .api h2 {
-  color: #000 !important;
+  color: colors.$black !important;
   margin-top: 20px;
 }
 
 .api h3 {
-  color: #000 !important;
+  color: colors.$black !important;
   font-weight: bold !important;
   font-size: 22px !important;
   margin-bottom: 20px;
@@ -187,7 +188,7 @@ section {
   margin: 10px 0;
   display: block;
   padding-bottom: 20px;
-  border-bottom: 1px dashed #ccc;
+  border-bottom: 1px dashed colors.$grey8;
 }
 
 .api .gototop.last {
@@ -291,8 +292,8 @@ table {
 code {
   padding: 2px 4px;
   font-size: 90%;
-  color: #39699a;
-  background-color: #f4f4f4;
+  color: colors.$linkBlueHover;
+  background-color: colors.$grey9;
   white-space: nowrap;
   border-radius: 4px;
 }
@@ -300,18 +301,18 @@ code {
 .req,
 .opt {
   font-family: inherit;
-  color: #c7254e;
-  background-color: #f9f2f4;
+  color: colors.$red800;
+  background-color: colors.$grey9;
   white-space: nowrap;
   padding: 2px 4px;
-  border-left: 2px solid #c7254e;
+  border-left: 2px solid colors.$red800;
   border-radius: 4px;
 }
 
 .opt {
-  background-color: #dff0d8;
-  border-left: 2px solid #3c763d;
-  color: #3c763d;
+  background-color: colors.$greenDefaultTransparent2;
+  border-left: 2px solid colors.$approvedGreenHover;
+  color: colors.$approvedGreenHover;
 }
 
 .api p {
@@ -326,54 +327,54 @@ code {
 }
 
 .outsource-btn {
-  border: 1px solid #666;
+  border: 1px solid colors.$grey6;
   border-radius: 4px;
   color: white;
   outline: 0;
   opacity: 0.9;
   padding: 0px !important;
-  border: 1px solid #ccc;
+  border: 1px solid colors.$grey8;
   cursor: pointer;
 }
 
 .outsource-btn:hover {
-  -moz-box-shadow: 0 0px 2px #666;
-  -webkit-box-shadow: 0 0px 2px #666;
-  box-shadow: 0 0px 2px #666;
+  -moz-box-shadow: 0 0px 2px colors.$grey6;
+  -webkit-box-shadow: 0 0px 2px colors.$grey6;
+  box-shadow: 0 0px 2px colors.$grey6;
 }
 
 .outsource-btn:active .outsource-price {
-  -moz-box-shadow: inset 0 0 5px 2px #888;
-  -webkit-box-shadow: inset 0 0 5px 2px #888;
-  box-shadow: inset 0 0 5px 2px #888;
+  -moz-box-shadow: inset 0 0 5px 2px colors.$grey7;
+  -webkit-box-shadow: inset 0 0 5px 2px colors.$grey7;
+  box-shadow: inset 0 0 5px 2px colors.$grey7;
 }
 
 .outsource-btn:active .outsource-delivery {
-  -moz-box-shadow: inset 0 -1px 2px 1px #888;
-  -webkit-box-shadow: inset 0 -1px 2px 1px #888;
-  box-shadow: inset 0 -1px 2px 1px #888;
+  -moz-box-shadow: inset 0 -1px 2px 1px colors.$grey7;
+  -webkit-box-shadow: inset 0 -1px 2px 1px colors.$grey7;
+  box-shadow: inset 0 -1px 2px 1px colors.$grey7;
 }
 
 .outsource-price {
   text-align: center;
   display: block;
   font-size: 18px;
-  background: #7eaf3e;
+  background: colors.$greenDefaultTransparent;
   font-weight: bold;
   padding: 10px;
 }
 
 .outsource-delivery {
-  background: #f4f4f4;
+  background: colors.$grey9;
   display: block;
   padding: 5px;
   margin-top: -5px;
   line-height: 18px;
   font-size: 12px;
   border-radius: 4px;
-  color: #333;
+  color: colors.$grey1300;
 
-  border-top: 1px solid #ccc;
+  border-top: 1px solid colors.$grey8;
 }
 
 .outsource-delivery strong {
@@ -385,7 +386,7 @@ code {
 .lang-info {
   margin-top: 40px;
   margin-left: 10px;
-  color: #666;
+  color: colors.$grey6;
   font-size: 20px;
 }
 
@@ -395,22 +396,22 @@ code {
 td[data-vote='Excellent'],
 td[data-vote='Verygood'],
 td[data-vote='Good'] {
-  background: #d8ead3;
+  background: colors.$greenDefaultTransparent2;
 }
 
 .revision-info tr[data-vote='Poor'],
 td[data-vote='Poor'] {
-  background: #fdd7a4;
+  background: colors.$orangeDefaultTransparent2;
 }
 
 .revision-info tr[data-vote='Acceptable'],
 td[data-vote='Acceptable'] {
-  background: #fff3cd;
+  background: colors.$orangeDefaultTransparent2;
 }
 
 .revision-info tr[data-vote='Fail'],
 td[data-vote='Fail'] {
-  background: #f4cdcc;
+  background: colors.$redDefaultTransparent;
 }
 
 .tablestats.revision {
@@ -440,7 +441,7 @@ td[data-vote='Fail'] {
 
 #details-link {
   font-size: 16px;
-  color: #999;
+  color: colors.$grey7;
   text-shadow: none;
   margin-top: 15px;
   display: block;
@@ -467,7 +468,7 @@ td[data-vote='Fail'] {
 
 #vote-box {
   width: 217px;
-  background: #f7f7f7;
+  background: colors.$grey5;
   height: 85px;
   position: absolute;
   right: 0px;
@@ -479,8 +480,8 @@ td[data-vote='Fail'] {
   padding: 50px 5px 10px;
   z-index: 100000000;
   border-radius: 4px;
-  border: 1px solid #ececec;
-  box-shadow: 1px 1px 0px #e6e6e6;
+  border: 1px solid colors.$grey4;
+  box-shadow: 1px 1px 0px colors.$grey4;
 }
 
 .vote-area {
@@ -497,27 +498,27 @@ td[data-vote='Fail'] {
 .blueline {
   width: 100%;
   height: 1px;
-  background: #09beec;
+  background: colors.$translatedBlueTransparent;
   float: left;
-  box-shadow: 0px 1px 0px #ccc;
+  box-shadow: 0px 1px 0px colors.$grey8;
 }
 
 #vote-box[data-vote='Excellent'],
 #vote-box[data-vote='Verygood'],
 #vote-box[data-vote='Good'] {
-  color: #3c9423;
+  color: colors.$greenDefaultHover;
 }
 
 #vote-box[data-vote='Acceptable'] {
-  color: #eaba22;
+  color: colors.$orangeDefaultHover;
 }
 
 #vote-box[data-vote='Poor'] {
-  color: #ffa935;
+  color: colors.$orange600;
 }
 
 #vote-box[data-vote='Fail'] {
-  color: #e7504d;
+  color: colors.$red800;
 }
 
 table.tablestats.revision-info td,
@@ -530,19 +531,19 @@ table.tablestats.revision-info th {
 .qa_eq_tr[data-vote='Excellent'] td,
 .qa_eq_tr[data-vote='Verygood'] td,
 .qa_eq_tr[data-vote='Good'] td {
-  border-color: #3c9423 !important;
+  border-color: colors.$greenDefaultHover !important;
 }
 
 .qa_eq_tr[data-vote='Acceptable'] td {
-  border-color: #e5b007 !important;
+  border-color: colors.$orangeDefaultHover !important;
 }
 
 .qa_eq_tr[data-vote='Poor'] td {
-  border-color: #ffa935 !important;
+  border-color: colors.$orange600 !important;
 }
 
 .qa_eq_tr[data-vote='Fail'] td {
-  border-color: #e7504d !important;
+  border-color: colors.$red800 !important;
 }
 
 .qa_eq_tr {
@@ -570,7 +571,7 @@ table.tablestats.revision-info th {
   font-size: 22px;
   margin-bottom: 20px;
   font-weight: bold !important;
-  color: #333 !important;
+  color: colors.$grey1300 !important;
 }
 
 .vote-howto h2 {
@@ -581,9 +582,9 @@ table.tablestats.revision-info th {
 blockquote {
   padding: 10px 20px;
   margin: 20px 30px 30px 30px;
-  background: #eee;
+  background: colors.$grey9;
   font-size: 16px;
-  border-left: 5px solid #aaa;
+  border-left: 5px solid colors.$grey7;
   width: 700px;
 }
 
@@ -617,8 +618,8 @@ blockquote {
   overflow: scroll;
 }
 .pee-page header {
-  border-bottom: 1px solid #5c5c5c;
-  background-color: #4d4d4d;
+  border-bottom: 1px solid colors.$grey6;
+  background-color: colors.$grey6;
   padding: 0px 0 2px 0;
   margin-bottom: 20px;
   height: 45px;
@@ -653,7 +654,7 @@ blockquote {
   position: relative;
   float: left;
   width: 4%;
-  text-shadow: 0px 0px 2px #fff;
+  text-shadow: 0px 0px 2px colors.$white;
   text-align: left;
 }
 
@@ -703,7 +704,7 @@ blockquote {
 }
 .pee-page .ui.styled.accordion {
   width: 100%;
-  background: #eee;
+  background: colors.$grey9;
 }
 .pee-page .accordion .title {
   text-align: right;

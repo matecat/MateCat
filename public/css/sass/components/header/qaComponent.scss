@@ -8,12 +8,12 @@
 }
 
 .qa-container {
-  background-color: #fff;
+  background-color: colors.$white;
   height: 50px;
-  box-shadow: 0 1px 3px #666;
+  box-shadow: 0 1px 3px colors.$grey6;
   border-radius: 0 0 2px 2px;
   display: block;
-  color: #4d4d4d;
+  color: colors.$grey6;
 }
 
 .qa-container {
@@ -55,16 +55,16 @@
         gap: 8px;
       }
       .icon-cancel-circle {
-        color: #e1565a;
+        color: colors.$red800;
       }
       .icon-warning2 {
-        color: #ea862c;
+        color: colors.$rebuttedRed;
       }
       .ui.basic.buttons {
         button {
           font-size: 16px !important;
           padding: 10px;
-          color: #000000 !important;
+          color: colors.$black !important;
           font-family: calibri;
           display: flex;
           gap: 4px;
@@ -75,10 +75,10 @@
             color: colors.$orangeDefault;
           }
           &:hover {
-            background: #f2f4f7 !important;
+            background: colors.$grey5 !important;
           }
           &.mc-bg-gray {
-            background: #f2f4f7 !important;
+            background: colors.$grey5 !important;
           }
 
         }

@@ -36,7 +36,7 @@
     width: 76px;
     border: 1px solid colors.$grey4;
     padding: 8px 12px 8px 12px;
-    box-shadow: 2px 2px 4px 0px #00000014 inset;
+    box-shadow: 2px 2px 4px 0px colors.$black inset;
     font-size: 16px;
     line-height: 24px;
     font-weight: 400;
@@ -137,14 +137,14 @@
             padding: 9px 46px 9px 12px;
             border-radius: 2px;
             border: 1px solid rgba(34, 36, 38, 0.15);
-            box-shadow: inset 0 1px 3px #ddd;
+            box-shadow: inset 0 1px 3px colors.$grey8;
           }
           .dropdown__search-bar {
             height: 34px;
             margin: 0 12px 12px;
             border-radius: 4px;
             border: 1px solid rgba(34, 36, 38, 0.15);
-            background-color: #fff;
+            background-color: colors.$white;
             outline: none;
             .dropdown__search-bar-input {
               width: 100%;

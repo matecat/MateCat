@@ -1,3 +1,4 @@
+@use '../commons/colors';
 .instructions-modal {
   min-height: 230px;
   max-width: 900px;
@@ -33,15 +34,15 @@
     .title {
       display: flex;
       align-items: center;
-      color: #666;
+      color: colors.$grey6;
       &:hover {
-        color: #000;
+        color: colors.$black;
       }
       &.current {
         //color: #fff;
-        background: #dee4ea;
+        background: colors.$grey3;
         &:hover {
-          background: #d9e0e8;
+          background: colors.$grey3;
           //color: #fff;
         }
         .current-icon {
@@ -62,7 +63,7 @@
     }
   }
   .instructions-container {
-    background-color: #fff;
+    background-color: colors.$white;
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
@@ -73,7 +74,7 @@
       word-break: break-all;
     }
     blockquote {
-      border-left: 5px solid #ccc;
+      border-left: 5px solid colors.$grey8;
       margin: 1.5em 10px;
       padding: 0.5em 10px;
     }
@@ -91,7 +92,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px #aebdcd;
+      border-top: solid 1px colors.$grey2;
     }
 
     &:has(.accordion-expanded) {
@@ -133,7 +134,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px #aebdcd;
+      border-top: solid 1px colors.$grey2;
     }
 
     &:has(.accordion-expanded) {
@@ -175,7 +176,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px #aebdcd;
+      border-top: solid 1px colors.$grey2;
     }
 
     &:has(.accordion-expanded) {

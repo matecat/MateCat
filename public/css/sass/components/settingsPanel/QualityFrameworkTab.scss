@@ -8,7 +8,7 @@
   p {
     display: block;
     text-align: left;
-    color: #666666;
+    color: colors.$grey6;
     font-size: 16px;
     line-height: 24px;
   }
@@ -208,7 +208,7 @@
   width: 100%;
   border: 1px solid colors.$grey4;
   padding: 8px 12px 8px 12px;
-  box-shadow: 2px 2px 4px 0px #00000014 inset;
+  box-shadow: 2px 2px 4px 0px colors.$black inset;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -333,7 +333,7 @@
   height: 40px;
   border: 1px solid colors.$grey4;
   padding: 8px 4px 8px 0;
-  box-shadow: 2px 2px 4px 0px #00000014 inset;
+  box-shadow: 2px 2px 4px 0px colors.$black inset;
 
   input {
     position: absolute;

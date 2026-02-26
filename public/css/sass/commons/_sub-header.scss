@@ -31,8 +31,8 @@
     input.search-projects {
       height: 40px;
       border-radius: variables.$border-radius-default;
-      background-color: #fff;
-      color: #002b5c;
+      background-color: colors.$white;
+      color: colors.$darkBlue;
       transition: 0.2s ease-in;
       font-size: 14px;
       max-width: 320px;
@@ -41,21 +41,21 @@
       box-shadow: none;
       border: none;
       &::placeholder {
-        color: #002b5c;
+        color: colors.$darkBlue;
       }
 
       &:focus {
         border: none !important;
         & + .dropdown {
-          background-color: #ffffff;
+          background-color: colors.$white;
         }
       }
     }
     .ui.dropdown {
-      background-color: #fff;
-      border-left: 1px solid #002b5c;
+      background-color: colors.$white;
+      border-left: 1px solid colors.$darkBlue;
       /*transition: 0.2s ease-in;*/
-      color: #002b5c;
+      color: colors.$darkBlue;
       font-weight: 500;
       padding: 2px 16px 2px 8px;
       line-height: 1.21;
@@ -79,7 +79,7 @@
         min-width: 144px;
         padding: 8px 8px 12px 8px;
         border-radius: 2px;
-        border: solid 1px #cdd4de;
+        border: solid 1px colors.$grey3;
         right: 0 !important;
         left: auto !important;
         box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.2);
@@ -90,7 +90,7 @@
 
         .item {
           border-radius: 2px;
-          color: #002b5c;
+          color: colors.$darkBlue;
           font-size: 15px;
           padding: 8px !important;
           font-weight: normal;
@@ -103,8 +103,8 @@
             background-color: rgba(0, 0, 0, 0.03);
           }
           &.selected {
-            background-color: #002b5c;
-            color: #ffffff !important;
+            background-color: colors.$darkBlue;
+            color: colors.$white !important;
           }
         }
       }
@@ -127,7 +127,7 @@
 
   .dropdownmenu-item {
     &:not([data-disabled]).selected {
-      background-color: #00254f !important;
+      background-color: colors.$darkBlueHover !important;
       color: white !important;
     }
   }

@@ -32,7 +32,7 @@ header {
   min-width: 1024px;
   .nav-bar {
     width: 100%;
-    background: #002b5c !important;
+    background: colors.$darkBlue !important;
     .logo {
       /*left: 13px;*/
       margin: 0;
@@ -40,7 +40,7 @@ header {
     .header-project-container-info {
       width: 75%;
       /*background: #00123a;*/
-      color: #fff;
+      color: colors.$white;
       margin-top: 9px;
       height: 47px;
       .header-project-info {
@@ -66,10 +66,10 @@ header {
           }
           .header-assignee {
             margin-left: 20px;
-            border: 1px solid #676767;
+            border: 1px solid colors.$grey6;
             padding: 1px 12px 1px 3px;
             border-radius: 20px;
-            background: #676767;
+            background: colors.$grey6;
             display: flex;
             align-items: center;
             flex-wrap: nowrap;
@@ -97,7 +97,7 @@ header {
             background: transparent;
             color: white;
             &:hover {
-              background: #676767;
+              background: colors.$grey6;
             }
             i {
               font-size: 20px;
@@ -134,14 +134,14 @@ header {
           z-index: -1;
         }
         .ui.table thead th {
-          background: #fff;
+          background: colors.$white;
           border: none;
-          border-bottom: 1px solid #f2f4f7;
+          border-bottom: 1px solid colors.$grey5;
           border-radius: 0;
         }
         .ui.celled.table tr th,
         .ui.celled.table tr td {
-          border-left: 1px solid #f2f4f7;
+          border-left: 1px solid colors.$grey5;
           border-radius: 0;
         }
         .qr-job-summary {
@@ -432,10 +432,10 @@ header {
                   margin-right: 10px;
                   margin-top: 5px;
                   &.revision-1 {
-                    background: #2fb177;
+                    background: colors.$approvedGreen;
                   }
                   &.revision-2 {
-                    background: #9352c1;
+                    background: colors.$approved2Green;
                   }
                 }
               }
@@ -599,17 +599,17 @@ header {
                               margin: 0;
                             }
                             &:hover {
-                              background: #e8e9ef;
+                              background: colors.$grey4;
                               i {
-                                color: #000000;
+                                color: colors.$black;
                               }
                             }
                             &.active,
                             &:active,
                             &:hover {
-                              background: #e8e9ef;
+                              background: colors.$grey4;
                               i {
-                                color: #000000;
+                                color: colors.$black;
                               }
                             }
                           }
@@ -688,10 +688,10 @@ header {
                               .qr-comment-list {
                                 padding: 5px 10px;
                                 font-size: 14px;
-                                background: #ffffff;
-                                color: #787878;
+                                background: colors.$white;
+                                color: colors.$grey;
                                 box-shadow:
-                                  0 0 0 #e0e0e0,
+                                  0 0 0 colors.$grey8,
                                   0 0 2px rgba(0, 0, 0, 0.12),
                                   0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                 max-height: 300px;
@@ -721,7 +721,7 @@ header {
                         .qr-spec {
                           width: 14%;
                           justify-content: space-between;
-                          background: #ffffff;
+                          background: colors.$white;
                           .spec-words {
                           }
                           .tm-percent {
@@ -740,7 +740,7 @@ header {
                           .segment-content {
                             .qr-issues-list {
                               .qr-issue {
-                                background: #ffffff;
+                                background: colors.$white;
                               }
                             }
                           }
@@ -780,7 +780,7 @@ header {
                 font-size: 16px;
               }
               .custom-dropdown.select__dropdown {
-                background-color: #fff;
+                background-color: colors.$white;
                 min-width: 120px;
               }
               .filter-category {
@@ -816,7 +816,7 @@ header {
   .circular.label {
     &.new-color {
       box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-      background: #ffffff;
+      background: colors.$white;
     }
 
     &.draft-color {
@@ -884,14 +884,14 @@ header {
     .ui.cancel.label {
       position: absolute;
       padding: 4px;
-      background-color: #d6d6d6;
+      background-color: colors.$grey8;
       border-radius: 15px;
       top: 8px;
       line-height: 0px;
       right: 0px;
       visibility: hidden;
       &:hover {
-        background-color: #cccccc !important;
+        background-color: colors.$grey8 !important;
       }
     }
     .not-filtered {
@@ -908,12 +908,12 @@ header {
     }
     .filtered {
       .ui.basic.button {
-        background-color: #ffffff !important;
+        background-color: colors.$white !important;
         box-shadow:
-          0 0 0 #e0e0e0,
+          0 0 0 colors.$grey8,
           0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
-        color: #000000 !important;
+        color: colors.$black !important;
         padding: 9px 20px 9px 15px;
         &:hover {
           width: fit-content;
@@ -931,13 +931,13 @@ header {
       .ui.basic.button {
         background: transparent none !important;
         box-shadow:
-          0 0 0 #e0e0e0,
+          0 0 0 colors.$grey8,
           0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
-        color: #000000 !important;
+        color: colors.$black !important;
         padding: 9px 20px 9px 15px;
         &:hover {
-          background-color: #ffffff !important;
+          background-color: colors.$white !important;
           .ui.cancel.label {
             visibility: unset;
             right: 5px;
@@ -961,11 +961,11 @@ header {
         float: none;
         label {
           &:before {
-            background: #dcdfe4 !important;
+            background: colors.$grey3 !important;
           }
           &:after {
             box-shadow: inset 0 0 0 1px rgba(34, 36, 38, 0.25);
-            background: #ffffff;
+            background: colors.$white;
           }
         }
       }
@@ -1014,7 +1014,7 @@ header {
   }
   .clear-filter-element {
     margin-left: 13px;
-    border-left: 1px solid #d6d6d7;
+    border-left: 1px solid colors.$grey8;
     padding-left: 13px;
     color: black;
     display: flex;
@@ -1042,7 +1042,7 @@ header {
 .no-segments-found {
   text-align: center;
   margin: 15px 0;
-  border: 1px dashed #c3c8d0;
+  border: 1px dashed colors.$grey8;
   padding: 15px;
 }
 
@@ -1056,31 +1056,31 @@ header {
 
 .per-orange {
   background: colors.$rebuttedRed !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-blue {
   background: colors.$translatedBlue !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-green {
   background: colors.$approvedGreen !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-yellow {
-  background: #ffcc00 !important;
-  color: #333 !important;
+  background: colors.$orangeDefault !important;
+  color: colors.$grey1300 !important;
 }
 
 .per-red {
   background: colors.$redDefault !important;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .per-gray {
-  background: #aaa !important;
+  background: colors.$grey7 !important;
   color: colors.$grey1 !important;
 }
 

@@ -1,3 +1,4 @@
+@use '../commons/colors';
 /*** Share Key Popup ***/
 .share-popup-container {
   margin: 20px;
@@ -35,7 +36,7 @@
 
 .share-popup-container-list h3 {
   font-size: 18px;
-  background: #f4f4f4;
+  background: colors.$grey9;
   text-align: left;
   margin: 0 !important;
   margin: 0 !important;
@@ -47,7 +48,7 @@
   border: 0;
   text-align: center;
   width: 165px;
-  border-bottom: 1px dashed #ccc;
+  border-bottom: 1px dashed colors.$grey8;
 }
 
 .share-popup-input-key:focus {
@@ -74,7 +75,7 @@
   max-height: 300px;
   position: relative;
   float: left;
-  border: 1px solid #d5d5d5;
+  border: 1px solid colors.$grey8;
   border-radius: 4px;
   margin: 20px;
 }
@@ -86,7 +87,7 @@
   float: left;
   overflow-y: auto;
   overflow-x: hidden;
-  border-top: 1px solid #cacaca;
+  border-top: 1px solid colors.$grey8;
   box-shadow: inset 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: inset 0 2px 2px -1px rgba(0, 0, 0, 0.1);
 }
@@ -115,8 +116,8 @@ input.share-popup-container-input-email {
   width: 344px;
   height: 34px;
   padding-left: 4px;
-  background-color: #fbfbfb;
-  border: 1px solid #ccc;
+  background-color: colors.$white;
+  border: 1px solid colors.$grey8;
   border-radius: 2px;
 }
 
@@ -124,7 +125,7 @@ input.share-popup-container-input-email {
   width: 100%;
   height: 45px;
   float: left;
-  border-bottom: 1px solid #cacaca;
+  border-bottom: 1px solid colors.$grey8;
 }
 
 .share-popup-list-item:last-child {
@@ -143,6 +144,6 @@ span.share-popup-item-name,
 
 span.share-popup-item-email {
   font-size: 14px;
-  color: #999;
+  color: colors.$grey7;
   line-height: 13px;
 }

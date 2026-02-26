@@ -5,7 +5,7 @@ header {
   width: 100%;
   z-index: 6;
   margin: 0;
-  background: #002b5c;
+  background: colors.$darkBlue;
   height: 60px;
   @media only screen and (max-width: 992px) {
     min-width: 992px;
@@ -52,7 +52,7 @@ header {
           color: colors.$translatedBlue;
 
           &:hover {
-            background-color: #f3f3f3;
+            background-color: colors.$grey9;
           }
 
           i {
@@ -79,7 +79,7 @@ header {
           padding-left: 1px;
 
           &:hover {
-            background-color: #dededc;
+            background-color: colors.$grey8;
             transition: 0.3s ease;
           }
         }
@@ -203,10 +203,10 @@ header {
     }
 
     .dropdown.select-org {
-      background-color: #ffffff;
+      background-color: colors.$white;
       border-radius: 30px;
       min-width: 105px;
-      color: #000000;
+      color: colors.$black;
       font-size: 14px;
       padding: 3px 15px;
       float: left;
@@ -254,7 +254,7 @@ header {
 
               svg {
                 path {
-                  fill: #0099cc;
+                  fill: colors.$translatedBlue;
                 }
               }
             }
@@ -267,14 +267,14 @@ header {
 
         &.selected {
           .item-info {
-            color: #fff;
+            color: colors.$white;
             border-radius: 2px;
-            background: #002b5c;
+            background: colors.$darkBlue;
 
             a {
               svg {
                 path {
-                  fill: #fff;
+                  fill: colors.$white;
                 }
               }
 
@@ -339,7 +339,7 @@ header {
     padding: 12px 8px !important;
     top: 45px !important;
     border-radius: 2px;
-    border: solid 1px #cdd4de;
+    border: solid 1px colors.$grey3;
     right: 8px !important;
     &::after {
       content: '';
@@ -347,7 +347,7 @@ header {
       height: 0;
       border-left: 6px solid transparent;
       border-right: 6px solid transparent;
-      border-bottom: 6px solid #ffffff;
+      border-bottom: 6px solid colors.$white;
       bottom: 100%;
       left: auto;
       right: 12%;
@@ -361,8 +361,8 @@ header {
       font-size: 16px !important;
 
       &:hover {
-        background-color: #f2f5f7 !important;
-        color: #0055b8 !important;
+        background-color: colors.$grey5 !important;
+        color: colors.$blue800 !important;
       }
       &.selected {
         background-color: transparent !important;
@@ -392,7 +392,7 @@ header {
   padding-right: 24px;
 
   .organization-name {
-    color: #fff;
+    color: colors.$white;
     font-size: 15px;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 600;
@@ -438,8 +438,8 @@ header {
   align-items: center;
   text-align: right;
   .btn {
-    background: #fff;
-    color: #002b5c;
+    background: colors.$white;
+    color: colors.$darkBlue;
     font-size: 16px;
     width: 140px;
     text-align: center;
@@ -464,7 +464,7 @@ header {
 .cta-create-team {
   position: fixed !important;
   .ui.primary.button {
-    border: 1px solid #797979;
+    border: 1px solid colors.$grey;
     float: right;
     border-radius: 2px;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -476,7 +476,7 @@ header {
     a {
       float: right;
       text-decoration: underline;
-      color: #39699a;
+      color: colors.$linkBlueHover;
       cursor: pointer;
       &:hover {
         text-decoration: none;

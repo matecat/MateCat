@@ -8,7 +8,7 @@
  */
 
 .mbc-comment-balloon-inner {
-  background: #ffffff;
+  background: colors.$white;
   box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
@@ -36,7 +36,7 @@
  */
 .mbc-thread-wrap {
   padding: 10px;
-  border-top: 1px solid #f2f4f7;
+  border-top: 1px solid colors.$grey5;
 }
 
 /*
@@ -76,7 +76,7 @@
 }
 
 .mbc-comment-info {
-  color: #7f7f7f;
+  color: colors.$grey;
   display: inline-block;
   font-size: 11px;
   font-weight: lighter;
@@ -87,7 +87,7 @@
  Message past comment details
  */
 .mbc-comment-body {
-  color: #323232;
+  color: colors.$grey1300;
   font-size: 14px;
   margin: 12px 0 16px;
   word-wrap: break-word;
@@ -111,10 +111,10 @@
   position: relative;
   word-break: normal;
   outline: none;
-  color: #000;
-  border: 1px solid #dedede;
-  box-shadow: inset 0 1px 2px #ccc;
-  -webkit-box-shadow: inset 0 1px 2px #ccc;
+  color: colors.$black;
+  border: 1px solid colors.$grey8;
+  box-shadow: inset 0 1px 2px colors.$grey8;
+  -webkit-box-shadow: inset 0 1px 2px colors.$grey8;
   min-height: 40px;
   overflow-y: auto !important;
   max-height: 160px;
@@ -134,15 +134,15 @@
   box-shadow: none;
 }
 .mbc-comment-textarea:focus {
-  border: 1px solid #96c8da;
-  box-shadow: inset 0px 0px 2px 2px #96c8da;
+  border: 1px solid colors.$grey2;
+  box-shadow: inset 0px 0px 2px 2px colors.$grey2;
   padding-top: 10px;
   padding-bottom: 10px;
 }
 
 .mbc-comment-textarea:empty:not(:focus):before {
   content: attr(data-placeholder);
-  color: #999;
+  color: colors.$grey7;
   position: absolute;
   top: 10px;
   pointer-events: none;
@@ -199,7 +199,7 @@
  Username label
  */
 .mbc-comment-username-label {
-  color: #323232;
+  color: colors.$grey1300;
   font-weight: bold;
   margin-bottom: 4px;
   padding: 5px 5px 2px 0;
@@ -247,7 +247,7 @@ a.ui.button.mbc-comment-delete-btn {
  */
 a.mbc-comment-link-btn,
 a.mbc-comment-link-btn:visited {
-  color: #7f7f7f;
+  color: colors.$grey;
   display: inline-block;
   font-size: 14px;
   text-decoration: underline;
@@ -265,7 +265,7 @@ a.mbc-comment-link-btn:active {
  */
 a.mbc-view-link:link,
 a.mbc-view-link:visited {
-  color: #0798bc;
+  color: colors.$translatedBlueHover;
   padding: 0 4px 6px 0;
 }
 
@@ -276,9 +276,9 @@ a.mbc-view-link:visited {
  */
 .mbc-nth-comment-label {
   display: block;
-  border-bottom: 1px solid #cccccc;
+  border-bottom: 1px solid colors.$grey8;
   font-size: 16px;
-  color: #9a9a9a;
+  color: colors.$grey7;
   line-height: 1.8;
   margin-bottom: 6px;
 }
@@ -337,7 +337,7 @@ a.mbc-view-link:visited {
  Highlight element unique properties
  */
 .mbc-comment-highlight {
-  background: #ffe400;
+  background: colors.$orangeDefault;
 }
 
 /*
@@ -377,7 +377,7 @@ article .mbc-comment-balloon-outer {
 }
 /* Warnings style.css line 136 */
 .mbc-warnings {
-  color: #d65959;
+  color: colors.$red800;
   font-size: 14px;
 }
 
@@ -421,7 +421,7 @@ article .mbc-comment-balloon-outer {
  Triangle top top in history balloon
  */
 .mbc-triangle-top {
-  border-right: 14px solid rgba(247, 247, 247, 1); /* #f7f77f */
+  border-right: 14px solid colors.$grey5; /* #f7f77f */
   border-top: 14px solid transparent;
   -webkit-filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
   filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
@@ -434,7 +434,7 @@ article .mbc-comment-balloon-outer {
  Triangle top left in comment balloon
  */
 .mbc-triangle-topleft {
-  border-top: 12px solid #ffffff;
+  border-top: 12px solid colors.$white;
   border-left: 14px solid transparent;
   -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
   filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
@@ -448,7 +448,7 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
 }
 
 .mbc-open-view {
-  border-top: 12px solid #ffffff;
+  border-top: 12px solid colors.$white;
   border-left: 14px solid transparent;
   -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
   filter: drop-shadow(-2px 0px 1px rgba(0, 0, 0, 0.2));
@@ -460,7 +460,7 @@ section.editor .mbc-triangle.mbc-triangle-topleft {
   bottom: 0px;
   border-top: unset;
   border-left: unset;
-  border-bottom: 12px solid #ffffff;
+  border-bottom: 12px solid colors.$white;
   border-left: 14px solid transparent;
   filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.2));
 }
@@ -474,18 +474,18 @@ Close icon ballon - Right panel
 .re-close-balloon {
   width: 24px;
   height: 24px;
-  background: #fff;
+  background: colors.$white;
   position: absolute;
   z-index: 1;
   right: 0px;
   top: -14px;
   border-radius: 50%;
-  color: #7b7b7b;
+  color: colors.$grey;
   cursor: pointer;
 }
 
 .re-close-balloon:hover {
-  color: #000000;
+  color: colors.$black;
 }
 
 .re-close-balloon i {

@@ -1,6 +1,6 @@
 @use '../commons/colors';
 .upload-files-container, .upload-box-not-logged, .upload-waiting-logged {
-  border: 1px dashed #ccc;
+  border: 1px dashed colors.$grey8;
   min-height: 200px;
   border-radius: 4px;
   padding: 24px;
@@ -44,7 +44,7 @@
       grid-template-columns: 2fr 1fr 24px;
       align-items: center;
       padding: 8px;
-      border-bottom: 1px dashed #ccc;
+      border-bottom: 1px dashed colors.$grey8;
       &.zip-folder {
         padding-left: 40px;
       }

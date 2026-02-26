@@ -102,7 +102,7 @@
           border-radius: 2px;
           border: 1px solid rgba(34, 36, 38, 0.15);
           height: 37px;
-          box-shadow: inset 0 1px 3px #ddd;
+          box-shadow: inset 0 1px 3px colors.$grey8;
           &:hover {
             border-color: rgba(34, 36, 38, 0.35);
             box-shadow: none;
@@ -155,11 +155,11 @@
   }
 
   .green-button {
-    background-color: #33b079 !important;
+    background-color: colors.$approvedGreen !important;
     color: white !important;
 
     &:hover {
-      background-color: rgba($color: #33b079, $alpha: 0.9) !important;
+      background-color: rgba($color: colors.$approvedGreen, $alpha: 0.9) !important;
     }
   }
 }
@@ -199,7 +199,7 @@
       padding: 9px 46px 9px 12px;
       border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
-      box-shadow: inset 0 1px 3px #ddd;
+      box-shadow: inset 0 1px 3px colors.$grey8;
       color: black;
       &:hover {
         border-color: rgba(34, 36, 38, 0.35);
@@ -296,7 +296,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #eaebee;
+    background-color: colors.$grey4;
 
     > button {
       background: unset;
@@ -468,11 +468,11 @@
   gap: 8px;
   border-radius: 2px;
   font-size: 16px;
-  color: #000;
-  background: #eaebee;
+  color: colors.$black;
+  background: colors.$grey4;
   padding: 0 8px;
   text-align: center;
-  border: 1px solid #9e9e9e;
+  border: 1px solid colors.$grey7;
   cursor: pointer;
 
   &:hover {
@@ -598,7 +598,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #eaebee;
+    background-color: colors.$grey4;
     border-radius: 8px;
 
     > button {
@@ -716,7 +716,7 @@
   }
 
   .dropdown__search-bar {
-    border-bottom: 1px #d7d8db solid;
+    border-bottom: 1px colors.$grey8 solid;
     margin-bottom: 1px;
   }
 

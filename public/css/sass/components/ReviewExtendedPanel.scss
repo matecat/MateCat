@@ -23,14 +23,14 @@ input {
     .re-warning-not-added-issue {
       p {
         background: variables.$notification-error;
-        color: #fff;
+        color: colors.$white;
         padding: 5px 10px;
         a {
-          color: #fff;
+          color: colors.$white;
           font-weight: bolder;
           cursor: pointer;
           &:hover {
-            color: #fff;
+            color: colors.$white;
             text-decoration: underline;
           }
         }
@@ -38,8 +38,8 @@ input {
     }
     .re-warning-selected-text-issue {
       p {
-        background: #ffeb3b;
-        color: #000;
+        background: colors.$orangeDefault;
+        color: colors.$black;
         padding: 5px 10px;
       }
     }
@@ -54,7 +54,7 @@ input {
           overflow-y: hidden;
         }
         .re-item-head {
-          border-bottom: 1px solid #f2f4f7;
+          border-bottom: 1px solid colors.$grey5;
           padding-top: 10px;
           margin-right: 1px;
           font-size: 16px;
@@ -121,7 +121,7 @@ input {
             }
             .re-comment-list {
               .re-comment {
-                background: #fff;
+                background: colors.$white;
                 padding: 5px 10px;
                 margin-bottom: 0;
                 .re-revisor {
@@ -137,12 +137,12 @@ input {
                   color: lightslategray;
                 }
                 .re-selected-text {
-                  color: #000;
+                  color: colors.$black;
                 }
               }
               .re-highlighted {
                 padding: 10px;
-                border-bottom: 1px solid #797979;
+                border-bottom: 1px solid colors.$grey;
               }
 
               span.re-selected-text {
@@ -159,7 +159,7 @@ input {
               display: flex;
               button {
                 padding: 7px 10px;
-                background-color: #f2f4f7;
+                background-color: colors.$grey5;
                 @media only screen and (max-width: 1450px) {
                   padding: 7px 7px;
                 }
@@ -172,7 +172,7 @@ input {
 
                 &:hover,
                 &.active {
-                  background-color: #cacbcd;
+                  background-color: colors.$grey8;
                 }
               }
             }
@@ -201,7 +201,7 @@ input {
     }
     .re-item.issue-comments-open {
       transition: 0.3s ease;
-      background: #f2f4f7;
+      background: colors.$grey5;
     }
     .re-created {
       background: colors.$grey3;
@@ -209,12 +209,12 @@ input {
       margin-bottom: 0;
       .issues {
         .re-item-issue-value {
-          background: #ffffff;
+          background: colors.$white;
         }
       }
     }
     .re-to-create {
-      background: #ffffff;
+      background: colors.$white;
       .errors {
         max-height: 450px;
         .re-category-item {
@@ -239,7 +239,7 @@ article {
 }
 
 .re-abb-issue {
-  background: #e5e9f1;
+  background: colors.$grey4;
   padding: 0 4px;
   margin-right: 5px;
   color: black;
@@ -251,7 +251,7 @@ article {
 
 .re-open-view.re-issues {
   top: 0px;
-  border-top: 12px solid #fff;
+  border-top: 12px solid colors.$white;
   border-left: 14px solid transparent;
   filter: drop-shadow(-1px 0px 1px rgba(0, 0, 0, 0.2));
   margin-left: -14px;
@@ -260,7 +260,7 @@ article {
     border-top: 12px solid variables.$notification-error;
   }
   &.warning {
-    border-top: 12px solid #ffeb3b;
+    border-top: 12px solid colors.$orangeDefault;
   }
 }
 
@@ -309,12 +309,12 @@ section {
 
   .errorTaggingArea {
     .highlight {
-      background-color: #7eb30c;
+      background-color: colors.$greenDefaultHover;
     }
   }
 
   .errorTaggingArea::selection {
-    background-color: #ffeb3b;
+    background-color: colors.$orangeDefault;
   }
 
   .translation-issues-button {
@@ -384,7 +384,7 @@ section {
 //Download Button
 .downloadtr-button.approved-2ndpass {
   background: colors.$approved2Green;
-  color: #fff !important;
+  color: colors.$white !important;
 }
 
 .severities-dropdown-trigger {

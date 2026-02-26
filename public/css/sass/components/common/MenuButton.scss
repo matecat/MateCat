@@ -47,7 +47,7 @@
   display: flex;
   flex-direction: column;
   box-shadow:
-    0 0 0 #e0e0e0,
+    0 0 0 colors.$grey8,
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24);
   padding: 8px;
@@ -64,7 +64,7 @@
     content: '';
     border-left: 8px solid transparent;
     border-right: 0px solid transparent;
-    border-bottom: 8px solid #ffffff;
+    border-bottom: 8px solid colors.$white;
     bottom: 100%;
     left: auto;
     right: 0;
@@ -79,7 +79,7 @@
     content: '';
     border-left: 8px solid transparent;
     border-right: 0px solid transparent;
-    border-top: 8px solid #ffffff;
+    border-top: 8px solid colors.$white;
     top: 100%;
     right: 0;
     left: auto;

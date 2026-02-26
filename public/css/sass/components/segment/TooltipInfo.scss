@@ -1,8 +1,9 @@
+@use '../../commons/colors';
 .tooltip {
   position: absolute;
   width: 140px;
   height: 32px;
-  background-color: #ccc !important;
+  background-color: colors.$grey8 !important;
   top: -35px;
   border-radius: 2px;
   display: flex;

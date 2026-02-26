@@ -20,7 +20,7 @@
     background-color: colors.$greenDefaultTransparent2;
   }
   &.settingsPanel-notification_warning {
-    border-top: 3px solid #ffcc01;
+    border-top: 3px solid colors.$orangeDefault;
     background-color: colors.$orangeDefaultTransparent2;
   }
   &.settingsPanel-notification_error {
