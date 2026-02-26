@@ -109,7 +109,7 @@ export const MachineTranslationTab = () => {
       enginesList.find((mt) => mt.id === engineIdFromQueryString)
 
     engineIdFromQueryString = false
-    return initialState
+    return initialState || undefined
   })
   const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
     useState(false)

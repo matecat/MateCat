@@ -13,6 +13,25 @@ import {mswServer} from '../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 import ModalsActions from '../../../../actions/ModalsActions'
 
+// Suppress "not configured to support act(...)" false positive caused by
+// @testing-library/react temporarily unsetting IS_REACT_ACT_ENVIRONMENT
+// during async operations while promise-based state updates resolve.
+const originalConsoleError = console.error
+beforeAll(() => {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('not configured to support act')
+    ) {
+      return
+    }
+    originalConsoleError(...args)
+  }
+})
+afterAll(() => {
+  console.error = originalConsoleError
+})
+
 global.config = {
   basepath: 'http://localhost/',
   enableMultiDomainApi: false,

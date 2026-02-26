@@ -1,6 +1,5 @@
 import React, {useState, useMemo, useRef, useEffect, useCallback} from 'react'
 import classnames from 'classnames'
-import {isNull} from 'lodash/lang'
 
 import TextUtils from '../../utils/textUtils'
 import SegmentQRLine from './SegmentQRLine'
@@ -15,576 +14,479 @@ import AlertIcon from '../../../img/icons/AlertIcon'
 import InfoIcon from '../../../img/icons/InfoIcon'
 import {Badge, BADGE_TYPE} from '../common/Badge'
 
-const errorObj = {
-  types: {
-    TAGS: {
-      label: 'Tag mismatch',
-    },
-    MISMATCH: {
-      label: 'Character mismatch',
-    },
-    GLOSSARY: {
-      label: 'Glossary',
-    },
-  },
-  icons: {
-    ERROR: <SegmentQA size={16} />,
-    WARNING: <AlertIcon size={16} />,
-    INFO: <InfoIcon size={16} />,
-  },
+const QA_TYPES = ['ERROR', 'WARNING', 'INFO']
+
+const QA_CATEGORY_LABELS = {
+  TAGS: 'Tag mismatch',
+  MISMATCH: 'Character mismatch',
+  GLOSSARY: 'Glossary',
 }
 
-function SegmentQR(props) {
-  // Derived values from props
-  const source = useMemo(() => props.segment.get('segment'), [props.segment])
-  const suggestion = useMemo(
-    () => props.segment.get('suggestion'),
-    [props.segment],
+const QA_ICONS = {
+  ERROR: <SegmentQA size={16} />,
+  WARNING: <AlertIcon size={16} />,
+  INFO: <InfoIcon size={16} />,
+}
+
+const strPadLeft = (value, pad, length) =>
+  (new Array(length + 1).join(pad) + value).slice(-length)
+
+const decodeTextAndTransformTags = (text, isRtl) => {
+  if (text) {
+    // Fix for more than 2 followed spaces
+    const normalized = text.replace(/ {2}/gi, '&nbsp; ')
+    return DraftMatecatUtils.transformTagsToHtml(normalized, isRtl)
+  }
+  return text
+}
+
+const getRevisionTranslation = (revisions, revisionNumber) => {
+  if (revisions === null) return false
+  const found = revisions.find(
+    (value) => value.get('revision_number') === revisionNumber,
   )
+  return found && found.size > 0 ? found.get('translation') : false
+}
+
+const getStatusBadgeType = (status) => {
+  const upper = status.toUpperCase()
+  if (upper === SEGMENTS_STATUS.NEW || upper === SEGMENTS_STATUS.DRAFT) {
+    return BADGE_TYPE.GREY
+  }
+  if (upper === SEGMENTS_STATUS.APPROVED) return BADGE_TYPE.GREEN
+  if (upper === SEGMENTS_STATUS.APPROVED2) return BADGE_TYPE.PURPLE
+  return BADGE_TYPE.PRIMARY
+}
+
+function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
+  // Derived values from props
+  const source = useMemo(() => segment.get('segment'), [segment])
+  const suggestion = useMemo(() => segment.get('suggestion'), [segment])
   const target = useMemo(() => {
-    const t = props.segment.get('last_translation')
-    return !isNull(t) && t
-  }, [props.segment])
-  const revise = useMemo(() => {
-    const revs = props.segment.get('last_revisions')
-    if (!isNull(revs)) {
-      const found = revs.find((value) => value.get('revision_number') === 1)
-      return found && found.size > 0 ? found.get('translation') : false
-    }
-    return false
-  }, [props.segment])
-  const revise2 = useMemo(() => {
-    const revs = props.segment.get('last_revisions')
-    if (!isNull(revs)) {
-      const found = revs.find((value) => value.get('revision_number') === 2)
-      return found && found.size > 0 ? found.get('translation') : false
-    }
-    return false
-  }, [props.segment])
-  // If second pass separate the issues
+    const t = segment.get('last_translation')
+    return t !== null && t
+  }, [segment])
+  const revise = useMemo(
+    () => getRevisionTranslation(segment.get('last_revisions'), 1),
+    [segment],
+  )
+  const revise2 = useMemo(
+    () => getRevisionTranslation(segment.get('last_revisions'), 2),
+    [segment],
+  )
+
+  // If second pass, separate the issues by revision number
   const issuesR1 = useMemo(() => {
-    if (props.secondPassReviewEnabled) {
-      return props.segment
-        .get('issues')
-        .filter((value) => value.get('revision_number') === 1)
-    }
-    return null
-  }, [props.segment, props.secondPassReviewEnabled])
+    if (!secondPassReviewEnabled) return null
+    return segment
+      .get('issues')
+      .filter((value) => value.get('revision_number') === 1)
+  }, [segment, secondPassReviewEnabled])
+
   const issuesR2 = useMemo(() => {
-    if (props.secondPassReviewEnabled) {
-      return props.segment
-        .get('issues')
-        .filter((value) => value.get('revision_number') === 2)
-    }
-    return null
-  }, [props.segment, props.secondPassReviewEnabled])
+    if (!secondPassReviewEnabled) return null
+    return segment
+      .get('issues')
+      .filter((value) => value.get('revision_number') === 2)
+  }, [segment, secondPassReviewEnabled])
 
   // State
+  const lastTranslation = segment.get('last_translation')
+  const lastRevisions = segment.get('last_revisions')
+
   const [translateDiffOn, setTranslateDiffOn] = useState(
-    props.segment.get('last_translation') &&
-      !isNull(props.segment.get('last_translation')) &&
-      isNull(props.segment.get('last_revisions')),
+    lastTranslation !== null && lastTranslation && lastRevisions === null,
   )
   const [reviseDiffOn, setReviseDiffOn] = useState(
-    !isNull(props.segment.get('last_revisions')) &&
+    lastRevisions !== null &&
       revise &&
       !revise2 &&
-      props.segment.get('last_translation') &&
-      !isNull(props.segment.get('last_translation')),
+      lastTranslation !== null &&
+      !!lastTranslation,
   )
   const [revise2DiffOn, setRevise2DiffOn] = useState(
-    !isNull(props.segment.get('last_revisions')) &&
-      revise2 &&
-      (revise || !isNull(props.segment.get('last_translation'))),
+    lastRevisions !== null && revise2 && (revise || lastTranslation !== null),
   )
   const [htmlDiff, setHtmlDiff] = useState('')
   const [automatedQaOpen, setAutomatedQaOpen] = useState(
-    props.segment.get('issues').size === 0 &&
-      props.segment.get('warnings').get('total') > 0,
+    segment.get('issues').size === 0 &&
+      segment.get('warnings').get('total') > 0,
   )
   const [humanQaOpen, setHumanQaOpen] = useState(
-    !props.secondPassReviewEnabled && props.segment.get('issues').size > 0,
+    !secondPassReviewEnabled && segment.get('issues').size > 0,
   )
-  const [r1QaOpen, setR1QaOpen] = useState(props.revisionToShow === '1')
-  const [r2QaOpen, setR2QaOpen] = useState(props.revisionToShow === '2')
+  const [r1QaOpen, setR1QaOpen] = useState(revisionToShow === '1')
+  const [r2QaOpen, setR2QaOpen] = useState(revisionToShow === '2')
 
-  // Ref for issues container
   const issuesContainer = useRef(null)
 
   // Initialize diff on mount
   useEffect(() => {
-    function initializeDiff() {
-      if (translateDiffOn) {
-        return getDiffPatch(suggestion, target)
-      } else if (reviseDiffOn) {
-        return getDiffPatch(target, revise)
-      } else if (revise2DiffOn) {
-        const src = revise ? revise : target
-        return getDiffPatch(src, revise2)
-      }
-      return ''
+    const getDiff = (src, tgt) => TextUtils.getDiffHtml(src, tgt)
+    if (translateDiffOn) {
+      setHtmlDiff(getDiff(suggestion, target))
+    } else if (reviseDiffOn) {
+      setHtmlDiff(getDiff(target, revise))
+    } else if (revise2DiffOn) {
+      setHtmlDiff(getDiff(revise || target, revise2))
     }
-    setHtmlDiff(initializeDiff())
     // eslint-disable-next-line
   }, [])
 
-  // Update QA open state on revisionToShow change
   useEffect(() => {
-    setR1QaOpen(props.revisionToShow === '1')
-    setR2QaOpen(props.revisionToShow === '2')
-  }, [props.revisionToShow])
+    setR1QaOpen(revisionToShow === '1')
+    setR2QaOpen(revisionToShow === '2')
+  }, [revisionToShow])
 
-  // Helper functions
-  const getDiffPatch = useCallback((source, text) => {
-    return TextUtils.getDiffHtml(source, text)
-  }, [])
-
+  // QA tab handlers
   const openAutomatedQa = useCallback(() => {
     setAutomatedQaOpen(true)
     setHumanQaOpen(false)
     setR1QaOpen(false)
     setR2QaOpen(false)
   }, [])
-  const openHumandQa = useCallback(() => {
+
+  const openHumanQa = useCallback(() => {
     setAutomatedQaOpen(false)
     setHumanQaOpen(true)
   }, [])
+
   const openR1Qa = useCallback(() => {
     setAutomatedQaOpen(false)
     setR1QaOpen(true)
     setR2QaOpen(false)
   }, [])
+
   const openR2Qa = useCallback(() => {
     setAutomatedQaOpen(false)
     setR1QaOpen(false)
     setR2QaOpen(true)
   }, [])
 
-  const getAutomatedQaHtml = useCallback(() => {
-    let html = []
-    let fnMap = (key, obj, type) => {
-      let item = (
-        <div className="qr-issue automated" key={key + type}>
-          <div className={`box-icon ${type.toLowerCase()}`}>
-            {errorObj.icons[type]}
-          </div>
-          <div className="qr-error">
-            {errorObj.types[key].label} <b>({obj.size})</b>
-          </div>
-        </div>
-      )
-      html.push(item)
-    }
-    let details = props.segment
-      .get('warnings')
-      .get('details')
-      .get('issues_info')
-    if (details.get('ERROR').get('Categories').size > 0) {
-      details
-        .get('ERROR')
-        .get('Categories')
-        .entrySeq()
-        .forEach((item) => {
-          let key = item[0]
-          let value = item[1]
-          fnMap(key, value, 'ERROR')
-        })
-    }
-    if (details.get('WARNING').get('Categories').size > 0) {
-      details
-        .get('WARNING')
-        .get('Categories')
-        .entrySeq()
-        .forEach((item) => {
-          let key = item[0]
-          let value = item[1]
-          fnMap(key, value, 'WARNING')
-        })
-    }
-    if (details.get('INFO').get('Categories').size > 0) {
-      details
-        .get('INFO')
-        .get('Categories')
-        .entrySeq()
-        .forEach((item) => {
-          let key = item[0]
-          let value = item[1]
-          fnMap(key, value, 'INFO')
-        })
-    }
-    return html
-  }, [props.segment])
-
-  const getHumanQaHtml = useCallback((issues) => {
-    let html = []
-    issues.map((issue, index) => {
-      let item = <SegmentQRIssue key={index} index={index} issue={issue} />
-      html.push(item)
-    })
-    return html
-  }, [])
-
+  // Diff toggle handlers
   const showTranslateDiff = useCallback(() => {
     if (translateDiffOn) {
       setTranslateDiffOn(false)
     } else {
-      let diffHtml = getDiffPatch(suggestion, target)
       setTranslateDiffOn(true)
       setReviseDiffOn(false)
       setRevise2DiffOn(false)
-      setHtmlDiff(diffHtml)
+      setHtmlDiff(TextUtils.getDiffHtml(suggestion, target))
     }
-  }, [translateDiffOn, suggestion, target, getDiffPatch])
+  }, [translateDiffOn, suggestion, target])
 
   const showReviseDiff = useCallback(() => {
     if (reviseDiffOn) {
       setReviseDiffOn(false)
     } else {
-      let textToDiff = target ? target : suggestion
-      let diffHtml = getDiffPatch(textToDiff, revise)
       setTranslateDiffOn(false)
       setReviseDiffOn(true)
       setRevise2DiffOn(false)
-      setHtmlDiff(diffHtml)
+      setHtmlDiff(TextUtils.getDiffHtml(target || suggestion, revise))
     }
-  }, [reviseDiffOn, target, suggestion, revise, getDiffPatch])
+  }, [reviseDiffOn, target, suggestion, revise])
 
   const showRevise2Diff = useCallback(() => {
     if (revise2DiffOn) {
       setRevise2DiffOn(false)
     } else {
-      let textToDiff = revise ? revise : target ? target : suggestion
-      let diffHtml = getDiffPatch(textToDiff, revise2)
       setTranslateDiffOn(false)
       setReviseDiffOn(false)
       setRevise2DiffOn(true)
-      setHtmlDiff(diffHtml)
+      setHtmlDiff(
+        TextUtils.getDiffHtml(revise || target || suggestion, revise2),
+      )
     }
-  }, [revise2DiffOn, revise, target, suggestion, revise2, getDiffPatch])
+  }, [revise2DiffOn, revise, target, suggestion, revise2])
+
+  const getAutomatedQaHtml = useCallback(() => {
+    const details = segment.get('warnings').get('details').get('issues_info')
+
+    return QA_TYPES.flatMap((type) => {
+      const categories = details.get(type).get('Categories')
+      if (categories.size === 0) return []
+      return categories
+        .entrySeq()
+        .map(([key, value]) => (
+          <div className="qr-issue automated" key={key + type}>
+            <div className={`box-icon ${type.toLowerCase()}`}>
+              {QA_ICONS[type]}
+            </div>
+            <div className="qr-error">
+              {QA_CATEGORY_LABELS[key]} <b>({value.size})</b>
+            </div>
+          </div>
+        ))
+        .toArray()
+    })
+  }, [segment])
+
+  const renderHumanQaIssues = useCallback(
+    (issues) =>
+      issues
+        .map((issue, index) => (
+          <SegmentQRIssue key={index} index={index} issue={issue} />
+        ))
+        .toArray(),
+    [],
+  )
 
   const getWordsSpeed = useCallback(() => {
-    let str_pad_left = function (string, pad, length) {
-      return (new Array(length + 1).join(pad) + string).slice(-length)
-    }
-    let time = parseInt(props.segment.get('secs_per_word'))
-    let minutes = Math.floor(time / 60)
-    let seconds = time - minutes * 60
+    const time = parseInt(segment.get('secs_per_word'))
+    const minutes = Math.floor(time / 60)
+    const seconds = time - minutes * 60
     if (minutes > 0) {
-      return (
-        str_pad_left(minutes, '0', 2) +
-        "'" +
-        str_pad_left(seconds, '0', 2) +
-        "''"
-      )
-    } else {
-      return str_pad_left(seconds, '0', 2) + "''"
+      return `${strPadLeft(minutes, '0', 2)}'${strPadLeft(seconds, '0', 2)}''`
     }
-  }, [props.segment])
+    return `${strPadLeft(seconds, '0', 2)}''`
+  }, [segment])
 
   const openTranslateLink = useCallback(() => {
-    window.open(props.urls.get('translate_url') + '#' + props.segment.get('id'))
-  }, [props.urls, props.segment])
+    window.open(`${urls.get('translate_url')}#${segment.get('id')}`)
+  }, [urls, segment])
 
   const openReviseLink = useCallback(
     (reviseNum) => {
-      if (
-        typeof props.urls.get('revise_url') === 'string' ||
-        props.urls.get('revise_url') instanceof String
-      ) {
-        window.open(
-          props.urls.get('revise_url') + '#' + props.segment.get('id'),
-        )
+      const reviseUrl = urls.get('revise_url')
+      if (typeof reviseUrl === 'string' || reviseUrl instanceof String) {
+        window.open(`${reviseUrl}#${segment.get('id')}`)
       } else {
-        let url = props.urls
+        const url = urls
           .get('revise_urls')
-          .find((value) => {
-            return value.get('revision_number') === reviseNum
-          })
+          .find((value) => value.get('revision_number') === reviseNum)
           .get('url')
-        window.open(url + '#' + props.segment.get('id'))
+        window.open(`${url}#${segment.get('id')}`)
       }
     },
-    [props.urls, props.segment],
+    [urls, segment],
   )
 
-  const decodeTextAndTransformTags = useCallback((text, isRtl) => {
-    if (text) {
-      // Fix for more than 2 followed spaces
-      text = text.replace(/ {2}/gi, '&nbsp; ')
-      return DraftMatecatUtils.transformTagsToHtml(text, isRtl)
-    }
-    return text
-  }, [])
-
-  const allowHTML = useCallback((string) => {
-    return {__html: string}
-  }, [])
-
   // Render logic
-  let renderedSource = decodeTextAndTransformTags(source, config.isSourceRTL)
-  let renderedSuggestion = decodeTextAndTransformTags(
+  const renderedSource = decodeTextAndTransformTags(source, config.isSourceRTL)
+  const renderedSuggestion = decodeTextAndTransformTags(
     suggestion,
     config.isTargetRTL,
   )
-  let renderedTarget =
-    target && decodeTextAndTransformTags(target, config.isTargetRTL)
-  let renderedRevise =
-    revise && decodeTextAndTransformTags(revise, config.isTargetRTL)
-  let renderedRevise2 =
-    revise2 && decodeTextAndTransformTags(revise2, config.isTargetRTL)
+  const renderedTarget = translateDiffOn
+    ? decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
+    : target && decodeTextAndTransformTags(target, config.isTargetRTL)
+  const renderedRevise = reviseDiffOn
+    ? decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
+    : revise && decodeTextAndTransformTags(revise, config.isTargetRTL)
+  const renderedRevise2 = revise2DiffOn
+    ? decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
+    : revise2 && decodeTextAndTransformTags(revise2, config.isTargetRTL)
 
-  if (translateDiffOn) {
-    renderedTarget = decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
-  }
-  if (reviseDiffOn) {
-    renderedRevise = decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
-  }
-  if (revise2DiffOn) {
-    renderedRevise2 = decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
-  }
-
-  let sourceClass = classnames({
-    'segment-container': true,
-    'qr-source': true,
+  const isDiffOn = translateDiffOn || reviseDiffOn || revise2DiffOn
+  const sourceClass = classnames('segment-container', 'qr-source', {
     'rtl-lang': config.isSourceRTL,
   })
-  let segmentBodyClass = classnames({
-    'qr-segment-body': true,
-    'qr-diff-on': translateDiffOn || reviseDiffOn || revise2DiffOn,
+  const segmentBodyClass = classnames('qr-segment-body', {
+    'qr-diff-on': isDiffOn,
   })
-  let suggestionClasses = classnames({
-    'segment-container': true,
-    'qr-suggestion': true,
+  const suggestionClasses = classnames('segment-container', 'qr-suggestion', {
     'shadow-1':
       translateDiffOn ||
       (reviseDiffOn && !target) ||
       (revise2DiffOn && !revise && !target),
     'rtl-lang': config.isTargetRTL,
   })
-  let translateClasses = classnames({
-    'segment-container': true,
-    'qr-translated': true,
+  const translateClasses = classnames('segment-container', 'qr-translated', {
     'shadow-1': translateDiffOn || reviseDiffOn || (revise2DiffOn && !revise),
     'rtl-lang': config.isTargetRTL,
   })
-  let revisedClasses = classnames({
-    'segment-container': true,
-    'qr-revised': true,
+  const revisedClasses = classnames('segment-container', 'qr-revised', {
     'shadow-1': reviseDiffOn || revise2DiffOn,
     'rtl-lang': config.isTargetRTL,
   })
-  let revised2Classes = classnames({
-    'segment-container': true,
-    'qr-revised': true,
-    'qr-revised-2ndpass': true,
-    'shadow-1': revise2DiffOn,
-    'rtl-lang': config.isTargetRTL,
-  })
+  const revised2Classes = classnames(
+    'segment-container',
+    'qr-revised',
+    'qr-revised-2ndpass',
+    {
+      'shadow-1': revise2DiffOn,
+      'rtl-lang': config.isTargetRTL,
+    },
+  )
+
+  const issuesCount = segment.get('issues').size
+  const warningsTotal = segment.get('warnings').get('total')
+  const isQaVisible = automatedQaOpen || humanQaOpen || r1QaOpen || r2QaOpen
 
   return (
     <div className="qr-single-segment">
       <div className="qr-segment-head">
-        <div className="segment-id">{props.segment.get('id')}</div>
+        <div className="segment-id">{segment.get('id')}</div>
         <div className="segment-production-container">
           <div className="segment-production">
             <div className="production match-type">
               Analysis:{' '}
-              <b>{ANALYSIS_BUCKETS_LABELS[props.segment.get('match_type')]}</b>
+              <b>{ANALYSIS_BUCKETS_LABELS[segment.get('match_type')]}</b>
             </div>
             <div className="production word-speed">
               Secs/Word: <b>{getWordsSpeed()}</b>
             </div>
-            {/*<div className="production time-edit">Time to edit: <b>{this.getTimeToEdit()}</b></div>*/}
             <div className="production pee">
-              PEE: <b>{props.segment.get('pee')}%</b>
+              PEE: <b>{segment.get('pee')}%</b>
             </div>
           </div>
         </div>
         <div className="segment-status-container">
           <div className="qr-label">Segment status</div>
           <div className="qr-info">
-            <Badge
-              type={
-                props.segment.get('status').toUpperCase() ===
-                  SEGMENTS_STATUS.NEW ||
-                props.segment.get('status').toUpperCase() ===
-                  SEGMENTS_STATUS.DRAFT
-                  ? BADGE_TYPE.GREY
-                  : props.segment.get('status').toUpperCase() ===
-                      SEGMENTS_STATUS.APPROVED
-                    ? BADGE_TYPE.GREEN
-                    : props.segment.get('status').toUpperCase() ===
-                        SEGMENTS_STATUS.APPROVED2
-                      ? BADGE_TYPE.PURPLE
-                      : BADGE_TYPE.PRIMARY
-              }
-            >
-              {props.segment.get('status') === SEGMENTS_STATUS.APPROVED2
+            <Badge type={getStatusBadgeType(segment.get('status'))}>
+              {segment.get('status') === SEGMENTS_STATUS.APPROVED2
                 ? SEGMENTS_STATUS.APPROVED.toLowerCase()
-                : props.segment.get('status').toLowerCase()}
+                : segment.get('status').toLowerCase()}
             </Badge>
           </div>
         </div>
       </div>
       <div className={segmentBodyClass}>
         <SegmentQRLine
-          segment={props.segment}
+          segment={segment}
           classes={sourceClass}
-          label={'Source'}
+          label="Source"
           text={renderedSource}
           showSegmentWords={true}
         />
         <SegmentQRLine
-          segment={props.segment}
+          segment={segment}
           classes={suggestionClasses}
-          label={'Suggestion'}
+          label="Suggestion"
           showSuggestionSource={true}
           text={renderedSuggestion}
         />
-        {props.segment.get('last_translation') ? (
+        {segment.get('last_translation') ? (
           <SegmentQRLine
-            segment={props.segment}
+            segment={segment}
             classes={translateClasses}
-            label={'Translation'}
+            label="Translation"
             onClickLabel={openTranslateLink}
             text={renderedTarget}
             showDiffButton={true}
             onClickDiff={showTranslateDiff}
             diffActive={translateDiffOn}
             showIceMatchInfo={true}
-            tte={props.segment.get('time_to_edit_translation')}
+            tte={segment.get('time_to_edit_translation')}
             showIsPretranslated={
-              props.segment.get('is_pre_translated') &&
-              !props.segment.get('ice_locked')
+              segment.get('is_pre_translated') && !segment.get('ice_locked')
             }
             rev={0}
           />
         ) : null}
-        {!isNull(props.segment.get('last_revisions')) && revise ? (
+        {segment.get('last_revisions') !== null && revise ? (
           <SegmentQRLine
-            segment={props.segment}
+            segment={segment}
             classes={revisedClasses}
-            label={'Revision'}
+            label="Revision"
             onClickLabel={() => openReviseLink(1)}
             text={renderedRevise}
             showDiffButton={true}
             onClickDiff={showReviseDiff}
             diffActive={reviseDiffOn}
-            showIceMatchInfo={isNull(target)}
-            tte={props.segment.get('time_to_edit_revise')}
+            showIceMatchInfo={target === null}
+            tte={segment.get('time_to_edit_revise')}
             showIsPretranslated={
-              props.segment.get('is_pre_translated') &&
-              !props.segment.get('ice_locked')
+              segment.get('is_pre_translated') && !segment.get('ice_locked')
             }
             rev={1}
           />
         ) : null}
-        {!isNull(props.segment.get('last_revisions')) && revise2 ? (
+        {segment.get('last_revisions') !== null && revise2 ? (
           <SegmentQRLine
-            segment={props.segment}
+            segment={segment}
             classes={revised2Classes}
-            label={'2nd Revision'}
+            label="2nd Revision"
             onClickLabel={() => openReviseLink(2)}
             text={renderedRevise2}
             showDiffButton={true}
             onClickDiff={showRevise2Diff}
             diffActive={revise2DiffOn}
-            showIceMatchInfo={isNull(target) && isNull(revise)}
-            tte={props.segment.get('time_to_edit_revise_2')}
+            showIceMatchInfo={target === null && revise === null}
+            tte={segment.get('time_to_edit_revise_2')}
             showIsPretranslated={
-              props.segment.get('is_pre_translated') &&
-              !props.segment.get('ice_locked')
+              segment.get('is_pre_translated') && !segment.get('ice_locked')
             }
             rev={2}
           />
         ) : null}
-        {automatedQaOpen || humanQaOpen || r1QaOpen || r2QaOpen ? (
+        {isQaVisible && (
           <div className="segment-container qr-issues">
             <div className="segment-content qr-segment-title">
               <b>QA</b>
               <div className="ui basic mini buttons segment-production">
-                {props.segment.get('issues').size > 0 &&
-                !props.secondPassReviewEnabled ? (
+                {issuesCount > 0 && !secondPassReviewEnabled && (
                   <div
-                    className={
-                      'ui button human-qa ' +
-                      (humanQaOpen ? 'active' : '') +
-                      ' ' +
-                      (props.segment.get('warnings').get('total') > 0
-                        ? ''
-                        : 'no-hover')
-                    }
-                    onClick={openHumandQa}
+                    className={classnames('ui button human-qa', {
+                      active: humanQaOpen,
+                      'no-hover': warningsTotal === 0,
+                    })}
+                    onClick={openHumanQa}
                   >
-                    Human<b> ({props.segment.get('issues').size})</b>
+                    Human<b> ({issuesCount})</b>
                   </div>
-                ) : null}
-                {issuesR1 &&
-                issuesR1.size > 0 &&
-                props.secondPassReviewEnabled ? (
+                )}
+                {issuesR1?.size > 0 && secondPassReviewEnabled && (
                   <div
-                    className={
-                      'ui button human-qa ' + (r1QaOpen ? 'active' : '')
-                    }
+                    className={classnames('ui button human-qa', {
+                      active: r1QaOpen,
+                    })}
                     style={{padding: '8px'}}
                     onClick={openR1Qa}
                   >
                     R1<b> ({issuesR1.size})</b>
                   </div>
-                ) : null}
-                {issuesR2 &&
-                issuesR2.size > 0 &&
-                props.secondPassReviewEnabled ? (
+                )}
+                {issuesR2?.size > 0 && secondPassReviewEnabled && (
                   <div
-                    className={
-                      'ui button human-qa ' + (r2QaOpen ? 'active' : '')
-                    }
+                    className={classnames('ui button human-qa', {
+                      active: r2QaOpen,
+                    })}
                     style={{padding: '8px'}}
                     onClick={openR2Qa}
                   >
                     R2<b> ({issuesR2.size})</b>
                   </div>
-                ) : null}
-                {props.segment.get('warnings').get('total') > 0 ? (
+                )}
+                {warningsTotal > 0 && (
                   <div
-                    className={
-                      'ui button automated-qa ' +
-                      (automatedQaOpen ? 'active' : '') +
-                      ' ' +
-                      (props.segment.get('issues').size > 0 ? '' : 'no-hover')
-                    }
+                    className={classnames('ui button automated-qa', {
+                      active: automatedQaOpen,
+                      'no-hover': issuesCount === 0,
+                    })}
                     onClick={openAutomatedQa}
                   >
                     Automated
-                    <b> ({props.segment.get('warnings').get('total')})</b>
+                    <b> ({warningsTotal})</b>
                   </div>
-                ) : null}
+                )}
               </div>
             </div>
             <div className="segment-content qr-text" ref={issuesContainer}>
-              {automatedQaOpen ? (
-                <div className="qr-issues-list" key={'automated-qa'}>
+              {automatedQaOpen && (
+                <div className="qr-issues-list" key="automated-qa">
                   {getAutomatedQaHtml()}
                 </div>
-              ) : null}
-              {humanQaOpen ? (
-                <div className="qr-issues-list" key={'human-qa'}>
-                  {getHumanQaHtml(props.segment.get('issues'))}
+              )}
+              {humanQaOpen && (
+                <div className="qr-issues-list" key="human-qa">
+                  {renderHumanQaIssues(segment.get('issues'))}
                 </div>
-              ) : null}
-              {r1QaOpen && issuesR1 ? (
-                <div className="qr-issues-list" key={'issues-r1-qa'}>
-                  {getHumanQaHtml(issuesR1)}
+              )}
+              {r1QaOpen && issuesR1 && (
+                <div className="qr-issues-list" key="issues-r1-qa">
+                  {renderHumanQaIssues(issuesR1)}
                 </div>
-              ) : null}
-              {r2QaOpen && issuesR2 ? (
-                <div className="qr-issues-list" key={'issues-r2-qa'}>
-                  {getHumanQaHtml(issuesR2)}
+              )}
+              {r2QaOpen && issuesR2 && (
+                <div className="qr-issues-list" key="issues-r2-qa">
+                  {renderHumanQaIssues(issuesR2)}
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   )

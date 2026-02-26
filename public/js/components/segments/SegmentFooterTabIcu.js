@@ -172,16 +172,6 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
       formatMessage.setup({
         locale: config.target_code.split('-')[0],
       })
-      console.log(
-        'message',
-        formatMessage(
-          textUtils.removeWhitespacePlaceholders(
-            transformTagsToText(removeTagsFromText(segment.translation)),
-          ),
-          valuesNew,
-        ),
-        valuesNew,
-      )
       return formatMessage(
         textUtils.removeWhitespacePlaceholders(
           transformTagsToText(removeTagsFromText(segment.translation)),

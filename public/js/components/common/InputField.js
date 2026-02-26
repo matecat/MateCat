@@ -30,20 +30,26 @@ const InputField = (props) => {
     name,
     classes,
     tabindex,
-    onKeyPress,
+    onKeyDown,
     showCancel,
   } = props
 
   const [value, setValue] = useState(propValue ? propValue : '')
   const inputRef = useRef(null)
+  const valueRef = useRef(value)
 
-  // Debounced callback
+  // Keep ref in sync with latest value
+  useEffect(() => {
+    valueRef.current = value
+  }, [value])
+
+  // Stable debounced callback that reads the latest value from ref
   const debouncedOnChange = useMemo(
     () =>
       debounce(() => {
-        onFieldChanged(value)
+        onFieldChanged(valueRef.current)
       }, 500),
-    [onFieldChanged, value],
+    [onFieldChanged],
   )
 
   // Handle input change
@@ -57,9 +63,10 @@ const InputField = (props) => {
 
   // Reset input
   const resetInput = useCallback(() => {
+    debouncedOnChange.cancel()
     setValue('')
     onFieldChanged('')
-  }, [onFieldChanged])
+  }, [onFieldChanged, debouncedOnChange])
 
   // componentDidMount logic
   useEffect(() => {
@@ -67,11 +74,14 @@ const InputField = (props) => {
       const event = new Event('input', {bubbles: true})
       inputRef.current.dispatchEvent(event)
     }
-    // Cleanup debounce on unmount
+  }, [text])
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
     return () => {
-      debouncedOnChange.cancel && debouncedOnChange.cancel()
+      debouncedOnChange.cancel()
     }
-  }, [text, debouncedOnChange])
+  }, [debouncedOnChange])
 
   const type = propType ? propType : 'text'
 
@@ -87,7 +97,7 @@ const InputField = (props) => {
         onChange={handleChange}
         className={classes}
         tabIndex={tabindex}
-        onKeyPress={onKeyPress}
+        onKeyDown={onKeyDown}
         ref={inputRef}
       />
       {showCancel && value.length > 0 ? (
