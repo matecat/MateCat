@@ -197,7 +197,6 @@
     .select {
       font-size: 16px;
       padding: 9px 46px 9px 12px;
-      border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
       box-shadow: inset 0 1px 3px colors.$grey8;
       color: black;
@@ -331,6 +330,10 @@
     .settings-panel-row-content {
       grid-template-columns: 8% minmax(0, 1fr) 22% 5%;
       background-color: unset;
+
+      > :first-child {
+        margin-top: 5px;
+      }
     }
     .settings-panel-row-content {
       grid-template-columns: 8% minmax(0, 1fr) 22% 5%;
@@ -369,6 +372,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .glossary-row-name {
+    align-items: center;
   }
 }
 
@@ -409,6 +416,9 @@
 }
 
 .glossary-deepl-row-name-input {
+  padding: 4px 8px;
+  border-radius: 8px;
+
   &:hover {
     background-color: unset;
   }
@@ -429,6 +439,10 @@
   }
 
   .grey-button {
+    font-size: 14px !important;
+    border-radius: 8px;
+    height: 32px;
+
     &.error {
       border: solid 1px colors.$redDefault;
     }
@@ -509,6 +523,10 @@
   .settings-panel-table-rows-container {
     max-height: 400px;
     overflow-y: auto;
+  }
+
+  > :first-child {
+    margin-bottom: 10px;
   }
 }
 
@@ -684,6 +702,11 @@
 
   .select--is-disabled {
     background-color: colors.$grey9;
+  }
+
+  input {
+    padding: 4px 8px;
+    border-radius: 8px;
   }
 }
 

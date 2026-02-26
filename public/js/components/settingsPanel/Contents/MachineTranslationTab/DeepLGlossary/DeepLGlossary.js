@@ -17,6 +17,7 @@ import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 import {DeepLGlossaryNoneRow} from './DeepLGlossaryNoneRow'
+import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
 
 const COLUMNS_TABLE = [
   {name: 'Active'},
@@ -324,26 +325,26 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         (haveRecords ? (
           <div className="main-buttons-container">
             {!shouldHideNewButton && (
-              <button
-                className="ui primary button settings-panel-button-icon confirm-button create-glossary-button"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
                 onClick={addGlossary}
                 title="Add glossary"
               >
                 <IconAdd size={18} />
                 New glossary
-              </button>
+              </Button>
             )}
           </div>
         ) : Array.isArray(rows) ? (
           <div className="empty-list-mode">
             <p>Start using DeepL's glossary feature</p>
-            <button
-              className="grey-button create-glossary-button"
+            <Button
+              className="settings-panel-grey-button"
               onClick={addGlossary}
             >
               <IconAdd size={18} />
               New glossary
-            </button>
+            </Button>
           </div>
         ) : (
           <p className="loading-list-mode">Loading...</p>

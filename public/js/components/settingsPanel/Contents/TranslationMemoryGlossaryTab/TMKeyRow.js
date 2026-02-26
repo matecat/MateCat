@@ -475,7 +475,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           stepValue={1}
         />
         <Button
-          className="penalty-numeric-stepper-close-button"
+          className="settings-panel-grey-button penalty-numeric-stepper-close-button"
           size={BUTTON_SIZE.ICON_SMALL}
           onClick={() => onChangePenalty(0)}
         >
@@ -484,7 +484,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       </div>
     ) : (
       <Button
-        className="tm-row-penalty-button"
+        className="settings-panel-grey-button"
         size={BUTTON_SIZE.SMALL}
         onClick={() => onChangePenalty(1)}
       >
@@ -545,7 +545,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           <div className="align-center tm-row-penalty">{renderPenalty}</div>
         )}
       {!isMMSharedKey && isOwner && !row.isTmFromFile ? (
-        <div className="align-center">
+        <div>
           <MenuButton
             label="Import TMX"
             onClick={() => handleExpandeRow(ImportTMX)}
@@ -605,7 +605,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       ) : isMMSharedKey && !config.not_empty_default_tm_key ? (
         <div className="tm-key-row-menu-button">
           <Button
-            className="tm-row-penalty-button"
+            className="settings-panel-grey-button"
             size={BUTTON_SIZE.SMALL}
             onClick={() => handleExpandeRow(ImportTMX)}
           >

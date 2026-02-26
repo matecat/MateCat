@@ -343,13 +343,13 @@ export const MachineTranslationTab = () => {
             <h2>Active MT</h2>
           </div>
           {!config.is_cattool && !addMTVisible && (
-            <button
-              className="ui primary button settings-panel-button-icon"
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
               onClick={() => setAddMTVisible(true)}
               title="Add MT engine"
             >
               <IconAdd size={16} /> Add MT engine
-            </button>
+            </Button>
           )}
         </div>
 

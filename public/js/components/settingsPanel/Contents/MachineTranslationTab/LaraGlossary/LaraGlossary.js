@@ -1,4 +1,10 @@
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelTable} from '../../../SettingsPanelTable'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
@@ -8,6 +14,7 @@ import {getLaraGlossaries} from '../../../../../api/getLaraGlossaries/getLaraGlo
 import CatToolStore from '../../../../../stores/CatToolStore'
 import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolActions from '../../../../../actions/CatToolActions'
+import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
 
 const COLUMNS_TABLE = [
   {name: 'Active'},
@@ -60,7 +67,7 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
       const rows = memories.filter(({id}) => {
         const laraGlossaries = project.mt_extra?.lara_glossaries
-            ? project.mt_extra.lara_glossaries
+          ? project.mt_extra.lara_glossaries
           : []
 
         return laraGlossaries.some((value) => value === id)
@@ -159,23 +166,20 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
       {!isCattoolPage &&
         (haveRecords ? (
           <div className="main-buttons-container">
-            <button
-              className="ui primary button settings-panel-button-icon confirm-button manage-lara-glossary-button"
-              onClick={openGlossaryPage}
-            >
+            <Button type={BUTTON_TYPE.PRIMARY} onClick={openGlossaryPage}>
               Manage your Lara glossaries
-            </button>
+            </Button>
           </div>
         ) : Array.isArray(rows) ? (
           <div className="empty-list-mode">
             <p>Start using Lara's glossary feature</p>
-            <button
-              className="grey-button create-glossary-button"
+            <Button
+              className="settings-panel-grey-button"
               onClick={openGlossaryPage}
             >
               <IconAdd size={16} />
               Create a glossary on Lara
-            </button>
+            </Button>
           </div>
         ) : (
           <p className="loading-list-mode">Loading...</p>

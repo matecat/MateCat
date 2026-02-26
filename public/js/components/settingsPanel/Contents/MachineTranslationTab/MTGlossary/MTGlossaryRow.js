@@ -18,6 +18,11 @@ import Close from '../../../../../../img/icons/Close'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 
 export const MTGlossaryRow = ({
   engineId,
@@ -138,9 +143,14 @@ export const MTGlossaryRow = ({
   }
 
   const editingNameButtons = !isEditingName ? (
-    <button className="grey-button" onClick={() => setIsEditingName(true)}>
+    <Button
+      className="settings-panel-grey-button"
+      type={BUTTON_TYPE.ICON}
+      size={BUTTON_SIZE.SMALL}
+      onClick={() => setIsEditingName(true)}
+    >
       <IconEdit size={16} />
-    </button>
+    </Button>
   ) : (
     <div className="editing-buttons">
       <button
@@ -217,14 +227,16 @@ export const MTGlossaryRow = ({
             </label>
           </div>
           <div className="glossary-row-delete">
-            <button
-              className="grey-button"
+            <Button
+              className="settings-panel-grey-button"
+              type={BUTTON_TYPE.ICON}
+              size={BUTTON_SIZE.SMALL}
               disabled={isWaitingResult}
               onClick={() => deleteGlossaryConfirm(row)}
-              data-testid={`delete-mtglossary-${row.id}`}
+              testId={`delete-mtglossary-${row.id}`}
             >
               <Trash size={16} />
-            </button>
+            </Button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}
         </>

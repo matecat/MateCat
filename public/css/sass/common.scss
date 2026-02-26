@@ -1073,3 +1073,7 @@ body svg {
     }
   }
 }
+
+input[type='checkbox'] {
+  accent-color: colors.$translatedBlue;
+}

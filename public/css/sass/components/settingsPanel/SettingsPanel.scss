@@ -547,3 +547,16 @@
     margin-bottom: 0;
   }
 }
+
+.settings-panel-grey-button {
+  color: #000 !important;
+  background: colors.$grey4 !important;
+  padding: 4px 8px;
+  text-align: center;
+  border: 1px solid colors.$grey2 !important;
+  font-size: 14px !important;
+
+  &:hover {
+    background-color: colors.$grey5 !important;
+  }
+}

@@ -132,7 +132,8 @@
   .settings-panel-table {
     .settings-panel-row-content:not(.row-content-create-resource):not(
         .row-content-default-memory
-      ):not(.row-content-tm-from-file) > :last-child {
+      ):not(.row-content-tm-from-file)
+      > :last-child {
       grid-column: 7;
     }
   }
@@ -169,10 +170,10 @@
 
 .tm-key-row-name {
   width: 100%;
-  padding: 4px;
+  padding: 4px 8px;
   background-color: unset;
   border: 1px solid colors.$grey8;
-  border-radius: 3px;
+  border-radius: 8px;
 
   &:focus,
   &:hover {
@@ -203,6 +204,8 @@
 }
 
 .tm-key-row-menu-button {
+  justify-content: unset;
+
   .menu-button-wrapper {
     button {
       color: colors.$black !important;
@@ -455,26 +458,12 @@
   }
 
   .switch-container-outer {
-    width: 155px;
+    width: 150px;
   }
 }
 
 .tm-key-row-menu-button,
 .tm-row-penalty {
-  .tm-row-penalty-button,
-  .penalty-numeric-stepper-close-button {
-    color: colors.$black !important;
-    background: colors.$grey4 !important;
-    padding: 4px 8px;
-    text-align: center;
-    border: 1px solid colors.$grey2 !important;
-    font-size: 14px !important;
-
-    &:hover {
-      background-color: colors.$grey5 !important;
-    }
-  }
-
   .tm-row-penalty-numeric-stepper {
     display: flex;
     gap: 5px;

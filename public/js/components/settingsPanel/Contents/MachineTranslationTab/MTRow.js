@@ -2,6 +2,8 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
+import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
+import Trash from '../../../../../img/icons/Trash'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
@@ -71,13 +73,13 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
       <div className="settings-panel-mt-row-description">{row.description}</div>
       {!row.default && !config.is_cattool && (
         <div>
-          <button
-            className="grey-button"
-            data-testid="delete-mt"
+          <Button
+            className="settings-panel-grey-button"
+            size={BUTTON_SIZE.SMALL}
             onClick={deleteMT}
           >
-            Delete
-          </button>
+            <Trash size={16} /> Delete
+          </Button>
         </div>
       )}
     </>
