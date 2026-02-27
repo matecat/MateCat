@@ -7,6 +7,7 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
 use Google_Service_Exception;
+use InvalidArgumentException;
 use Matecat\Locales\InvalidLanguageException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
@@ -14,6 +15,7 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\Constants;
+use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -69,6 +71,54 @@ class GDriveController extends AbstractStatefulKleinController
 
                 $this->filters_extraction_parameters = $filtersTemplate;
             }
+
+            $state = json_decode($this->request->param('state'), true);
+
+            if (array_key_exists('ids', $state)) {
+                $listOfIds = $state['ids'];
+            } elseif (array_key_exists('exportIds', $state)) {
+                $listOfIds = $state['exportIds'];
+            } else {
+                throw new Exception(" no ids or export ids found ");
+            }
+
+            // set the upload directory name if there are files from gDrive
+            if (!$this->isAsyncReq) {
+                $guid = Utils::uuid4();
+                CookieManager::setCookie(
+                    "upload_token",
+                    $guid,
+                    [
+                        'expires' => time() + 86400,
+                        'path' => '/',
+                        'domain' => AppConfig::$COOKIE_DOMAIN,
+                        'secure' => true,
+                        'httponly' => true,
+                        'samesite' => 'Strict',
+                    ]
+                );
+                $_SESSION["upload_token"] = $_COOKIE["upload_token"] = $guid;
+                $this->gdriveUserSession->clearFileListFromSession();
+            }
+
+            $guid = $_SESSION["upload_token"] = $_COOKIE["upload_token"];
+
+            if (!Utils::isTokenValid($guid)) {
+                throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
+            }
+
+            $this->gdriveUserSession->setConversionParams(
+                $guid,
+                $this->source_lang,
+                $this->target_lang,
+                $this->segmentation_rule,
+                $this->filters_extraction_parameters
+            );
+
+            $this->doImport($listOfIds);
+            $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = $this->source_lang;
+
+            $this->finalize();
         } catch (Exception $e) {
             $this->isImportingSuccessful = false;
             $this->error = [
@@ -79,11 +129,6 @@ class GDriveController extends AbstractStatefulKleinController
 
             return;
         }
-
-        $_SESSION[Constants::SESSION_ACTUAL_SOURCE_LANG] = $this->source_lang;
-
-        $this->doImport();
-        $this->finalize();
     }
 
     /**
@@ -133,41 +178,8 @@ class GDriveController extends AbstractStatefulKleinController
     /**
      * @throws Exception
      */
-    private function doImport(): void
+    private function doImport(array $listOfIds): void
     {
-        $state = json_decode($this->request->param('state'), true);
-
-        // set the upload directory name if there are files from gDrive
-        if (!$this->isAsyncReq) {
-            $guid = Utils::uuid4();
-            CookieManager::setCookie(
-                "upload_token",
-                $guid,
-                [
-                    'expires' => time() + 86400,
-                    'path' => '/',
-                    'domain' => AppConfig::$COOKIE_DOMAIN,
-                    'secure' => true,
-                    'httponly' => true,
-                    'samesite' => 'Strict',
-                ]
-            );
-            $_SESSION["upload_token"] = $_COOKIE["upload_token"] = $guid;
-            $this->gdriveUserSession->clearFileListFromSession();
-        }
-
-        $guid = $_SESSION["upload_token"] = $_COOKIE["upload_token"];
-
-        if (array_key_exists('ids', $state)) {
-            $listOfIds = $state['ids'];
-        } elseif (array_key_exists('exportIds', $state)) {
-            $listOfIds = $state['exportIds'];
-        } else {
-            throw new Exception(" no ids or export ids found ");
-        }
-
-        $this->gdriveUserSession->setConversionParams($guid, $this->source_lang, $this->target_lang, $this->segmentation_rule, $this->filters_extraction_parameters);
-
         for ($i = 0; $i < count($listOfIds) && $this->isImportingSuccessful === true; $i++) {
             try {
                 $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");

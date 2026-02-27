@@ -16,6 +16,7 @@ use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_Permission;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\Conversion\FilesConverter;
@@ -32,6 +33,7 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\Constants;
+use Utils\Constants\ConversionHandlerStatus;
 use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
@@ -644,7 +646,11 @@ class Session
      */
     private function sanitizeFileName(string $fileName): string
     {
-        return str_replace('/', '_', $fileName);
+        $fileName = str_replace('/', '_', $fileName);
+        if (!Utils::isValidFileName($fileName) || empty($fileName)) {
+            throw new InvalidArgumentException("Invalid file name: " . $fileName, ConversionHandlerStatus::INVALID_FILE);
+        }
+        return $fileName;
     }
 
     /**
@@ -675,8 +681,8 @@ class Session
             $uploadDir,
             $errDir,
             $uploadTokenValue,
-            $this->seg_rule,
             false,
+            $this->seg_rule,
             $this->featureSet,
             $this->filters_extraction_parameters,
         );

@@ -6,6 +6,7 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
+use Controller\Traits\ValidatesDialectStrictTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\Languages;
@@ -32,9 +33,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
-use Utils\Engines\Validators\DeeplFormalityValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
-use Utils\Engines\Validators\IntentoRoutingValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -177,7 +176,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         //reserve a project id from the sequence
         $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
-        $projectStructure['ppassword'] = Utils::randomString(12);
+        $projectStructure['ppassword'] = Utils::randomString();
 
         $projectManager->sanitizeProjectStructure();
         $fs::moveFileFromUploadSessionToQueuePath($_COOKIE['upload_token']);
@@ -634,50 +633,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             } catch (Exception $exception) {
                 throw new InvalidArgumentException($exception->getMessage(), -6);
             }
-        }
-
-        return null;
-    }
-
-    /**
-     * Validate DeepL params
-     *
-     * @param null $deepl_formality
-     *
-     * @return string|null
-     */
-    private function validateDeepLFormalityParams($deepl_formality = null): ?string
-    {
-        if (!empty($deepl_formality)) {
-            $allowedFormalities = [
-                'default',
-                'prefer_less',
-                'prefer_more'
-            ];
-
-            if (!in_array($deepl_formality, $allowedFormalities)) {
-                throw new InvalidArgumentException("Not allowed value of DeepL formality", -6);
-            }
-
-            return $deepl_formality;
-        }
-
-        return null;
-    }
-
-    private function validateDeepLEngineType(?string $deepl_engine_type = null): ?string
-    {
-        if (!empty($deepl_engine_type)) {
-            $allowedEngineTypes = [
-                'prefer_quality_optimized',
-                'latency_optimized',
-            ];
-
-            if (!in_array($deepl_engine_type, $allowedEngineTypes)) {
-                throw new InvalidArgumentException("Not allowed value of DeepL engine type", -7);
-            }
-
-            return $deepl_engine_type;
         }
 
         return null;

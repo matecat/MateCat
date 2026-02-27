@@ -4,16 +4,12 @@ namespace Model\Conversion;
 
 use DomainException;
 use Exception;
-use InvalidArgumentException;
-use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use ReflectionException;
 use RuntimeException;
-use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
-use Utils\Tools\Utils;
 
 class FilesConverter
 {
@@ -29,11 +25,6 @@ class FilesConverter
      * @var ConvertedFileList
      */
     private ConvertedFileList $resultStack;
-
-    /**
-     * @var Languages|null
-     */
-    private ?Languages $lang_handler;
 
     /**
      * @var FeatureSet
@@ -60,6 +51,7 @@ class FilesConverter
      * @param string $intDir
      * @param string $errDir
      * @param string $uploadTokenValue
+     * @param bool $icu_enabled
      * @param string|null $segmentation_rule
      * @param FeatureSet $featureSet
      * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
@@ -78,7 +70,6 @@ class FilesConverter
         ?FiltersConfigTemplateStruct $filters_extraction_parameters = null,
         ?bool $legacy_icu = false
     ) {
-        $this->lang_handler = Languages::getInstance();
         $this->files = $files;
         $this->setSourceLang($source_lang);
         $this->setTargetLangs($target_lang);
@@ -98,12 +89,7 @@ class FilesConverter
      */
     private function setSourceLang($source_lang): void
     {
-        try {
-            $this->lang_handler->validateLanguage($source_lang);
-            $this->source_lang = $source_lang;
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::SOURCE_ERROR);
-        }
+        $this->source_lang = $source_lang;
     }
 
     /**
@@ -111,23 +97,7 @@ class FilesConverter
      */
     private function setTargetLangs($target_lang): void
     {
-        $targets = explode(',', $target_lang);
-        $targets = array_map('trim', $targets);
-        $targets = array_unique($targets);
-
-        if (empty($targets)) {
-            throw new InvalidArgumentException("Missing target language.");
-        }
-
-        try {
-            foreach ($targets as $target) {
-                $this->lang_handler->validateLanguage($target);
-            }
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::TARGET_ERROR);
-        }
-
-        $this->target_lang = implode(',', $targets);
+        $this->target_lang = $target_lang;
     }
 
     /**
@@ -204,20 +174,6 @@ class FilesConverter
      */
     private function convertFile(string $fileName): ?ConvertedFileModel
     {
-        try {
-            $this->segmentation_rule = Constants::validateSegmentationRules($this->segmentation_rule);
-        } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::INVALID_SEGMENTATION_RULE);
-        }
-
-        if (!Utils::isTokenValid($this->uploadTokenValue)) {
-            throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
-        }
-
-        if (!Utils::isValidFileName($fileName) || empty($fileName)) {
-            throw new InvalidArgumentException("Invalid file name: " . $fileName, ConversionHandlerStatus::INVALID_FILE);
-        }
-
         $conversionHandler = $this->getConversionHandlerInstance($fileName);
         $conversionHandler->processConversion();
 

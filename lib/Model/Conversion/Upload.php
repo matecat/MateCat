@@ -132,7 +132,7 @@ class Upload
     protected function _uploadFile(UploadElement $fileUp, ?bool $disable_upload_limit = false): object
     {
         // reject invalid file names
-        if( !Utils::isValidFileName($fileUp['name']) ){
+        if (!Utils::isValidFileName($fileUp['name'])) {
             throw new InvalidArgumentException("Invalid file name: {$fileUp['name']}");
         }
 
@@ -285,7 +285,7 @@ class Upload
      */
     public function fixFileName(string $stringName, bool $upCount = true): string
     {
-        if( !Utils::isValidFileName($stringName) ){
+        if (!Utils::isValidFileName($stringName)) {
             throw new InvalidArgumentException("Invalid file name: $stringName");
         }
         return Utils::fixFileName($stringName, $this->dirUpload, $upCount);
