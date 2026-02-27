@@ -339,7 +339,7 @@ a.button-component-container {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
   --btnAltTextColor: #{colors.$purple500};
-  --btnAltTextColorHover: #{colors.$purple600};
+  --btnAltTextColorHover: #{colors.$purple1000};
   --btnAltTextColorDisabled: #{rgba(colors.$purple500, 0.24)};
 
   --btnBorderColor: #{rgba(colors.$purple500, 0.24)};
@@ -348,7 +348,7 @@ a.button-component-container {
   --btnBorderColorDisabled: #{rgba(colors.$purple500, 0.24)};
 
   --btnBgColor: #{colors.$purple500};
-  --btnBgColorAlt: #{colors.$purple600};
+  --btnBgColorAlt: #{colors.$purple1000};
   --btnBgColorSemitrans: #{rgba(colors.$purple500, 0.12)};
   --btnBgColorSemitransAlt: #{rgba(colors.$purple500, 0.24)};
   --btnBgColorOutline: #{rgba(colors.$purple500, 0.5)};

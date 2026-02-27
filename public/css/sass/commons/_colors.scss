@@ -41,7 +41,7 @@ $blue50: #e4f2fb;
 $blue200: #63c3e3;
 $blue300: #86aacd;
 $blue400: #2a8cfc;
-$blue500: #0099cc;
+$blue500: #0099cc; //Translated blue
 $blue600: #0889b3;
 $blue700: #4184c4;
 $blue800: #3174b4;
@@ -51,14 +51,46 @@ $blue950: #00254f;
 // Purple scale (lightest → darkest)
 $purple200: #b58dd2;
 $purple500: #9352c1;
-$purple600: #7a3ca6;
+$purple1000: #7E22CE;
 
 // Green scale (lightest → darkest)
 $green50: #d1e0d1;
 $green200: #80d5af;
 $green300: #7cc576;
-$green400: #2fb177;
+$green400: #4ADE80;
 $green500: #1fbd1f;
 $green600: #1c9f64;
 $green700: #1ba61b;
 
+// Color variables for translation status
+$transparentBlue: $blue50;
+$translatedBlueTransparent: $blue200;
+$linkBlueTransparent: $blue300;
+$translatedBlue: $blue500;
+$translatedBlueHover : $blue600;
+$linkBlue: $blue700;
+$linkBlueHover : $blue800;
+$darkBlue:$blue900;
+$darkBlueHover:$blue950;
+
+$greenDefaultTransparent2: $green50;
+$approvedGreenTransparent:$green200;
+$greenDefaultTransparent:$green300;
+$approvedGreen:$green400;
+$approvedGreenHover:$green500;
+$greenDefault:$green500;
+$approvedGreenHover: $green600;
+$greenDefaultHover:$green700;
+
+$approved2GreenTransparent: $purple200;
+$approved2Green: $purple500;
+$approved2GreenHover:$purple1000;
+
+$warning: $orange700;
+$warningHover:$orange800;
+$rebuttedRedTransparent: $orange500;
+$rebuttedRed:$orange600;
+
+$redDefaultTransparent:$red100;
+$redDefault: $red500;
+$redDefaultHover:$red600;
