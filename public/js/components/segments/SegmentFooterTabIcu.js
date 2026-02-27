@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback} from 'react'
+import React, {useState, useMemo, useCallback, useRef, createRef} from 'react'
 import parse from 'format-message-parse'
 import formatMessage, {date, number, time} from 'format-message'
 import {
@@ -7,6 +7,7 @@ import {
 } from './utils/DraftMatecatUtils/tagUtils'
 import pluralRules from '../../resources/pluralRules.json'
 import textUtils from '../../utils/textUtils'
+import Tooltip from '../common/Tooltip'
 
 const inputTypes = {
   number: 'number',
@@ -34,7 +35,7 @@ const inputDefaultValue = {
 }
 const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   const [values, setValues] = useState([])
-
+  const ruleRef = useRef()
   const variableNames = useMemo(() => {
     try {
       const tree = parse(
@@ -194,13 +195,17 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   }, [values, segment.translation])
 
   const renderRule = useCallback(
-    ({category, rule, example}) => (
+    ({category, human_rule, example}) => (
       <div key={category} className="segment-footer-icu-plurals-rule">
         <div className="plural-title">
           <span className="category">{category}</span>
           {/*<span className="rule">{rule}</span>*/}
         </div>
-        <div className="plural-example">{example}</div>
+        <Tooltip content={human_rule}>
+          <div ref={createRef()} className="plural-example">
+            {human_rule}
+          </div>
+        </Tooltip>
       </div>
     ),
     [],

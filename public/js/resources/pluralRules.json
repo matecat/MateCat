@@ -5,19 +5,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -26,13 +29,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -43,29 +48,34 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "many",
         "example": "4, 24, 34, 44, 54, 64, 74, 84, 104, 1004, …",
-        "rule": "n % 10 = 4 and n % 100 != 14"
+        "rule": "n % 10 = 4 and n % 100 != 14",
+        "human_rule": "ends in 4, except 14"
       },
       {
         "category": "other",
         "example": "0, 2, 3, 5–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -74,20 +84,23 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "example": "0, 1, 0.0–1.0, 0.00–0.04",
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -97,39 +110,46 @@
       {
         "category": "zero",
         "example": "00.0, 0.00, 0.000, 0.0000",
-        "rule": "n = 0"
+        "rule": "n = 0",
+        "human_rule": "is 0"
       },
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "zero",
         "example": "0",
-        "rule": "i = 0"
+        "rule": "i = 0",
+        "human_rule": "is 0"
       },
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1"
+        "rule": "i = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "few",
         "example": "2–6",
-        "rule": "i = 2, 3, 4, 5, 6"
+        "rule": "i = 2, 3, 4, 5, 6",
+        "human_rule": "is 2, 3, 4, 5 or 6"
       },
       {
         "category": "other",
         "example": "7–22, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -139,39 +159,46 @@
       {
         "category": "zero",
         "example": "00.0, 0.00, 0.000, 0.0000",
-        "rule": "n = 0"
+        "rule": "n = 0",
+        "human_rule": "is 0"
       },
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "few",
         "example": "3–10, 103–110, 1003, … | 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 103.0, 1003.0, …",
-        "rule": "n % 100 = 3–10"
+        "rule": "n % 100 = 3–10",
+        "human_rule": "ends in 03-10"
       },
       {
         "category": "many",
         "example": "11–26, 111, 1011, … | 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 111.0, 1011.0, …",
-        "rule": "n % 100 = 11–99"
+        "rule": "n % 100 = 11–99",
+        "human_rule": "ends in 11-99"
       },
       {
         "category": "other",
         "example": "100–102, 200–202, 300–302, 400–402, 500–502, 600, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.1, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -181,19 +208,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -202,25 +232,29 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0–1.5",
-        "rule": "i = 0, 1"
+        "example": "0, 1, 0.0–1.5",
+        "rule": "i = 0, 1",
+        "human_rule": "is 0, 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 2.0–3.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -229,40 +263,47 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "example": "0, 1, 0.0–1.0, 0.00–0.04",
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 5, 7–10",
-        "rule": "n = 1, 5, 7, 8, 9, 10"
+        "rule": "n = 1, 5, 7, 8, 9, 10",
+        "human_rule": "is 1, 5, 7, 8, 9 or 10"
       },
       {
         "category": "two",
         "example": "2, 3",
-        "rule": "n = 2, 3"
+        "rule": "n = 2, 3",
+        "human_rule": "is 2 or 3"
       },
       {
         "category": "few",
         "example": "4",
-        "rule": "n = 4"
+        "rule": "n = 4",
+        "human_rule": "is 4"
       },
       {
         "category": "many",
         "example": "6",
-        "rule": "n = 6"
+        "rule": "n = 6",
+        "human_rule": "is 6"
       },
       {
         "category": "other",
         "example": "0, 11–25, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -272,19 +313,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -294,12 +338,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -310,34 +356,40 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 2, 5, 7, 8, 11, 12, 15, 17, 18, 20–22, 25, 101, 1001, …",
-        "rule": "i % 10 = 1, 2, 5, 7, 8 or i % 100 = 20, 50, 70, 80"
+        "rule": "i % 10 = 1, 2, 5, 7, 8 or i % 100 = 20, 50, 70, 80",
+        "human_rule": "integer part ends in 1, 2, 5, 7 or 8; or ends in 20, 50, 70 or 80"
       },
       {
         "category": "few",
         "example": "3, 4, 13, 14, 23, 24, 33, 34, 43, 44, 53, 54, 63, 64, 73, 74, 100, 1003, …",
-        "rule": "i % 10 = 3, 4 or i % 1000 = 100, 200, 300, 400, 500, 600, 700, 800, 900"
+        "rule": "i % 10 = 3, 4 or i % 1000 = 100, 200, 300, 400, 500, 600, 700, 800, 900",
+        "human_rule": "integer part ends in 3 or 4, or integer is a multiple of 100"
       },
       {
         "category": "many",
         "example": "0, 6, 16, 26, 36, 40, 46, 56, 106, 1006, …",
-        "rule": "i = 0 or i % 10 = 6 or i % 100 = 40, 60, 90"
+        "rule": "i = 0 or i % 10 = 6 or i % 100 = 40, 60, 90",
+        "human_rule": "integer part is 0, ends in 6, or ends in 40, 60 or 90"
       },
       {
         "category": "other",
         "example": "9, 10, 19, 29, 30, 39, 49, 59, 69, 79, 109, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -347,24 +399,28 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -374,7 +430,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -384,40 +441,47 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "example": "0, 1, 0.0–1.0, 0.00–0.04",
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 5, 7–10",
-        "rule": "n = 1, 5, 7, 8, 9, 10"
+        "rule": "n = 1, 5, 7, 8, 9, 10",
+        "human_rule": "is 1, 5, 7, 8, 9 or 10"
       },
       {
         "category": "two",
         "example": "2, 3",
-        "rule": "n = 2, 3"
+        "rule": "n = 2, 3",
+        "human_rule": "is 2 or 3"
       },
       {
         "category": "few",
         "example": "4",
-        "rule": "n = 4"
+        "rule": "n = 4",
+        "human_rule": "is 4"
       },
       {
         "category": "many",
         "example": "6",
-        "rule": "n = 6"
+        "rule": "n = 6",
+        "human_rule": "is 6"
       },
       {
         "category": "other",
         "example": "0, 11–25, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -427,19 +491,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -449,34 +516,40 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 1.0, 21.0, 31.0, 41.0, 51.0, 61.0, 71.0, 81.0, 101.0, 1001.0, …",
-        "rule": "n % 10 = 1 and n % 100 != 11"
+        "rule": "n % 10 = 1 and n % 100 != 11",
+        "human_rule": "ends in 1, except 11"
       },
       {
         "category": "few",
         "example": "2–4, 22–24, 32–34, 42–44, 52–54, 62, 102, 1002, … | 2.0, 3.0, 4.0, 22.0, 23.0, 24.0, 32.0, 33.0, 102.0, 1002.0, …",
-        "rule": "n % 10 = 2–4 and n % 100 != 12–14"
+        "rule": "n % 10 = 2–4 and n % 100 != 12–14",
+        "human_rule": "ends in 2–4, except 12–14"
       },
       {
         "category": "many",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, … | 0.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "n % 10 = 0 or n % 10 = 5–9 or n % 100 = 11–14"
+        "rule": "n % 10 = 0 or n % 10 = 5–9 or n % 100 = 11–14",
+        "human_rule": "ends in 0, 5–9, or 11–14"
       },
       {
         "category": "other",
         "example": "0.1–0.9, 1.1–1.7, 10.1, 100.1, 1000.1, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "few",
         "example": "2, 3, 22, 23, 32, 33, 42, 43, 52, 53, 62, 63, 72, 73, 82, 83, 102, 1002, …",
-        "rule": "n % 10 = 2, 3 and n % 100 != 12, 13"
+        "rule": "n % 10 = 2, 3 and n % 100 != 12, 13",
+        "human_rule": "ends in 2 or 3, except 12 or 13"
       },
       {
         "category": "other",
         "example": "0, 1, 4–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -486,12 +559,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -502,12 +577,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -517,13 +594,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -534,12 +613,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -550,24 +631,28 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11"
+        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11",
+        "human_rule": "no decimals and integer ends in 1 (except 11), or decimal part ends in 1 (except 11)"
       },
       {
         "category": "few",
         "example": "2–4, 22–24, 32–34, 42–44, 52–54, 62, 102, 1002, … | 0.2–0.4, 1.2–1.4, 2.2–2.4, 3.2–3.4, 4.2–4.4, 5.2, 10.2, 100.2, 1000.2, …",
-        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14 or f % 10 = 2–4 and f % 100 != 12–14"
+        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14 or f % 10 = 2–4 and f % 100 != 12–14",
+        "human_rule": "no decimals and integer ends in 2–4 (except 12–14), or decimal part ends in 2–4 (except 12–14)"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, … | 0.0, 0.5–1.0, 1.5–2.0, 2.5–2.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -577,27 +662,32 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 81, 101, 1001, … | 1.0, 21.0, 31.0, 41.0, 51.0, 61.0, 81.0, 101.0, 1001.0, …",
-        "rule": "n % 10 = 1 and n % 100 != 11, 71, 91"
+        "rule": "n % 10 = 1 and n % 100 != 11, 71, 91",
+        "human_rule": "ends in 1, except 11, 71 or 91"
       },
       {
         "category": "two",
         "example": "2, 22, 32, 42, 52, 62, 82, 102, 1002, … | 2.0, 22.0, 32.0, 42.0, 52.0, 62.0, 82.0, 102.0, 1002.0, …",
-        "rule": "n % 10 = 2 and n % 100 != 12, 72, 92"
+        "rule": "n % 10 = 2 and n % 100 != 12, 72, 92",
+        "human_rule": "ends in 2, except 12, 72 or 92"
       },
       {
         "category": "few",
         "example": "3, 4, 9, 23, 24, 29, 33, 34, 39, 43, 44, 49, 103, 1003, … | 3.0, 4.0, 9.0, 23.0, 24.0, 29.0, 33.0, 34.0, 103.0, 1003.0, …",
-        "rule": "n % 10 = 3–4, 9 and n % 100 != 10–19, 70–79, 90–99"
+        "rule": "n % 10 = 3–4, 9 and n % 100 != 10–19, 70–79, 90–99",
+        "human_rule": "ends in 3–4 or 9, except 10–19, 70–79 or 90–99"
       },
       {
         "category": "many",
         "example": "1000000, … | 1000000.0, 1000000.00, 1000000.000, 1000000.0000, …",
-        "rule": "n != 0 and n % 1000000 = 0"
+        "rule": "n != 0 and n % 1000000 = 0",
+        "human_rule": "is a multiple of 1,000,000 (but not 0)"
       },
       {
         "category": "other",
         "example": "0, 5–8, 10–20, 100, 1000, 10000, 100000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -608,19 +698,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -630,14 +723,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -647,14 +742,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -664,39 +761,46 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 3",
-        "rule": "n = 1, 3"
+        "rule": "n = 1, 3",
+        "human_rule": "is 1 or 3"
       },
       {
         "category": "two",
         "example": "2",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "few",
         "example": "4",
-        "rule": "n = 4"
+        "rule": "n = 4",
+        "human_rule": "is 4"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -706,12 +810,14 @@
       {
         "category": "one",
         "example": "0–3, 5, 7, 8, 10–13, 15, 17, 18, 20, 21, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.3, 0.5, 0.7, 0.8, 1.0–1.3, 1.5, 1.7, 1.8, 2.0, 2.1, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "v = 0 and i = 1, 2, 3 or v = 0 and i % 10 != 4, 6, 9 or v != 0 and f % 10 != 4, 6, 9"
+        "rule": "v = 0 and i = 1, 2, 3 or v = 0 and i % 10 != 4, 6, 9 or v != 0 and f % 10 != 4, 6, 9",
+        "human_rule": "no decimals and integer is 1–3, or integer doesn't end in 4, 6, 9; or has decimals not ending in 4, 6, 9"
       },
       {
         "category": "other",
         "example": "4, 6, 9, 14, 16, 19, 24, 26, 104, 1004, … | 0.4, 0.6, 0.9, 1.4, 1.6, 1.9, 2.4, 2.6, 10.4, 100.4, 1000.4, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -722,12 +828,14 @@
       {
         "category": "one",
         "example": "0, 1, 11–240.0, 1.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0",
-        "rule": "n = 0–1 or n = 11–99"
+        "rule": "n = 0–1 or n = 11–99",
+        "human_rule": "is 0–1 or 11–99"
       },
       {
         "category": "other",
         "example": "2–10, 100–106, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -738,12 +846,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -754,19 +864,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -776,12 +889,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -792,12 +907,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -808,14 +925,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -825,17 +944,20 @@
       {
         "category": "zero",
         "example": "00.0, 0.00, 0.000, 0.0000",
-        "rule": "n = 0"
+        "rule": "n = 0",
+        "human_rule": "is 0"
       },
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -846,49 +968,58 @@
       {
         "category": "zero",
         "example": "00.0, 0.00, 0.000, 0.0000",
-        "rule": "n = 0"
+        "rule": "n = 0",
+        "human_rule": "is 0"
       },
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "2, 22, 42, 62, 82, 102, 122, 142, 1000, 10000, 100000, … | 2.0, 22.0, 42.0, 62.0, 82.0, 102.0, 122.0, 142.0, 1000.0, 10000.0, 100000.0, …",
-        "rule": "n % 100 = 2, 22, 42, 62, 82 or n % 1000 = 0 and n % 100000 = 1000–20000, 40000, 60000, 80000 or n != 0 and n % 1000000 = 100000"
+        "rule": "n % 100 = 2, 22, 42, 62, 82 or n % 1000 = 0 and n % 100000 = 1000–20000, 40000, 60000, 80000 or n != 0 and n % 1000000 = 100000",
+        "human_rule": "ends in 2, 22, 42, 62 or 82; or specific multiples of 1000"
       },
       {
         "category": "few",
         "example": "3, 23, 43, 63, 83, 103, 123, 143, 1003, … | 3.0, 23.0, 43.0, 63.0, 83.0, 103.0, 123.0, 143.0, 1003.0, …",
-        "rule": "n % 100 = 3, 23, 43, 63, 83"
+        "rule": "n % 100 = 3, 23, 43, 63, 83",
+        "human_rule": "ends in 3, 23, 43, 63 or 83"
       },
       {
         "category": "many",
         "example": "21, 41, 61, 81, 101, 121, 141, 161, 1001, … | 21.0, 41.0, 61.0, 81.0, 101.0, 121.0, 141.0, 161.0, 1001.0, …",
-        "rule": "n != 1 and n % 100 = 1, 21, 41, 61, 81"
+        "rule": "n != 1 and n % 100 = 1, 21, 41, 61, 81",
+        "human_rule": "is not 1 and ends in 1, 21, 41, 61 or 81"
       },
       {
         "category": "other",
         "example": "4–19, 100, 1004, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.1, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1–4, 21–24, 41–44, 61–64, 101, 1001, …",
-        "rule": "n = 1–4 or n % 100 = 1–4, 21–24, 41–44, 61–64, 81–84"
+        "rule": "n = 1–4 or n % 100 = 1–4, 21–24, 41–44, 61–64, 81–84",
+        "human_rule": "is 1–4, or ends in 1–4 except 11–14"
       },
       {
         "category": "many",
         "example": "5, 105, 205, 305, 405, 505, 605, 705, 1005, …",
-        "rule": "n = 5 or n % 100 = 5"
+        "rule": "n = 5 or n % 100 = 5",
+        "human_rule": "is 5 or ends in 05"
       },
       {
         "category": "other",
         "example": "0, 6–20, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -898,24 +1029,28 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11"
+        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11",
+        "human_rule": "no decimals and integer ends in 1 (except 11), or decimal part ends in 1 (except 11)"
       },
       {
         "category": "few",
         "example": "2–4, 22–24, 32–34, 42–44, 52–54, 62, 102, 1002, … | 0.2–0.4, 1.2–1.4, 2.2–2.4, 3.2–3.4, 4.2–4.4, 5.2, 10.2, 100.2, 1000.2, …",
-        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14 or f % 10 = 2–4 and f % 100 != 12–14"
+        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14 or f % 10 = 2–4 and f % 100 != 12–14",
+        "human_rule": "no decimals and integer ends in 2–4 (except 12–14), or decimal part ends in 2–4 (except 12–14)"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, … | 0.0, 0.5–1.0, 1.5–2.0, 2.5–2.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -925,29 +1060,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "few",
         "example": "2–4",
-        "rule": "i = 2–4 and v = 0"
+        "rule": "i = 2–4 and v = 0",
+        "human_rule": "is 2, 3 or 4 with no decimal digits"
       },
       {
         "category": "many",
         "example": "0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "v != 0"
+        "rule": "v != 0",
+        "human_rule": "has decimal digits"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -957,19 +1097,22 @@
       {
         "category": "one",
         "example": "10.1–1.6",
-        "rule": "n = 1 or t != 0 and i = 0, 1"
+        "rule": "n = 1 or t != 0 and i = 0, 1",
+        "human_rule": "is 1, or a decimal fraction whose integer part is 0 or 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0, 2.0–3.4, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -979,12 +1122,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -994,13 +1139,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "example": "0, 1, 0.0–1.0, 0.00–0.04",
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1011,19 +1158,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1033,7 +1183,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1044,34 +1195,40 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, …",
-        "rule": "n % 10 = 1 and n % 100 != 11"
+        "rule": "n % 10 = 1 and n % 100 != 11",
+        "human_rule": "ends in 1, except 11"
       },
       {
         "category": "two",
         "example": "2, 22, 32, 42, 52, 62, 72, 82, 102, 1002, …",
-        "rule": "n % 10 = 2 and n % 100 != 12"
+        "rule": "n % 10 = 2 and n % 100 != 12",
+        "human_rule": "ends in 2, except 12"
       },
       {
         "category": "few",
         "example": "3, 23, 33, 43, 53, 63, 73, 83, 103, 1003, …",
-        "rule": "n % 10 = 3 and n % 100 != 13"
+        "rule": "n % 10 = 3 and n % 100 != 13",
+        "human_rule": "ends in 3, except 13"
       },
       {
         "category": "other",
         "example": "0, 4–18, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1081,12 +1238,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1097,19 +1256,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1119,17 +1281,20 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1140,12 +1305,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1156,12 +1323,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1172,24 +1341,28 @@
       {
         "category": "one",
         "example": "0–3, 5, 7, 8, 10–13, 15, 17, 18, 20, 21, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.3, 0.5, 0.7, 0.8, 1.0–1.3, 1.5, 1.7, 1.8, 2.0, 2.1, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "v = 0 and i = 1, 2, 3 or v = 0 and i % 10 != 4, 6, 9 or v != 0 and f % 10 != 4, 6, 9"
+        "rule": "v = 0 and i = 1, 2, 3 or v = 0 and i % 10 != 4, 6, 9 or v != 0 and f % 10 != 4, 6, 9",
+        "human_rule": "no decimals and integer is 1–3, or integer doesn't end in 4, 6, 9; or has decimals not ending in 4, 6, 9"
       },
       {
         "category": "other",
         "example": "4, 6, 9, 14, 16, 19, 24, 26, 104, 1004, … | 0.4, 0.6, 0.9, 1.4, 1.6, 1.9, 2.4, 2.6, 10.4, 100.4, 1000.4, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1199,19 +1372,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1220,30 +1396,35 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0–1.5",
-        "rule": "i = 0, 1"
+        "example": "0, 1, 0.0–1.5",
+        "rule": "i = 0, 1",
+        "human_rule": "integer part is 0 or 1"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 2.0–3.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1253,12 +1434,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1269,12 +1452,14 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.5",
-        "rule": "i = 0, 1"
+        "rule": "i = 0, 1",
+        "human_rule": "integer part is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 2.0–3.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1285,19 +1470,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1307,12 +1495,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1323,29 +1513,34 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1"
+        "rule": "i = 1",
+        "human_rule": "integer part is 1"
       },
       {
         "category": "many",
         "example": "0, 2–16, 102, 1002, …",
-        "rule": "i = 0 or i % 100 = 2–20, 40, 60, 80"
+        "rule": "i = 0 or i % 100 = 2–20, 40, 60, 80",
+        "human_rule": "integer part is 0 or ends in 2–20, 40, 60 or 80"
       },
       {
         "category": "other",
         "example": "21–36, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1355,19 +1550,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1377,19 +1575,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1399,39 +1600,46 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "two",
         "example": "2, 3",
-        "rule": "n = 2, 3"
+        "rule": "n = 2, 3",
+        "human_rule": "is 2 or 3"
       },
       {
         "category": "few",
         "example": "4",
-        "rule": "n = 4"
+        "rule": "n = 4",
+        "human_rule": "is 4"
       },
       {
         "category": "many",
         "example": "6",
-        "rule": "n = 6"
+        "rule": "n = 6",
+        "human_rule": "is 6"
       },
       {
         "category": "other",
         "example": "0, 5, 7–20, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1441,12 +1649,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1457,12 +1667,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1473,24 +1685,28 @@
       {
         "category": "one",
         "example": "1, 0.0–0.9, 0.00–0.05",
-        "rule": "i = 1 and v = 0 or i = 0 and v != 0"
+        "rule": "i = 1 and v = 0 or i = 0 and v != 0",
+        "human_rule": "is 1 without decimals, or 0 with decimals"
       },
       {
         "category": "two",
         "example": "2",
-        "rule": "i = 2 and v = 0"
+        "rule": "i = 2 and v = 0",
+        "human_rule": "is 2 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 1.0–2.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1500,39 +1716,46 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "two",
         "example": "2, 3",
-        "rule": "n = 2, 3"
+        "rule": "n = 2, 3",
+        "human_rule": "is 2 or 3"
       },
       {
         "category": "few",
         "example": "4",
-        "rule": "n = 4"
+        "rule": "n = 4",
+        "human_rule": "is 4"
       },
       {
         "category": "many",
         "example": "6",
-        "rule": "n = 6"
+        "rule": "n = 6",
+        "human_rule": "is 6"
       },
       {
         "category": "other",
         "example": "0, 5, 7–20, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1542,7 +1765,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1553,24 +1777,28 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 5",
-        "rule": "n = 1, 5"
+        "rule": "n = 1, 5",
+        "human_rule": "is 1 or 5"
       },
       {
         "category": "other",
         "example": "0, 2–4, 6–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1580,19 +1808,22 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 0.1, 1.0, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "t = 0 and i % 10 = 1 and i % 100 != 11 or t % 10 = 1 and t % 100 != 11"
+        "rule": "t = 0 and i % 10 = 1 and i % 100 != 11 or t % 10 = 1 and t % 100 != 11",
+        "human_rule": "no decimal digits and integer ends in 1 (except 11), or decimal ends in 1 (except 11)"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0, 0.2–0.9, 1.2–1.8, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1602,12 +1833,14 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1618,7 +1851,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1629,17 +1863,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1650,14 +1887,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1667,19 +1906,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1689,17 +1931,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1710,39 +1955,46 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "few",
         "example": "3–63.0, 4.0, 5.0, 6.0, 3.00, 4.00, 5.00, 6.00, 3.000, 4.000, 5.000, 6.000, 3.0000, 4.0000, 5.0000, 6.0000",
-        "rule": "n = 3–6"
+        "rule": "n = 3–6",
+        "human_rule": "is 3, 4, 5 or 6"
       },
       {
         "category": "many",
         "example": "7–107.0, 8.0, 9.0, 10.0, 7.00, 8.00, 9.00, 10.00, 7.000, 8.000, 9.000, 10.000, 7.0000, 8.0000, 9.0000, 10.0000",
-        "rule": "n = 7–10"
+        "rule": "n = 7–10",
+        "human_rule": "is 7, 8, 9 or 10"
       },
       {
         "category": "other",
         "example": "0, 11–25, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.1, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1752,29 +2004,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "many",
         "example": "8, 11, 80, 800",
-        "rule": "n = 11, 8, 80, 800"
+        "rule": "n = 11, 8, 80, 800",
+        "human_rule": "is 8, 11, 80 or 800"
       },
       {
         "category": "other",
         "example": "0–7, 9, 10, 12–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1784,14 +2041,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1801,7 +2060,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1812,12 +2072,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1828,7 +2090,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1839,12 +2102,14 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.5",
-        "rule": "i = 0, 1"
+        "rule": "i = 0, 1",
+        "human_rule": "integer part is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 2.0–3.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1855,12 +2120,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1871,12 +2138,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1887,19 +2156,22 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1909,12 +2181,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1925,24 +2199,28 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "many",
         "example": "6, 9, 10, 16, 19, 20, 26, 29, 30, 36, 39, 40, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": "n % 10 = 6 or n % 10 = 9 or n % 10 = 0 and n != 0"
+        "rule": "n % 10 = 6 or n % 10 = 9 or n % 10 = 0 and n != 0",
+        "human_rule": "ends in 6, 9 or 0 (but not 0 itself)"
       },
       {
         "category": "other",
         "example": "0–5, 7, 8, 11–15, 17, 18, 21, 101, 1001, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1952,14 +2230,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1969,14 +2249,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -1986,7 +2268,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -1997,12 +2280,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2013,19 +2298,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2035,29 +2323,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "many",
         "example": "8, 11, 80, 800",
-        "rule": "n = 11, 8, 80, 800"
+        "rule": "n = 11, 8, 80, 800",
+        "human_rule": "is 8, 11, 80 or 800"
       },
       {
         "category": "other",
         "example": "0–7, 9, 10, 12–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2067,7 +2360,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2078,17 +2372,20 @@
       {
         "category": "zero",
         "example": "00.0, 0.00, 0.000, 0.0000",
-        "rule": "n = 0"
+        "rule": "n = 0",
+        "human_rule": "is 0"
       },
       {
         "category": "one",
         "example": "10.1–1.6",
-        "rule": "i = 0, 1 and n != 0"
+        "rule": "i = 0, 1 and n != 0",
+        "human_rule": "integer part is 0 or 1, and n is not 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 2.0–3.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2099,19 +2396,22 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2121,24 +2421,28 @@
       {
         "category": "zero",
         "example": "0, 10–20, 30, 40, 50, 60, 100, 1000, 10000, 100000, 1000000, … | 0.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "n % 10 = 0 or n % 100 = 11–19 or v = 2 and f % 100 = 11–19"
+        "rule": "n % 10 = 0 or n % 100 = 11–19 or v = 2 and f % 100 = 11–19",
+        "human_rule": "ends in 0, or 11–19, or has 2 decimal digits ending in 11–19"
       },
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 0.1, 1.0, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "n % 10 = 1 and n % 100 != 11 or v = 2 and f % 10 = 1 and f % 100 != 11 or v != 2 and f % 10 = 1"
+        "rule": "n % 10 = 1 and n % 100 != 11 or v = 2 and f % 10 = 1 and f % 100 != 11 or v != 2 and f % 10 = 1",
+        "human_rule": "ends in 1, except 11; or decimal fraction ending in 1"
       },
       {
         "category": "other",
         "example": "2–9, 22–29, 102, 1002, … | 0.2–0.9, 1.2–1.9, 10.2, 100.2, 1000.2, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2148,24 +2452,28 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "many",
         "example": "8, 11, 80–89, 800–803",
-        "rule": "n = 11, 8, 80–89, 800–899"
+        "rule": "n = 11, 8, 80–89, 800–899",
+        "human_rule": "is 8, 11, 80–89 or 800–899"
       },
       {
         "category": "other",
         "example": "0–7, 9, 10, 12–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2174,13 +2482,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2191,29 +2501,34 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 1.0, 21.0, 31.0, 41.0, 51.0, 61.0, 71.0, 81.0, 101.0, 1001.0, …",
-        "rule": "n % 10 = 1 and n % 100 != 11–19"
+        "rule": "n % 10 = 1 and n % 100 != 11–19",
+        "human_rule": "ends in 1, except 11–19"
       },
       {
         "category": "few",
         "example": "2–9, 22–29, 102, 1002, … | 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 22.0, 102.0, 1002.0, …",
-        "rule": "n % 10 = 2–9 and n % 100 != 11–19"
+        "rule": "n % 10 = 2–9 and n % 100 != 11–19",
+        "human_rule": "ends in 2–9, except 11–19"
       },
       {
         "category": "many",
         "example": "0.1–0.9, 1.1–1.7, 10.1, 100.1, 1000.1, …",
-        "rule": "f != 0"
+        "rule": "f != 0",
+        "human_rule": "has non-zero decimal part"
       },
       {
         "category": "other",
         "example": "0, 10–20, 30, 40, 50, 60, 100, 1000, 10000, 100000, 1000000, … | 0.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2223,7 +2538,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2234,29 +2550,34 @@
       {
         "category": "one",
         "example": "1, 101, 201, 301, 401, 501, 601, 701, 1001, … | 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "v = 0 and i % 100 = 1 or f % 100 = 1"
+        "rule": "v = 0 and i % 100 = 1 or f % 100 = 1",
+        "human_rule": "no decimals and integer ends in 01, or decimal part ends in 1"
       },
       {
         "category": "two",
         "example": "2, 102, 202, 302, 402, 502, 602, 702, 1002, … | 0.2, 1.2, 2.2, 3.2, 4.2, 5.2, 6.2, 7.2, 10.2, 100.2, 1000.2, …",
-        "rule": "v = 0 and i % 100 = 2 or f % 100 = 2"
+        "rule": "v = 0 and i % 100 = 2 or f % 100 = 2",
+        "human_rule": "no decimals and integer ends in 02, or decimal part ends in 2"
       },
       {
         "category": "few",
         "example": "3, 4, 103, 104, 203, 204, 303, 304, 403, 404, 503, 504, 603, 604, 703, 704, 1003, … | 0.3, 0.4, 1.3, 1.4, 2.3, 2.4, 3.3, 3.4, 4.3, 4.4, 5.3, 5.4, 6.3, 6.4, 7.3, 7.4, 10.3, 100.3, 1000.3, …",
-        "rule": "v = 0 and i % 100 = 3–4 or f % 100 = 3–4"
+        "rule": "v = 0 and i % 100 = 3–4 or f % 100 = 3–4",
+        "human_rule": "no decimals and integer ends in 03–04, or decimal part ends in 3–4"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, … | 0.0, 0.5–1.0, 1.5–2.0, 2.5–2.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2266,17 +2587,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2287,12 +2611,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2303,34 +2629,40 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11"
+        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11",
+        "human_rule": "no decimals and integer ends in 1 (except 11), or decimal part ends in 1 (except 11)"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0, 0.2–1.0, 1.2–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, …",
-        "rule": "i % 10 = 1 and i % 100 != 11"
+        "rule": "i % 10 = 1 and i % 100 != 11",
+        "human_rule": "integer part ends in 1, except 11"
       },
       {
         "category": "two",
         "example": "2, 22, 32, 42, 52, 62, 72, 82, 102, 1002, …",
-        "rule": "i % 10 = 2 and i % 100 != 12"
+        "rule": "i % 10 = 2 and i % 100 != 12",
+        "human_rule": "integer part ends in 2, except 12"
       },
       {
         "category": "many",
         "example": "7, 8, 27, 28, 37, 38, 47, 48, 57, 58, 67, 68, 77, 78, 87, 88, 107, 1007, …",
-        "rule": "i % 10 = 7, 8 and i % 100 != 17, 18"
+        "rule": "i % 10 = 7, 8 and i % 100 != 17, 18",
+        "human_rule": "integer part ends in 7 or 8, except 17 or 18"
       },
       {
         "category": "other",
         "example": "0, 3–6, 9–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2340,12 +2672,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2356,7 +2690,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2366,13 +2701,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2383,19 +2720,22 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2405,19 +2745,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2427,27 +2770,32 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "few",
         "example": "0, 3–10, 103–109, 1003, … | 0.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 103.0, 1003.0, …",
-        "rule": "n = 0 or n % 100 = 3–10"
+        "rule": "n = 0 or n % 100 = 3–10",
+        "human_rule": "is 0 or ends in 3–10"
       },
       {
         "category": "many",
         "example": "11–19, 111–117, 1011, … | 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 111.0, 1011.0, …",
-        "rule": "n % 100 = 11–19"
+        "rule": "n % 100 = 11–19",
+        "human_rule": "ends in 11–19"
       },
       {
         "category": "other",
         "example": "20–35, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.1, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2458,27 +2806,32 @@
       {
         "category": "one",
         "example": "1, 11, 21, 31, 41, 51, 61, 71, 101, 1001, …",
-        "rule": "v = 0 and i % 10 = 1"
+        "rule": "v = 0 and i % 10 = 1",
+        "human_rule": "no decimal digits and integer part ends in 1"
       },
       {
         "category": "two",
         "example": "2, 12, 22, 32, 42, 52, 62, 72, 102, 1002, …",
-        "rule": "v = 0 and i % 10 = 2"
+        "rule": "v = 0 and i % 10 = 2",
+        "human_rule": "no decimal digits and integer part ends in 2"
       },
       {
         "category": "few",
         "example": "0, 20, 40, 60, 80, 100, 120, 140, 1000, 10000, 100000, 1000000, …",
-        "rule": "v = 0 and i % 100 = 0, 20, 40, 60, 80"
+        "rule": "v = 0 and i % 100 = 0, 20, 40, 60, 80",
+        "human_rule": "no decimal digits and integer ends in 0, 20, 40, 60 or 80"
       },
       {
         "category": "many",
         "example": "0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "v != 0"
+        "rule": "v != 0",
+        "human_rule": "has decimal digits"
       },
       {
         "category": "other",
         "example": "3–10, 13–19, 23, 103, 1003, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2489,34 +2842,40 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "two",
         "example": "2, 3",
-        "rule": "n = 2, 3"
+        "rule": "n = 2, 3",
+        "human_rule": "is 2 or 3"
       },
       {
         "category": "few",
         "example": "4",
-        "rule": "n = 4"
+        "rule": "n = 4",
+        "human_rule": "is 4"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2526,12 +2885,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2542,12 +2903,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2563,19 +2926,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2585,7 +2951,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2596,17 +2963,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2617,24 +2987,28 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1–4",
-        "rule": "n = 1–4"
+        "rule": "n = 1–4",
+        "human_rule": "is 1, 2, 3 or 4"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2644,12 +3018,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2660,12 +3036,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2676,12 +3054,14 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2692,12 +3072,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2708,17 +3090,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2728,13 +3113,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2745,19 +3132,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2767,19 +3157,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2789,12 +3182,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2805,12 +3200,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2821,12 +3218,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2837,39 +3236,46 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 5, 7–9",
-        "rule": "n = 1, 5, 7–9"
+        "rule": "n = 1, 5, 7–9",
+        "human_rule": "is 1, 5, 7, 8 or 9"
       },
       {
         "category": "two",
         "example": "2, 3",
-        "rule": "n = 2, 3"
+        "rule": "n = 2, 3",
+        "human_rule": "is 2 or 3"
       },
       {
         "category": "few",
         "example": "4",
-        "rule": "n = 4"
+        "rule": "n = 4",
+        "human_rule": "is 4"
       },
       {
         "category": "many",
         "example": "6",
-        "rule": "n = 6"
+        "rule": "n = 6",
+        "human_rule": "is 6"
       },
       {
         "category": "other",
         "example": "0, 10–24, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2879,12 +3285,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2895,7 +3303,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2906,12 +3315,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2922,12 +3333,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -2938,19 +3351,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2960,19 +3376,22 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -2982,29 +3401,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "few",
         "example": "2–4, 22–24, 32–34, 42–44, 52–54, 62, 102, 1002, …",
-        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14"
+        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14",
+        "human_rule": "no decimal digits and integer ends in 2–4, except 12–14"
       },
       {
         "category": "many",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": "v = 0 and i != 1 and i % 10 = 0–1 or v = 0 and i % 10 = 5–9 or v = 0 and i % 100 = 12–14"
+        "rule": "v = 0 and i != 1 and i % 10 = 0–1 or v = 0 and i % 10 = 5–9 or v = 0 and i % 100 = 12–14",
+        "human_rule": "no decimals and integer ends in 0, 1 (except 1 itself), 5–9, or ends in 12–14"
       },
       {
         "category": "other",
         "example": "0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3014,24 +3438,28 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.5",
-        "rule": "i = 0–1"
+        "rule": "i = 0–1",
+        "human_rule": "integer part is 0 or 1"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 2.0–3.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3041,24 +3469,28 @@
       {
         "category": "zero",
         "example": "0, 10–20, 30, 40, 50, 60, 100, 1000, 10000, 100000, 1000000, … | 0.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "n % 10 = 0 or n % 100 = 11–19 or v = 2 and f % 100 = 11–19"
+        "rule": "n % 10 = 0 or n % 100 = 11–19 or v = 2 and f % 100 = 11–19",
+        "human_rule": "ends in 0, or 11–19, or has 2 decimal digits ending in 11–19"
       },
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 0.1, 1.0, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "n % 10 = 1 and n % 100 != 11 or v = 2 and f % 10 = 1 and f % 100 != 11 or v != 2 and f % 10 = 1"
+        "rule": "n % 10 = 1 and n % 100 != 11 or v = 2 and f % 10 = 1 and f % 100 != 11 or v != 2 and f % 10 = 1",
+        "human_rule": "ends in 1, except 11; or decimal fraction ending in 1"
       },
       {
         "category": "other",
         "example": "2–9, 22–29, 102, 1002, … | 0.2–0.9, 1.2–1.9, 10.2, 100.2, 1000.2, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3067,20 +3499,23 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3090,29 +3525,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "few",
         "example": "0, 2–16, 101, 1001, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "v != 0 or n = 0 or n != 1 and n % 100 = 1–19"
+        "rule": "v != 0 or n = 0 or n != 1 and n % 100 = 1–19",
+        "human_rule": "has decimal digits, is 0, or is not 1 and ends in 1–19"
       },
       {
         "category": "other",
         "example": "20–35, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3122,12 +3562,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3138,12 +3580,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3154,29 +3598,34 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, …",
-        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11"
+        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11",
+        "human_rule": "no decimal digits and integer ends in 1, except 11"
       },
       {
         "category": "few",
         "example": "2–4, 22–24, 32–34, 42–44, 52–54, 62, 102, 1002, …",
-        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14"
+        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14",
+        "human_rule": "no decimal digits and integer ends in 2–4, except 12–14"
       },
       {
         "category": "many",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": "v = 0 and i % 10 = 0 or v = 0 and i % 10 = 5–9 or v = 0 and i % 100 = 11–14"
+        "rule": "v = 0 and i % 10 = 0 or v = 0 and i % 10 = 5–9 or v = 0 and i % 100 = 11–14",
+        "human_rule": "no decimals and integer ends in 0, 5–9, or 11–14"
       },
       {
         "category": "other",
         "example": "0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3186,12 +3635,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3202,12 +3653,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3218,12 +3671,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3234,7 +3689,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3245,17 +3701,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3266,24 +3725,28 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "many",
         "example": "8, 11, 80, 800",
-        "rule": "n = 11, 8, 80, 800"
+        "rule": "n = 11, 8, 80, 800",
+        "human_rule": "is 8, 11, 80 or 800"
       },
       {
         "category": "other",
         "example": "0–7, 9, 10, 12–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3293,44 +3756,52 @@
       {
         "category": "one",
         "example": "1, 111.0, 11.0, 1.00, 11.00, 1.000, 11.000, 1.0000",
-        "rule": "n = 1, 11"
+        "rule": "n = 1, 11",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "2, 122.0, 12.0, 2.00, 12.00, 2.000, 12.000, 2.0000",
-        "rule": "n = 2, 12"
+        "rule": "n = 2, 12",
+        "human_rule": "is 2 or 12"
       },
       {
         "category": "few",
         "example": "3–10, 13–193.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 3.00",
-        "rule": "n = 3–10, 13–19"
+        "rule": "n = 3–10, 13–19",
+        "human_rule": "is 3–10 or 13–19"
       },
       {
         "category": "other",
         "example": "0, 20–34, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.1, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 11",
-        "rule": "n = 1, 11"
+        "rule": "n = 1, 11",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "2, 12",
-        "rule": "n = 2, 12"
+        "rule": "n = 2, 12",
+        "human_rule": "is 2 or 12"
       },
       {
         "category": "few",
         "example": "3, 13",
-        "rule": "n = 3, 13"
+        "rule": "n = 3, 13",
+        "human_rule": "is 3 or 13"
       },
       {
         "category": "other",
         "example": "0, 4–10, 14–21, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3340,12 +3811,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3356,24 +3829,28 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, … | 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11"
+        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11 or f % 10 = 1 and f % 100 != 11",
+        "human_rule": "no decimals and integer ends in 1 (except 11), or decimal part ends in 1 (except 11)"
       },
       {
         "category": "few",
         "example": "2–4, 22–24, 32–34, 42–44, 52–54, 62, 102, 1002, … | 0.2–0.4, 1.2–1.4, 2.2–2.4, 3.2–3.4, 4.2–4.4, 5.2, 10.2, 100.2, 1000.2, …",
-        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14 or f % 10 = 2–4 and f % 100 != 12–14"
+        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14 or f % 10 = 2–4 and f % 100 != 12–14",
+        "human_rule": "no decimals and integer ends in 2–4 (except 12–14), or decimal part ends in 2–4 (except 12–14)"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, … | 0.0, 0.5–1.0, 1.5–2.0, 2.5–2.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3388,12 +3865,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3404,12 +3883,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3420,7 +3901,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3431,29 +3913,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "many",
         "example": "8, 11, 80, 800",
-        "rule": "n = 11, 8, 80, 800"
+        "rule": "n = 11, 8, 80, 800",
+        "human_rule": "is 8, 11, 80 or 800"
       },
       {
         "category": "other",
         "example": "0–7, 9, 10, 12–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3463,19 +3950,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3484,20 +3974,23 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 0.1, 1.0, 0.00, 0.01, 1.00, 0.000, 0.001, 1.000, 0.0000, 0.0001, 1.0000",
-        "rule": "n = 0, 1 or i = 0 and f = 1"
+        "example": "0, 1, 0.0, 0.1, 1.0, 0.00, 0.01, 1.00, 0.000, 0.001, 1.000, 0.0000, 0.0001, 1.0000",
+        "rule": "n = 0, 1 or i = 0 and f = 1",
+        "human_rule": "is 0 or 1, or decimal 0.1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.2–0.9, 1.1–1.8, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3507,17 +4000,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3528,29 +4024,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "few",
         "example": "2–4",
-        "rule": "i = 2–4 and v = 0"
+        "rule": "i = 2–4 and v = 0",
+        "human_rule": "is 2, 3 or 4 with no decimal digits"
       },
       {
         "category": "many",
         "example": "0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "v != 0"
+        "rule": "v != 0",
+        "human_rule": "has decimal digits"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3560,29 +4061,34 @@
       {
         "category": "one",
         "example": "1, 101, 201, 301, 401, 501, 601, 701, 1001, …",
-        "rule": "v = 0 and i % 100 = 1"
+        "rule": "v = 0 and i % 100 = 1",
+        "human_rule": "no decimal digits and integer ends in 01"
       },
       {
         "category": "two",
         "example": "2, 102, 202, 302, 402, 502, 602, 702, 1002, …",
-        "rule": "v = 0 and i % 100 = 2"
+        "rule": "v = 0 and i % 100 = 2",
+        "human_rule": "no decimal digits and integer ends in 02"
       },
       {
         "category": "few",
         "example": "3, 4, 103, 104, 203, 204, 303, 304, 403, 404, 503, 504, 603, 604, 703, 704, 1003, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": "v = 0 and i % 100 = 3–4 or v != 0"
+        "rule": "v = 0 and i % 100 = 3–4 or v != 0",
+        "human_rule": "no decimals and integer ends in 03–04, or has decimal digits"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3592,12 +4098,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3608,12 +4116,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3624,12 +4134,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3640,12 +4152,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3656,17 +4170,20 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3677,12 +4194,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3693,24 +4212,28 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3720,7 +4243,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3731,19 +4255,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3752,13 +4279,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3769,12 +4298,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3785,24 +4316,28 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1, 2, 21, 22, 31, 32, 41, 42, 51, 52, 61, 62, 71, 72, 81, 82, 101, 1001, …",
-        "rule": "n % 10 = 1, 2 and n % 100 != 11, 12"
+        "rule": "n % 10 = 1, 2 and n % 100 != 11, 12",
+        "human_rule": "ends in 1 or 2, except 11 or 12"
       },
       {
         "category": "other",
         "example": "0, 3–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3812,19 +4347,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3834,12 +4372,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3850,17 +4390,20 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "few",
         "example": "2–102.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 2.00, 3.00, 4.00, 5.00, 6.00, 7.00, 8.00",
-        "rule": "n = 2–10"
+        "rule": "n = 2–10",
+        "human_rule": "is 2, 3, 4, 5, 6, 7, 8, 9 or 10"
       },
       {
         "category": "other",
         "example": "11–26, 100, 1000, 10000, 100000, 1000000, … | 1.1–1.9, 2.1–2.7, 10.1, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3876,19 +4419,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3898,19 +4444,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3920,12 +4469,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3936,14 +4487,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -3953,7 +4506,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3964,12 +4518,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3979,13 +4535,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -3996,14 +4554,16 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4013,7 +4573,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4024,12 +4585,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4040,12 +4603,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4056,19 +4621,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4078,24 +4646,28 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "few",
         "example": "6, 9, 10, 16, 19, 26, 29, 36, 39, 106, 1006, …",
-        "rule": "n % 10 = 6, 9 or n = 10"
+        "rule": "n % 10 = 6, 9 or n = 10",
+        "human_rule": "ends in 6 or 9, or is 10"
       },
       {
         "category": "other",
         "example": "0–5, 7, 8, 11–15, 17, 18, 20, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4105,12 +4677,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4121,34 +4695,40 @@
       {
         "category": "one",
         "example": "1, 21, 31, 41, 51, 61, 71, 81, 101, 1001, …",
-        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11"
+        "rule": "v = 0 and i % 10 = 1 and i % 100 != 11",
+        "human_rule": "no decimal digits and integer ends in 1, except 11"
       },
       {
         "category": "few",
         "example": "2–4, 22–24, 32–34, 42–44, 52–54, 62, 102, 1002, …",
-        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14"
+        "rule": "v = 0 and i % 10 = 2–4 and i % 100 != 12–14",
+        "human_rule": "no decimal digits and integer ends in 2–4, except 12–14"
       },
       {
         "category": "many",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": "v = 0 and i % 10 = 0 or v = 0 and i % 10 = 5–9 or v = 0 and i % 100 = 11–14"
+        "rule": "v = 0 and i % 10 = 0 or v = 0 and i % 10 = 5–9 or v = 0 and i % 100 = 11–14",
+        "human_rule": "no decimals and integer ends in 0, 5–9, or 11–14"
       },
       {
         "category": "other",
         "example": "0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "few",
         "example": "3, 23, 33, 43, 53, 63, 73, 83, 103, 1003, …",
-        "rule": "n % 10 = 3 and n % 100 != 13"
+        "rule": "n % 10 = 3 and n % 100 != 13",
+        "human_rule": "ends in 3, except 13"
       },
       {
         "category": "other",
         "example": "0–2, 4–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4158,29 +4738,34 @@
       {
         "category": "one",
         "example": "1, 101, 201, 301, 401, 501, 601, 701, 1001, … | 0.1, 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 10.1, 100.1, 1000.1, …",
-        "rule": "v = 0 and i % 100 = 1 or f % 100 = 1"
+        "rule": "v = 0 and i % 100 = 1 or f % 100 = 1",
+        "human_rule": "no decimals and integer ends in 01, or decimal part ends in 1"
       },
       {
         "category": "two",
         "example": "2, 102, 202, 302, 402, 502, 602, 702, 1002, … | 0.2, 1.2, 2.2, 3.2, 4.2, 5.2, 6.2, 7.2, 10.2, 100.2, 1000.2, …",
-        "rule": "v = 0 and i % 100 = 2 or f % 100 = 2"
+        "rule": "v = 0 and i % 100 = 2 or f % 100 = 2",
+        "human_rule": "no decimals and integer ends in 02, or decimal part ends in 2"
       },
       {
         "category": "few",
         "example": "3, 4, 103, 104, 203, 204, 303, 304, 403, 404, 503, 504, 603, 604, 703, 704, 1003, … | 0.3, 0.4, 1.3, 1.4, 2.3, 2.4, 3.3, 3.4, 4.3, 4.4, 5.3, 5.4, 6.3, 6.4, 7.3, 7.4, 10.3, 100.3, 1000.3, …",
-        "rule": "v = 0 and i % 100 = 3–4 or f % 100 = 3–4"
+        "rule": "v = 0 and i % 100 = 3–4 or f % 100 = 3–4",
+        "human_rule": "no decimals and integer ends in 03–04, or decimal part ends in 3–4"
       },
       {
         "category": "other",
         "example": "0, 5–19, 100, 1000, 10000, 100000, 1000000, … | 0.0, 0.5–1.0, 1.5–2.0, 2.5–2.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4190,19 +4775,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4212,12 +4800,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4228,19 +4818,22 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4250,12 +4843,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4266,29 +4861,34 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "many",
         "example": "1000000, 1c6, 2c6, 3c6, 4c6, 5c6, 6c6, … | 1.0000001c6, 1.1c6, 2.0000001c6, 2.1c6, 3.0000001c6, 3.1c6, …",
-        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5"
+        "rule": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0–5",
+        "human_rule": "is a multiple of 1,000,000 without decimals (non-zero), or compact exponent is not 0–5"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1c3, 2c3, 3c3, 4c3, 5c3, 6c3, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 1.0001c3, 1.1c3, 2.0001c3, 2.1c3, 3.0001c3, 3.1c3, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "many",
         "example": "8, 11, 80, 800",
-        "rule": "n = 11, 8, 80, 800"
+        "rule": "n = 11, 8, 80, 800",
+        "human_rule": "is 8, 11, 80 or 800"
       },
       {
         "category": "other",
         "example": "0–7, 9, 10, 12–17, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4298,19 +4898,22 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4320,12 +4923,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4336,12 +4941,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4351,13 +4958,15 @@
     "cardinal": [
       {
         "category": "one",
-        "example": "0, 10.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
-        "rule": "n = 0–1"
+        "example": "0, 1, 0.0, 1.0, 0.00, 1.00, 0.000, 1.000, 0.0000, 1.0000",
+        "rule": "n = 0–1",
+        "human_rule": "is 0 or 1"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4368,12 +4977,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4384,64 +4995,76 @@
       {
         "category": "zero",
         "example": "00.0, 0.00, 0.000, 0.0000",
-        "rule": "n = 0"
+        "rule": "n = 0",
+        "human_rule": "is 0"
       },
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "two",
         "example": "22.0, 2.00, 2.000, 2.0000",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "few",
         "example": "33.0, 3.00, 3.000, 3.0000",
-        "rule": "n = 3"
+        "rule": "n = 3",
+        "human_rule": "is 3"
       },
       {
         "category": "many",
         "example": "66.0, 6.00, 6.000, 6.0000",
-        "rule": "n = 6"
+        "rule": "n = 6",
+        "human_rule": "is 6"
       },
       {
         "category": "other",
         "example": "4, 5, 7–20, 100, 1000, 10000, 100000, 1000000, … | 0.1–0.9, 1.1–1.7, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "zero",
         "example": "0, 7–9",
-        "rule": "n = 0, 7, 8, 9"
+        "rule": "n = 0, 7, 8, 9",
+        "human_rule": "is 0, 7, 8 or 9"
       },
       {
         "category": "one",
         "example": "1",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1"
       },
       {
         "category": "two",
         "example": "2",
-        "rule": "n = 2"
+        "rule": "n = 2",
+        "human_rule": "is 2"
       },
       {
         "category": "few",
         "example": "3, 4",
-        "rule": "n = 3, 4"
+        "rule": "n = 3, 4",
+        "human_rule": "is 3 or 4"
       },
       {
         "category": "many",
         "example": "5, 6",
-        "rule": "n = 5, 6"
+        "rule": "n = 5, 6",
+        "human_rule": "is 5 or 6"
       },
       {
         "category": "other",
         "example": "10–25, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4451,19 +5074,22 @@
       {
         "category": "one",
         "example": "1",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   },
@@ -4473,7 +5099,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4484,12 +5111,14 @@
       {
         "category": "one",
         "example": "11.0, 1.00, 1.000, 1.0000",
-        "rule": "n = 1"
+        "rule": "n = 1",
+        "human_rule": "is 1 or 11"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–0.9, 1.1–1.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4500,7 +5129,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4511,12 +5141,14 @@
       {
         "category": "yi",
         "example": "one",
-        "rule": "i = 1 and v = 0"
+        "rule": "i = 1 and v = 0",
+        "human_rule": "is 1 with no decimal digits"
       },
       {
         "category": "other",
         "example": "0, 2–16, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4527,7 +5159,8 @@
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, … | 0.0–1.5, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": []
@@ -4538,19 +5171,22 @@
       {
         "category": "one",
         "example": "0, 1, 0.0–1.0, 0.00–0.04",
-        "rule": "i = 0 or n = 1"
+        "rule": "i = 0 or n = 1",
+        "human_rule": "is 0, 1 or decimals starting with 0"
       },
       {
         "category": "other",
         "example": "2–17, 100, 1000, 10000, 100000, 1000000, … | 1.1–2.6, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ],
     "ordinal": [
       {
         "category": "other",
         "example": "0–15, 100, 1000, 10000, 100000, 1000000, …",
-        "rule": ""
+        "rule": "",
+        "human_rule": "everything else"
       }
     ]
   }
