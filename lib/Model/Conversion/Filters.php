@@ -232,16 +232,16 @@ class Filters
     /**
      * Logs a conversion to xliff, doing also file backup in case of failure.
      *
-     * @param             $response
-     * @param string $sentFile
-     * @param string $sourceLang
-     * @param string $targetLang
-     * @param string|null $segmentation
-     * @param             $extractionParameters
+     * @param array       $response            The response array returned by sendToFilters().
+     * @param string      $sentFile            Absolute path of the source file sent to Filters.
+     * @param string      $sourceLang          Source language code.
+     * @param string      $targetLang          Target language code.
+     * @param string|null $segmentation        Segmentation rule used, or null for the default.
+     * @param IDto|null   $extractionParameters Extraction parameters DTO, or null.
      *
      * @throws Exception
      */
-    public static function logConversionToXliff($response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, $extractionParameters): void
+    public static function logConversionToXliff(array $response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, ?IDto $extractionParameters): void
     {
         // @TODO $extractionParameters to MySQL table?
         self::logConversion($response, true, $sentFile, ['source' => $sourceLang, 'target' => $targetLang], ['segmentation_rule' => $segmentation]);
@@ -250,14 +250,14 @@ class Filters
     /**
      * Logs a conversion to target, doing also file backup in case of failure.
      *
-     * @param                $response
-     * @param string $sentFile
-     * @param JobStruct $jobData
-     * @param array $sourceFileData
+     * @param array     $response       The response array returned by sendToFilters().
+     * @param string    $sentFile       Absolute path of the XLIFF file sent to Filters.
+     * @param JobStruct $jobData        The job struct associated with this conversion.
+     * @param array     $sourceFileData Metadata about the original source file.
      *
      * @throws Exception
      */
-    public static function logConversionToTarget($response, string $sentFile, JobStruct $jobData, array $sourceFileData): void
+    public static function logConversionToTarget(array $response, string $sentFile, JobStruct $jobData, array $sourceFileData): void
     {
         self::logConversion($response, false, $sentFile, $jobData->toArray(), $sourceFileData);
     }
@@ -267,11 +267,11 @@ class Filters
      * you have the matecat_conversions_log database properly configured.
      * See /lib/Model/matecat_conversions_log.sql
      *
-     * @param array $response
-     * @param bool $toXliff
-     * @param string $sentFile
-     * @param array $jobData
-     * @param array $sourceFileData
+     * @param array  $response       The response array returned by sendToFilters().
+     * @param bool   $toXliff        True if the conversion was the source→XLIFF, false for XLIFF→target.
+     * @param string $sentFile       Absolute path of the file sent to Filters.
+     * @param array  $jobData        Job metadata (source, target, id, password, owner).
+     * @param array  $sourceFileData Source file metadata (segmentation_rule, id_file, etc.).
      *
      * @throws Exception
      */

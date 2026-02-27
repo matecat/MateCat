@@ -34,7 +34,14 @@ class ZipArchiveHandler extends ZipArchive
 
     protected static int $MAX_FILES;
 
-    public function message($code): string
+    /**
+     * Returns a human-readable error message for a given ZipArchive error code.
+     *
+     * @param int $code A ZipArchive error code.
+     *
+     * @return string
+     */
+    public function message(int $code): string
     {
         return match ($code) {
             0 => 'No error',
@@ -61,10 +68,17 @@ class ZipArchiveHandler extends ZipArchive
             21 => 'Zip archive inconsistent',
             22 => 'Can\'t remove file',
             23 => 'Entry has been deleted',
-            default => 'An unknown error has occurred(' . intval($code) . ')',
+            default => 'An unknown error has occurred(' . $code . ')',
         };
     }
 
+    /**
+     * Returns true if the given ZIP entry path represents a directory (ends with a separator).
+     *
+     * @param string $path A ZIP entry path.
+     *
+     * @return bool
+     */
     public function isDir(string $path): bool
     {
         return substr($path, -1) == DIRECTORY_SEPARATOR;
@@ -180,6 +194,16 @@ class ZipArchiveHandler extends ZipArchive
         $this->treeList = array_map([ZipArchiveHandler::class, 'prependZipFileName'], $this->treeList);
     }
 
+    /**
+     * Extracts all files listed in $this->treeList into a temporary folder,
+     * enforcing the max upload file size limit per file.
+     * Must be called after createTree().
+     *
+     * @param string $tmp_folder Absolute path to the temporary extraction directory (with trailing slash).
+     *
+     * @return array An associative array keyed by an internal file path, each value containing
+     *               'size', 'name', 'tmp_name', 'error', and 'type'.
+     */
     public function extractFilesInTmp(string $tmp_folder): array
     {
         $filesArray = [];
@@ -236,11 +260,26 @@ class ZipArchiveHandler extends ZipArchive
         return $filesArray;
     }
 
+    /**
+     * Prefixes a ZIP tree key with ARRAY_FILES_PREFIX to distinguish directory entries from file entries.
+     *
+     * @param string $key A path segment from the ZIP entry.
+     *
+     * @return string
+     */
     private function treeKey(string $key): string
     {
         return self::ARRAY_FILES_PREFIX . $key;
     }
 
+    /**
+     * Prepends the ZIP archive base filename to an internal file name,
+     * using INTERNAL_SEPARATOR as the delimiter.
+     *
+     * @param string $fName An internal file name from $this->treeList.
+     *
+     * @return string
+     */
     private function prependZipFileName(string $fName): string
     {
         return AbstractFilesStorage::pathinfo_fix($this->filename, PATHINFO_BASENAME) . self::INTERNAL_SEPARATOR . $fName;
@@ -290,9 +329,12 @@ class ZipArchiveHandler extends ZipArchive
     }
 
     /**
-     * @param $fileName string
+     * Converts a regular filesystem path (using DIRECTORY_SEPARATOR) into the internal
+     * ZIP representation (using INTERNAL_SEPARATOR).
      *
-     * @return string
+     * @param string $fileName A standard filesystem path.
+     *
+     * @return string The path encoded with INTERNAL_SEPARATOR.
      */
     public static function getInternalFileName(string $fileName): string
     {

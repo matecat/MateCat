@@ -59,11 +59,23 @@ class ConversionHandler
         $this->logger = LoggerFactory::getLogger("conversion");
     }
 
+    /**
+     * Checks whether the file requires conversion to XLIFF via Filters.
+     * Returns true if conversion is needed, false if not, or an integer error/warning code
+     * if the file format is not supported.
+     *
+     * @return bool|int
+     */
     public function fileMustBeConverted(): bool|int
     {
         return XliffProprietaryDetect::fileMustBeConverted($this->getLocalFilePath(), true, AppConfig::$FILTERS_ADDRESS);
     }
 
+    /**
+     * Returns the absolute path to the file in the upload directory.
+     *
+     * @return string
+     */
     public function getLocalFilePath(): string
     {
         return $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
@@ -392,11 +404,11 @@ class ConversionHandler
     }
 
     /**
-     * @param $stdResult
+     * @param iterable $stdResult The result from Upload::uploadFiles(), iterated to check for errors.
      *
      * @return bool
      */
-    public function isZipExtractionFailed($stdResult): bool
+    public function isZipExtractionFailed(iterable $stdResult): bool
     {
         $error = false;
 
@@ -532,6 +544,9 @@ class ConversionHandler
         $this->legacy_icu = $legacy_icu;
     }
 
+    /**
+     * @param bool $icu_enabled Whether ICU message format segmentation is enabled for this file.
+     */
     public function setIcuEnabled(bool $icu_enabled): void
     {
         $this->icu_enabled = $icu_enabled;

@@ -31,29 +31,22 @@ class Upload
 
     protected bool $raiseException = true;
 
-    public function getDirUploadToken()
+    /**
+     * Returns the upload token string used to identify the session directory.
+     *
+     * @return string
+     */
+    public function getDirUploadToken(): string
     {
         return $this->uploadToken;
     }
 
-    public function getUploadPath(): string
-    {
-        return $this->dirUpload;
-    }
-
-    /**
-     * @param boolean $raiseException
-     */
-    public function setRaiseException(bool $raiseException): void
-    {
-        $this->raiseException = $raiseException;
-    }
-
+    // ...existing code...
 
     /**
      * @throws Exception
      */
-    public function __construct($uploadToken = null)
+    public function __construct(?string $uploadToken = null)
     {
         if (empty($uploadToken)) {
             $this->uploadToken = Utils::uuid4();
@@ -97,6 +90,14 @@ class Upload
         return $result;
     }
 
+    /**
+     * Normalises a raw $_FILES array (or Klein files array) into a flat UploadElement
+     * regardless of whether single or multiple files were submitted per input name.
+     *
+     * @param array $filesToUpload Raw files array (e.g. from $_FILES or $request->files()->all()).
+     *
+     * @return UploadElement A flat object keyed by tmp_name (or input name for single files).
+     */
     public static function getUniformGlobalFilesStructure(array $filesToUpload): UploadElement
     {
         $result = new UploadElement();

@@ -11,6 +11,25 @@ use ReflectionException;
 use RuntimeException;
 use Utils\Constants\ConversionHandlerStatus;
 
+/**
+ * Class FilesConverter
+ *
+ * Handles the conversion of files from a source language to a target language. The class supports
+ * various types of files, including handling ZIP files and extracting their contents for conversion.
+ * It manages the entire conversion process, including error handling, file warnings, and the accumulation
+ * of results.
+ *
+ * **No input validation is performed by this class.**
+ * Validation of the following inputs is intentionally outside the responsibility of this class
+ * and must be performed by the caller before instantiation:
+ *
+ *  - **File names**: must be validated (e.g. via Utils::isValidFileName()) before being passed in.
+ *  - **Upload token**: must be a valid, non-empty token (e.g. via Utils::isTokenValid()).
+ *  - **Source and target languages**: must be valid language codes (e.g. via Languages::validateLanguage()).
+ *  - **Segmentation rule**: must be a recognised rule or null (e.g. via Constants::validateSegmentationRules()).
+ *
+ * This class assumes all inputs are already sanitised and trusted.
+ */
 class FilesConverter
 {
     private string $source_lang;
@@ -85,17 +104,24 @@ class FilesConverter
     }
 
     /**
-     * @param $source_lang
+     * Sets the source language for the conversion.
+     * No validation is performed — the caller is responsible for passing a valid language code.
+     *
+     * @param string $source_lang The source language code (e.g. "en-US").
      */
-    private function setSourceLang($source_lang): void
+    private function setSourceLang(string $source_lang): void
     {
         $this->source_lang = $source_lang;
     }
 
     /**
-     * @param $target_lang
+     * Sets the target language(s) for the conversion.
+     * Multiple languages can be passed as a comma-separated string (e.g. "it-IT,fr-FR").
+     * No validation is performed — the caller is responsible for passing valid language codes.
+     *
+     * @param string $target_lang A comma-separated list of target language codes.
      */
-    private function setTargetLangs($target_lang): void
+    private function setTargetLangs(string $target_lang): void
     {
         $this->target_lang = $target_lang;
     }
@@ -213,6 +239,11 @@ class FilesConverter
         return $internalZipFileNames;
     }
 
+    /**
+     * Returns the accumulated conversion result list after processing.
+     *
+     * @return ConvertedFileList
+     */
     public function getResult(): ConvertedFileList
     {
         return $this->resultStack;

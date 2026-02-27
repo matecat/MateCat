@@ -19,6 +19,11 @@ class ConvertedFileList
     private array $erroredFiles = [];
     private array $warnedFiles = [];
 
+    /**
+     * Appends a conversion result to the internal list.
+     *
+     * @param ConvertedFileModel $convertedFileModel
+     */
     public function add(ConvertedFileModel $convertedFileModel): void
     {
         $this->convertedFiles[] = $convertedFileModel;
@@ -49,6 +54,9 @@ class ConvertedFileList
         return !empty($this->erroredFiles);
     }
 
+    /**
+     * @return bool
+     */
     public function hasWarnings(): bool
     {
         return !empty($this->warnedFiles);
