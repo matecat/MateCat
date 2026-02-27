@@ -4,30 +4,30 @@
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today {
-  color: colors.$translatedBlue;
+  color: colors.$blue500;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current {
-  background: colors.$translatedBlue;
+  background: colors.$blue500;
   box-shadow: none;
   color: colors.$white;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:hover {
-  color: colors.$grey6 !important;
-  background: colors.$grey8 !important;
+  color: colors.$grey700 !important;
+  background: colors.$grey200 !important;
   box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:active {
   color: colors.$white !important;
-  background: colors.$translatedBlue !important;
+  background: colors.$blue500 !important;
   box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:focus {
   color: colors.$white !important;
-  background: colors.$translatedBlue !important;
+  background: colors.$blue500 !important;
   box-shadow: none !important;
 }
 
@@ -36,28 +36,28 @@
   .xdsoft_time_box
   > div
   > div.xdsoft_current {
-  background: colors.$translatedBlue;
+  background: colors.$blue500;
   box-shadow: none;
 }
 
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box > div > div:hover {
-  color: colors.$grey6 !important;
-  background: colors.$grey8 !important;
+  color: colors.$grey700 !important;
+  background: colors.$grey200 !important;
   box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .blue-gradient-button {
-  background: colors.$translatedBlue;
+  background: colors.$blue500;
   color: white;
   font-family: Calibri;
-  border: 1px solid colors.$grey !important;
+  border: 1px solid colors.$grey600 !important;
   padding: 4px;
 }
 
 .xdsoft_datetimepicker .blue-gradient-button:hover {
-  background: colors.$translatedBlue;
-  box-shadow: 0 0 0 colors.$grey8, 0 0 2px rgba(0, 0, 0, 0.12),
+  background: colors.$blue500;
+  box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
   color: colors.$white;
-  border: 1px solid colors.$grey !important;
+  border: 1px solid colors.$grey600 !important;
 }

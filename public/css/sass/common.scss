@@ -82,10 +82,10 @@ ul {
   display: block;
   z-index: 999999;
   background: colors.$white;
-  box-shadow: 0px 0px 5px colors.$grey8;
+  box-shadow: 0px 0px 5px colors.$grey200;
   border-radius: 2px;
   font-size: 18px;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
 }
 
 .iepopup img {
@@ -94,7 +94,7 @@ ul {
 
 .iepopup ul a {
   padding: 0px 0 0 0;
-  color: colors.$linkBlueHover;
+  color: colors.$blue400;
   text-decoration: underline;
 }
 
@@ -140,7 +140,7 @@ section mark.searchMarker {
 }
 
 section mark.searchMarker.currSearchItem {
-  background: colors.$orangeDefault;
+  background: colors.$orange200;
   /*	background: #00c1e6; */
 }
 
@@ -163,7 +163,7 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline header {
-  background: colors.$grey;
+  background: colors.$grey600;
   border-bottom: 1px solid colors.$grey1300;
   padding: 0px 0 2px 0;
   margin-bottom: 20px;
@@ -178,13 +178,13 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline h2 {
-  color: colors.$grey7 !important;
+  color: colors.$grey400 !important;
   font-weight: normal !important;
 }
 
 .claim span {
   font-weight: bold;
-  color: colors.$linkBlueHover;
+  color: colors.$blue400;
 }
 
 .fileformat span {
@@ -621,7 +621,7 @@ header .filter:before {
 .mbc-warnings:before,
 .text .alternatives:before {
   content: '\f071';
-  color: colors.$red800;
+  color: colors.$red400;
   margin-right: 10px;
 }
 
@@ -1027,7 +1027,7 @@ a.unarchive-project:after {
 #menu-site li a.bigblue {
   font-size: 17px !important;
   border: none !important;
-  color: colors.$darkBlue !important;
+  color: colors.$blue900 !important;
   border-radius: 18px;
   background-color: colors.$white;
   padding: 4px 18px;
@@ -1037,11 +1037,11 @@ a.unarchive-project:after {
 }
 
 #menu-site li a.bigred:hover {
-  color: colors.$darkBlueHover !important;
+  color: colors.$blue950 !important;
 }
 
 #menu-site li a:hover {
-  color: colors.$translatedBlue;
+  color: colors.$blue500;
 }
 
 /*****************************/
@@ -1064,7 +1064,7 @@ body svg {
     > span {
       display: block;
       text-align: center;
-      background-color: colors.$grey7;
+      background-color: colors.$grey400;
       border-radius: 4px;
       padding: 2px 4px;
       color: colors.$white;
@@ -1075,5 +1075,5 @@ body svg {
 }
 
 input[type='checkbox'] {
-  accent-color: colors.$translatedBlue;
+  accent-color: colors.$blue500;
 }

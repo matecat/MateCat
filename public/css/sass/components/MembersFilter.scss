@@ -42,17 +42,17 @@
         &:not(.item-filter) {
           justify-content: space-between;
           > :last-child {
-            color: colors.$translatedBlue;
+            color: colors.$blue500;
             font-weight: bold;
           }
         }
 
         &:hover {
-          background-color: colors.$grey9;
+          background-color: colors.$grey75;
         }
 
         &.active {
-          background-color: colors.$darkBlueHover;
+          background-color: colors.$blue950;
           color: colors.$white;
 
           &:not(.item-filter) {
@@ -83,8 +83,8 @@
 
     &:disabled {
       box-shadow: unset !important;
-      border: 1px solid colors.$grey8;
-      //color: $grey6 !important;
+      border: 1px solid colors.$grey200;
+      //color: $grey700 !important;
     }
 
     > :first-child {
@@ -133,7 +133,7 @@
 
   .no-results {
     text-align: center;
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
 
   .item-filter {
@@ -146,14 +146,14 @@
 
     > :first-child {
       font-size: 12px;
-      border: 2px solid colors.$translatedBlue;
-      color: colors.$translatedBlue;
+      border: 2px solid colors.$blue500;
+      color: colors.$blue500;
       border-radius: 100%;
       width: 28px;
       height: 28px;
       display: flex;
       text-align: center;
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
       padding: 6px 4px;
       font-weight: bold;
       margin-right: 0.25em;

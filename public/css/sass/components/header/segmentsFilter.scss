@@ -1,6 +1,6 @@
 @use "../../commons/colors";
 body section.muted {
-  background: colors.$grey5;
+  background: colors.$grey50;
   cursor: not-allowed;
   .body {
     .text {
@@ -29,11 +29,11 @@ body section.muted {
 }
 
 .search-settings-panel {
-  background: colors.$grey9;
+  background: colors.$grey75;
   padding: 10px;
   position: absolute;
   width: 205px;
-  border: 1px solid colors.$grey6;
+  border: 1px solid colors.$grey700;
   top: 48px;
 }
 
@@ -46,7 +46,7 @@ header .filter:before {
 header .filter {
   display: block !important;
   text-decoration: none;
-  color: colors.$grey9;
+  color: colors.$grey75;
   box-shadow: none;
   border: 0;
   padding: 12px;
@@ -91,7 +91,7 @@ body.cattool .filter:hover {
   cursor: pointer;
 }
 body.cattool .filter:hover {
-  color: colors.$grey8;
+  color: colors.$grey200;
 }
 
 .cattool header .filter {
@@ -110,7 +110,7 @@ body.cattool .filter:hover {
 .search-settings-info {
   float: left;
   margin-right: 10px;
-  color: colors.$grey6;
+  color: colors.$grey700;
 }
 
 .filter-segments-count {
@@ -144,15 +144,15 @@ section.muted .segment-side-buttons {
     .filter-container {
       background-color: colors.$white;
       height: 50px;
-      box-shadow: 0 1px 3px colors.$grey6;
+      box-shadow: 0 1px 3px colors.$grey700;
       border-radius: 0 0 2px 2px;
       display: block;
-      color: colors.$grey6;
+      color: colors.$grey700;
       //TODO: Transform in SCSS Component for all INPUT TYPES
       input:not(.input--invisible) {
         border-radius: 2px !important;
         border: 1px solid rgba(34, 36, 38, 0.15) !important;
-        box-shadow: inset 0 1px 3px colors.$grey8 !important;
+        box-shadow: inset 0 1px 3px colors.$grey200 !important;
         font-size: 1.2em !important;
         padding: 8px 16px 7px !important;
         &::-webkit-input-placeholder {
@@ -162,7 +162,7 @@ section.muted .segment-side-buttons {
           border-color: rgba(34, 36, 38, 0.35) !important;
         }
         &:focus {
-          border-color: colors.$linkBlueTransparent !important;
+          border-color: colors.$blue300 !important;
           background: colors.$white !important;
           color: rgba(0, 0, 0, 0.8) !important;
           outline: none;
@@ -216,7 +216,7 @@ section.muted .segment-side-buttons {
               padding: 0 10px;
             }
             .switch-container input:checked + span {
-              background-color: colors.$grey7;
+              background-color: colors.$grey400;
             }
             &:nth-child(2) {
               margin-left: 15px;
@@ -231,8 +231,8 @@ section.muted .segment-side-buttons {
 
               &:hover,
               &.active {
-                box-shadow: 0 0 0 1px colors.$blue800 inset;
-                color: colors.$blue800 !important;
+                box-shadow: 0 0 0 1px colors.$blue400 inset;
+                color: colors.$blue400 !important;
                 background: colors.$white !important;
               }
 
@@ -244,14 +244,14 @@ section.muted .segment-side-buttons {
               .ui.cancel.label {
                 position: absolute;
                 padding: 4px;
-                background-color: colors.$grey8;
+                background-color: colors.$grey200;
                 border-radius: 15px;
                 top: 8px;
                 line-height: 0px;
                 right: 0px;
                 visibility: hidden;
                 &:hover {
-                  background-color: colors.$grey8 !important;
+                  background-color: colors.$grey200 !important;
                 }
               }
             }
@@ -275,7 +275,7 @@ section.muted .segment-side-buttons {
               &.filtered {
                 .ui.basic.button {
                   background-color: colors.$white !important;
-                  box-shadow: 0 0 0 colors.$grey8, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                   color: colors.$black !important;
                   padding: 9px 20px 9px 15px;
@@ -306,20 +306,20 @@ section.muted .segment-side-buttons {
                   background: colors.$white;
                 }
                 &.draft-color {
-                  background: colors.$grey1;
+                  background: colors.$grey500;
                 }
                 &.translated-color,
                 &.post-edited-color {
-                  background: colors.$translatedBlue;
+                  background: colors.$blue500;
                 }
                 &.approved-color {
-                  background: colors.$approvedGreen;
+                  background: colors.$green400;
                 }
                 &.approved-2ndpass-color {
-                  background: colors.$approved2Green;
+                  background: colors.$purple500;
                 }
                 &.rejected-color {
-                  background: colors.$rebuttedRed;
+                  background: colors.$orange600;
                 }
               }
             }
@@ -333,7 +333,7 @@ section.muted .segment-side-buttons {
                 float: none;
                 label {
                   &:before {
-                    background: colors.$grey3 !important;
+                    background: colors.$grey150 !important;
                   }
                   &:after {
                     box-shadow: inset 0 0 0 1px rgba(34, 36, 38, 0.25);
@@ -366,7 +366,7 @@ section.muted .segment-side-buttons {
           }
           .clear-filter-element {
             margin-left: 13px;
-            border-left: 1px solid colors.$grey8;
+            border-left: 1px solid colors.$grey200;
             padding-left: 13px;
             color: black;
             display: flex;
@@ -485,10 +485,10 @@ section.muted .segment-side-buttons {
         padding: 10px;
         position: relative;
         &:hover {
-          background-color: colors.$grey4;
+          background-color: colors.$grey100;
         }
         &.active {
-          background-color: colors.$grey8;
+          background-color: colors.$grey200;
         }
       }
     }
@@ -502,11 +502,11 @@ section.muted .segment-side-buttons {
     height: 38px !important;
     &:disabled {
       box-shadow: unset !important;
-      border: 1px solid colors.$grey8;
-      color: colors.$grey6 !important;
+      border: 1px solid colors.$grey200;
+      color: colors.$grey700 !important;
       opacity: 0.5;
       svg {
-        color: colors.$grey6 !important;
+        color: colors.$grey700 !important;
         opacity: 0.5;
       }
     }

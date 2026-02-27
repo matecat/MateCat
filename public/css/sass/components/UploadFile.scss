@@ -1,6 +1,6 @@
 @use '../commons/colors';
 .upload-files-container, .upload-box-not-logged, .upload-waiting-logged {
-  border: 1px dashed colors.$grey8;
+  border: 1px dashed colors.$grey200;
   min-height: 200px;
   border-radius: 4px;
   padding: 24px;
@@ -16,7 +16,7 @@
     align-items: flex-start;
   }
   &.isDragging {
-    background-color: colors.$grey7;
+    background-color: colors.$grey400;
   }
   .upload-files-start {
     display: flex;
@@ -32,7 +32,7 @@
     }
     span {
       font-size: 24px;
-      color: colors.$grey1
+      color: colors.$grey500
     }
   }
   .upload-files-list {
@@ -44,7 +44,7 @@
       grid-template-columns: 2fr 1fr 24px;
       align-items: center;
       padding: 8px;
-      border-bottom: 1px dashed colors.$grey8;
+      border-bottom: 1px dashed colors.$grey200;
       &.zip-folder {
         padding-left: 40px;
       }
@@ -65,13 +65,13 @@
         margin-bottom: 4px;
       }
       .file-item-error {
-        color: colors.$redDefault;
+        color: colors.$red500;
       }
       .file-item-warning {
-        color: colors.$orangeDefault;
+        color: colors.$orange200;
       }
       .file-item-success {
-        color: colors.$greenDefault;
+        color: colors.$green500;
       }
       .file-item-info {
         display:flex;
@@ -83,10 +83,10 @@
     }
     .importing-progress {
       .progress {
-        background-color: colors.$approvedGreen;
+        background-color: colors.$green400;
       }
       .progress-wrapper {
-        background-color: rgba(colors.$approvedGreen, 0.24);
+        background-color: rgba(colors.$green400, 0.24);
       }
     }
   }

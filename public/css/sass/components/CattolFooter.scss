@@ -30,7 +30,7 @@
   .grey-box {
     display: flex;
     flex-direction: column;
-    background-color: colors.$grey5;
+    background-color: colors.$grey50;
     border-radius: 4px;
     padding: 5px 10px;
     line-height: 1.2;
@@ -40,7 +40,7 @@
     }
 
     > :last-child {
-      color: colors.$grey6;
+      color: colors.$grey700;
     }
 
     .grey-box-row {

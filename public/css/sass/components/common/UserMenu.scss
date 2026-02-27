@@ -10,7 +10,7 @@
     color: colors.$white !important;
   }
   .header-button-signup {
-    color: colors.$darkBlue !important;
+    color: colors.$blue900 !important;
   }
 
 }
@@ -31,7 +31,7 @@
     margin: 0;
     border: none;
     height: 1px;
-    background-color: colors.$grey9;
+    background-color: colors.$grey75;
   }
 
   .user-info {
@@ -84,10 +84,10 @@
     width: 100%;
     display: block;
     text-decoration: none;
-    color: colors.$grey6;
+    color: colors.$grey700;
     &:hover {
-      background-color: colors.$grey5 !important;
-      color: colors.$darkBlue !important;
+      background-color: colors.$grey50 !important;
+      color: colors.$blue900 !important;
     }
   }
 }

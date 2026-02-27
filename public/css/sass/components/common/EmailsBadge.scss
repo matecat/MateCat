@@ -27,7 +27,7 @@
   outline: none;
   cursor: text;
   overflow-y: auto;
-  box-shadow: inset 0 1px 3px colors.$grey8;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   border: 1px solid rgba(34, 36, 38, 0.15);
   background-color: white;
 }
@@ -60,7 +60,7 @@
 .email-badge-placeholder {
   position: absolute;
   inset: 12px;
-  color: colors.$grey7;
+  color: colors.$grey400;
 }
 
 .email-badge-item {
@@ -69,7 +69,7 @@
 }
 
 .email-badge-error {
-  color: colors.$redDefault;
+  color: colors.$red500;
 }
 
 .email-badge-tag {
@@ -81,15 +81,15 @@
   cursor: default;
 
   &.default {
-    background-color: colors.$grey7;
+    background-color: colors.$grey400;
     color: white;
   }
   &.selected {
-    background-color: colors.$translatedBlue;
+    background-color: colors.$blue500;
     color: colors.$white;
   }
   &.invalid {
-    background-color: colors.$redDefault;
+    background-color: colors.$red500;
     color: colors.$white;
   }
 }
@@ -100,14 +100,14 @@
 
   &:hover {
     background-color: transparent !important;
-    color: colors.$grey8 !important;
+    color: colors.$grey200 !important;
   }
 
   .selected & {
-    color: colors.$grey9 !important;
+    color: colors.$grey75 !important;
 
     &:hover {
-      color: colors.$grey8 !important;
+      color: colors.$grey200 !important;
     }
   }
 }

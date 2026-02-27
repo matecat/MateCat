@@ -31,7 +31,7 @@
 
     > p {
       font-size: 16px;
-      color: colors.$grey6;
+      color: colors.$grey700;
     }
   }
 
@@ -56,7 +56,7 @@
       padding: 9px 46px 9px 12px;
       border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
-      box-shadow: inset 0 1px 3px colors.$grey8;
+      box-shadow: inset 0 1px 3px colors.$grey200;
 
       &:hover {
         border-color: rgba(34, 36, 38, 0.35);
@@ -66,11 +66,11 @@
 
     .select--is-focused,
     .select--is-focused:hover {
-      border: solid 1px colors.$grey2;
+      border: solid 1px colors.$grey300;
     }
 
     .select--is-disabled {
-      background-color: colors.$grey9;
+      background-color: colors.$grey75;
     }
 
     .custom-dropdown {
@@ -112,7 +112,7 @@
       }
 
       .dropdown__option--is-no-results-found {
-        color: colors.$grey7;
+        color: colors.$grey400;
       }
 
       .dropdown__option--is-no-results-found {
@@ -122,12 +122,12 @@
       .dropdown__option--is-active-option {
         background-color: unset;
         font-weight: bold;
-        background-color: colors.$grey5;
+        background-color: colors.$grey50;
       }
 
       .dropdown__option--is-highlighted-option,
       .dropdown__option:hover {
-        background-color: colors.$grey4;
+        background-color: colors.$grey100;
       }
     }
 
@@ -138,7 +138,7 @@
 
       input:not([type='radio']),
       textarea {
-        border: 1px solid colors.$grey2;
+        border: 1px solid colors.$grey300;
         border-radius: 4px;
         padding: 4px 8px;
         outline: none;
@@ -146,7 +146,7 @@
         line-height: 16px;
         &:focus,
         &:focus-visible {
-          border-color: colors.$linkBlueTransparent;
+          border-color: colors.$blue300;
         }
       }
       .dropdown__search-bar {

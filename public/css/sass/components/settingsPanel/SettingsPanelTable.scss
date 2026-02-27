@@ -7,12 +7,12 @@
   .settings-panel-button {
     cursor: pointer;
     color: colors.$black;
-    background: colors.$grey8;
+    background: colors.$grey200;
     border-radius: 2px 0 0 2px;
     padding: 6px 30px;
-    border: 1px solid colors.$grey;
+    border: 1px solid colors.$grey600;
     &:hover {
-      background-color: colors.$grey7;
+      background-color: colors.$grey400;
     }
   }
   .settings-panel-table-row-empty {
@@ -24,7 +24,7 @@
 .settings-panel-table-rowHeading {
   display: grid;
   align-items: center;
-  background-color: colors.$grey;
+  background-color: colors.$grey600;
   height: 30px;
   color: white;
   font-size: 15px;
@@ -39,7 +39,7 @@
 .settings-panel-row {
   display: flex;
   flex-direction: column;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   border-bottom: unset;
   transition: padding 0.2s ease-out 0.15s;
   .settings-panel-cell-center {
@@ -54,7 +54,7 @@
   align-items: center;
   width: 100%;
   min-height: 50px;
-  background-color: colors.$grey9;
+  background-color: colors.$grey75;
 }
 
 .settings-panel-row-content > *:not(.settings-panel-row-drag-handle) {
@@ -67,11 +67,11 @@
 }
 
 .settings-panel-row-active {
-  background-color: colors.$transparentBlue;
+  background-color: colors.$blue50;
 }
 
 .settings-panel-row:last-child {
-  border-bottom: 1px solid colors.$grey8;
+  border-bottom: 1px solid colors.$grey200;
 }
 
 .settings-panel-row-drag-handle {
@@ -79,7 +79,7 @@
   margin-left: 15px;
   margin-top: 8px;
   cursor: move;
-  border: 2px dotted colors.$grey8;
+  border: 2px dotted colors.$grey200;
   border-top: 0;
   border-bottom: 0;
   width: 2px;

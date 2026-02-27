@@ -9,7 +9,7 @@ body {
 body.manage {
   min-width: 1200px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   overflow-y: hidden;
   overflow-x: auto;
   font-size: 14px;
@@ -85,7 +85,7 @@ div#manage-container {
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
     }
   }
 
@@ -110,7 +110,7 @@ div#manage-container {
       max-width: 540px;
       min-width: 0px;
       line-height: 24px;
-      background-color: colors.$grey2;
+      background-color: colors.$grey300;
       color: colors.$black;
       height: 38px;
       border-radius: 0 2px 2px 0;
@@ -120,7 +120,7 @@ div#manage-container {
       padding-left: 10px !important;
     }
     .project-header {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
       padding-bottom: 10px !important;
       //border-bottom: 1px solid #ccc;
       margin-bottom: -25px;
@@ -143,7 +143,7 @@ div#manage-container {
         display: inline-block;
         vertical-align: text-bottom;
         min-width: 72px;
-        color: colors.$grey6;
+        color: colors.$grey700;
       }
       .ui.form .field :disabled {
         opacity: 1 !important;
@@ -176,7 +176,7 @@ div#manage-container {
           .ui.icon.input input {
             font-family: Calibri, Arial, Helvetica, sans-serif;
             padding-right: 2.67142857em !important;
-            box-shadow: inset 0 1px 3px colors.$grey8;
+            box-shadow: inset 0 1px 3px colors.$grey200;
           }
           &.project-menu.ui.button {
             box-shadow: none;
@@ -185,7 +185,7 @@ div#manage-container {
             margin-right: 8px;
             background-color: colors.$white;
             vertical-align: top;
-            border: 1px solid colors.$grey8;
+            border: 1px solid colors.$grey200;
             cursor: default;
             .text {
               border-radius: 15px;
@@ -193,8 +193,8 @@ div#manage-container {
               color: black;
               transition: 0.3s ease;
               .ui.circular.label {
-                background-color: colors.$grey8;
-                color: colors.$grey7;
+                background-color: colors.$grey200;
+                color: colors.$grey400;
               }
             }
           }
@@ -233,12 +233,12 @@ div#manage-container {
                 cursor: pointer;
 
                 &:hover {
-                  background-color: colors.$grey3;
+                  background-color: colors.$grey150;
                 }
               }
             }
             &:hover .text {
-              background-color: colors.$grey5 !important;
+              background-color: colors.$grey50 !important;
             }
           }
           &.project-assignee {
@@ -278,15 +278,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 &:hover {
-                  background-color: colors.$grey3;
+                  background-color: colors.$grey150;
                 }
               }
               .scrolling {
@@ -309,17 +309,17 @@ div#manage-container {
               padding-right: 30px;
             }
             &.disabled {
-              background-color: colors.$grey9 !important;
-              box-shadow: 0px 0px 1px colors.$grey6 !important;
+              background-color: colors.$grey75 !important;
+              box-shadow: 0px 0px 1px colors.$grey700 !important;
               opacity: 1;
               &.text {
-                color: colors.$grey6 !important;
+                color: colors.$grey700 !important;
               }
             }
           }
 
           &.project-not-assigned {
-            border: 1px solid colors.$grey;
+            border: 1px solid colors.$grey600;
             padding: 0px 15px 0px 3px;
             trans\ition: 0.3s ease;
             color: rgba(0, 0, 0, 0.6);
@@ -329,10 +329,10 @@ div#manage-container {
               transition: 0.3s ease;
             }
             &:hover {
-              border: 1px solid colors.$translatedBlue;
-              color: colors.$translatedBlue;
+              border: 1px solid colors.$blue500;
+              color: colors.$blue500;
               .icon-user22 {
-                color: colors.$translatedBlue;
+                color: colors.$blue500;
               }
             }
             .not-assigned {
@@ -348,15 +348,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 &:hover {
-                  background-color: colors.$grey3;
+                  background-color: colors.$grey150;
                 }
               }
             }
@@ -367,7 +367,7 @@ div#manage-container {
           &.project-assignee {
             .ui.cancel.label {
               padding: 4px;
-              background-color: colors.$grey8;
+              background-color: colors.$grey200;
               margin: 0px;
               border-radius: 15px;
               position: absolute;
@@ -380,7 +380,7 @@ div#manage-container {
                 color: colors.$white;
               }
               &:hover {
-                background-color: colors.$grey8 !important;
+                background-color: colors.$grey200 !important;
               }
             }
 
@@ -398,7 +398,7 @@ div#manage-container {
     }
 
     .project-body {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
 
       .jobs {
         margin-top: 0px;
@@ -415,7 +415,7 @@ div#manage-container {
             .merge {
               font-family: Calibri, Arial, Helvetica, sans-serif;
               padding: 5px 17px;
-              border: 1px solid colors.$grey;
+              border: 1px solid colors.$grey600;
               font-size: 16px;
               transition: 0.3s ease !important;
             }
@@ -440,7 +440,7 @@ div#manage-container {
               }
 
               .job-id {
-                color: colors.$grey7;
+                color: colors.$grey400;
                 font-size: 12px;
                 position: relative;
               }
@@ -461,7 +461,7 @@ div#manage-container {
                 .in-to {
                   float: left;
                   top: 4px;
-                  color: colors.$grey6;
+                  color: colors.$grey700;
                   line-height: 26px;
                   position: relative;
                   font-size: 12px;
@@ -552,7 +552,7 @@ div#manage-container {
                     font-weight: 700;
                   }
                   .outsource-gmt-text {
-                    color: colors.$grey7;
+                    color: colors.$grey400;
                     display: inherit;
                     margin-left: 5px;
                     font-size: 13px;
@@ -573,7 +573,7 @@ div#manage-container {
                 }
                 .job-delivery-date {
                   margin-left: 5px;
-                  color: colors.$grey7;
+                  color: colors.$grey400;
                   display: flex;
                   gap: 4px;
                   .job-delivery-email {
@@ -597,7 +597,7 @@ div#manage-container {
                   }
                   .ui.cancel {
                     padding: 4px;
-                    background-color: colors.$grey8;
+                    background-color: colors.$grey200;
                     margin-top: 3px;
                     margin-bottom: 2px;
                     position: relative;
@@ -607,7 +607,7 @@ div#manage-container {
                     color: colors.$white;
                   }
                   &:hover .ui.cancel {
-                    background-color: colors.$grey8 !important;
+                    background-color: colors.$grey200 !important;
                   }
                 }
                 &:hover .item {
@@ -640,10 +640,10 @@ div#manage-container {
                 border-radius: 2px;
                 font-weight: bold;
                 box-shadow: none !important;
-                color: colors.$greenDefaultTransparent !important;
+                color: colors.$green300 !important;
                 &:hover {
                   box-shadow:
-                    0 0 0 colors.$grey8,
+                    0 0 0 colors.$grey200,
                     0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
@@ -690,7 +690,7 @@ div#manage-container {
 
                     span {
                       text-decoration: none;
-                      color: colors.$grey;
+                      color: colors.$grey600;
                     }
                   }
                   span {
@@ -713,7 +713,7 @@ div#manage-container {
                 float: right;
                 &:hover {
                   box-shadow:
-                    0 0 0 colors.$grey8,
+                    0 0 0 colors.$grey200,
                     0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
@@ -726,7 +726,7 @@ div#manage-container {
               }
               .job-menu {
                 &:hover {
-                  background-color: rgba(colors.$grey8, 0.5) !important;
+                  background-color: rgba(colors.$grey200, 0.5) !important;
                 }
               }
 
@@ -752,7 +752,7 @@ div#manage-container {
                 }
               }
               &.updated-job {
-                background-color: colors.$orangeDefaultTransparent2;
+                background-color: colors.$orange50;
               }
             }
           }
@@ -766,14 +766,14 @@ div#manage-container {
     .project-footer {
       padding: 0 30px 5px !important;
       text-align: right;
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
       border-radius: 0 0 8px 8px;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;
         a {
           text-decoration: underline;
-          color: colors.$grey1;
+          color: colors.$grey500;
           font-size: 13px;
           &:hover {
             text-decoration: none;
@@ -783,7 +783,7 @@ div#manage-container {
       .project-due-date {
         margin-top: -10px;
         margin-left: -15px;
-        color: colors.$grey1;
+        color: colors.$grey500;
         font-size: 13px;
       }
     }
@@ -831,7 +831,7 @@ div#manage-container {
         padding: 16px 25px;
         vertical-align: top;
         font-size: 20px;
-        border: 1px solid colors.$grey;
+        border: 1px solid colors.$grey600;
         border-radius: 2px;
         margin: 10px;
       }
@@ -925,10 +925,10 @@ div#manage-container {
   gap: 10px;
   .status-filter {
     display: inline-block;
-    background: colors.$grey8;
+    background: colors.$grey200;
     padding: 4px 5px 4px;
     border-radius: 2px;
-    color: colors.$grey6;
+    color: colors.$grey700;
     font-weight: 100;
     font-size: 12px;
   }
@@ -947,7 +947,7 @@ div#manage-container {
   border-radius: 999px !important;
   line-height: 1;
   box-shadow:
-    0 0 0 colors.$grey8,
+    0 0 0 colors.$grey200,
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
   height: 40px;
@@ -957,10 +957,10 @@ div#manage-container {
   border-radius: 50% !important;
   width: 40px !important;
   height: 40px !important;
-  //background-color: rgba(colors.$grey8, 0.5) !important;
+  //background-color: rgba(colors.$grey200, 0.5) !important;
 
   &:hover {
-    background-color: rgba(colors.$grey8, 1) !important;
+    background-color: rgba(colors.$grey200, 1) !important;
   }
 }
 
@@ -999,7 +999,7 @@ div#manage-container {
     &:active,
     &:focus {
       box-shadow: unset;
-      border: 1px solid colors.$grey1;
+      border: 1px solid colors.$grey500;
     }
   }
 }

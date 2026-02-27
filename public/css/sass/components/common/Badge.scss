@@ -39,144 +39,144 @@
 
 .badge-primary {
   &.badge-default {
-    border: solid 1px colors.$translatedBlueTransparent;
-    background-color: rgba(colors.$translatedBlueTransparent, 0.24);
-    color: colors.$translatedBlue;
+    border: solid 1px colors.$blue200;
+    background-color: rgba(colors.$blue200, 0.24);
+    color: colors.$blue500;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$translatedBlue, 0.72);
+    background-color: rgba(colors.$blue500, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$translatedBlue;
-    color: colors.$translatedBlue;
+    border: solid 1px colors.$blue500;
+    color: colors.$blue500;
   }
 }
 
 .badge-green {
   &.badge-default {
-    border: solid 1px colors.$approvedGreenTransparent;
-    background-color: rgba(colors.$approvedGreenTransparent, 0.24);
-    color: colors.$greenDefaultHover;
+    border: solid 1px colors.$green200;
+    background-color: rgba(colors.$green200, 0.24);
+    color: colors.$green700;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$approvedGreen, 0.72);
+    background-color: rgba(colors.$green400, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$approvedGreen;
-    color: colors.$greenDefaultHover;
+    border: solid 1px colors.$green400;
+    color: colors.$green700;
   }
 }
 
 .badge-yellow {
   &.badge-default {
-    border: solid 1px colors.$orangeDefaultTransparent;
-    background-color: rgba(colors.$orangeDefaultTransparent, 0.15);
-    color: colors.$orangeDefaultHover;
+    border: solid 1px colors.$orange100;
+    background-color: rgba(colors.$orange100, 0.15);
+    color: colors.$orange400;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$orangeDefault, 0.72);
+    background-color: rgba(colors.$orange200, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$orangeDefault;
-    color: colors.$orangeDefaultHover;
+    border: solid 1px colors.$orange200;
+    color: colors.$orange400;
   }
 }
 
 .badge-blue {
   &.badge-default {
-    border: solid 1px colors.$linkBlue;
-    background-color: rgba(colors.$linkBlue, 0.15);
-    color: colors.$linkBlue;
+    border: solid 1px colors.$blue700;
+    background-color: rgba(colors.$blue700, 0.15);
+    color: colors.$blue700;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$linkBlue, 0.72);
+    background-color: rgba(colors.$blue700, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$linkBlue;
-    color: colors.$linkBlue;
+    border: solid 1px colors.$blue700;
+    color: colors.$blue700;
   }
 }
 
 .badge-red {
   &.badge-default {
-    border: solid 1px colors.$redDefault;
-    background-color: rgba(colors.$redDefault, 0.15);
-    color: colors.$redDefault;
+    border: solid 1px colors.$red500;
+    background-color: rgba(colors.$red500, 0.15);
+    color: colors.$red500;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$redDefault, 0.72);
+    background-color: rgba(colors.$red500, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$redDefault;
-    color: colors.$redDefault;
+    border: solid 1px colors.$red500;
+    color: colors.$red500;
   }
 }
 
 .badge-purple {
   &.badge-default {
-    border: solid 1px colors.$approved2Green;
-    background-color: rgba(colors.$approved2Green, 0.15);
-    color: colors.$approved2Green;
+    border: solid 1px colors.$purple500;
+    background-color: rgba(colors.$purple500, 0.15);
+    color: colors.$purple500;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$approved2Green, 0.72);
+    background-color: rgba(colors.$purple500, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$approved2Green;
-    color: colors.$approved2Green;
+    border: solid 1px colors.$purple500;
+    color: colors.$purple500;
   }
 }
 
 .badge-orange {
   &.badge-default {
-    border: solid 1px colors.$rebuttedRed;
-    background-color: rgba(colors.$rebuttedRed, 0.15);
-    color: colors.$rebuttedRed;
+    border: solid 1px colors.$orange600;
+    background-color: rgba(colors.$orange600, 0.15);
+    color: colors.$orange600;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$rebuttedRed, 0.72);
+    background-color: rgba(colors.$orange600, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$rebuttedRed;
-    color: colors.$rebuttedRed;
+    border: solid 1px colors.$orange600;
+    color: colors.$orange600;
   }
 }
 
 .badge-grey {
   &.badge-default {
-    border: solid 1px colors.$grey1;
-    background-color: rgba(colors.$grey1, 0.15);
-    color: colors.$grey1;
+    border: solid 1px colors.$grey500;
+    background-color: rgba(colors.$grey500, 0.15);
+    color: colors.$grey500;
   }
 
   &.badge-full {
-    background-color: rgba(colors.$grey1, 0.72);
+    background-color: rgba(colors.$grey500, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$grey1;
-    color: colors.$grey1;
+    border: solid 1px colors.$grey500;
+    color: colors.$grey500;
   }
 }

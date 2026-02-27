@@ -10,10 +10,10 @@
 .qa-container {
   background-color: colors.$white;
   height: 50px;
-  box-shadow: 0 1px 3px colors.$grey6;
+  box-shadow: 0 1px 3px colors.$grey700;
   border-radius: 0 0 2px 2px;
   display: block;
-  color: colors.$grey6;
+  color: colors.$grey700;
 }
 
 .qa-container {
@@ -55,10 +55,10 @@
         gap: 8px;
       }
       .icon-cancel-circle {
-        color: colors.$red800;
+        color: colors.$red400;
       }
       .icon-warning2 {
-        color: colors.$rebuttedRed;
+        color: colors.$orange600;
       }
       .ui.basic.buttons {
         button {
@@ -69,16 +69,16 @@
           display: flex;
           gap: 4px;
           &.error svg {
-            color: colors.$red800;
+            color: colors.$red400;
           }
           &.warning svg {
-            color: colors.$orangeDefault;
+            color: colors.$orange200;
           }
           &:hover {
-            background: colors.$grey5 !important;
+            background: colors.$grey50 !important;
           }
           &.mc-bg-gray {
-            background: colors.$grey5 !important;
+            background: colors.$grey50 !important;
           }
 
         }

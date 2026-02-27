@@ -27,7 +27,7 @@
       }
 
       p {
-        color: colors.$grey7;
+        color: colors.$grey400;
       }
 
 
@@ -54,14 +54,14 @@
       height: 20px;
       line-height: 20px;
       border-radius: 50%;
-      background-color: colors.$grey7;
+      background-color: colors.$grey400;
       color: colors.$white;
     }
   }
 }
 .form-errorMessage {
   font-size: 14px;
-  color: colors.$redDefault;
+  color: colors.$red500;
   text-align: center;
   padding-left: 2px;
 }

@@ -34,15 +34,15 @@
     .title {
       display: flex;
       align-items: center;
-      color: colors.$grey6;
+      color: colors.$grey700;
       &:hover {
         color: colors.$black;
       }
       &.current {
         //color: #fff;
-        background: colors.$grey3;
+        background: colors.$grey150;
         &:hover {
-          background: colors.$grey3;
+          background: colors.$grey150;
           //color: #fff;
         }
         .current-icon {
@@ -74,7 +74,7 @@
       word-break: break-all;
     }
     blockquote {
-      border-left: 5px solid colors.$grey8;
+      border-left: 5px solid colors.$grey200;
       margin: 1.5em 10px;
       padding: 0.5em 10px;
     }
@@ -92,7 +92,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px colors.$grey2;
+      border-top: solid 1px colors.$grey300;
     }
 
     &:has(.accordion-expanded) {
@@ -134,7 +134,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px colors.$grey2;
+      border-top: solid 1px colors.$grey300;
     }
 
     &:has(.accordion-expanded) {
@@ -176,7 +176,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px colors.$grey2;
+      border-top: solid 1px colors.$grey300;
     }
 
     &:has(.accordion-expanded) {

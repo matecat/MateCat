@@ -37,16 +37,16 @@
         padding: 10px;
 
         &:hover {
-          background-color: colors.$grey9;
+          background-color: colors.$grey75;
 
           .container-icon-settings {
             visibility: visible;
-            color: colors.$translatedBlue;
+            color: colors.$blue500;
           }
         }
 
         &.active {
-          background-color: colors.$darkBlueHover;
+          background-color: colors.$blue950;
           color: colors.$white;
 
           .container-icon-settings {
@@ -79,14 +79,14 @@
   }
 
   .create-new-team {
-    border-bottom: 1px solid colors.$grey8;
+    border-bottom: 1px solid colors.$grey200;
     margin-bottom: 10px;
     text-transform: uppercase;
-    color: colors.$translatedBlue;
+    color: colors.$blue500;
     font-weight: bold;
 
     > svg {
-      border: 1px solid colors.$translatedBlue;
+      border: 1px solid colors.$blue500;
       border-radius: 50%;
     }
   }

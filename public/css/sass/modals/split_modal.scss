@@ -11,7 +11,7 @@
     top: 0;
     border-radius: 0 0 4px 4px;
     text-align: left;
-    border: 1px solid colors.$grey6;
+    border: 1px solid colors.$grey700;
     min-width: 670px;
   }
   .splitbtn-cont {
@@ -21,7 +21,7 @@
     .popup-split-job-id {
       font-weight: 100;
       font-size: 16px;
-      color: colors.$grey1;
+      color: colors.$grey500;
       margin-right: 5px;
     }
   }
@@ -32,7 +32,7 @@
     margin-right: 15px !important;
     font-size: 18px;
     text-align: right;
-    color: colors.$red800 !important;
+    color: colors.$red400 !important;
     display: block;
     line-height: 13px !important;
   }
@@ -45,7 +45,7 @@
   .splitbtn-cont {
     overflow: hidden;
     font-size: 18px;
-    color: colors.$grey1;
+    color: colors.$grey500;
     font-weight: bold;
     display: flex;
     flex-direction: column;
@@ -71,7 +71,7 @@
   .nosplit {
     float: right;
     font-size: 20px;
-    color: colors.$grey1;
+    color: colors.$grey500;
     display: none;
     margin: 45px 140px 0 0;
   }
@@ -83,7 +83,7 @@
   }
 
   input[type='text'][disabled] {
-    background: colors.$grey9;
+    background: colors.$grey75;
   }
 
   h2 {
@@ -114,9 +114,9 @@
       width: auto;
       height: 37px;
       padding: 4px;
-      color: colors.$grey1;
+      color: colors.$grey500;
       font-size: 18px;
-      border: 1px solid colors.$grey1;
+      border: 1px solid colors.$grey500;
       box-sizing: border-box;
       display: inline-block;
       background: white;
@@ -153,8 +153,8 @@
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    border: 1px solid colors.$grey1;
-    background: colors.$grey8;
+    border: 1px solid colors.$grey500;
+    background: colors.$grey200;
   }
 
   .split-box2 {
@@ -172,7 +172,7 @@
     border-radius: 2px;
     text-align: left;
     font-size: 18px;
-    border: 1px solid colors.$grey1;
+    border: 1px solid colors.$grey500;
   }
   .split-box3 .input,
   .split-box2 .input {
@@ -204,9 +204,9 @@
     background: colors.$white;
     background-size: 13px 11px;
     box-sizing: content-box;
-    border: 1px solid colors.$grey8;
+    border: 1px solid colors.$grey200;
     border-radius: 6px;
-    box-shadow: inset 0 1px 3px colors.$grey8;
+    box-shadow: inset 0 1px 3px colors.$grey200;
   }
 
   .btn-cancel {
@@ -231,12 +231,12 @@
     width: 82%;
     margin: 25px 0 -20px 20px;
     text-align: right;
-    color: colors.$redDefault;
+    color: colors.$red500;
     font-size: 12px;
   }
 
   .error-message {
-    background: colors.$red800;
+    background: colors.$red400;
     color: colors.$white;
     margin: 0 0 10px 0;
     float: left;
@@ -244,18 +244,18 @@
     width: 100%;
     -moz-border-radius: 2px;
     border-radius: 2px;
-    border: 1px solid colors.$rebuttedRedTransparent;
+    border: 1px solid colors.$orange500;
     margin-top: 10px;
   }
 
   .error {
     margin-right: auto;
-    color: colors.$redDefault;;
+    color: colors.$red500;;
   }
 
   .jobcontainer {
     padding-bottom: 50px;
-    border-bottom: 1px dashed colors.$grey8;
+    border-bottom: 1px dashed colors.$grey200;
   }
 
   div.wrapper div:last-child {
@@ -289,7 +289,7 @@
     float: right;
   }
   .job-perc {
-    color: colors.$grey7;
+    color: colors.$grey400;
     margin: 0;
     float: left;
     padding: 10px;
@@ -307,7 +307,7 @@
 
   .total .wordsum {
     font-size: 20px;
-    color: colors.$grey1;
+    color: colors.$grey500;
     text-align: right;
     margin-right: 15px;
     margin-top: 10px;
@@ -326,7 +326,7 @@
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    background: colors.$grey8 !important;
+    background: colors.$grey200 !important;
   }
 
   .btn-cancel {
@@ -345,7 +345,7 @@
 
   .empty {
     border: 0 !important;
-    background: colors.$grey9 !important;
+    background: colors.$grey75 !important;
     width: 120px;
   }
 
@@ -356,7 +356,7 @@
       box-shadow: none;
     }
     &:focus {
-      border-color: colors.$grey2;
+      border-color: colors.$grey300;
       box-shadow: none;
     }
   }

@@ -37,11 +37,11 @@
         padding: 10px;
 
         &:hover {
-          background-color: colors.$grey9;
+          background-color: colors.$grey75;
         }
 
         &.active {
-          background-color: colors.$darkBlueHover;
+          background-color: colors.$blue950;
           color: colors.$white;
         }
       }
@@ -56,11 +56,11 @@
     &.not-assignee {
       box-shadow: unset !important;
       background-color: transparent !important;
-      border: 1px solid colors.$grey7;
+      border: 1px solid colors.$grey400;
 
       &:hover {
-        border-color: colors.$translatedBlue;
-        color: colors.$translatedBlue !important;
+        border-color: colors.$blue500;
+        color: colors.$blue500 !important;
       }
 
       > span {
@@ -73,8 +73,8 @@
 
     &:disabled {
       box-shadow: unset !important;
-      border: 1px solid colors.$grey8;
-      //color: $grey6 !important;
+      border: 1px solid colors.$grey200;
+      //color: $grey700 !important;
     }
 
     &:hover:not(:disabled):not(.not-assignee) {
@@ -87,15 +87,15 @@
   }
 
   .add-new-member {
-    border-bottom: 1px solid colors.$grey8;
+    border-bottom: 1px solid colors.$grey200;
     margin-bottom: 10px;
     text-transform: uppercase;
-    color: colors.$translatedBlue;
+    color: colors.$blue500;
     font-weight: bold;
     justify-content: space-between;
 
     > svg {
-      border: 1px solid colors.$translatedBlue;
+      border: 1px solid colors.$blue500;
       border-radius: 50%;
     }
   }
@@ -119,7 +119,7 @@
 
   .no-results {
     text-align: center;
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
 
   .button-remove-assignee {
@@ -131,12 +131,12 @@
     height: 24px;
     justify-content: center;
     align-items: center;
-    background-color: rgba(colors.$grey7, 0.5);
+    background-color: rgba(colors.$grey400, 0.5);
     border-radius: 50%;
     color: colors.$white;
 
     &:hover {
-      background-color: rgba(colors.$grey7, 0.7);
+      background-color: rgba(colors.$grey400, 0.7);
     }
   }
 }

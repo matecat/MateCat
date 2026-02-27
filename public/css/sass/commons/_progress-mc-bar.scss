@@ -27,7 +27,7 @@
       width: 100%;
       float: left;
       margin: 0px 15px 0px 0 !important;
-      background-color: colors.$grey8;
+      background-color: colors.$grey200;
       overflow: hidden;
       border-radius: 10px;
       > div {
@@ -52,19 +52,19 @@
     }
 
     .translated-bar {
-      background-color: colors.$translatedBlue;
+      background-color: colors.$blue500;
     }
     .approved-bar {
-      background-color: colors.$approvedGreen;
+      background-color: colors.$green400;
     }
     .approved-bar-2nd-pass {
-      background-color: colors.$approved2Green;
+      background-color: colors.$purple500;
     }
     .warning-bar {
-      background-color: colors.$rebuttedRed;
+      background-color: colors.$orange600;
     }
     .draft-bar {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
     }
   }
 }

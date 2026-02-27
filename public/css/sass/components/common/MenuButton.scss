@@ -18,15 +18,15 @@
 
   > button {
     color: colors.$black;
-    background: colors.$grey4;
+    background: colors.$grey100;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid colors.$grey7;
+    border: 1px solid colors.$grey400;
   }
 
   .label {
     &:hover {
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
     }
   }
 
@@ -36,7 +36,7 @@
     padding: 0 2px;
 
     &:hover {
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
   }
 }
@@ -47,7 +47,7 @@
   display: flex;
   flex-direction: column;
   box-shadow:
-    0 0 0 colors.$grey8,
+    0 0 0 colors.$grey200,
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24);
   padding: 8px;
@@ -55,7 +55,7 @@
   margin-top: 10px;
 
   > :not(:last-child) {
-    border-bottom: solid 1px colors.$grey4;
+    border-bottom: solid 1px colors.$grey100;
   }
 }
 
@@ -102,7 +102,7 @@
   cursor: pointer;
 
   &:not(:disabled):hover {
-    background-color: colors.$grey9;
-    color: colors.$translatedBlue;
+    background-color: colors.$grey75;
+    color: colors.$blue500;
   }
 }

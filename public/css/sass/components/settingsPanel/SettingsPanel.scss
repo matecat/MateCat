@@ -57,7 +57,7 @@
   align-items: center;
   height: 55px;
   padding: 0 10px;
-  background-color: colors.$darkBlue;
+  background-color: colors.$blue900;
   color: white;
 
   > span {
@@ -93,12 +93,12 @@
 }
 
 .settings-panel-tab-active {
-  background-color: rgba(colors.$grey3, 0.24);
+  background-color: rgba(colors.$grey150, 0.24);
   opacity: 1;
 }
 
 .settings-panel-tab-modifyng-icon {
-  color: colors.$translatedBlue;
+  color: colors.$blue500;
   margin-right: 5px;
 }
 
@@ -106,7 +106,7 @@
   > ul {
     display: flex;
     gap: 1px;
-    background-color: colors.$darkBlue;
+    background-color: colors.$blue900;
   }
 }
 
@@ -150,7 +150,7 @@
 
   span {
     font-size: 16px;
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 }
 
@@ -163,7 +163,7 @@
   align-items: end;
 
   padding: 16px 24px;
-  background-color: colors.$darkBlue;
+  background-color: colors.$blue900;
 
   .select-with-label__wrapper {
     width: 240px;
@@ -189,13 +189,13 @@
 
     .dropdown__option--is-active-option {
       color: colors.$white;
-      background-color: colors.$darkBlue;
+      background-color: colors.$blue900;
     }
   }
 
   .select {
     color: colors.$black;
-    border-color: colors.$grey8;
+    border-color: colors.$grey200;
   }
 }
 
@@ -236,7 +236,7 @@
     border-radius: unset;
     font-weight: normal;
     color: black !important;
-    box-shadow: inset 0 0 0 1px colors.$grey8;
+    box-shadow: inset 0 0 0 1px colors.$grey200;
   }
 
   button.template-button-white {
@@ -265,7 +265,7 @@
     border-radius: 8px;
     font-weight: normal;
     color: black;
-    box-shadow: inset 0 0 0 1px colors.$grey8;
+    box-shadow: inset 0 0 0 1px colors.$grey200;
     padding: 0;
 
     &:hover {
@@ -307,18 +307,18 @@
   }
 
   button.button-save-changes {
-    background-color: colors.$grey4;
+    background-color: colors.$grey100;
     color: black !important;
 
     &:hover {
-      background-color: colors.$grey4 !important;
+      background-color: colors.$grey100 !important;
       opacity: 0.8;
     }
   }
 }
 
 .settings-panel-contentwrapper-tab-background {
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   padding: 20px;
   border-radius: 16px;
 }
@@ -329,7 +329,7 @@
       display: inline-block;
       width: 100%;
       content: '';
-      border-top: solid 2px rgba(colors.$darkBlueTransparent, 0.5);
+      border-top: solid 2px rgba(colors.$blue50, 0.5);
     }
 
     > h2 {
@@ -365,7 +365,7 @@
     font-weight: bold;
 
     div {
-      color: colors.$linkBlue;
+      color: colors.$blue700;
     }
   }
 
@@ -427,7 +427,7 @@
 
 .settings-panel-subtemplates-select-unsaved {
   .select {
-    color: colors.$translatedBlue !important;
+    color: colors.$blue500 !important;
   }
 }
 
@@ -451,7 +451,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   border-radius: 16px;
 }
 
@@ -495,7 +495,7 @@
     }
 
     .dropdown__option--is-no-results-found {
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
 
     .dropdown__option--is-no-results-found {
@@ -505,12 +505,12 @@
     .dropdown__option--is-active-option {
       background-color: unset;
       font-weight: bold;
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
     }
 
     .dropdown__option--is-highlighted-option,
     .dropdown__option:hover {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
     }
   }
 
@@ -520,7 +520,7 @@
 
     input:not([type='radio']),
     textarea {
-      border: 1px solid colors.$grey2;
+      border: 1px solid colors.$grey300;
       border-radius: 4px;
       padding: 4px 8px;
       outline: none;
@@ -528,7 +528,7 @@
       line-height: 16px;
       &:focus,
       &:focus-visible {
-        border-color: colors.$linkBlueTransparent;
+        border-color: colors.$blue300;
       }
     }
     .dropdown__search-bar {
@@ -550,13 +550,13 @@
 
 .settings-panel-grey-button {
   color: #000 !important;
-  background: colors.$grey4 !important;
+  background: colors.$grey100 !important;
   padding: 4px 8px;
   text-align: center;
-  border: 1px solid colors.$grey2 !important;
+  border: 1px solid colors.$grey300 !important;
   font-size: 14px !important;
 
   &:hover {
-    background-color: colors.$grey5 !important;
+    background-color: colors.$grey50 !important;
   }
 }

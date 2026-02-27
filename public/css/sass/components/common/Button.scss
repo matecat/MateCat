@@ -128,7 +128,7 @@ a.button-component-container {
     color: var(--btnAltTextColor);
 
     &:not(:disabled):global(.button--active) {
-      color: colors.$grey8;
+      color: colors.$grey200;
     }
 
     &:not(:disabled):hover,
@@ -228,19 +228,19 @@ a.button-component-container {
 
 // Type modifiers
 .default {
-  --btnTextColor: #{colors.$grey6};
-  --btnTextColorDisabled: #{colors.$grey8};
-  --btnAltTextColor: #{colors.$grey6};
-  --btnAltTextColorHover: #{colors.$grey};
-  --btnAltTextColorDisabled: #{rgba(colors.$grey6, 0.12)};
+  --btnTextColor: #{colors.$grey700};
+  --btnTextColorDisabled: #{colors.$grey200};
+  --btnAltTextColor: #{colors.$grey700};
+  --btnAltTextColorHover: #{colors.$grey600};
+  --btnAltTextColorDisabled: #{rgba(colors.$grey700, 0.12)};
 
-  --btnBorderColor: #{colors.$grey8};
-  --btnBorderColorHover: #{colors.$grey6};
-  --btnBorderColorActive: #{colors.$grey6};
-  --btnBorderColorDisabled: #{rgba(colors.$grey6, 0.12)};
+  --btnBorderColor: #{colors.$grey200};
+  --btnBorderColorHover: #{colors.$grey700};
+  --btnBorderColorActive: #{colors.$grey700};
+  --btnBorderColorDisabled: #{rgba(colors.$grey700, 0.12)};
 
   --btnBgColor: #{colors.$white};
-  --btnBgColorAlt: #{colors.$grey9};
+  --btnBgColorAlt: #{colors.$grey75};
   --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
   --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
   --btnBgColorOutline: #{rgba(colors.$white, 0.5)};
@@ -248,122 +248,122 @@ a.button-component-container {
 .primary {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$translatedBlue};
-  --btnAltTextColorHover: #{colors.$translatedBlueHover};
-  --btnAltTextColorDisabled: #{rgba(colors.$translatedBlue, 0.24)};
+  --btnAltTextColor: #{colors.$blue500};
+  --btnAltTextColorHover: #{colors.$blue600};
+  --btnAltTextColorDisabled: #{rgba(colors.$blue500, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$translatedBlue, 0.24)};
-  --btnBorderColorHover: #{colors.$translatedBlueHover};
-  --btnBorderColorActive: #{colors.$translatedBlue};
-  --btnBorderColorDisabled: #{rgba(colors.$translatedBlue, 0.24)};
+  --btnBorderColor: #{rgba(colors.$blue500, 0.24)};
+  --btnBorderColorHover: #{colors.$blue600};
+  --btnBorderColorActive: #{colors.$blue500};
+  --btnBorderColorDisabled: #{rgba(colors.$blue500, 0.24)};
 
-  --btnBgColor: #{colors.$translatedBlue};
-  --btnBgColorAlt: #{colors.$translatedBlueHover};
-  --btnBgColorSemitrans: #{rgba(colors.$translatedBlue, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$translatedBlue, 0.24)};
-  --btnBgColorOutline: #{rgba(colors.$translatedBlue, 0.5)};
+  --btnBgColor: #{colors.$blue500};
+  --btnBgColorAlt: #{colors.$blue600};
+  --btnBgColorSemitrans: #{rgba(colors.$blue500, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$blue500, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$blue500, 0.5)};
 }
 .info {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$linkBlue};
-  --btnAltTextColorHover: #{colors.$linkBlueHover};
-  --btnAltTextColorDisabled: #{rgba(colors.$linkBlue, 0.24)};
+  --btnAltTextColor: #{colors.$blue700};
+  --btnAltTextColorHover: #{colors.$blue400};
+  --btnAltTextColorDisabled: #{rgba(colors.$blue700, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$linkBlue, 0.24)};
-  --btnBorderColorHover: #{colors.$linkBlue};
-  --btnBorderColorActive: #{colors.$linkBlue};
-  --btnBorderColorDisabled: #{rgba(colors.$linkBlue, 0.24)};
+  --btnBorderColor: #{rgba(colors.$blue700, 0.24)};
+  --btnBorderColorHover: #{colors.$blue700};
+  --btnBorderColorActive: #{colors.$blue700};
+  --btnBorderColorDisabled: #{rgba(colors.$blue700, 0.24)};
 
-  --btnBgColor: #{colors.$linkBlue};
-  --btnBgColorAlt: #{colors.$linkBlueHover};
-  --btnBgColorSemitrans: #{rgba(colors.$linkBlue, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$linkBlue, 0.24)};
-  --btnBgColorOutline: #{rgba(colors.$linkBlue, 0.5)};
+  --btnBgColor: #{colors.$blue700};
+  --btnBgColorAlt: #{colors.$blue400};
+  --btnBgColorSemitrans: #{rgba(colors.$blue700, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$blue700, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$blue700, 0.5)};
 }
 .success {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$approvedGreen};
-  --btnAltTextColorHover: #{colors.$approvedGreenHover};
-  --btnAltTextColorDisabled: #{rgba(colors.$approvedGreenTransparent, 0.24)};
+  --btnAltTextColor: #{colors.$green400};
+  --btnAltTextColorHover: #{colors.$green600};
+  --btnAltTextColorDisabled: #{rgba(colors.$green200, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$approvedGreen, 0.24)};
-  --btnBorderColorHover: #{colors.$approvedGreen};
-  --btnBorderColorActive: #{colors.$approvedGreen};
-  --btnBorderColorDisabled: #{rgba(colors.$approvedGreen, 0.24)};
+  --btnBorderColor: #{rgba(colors.$green400, 0.24)};
+  --btnBorderColorHover: #{colors.$green400};
+  --btnBorderColorActive: #{colors.$green400};
+  --btnBorderColorDisabled: #{rgba(colors.$green400, 0.24)};
 
-  --btnBgColor: #{colors.$approvedGreen};
-  --btnBgColorAlt: #{colors.$approvedGreenHover};
-  --btnBgColorSemitrans: #{rgba(colors.$approvedGreen, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$approvedGreen, 0.24)};
-  --btnBgColorOutline: #{rgba(colors.$approvedGreen, 0.5)};
+  --btnBgColor: #{colors.$green400};
+  --btnBgColorAlt: #{colors.$green600};
+  --btnBgColorSemitrans: #{rgba(colors.$green400, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$green400, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$green400, 0.5)};
 }
 .warning {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$warning};
-  --btnAltTextColorHover: #{colors.$warningHover};
-  --btnAltTextColorDisabled: #{rgba(colors.$warning, 0.24)};
+  --btnAltTextColor: #{colors.$orange700};
+  --btnAltTextColorHover: #{colors.$orange800};
+  --btnAltTextColorDisabled: #{rgba(colors.$orange700, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$warning, 0.24)};
-  --btnBorderColorHover: #{colors.$warning};
-  --btnBorderColorActive: #{colors.$warning};
-  --btnBorderColorDisabled: #{rgba(colors.$warning, 0.24)};
+  --btnBorderColor: #{rgba(colors.$orange700, 0.24)};
+  --btnBorderColorHover: #{colors.$orange700};
+  --btnBorderColorActive: #{colors.$orange700};
+  --btnBorderColorDisabled: #{rgba(colors.$orange700, 0.24)};
 
-  --btnBgColor: #{colors.$warning};
-  --btnBgColorAlt: #{colors.$warningHover};
-  --btnBgColorSemitrans: #{rgba(colors.$warning, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$warning, 0.24)};
-  --btnBgColorOutline: #{rgba(colors.$warning, 0.5)};
+  --btnBgColor: #{colors.$orange700};
+  --btnBgColorAlt: #{colors.$orange800};
+  --btnBgColorSemitrans: #{rgba(colors.$orange700, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$orange700, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$orange700, 0.5)};
 }
 .critical {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$redDefault};
-  --btnAltTextColorHover: #{colors.$redDefaultHover};
-  --btnAltTextColorDisabled: #{rgba(colors.$redDefault, 0.24)};
+  --btnAltTextColor: #{colors.$red500};
+  --btnAltTextColorHover: #{colors.$red600};
+  --btnAltTextColorDisabled: #{rgba(colors.$red500, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$redDefault, 0.24)};
-  --btnBorderColorHover: #{colors.$redDefault};
-  --btnBorderColorActive: #{colors.$redDefault};
-  --btnBorderColorDisabled: #{rgba(colors.$redDefault, 0.24)};
+  --btnBorderColor: #{rgba(colors.$red500, 0.24)};
+  --btnBorderColorHover: #{colors.$red500};
+  --btnBorderColorActive: #{colors.$red500};
+  --btnBorderColorDisabled: #{rgba(colors.$red500, 0.24)};
 
-  --btnBgColor: #{colors.$redDefault};
-  --btnBgColorAlt: #{colors.$redDefaultHover};
-  --btnBgColorSemitrans: #{rgba(colors.$redDefault, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$redDefault, 0.24)};
-  --btnBgColorOutline: #{rgba(colors.$redDefault, 0.5)};
+  --btnBgColor: #{colors.$red500};
+  --btnBgColorAlt: #{colors.$red600};
+  --btnBgColorSemitrans: #{rgba(colors.$red500, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$red500, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$red500, 0.5)};
 }
 .purple {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$approved2Green};
-  --btnAltTextColorHover: #{colors.$approved2GreenHover};
-  --btnAltTextColorDisabled: #{rgba(colors.$approved2Green, 0.24)};
+  --btnAltTextColor: #{colors.$purple500};
+  --btnAltTextColorHover: #{colors.$purple600};
+  --btnAltTextColorDisabled: #{rgba(colors.$purple500, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$approved2Green, 0.24)};
-  --btnBorderColorHover: #{colors.$approved2Green};
-  --btnBorderColorActive: #{colors.$approved2Green};
-  --btnBorderColorDisabled: #{rgba(colors.$approved2Green, 0.24)};
+  --btnBorderColor: #{rgba(colors.$purple500, 0.24)};
+  --btnBorderColorHover: #{colors.$purple500};
+  --btnBorderColorActive: #{colors.$purple500};
+  --btnBorderColorDisabled: #{rgba(colors.$purple500, 0.24)};
 
-  --btnBgColor: #{colors.$approved2Green};
-  --btnBgColorAlt: #{colors.$approved2GreenHover};
-  --btnBgColorSemitrans: #{rgba(colors.$approved2Green, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$approved2Green, 0.24)};
-  --btnBgColorOutline: #{rgba(colors.$approved2Green, 0.5)};
+  --btnBgColor: #{colors.$purple500};
+  --btnBgColorAlt: #{colors.$purple600};
+  --btnBgColorSemitrans: #{rgba(colors.$purple500, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$purple500, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$purple500, 0.5)};
 }
 
 .icon {
   --btnAltTextColorDisabled: #{rgba(colors.$white, 0.12)};
 
-  --btnBorderColor: #{colors.$grey8};
-  --btnBorderColorHover: #{colors.$grey6};
-  --btnBorderColorActive: #{colors.$grey6};
+  --btnBorderColor: #{colors.$grey200};
+  --btnBorderColorHover: #{colors.$grey700};
+  --btnBorderColorActive: #{colors.$grey700};
   --btnBorderColorDisabled: #{rgba(colors.$white, 0.12)};
 
   --btnBgColor: #{colors.$white};
-  --btnBgColorAlt: #{colors.$grey9};
+  --btnBgColorAlt: #{colors.$grey75};
   --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
   --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
   --btnBgColorOutline: #{rgba(colors.$white, 0.5)};

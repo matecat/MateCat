@@ -36,7 +36,7 @@
  */
 .mbc-thread-wrap {
   padding: 10px;
-  border-top: 1px solid colors.$grey5;
+  border-top: 1px solid colors.$grey50;
 }
 
 /*
@@ -49,7 +49,7 @@
 }
 
 .mbc-comments-wrap .mbc-show-comment:not(:last-of-type) {
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   border-radius: 4px;
   padding: 8px;
   > .bc-show-comment-top {
@@ -61,7 +61,7 @@
 .mbc-comments-wrap
   .mbc-thread-wrap-resolved
   .mbc-show-comment:not(:last-of-type) {
-  background-color: rgba(colors.$greenDefaultTransparent, 0.2);
+  background-color: rgba(colors.$green300, 0.2);
   border-radius: 4px;
 }
 
@@ -76,7 +76,7 @@
 }
 
 .mbc-comment-info {
-  color: colors.$grey;
+  color: colors.$grey600;
   display: inline-block;
   font-size: 11px;
   font-weight: lighter;
@@ -112,9 +112,9 @@
   word-break: normal;
   outline: none;
   color: colors.$black;
-  border: 1px solid colors.$grey8;
-  box-shadow: inset 0 1px 2px colors.$grey8;
-  -webkit-box-shadow: inset 0 1px 2px colors.$grey8;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 2px colors.$grey200;
+  -webkit-box-shadow: inset 0 1px 2px colors.$grey200;
   min-height: 40px;
   overflow-y: auto !important;
   max-height: 160px;
@@ -134,15 +134,15 @@
   box-shadow: none;
 }
 .mbc-comment-textarea:focus {
-  border: 1px solid colors.$grey2;
-  box-shadow: inset 0px 0px 2px 2px colors.$grey2;
+  border: 1px solid colors.$grey300;
+  box-shadow: inset 0px 0px 2px 2px colors.$grey300;
   padding-top: 10px;
   padding-bottom: 10px;
 }
 
 .mbc-comment-textarea:empty:not(:focus):before {
   content: attr(data-placeholder);
-  color: colors.$grey7;
+  color: colors.$grey400;
   position: absolute;
   top: 10px;
   pointer-events: none;
@@ -154,25 +154,25 @@
 
 .mbc-comment-input__suggestions__list {
   background-color: colors.$white;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
 }
 
 .mbc-comment-input__suggestions__item {
   padding: 5px 15px;
-  border-bottom: 1px solid colors.$grey9;
+  border-bottom: 1px solid colors.$grey75;
 }
 
 .mbc-comment-input__suggestions__item--focused {
-  background-color: rgba(colors.$grey9, 0.6);
-  color: colors.$translatedBlue;
+  background-color: rgba(colors.$grey75, 0.6);
+  color: colors.$blue500;
 }
 
 .tagging-item {
-  color: colors.$translatedBlue;
+  color: colors.$blue500;
 }
 
 .tagging-item-textarea {
-  background-color: rgba(colors.$translatedBlue, 0.3);
+  background-color: rgba(colors.$blue500, 0.3);
   border-radius: 10px;
   padding: 2px 0;
 }
@@ -204,7 +204,7 @@
   margin-bottom: 4px;
   padding: 5px 5px 2px 0;
   span {
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
 }
 /*
@@ -229,7 +229,7 @@
 }
 
 .mbc-comment-resolved-label {
-  color: colors.$approvedGreen; /* per-green line 2350 style.css */
+  color: colors.$green400; /* per-green line 2350 style.css */
   font-size: 12px;
   font-weight: bold;
 }
@@ -247,7 +247,7 @@ a.ui.button.mbc-comment-delete-btn {
  */
 a.mbc-comment-link-btn,
 a.mbc-comment-link-btn:visited {
-  color: colors.$grey;
+  color: colors.$grey600;
   display: inline-block;
   font-size: 14px;
   text-decoration: underline;
@@ -265,7 +265,7 @@ a.mbc-comment-link-btn:active {
  */
 a.mbc-view-link:link,
 a.mbc-view-link:visited {
-  color: colors.$translatedBlueHover;
+  color: colors.$blue600;
   padding: 0 4px 6px 0;
 }
 
@@ -276,9 +276,9 @@ a.mbc-view-link:visited {
  */
 .mbc-nth-comment-label {
   display: block;
-  border-bottom: 1px solid colors.$grey8;
+  border-bottom: 1px solid colors.$grey200;
   font-size: 16px;
-  color: colors.$grey7;
+  color: colors.$grey400;
   line-height: 1.8;
   margin-bottom: 6px;
 }
@@ -337,15 +337,15 @@ a.mbc-view-link:visited {
  Highlight element unique properties
  */
 .mbc-comment-highlight {
-  background: colors.$orangeDefault;
+  background: colors.$orange200;
 }
 
 /*
  Invitation element unique properties
  */
 .mbc-comment-highlight-invite {
-  background: colors.$darkBlue;
-  color: colors.$grey3;
+  background: colors.$blue900;
+  color: colors.$grey150;
   position: absolute;
 }
 
@@ -377,7 +377,7 @@ article .mbc-comment-balloon-outer {
 }
 /* Warnings style.css line 136 */
 .mbc-warnings {
-  color: colors.$red800;
+  color: colors.$red400;
   font-size: 14px;
 }
 
@@ -421,7 +421,7 @@ article .mbc-comment-balloon-outer {
  Triangle top top in history balloon
  */
 .mbc-triangle-top {
-  border-right: 14px solid colors.$grey5; /* #f7f77f */
+  border-right: 14px solid colors.$grey50; /* #f7f77f */
   border-top: 14px solid transparent;
   -webkit-filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
   filter: drop-shadow(-3px -1px 2px rgba(0, 0, 0, 0.1));
@@ -480,7 +480,7 @@ Close icon ballon - Right panel
   right: 0px;
   top: -14px;
   border-radius: 50%;
-  color: colors.$grey;
+  color: colors.$grey600;
   cursor: pointer;
 }
 
@@ -550,7 +550,7 @@ section:hover .mbc-comment-icon-button,
   align-items: center;
   padding: 8px 4px;
   .input-checkbox > span {
-    color: colors.$grey7;
+    color: colors.$grey400;
     font-size: 14px;
   }
 }

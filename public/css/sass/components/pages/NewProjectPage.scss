@@ -46,12 +46,12 @@
       opacity: 0.4;
       h2,
       label {
-        color: colors.$grey1;
+        color: colors.$grey500;
       }
       input,
       .select-with-icon__wrapper .select {
         cursor: not-allowed;
-        background-color: colors.$grey9;
+        background-color: colors.$grey75;
       }
     }
   }
@@ -64,7 +64,7 @@
   }
 
   .label-tmx-select > span:last-of-type {
-    color: colors.$linkBlue;
+    color: colors.$blue700;
     &[aria-label]::after {
       min-width: 260px;
       white-space: normal;
@@ -106,7 +106,7 @@
     }
   }
   span {
-    color: colors.$grey6;
+    color: colors.$grey700;
     font-size: 24px;
     line-height: 20px;
   }
@@ -147,7 +147,7 @@
     border-radius: 8px;
     border: 1px solid rgba(34, 36, 38, 0.15);
     height: 40px;
-    box-shadow: inset 0 1px 3px colors.$grey8;
+    box-shadow: inset 0 1px 3px colors.$grey200;
   }
 }
 

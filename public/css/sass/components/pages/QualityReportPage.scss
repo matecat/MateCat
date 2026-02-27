@@ -21,7 +21,7 @@ $color-yellow: #ffe600;
 body {
   font-family: Calibri, Arial, Helvetica, sans-serif;
   text-align: left;
-  background: colors.$grey5;
+  background: colors.$grey50;
   font-size: 16px;
   min-width: 1024px;
   overflow-x: auto;
@@ -32,7 +32,7 @@ header {
   min-width: 1024px;
   .nav-bar {
     width: 100%;
-    background: colors.$darkBlue !important;
+    background: colors.$blue900 !important;
     .logo {
       /*left: 13px;*/
       margin: 0;
@@ -66,10 +66,10 @@ header {
           }
           .header-assignee {
             margin-left: 20px;
-            border: 1px solid colors.$grey6;
+            border: 1px solid colors.$grey700;
             padding: 1px 12px 1px 3px;
             border-radius: 20px;
-            background: colors.$grey6;
+            background: colors.$grey700;
             display: flex;
             align-items: center;
             flex-wrap: nowrap;
@@ -97,7 +97,7 @@ header {
             background: transparent;
             color: white;
             &:hover {
-              background: colors.$grey6;
+              background: colors.$grey700;
             }
             i {
               font-size: 20px;
@@ -128,7 +128,7 @@ header {
         transition: 0.3s ease;
         .qr-bg-head {
           height: 258px;
-          background: colors.$grey5;
+          background: colors.$grey50;
           position: absolute;
           width: 100%;
           z-index: -1;
@@ -136,12 +136,12 @@ header {
         .ui.table thead th {
           background: colors.$white;
           border: none;
-          border-bottom: 1px solid colors.$grey5;
+          border-bottom: 1px solid colors.$grey50;
           border-radius: 0;
         }
         .ui.celled.table tr th,
         .ui.celled.table tr td {
-          border-left: 1px solid colors.$grey5;
+          border-left: 1px solid colors.$grey50;
           border-radius: 0;
         }
         .qr-job-summary {
@@ -164,7 +164,7 @@ header {
             }
             .qr-production {
               display: flex;
-              background: colors.$grey3;
+              background: colors.$grey150;
               padding: 0 24px;
               align-items: center;
               position: relative;
@@ -175,7 +175,7 @@ header {
               .job-id {
                 font-size: 16px;
                 min-width: 90px;
-                color: colors.$grey6;
+                color: colors.$grey700;
                 line-height: 24px;
 
               }
@@ -235,7 +235,7 @@ header {
                 justify-content: space-between;
                 gap: 8px;
                 flex-shrink: 0;
-                background: colors.$grey3;
+                background: colors.$grey150;
                 border-radius: 8px;
                 > div {
                   display: flex;
@@ -274,16 +274,16 @@ header {
                   line-height: 12px;
                 }
                 &.qr-pass {
-                  background: #{rgba(colors.$greenDefault, 0.2)};
+                  background: #{rgba(colors.$green500, 0.2)};
                   .qr-pass-score {
-                    color: colors.$greenDefault;
+                    color: colors.$green500;
                     font-weight: 700;
                   }
                 }
                 &.qr-fail {
-                  background: #{rgba(colors.$redDefault, 0.2)};
+                  background: #{rgba(colors.$red500, 0.2)};
                   .qr-pass-score {
-                    color: colors.$redDefault;
+                    color: colors.$red500;
                     font-weight: 700;
                   }
                 }
@@ -292,7 +292,7 @@ header {
             .qr-quality {
               margin-top: 20px;
               margin-bottom: 20px;
-              border: 1px solid colors.$grey3;
+              border: 1px solid colors.$grey150;
               position: relative;
               z-index: 1;
               border-radius: 8px;
@@ -302,7 +302,7 @@ header {
                 display: flex;
                 align-items: center;
                 font-weight: 700;
-                background: colors.$grey3;
+                background: colors.$grey150;
                 height: 40px  ;
                 .qr-title {
                   padding-left: 24px;
@@ -313,7 +313,7 @@ header {
                 align-items: center;
                 background-color: colors.$white;
                 height: 40px;
-                border-bottom: 1px solid colors.$grey4;
+                border-bottom: 1px solid colors.$grey100;
                 &:last-child {
                   border-bottom: none;
                 }
@@ -323,12 +323,12 @@ header {
 
                 }
                 &.severity_weight-line {
-                  background-color: colors.$grey5;
+                  background-color: colors.$grey50;
                   height: 32px;
                   font-weight: 700;
                   span {
                     font-weight: 400;
-                    color: colors.$grey6;
+                    color: colors.$grey700;
                   }
                   .qr-element {
                     font-size: 14px;
@@ -337,14 +337,14 @@ header {
                   }
                 }
                 &.qr-total-line {
-                    background-color: colors.$grey3;
+                    background-color: colors.$grey150;
                     height: 40px;
                   .qr-issue-name, .total-score {
                     font-weight: 700;
                     line-height: 40px;
                   }
                   .total-score {
-                    background-color: colors.$grey2;
+                    background-color: colors.$grey300;
                     height: 100%;
                   }
                 }
@@ -380,7 +380,7 @@ header {
                 &.kudos-total {
                   display: flex;
                   flex-direction: column;
-                  background: colors.$grey3;
+                  background: colors.$grey150;
                   font-weight: 700;
                   text-transform: capitalize;
                 }
@@ -409,7 +409,7 @@ header {
             align-items: center;
             border-radius: 8px;
             margin-bottom: 20px;
-            border: 1px solid colors.$grey3;
+            border: 1px solid colors.$grey150;
             font-size: 14px;
             .qr-kudos-value {
               padding-right: 140px;
@@ -425,17 +425,17 @@ header {
             .qr-feedback {
               .qr-head {
                 padding: 10px 20px;
-                background: colors.$grey3;
+                background: colors.$grey150;
                 .label.revision-color {
                   float: left;
 
                   margin-right: 10px;
                   margin-top: 5px;
                   &.revision-1 {
-                    background: colors.$approvedGreen;
+                    background: colors.$green400;
                   }
                   &.revision-2 {
-                    background: colors.$approved2Green;
+                    background: colors.$purple500;
                   }
                 }
               }
@@ -453,10 +453,10 @@ header {
             align-items: center;
           }
           .qr-segment-details-container {
-            background: colors.$grey4;
+            background: colors.$grey100;
             padding: 16px;
             border-radius: 8px;
-            border: 1px solid colors.$grey3;
+            border: 1px solid colors.$grey150;
             .qr-segments-summary {
               h3 {
                 margin-bottom: 0;
@@ -471,14 +471,14 @@ header {
                     margin-top: 30px;
                     border-radius: 8px;
                     overflow: hidden;
-                    border: 1px solid colors.$grey3;
+                    border: 1px solid colors.$grey150;
                     &:first-child {
                       margin-top: 15px;
                     }
                     .qr-segment-head {
                       display: flex;
                       position: relative;
-                      background: colors.$grey5;
+                      background: colors.$grey50;
                       align-items: center;
                       height: 48px;
                       padding: 0 24px;
@@ -511,37 +511,37 @@ header {
                       }
                        //.status-new {
                        //  font-size: 20px;
-                       //  color: colors.$grey1;
+                       //  color: colors.$grey500;
                        //}
                        //.status-translated {
                        //  font-size: 20px;
-                       //  color: colors.$translatedBlue;
+                       //  color: colors.$blue500;
                        //}
                        //.status-approved {
                        //  font-size: 20px;
-                       //  color: colors.$approvedGreen;
+                       //  color: colors.$green400;
                        //  &.approved-r2 {
-                       //    color: colors.$approved2Green;
+                       //    color: colors.$purple500;
                        //  }
                        //}
                        //.status-approved2 {
-                       //  color: colors.$approved2Green;
+                       //  color: colors.$purple500;
                        //  font-size: 20px;
                        //}
                        //.status-draft {
                        //  font-size: 20px;
-                       //  color: colors.$grey1;
+                       //  color: colors.$grey500;
                        //}
                        //.status-rejected {
                        //  font-size: 20px;
-                       //  color: colors.$rebuttedRed;
+                       //  color: colors.$orange600;
                        //}
                      }
                     .qr-segment-body {
                       .segment-container {
                         display: flex;
                         background: colors.$white;
-                        border-bottom: 1px solid colors.$grey4;
+                        border-bottom: 1px solid colors.$grey100;
                         height: 40px;
                         font-size: 14px;
                         &.qr-issues {
@@ -566,11 +566,11 @@ header {
                           }
                         }
                         &.qr-issues {
-                          background-color: colors.$grey5 !important;
+                          background-color: colors.$grey50 !important;
                           border-bottom: none !important;
                           height: unset;
                           .segment-content {
-                            background-color: colors.$grey5 !important;
+                            background-color: colors.$grey50 !important;
                           }
                           .qr-text {
                             padding: 4px 0;
@@ -599,7 +599,7 @@ header {
                               margin: 0;
                             }
                             &:hover {
-                              background: colors.$grey4;
+                              background: colors.$grey100;
                               i {
                                 color: colors.$black;
                               }
@@ -607,7 +607,7 @@ header {
                             &.active,
                             &:active,
                             &:hover {
-                              background: colors.$grey4;
+                              background: colors.$grey100;
                               i {
                                 color: colors.$black;
                               }
@@ -625,17 +625,17 @@ header {
                         }
                         &.qr-translated {
                           b {
-                            color: colors.$translatedBlue;
+                            color: colors.$blue500;
                           }
                         }
                         &.qr-revised {
                           b {
-                            color: colors.$approvedGreen;
+                            color: colors.$green400;
                           }
                         }
                         &.qr-revised-2ndpass {
                           b {
-                            color: colors.$approved2Green;
+                            color: colors.$purple500;
                           }
                         }
                         &.rtl-lang {
@@ -669,19 +669,19 @@ header {
                               margin-right: 5px;
                               margin-top: 5px;
                               background: colors.$white;
-                              border: 1px solid colors.$grey4;
+                              border: 1px solid colors.$grey100;
                               border-radius: 8px;
                               gap: 6px;
                               &.automated {
                                 .box-icon {
                                   display: flex;
-                                  background: colors.$grey5;
+                                  background: colors.$grey50;
                                   margin-right: 6px;
                                   &.error {
-                                    color: colors.$red800;
+                                    color: colors.$red400;
                                   }
                                   &.warning {
-                                    color:  colors.$orangeDefault;
+                                    color:  colors.$orange200;
                                   }
                                 }
                               }
@@ -689,9 +689,9 @@ header {
                                 padding: 5px 10px;
                                 font-size: 14px;
                                 background: colors.$white;
-                                color: colors.$grey;
+                                color: colors.$grey600;
                                 box-shadow:
-                                  0 0 0 colors.$grey8,
+                                  0 0 0 colors.$grey200,
                                   0 0 2px rgba(0, 0, 0, 0.12),
                                   0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                 max-height: 300px;
@@ -701,17 +701,17 @@ header {
                                   font-size: 16px;
                                   margin-bottom: 0;
                                   .re-revisor {
-                                    color: colors.$approvedGreen;
+                                    color: colors.$green400;
                                   }
                                   .re-revisor2 {
-                                    color: colors.$approved2Green;
+                                    color: colors.$purple500;
                                   }
                                   .re-translator {
-                                    color: colors.$translatedBlue;
+                                    color: colors.$blue500;
                                   }
                                   .re-comment-date {
                                     font-size: 13px;
-                                    color: colors.$grey1;
+                                    color: colors.$grey500;
                                   }
                                 }
                               }
@@ -750,7 +750,7 @@ header {
                               background: colors.$white;
                             }
                             .qr-segment-title {
-                              background: colors.$grey4;
+                              background: colors.$grey100;
                               flex-shrink: 0;
                             }
                           }
@@ -820,28 +820,28 @@ header {
     }
 
     &.draft-color {
-      background: colors.$grey1;
+      background: colors.$grey500;
     }
 
     &.translated-color {
-      background: colors.$translatedBlue;
+      background: colors.$blue500;
     }
 
     &.approved-color {
-      background: colors.$approvedGreen;
+      background: colors.$green400;
     }
 
     &.rejected-color {
-      background: colors.$rebuttedRed;
+      background: colors.$orange600;
     }
 
     &.revision-color {
-      background: colors.$approvedGreen;
+      background: colors.$green400;
     }
 
     &.second-revision-color,
     &.approved-2ndpass-color {
-      background: colors.$approved2Green;
+      background: colors.$purple500;
     }
   }
 }
@@ -884,21 +884,21 @@ header {
     .ui.cancel.label {
       position: absolute;
       padding: 4px;
-      background-color: colors.$grey8;
+      background-color: colors.$grey200;
       border-radius: 15px;
       top: 8px;
       line-height: 0px;
       right: 0px;
       visibility: hidden;
       &:hover {
-        background-color: colors.$grey8 !important;
+        background-color: colors.$grey200 !important;
       }
     }
     .not-filtered {
       .ui.basic.button {
         &:hover {
-          box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset;
-          color: colors.$translatedBlue !important;
+          box-shadow: 0px 0px 0px 1px colors.$blue500 inset;
+          color: colors.$blue500 !important;
         }
         &.disabled {
           box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
@@ -910,7 +910,7 @@ header {
       .ui.basic.button {
         background-color: colors.$white !important;
         box-shadow:
-          0 0 0 colors.$grey8,
+          0 0 0 colors.$grey200,
           0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
         color: colors.$black !important;
@@ -931,7 +931,7 @@ header {
       .ui.basic.button {
         background: transparent none !important;
         box-shadow:
-          0 0 0 colors.$grey8,
+          0 0 0 colors.$grey200,
           0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
         color: colors.$black !important;
@@ -961,7 +961,7 @@ header {
         float: none;
         label {
           &:before {
-            background: colors.$grey3 !important;
+            background: colors.$grey150 !important;
           }
           &:after {
             box-shadow: inset 0 0 0 1px rgba(34, 36, 38, 0.25);
@@ -1014,7 +1014,7 @@ header {
   }
   .clear-filter-element {
     margin-left: 13px;
-    border-left: 1px solid colors.$grey8;
+    border-left: 1px solid colors.$grey200;
     padding-left: 13px;
     color: black;
     display: flex;
@@ -1042,7 +1042,7 @@ header {
 .no-segments-found {
   text-align: center;
   margin: 15px 0;
-  border: 1px dashed colors.$grey8;
+  border: 1px dashed colors.$grey200;
   padding: 15px;
 }
 
@@ -1050,38 +1050,38 @@ header {
   margin: 30px 15px 15px;
   z-index: 1;
   .ui.active.inverted.dimmer {
-    background: colors.$grey4;
+    background: colors.$grey100;
   }
 }
 
 .per-orange {
-  background: colors.$rebuttedRed !important;
+  background: colors.$orange600 !important;
   color: colors.$white !important;
 }
 
 .per-blue {
-  background: colors.$translatedBlue !important;
+  background: colors.$blue500 !important;
   color: colors.$white !important;
 }
 
 .per-green {
-  background: colors.$approvedGreen !important;
+  background: colors.$green400 !important;
   color: colors.$white !important;
 }
 
 .per-yellow {
-  background: colors.$orangeDefault !important;
+  background: colors.$orange200 !important;
   color: colors.$grey1300 !important;
 }
 
 .per-red {
-  background: colors.$redDefault !important;
+  background: colors.$red500 !important;
   color: colors.$white !important;
 }
 
 .per-gray {
-  background: colors.$grey7 !important;
-  color: colors.$grey1 !important;
+  background: colors.$grey400 !important;
+  color: colors.$grey500 !important;
 }
 
 .ui.popup.bottom.right.qr-score-popup {

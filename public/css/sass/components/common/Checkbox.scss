@@ -30,24 +30,24 @@
     position: relative;
     z-index: 1;
     flex-shrink: 0;
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 
   input[type='checkbox']:not(:disabled):checked,
   input[type='checkbox']:not(:disabled):indeterminate {
     & + svg {
-      color: colors.$translatedBlue;
+      color: colors.$blue500;
     }
   }
 
   input[type='checkbox']:disabled {
     & + svg {
       opacity: 0.4;
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
 
     & ~ span {
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
   }
 
@@ -60,5 +60,5 @@
 .errorMessage {
   margin-top: 8px;
   font-size: 12px;
-  color: colors.$redDefault;
+  color: colors.$red500;
 }

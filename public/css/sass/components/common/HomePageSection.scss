@@ -5,7 +5,7 @@
     padding: 48px 0;
     display: flex;
     flex-direction: column;
-    background-color: colors.$darkBlue;
+    background-color: colors.$blue900;
     align-items: center;
     gap: 8px;
     h3 {
@@ -69,7 +69,7 @@
       p {
         font-size: 18px;
         line-height: 24px;
-        color: colors.$grey6;
+        color: colors.$grey700;
       }
     }
   }

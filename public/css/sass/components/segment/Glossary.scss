@@ -4,20 +4,20 @@
   display: inline-block;
   position: relative;
   background: rgba(255, 169, 2, 0.24);
-  border-bottom: 2px solid colors.$orangeDefaultHover;
+  border-bottom: 2px solid colors.$orange400;
   cursor: pointer;
 }
 
 .glossaryItem {
   display: inline-block;
   position: relative;
-  border-bottom: 2px solid colors.$translatedBlue;
+  border-bottom: 2px solid colors.$blue500;
   cursor: pointer;
 }
 
 .blacklistItem {
   background: rgba(255, 47, 34, 0.24);
-  border-bottom: 2px solid colors.$redDefault;
+  border-bottom: 2px solid colors.$red500;
   display: inline-block;
   position: relative;
 }

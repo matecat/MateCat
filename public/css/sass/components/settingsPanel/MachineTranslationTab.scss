@@ -102,18 +102,18 @@
           border-radius: 2px;
           border: 1px solid rgba(34, 36, 38, 0.15);
           height: 37px;
-          box-shadow: inset 0 1px 3px colors.$grey8;
+          box-shadow: inset 0 1px 3px colors.$grey200;
           &:hover {
             border-color: rgba(34, 36, 38, 0.35);
             box-shadow: none;
           }
         }
         .field-error {
-          color: colors.$redDefault;
+          color: colors.$red500;
           font-size: 12px;
         }
         .mt-error {
-          color: colors.$redDefault;
+          color: colors.$red500;
         }
 
         &.container-actions {
@@ -127,10 +127,10 @@
       width: 50%;
       text-align: left;
       padding: 16px;
-      background: colors.$grey4;
+      background: colors.$grey100;
       display: flex;
       flex-direction: column;
-      border: 1px solid colors.$grey3;
+      border: 1px solid colors.$grey150;
       border-radius: 8px;
 
       .button {
@@ -155,11 +155,11 @@
   }
 
   .green-button {
-    background-color: colors.$approvedGreen !important;
+    background-color: colors.$green400 !important;
     color: white !important;
 
     &:hover {
-      background-color: rgba($color: colors.$approvedGreen, $alpha: 0.9) !important;
+      background-color: rgba($color: colors.$green400, $alpha: 0.9) !important;
     }
   }
 }
@@ -198,7 +198,7 @@
       font-size: 16px;
       padding: 9px 46px 9px 12px;
       border: 1px solid rgba(34, 36, 38, 0.15);
-      box-shadow: inset 0 1px 3px colors.$grey8;
+      box-shadow: inset 0 1px 3px colors.$grey200;
       color: black;
       &:hover {
         border-color: rgba(34, 36, 38, 0.35);
@@ -295,7 +295,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: colors.$grey4;
+    background-color: colors.$grey100;
 
     > button {
       background: unset;
@@ -397,7 +397,7 @@
   width: 100%;
   padding: 4px;
   background-color: unset;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -411,7 +411,7 @@
   }
 
   &.error {
-    border: solid 1px colors.$redDefault;
+    border: solid 1px colors.$red500;
   }
 }
 
@@ -444,7 +444,7 @@
     height: 32px;
 
     &.error {
-      border: solid 1px colors.$redDefault;
+      border: solid 1px colors.$red500;
     }
   }
 
@@ -483,14 +483,14 @@
   border-radius: 2px;
   font-size: 16px;
   color: colors.$black;
-  background: colors.$grey4;
+  background: colors.$grey100;
   padding: 0 8px;
   text-align: center;
-  border: 1px solid colors.$grey7;
+  border: 1px solid colors.$grey400;
   cursor: pointer;
 
   &:hover {
-    background-color: colors.$grey5;
+    background-color: colors.$grey50;
   }
 
   &:disabled {
@@ -563,10 +563,10 @@
   gap: 15px;
   align-items: center;
   justify-content: space-between;
-  background-color: colors.$grey4;
+  background-color: colors.$grey100;
   padding: 12px;
   border-radius: 8px;
-  border: solid 1px colors.$grey3;
+  border: solid 1px colors.$grey150;
   margin-bottom: 16px;
 
   h4 {
@@ -600,7 +600,7 @@
   }
 
   p {
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 }
 
@@ -616,7 +616,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: colors.$grey4;
+    background-color: colors.$grey100;
     border-radius: 8px;
 
     > button {
@@ -650,7 +650,7 @@
     flex-direction: column;
     border-radius: 0 0 8px 8px;
     padding: 24px;
-    background-color: colors.$grey5;
+    background-color: colors.$grey50;
 
     .mt-params-option {
       display: flex;
@@ -679,7 +679,7 @@
     p {
       display: block;
       text-align: left;
-      color: colors.$grey6;
+      color: colors.$grey700;
       font-size: 16px;
       line-height: 24px;
     }
@@ -692,7 +692,7 @@
 
   .select {
     color: colors.$black;
-    border-color: colors.$grey8;
+    border-color: colors.$grey200;
   }
 
   .select-with-label__wrapper .select {
@@ -701,7 +701,7 @@
   }
 
   .select--is-disabled {
-    background-color: colors.$grey9;
+    background-color: colors.$grey75;
   }
 
   input {
@@ -718,7 +718,7 @@
 
     position: sticky;
     top: -1px;
-    background: colors.$grey5;
+    background: colors.$grey50;
 
     &::after {
       display: block;
@@ -727,9 +727,9 @@
       margin-top: 5px;
       background: linear-gradient(
         90deg,
-        rgba(colors.$grey8, 0.6) 0%,
-        rgba(colors.$grey8, 0.6) 75%,
-        rgba(colors.$grey8, 0) 100%
+        rgba(colors.$grey200, 0.6) 0%,
+        rgba(colors.$grey200, 0.6) 75%,
+        rgba(colors.$grey200, 0) 100%
       );
     }
   }
@@ -739,7 +739,7 @@
   }
 
   .dropdown__search-bar {
-    border-bottom: 1px colors.$grey8 solid;
+    border-bottom: 1px colors.$grey200 solid;
     margin-bottom: 1px;
   }
 

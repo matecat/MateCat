@@ -9,7 +9,7 @@
     //-webkit-box-shadow: 0 1px 20px #000;
     //box-shadow: 0 1px 20px #000;
     min-width: 600px;
-    background-color: colors.$grey5;
+    background-color: colors.$grey50;
     margin: -200px 0 0 -250px;
     padding: 0 0px 20px 0px;
     position: fixed;
@@ -74,14 +74,14 @@
 
   .inner {
     width: 45px;
-    border-right: 1px solid colors.$darkBlue;
+    border-right: 1px solid colors.$blue900;
     border-radius: 0 0 0 6px;
   }
 
   .btn-ok,
   .btn-cancel {
     color: colors.$white;
-    background: colors.$translatedBlue;
+    background: colors.$blue500;
     font-weight: bold;
     text-decoration: none;
     padding: 8px 10px;
@@ -91,20 +91,20 @@
     cursor: pointer;
   }
   .btn-ok:hover {
-    background-color: colors.$translatedBlueHover;
+    background-color: colors.$blue600;
   }
   .btn-ok:active {
-    background-color: colors.$translatedBlueActive;
+    background-color: colors.$blue600;
   }
 
   .btn-cancel {
-    color: colors.$grey1 !important;
+    color: colors.$grey500 !important;
     background: white !important;
-    border: 1px solid colors.$grey1 !important;
+    border: 1px solid colors.$grey500 !important;
   }
 
   .btn-cancel:hover {
     cursor: pointer;
-    background-color: colors.$grey3 !important;
+    background-color: colors.$grey150 !important;
   }
 }

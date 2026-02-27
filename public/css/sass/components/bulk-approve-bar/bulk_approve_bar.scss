@@ -2,7 +2,7 @@
 .bulk-approve-bar {
   position: relative;
   z-index: 2;
-  background: colors.$transparentBlue;
+  background: colors.$blue50;
   padding: 8px 10px;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.43);
   float: left;
@@ -55,19 +55,19 @@
       vertical-align: bottom;
       margin-right: 0;
       &:hover {
-        box-shadow: 0 0 0 colors.$grey8, 0 0 2px rgba(0, 0, 0, 0.12),
+        box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
       }
       &.translated-all-bulked {
-        border: 1px solid colors.$translatedBlue;
-        color: colors.$translatedBlue;
+        border: 1px solid colors.$blue500;
+        color: colors.$blue500;
       }
       &.approved-all-bulked {
-        border: 1px solid colors.$approvedGreen;
-        color: colors.$approvedGreen;
+        border: 1px solid colors.$green400;
+        color: colors.$green400;
         &.approved-2nd-pass {
-          border: 1px solid colors.$approved2Green;
-          color: colors.$approved2Green;
+          border: 1px solid colors.$purple500;
+          color: colors.$purple500;
         }
       }
       i {

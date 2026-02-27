@@ -48,7 +48,7 @@
     align-items: center;
     gap: 8px;
     width: 100%;
-    color: colors.$grey6;
+    color: colors.$grey700;
     .labelProgress {
       width: auto;
     }
@@ -57,21 +57,21 @@
   // Type modifiers
   &.default {
     .progress-wrapper {
-      background-color: rgba(colors.$translatedBlue, 0.24);
+      background-color: rgba(colors.$blue500, 0.24);
     }
     .progress {
-      background-color: colors.$translatedBlue;
+      background-color: colors.$blue500;
     }
     .labelProgress span {
-      color: colors.$translatedBlue;
+      color: colors.$blue500;
     }
 
     &.complete {
       .progress {
-        background-color: colors.$approvedGreen;
+        background-color: colors.$green400;
       }
       .labelProgress span {
-        color: colors.$approvedGreen;
+        color: colors.$green400;
       }
     }
   }

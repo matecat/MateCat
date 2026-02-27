@@ -34,11 +34,11 @@ a {
   text-decoration: underline;
   float: left;
   cursor: pointer;
-  color: colors.$linkBlue;
+  color: colors.$blue700;
 
   &:hover {
     text-decoration: none;
-    color: colors.$linkBlueHover;
+    color: colors.$blue400;
   }
 }
 
@@ -69,7 +69,7 @@ a {
 .forgot-password {
   cursor: pointer;
   text-decoration: underline;
-  color: colors.$linkBlue;
+  color: colors.$blue700;
 }
 
 .dqf-modal input[type='text'],
@@ -83,8 +83,8 @@ a {
   width: 100%;
   padding: 0.7em 0.6em;
   display: inline-block;
-  border: 1px solid colors.$grey8;
-  box-shadow: inset 0 1px 3px colors.$grey8;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   border-radius: 4px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -94,9 +94,9 @@ a {
 }
 
 .dqf-modal input[disabled] {
-  color: colors.$grey7;
+  color: colors.$grey400;
   cursor: not-allowed;
-  background: colors.$grey2;
+  background: colors.$grey300;
 }
 
 .user-info-form input {
@@ -124,9 +124,9 @@ a {
 }
 
 .preference-modal-message {
-  box-shadow: 0 2px 2px colors.$grey4;
+  box-shadow: 0 2px 2px colors.$grey100;
   border-radius: 2px;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   line-height: 20px;
   padding: 10px 15px;
   background: rgb(195, 224, 195);
@@ -180,7 +180,7 @@ a {
     overflow: visible;
     max-height: inherit;
     font-size: 23px;
-    background: colors.$darkBlue;
+    background: colors.$blue900;
     padding: 7px 10px 7px 24px;
     background-size: 35px;
     color: colors.$white;
@@ -216,7 +216,7 @@ a {
     min-height: 50px;
     height: 100%;
     /*color: #000;*/
-    background-color: colors.$grey5;
+    background-color: colors.$grey50;
     border-radius: 0 0 16px 16px;
     margin: 0 auto;
     overflow: hidden;
@@ -289,7 +289,7 @@ a {
     width: 340px;
     min-width: unset;
     box-shadow:
-      0 0 0 colors.$grey8,
+      0 0 0 colors.$grey200,
       0 0 2px rgba(0, 0, 0, 0.12),
       0 2px 4px rgba(0, 0, 0, 0.24) !important;
   }
@@ -300,7 +300,7 @@ a {
     border-radius: 4px 4px 0 0;
     overflow: visible;
     max-height: inherit;
-    background: colors.$darkBlue;
+    background: colors.$blue900;
     padding: 6px 10px 3px 24px;
     background-size: 31px;
     color: colors.$white;
@@ -356,7 +356,7 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  border: 1px solid colors.$grey6;
+  border: 1px solid colors.$grey700;
 }
 
 .matecat-modal-content .disabled,
@@ -365,7 +365,7 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  background: colors.$grey8;
+  background: colors.$grey200;
 }
 
 .matecat-modal-content,
@@ -412,12 +412,12 @@ a {
       ::-webkit-scrollbar-thumb {
         -webkit-border-radius: 10px;
         border-radius: 10px;
-        background: colors.$grey7;
+        background: colors.$grey400;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
 
       ::-webkit-scrollbar-thumb:window-inactive {
-        background: colors.$grey7;
+        background: colors.$grey400;
       }
 
       &.team {
@@ -438,7 +438,7 @@ a {
             width: 40px !important;
             max-width: 40px;
             height: 40px;
-            background-color: colors.$grey2;
+            background-color: colors.$grey300;
             border-radius: 50%;
             vertical-align: middle;
             text-align: center;
@@ -457,31 +457,31 @@ a {
           .content.email-user-invited {
             font-weight: 100;
             font-size: 14px;
-            color: colors.$grey1;
+            color: colors.$grey500;
           }
 
           .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
-            color: colors.$grey1;
+            color: colors.$grey500;
             white-space: nowrap;
           }
 
           .mini.ui.button.right.floated {
             margin-top: 6px;
-            border: 1px solid colors.$grey;
+            border: 1px solid colors.$grey600;
             display: inherit;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-size: 14px;
             padding: 6px 15px;
-            background-color: colors.$grey5;
+            background-color: colors.$grey50;
             white-space: nowrap;
 
             &:hover {
               box-shadow:
-                0 0 0 colors.$grey8,
+                0 0 0 colors.$grey200,
                 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             }
@@ -496,7 +496,7 @@ a {
           }
 
           .mini.ui.primary.button {
-            border: 1px solid colors.$grey;
+            border: 1px solid colors.$grey600;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -511,7 +511,7 @@ a {
           }
 
           .ui.primary.button {
-            border: 1px solid colors.$grey;
+            border: 1px solid colors.$grey600;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -523,7 +523,7 @@ a {
             line-height: 20px;
             text-align: center;
             vertical-align: bottom;
-            border: 1px solid colors.$grey;
+            border: 1px solid colors.$grey600;
             border-radius: 2px;
           }
         }
@@ -594,13 +594,13 @@ a {
 
 .ui.fluid.input > input {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  box-shadow: inset 0 1px 3px colors.$grey8;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   font-size: 15px;
 }
 
 .ui.multiple.search.dropdown {
   width: 100%;
-  box-shadow: inset 0 1px 3px colors.$grey8;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   font-size: 15px;
 }
 
@@ -630,7 +630,7 @@ a {
   .divider-line {
     height: 2px;
     width: 40%;
-    background-color: colors.$grey8;
+    background-color: colors.$grey200;
     margin-top: 10px;
     display: block;
     float: left;
@@ -639,7 +639,7 @@ a {
   span {
     float: left;
     width: 20%;
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 }
 
@@ -660,7 +660,7 @@ a {
     .ui.primary.button,
     .ui.red.button {
       font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      border: 1px solid colors.$grey;
+      border: 1px solid colors.$grey600;
       border-radius: 2px;
     }
   }
@@ -714,7 +714,7 @@ a {
 
     .no-result {
       font-size: 14px;
-      color: colors.$grey6;
+      color: colors.$grey700;
       padding: 7px;
     }
   }
@@ -724,7 +724,7 @@ a {
 
     .matecat-modal-top {
       .move-ribbon {
-        background: colors.$grey4;
+        background: colors.$grey100;
         padding: 8px 15px;
         border-radius: 4px;
 
@@ -763,12 +763,12 @@ a {
       ::-webkit-scrollbar-thumb {
         -webkit-border-radius: 10px;
         border-radius: 10px;
-        background: colors.$grey7;
+        background: colors.$grey400;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
 
       ::-webkit-scrollbar-thumb:window-inactive {
-        background: colors.$grey7;
+        background: colors.$grey400;
       }
 
       .default.text {
@@ -800,7 +800,7 @@ a {
       h2 {
         padding-left: 10px;
         padding-bottom: 10px;
-        border-bottom: 1px solid colors.$grey4;
+        border-bottom: 1px solid colors.$grey100;
       }
 
       .shortcut-item-list {
@@ -813,7 +813,7 @@ a {
           }
 
           &:hover {
-            background: colors.$grey9;
+            background: colors.$grey75;
           }
 
           .shortcut-title,
@@ -825,7 +825,7 @@ a {
           .shortcut-keys {
             .shortcuts {
               text-align: right;
-              color: colors.$translatedBlueTransparent;
+              color: colors.$blue200;
             }
 
             .mac,
@@ -836,7 +836,7 @@ a {
                 display: inline-block;
                 margin-left: 5px;
                 margin-right: 5px;
-                background: colors.$grey7;
+                background: colors.$grey400;
                 padding: 0 5px;
                 line-height: 20px;
                 font-size: 12px;
@@ -1018,7 +1018,7 @@ a {
 
   .buttons-popup-container {
     padding: 25px 0 30px;
-    border-bottom: 1px solid colors.$grey5;
+    border-bottom: 1px solid colors.$grey50;
     display: flex;
     gap: 20px;
     align-items: center;

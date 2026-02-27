@@ -34,14 +34,14 @@
       }
     }
     .tooltip-error-ignore {
-      color: colors.$grey;
+      color: colors.$grey600;
       text-decoration: none;
       cursor: pointer;
       border-radius: 0 4px 4px 0;
       padding-left: 10px;
       height: 40px;
       &:hover {
-        color: colors.$grey6;
+        color: colors.$grey700;
       }
       .icon-cancel-circle:before {
         line-height: 40px;
@@ -82,15 +82,15 @@
   }
 
   .n0 {
-    background-color: colors.$rebuttedRedTransparent;
+    background-color: colors.$orange500;
   }
 
   .p0 {
-    background-color: colors.$greenDefaultTransparent;
+    background-color: colors.$green300;
   }
 
   .c0 {
-    background-color: colors.$greenDefaultTransparent;
+    background-color: colors.$green300;
   }
 
   .u0 {
@@ -98,11 +98,11 @@
   }
 
   .s0 {
-    background-color: colors.$translatedBlueTransparent;
+    background-color: colors.$blue200;
   }
 
   .l0 {
-    background-color: colors.$approved2GreenTransparent;
+    background-color: colors.$purple200;
   }
 
   .b0 {
@@ -118,11 +118,11 @@
   }
 
   .o0 {
-    background-color: rgba(colors.$translatedBlueTransparent, 0.75);
+    background-color: rgba(colors.$blue200, 0.75);
   }
 
   .m {
-    background-color: colors.$redDefaultTransparent;
+    background-color: colors.$red100;
   }
 
   .m,

@@ -1,7 +1,7 @@
 @use '../commons/colors';
 @use "../commons/variables";
 .after-open-outsource {
-  border-left: 2px solid colors.$translatedBlue;
+  border-left: 2px solid colors.$blue500;
   padding-left: 13px !important;
 }
 .outsource-container {
@@ -19,7 +19,7 @@
     z-index: 1;
     border-radius: 8px 8px 0 0;
     .job-id {
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
     .source-target {
       display: flex;
@@ -145,7 +145,7 @@
         min-width: 330px;
         height: 205px;
         .item {
-          border-top: 1px solid colors.$grey5;
+          border-top: 1px solid colors.$grey50;
           padding: 15px 5px 15px 10px !important;
           white-space: normal;
           word-wrap: normal;
@@ -189,7 +189,7 @@
     }
   }
   .confirm-delivery-box {
-    background: colors.$greenDefaultTransparent2;
+    background: colors.$green50;
     padding: 9px 15px 3px;
     text-align: right;
     line-height: 20px;
@@ -203,7 +203,7 @@
   }
 
   .assign-job-translator {
-    background-color: colors.$grey8;
+    background-color: colors.$grey200;
     padding: 10px 15px 35px;
     width: 100%;
     .title {
@@ -242,16 +242,16 @@
               input[type='text'],
               input[type='email'],
               span.select {
-                box-shadow: inset 0 1px 3px colors.$grey8;
-                border: 1px solid colors.$grey8;
+                box-shadow: inset 0 1px 3px colors.$grey200;
+                border: 1px solid colors.$grey200;
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 border-radius: variables.$border-radius-default;
                 height: 40px;
                 &:focus {
-                  border-color: colors.$linkBlueTransparent;
+                  border-color: colors.$blue300;
                 }
                 &:active {
-                  border-color: colors.$linkBlueTransparent;
+                  border-color: colors.$blue300;
                 }
               }
               &.send-job-box {
@@ -281,8 +281,8 @@
                 .selection.dropdown {
                   width: 100%;
                   min-width: 91px !important;
-                  border: 1px solid colors.$grey8;
-                  box-shadow: inset 0 1px 3px colors.$grey8;
+                  border: 1px solid colors.$grey200;
+                  box-shadow: inset 0 1px 3px colors.$grey200;
                   font-size: 14px;
                   .menu {
                     height: 205px;
@@ -301,7 +301,7 @@
     }
   }
   .open-job-box {
-    background-color: colors.$grey2;
+    background-color: colors.$grey300;
     padding: 35px 30px 25px 40px;
     width: 100%;
     cursor: auto;
@@ -362,7 +362,7 @@
   }
 
   .background-outsource-vendor {
-    background: colors.$grey3;
+    background: colors.$grey150;
     width: 100%;
     padding-bottom: 15px;
     padding-top: 15px;
@@ -449,7 +449,7 @@
                 .icon {
                   &.active {
                     background: transparent !important;
-                    color: colors.$greenDefaultTransparent !important;
+                    color: colors.$green300 !important;
                     text-shadow: none !important;
                   }
                 }
@@ -488,7 +488,7 @@
                   margin: 0;
                   font-weight: 100;
                   font-size: 13px;
-                  color: colors.$grey6;
+                  color: colors.$grey700;
                 }
               }
               .target-box {
@@ -529,7 +529,7 @@
         }
         .revision-box {
           padding: 4px 0px;
-          background-color: colors.$grey2;
+          background-color: colors.$grey300;
           margin-bottom: 10px;
           height: 28px;
           border-radius: variables.$border-radius-default;
@@ -560,8 +560,8 @@
             display: inline-block;
             font-size: 23px;
             span.select {
-              box-shadow: inset 0 1px 3px colors.$grey8;
-              border: 1px solid colors.$grey8;
+              box-shadow: inset 0 1px 3px colors.$grey200;
+              border: 1px solid colors.$grey200;
               font-family: Calibri, Arial, Helvetica, sans-serif;
             }
             .react-datepicker__input-container input {
@@ -608,14 +608,14 @@
                 color: red;
               }
               &.too-far-date {
-                color: colors.$rebuttedRed;
+                color: colors.$orange600;
                 .tip {
                   display: inline-block;
                   width: 5px;
                   margin-right: 20px;
                   i {
                     position: relative;
-                    color: colors.$grey7;
+                    color: colors.$grey400;
                     font-size: 16px;
                     top: 2px;
                   }
@@ -651,14 +651,14 @@
               position: relative;
               top: 2px;
               font-size: 15px;
-              background: colors.$grey2;
+              background: colors.$grey300;
               color: colors.$black;
             }
           }
           .delivery-box {
             padding: 14px 15px;
             text-align: left;
-            border: 1px solid colors.$grey2;
+            border: 1px solid colors.$grey300;
             > div {
               display: flex;
               align-items: center;
@@ -671,14 +671,14 @@
                 }
                 input[type='text'],
                 input[type='email'] {
-                  box-shadow: inset 0 1px 3px colors.$grey8;
-                  border: 1px solid colors.$grey8;
+                  box-shadow: inset 0 1px 3px colors.$grey200;
+                  border: 1px solid colors.$grey200;
                   font-family: Calibri, Arial, Helvetica, sans-serif;
                   &:focus {
-                    border-color: colors.$linkBlueTransparent;
+                    border-color: colors.$blue300;
                   }
                   &:active {
-                    border-color: colors.$linkBlueTransparent;
+                    border-color: colors.$blue300;
                   }
                 }
                 &.input-time {
@@ -686,8 +686,8 @@
                   .selection.dropdown {
                     width: 100%;
                     min-width: 101px !important;
-                    border: 1px solid colors.$grey8;
-                    box-shadow: inset 0 1px 3px colors.$grey8;
+                    border: 1px solid colors.$grey200;
+                    box-shadow: inset 0 1px 3px colors.$grey200;
                     .text {
                       font-weight: 100 !important;
                     }
@@ -706,7 +706,7 @@
                   padding: 9px 11px;
                   vertical-align: top;
                   font-size: 18px;
-                  border: 1px solid colors.$translatedBlue;
+                  border: 1px solid colors.$blue500;
                   box-shadow: none !important;
                   background-color: colors.$white !important;
                   font-weight: 700;
@@ -714,12 +714,12 @@
                   &:hover {
                     text-decoration: none;
                     //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                    border: 1px solid colors.$translatedBlue;
-                    background-color: colors.$grey3;
+                    border: 1px solid colors.$blue500;
+                    background-color: colors.$grey150;
                   }
                   &:focus {
                     box-shadow: none !important;
-                    background-color: colors.$grey3 !important;
+                    background-color: colors.$grey150 !important;
                   }
                 }
               }
@@ -743,7 +743,7 @@
           width: 18%;
           min-width: 199px;
           .order-box {
-            background-color: colors.$greenDefaultTransparent;
+            background-color: colors.$green300;
             height: 70px;
             text-align: center;
             margin-bottom: 5px;
@@ -821,14 +821,14 @@
               .pointer {
                 width: 12px;
                 height: 12px;
-                background: colors.$grey8;
+                background: colors.$grey200;
                 display: inline-block;
                 border-radius: 50%;
                 margin-right: 5px;
                 cursor: pointer;
                 transition: 0.3s ease;
                 &.active {
-                  background: colors.$greenDefault;
+                  background: colors.$green500;
                 }
               }
             }
@@ -836,7 +836,7 @@
           .slider-box {
             min-height: 110px;
             position: relative;
-            border: 1px solid colors.$grey7;
+            border: 1px solid colors.$grey400;
             padding: 15px 0px;
             border-radius: variables.$border-radius-default;
             .appendix {
@@ -846,9 +846,9 @@
               font-size: 28px;
               position: relative;
               top: -3px;
-              color: colors.$grey7;
+              color: colors.$grey400;
               right: 13px;
-              background: colors.$grey9;
+              background: colors.$grey75;
               padding: 6px 2px;
               text-align: center;
             }
@@ -916,7 +916,7 @@
             }
           }
           .request-info-box {
-            color: colors.$grey7;
+            color: colors.$grey400;
             position: absolute;
             bottom: 20px;
             right: 30px;
@@ -958,8 +958,8 @@
                 .content {
                   .button {
                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                    border: 1px solid colors.$grey8;
-                    background: colors.$grey9;
+                    border: 1px solid colors.$grey200;
+                    background: colors.$grey75;
                     position: relative;
                     top: 5px;
                     width: 100%;
@@ -975,7 +975,7 @@
                       position: relative;
                       top: 1px;
                       &.online-item {
-                        background-color: colors.$translatedBlue;
+                        background-color: colors.$blue500;
                       }
                       &.offline-item {
                         background-color: gray;
@@ -1055,7 +1055,7 @@
             top: -15px;
             .need-it-faster-box {
               .delivery-box {
-                border: 1px solid colors.$grey2;
+                border: 1px solid colors.$grey300;
               }
             }
             .delivery-box {
@@ -1130,7 +1130,7 @@
           width: 18%;
           min-width: 200px;
           .order-box {
-            background-color: colors.$greenDefaultTransparent;
+            background-color: colors.$green300;
             padding: 25px 5px 15px;
             margin-bottom: 5px;
             display: flex;
@@ -1290,7 +1290,7 @@
       margin-right: 0 !important;
       &:hover {
         box-shadow:
-          0 0 0 colors.$grey8,
+          0 0 0 colors.$grey200,
           0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
       }

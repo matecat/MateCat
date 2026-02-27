@@ -8,7 +8,7 @@ body {
 body.analyze {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   overflow-x: auto;
   overflow-y: hidden;
   font-size: 14px;
@@ -30,7 +30,7 @@ body.analyze {
 
   .project {
     .scroll {
-      background-color: colors.$grey2;
+      background-color: colors.$grey300;
       width: 40px;
       height: 40px;
       position: fixed;
@@ -52,7 +52,7 @@ body.analyze {
     }
 
     .project-header {
-      background: colors.$grey4;
+      background: colors.$grey100;
       padding-bottom: 10px;
       margin-bottom: 0;
       border-radius: variables.$border-radius-big;
@@ -76,12 +76,12 @@ body.analyze {
           left: -45px;
           max-width: 100%;
           min-width: 0;
-          background-color: colors.$grey2;
+          background-color: colors.$grey300;
           color: colors.$black;
           border-radius: 0 2px 2px 0;
           padding-right: 15px;
           &:after {
-            border-right-color: colors.$grey1 !important;
+            border-right-color: colors.$grey500 !important;
           }
           .project-id,
           .project-name {
@@ -94,7 +94,7 @@ body.analyze {
             font-weight: 700;
             margin-right: 5px;
             margin-left: 15px;
-            color: colors.$grey6;
+            color: colors.$grey700;
             top: -2px;
           }
           .project-name {
@@ -124,13 +124,13 @@ body.analyze {
               display: inline-block;
               margin-bottom: 0;
               span {
-                color: colors.$greenDefault;
+                color: colors.$green500;
                 padding: 5px 2px 5px 0;
                 margin-left: 4px;
                 border-radius: 15px;
               }
               i {
-                color: colors.$greenDefault;
+                color: colors.$green500;
                 position: relative;
                 top: 2px;
               }
@@ -175,7 +175,7 @@ body.analyze {
         .word-percent {
           position: relative;
           padding: 15px 15px 10px 20px;
-          border: 1px solid colors.$greenDefault;
+          border: 1px solid colors.$green500;
           top: 27px;
           font-size: 16px;
           margin-bottom: 25px;
@@ -209,7 +209,7 @@ body.analyze {
           }
         }
         .updated-count {
-          background-color: colors.$orangeDefaultTransparent2;
+          background-color: colors.$orange50;
         }
       }
 
@@ -237,7 +237,7 @@ body.analyze {
 
     .project-top {
       padding: 45px 15px 15px;
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
       margin: 0 -1rem 0;
       border-radius: variables.$border-radius-default;
       &.type-mtqe {
@@ -247,11 +247,11 @@ body.analyze {
         }
       }
       .compare-table {
-        background-color: colors.$grey3;
+        background-color: colors.$grey150;
         margin-bottom: 1px;
         border-radius: 8px 8px 0 0;
         .updated-count {
-          background-color: colors.$orangeDefaultTransparent2;
+          background-color: colors.$orange50;
           transition: 0.4s ease;
         }
         .header-compare-table,
@@ -325,9 +325,9 @@ body.analyze {
             }
             input {
               outline: none;
-              border: 1px solid colors.$grey2;
+              border: 1px solid colors.$grey300;
               padding: 4px;
-              color: colors.$translatedBlue;
+              color: colors.$blue500;
               font-size: 12px;
               font-weight: 700;
               white-space: nowrap;
@@ -339,9 +339,9 @@ body.analyze {
               width: 100%;
             }
             button {
-              border: 1px solid colors.$grey2;
+              border: 1px solid colors.$grey300;
               background-color: colors.$white;
-              color: colors.$translatedBlue;
+              color: colors.$blue500;
               text-align: center;
               text-decoration: none;
               border-radius: 0 8px 8px 0;
@@ -371,7 +371,7 @@ body.analyze {
           align-items: center;
           justify-content: center;
           width: 33.333%;
-          border-right: 1px solid colors.$grey8;
+          border-right: 1px solid colors.$grey200;
           /*border-left: 1px solid #d7d8dc;*/
           /*margin-left: -1px;*/
           /*line-height: 100px;*/
@@ -379,13 +379,13 @@ body.analyze {
           padding-bottom: 15px;
           height: 100%;
           &:first-child {
-            border-left: 1px solid colors.$grey8;
+            border-left: 1px solid colors.$grey200;
           }
         }
         .title-standard-words {
           h5 {
             span {
-              color: colors.$grey7;
+              color: colors.$grey400;
               font-weight: 100;
               position: relative;
               top: 2px;
@@ -399,7 +399,7 @@ body.analyze {
           }
         }
         &.jobs {
-          background-color: colors.$grey5;
+          background-color: colors.$grey50;
           z-index: 0;
           position: relative;
           .job {
@@ -419,7 +419,7 @@ body.analyze {
                   font-size: 15px;
                   float: right;
                   top: 11px;
-                  color: colors.$linkBlue;
+                  color: colors.$blue700;
                   text-decoration: underline;
                   font-weight: 700;
                   margin-left: 5px;
@@ -430,9 +430,9 @@ body.analyze {
                   }
                 }
                 &:hover {
-                  background-color: colors.$grey5;
+                  background-color: colors.$grey50;
                   .title-matecat-words {
-                    background: colors.$orangeDefaultTransparent2 !important;
+                    background: colors.$orange50 !important;
                     transition: 0.3s ease;
                   }
                 }
@@ -441,7 +441,7 @@ body.analyze {
                 .tmw {
                   text-align: center;
                   /*padding-right: 15px;*/
-                  color: colors.$grey1;
+                  color: colors.$grey500;
                   padding-top: 0;
                   padding-bottom: 0;
                   .cell-label {
@@ -455,11 +455,11 @@ body.analyze {
                   font-weight: 700;
                   font-size: 18px;
                   margin-bottom: 1px;
-                  color: colors.$grey1;
+                  color: colors.$grey500;
                   .cell-label {
                     text-decoration: underline;
                     cursor: pointer;
-                    color: colors.$grey6;
+                    color: colors.$grey700;
                     &:hover {
                       text-decoration: none;
                     }
@@ -496,7 +496,7 @@ body.analyze {
             width: 68%;
             padding: 0 4px;
             justify-content: center;
-            border-right: 1px solid colors.$grey2;
+            border-right: 1px solid colors.$grey300;
             padding: 8px;
             gap: 24px;
             button {
@@ -517,11 +517,11 @@ body.analyze {
             &.outsource-translation-disabled {
               span,
               a {
-                color: colors.$grey;
+                color: colors.$grey600;
               }
             }
             a {
-              color: colors.$translatedBlueTransparent;
+              color: colors.$blue200;
               text-decoration: underline;
             }
             span {
@@ -573,7 +573,7 @@ body.analyze {
     .analyze-report {
       text-align: center;
       width: 100%;
-      background-color: colors.$grey3;
+      background-color: colors.$grey150;
       margin: 0 auto;
       position: relative;
       display: flex;
@@ -617,7 +617,7 @@ body.analyze {
     }
     .job-id {
       display: inline-block;
-      color: colors.$grey1;
+      color: colors.$grey500;
       font-size: 12px;
       position: relative;
       line-height: 35px;
@@ -652,7 +652,7 @@ body.analyze {
       .in-to {
         display: inline-block;
         top: 3px;
-        color: colors.$grey6;
+        color: colors.$grey700;
         /*line-height: 28px;*/
         width: 24px;
         position: relative;
@@ -699,7 +699,7 @@ body.analyze {
     }
 
     .project-body {
-      background-color: colors.$grey3;
+      background-color: colors.$grey150;
       margin: 0 auto;
       border-radius: 8px;
       .job {
@@ -711,7 +711,7 @@ body.analyze {
           padding: 0 0 !important;
         }
         .job-body {
-          background-color: colors.$grey5;
+          background-color: colors.$grey50;
           border-radius: 8px;
           overflow: hidden;
           .chunks {
@@ -726,7 +726,7 @@ body.analyze {
                 &.show-details {
                   .chunks-analyze,
                   .chunk-analyze-container > div {
-                    background-color: colors.$grey4 !important;
+                    background-color: colors.$grey100 !important;
                   }
                 }
                 &.outsource-open {
@@ -842,7 +842,7 @@ body.analyze {
   .chunk-detail {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-    background-color: $grey2;
+    background-color: $grey300;
     padding-left: 12px;
     z-index: 0;
     .left-box {

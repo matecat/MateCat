@@ -22,7 +22,7 @@
 
   > label {
     font-size: 15px;
-    color: colors.$grey1;
+    color: colors.$grey500;
   }
 }
 
@@ -55,7 +55,7 @@
       font-size: 15px;
       text-align: left;
       word-wrap: break-word;
-      color: colors.$grey1;
+      color: colors.$grey500;
       white-space: nowrap;
       width: 100%;
       border: none;
@@ -83,7 +83,7 @@
     flex: 1 100%;
     line-height: 40px;
     margin-top: 13px;
-    border: 1px solid colors.$greenDefault;
+    border: 1px solid colors.$green500;
     background-color: colors.$white;
     border-radius: 4px;
     display: flex;
@@ -92,7 +92,7 @@
     padding: 10px;
 
     i {
-      color: colors.$greenDefault;
+      color: colors.$green500;
       margin-top: 8px;
       margin-left: 20px;
     }
@@ -132,7 +132,7 @@
   line-height: 25px;
   .user-info-icon-update {
     cursor: pointer;
-    color: colors.$grey;
+    color: colors.$grey600;
     &:hover {
       color: colors.$black;
     }
@@ -179,8 +179,8 @@
   font-size: 21px;
   color: colors.$white;
   padding: 0;
-  background: colors.$grey7;
-  border: 1px solid colors.$grey8;
+  background: colors.$grey400;
+  border: 1px solid colors.$grey200;
   -moz-border-radius: 50px;
   -webkit-border-radius: 50px;
   border-radius: 50px;
@@ -206,12 +206,12 @@
   .button {
     font-family: Calibri, Arial, Helvetica, sans-serif;
     vertical-align: top;
-    border: 1px solid colors.$grey;
+    border: 1px solid colors.$grey600;
     border-radius: 2px;
     font-size: 16px;
     margin-bottom: 15px;
     margin-left: 80%;
-    background-color: colors.$translatedBlue;
+    background-color: colors.$blue500;
     transition: 0.3s ease;
     color: colors.$white;
     text-shadow: none;
@@ -228,9 +228,9 @@
     text-decoration: none;
     user-select: none;
     &:hover {
-      background-color: colors.$translatedBlueTransparent;
+      background-color: colors.$blue200;
       box-shadow:
-        0 0 0 colors.$grey8,
+        0 0 0 colors.$grey200,
         0 0 2px rgba(0, 0, 0, 0.12),
         0 2px 4px rgba(0, 0, 0, 0.24) !important;
     }
@@ -238,6 +238,6 @@
 }
 
 .user-info-form .grey-txt {
-  color: colors.$grey1;
+  color: colors.$grey500;
 }
 

@@ -25,7 +25,7 @@ body.incomingMsg header {
 
 header .wrapper {
   width: 100%;
-  background: colors.$darkBlue;
+  background: colors.$blue900;
   height: 60px;
   display: grid;
   grid-template-columns: 170px auto auto 64px;
@@ -69,7 +69,7 @@ header .wrapper {
 .warnings,
 .text .alternatives {
   clear: left;
-  color: colors.$red800;
+  color: colors.$red400;
   float: left;
   margin-left: -10px;
   font-size: 14px;
@@ -128,7 +128,7 @@ section.opened .warnings {
 .cattool #quality-report[data-vote='excellent'],
 .cattool #quality-report[data-vote='verygood'],
 .cattool #quality-report[data-vote='good'] {
-  background-color: colors.$greenDefaultHover !important;
+  background-color: colors.$green700 !important;
 }
 
 .cattool #quality-report[data-vote='poor'] {
@@ -136,11 +136,11 @@ section.opened .warnings {
 }
 
 .cattool #quality-report[data-vote='acceptable'] {
-  background-color: colors.$orangeDefaultHover !important;
+  background-color: colors.$orange400 !important;
 }
 
 .cattool #quality-report[data-vote='fail'] {
-  background-color: colors.$red800 !important;
+  background-color: colors.$red400 !important;
 }
 
 .logo {
@@ -164,7 +164,7 @@ section.opened .warnings {
 }
 
 .projectbar {
-  color: colors.$grey1;
+  color: colors.$grey500;
   display: flex;
   justify-content: flex-start;
   padding: 40px 115px 10px 4.5%;
@@ -195,15 +195,15 @@ section.opened .warnings {
     padding: 6px 12px;
     border-radius: 2px;
     font-size: 16px;
-    background: colors.$translatedBlue;
-    background: -moz-linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
-    background: linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
+    background: colors.$blue500;
+    background: -moz-linear-gradient(top, colors.$blue500, colors.$blue500);
+    background: linear-gradient(top, colors.$blue500, colors.$blue500);
     user-select: none;
     cursor: pointer;
     min-width: 95px;
     margin-left: 15px;
     &:hover {
-      background-color: colors.$translatedBlueHover;
+      background-color: colors.$blue600;
     }
     svg {
       display: block;
@@ -237,38 +237,38 @@ section.opened .warnings {
 }
 
 .approved-bar {
-  background-color: colors.$approvedGreen;
+  background-color: colors.$green400;
 }
 .approved-bar-2nd-pass {
-  background-color: colors.$approved2Green;
+  background-color: colors.$purple500;
 }
 
 .draft-bar {
-  background-color: colors.$grey4;
+  background-color: colors.$grey100;
 }
 
 .rejected-bar {
-  background-color: colors.$redDefault;
+  background-color: colors.$red500;
 }
 
 .translated-bar {
-  background-color: colors.$translatedBlue;
+  background-color: colors.$blue500;
 }
 
 .rejected-background {
-  background-color: colors.$redDefault;
+  background-color: colors.$red500;
 }
 
 .approved-backgruond {
-  background-color: colors.$approvedGreen;
+  background-color: colors.$green400;
 }
 
 .rejected-foreground {
-  color: colors.$redDefault;
+  color: colors.$red500;
 }
 
 .approved-foreground {
-  color: colors.$approvedGreen;
+  color: colors.$green400;
 }
 
 .meter > a {
@@ -356,7 +356,7 @@ section.opened .warnings {
   text-align: center;
   display: block;
   font-size: 11px;
-  color: colors.$grey2;
+  color: colors.$grey300;
   text-decoration: none;
   cursor: default;
   height: 100%;
@@ -371,7 +371,7 @@ section.opened .warnings {
 .sid .txt {
   padding: 0px 3px;
   margin: 2px 0px 0 0px;
-  background: colors.$grey5;
+  background: colors.$grey50;
   display: contents;
 }
 
@@ -395,10 +395,10 @@ section.editor .txt.segment-add-inBulk {
 }
 
 section.segment-selected-inBulk .body .text {
-  background: colors.$transparentBlue;
+  background: colors.$blue50;
 }
 section.segment-selected-inBulk .body .text:hover {
-  background: colors.$transparentBlue !important;
+  background: colors.$blue50 !important;
 }
 
 p.split-shortcut {
@@ -436,7 +436,7 @@ p.split-shortcut {
 }
 
 section:hover .sid {
-  color: colors.$grey1;
+  color: colors.$grey500;
 }
 
 .editor .sid {
@@ -490,7 +490,7 @@ section {
   /*-webkit-transition: all 100ms ease-in;*/
   /*transition: all 100ms ease-in;*/
   //box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  //border: 1px solid $grey4;
+  //border: 1px solid $grey100;
 }
 
 strong:first-child {
@@ -546,7 +546,7 @@ strong:first-child {
 .outersource .copy p {
   visibility: hidden;
   font-size: 11px;
-  color: colors.$grey6;
+  color: colors.$grey700;
   margin-top: 46px;
   margin-left: -4px;
 }
@@ -558,7 +558,7 @@ strong:first-child {
 article {
   //margin: 0px auto 100px auto;
   -moz-border-radius: 2px;
-  -moz-box-shadow: 0 1px 3px colors.$grey8;
+  -moz-box-shadow: 0 1px 3px colors.$grey200;
   position: relative;
   width: 100%;
   float: left;
@@ -641,9 +641,9 @@ section .body > .text {
 }
 
 body #file section:not(.editor) {
-  background: colors.$grey3;
+  background: colors.$grey150;
   cursor: pointer;
-  border: 1px solid colors.$grey2;
+  border: 1px solid colors.$grey300;
   .body {
     height: 100%;
   }
@@ -671,10 +671,10 @@ body #file section:not(.editor) {
   //background: #fff;
   float: left;
   position: relative;
-  color: colors.$grey6;
+  color: colors.$grey700;
   -webkit-transition: all 100ms ease-in;
   transition: all 100ms ease-in;
-  //border-bottom: 1px solid $grey2;
+  //border-bottom: 1px solid $grey300;
 }
 
 ul.suggestion-item.graysmall:last-child {
@@ -736,9 +736,9 @@ section.loaded .submenu {
   float: left;
   position: relative;
   width: auto !important;
-  background: colors.$grey4;
+  background: colors.$grey100;
   z-index: 1;
-  border-bottom: 1px solid colors.$grey3;
+  border-bottom: 1px solid colors.$grey150;
   cursor: pointer;
   user-select: none;
 }
@@ -753,12 +753,12 @@ section.loaded .submenu {
   -moz-transition: all 100ms ease-in;
   padding: 5px 20px;
   display: block;
-  color: colors.$grey1;
+  color: colors.$grey500;
   font-size: 16px;
   float: left;
   text-decoration: none;
-  border-right: 2px solid colors.$grey3;
-  border-top: 2px solid colors.$grey3;
+  border-right: 2px solid colors.$grey150;
+  border-top: 2px solid colors.$grey150;
 }
 
 .submenu .notification:hover {
@@ -766,8 +766,8 @@ section.loaded .submenu {
 }
 
 .submenu a:hover {
-  background: colors.$grey5;
-  color: colors.$grey1;
+  background: colors.$grey50;
+  color: colors.$grey500;
   -moz-box-shadow: none;
   //position: relative;
   -webkit-box-shadow: none;
@@ -781,7 +781,7 @@ section.loaded .submenu {
 }
 
 .tab-switcher.loading-tab a {
-  color: colors.$grey7;
+  color: colors.$grey400;
   padding-right: 36px;
 }
 
@@ -803,7 +803,7 @@ section.loaded .submenu {
   .icon-close {
     display: block;
     height: 15px;
-    color: colors.$grey1;
+    color: colors.$grey500;
   }
 }
 
@@ -845,8 +845,8 @@ section.loaded .submenu {
   color: colors.$white;
   padding: 3px 10px 7px 4px;
   font-size: 12px;
-  background: colors.$translatedBlue;
-  box-shadow: 0px 2px 4px 0px colors.$grey;
+  background: colors.$blue500;
+  box-shadow: 0px 2px 4px 0px colors.$grey600;
   z-index: 2;
 }
 
@@ -860,7 +860,7 @@ section.loaded .submenu {
   text-decoration: none;
   color: colors.$white;
   padding: 0 10px;
-  background: colors.$grey7;
+  background: colors.$grey400;
   font-size: 14px;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
@@ -889,7 +889,7 @@ section.loaded .submenu {
 
 .footer-message {
   margin-left: 20px;
-  background: colors.$orangeDefault !important;
+  background: colors.$orange200 !important;
   padding: 2px 10px;
 }
 
@@ -905,7 +905,7 @@ section.loaded .submenu {
 .filter {
   width: 24px;
   height: 24px;
-  box-shadow: 0px 0px 1px colors.$grey7;
+  box-shadow: 0px 0px 1px colors.$grey400;
   display: block;
   float: right;
   margin: -5px 10px -2px 0;
@@ -918,7 +918,7 @@ section.loaded .submenu {
 }
 
 .search-display .found .warning {
-  color: colors.$redDefault;
+  color: colors.$red500;
 }
 
 .search .loader {
@@ -936,7 +936,7 @@ section.loaded .submenu {
 }
 
 .filter:hover {
-  background-color: colors.$grey6;
+  background-color: colors.$grey700;
 }
 
 .checkbox {
@@ -950,7 +950,7 @@ section.loaded .submenu {
   margin: 4px 10px 3px 0;
   padding: 2px 20px;
   height: 28px;
-  background: colors.$grey8;
+  background: colors.$grey200;
   cursor: pointer;
   font-size: 14px;
   width: 120px;
@@ -1018,7 +1018,7 @@ section.editor .loader_on {
   margin-top: 3px;
   border-radius: 20px;
   background: colors.$white;
-  color: colors.$grey7;
+  color: colors.$grey400;
 }
 
 .close:hover {
@@ -1030,7 +1030,7 @@ section.editor .loader_on {
 section .header .context {
   display: none;
   float: left;
-  color: colors.$grey1;
+  color: colors.$grey500;
   text-decoration: none;
   margin: 3px 0 0 10px;
 }
@@ -1044,21 +1044,21 @@ section .header .context:hover {
 }
 
 .qa {
-  background: colors.$orangeDefault;
-  -moz-box-shadow: 0 1px 3px colors.$grey2;
-  -webkit-box-shadow: 0 1px 3px colors.$grey2;
+  background: colors.$orange200;
+  -moz-box-shadow: 0 1px 3px colors.$grey300;
+  -webkit-box-shadow: 0 1px 3px colors.$grey300;
   padding: 0 2px;
 }
 
 section .text .warning {
-  background: colors.$orangeDefault;
+  background: colors.$orange200;
   padding: 2px 7px;
   text-align: center;
   border: 1px solid colors.$grey1300;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  -moz-box-shadow: 0 1px 3px colors.$grey2;
-  -webkit-box-shadow: 0 1px 3px colors.$grey2;
+  -moz-box-shadow: 0 1px 3px colors.$grey300;
+  -webkit-box-shadow: 0 1px 3px colors.$grey300;
   display: block;
   position: absolute;
   bottom: -30px;
@@ -1115,7 +1115,7 @@ section.opened {
       padding: 0;
     }
     .revise-lock-editArea-active {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
     }
   }
 }
@@ -1127,7 +1127,7 @@ section.opened {
   resize: none;
   margin: 2px 0 0px -11px;
   padding: 5px;
-  color: colors.$grey6;
+  color: colors.$grey700;
   border: 1px solid transparent;
   -moz-border-radius: 2px;
   border-radius: 2px;
@@ -1141,11 +1141,11 @@ section.readonly {
 
 section.ice-locked:not(.segment-selected) .text {
   cursor: no-drop !important;
-  background-color: colors.$grey5 !important;
+  background-color: colors.$grey50 !important;
 }
 
 body section:not(.editor).ice-locked {
-  background: colors.$grey3 !important;
+  background: colors.$grey150 !important;
 }
 
 .ice-locked-icon > button {
@@ -1155,7 +1155,7 @@ body section:not(.editor).ice-locked {
   border: 1px solid transparent;
   border-radius: 2px;
   cursor: pointer;
-  color: colors.$grey7;
+  color: colors.$grey400;
   position: relative;
   margin-bottom: 5px;
   top: 2px;
@@ -1172,12 +1172,12 @@ button.unlock-button.unlocked.icon-unlocked3:before {
 }
 
 section:hover .ice-locked-icon > button {
-  color: colors.$grey;
+  color: colors.$grey600;
 }
 
 .ice-locked-icon > button:hover {
-  background-color: colors.$grey7;
-  border: 1px solid colors.$grey6;
+  background-color: colors.$grey400;
+  border: 1px solid colors.$grey700;
   color: white !important;
 }
 
@@ -1188,8 +1188,8 @@ body.archived section {
 
 section.readonly,
 body.archived section {
-  background: colors.$grey5;
-  color: colors.$grey7;
+  background: colors.$grey50;
+  color: colors.$grey400;
   cursor: not-allowed !important;
 }
 section.readonly .status-container a.status:hover,
@@ -1205,17 +1205,17 @@ body.archived section .status-container a.status:hover {
   line-height: 25px;
   outline: none;
   color: colors.$black;
-  border: 1px solid colors.$grey8;
-  box-shadow: inset 0 1px 2px colors.$grey2;
-  -webkit-box-shadow: inset 0 1px 2px colors.$grey2;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 2px colors.$grey300;
+  -webkit-box-shadow: inset 0 1px 2px colors.$grey300;
   /*font-variant-ligatures: none;*/
   cursor: text;
 }
 
 .editarea:focus {
-  border: 1px solid colors.$grey2;
-  box-shadow: inset 0px 0px 2px 2px colors.$grey2;
-  outline-color: colors.$grey2;
+  border: 1px solid colors.$grey300;
+  box-shadow: inset 0px 0px 2px 2px colors.$grey300;
+  outline-color: colors.$grey300;
 }
 
 .source {
@@ -1279,7 +1279,7 @@ body.archived section .status-container a.status:hover {
   margin: 2px 1px 0px 0;
   padding: 12px 20px 12px 34px;
   text-align: left;
-  color: colors.$grey6;
+  color: colors.$grey700;
   list-style: none;
   font-size: 14px;
   line-height: 16px;
@@ -1340,7 +1340,7 @@ body.archived section .status-container a.status:hover {
   margin-left: 30px;
   width: 60%;
   padding: 3px 0;
-  border-top: 1px dotted colors.$grey2;
+  border-top: 1px dotted colors.$grey300;
   font-style: italic;
   overflow: hidden;
 }
@@ -1372,7 +1372,7 @@ body.archived section .status-container a.status:hover {
 
 .trash {
   transition: all 0.1s linear;
-  color: colors.$grey1;
+  color: colors.$grey500;
   text-decoration: none;
   -o-transition: all 0.1s linear;
   -webkit-transition: all 0.1s linear;
@@ -1391,7 +1391,7 @@ body.archived section .status-container a.status:hover {
   position: absolute;
   font-size: 10px;
   display: none;
-  color: colors.$grey7;
+  color: colors.$grey400;
 }
 
 .graysmall:hover .graysmall-message {
@@ -1402,7 +1402,7 @@ body.archived section .status-container a.status:hover {
   display: none;
   position: absolute;
   bottom: 0px;
-  color: colors.$grey1;
+  color: colors.$grey500;
   width: 100%;
   float: left;
   margin: 0;
@@ -1443,7 +1443,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .graysmall:hover {
-  background: colors.$grey5;
+  background: colors.$grey50;
   cursor: default;
   .tag {
     opacity: 1;
@@ -1460,7 +1460,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .error-img {
-  background: colors.$redDefaultHover url(/public/img/warning.png) no-repeat center;
+  background: colors.$red600 url(/public/img/warning.png) no-repeat center;
   background-size: 17px;
   width: 22px;
   height: 22px;
@@ -1473,7 +1473,7 @@ body.archived section .status-container a.status:hover {
 }
 
 .warning-img {
-  background: colors.$rebuttedRed url(/public/img/warning.png) no-repeat center;
+  background: colors.$orange600 url(/public/img/warning.png) no-repeat center;
   background-size: 17px;
   width: 22px;
   height: 22px;
@@ -1516,7 +1516,7 @@ body.archived section .status-container a.status:hover {
   position: absolute;
   right: 0;
   height: 100%;
-  background: colors.$grey2;
+  background: colors.$grey300;
   top: 0;
   border-bottom: 0;
   z-index: 0;
@@ -1543,20 +1543,20 @@ body.archived section .status-container a.status:hover {
 }
 
 section.status-translated .status {
-  background-color: colors.$translatedBlue !important;
+  background-color: colors.$blue500 !important;
 }
 
 section.status-approved .status {
-  background-color: colors.$approvedGreen !important;
+  background-color: colors.$green400 !important;
 }
 
 section.status-approved2 .status {
-  background-color: colors.$approved2Green !important;
+  background-color: colors.$purple500 !important;
 }
 
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status {
-  background-color: colors.$rebuttedRed !important;
+  background-color: colors.$orange600 !important;
 }
 
 .message-offline-icons {
@@ -1566,7 +1566,7 @@ section.status-rejected .status {
 }
 
 section.editor.status-rejected .status {
-  background-color: colors.$rebuttedRed !important;
+  background-color: colors.$orange600 !important;
 }
 
 section.modified .status {
@@ -1600,42 +1600,42 @@ section.opened.editor .status {
 }
 
 .per-orange {
-  background: colors.$rebuttedRed !important;
+  background: colors.$orange600 !important;
   color: colors.$white !important;
 }
 
 .per-blue {
-  background: colors.$translatedBlue !important;
+  background: colors.$blue500 !important;
   color: colors.$white !important;
 }
 
 .per-green {
-  background: colors.$approvedGreen !important;
+  background: colors.$green400 !important;
   color: colors.$white !important;
 }
 
 .per-yellow {
-  background: colors.$orangeDefault !important;
+  background: colors.$orange200 !important;
   color: colors.$grey1300 !important;
 }
 
 .per-red {
-  background: colors.$redDefault !important;
+  background: colors.$red500 !important;
   color: colors.$white !important;
 }
 
 .per-gray {
-  background: colors.$grey3 !important;
+  background: colors.$grey150 !important;
   color: colors.$grey1300 !important;
 }
 
 .per-red-outline {
   margin-left: 5px !important;
   background-color: transparent !important;
-  color: colors.$redDefault !important;
-  box-shadow: inset 0px 0px 0px 1px colors.$redDefault;
-  -moz-box-shadow: inset 0px 0px 0px 1px colors.$redDefault;
-  -webkit-box-shadow: inset 0px 0px 0px 1px colors.$redDefault;
+  color: colors.$red500 !important;
+  box-shadow: inset 0px 0px 0px 1px colors.$red500;
+  -moz-box-shadow: inset 0px 0px 0px 1px colors.$red500;
+  -webkit-box-shadow: inset 0px 0px 0px 1px colors.$red500;
 }
 
 .graysmall-details .per-yellow,
@@ -1852,11 +1852,11 @@ p.percent {
 }
 
 ins.diff {
-  background: colors.$approvedGreenTransparent;
+  background: colors.$green200;
 }
 
 del.diff {
-  background: colors.$redDefaultTransparent;
+  background: colors.$red100;
 }
 
 .editToolbar {
@@ -1871,10 +1871,10 @@ del.diff {
 }
 
 .split {
-  border: 1px solid colors.$grey6;
+  border: 1px solid colors.$grey700;
   cursor: pointer !important;
   font-size: 17px;
-  background-color: colors.$grey7;
+  background-color: colors.$grey400;
   border-radius: 2px;
   color: colors.$white;
   margin-bottom: 0px;
@@ -1903,7 +1903,7 @@ del.diff {
 }
 
 .editor.split-action .actions .split {
-  background: colors.$translatedBlue;
+  background: colors.$blue500;
 }
 
 section .toolbar {
@@ -2070,7 +2070,7 @@ section.editor .toolbar {
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr:hover {
-  background: colors.$grey4;
+  background: colors.$grey100;
 }
 
 .open-popup-addtm-tr {
@@ -2084,22 +2084,22 @@ section.editor .toolbar {
 }
 
 .addtmx-tr:active {
-  -moz-box-shadow: inset 0 0 1px 1px colors.$grey7;
-  -webkit-box-shadow: inset 0 0 1px 1px colors.$grey7;
-  box-shadow: inset 0 0 1px 1px colors.$grey7;
+  -moz-box-shadow: inset 0 0 1px 1px colors.$grey400;
+  -webkit-box-shadow: inset 0 0 1px 1px colors.$grey400;
+  box-shadow: inset 0 0 1px 1px colors.$grey400;
 }
 
 .alternatives .deleted,
 .suggestion_source .deleted,
 .suggestion_source del {
-  background: colors.$redDefaultTransparent;
+  background: colors.$red100;
   text-decoration: line-through;
 }
 
 .alternatives .added,
 .suggestion_source .added,
 .suggestion_source ins {
-  background: colors.$greenDefaultTransparent;
+  background: colors.$green300;
   text-decoration: none;
 }
 
@@ -2114,7 +2114,7 @@ section.editor .toolbar {
     width: 100%;
     padding: 3px 0px 5px 3px;
     margin: 7px 1.7%;
-    background: colors.$grey9;
+    background: colors.$grey75;
     font-size: 18px;
     min-height: 70px;
     outline: 0;
@@ -2122,7 +2122,7 @@ section.editor .toolbar {
     border-radius: 2px;
     line-height: 27px;
     color: colors.$black;
-    border: 1px solid colors.$grey;
+    border: 1px solid colors.$grey600;
     word-break: normal !important;
     cursor: col-resize;
     float: left;
@@ -2161,14 +2161,14 @@ section.editor .toolbar {
 }
 
 .splitBar .btn-ok:hover {
-  background: colors.$translatedBlueTransparent;
+  background: colors.$blue200;
 }
 
 .splitpoint {
   display: inline-block;
   width: 8px;
   height: 26px;
-  color: colors.$grey;
+  color: colors.$grey600;
   cursor: pointer;
   width: 19px;
   margin: 0px 5px;
@@ -2192,28 +2192,28 @@ section .footer .tab.open {
   display: block;
   z-index: 0;
   position: relative;
-  border-top: 1px solid colors.$grey3;
+  border-top: 1px solid colors.$grey150;
   top: -1px;
   min-height: 40px;
   background-color: colors.$white;
 }
 
 section .segment-side-buttons {
-  color: colors.$grey1;
+  color: colors.$grey500;
 }
 
 .grey-button {
   color: colors.$grey1300;
-  background: colors.$grey5;
+  background: colors.$grey50;
   background: -webkit-gradient(
     linear,
     left top,
     left bottom,
-    from(colors.$grey5),
-    to(colors.$grey4)
+    from(colors.$grey50),
+    to(colors.$grey100)
   );
-  background: -moz-linear-gradient(top, colors.$grey5, colors.$grey4);
-  background: linear-gradient(top, colors.$grey5, colors.$grey4);
+  background: -moz-linear-gradient(top, colors.$grey50, colors.$grey100);
+  background: linear-gradient(top, colors.$grey50, colors.$grey100);
 }
 
 .edit-distance {
@@ -2222,7 +2222,7 @@ section .segment-side-buttons {
   top: 4px;
   right: 6px;
   font-size: 0.8rem;
-  color: colors.$grey7;
+  color: colors.$grey400;
 }
 
 .ui.user.label {
@@ -2253,8 +2253,8 @@ section .segment-side-buttons {
     height: 24px;
     cursor: pointer;
     border-radius: 3px;
-    border: 1px solid colors.$grey8;
-    color: colors.$grey1;
+    border: 1px solid colors.$grey200;
+    color: colors.$grey500;
 
     &:hover:not(.disabled) {
       color: colors.$black;

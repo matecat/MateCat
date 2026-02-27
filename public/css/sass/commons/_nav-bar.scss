@@ -5,7 +5,7 @@ header {
   width: 100%;
   z-index: 6;
   margin: 0;
-  background: colors.$darkBlue;
+  background: colors.$blue900;
   height: 60px;
   @media only screen and (max-width: 992px) {
     min-width: 992px;
@@ -49,10 +49,10 @@ header {
           margin: 0;
           padding: 8px 16px;
           cursor: pointer;
-          color: colors.$translatedBlue;
+          color: colors.$blue500;
 
           &:hover {
-            background-color: colors.$grey9;
+            background-color: colors.$grey75;
           }
 
           i {
@@ -60,7 +60,7 @@ header {
             font-size: 24px;
             margin-top: -3px;
             margin-right: -3px;
-            color: colors.$translatedBlue;
+            color: colors.$blue500;
           }
         }
 
@@ -74,12 +74,12 @@ header {
           right: 10px;
           bottom: 20%;
           background-color: transparent;
-          color: colors.$translatedBlue;
+          color: colors.$blue500;
           font-size: 18px;
           padding-left: 1px;
 
           &:hover {
-            background-color: colors.$grey8;
+            background-color: colors.$grey200;
             transition: 0.3s ease;
           }
         }
@@ -133,7 +133,7 @@ header {
       box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
       -moz-box-sizing: border-box;
       box-sizing: border-box;
-      color: colors.$translatedBlue;
+      color: colors.$blue500;
       display: -webkit-inline-box;
       display: -webkit-inline-flex;
       display: -ms-inline-flexbox;
@@ -155,7 +155,7 @@ header {
       transition: 0.3s ease;
       cursor: pointer;
       background-color: transparent;
-      border: 2px solid colors.$translatedBlue;
+      border: 2px solid colors.$blue500;
       /*opacity: 0.8;
             &:hover {
                 opacity: 1;
@@ -195,9 +195,9 @@ header {
       padding: 0;
       width: 40px;
       /*&:hover {
-                border: 1px dashed $translatedBlue !important;
+                border: 1px dashed $blue500 !important;
                 i {
-                    color: $translatedBlue;
+                    color: $blue500;
                 }
             }*/
     }
@@ -254,7 +254,7 @@ header {
 
               svg {
                 path {
-                  fill: colors.$translatedBlue;
+                  fill: colors.$blue500;
                 }
               }
             }
@@ -269,7 +269,7 @@ header {
           .item-info {
             color: colors.$white;
             border-radius: 2px;
-            background: colors.$darkBlue;
+            background: colors.$blue900;
 
             a {
               svg {
@@ -281,7 +281,7 @@ header {
               &:hover {
                 svg {
                   path {
-                    fill: colors.$translatedBlue;
+                    fill: colors.$blue500;
                   }
                 }
               }
@@ -339,7 +339,7 @@ header {
     padding: 12px 8px !important;
     top: 45px !important;
     border-radius: 2px;
-    border: solid 1px colors.$grey3;
+    border: solid 1px colors.$grey150;
     right: 8px !important;
     &::after {
       content: '';
@@ -361,8 +361,8 @@ header {
       font-size: 16px !important;
 
       &:hover {
-        background-color: colors.$grey5 !important;
-        color: colors.$blue800 !important;
+        background-color: colors.$grey50 !important;
+        color: colors.$blue400 !important;
       }
       &.selected {
         background-color: transparent !important;
@@ -439,7 +439,7 @@ header {
   text-align: right;
   .btn {
     background: colors.$white;
-    color: colors.$darkBlue;
+    color: colors.$blue900;
     font-size: 16px;
     width: 140px;
     text-align: center;
@@ -464,7 +464,7 @@ header {
 .cta-create-team {
   position: fixed !important;
   .ui.primary.button {
-    border: 1px solid colors.$grey;
+    border: 1px solid colors.$grey600;
     float: right;
     border-radius: 2px;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -476,7 +476,7 @@ header {
     a {
       float: right;
       text-decoration: underline;
-      color: colors.$linkBlueHover;
+      color: colors.$blue400;
       cursor: pointer;
       &:hover {
         text-decoration: none;

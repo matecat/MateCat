@@ -19,7 +19,7 @@ div.segment-notes ul.graysmall li span.note-label {
   box-sizing: border-box;
   position: relative;
   border: 5px solid white;
-  border-right: 1px solid colors.$grey8;
+  border-right: 1px solid colors.$grey200;
   float: left;
 }
 
@@ -42,13 +42,13 @@ div.segment-notes ul.graysmall li span.note-label {
   background-position: 50%;
   overflow-y: auto;
   cursor: pointer;
-  box-shadow: 0 0 0 colors.$grey8, 0 0 2px rgba(0, 0, 0, 0.12),
+  box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24);
   margin: 0 auto;
 }
 
 .segments-preview-container:hover {
-  box-shadow: 0 0 0 colors.$grey8, 0 0 8px rgba(0, 0, 0, 0.12),
+  box-shadow: 0 0 0 colors.$grey200, 0 0 8px rgba(0, 0, 0, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.24);
   transition: 0.2s ease;
 }
@@ -62,7 +62,7 @@ div.segment-notes ul.graysmall li span.note-label {
 .segments-notes-container div.context-group {
   text-align: left;
   padding: 12px 20px;
-  color: colors.$grey6;
+  color: colors.$grey700;
   list-style: none;
   font-size: 16px;
   word-break: break-word;
@@ -109,9 +109,9 @@ div.segment-notes ul.graysmall li span.note-label {
   text-align: center;
   margin: 0 3px;
   border-radius: 2px;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   cursor: pointer;
-  color: colors.$grey6;
+  color: colors.$grey700;
   outline: none;
   position: relative;
   background-color: transparent;

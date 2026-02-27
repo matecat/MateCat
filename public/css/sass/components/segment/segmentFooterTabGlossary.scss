@@ -13,14 +13,14 @@
       margin-bottom: 4px;
       font-size: 14px;
       line-height: 16px;
-      color: colors.$grey6;
+      color: colors.$grey700;
     }
   }
   .glossary-select {
     .select-with-icon__wrapper {
       z-index: 2;
       svg {
-        color: colors.$grey2;
+        color: colors.$grey300;
       }
     }
     .select {
@@ -50,7 +50,7 @@
           width: 100%;
 
           input[type='checkbox'] {
-            accent-color: colors.$translatedBlue;
+            accent-color: colors.$blue500;
           }
           label {
             white-space: nowrap;
@@ -68,16 +68,16 @@
         }
         .dropdown__option--is-no-results-found {
           background-color: unset;
-          color: colors.$grey7;
+          color: colors.$grey400;
         }
         .dropdown__option--is-highlighted-option,
         .dropdown__option:hover {
-          background-color: colors.$grey8;
+          background-color: colors.$grey200;
         }
         .button-create-glossary-key {
           width: 100%;
           text-align: left;
-          color: colors.$grey6;
+          color: colors.$grey700;
           font-style: italic;
           font-size: 14px;
           border: none;
@@ -86,7 +86,7 @@
           padding: 0;
 
           &:hover {
-            color: colors.$grey6;
+            color: colors.$grey700;
           }
         }
       }
@@ -99,18 +99,18 @@
     .select__dropdown-wrapper .custom-dropdown {
       .dropdown__list {
         .dropdown__option--is-active-option {
-          background-color: colors.$grey4;
-          color: colors.$grey6;
+          background-color: colors.$grey100;
+          color: colors.$grey700;
         }
         .dropdown__option--is-no-results-found {
           display: none;
         }
         .dropdown__option--is-highlighted-option,
         .dropdown__option:hover {
-          background-color: colors.$grey8;
+          background-color: colors.$grey200;
         }
         .domain-option {
-          border: 1px solid colors.$grey7;
+          border: 1px solid colors.$grey400;
           border-radius: 12px;
           padding: 0 6px 0 6px;
           white-space: nowrap;
@@ -120,7 +120,7 @@
           text-align: center;
         }
         .button-create-option {
-          color: colors.$grey7;
+          color: colors.$grey400;
           font-style: italic;
           font-size: 12px;
           border: none;
@@ -128,7 +128,7 @@
           cursor: pointer;
 
           &:hover {
-            color: colors.$grey6;
+            color: colors.$grey700;
           }
         }
       }
@@ -136,7 +136,7 @@
   }
   input:not([type='radio']),
   textarea {
-    border: 1px solid colors.$grey2;
+    border: 1px solid colors.$grey300;
     border-radius: 4px;
     padding: 4px 8px;
     outline: none;
@@ -144,7 +144,7 @@
     line-height: 16px;
     &:focus,
     &:focus-visible {
-      border-color: colors.$linkBlueTransparent;
+      border-color: colors.$blue300;
     }
     &.input-large {
       height: 64px;
@@ -160,7 +160,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     padding: 24px 32px;
-    border-bottom: 1px solid colors.$grey3;
+    border-bottom: 1px solid colors.$grey150;
     justify-content: space-between;
   }
 
@@ -168,12 +168,12 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    border: 1px solid colors.$grey2;
+    border: 1px solid colors.$grey300;
     border-radius: 4px;
     padding: 4px;
 
     svg {
-      color: colors.$grey2;
+      color: colors.$grey300;
     }
   }
 
@@ -209,19 +209,19 @@
     border-radius: 2px;
     font-size: 16px;
     line-height: 20px;
-    background: colors.$translatedBlue;
-    background: -moz-linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
-    background: linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
+    background: colors.$blue500;
+    background: -moz-linear-gradient(top, colors.$blue500, colors.$blue500);
+    background: linear-gradient(top, colors.$blue500, colors.$blue500);
     user-select: none;
     border: none;
     white-space: nowrap;
     cursor: pointer;
     &:hover {
-      background-color: colors.$translatedBlueHover;
+      background-color: colors.$blue600;
     }
   }
   .glossary__button-cancel {
-    color: colors.$translatedBlue;
+    color: colors.$blue500;
     font-weight: bold;
     text-decoration: none;
     padding: 6px 12px;
@@ -234,7 +234,7 @@
     white-space: nowrap;
     cursor: pointer;
     &:hover {
-      color: colors.$translatedBlueHover;
+      color: colors.$blue600;
     }
   }
   .glossary_items {
@@ -243,11 +243,11 @@
     overflow: auto;
     .glossary_item {
       padding: 24px 32px;
-      color: colors.$grey6;
+      color: colors.$grey700;
       font: 14px/16px calibri, Arial, Helvetica, sans-serif;
       text-align: left;
       &:nth-child(even) {
-        background: colors.$grey5;
+        background: colors.$grey50;
       }
       .glossary_item-header {
         display: flex;
@@ -256,10 +256,10 @@
         display: flex;
         flex-shrink: 0;
         > span {
-          color: colors.$grey6;
+          color: colors.$grey700;
           font-size: 12px;
           line-height: 15px;
-          border: 1px solid colors.$grey6;
+          border: 1px solid colors.$grey700;
           border-radius: 12px;
           padding: 0 4px;
           overflow: hidden;
@@ -307,7 +307,7 @@
         flex-shrink: 0;
 
         > span {
-          color: colors.$grey7;
+          color: colors.$grey400;
           font-size: 10px;
           margin-left: 8px;
         }
@@ -325,7 +325,7 @@
         text-overflow: ellipsis;
 
         span {
-          color: colors.$grey7;
+          color: colors.$grey400;
         }
       }
       .glossary_item-actions {
@@ -334,9 +334,9 @@
         align-items: center;
         gap: 12px;
         padding-left: 16px;
-        color: colors.$grey7;
+        color: colors.$grey400;
         svg:hover {
-          color: colors.$grey6;
+          color: colors.$grey700;
         }
 
         > * {
@@ -385,7 +385,7 @@
             align-items: center;
             svg {
               cursor: pointer;
-              color: colors.$grey7;
+              color: colors.$grey400;
             }
           }
 
@@ -399,10 +399,10 @@
           }
 
           .forbidden-badge {
-            background-color: colors.$grey4;
+            background-color: colors.$grey100;
             font-weight: normal;
             font-size: 14px;
-            color: colors.$grey6;
+            color: colors.$grey700;
             border-radius: 4px;
             padding: 2px 6px;
             margin-left: 10px;
@@ -502,7 +502,7 @@
       display: flex;
       gap: 0;
       justify-content: space-between;
-      color: colors.$grey2;
+      color: colors.$grey300;
       > div {
         width: auto;
         display: flex;
@@ -542,11 +542,11 @@
   }
 
   .select--is-disabled {
-    background-color: colors.$grey4;
+    background-color: colors.$grey100;
   }
 
   .segmented-control {
-    background-color: colors.$grey3;
+    background-color: colors.$grey150;
     .segmented-control__cursor {
       padding: unset;
       height: 74%;

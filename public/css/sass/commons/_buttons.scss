@@ -20,13 +20,13 @@
       linear,
       left top,
       left bottom,
-      from(colors.$translatedBlue),
-      to(colors.$translatedBlue)
+      from(colors.$blue500),
+      to(colors.$blue500)
     );
-    background: -moz-linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
-    background: linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
+    background: -moz-linear-gradient(top, colors.$blue500, colors.$blue500);
+    background: linear-gradient(top, colors.$blue500, colors.$blue500);
     color: colors.$white;
-    border: 1px solid colors.$grey1;
+    border: 1px solid colors.$grey500;
     text-decoration: none;
     border-radius: 2px;
     &.disabled {
@@ -34,51 +34,51 @@
       cursor: default;
       -moz-box-shadow: none;
       -webkit-box-shadow: none;
-      border: 1px solid colors.$grey6;
-      background: colors.$grey8;
+      border: 1px solid colors.$grey700;
+      background: colors.$grey200;
     }
   }
   &.grey {
     color: colors.$grey1300;
-    background: colors.$grey5;
+    background: colors.$grey50;
     background: -webkit-gradient(
       linear,
       left top,
       left bottom,
-      from(colors.$grey5),
-      to(colors.$grey4)
+      from(colors.$grey50),
+      to(colors.$grey100)
     );
-    background: -moz-linear-gradient(top, colors.$grey5, colors.$grey4);
-    background: linear-gradient(top, colors.$grey5, colors.$grey4);
-    border: 1px solid colors.$grey1;
+    background: -moz-linear-gradient(top, colors.$grey50, colors.$grey100);
+    background: linear-gradient(top, colors.$grey50, colors.$grey100);
+    border: 1px solid colors.$grey500;
     text-decoration: none;
     border-radius: 2px;
   }
   &.orange {
-    background-color: colors.$warning;
+    background-color: colors.$orange700;
     background: -webkit-gradient(
       linear,
       left top,
       left bottom,
-      from(colors.$warning),
-      to(colors.$rebuttedRedHover)
+      from(colors.$orange700),
+      to(colors.$orange900)
     );
-    background: -moz-linear-gradient(top, colors.$warning, colors.$rebuttedRedHover);
-    background: linear-gradient(top, colors.$warning, colors.$rebuttedRedHover);
+    background: -moz-linear-gradient(top, colors.$orange700, colors.$orange900);
+    background: linear-gradient(top, colors.$orange700, colors.$orange900);
     color: colors.$white;
-    border: 1px solid colors.$grey1;
+    border: 1px solid colors.$grey500;
     text-decoration: none;
     border-radius: 2px;
   }
   &:hover {
-    box-shadow: 0 1px 2px colors.$grey8;
-    -webkit-box-shadow: 0 1px 2px colors.$grey8;
+    box-shadow: 0 1px 2px colors.$grey200;
+    -webkit-box-shadow: 0 1px 2px colors.$grey200;
     border: 1px solid colors.$black;
   }
   &:active {
-    -moz-box-shadow: inset 0 0 1px 1px colors.$grey7;
-    -webkit-box-shadow: inset 0 0 1px 1px colors.$grey7;
-    box-shadow: inset 0 0 1px 1px colors.$grey7;
+    -moz-box-shadow: inset 0 0 1px 1px colors.$grey400;
+    -webkit-box-shadow: inset 0 0 1px 1px colors.$grey400;
+    box-shadow: inset 0 0 1px 1px colors.$grey400;
   }
 
   &.margin {

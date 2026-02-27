@@ -17,10 +17,10 @@ header {
     border: 1px solid colors.$white;
 
     &.revision-r1 {
-      background: colors.$approvedGreen;
+      background: colors.$green400;
     }
     &.revision-r2 {
-      background: colors.$approved2Green;
+      background: colors.$purple500;
     }
   }
 }
@@ -98,22 +98,22 @@ header {
       }
 
       &.button-badge-warning {
-        background-color: colors.$orangeDefault;
+        background-color: colors.$orange200;
         color: colors.$white;
       }
 
       &.button-badge-info {
-        background-color: colors.$translatedBlue;
+        background-color: colors.$blue500;
         color: colors.$white;
       }
 
       &.button-badge-error {
-        background-color: colors.$redDefault;
+        background-color: colors.$red500;
         color: colors.$white;
       }
 
       &.button-badge-success {
-        background-color: colors.$approvedGreen;
+        background-color: colors.$green400;
         color: colors.$white;
       }
     }
@@ -145,15 +145,15 @@ header {
           gap: 8px;
           padding: 8px;
           border-radius: 8px;
-          background-color: #{rgba(colors.$grey9, 0.5)};
+          background-color: #{rgba(colors.$grey75, 0.5)};
           &.resolved {
-            background-color: #{rgba(colors.$greenDefaultTransparent, 0.15)};
+            background-color: #{rgba(colors.$green300, 0.15)};
             &:hover {
-              background-color: #{rgba(colors.$greenDefaultTransparent, 0.25)};
+              background-color: #{rgba(colors.$green300, 0.25)};
             }
           }
           &:hover {
-            background-color: colors.$grey9;
+            background-color: colors.$grey75;
           }
 
           .popover-comments-item-header {
@@ -168,7 +168,7 @@ header {
             color: colors.$grey1300;
 
             .popover-comments-item-name {
-              color: colors.$grey;
+              color: colors.$grey600;
             }
 
           }

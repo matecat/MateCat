@@ -34,35 +34,35 @@ h3 {
   margin: 0px 0 0 0;
   padding: 0;
   font-size: 18px;
-  color: colors.$grey7 !important;
+  color: colors.$grey400 !important;
   font-weight: normal !important;
 }
 
 .tablestats {
-  border-right: 1px solid colors.$grey8;
+  border-right: 1px solid colors.$grey200;
 }
 
 .tablestats th {
-  background-color: colors.$grey9;
+  background-color: colors.$grey75;
 }
 
 .tablestats td,
 .tablestats th {
-  border-bottom: 1px solid colors.$grey8;
-  border-left: 1px solid colors.$grey8;
+  border-bottom: 1px solid colors.$grey200;
+  border-left: 1px solid colors.$grey200;
   padding: 6px 8px;
   margin: 1px 0;
   text-align: center;
 }
 
 .tablestats tr:hover {
-  background: colors.$grey5;
+  background: colors.$grey50;
 }
 
 .tablestats {
-  border-top: 1px solid colors.$grey8;
+  border-top: 1px solid colors.$grey200;
   margin-bottom: 40px;
-  -moz-box-shadow: 0 1px 2px colors.$grey8;
+  -moz-box-shadow: 0 1px 2px colors.$grey200;
   background: colors.$white;
 }
 
@@ -96,7 +96,7 @@ h3 {
 
 .api .block-swagger {
   margin-top: -20px;
-  background: colors.$grey5;
+  background: colors.$grey50;
 }
 
 /* Bruteforce Override style.css and legacy.min.css */
@@ -115,7 +115,7 @@ section {
 /* Bruteforce Override style.css and legacy.min.css */
 
 .api a {
-  color: colors.$linkBlueHover;
+  color: colors.$blue400;
 }
 
 .api .menu {
@@ -138,7 +138,7 @@ section {
 .api dt {
   float: left;
   text-align: left;
-  color: colors.$grey6;
+  color: colors.$grey700;
   width: 100px;
   padding-right: 20px;
 }
@@ -188,7 +188,7 @@ section {
   margin: 10px 0;
   display: block;
   padding-bottom: 20px;
-  border-bottom: 1px dashed colors.$grey8;
+  border-bottom: 1px dashed colors.$grey200;
 }
 
 .api .gototop.last {
@@ -292,8 +292,8 @@ table {
 code {
   padding: 2px 4px;
   font-size: 90%;
-  color: colors.$linkBlueHover;
-  background-color: colors.$grey9;
+  color: colors.$blue400;
+  background-color: colors.$grey75;
   white-space: nowrap;
   border-radius: 4px;
 }
@@ -301,18 +301,18 @@ code {
 .req,
 .opt {
   font-family: inherit;
-  color: colors.$red800;
-  background-color: colors.$grey9;
+  color: colors.$red400;
+  background-color: colors.$grey75;
   white-space: nowrap;
   padding: 2px 4px;
-  border-left: 2px solid colors.$red800;
+  border-left: 2px solid colors.$red400;
   border-radius: 4px;
 }
 
 .opt {
-  background-color: colors.$greenDefaultTransparent2;
-  border-left: 2px solid colors.$approvedGreenHover;
-  color: colors.$approvedGreenHover;
+  background-color: colors.$green50;
+  border-left: 2px solid colors.$green600;
+  color: colors.$green600;
 }
 
 .api p {
@@ -327,45 +327,45 @@ code {
 }
 
 .outsource-btn {
-  border: 1px solid colors.$grey6;
+  border: 1px solid colors.$grey700;
   border-radius: 4px;
   color: white;
   outline: 0;
   opacity: 0.9;
   padding: 0px !important;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   cursor: pointer;
 }
 
 .outsource-btn:hover {
-  -moz-box-shadow: 0 0px 2px colors.$grey6;
-  -webkit-box-shadow: 0 0px 2px colors.$grey6;
-  box-shadow: 0 0px 2px colors.$grey6;
+  -moz-box-shadow: 0 0px 2px colors.$grey700;
+  -webkit-box-shadow: 0 0px 2px colors.$grey700;
+  box-shadow: 0 0px 2px colors.$grey700;
 }
 
 .outsource-btn:active .outsource-price {
-  -moz-box-shadow: inset 0 0 5px 2px colors.$grey7;
-  -webkit-box-shadow: inset 0 0 5px 2px colors.$grey7;
-  box-shadow: inset 0 0 5px 2px colors.$grey7;
+  -moz-box-shadow: inset 0 0 5px 2px colors.$grey400;
+  -webkit-box-shadow: inset 0 0 5px 2px colors.$grey400;
+  box-shadow: inset 0 0 5px 2px colors.$grey400;
 }
 
 .outsource-btn:active .outsource-delivery {
-  -moz-box-shadow: inset 0 -1px 2px 1px colors.$grey7;
-  -webkit-box-shadow: inset 0 -1px 2px 1px colors.$grey7;
-  box-shadow: inset 0 -1px 2px 1px colors.$grey7;
+  -moz-box-shadow: inset 0 -1px 2px 1px colors.$grey400;
+  -webkit-box-shadow: inset 0 -1px 2px 1px colors.$grey400;
+  box-shadow: inset 0 -1px 2px 1px colors.$grey400;
 }
 
 .outsource-price {
   text-align: center;
   display: block;
   font-size: 18px;
-  background: colors.$greenDefaultTransparent;
+  background: colors.$green300;
   font-weight: bold;
   padding: 10px;
 }
 
 .outsource-delivery {
-  background: colors.$grey9;
+  background: colors.$grey75;
   display: block;
   padding: 5px;
   margin-top: -5px;
@@ -374,7 +374,7 @@ code {
   border-radius: 4px;
   color: colors.$grey1300;
 
-  border-top: 1px solid colors.$grey8;
+  border-top: 1px solid colors.$grey200;
 }
 
 .outsource-delivery strong {
@@ -386,7 +386,7 @@ code {
 .lang-info {
   margin-top: 40px;
   margin-left: 10px;
-  color: colors.$grey6;
+  color: colors.$grey700;
   font-size: 20px;
 }
 
@@ -396,22 +396,22 @@ code {
 td[data-vote='Excellent'],
 td[data-vote='Verygood'],
 td[data-vote='Good'] {
-  background: colors.$greenDefaultTransparent2;
+  background: colors.$green50;
 }
 
 .revision-info tr[data-vote='Poor'],
 td[data-vote='Poor'] {
-  background: colors.$orangeDefaultTransparent2;
+  background: colors.$orange50;
 }
 
 .revision-info tr[data-vote='Acceptable'],
 td[data-vote='Acceptable'] {
-  background: colors.$orangeDefaultTransparent2;
+  background: colors.$orange50;
 }
 
 .revision-info tr[data-vote='Fail'],
 td[data-vote='Fail'] {
-  background: colors.$redDefaultTransparent;
+  background: colors.$red100;
 }
 
 .tablestats.revision {
@@ -441,7 +441,7 @@ td[data-vote='Fail'] {
 
 #details-link {
   font-size: 16px;
-  color: colors.$grey7;
+  color: colors.$grey400;
   text-shadow: none;
   margin-top: 15px;
   display: block;
@@ -468,7 +468,7 @@ td[data-vote='Fail'] {
 
 #vote-box {
   width: 217px;
-  background: colors.$grey5;
+  background: colors.$grey50;
   height: 85px;
   position: absolute;
   right: 0px;
@@ -480,8 +480,8 @@ td[data-vote='Fail'] {
   padding: 50px 5px 10px;
   z-index: 100000000;
   border-radius: 4px;
-  border: 1px solid colors.$grey4;
-  box-shadow: 1px 1px 0px colors.$grey4;
+  border: 1px solid colors.$grey100;
+  box-shadow: 1px 1px 0px colors.$grey100;
 }
 
 .vote-area {
@@ -498,19 +498,19 @@ td[data-vote='Fail'] {
 .blueline {
   width: 100%;
   height: 1px;
-  background: colors.$translatedBlueTransparent;
+  background: colors.$blue200;
   float: left;
-  box-shadow: 0px 1px 0px colors.$grey8;
+  box-shadow: 0px 1px 0px colors.$grey200;
 }
 
 #vote-box[data-vote='Excellent'],
 #vote-box[data-vote='Verygood'],
 #vote-box[data-vote='Good'] {
-  color: colors.$greenDefaultHover;
+  color: colors.$green700;
 }
 
 #vote-box[data-vote='Acceptable'] {
-  color: colors.$orangeDefaultHover;
+  color: colors.$orange400;
 }
 
 #vote-box[data-vote='Poor'] {
@@ -518,7 +518,7 @@ td[data-vote='Fail'] {
 }
 
 #vote-box[data-vote='Fail'] {
-  color: colors.$red800;
+  color: colors.$red400;
 }
 
 table.tablestats.revision-info td,
@@ -531,11 +531,11 @@ table.tablestats.revision-info th {
 .qa_eq_tr[data-vote='Excellent'] td,
 .qa_eq_tr[data-vote='Verygood'] td,
 .qa_eq_tr[data-vote='Good'] td {
-  border-color: colors.$greenDefaultHover !important;
+  border-color: colors.$green700 !important;
 }
 
 .qa_eq_tr[data-vote='Acceptable'] td {
-  border-color: colors.$orangeDefaultHover !important;
+  border-color: colors.$orange400 !important;
 }
 
 .qa_eq_tr[data-vote='Poor'] td {
@@ -543,7 +543,7 @@ table.tablestats.revision-info th {
 }
 
 .qa_eq_tr[data-vote='Fail'] td {
-  border-color: colors.$red800 !important;
+  border-color: colors.$red400 !important;
 }
 
 .qa_eq_tr {
@@ -582,9 +582,9 @@ table.tablestats.revision-info th {
 blockquote {
   padding: 10px 20px;
   margin: 20px 30px 30px 30px;
-  background: colors.$grey9;
+  background: colors.$grey75;
   font-size: 16px;
-  border-left: 5px solid colors.$grey7;
+  border-left: 5px solid colors.$grey400;
   width: 700px;
 }
 
@@ -618,8 +618,8 @@ blockquote {
   overflow: scroll;
 }
 .pee-page header {
-  border-bottom: 1px solid colors.$grey6;
-  background-color: colors.$grey6;
+  border-bottom: 1px solid colors.$grey700;
+  background-color: colors.$grey700;
   padding: 0px 0 2px 0;
   margin-bottom: 20px;
   height: 45px;
@@ -704,7 +704,7 @@ blockquote {
 }
 .pee-page .ui.styled.accordion {
   width: 100%;
-  background: colors.$grey9;
+  background: colors.$grey75;
 }
 .pee-page .accordion .title {
   text-align: right;

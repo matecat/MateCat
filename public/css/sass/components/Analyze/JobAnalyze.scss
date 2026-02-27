@@ -1,6 +1,6 @@
 @use '../../commons/colors';
 .job-analyze-header {
-  background-color: colors.$grey2;
+  background-color: colors.$grey300;
   display: flex;
   height: 32px;
   align-items: center;
@@ -42,8 +42,8 @@
     );
   grid-template-rows: 125px;
   padding: 0 !important;
-  border-bottom: 1px solid colors.$grey3;
-  background-color: colors.$grey4;
+  border-bottom: 1px solid colors.$grey150;
+  background-color: colors.$grey100;
   &.mtqe {
     grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
   }
@@ -52,7 +52,7 @@
     flex-direction: column;
     height: 100%;
     text-align: right;
-    border-left: 1px solid colors.$grey3;
+    border-left: 1px solid colors.$grey150;
     min-width: 46px;
     font-size: 16px;
     &:first-child {
@@ -63,7 +63,7 @@
     }
     :first-child {
       height: 85px;
-      border-bottom: 1px solid colors.$grey3;
+      border-bottom: 1px solid colors.$grey150;
       font-weight: bold;
     }
     > div {
@@ -81,8 +81,8 @@
     flex-direction: column;
     height: 100%;
     text-align: right;
-    color: colors.$grey;
-    background-color: colors.$grey5;
+    color: colors.$grey600;
+    background-color: colors.$grey50;
     padding-right: 6px;
     font-size: 16px;
     :first-child {
@@ -127,7 +127,7 @@
     .chunk-analyze-info-background {
       position: absolute;
       width: 86%;
-      background: colors.$grey;
+      background: colors.$grey600;
       height: 24px;
       right: 10px;
       top: 40px;
@@ -136,7 +136,7 @@
     }
     .chunk-analyze-info-header {
       height: 48px;
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
       border-radius: 4px;
       display: flex;
       flex-direction: column;
@@ -160,7 +160,7 @@
       }
 
       :first-child {
-        color: colors.$grey;
+        color: colors.$grey600;
         font-size: 14px;
       }
       > div {
@@ -183,7 +183,7 @@
       }
     }
     > div {
-      border-right: 1px solid colors.$grey3;
+      border-right: 1px solid colors.$grey150;
       &:last-child,
       &:first-child {
         border-right: none;
@@ -197,7 +197,7 @@
       }
       :first-child {
         font-size: 14px;
-        color: colors.$grey;
+        color: colors.$grey600;
       }
     }
   }
@@ -211,7 +211,7 @@
   grid-template-rows: 24px;
   display: grid;
   padding: 0;
-  color: colors.$grey;
+  color: colors.$grey600;
   position: relative;
   &.mtqe {
     grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
@@ -219,7 +219,7 @@
   .chunk-file-detail-background {
     position: absolute;
     width: 86%;
-    background: colors.$grey;
+    background: colors.$grey600;
     height: 24px;
     right: 10px;
     top: 0px;
@@ -233,7 +233,7 @@
     justify-content: left;
   }
   > div {
-    border-right: 1px solid colors.$grey3;
+    border-right: 1px solid colors.$grey150;
     justify-content: right;
     display: flex;
     padding-right: 6px;
@@ -261,7 +261,7 @@
       padding: 0 6px;
       width: 100%;
       gap: 4px;
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
       cursor: default;
     }
   }

@@ -38,7 +38,7 @@ input {
     }
     .re-warning-selected-text-issue {
       p {
-        background: colors.$orangeDefault;
+        background: colors.$orange200;
         color: colors.$black;
         padding: 5px 10px;
       }
@@ -54,7 +54,7 @@ input {
           overflow-y: hidden;
         }
         .re-item-head {
-          border-bottom: 1px solid colors.$grey5;
+          border-bottom: 1px solid colors.$grey50;
           padding-top: 10px;
           margin-right: 1px;
           font-size: 16px;
@@ -70,7 +70,7 @@ input {
         .re-item {
           &:hover,
           &.active {
-            background: colors.$grey5 !important;
+            background: colors.$grey50 !important;
           }
           .re-item-box {
             display: flex;
@@ -125,13 +125,13 @@ input {
                 padding: 5px 10px;
                 margin-bottom: 0;
                 .re-revisor {
-                  color: colors.$approvedGreen;
+                  color: colors.$green400;
                 }
                 .re-revisor2 {
-                  color: colors.$approved2Green;
+                  color: colors.$purple500;
                 }
                 .re-translator {
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 .re-comment-date {
                   color: lightslategray;
@@ -142,7 +142,7 @@ input {
               }
               .re-highlighted {
                 padding: 10px;
-                border-bottom: 1px solid colors.$grey;
+                border-bottom: 1px solid colors.$grey600;
               }
 
               span.re-selected-text {
@@ -159,7 +159,7 @@ input {
               display: flex;
               button {
                 padding: 7px 10px;
-                background-color: colors.$grey5;
+                background-color: colors.$grey50;
                 @media only screen and (max-width: 1450px) {
                   padding: 7px 7px;
                 }
@@ -172,7 +172,7 @@ input {
 
                 &:hover,
                 &.active {
-                  background-color: colors.$grey8;
+                  background-color: colors.$grey200;
                 }
               }
             }
@@ -201,10 +201,10 @@ input {
     }
     .re-item.issue-comments-open {
       transition: 0.3s ease;
-      background: colors.$grey5;
+      background: colors.$grey50;
     }
     .re-created {
-      background: colors.$grey3;
+      background: colors.$grey150;
       padding: 10px 10px 10px;
       margin-bottom: 0;
       .issues {
@@ -239,7 +239,7 @@ article {
 }
 
 .re-abb-issue {
-  background: colors.$grey4;
+  background: colors.$grey100;
   padding: 0 4px;
   margin-right: 5px;
   color: black;
@@ -260,13 +260,13 @@ article {
     border-top: 12px solid variables.$notification-error;
   }
   &.warning {
-    border-top: 12px solid colors.$orangeDefault;
+    border-top: 12px solid colors.$orange200;
   }
 }
 
 .re-wrapper.thereAreIssues .re-open-view.re-issues {
   top: -1px;
-  border-top: 12px solid colors.$grey3;
+  border-top: 12px solid colors.$grey150;
 }
 
 section {
@@ -309,12 +309,12 @@ section {
 
   .errorTaggingArea {
     .highlight {
-      background-color: colors.$greenDefaultHover;
+      background-color: colors.$green700;
     }
   }
 
   .errorTaggingArea::selection {
-    background-color: colors.$orangeDefault;
+    background-color: colors.$orange200;
   }
 
   .translation-issues-button {
@@ -353,7 +353,7 @@ section {
   }
 
   .revise-button-2 {
-    background: colors.$approved2Green;
+    background: colors.$purple500;
   }
 }
 
@@ -362,7 +362,7 @@ section {
 }
 
 .editing-highlight {
-  background-color: colors.$grey5 !important;
+  background-color: colors.$grey50 !important;
 }
 
 .editing-backward-container {
@@ -383,7 +383,7 @@ section {
 
 //Download Button
 .downloadtr-button.approved-2ndpass {
-  background: colors.$approved2Green;
+  background: colors.$purple500;
   color: colors.$white !important;
 }
 

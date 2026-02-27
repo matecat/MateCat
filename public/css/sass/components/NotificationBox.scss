@@ -64,7 +64,7 @@
   font-size: 16px;
   margin: 10px 0 0;
   padding: 15px;
-  box-shadow: 0 1px 10px colors.$grey6;
+  box-shadow: 0 1px 10px colors.$grey700;
   display: block;
   @include variables.box-sizing(border-box);
   opacity: 0;
@@ -100,7 +100,7 @@
     text-align: right;
     a {
       text-decoration: underline;
-      color: colors.$linkBlue;
+      color: colors.$blue700;
       font-weight: 700;
       &:hover {
         text-decoration: none;
@@ -124,7 +124,7 @@
   text-align: center;
   cursor: pointer;
   &:hover {
-    background-color: colors.$grey6;
+    background-color: colors.$grey700;
   }
 }
 
@@ -166,7 +166,7 @@
     font-weight: bold;
     line-height: 28px;
     span {
-      color: colors.$linkBlue;
+      color: colors.$blue700;
     }
   }
 }

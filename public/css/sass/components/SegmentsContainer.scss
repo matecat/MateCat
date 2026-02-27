@@ -11,7 +11,7 @@
     height: auto;
 
     section.editor {
-      border: 1px solid colors.$grey2;
+      border: 1px solid colors.$grey300;
     }
   }
 
@@ -26,7 +26,7 @@
     section {
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
-      border-top-color: colors.$grey2 !important;
+      border-top-color: colors.$grey300 !important;
 
       .body {
         border-top-left-radius: 8px;
@@ -70,5 +70,5 @@
 }
 
 #file .virtual-list > :first-child > :not(:first-child) > div > :first-child:not(.editor) {
-  border-top-color: colors.$grey3;
+  border-top-color: colors.$grey150;
 }

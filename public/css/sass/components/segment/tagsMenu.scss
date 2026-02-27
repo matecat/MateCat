@@ -6,7 +6,7 @@
     max-width: 300px;
     border-radius: 2px;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    border: 1px solid colors.$grey8;
+    border: 1px solid colors.$grey200;
     .ui.vertical.menu {
       -webkit-box-shadow: none;
       -moz-box-shadow: none;
@@ -22,8 +22,8 @@
         padding: 1rem 1.14rem;
         font-weight: bold;
         line-height: 17px;
-        border-top: 1px solid colors.$grey4;
-        border-bottom: 1px solid colors.$grey3;
+        border-top: 1px solid colors.$grey100;
+        border-bottom: 1px solid colors.$grey150;
         z-index: 1;
         background: colors.$white;
         pointer-events: none;
@@ -33,7 +33,7 @@
           padding: 4px 7px;
           margin: 0 5px;
           &.mismatch {
-            color: colors.$red800;
+            color: colors.$red400;
           }
         }
       }
@@ -53,10 +53,10 @@
           background: rgba(0, 0, 0, 0.05) !important;
         }
         &.added-tag {
-          color: colors.$grey !important;
+          color: colors.$grey600 !important;
 
           & a {
-            color: colors.$grey !important;
+            color: colors.$grey600 !important;
           }
         }
         &.missing-tag {
@@ -67,7 +67,7 @@
           }
         }
         mark {
-          background: colors.$orangeDefault;
+          background: colors.$orange200;
         }
         &.no-results {
           cursor: default;
@@ -79,9 +79,9 @@
     }
   }
   .head-tag-list .locked.mismatch {
-    background-color: colors.$grey9;
-    color: colors.$red800;
-    box-shadow: inset 0 0px 0 2px colors.$red800;
+    background-color: colors.$grey75;
+    color: colors.$red400;
+    box-shadow: inset 0 0px 0 2px colors.$red400;
     font-weight: 100;
     padding: 4px 6px;
     position: relative;
@@ -91,11 +91,11 @@
 
 .style-tag {
   display: inline-flex;
-  background: colors.$grey5;
-  box-shadow: inset 0 0 0 2px colors.$grey4;
+  background: colors.$grey50;
+  box-shadow: inset 0 0 0 2px colors.$grey100;
   border-radius: 7px;
   font-size: 15px;
-  color: colors.$grey;
+  color: colors.$grey600;
   font-style: italic;
   padding: 0 6px 0 3px;
   vertical-align: middle;
@@ -106,7 +106,7 @@
     background: transparent !important;
   }
   &:hover {
-    background: colors.$grey4;
+    background: colors.$grey100;
     cursor: pointer;
   }
   a {
@@ -114,18 +114,18 @@
     font-weight: 700;
   }
   &.mismatch {
-    background-color: colors.$grey9;
-    box-shadow: inset 0 0 0 2px colors.$redDefaultTransparent;
+    background-color: colors.$grey75;
+    box-shadow: inset 0 0 0 2px colors.$red100;
     &:hover {
-      background-color: colors.$redDefaultTransparent;
+      background-color: colors.$red100;
     }
     &.selected {
-      box-shadow: inset 0 0 0 2px colors.$red800;
-      background: colors.$redDefaultTransparent;
+      box-shadow: inset 0 0 0 2px colors.$red400;
+      background: colors.$red100;
     }
     &,
     a {
-      color: colors.$red800;
+      color: colors.$red400;
     }
   }
   &.highlight {

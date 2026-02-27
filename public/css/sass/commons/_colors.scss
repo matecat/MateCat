@@ -1,62 +1,64 @@
-$black: #000;
-$grey: #6f6f6f;
 $white: white;
 
-$grey1: #788190;
-$grey2: #aebdcd;
-$grey3: #d9e0e8;
-$grey4: #eaebee;
-$grey5: #f5f6f7;
-$grey6: #666666;
-$grey7: #9e9e9e;
-$grey8: #d7d8db;
-$grey9: #f3f3f3;
+$black: #000;
+$black100: rgba(#1A1A29, 0.07);
 
-$black100: rgba(26, 26, 41, 0.07);
-$grey1300: rgba(41, 41, 45, 1); //#29292D
-$orange600: rgba(235, 191, 71, 1);
-$blue800: rgba(42, 140, 252, 1);
 
-$darkBlue: #002b5a;
-$darkBlueHover: #00254f;
-$darkBlueTransparent: #d9e0e8;
+// Grey scale (lightest → darkest)
+$grey50: #f5f6f7;
+$grey75: #f3f3f3;
+$grey100: #eaebee;
+$grey150: #d9e0e8;
+$grey200: #d7d8db;
+$grey300: #aebdcd;
+$grey400: #9e9e9e;
+$grey500: #788190;
+$grey600: #6f6f6f;
+$grey700: #666666;
+$grey1300: #29292D;
 
-$linkBlue: #4184c4;
-$linkBlueHover: #3174b4;
-$linkBlueActive: #3174b4;
-$linkBlueTransparent: #86aacd;
 
-$translatedBlue: #0099cc;
-$translatedBlueHover: #0889b3;
-$translatedBlueActive: #0889b3;
-$translatedBlueTransparent: #63c3e3;
-$transparentBlue: #e4f2fb;
+// Orange scale (lightest → darkest)
+$orange50: #fffed8;
+$orange100: #fee47a;
+$orange200: #ffcc01;
+$orange300: #ebbf47;
+$orange400: #efbf00;
+$orange500: #ffaa8e;
+$orange600: #ff8734;
+$orange700: #f2711c;
+$orange800: #df681a;
+$orange900: #e9511f;
 
-$approved2Green: #9352c1;
-$approved2GreenHover: #7a3ca6;
-$approved2GreenTransparent: #b58dd2;
+// Red scale (lightest → darkest)
+$red100: #ffc8ca;
+$red400: #ef4740;
+$red500: #e02020;
+$red600: #d31d1d;
 
-$rebuttedRed: #ff8734;
-$rebuttedRedHover: #e9511f;
-$rebuttedRedTransparent: #ffaa8e;
+// Blue scale (lightest → darkest)
+$blue50: #e4f2fb;
+$blue200: #63c3e3;
+$blue300: #86aacd;
+$blue400: #2a8cfc;
+$blue500: #0099cc;
+$blue600: #0889b3;
+$blue700: #4184c4;
+$blue800: #3174b4;
+$blue900: #002b5a;
+$blue950: #00254f;
 
-$approvedGreen: #2fb177;
-$approvedGreenHover: #1c9f64;
-$approvedGreenTransparent: #80d5af;
-$greenDefault: #1fbd1f;
-$greenDefaultHover: #1ba61b;
-$greenDefaultTransparent: #7cc576;
-$greenDefaultTransparent2: #d1e0d1;
+// Purple scale (lightest → darkest)
+$purple200: #b58dd2;
+$purple500: #9352c1;
+$purple600: #7a3ca6;
 
-$redDefault: #e02020;
-$redDefaultHover: #d31d1d;
-$redDefaultTransparent: #ffc8ca;
-$red800: rgba(239, 71, 64, 1);
+// Green scale (lightest → darkest)
+$green50: #d1e0d1;
+$green200: #80d5af;
+$green300: #7cc576;
+$green400: #2fb177;
+$green500: #1fbd1f;
+$green600: #1c9f64;
+$green700: #1ba61b;
 
-$orangeDefault: #ffcc01;
-$orangeDefaultHover: #efbf00;
-$orangeDefaultTransparent: #fee47a;
-$orangeDefaultTransparent2: #fffed8;
-
-$warning: #f2711c;
-$warningHover: #df681a;

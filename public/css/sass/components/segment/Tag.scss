@@ -10,7 +10,7 @@
               content: '\21B5'; //↵
               padding: 0 4px;
               font-size: 14px;
-              color: colors.$translatedBlueTransparent;
+              color: colors.$blue200;
             }
           }
         }
@@ -53,7 +53,7 @@
   display: flex;
   flex-direction: row;
   padding: 0 2px;
-  background: colors.$darkBlue;
+  background: colors.$blue900;
   font-size: 13px;
   line-height: 1.3;
   color: colors.$white;
@@ -97,7 +97,7 @@
       bottom: 0;
       width: 0;
       height: 0;
-      border-left: 8px solid colors.$darkBlue;
+      border-left: 8px solid colors.$blue900;
       border-top: 8px solid transparent;
       border-bottom: 8px solid transparent;
     }
@@ -112,7 +112,7 @@
       top: 0;
       width: 0;
       height: 0;
-      border-right: 8px solid colors.$darkBlue;
+      border-right: 8px solid colors.$blue900;
       border-top: 8px solid transparent;
       border-bottom: 8px solid transparent;
     }
@@ -127,7 +127,7 @@
       top: 0;
       width: 0;
       height: 0;
-      border-right: 8px solid colors.$darkBlue;
+      border-right: 8px solid colors.$blue900;
       border-top: 8px solid transparent;
       border-bottom: 8px solid transparent;
     }
@@ -138,7 +138,7 @@
       bottom: 0;
       width: 0;
       height: 0;
-      border-left: 8px solid colors.$darkBlue;
+      border-left: 8px solid colors.$blue900;
       border-top: 8px solid transparent;
       border-bottom: 8px solid transparent;
     }
@@ -146,7 +146,7 @@
 
   &.tag-ph {
     border-radius: 8px;
-    background: colors.$grey1;
+    background: colors.$grey500;
     margin: 0 1px;
     padding: 0 4px;
     max-width: unset;
@@ -224,36 +224,36 @@
 
   /* Tag states */
   &.tag-inactive {
-    color: colors.$grey1;
-    background: colors.$grey5;
+    color: colors.$grey500;
+    background: colors.$grey50;
     &:before {
-      border-left-color: colors.$grey5;
+      border-left-color: colors.$grey50;
     }
     &:after {
-      border-right-color: colors.$grey5;
+      border-right-color: colors.$grey50;
     }
   }
 
   &.tag-clicked {
-    background-color: colors.$approvedGreen;
+    background-color: colors.$green400;
     opacity: 1;
     &:before {
-      border-left-color: colors.$approvedGreen;
+      border-left-color: colors.$green400;
     }
     &:after {
-      border-right-color: colors.$approvedGreen;
+      border-right-color: colors.$green400;
     }
   }
 
   &.tag-focused {
     cursor: grab;
     opacity: 1;
-    background-color: colors.$translatedBlue;
+    background-color: colors.$blue500;
     &:before {
-      border-left-color: colors.$translatedBlue;
+      border-left-color: colors.$blue500;
     }
     &:after {
-      border-right-color: colors.$translatedBlue;
+      border-right-color: colors.$blue500;
     }
     &:active {
       cursor: grabbing;
@@ -263,35 +263,35 @@
   &.tag-selected {
     cursor: grab;
     opacity: 1;
-    background-color: colors.$translatedBlue;
-    box-shadow: 2px 0px 5px 2px colors.$translatedBlue;
+    background-color: colors.$blue500;
+    box-shadow: 2px 0px 5px 2px colors.$blue500;
     &:before {
-      border-left-color: colors.$translatedBlue;
+      border-left-color: colors.$blue500;
     }
     &:after {
-      border-right-color: colors.$translatedBlue;
+      border-right-color: colors.$blue500;
     }
     &:active {
       cursor: grabbing;
     }
   }
   &.tag-mismatch-error {
-    background-color: colors.$redDefault;
+    background-color: colors.$red500;
     &:before {
-      border-left-color: colors.$redDefault;
+      border-left-color: colors.$red500;
     }
     &:after {
-      border-right-color: colors.$redDefault;
+      border-right-color: colors.$red500;
     }
   }
 
   &.tag-mismatch-warning {
-    background-color: colors.$orangeDefault;
+    background-color: colors.$orange200;
     &:before {
-      border-left-color: colors.$orangeDefault;
+      border-left-color: colors.$orange200;
     }
     &:after {
-      border-right-color: colors.$orangeDefault;
+      border-right-color: colors.$orange200;
     }
   }
 
@@ -303,7 +303,7 @@
   &.tag-nbsp {
     font-size: 18px;
     margin: 0 2px;
-    color: colors.$translatedBlueTransparent;
+    color: colors.$blue200;
     background: transparent;
     &:before {
       border: none;
@@ -313,7 +313,7 @@
     }
     span {
       &::selection {
-        color: colors.$darkBlue;
+        color: colors.$blue900;
       }
     }
   }
@@ -321,7 +321,7 @@
   &.tag-word-joiner {
     font-size: 16px;
     margin: 0;
-    background: colors.$translatedBlueTransparent;
+    background: colors.$blue200;
     &:before {
       border: none;
     }
@@ -330,7 +330,7 @@
     }
     span {
       &::selection {
-        color: colors.$darkBlue;
+        color: colors.$blue900;
       }
     }
   }
@@ -339,7 +339,7 @@
     font-size: 17px;
     font-weight: 900;
     margin: 0;
-    color: colors.$translatedBlueTransparent;
+    color: colors.$blue200;
     background-color: transparent;
     &:before {
       border: none;
@@ -349,7 +349,7 @@
     }
     span {
       &::selection {
-        color: colors.$darkBlue;
+        color: colors.$blue900;
       }
     }
   }
@@ -368,7 +368,7 @@
       top: -7px;
       padding: 0 4px;
       font-size: 14px;
-      color: colors.$translatedBlueTransparent;
+      color: colors.$blue200;
       border: none;
     }
   }
@@ -382,7 +382,7 @@
       top: -7px;
       padding: 0 4px;
       font-size: 14px;
-      color: colors.$translatedBlueTransparent;
+      color: colors.$blue200;
       border: none;
     }
   }
@@ -390,7 +390,7 @@
   &.tag-tab {
     font-size: 14px;
     margin: 0 2px;
-    color: colors.$translatedBlueTransparent;
+    color: colors.$blue200;
     background: transparent;
     &:before {
       border: none;
@@ -400,7 +400,7 @@
     }
     span {
       &::selection {
-        color: colors.$darkBlue;
+        color: colors.$blue900;
       }
     }
   }
@@ -409,7 +409,7 @@
     font-size: 14px;
     font-family: 'icomoon';
     margin: 0 2px;
-    color: colors.$translatedBlueTransparent;
+    color: colors.$blue200;
     background: transparent;
     &:before {
       border: none;
@@ -419,7 +419,7 @@
     }
     span {
       &::selection {
-        color: colors.$darkBlue;
+        color: colors.$blue900;
       }
     }
     &:hover {
@@ -436,11 +436,11 @@
   .index-counter {
     margin-left: 2px;
     margin-right: -3px;
-    background-color: colors.$grey6;
+    background-color: colors.$grey700;
     border-radius: 10px;
     padding-left: 5px;
     padding-right: 5px;
-    box-shadow: inset 0px 0px 0px 1px colors.$grey1;
+    box-shadow: inset 0px 0px 0px 1px colors.$grey500;
   }
 }
 
@@ -448,7 +448,7 @@
   position: absolute;
   width: 140px;
   height: 32px;
-  background-color: colors.$grey8;
+  background-color: colors.$grey200;
   top: -35px;
   border-radius: 2px;
   display: flex;
@@ -553,14 +553,14 @@
       }
     }
     .tooltip-error-ignore {
-      color: colors.$grey;
+      color: colors.$grey600;
       text-decoration: none;
       cursor: pointer;
       border-radius: 0 4px 4px 0;
       padding-left: 10px;
       height: 40px;
       &:hover {
-        color: colors.$grey6;
+        color: colors.$grey700;
       }
       .icon-cancel-circle:before {
         line-height: 40px;
@@ -617,7 +617,7 @@
     padding: 1rem 0;
     font-weight: 700;
     line-height: 17px;
-    border-bottom: 1px solid colors.$grey3;
+    border-bottom: 1px solid colors.$grey150;
     background: colors.$white;
     align-items: center;
     cursor: default;
@@ -637,7 +637,7 @@
   }
 
   .tag-menu-suggestion {
-    border-bottom: 1px solid colors.$grey3;
+    border-bottom: 1px solid colors.$grey150;
     padding: 4px 0;
     color: rgb(0, 85, 184);
     text-overflow: ellipsis;
@@ -648,7 +648,7 @@
     cursor: pointer;
     &:hover,
     &.active {
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
       font-weight: 700;
       .tag-placeholder {
         transition: opacity 0.25s;
@@ -681,8 +681,8 @@
       }
 
       .place-here-tips {
-        border: 1px solid colors.$translatedBlueTransparent;
-        color: colors.$translatedBlueTransparent;
+        border: 1px solid colors.$blue200;
+        color: colors.$blue200;
         border-radius: 2px;
         padding: 1px 2px;
         line-height: 1.1;

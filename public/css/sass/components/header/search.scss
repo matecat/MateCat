@@ -24,7 +24,7 @@
     margin: 4px 0px 3px 10px;
     padding: 2px 10px;
     height: 28px;
-    background: colors.$grey4;
+    background: colors.$grey100;
     cursor: pointer;
     font-size: 14px;
     width: fit-content;
@@ -32,9 +32,9 @@
     &:disabled {
       cursor: not-allowed;
       background: colors.$white;
-      color: colors.$grey8;
-      color: colors.$grey8;
-      border: 1px solid colors.$grey8;
+      color: colors.$grey200;
+      color: colors.$grey200;
+      border: 1px solid colors.$grey200;
       font-weight: 100;
     }
   }
@@ -47,19 +47,19 @@
     font-size: 12px !important;
     height: 23px;
     padding: 0 5px;
-    border: 1px solid colors.$grey7;
+    border: 1px solid colors.$grey400;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
   }
 
   .search-input:hover {
-    -moz-box-shadow: inset 0 1px 1px colors.$grey4;
-    -webkit-box-shadow: inset 0 1px 1px colors.$grey4;
+    -moz-box-shadow: inset 0 1px 1px colors.$grey100;
+    -webkit-box-shadow: inset 0 1px 1px colors.$grey100;
   }
 
   .search-input:focus {
-    -moz-box-shadow: inset 0 1px 2px colors.$grey8;
-    -webkit-box-shadow: inset 0 1px 2px colors.$grey8;
+    -moz-box-shadow: inset 0 1px 2px colors.$grey200;
+    -webkit-box-shadow: inset 0 1px 2px colors.$grey200;
     color: colors.$black;
   }
 
@@ -140,12 +140,12 @@ button#exec-replace {
       input:not(.input--invisible), {
         border-radius: 2px !important;
         border: 1px solid rgba(34, 36, 38, 0.15) !important;
-        box-shadow: inset 0 1px 3px colors.$grey8 !important;
+        box-shadow: inset 0 1px 3px colors.$grey200 !important;
         font-size: 1.2em !important;
         padding: 8px 16px 7px !important;
 
         &::-webkit-input-placeholder {
-          color: colors.$grey7;
+          color: colors.$grey400;
         }
 
         &:hover {
@@ -153,7 +153,7 @@ button#exec-replace {
         }
 
         &:focus {
-          border-color: colors.$linkBlueTransparent !important;
+          border-color: colors.$blue300 !important;
           background: colors.$white !important;
           color: rgba(0, 0, 0, 0.8) !important;
           /*outline: none;*/
@@ -164,10 +164,10 @@ button#exec-replace {
       background-color: colors.$white;
       padding: 10px 0 0;
       margin-bottom: 0;
-      box-shadow: 0 1px 3px colors.$grey6;
+      box-shadow: 0 1px 3px colors.$grey700;
       border-radius: 0 0 0 0;
       display: block;
-      color: colors.$grey6;
+      color: colors.$grey700;
       .find-container-inside {
         height: 100%;
         padding: 0 6.5% 0 5%;
@@ -200,17 +200,17 @@ button#exec-replace {
               }
               .ui.cancel.label {
                 padding: 4px;
-                background-color: colors.$grey8;
+                background-color: colors.$grey200;
                 border-radius: 15px;
                 top: 8px;
                 line-height: 0px;
                 right: 0px;
                 &:hover {
-                  background-color: colors.$grey8 !important;
+                  background-color: colors.$grey200 !important;
                 }
               }
               .ui.input input {
-                box-shadow: inset 0 1px 3px colors.$grey8;
+                box-shadow: inset 0 1px 3px colors.$grey200;
               }
 
               &.not-filtered {
@@ -239,19 +239,19 @@ button#exec-replace {
                   background: colors.$white;
                 }
                 &.draft-color {
-                  background: colors.$grey4;
+                  background: colors.$grey100;
                 }
                 &.translated-color {
-                  background: colors.$translatedBlue;
+                  background: colors.$blue500;
                 }
                 &.approved-color {
-                  background: colors.$approvedGreen;
+                  background: colors.$green400;
                 }
                 &.approved-2ndpass-color {
-                  background: colors.$approved2Green;
+                  background: colors.$purple500;
                 }
                 &.rejected-color {
-                  background: colors.$red800;
+                  background: colors.$red400;
                 }
               }
             }
@@ -296,7 +296,7 @@ button#exec-replace {
 
           .find-clear {
             margin-left: 13px;
-            border-left: 1px solid colors.$grey8;
+            border-left: 1px solid colors.$grey200;
             padding-left: 15px;
             position: relative;
             top: 9px;
@@ -343,7 +343,7 @@ button#exec-replace {
         font-size: 1.2em;
         padding: 15px 6.5% 15px 5%;
         text-align: left;
-        background: colors.$grey5;
+        background: colors.$grey50;
         .found {
           margin: 0;
           margin-right: 20px;
@@ -378,7 +378,7 @@ button#exec-replace {
             span {
               position: absolute;
               font-size: 12px;
-              color: colors.$grey7;
+              color: colors.$grey400;
               -webkit-transition: all 100ms ease-in;
               -moz-transition: all 100ms ease-in;
               visibility: hidden;

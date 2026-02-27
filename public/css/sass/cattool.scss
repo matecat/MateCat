@@ -7,7 +7,7 @@ body.cattool {
   //flex-direction: column;
   overflow-y: hidden !important;
   padding: unset;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
 
   .page-content {
     display: flex;
@@ -49,7 +49,7 @@ body.cattool {
   .pointer-first-segment {
     height: 36px;
     width: 36px;
-    background: colors.$darkBlue url('/public/img/icons/arrow-up.svg') no-repeat
+    background: colors.$blue900 url('/public/img/icons/arrow-up.svg') no-repeat
       center center;
     background-size: 24px;
     border-radius: 50%;
@@ -60,7 +60,7 @@ body.cattool {
     bottom: 8px;
     cursor: pointer;
     &:hover {
-      background-color: colors.$darkBlueHover;
+      background-color: colors.$blue950;
     }
   }
 }
@@ -84,7 +84,7 @@ body.cattool {
     height: 24px;
   }
   .icon-warning-sign.qa-icon {
-    background-color: colors.$red800;
+    background-color: colors.$red400;
     color: colors.$white;
     display: flex;
     padding: 3px;
@@ -114,7 +114,7 @@ body.cattool {
     line-height: 12px;
     &.badge-red {
       color: colors.$white;
-      background-color: colors.$red800;
+      background-color: colors.$red400;
     }
     &.badge-orange {
       color: colors.$black;
@@ -122,7 +122,7 @@ body.cattool {
     }
     &.badge-blue {
       color: colors.$white;
-      background-color: colors.$blue800;
+      background-color: colors.$blue400;
     }
   }
 }
@@ -152,11 +152,11 @@ body.cattool {
     padding: 0 !important;
 
     &:disabled {
-      color: colors.$grey8 !important;
-      box-shadow: inset 0 0 0 1px colors.$grey8 !important;
+      color: colors.$grey200 !important;
+      box-shadow: inset 0 0 0 1px colors.$grey200 !important;
 
       svg {
-        color: colors.$grey8 !important;
+        color: colors.$grey200 !important;
       }
     }
   }
@@ -174,7 +174,7 @@ body.cattool {
 
   .lara-styles-dropdown-item {
     font-size: 14px;
-    color: colors.$grey7;
+    color: colors.$grey400;
     padding: 12px;
     border-radius: 6px;
     text-wrap: auto;
@@ -187,10 +187,10 @@ body.cattool {
 
     &.lara-styles-dropdown-item-active,
     &:hover {
-      background-color: rgba(colors.$blue800, 0.16);
-      color: colors.$translatedBlue;
+      background-color: rgba(colors.$blue400, 0.16);
+      color: colors.$blue500;
       > span {
-        color: colors.$translatedBlueHover;
+        color: colors.$blue600;
       }
     }
   }

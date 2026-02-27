@@ -10,7 +10,7 @@
     flex-direction: column;
     gap: 20px;
     max-width: 320px;
-    background: colors.$grey5;
+    background: colors.$grey50;
     border-radius: 8px;
     padding: 64px 40px;
 
@@ -31,7 +31,7 @@
 
         svg {
           flex-shrink: 0;
-          color: colors.$translatedBlue;
+          color: colors.$blue500;
         }
       }
     }
@@ -51,14 +51,14 @@
     h4 {
       font-size: 16px;
       font-weight: bold;
-      color: colors.$grey7;
+      color: colors.$grey400;
       text-align: center;
       margin: 0;
     }
   }
 
   .register-divider {
-    color: colors.$grey7;
+    color: colors.$grey400;
     display: flex;
     align-items: center;
     width: 100%;
@@ -66,7 +66,7 @@
     div {
       flex-grow: 1;
       height: 1px;
-      background-color: colors.$grey8;
+      background-color: colors.$grey200;
     }
 
     span {
@@ -101,7 +101,7 @@
 
         > span {
           display: flex;
-          color: colors.$grey7;
+          color: colors.$grey400;
         }
       }
     }
@@ -109,7 +109,7 @@
     .terms-and-conditions-error {
       font-size: 12px;
       text-align: left;
-      color: colors.$redDefault;
+      color: colors.$red500;
     }
   }
 
@@ -117,7 +117,7 @@
     display: flex;
     justify-content: center;
     font-size: 16px;
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
 }
 
@@ -140,7 +140,7 @@
   }
 
   p {
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
 
   .footer-buttons {
@@ -153,6 +153,6 @@
 
   .email-sent-again {
     text-align: center;
-    color: colors.$grey7;
+    color: colors.$grey400;
   }
 }

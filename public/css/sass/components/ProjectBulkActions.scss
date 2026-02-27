@@ -5,12 +5,12 @@
   z-index: 3;
   top: 80px;
   margin-left: -100px;
-  background: colors.$grey5;
+  background: colors.$grey50;
   background: linear-gradient(
     180deg,
-    rgba(colors.$grey5, 1) 0%,
-    rgba(colors.$grey5, 1) 84%,
-    rgba(colors.$grey5, 0) 100%
+    rgba(colors.$grey50, 1) 0%,
+    rgba(colors.$grey50, 1) 84%,
+    rgba(colors.$grey50, 0) 100%
   );
 
   &.project-bulk-actions-background-hidden {
@@ -24,7 +24,7 @@
   padding: 5px;
   justify-content: center;
   align-items: center;
-  background-color: colors.$grey4;
+  background-color: colors.$grey100;
   border-radius: 24px;
 
   > div {
@@ -39,7 +39,7 @@
       width: 25px;
       height: 25px;
       font-size: 12px;
-      background-color: colors.$grey6;
+      background-color: colors.$grey700;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -49,11 +49,11 @@
     }
 
     .jobs-selected-reached-limit {
-      background-color: colors.$orangeDefaultHover;
+      background-color: colors.$orange400;
     }
 
     > span:not(:first-of-type) {
-      color: colors.$grey6;
+      color: colors.$grey700;
     }
 
     > div {
@@ -63,7 +63,7 @@
   }
 
   .button-component-container:disabled {
-    color: colors.$grey7 !important;
+    color: colors.$grey400 !important;
   }
 }
 
@@ -88,6 +88,6 @@
     width: 30px;
     height: 1px;
     display: block;
-    background: colors.$grey7;
+    background: colors.$grey400;
   }
 }

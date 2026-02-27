@@ -49,7 +49,7 @@
 
 .select {
   margin: 0;
-  border: 1px solid colors.$grey2;
+  border: 1px solid colors.$grey300;
   border-radius: 8px;
   padding: 4px 8px;
   outline: none;
@@ -58,11 +58,11 @@
   width: 100%;
   background-color: colors.$white;
   white-space: nowrap;
-  color: colors.$grey6;
+  color: colors.$grey700;
   transition: box-shadow 0.3s cubic-bezier(0.77, 0, 0.175, 1);
   display: block;
   &::placeholder {
-    color: colors.$grey1;
+    color: colors.$grey500;
     opacity: 1;
   }
   .icon-reset {
@@ -84,7 +84,7 @@
 .select--is-invalid,
 .select--is-invalid:hover,
 .select--is-invalid:focus {
-  box-shadow: inset 0 0 0 2px colors.$redDefault !important;
+  box-shadow: inset 0 0 0 2px colors.$red500 !important;
 }
 
 .select-with-icon__wrapper {
@@ -103,7 +103,7 @@
 
 .select-with-icon__wrapper input + svg {
   right: 12px;
-  color: colors.$grey;
+  color: colors.$grey600;
 }
 
 .input--invisible,
@@ -148,23 +148,23 @@ label ~ .select__dropdown-wrapper:not(
   inset: 0;
   z-index: 10;
   padding: 40px;
-  background-color: rgba(colors.$grey, 0.6);
+  background-color: rgba(colors.$grey600, 0.6);
 }
 
 // Disabled state
 .select--is-disabled {
-  //background-color: colors.$grey6;
+  //background-color: colors.$grey700;
   box-shadow: none;
-  color: colors.$grey7;
+  color: colors.$grey400;
   cursor: not-allowed;
 
   &::placeholder {
-    color: colors.$grey7;
+    color: colors.$grey400;
     opacity: 1;
   }
 
   & ~ svg {
-    color: colors.$grey7 !important;
+    color: colors.$grey400 !important;
   }
 }
 
@@ -180,20 +180,20 @@ label ~ .select__dropdown-wrapper:not(
     background: colors.$white;
   }
   .draft-color {
-    background: colors.$grey1;
+    background: colors.$grey500;
   }
   .translated-color,
   .post-edited-color {
-    background: colors.$translatedBlue;
+    background: colors.$blue500;
   }
   .approved-color {
-    background: colors.$approvedGreen;
+    background: colors.$green400;
   }
   .approved-2ndpass-color,
   .approved2-color {
-    background: colors.$approved2Green;
+    background: colors.$purple500;
   }
   .rejected-color {
-    background: colors.$rebuttedRed;
+    background: colors.$orange600;
   }
 }

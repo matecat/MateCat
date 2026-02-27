@@ -19,11 +19,11 @@ body {
 
 .translate-box a.tooltip.gray span,
 .translate-box a.tooltip.gray {
-  background: colors.$grey9;
+  background: colors.$grey75;
 }
 
 .translate-box a.tooltip.gray span:after {
-  border-top: 10px solid colors.$grey9;
+  border-top: 10px solid colors.$grey75;
 }
 
 .translate-box a.tooltip:hover span {
@@ -138,7 +138,7 @@ body {
     .select {
       padding: 9px 46px 9px 12px;
       border: 1px solid rgba(34, 36, 38, 0.15);
-      box-shadow: inset 0 1px 3px colors.$grey8;
+      box-shadow: inset 0 1px 3px colors.$grey200;
 
       &:hover {
         border-color: rgba(34, 36, 38, 0.35);
@@ -148,12 +148,12 @@ body {
 
     .select--is-focused,
     .select--is-focused:hover {
-      border: solid 1px colors.$grey2;
+      border: solid 1px colors.$grey300;
       border-bottom: unset;
     }
 
     .select--is-disabled {
-      background-color: colors.$grey9;
+      background-color: colors.$grey75;
     }
 
     .custom-dropdown {
@@ -194,7 +194,7 @@ body {
       }
 
       .dropdown__option--is-no-results-found {
-        color: colors.$grey7;
+        color: colors.$grey400;
       }
 
       .dropdown__option--is-no-results-found {
@@ -205,25 +205,25 @@ body {
         background-color: unset;
         color: colors.$black;
         font-weight: bold;
-        background-color: colors.$grey5;
+        background-color: colors.$grey50;
       }
 
       .dropdown__option--is-highlighted-option,
       .dropdown__option:hover {
-        background-color: colors.$grey4;
+        background-color: colors.$grey100;
       }
     }
 
     .select__dropdown-wrapper {
       min-width: 350px;
-      border: solid 1px colors.$grey2;
+      border: solid 1px colors.$grey300;
       border-top: unset;
       z-index: 3;
       margin-top: 1px;
 
       input:not([type='radio']),
       textarea {
-        border: 1px solid colors.$grey2;
+        border: 1px solid colors.$grey300;
         border-radius: 4px;
         padding: 4px 8px;
         outline: none;
@@ -231,7 +231,7 @@ body {
         line-height: 16px;
         &:focus,
         &:focus-visible {
-          border-color: colors.$linkBlueTransparent;
+          border-color: colors.$blue300;
         }
       }
       .dropdown__search-bar {
@@ -248,7 +248,7 @@ body {
         cursor: pointer;
         border: none;
         background-color: white;
-        color: colors.$linkBlueHover;
+        color: colors.$blue400;
         font-size: 14px;
         font-weight: bold;
         margin: 0;
@@ -261,7 +261,7 @@ body {
         }
 
         &:hover {
-          background-color: colors.$grey4;
+          background-color: colors.$grey100;
         }
       }
     }
@@ -326,7 +326,7 @@ body {
   max-width: 1600px;
   position: relative;
   padding: 0 24px 24px;
-  background: colors.$grey5;
+  background: colors.$grey50;
   border-radius: 16px;
 }
 
@@ -351,7 +351,7 @@ body {
   display: grid;
   align-items: center;
   justify-content: center;
-  color: colors.$darkBlue;
+  color: colors.$blue900;
   min-width: 992px;
   /*margin: -3px 0 10px 0;*/
   height: 175px;
@@ -373,7 +373,7 @@ body {
   margin: 0px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   .highlight {
-    color: colors.$translatedBlue;
+    color: colors.$blue500;
   }
 }
 
@@ -399,7 +399,7 @@ h2 {
   min-width: 200px;
   font-size: 26px !important;
   &.disabled {
-    background: colors.$grey2 !important;
+    background: colors.$grey300 !important;
   }
   .uploadloader {
     background: url(/public/img/loader.gif) center center no-repeat;
@@ -423,7 +423,7 @@ h2 {
   margin: -2px 0 0 5px;
   font-size: 13px;
   font-weight: normal;
-  color: colors.$grey7;
+  color: colors.$grey400;
   display: none;
   text-align: center;
 }
@@ -454,16 +454,16 @@ body {
   height: 37px;
   padding: 5px;
   font-size: 16px;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   margin: 0 0 5px 0;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   border-radius: 2px;
 }
 
 a {
-  color: colors.$linkBlue;
+  color: colors.$blue700;
   &:hover {
-    color: colors.$linkBlueHover;
+    color: colors.$blue400;
   }
 }
 
@@ -471,7 +471,7 @@ a {
   float: left;
   font-weight: bold;
   font-size: 16px;
-  color: colors.$grey1;
+  color: colors.$grey500;
   margin: 0px;
   .supported-file-formats {
     cursor: pointer;
@@ -481,7 +481,7 @@ a {
 .btn {
   height: 44px;
   display: block;
-  border: 1px solid colors.$grey1;
+  border: 1px solid colors.$grey500;
   text-decoration: none;
   -moz-border-radius: 2px;
   border-radius: 2px;
@@ -494,7 +494,7 @@ a {
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   border: none;
-  background: colors.$grey2;
+  background: colors.$grey300;
   box-shadow: none !important;
 }
 
@@ -531,11 +531,11 @@ a {
   height: 20px;
   float: left;
   text-align: left;
-  background: colors.$grey9;
-  border-bottom: 1px solid colors.$grey8;
+  background: colors.$grey75;
+  border-bottom: 1px solid colors.$grey200;
   margin-bottom: 5px;
-  -webkit-box-shadow: inset 0 1px 1px 1px colors.$grey5;
-  box-shadow: inset 0 1px 1px 1px colors.$grey5;
+  -webkit-box-shadow: inset 0 1px 1px 1px colors.$grey50;
+  box-shadow: inset 0 1px 1px 1px colors.$grey50;
   color: colors.$grey1300;
   font-size: 22px;
   font-weight: bold;
@@ -567,13 +567,13 @@ a {
 .popup .header input {
   float: right;
   margin: 1px 0px 0px 15px !important;
-  background: colors.$translatedBlue;
+  background: colors.$blue500;
   font-weight: bold;
   float: right;
   font-size: 14px;
   cursor: pointer;
   color: colors.$grey1300;
-  border: 1px solid colors.$grey8 !important;
+  border: 1px solid colors.$grey200 !important;
   border-radius: 2px;
   border-radius: 2px;
   padding: 3px 12px !important;
@@ -585,8 +585,8 @@ a {
     from(rgb(245, 245, 245)),
     to(rgb(211, 212, 213))
   );
-  background: -moz-linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
-  background: linear-gradient(top, colors.$translatedBlue, colors.$translatedBlue);
+  background: -moz-linear-gradient(top, colors.$blue500, colors.$blue500);
+  background: linear-gradient(top, colors.$blue500, colors.$blue500);
 }
 
 .translate-box h2 span.extra {
@@ -605,7 +605,7 @@ a {
     overflow: auto;
     h3 {
       padding: 0 30px;
-      background-color: colors.$grey9;
+      background-color: colors.$grey75;
       text-align: center;
     }
 
@@ -659,7 +659,7 @@ ul.test li {
   height: 18px;
   margin: 52px 14px 0 5px;
   font-size: 20px;
-  color: colors.$grey8;
+  color: colors.$grey200;
   cursor: pointer;
 }
 
@@ -668,7 +668,7 @@ ul.test li {
 }
 
 #swaplang:hover {
-  color: colors.$grey8;
+  color: colors.$grey200;
 }
 
 .name {
@@ -707,25 +707,25 @@ header .nav-bar .dropdown.select-org span.text {
 }
 
 .translate-box input:focus {
-  border-color: colors.$linkBlueTransparent;
+  border-color: colors.$blue300;
   background: colors.$white;
   color: rgba(0, 0, 0, 0.8);
   outline: none;
 }
 
 select:focus {
-  border-color: colors.$linkBlueTransparent;
+  border-color: colors.$blue300;
   background: colors.$white;
   color: rgba(0, 0, 0, 0.8);
   outline: none;
 }
 
 .ui.selection.dropdown {
-  box-shadow: inset 0 1px 3px colors.$grey8;
+  box-shadow: inset 0 1px 3px colors.$grey200;
 }
 
 .ui.input input {
-  box-shadow: inset 0 1px 3px colors.$grey8;
+  box-shadow: inset 0 1px 3px colors.$grey200;
 }
 /* Header restyling */
 
@@ -741,7 +741,7 @@ select:focus {
   align-items: center;
   justify-content: center;
   padding: 80px 20px;
-  color: colors.$darkBlue;
+  color: colors.$blue900;
   div.buttons {
     padding-top: 20px;
   }
@@ -788,7 +788,7 @@ select:focus {
 
 .project-template-select-unsaved {
   .select {
-    color: colors.$translatedBlue !important;
+    color: colors.$blue500 !important;
   }
 }
 
@@ -848,7 +848,7 @@ select:focus {
 
 .project-template-select-unsaved {
   .select {
-    color: colors.$translatedBlue !important;
+    color: colors.$blue500 !important;
   }
 }
 
@@ -889,7 +889,7 @@ select:focus {
 
 .error-message,
 .warning-message {
-  background: colors.$red800;
+  background: colors.$red400;
   color: colors.$white;
   padding: 10px 0 10px 16px;
   margin: 10px 0;
@@ -897,7 +897,7 @@ select:focus {
   width: 100%;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  border: 1px solid colors.$rebuttedRedTransparent;
+  border: 1px solid colors.$orange500;
   display: flex;
   .icon {
     float: left;
@@ -918,6 +918,6 @@ select:focus {
 
 .warning-message {
   background: rgba(255, 250, 139, 0.38) !important;
-  border-color: colors.$grey;
+  border-color: colors.$grey600;
   color: colors.$black;
 }
