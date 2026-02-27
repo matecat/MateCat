@@ -3,8 +3,8 @@
 namespace unit\Model\Conversion;
 
 use Exception;
-use Model\Conversion\Adapter\FiltersAdapterInterface;
-use Model\Conversion\Adapter\XliffDetectAdapterInterface;
+use Model\Conversion\Filters;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Conversion\ConversionHandler;
 use Model\Conversion\ConvertedFileModel;
 use Model\Conversion\OCRCheck;
@@ -87,7 +87,7 @@ class ConversionHandlerTest extends AbstractTest
         ?AbstractFilesStorage $fsStub = null,
     ): ConversionHandler {
 
-        $xliffDetect = $this->createStub(XliffDetectAdapterInterface::class);
+        $xliffDetect = $this->createStub(XliffProprietaryDetect::class);
         $xliffDetect->method('fileMustBeConverted')->willReturn($fileMustBeConvertedReturn);
         $xliffDetect->method('getInfo')->willReturn(['proprietary_name' => 'Unknown']);
 
@@ -95,7 +95,7 @@ class ConversionHandlerTest extends AbstractTest
         $ocrCheck->method('thereIsError')->willReturn($ocrError);
         $ocrCheck->method('thereIsWarning')->willReturn($ocrWarning);
 
-        $filtersAdapter = $this->createStub(FiltersAdapterInterface::class);
+        $filtersAdapter = $this->createStub(Filters::class);
         $filtersAdapter->method('sourceToXliff')->willReturn(
             $filterResponse ?? ['successful' => 0, 'errorMessage' => 'Not configured'],
         );
@@ -509,7 +509,7 @@ class ConversionHandlerTest extends AbstractTest
     {
         $this->createTempFile('test.docx', 'fake docx');
 
-        $filtersAdapter = $this->createStub(FiltersAdapterInterface::class);
+        $filtersAdapter = $this->createStub(Filters::class);
         $filtersAdapter->method('sourceToXliff')
             ->willReturnCallback(function (string $filePath, string $source, string $target) {
                 // Verify only the first language is passed
@@ -638,6 +638,19 @@ class ConversionHandlerTest extends AbstractTest
     // ================================================
 
     /**
+     * Simulates a race condition where the original file is deleted from disk
+     * during the {@see AbstractFilesStorage::makeCachePackage()} call — e.g. a
+     * concurrent upload on the same session or an external cleanup process.
+     *
+     * After makeCachePackage succeeds the file no longer exists, so:
+     *  - {@see AbstractFilesStorage::linkSessionToCacheForOriginalFiles()} must
+     *    NOT be called (guarded by is_file() in production code).
+     *  - The conversion hashes must still be recorded (the conversion itself
+     *    succeeded and the cache package was stored).
+     *
+     * Uses createMock (not createStub) because we need expects($this->never())
+     * to assert the linking method is never invoked.
+     *
      * @throws Exception
      */
     #[Test]
@@ -850,7 +863,7 @@ class ConversionHandlerTest extends AbstractTest
     public function getRightExtractionParameterNoStructReturnsNull(): void
     {
         $handler = $this->createHandler('test.json');
-        $handler->setFiltersExtractionParameters(null);
+        $handler->setFiltersExtractionParameters();
         $this->createTempFile('test.json', '{}');
 
         $this->assertNull($this->invokePrivateMethod($handler, [$handler->getLocalFilePath()]));
@@ -988,6 +1001,135 @@ class ConversionHandlerTest extends AbstractTest
     {
         $handler = $this->createHandler();
         $this->assertInstanceOf(ConvertedFileModel::class, $handler->getResult());
+    }
+
+    // ================================================
+    // extractZipFile
+    // ================================================
+
+    /**
+     * Helper: creates a real ZIP archive on disk containing one or more files.
+     *
+     * @param string               $zipName Name of the zip file (created in $this->tmpDir).
+     * @param array<string,string> $files   Map of internal-filename → content.
+     *
+     * @return string Absolute path to the created zip file.
+     */
+    private function createZipFile(string $zipName, array $files): string
+    {
+        $zipPath = $this->tmpDir . DIRECTORY_SEPARATOR . $zipName;
+        $za = new \ZipArchive();
+        $za->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        foreach ($files as $name => $content) {
+            $za->addFromString($name, $content);
+        }
+        $za->close();
+
+        return $zipPath;
+    }
+
+    /**
+     * Verifies the happy-path: a valid zip with one text file is extracted successfully.
+     * The returned array should contain exactly one entry whose name matches the
+     * internal tree-list representation produced by {@see ZipArchiveHandler}.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function extractZipFileSuccess(): void
+    {
+        $this->createZipFile('archive.zip', ['hello.txt' => 'Hello World']);
+
+        $handler = $this->createHandler('archive.zip');
+
+        $result = $handler->extractZipFile();
+
+        $this->assertNotEmpty($result, 'extractZipFile should return a non-empty file list');
+        $this->assertFalse($handler->zipExtractionErrorFlag);
+        $this->assertEmpty($handler->getZipExtractionErrorFiles());
+
+        // The result name should contain the original internal filename
+        $firstName = reset($result);
+        $this->assertStringContainsString('hello.txt', $firstName);
+    }
+
+    /**
+     * Verifies the happy-path with multiple files inside the zip.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function extractZipFileMultipleFiles(): void
+    {
+        $this->createZipFile('multi.zip', [
+            'a.txt' => 'File A',
+            'b.txt' => 'File B',
+            'c.txt' => 'File C',
+        ]);
+
+        $handler = $this->createHandler('multi.zip');
+
+        $result = $handler->extractZipFile();
+
+        $this->assertCount(3, $result);
+        $this->assertFalse($handler->zipExtractionErrorFlag);
+    }
+
+    /**
+     * When the zip file does not exist, {@see \ZipArchive::open()} returns an error code.
+     * The production code checks this return value and throws an {@see Exception}
+     * ("Cannot open zip file: ...") which is caught by the outer {@see \Throwable} catch,
+     * setting the error on the result and returning an empty array.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function extractZipFileNotFound(): void
+    {
+        $handler = $this->createHandler('nonexistent.zip');
+
+        $result = $handler->extractZipFile();
+
+        $this->assertEmpty($result);
+        $this->assertStringContainsString('Zip error', $handler->getResult()->getMessage());
+        $this->assertStringContainsString('Cannot open zip file', $handler->getResult()->getMessage());
+    }
+
+    /**
+     * When the file is not a valid zip archive, {@see \ZipArchive::open()} returns an error code.
+     * Same behavior as the "not found" case — the error is caught and set on the result.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function extractZipFileCorruptArchive(): void
+    {
+        $this->createTempFile('corrupt.zip', 'this is not a zip file');
+
+        $handler = $this->createHandler('corrupt.zip');
+
+        $result = $handler->extractZipFile();
+
+        $this->assertEmpty($result);
+        $this->assertStringContainsString('Zip error', $handler->getResult()->getMessage());
+        $this->assertStringContainsString('Cannot open zip file', $handler->getResult()->getMessage());
+    }
+
+    /**
+     * Verifies that the result's fileName is set to the zip archive name
+     * (via {@see AbstractFilesStorage::basename_fix()}).
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function extractZipFileSetsResultFileName(): void
+    {
+        $this->createZipFile('my-archive.zip', ['doc.txt' => 'content']);
+
+        $handler = $this->createHandler('my-archive.zip');
+        $handler->extractZipFile();
+
+        $this->assertEquals('my-archive.zip', $handler->getResult()->getName());
     }
 }
 

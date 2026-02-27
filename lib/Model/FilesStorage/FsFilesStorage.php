@@ -2,6 +2,7 @@
 
 namespace Model\FilesStorage;
 
+use Exception;
 use FilesystemIterator;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
@@ -74,6 +75,7 @@ class FsFilesStorage extends AbstractFilesStorage
      *
      * @return bool
      * @throws FileSystemException
+     * @throws Exception
      */
     public function makeCachePackage(string $hash, string $lang, ?string $originalPath, string $xliffPath): bool
     {
@@ -99,7 +101,7 @@ class FsFilesStorage extends AbstractFilesStorage
             // detect which type of xliff
             //check also for the extension, if already present do not force
             $force_extension = "";
-            $fileType = XliffProprietaryDetect::getInfo($xliffPath);
+            $fileType = (new XliffProprietaryDetect())->getInfo($xliffPath);
             if (!$fileType['proprietary'] && $fileType['info']['extension'] != 'sdlxliff') {
                 $force_extension = '.sdlxliff';
             }

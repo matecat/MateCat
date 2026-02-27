@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.371.1",
+            "version": "3.371.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "26cd04f9f47ca0d66baa59303f70bff5a5d48706"
+                "reference": "32090a8ac3ec8859cb83bdde800b8f0ecf92d8ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/26cd04f9f47ca0d66baa59303f70bff5a5d48706",
-                "reference": "26cd04f9f47ca0d66baa59303f70bff5a5d48706",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/32090a8ac3ec8859cb83bdde800b8f0ecf92d8ec",
+                "reference": "32090a8ac3ec8859cb83bdde800b8f0ecf92d8ec",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.371.1"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.371.2"
             },
-            "time": "2026-02-25T19:05:28+00:00"
+            "time": "2026-02-26T19:06:10+00:00"
         },
         {
             "name": "composer/pcre",
@@ -481,16 +481,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v7.0.2",
+            "version": "v7.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "5645b43af647b6947daac1d0f659dd1fbe8d3b65"
+                "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/5645b43af647b6947daac1d0f659dd1fbe8d3b65",
-                "reference": "5645b43af647b6947daac1d0f659dd1fbe8d3b65",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",
+                "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",
                 "shasum": ""
             },
             "require": {
@@ -538,9 +538,9 @@
             ],
             "support": {
                 "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/v7.0.2"
+                "source": "https://github.com/firebase/php-jwt/tree/v7.0.3"
             },
-            "time": "2025-12-16T22:17:28+00:00"
+            "time": "2026-02-25T22:16:40+00:00"
         },
         {
             "name": "google/apiclient",
@@ -1597,16 +1597,16 @@
         },
         {
             "name": "matecat/icu-intl",
-            "version": "1.1.9",
+            "version": "1.1.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/icu-intl.git",
-                "reference": "e583e17fcc7db369d6b5cb8e7fa7704b53dd0623"
+                "reference": "4f65e3d5eb46dc06aa070b5f90fd3affc272f3b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/e583e17fcc7db369d6b5cb8e7fa7704b53dd0623",
-                "reference": "e583e17fcc7db369d6b5cb8e7fa7704b53dd0623",
+                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/4f65e3d5eb46dc06aa070b5f90fd3affc272f3b5",
+                "reference": "4f65e3d5eb46dc06aa070b5f90fd3affc272f3b5",
                 "shasum": ""
             },
             "require": {
@@ -1642,9 +1642,9 @@
             "description": "A PHP port of ICU4J's MessagePattern parser with locale utilities. Parses ICU MessageFormat patterns into an inspectable AST and provides locale data support for internationalization in PHP.",
             "support": {
                 "issues": "https://github.com/matecat/icu-intl/issues",
-                "source": "https://github.com/matecat/icu-intl/tree/1.1.9"
+                "source": "https://github.com/matecat/icu-intl/tree/1.1.12"
             },
-            "time": "2026-02-25T17:02:16+00:00"
+            "time": "2026-02-26T17:39:52+00:00"
         },
         {
             "name": "matecat/klein",
@@ -1942,16 +1942,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v3.0.1",
+            "version": "v3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "99e9faa2197f3c21ae0c2b816d42d465f4c4341f"
+                "reference": "9ef8ffec0f187fe55320c9d04c416bd760d7bbef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/99e9faa2197f3c21ae0c2b816d42d465f4c4341f",
-                "reference": "99e9faa2197f3c21ae0c2b816d42d465f4c4341f",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/9ef8ffec0f187fe55320c9d04c416bd760d7bbef",
+                "reference": "9ef8ffec0f187fe55320c9d04c416bd760d7bbef",
                 "shasum": ""
             },
             "require": {
@@ -2002,9 +2002,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.1"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.2"
             },
-            "time": "2026-02-19T18:11:03+00:00"
+            "time": "2026-02-27T18:52:24+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
@@ -4219,16 +4219,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v7.4.0",
+            "version": "v7.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "d551b38811096d0be9c4691d406991b47c0c630a"
+                "reference": "3ebc794fa5315e59fd122561623c2e2e4280538e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/d551b38811096d0be9c4691d406991b47c0c630a",
-                "reference": "d551b38811096d0be9c4691d406991b47c0c630a",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/3ebc794fa5315e59fd122561623c2e2e4280538e",
+                "reference": "3ebc794fa5315e59fd122561623c2e2e4280538e",
                 "shasum": ""
             },
             "require": {
@@ -4265,7 +4265,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v7.4.0"
+                "source": "https://github.com/symfony/filesystem/tree/v7.4.6"
             },
             "funding": [
                 {
@@ -4285,7 +4285,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-11-27T13:27:24+00:00"
+            "time": "2026-02-25T16:50:00+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",

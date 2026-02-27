@@ -66,13 +66,14 @@ trait ScanDirectoryForConvertedFiles
      */
     private function getFileMetadata(string $filename): array
     {
-        $info = XliffProprietaryDetect::getInfo($filename);
+        $detect = new XliffProprietaryDetect();
+        $info = $detect->getInfo($filename);
         $isXliff = XliffFiles::isXliff($filename);
         $isGlossary = XliffFiles::isGlossaryFile($filename);
         $isTMX = XliffFiles::isTMXFile($filename);
         $getMemoryType = XliffFiles::getMemoryFileType($filename);
 
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted($filename, AppConfig::$FORCE_XLIFF_CONVERSION, AppConfig::$FILTERS_ADDRESS);
+        $mustBeConverted = $detect->fileMustBeConverted($filename, AppConfig::$FORCE_XLIFF_CONVERSION, AppConfig::$FILTERS_ADDRESS);
 
         $redisKey = md5($filename . "__pdfAnalysis.json");
         $pdfAnalysis = (new RedisHandler())->getConnection()->get($redisKey);

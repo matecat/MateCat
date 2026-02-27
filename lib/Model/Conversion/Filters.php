@@ -27,7 +27,7 @@ class Filters
      *
      * @return array
      */
-    private static function sendToFilters(array $dataGroups, string $endpoint): array
+    private function sendToFilters(array $dataGroups, string $endpoint): array
     {
         $logger = LoggerFactory::getLogger("conversion");
 
@@ -80,7 +80,7 @@ class Filters
                 if ($response === '{"message":"Invalid RapidAPI Key"}') {
                     $errResponse['errorMessage'] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } elseif (isset($originalResponse->errorMessage)) {
-                    $errResponse['errorMessage'] = self::formatErrorMessage($originalResponse->errorMessage);
+                    $errResponse['errorMessage'] = $this->formatErrorMessage($originalResponse->errorMessage);
                 } elseif ($info['errno']) {
                     $errResponse['errorMessage'] = "Curl error $info[errno]: $info[error]";
                 } else {
@@ -99,7 +99,7 @@ class Filters
             }
 
             // Compute headers
-            $instanceInfo = self::extractInstanceInfoFromHeaders($headers[$id]);
+            $instanceInfo = $this->extractInstanceInfoFromHeaders($headers[$id]);
             if (isset($instanceInfo)) {
                 $response = array_merge($response, $instanceInfo);
             }
@@ -116,7 +116,7 @@ class Filters
      *
      * @return string
      */
-    private static function formatErrorMessage(string $error): string
+    private function formatErrorMessage(string $error): string
     {
         // Error from Excel files
         return str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
@@ -130,7 +130,7 @@ class Filters
      * @return array|null an array with the address and version of the
      *                    respondent instance; false if the header was not found
      */
-    private static function extractInstanceInfoFromHeaders(array $headers): ?array
+    private function extractInstanceInfoFromHeaders(array $headers): ?array
     {
         foreach ($headers as $header) {
             if (preg_match("|^Filters-Instance: address=([^;]+); version=(.+)$|", $header, $matches)) {
@@ -157,7 +157,7 @@ class Filters
      *
      * @return mixed
      */
-    public static function sourceToXliff(string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, bool $icu_enabled = false, ?bool $legacy_icu = false): mixed
+    public function sourceToXliff(string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, bool $icu_enabled = false, ?bool $legacy_icu = false): mixed
     {
         $basename = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_FILENAME);
         $extension = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_EXTENSION);
@@ -192,7 +192,7 @@ class Filters
             $data['escape_icu'] = true;
         }
 
-        $filtersResponse = self::sendToFilters([$data], self::SOURCE_TO_XLIFF_ENDPOINT);
+        $filtersResponse = $this->sendToFilters([$data], self::SOURCE_TO_XLIFF_ENDPOINT);
 
         return $filtersResponse[0];
     }
@@ -202,7 +202,7 @@ class Filters
      *
      * @return array
      */
-    public static function xliffToTarget(array $xliffsData): array
+    public function xliffToTarget(array $xliffsData): array
     {
         $dataGroups = [];
         $tmpFiles = [];
@@ -219,7 +219,7 @@ class Filters
             $dataGroups[$id] = ['xliff' => new CURLFile($tmpXliffFile)];
         }
 
-        $responses = self::sendToFilters($dataGroups, self::XLIFF_TO_TARGET_ENDPOINT);
+        $responses = $this->sendToFilters($dataGroups, self::XLIFF_TO_TARGET_ENDPOINT);
 
         // We sent requests and obtained responses, we can delete temp files
         foreach ($tmpFiles as $tmpFile) {
@@ -241,10 +241,10 @@ class Filters
      *
      * @throws Exception
      */
-    public static function logConversionToXliff(array $response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, ?IDto $extractionParameters): void
+    public function logConversionToXliff(array $response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, ?IDto $extractionParameters): void
     {
         // @TODO $extractionParameters to MySQL table?
-        self::logConversion($response, true, $sentFile, ['source' => $sourceLang, 'target' => $targetLang], ['segmentation_rule' => $segmentation]);
+        $this->logConversion($response, true, $sentFile, ['source' => $sourceLang, 'target' => $targetLang], ['segmentation_rule' => $segmentation]);
     }
 
     /**
@@ -257,9 +257,9 @@ class Filters
      *
      * @throws Exception
      */
-    public static function logConversionToTarget(array $response, string $sentFile, JobStruct $jobData, array $sourceFileData): void
+    public function logConversionToTarget(array $response, string $sentFile, JobStruct $jobData, array $sourceFileData): void
     {
-        self::logConversion($response, false, $sentFile, $jobData->toArray(), $sourceFileData);
+        $this->logConversion($response, false, $sentFile, $jobData->toArray(), $sourceFileData);
     }
 
     /**
@@ -275,7 +275,7 @@ class Filters
      *
      * @throws Exception
      */
-    private static function logConversion(array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData): void
+    private function logConversion(array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData): void
     {
         try {
             $conn = new PDO(
@@ -333,7 +333,7 @@ class Filters
                 Utils::sendErrMailReport("Matecat: conversion failed.\n\n" . print_r($info, true));
             }
 
-            self::backupFailedConversion($sentFile);
+            $this->backupFailedConversion($sentFile);
         }
     }
 
@@ -343,7 +343,7 @@ class Filters
      *
      * @param string $sentFile
      */
-    private static function backupFailedConversion(string &$sentFile): void
+    private function backupFailedConversion(string &$sentFile): void
     {
         $backupDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR
             . 'conversion_errors' . DIRECTORY_SEPARATOR

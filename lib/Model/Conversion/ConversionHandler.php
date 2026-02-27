@@ -3,16 +3,14 @@
 namespace Model\Conversion;
 
 use Exception;
-use Model\Conversion\Adapter\FiltersAdapter;
-use Model\Conversion\Adapter\FiltersAdapterInterface;
-use Model\Conversion\Adapter\XliffDetectAdapter;
-use Model\Conversion\Adapter\XliffDetectAdapterInterface;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\Exceptions\FileSystemException;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Throwable;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -55,8 +53,8 @@ class ConversionHandler
 
     private MatecatLogger $logger;
     private AbstractFilesStorage $filesStorage;
-    private FiltersAdapterInterface $filtersAdapter;
-    private XliffDetectAdapterInterface $xliffDetect;
+    private Filters $filtersAdapter;
+    private XliffProprietaryDetect $xliffDetect;
     private ?OCRCheck $ocrCheck;
     private RedisHandler $redisHandler;
 
@@ -67,8 +65,8 @@ class ConversionHandler
      * Pass explicit instances in tests to replace external I/O with mocks/stubs.
      *
      * @param AbstractFilesStorage|null         $filesStorage   File-storage backend (default: FilesStorageFactory::create()).
-     * @param FiltersAdapterInterface|null      $filtersAdapter Filters HTTP adapter (default: new FiltersAdapter()).
-     * @param XliffDetectAdapterInterface|null  $xliffDetect    XLIFF format detector (default: new XliffDetectAdapter()).
+     * @param Filters|null                      $filtersAdapter Filters HTTP/log service (default: new Filters()).
+     * @param XliffProprietaryDetect|null       $xliffDetect    XLIFF format detector (default: new XliffProprietaryDetect()).
      * @param OCRCheck|null                     $ocrCheck       OCR checker (default: lazy-created with source_lang in processConversion()).
      * @param RedisHandler|null                 $redisHandler   Redis handler (default: new RedisHandler()).
      * @param MatecatLogger|null                $logger         Logger (default: LoggerFactory::getLogger('conversion')).
@@ -77,16 +75,16 @@ class ConversionHandler
      */
     public function __construct(
         ?AbstractFilesStorage        $filesStorage = null,
-        ?FiltersAdapterInterface     $filtersAdapter = null,
-        ?XliffDetectAdapterInterface $xliffDetect = null,
+        ?Filters                     $filtersAdapter = null,
+        ?XliffProprietaryDetect      $xliffDetect = null,
         ?OCRCheck                    $ocrCheck = null,
         ?RedisHandler                $redisHandler = null,
         ?MatecatLogger               $logger = null,
     ) {
         $this->result         = new ConvertedFileModel();
         $this->filesStorage   = $filesStorage ?? FilesStorageFactory::create();
-        $this->filtersAdapter = $filtersAdapter ?? new FiltersAdapter();
-        $this->xliffDetect    = $xliffDetect ?? new XliffDetectAdapter();
+        $this->filtersAdapter = $filtersAdapter ?? new Filters();
+        $this->xliffDetect    = $xliffDetect ?? new XliffProprietaryDetect();
         $this->ocrCheck       = $ocrCheck;  // lazy: source_lang is set after construction
         $this->redisHandler   = $redisHandler ?? new RedisHandler();
         $this->logger         = $logger ?? LoggerFactory::getLogger('conversion');
@@ -270,7 +268,11 @@ class ConversionHandler
             ])
         );
 
-        $this->result->setSize(filesize($file_path));
+        // The file may have been removed between makeCachePackage and here
+        // (e.g. race condition with concurrent uploads on the same session).
+        if (is_file($file_path)) {
+            $this->result->setSize(filesize($file_path));
+        }
 
         if (isset($convertResult["pdfAnalysis"]) and !empty($convertResult["pdfAnalysis"])) {
             $this->result->setPdfAnalysis($convertResult["pdfAnalysis"]);
@@ -384,9 +386,18 @@ class ConversionHandler
 
         $za = new ZipArchiveHandler();
 
-        $za->open($file_path);
-
         try {
+
+            $openResult = $za->open($file_path);
+            if ($openResult !== true) {
+                // ZipArchive::open() returns true on success, or an int error code on failure.
+                // Throw immediately to avoid operating on an uninitialized ZipArchive object.
+                throw new Exception(
+                    "Cannot open zip file: " . $za->message($openResult),
+                    ConversionHandlerStatus::INVALID_FILE,
+                );
+            }
+
             $za->createTree();
 
             //get system temporary folder
@@ -423,10 +434,19 @@ class ConversionHandler
             return array_map(function ($fileName) use ($uploadFile) {
                 return $uploadFile->fixFileName($fileName, false);
             }, $za->treeList);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
+            // Catch both Exception (from createTree, extractFilesInTmp, Upload)
+            // and Error/ValueError (from ZipArchive extension on unexpected failures).
             $this->logger->debug("ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}");
 
-            $this->result->setErrorCode($e->getCode());
+            // Use the exception code if it's a valid ConversionHandlerStatus,
+            // otherwise fall back to INVALID_FILE.
+            $code = $e->getCode();
+            if (!in_array($code, ConversionHandlerStatus::errorCodes, true)) {
+                $code = ConversionHandlerStatus::INVALID_FILE;
+            }
+
+            $this->result->setErrorCode($code);
             $this->result->setErrorMessage("Zip error: " . $e->getMessage());
 
             return [];
