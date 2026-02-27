@@ -473,6 +473,20 @@ class ErrorManagerTest extends AbstractTest
     }
 
     #[Test]
+    public function invalidJSON(): void
+    {
+        $json = '[{"outcome": 1000, "debug": "Tag mismatch."}, {"outcome": 15, ';
+
+        $list = ErrorManager::JSONtoExceptionList($json);
+
+        $this->assertArrayHasKey(ErrorManager::ERROR, $list);
+        $this->assertArrayHasKey(ErrorManager::WARNING, $list);
+        $this->assertArrayHasKey(ErrorManager::INFO, $list);
+        $this->assertCount(1, $list[ErrorManager::ERROR]);
+        $this->assertCount(0, $list[ErrorManager::WARNING]);
+    }
+
+    #[Test]
     public function jSONtoExceptionListWithInvalidJson(): void
     {
         $json = 'invalid json';

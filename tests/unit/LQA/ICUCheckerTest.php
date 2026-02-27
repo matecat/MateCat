@@ -3,10 +3,8 @@
 namespace unit\LQA;
 
 use DG\BypassFinals;
+use Exception;
 use Matecat\ICU\MessagePatternComparator;
-use Matecat\ICU\MessagePatternValidator;
-use Matecat\ICU\Plurals\PluralArgumentWarning;
-use Matecat\ICU\Plurals\PluralComplianceWarning;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\LQA\QA\ErrorManager;
@@ -42,7 +40,6 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function hasIcuPatternsWithComparatorNoIcu(): void
     {
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
         $comparator = $this->createStub(MessagePatternComparator::class);
         $this->icuChecker->setIcuPatternComparator($comparator);
 
@@ -60,7 +57,6 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function hasIcuPatternsWithBoth(): void
     {
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
         $comparator = $this->createStub(MessagePatternComparator::class);
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->setSourceContainsIcu(true);
@@ -98,16 +94,7 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function checkICUMessageConsistencyValidPattern(): void
     {
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
-        // Create a stub that validates successfully
-        $validator = $this->createStub(MessagePatternValidator::class);
-        $validator->method('validatePluralCompliance')->willReturn(null);
-
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
-        $comparator = $this->createMock(MessagePatternComparator::class);
-        $comparator->expects($this->once())->method('validate');
-        $comparator->method('getTargetValidator')->willReturn($validator);
-
+        $comparator = new MessagePatternComparator('en', 'en', 'Hello {0}', 'Hello {0}');
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->checkICUMessageConsistency();
 
@@ -117,9 +104,8 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function checkICUMessageConsistencyValidationException(): void
     {
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
         $comparator = $this->createStub(MessagePatternComparator::class);
-        $comparator->method('validate')->willThrowException(new \Exception('Invalid ICU pattern'));
+        $comparator->method('validate')->willThrowException(new Exception('Invalid ICU pattern'));
 
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->checkICUMessageConsistency();
@@ -130,23 +116,9 @@ class ICUCheckerTest extends AbstractTest
     }
 
     #[Test]
-    public function checkICUMessageConsistencyWithComplaintWarnings(): void
+    public function checkICUMessageConsistencyWithInvalidComplexFormsCompatibility(): void
     {
-        // Create mock complaint with warnings
-        $warning = $this->createStub(PluralArgumentWarning::class);
-        $warning->method('getMessages')->willReturn(['Plural mismatch']);
-
-        $complaints = $this->createStub(PluralComplianceWarning::class);
-        $complaints->method('getArgumentWarnings')->willReturn([$warning]);
-
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
-        $validator = $this->createStub(MessagePatternValidator::class);
-        $validator->method('validatePluralCompliance')->willReturn($complaints);
-
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
-        $comparator = $this->createStub(MessagePatternComparator::class);
-        $comparator->method('validate');
-        $comparator->method('getTargetValidator')->willReturn($validator);
+        $comparator = new MessagePatternComparator('en', 'en', 'You have {select, plural, one{a car} other{# cars}}', 'Hello {0}');
 
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->checkICUMessageConsistency();
@@ -155,24 +127,19 @@ class ICUCheckerTest extends AbstractTest
     }
 
     #[Test]
-    public function checkICUMessageConsistencyEmptyWarnings(): void
+    public function checkICUMessageConsistencyWithComplaintWarningsForMissingCategories(): void
     {
-        $complaints = $this->createStub(PluralComplianceWarning::class);
-        $complaints->method('getArgumentWarnings')->willReturn([]);
-
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
-        $validator = $this->createStub(MessagePatternValidator::class);
-        $validator->method('validatePluralCompliance')->willReturn($complaints);
-
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
-        $comparator = $this->createStub(MessagePatternComparator::class);
-        $comparator->method('validate');
-        $comparator->method('getTargetValidator')->willReturn($validator);
+        $comparator = new MessagePatternComparator(
+            'en',
+            'it',
+            'You have {select, plural, one{a car} other{# cars}}',
+            'You have {select, plural, one{a car} other{# cars}}',
+        );
 
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->checkICUMessageConsistency();
 
-        $this->assertFalse($this->errorManager->thereAreErrors());
+        $this->assertTrue($this->errorManager->thereAreErrors());
     }
 
     // ========== Edge Cases ==========
@@ -180,9 +147,8 @@ class ICUCheckerTest extends AbstractTest
     #[Test]
     public function multipleCallsToCheckConsistency(): void
     {
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
         $comparator = $this->createStub(MessagePatternComparator::class);
-        $comparator->method('validate')->willThrowException(new \Exception('Error'));
+        $comparator->method('validate')->willThrowException(new Exception('Error'));
 
         $this->icuChecker->setIcuPatternComparator($comparator);
         $this->icuChecker->checkICUMessageConsistency();
@@ -199,7 +165,6 @@ class ICUCheckerTest extends AbstractTest
         $this->icuChecker->setSourceContainsIcu(true);
         $this->assertFalse($this->icuChecker->hasIcuPatterns());
 
-        /** @noinspection PhpUnitInvalidMockingEntityInspection */
         $comparator = $this->createStub(MessagePatternComparator::class);
         $this->icuChecker->setIcuPatternComparator($comparator);
 

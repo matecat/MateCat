@@ -65,7 +65,14 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
     public function thereAreErrors(int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null): bool
     {
 
-        // if there are ERR_SIZE_RESTRICTION errors, return true
+        // TODO implement the syntax check algorithms in the backend too and count characters at runtime instead of use the stored values
+        //  because some segments might not have been opened and the error list could be empty
+
+        // If there are ERR_SIZE_RESTRICTION errors, return true.
+        // This check is here because, at this point, the backend doesn't know the segment's character count.
+        // It is calculated only on the frontend, using an algorithm implemented only on the frontend.
+        // Since we need the string length to check for the error in the QA class, we can't compute it here.
+        // We get the error from `segment_translations.serialized_errors_list`.
         if ($error !== null) {
             $errors = json_decode($error);
 
@@ -90,23 +97,20 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
         $segment = $filter->fromLayer0ToLayer1($segment);
         $translation = $filter->fromLayer0ToLayer1($translation);
 
+        // In Matecat, some special characters are mapped in data_ref_map (for example, &#39;)
+        // and can be omitted in the target.
+        // In this case, |||UNTRANSLATED_CONTENT_START||| should not be found in the target.
         //
-        // ------------------------------------
-        // NOTE 2021-01-25
-        // ------------------------------------
-        //
-        // In Matecat there are some special characters mapped in data_ref_map (like &#39; for example)
-        // that can be omitted in the target.
-        // In this case no |||UNTRANSLATED_CONTENT_START||| should be found in the target
-        //
-        // To skip these characters QA class needs replaced version of segment and target for _addThisElementToDomMap() function
-        //
+        // To skip these characters, the QA class needs the replaced versions of the segment and the target
+        // for the _addThisElementToDomMap() function.
         if (!empty($dataRefMap)) {
             $dataRefReplacer = new DataRefReplacer($dataRefMap);
             $segment = $dataRefReplacer->replace($segment);
             $translation = $dataRefReplacer->replace($translation);
         }
 
+        // We must perform a new validation here, ignoring `$error` from `segment_translations.serialized_errors_list`
+        // because some segments might not have been opened and the error list could be empty.
         $check = new QA(
             $segment,
             $translation,
