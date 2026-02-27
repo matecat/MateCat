@@ -3,14 +3,16 @@
 namespace Model\Conversion;
 
 use Exception;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\Conversion\Adapter\FiltersAdapter;
+use Model\Conversion\Adapter\FiltersAdapterInterface;
+use Model\Conversion\Adapter\XliffDetectAdapter;
+use Model\Conversion\Adapter\XliffDetectAdapterInterface;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\Exceptions\FileSystemException;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
-use ReflectionException;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -41,7 +43,6 @@ class ConversionHandler
      * @var FeatureSet
      */
     public FeatureSet $features;
-    private MatecatLogger $logger;
 
     /**
      * @var bool|null
@@ -50,13 +51,45 @@ class ConversionHandler
 
     protected bool $icu_enabled = false;
 
+    // -- Injected dependencies (nullable for backwards compatibility) --
+
+    private MatecatLogger $logger;
+    private AbstractFilesStorage $filesStorage;
+    private FiltersAdapterInterface $filtersAdapter;
+    private XliffDetectAdapterInterface $xliffDetect;
+    private ?OCRCheck $ocrCheck;
+    private RedisHandler $redisHandler;
+
     /**
      * ConversionHandler constructor.
+     *
+     * All parameters are optional. When omitted (or null), production defaults are used.
+     * Pass explicit instances in tests to replace external I/O with mocks/stubs.
+     *
+     * @param AbstractFilesStorage|null         $filesStorage   File-storage backend (default: FilesStorageFactory::create()).
+     * @param FiltersAdapterInterface|null      $filtersAdapter Filters HTTP adapter (default: new FiltersAdapter()).
+     * @param XliffDetectAdapterInterface|null  $xliffDetect    XLIFF format detector (default: new XliffDetectAdapter()).
+     * @param OCRCheck|null                     $ocrCheck       OCR checker (default: lazy-created with source_lang in processConversion()).
+     * @param RedisHandler|null                 $redisHandler   Redis handler (default: new RedisHandler()).
+     * @param MatecatLogger|null                $logger         Logger (default: LoggerFactory::getLogger('conversion')).
+     *
+     * @throws Exception
      */
-    public function __construct()
-    {
-        $this->result = new ConvertedFileModel();
-        $this->logger = LoggerFactory::getLogger("conversion");
+    public function __construct(
+        ?AbstractFilesStorage        $filesStorage = null,
+        ?FiltersAdapterInterface     $filtersAdapter = null,
+        ?XliffDetectAdapterInterface $xliffDetect = null,
+        ?OCRCheck                    $ocrCheck = null,
+        ?RedisHandler                $redisHandler = null,
+        ?MatecatLogger               $logger = null,
+    ) {
+        $this->result         = new ConvertedFileModel();
+        $this->filesStorage   = $filesStorage ?? FilesStorageFactory::create();
+        $this->filtersAdapter = $filtersAdapter ?? new FiltersAdapter();
+        $this->xliffDetect    = $xliffDetect ?? new XliffDetectAdapter();
+        $this->ocrCheck       = $ocrCheck;  // lazy: source_lang is set after construction
+        $this->redisHandler   = $redisHandler ?? new RedisHandler();
+        $this->logger         = $logger ?? LoggerFactory::getLogger('conversion');
     }
 
     /**
@@ -68,7 +101,7 @@ class ConversionHandler
      */
     public function fileMustBeConverted(): bool|int
     {
-        return XliffProprietaryDetect::fileMustBeConverted($this->getLocalFilePath(), true, AppConfig::$FILTERS_ADDRESS);
+        return $this->xliffDetect->fileMustBeConverted($this->getLocalFilePath(), true, AppConfig::$FILTERS_ADDRESS);
     }
 
     /**
@@ -82,12 +115,10 @@ class ConversionHandler
     }
 
     /**
-     * @throws ReflectionException
      * @throws Exception
      */
     public function processConversion(): void
     {
-        $fs = FilesStorageFactory::create();
         $file_path = $this->getLocalFilePath();
 
         $isZipContent = !empty(ZipArchiveHandler::zipPathInfo($file_path));
@@ -118,7 +149,7 @@ class ConversionHandler
             unlink($file_path);
 
             $this->result->setErrorCode(ConversionHandlerStatus::MISCONFIGURATION);
-            $this->result->setErrorMessage('Matecat Open-Source does not support ' . ucwords(XliffProprietaryDetect::getInfo($file_path)['proprietary_name']) . '. Use MatecatPro.');
+            $this->result->setErrorMessage('Matecat Open-Source does not support ' . ucwords($this->xliffDetect->getInfo($file_path)['proprietary_name'] ?? '') . '. Use MatecatPro.');
 
             return;
         }
@@ -135,9 +166,8 @@ class ConversionHandler
 
         $short_hash = sha1($hash_name_for_disk);
 
-        // Initialize path variable
-        // Convert the file
-        $ocrCheck = new OCRCheck($this->source_lang);
+        // Convert the file — use injected OCRCheck or lazy-create with source_lang
+        $ocrCheck = $this->ocrCheck ?? new OCRCheck($this->source_lang);
         if ($ocrCheck->thereIsError($file_path)) {
             $this->result->setErrorCode(ConversionHandlerStatus::OCR_ERROR);
             $this->result->setErrorMessage("File is not valid. OCR for RTL languages is not supported.");
@@ -156,7 +186,7 @@ class ConversionHandler
             $single_language = $this->target_lang;
         }
 
-        $convertResult = Filters::sourceToXliff(
+        $convertResult = $this->filtersAdapter->sourceToXliff(
             $file_path,
             $this->source_lang,
             $single_language,
@@ -165,7 +195,7 @@ class ConversionHandler
             $this->icu_enabled,
             $this->legacy_icu,
         );
-        Filters::logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters);
+        $this->filtersAdapter->logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters);
 
         if ($convertResult['successful'] == 1) {
             //store converted content on a temporary path on disk (and off RAM)
@@ -180,7 +210,7 @@ class ConversionHandler
              */
             //save in cache
             try {
-                $res_insert = $fs->makeCachePackage($short_hash, $this->source_lang, $file_path, $cachedXliffPath);
+                $res_insert = $this->filesStorage->makeCachePackage($short_hash, $this->source_lang, $file_path, $cachedXliffPath);
 
                 if (!$res_insert) {
                     //custom error message passed directly to JavaScript client and displayed as is
@@ -219,11 +249,11 @@ class ConversionHandler
         if (!empty($cachedXliffPath)) {
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
             $uploadDir = $this->uploadDir;
-            $fs->deleteHashFromUploadDir($uploadDir, $hash_name_for_disk);
+            $this->filesStorage->deleteHashFromUploadDir($uploadDir, $hash_name_for_disk);
 
             if (is_file($file_path)) {
                 //put reference to cache in upload dir to link cache to session
-                $fs->linkSessionToCacheForOriginalFiles(
+                $this->filesStorage->linkSessionToCacheForOriginalFiles(
                     $hash_name_for_disk,
                     $this->uploadTokenValue,
                     AbstractFilesStorage::basename_fix($file_path)
@@ -247,7 +277,7 @@ class ConversionHandler
 
             // save pdfAnalysis.json
             $redisKey = md5($file_path . "__pdfAnalysis.json");
-            (new RedisHandler())->getConnection()->set($redisKey, serialize($convertResult["pdfAnalysis"]), 'ex', 60);
+            $this->redisHandler->getConnection()->set($redisKey, serialize($convertResult["pdfAnalysis"]), 'ex', 60);
         }
     }
 
@@ -404,11 +434,18 @@ class ConversionHandler
     }
 
     /**
-     * @param iterable $stdResult The result from Upload::uploadFiles(), iterated to check for errors.
+     * Checks if any file in the upload result has an error.
      *
-     * @return bool
+     * Accepts an {@see UploadElement} (returned by {@see Upload::uploadFiles()}).
+     * UploadElement extends stdClass, and its dynamic properties are iterable
+     * via foreach, but it does not implement Traversable, so the type hint
+     * is UploadElement rather than iterable.
+     *
+     * @param UploadElement $stdResult The result from Upload::uploadFiles(), iterated to check for errors.
+     *
+     * @return bool True if at least one file has a non-empty error property.
      */
-    public function isZipExtractionFailed(iterable $stdResult): bool
+    public function isZipExtractionFailed(UploadElement $stdResult): bool
     {
         $error = false;
 
@@ -453,7 +490,6 @@ class ConversionHandler
     /**
      * @param string $file_name
      *
-     * @throws Exception
      */
     public function setFileName(string $file_name): void
     {

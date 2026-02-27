@@ -41,7 +41,18 @@ class Upload
         return $this->uploadToken;
     }
 
-    // ...existing code...
+    public function getUploadPath(): string
+    {
+        return $this->dirUpload;
+    }
+
+    /**
+     * @param boolean $raiseException
+     */
+    public function setRaiseException(bool $raiseException): void
+    {
+        $this->raiseException = $raiseException;
+    }
 
     /**
      * @throws Exception

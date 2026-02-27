@@ -1,5 +1,8 @@
 <?php
 
+namespace unit\Model\Conversion;
+
+use Exception;
 use Model\Conversion\ConvertedFileModel;
 use TestHelpers\AbstractTest;
 use Utils\Constants\ConversionHandlerStatus;
