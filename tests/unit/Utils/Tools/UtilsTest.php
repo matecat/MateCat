@@ -1301,8 +1301,8 @@ class UtilsTest extends AbstractTest
 
     public function testIsValidFileNameWithSingleQuote(): void
     {
-        // Test that single quotes are invalid (part of invalidChars)
-        $this->assertFalse(Utils::isValidFileName("file'name.txt"));
+        // Test that single quotes are valid (not part of invalidChars)
+        $this->assertTrue(Utils::isValidFileName("file'name.txt"));
     }
 
     public function testIsValidFileNameWithReservedNameAndExtension(): void

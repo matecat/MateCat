@@ -215,7 +215,7 @@ class FilesConverter
         }
 
         if (!Utils::isValidFileName($fileName) || empty($fileName)) {
-            throw new InvalidArgumentException("Invalid File.", ConversionHandlerStatus::INVALID_FILE);
+            throw new InvalidArgumentException("Invalid file name: " . $fileName, ConversionHandlerStatus::INVALID_FILE);
         }
 
         $conversionHandler = $this->getConversionHandlerInstance($fileName);

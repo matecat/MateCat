@@ -676,6 +676,7 @@ class Session
             $errDir,
             $uploadTokenValue,
             $this->seg_rule,
+            false,
             $this->featureSet,
             $this->filters_extraction_parameters,
         );

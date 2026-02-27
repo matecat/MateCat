@@ -445,13 +445,7 @@ class ConversionHandler
      */
     public function setFileName(string $file_name): void
     {
-        $decoded_filename = html_entity_decode($file_name, ENT_QUOTES);
-
-        if ($decoded_filename !== $file_name) {
-            throw new Exception("Invalid file name: symbols (e.g. & ') are not allowed.");
-        }
-
-        $this->file_name = $decoded_filename;
+        $this->file_name = $file_name;
     }
 
     /**

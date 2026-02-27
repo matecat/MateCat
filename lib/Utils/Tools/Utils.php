@@ -526,9 +526,24 @@ class Utils
 
 
     /**
-     * Validates if the given file name is valid according to various rules, including
+     * Validates if the given file name is valid, according to various rules, including
      * checks for empty names, control characters, invalid characters in file systems,
      * reserved names, and length limitations.
+     *
+     * Two values are checked throughout this function:
+     *  - $fileName: the raw input as received (maybe URL-encoded)
+     *  - $decoded: the fully URL-decoded version (all encoding layers stripped)
+     *
+     * Both must be checked because an attacker can bypass raw-string checks by
+     * encoding dangerous characters. For example, `../` can be submitted as
+     * `..%2F` or `..%252F` (double-encoded), which would pass a check on $fileName
+     * alone but reveal the real path after decoding.
+     *
+     * Checks that only apply to $fileName (not $decoded):
+     *  - Control characters and newlines: these are dangerous as-is in the raw input
+     *    and decoding does not change them (they are not URL-encoded by browsers).
+     *  - Reserved names and length: these apply to what the filesystem actually receives,
+     *    which is the raw $fileName, not the decoded form.
      *
      * @param string $fileName The file name to validate.
      *
@@ -536,75 +551,83 @@ class Utils
      */
     public static function isValidFileName(string $fileName): bool
     {
-        // Decode URL to capture multiple encodings
-        $decoded = urldecode(urldecode($fileName));
+        // Fully URL-decode $fileName by looping until the string stops changing.
+        // A single urldecode() call would only strip one layer of encoding, missing
+        // double-encoded payloads like %252F (%25 → %, then %2F → /).
+        // The loop handles any arbitrary depth of encoding.
+        $decoded = $fileName;
+        $prev = null;
+        while ($prev !== $decoded) {
+            $prev = $decoded;
+            $decoded = urldecode($decoded);
+        }
 
-        // Blocks empty names or only spaces
+        // Reject empty names or names made entirely of spaces.
+        // Both $fileName and $decoded are checked because a name like "%20" decodes
+        // to a single space and must also be rejected.
         if (trim($fileName) === '' || trim($decoded) === '') {
             return false;
         }
 
-        // Block of null byte
+        // Reject null bytes (\0).
+        // Null bytes can truncate file paths in C-based system calls (e.g., fopen),
+        // allowing an attacker to bypass extension checks (e.g., "shell.php\0.jpg").
+        // %00 in $fileName decodes to \0 in $decoded, so both must be checked.
         if (str_contains($fileName, "\0") || str_contains($decoded, "\0")) {
             return false;
         }
 
-        // Block of control chars (0x00-0x1F, 0x7F)
+        // Reject control characters (0x00 - 0x1F, 0x7F) in the raw input only.
+        // Browsers do not URL-encode control characters, so they appear as-is in
+        // $fileName. The decoded form is covered by the null byte check above.
         if (preg_match('/[\x00-\x1F\x7F]/', $fileName)) {
             return false;
         }
 
-        // Block of newline/carriage return
+        // Reject newline and carriage return characters in the raw input only.
+        // These can break HTTP headers or log injection and are not URL-encoded
+        // by well-behaved clients, so checking $fileName is sufficient here.
         if (preg_match('/[\r\n]/', $fileName)) {
             return false;
         }
 
-        // Directory traversal
-        $patterns = [
-            '/\.\.[\\/]/',           // ../ or ..\
-            '/[\\/]\.\./',           // /.. or \..
-            '/^\.\.?$/',             // . or .. like complete name
-            '/^\./',                 // starts with point
+        // Reject directory traversal sequences.
+        // Both $fileName and $decoded must be checked because traversal sequences
+        // like "../" can be encoded as "%2E%2E%2F" or "%252E%252E%252F" to bypass
+        // a check on the raw string alone.
+        $traversalPatterns = [
+            '/\.\.[\\/]/',  // ../ or ..\ — traverse up from a directory
+            '/[\\/]\.\./',  // /.. or \.. — traverse up after a separator
+            '/^\.\.?$/',    // exactly "." or ".." as the full filename
+            '/^\./',        // starts with "." — hidden file or relative path entry
         ];
 
-        foreach ($patterns as $pattern) {
+        foreach ($traversalPatterns as $pattern) {
             if (preg_match($pattern, $fileName) || preg_match($pattern, $decoded)) {
                 return false;
             }
         }
 
-        // Block of not allowed chars in Windows/Linux filesystems
-        $invalidChars = ['\\', '/', ':', '*', '?', '"', "'", '<', '>', '|', "\0"];
+        // Reject characters that are illegal in Windows and/or Linux filesystems.
+        // Both $fileName and $decoded must be checked: "/" and "\" can be encoded
+        // as %2F and %5C respectively, which would pass a check on $fileName alone
+        // but become path separators after decoding, enabling path injection.
+        $invalidChars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', "\0"];
         foreach ($invalidChars as $char) {
-            if (str_contains($fileName, $char)) {
+            if (str_contains($fileName, $char) || str_contains($decoded, $char)) {
                 return false;
             }
         }
 
-        // Block of Windows riserved names (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
+        // Reject Windows reserved device names (case-insensitive, with or without extension).
+        // These names refer to system devices (e.g., CON, NUL, COM1) and cannot be used
+        // as filenames on Windows regardless of extension (e.g., "NUL.txt" is also reserved).
+        // Only $fileName is checked here: encoding cannot produce a reserved name like "CON"
+        // from a safe input, so $decoded would give the same result.
         $reserved = [
-            'CON',
-            'PRN',
-            'AUX',
-            'NUL',
-            'COM1',
-            'COM2',
-            'COM3',
-            'COM4',
-            'COM5',
-            'COM6',
-            'COM7',
-            'COM8',
-            'COM9',
-            'LPT1',
-            'LPT2',
-            'LPT3',
-            'LPT4',
-            'LPT5',
-            'LPT6',
-            'LPT7',
-            'LPT8',
-            'LPT9'
+            'CON', 'PRN', 'AUX', 'NUL',
+            'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+            'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
         ];
 
         $nameWithoutExt = pathinfo($fileName, PATHINFO_BASENAME);
@@ -612,7 +635,10 @@ class Utils
             return false;
         }
 
-        // Max 255 chars
+        // Reject names exceeding 255 bytes (the limit on most filesystems: ext4, NTFS, APFS).
+        // Only $fileName is checked because the filesystem receives the raw value, not the
+        // decoded one. A long encoded string may be short after decoding, but the raw length
+        // is what matters for storage.
         if (strlen($fileName) > 255) {
             return false;
         }

@@ -4,6 +4,7 @@ namespace Model\Conversion;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -130,8 +131,10 @@ class Upload
      */
     protected function _uploadFile(UploadElement $fileUp, ?bool $disable_upload_limit = false): object
     {
-        // fix possibly XSS on the file name
-        $fileUp['name'] = $this->fixFileName($fileUp['name']);
+        // reject invalid file names
+        if( !Utils::isValidFileName($fileUp['name']) ){
+            throw new InvalidArgumentException("Invalid file name: {$fileUp['name']}");
+        }
 
         $fileName = $fileUp['name'];
         $fileTmpName = $fileUp['tmp_name'];
@@ -234,7 +237,7 @@ class Upload
             if (!Utils::isValidFileName($fileUp->name)) {
                 $this->setObjectErrorOrThrowException(
                     $fileUp,
-                    new DomainException ("Invalid File Name '" . $out_filename . "'")
+                    new DomainException ("Invalid file name: $out_filename")
                 );
             }
 
@@ -282,6 +285,9 @@ class Upload
      */
     public function fixFileName(string $stringName, bool $upCount = true): string
     {
+        if( !Utils::isValidFileName($stringName) ){
+            throw new InvalidArgumentException("Invalid file name: $stringName");
+        }
         return Utils::fixFileName($stringName, $this->dirUpload, $upCount);
     }
 
