@@ -199,7 +199,11 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
       <div key={category} className="segment-footer-icu-plurals-rule">
         <div className="plural-title">
           <span className="category">{category}</span>
-          {/*<span className="rule">{rule}</span>*/}
+          <Tooltip content={example}>
+            <div ref={createRef()} className="rule">
+              {example}
+            </div>
+          </Tooltip>
         </div>
         <Tooltip content={human_rule}>
           <div ref={createRef()} className="plural-example">
