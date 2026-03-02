@@ -4,6 +4,7 @@ namespace unit\Utils\Tools;
 
 use Exception;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\Utils;
 
@@ -13,6 +14,7 @@ class UtilsTest extends AbstractTest
     // Tests for getSourcePage() and getSourcePageFromReferer()
     // =========================================================================
 
+    #[Test]
     public function testGetSourcePageReturnsTranslateWhenNoRequestUri(): void
     {
         unset($_SERVER['REQUEST_URI']);
@@ -20,6 +22,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(1, $result); // SOURCE_PAGE_TRANSLATE = 1
     }
 
+    #[Test]
     public function testGetSourcePageReturnsTranslateForTranslatePath(): void
     {
         $_SERVER['REQUEST_URI'] = '/translate/project/1-2/en-US-it-IT';
@@ -27,6 +30,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(1, $result);
     }
 
+    #[Test]
     public function testGetSourcePageFromRefererReturnsTranslateWhenNoReferer(): void
     {
         unset($_SERVER['HTTP_REFERER']);
@@ -38,6 +42,7 @@ class UtilsTest extends AbstractTest
     // Tests for getBrowser()
     // =========================================================================
 
+    #[Test]
     public function testGetBrowserReturnsNullValuesWhenNoUserAgent(): void
     {
         unset($_SERVER['HTTP_USER_AGENT']);
@@ -49,6 +54,7 @@ class UtilsTest extends AbstractTest
         $this->assertNull($result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsChrome(): void
     {
         $chromeAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
@@ -59,6 +65,7 @@ class UtilsTest extends AbstractTest
         $this->assertNotEmpty($result['version']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsFirefox(): void
     {
         $firefoxAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0';
@@ -68,6 +75,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Windows', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsSafari(): void
     {
         $safariAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15';
@@ -77,6 +85,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('MacOSX', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsMobileSafari(): void
     {
         $iosAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1';
@@ -86,6 +95,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('iOS', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsEdge(): void
     {
         $edgeAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59';
@@ -95,6 +105,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Windows', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsOpera(): void
     {
         $operaAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.254';
@@ -103,6 +114,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Opera', $result['name']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsInternetExplorer(): void
     {
         $ieAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko';
@@ -112,6 +124,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Windows', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsLinux(): void
     {
         $linuxAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
@@ -120,6 +133,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Linux', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsAndroid(): void
     {
         $androidAgent = 'Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
@@ -128,6 +142,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Android', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsIPad(): void
     {
         $ipadAgent = 'Mozilla/5.0 (iPad; CPU OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1';
@@ -136,6 +151,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('ipadOS', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsWindowsPhone(): void
     {
         $wpAgent = 'Mozilla/5.0 (Windows Phone 10.0; Android 6.0.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Mobile Safari/537.36 Edge/15.15254';
@@ -144,6 +160,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Windows Phone', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserReturnsUnknownForUnknownAgent(): void
     {
         $unknownAgent = 'UnknownBrowser/1.0';
@@ -153,6 +170,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Unknown', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserUsesServerUserAgentWhenNoParam(): void
     {
         $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/91.0.4472.124 Safari/537.36';
@@ -165,6 +183,7 @@ class UtilsTest extends AbstractTest
     // Tests for friendly_slug()
     // =========================================================================
 
+    #[Test]
     public function testFriendlySlugConvertsToLowercase(): void
     {
         $result = Utils::friendlySlug('HELLO WORLD');
@@ -172,12 +191,14 @@ class UtilsTest extends AbstractTest
         $this->assertStringNotContainsString('W', $result);
     }
 
+    #[Test]
     public function testFriendlySlugReplacesSpacesWithDashes(): void
     {
         $result = Utils::friendlySlug('hello world');
         $this->assertEquals('hello-world', $result);
     }
 
+    #[Test]
     public function testFriendlySlugReplacesAmpersand(): void
     {
         $result = Utils::friendlySlug('hello & world');
@@ -185,30 +206,35 @@ class UtilsTest extends AbstractTest
         $this->assertStringNotContainsString('&', $result);
     }
 
+    #[Test]
     public function testFriendlySlugReplacesPlus(): void
     {
         $result = Utils::friendlySlug('hello+world');
         $this->assertStringContainsString('-', $result);
     }
 
+    #[Test]
     public function testFriendlySlugReplacesComma(): void
     {
         $result = Utils::friendlySlug('hello,world');
         $this->assertStringContainsString('-', $result);
     }
 
+    #[Test]
     public function testFriendlySlugHandlesAccents(): void
     {
         $result = Utils::friendlySlug('café résumé');
         $this->assertMatchesRegularExpression('/^[a-z0-9\-]+$/', $result);
     }
 
+    #[Test]
     public function testFriendlySlugReturnsHyphenForEmptyString(): void
     {
         $result = Utils::friendlySlug('   ');
         $this->assertEquals('-', $result);
     }
 
+    #[Test]
     public function testFriendlySlugRemovesSpecialCharacters(): void
     {
         $result = Utils::friendlySlug('hello@world#test!');
@@ -219,60 +245,70 @@ class UtilsTest extends AbstractTest
     // Tests for replace_accents()
     // =========================================================================
 
+    #[Test]
     public function testReplaceAccentsConvertsUppercaseAccents(): void
     {
         $result = Utils::transliterate('ÀÁÂÃÄÅ');
         $this->assertEquals('AAAAAA', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsLowercaseAccents(): void
     {
         $result = Utils::transliterate('àáâãäå');
         $this->assertEquals('aaaaaa', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsAE(): void
     {
         $result = Utils::transliterate('Æ');
         $this->assertEquals('AE', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsCedilla(): void
     {
         $result = Utils::transliterate('Ç');
         $this->assertEquals('C', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsEAccents(): void
     {
         $result = Utils::transliterate('ÈÉÊË');
         $this->assertEquals('EEEE', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsIAccents(): void
     {
         $result = Utils::transliterate('ÌÍÎÏ');
         $this->assertEquals('IIII', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsNTilde(): void
     {
         $result = Utils::transliterate('Ñ');
         $this->assertEquals('N', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsOAccents(): void
     {
         $result = Utils::transliterate('ÒÓÔÕÖØ');
         $this->assertEquals('OOOOOO', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsUAccents(): void
     {
         $result = Utils::transliterate('ÙÚÛÜ');
         $this->assertEquals('UUUU', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsSzlig(): void
     {
         $result = Utils::transliterate('ß');
@@ -280,12 +316,14 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('ss', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsOE(): void
     {
         $result = Utils::transliterate('Œœ');
         $this->assertEquals('OEoe', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsConvertsPolishL(): void
     {
         $result = Utils::transliterate('Łł');
@@ -293,12 +331,14 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Ll', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsPreservesNonAccentedChars(): void
     {
         $result = Utils::transliterate('Hello World 123');
         $this->assertEquals('Hello World 123', $result);
     }
 
+    #[Test]
     public function testReplaceAccentsHandlesMixedContent(): void
     {
         $result = Utils::transliterate('Café résumé naïve');
@@ -310,6 +350,7 @@ class UtilsTest extends AbstractTest
     // Tests for encryptPass() and verifyPass()
     // =========================================================================
 
+    #[Test]
     public function testEncryptPassReturnsNonEmptyString(): void
     {
         $result = Utils::encryptPass('password123', 'salt123');
@@ -317,6 +358,7 @@ class UtilsTest extends AbstractTest
         $this->assertIsString($result);
     }
 
+    #[Test]
     public function testEncryptPassReturnsDifferentHashForDifferentSalts(): void
     {
         $hash1 = Utils::encryptPass('password', 'salt1');
@@ -324,6 +366,7 @@ class UtilsTest extends AbstractTest
         $this->assertNotEquals($hash1, $hash2);
     }
 
+    #[Test]
     public function testVerifyPassReturnsTrueForCorrectPassword(): void
     {
         $password = 'testPassword123';
@@ -333,6 +376,7 @@ class UtilsTest extends AbstractTest
         $this->assertTrue(Utils::verifyPass($password, $salt, $hash));
     }
 
+    #[Test]
     public function testVerifyPassReturnsFalseForWrongPassword(): void
     {
         $password = 'testPassword123';
@@ -342,6 +386,7 @@ class UtilsTest extends AbstractTest
         $this->assertFalse(Utils::verifyPass('wrongPassword', $salt, $hash));
     }
 
+    #[Test]
     public function testVerifyPassReturnsFalseForWrongSalt(): void
     {
         $password = 'testPassword123';
@@ -355,36 +400,42 @@ class UtilsTest extends AbstractTest
     // Tests for randomString()
     // =========================================================================
 
+    #[Test]
     public function testRandomStringReturnsCorrectLength(): void
     {
         $result = Utils::randomString();
         $this->assertEquals(12, strlen($result));
     }
 
+    #[Test]
     public function testRandomStringReturnsDefaultLength(): void
     {
         $result = Utils::randomString();
         $this->assertEquals(12, strlen($result));
     }
 
+    #[Test]
     public function testRandomStringReturnsLongerString(): void
     {
         $result = Utils::randomString(24);
         $this->assertEquals(24, strlen($result));
     }
 
+    #[Test]
     public function testRandomStringReturnsVeryLongString(): void
     {
         $result = Utils::randomString(100);
         $this->assertEquals(100, strlen($result));
     }
 
+    #[Test]
     public function testRandomStringWithMoreEntropyReturnsValidString(): void
     {
         $result = Utils::randomString(12, true);
         $this->assertEquals(12, strlen($result));
     }
 
+    #[Test]
     public function testRandomStringGeneratesUniqueStrings(): void
     {
         $strings = [];
@@ -399,6 +450,7 @@ class UtilsTest extends AbstractTest
     // Tests for mysqlTimestamp()
     // =========================================================================
 
+    #[Test]
     public function testMysqlTimestampReturnsCorrectFormat(): void
     {
         $time = strtotime('2023-06-15 14:30:00');
@@ -406,6 +458,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('2023-06-15 14:30:00', $result);
     }
 
+    #[Test]
     public function testMysqlTimestampHandlesCurrentTime(): void
     {
         $time = time();
@@ -420,6 +473,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testApiTimestampReturnsNullForNullInput(): void
     {
         $result = Utils::api_timestamp(null);
@@ -439,18 +493,21 @@ class UtilsTest extends AbstractTest
     // Tests for underscoreToCamelCase()
     // =========================================================================
 
+    #[Test]
     public function testUnderscoreToCamelCaseConvertsSimpleString(): void
     {
         $result = Utils::underscoreToCamelCase('hello_world');
         $this->assertEquals('HelloWorld', $result);
     }
 
+    #[Test]
     public function testUnderscoreToCamelCaseHandlesMultipleUnderscores(): void
     {
         $result = Utils::underscoreToCamelCase('hello_world_test_case');
         $this->assertEquals('HelloWorldTestCase', $result);
     }
 
+    #[Test]
     public function testUnderscoreToCamelCaseHandlesNoUnderscores(): void
     {
         $result = Utils::underscoreToCamelCase('hello');
@@ -461,18 +518,21 @@ class UtilsTest extends AbstractTest
     // Tests for trimAndLowerCase()
     // =========================================================================
 
+    #[Test]
     public function testTrimAndLowerCaseTrimsWhitespace(): void
     {
         $result = Utils::trimAndLowerCase('  hello  ');
         $this->assertEquals('hello', $result);
     }
 
+    #[Test]
     public function testTrimAndLowerCaseConvertsToLowercase(): void
     {
         $result = Utils::trimAndLowerCase('HELLO');
         $this->assertEquals('hello', $result);
     }
 
+    #[Test]
     public function testTrimAndLowerCaseCombinesBoth(): void
     {
         $result = Utils::trimAndLowerCase('  HELLO WORLD  ');
@@ -483,6 +543,7 @@ class UtilsTest extends AbstractTest
     // Tests for removeEmptyStringFromTail()
     // =========================================================================
 
+    #[Test]
     public function testRemoveEmptyStringFromTailRemovesSingleEmpty(): void
     {
         $array = ['a', 'b', 'c', ''];
@@ -490,6 +551,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(['a', 'b', 'c'], $result);
     }
 
+    #[Test]
     public function testRemoveEmptyStringFromTailRemovesMultipleEmpty(): void
     {
         $array = ['a', 'b', '', ''];
@@ -497,6 +559,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(['a', 'b'], $result);
     }
 
+    #[Test]
     public function testRemoveEmptyStringFromTailPreservesNonTrailingEmpty(): void
     {
         $array = ['a', '', 'b', 'c'];
@@ -504,6 +567,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(['a', '', 'b', 'c'], $result);
     }
 
+    #[Test]
     public function testRemoveEmptyStringFromTailHandlesNoTrailingEmpty(): void
     {
         $array = ['a', 'b', 'c'];
@@ -518,6 +582,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testEnsureKeysReturnsParamsWhenAllKeysPresent(): void
     {
         $params = ['key1' => 'value1', 'key2' => 'value2'];
@@ -526,6 +591,7 @@ class UtilsTest extends AbstractTest
         $this->assertSame($params, $result);
     }
 
+    #[Test]
     public function testEnsureKeysThrowsExceptionWhenKeysMissing(): void
     {
         $this->expectException(Exception::class);
@@ -536,6 +602,7 @@ class UtilsTest extends AbstractTest
         Utils::ensure_keys($params, $required);
     }
 
+    #[Test]
     public function testEnsureKeysThrowsExceptionWithMultipleMissingKeys(): void
     {
         $this->expectException(Exception::class);
@@ -549,6 +616,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testEnsureKeysAcceptsNullValues(): void
     {
         $params = ['key1' => null, 'key2' => 'value2'];
@@ -561,6 +629,7 @@ class UtilsTest extends AbstractTest
     // Tests for getRealIpAddr()
     // =========================================================================
 
+    #[Test]
     public function testGetRealIpAddrReturnsRemoteAddr(): void
     {
         $_SERVER['REMOTE_ADDR'] = '192.168.1.1';
@@ -568,6 +637,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('192.168.1.1', $result);
     }
 
+    #[Test]
     public function testGetRealIpAddrPrefersClientIp(): void
     {
         $_SERVER['HTTP_CLIENT_IP'] = '10.0.0.1';
@@ -576,6 +646,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('10.0.0.1', $result);
     }
 
+    #[Test]
     public function testGetRealIpAddrHandlesForwardedFor(): void
     {
         unset($_SERVER['HTTP_CLIENT_IP']);
@@ -585,6 +656,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('172.16.0.1', $result);
     }
 
+    #[Test]
     public function testGetRealIpAddrHandlesMultipleIpsInForwardedFor(): void
     {
         unset($_SERVER['HTTP_CLIENT_IP']);
@@ -602,6 +674,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('2001:0db8:85a3:0000:0000:8a2e:0370:7334', $result);
     }
 
+    #[Test]
     public function testGetRealIpAddrReturnsNullWhenNoValidIp(): void
     {
         unset($_SERVER['HTTP_CLIENT_IP']);
@@ -653,6 +726,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testUuid4HasCorrectVersionBit(): void
     {
         $uuid = Utils::uuid4();
@@ -665,33 +739,39 @@ class UtilsTest extends AbstractTest
     // Tests for isTokenValid()
     // =========================================================================
 
+    #[Test]
     public function testIsTokenValidReturnsTrueForValidToken(): void
     {
         $validToken = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
         $this->assertTrue(Utils::isTokenValid($validToken));
     }
 
+    #[Test]
     public function testIsTokenValidReturnsFalseForNullToken(): void
     {
         $this->assertFalse(Utils::isTokenValid());
     }
 
+    #[Test]
     public function testIsTokenValidReturnsFalseForEmptyToken(): void
     {
         $this->assertFalse(Utils::isTokenValid(''));
     }
 
+    #[Test]
     public function testIsTokenValidReturnsFalseForInvalidFormat(): void
     {
         $this->assertFalse(Utils::isTokenValid('not-a-valid-uuid'));
     }
 
+    #[Test]
     public function testIsTokenValidReturnsFalseForUppercaseToken(): void
     {
         $upperCaseToken = 'A1B2C3D4-E5F6-7890-ABCD-EF1234567890';
         $this->assertFalse(Utils::isTokenValid($upperCaseToken));
     }
 
+    #[Test]
     public function testIsTokenValidReturnsFalseForWrongLength(): void
     {
         $this->assertFalse(Utils::isTokenValid('a1b2c3d4-e5f6-7890-abcd'));
@@ -701,18 +781,21 @@ class UtilsTest extends AbstractTest
     // Tests for fixFileName()
     // =========================================================================
 
+    #[Test]
     public function testFixFileNameSanitizesSpecialCharacters(): void
     {
         $result = Utils::fixFileName('<script>alert("xss")</script>.txt');
         $this->assertStringNotContainsString('<script>', $result);
     }
 
+    #[Test]
     public function testFixFileNamePreservesNormalCharacters(): void
     {
         $result = Utils::fixFileName('normal_file.txt');
         $this->assertEquals('normal_file.txt', $result);
     }
 
+    #[Test]
     public function testFixFileNameIncrementsCountWhenFileExists(): void
     {
         $tempDir = sys_get_temp_dir();
@@ -725,6 +808,7 @@ class UtilsTest extends AbstractTest
         unlink($testFile);
     }
 
+    #[Test]
     public function testFixFileNameDoesNotIncrementWhenUpCountFalse(): void
     {
         $tempDir = sys_get_temp_dir();
@@ -741,136 +825,119 @@ class UtilsTest extends AbstractTest
     // Tests for isValidFileName()
     // =========================================================================
 
+    #[Test]
     public function testIsValidFileName(): void
     {
         $this->assertTrue(Utils::isValidFileName('valid_file.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameWithSpaces(): void
     {
         $this->assertTrue(Utils::isValidFileName('valid file name.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForEmptyName(): void
     {
         $this->assertFalse(Utils::isValidFileName(''));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForOnlySpaces(): void
     {
         $this->assertFalse(Utils::isValidFileName('   '));
     }
 
-    public function testIsValidFileNameReturnsFalseForNullByte(): void
-    {
-        $this->assertFalse(Utils::isValidFileName("file\0.txt"));
-    }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForControlChars(): void
     {
         $this->assertFalse(Utils::isValidFileName("file\x01.txt"));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForNewline(): void
     {
         $this->assertFalse(Utils::isValidFileName("file\n.txt"));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForCarriageReturn(): void
     {
         $this->assertFalse(Utils::isValidFileName("file\r.txt"));
     }
 
-    public function testIsValidFileNameReturnsFalseForDirectoryTraversal(): void
-    {
-        $this->assertFalse(Utils::isValidFileName('../etc/passwd'));
-    }
 
-    public function testIsValidFileNameReturnsFalseForDotDot(): void
-    {
-        $this->assertFalse(Utils::isValidFileName('..'));
-    }
-
-    public function testIsValidFileNameReturnsFalseForHiddenFile(): void
-    {
-        $this->assertFalse(Utils::isValidFileName('.htaccess'));
-    }
-
+    #[Test]
     public function testIsValidFileNameReturnsFalseForBackslash(): void
     {
         $this->assertFalse(Utils::isValidFileName('file\\name.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForForwardSlash(): void
     {
         $this->assertFalse(Utils::isValidFileName('file/name.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForColon(): void
     {
         $this->assertFalse(Utils::isValidFileName('file:name.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForAsterisk(): void
     {
         $this->assertFalse(Utils::isValidFileName('file*.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForQuestionMark(): void
     {
         $this->assertFalse(Utils::isValidFileName('file?.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForDoubleQuote(): void
     {
         $this->assertFalse(Utils::isValidFileName('file".txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForLessThan(): void
     {
         $this->assertFalse(Utils::isValidFileName('file<.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForGreaterThan(): void
     {
         $this->assertFalse(Utils::isValidFileName('file>.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForPipe(): void
     {
         $this->assertFalse(Utils::isValidFileName('file|.txt'));
     }
 
-    public function testIsValidFileNameReturnsFalseForReservedNameCON(): void
-    {
-        $this->assertFalse(Utils::isValidFileName('CON'));
-    }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForReservedNamePRN(): void
     {
         $this->assertFalse(Utils::isValidFileName('PRN'));
     }
 
+    #[Test]
     public function testIsValidFileNameReturnsFalseForReservedNameAUX(): void
     {
         $this->assertFalse(Utils::isValidFileName('AUX'));
     }
 
-    public function testIsValidFileNameReturnsFalseForReservedNameNUL(): void
-    {
-        $this->assertFalse(Utils::isValidFileName('NUL'));
-    }
 
-    public function testIsValidFileNameReturnsFalseForReservedNameCOM1(): void
-    {
-        $this->assertFalse(Utils::isValidFileName('COM1'));
-    }
-
-    public function testIsValidFileNameReturnsFalseForReservedNameLPT1(): void
-    {
-        $this->assertFalse(Utils::isValidFileName('LPT1'));
-    }
-
+    #[Test]
     public function testIsValidFileNameReturnsFalseForTooLongName(): void
     {
         $longName = str_repeat('a', 256);
@@ -884,12 +951,242 @@ class UtilsTest extends AbstractTest
     }
 
     // =========================================================================
+    // Traversal attack vectors for isValidFileName()
+    //
+    // Exhaustive coverage of known path-traversal, encoding, null-byte, and
+    // overlong-UTF-8 attack techniques.  Each test is named after the attack
+    // category so failures immediately reveal which vector is not blocked.
+    // =========================================================================
+
+    // -- Classic directory traversal ------------------------------------------
+
+    #[Test]
+    public function testTraversalClassicDotDotSlash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('../etc/passwd'));
+    }
+
+    #[Test]
+    public function testTraversalClassicDotDotBackslash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName("..\\etc\\passwd"));
+    }
+
+    #[Test]
+    public function testTraversalMidPathForwardSlash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('foo/../../etc/passwd'));
+    }
+
+    #[Test]
+    public function testTraversalMidPathRelative(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('foo/../bar'));
+    }
+
+    #[Test]
+    public function testTraversalMidPathBackslash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName("foo\\..\\bar"));
+    }
+
+    #[Test]
+    public function testTraversalDotDotBackslashPrefix(): void
+    {
+        $this->assertFalse(Utils::isValidFileName("..\\foo"));
+    }
+
+    // -- URL-encoded traversal (single layer) ---------------------------------
+
+    #[Test]
+    public function testTraversalUrlEncodedDotDotSlash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('%2E%2E%2Fetc%2Fpasswd'));
+    }
+
+    #[Test]
+    public function testTraversalUrlEncodedDotDotBackslash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('%2E%2E%5Cetc%5Cpasswd'));
+    }
+
+    #[Test]
+    public function testTraversalPartialEncodeDotDotSlash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('..%2Fetc%2Fpasswd'));
+    }
+
+    #[Test]
+    public function testTraversalPartialEncodeDotDotBackslash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('..%5Cetc%5Cpasswd'));
+    }
+
+    // -- Double-encoded traversal ---------------------------------------------
+
+    #[Test]
+    public function testTraversalDoubleEncodedDotDotSlash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('%252E%252E%252F'));
+    }
+
+    #[Test]
+    public function testTraversalDoubleEncodedDotDotBackslash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('%252E%252E%255C'));
+    }
+
+    // -- Triple-encoded traversal ---------------------------------------------
+
+    #[Test]
+    public function testTraversalTripleEncodedDotDotSlash(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('%25252E%25252E%25252F'));
+    }
+
+    // -- Null byte injection --------------------------------------------------
+
+    #[Test]
+    public function testTraversalNullByteUrlEncoded(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('shell.php%00.jpg'));
+    }
+
+    #[Test]
+    public function testTraversalNullByteLiteral(): void
+    {
+        $this->assertFalse(Utils::isValidFileName("shell.php\x00.jpg"));
+    }
+
+    // -- Overlong UTF-8 traversal ---------------------------------------------
+    // %c0%ae is an overlong encoding of '.' (U+002E)
+    // %c0%af is an overlong encoding of '/' (U+002F)
+    // These are NOT exploitable in PHP on Linux/macOS/Windows because
+    // PHP's urldecode() produces raw bytes (0xC0 0xAE), which are NOT
+    // treated as '.' by the kernel or any PHP filesystem function.
+    // The attack only worked on old IIS/Tomcat with broken UTF-8 decoders
+    // (CVE-2008-2938). Still, partial sequences starting with '..' are blocked.
+
+    public function testTraversalOverlongUtf8PartialDotDotSlash(): void
+    {
+        // ..%c0%af — starts with literal '..' so the traversal regex catches it
+        $this->assertFalse(Utils::isValidFileName('..%c0%af'));
+    }
+
+    public function testTraversalOverlongUtf8PartialDotDotBackslash(): void
+    {
+        // ..%c1%9c — starts with literal '..' so the traversal regex catches it
+        $this->assertFalse(Utils::isValidFileName('..%c1%9c'));
+    }
+
+    public function testTraversalOverlongUtf8FullSequenceIsNotExploitable(): void
+    {
+        // %c0%ae%c0%ae%c0%af — fully overlong-encoded '../'
+        // This passes validation because after urldecode the raw bytes (0xC0 0xAE ...)
+        // are NOT '.' or '/' to PHP or the kernel.  This is expected and safe:
+        // the file system would create a file named with those literal bytes,
+        // not traverse the directory tree.
+        $this->assertTrue(Utils::isValidFileName('%c0%ae%c0%ae%c0%af'));
+    }
+
+    // -- Dot files and special dot names --------------------------------------
+
+    #[Test]
+    public function testTraversalDotAsFullName(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('.'));
+    }
+
+    #[Test]
+    public function testTraversalDotDotAsFullName(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('..'));
+    }
+
+    #[Test]
+    public function testTraversalHiddenDotEnv(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('.env'));
+    }
+
+    #[Test]
+    public function testTraversalHiddenHtaccess(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('.htaccess'));
+    }
+
+    // -- Absolute paths -------------------------------------------------------
+
+    #[Test]
+    public function testTraversalAbsoluteUnixPath(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('/etc/passwd'));
+    }
+
+    #[Test]
+    public function testTraversalAbsoluteWindowsPath(): void
+    {
+        $this->assertFalse(Utils::isValidFileName("C:\\Windows\\system32"));
+    }
+
+    // -- Windows reserved device names ----------------------------------------
+
+    #[Test]
+    public function testTraversalReservedCON(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('CON'));
+    }
+
+    #[Test]
+    public function testTraversalReservedNUL(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('NUL'));
+    }
+
+    public function testTraversalReservedCOM1(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('COM1'));
+    }
+
+    public function testTraversalReservedLPT1(): void
+    {
+        $this->assertFalse(Utils::isValidFileName('LPT1'));
+    }
+
+    // -- Valid file names that must NOT be blocked ----------------------------
+
+    #[Test]
+    public function testTraversalValidSimpleName(): void
+    {
+        $this->assertTrue(Utils::isValidFileName('report.txt'));
+    }
+
+    #[Test]
+    public function testTraversalValidNameWithSpacesAndParens(): void
+    {
+        $this->assertTrue(Utils::isValidFileName('my file (1).docx'));
+    }
+
+    #[Test]
+    public function testTraversalValidUnicodeName(): void
+    {
+        $this->assertTrue(Utils::isValidFileName('résumé.pdf'));
+    }
+
+    #[Test]
+    public function testTraversalValidCjkName(): void
+    {
+        $this->assertTrue(Utils::isValidFileName('日本語.txt'));
+    }
+
+    // =========================================================================
     // Tests for deleteDir()
     // =========================================================================
 
     /**
      * @throws Exception
      */
+    #[Test]
     public function testDeleteDirRemovesEmptyDirectory(): void
     {
         $tempDir = sys_get_temp_dir() . '/test_delete_' . uniqid();
@@ -903,6 +1200,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testDeleteDirRemovesDirectoryWithFiles(): void
     {
         $tempDir = sys_get_temp_dir() . '/test_delete_' . uniqid();
@@ -917,6 +1215,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testDeleteDirRemovesNestedDirectories(): void
     {
         $tempDir = sys_get_temp_dir() . '/test_delete_' . uniqid();
@@ -931,6 +1230,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testDeleteDirSkipsHiddenFiles(): void
     {
         $tempDir = sys_get_temp_dir() . '/test_delete_' . uniqid();
@@ -995,6 +1295,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Hello World', $result);
     }
 
+    #[Test]
     public function testStripBOMPreservesStringWithoutBom(): void
     {
         $string = 'Hello World';
@@ -1002,6 +1303,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Hello World', $result);
     }
 
+    #[Test]
     public function testStripBOMHandlesEmptyString(): void
     {
         $result = Utils::stripBOM('');
@@ -1012,6 +1314,7 @@ class UtilsTest extends AbstractTest
     // Tests for uploadDirFromSessionCookie()
     // =========================================================================
 
+    #[Test]
     public function testUploadDirFromSessionCookieReturnsCorrectPath(): void
     {
         $guid = 'test-guid-123';
@@ -1019,6 +1322,7 @@ class UtilsTest extends AbstractTest
         $this->assertStringContainsString($guid, $result);
     }
 
+    #[Test]
     public function testUploadDirFromSessionCookieIncludesFileName(): void
     {
         $guid = 'test-guid-123';
@@ -1056,6 +1360,7 @@ class UtilsTest extends AbstractTest
     // Tests for truncatePhrase()
     // =========================================================================
 
+    #[Test]
     public function testTruncatePhraseReturnsFullPhraseWhenUnderLimit(): void
     {
         $phrase = 'Hello World';
@@ -1063,6 +1368,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Hello World', $result);
     }
 
+    #[Test]
     public function testTruncatePhraseTruncatesLongPhrase(): void
     {
         $phrase = 'One Two Three Four Five Six Seven';
@@ -1070,6 +1376,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('One Two Three', $result);
     }
 
+    #[Test]
     public function testTruncatePhraseReturnsFullPhraseWhenLimitIsZero(): void
     {
         $phrase = 'Hello World';
@@ -1077,6 +1384,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Hello World', $result);
     }
 
+    #[Test]
     public function testTruncatePhraseHandlesSingleWord(): void
     {
         $phrase = 'Hello';
@@ -1088,6 +1396,7 @@ class UtilsTest extends AbstractTest
     // Tests for stripTagsPreservingHrefs()
     // =========================================================================
 
+    #[Test]
     public function testStripTagsPreservingHrefsPreservesPlainText(): void
     {
         $text = 'This is plain text.';
@@ -1095,6 +1404,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals($text, $result);
     }
 
+    #[Test]
     public function testStripTagsPreservingHrefsConvertsLinks(): void
     {
         $html = '<a href="https://example.com">Click here</a>';
@@ -1103,6 +1413,7 @@ class UtilsTest extends AbstractTest
         $this->assertStringContainsString('(https://example.com)', $result);
     }
 
+    #[Test]
     public function testStripTagsPreservingHrefsPreservesImgSrc(): void
     {
         $html = '<img src="https://example.com/image.jpg" alt="Test"/>';
@@ -1110,6 +1421,7 @@ class UtilsTest extends AbstractTest
         $this->assertStringContainsString('https://example.com/image.jpg', $result);
     }
 
+    #[Test]
     public function testStripTagsPreservingHrefsStripsParagraphTags(): void
     {
         $html = '<p>Hello <strong>World</strong></p>';
@@ -1124,6 +1436,7 @@ class UtilsTest extends AbstractTest
     // Tests for validateEmailList()
     // =========================================================================
 
+    #[Test]
     public function testValidateEmailListReturnsValidEmails(): void
     {
         $list = 'test@example.com, user@domain.org';
@@ -1133,6 +1446,7 @@ class UtilsTest extends AbstractTest
         $this->assertContains('user@domain.org', $result);
     }
 
+    #[Test]
     public function testValidateEmailListThrowsExceptionForInvalidEmail(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -1141,6 +1455,7 @@ class UtilsTest extends AbstractTest
         Utils::validateEmailList('invalid-email, test@example.com');
     }
 
+    #[Test]
     public function testValidateEmailListHandlesEmptyEntries(): void
     {
         $list = 'test@example.com, , user@domain.org';
@@ -1148,6 +1463,7 @@ class UtilsTest extends AbstractTest
         $this->assertCount(2, $result);
     }
 
+    #[Test]
     public function testValidateEmailListTrimsWhitespace(): void
     {
         $list = '  test@example.com  ,  user@domain.org  ';
@@ -1156,6 +1472,7 @@ class UtilsTest extends AbstractTest
         $this->assertContains('user@domain.org', $result);
     }
 
+    #[Test]
     public function testValidateEmailListHandlesSingleEmail(): void
     {
         $list = 'test@example.com';
@@ -1168,6 +1485,7 @@ class UtilsTest extends AbstractTest
     // Additional tests for full coverage
     // =========================================================================
 
+    #[Test]
     public function testGetBrowserDetectsMSIE(): void
     {
         // Test MSIE browser detection (lines 115-116)
@@ -1178,6 +1496,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Windows', $result['platform']);
     }
 
+    #[Test]
     public function testGetBrowserDetectsMSIENotOpera(): void
     {
         // MSIE should not be detected as Opera
@@ -1187,6 +1506,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Internet Explorer', $result['name']);
     }
 
+    #[Test]
     public function testGetBrowserVersionWithVersionFirst(): void
     {
         // Test case where 'Version' comes before browser name (line 156)
@@ -1198,6 +1518,7 @@ class UtilsTest extends AbstractTest
         $this->assertNotEquals('?', $result['version']);
     }
 
+    #[Test]
     public function testGetBrowserEdgeOnIpad(): void
     {
         // Test Edge browser on iPad (should not be detected as Edge due to ipadOS platform check)
@@ -1209,6 +1530,7 @@ class UtilsTest extends AbstractTest
         $this->assertNotEquals('Microsoft Edge', $result['name']);
     }
 
+    #[Test]
     public function testGetBrowserIEMobile(): void
     {
         // Test IEMobile detection
@@ -1218,6 +1540,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Internet Explorer Mobile', $result['name']);
     }
 
+    #[Test]
     public function testGetBrowserWebKitMobile(): void
     {
         // Test WebKit mobile detection without Safari string
@@ -1227,6 +1550,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Mobile Safari', $result['name']);
     }
 
+    #[Test]
     public function testGetBrowserNoVersionMatch(): void
     {
         // Test when version pattern doesn't match - should return '?'
@@ -1236,6 +1560,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('?', $result['version']);
     }
 
+    #[Test]
     public function testGetSourcePageForRevisePath(): void
     {
         $_SERVER['REQUEST_URI'] = '/revise/project/1-2/en-US-it-IT';
@@ -1252,6 +1577,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(3, $result);
     }
 
+    #[Test]
     public function testGetSourcePageFromRefererForRevisePath(): void
     {
         $_SERVER['HTTP_REFERER'] = 'https://example.com/revise/project/1-2/en-US-it-IT';
@@ -1259,6 +1585,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(2, $result);
     }
 
+    #[Test]
     public function testMysqlTimestampFallbackForInvalidTime(): void
     {
         // Test with a value that causes date() to return false (line 284)
@@ -1269,6 +1596,7 @@ class UtilsTest extends AbstractTest
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $result);
     }
 
+    #[Test]
     public function testRandomStringWithMoreEntropyLonger(): void
     {
         // Test more_entropy with longer string
@@ -1279,6 +1607,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testDeleteDirWithNestedHiddenFiles(): void
     {
         $tempDir = sys_get_temp_dir() . '/test_delete_nested_' . uniqid();
@@ -1299,12 +1628,14 @@ class UtilsTest extends AbstractTest
         $this->assertDirectoryDoesNotExist($tempDir);
     }
 
+    #[Test]
     public function testIsValidFileNameWithSingleQuote(): void
     {
         // Test that single quotes are valid (not part of invalidChars)
         $this->assertTrue(Utils::isValidFileName("file'name.txt"));
     }
 
+    #[Test]
     public function testIsValidFileNameWithReservedNameAndExtension(): void
     {
         // Reserved name with extension - the function uses PATHINFO_BASENAME
@@ -1323,12 +1654,7 @@ class UtilsTest extends AbstractTest
         $this->assertFalse(Utils::isValidFileName('LPT9'));
     }
 
-    public function testIsValidFileNameWithUrlEncodedTraversal(): void
-    {
-        // URL-encoded directory traversal
-        $this->assertFalse(Utils::isValidFileName('%2e%2e%2f'));
-    }
-
+    #[Test]
     public function testStripTagsPreservingHrefsWithMultipleLinks(): void
     {
         $html = '<p>Link 1: <a href="https://example1.com">First</a> and Link 2: <a href="https://example2.com">Second</a></p>';
@@ -1337,6 +1663,7 @@ class UtilsTest extends AbstractTest
         $this->assertStringContainsString('[Second](https://example2.com)', $result);
     }
 
+    #[Test]
     public function testStripTagsPreservingHrefsWithNestedTags(): void
     {
         $html = '<div><p><strong>Bold</strong> and <em>italic</em></p></div>';
@@ -1346,6 +1673,7 @@ class UtilsTest extends AbstractTest
         $this->assertStringNotContainsString('<strong>', $result);
     }
 
+    #[Test]
     public function testTruncatePhraseWithExactWordCount(): void
     {
         $phrase = 'One Two Three';
@@ -1353,6 +1681,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('One Two Three', $result);
     }
 
+    #[Test]
     public function testFixFileNameMultipleIncrements(): void
     {
         $tempDir = sys_get_temp_dir();
