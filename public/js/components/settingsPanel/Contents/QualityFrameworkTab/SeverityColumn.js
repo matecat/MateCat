@@ -1,8 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
-import {MenuButton} from '../../../common/MenuButton/MenuButton'
-import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../img/icons/Trash'
