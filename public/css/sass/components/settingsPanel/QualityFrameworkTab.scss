@@ -145,7 +145,7 @@
 
       .column {
         display: grid;
-        grid-template-columns: 1fr 10%;
+        grid-template-columns: 1fr 20%;
         align-items: center;
         height: 32px;
         border: 1px solid colors.$grey150;
@@ -208,7 +208,8 @@
   width: 100%;
   border: 1px solid colors.$grey100;
   padding: 8px 12px 8px 12px;
-  box-shadow: 2px 2px 4px 0px colors.$black inset;
+  box-shadow: 2px 2px 4px 0px rgba(colors.$black, 0.07) inset;
+  border-radius: 8px;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -333,7 +334,8 @@
   height: 40px;
   border: 1px solid colors.$grey100;
   padding: 8px 4px 8px 0;
-  box-shadow: 2px 2px 4px 0px colors.$black inset;
+  box-shadow: 2px 2px 4px 0px rgba(colors.$black, 0.07) inset;
+  border-radius: 8px;
 
   input {
     position: absolute;

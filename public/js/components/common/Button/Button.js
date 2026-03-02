@@ -41,6 +41,7 @@ export const BUTTON_SIZE = {
   STANDARD: 'standard',
   MEDIUM: 'medium',
   BIG: 'big',
+  ICON_XSMALL: 'iconXSmall',
   ICON_SMALL: 'iconSmall',
   ICON_MEDIUM: 'iconMedium',
   ICON_STANDARD: 'iconStandard',
@@ -118,9 +119,9 @@ export const Button = React.forwardRef(
             {/* <Spinner
                         className={styles.spinner}
                         size={
-                            size === BUTTON_SIZE.ICON_SMALL
+                            size === BUTTON_SIZE.ICON_XSMALL
                                 ? 16
-                                : size === BUTTON_SIZE.BIG || size === BUTTON_SIZE.ICON_BIG
+                                : size === BUTTON_SIZE.BIG || size === BUTTON_SIZE.ICON_MEDIUM
                                   ? 24
                                   : 20
                         }

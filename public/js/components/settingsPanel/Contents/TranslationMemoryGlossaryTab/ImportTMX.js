@@ -5,6 +5,12 @@ import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
 import Close from '../../../../../img/icons/Close'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
 
 export const ImportTMX = ({row, onClose}) => {
   const {setIsImportTMXInProgress} = useContext(CreateProjectContext)
@@ -84,23 +90,24 @@ export const ImportTMX = ({row, onClose}) => {
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
           {files.length > 0 && (
-            <button
-              type="submit"
-              className="ui primary button settings-panel-button-icon confirm-button"
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              size={BUTTON_SIZE.SMALL}
+              htmlType={BUTTON_HTML_TYPE.SUBMIT}
               disabled={isFormDisabled || isErrorUpload}
             >
               <Checkmark size={12} />
               Confirm
-            </button>
+            </Button>
           )}
-
-          <button
-            type="reset"
-            className="ui button orange close-button"
+          <Button
+            type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.ICON_SMALL}
+            htmlType={BUTTON_HTML_TYPE.RESET}
             disabled={isFormDisabled}
           >
             <Close size={18} />
-          </button>
+          </Button>
         </div>
       </form>
       {uuids?.length > 0 && (

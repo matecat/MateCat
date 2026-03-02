@@ -170,19 +170,19 @@ a.button-component-container {
     font: variables.$font-style-big;
     font-weight: 700;
   }
-  &.iconSmall {
+  &.iconXSmall {
     width: 24px;
     height: 24px;
     padding: 4px;
     line-height: 24px;
     font-size: 12px;
   }
-  &.iconMedium {
-    width: 36px;
-    height: 36px;
+  &.iconSmall {
+    width: 32px;
+    height: 32px;
     padding: 4px;
-    line-height: 36px;
-    font-size: 14px;
+    line-height: 24px;
+    font-size: 12px;
   }
   &.iconStandard {
     width: 40px;
@@ -190,11 +190,17 @@ a.button-component-container {
     line-height: 40px;
     font-size: 14px;
   }
-  &.iconBig {
+  &.iconMedium {
     width: 48px;
     height: 48px;
     line-height: 48px;
     font-size: 16px;
+  }
+  &.iconBig {
+    width: 56px;
+    height: 56px;
+    line-height: 56px;
+    font-size: 18px;
   }
   &.fullWidth {
     width: 100%;

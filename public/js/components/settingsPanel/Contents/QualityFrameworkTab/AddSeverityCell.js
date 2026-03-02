@@ -43,7 +43,7 @@ export const AddSeverityCell = ({idCategory, severityColumn}) => {
   return (
     <div className="cell quality-framework-severity-add-severity-button">
       <Button size={BUTTON_SIZE.SMALL} onClick={addSeverity}>
-        <IconAdd />
+        <IconAdd size={16} />
         Add severity
       </Button>
     </div>

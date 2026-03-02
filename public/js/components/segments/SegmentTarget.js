@@ -144,7 +144,7 @@ class SegmentTarget extends React.Component {
           <div className="segment-target-toolbar">
             {config.isReview ? (
               <Button
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 mode={BUTTON_MODE.OUTLINE}
                 onClick={this.lockEditArea.bind(this)}
                 title="Highlight text and assign an issue to the selected text."
@@ -205,7 +205,7 @@ class SegmentTarget extends React.Component {
             />
             <Button
               className="removeAllTags"
-              size={BUTTON_SIZE.ICON_SMALL}
+              size={BUTTON_SIZE.ICON_XSMALL}
               mode={BUTTON_MODE.OUTLINE}
               alt={`Remove all tags (${Shortcuts.cattol.events.removeTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
               title={`Remove all tags (${Shortcuts.cattol.events.removeTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
@@ -232,7 +232,7 @@ class SegmentTarget extends React.Component {
               callback={this.editArea.addMissingSourceTagsToTarget}
             />
             <Button
-              size={BUTTON_SIZE.ICON_SMALL}
+              size={BUTTON_SIZE.ICON_XSMALL}
               mode={BUTTON_MODE.OUTLINE}
               alt={`Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
               title={`Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}

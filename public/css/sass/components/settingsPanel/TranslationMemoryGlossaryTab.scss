@@ -253,8 +253,9 @@
   }
 }
 
-.tm-key-row-menu-button-dropdown {
-  margin-left: -35px;
+.tm-key-row-options-menu-container {
+  display: flex;
+  gap: 8px;
 }
 
 .tm-key-row-icons {
@@ -286,7 +287,7 @@
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 10px 35px 10px 10px;
   min-height: 50px;
 
   .action-form {
@@ -295,7 +296,7 @@
     align-items: center;
     width: 100%;
     .translation-memory-glossary-tab-label {
-      gap: 220px !important;
+      gap: 200px !important;
     }
     > :first-child {
       display: flex;

@@ -560,3 +560,18 @@
     background-color: colors.$grey50 !important;
   }
 }
+
+.settings-panel-dropdownMenu {
+  z-index: 14;
+}
+
+.project-template-dropdown-trigger-button {
+  color: white !important;
+
+  &:hover,
+  &:focus {
+    background-color: unset !important;
+    box-shadow: inset 0 0 0 1px rgba(white, 0.6) !important;
+    color: rgba(white, 0.6) !important;
+  }
+}

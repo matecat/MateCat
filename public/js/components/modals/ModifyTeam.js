@@ -286,7 +286,7 @@ export const ModifyTeam = ({team}) => {
               <Button
                 className="button-edit"
                 mode={BUTTON_MODE.GHOST}
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={() => setIsModifyingName(true)}
               >
                 <IconEdit size={18} />

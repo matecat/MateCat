@@ -18,19 +18,10 @@ global.config = {
   isLoggedIn: 1,
 }
 
-const wrapperElement = document.createElement('div')
 const WrapperComponent = (contextProps) => {
-  const ref = useRef()
-
-  useEffect(() => {
-    ref.current.appendChild(wrapperElement)
-  }, [])
-
   return (
     <SettingsPanelContext.Provider value={contextProps}>
-      <div ref={ref}>
-        <ProjectTemplate portalTarget={wrapperElement} />
-      </div>
+      <ProjectTemplate />
     </SettingsPanelContext.Provider>
   )
 }

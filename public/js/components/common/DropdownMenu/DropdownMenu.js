@@ -42,7 +42,7 @@ export const DropdownMenu = ({
   const defaultToggleButtonProps = {
     type: BUTTON_TYPE.DEFAULT,
     mode: BUTTON_MODE.GHOST,
-    size: BUTTON_SIZE.ICON_SMALL,
+    size: BUTTON_SIZE.ICON_XSMALL,
     children: <DotsHorizontal />,
     ...toggleButtonProps,
     className: `${toggleButtonProps.className || ''} ${className}`,

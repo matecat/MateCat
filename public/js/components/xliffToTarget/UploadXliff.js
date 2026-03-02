@@ -236,7 +236,7 @@ export const UploadXliff = () => {
                 </div>
               )}
               <Button
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={() => deleteFile(f.name)}
                 style={{marginLeft: 'auto'}}
                 tooltip={'Remove file'}

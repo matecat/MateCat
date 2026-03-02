@@ -288,9 +288,7 @@ export const SubTemplates = ({
                   Save as new
                 </Button>
               )}
-              {!isStandardTemplateBool && (
-                <SubTemplateMoreMenu {...{portalTarget}} />
-              )}
+              {!isStandardTemplateBool && <SubTemplateMoreMenu />}
             </>
           ) : (
             <SubTemplateCreateUpdateControl />

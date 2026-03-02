@@ -83,7 +83,7 @@ class SegmentQRIssue extends React.Component {
               position="bottom right"
               trigger={
                 <Button
-                  size={BUTTON_SIZE.ICON_SMALL}
+                  size={BUTTON_SIZE.ICON_XSMALL}
                   title="Comments"
                   mode={BUTTON_MODE.OUTLINE}
                 >

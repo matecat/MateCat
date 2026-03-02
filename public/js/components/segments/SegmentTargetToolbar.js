@@ -37,7 +37,7 @@ export const SegmentTargetToolbar = ({
     return (
       <Button
         className="segment-target-toolbar-icon"
-        size={BUTTON_SIZE.ICON_SMALL}
+        size={BUTTON_SIZE.ICON_XSMALL}
         mode={BUTTON_MODE.OUTLINE}
         {...rest}
       >

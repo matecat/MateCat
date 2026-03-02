@@ -1,12 +1,9 @@
 import React, {useContext} from 'react'
-import PropTypes from 'prop-types'
 import {
   SUBTEMPLATE_MODIFIERS,
   SubTemplatesContext,
   isStandardSubTemplate,
 } from './SubTemplate'
-import {MenuButton} from '../../../common/MenuButton/MenuButton'
-import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
@@ -15,8 +12,10 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDele
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {flushSync} from 'react-dom'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
+import {BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 
-export const SubTemplateMoreMenu = ({portalTarget}) => {
+export const SubTemplateMoreMenu = () => {
   const {
     projectTemplates,
     setProjectTemplates,
@@ -123,40 +122,43 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
   }
 
   return (
-    <MenuButton
-      className="button-menu-button button-more-items"
-      onClick={() => false}
-      icon={<DotsHorizontal size={18} />}
-      isVisibleRectArrow={false}
-      itemsTarget={portalTarget}
-    >
-      <MenuButtonItem
-        disabled={isRequestInProgress}
-        className="settings-panel-templates-button-more"
-        onMouseUp={() => {
-          setTemplateModifier(SUBTEMPLATE_MODIFIERS.UPDATE)
-          setTemplateName(currentTemplate.name)
-        }}
-      >
-        <IconEdit size={18} />
-        Rename
-      </MenuButtonItem>
-      <MenuButtonItem
-        data-testid="delete-template"
-        className="settings-panel-templates-button-more"
-        disabled={isRequestInProgress}
-        onMouseUp={deleteTemplateConfirmation}
-      >
-        <Trash size={18} />
-        Delete
-      </MenuButtonItem>
-    </MenuButton>
+    <DropdownMenu
+      dropdownClassName="settings-panel-dropdownMenu"
+      toggleButtonProps={{
+        mode: BUTTON_MODE.OUTLINE,
+        size: BUTTON_SIZE.ICON_STANDARD,
+        children: (
+          <>
+            <DotsHorizontal size={18} />
+          </>
+        ),
+      }}
+      items={[
+        {
+          label: (
+            <>
+              <IconEdit size={18} />
+              Rename
+            </>
+          ),
+          disabled: isRequestInProgress,
+          onClick: () => {
+            setTemplateModifier(SUBTEMPLATE_MODIFIERS.UPDATE)
+            setTemplateName(currentTemplate.name)
+          },
+        },
+        {
+          label: (
+            <>
+              <Trash size={18} />
+              Delete
+            </>
+          ),
+          disabled: isRequestInProgress,
+          onClick: deleteTemplateConfirmation,
+          testId: 'delete-template',
+        },
+      ]}
+    />
   )
-}
-
-SubTemplateMoreMenu.propTypes = {
-  portalTarget: PropTypes.oneOfType([
-    PropTypes.instanceOf(Element),
-    PropTypes.node,
-  ]),
 }

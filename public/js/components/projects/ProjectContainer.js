@@ -585,7 +585,7 @@ const ProjectContainer = ({
                   <Button
                     className="project-container-button-edit-name"
                     mode={BUTTON_MODE.GHOST}
-                    size={BUTTON_SIZE.ICON_SMALL}
+                    size={BUTTON_SIZE.ICON_XSMALL}
                     onClick={() => setIsEditingName(true)}
                   >
                     <IconEdit size={18} />

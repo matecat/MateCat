@@ -1,9 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
-import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import IconDown from '../../../icons/IconDown'
-import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../img/icons/Trash'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -12,6 +10,8 @@ import LabelWithTooltip from '../../../common/LabelWithTooltip'
 import {ModifyCategory} from './ModifyCategory'
 import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTable'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
+import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
+import {BUTTON_MODE} from '../../../common/Button/Button'
 
 export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -94,49 +94,65 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
   const isDeleteDisabled = currentTemplate.categories.length === 1
 
   const menu = (
-    <MenuButton
-      className="button-menu-button quality-framework-columns-menu-button"
-      icon={<IconDown size={20} />}
-      onClick={() => false}
-      isVisibleRectArrow={false}
-      itemsTarget={portalTarget}
-    >
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item"
-        onMouseUp={() => setIsEditingName(true)}
-        data-testid="menu-button-rename"
-      >
-        <IconEdit size={18} />
-        Edit
-      </MenuButtonItem>
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item quality-framework-columns-menu-item-moveup"
-        onMouseUp={moveUp}
-        disabled={isMoveUpDisabled}
-        data-testid="menu-button-moveup"
-      >
-        <ChevronDown />
-        Move up
-      </MenuButtonItem>
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item"
-        onMouseUp={moveDown}
-        disabled={isMoveDownDisabled}
-        data-testid="menu-button-movedown"
-      >
-        <ChevronDown />
-        Move down
-      </MenuButtonItem>
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item"
-        onMouseUp={deleteCategory}
-        data-testid="menu-button-delete"
-        disabled={isDeleteDisabled}
-      >
-        <Trash size={18} />
-        Delete
-      </MenuButtonItem>
-    </MenuButton>
+    <DropdownMenu
+      dropdownClassName="settings-panel-dropdownMenu"
+      toggleButtonProps={{
+        className: 'quality-framework-columns-menu-button',
+        mode: BUTTON_MODE.GHOST,
+        children: (
+          <>
+            <IconDown size={20} />
+          </>
+        ),
+      }}
+      items={[
+        {
+          label: (
+            <>
+              <IconEdit size={18} />
+              Edit
+            </>
+          ),
+          onClick: () => setIsEditingName(true),
+          testId: 'menu-button-rename',
+        },
+        {
+          label: (
+            <>
+              <div className="quality-framework-columns-menu-item-moveup">
+                <ChevronDown />
+              </div>
+              Move up
+            </>
+          ),
+          disabled: isMoveUpDisabled,
+          onClick: moveUp,
+          testId: 'menu-button-moveup',
+        },
+        {
+          label: (
+            <>
+              <ChevronDown />
+              Move down
+            </>
+          ),
+          disabled: isMoveUpDisabled,
+          onClick: isMoveDownDisabled,
+          testId: 'menu-button-movedown',
+        },
+        {
+          label: (
+            <>
+              <Trash size={18} />
+              Delete
+            </>
+          ),
+          disabled: isDeleteDisabled,
+          onClick: deleteCategory,
+          testId: 'menu-button-delete',
+        },
+      ]}
+    />
   )
 
   return (

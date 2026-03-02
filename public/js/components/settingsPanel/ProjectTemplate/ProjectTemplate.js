@@ -1,5 +1,4 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../SettingsPanelContext'
 import {
   SCHEMA_KEYS,
@@ -27,7 +26,7 @@ export const TEMPLATE_MODIFIERS = {
   UPDATE: 'update',
 }
 
-export const ProjectTemplate = ({portalTarget}) => {
+export const ProjectTemplate = () => {
   const {
     projectTemplates,
     setProjectTemplates,
@@ -401,7 +400,7 @@ export const ProjectTemplate = ({portalTarget}) => {
                   Save as new
                 </Button>
               )}
-              {!isStandardTemplateBool && <MoreMenu {...{portalTarget}} />}
+              {!isStandardTemplateBool && <MoreMenu />}
             </>
           ) : (
             <CreateUpdateControl />
@@ -410,11 +409,4 @@ export const ProjectTemplate = ({portalTarget}) => {
       </div>
     </ProjectTemplateContext.Provider>
   )
-}
-
-ProjectTemplate.propTypes = {
-  portalTarget: PropTypes.oneOfType([
-    PropTypes.instanceOf(Element),
-    PropTypes.node,
-  ]),
 }
