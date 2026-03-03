@@ -1,6 +1,6 @@
-import React, {useState, useMemo, useCallback, useRef, createRef} from 'react'
+import React, {useState, useMemo, useCallback, createRef} from 'react'
 import parse from 'format-message-parse'
-import formatMessage, {date, number, time} from 'format-message'
+import formatMessage from 'format-message'
 import {
   removeTagsFromText,
   transformTagsToText,
@@ -35,7 +35,6 @@ const inputDefaultValue = {
 }
 const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   const [values, setValues] = useState([])
-  const ruleRef = useRef()
   const variableNames = useMemo(() => {
     try {
       const tree = parse(
