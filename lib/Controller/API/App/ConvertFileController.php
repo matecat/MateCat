@@ -86,7 +86,7 @@ class ConvertFileController extends KleinController
      */
     private function validateTheRequest(): array
     {
-        $file_name = filter_var($this->request->param('file_name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $file_name = filter_var($this->request->param('file_name'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
@@ -125,7 +125,7 @@ class ConvertFileController extends KleinController
         }
 
         if (!Utils::isValidFileName($file_name)) {
-            throw new InvalidArgumentException("Invalid file name.");
+            throw new InvalidArgumentException("Invalid file name: $file_name");
         }
 
         $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule);

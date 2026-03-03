@@ -108,7 +108,7 @@ class UploadHandler
     protected static function _validateFileName(string $fileName): void
     {
         if (!Utils::isValidFileName($fileName)) {
-            throw new Exception("Invalid File Name");
+            throw new Exception("Invalid file name: $fileName");
         }
     }
 

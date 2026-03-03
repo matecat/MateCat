@@ -126,7 +126,7 @@ class GetSegmentsController extends KleinController
                     language: $job->source,
                     patternString: $seg['segment']
                 );
-                $string_contains_icu = $analyzer->containsComplexSyntax();
+                $string_contains_icu = $analyzer->containsComplexSyntax() && $analyzer->isValidSyntax();
             }
 
             /** @var MateCatFilter $Filter */

@@ -9,6 +9,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\ICU\MessagePatternComparator;
 use Matecat\ICU\MessagePatternValidator;
+use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -143,7 +144,8 @@ class GetWarningController extends KleinController
                 $this->icuSourcePatternValidator,
                 new MessagePatternValidator(
                     $chunk->target,
-                    $trg_content
+                    // Transform target content: convert control character placeholders back to ASCII control characters
+                    (new CtrlCharsPlaceHoldToAscii())->transform($request['trg_content'])
                 )
             ),
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax

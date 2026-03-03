@@ -4,6 +4,7 @@ namespace Model\Conversion;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -30,7 +31,12 @@ class Upload
 
     protected bool $raiseException = true;
 
-    public function getDirUploadToken()
+    /**
+     * Returns the upload token string used to identify the session directory.
+     *
+     * @return string
+     */
+    public function getDirUploadToken(): string
     {
         return $this->uploadToken;
     }
@@ -48,11 +54,10 @@ class Upload
         $this->raiseException = $raiseException;
     }
 
-
     /**
      * @throws Exception
      */
-    public function __construct($uploadToken = null)
+    public function __construct(?string $uploadToken = null)
     {
         if (empty($uploadToken)) {
             $this->uploadToken = Utils::uuid4();
@@ -96,6 +101,14 @@ class Upload
         return $result;
     }
 
+    /**
+     * Normalises a raw $_FILES array (or Klein files array) into a flat UploadElement
+     * regardless of whether single or multiple files were submitted per input name.
+     *
+     * @param array $filesToUpload Raw files array (e.g. from $_FILES or $request->files()->all()).
+     *
+     * @return UploadElement A flat object keyed by tmp_name (or input name for single files).
+     */
     public static function getUniformGlobalFilesStructure(array $filesToUpload): UploadElement
     {
         $result = new UploadElement();
@@ -130,8 +143,10 @@ class Upload
      */
     protected function _uploadFile(UploadElement $fileUp, ?bool $disable_upload_limit = false): object
     {
-        // fix possibly XSS on the file name
-        $fileUp['name'] = $this->fixFileName($fileUp['name']);
+        // reject invalid file names
+        if (!Utils::isValidFileName($fileUp['name'])) {
+            throw new InvalidArgumentException("Invalid file name: {$fileUp['name']}");
+        }
 
         $fileName = $fileUp['name'];
         $fileTmpName = $fileUp['tmp_name'];
@@ -234,7 +249,7 @@ class Upload
             if (!Utils::isValidFileName($fileUp->name)) {
                 $this->setObjectErrorOrThrowException(
                     $fileUp,
-                    new DomainException ("Invalid File Name '" . $out_filename . "'")
+                    new DomainException ("Invalid file name: $out_filename")
                 );
             }
 
@@ -282,6 +297,9 @@ class Upload
      */
     public function fixFileName(string $stringName, bool $upCount = true): string
     {
+        if (!Utils::isValidFileName($stringName)) {
+            throw new InvalidArgumentException("Invalid file name: $stringName");
+        }
         return Utils::fixFileName($stringName, $this->dirUpload, $upCount);
     }
 

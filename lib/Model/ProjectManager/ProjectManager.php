@@ -1940,7 +1940,7 @@ class ProjectManager
 
         try {
             $xliff = $xliffParser->xliffToArray($xliff_file_content);
-            $xliffInfo = XliffProprietaryDetect::getInfoByStringData($xliff_file_content);
+            $xliffInfo = (new XliffProprietaryDetect())->getInfoByStringData($xliff_file_content);
             $this->projectStructure['current-xliff-info'][$fid] = $xliffInfo;
         } catch (Throwable $e) {
             throw new Exception("Failed to parse " . $file_info['original_filename'], ($e->getCode() != 0 ? $e->getCode() : -4), $e);

@@ -205,11 +205,17 @@ export const UploadGdrive = () => {
           } else {
             let message =
               'There was an error retrieving the file from Google Drive. Try again and if the error persists contact the Support.'
+
             if (response.error_class === 'Google\\Service\\Exception') {
               message =
                 'There was an error retrieving the file from Google Drive: ' +
                 response.error_msg
             }
+
+            if (response.error_class === 'InvalidArgumentException') {
+              message = response.error_msg
+            }
+
             if (response.error_code === 404) {
               message = (
                 <span>

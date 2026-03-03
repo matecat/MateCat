@@ -35,7 +35,7 @@ class Constants
     public static function validateSegmentationRules(?string $segmentation_rule = ''): ?string
     {
         //normalize segmentation rule to what it's used internally
-        if ($segmentation_rule == 'standard' || $segmentation_rule == '') {
+        if ($segmentation_rule == 'standard' || $segmentation_rule == '' || $segmentation_rule == null) {
             return null;
         }
 

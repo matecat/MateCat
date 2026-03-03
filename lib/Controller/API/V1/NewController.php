@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
+use Controller\Traits\ValidatesDialectStrictTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\LanguageDomains;
@@ -39,6 +40,7 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
+use ReflectionException;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
@@ -66,6 +68,7 @@ class NewController extends KleinController
 {
 
     use ScanDirectoryForConvertedFiles;
+    use ValidatesDialectStrictTrait;
 
     const int MAX_NUM_KEYS = 13;
 
@@ -289,11 +292,7 @@ class NewController extends KleinController
 
     /**
      * @return array
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
+     * @throws ReflectionException
      * @throws Exception
      */
     private function validateTheRequest(): array
@@ -914,7 +913,7 @@ class NewController extends KleinController
 
         //If a TMX file has been uploaded and no key was provided, create a new key.
         if (empty($private_tm_key)) {
-            $uniformedFileObject = Upload::getUniformGlobalFilesStructure($_FILES);
+            $uniformedFileObject = Upload::getUniformGlobalFilesStructure($this->request->files()->all());
             foreach ($uniformedFileObject as $_fileinfo) {
                 $pathinfo = AbstractFilesStorage::pathinfo_fix($_fileinfo->name);
                 if ($pathinfo['extension'] == 'tmx') {
@@ -1156,49 +1155,6 @@ class NewController extends KleinController
         return null;
     }
 
-    /**
-     * Validate `dialect_strict` param
-     *
-     * Example: {"it-IT": true, "en-US": false, "fr-FR": false}
-     *
-     * @param Languages $lang_handler
-     * @param null $dialect_strict
-     *
-     * @return string|null
-     */
-    private function validateDialectStrictParam(Languages $lang_handler, $dialect_strict = null): ?string
-    {
-        if (!empty($dialect_strict)) {
-            $dialect_strict = trim(html_entity_decode($dialect_strict));
-
-            // first check if `dialect_strict` is a valid JSON
-            if (!json_validate($dialect_strict)) {
-                throw new InvalidArgumentException("dialect_strict is not a valid JSON");
-            }
-
-            $dialectStrictObj = json_decode($dialect_strict, true);
-
-            foreach ($dialectStrictObj as $lang => $value) {
-                try {
-                    $lang_handler->validateLanguage($lang);
-                } catch (Exception $e) {
-                    throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not supported'
-                    );
-                }
-
-                if (!is_bool($value)) {
-                    throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, not boolean declared value for ' . $lang
-                    );
-                }
-            }
-
-            return html_entity_decode($dialect_strict);
-        }
-
-        return null;
-    }
 
     /**
      * @param null $filters_extraction_parameters

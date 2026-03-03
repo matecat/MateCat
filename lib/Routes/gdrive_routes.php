@@ -25,7 +25,7 @@ route(
 );
 route(
     '/gdrive/change',
-    'GET',
+    'POST',
     ['Controller\API\GDrive\GDriveController', 'changeConversionParameters']
 );
 route(

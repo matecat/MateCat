@@ -201,7 +201,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <QR /> QA Report
+            <QR /> Quality report
           </>
         ),
         onClick: () => {
@@ -243,7 +243,7 @@ class JobMenu extends React.Component {
       {
         label: (
           <>
-            <Download size={18} /> Export TMX
+            <Download size={18} /> Export job TMX
           </>
         ),
         onClick: () => {

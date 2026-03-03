@@ -1,7 +1,7 @@
 import React from 'react'
 import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
-import InfoIcon from '../../../img/icons/InfoIcon'
+import HelpCircle from '../../../img/icons/HelpCircle'
 
 export const ProductionSummary = ({qualitySummary, jobInfo}) => {
   const getTimeToEdit = () => {
@@ -130,7 +130,7 @@ export const ProductionSummary = ({qualitySummary, jobInfo}) => {
               wide="very"
               trigger={
                 <div className="qr-ept-info">
-                  EPT score <InfoIcon size={12} />
+                  EPT score <HelpCircle size={12} />
                 </div>
               }
             />
