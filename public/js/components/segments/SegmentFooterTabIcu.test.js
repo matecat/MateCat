@@ -22,6 +22,7 @@ afterEach(() => {
 })
 
 const createSegment = (translation) => ({
+  segment: translation,
   translation,
 })
 
