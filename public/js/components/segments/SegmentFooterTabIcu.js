@@ -92,7 +92,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
 
   const analyzeICU = useMemo(() => {
     const text = textUtils.removeWhitespacePlaceholders(
-      transformTagsToText(removeTagsFromText(segment.translation)),
+      transformTagsToText(removeTagsFromText(segment.segment)),
     )
 
     let ast
