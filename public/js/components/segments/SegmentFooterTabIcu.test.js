@@ -10,6 +10,7 @@ window.config = {
 }
 
 const createSegment = (translation) => ({
+  segment: translation,
   translation,
 })
 
