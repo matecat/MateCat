@@ -110,7 +110,6 @@ export const AddSeverity = ({numbersOfColumns}) => {
         confirmButtonProps={{
           ref: confirmRef,
           type: BUTTON_TYPE.PRIMARY,
-          size: BUTTON_SIZE.MEDIUM,
           disabled: !name || typeof error === 'string',
           children: (
             <>
@@ -122,7 +121,6 @@ export const AddSeverity = ({numbersOfColumns}) => {
         }}
         cancelButtonProps={{
           mode: BUTTON_MODE.OUTLINE,
-          size: BUTTON_SIZE.MEDIUM,
           children: 'Cancel',
         }}
         align={POPOVER_ALIGN.RIGHT}

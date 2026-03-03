@@ -11,7 +11,8 @@
 @use '../header/header';
 @use '../header/ActionMenu';
 @use '../../style';
-@use "../../commons/colors";
+@use '../../commons/colors';
+@use '../../commons/variables';
 
 $color-red: #fb2a0d;
 $color-orange: #fbaa0d;
@@ -170,14 +171,13 @@ header {
               position: relative;
               height: 64px;
               gap: 30px;
-              border-radius: 8px;
+              border-radius: variables.$border-radius-default;
               flex: 1 0 0;
               .job-id {
                 font-size: 16px;
                 min-width: 90px;
                 color: colors.$grey700;
                 line-height: 24px;
-
               }
               .source-to-target {
                 display: flex;
@@ -236,7 +236,7 @@ header {
                 gap: 8px;
                 flex-shrink: 0;
                 background: colors.$grey150;
-                border-radius: 8px;
+                border-radius: variables.$border-radius-default;
                 > div {
                   display: flex;
                   flex-direction: column;
@@ -295,7 +295,7 @@ header {
               border: 1px solid colors.$grey150;
               position: relative;
               z-index: 1;
-              border-radius: 8px;
+              border-radius: variables.$border-radius-default;
               overflow: hidden;
               font-size: 14px;
               .qr-head {
@@ -303,7 +303,7 @@ header {
                 align-items: center;
                 font-weight: 700;
                 background: colors.$grey150;
-                height: 40px  ;
+                height: 40px;
                 .qr-title {
                   padding-left: 24px;
                 }
@@ -320,7 +320,6 @@ header {
                 .qr-element {
                   position: relative;
                   padding-left: 24px;
-
                 }
                 &.severity_weight-line {
                   background-color: colors.$grey50;
@@ -337,9 +336,10 @@ header {
                   }
                 }
                 &.qr-total-line {
-                    background-color: colors.$grey150;
-                    height: 40px;
-                  .qr-issue-name, .total-score {
+                  background-color: colors.$grey150;
+                  height: 40px;
+                  .qr-issue-name,
+                  .total-score {
                     font-weight: 700;
                     line-height: 40px;
                   }
@@ -353,7 +353,7 @@ header {
               .qr-issue {
                 font-weight: 700;
               }
-              .qr-issue ,
+              .qr-issue,
               .qr-issue-name {
                 width: 56%;
               }
@@ -407,7 +407,7 @@ header {
             padding: 0 24px;
             height: 40px;
             align-items: center;
-            border-radius: 8px;
+            border-radius: variables.$border-radius-default;
             margin-bottom: 20px;
             border: 1px solid colors.$grey150;
             font-size: 14px;
@@ -420,7 +420,7 @@ header {
             position: relative;
             margin-bottom: 20px;
             background-color: colors.$white;
-            border-radius: 8px;
+            border-radius: variables.$border-radius-default;
             overflow: hidden;
             .qr-feedback {
               .qr-head {
@@ -455,7 +455,7 @@ header {
           .qr-segment-details-container {
             background: colors.$grey100;
             padding: 16px;
-            border-radius: 8px;
+            border-radius: variables.$border-radius-default;
             border: 1px solid colors.$grey150;
             .qr-segments-summary {
               h3 {
@@ -469,7 +469,7 @@ header {
                 .qr-segments-list {
                   .qr-single-segment {
                     margin-top: 30px;
-                    border-radius: 8px;
+                    border-radius: variables.$border-radius-default;
                     overflow: hidden;
                     border: 1px solid colors.$grey150;
                     &:first-child {
@@ -509,34 +509,34 @@ header {
                         font-size: 14px;
                         text-transform: capitalize;
                       }
-                       //.status-new {
-                       //  font-size: 20px;
-                       //  color: colors.$grey500;
-                       //}
-                       //.status-translated {
-                       //  font-size: 20px;
-                       //  color: colors.$blue500;
-                       //}
-                       //.status-approved {
-                       //  font-size: 20px;
-                       //  color: colors.$green400;
-                       //  &.approved-r2 {
-                       //    color: colors.$purple500;
-                       //  }
-                       //}
-                       //.status-approved2 {
-                       //  color: colors.$purple500;
-                       //  font-size: 20px;
-                       //}
-                       //.status-draft {
-                       //  font-size: 20px;
-                       //  color: colors.$grey500;
-                       //}
-                       //.status-rejected {
-                       //  font-size: 20px;
-                       //  color: colors.$orange600;
-                       //}
-                     }
+                      //.status-new {
+                      //  font-size: 20px;
+                      //  color: colors.$grey500;
+                      //}
+                      //.status-translated {
+                      //  font-size: 20px;
+                      //  color: colors.$blue500;
+                      //}
+                      //.status-approved {
+                      //  font-size: 20px;
+                      //  color: colors.$green400;
+                      //  &.approved-r2 {
+                      //    color: colors.$purple500;
+                      //  }
+                      //}
+                      //.status-approved2 {
+                      //  color: colors.$purple500;
+                      //  font-size: 20px;
+                      //}
+                      //.status-draft {
+                      //  font-size: 20px;
+                      //  color: colors.$grey500;
+                      //}
+                      //.status-rejected {
+                      //  font-size: 20px;
+                      //  color: colors.$orange600;
+                      //}
+                    }
                     .qr-segment-body {
                       .segment-container {
                         display: flex;
@@ -670,7 +670,7 @@ header {
                               margin-top: 5px;
                               background: colors.$white;
                               border: 1px solid colors.$grey100;
-                              border-radius: 8px;
+                              border-radius: variables.$border-radius-default;
                               gap: 6px;
                               &.automated {
                                 .box-icon {
@@ -681,7 +681,7 @@ header {
                                     color: colors.$red400;
                                   }
                                   &.warning {
-                                    color:  colors.$orange200;
+                                    color: colors.$orange200;
                                   }
                                 }
                               }
@@ -803,7 +803,7 @@ header {
   }
   .segmented-control__cursor:before {
     background-color: colors.$white;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
   }
   .segmented-control input:checked + .segmented-control__label {
     color: colors.$black;
@@ -812,7 +812,8 @@ header {
     line-height: 40px;
   }
 }
-.qr-reviewType-dropdown, .filter-reviewType  {
+.qr-reviewType-dropdown,
+.filter-reviewType {
   .circular.label {
     &.new-color {
       box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;

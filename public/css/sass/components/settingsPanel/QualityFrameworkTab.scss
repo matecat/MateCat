@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 .quality-framework-tab {
   &.settings-panel-contentwrapper-tab-background {
@@ -47,6 +48,8 @@
     overflow-x: auto;
     overscroll-behavior: none;
     scrollbar-width: thin;
+    border-radius: variables.$border-radius-default;
+    border: 1px solid colors.$grey150;
 
     @media (max-height: 1200px) {
       max-height: calc(100vh - 470px);
@@ -77,10 +80,11 @@
       display: flex;
       justify-content: space-between;
       max-width: 280px;
-      /* height: 64px; */
       min-height: 64px;
       background-color: colors.$white;
       border: 1px solid colors.$grey150;
+      border-bottom: unset;
+      border-left: unset;
       border-left-width: 2px;
       padding: 0 10px;
 
@@ -173,6 +177,8 @@
         display: flex;
         justify-content: center;
         border: 1px solid colors.$grey150;
+        border-right: unset;
+        border-bottom: unset;
         padding: 10px;
         height: 64px;
 
@@ -209,7 +215,7 @@
   border: 1px solid colors.$grey100;
   padding: 8px 12px 8px 12px;
   box-shadow: 2px 2px 4px 0px rgba(colors.$black, 0.07) inset;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -335,7 +341,7 @@
   border: 1px solid colors.$grey100;
   padding: 8px 4px 8px 0;
   box-shadow: 2px 2px 4px 0px rgba(colors.$black, 0.07) inset;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
 
   input {
     position: absolute;
@@ -352,7 +358,6 @@
   button {
     width: 20px !important;
     height: 20px !important;
-    z-index: 2;
     color: colors.$grey300 !important;
 
     &:hover {

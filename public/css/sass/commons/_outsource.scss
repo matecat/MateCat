@@ -1,5 +1,5 @@
 @use '../commons/colors';
-@use "../commons/variables";
+@use '../commons/variables';
 .after-open-outsource {
   border-left: 2px solid colors.$blue500;
   padding-left: 13px !important;
@@ -17,7 +17,8 @@
     align-items: center;
     padding: 5px 35px 5px 40px !important;
     z-index: 1;
-    border-radius: 8px 8px 0 0;
+    border-radius: variables.$border-radius-default
+      variables.$border-radius-default 0 0;
     .job-id {
       color: colors.$grey400;
     }
@@ -923,7 +924,7 @@
             .mobile-mail-box,
             .account-box {
               .list {
-               display: flex;
+                display: flex;
               }
               .item {
                 padding: 0;

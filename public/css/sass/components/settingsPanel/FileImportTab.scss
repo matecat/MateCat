@@ -173,14 +173,8 @@
     .select {
       font-size: 16px;
       padding: 9px 46px 9px 12px;
-      border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
       box-shadow: inset 0 1px 3px colors.$grey200;
-
-      &:hover {
-        border-color: rgba(34, 36, 38, 0.35);
-        box-shadow: none;
-      }
     }
 
     .select--is-focused,

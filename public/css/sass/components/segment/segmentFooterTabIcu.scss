@@ -1,4 +1,5 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
+@use '../../commons/variables';
 .segment-footer-icu-container.open {
   h3 {
     margin: 0;
@@ -11,7 +12,8 @@
     padding: 24px;
     gap: 60px;
   }
-  .segment-footer-icu-plurals, .segment-footer-icu-editor {
+  .segment-footer-icu-plurals,
+  .segment-footer-icu-editor {
     width: 50%;
   }
   .segment-footer-icu-plurals {
@@ -45,7 +47,7 @@
       font-weight: 700;
       font-size: 14px;
     }
-    .rule  {
+    .rule {
       color: colors.$grey400;
       font-size: 14px;
       width: 100%;
@@ -94,9 +96,9 @@
       div {
         text-transform: capitalize;
         span {
-            color: colors.$grey400;
-            font-weight: 400;
-            margin-left: 4px;
+          color: colors.$grey400;
+          font-weight: 400;
+          margin-left: 4px;
         }
       }
     }
@@ -123,7 +125,7 @@
       justify-content: flex-start;
       gap: 8px;
       align-self: stretch;
-      border-radius: 8px;
+      border-radius: variables.$border-radius-default;
       background: colors.$grey50;
       align-content: flex-start;
       text-align: left;

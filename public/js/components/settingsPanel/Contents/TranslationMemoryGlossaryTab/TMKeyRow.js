@@ -36,7 +36,10 @@ import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 import IconClose from '../../../icons/IconClose'
 import {getTmKeyEnginesInfo} from '../../../../api/getTmKeyEnginesInfo/getTmKeyEnginesInfo'
 import Globe from '../../../../../img/icons/Globe'
-import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
+import {
+  DROPDOWN_MENU_ALIGN,
+  DropdownMenu,
+} from '../../../common/DropdownMenu/DropdownMenu'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -556,6 +559,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           </Button>
           <DropdownMenu
             dropdownClassName="settings-panel-dropdownMenu"
+            align={DROPDOWN_MENU_ALIGN.RIGHT}
             toggleButtonProps={{
               className: 'settings-panel-grey-button',
               size: BUTTON_SIZE.ICON_SMALL,

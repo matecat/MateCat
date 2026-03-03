@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 .register-component {
   display: flex;
@@ -11,7 +12,7 @@
     gap: 20px;
     max-width: 320px;
     background: colors.$grey50;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
     padding: 64px 40px;
 
     h2,

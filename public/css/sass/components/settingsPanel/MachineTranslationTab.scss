@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 .machine-translation-tab {
   .add-mt-button,
   .add-mt-container {
@@ -131,7 +132,7 @@
       display: flex;
       flex-direction: column;
       border: 1px solid colors.$grey150;
-      border-radius: 8px;
+      border-radius: variables.$border-radius-default;
 
       .button {
         margin-top: 20px;
@@ -417,7 +418,7 @@
 
 .glossary-deepl-row-name-input {
   padding: 4px 8px;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
 
   &:hover {
     background-color: unset;
@@ -440,7 +441,7 @@
 
   .grey-button {
     font-size: 14px !important;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
     height: 32px;
 
     &.error {
@@ -565,7 +566,7 @@
   justify-content: space-between;
   background-color: colors.$grey100;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
   border: solid 1px colors.$grey150;
   margin-bottom: 16px;
 
@@ -617,7 +618,7 @@
     align-items: center;
     justify-content: center;
     background-color: colors.$grey100;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
 
     > button {
       background: unset;
@@ -641,7 +642,8 @@
 
   &.options-container-expanded {
     .expand-button {
-      border-radius: 8px 8px 0 0;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0;
     }
   }
 
@@ -705,8 +707,9 @@
   }
 
   input {
+    height: 32px;
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
   }
 }
 

@@ -1,5 +1,5 @@
-@use "./colors";
-@use "../commons/variables";
+@use './colors';
+@use '../commons/variables';
 // rewrite semantic CSS
 html,
 body {
@@ -249,7 +249,8 @@ body.analyze {
       .compare-table {
         background-color: colors.$grey150;
         margin-bottom: 1px;
-        border-radius: 8px 8px 0 0;
+        border-radius: variables.$border-radius-default
+          variables.$border-radius-default 0 0;
         .updated-count {
           background-color: colors.$orange50;
           transition: 0.4s ease;
@@ -270,7 +271,8 @@ body.analyze {
           //padding-bottom: 15px;
           z-index: 1;
           position: relative;
-          border-radius: 8px 8px 0 0;
+          border-radius: variables.$border-radius-default
+            variables.$border-radius-default 0 0;
         }
         .title-job {
           display: flex;
@@ -332,7 +334,8 @@ body.analyze {
               font-weight: 700;
               white-space: nowrap;
               text-overflow: ellipsis;
-              border-radius: 8px 0 0 8px;
+              border-radius: variables.$border-radius-default 0 0
+                variables.$border-radius-default;
               border-right: none;
               min-width: 200px;
               height: 24px;
@@ -404,7 +407,7 @@ body.analyze {
           position: relative;
           .job {
             margin-bottom: 15px;
-            &:first-child .chunks{
+            &:first-child .chunks {
               border-radius: 0 0 8px 8px;
             }
             .chunks {
@@ -568,7 +571,6 @@ body.analyze {
           }
         }
       }
-
     }
     .analyze-report {
       text-align: center;
@@ -581,7 +583,7 @@ body.analyze {
       top: 30px;
       cursor: pointer;
       z-index: 1;
-      border-radius: 8px;
+      border-radius: variables.$border-radius-default;
       h3 {
         margin-bottom: 10px;
         color: colors.$black;
@@ -701,7 +703,7 @@ body.analyze {
     .project-body {
       background-color: colors.$grey150;
       margin: 0 auto;
-      border-radius: 8px;
+      border-radius: variables.$border-radius-default;
       .job {
         padding: 0 15px;
         margin-top: 35px;
@@ -712,7 +714,7 @@ body.analyze {
         }
         .job-body {
           background-color: colors.$grey50;
-          border-radius: 8px;
+          border-radius: variables.$border-radius-default;
           overflow: hidden;
           .chunks {
             overflow-x: auto;

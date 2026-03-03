@@ -3,11 +3,7 @@ import {XliffSettingsContext} from './XliffSettings'
 import {XliffRulesRow} from './XliffRulesRow'
 import {Accordion} from '../../../../common/Accordion/Accordion'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'
-import {
-  Button,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../../../../common/Button/Button'
+import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
 import IconAdd from '../../../../icons/IconAdd'
 import {isEqual} from 'lodash'
 
@@ -129,7 +125,6 @@ export const Xliff20 = () => {
           <Button
             className="button-add-rule"
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
             onClick={onAdd}
           >
             <IconAdd size={22} /> Add rule

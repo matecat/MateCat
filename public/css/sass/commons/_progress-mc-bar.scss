@@ -1,4 +1,5 @@
-@use "../commons/colors";
+@use '../commons/colors';
+@use '../commons/variables';
 #manage-container .progress-bar {
   height: 20px;
   top: 15px;
@@ -84,7 +85,7 @@
           height: 8px;
           margin: -5px 0 0 0 !important;
           border: 0px;
-          border-radius: 8px;
+          border-radius: variables.$border-radius-default;
           a {
             height: 8px;
             border-radius: 0px;

@@ -29,6 +29,8 @@
   color: white;
   font-size: 15px;
   font-weight: bold;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .settings-panel-table-rowHeading-column {
@@ -39,8 +41,6 @@
 .settings-panel-row {
   display: flex;
   flex-direction: column;
-  border: 1px solid colors.$grey200;
-  border-bottom: unset;
   transition: padding 0.2s ease-out 0.15s;
   .settings-panel-cell-center {
     align-self: center;
@@ -68,10 +68,6 @@
 
 .settings-panel-row-active {
   background-color: colors.$blue50;
-}
-
-.settings-panel-row:last-child {
-  border-bottom: 1px solid colors.$grey200;
 }
 
 .settings-panel-row-drag-handle {
@@ -153,4 +149,11 @@
 .settings-panel-mt-row-description {
   padding: 5px 10px !important;
   font-size: 14px;
+}
+
+.settings-panel-table-rows-container {
+  overflow: hidden;
+  border: 1px solid colors.$grey200;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }

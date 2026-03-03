@@ -741,6 +741,14 @@ section.loaded .submenu {
   border-bottom: 1px solid colors.$grey150;
   cursor: pointer;
   user-select: none;
+
+  &:last-child {
+    border-top-right-radius: 8px;
+
+    > a {
+      border-top-right-radius: 8px;
+    }
+  }
 }
 
 .submenu li.active {
@@ -2237,8 +2245,6 @@ section .segment-side-buttons {
   z-index: 0;
   position: relative;
 }
-
-
 
 .optionsToolbar {
   margin-top: 16px;

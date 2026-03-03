@@ -1,4 +1,5 @@
 @use '../commons/colors';
+@use '../commons/variables';
 .instructions-modal {
   min-height: 230px;
   max-width: 900px;
@@ -110,7 +111,8 @@
 
   &:first-child {
     .accordion-component-title {
-      border-radius: 8px 8px 0 0 !important;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0 !important;
     }
   }
 
@@ -152,7 +154,8 @@
 
   &:first-child {
     .accordion-component-title {
-      border-radius: 8px 8px 0 0 !important;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0 !important;
     }
   }
 
@@ -194,7 +197,8 @@
 
   &:first-child {
     .accordion-component-title {
-      border-radius: 8px 8px 0 0 !important;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0 !important;
     }
   }
 
@@ -212,7 +216,7 @@
 
   &:first-child:nth-last-child(1) {
     .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 8px !important;
+      border-radius: variables.$border-radius-default !important;
     }
   }
 }

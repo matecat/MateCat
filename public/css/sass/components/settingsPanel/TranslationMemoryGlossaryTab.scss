@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 .translation-memory-glossary-tab {
   display: flex;
@@ -32,7 +33,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
   border: 1px dashed colors.$grey200;
   padding: 10px;
   margin-bottom: 20px;
@@ -173,7 +174,7 @@
   padding: 4px 8px;
   background-color: unset;
   border: 1px solid colors.$grey200;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
 
   &:focus,
   &:hover {

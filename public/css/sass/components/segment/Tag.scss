@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 .DraftEditor-root {
   .public-DraftEditor-content > div > div {
     // everything
@@ -145,7 +146,7 @@
   }
 
   &.tag-ph {
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
     background: colors.$grey500;
     margin: 0 1px;
     padding: 0 4px;

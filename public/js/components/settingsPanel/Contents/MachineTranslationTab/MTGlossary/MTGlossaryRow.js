@@ -146,7 +146,7 @@ export const MTGlossaryRow = ({
     <Button
       className="settings-panel-grey-button"
       type={BUTTON_TYPE.ICON}
-      size={BUTTON_SIZE.SMALL}
+      size={BUTTON_SIZE.ICON_SMALL}
       onClick={() => setIsEditingName(true)}
     >
       <IconEdit size={16} />
@@ -233,7 +233,7 @@ export const MTGlossaryRow = ({
             <Button
               className="settings-panel-grey-button"
               type={BUTTON_TYPE.ICON}
-              size={BUTTON_SIZE.SMALL}
+              size={BUTTON_SIZE.ICON_SMALL}
               disabled={isWaitingResult}
               onClick={() => deleteGlossaryConfirm(row)}
               testId={`delete-mtglossary-${row.id}`}
