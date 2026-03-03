@@ -108,7 +108,7 @@ function UploadFileLocal() {
       files.some((f) => !f.uploaded || !f.converted || f.error) ||
       !files.some((f) => f.ext !== EXTENSIONS.tmx)
     CreateProjectActions.enableAnalyzeButton(!hasIncompleteFiles)
-    if (files.length >= config.maxNumberFiles) {
+    if (files.length > config.maxNumberFiles) {
       CreateProjectActions.showError(
         'No more files can be loaded (the limit of ' +
           config.maxNumberFiles +

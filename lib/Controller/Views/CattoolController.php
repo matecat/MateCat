@@ -90,7 +90,7 @@ class CattoolController extends BaseKleinViewController
     private function findJobByIdPasswordAndSourcePage(int $job_id, string $password, int $sourcePage, bool $isRevision): stdClass
     {
         $result = [
-            'chunk' => null,
+                'chunk' => null,
             'chunkReviewStruct' => null,
             'isRevision' => $isRevision,
         ];
