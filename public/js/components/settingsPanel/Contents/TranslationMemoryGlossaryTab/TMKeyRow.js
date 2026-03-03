@@ -474,8 +474,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           stepValue={1}
         />
         <Button
-          className="settings-panel-grey-button penalty-numeric-stepper-close-button"
-          size={BUTTON_SIZE.ICON_XSMALL}
+          className="settings-panel-grey-button"
+          size={BUTTON_SIZE.ICON_SMALL}
           onClick={() => onChangePenalty(0)}
         >
           <IconClose />
@@ -549,6 +549,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             className="settings-panel-grey-button"
             size={BUTTON_SIZE.SMALL}
             disabled={isImportTMXInProgress}
+            testId="tm-row-import-tmx"
             onClick={() => handleExpandeRow(ImportTMX)}
           >
             Import TMX
@@ -559,6 +560,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               className: 'settings-panel-grey-button',
               size: BUTTON_SIZE.ICON_SMALL,
               disabled: isImportTMXInProgress,
+              testId: 'tm-row-menu',
               children: (
                 <>
                   <DotsHorizontal size={16} />
@@ -583,6 +585,15 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                 ),
                 onClick: () => handleExpandeRow(ExportTMX),
                 testId: 'export-tmx',
+              },
+              {
+                label: (
+                  <>
+                    <Download size={20} /> Export termbase
+                  </>
+                ),
+                onClick: () => handleExpandeRow(ExportGlossary),
+                testId: 'export-glossary',
               },
               {
                 label: (

@@ -127,6 +127,7 @@ export const SubTemplateMoreMenu = () => {
       toggleButtonProps={{
         mode: BUTTON_MODE.OUTLINE,
         size: BUTTON_SIZE.ICON_STANDARD,
+        testId: 'subtemplates-more-menu',
         children: (
           <>
             <DotsHorizontal size={18} />

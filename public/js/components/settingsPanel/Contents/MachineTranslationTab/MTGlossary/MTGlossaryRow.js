@@ -153,23 +153,26 @@ export const MTGlossaryRow = ({
     </Button>
   ) : (
     <div className="editing-buttons">
-      <button
-        className="ui primary button settings-panel-button-icon confirm-button"
+      <Button
+        type={BUTTON_TYPE.PRIMARY}
+        size={BUTTON_SIZE.SMALL}
         disabled={!name}
         onClick={updateKeyName}
       >
         <Checkmark size={12} />
         Confirm
-      </button>
-      <button
-        className="ui button orange close-button"
+      </Button>
+
+      <Button
+        type={BUTTON_TYPE.WARNING}
+        size={BUTTON_SIZE.ICON_SMALL}
         onClick={() => {
           setIsEditingName(false)
           setName(row.name)
         }}
       >
         <Close size={18} />
-      </button>
+      </Button>
     </div>
   )
 

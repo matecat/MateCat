@@ -34,7 +34,6 @@ export const SubTemplates = ({
   updateApi,
   deleteApi,
   saveErrorCallback,
-  portalTarget,
 }) => {
   const [templateModifier, setTemplateModifier] = useState()
   const [templateName, setTemplateName] = useState('')

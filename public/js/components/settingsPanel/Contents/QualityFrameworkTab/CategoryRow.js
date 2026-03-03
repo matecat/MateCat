@@ -99,6 +99,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
       toggleButtonProps={{
         className: 'quality-framework-columns-menu-button',
         mode: BUTTON_MODE.GHOST,
+        testId: 'qf-category-menu',
         children: (
           <>
             <IconDown size={20} />
@@ -136,8 +137,8 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
               Move down
             </>
           ),
-          disabled: isMoveUpDisabled,
-          onClick: isMoveDownDisabled,
+          disabled: isMoveDownDisabled,
+          onClick: moveDown,
           testId: 'menu-button-movedown',
         },
         {

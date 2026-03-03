@@ -18,6 +18,16 @@ global.config = {
   isLoggedIn: 1,
 }
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+beforeAll(() => {
+  window.ResizeObserver = ResizeObserver
+  return (window.open = jest.fn())
+})
+
 const WrapperComponent = (contextProps) => {
   return (
     <SettingsPanelContext.Provider value={contextProps}>
@@ -260,7 +270,7 @@ test('Create, update and delete template', async () => {
 
   // delete
   await act(async () =>
-    user.click(screen.getByTestId('menu-button-show-items')),
+    user.click(screen.getByTestId('project-template-more-menu')),
   )
 
   await waitFor(async () => user.click(screen.getByTestId('delete-template')))

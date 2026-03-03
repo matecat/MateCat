@@ -76,6 +76,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
           <Button
             className="settings-panel-grey-button"
             size={BUTTON_SIZE.SMALL}
+            testId="delete-mt"
             onClick={deleteMT}
           >
             <Trash size={16} /> Delete

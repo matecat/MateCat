@@ -146,6 +146,7 @@ export const SeverityColumn = ({
       toggleButtonProps={{
         className: 'quality-framework-columns-menu-button',
         mode: BUTTON_MODE.GHOST,
+        testId: 'qf-severity-menu',
         children: (
           <>
             <IconDown size={20} />

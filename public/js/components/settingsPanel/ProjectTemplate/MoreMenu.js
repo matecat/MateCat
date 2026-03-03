@@ -51,6 +51,7 @@ export const MoreMenu = () => {
         className: 'project-template-dropdown-trigger-button',
         mode: BUTTON_MODE.OUTLINE,
         size: BUTTON_SIZE.ICON_STANDARD,
+        testId: 'project-template-more-menu',
         children: (
           <>
             <DotsHorizontal size={18} />

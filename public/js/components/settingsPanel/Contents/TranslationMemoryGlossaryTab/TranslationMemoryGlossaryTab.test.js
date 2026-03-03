@@ -13,6 +13,12 @@ import {mswServer} from '../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 import ModalsActions from '../../../../actions/ModalsActions'
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 // Suppress "not configured to support act(...)" false positive caused by
 // @testing-library/react temporarily unsetting IS_REACT_ACT_ENVIRONMENT
 // during async operations while promise-based state updates resolve.
@@ -27,6 +33,9 @@ beforeAll(() => {
     }
     originalConsoleError(...args)
   }
+
+  window.ResizeObserver = ResizeObserver
+  return (window.open = jest.fn())
 })
 afterAll(() => {
   console.error = originalConsoleError
@@ -361,7 +370,7 @@ test('Create and delete new resource', async () => {
   expect(rowNewEntry.update).toBeChecked()
 
   // delete
-  const menuButton = screen.getByTestId('menu-button-show-items')
+  const menuButton = screen.getByTestId('tm-row-menu')
 
   await act(async () => user.click(menuButton))
 
@@ -453,9 +462,9 @@ test('Row Menu items', async () => {
 
   rerender(<WrapperComponent {...contextValues} />)
 
-  const menuButton = screen.getByTestId('menu-button-show-items')
+  const menuButton = screen.getByTestId('tm-row-menu')
 
-  await act(async () => user.click(screen.getByTestId('menu-button')))
+  await act(async () => user.click(screen.getByTestId('tm-row-import-tmx')))
   expect(screen.getByText('Select a tmx file to import')).toBeInTheDocument()
 
   await act(async () => user.click(menuButton))
@@ -578,7 +587,7 @@ test('Modal delete tmkeys used in other templates', async () => {
 
   render(<WrapperComponent {...contextValues} />)
 
-  const menuButton = screen.getByTestId('menu-button-show-items')
+  const menuButton = screen.getByTestId('tm-row-menu')
 
   await act(async () => user.click(menuButton))
 

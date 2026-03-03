@@ -3,7 +3,7 @@
 .numeric-stepper-component {
   display: flex;
   max-width: 70px;
-  height: 28px;
+  height: 32px;
   border-radius: 8px;
 
   input {
@@ -20,7 +20,7 @@
     flex-direction: column;
 
     button {
-      height: 14px !important;
+      height: 16px !important;
       line-height: 1 !important;
       padding: 0 !important;
       background: colors.$grey100 !important;
