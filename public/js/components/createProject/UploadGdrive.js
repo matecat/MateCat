@@ -372,7 +372,7 @@ export const UploadGdrive = () => {
                   </div>
                   <div>{getPrintableFileSize(f.size)}</div>
                   <Button
-                    size={BUTTON_SIZE.ICON_SMALL}
+                    size={BUTTON_SIZE.ICON_XSMALL}
                     style={{marginLeft: 'auto'}}
                     tooltip={'Remove file'}
                     onClick={() => deleteGDriveFile(f)}

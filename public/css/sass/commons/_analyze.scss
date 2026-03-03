@@ -1,4 +1,5 @@
-@use '../commons/colors';
+@use "./colors";
+@use "../commons/variables";
 // rewrite semantic CSS
 html,
 body {
@@ -7,7 +8,7 @@ body {
 body.analyze {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: colors.$grey5;
+  background-color: colors.$grey50;
   overflow-x: auto;
   overflow-y: hidden;
   font-size: 14px;
@@ -29,7 +30,7 @@ body.analyze {
 
   .project {
     .scroll {
-      background-color: colors.$grey2;
+      background-color: colors.$grey300;
       width: 40px;
       height: 40px;
       position: fixed;
@@ -51,9 +52,10 @@ body.analyze {
     }
 
     .project-header {
-      background: colors.$grey4;
+      background: colors.$grey100;
       padding-bottom: 10px;
       margin-bottom: 0;
+      border-radius: variables.$border-radius-big;
       .left-analysis {
         padding-top: 20px;
         padding-left: 30px;
@@ -74,12 +76,12 @@ body.analyze {
           left: -45px;
           max-width: 100%;
           min-width: 0;
-          background-color: colors.$grey2;
-          color: #000000;
+          background-color: colors.$grey300;
+          color: colors.$black;
           border-radius: 0 2px 2px 0;
           padding-right: 15px;
           &:after {
-            border-right-color: colors.$grey1 !important;
+            border-right-color: colors.$grey500 !important;
           }
           .project-id,
           .project-name {
@@ -92,7 +94,7 @@ body.analyze {
             font-weight: 700;
             margin-right: 5px;
             margin-left: 15px;
-            color: #5a5a5a;
+            color: colors.$grey700;
             top: -2px;
           }
           .project-name {
@@ -122,13 +124,13 @@ body.analyze {
               display: inline-block;
               margin-bottom: 0;
               span {
-                color: colors.$greenDefault;
+                color: colors.$green500;
                 padding: 5px 2px 5px 0;
                 margin-left: 4px;
                 border-radius: 15px;
               }
               i {
-                color: colors.$greenDefault;
+                color: colors.$green500;
                 position: relative;
                 top: 2px;
               }
@@ -173,10 +175,11 @@ body.analyze {
         .word-percent {
           position: relative;
           padding: 15px 15px 10px 20px;
-          border: 1px solid colors.$greenDefault;
+          border: 1px solid colors.$green500;
           top: 27px;
           font-size: 16px;
           margin-bottom: 25px;
+          border-radius: variables.$border-radius-default;
           .percent {
             font-size: 40px;
             font-weight: 700;
@@ -205,33 +208,8 @@ body.analyze {
             }
           }
         }
-        .word-raw,
-        .matecat-raw {
-          background-color: #f2f4f1;
-          padding: 5px;
-          border: 1px solid #7eaf3e;
-          text-align: center;
-          transition: 0.4s ease;
-          h3,
-          h4 {
-            margin: 0;
-          }
-          h3 {
-            font-size: 28px;
-          }
-        }
-        .word-raw {
-        }
-        .overlay {
-          background-color: rgba(243, 243, 243, 0.6);
-          border: 1px solid #a7c3a7;
-          margin-top: -67px;
-          z-index: 10;
-          position: relative;
-          height: 100%;
-        }
         .updated-count {
-          background-color: #f9ffb5;
+          background-color: colors.$orange50;
         }
       }
 
@@ -259,8 +237,9 @@ body.analyze {
 
     .project-top {
       padding: 45px 15px 15px;
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
       margin: 0 -1rem 0;
+      border-radius: variables.$border-radius-default;
       &.type-mtqe {
         .title-total-words,
         .title-matecat-words {
@@ -268,10 +247,11 @@ body.analyze {
         }
       }
       .compare-table {
-        background-color: colors.$grey3;
+        background-color: colors.$grey150;
         margin-bottom: 1px;
+        border-radius: 8px 8px 0 0;
         .updated-count {
-          background-color: #f9ffb5;
+          background-color: colors.$orange50;
           transition: 0.4s ease;
         }
         .header-compare-table,
@@ -290,6 +270,7 @@ body.analyze {
           //padding-bottom: 15px;
           z-index: 1;
           position: relative;
+          border-radius: 8px 8px 0 0;
         }
         .title-job {
           display: flex;
@@ -344,26 +325,26 @@ body.analyze {
             }
             input {
               outline: none;
-              border: 1px solid #bbbbbb;
+              border: 1px solid colors.$grey300;
               padding: 4px;
-              color: #0099cc;
+              color: colors.$blue500;
               font-size: 12px;
               font-weight: 700;
               white-space: nowrap;
               text-overflow: ellipsis;
-              border-radius: 2px 0 0 2px;
+              border-radius: 8px 0 0 8px;
               border-right: none;
               min-width: 200px;
               height: 24px;
               width: 100%;
             }
             button {
-              border: 1px solid #bbbbbb;
-              background-color: #ffffff;
-              color: #0099cc;
+              border: 1px solid colors.$grey300;
+              background-color: colors.$white;
+              color: colors.$blue500;
               text-align: center;
               text-decoration: none;
-              border-radius: 0 2px 2px 0;
+              border-radius: 0 8px 8px 0;
               height: 24px;
               min-width: 24px;
               padding: 0;
@@ -390,7 +371,7 @@ body.analyze {
           align-items: center;
           justify-content: center;
           width: 33.333%;
-          border-right: 1px solid #d7d8dc;
+          border-right: 1px solid colors.$grey200;
           /*border-left: 1px solid #d7d8dc;*/
           /*margin-left: -1px;*/
           /*line-height: 100px;*/
@@ -398,13 +379,13 @@ body.analyze {
           padding-bottom: 15px;
           height: 100%;
           &:first-child {
-            border-left: 1px solid #d7d8dc;
+            border-left: 1px solid colors.$grey200;
           }
         }
         .title-standard-words {
           h5 {
             span {
-              color: #a7a7a7;
+              color: colors.$grey400;
               font-weight: 100;
               position: relative;
               top: 2px;
@@ -418,22 +399,27 @@ body.analyze {
           }
         }
         &.jobs {
-          background-color: colors.$grey5;
+          background-color: colors.$grey50;
           z-index: 0;
           position: relative;
           .job {
             margin-bottom: 15px;
+            &:first-child .chunks{
+              border-radius: 0 0 8px 8px;
+            }
             .chunks {
+              border-radius: variables.$border-radius-default;
+              overflow: hidden;
+
               .chunk {
-                background-color: #ffffff;
+                background-color: colors.$white;
                 transition: 0.3s ease;
                 cursor: pointer;
-                /*padding: 16px 8px;*/
                 .job-details {
                   font-size: 15px;
                   float: right;
                   top: 11px;
-                  color: #4183c4;
+                  color: colors.$blue700;
                   text-decoration: underline;
                   font-weight: 700;
                   margin-left: 5px;
@@ -444,9 +430,9 @@ body.analyze {
                   }
                 }
                 &:hover {
-                  background-color: #f6f6f9;
+                  background-color: colors.$grey50;
                   .title-matecat-words {
-                    background: #f6ffe9 !important;
+                    background: colors.$orange50 !important;
                     transition: 0.3s ease;
                   }
                 }
@@ -455,7 +441,7 @@ body.analyze {
                 .tmw {
                   text-align: center;
                   /*padding-right: 15px;*/
-                  color: #788190;
+                  color: colors.$grey500;
                   padding-top: 0;
                   padding-bottom: 0;
                   .cell-label {
@@ -469,11 +455,11 @@ body.analyze {
                   font-weight: 700;
                   font-size: 18px;
                   margin-bottom: 1px;
-                  color: #788190;
+                  color: colors.$grey500;
                   .cell-label {
                     text-decoration: underline;
                     cursor: pointer;
-                    color: #646760;
+                    color: colors.$grey700;
                     &:hover {
                       text-decoration: none;
                     }
@@ -509,11 +495,12 @@ body.analyze {
             display: flex;
             width: 68%;
             padding: 0 4px;
-            justify-content: flex-end;
-            border-right: 1px solid #bbbbbb;
+            justify-content: center;
+            border-right: 1px solid colors.$grey300;
             padding: 8px;
-            .button {
-              width: 45%;
+            gap: 24px;
+            button {
+              width: 120px;
             }
             &.disable-outsource {
               border-right: none;
@@ -530,15 +517,15 @@ body.analyze {
             &.outsource-translation-disabled {
               span,
               a {
-                color: colors.$grey;
+                color: colors.$grey600;
               }
             }
             a {
-              color: #09beec;
+              color: colors.$blue200;
               text-decoration: underline;
             }
             span {
-              color: #000;
+              color: colors.$black;
               font-size: 10px;
               display: flex;
               justify-content: center;
@@ -548,57 +535,6 @@ body.analyze {
                 margin-left: 2px;
               }
             }
-          }
-          .split {
-            display: flex;
-            align-items: center;
-            justify-content: space-evenly;
-          }
-          .split,
-          .merge {
-            font-family: Calibri, Arial, Helvetica, sans-serif;
-            padding: 5px 20px; //padding: 8px 16px;
-            vertical-align: top;
-            font-size: 19px; //font-size: 16px;
-            border: 1px solid #09beec;
-            border-radius: 2px;
-            box-shadow: none !important;
-            background-color: #ffffff !important;
-            font-weight: 700; //font-weight: normal;
-            /*margin-top: -3px;*/
-            &:hover {
-              text-decoration: none;
-              box-shadow:
-                0 0 0 #e0e0e0,
-                0 0 2px rgba(0, 0, 0, 0.12),
-                0 2px 4px rgba(0, 0, 0, 0.24) !important;
-              border: 1px solid #09beec;
-            }
-            &:focus {
-              box-shadow: none !important;
-              background-color: #f2f2f2 !important;
-            }
-            &:active {
-              box-shadow: none !important;
-              background-color: #f2f2f2 !important;
-            }
-          }
-
-          .merge {
-            margin: -3px 0 0;
-            padding: 5px 14px;
-            width: 54%;
-          }
-          .open-translate,
-          .open-revise {
-            font-family: Calibri, Arial, Helvetica, sans-serif;
-            padding: 6px 15px; // padding: 8px 16px;
-            vertical-align: top;
-            font-size: 20px; //font-size: 16px;
-            border: 1px solid #797979; //border: none;
-            border-radius: 2px;
-            /*margin: -3px 0 0 0;*/
-            font-weight: 700; //font-weight: normal;
           }
 
           &.splitted {
@@ -622,11 +558,6 @@ body.analyze {
                 margin: 0;
               }
             }
-
-            .open-translate {
-              font-family: Calibri, Arial, Helvetica, sans-serif;
-              padding: 5px 12px;
-            }
           }
         }
         .openOutsource {
@@ -637,59 +568,56 @@ body.analyze {
           }
         }
       }
-      .analyze-report {
-        text-align: center;
-        width: 100%;
-        background-color: colors.$grey3;
-        margin: 0 auto;
-        position: relative;
-        top: 30px;
+
+    }
+    .analyze-report {
+      text-align: center;
+      width: 100%;
+      background-color: colors.$grey150;
+      margin: 0 auto;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      top: 30px;
+      cursor: pointer;
+      z-index: 1;
+      border-radius: 8px;
+      h3 {
+        margin-bottom: 10px;
+        color: colors.$black;
+        float: left;
+        margin-top: 10px;
+      }
+      .rounded {
+        width: 35px;
+        height: 35px;
+        line-height: 0;
+        border-radius: 17px;
         cursor: pointer;
-        z-index: 1;
-        > div {
-          width: 160px;
-          margin: 0 auto;
+        transition: 0.3s ease;
+        float: left;
+        i {
+          font-size: 30px;
+          margin: 0;
+          padding: 0;
+          top: 3px;
           position: relative;
-          height: 48px;
-          display: flex;
-        }
-        h3 {
-          margin-bottom: 10px;
-          color: #000;
-          float: left;
-          margin-top: 10px;
-        }
-        .rounded {
-          width: 35px;
-          height: 35px;
-          line-height: 0;
-          border-radius: 17px;
-          cursor: pointer;
           transition: 0.3s ease;
-          float: left;
-          i {
-            font-size: 30px;
-            margin: 0;
-            padding: 0;
-            top: 3px;
-            position: relative;
-            transition: 0.3s ease;
-            color: colors.$black;
-            &.open {
-              -webkit-transform: rotate(180deg);
-              -moz-transform: rotate(180deg);
-              -ms-transform: rotate(180deg);
-              -o-transform: rotate(180deg);
-              transform: rotate(180deg);
-              top: 11px;
-            }
+          color: colors.$black;
+          &.open {
+            -webkit-transform: rotate(180deg);
+            -moz-transform: rotate(180deg);
+            -ms-transform: rotate(180deg);
+            -o-transform: rotate(180deg);
+            transform: rotate(180deg);
+            top: 11px;
           }
         }
       }
     }
     .job-id {
       display: inline-block;
-      color: colors.$grey1;
+      color: colors.$grey500;
       font-size: 12px;
       position: relative;
       line-height: 35px;
@@ -724,7 +652,7 @@ body.analyze {
       .in-to {
         display: inline-block;
         top: 3px;
-        color: #5a5a5a;
+        color: colors.$grey700;
         /*line-height: 28px;*/
         width: 24px;
         position: relative;
@@ -738,7 +666,7 @@ body.analyze {
       .target-box {
         display: inline-block;
         /*line-height: 30px;*/
-        max-width: 50%;
+        max-width: 300px;
         min-width: 60px;
         vertical-align: middle;
         overflow: hidden;
@@ -771,11 +699,9 @@ body.analyze {
     }
 
     .project-body {
-      margin-top: 0;
-      background-color: colors.$grey3;
-      margin: 0 -1rem 0;
-      margin-left: 1px;
-      margin-right: 1px;
+      background-color: colors.$grey150;
+      margin: 0 auto;
+      border-radius: 8px;
       .job {
         padding: 0 15px;
         margin-top: 35px;
@@ -785,7 +711,9 @@ body.analyze {
           padding: 0 0 !important;
         }
         .job-body {
-          background-color: colors.$grey5;
+          background-color: colors.$grey50;
+          border-radius: 8px;
+          overflow: hidden;
           .chunks {
             overflow-x: auto;
             .chunk-container {
@@ -798,7 +726,7 @@ body.analyze {
                 &.show-details {
                   .chunks-analyze,
                   .chunk-analyze-container > div {
-                    background-color: colors.$grey4 !important;
+                    background-color: colors.$grey100 !important;
                   }
                 }
                 &.outsource-open {
@@ -914,7 +842,7 @@ body.analyze {
   .chunk-detail {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-    background-color: $grey2;
+    background-color: $grey300;
     padding-left: 12px;
     z-index: 0;
     .left-box {

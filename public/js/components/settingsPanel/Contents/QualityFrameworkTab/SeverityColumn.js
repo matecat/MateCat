@@ -1,8 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
-import {MenuButton} from '../../../common/MenuButton/MenuButton'
-import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../img/icons/Trash'
@@ -10,6 +8,8 @@ import IconDown from '../../../icons/IconDown'
 import LabelWithTooltip from '../../../common/LabelWithTooltip'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 import {ModifySeverity} from './ModifySeverity'
+import {BUTTON_MODE} from '../../../common/Button/Button'
+import {DropdownMenu} from '../../../common/DropdownMenu/DropdownMenu'
 
 export const orderSeverityBySort = (severities) =>
   severities.sort((a, b) => (a.sort > b.sort ? 1 : -1))
@@ -141,49 +141,68 @@ export const SeverityColumn = ({
   )
 
   const menu = (
-    <MenuButton
-      className="button-menu-button quality-framework-columns-menu-button"
-      icon={<IconDown size={20} />}
-      onClick={() => false}
-      isVisibleRectArrow={false}
-      itemsTarget={portalTarget}
-    >
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item"
-        onMouseUp={() => setIsEditingName(true)}
-        data-testid="menu-button-rename"
-      >
-        <IconEdit size={18} />
-        Rename
-      </MenuButtonItem>
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item quality-framework-columns-menu-item-moveleft"
-        onMouseUp={moveLeft}
-        disabled={isMoveLeftDisabled}
-        data-testid="menu-button-moveleft"
-      >
-        <ChevronDown />
-        Move left
-      </MenuButtonItem>
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item quality-framework-columns-menu-item-moveright"
-        onMouseUp={moveRight}
-        disabled={isMoveRightDisabled}
-        data-testid="menu-button-moveright"
-      >
-        <ChevronDown />
-        Move right
-      </MenuButtonItem>
-      <MenuButtonItem
-        className="quality-framework-columns-menu-item"
-        onMouseUp={deleteSeverity}
-        data-testid="menu-button-delete"
-        disabled={isDeleteDisabled}
-      >
-        <Trash size={18} />
-        Delete
-      </MenuButtonItem>
-    </MenuButton>
+    <DropdownMenu
+      dropdownClassName="settings-panel-dropdownMenu"
+      toggleButtonProps={{
+        className: 'quality-framework-columns-menu-button',
+        mode: BUTTON_MODE.GHOST,
+        testId: 'qf-severity-menu',
+        children: (
+          <>
+            <IconDown size={20} />
+          </>
+        ),
+      }}
+      items={[
+        {
+          label: (
+            <>
+              <IconEdit size={18} />
+              Edit
+            </>
+          ),
+          onClick: () => setIsEditingName(true),
+          testId: 'menu-button-rename',
+        },
+        {
+          label: (
+            <>
+              <div className="quality-framework-columns-menu-item-moveleft">
+                <ChevronDown />
+              </div>
+              Move left
+            </>
+          ),
+          disabled: isMoveLeftDisabled,
+          onClick: moveLeft,
+          testId: 'menu-button-moveleft',
+        },
+        {
+          label: (
+            <>
+              <div className="quality-framework-columns-menu-item-moveright">
+                <ChevronDown />
+              </div>
+              Move right
+            </>
+          ),
+          disabled: isMoveRightDisabled,
+          onClick: moveRight,
+          testId: 'menu-button-moveright',
+        },
+        {
+          label: (
+            <>
+              <Trash size={18} />
+              Delete
+            </>
+          ),
+          disabled: isDeleteDisabled,
+          onClick: deleteSeverity,
+          testId: 'menu-button-delete',
+        },
+      ]}
+    />
   )
 
   return (

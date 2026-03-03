@@ -1,8 +1,5 @@
 import React, {useContext} from 'react'
-import PropTypes from 'prop-types'
-import {MenuButton} from '../../common/MenuButton/MenuButton'
 import DotsHorizontal from '../../../../img/icons/DotsHorizontal'
-import {MenuButtonItem} from '../../common/MenuButton/MenuButtonItem'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
 import {deleteProjectTemplate} from '../../../api/deleteProjectTemplate'
 import {isStandardTemplate} from '../../../hooks/useProjectTemplates'
@@ -10,8 +7,10 @@ import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
 import {SettingsPanelContext} from '../SettingsPanelContext'
 import IconEdit from '../../icons/IconEdit'
 import Trash from '../../../../img/icons/Trash'
+import {DropdownMenu} from '../../common/DropdownMenu/DropdownMenu'
+import {BUTTON_MODE, BUTTON_SIZE, BUTTON_TYPE} from '../../common/Button/Button'
 
-export const MoreMenu = ({portalTarget}) => {
+export const MoreMenu = () => {
   const {setProjectTemplates, currentProjectTemplate} =
     useContext(SettingsPanelContext)
   const {
@@ -46,40 +45,45 @@ export const MoreMenu = ({portalTarget}) => {
   }
 
   return (
-    <MenuButton
-      className="template-button-white button-more-items button-more-items-project-templates"
-      onClick={() => false}
-      icon={<DotsHorizontal size={18} />}
-      isVisibleRectArrow={false}
-      itemsTarget={portalTarget}
-    >
-      <MenuButtonItem
-        disabled={isRequestInProgress}
-        className="settings-panel-templates-button-more"
-        onMouseUp={() => {
-          setTemplateModifier(TEMPLATE_MODIFIERS.UPDATE)
-          setTemplateName(currentProjectTemplate.name)
-        }}
-      >
-        <IconEdit size={18} />
-        Rename
-      </MenuButtonItem>
-      <MenuButtonItem
-        data-testid="delete-template"
-        className="settings-panel-templates-button-more"
-        disabled={isRequestInProgress}
-        onMouseUp={deleteTemplate}
-      >
-        <Trash size={18} />
-        Delete
-      </MenuButtonItem>
-    </MenuButton>
+    <DropdownMenu
+      dropdownClassName="settings-panel-dropdownMenu"
+      toggleButtonProps={{
+        className: 'project-template-dropdown-trigger-button',
+        mode: BUTTON_MODE.OUTLINE,
+        size: BUTTON_SIZE.ICON_STANDARD,
+        testId: 'project-template-more-menu',
+        children: (
+          <>
+            <DotsHorizontal size={18} />
+          </>
+        ),
+      }}
+      items={[
+        {
+          label: (
+            <>
+              <IconEdit size={18} />
+              Rename
+            </>
+          ),
+          disable: isRequestInProgress,
+          onClick: () => {
+            setTemplateModifier(TEMPLATE_MODIFIERS.UPDATE)
+            setTemplateName(currentProjectTemplate.name)
+          },
+        },
+        {
+          label: (
+            <>
+              <Trash size={18} />
+              Delete
+            </>
+          ),
+          disable: isRequestInProgress,
+          onClick: deleteTemplate,
+          testId: 'delete-template',
+        },
+      ]}
+    />
   )
-}
-
-MoreMenu.propTypes = {
-  portalTarget: PropTypes.oneOfType([
-    PropTypes.instanceOf(Element),
-    PropTypes.node,
-  ]),
 }

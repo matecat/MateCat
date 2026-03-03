@@ -11,7 +11,7 @@
     top: 0;
     border-radius: 0 0 4px 4px;
     text-align: left;
-    border: 1px solid #666;
+    border: 1px solid colors.$grey700;
     min-width: 670px;
   }
   .splitbtn-cont {
@@ -21,7 +21,7 @@
     .popup-split-job-id {
       font-weight: 100;
       font-size: 16px;
-      color: colors.$grey1;
+      color: colors.$grey500;
       margin-right: 5px;
     }
   }
@@ -32,7 +32,7 @@
     margin-right: 15px !important;
     font-size: 18px;
     text-align: right;
-    color: #d65757 !important;
+    color: colors.$red400 !important;
     display: block;
     line-height: 13px !important;
   }
@@ -45,7 +45,7 @@
   .splitbtn-cont {
     overflow: hidden;
     font-size: 18px;
-    color: colors.$grey1;
+    color: colors.$grey500;
     font-weight: bold;
     display: flex;
     flex-direction: column;
@@ -71,7 +71,7 @@
   .nosplit {
     float: right;
     font-size: 20px;
-    color: colors.$grey1;
+    color: colors.$grey500;
     display: none;
     margin: 45px 140px 0 0;
   }
@@ -83,7 +83,7 @@
   }
 
   input[type='text'][disabled] {
-    background: #f0f0f0;
+    background: colors.$grey75;
   }
 
   h2 {
@@ -97,7 +97,7 @@
   h3 {
     font-size: 20px !important;
     font-weight: bold !important;
-    color: #333 !important;
+    color: colors.$grey1300 !important;
     display: inline-block;
     vertical-align: text-top;
   }
@@ -114,9 +114,9 @@
       width: auto;
       height: 37px;
       padding: 4px;
-      color: colors.$grey1;
+      color: colors.$grey500;
       font-size: 18px;
-      border: 1px solid colors.$grey1;
+      border: 1px solid colors.$grey500;
       box-sizing: border-box;
       display: inline-block;
       background: white;
@@ -153,8 +153,8 @@
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    border: 1px solid colors.$grey1;
-    background: #ccc;
+    border: 1px solid colors.$grey500;
+    background: colors.$grey200;
   }
 
   .split-box2 {
@@ -167,12 +167,12 @@
     left: 50%;
     margin: -300px 0 0 -350px;
     z-index: 999999;
-    background: #fff;
-    box-shadow: 0px 0px 25px #000;
+    background: colors.$white;
+    box-shadow: 0px 0px 25px colors.$black;
     border-radius: 2px;
     text-align: left;
     font-size: 18px;
-    border: 1px solid colors.$grey1;
+    border: 1px solid colors.$grey500;
   }
   .split-box3 .input,
   .split-box2 .input {
@@ -201,12 +201,12 @@
     margin-right: 0px;
     padding: 6px 5px 5px 5px;
     font-size: 18px;
-    background: #fdfdfd;
+    background: colors.$white;
     background-size: 13px 11px;
     box-sizing: content-box;
-    border: 1px solid #ccc;
+    border: 1px solid colors.$grey200;
     border-radius: 6px;
-    box-shadow: inset 0 1px 3px #ddd;
+    box-shadow: inset 0 1px 3px colors.$grey200;
   }
 
   .btn-cancel {
@@ -219,7 +219,7 @@
     padding: 0px;
     width: 99%;
     border-radius: 0px;
-    background: #ffffff;
+    background: colors.$white;
     //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
   }
 
@@ -231,31 +231,31 @@
     width: 82%;
     margin: 25px 0 -20px 20px;
     text-align: right;
-    color: #ff0000;
+    color: colors.$red500;
     font-size: 12px;
   }
 
   .error-message {
-    background: #d65757;
-    color: #fff;
+    background: colors.$red400;
+    color: colors.$white;
     margin: 0 0 10px 0;
     float: left;
     font-weight: bold;
     width: 100%;
     -moz-border-radius: 2px;
     border-radius: 2px;
-    border: 1px solid #c45f5f;
+    border: 1px solid colors.$orange500;
     margin-top: 10px;
   }
 
   .error {
     margin-right: auto;
-    color: #ff0000;;
+    color: colors.$red500;;
   }
 
   .jobcontainer {
     padding-bottom: 50px;
-    border-bottom: 1px dashed #ccc;
+    border-bottom: 1px dashed colors.$grey200;
   }
 
   div.wrapper div:last-child {
@@ -289,12 +289,12 @@
     float: right;
   }
   .job-perc {
-    color: #999;
+    color: colors.$grey400;
     margin: 0;
     float: left;
     padding: 10px;
     font-size: 18px;
-    color: #000;
+    color: colors.$black;
     text-align: right;
   }
   .job-perc p {
@@ -307,7 +307,7 @@
 
   .total .wordsum {
     font-size: 20px;
-    color: colors.$grey1;
+    color: colors.$grey500;
     text-align: right;
     margin-right: 15px;
     margin-top: 10px;
@@ -326,8 +326,7 @@
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    border: 1px solid colors.$grey1;
-    background: #ccc !important;
+    background: colors.$grey200 !important;
   }
 
   .btn-cancel {
@@ -346,7 +345,7 @@
 
   .empty {
     border: 0 !important;
-    background: #f0f0f0 !important;
+    background: colors.$grey75 !important;
     width: 120px;
   }
 
@@ -357,7 +356,7 @@
       box-shadow: none;
     }
     &:focus {
-      border-color: #96c8da;
+      border-color: colors.$grey300;
       box-shadow: none;
     }
   }

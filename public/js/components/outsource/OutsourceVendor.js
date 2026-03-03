@@ -16,7 +16,7 @@ import UserStore from '../../stores/UserStore'
 import 'react-datepicker/dist/react-datepicker.css'
 import {Select} from '../common/Select'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
-import {BUTTON_MODE} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import HelpCircle from '../../../img/icons/HelpCircle'
 class OutsourceVendor extends React.Component {
   constructor(props) {
@@ -728,12 +728,14 @@ class OutsourceVendor extends React.Component {
                           />
                         </div>
                         <div className="field">
-                          <button
-                            className="get-price ui blue basic button"
+                          <Button
+                            type={BUTTON_TYPE.PRIMARY}
+                            mode={BUTTON_MODE.OUTLINE}
+                            className="get-price"
                             onClick={this.getNewRates.bind(this)}
                           >
                             Get Price
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -779,29 +781,32 @@ class OutsourceVendor extends React.Component {
                 </div>
                 <div className="order-button-outsource">
                   {!this.state.outsourceConfirmed ? (
-                    <button
-                      className="open-order ui green button"
+                    <Button
+                      type={BUTTON_TYPE.SUCCESS}
+                      className="open-order"
                       id="accept-outsource-quote"
                       onClick={this.sendOutsource.bind(this)}
                     >
                       Order now
-                    </button>
+                    </Button>
                   ) : !this.state.jobOutsourced ? (
-                    <button
-                      className="open-order ui green button"
+                    <Button
+                      type={BUTTON_TYPE.SUCCESS}
+                      className="open-order"
                       id="accept-outsource-quote"
                       onClick={this.sendOutsource.bind(this)}
                     >
                       Confirm
-                    </button>
+                    </Button>
                   ) : (
-                    <button
-                      className="open-outsourced ui button "
+                    <Button
+                      type={BUTTON_TYPE.SUCCESS}
+                      className="open-outsourced"
                       id="accept-outsource-quote"
                       onClick={this.openOutsourcePage.bind(this)}
                     >
                       View status
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -942,28 +947,30 @@ class OutsourceVendor extends React.Component {
                 </div>
                 <div className="order-button-outsource">
                   {!this.state.outsourceConfirmed ? (
-                    <button
-                      className="open-order ui green button"
+                    <Button
+                      type={BUTTON_TYPE.SUCCESS}
+                      className="open-order"
                       onClick={this.sendOutsource.bind(this)}
                     >
                       Order now
-                    </button>
-                  ) : // <button className="open-order ui green button" onClick={this.confirmOutsource.bind(this)}>Order now</button>
-                  !this.state.jobOutsourced ? (
-                    <button
-                      className="confirm-order ui green button"
+                    </Button>
+                  ) : !this.state.jobOutsourced ? (
+                    <Button
+                      type={BUTTON_TYPE.SUCCESS}
+                      className="confirm-order "
                       onClick={this.sendOutsource.bind(this)}
                     >
                       Confirm
-                    </button>
+                    </Button>
                   ) : (
-                    <button
-                      className="open-outsourced ui button "
+                    <Button
+                      type={BUTTON_TYPE.SUCCESS}
+                      className="open-outsourced "
                       href=""
                       onClick={this.openOutsourcePage.bind(this)}
                     >
                       View status
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>

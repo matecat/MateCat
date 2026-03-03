@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {debounce} from 'lodash/function'
 
@@ -13,83 +13,109 @@ const styleInput = {
   display: 'flex',
   maxWidth: '150px',
 }
-const styleContainer = {
-  position: 'relative',
-  marginRight: '5px',
-}
 
 const styleIcon = {
   visibility: 'visible',
   right: '7px',
   cursor: 'pointer',
 }
-export default class InputField extends React.Component {
-  constructor(props) {
-    super(props)
-    this.handleChange = this.handleChange.bind(this)
-    this.resetInput = this.resetInput.bind(this)
-    this.state = {
-      value: this.props.value ? this.props.value : '',
+
+const InputField = (props) => {
+  const {
+    value: propValue,
+    onFieldChanged,
+    text,
+    type: propType,
+    placeholder,
+    name,
+    classes,
+    tabindex,
+    onKeyDown,
+    showCancel,
+  } = props
+
+  const [value, setValue] = useState(propValue ? propValue : '')
+  const inputRef = useRef(null)
+  const valueRef = useRef(value)
+
+  // Keep ref in sync with latest value
+  useEffect(() => {
+    valueRef.current = value
+  }, [value])
+
+  // Stable debounced callback that reads the latest value from ref
+  const debouncedOnChange = useMemo(
+    () =>
+      debounce(() => {
+        onFieldChanged(valueRef.current)
+      }, 500),
+    [onFieldChanged],
+  )
+
+  // Handle input change
+  const handleChange = useCallback(
+    (event) => {
+      setValue(event.target.value)
+      debouncedOnChange()
+    },
+    [debouncedOnChange],
+  )
+
+  // Reset input
+  const resetInput = useCallback(() => {
+    debouncedOnChange.cancel()
+    setValue('')
+    onFieldChanged('')
+  }, [onFieldChanged, debouncedOnChange])
+
+  // componentDidMount logic
+  useEffect(() => {
+    if (text && inputRef.current) {
+      const event = new Event('input', {bubbles: true})
+      inputRef.current.dispatchEvent(event)
     }
-    this.debouncedOnChange = debounce(() => {
-      this.props.onFieldChanged(this.state.value)
-    }, 500)
-  }
+  }, [text])
 
-  handleChange(event) {
-    this.setState({value: event.target.value})
-    this.debouncedOnChange()
-  }
-
-  resetInput() {
-    this.setState({value: ''})
-    this.props.onFieldChanged('')
-  }
-
-  componentDidMount() {
-    if (this.props.text) {
-      var event = new Event('input', {bubbles: true})
-      this.input.dispatchEvent(event)
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel()
     }
-  }
+  }, [debouncedOnChange])
 
-  render() {
-    var type = 'text'
+  const type = propType ? propType : 'text'
 
-    if (this.props.type) {
-      type = this.props.type
-    }
-
-    return (
-      <div className={'qr-filter-idSegment'} style={styleContainer}>
-        <input
-          data-testid="input"
-          style={styleInput}
-          type={type}
-          placeholder={this.props.placeholder}
-          value={this.state.value}
-          name={this.props.name}
-          onChange={this.handleChange}
-          className={this.props.classes}
-          tabIndex={this.props.tabindex}
-          onKeyPress={this.props.onKeyPress}
-          ref={(input) => (this.input = input)}
-        />
-        {this.props.showCancel && this.state.value.length > 0 ? (
-          <div
-            data-testid="reset-button"
-            className="ui cancel label"
-            style={styleIcon}
-            onClick={this.resetInput}
-          >
-            <i className="icon-cancel3" />
-          </div>
-        ) : null}
-      </div>
-    )
-  }
+  return (
+    <div className={'qr-filter-idSegment'}>
+      <input
+        data-testid="input"
+        style={styleInput}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        name={name}
+        onChange={handleChange}
+        className={classes}
+        tabIndex={tabindex}
+        onKeyDown={onKeyDown}
+        ref={inputRef}
+      />
+      {showCancel && value.length > 0 ? (
+        <div
+          data-testid="reset-button"
+          className="ui cancel label"
+          style={styleIcon}
+          onClick={resetInput}
+        >
+          <i className="icon-cancel3" />
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 InputField.propTypes = {
   onFieldChanged: PropTypes.func.isRequired,
 }
+
+export default InputField

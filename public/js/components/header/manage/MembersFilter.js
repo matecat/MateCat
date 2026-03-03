@@ -77,7 +77,6 @@ const MembersFilter = ({selectedTeam, currentUser, setCurrentUser}) => {
       <Button
         className={`trigger-button user-project-dropdown${isDropdownVisible ? ' open' : ''}`}
         type={BUTTON_TYPE.BASIC}
-        size={BUTTON_SIZE.SMALL}
         onClick={toggleDropdown}
       >
         {currentUser === ManageConstants.ALL_MEMBERS_FILTER ? (

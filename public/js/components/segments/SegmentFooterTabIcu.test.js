@@ -9,6 +9,18 @@ window.config = {
   isTargetRTL: false,
 }
 
+// Suppress expected console output from format-message and ICU parser during tests
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {})
+  jest.spyOn(console, 'error').mockImplementation(() => {})
+  jest.spyOn(console, 'log').mockImplementation(() => {})
+})
+afterEach(() => {
+  console.warn.mockRestore()
+  console.error.mockRestore()
+  console.log.mockRestore()
+})
+
 const createSegment = (translation) => ({
   translation,
 })

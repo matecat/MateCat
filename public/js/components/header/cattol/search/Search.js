@@ -23,6 +23,9 @@ import {
 } from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
 import {segmentTranslation} from '../../../../setTranslationUtil'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
+import ChevronLeft from '../../../../../img/icons/ChevronLeft'
+import ChevronRight from '../../../../../img/icons/ChevronRight'
 
 class Search extends React.Component {
   constructor(props) {
@@ -370,9 +373,7 @@ class Search extends React.Component {
           })
         }
       }
-      $('body').addClass('search-open')
     } else {
-      $('body').removeClass('search-open')
       if (!this.state.focus) {
         this.setState({
           focus: true,
@@ -497,21 +498,22 @@ class Search extends React.Component {
           {this.state.searchResults.length > 0 ? (
             <div className="search-result-buttons">
               <p>{segmentIndex + 1 + ' of ' + totalResults + ' segments'}</p>
-
-              <button
-                className="ui basic tiny button"
+              <Button
+                size={BUTTON_SIZE.ICON_STANDARD}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={this.goToPrev.bind(this)}
+                tooltip={'Find Previous (Shift + F3)'}
               >
-                <i className="icon-chevron-left" />
-                <span> Find Previous (Shift + F3)</span>
-              </button>
-              <button
-                className="ui basic tiny button"
+                <ChevronLeft />
+              </Button>
+              <Button
                 onClick={this.goToNext.bind(this)}
+                mode={BUTTON_MODE.OUTLINE}
+                size={BUTTON_SIZE.ICON_STANDARD}
+                tooltip={'Find Next (F3)'}
               >
-                <i className="icon-chevron-right" />
-                <span> Find Next (F3)</span>
-              </button>
+                <ChevronRight />
+              </Button>
             </div>
           ) : null}
         </div>
@@ -623,8 +625,7 @@ class Search extends React.Component {
     ) {
       findIsDisabled = false
     }
-    let findButtonClassDisabled =
-      !this.state.funcFindButton || findIsDisabled ? 'disabled' : ''
+    let findButtonDisabled = !this.state.funcFindButton || findIsDisabled
     let statusDropdownClass =
       this.state.search.selectStatus !== '' &&
       this.state.search.selectStatus !== 'all'
@@ -636,17 +637,15 @@ class Search extends React.Component {
         ? ''
         : 'disabled'
     let replaceCheckboxClass = this.state.search.searchTarget ? '' : 'disabled'
-    let replaceButtonsClass =
+    let replaceDisabled = !(
       this.state.search.enableReplace &&
       this.state.search.searchTarget &&
       !this.state.funcFindButton &&
       !this.state.isSelectedTag
-        ? ''
-        : 'disabled'
-    let replaceAllButtonsClass =
+    )
+    let replaceAllDisabled = !(
       this.state.search.enableReplace && this.state.search.searchTarget
-        ? ''
-        : 'disabled'
+    )
     let clearVisible =
       this.state.search.searchTarget !== '' ||
       this.state.search.searchSource !== '' ||
@@ -804,28 +803,27 @@ class Search extends React.Component {
               {this.state.showReplaceOptionsInSearch ? (
                 <div>
                   <div className="find-actions">
-                    <button
-                      className={
-                        'ui basic tiny button ' + findButtonClassDisabled
-                      }
+                    <Button
+                      mode={BUTTON_MODE.OUTLINE}
                       onClick={this.handleSubmit.bind(this)}
+                      disabled={findButtonDisabled}
                     >
                       FIND
-                    </button>
-                    <button
-                      className={'ui basic tiny button ' + replaceButtonsClass}
+                    </Button>
+                    <Button
+                      mode={BUTTON_MODE.OUTLINE}
                       onClick={this.handleReplaceClick.bind(this)}
+                      disabled={replaceDisabled}
                     >
                       REPLACE
-                    </button>
-                    <button
-                      className={
-                        'ui basic tiny button ' + replaceAllButtonsClass
-                      }
+                    </Button>
+                    <Button
+                      mode={BUTTON_MODE.OUTLINE}
                       onClick={this.handleReplaceAllClick.bind(this)}
+                      disabled={replaceAllDisabled}
                     >
                       REPLACE ALL
-                    </button>
+                    </Button>
                   </div>
                   {this.jobIsSplitted && (
                     <div className="find-option">
@@ -844,15 +842,13 @@ class Search extends React.Component {
                 </div>
               ) : (
                 <div className="find-actions">
-                  <button
-                    type="button"
-                    className={
-                      'ui basic tiny button ' + findButtonClassDisabled
-                    }
+                  <Button
+                    mode={BUTTON_MODE.OUTLINE}
                     onClick={this.handleSubmit.bind(this)}
+                    disabled={findButtonDisabled}
                   >
                     FIND
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

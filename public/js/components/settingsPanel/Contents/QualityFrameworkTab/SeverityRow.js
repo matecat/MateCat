@@ -124,7 +124,7 @@ export const SeveritiyRow = ({severity}) => {
         >
           <Button
             ref={removeSeverityRef}
-            size={BUTTON_SIZE.ICON_SMALL}
+            size={BUTTON_SIZE.ICON_XSMALL}
             onClick={removeSeverity}
           >
             <IconClose size={9} />

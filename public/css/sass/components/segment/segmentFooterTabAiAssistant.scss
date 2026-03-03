@@ -27,7 +27,7 @@
 .feedback-container {
   display: flex;
   gap: 20px;
-  color: colors.$grey6;
+  color: colors.$grey700;
 }
 
 .feedback-container-submited {
@@ -53,35 +53,35 @@
   align-content: center;
   justify-content: center;
   align-items: center;
-  border: solid 1px colors.$grey8;
+  border: solid 1px colors.$grey200;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .like {
-  color: colors.$approvedGreen;
+  color: colors.$green400;
   margin-right: 8px;
 
   &:hover,
   &.active {
-    border-color: colors.$approvedGreen;
-    background-color: rgba(colors.$approvedGreen, 0.1);
+    border-color: colors.$green400;
+    background-color: rgba(colors.$green400, 0.1);
   }
 }
 
 .dislike {
-  color: colors.$redDefault;
+  color: colors.$red500;
 
   &:hover,
   &.active {
-    border-color: colors.$redDefault;
-    background-color: rgba(colors.$redDefault, 0.1);
+    border-color: colors.$red500;
+    background-color: rgba(colors.$red500, 0.1);
   }
 }
 
 .submited {
   border: none;
-  background-color: rgba(colors.$grey1, 0.1);
+  background-color: rgba(colors.$grey500, 0.1);
   cursor: unset;
 }
 
@@ -106,7 +106,7 @@
   display: flex;
   flex-direction: column;
 
-  border-top: solid 1px colors.$grey3;
+  border-top: solid 1px colors.$grey150;
 }
 
 .tm-matches-title {

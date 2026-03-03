@@ -35,7 +35,7 @@
   box-shadow: 0 0 24px rgba(colors.$black, 0.15);
   overflow: hidden;
   background-color: colors.$white;
-  border: 1px solid colors.$grey4;
+  border: 1px solid colors.$grey100;
 
   &.popover-component-left {
     left: 0;
@@ -81,7 +81,7 @@
 .popover-component-body {
   max-height: calc(100vh - 124px);
   padding: 0 16px;
-  color: colors.$grey6;
+  color: colors.$grey700;
   overflow-y: auto;
 }
 
@@ -91,5 +91,5 @@
   gap: 10px;
   padding: 10px;
   justify-content: flex-end;
-  //   box-shadow: inset 0 1px 0 0 $grey8;
+  //   box-shadow: inset 0 1px 0 0 $grey200;
 }

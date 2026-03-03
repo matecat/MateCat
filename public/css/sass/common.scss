@@ -81,11 +81,11 @@ ul {
   padding: 30px 0 30px 0;
   display: block;
   z-index: 999999;
-  background: #fff;
-  box-shadow: 0px 0px 5px #ccc;
+  background: colors.$white;
+  box-shadow: 0px 0px 5px colors.$grey200;
   border-radius: 2px;
   font-size: 18px;
-  border: 1px solid #ccc;
+  border: 1px solid colors.$grey200;
 }
 
 .iepopup img {
@@ -94,7 +94,7 @@ ul {
 
 .iepopup ul a {
   padding: 0px 0 0 0;
-  color: #39699a;
+  color: colors.$blue400;
   text-decoration: underline;
 }
 
@@ -140,7 +140,7 @@ section mark.searchMarker {
 }
 
 section mark.searchMarker.currSearchItem {
-  background: #f7d315;
+  background: colors.$orange200;
   /*	background: #00c1e6; */
 }
 
@@ -163,8 +163,8 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline header {
-  background: #6d6e71;
-  border-bottom: 1px solid #333;
+  background: colors.$grey600;
+  border-bottom: 1px solid colors.$grey1300;
   padding: 0px 0 2px 0;
   margin-bottom: 20px;
   height: 45px;
@@ -178,13 +178,13 @@ section mark.searchMarker.currSearchItem {
 }
 
 .offline h2 {
-  color: #999999 !important;
+  color: colors.$grey400 !important;
   font-weight: normal !important;
 }
 
 .claim span {
   font-weight: bold;
-  color: #39699a;
+  color: colors.$blue400;
 }
 
 .fileformat span {
@@ -565,28 +565,20 @@ icon-iconmoon:before,
 .sorting_asc:after,
 .open-popup-addtm-tr:before,
 .sorting:after,
-.x-popup:before,
-.x-popup2:before,
-.popup .x-popup:before,
-.mgmt-panel .x-popup:before,
-.popup-tm .x-popup:before,
 td.actions a:before,
 a.archive-project:before,
 a.unarchive-project:before,
 a.unarchive-project:after,
 .splitpoint:before,
-.notific:before,
 #swaplang:after,
 .more:before,
 .more.minus:before,
 .close:before,
-.notific.error:before,
 .breadcrumbs #pname:before,
 .delete button:before,
 .cancel button:before,
 .graysmall:hover .trash:before,
 .splitpoint-delete:after,
-#point2seg:after,
 .warnings:before,
   /* mbc chat */
 .mbc-warnings:before,
@@ -625,27 +617,12 @@ header .filter:before {
   vertical-align: middle;
 }
 
-.notific:before {
-  content: '\f058';
-  font-size: 25px;
-}
-
-.notific.error:before {
-  content: '\f071';
-  font-size: 25px;
-}
-
 .warnings:before,
 .mbc-warnings:before,
 .text .alternatives:before {
   content: '\f071';
-  color: #d65959;
+  color: colors.$red400;
   margin-right: 10px;
-}
-
-#point2seg:after {
-  content: '\e903';
-  font-size: 24px;
 }
 
 #swaplang:after {
@@ -694,11 +671,6 @@ a.unarchive-project:after {
   left: -1px;
   top: 1px;
   transform: rotate(-45deg);
-}
-
-.x-popup:before,
-.x-popup2:before {
-  content: '\f057';
 }
 
 .open-popup-addtm-tr:before {
@@ -1043,7 +1015,7 @@ a.unarchive-project:after {
 }
 
 #menu-site li a {
-  color: #fff;
+  color: colors.$white;
   text-decoration: none;
   -webkit-font-smoothing: antialiased;
   line-height: 22px;
@@ -1055,9 +1027,9 @@ a.unarchive-project:after {
 #menu-site li a.bigblue {
   font-size: 17px !important;
   border: none !important;
-  color: colors.$darkBlue !important;
+  color: colors.$blue900 !important;
   border-radius: 18px;
-  background-color: #fff;
+  background-color: colors.$white;
   padding: 4px 18px;
   font-weight: bold;
   margin-left: 5px;
@@ -1065,17 +1037,11 @@ a.unarchive-project:after {
 }
 
 #menu-site li a.bigred:hover {
-  color: colors.$darkBlueHover !important;
+  color: colors.$blue950 !important;
 }
 
 #menu-site li a:hover {
-  color: #3aa9dd;
-}
-
-.ui.primary.button.button-modal.warning-button.orange.margin.left-10.right-20 {
-  height: 43px;
-  padding: 1px 10px;
-  font-size: 15px;
+  color: colors.$blue500;
 }
 
 /*****************************/
@@ -1098,7 +1064,7 @@ body svg {
     > span {
       display: block;
       text-align: center;
-      background-color: colors.$grey7;
+      background-color: colors.$grey400;
       border-radius: 4px;
       padding: 2px 4px;
       color: colors.$white;
@@ -1106,4 +1072,8 @@ body svg {
       white-space: nowrap;
     }
   }
+}
+
+input[type='checkbox'] {
+  accent-color: colors.$blue500;
 }

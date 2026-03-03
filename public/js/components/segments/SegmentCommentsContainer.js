@@ -94,7 +94,10 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   resolveThread() {
-    CommentsActions.resolveThread(this.context.segment.original_sid, this.state.anonymousComments)
+    CommentsActions.resolveThread(
+      this.context.segment.original_sid,
+      this.state.anonymousComments,
+    )
   }
 
   updateComments(sid) {
@@ -213,11 +216,14 @@ class SegmentCommentsContainer extends React.Component {
             <div className="mbc-resolved-comment" key={'comment-' + i}>
               <span className="mbc-comment-resolved-label">
                 {comment.is_anonymous === 0 && (
-                    <span className="mbc-comment-username mbc-comment-resolvedby">
-                      {comment.full_name}
-                    </span>
+                  <span className="mbc-comment-username mbc-comment-resolvedby">
+                    {comment.full_name}
+                  </span>
                 )}
-                <span className=""> {comment.is_anonymous === 0 ? "m" : "M"}arked as resolved</span>
+                <span className="">
+                  {' '}
+                  {comment.is_anonymous === 0 ? 'm' : 'M'}arked as resolved
+                </span>
               </span>
             </div>,
           )
@@ -239,7 +245,7 @@ class SegmentCommentsContainer extends React.Component {
             <Button
               type={BUTTON_TYPE.DEFAULT}
               mode={BUTTON_MODE.GHOST}
-              size={BUTTON_SIZE.ICON_SMALL}
+              size={BUTTON_SIZE.ICON_XSMALL}
               onClick={this.deleteComment}
             >
               <Trash size={20} />

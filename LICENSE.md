@@ -60,7 +60,7 @@ version:
    b) under the GNU GPL, with none of the additional permissions of
    this License applicable to that copy.
 
-  3. Object Code Incorporating Material from Library Header Files.
+  3. Object Code Incorporating Material from Library Header GoToIcon.
 
   The object code form of an Application may incorporate material from
 a header file that is part of the Library.  You may convey such object

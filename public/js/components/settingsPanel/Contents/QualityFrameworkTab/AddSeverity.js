@@ -94,7 +94,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
-          size: BUTTON_SIZE.ICON_SMALL,
+          size: BUTTON_SIZE.ICON_XSMALL,
           testId: 'add-severity-button',
           disabled: isDisabled,
           ...(isDisabled && {

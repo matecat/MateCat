@@ -1,5 +1,4 @@
 import React from 'react'
-import {isUndefined} from 'lodash'
 
 import JobAnalyze from './JobAnalyze'
 

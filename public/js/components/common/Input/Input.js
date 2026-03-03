@@ -79,7 +79,7 @@ export const Input = React.forwardRef(
           {type === INPUT_TYPE.PASSWORD && (
             <Button
               mode={BUTTON_MODE.GHOST}
-              size={BUTTON_SIZE.ICON_SMALL}
+              size={BUTTON_SIZE.ICON_XSMALL}
               active={isPasswordVisible}
               className="input-component-togglePwdButton"
               onClick={togglePassword}
