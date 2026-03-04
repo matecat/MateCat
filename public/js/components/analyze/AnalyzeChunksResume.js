@@ -574,7 +574,10 @@ class AnalyzeChunksResume extends React.Component {
                 <div className="title-standard-words">
                   <h5>
                     Industry weighted
-                    <span data-tooltip="No discount applied for machine-translated words">
+                    <span
+                      className="title-standard-words-help-icon"
+                      data-tooltip="No discount applied for machine-translated words"
+                    >
                       <HelpCircle />
                     </span>
                   </h5>

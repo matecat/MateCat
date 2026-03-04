@@ -334,8 +334,8 @@ class AnalyzeHeader extends React.Component {
                     style={{
                       marginLeft: '2px',
                       color: '#4184c4',
-                      cursor: 'pointer',
                       verticalAlign: '-2px',
+                      cursor: 'help',
                     }}
                   >
                     <HelpCircle />
