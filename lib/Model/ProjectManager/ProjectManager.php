@@ -1706,6 +1706,9 @@ class ProjectManager
      */
     protected function _splitJob(ArrayObject $projectStructure): void
     {
+        // init JobsMetadataDao
+        $jobsMetadataDao = new JobsMetadataDao();
+
         // init JobDao
         $jobDao = new JobDao();
 
@@ -1766,6 +1769,22 @@ class ProjectManager
             }
 
             $newJobList[] = $newJob;
+
+            // duplicate character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata
+            $metadata = [
+                'character_counter_count_tags',
+                'character_counter_mode',
+                'subfiltering_handlers',
+            ];
+
+            foreach ($metadata as $key) {
+                $data = $jobsMetadataDao->get($jobToSplit->id, $jobToSplit->password, $key);
+
+                if(!empty($data)){
+                    $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $data->value);
+                    $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id, $jobToSplit->password, $key);
+                }
+            }
 
             $stmt->closeCursor();
             unset($stmt);
@@ -1831,6 +1850,8 @@ class ProjectManager
      */
     public function mergeALL(ArrayObject $projectStructure, array $jobStructs): void
     {
+        $jobsMetadataDao = new JobsMetadataDao();
+
         $metadata_dao = new ProjectsMetadataDao();
         $metadata_dao->cleanupChunksOptions($jobStructs);
 
@@ -1873,10 +1894,26 @@ class ProjectManager
 
         $totalAvgPee = 0;
         $totalTimeToEdit = 0;
-        foreach ($jobStructs as $_jStruct) {
+
+        foreach ($jobStructs as $i => $_jStruct) {
             $totalAvgPee += $_jStruct->avg_post_editing_effort;
             $totalTimeToEdit += $_jStruct->total_time_to_edit;
+
+            if($i > 0){
+                // delete character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata (not from the first job)
+                $metadata = [
+                    'character_counter_count_tags',
+                    'character_counter_mode',
+                    'subfiltering_handlers',
+                ];
+
+                foreach ($metadata as $key) {
+                    $jobsMetadataDao->delete($_jStruct->id, $_jStruct->password, $key);
+                    $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($_jStruct->id, $_jStruct->password, $key);
+                }
+            }
         }
+
         $first_job['avg_post_editing_effort'] = $totalAvgPee;
         $first_job['total_time_to_edit'] = $totalTimeToEdit;
 
