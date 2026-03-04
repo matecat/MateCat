@@ -64,54 +64,52 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   return (
     <div className="layout__container">
       {volumeAnalysis && project ? (
-        <div className="project ui grid">
-          <div className="sixteen wide column">
-            <div className="analyze-header">
-              <AnalyzeHeader
-                data={volumeAnalysis.get('summary')}
+        <div className="project">
+          <div className="analyze-header">
+            <AnalyzeHeader
+              data={volumeAnalysis.get('summary')}
+              project={project}
+            />
+          </div>
+          {volumeAnalysis.get('jobs').size > 0 ? (
+            <>
+              {' '}
+              <AnalyzeChunksResume
+                jobsAnalysis={volumeAnalysis.get('jobs').toJS()}
                 project={project}
+                status={volumeAnalysis.get('summary').get('status')}
+                showAnalysis={showAnalysis}
+                openAnalysisReport={openAnalysisReport}
               />
-            </div>
-            {volumeAnalysis.get('jobs').size > 0 ? (
-              <>
-                {' '}
-                <AnalyzeChunksResume
-                  jobsAnalysis={volumeAnalysis.get('jobs').toJS()}
-                  project={project}
-                  status={volumeAnalysis.get('summary').get('status')}
-                  showAnalysis={showAnalysis}
-                  openAnalysisReport={openAnalysisReport}
-                />
-                {volumeAnalysis.get('jobs') ? (
-                  <div className="analyze-report" onClick={openAnalysisReport}>
-                    <h3>{showHideText}</h3>
-                    <div className="rounded">
-                      <i className={'icon-sort-down icon ' + iconClass} />
-                    </div>
+              {volumeAnalysis.get('jobs') ? (
+                <div className="analyze-report" onClick={openAnalysisReport}>
+                  <h3>{showHideText}</h3>
+                  <div className="rounded">
+                    <i className={'icon-sort-down icon ' + iconClass} />
                   </div>
-                ) : null}
-                {showAnalysis ? (
-                  <div className="project-body ui grid">
-                    {/*<TransitionGroup>
+                </div>
+              ) : null}
+              {showAnalysis ? (
+                <div className="project-body">
+                  {/*<TransitionGroup>
                       <CSSTransition
                         key={0}
                         classNames="transitionAnalyzeMain"
                         timeout={{enter: 1000, exit: 300}}
                       >*/}
-                    <ProjectAnalyze
-                      volumeAnalysis={volumeAnalysis.get('jobs')}
-                      project={project}
-                      status={volumeAnalysis.get('summary').get('status')}
-                      jobToScroll={jobToScroll}
-                      showAnalysis={showAnalysis}
-                    />
-                    {/* </CSSTransition>
+                  <ProjectAnalyze
+                    volumeAnalysis={volumeAnalysis.get('jobs')}
+                    project={project}
+                    status={volumeAnalysis.get('summary').get('status')}
+                    jobToScroll={jobToScroll}
+                    showAnalysis={showAnalysis}
+                  />
+                  {/* </CSSTransition>
                     </TransitionGroup>*/}
-                  </div>
-                ) : null}
-              </>
-            ) : null}
-          </div>
+                </div>
+              ) : null}
+            </>
+          ) : null}
           {scrollTop > 200 ? (
             <Button
               title="Back to top"

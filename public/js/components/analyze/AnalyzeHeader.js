@@ -1,21 +1,73 @@
-import React from 'react'
-import $ from 'jquery'
+import React, {useRef, useEffect, useCallback} from 'react'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
 import {Popup} from 'semantic-ui-react'
 import HelpCircle from '../../../img/icons/HelpCircle'
+import {downloadAnalysisReport} from '../../api/downloadAnalysisReport'
 
-class AnalyzeHeader extends React.Component {
-  constructor(props) {
-    super(props)
-    this.previousQueueSize = 0
-    this.lastProgressSegments = 0
-    this.noProgressTail = 0
-    this.state = {}
-  }
+const AnalyzeHeader = ({data, project}) => {
+  const previousQueueSizeRef = useRef(0)
+  const lastProgressSegmentsRef = useRef(0)
+  const noProgressTailRef = useRef(0)
 
-  getAnalysisStateHtml() {
-    this.showProgressBar = false
+  const containerAnalysisCompleteRef = useRef(null)
+
+  const showProgressBarRef = useRef(false)
+
+  const errorAnalysisHtml = useCallback(() => {
+    let analyzerNotRunningErrorString
+    if (config.support_mail.indexOf('@') === -1) {
+      analyzerNotRunningErrorString = (
+        <p className="label">
+          The analysis seems not to be running. Contact {config.support_mail}.
+        </p>
+      )
+    } else {
+      analyzerNotRunningErrorString = (
+        <p className="label">
+          The analysis seems not to be running. Contact{' '}
+          <a href={'mailto: ' + config.support_mail}>{config.support_mail}</a>.
+        </p>
+      )
+    }
+    return (
+      <div className="analysis-create">
+        <div className="search-tm-matches">
+          <span className="complete">{analyzerNotRunningErrorString}</span>
+        </div>
+      </div>
+    )
+  }, [])
+
+  const getProgressBarText = useCallback(() => {
+    return (
+      <div className="analysis-create">
+        <div className="search-tm-matches">
+          <h5>Searching for TM Matches </h5>
+          <span className="initial-segments">
+            {' '}
+            ({data.get('segments_analyzed')} of{' '}
+          </span>
+          <span className="total-segments">
+            {' '}
+            {' ' + data.get('total_segments')})
+          </span>
+        </div>
+      </div>
+    )
+  }, [data])
+
+  const handleDownloadAnalysisReport = useCallback(() => {
+    downloadAnalysisReport({
+      idProject: project.get('id'),
+      password: project.get('password'),
+    }).catch((error) => {
+      console.error('Error downloading analysis report:', error)
+    })
+  }, [project])
+
+  const getAnalysisStateHtml = useCallback(() => {
+    showProgressBarRef.current = false
 
     let html = (
       <div className="analysis-create">
@@ -25,14 +77,14 @@ class AnalyzeHeader extends React.Component {
         </div>
       </div>
     )
-    let status = this.props.data.get('status')
-    let in_queue_before = parseInt(this.props.data.get('in_queue_before'))
+    const status = data.get('status')
+    const in_queue_before = parseInt(data.get('in_queue_before'))
     if (status === 'DONE') {
       html = (
         <div className="analysis-create">
           <div
             className="search-tm-matches hide"
-            ref={(container) => (this.containerAnalysisComplete = container)}
+            ref={containerAnalysisCompleteRef}
           >
             <h5 className="complete">
               Analysis:
@@ -42,7 +94,7 @@ class AnalyzeHeader extends React.Component {
             </h5>
             <a
               className="downloadAnalysisReport"
-              onClick={this.downloadAnalysisReport.bind(this)}
+              onClick={handleDownloadAnalysisReport}
             >
               Download Analysis Report
             </a>
@@ -56,9 +108,9 @@ class AnalyzeHeader extends React.Component {
       in_queue_before > 0
     ) {
       if (config.daemon_warning) {
-        html = this.errorAnalysisHtml()
+        html = errorAnalysisHtml()
       } else if (in_queue_before > 0) {
-        if (this.previousQueueSize <= in_queue_before) {
+        if (previousQueueSizeRef.current <= in_queue_before) {
           html = (
             <div className="analysis-create">
               <div className="search-tm-matches">
@@ -74,7 +126,6 @@ class AnalyzeHeader extends React.Component {
             </div>
           )
         } else {
-          //decreasing ( TM analysis on another project )
           html = (
             <div className="analysis-create">
               <div className="search-tm-matches">
@@ -87,7 +138,7 @@ class AnalyzeHeader extends React.Component {
                   <p className="label">
                     There are still{' '}
                     <span className="number">
-                      {this.props.data.get('in_queue_before')}
+                      {data.get('in_queue_before')}
                     </span>{' '}
                     segments in queue.
                   </p>
@@ -112,19 +163,17 @@ class AnalyzeHeader extends React.Component {
           </div>
         )
       }
-      this.previousQueueSize = in_queue_before
+      previousQueueSizeRef.current = in_queue_before
     } else if (status === 'FAST_OK' && in_queue_before === 0) {
-      if (
-        this.lastProgressSegments !== this.props.data.get('segments_analyzed')
-      ) {
-        this.lastProgressSegments = this.props.data.get('segments_analyzed')
-        this.noProgressTail = 0
-        this.showProgressBar = true
-        html = this.getProgressBarText()
+      if (lastProgressSegmentsRef.current !== data.get('segments_analyzed')) {
+        lastProgressSegmentsRef.current = data.get('segments_analyzed')
+        noProgressTailRef.current = 0
+        showProgressBarRef.current = true
+        html = getProgressBarText()
       } else {
-        this.noProgressTail++
-        if (this.noProgressTail > 9) {
-          html = this.errorAnalysisHtml()
+        noProgressTailRef.current++
+        if (noProgressTailRef.current > 9) {
+          html = errorAnalysisHtml()
         }
       }
     } else if (status === 'NOT_TO_ANALYZE') {
@@ -159,7 +208,7 @@ class AnalyzeHeader extends React.Component {
           <div className="search-tm-matches">
             <span className="complete">
               Ops.. we got an error. No text to translate in the file{' '}
-              {this.props.data.get('NAME')}.
+              {data.get('NAME')}.
             </span>
             <br />
             <span className="analysisNotPerformed">Contact {error}</span>
@@ -167,91 +216,23 @@ class AnalyzeHeader extends React.Component {
         </div>
       )
     } else {
-      // Unknown error :)
-      html = this.errorAnalysisHtml()
+      html = errorAnalysisHtml()
     }
     return html
-  }
+  }, [
+    data,
+    errorAnalysisHtml,
+    getProgressBarText,
+    handleDownloadAnalysisReport,
+  ])
 
-  errorAnalysisHtml() {
-    let analyzerNotRunningErrorString
-    if (config.support_mail.indexOf('@') === -1) {
-      analyzerNotRunningErrorString = (
-        <p className="label">
-          The analysis seems not to be running. Contact {config.support_mail}.
-        </p>
-      )
-    } else {
-      analyzerNotRunningErrorString = (
-        <p className="label">
-          The analysis seems not to be running. Contact{' '}
-          <a href={'mailto: ' + config.support_mail}>{config.support_mail}</a>.
-        </p>
-      )
-    }
-    return (
-      <div className="analysis-create">
-        <div className="search-tm-matches">
-          <span className="complete">{analyzerNotRunningErrorString}</span>
-        </div>
-      </div>
-    )
-  }
-
-  getProgressBarText() {
-    return (
-      <div className="analysis-create">
-        <div className="search-tm-matches">
-          <h5>Searching for TM Matches </h5>
-          <span className="initial-segments">
-            {' '}
-            ({this.props.data.get('segments_analyzed')} of{' '}
-          </span>
-          <span className="total-segments">
-            {' '}
-            {' ' + this.props.data.get('total_segments')})
-          </span>
-        </div>
-      </div>
-    )
-  }
-
-  getProgressBar() {
-    if (this.showProgressBar) {
-      let width =
-        (this.props.data.get('segments_analyzed') /
-          this.props.data.get('total_segments')) *
-          100 +
-        '%'
-      return (
-        <div className="progress sixteen wide column">
-          <TransitionGroup>
-            <CSSTransition
-              key={0}
-              classNames="transition"
-              timeout={{enter: 500, exit: 300}}
-            >
-              <div className="progress-bar">
-                <div className="progr">
-                  <div className="meter">
-                    <a className="approved-bar" style={{width: width}} />
-                  </div>
-                </div>
-              </div>
-            </CSSTransition>
-          </TransitionGroup>
-        </div>
-      )
-    }
-    return null
-  }
-  getSavingWorkCount() {
-    const data = this.props.data.toJS()
-    const {total_equivalent} = data
+  const getSavingWorkCount = useCallback(() => {
+    const dataJS = data.toJS()
+    const {total_equivalent} = dataJS
     let wcTime = total_equivalent / 3000
     let wcUnit = 'day'
     if (wcTime > 0 && wcTime < 1) {
-      wcTime = wcTime * 8 //convert to hours (1 work day = 8 hours)
+      wcTime = wcTime * 8
       wcUnit = 'hour'
     }
     if (wcTime > 0 && wcTime < 1) {
@@ -262,8 +243,9 @@ class AnalyzeHeader extends React.Component {
       wcUnit = wcUnit + 's'
     }
     return Math.round(wcTime) + ' work ' + wcUnit
-  }
-  getWordscount() {
+  }, [data])
+
+  const getWordscount = useCallback(() => {
     const tooltipText = (
       <span>
         Matecat suggests MT only when it helps thanks to a dynamic penalty
@@ -276,49 +258,39 @@ class AnalyzeHeader extends React.Component {
       </span>
     )
 
-    let status = this.props.data.get('status')
-    let raw_words = this.props.data.get('total_raw'),
+    const status = data.get('status')
+    let raw_words = data.get('total_raw'),
       weightedWords = ''
     if (
       (status === ANALYSIS_STATUS.NEW ||
         status === '' ||
-        this.props.data.get('in_queue_before') > 0) &&
+        data.get('in_queue_before') > 0) &&
       config.daemon_warning
     ) {
-      weightedWords = this.props.data.get('total_raw')
+      weightedWords = data.get('total_raw')
     } else {
-      if (
-        status === ANALYSIS_STATUS.DONE ||
-        this.props.data.get('total_equivalent') > 0
-      ) {
-        weightedWords = this.props.data.get('total_equivalent')
+      if (status === ANALYSIS_STATUS.DONE || data.get('total_equivalent') > 0) {
+        weightedWords = data.get('total_equivalent')
       }
       if (status === ANALYSIS_STATUS.NOT_TO_ANALYZE) {
-        weightedWords = this.props.data.get('total_raw')
+        weightedWords = data.get('total_raw')
       }
     }
     let saving_perc =
       raw_words > 0
         ? parseInt(((raw_words - weightedWords) / raw_words) * 100) + '%'
         : '0%'
-    if (saving_perc !== this.saving_perc_value) {
-      this.updatedSavingWords = true
-    }
-    this.saving_perc_value = saving_perc
 
     return (
       <div className="word-count ui grid">
         <div className="sixteen wide column">
-          <div
-            className="word-percent "
-            ref={(container) => (this.containerSavingWords = container)}
-          >
+          <div className="word-percent ">
             <h2 className="ui header">
               <div className="percent">{saving_perc}</div>
               <div className="content">
                 Saving on word count
                 <div className="sub header">
-                  {this.getSavingWorkCount()} at 3.000 w/day
+                  {getSavingWorkCount()} at 3.000 w/day
                 </div>
               </div>
             </h2>
@@ -347,93 +319,95 @@ class AnalyzeHeader extends React.Component {
         </div>
       </div>
     )
-  }
-
-  downloadAnalysisReport() {
-    const pid = this.props.project.get('id')
-    const ppassword = this.props.project.get('password')
-
-    const form =
-      '			<form id="downloadAnalysisReportForm" action="/api/app/download-analysis-report" method="post">' +
-      '				<input type=hidden name="id_project" value="' +
-      pid +
-      '">' +
-      '				<input type=hidden name="password" value="' +
-      ppassword +
-      '">' +
-      '				<input type=hidden name="download_type" value="XTRF">' +
-      '			</form>'
-    $('body').append(form)
-    $('#downloadAnalysisReportForm').submit()
-  }
+  }, [data, getSavingWorkCount])
 
   /**
    * To add informations from the plugins
    * @returns {string}
    */
-  moreProjectInfo() {
+  const moreProjectInfo = useCallback(() => {
     return ''
-  }
+  }, [])
 
-  componentDidUpdate() {
-    let self = this
-    if (this.updatedSavingWords) {
-      this.containerSavingWords.classList.add('updated-count')
-      this.updatedSavingWords = false
-      setTimeout(function () {
-        self.containerSavingWords.classList.remove('updated-count')
-      }, 400)
-    }
-    let status = this.props.data.get('status')
-    if (status === ANALYSIS_STATUS.DONE) {
-      setTimeout(function () {
-        self.containerAnalysisComplete?.classList.remove('hide')
-      }, 600)
-    }
-  }
-
-  componentDidMount() {
-    let self = this
-    let status = this.props.data.get('status')
-    if (status === ANALYSIS_STATUS.DONE) {
-      this.containerSavingWords.classList.add('updated-count')
-      setTimeout(function () {
-        self.containerSavingWords.classList.remove('updated-count')
-        self.containerAnalysisComplete?.classList.remove('hide')
-      }, 400)
-    }
-  }
-
-  shouldComponentUpdate(nextProps) {
-    return !nextProps.data.equals(this.props.data)
-  }
-
-  render() {
-    let analysisStateHtml = this.getAnalysisStateHtml()
-    let wordsCountHtml = this.getWordscount()
-    let projectName = this.props.project.get('name')
-      ? this.props.project.get('name')
-      : ''
-    return (
-      <div className="project-header ui grid">
-        <div className="left-analysis nine wide column">
-          <h1>Volume Analysis</h1>
-          <div className="ui ribbon label">
-            <div className="project-name" title="Project name">
-              {' '}
-              {projectName}{' '}
-            </div>
-          </div>
-          {this.moreProjectInfo()}
-          {analysisStateHtml}
+  const getProgressBar = useCallback(() => {
+    if (showProgressBarRef.current) {
+      const width =
+        (data.get('segments_analyzed') / data.get('total_segments')) * 100 + '%'
+      return (
+        <div className="progress sixteen wide column">
+          <TransitionGroup>
+            <CSSTransition
+              key={0}
+              classNames="transition"
+              timeout={{enter: 500, exit: 300}}
+            >
+              <div className="progress-bar">
+                <div className="progr">
+                  <div className="meter">
+                    <a className="approved-bar" style={{width: width}} />
+                  </div>
+                </div>
+              </div>
+            </CSSTransition>
+          </TransitionGroup>
         </div>
+      )
+    }
+    return null
+  }, [data])
 
-        <div className="seven wide right floated column">{wordsCountHtml}</div>
+  // Replaces componentDidMount + componentDidUpdate
+  const prevDataRef = useRef(data)
+  const isFirstRender = useRef(true)
 
-        {this.getProgressBar()}
+  useEffect(() => {
+    const status = data.get('status')
+
+    if (isFirstRender.current) {
+      // componentDidMount logic
+      if (status === ANALYSIS_STATUS.DONE) {
+        setTimeout(() => {
+          containerAnalysisCompleteRef.current?.classList.remove('hide')
+        }, 400)
+      }
+      isFirstRender.current = false
+    } else {
+      // componentDidUpdate logic
+      if (status === ANALYSIS_STATUS.DONE) {
+        setTimeout(() => {
+          containerAnalysisCompleteRef.current?.classList.remove('hide')
+        }, 600)
+      }
+    }
+
+    prevDataRef.current = data
+  }, [data])
+
+  const analysisStateHtml = getAnalysisStateHtml()
+  const wordsCountHtml = getWordscount()
+  const projectName = project.get('name') ? project.get('name') : ''
+
+  return (
+    <div className="project-header ui grid">
+      <div className="left-analysis nine wide column">
+        <h1>Volume Analysis</h1>
+        <div className="ui ribbon label">
+          <div className="project-name" title="Project name">
+            {' '}
+            {projectName}{' '}
+          </div>
+        </div>
+        {moreProjectInfo()}
+        {analysisStateHtml}
       </div>
-    )
-  }
+
+      <div className="seven wide right floated column">{wordsCountHtml}</div>
+
+      {getProgressBar()}
+    </div>
+  )
 }
 
-export default AnalyzeHeader
+export default React.memo(AnalyzeHeader, (prevProps, nextProps) => {
+  return nextProps.data.equals(prevProps.data)
+})
