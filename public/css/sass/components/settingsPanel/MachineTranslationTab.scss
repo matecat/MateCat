@@ -647,7 +647,8 @@
   .options-container-content {
     display: flex;
     flex-direction: column;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 variables.$border-radius-default
+      variables.$border-radius-default;
     padding: 24px;
     background-color: colors.$grey50;
 

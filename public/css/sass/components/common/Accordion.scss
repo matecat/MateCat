@@ -38,6 +38,7 @@
   transition-timing-function: 'ease-in-out';
   transform-origin: top center;
   padding: 0 24px;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 variables.$border-radius-default
+    variables.$border-radius-default;
   background-color: colors.$grey100;
 }

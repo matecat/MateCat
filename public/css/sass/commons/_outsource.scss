@@ -368,7 +368,8 @@
     padding-bottom: 15px;
     padding-top: 15px;
     cursor: auto;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 variables.$border-radius-default
+      variables.$border-radius-default;
     .outsource-not-available {
       font-size: 20px;
     }

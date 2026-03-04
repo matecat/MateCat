@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 // General dropdown
 .custom-dropdown {
@@ -52,6 +53,8 @@
   background-color: colors.$grey50;
   box-shadow: none;
   padding: 0;
+  border-radius: variables.$border-radius-default;
+
   input + svg {
     position: absolute;
     right: 12px;
@@ -104,11 +107,19 @@
 }
 .dropdown__most-popular::before {
   left: 0;
-  background-image: linear-gradient(to right, colors.$black, rgba(colors.$black, 0));
+  background-image: linear-gradient(
+    to right,
+    colors.$black,
+    rgba(colors.$black, 0)
+  );
 }
 .dropdown__most-popular::after {
   right: 0;
-  background-image: linear-gradient(to right, rgba(colors.$black, 0), colors.$black);
+  background-image: linear-gradient(
+    to right,
+    rgba(colors.$black, 0),
+    colors.$black
+  );
 }
 
 .dropdown__most-popular-option {
@@ -200,7 +211,7 @@
     white-space: nowrap;
     font-weight: normal !important;
     a {
-        color: colors.$white;
+      color: colors.$white;
     }
   }
 }

@@ -1,6 +1,12 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 .tab.glossary {
   outline: none;
+
+  input,
+  textarea {
+    border-radius: variables.$border-radius-default;
+  }
 
   .glossary-select,
   .input-with-label__wrapper {
@@ -24,7 +30,6 @@
       }
     }
     .select {
-      border-radius: 4px;
       line-height: 16px;
     }
     .select__dropdown-wrapper .custom-dropdown {
@@ -137,7 +142,6 @@
   input:not([type='radio']),
   textarea {
     border: 1px solid colors.$grey300;
-    border-radius: 4px;
     padding: 4px 8px;
     outline: none;
     font-size: 14px;
@@ -169,7 +173,7 @@
     flex-direction: row;
     align-items: center;
     border: 1px solid colors.$grey300;
-    border-radius: 4px;
+    border-radius: variables.$border-radius-default;
     padding: 4px;
 
     svg {
@@ -244,7 +248,11 @@
     .glossary_item {
       padding: 24px 32px;
       color: colors.$grey700;
-      font: 14px/16px calibri, Arial, Helvetica, sans-serif;
+      font:
+        14px/16px calibri,
+        Arial,
+        Helvetica,
+        sans-serif;
       text-align: left;
       &:nth-child(even) {
         background: colors.$grey50;
@@ -506,6 +514,7 @@
       > div {
         width: auto;
         display: flex;
+        gap: 8px;
         flex-direction: row;
       }
       > div:first-child {

@@ -118,7 +118,8 @@
 
   &:last-child {
     .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 0 0 8px 8px !important;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default !important;
     }
   }
 
@@ -161,7 +162,8 @@
 
   &:last-child {
     .accordion-component-title {
-      border-radius: 0 0 8px 8px !important;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default !important;
     }
   }
 
@@ -204,7 +206,8 @@
 
   &:last-child {
     .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 0 0 8px 8px !important;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default !important;
     }
   }
 

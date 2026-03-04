@@ -114,7 +114,8 @@
 
 .filter-project-status-dropdown-trigger {
   gap: 0 !important;
-  border-radius: 0 8px 8px 0 !important;
+  border-radius: 0 variables.$border-radius-default
+    variables.$border-radius-default 0 !important;
   margin-left: 1px;
 
   //&:hover,

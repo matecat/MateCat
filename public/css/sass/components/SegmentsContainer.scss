@@ -1,4 +1,5 @@
-@use "../commons/colors";
+@use '../commons/colors';
+@use '../commons/variables';
 .virtual-list {
   width: 100%;
   height: 100%;
@@ -24,13 +25,13 @@
 
   .row-border-radius-top {
     section {
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
+      border-top-left-radius: variables.$border-radius-default;
+      border-top-right-radius: variables.$border-radius-default;
       border-top-color: colors.$grey300 !important;
 
       .body {
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
+        border-top-left-radius: variables.$border-radius-default;
+        border-top-right-radius: variables.$border-radius-default;
         overflow: hidden;
       }
     }
@@ -42,33 +43,38 @@
 
   .row-border-radius-bottom {
     section {
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
+      border-bottom-left-radius: variables.$border-radius-default;
+      border-bottom-right-radius: variables.$border-radius-default;
 
       &.editor {
         .footer {
           .tab {
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
+            border-bottom-left-radius: variables.$border-radius-default;
+            border-bottom-right-radius: variables.$border-radius-default;
           }
         }
       }
     }
 
     section.opened {
-      margin-bottom: 8px;
+      margin-bottom: variables.$border-radius-default;
     }
 
     section:not(.editor) {
       .body {
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: variables.$border-radius-default;
+        border-bottom-right-radius: variables.$border-radius-default;
         overflow: hidden;
       }
     }
   }
 }
 
-#file .virtual-list > :first-child > :not(:first-child) > div > :first-child:not(.editor) {
+#file
+  .virtual-list
+  > :first-child
+  > :not(:first-child)
+  > div
+  > :first-child:not(.editor) {
   border-top-color: colors.$grey150;
 }

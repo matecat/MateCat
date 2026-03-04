@@ -154,37 +154,42 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
   const haveRecords = rows?.length > 0
 
   return (
-    <div className="mt-glossary">
-      {haveRecords && (
-        <SettingsPanelTable
-          columns={COLUMNS_TABLE}
-          rows={rows}
-          className="mt-glossary-table"
-        />
+    <>
+      {(!isCattoolPage || (isCattoolPage && haveRecords)) && (
+        <h2>Glossaries</h2>
       )}
+      <div className="mt-glossary">
+        {haveRecords && (
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE}
+            rows={rows}
+            className="mt-glossary-table"
+          />
+        )}
 
-      {!isCattoolPage &&
-        (haveRecords ? (
-          <div className="main-buttons-container">
-            <Button type={BUTTON_TYPE.PRIMARY} onClick={openGlossaryPage}>
-              Manage your Lara glossaries
-            </Button>
-          </div>
-        ) : Array.isArray(rows) ? (
-          <div className="empty-list-mode">
-            <p>Start using Lara's glossary feature</p>
-            <Button
-              className="settings-panel-grey-button"
-              onClick={openGlossaryPage}
-            >
-              <IconAdd size={16} />
-              Create a glossary on Lara
-            </Button>
-          </div>
-        ) : (
-          <p className="loading-list-mode">Loading...</p>
-        ))}
-    </div>
+        {!isCattoolPage &&
+          (haveRecords ? (
+            <div className="main-buttons-container">
+              <Button type={BUTTON_TYPE.PRIMARY} onClick={openGlossaryPage}>
+                Manage your Lara glossaries
+              </Button>
+            </div>
+          ) : Array.isArray(rows) ? (
+            <div className="empty-list-mode">
+              <p>Start using Lara's glossary feature</p>
+              <Button
+                className="settings-panel-grey-button"
+                onClick={openGlossaryPage}
+              >
+                <IconAdd size={16} />
+                Create a glossary on Lara
+              </Button>
+            </div>
+          ) : (
+            <p className="loading-list-mode">Loading...</p>
+          ))}
+      </div>
+    </>
   )
 }
 

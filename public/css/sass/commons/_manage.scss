@@ -427,8 +427,7 @@ div#manage-container {
             overflow: hidden;
             .chunk {
               display: grid;
-              grid-template-columns:
-                20px 100px 150px 120px 106px 100px auto 180px 65px 40px;
+              grid-template-columns: 20px 100px 150px 120px 106px 100px auto 180px 65px 40px;
               align-items: center;
               gap: 6px;
               transition: 0.3s ease;
@@ -767,7 +766,8 @@ div#manage-container {
       padding: 0 30px 5px !important;
       text-align: right;
       background-color: colors.$grey100;
-      border-radius: 0 0 8px 8px;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;

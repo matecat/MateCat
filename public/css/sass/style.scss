@@ -1,4 +1,5 @@
 @use 'commons/colors';
+@use 'commons/variables';
 body {
   transition: padding-top 200ms ease-out;
   -webkit-transition: padding-top 200ms ease-out;
@@ -718,8 +719,8 @@ ul.suggestion-item.graysmall:last-child {
 
 section.loaded .submenu {
   display: block;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: variables.$border-radius-default;
+  border-bottom-right-radius: variables.$border-radius-default;
   overflow: hidden;
 
   &:has(.active) {
@@ -743,10 +744,10 @@ section.loaded .submenu {
   user-select: none;
 
   &:last-child {
-    border-top-right-radius: 8px;
+    border-top-right-radius: variables.$border-radius-default;
 
     > a {
-      border-top-right-radius: 8px;
+      border-top-right-radius: variables.$border-radius-default;
     }
   }
 }

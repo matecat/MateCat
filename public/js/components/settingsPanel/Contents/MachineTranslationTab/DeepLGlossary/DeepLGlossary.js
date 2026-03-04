@@ -312,44 +312,49 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
   )
 
   return (
-    <div className="mt-glossary">
-      {haveRecords && (
-        <SettingsPanelTable
-          columns={COLUMNS_TABLE}
-          rows={rows}
-          className="mt-glossary-table"
-        />
+    <>
+      {(!isCattoolPage || (isCattoolPage && haveRecords)) && (
+        <h2>Glossaries</h2>
       )}
+      <div className="mt-glossary">
+        {haveRecords && (
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE}
+            rows={rows}
+            className="mt-glossary-table"
+          />
+        )}
 
-      {!isCattoolPage &&
-        (haveRecords ? (
-          <div className="main-buttons-container">
-            {!shouldHideNewButton && (
+        {!isCattoolPage &&
+          (haveRecords ? (
+            <div className="main-buttons-container">
+              {!shouldHideNewButton && (
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={addGlossary}
+                  title="Add glossary"
+                >
+                  <IconAdd size={18} />
+                  New glossary
+                </Button>
+              )}
+            </div>
+          ) : Array.isArray(rows) ? (
+            <div className="empty-list-mode">
+              <p>Start using DeepL's glossary feature</p>
               <Button
-                type={BUTTON_TYPE.PRIMARY}
+                className="settings-panel-grey-button"
                 onClick={addGlossary}
-                title="Add glossary"
               >
                 <IconAdd size={18} />
                 New glossary
               </Button>
-            )}
-          </div>
-        ) : Array.isArray(rows) ? (
-          <div className="empty-list-mode">
-            <p>Start using DeepL's glossary feature</p>
-            <Button
-              className="settings-panel-grey-button"
-              onClick={addGlossary}
-            >
-              <IconAdd size={18} />
-              New glossary
-            </Button>
-          </div>
-        ) : (
-          <p className="loading-list-mode">Loading...</p>
-        ))}
-    </div>
+            </div>
+          ) : (
+            <p className="loading-list-mode">Loading...</p>
+          ))}
+      </div>
+    </>
   )
 }
 

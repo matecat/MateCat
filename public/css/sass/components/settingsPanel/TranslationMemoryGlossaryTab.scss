@@ -427,8 +427,8 @@
         .settings-panel-row-dragover-half-bottom
       ) {
       .settings-panel-row-active {
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: variables.$border-radius-default;
+        border-bottom-right-radius: variables.$border-radius-default;
       }
     }
   }
@@ -440,8 +440,8 @@
     height: 56px;
     padding: 20px;
     background-color: colors.$grey150;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: variables.$border-radius-default;
+    border-top-right-radius: variables.$border-radius-default;
   }
 
   .tm-prioritization-text-content {

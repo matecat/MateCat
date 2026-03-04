@@ -347,7 +347,8 @@ body.analyze {
               color: colors.$blue500;
               text-align: center;
               text-decoration: none;
-              border-radius: 0 8px 8px 0;
+              border-radius: 0 variables.$border-radius-default
+                variables.$border-radius-default 0;
               height: 24px;
               min-width: 24px;
               padding: 0;
@@ -408,7 +409,8 @@ body.analyze {
           .job {
             margin-bottom: 15px;
             &:first-child .chunks {
-              border-radius: 0 0 8px 8px;
+              border-radius: 0 0 variables.$border-radius-default
+                variables.$border-radius-default;
             }
             .chunks {
               border-radius: variables.$border-radius-default;

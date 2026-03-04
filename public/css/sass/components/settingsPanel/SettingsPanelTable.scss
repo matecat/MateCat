@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 .settings-panel-table {
   position: relative;
@@ -29,8 +30,8 @@
   color: white;
   font-size: 15px;
   font-weight: bold;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-top-left-radius: variables.$border-radius-default;
+  border-top-right-radius: variables.$border-radius-default;
 }
 
 .settings-panel-table-rowHeading-column {
@@ -154,6 +155,6 @@
 .settings-panel-table-rows-container {
   overflow: hidden;
   border: 1px solid colors.$grey200;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: variables.$border-radius-default;
+  border-bottom-right-radius: variables.$border-radius-default;
 }
