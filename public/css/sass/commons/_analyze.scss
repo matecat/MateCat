@@ -388,6 +388,13 @@ body.analyze {
               left: 2px;
             }
           }
+          .title-standard-words-help-icon {
+            cursor: help;
+
+            svg {
+              color: colors.$linkBlue;
+            }
+          }
         }
 
         .title-matecat-words {
