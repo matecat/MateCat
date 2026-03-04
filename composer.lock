@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.371.3",
+            "version": "3.371.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d300ec1c861e52dc8f17ca3d75dc754da949f065"
+                "reference": "957f8a5ecc30670c95dfc37a9d04660899fc44e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d300ec1c861e52dc8f17ca3d75dc754da949f065",
-                "reference": "d300ec1c861e52dc8f17ca3d75dc754da949f065",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/957f8a5ecc30670c95dfc37a9d04660899fc44e0",
+                "reference": "957f8a5ecc30670c95dfc37a9d04660899fc44e0",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.371.3"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.371.4"
             },
-            "time": "2026-02-27T19:05:40+00:00"
+            "time": "2026-03-03T19:52:06+00:00"
         },
         {
             "name": "composer/pcre",
@@ -1597,16 +1597,16 @@
         },
         {
             "name": "matecat/icu-intl",
-            "version": "v1.1.15",
+            "version": "1.1.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/icu-intl.git",
-                "reference": "4042056d98cc1526ae1a2c20f664c148cad631ad"
+                "reference": "0bfcc2aa2f0bfd4ef851373b6a357ef8ca2fa1c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/4042056d98cc1526ae1a2c20f664c148cad631ad",
-                "reference": "4042056d98cc1526ae1a2c20f664c148cad631ad",
+                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/0bfcc2aa2f0bfd4ef851373b6a357ef8ca2fa1c7",
+                "reference": "0bfcc2aa2f0bfd4ef851373b6a357ef8ca2fa1c7",
                 "shasum": ""
             },
             "require": {
@@ -1614,6 +1614,7 @@
                 "php": ">=8.3"
             },
             "require-dev": {
+                "ext-dom": "*",
                 "ext-xdebug": "*",
                 "phpstan/phpstan": "@stable",
                 "phpunit/php-code-coverage": "^12",
@@ -1642,9 +1643,9 @@
             "description": "A PHP port of ICU4J's MessagePattern parser with locale utilities. Parses ICU MessageFormat patterns into an inspectable AST and provides locale data support for internationalization in PHP.",
             "support": {
                 "issues": "https://github.com/matecat/icu-intl/issues",
-                "source": "https://github.com/matecat/icu-intl/tree/v1.1.15"
+                "source": "https://github.com/matecat/icu-intl/tree/1.1.16"
             },
-            "time": "2026-03-03T16:32:56+00:00"
+            "time": "2026-03-04T16:26:02+00:00"
         },
         {
             "name": "matecat/klein",
