@@ -62,7 +62,7 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   let iconClass = showAnalysis ? 'open' : ''
 
   return (
-    <div className="ui container">
+    <div className="layout__container">
       {volumeAnalysis && project ? (
         <div className="project ui grid">
           <div className="sixteen wide column">

@@ -296,7 +296,7 @@ class ProjectsContainer extends React.Component {
 
     return (
       <div className="project-list">
-        <div className="ui container">
+        <div className="layout__container">
           <ProjectsBulkActions
             projects={this.state.projects.toJS()}
             teams={this.state.teams.toJS()}

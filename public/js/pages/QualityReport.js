@@ -168,7 +168,7 @@ export const QualityReport = () => {
             <div className="qr-bg-head" />
 
             {jobInfo ? (
-              <div className="qr-job-summary">
+              <div className="layout__container">
                 <div className="qr-header">
                   <h3>Quality report</h3>
 
