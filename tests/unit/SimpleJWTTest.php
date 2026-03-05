@@ -182,7 +182,9 @@ class SimpleJWTTest extends AbstractTest
         );
 
         $tokenString = $jwt->encode();
-        $tamperedTokenString = substr($tokenString, 0, -1) . 'x';
+
+        $tamperPart = '1234-foo-bar-x';
+        $tamperedTokenString = substr($tokenString, 0, -strlen($tamperPart)) . $tamperPart;
 
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage("Invalid Token Signature");

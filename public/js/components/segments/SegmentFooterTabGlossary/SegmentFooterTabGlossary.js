@@ -223,7 +223,7 @@ export const SegmentFooterTabGlossary = ({
         actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
         sid: segment.sid,
         message: update
-          ? 'A termbase item has been updated'
+          ? 'A termbase entry has been updated'
           : 'A termbase entry has been added',
       })
     }

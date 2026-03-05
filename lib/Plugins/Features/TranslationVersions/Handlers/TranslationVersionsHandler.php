@@ -19,7 +19,6 @@ use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use RuntimeException;
 use Utils\Constants\TranslationStatus;
-use Utils\Tools\Utils;
 
 /**
  * Class TranslationVersionsHandler
@@ -120,7 +119,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface
         SegmentTranslationStruct $new_translation,
         SegmentTranslationStruct $old_translation
     ): bool {
-        if (Utils::stringsAreEqual($new_translation->translation, $old_translation->translation ?? '')) {
+        if ($new_translation->translation == ($old_translation->translation ?? '')) {
             return false;
         }
 

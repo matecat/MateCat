@@ -45,9 +45,9 @@ use Utils\TmKeyManagement\TmKeyStruct;
  */
 class Lara extends AbstractEngine
 {
-    public const DEFAULT_STYLE = "faithful";
+    public const string DEFAULT_STYLE = "faithful";
 
-    private const ALLOWED_STYLES = [
+    private const array ALLOWED_STYLES = [
         'faithful',
         'fluid',
         'creative',
@@ -376,7 +376,7 @@ class Lara extends AbstractEngine
                 return $this->mmt_GET_Fallback->get($_config);
             }
         } else {
-            $reasoning = is_bool($_config['reasoning']) ? $_config['reasoning'] : true;
+            $reasoning = !is_bool($_config['reasoning']) || $_config['reasoning'];
             $translation = $_config['translation'];
             // Get score from MMT Quality Estimation
             if (isset($_config['include_score']) && $_config['include_score']) {

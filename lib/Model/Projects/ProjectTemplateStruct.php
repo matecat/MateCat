@@ -38,6 +38,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public ?string $character_counter_mode = null;
     public ?string $subfiltering_handlers = null;
     public ?int $mt_quality_value_in_editor = null;
+    public bool $icu_enabled = false;
 
     /**
      * @param object $decodedObject
@@ -73,6 +74,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->source_language = $decodedObject->source_language;
         $this->target_language = (!empty($decodedObject->target_language)) ? serialize($decodedObject->target_language) : null;
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
+        $this->icu_enabled = $decodedObject->icu_enabled ?? false;
 
         return $this;
     }
@@ -167,6 +169,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             'target_language' => $this->getTargetLanguage(),
             'created_at' => date_create($this->created_at)->format(DATE_RFC822),
             'modified_at' => date_create($this->modified_at)->format(DATE_RFC822),
+            'icu_enabled' => $this->icu_enabled
         ];
     }
 }

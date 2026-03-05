@@ -1,5 +1,7 @@
 <?php
 
+namespace unit\LQA;
+
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\LQA\BxExG\Validator;

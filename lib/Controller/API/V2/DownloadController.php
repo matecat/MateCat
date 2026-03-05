@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Exception;
 use Google_Service_Drive_DriveFile;
+use Matecat\Locales\Languages;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -34,7 +35,6 @@ use Model\Projects\ProjectDao;
 use Model\RemoteFiles\RemoteFileDao;
 use Model\Segments\SegmentDao;
 use ReflectionException;
-use Utils\Langs\Languages;
 use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -271,7 +271,7 @@ class DownloadController extends AbstractDownloadController
                     $xliffFilePath = $params['save_as'];
                 }
 
-                $fileType = XliffProprietaryDetect::getInfo($xliffFilePath);
+                $fileType = (new XliffProprietaryDetect())->getInfo($xliffFilePath);
 
                 // if data is empty, copy the original file in the outputPath
                 if (empty($data)) {
@@ -358,7 +358,8 @@ class DownloadController extends AbstractDownloadController
                 }
             }
 
-            $convertResult = Filters::xliffToTarget($files_to_be_converted);
+            $filters = new Filters();
+            $convertResult = $filters->xliffToTarget($files_to_be_converted);
 
             // check for errors and log them on fatal_errors.txt
             foreach ($convertResult as $result) {
@@ -368,7 +369,7 @@ class DownloadController extends AbstractDownloadController
             }
 
             foreach (array_keys($files_to_be_converted) as $pos => $fileID) {
-                Filters::logConversionToTarget($convertResult[$fileID], $files_to_be_converted[$fileID]['out_xliff_name'], $jobData, $chunk[$pos]);
+                $filters->logConversionToTarget($convertResult[$fileID], $files_to_be_converted[$fileID]['out_xliff_name'], $jobData, $chunk[$pos]);
 
                 if (empty($convertResult[$fileID] ['document_content'])) {
                     continue;
@@ -563,7 +564,7 @@ class DownloadController extends AbstractDownloadController
         }
 
         //Let's avoid in-memory copy of very large files if possible
-        $detect_result = XliffProprietaryDetect::getInfoByStringData(substr($documentContent, 0, 1024));
+        $detect_result = (new XliffProprietaryDetect())->getInfoByStringData(substr($documentContent, 0, 1024));
 
         //clean mrk tags for GlobalSight application compatibility
         //this should be a sax parser instead of in memory copy for every trans-unit

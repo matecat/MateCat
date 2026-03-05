@@ -25,5 +25,5 @@ try {
     $klein = mockKleinFramework();
     disableAmqWorkerClientHelper();
     setupSignalHandler();
-} catch (ReflectionException $ignore) {
+} catch (Throwable $ignore) {
 }

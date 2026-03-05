@@ -10,7 +10,7 @@ use Klein\Klein;
 use Model\Exceptions\ValidationError as Model_ValidationError;
 use Model\FeaturesBase\PluginsLoader;
 use Swaggest\JsonSchema\InvalidValue;
-use Utils\Langs\InvalidLanguageException;
+use Matecat\Locales\InvalidLanguageException;
 use Utils\Logger\LoggerFactory;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;

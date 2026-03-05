@@ -76,7 +76,7 @@ class AIAssistantWorker extends AbstractWorker
      *
      * @throws Exception
      */
-    private function explain_meaning(array $payload)
+    private function explain_meaning(array $payload): void
     {
         $phraseTrimLimit = ceil(AppConfig::$OPEN_AI_MAX_TOKENS / 2);
         $phrase = strip_tags(html_entity_decode($payload['phrase']));
@@ -125,7 +125,7 @@ class AIAssistantWorker extends AbstractWorker
                                 // Trigger error only if $clean is not empty
                             } elseif (!empty($clean) and $clean !== '') {
                                 // Trigger real errors here
-                                if (Utils::isJson($clean)) {
+                                if (json_validate($clean)) {
                                     $clean = json_decode($clean, true);
 
                                     if (

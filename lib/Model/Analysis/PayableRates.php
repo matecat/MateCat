@@ -2,7 +2,7 @@
 
 namespace Model\Analysis;
 
-use Utils\Langs\Languages;
+use Matecat\Locales\Languages;
 
 /**
  * Created by PhpStorm.

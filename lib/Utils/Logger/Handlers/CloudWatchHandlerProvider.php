@@ -3,11 +3,9 @@
 namespace Utils\Logger\Handlers;
 
 use Aws\CloudWatchLogs\CloudWatchLogsClient;
-use Google\Auth\Cache\FileSystemCacheItemPool;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use PhpNexus\Cwh\Handler\CloudWatch;
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Utils\Registry\AppConfig;
 

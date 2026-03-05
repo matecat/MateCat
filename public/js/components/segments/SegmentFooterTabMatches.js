@@ -54,7 +54,7 @@ class SegmentFooterTabMatches extends React.Component {
       ) {
         item.suggestion_info =
           'Quality: <b>' + this.sentence_confidence + '</b>'
-      } else if (this.match != 'MT') {
+      } else if (this.match != 'MT' && this.match !== 'ICE_MT') {
         item.suggestion_info = this.last_update_date
       } else {
         item.suggestion_info = ''

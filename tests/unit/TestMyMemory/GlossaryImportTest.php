@@ -21,7 +21,7 @@ use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
-use Utils\Langs\Languages;
+use Matecat\Locales\Languages;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;

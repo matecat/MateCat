@@ -17,6 +17,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import {Select} from '../common/Select'
 import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
 import {BUTTON_MODE} from '../common/Button/Button'
+import HelpCircle from '../../../img/icons/HelpCircle'
 class OutsourceVendor extends React.Component {
   constructor(props) {
     super(props)
@@ -621,7 +622,7 @@ class OutsourceVendor extends React.Component {
                               data-position="bottom center"
                               data-variation="wide"
                             >
-                              <i className="icon-info icon" />
+                              <HelpCircle />
                             </div>
                           </div>
                         ) : (

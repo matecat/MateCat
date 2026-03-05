@@ -54,17 +54,23 @@ class MetadataDao extends AbstractDao
      * @param string $password
      * @param int $ttl
      *
-     * @return ?array|?MetadataStruct[]
+     * @return MetadataStruct[]
      * @throws ReflectionException
      */
-    public function getByJobIdAndPassword(int $id_job, string $password, int $ttl = 0): ?array
+    public function getByJobIdAndPassword(int $id_job, string $password, int $ttl = 0): array
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
+        $list = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_job' => $id_job,
             'password' => $password,
-        ]) ?? null;
+        ]) ?? [];
+
+        foreach ($list as $metadata) {
+            $metadata->value = JobsMetadataMarshaller::unMarshall($metadata);
+        }
+
+        return $list;
     }
 
     /**
@@ -176,14 +182,15 @@ class MetadataDao extends AbstractDao
      * @param int $id_job
      * @param string $password
      *
-     * @return array|null
+     * @return ?array empty array if the subfiltering_handlers metadata is not set,
+     *                  null when all handlers are disabled
      */
     public function getSubfilteringCustomHandlers(int $id_job, string $password): ?array
     {
         try {
             $subfiltering = $this->get($id_job, $password, self::SUBFILTERING_HANDLERS, 86400);
 
-            return json_decode($subfiltering->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
+            return json_decode($subfiltering->value ?? '[]') ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {
             return [];
         }

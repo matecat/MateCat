@@ -204,12 +204,16 @@ class GetContributionWorker extends AbstractWorker
      */
     public function normalizeMTMatches(array &$matches, GetContributionRequest $contributionStruct, FeatureSet $featureSet): void
     {
+        $jobStruct = $contributionStruct->getJobStruct();
+
         foreach ($matches as &$match) {
             if ($this->isMtMatch($match)) {
                 $match['match'] = EngineConstants::MT;
 
                 $QA = new PostProcess($match['segment'], $match['translation']); // layer 1 here
                 $QA->setFeatureSet($featureSet);
+                $QA->setSourceSegLang($jobStruct?->source);
+                $QA->setTargetSegLang($jobStruct?->target);
                 $QA->realignMTSpaces();
 
                 //this should every time be ok because MT preserve tags, but we use the check on the errors

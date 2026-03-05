@@ -22,6 +22,7 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
+use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\TranslationStatus;
@@ -423,7 +424,7 @@ class GetSearchController extends AbstractStatefulKleinController
             $new_translation->translation_date = date("Y-m-d H:i:s");
 
             $version_number = $old_translation->version_number;
-            if (false === Utils::stringsAreEqual($new_translation->translation, $old_translation->translation)) {
+            if ($new_translation->translation != $old_translation->translation) {
                 $version_number++;
             }
 

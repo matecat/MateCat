@@ -17,6 +17,5 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct
     public int $id_job;
     public string $password;
     public string $key;
-    public string $value;
-
+    public mixed $value;
 }

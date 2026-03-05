@@ -4,11 +4,11 @@ namespace Model\Conversion;
 
 use CURLFile;
 use Exception;
+use Matecat\Locales\Languages;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
-use Utils\Langs\Languages;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
@@ -27,7 +27,7 @@ class Filters
      *
      * @return array
      */
-    private static function sendToFilters(array $dataGroups, string $endpoint): array
+    private function sendToFilters(array $dataGroups, string $endpoint): array
     {
         $logger = LoggerFactory::getLogger("conversion");
 
@@ -80,7 +80,7 @@ class Filters
                 if ($response === '{"message":"Invalid RapidAPI Key"}') {
                     $errResponse['errorMessage'] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } elseif (isset($originalResponse->errorMessage)) {
-                    $errResponse['errorMessage'] = self::formatErrorMessage($originalResponse->errorMessage);
+                    $errResponse['errorMessage'] = $this->formatErrorMessage($originalResponse->errorMessage);
                 } elseif ($info['errno']) {
                     $errResponse['errorMessage'] = "Curl error $info[errno]: $info[error]";
                 } else {
@@ -99,7 +99,7 @@ class Filters
             }
 
             // Compute headers
-            $instanceInfo = self::extractInstanceInfoFromHeaders($headers[$id]);
+            $instanceInfo = $this->extractInstanceInfoFromHeaders($headers[$id]);
             if (isset($instanceInfo)) {
                 $response = array_merge($response, $instanceInfo);
             }
@@ -116,7 +116,7 @@ class Filters
      *
      * @return string
      */
-    private static function formatErrorMessage(string $error): string
+    private function formatErrorMessage(string $error): string
     {
         // Error from Excel files
         return str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
@@ -130,7 +130,7 @@ class Filters
      * @return array|null an array with the address and version of the
      *                    respondent instance; false if the header was not found
      */
-    private static function extractInstanceInfoFromHeaders(array $headers): ?array
+    private function extractInstanceInfoFromHeaders(array $headers): ?array
     {
         foreach ($headers as $header) {
             if (preg_match("|^Filters-Instance: address=([^;]+); version=(.+)$|", $header, $matches)) {
@@ -152,12 +152,20 @@ class Filters
      * @param string $targetLang
      * @param string|null $segmentation
      * @param IDto|null $extractionParams
+     * @param bool $icu_enabled
      * @param bool|null $legacy_icu
      *
      * @return mixed
      */
-    public static function sourceToXliff(string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false): mixed
-    {
+    public function sourceToXliff(
+        string $filePath,
+        string $sourceLang,
+        string $targetLang,
+        ?string $segmentation = null,
+        IDto $extractionParams = null,
+        bool $icu_enabled = false,
+        ?bool $legacy_icu = false
+    ): mixed {
         $basename = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_FILENAME);
         $extension = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_EXTENSION);
         $filename = "$basename.$extension";
@@ -170,22 +178,24 @@ class Filters
             'utf8FileName' => $filename
         ];
 
+        // convert the extractionParams to an array, for further manipulations
+        $extractionParams = $extractionParams?->jsonSerialize() ?? [];
+
         // The legacy_icu option overrides any other extractionParams
         if ($legacy_icu === true) {
             $extractionParams = [];
             $extractionParams['escape_icu'] = true;
+        } else {
+            /*
+             * icu_enabled = true => segment_icu = false
+             * icu_enabled = false => segment_icu = true (default)
+             */
+            $extractionParams['segment_icu'] = !$icu_enabled;
         }
 
-        if ($extractionParams !== null) {
-            $data['extractionParams'] = json_encode($extractionParams);
-        }
+        $data['extractionParams'] = json_encode($extractionParams);
 
-        // This is probably useless
-        if ($legacy_icu === true) {
-            $data['escape_icu'] = true;
-        }
-
-        $filtersResponse = self::sendToFilters([$data], self::SOURCE_TO_XLIFF_ENDPOINT);
+        $filtersResponse = $this->sendToFilters([$data], self::SOURCE_TO_XLIFF_ENDPOINT);
 
         return $filtersResponse[0];
     }
@@ -195,7 +205,7 @@ class Filters
      *
      * @return array
      */
-    public static function xliffToTarget(array $xliffsData): array
+    public function xliffToTarget(array $xliffsData): array
     {
         $dataGroups = [];
         $tmpFiles = [];
@@ -212,7 +222,7 @@ class Filters
             $dataGroups[$id] = ['xliff' => new CURLFile($tmpXliffFile)];
         }
 
-        $responses = self::sendToFilters($dataGroups, self::XLIFF_TO_TARGET_ENDPOINT);
+        $responses = $this->sendToFilters($dataGroups, self::XLIFF_TO_TARGET_ENDPOINT);
 
         // We sent requests and obtained responses, we can delete temp files
         foreach ($tmpFiles as $tmpFile) {
@@ -225,34 +235,34 @@ class Filters
     /**
      * Logs a conversion to xliff, doing also file backup in case of failure.
      *
-     * @param             $response
-     * @param string $sentFile
-     * @param string $sourceLang
-     * @param string $targetLang
-     * @param string|null $segmentation
-     * @param             $extractionParameters
+     * @param array $response The response array returned by sendToFilters().
+     * @param string $sentFile Absolute path of the source file sent to Filters.
+     * @param string $sourceLang Source language code.
+     * @param string $targetLang Target language code.
+     * @param string|null $segmentation Segmentation rule used, or null for the default.
+     * @param IDto|null $extractionParameters Extraction parameters DTO, or null.
      *
      * @throws Exception
      */
-    public static function logConversionToXliff($response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, $extractionParameters): void
+    public function logConversionToXliff(array $response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, ?IDto $extractionParameters): void
     {
         // @TODO $extractionParameters to MySQL table?
-        self::logConversion($response, true, $sentFile, ['source' => $sourceLang, 'target' => $targetLang], ['segmentation_rule' => $segmentation]);
+        $this->logConversion($response, true, $sentFile, ['source' => $sourceLang, 'target' => $targetLang], ['segmentation_rule' => $segmentation]);
     }
 
     /**
      * Logs a conversion to target, doing also file backup in case of failure.
      *
-     * @param                $response
-     * @param string $sentFile
-     * @param JobStruct $jobData
-     * @param array $sourceFileData
+     * @param array $response The response array returned by sendToFilters().
+     * @param string $sentFile Absolute path of the XLIFF file sent to Filters.
+     * @param JobStruct $jobData The job struct associated with this conversion.
+     * @param array $sourceFileData Metadata about the original source file.
      *
      * @throws Exception
      */
-    public static function logConversionToTarget($response, string $sentFile, JobStruct $jobData, array $sourceFileData): void
+    public function logConversionToTarget(array $response, string $sentFile, JobStruct $jobData, array $sourceFileData): void
     {
-        self::logConversion($response, false, $sentFile, $jobData->toArray(), $sourceFileData);
+        $this->logConversion($response, false, $sentFile, $jobData->toArray(), $sourceFileData);
     }
 
     /**
@@ -260,15 +270,15 @@ class Filters
      * you have the matecat_conversions_log database properly configured.
      * See /lib/Model/matecat_conversions_log.sql
      *
-     * @param array $response
-     * @param bool $toXliff
-     * @param string $sentFile
-     * @param array $jobData
-     * @param array $sourceFileData
+     * @param array $response The response array returned by sendToFilters().
+     * @param bool $toXliff True if the conversion was the source→XLIFF, false for XLIFF→target.
+     * @param string $sentFile Absolute path of the file sent to Filters.
+     * @param array $jobData Job metadata (source, target, id, password, owner).
+     * @param array $sourceFileData Source file metadata (segmentation_rule, id_file, etc.).
      *
      * @throws Exception
      */
-    private static function logConversion(array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData): void
+    private function logConversion(array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData): void
     {
         try {
             $conn = new PDO(
@@ -326,7 +336,7 @@ class Filters
                 Utils::sendErrMailReport("Matecat: conversion failed.\n\n" . print_r($info, true));
             }
 
-            self::backupFailedConversion($sentFile);
+            $this->backupFailedConversion($sentFile);
         }
     }
 
@@ -336,7 +346,7 @@ class Filters
      *
      * @param string $sentFile
      */
-    private static function backupFailedConversion(string &$sentFile): void
+    private function backupFailedConversion(string &$sentFile): void
     {
         $backupDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR
             . 'conversion_errors' . DIRECTORY_SEPARATOR

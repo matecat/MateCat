@@ -70,8 +70,11 @@ class CatUtils
      *
      * @return bool
      */
-    public static function isCJ($langCode): bool
+    public static function isCJ(?string $langCode): bool
     {
+        if ($langCode === null) {
+            return false;
+        }
         return array_key_exists(explode('-', $langCode)[0], self::$cj);
     }
 
@@ -140,34 +143,43 @@ class CatUtils
      *
      * @param MateCatFilter $Filter
      *
-     * @return array
+     * @return array Returns [$reconstructed_segment, $chunk_positions] where chunk_positions is an array of cumulative character lengths
      * @throws Exception
      */
     public static function parseSegmentSplit(string $segment, string $separateWithChar, MateCatFilter $Filter): array
     {
+        // Split the segment by the placeholder marker (e.g., "text1##$_SPLIT$##text2" -> ["text1", "text2"])
         $split_chunks = explode(self::splitPlaceHolder, $segment);
         $chunk_positions = [];
 
+        // Only process if the segment was actually split (contains the placeholder)
         if (count($split_chunks) > 1) {
             $segment = "";
+            // Initialize with 0 as the starting position
             $chunk_positions[] = 0;
             foreach ($split_chunks as $pos => $chunk) {
+                // Break if we encounter an empty chunk (malformed input or trailing placeholder)
                 if (strlen($chunk) == 0) {
                     break;
-                } //remove eventually present null string
+                }
 
+                // Convert from internal representation (Layer 2) to raw text (Layer 0) for accurate length calculation
+                // Layer 2 may contain encoded placeholders/tags that shouldn't be counted in the final length
                 $chunk = $Filter->fromLayer2ToLayer0($chunk);
 
                 //WARNING We count length in NO MULTIBYTE mode
                 $separator_len = strlen($separateWithChar);
                 $separator = $separateWithChar;
 
-                //if the last char of the last chunk AND the first of the next are spaces, don't add another one
+                // Smart spacing: avoid double separators if the current chunk ends with the separator
+                // or the next chunk starts with it (e.g., prevents "word  word" -> ensures "word word")
                 if (substr($chunk, -1) == $separateWithChar || substr($split_chunks[$pos + 1] ?? "", 0, 1) == $separateWithChar) {
                     $separator_len = 0;
                     $separator = '';
                 }
 
+                // Store the cumulative character count for this chunk (chunk length + separator)
+                // This allows tracking where each chunk boundary falls in the reconstructed segment
                 $chunk_positions[] = strlen($chunk) + $separator_len;
                 $segment .= $chunk . $separator;
             }
@@ -391,7 +403,7 @@ class CatUtils
             $ctype = str_replace('"', '', $ctype);
             $ctype = str_replace('ctype=', '', $ctype);
 
-            if (in_array($ctype, [CTypeEnum::HTML, CTypeEnum::XML])) {
+            if (in_array($ctype, [CTypeEnum::HTML->value, CTypeEnum::XML->value])) {
                 $string = str_replace($match[0], '', $string); // count html snippets as zero words
             } else {
                 $string = str_replace($match[0], $variables_placeholder, $string); // count variables as one word
