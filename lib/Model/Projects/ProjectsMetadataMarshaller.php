@@ -22,6 +22,8 @@ enum ProjectsMetadataMarshaller: string
     case MMT_IGNORE_GLOSSARY_CASE = 'mmt_ignore_glossary_case';
     case FROM_API = 'from_api';
 
+    case MT_QE_WORKFLOW_PARAMETERS = 'mt_qe_workflow_parameters';
+
     public static function unMarshall(MetadataStruct $struct): mixed
     {
         return (match ($struct->key) {
@@ -35,6 +37,8 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::FROM_API->value,
             ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value => fn() => (bool)$struct->value,
             ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => fn() => (int)$struct->value,
+            // XXX unmarshal as Object/Array
+            ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value => fn() => (string)$struct->value, //universally used as string in matecat when get
             default => fn() => json_validate((string)$struct->value) ? json_decode((string)$struct->value, true) : (string)$struct->value,
         })();
     }
