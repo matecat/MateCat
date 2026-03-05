@@ -11,6 +11,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;
@@ -182,6 +183,17 @@ class NewController extends KleinController
 
         $projectStructure['character_counter_mode'] = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
         $projectStructure['character_counter_count_tags'] = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
+
+        // in case of empty subfilter handlers, use the default ones
+        if(empty($request[JobsMetadataDao::SUBFILTERING_HANDLERS])){
+            $request[JobsMetadataDao::SUBFILTERING_HANDLERS] = [
+                InjectableFiltersTags::markup,
+                InjectableFiltersTags::twig,
+                InjectableFiltersTags::double_snail,
+                InjectableFiltersTags::double_square,
+                InjectableFiltersTags::double_percent,
+            ];
+        }
 
         $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
 
