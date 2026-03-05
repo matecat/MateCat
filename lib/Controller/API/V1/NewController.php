@@ -185,14 +185,14 @@ class NewController extends KleinController
         $projectStructure['character_counter_count_tags'] = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
 
         // in case of empty subfilter handlers, use the default ones
-        if(empty($request[JobsMetadataDao::SUBFILTERING_HANDLERS])){
-            $request[JobsMetadataDao::SUBFILTERING_HANDLERS] = [
+        if(empty($request[JobsMetadataDao::SUBFILTERING_HANDLERS]) || $request[JobsMetadataDao::SUBFILTERING_HANDLERS] === "[]"){
+            $request[JobsMetadataDao::SUBFILTERING_HANDLERS] = json_encode([
                 InjectableFiltersTags::markup,
                 InjectableFiltersTags::twig,
                 InjectableFiltersTags::double_snail,
                 InjectableFiltersTags::double_square,
                 InjectableFiltersTags::double_percent,
-            ];
+            ]);
         }
 
         $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
