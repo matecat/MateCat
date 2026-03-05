@@ -5,8 +5,8 @@ import {
   removeTagsFromText,
   transformTagsToText,
 } from './utils/DraftMatecatUtils/tagUtils'
-import pluralRules from '../../resources/pluralRules.json'
 import textUtils from '../../utils/textUtils'
+import ApplicationStore from '../../stores/ApplicationStore'
 import Tooltip from '../common/Tooltip'
 
 const inputTypes = {
@@ -35,6 +35,9 @@ const inputDefaultValue = {
 }
 const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
   const [values, setValues] = useState([])
+  const pluralRulesForLocale = ApplicationStore.getPluralRulesForLocale(
+    config.target_code,
+  )
   const variableNames = useMemo(() => {
     try {
       const tree = parse(
@@ -226,11 +229,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
                 <div>
                   <h3>Plural Rules</h3>
                 </div>
-                <div>
-                  {pluralRules[config.target_code.split('-')[0]]?.cardinal.map(
-                    renderRule,
-                  )}
-                </div>
+                <div>{pluralRulesForLocale?.cardinal.map(renderRule)}</div>
               </div>
             )}
             {analyzeICU.hasSelectOrdinal && (
@@ -238,11 +237,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
                 <div>
                   <h3>SelectOrdinal Rules</h3>
                 </div>
-                <div>
-                  {pluralRules[config.target_code.split('-')[0]]?.ordinal.map(
-                    renderRule,
-                  )}
-                </div>
+                <div>{pluralRulesForLocale?.ordinal.map(renderRule)}</div>
               </div>
             )}
           </div>
