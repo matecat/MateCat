@@ -3,28 +3,6 @@
 @use 'modals/PreferenceModal';
 @use 'commons/colors';
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
-h2 {
-  font-size: 22px;
-}
-
-a {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
-::-webkit-input-placeholder {
-  /* Chrome/Opera/Safari */
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
 /***********************/
 /***** Login Footer ****/
 

@@ -1,16 +1,18 @@
 import React, {useRef, useEffect, useCallback} from 'react'
-import {TransitionGroup, CSSTransition} from 'react-transition-group'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
 import {Popup} from 'semantic-ui-react'
 import HelpCircle from '../../../img/icons/HelpCircle'
 import {downloadAnalysisReport} from '../../api/downloadAnalysisReport'
+import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
+import {Badge, BADGE_TYPE} from '../common/Badge'
+import Check from '../../../img/icons/Check'
+import Download from '../../../img/icons/Download'
+import InfoIcon from '../../../img/icons/InfoIcon'
 
 const AnalyzeHeader = ({data, project}) => {
   const previousQueueSizeRef = useRef(0)
   const lastProgressSegmentsRef = useRef(0)
   const noProgressTailRef = useRef(0)
-
-  const containerAnalysisCompleteRef = useRef(null)
 
   const showProgressBarRef = useRef(false)
 
@@ -32,30 +34,10 @@ const AnalyzeHeader = ({data, project}) => {
     }
     return (
       <div className="analysis-create">
-        <div className="search-tm-matches">
-          <span className="complete">{analyzerNotRunningErrorString}</span>
-        </div>
+        <span className="not-complete">{analyzerNotRunningErrorString}</span>
       </div>
     )
   }, [])
-
-  const getProgressBarText = useCallback(() => {
-    return (
-      <div className="analysis-create">
-        <div className="search-tm-matches">
-          <h5>Searching for TM Matches </h5>
-          <span className="initial-segments">
-            {' '}
-            ({data.get('segments_analyzed')} of{' '}
-          </span>
-          <span className="total-segments">
-            {' '}
-            {' ' + data.get('total_segments')})
-          </span>
-        </div>
-      </div>
-    )
-  }, [data])
 
   const handleDownloadAnalysisReport = useCallback(() => {
     downloadAnalysisReport({
@@ -66,39 +48,32 @@ const AnalyzeHeader = ({data, project}) => {
     })
   }, [project])
 
-  const getAnalysisStateHtml = useCallback(() => {
+  let getAnalysisStateHtml
+  getAnalysisStateHtml = useCallback(() => {
     showProgressBarRef.current = false
 
     let html = (
       <div className="analysis-create">
-        <div className="search-tm-matches">
-          <div className="ui active inline loader" />
-          <div className="complete">Fast word counting...</div>
-        </div>
+        <div className="ui active inline loader" />
+        <div className="complete">Fast word counting...</div>
       </div>
     )
-    const status = data.get('status')
+    let status = data.get('status')
     const in_queue_before = parseInt(data.get('in_queue_before'))
     if (status === 'DONE') {
       html = (
         <div className="analysis-create">
-          <div
-            className="search-tm-matches hide"
-            ref={containerAnalysisCompleteRef}
-          >
-            <h5 className="complete">
-              Analysis:
-              <span>
-                complete <i className="icon-checkmark icon" />
-              </span>
-            </h5>
-            <a
-              className="downloadAnalysisReport"
-              onClick={handleDownloadAnalysisReport}
-            >
-              Download Analysis Report
-            </a>
+          <div className="complete">
+            Analysis:
+            <Badge type={BADGE_TYPE.GREEN}>
+              <Check size={20} />
+              Complete
+            </Badge>
           </div>
+          <a className={'downloadAnalysisReport'}>
+            Download Analysis Report
+            <Download size={16} />
+          </a>
         </div>
       )
     } else if (
@@ -113,36 +88,24 @@ const AnalyzeHeader = ({data, project}) => {
         if (previousQueueSizeRef.current <= in_queue_before) {
           html = (
             <div className="analysis-create">
-              <div className="search-tm-matches">
-                <div
-                  style={{top: '-12px'}}
-                  className="ui active inline loader right-15"
-                />
-                <span className="complete">
-                  Please wait...{' '}
-                  <p className="label">There are other projects in queue. </p>
-                </span>
-              </div>
+              <div className="ui active inline loader right-15" />
+              <span className="not-complete">
+                Please wait...{' '}
+                <p className="label">There are other projects in queue. </p>
+              </span>
             </div>
           )
         } else {
           html = (
             <div className="analysis-create">
-              <div className="search-tm-matches">
-                <div
-                  style={{top: '-12px'}}
-                  className="ui active inline loader right-15"
-                />
-                <span className="complete">
-                  Please wait...
-                  <p className="label">
-                    There are still{' '}
-                    <span className="number">
-                      {data.get('in_queue_before')}
-                    </span>{' '}
-                    segments in queue.
-                  </p>
-                </span>
+              <div className="ui active inline loader right-15" />
+              <div className="not-complete">
+                Please wait...
+                <p className="label">
+                  There are still{' '}
+                  <span className="number">{data.get('in_queue_before')}</span>{' '}
+                  segments in queue.
+                </p>
               </div>
             </div>
           )
@@ -150,44 +113,36 @@ const AnalyzeHeader = ({data, project}) => {
       } else {
         html = (
           <div className="analysis-create">
-            <div className="search-tm-matches">
-              <div
-                style={{top: '-12px'}}
-                className="ui active inline loader right-15"
-              />
-              <span className="complete">
-                Please wait...
-                <p className="label">There are other projects in queue. </p>
-              </span>
+            <div className="ui active inline loader right-15" />
+            <div className="not-complete">
+              Please wait...
+              <p className="label">There are other projects in queue. </p>
             </div>
           </div>
         )
       }
       previousQueueSizeRef.current = in_queue_before
-    } else if (status === 'FAST_OK' && in_queue_before === 0) {
+    } else if (status === ANALYSIS_STATUS.FAST_OK && in_queue_before === 0) {
       if (lastProgressSegmentsRef.current !== data.get('segments_analyzed')) {
         lastProgressSegmentsRef.current = data.get('segments_analyzed')
         noProgressTailRef.current = 0
         showProgressBarRef.current = true
-        html = getProgressBarText()
+        html = getProgressBar()
       } else {
         noProgressTailRef.current++
         if (noProgressTailRef.current > 9) {
           html = errorAnalysisHtml()
         }
       }
-    } else if (status === 'NOT_TO_ANALYZE') {
+    } else if (status === ANALYSIS_STATUS.NOT_TO_ANALYZE) {
       html = (
         <div className="analysis-create">
-          <div className="search-tm-matches">
-            <div className="complete">
-              We are having issues with the analysis of this project.
-            </div>
+          <div className="not-complete">
+            We are having issues with the analysis of this project.
             <div className="analysisNotPerformed">
-              {' '}
               Please contact us at{' '}
               <a href="mailto: + config.support_mail + ">
-                {config.support_mail}{' '}
+                {config.support_mail}
               </a>{' '}
               for more information.
             </div>
@@ -203,15 +158,12 @@ const AnalyzeHeader = ({data, project}) => {
           <a href="mailto: + config.support_mail + "> {config.support_mail} </a>
         )
       }
+
       html = (
         <div className="analysis-create">
-          <div className="search-tm-matches">
-            <span className="complete">
-              Ops.. we got an error. No text to translate in the file{' '}
-              {data.get('NAME')}.
-            </span>
-            <br />
-            <span className="analysisNotPerformed">Contact {error}</span>
+          <div className="not-complete">
+            Ops.. we got an error. No text to translate in the file .
+            <div className="analysisNotPerformed">Contact {error}</div>
           </div>
         </div>
       )
@@ -219,12 +171,7 @@ const AnalyzeHeader = ({data, project}) => {
       html = errorAnalysisHtml()
     }
     return html
-  }, [
-    data,
-    errorAnalysisHtml,
-    getProgressBarText,
-    handleDownloadAnalysisReport,
-  ])
+  }, [data, errorAnalysisHtml, getProgressBar])
 
   const getSavingWorkCount = useCallback(() => {
     const dataJS = data.toJS()
@@ -282,105 +229,58 @@ const AnalyzeHeader = ({data, project}) => {
         : '0%'
 
     return (
-      <div className="word-count ui grid">
-        <div className="sixteen wide column">
-          <div className="word-percent ">
-            <h2 className="ui header">
-              <div className="percent">{saving_perc}</div>
-              <div className="content">
-                Saving on word count
-                <div className="sub header">
-                  {getSavingWorkCount()} at 3.000 w/day
-                </div>
-              </div>
-            </h2>
-            <p>
-              Matecat gives you more matches than any other tool thanks to a
-              better integration of machine translation and translation
-              memories.
-              <Popup
-                content={tooltipText}
-                position="bottom center"
-                trigger={
-                  <span
-                    style={{
-                      marginLeft: '2px',
-                      color: '#4184c4',
-                      cursor: 'pointer',
-                      verticalAlign: '-2px',
-                    }}
-                  >
-                    <HelpCircle />
-                  </span>
-                }
-              />
-            </p>
+      <div className="word-count">
+        <div className="percent">
+          <h2>{saving_perc}</h2>
+          <div className="content">
+            Saving on word count
+            <div className="work-hour">
+              {getSavingWorkCount()} at 3.000 w/day
+            </div>
           </div>
         </div>
+        <Popup
+          content={tooltipText}
+          position="bottom center"
+          trigger={
+            <div>
+              <InfoIcon />
+            </div>
+          }
+        />
       </div>
     )
   }, [data, getSavingWorkCount])
 
-  /**
-   * To add informations from the plugins
-   * @returns {string}
-   */
-  const moreProjectInfo = useCallback(() => {
-    return ''
-  }, [])
-
   const getProgressBar = useCallback(() => {
     if (showProgressBarRef.current) {
-      const width =
-        (data.get('segments_analyzed') / data.get('total_segments')) * 100 + '%'
+      const progress =
+        (data.get('segments_analyzed') / data.get('total_segments')) * 100
       return (
-        <div className="progress sixteen wide column">
-          <TransitionGroup>
-            <CSSTransition
-              key={0}
-              classNames="transition"
-              timeout={{enter: 500, exit: 300}}
-            >
-              <div className="progress-bar">
-                <div className="progr">
-                  <div className="meter">
-                    <a className="approved-bar" style={{width: width}} />
-                  </div>
-                </div>
+        <div className="analysis-create">
+          <ProgressBar
+            total={100}
+            progress={progress}
+            size={PROGRESS_BAR_SIZE.SMALL}
+            label={
+              <div>
+                Searching for TM Matches
+                <span className="initial-segments">
+                  {' '}
+                  ({data.get('segments_analyzed')} of{' '}
+                </span>
+                <span className="total-segments">
+                  {' '}
+                  {data.get('total_segments')})
+                </span>
               </div>
-            </CSSTransition>
-          </TransitionGroup>
+            }
+            className={'analysis-progressbar'}
+          />
         </div>
       )
     }
     return null
-  }, [data])
-
-  // Replaces componentDidMount + componentDidUpdate
-  const prevDataRef = useRef(data)
-  const isFirstRender = useRef(true)
-
-  useEffect(() => {
-    const status = data.get('status')
-
-    if (isFirstRender.current) {
-      // componentDidMount logic
-      if (status === ANALYSIS_STATUS.DONE) {
-        setTimeout(() => {
-          containerAnalysisCompleteRef.current?.classList.remove('hide')
-        }, 400)
-      }
-      isFirstRender.current = false
-    } else {
-      // componentDidUpdate logic
-      if (status === ANALYSIS_STATUS.DONE) {
-        setTimeout(() => {
-          containerAnalysisCompleteRef.current?.classList.remove('hide')
-        }, 600)
-      }
-    }
-
-    prevDataRef.current = data
   }, [data])
 
   const analysisStateHtml = getAnalysisStateHtml()
@@ -388,22 +288,14 @@ const AnalyzeHeader = ({data, project}) => {
   const projectName = project.get('name') ? project.get('name') : ''
 
   return (
-    <div className="project-header ui grid">
-      <div className="left-analysis nine wide column">
-        <h1>Volume Analysis</h1>
-        <div className="ui ribbon label">
-          <div className="project-name" title="Project name">
-            {' '}
-            {projectName}{' '}
-          </div>
+    <div className="project-header">
+      <div className="left-analysis">
+        <div className="project-name" title="Project name">
+          <h5>{projectName}</h5>
         </div>
-        {moreProjectInfo()}
         {analysisStateHtml}
       </div>
-
-      <div className="seven wide right floated column">{wordsCountHtml}</div>
-
-      {getProgressBar()}
+      {wordsCountHtml}
     </div>
   )
 }

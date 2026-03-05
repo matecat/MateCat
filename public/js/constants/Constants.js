@@ -30,6 +30,7 @@ export const ANALYSIS_STATUS = {
   EMPTY: 'EMPTY',
   DONE: 'DONE',
   NOT_TO_ANALYZE: 'NOT_TO_ANALYZE',
+  FAST_OK: 'FAST_OK',
 }
 
 export const UNIT_COUNT = {

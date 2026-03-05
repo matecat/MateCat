@@ -65,12 +65,11 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
     <div className="layout__container">
       {volumeAnalysis && project ? (
         <div className="project">
-          <div className="analyze-header">
-            <AnalyzeHeader
-              data={volumeAnalysis.get('summary')}
-              project={project}
-            />
-          </div>
+          <h1>Volume Analysis</h1>
+          <AnalyzeHeader
+            data={volumeAnalysis.get('summary')}
+            project={project}
+          />
           {volumeAnalysis.get('jobs').size > 0 ? (
             <>
               {' '}
@@ -91,21 +90,21 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
               ) : null}
               {showAnalysis ? (
                 <div className="project-body">
-                  {/*<TransitionGroup>
-                      <CSSTransition
-                        key={0}
-                        classNames="transitionAnalyzeMain"
-                        timeout={{enter: 1000, exit: 300}}
-                      >*/}
-                  <ProjectAnalyze
-                    volumeAnalysis={volumeAnalysis.get('jobs')}
-                    project={project}
-                    status={volumeAnalysis.get('summary').get('status')}
-                    jobToScroll={jobToScroll}
-                    showAnalysis={showAnalysis}
-                  />
-                  {/* </CSSTransition>
-                    </TransitionGroup>*/}
+                  <TransitionGroup>
+                    <CSSTransition
+                      key={0}
+                      classNames="transitionAnalyzeMain"
+                      timeout={{enter: 1000, exit: 300}}
+                    >
+                      <ProjectAnalyze
+                        volumeAnalysis={volumeAnalysis.get('jobs')}
+                        project={project}
+                        status={volumeAnalysis.get('summary').get('status')}
+                        jobToScroll={jobToScroll}
+                        showAnalysis={showAnalysis}
+                      />
+                    </CSSTransition>
+                  </TransitionGroup>
                 </div>
               ) : null}
             </>
