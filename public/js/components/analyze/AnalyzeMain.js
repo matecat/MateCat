@@ -6,8 +6,7 @@ import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
 import {Button} from '../common/Button/Button'
 
-const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
-  const [showAnalysis, setShowAnalysis] = useState(false)
+const AnalyzeMain = ({volumeAnalysis, project}) => {
   const [intervalId, setIntervalId] = useState()
   const [scrollTop, setScrollTop] = useState()
   const [jobToScroll, setJobToScroll] = useState()
@@ -30,12 +29,11 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
     </div>
   )
 
-  const openAnalysisReport = (idJob, forceOpen) => {
-    setShowAnalysis((showAnalysis) => (forceOpen ? forceOpen : !showAnalysis))
+  const openAnalysisReport = (idJob) => {
     setJobToScroll(idJob)
   }
 
-  const scrollStep = () => {
+  /*  const scrollStep = () => {
     if (window.pageYOffset === 0) {
       clearInterval(intervalId)
     }
@@ -56,10 +54,7 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
       parentRef.current &&
         parentRef.current.removeEventListener('scroll', handleScroll)
     }
-  })
-
-  let showHideText = showAnalysis ? 'Hide Details' : 'Show Details'
-  let iconClass = showAnalysis ? 'open' : ''
+  })*/
 
   return (
     <div className="layout__container">
@@ -72,44 +67,23 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
           />
           {volumeAnalysis.get('jobs').size > 0 ? (
             <>
-              {' '}
               <AnalyzeChunksResume
                 jobsAnalysis={volumeAnalysis.get('jobs').toJS()}
                 project={project}
                 status={volumeAnalysis.get('summary').get('status')}
-                showAnalysis={showAnalysis}
                 openAnalysisReport={openAnalysisReport}
               />
-              {volumeAnalysis.get('jobs') ? (
-                <div className="analyze-report" onClick={openAnalysisReport}>
-                  <h3>{showHideText}</h3>
-                  <div className="rounded">
-                    <i className={'icon-sort-down icon ' + iconClass} />
-                  </div>
-                </div>
-              ) : null}
-              {showAnalysis ? (
-                <div className="project-body">
-                  <TransitionGroup>
-                    <CSSTransition
-                      key={0}
-                      classNames="transitionAnalyzeMain"
-                      timeout={{enter: 1000, exit: 300}}
-                    >
-                      <ProjectAnalyze
-                        volumeAnalysis={volumeAnalysis.get('jobs')}
-                        project={project}
-                        status={volumeAnalysis.get('summary').get('status')}
-                        jobToScroll={jobToScroll}
-                        showAnalysis={showAnalysis}
-                      />
-                    </CSSTransition>
-                  </TransitionGroup>
-                </div>
-              ) : null}
+              <div className="project-body">
+                <ProjectAnalyze
+                  volumeAnalysis={volumeAnalysis.get('jobs')}
+                  project={project}
+                  status={volumeAnalysis.get('summary').get('status')}
+                  jobToScroll={jobToScroll}
+                />
+              </div>
             </>
           ) : null}
-          {scrollTop > 200 ? (
+          {/*{scrollTop > 200 ? (
             <Button
               title="Back to top"
               className="scroll"
@@ -117,7 +91,7 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
             >
               <i className="icon-sort-up icon"></i>
             </Button>
-          ) : null}
+          ) : null}*/}
         </div>
       ) : (
         spinner

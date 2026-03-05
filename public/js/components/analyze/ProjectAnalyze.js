@@ -28,7 +28,6 @@ class ProjectAnalyze extends React.Component {
             jobInfo={jobInfo.toJS()}
             status={this.props.status}
             jobToScroll={this.props.jobToScroll}
-            showAnalysis={this.props.showAnalysis}
           />
         )
       }

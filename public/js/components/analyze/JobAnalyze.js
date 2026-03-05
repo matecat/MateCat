@@ -45,7 +45,7 @@ class JobAnalyze extends React.Component {
   }
 
   showDetails() {
-    if (this.props.jobToScroll == this.props.idJob && this.props.showAnalysis) {
+    if (this.props.jobToScroll === this.props.idJob) {
       this.scrollElement()
     }
   }
