@@ -157,8 +157,15 @@ class Filters
      *
      * @return mixed
      */
-    public function sourceToXliff(string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, bool $icu_enabled = false, ?bool $legacy_icu = false): mixed
-    {
+    public function sourceToXliff(
+        string $filePath,
+        string $sourceLang,
+        string $targetLang,
+        ?string $segmentation = null,
+        IDto $extractionParams = null,
+        bool $icu_enabled = false,
+        ?bool $legacy_icu = false
+    ): mixed {
         $basename = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_FILENAME);
         $extension = AbstractFilesStorage::pathinfo_fix($filePath, PATHINFO_EXTENSION);
         $filename = "$basename.$extension";
@@ -171,26 +178,22 @@ class Filters
             'utf8FileName' => $filename
         ];
 
+        // convert the extractionParams to an array, for further manipulations
+        $extractionParams = $extractionParams?->jsonSerialize() ?? [];
+
         // The legacy_icu option overrides any other extractionParams
         if ($legacy_icu === true) {
             $extractionParams = [];
             $extractionParams['escape_icu'] = true;
+        } else {
+            /*
+             * icu_enabled = true => segment_icu = false
+             * icu_enabled = false => segment_icu = true (default)
+             */
+            $extractionParams['segment_icu'] = !$icu_enabled;
         }
 
-        /*
-         * icu_enabled = true => segment_icu = false
-         * icu_enabled = false => segment_icu = true (default)
-         */
-        $extractionParams['segment_icu'] = !$icu_enabled;
-
-        if ($extractionParams !== null) {
-            $data['extractionParams'] = json_encode($extractionParams);
-        }
-
-        // This is probably useless
-        if ($legacy_icu === true) {
-            $data['escape_icu'] = true;
-        }
+        $data['extractionParams'] = json_encode($extractionParams);
 
         $filtersResponse = $this->sendToFilters([$data], self::SOURCE_TO_XLIFF_ENDPOINT);
 
@@ -232,12 +235,12 @@ class Filters
     /**
      * Logs a conversion to xliff, doing also file backup in case of failure.
      *
-     * @param array       $response            The response array returned by sendToFilters().
-     * @param string      $sentFile            Absolute path of the source file sent to Filters.
-     * @param string      $sourceLang          Source language code.
-     * @param string      $targetLang          Target language code.
-     * @param string|null $segmentation        Segmentation rule used, or null for the default.
-     * @param IDto|null   $extractionParameters Extraction parameters DTO, or null.
+     * @param array $response The response array returned by sendToFilters().
+     * @param string $sentFile Absolute path of the source file sent to Filters.
+     * @param string $sourceLang Source language code.
+     * @param string $targetLang Target language code.
+     * @param string|null $segmentation Segmentation rule used, or null for the default.
+     * @param IDto|null $extractionParameters Extraction parameters DTO, or null.
      *
      * @throws Exception
      */
@@ -250,10 +253,10 @@ class Filters
     /**
      * Logs a conversion to target, doing also file backup in case of failure.
      *
-     * @param array     $response       The response array returned by sendToFilters().
-     * @param string    $sentFile       Absolute path of the XLIFF file sent to Filters.
-     * @param JobStruct $jobData        The job struct associated with this conversion.
-     * @param array     $sourceFileData Metadata about the original source file.
+     * @param array $response The response array returned by sendToFilters().
+     * @param string $sentFile Absolute path of the XLIFF file sent to Filters.
+     * @param JobStruct $jobData The job struct associated with this conversion.
+     * @param array $sourceFileData Metadata about the original source file.
      *
      * @throws Exception
      */
@@ -267,11 +270,11 @@ class Filters
      * you have the matecat_conversions_log database properly configured.
      * See /lib/Model/matecat_conversions_log.sql
      *
-     * @param array  $response       The response array returned by sendToFilters().
-     * @param bool   $toXliff        True if the conversion was the source→XLIFF, false for XLIFF→target.
-     * @param string $sentFile       Absolute path of the file sent to Filters.
-     * @param array  $jobData        Job metadata (source, target, id, password, owner).
-     * @param array  $sourceFileData Source file metadata (segmentation_rule, id_file, etc.).
+     * @param array $response The response array returned by sendToFilters().
+     * @param bool $toXliff True if the conversion was the source→XLIFF, false for XLIFF→target.
+     * @param string $sentFile Absolute path of the file sent to Filters.
+     * @param array $jobData Job metadata (source, target, id, password, owner).
+     * @param array $sourceFileData Source file metadata (segmentation_rule, id_file, etc.).
      *
      * @throws Exception
      */
