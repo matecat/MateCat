@@ -291,12 +291,13 @@ let TranslationMatches = {
 
     const jobLanguages = [config.source_code, config.target_code]
     // Keep only languages whose base code is 'en' or 'it'.
-    let allowed = jobLanguages.filter(
-        (x) => ['en', 'it'].includes(x.split('-')[0])
-    ).filter(
-        // Remove duplicates, then check we have exactly two distinct matches.
-        (value, index, array) => array.indexOf(value) === index
-    ).length === 2;
+    let allowed = jobLanguages
+        .map((x) => x.split('-')[0])
+        .filter((x) => ['en', 'it'].includes(x))
+        .filter(
+            // Remove duplicates, then check we have exactly two distinct matches.
+            (value, index, array) => array.indexOf(value) === index
+        ).length === 2;
 
     if (
       this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
