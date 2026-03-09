@@ -38,7 +38,6 @@ export const TAB = {
   AI_ASSISTANT: 'AiAssistant',
   LARA_STYLES: 'LaraStyles',
   ICU: 'icu',
-  LARA_STYLES: 'laraStyles',
   AI_ALTERNATIVES: 'aiAlternatives',
   AI_FEEDBACK: 'aiFeedback',
 }
