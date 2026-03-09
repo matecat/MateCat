@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import ReviseLockIcon from '../../../img/icons/ReviseLockIcon'
@@ -19,6 +19,7 @@ import AddTagsIcon from '../../../img/icons/AddTagsIcon'
 import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
 import Star from '../icons/Star'
+import useResizeObserver from '../../hooks/useResizeObserver'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -33,6 +34,14 @@ export const SegmentTargetToolbar = ({
   addMissingSourceTagsToTarget,
 }) => {
   const [isIconsBundled, setIsIconsBundled] = useState(false)
+
+  const ref = useRef()
+
+  const {width} = useResizeObserver({current: ref?.current?.parentNode})
+
+  useEffect(() => {
+    setIsIconsBundled(width <= 400)
+  }, [width])
 
   const getIconButton = (props) => {
     const {children, ...rest} = props
@@ -241,7 +250,7 @@ export const SegmentTargetToolbar = ({
   }, [])
 
   return (
-    <div className="segment-target-toolbar">
+    <div ref={ref} className="segment-target-toolbar">
       {buttons.map((button) => {
         if (button.dropdownGroup) return button.dropdownGroup
         return button.component

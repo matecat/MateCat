@@ -143,13 +143,16 @@ body.cattool {
 
 .segment-actions-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 8px;
 }
 
 .segment-target-toolbar {
   display: flex;
   gap: 8px;
+  flex-grow: 1;
   margin-left: -11px;
 
   .last-ai-feature-button:not(:last-child) {
