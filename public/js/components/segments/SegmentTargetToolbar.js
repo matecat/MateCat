@@ -18,6 +18,7 @@ import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
 import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
+import Star from '../icons/Star'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -38,8 +39,7 @@ export const SegmentTargetToolbar = ({
 
     return (
       <Button
-        className="segment-target-toolbar-icon"
-        size={BUTTON_SIZE.ICON_XSMALL}
+        size={BUTTON_SIZE.ICON_SMALL}
         mode={BUTTON_MODE.OUTLINE}
         {...rest}
       >
@@ -53,16 +53,22 @@ export const SegmentTargetToolbar = ({
       ? [
           {
             group: 0,
-            component: <AiFeedback {...{key: 'aifeedback', sid}} />,
-          },
-          {
-            group: 0,
-            component: <LaraStyles {...{key: 'larastyle', sid}} />,
+            component: (
+              <AiFeedback {...{key: 'aifeedback', sid, isIconsBundled}} />
+            ),
           },
           {
             group: 0,
             component: (
-              <AiAlternatives {...{key: 'aialternatives', sid, editArea}} />
+              <LaraStyles {...{key: 'larastyle', sid, isIconsBundled}} />
+            ),
+          },
+          {
+            group: 0,
+            component: (
+              <AiAlternatives
+                {...{key: 'aialternatives', sid, editArea, isIconsBundled}}
+              />
             ),
           },
         ]
@@ -147,8 +153,8 @@ export const SegmentTargetToolbar = ({
                 key="formatmenu"
                 triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
                 toggleButtonProps={{
-                  className: 'segment-target-toolbar-dropdown-trigger',
                   mode: BUTTON_MODE.OUTLINE,
+                  size: BUTTON_SIZE.SMALL,
                   children: (
                     <>
                       Tt
@@ -192,7 +198,7 @@ export const SegmentTargetToolbar = ({
       : []),
   ]
 
-  const buttons = items /* items.reduce((acc, cur, index, arr) => {
+  const buttons = items.reduce((acc, cur, index, arr) => {
     if (
       typeof cur.group === 'number' &&
       acc.find(
@@ -204,18 +210,26 @@ export const SegmentTargetToolbar = ({
 
     if (typeof cur.group === 'number' && isIconsBundled && !cur.dropdownGroup) {
       const groups = arr.filter(({group}) => group === cur.group)
+
       return [
         ...acc,
         {
           group: cur.group,
           dropdownGroup: (
             <DropdownMenu
+              triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
               toggleButtonProps={{
-                children: <DotsHorizontal size={18} />,
+                size: BUTTON_SIZE.SMALL,
+                mode: BUTTON_MODE.OUTLINE,
+                children: (
+                  <>
+                    <Star size={16} />
+                    <IconDown size={16} />
+                  </>
+                ),
               }}
-              items={groups.map(({label, onClick}) => ({
-                label,
-                onClick,
+              items={groups.map(({component}) => ({
+                label: component,
               }))}
             />
           ),
@@ -224,7 +238,7 @@ export const SegmentTargetToolbar = ({
     } else {
       return [...acc, cur]
     }
-  }, []) */
+  }, [])
 
   return (
     <div className="segment-target-toolbar">

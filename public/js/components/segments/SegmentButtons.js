@@ -18,7 +18,7 @@ import UserStore from '../../stores/UserStore'
 import {isMacOS} from '../../utils/Utils'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
-import {Button, BUTTON_TYPE} from '../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 
 export const SegmentButton = ({segment, disabled, isReview}) => {
   useHotkeys(
@@ -187,6 +187,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     nextButton = enableGoToNext ? (
       <Button
         type={type}
+        size={BUTTON_SIZE.SMALL}
         onClick={(event) => clickOnApprovedButton(event, true)}
         disabled={disabled}
         title="Revise and go to next translated"
@@ -207,6 +208,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         nextButton.push(
           <Button
             type={type}
+            size={BUTTON_SIZE.SMALL}
             onClick={(e) => goToNextRepetition(e, status)}
             disabled={disabled}
             title="Revise and go to next repetition"
@@ -217,6 +219,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         nextButton.push(
           <Button
             type={type}
+            size={BUTTON_SIZE.SMALL}
             onClick={(e) => goToNextRepetitionGroup(e, status)}
             disabled={disabled}
             title="Revise and go to next repetition group"
@@ -261,6 +264,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
       currentButton = (
         <Button
           type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           onClick={clickOnGuessTags}
           disabled={disabled}
           tooltip={`${isMac ? 'CMD' : 'CTRL'} ENTER`}
@@ -272,6 +276,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
       nextButton = enableGoToNext ? (
         <Button
           type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           onClick={(e) => clickOnTranslatedButton(e, true)}
           disabled={disabled}
           tooltip={`{isMac ? 'CMD' : 'CTRL'}+SHIFT+ENTER`}
@@ -292,6 +297,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         nextButton.push(
           <Button
             type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
             onClick={(e) => goToNextRepetition(e, 'translated')}
             title="Translate and go to next repetition"
           >
@@ -301,6 +307,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         nextButton.push(
           <Button
             type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
             onClick={(e) => goToNextRepetitionGroup(e, 'translated')}
             title="Translate and go to next repetition group"
           >
@@ -326,6 +333,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     return (
       <Button
         type={BUTTON_TYPE.PRIMARY}
+        size={BUTTON_SIZE.SMALL}
         onClick={(e) => clickOnTranslatedButton(e, false)}
         tooltip={`${isMac ? 'CMD' : 'CTRL'}+ENTER`}
       >
@@ -342,6 +350,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     return (
       <Button
         type={type}
+        size={BUTTON_SIZE.SMALL}
         onClick={(event) => clickOnApprovedButton(event, false)}
         tooltip={`${isMac ? 'CMD' : 'CTRL'}+ENTER`}
       >

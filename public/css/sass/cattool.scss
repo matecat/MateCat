@@ -141,33 +141,34 @@ body.cattool {
   }
 }
 
+.segment-actions-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
 .segment-target-toolbar {
   display: flex;
   gap: 8px;
   margin-left: -11px;
-  margin-top: 8px;
 
-  .segment-target-toolbar-icon {
-    width: 32px !important;
-    height: 32px !important;
-    padding: 0 !important;
+  .last-ai-feature-button:not(:last-child) {
+    margin-right: 15px;
 
-    &:disabled {
-      color: colors.$grey200 !important;
-      box-shadow: inset 0 0 0 1px colors.$grey200 !important;
-
-      svg {
-        color: colors.$grey200 !important;
-      }
+    &::after {
+      position: absolute;
+      content: '';
+      left: 43px;
+      width: 1px;
+      height: 100%;
+      background-color: colors.$grey150;
     }
   }
+}
 
-  .segment-target-toolbar-dropdown-trigger {
-    height: 32px !important;
-    padding: 0 16px !important;
-    font-weight: bold;
-    font-size: 14px !important;
-  }
+.segment-target-toolbar-icon-bundled {
+  padding: 0 !important;
+  font-weight: normal !important;
 }
 
 .lara-styles-dropdown {

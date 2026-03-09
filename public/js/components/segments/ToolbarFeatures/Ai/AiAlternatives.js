@@ -5,8 +5,9 @@ import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/Appl
 import CommonUtils from '../../../../utils/commonUtils'
 import Alternatives from '../../../icons/Alternatives'
 import {getSelectedTextWithTags} from '../../utils/DraftMatecatUtils/getSelectedTextWithTags'
+import PropTypes from 'prop-types'
 
-export const AiAlternatives = ({sid, editArea}) => {
+export const AiAlternatives = ({sid, editArea, isIconsBundled}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
   const selectedText = useMemo(() => {
@@ -31,7 +32,7 @@ export const AiAlternatives = ({sid, editArea}) => {
       segmentId: sid,
       selectedText,
     }
-    // CommonUtils.dispatchTrackingEvents('LaraStyle', message)
+    CommonUtils.dispatchTrackingEvents('LaraStyle', message)
   }
 
   const isDisabled =
@@ -40,15 +41,22 @@ export const AiAlternatives = ({sid, editArea}) => {
   return (
     !config.isReview && (
       <Button
-        className="segment-target-toolbar-icon"
-        size={BUTTON_SIZE.ICON_SMALL}
-        mode={BUTTON_MODE.OUTLINE}
+        className={`last-ai-feature-button ${isIconsBundled ? 'segment-target-toolbar-icon-bundled' : ''}`}
+        size={isIconsBundled ? BUTTON_SIZE.SMALL : BUTTON_SIZE.ICON_SMALL}
+        mode={isIconsBundled ? BUTTON_MODE.GHOST : BUTTON_MODE.OUTLINE}
         title="Ai alternatives"
         onClick={openTab}
         disabled={isDisabled}
       >
-        <Alternatives size={16} />
+        <Alternatives size={isIconsBundled ? 18 : 16} />
+        {isIconsBundled && 'Ai alternatives'}
       </Button>
     )
   )
+}
+
+AiAlternatives.propTypes = {
+  sid: PropTypes.string.isRequired,
+  editArea: PropTypes.object.isRequired,
+  isIconsBundled: PropTypes.bool,
 }

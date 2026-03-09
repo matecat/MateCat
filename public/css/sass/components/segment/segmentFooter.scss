@@ -60,7 +60,7 @@
         font-size: 16px;
         margin: 0;
 
-        > span {
+        .ai-feature-grey-label {
           color: colors.$grey400;
         }
       }
@@ -114,12 +114,12 @@
 
     .ai-feature-option-alternative-description {
       font-size: 12px;
-      color: colors.$grey7;
+      color: colors.$grey400;
     }
 
     .ai-feature-alternatives-for {
       p {
-        color: colors.$grey6;
+        color: colors.$grey700;
       }
     }
 
