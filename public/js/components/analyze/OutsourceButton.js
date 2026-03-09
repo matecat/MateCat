@@ -1,10 +1,10 @@
-import React, {useRef} from 'react'
+import React, {createRef, useRef} from 'react'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
 import TranslatedIcon from '../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 
 const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
-  const outsourceButton = useRef()
   return !chunk.outsource_available &&
     chunk.outsource_info?.custom_payable_rate ? (
     <div
@@ -22,27 +22,27 @@ const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
           </div>
         }
       >
-        <div ref={outsourceButton}>
-          <a>Buy Translation</a>
-          <span>
-            from <TranslatedIcon />
-          </span>
-        </div>
+        <Button
+          ref={createRef()}
+          mode={BUTTON_MODE.GHOST}
+          size={BUTTON_SIZE.SMALL}
+          disabled={true}
+        >
+          <TranslatedIcon size={16} />
+          <div>Buy Translation</div>
+        </Button>
       </Tooltip>
     </div>
   ) : (
-    <div
-      className={`outsource-translation  ${
-        status !== ANALYSIS_STATUS.DONE ? 'outsource-translation-disabled' : ''
-      }`}
+    <Button
+      mode={BUTTON_MODE.GHOST}
+      size={BUTTON_SIZE.SMALL}
+      disabled={status !== ANALYSIS_STATUS.DONE}
       onClick={openOutsourceModal(index, chunk)}
-      id="open-quote-request"
     >
-      <a>Buy Translation</a>
-      <span>
-        from <TranslatedIcon />
-      </span>
-    </div>
+      <TranslatedIcon size={16} />
+      <div>Buy Translation</div>
+    </Button>
   )
 }
 

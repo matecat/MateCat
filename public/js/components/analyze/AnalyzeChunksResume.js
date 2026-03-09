@@ -3,10 +3,8 @@ import ModalsActions from '../../actions/ModalsActions'
 import CommonUtils from '../../utils/commonUtils'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
 import UserStore from '../../stores/UserStore'
-import LabelWithTooltip from '../common/LabelWithTooltip'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import CompareTableHeader from './CompareTableHeader'
-import SplitChunkJob from './SplitChunkJob'
 import SingleChunkJob from './SingleChunkJob'
 
 const AnalyzeChunksResume = ({
@@ -168,36 +166,24 @@ const AnalyzeChunksResume = ({
           <CompareTableHeader
             countUnit={countUnit}
             workflowType={workflowType}
+            jobInfo={jobInfo}
           />
-          <div className="compare-table jobs">
-            <div className="job">
-              <div className="chunks">
-                <div className="chunk">
-                  <div className="title-job no-split">
-                    <div className="source-target">
-                      <LabelWithTooltip className="source-box no-split">
-                        <span>{jobInfo.get('sourceTxt')}</span>
-                      </LabelWithTooltip>
-                      <div className="in-to">
-                        <i className="icon-chevron-right icon" />
-                      </div>
-                      <LabelWithTooltip className="target-box no-split">
-                        <span>{jobInfo.get('targetTxt')}</span>
-                      </LabelWithTooltip>
-                    </div>
-                  </div>
-                  <div className="titles-compare">
-                    <div className="title-total-words ttw">
+          <div>
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <div>
                       <div>0</div>
                     </div>
-                    <div className="title-standard-words tsw">
+                    <div>
                       <div>0</div>
                     </div>
-                    <div className="title-matecat-words tmw">
+                    <div>
                       <div>0</div>
                     </div>
                   </div>
-                  <div className="activity-icons" />
+                  <div />
                 </div>
               </div>
             </div>
@@ -210,25 +196,22 @@ const AnalyzeChunksResume = ({
       const isSplit = job.chunks.length > 1
 
       return (
-        <div key={indexJob}>
+        <div key={indexJob} className="project-card">
           <CompareTableHeader
             countUnit={countUnit}
             workflowType={workflowType}
+            isSplit={isSplit}
+            openSplitModal={openSplitModal}
+            openMergeModal={openMergeModal}
+            job={job}
+            thereIsChunkOutsourced={thereIsChunkOutsourced}
+            {...sharedProps}
           />
-          {isSplit ? (
-            <SplitChunkJob
-              job={job}
-              openMergeModal={openMergeModal}
-              {...sharedProps}
-            />
-          ) : (
-            <SingleChunkJob
-              job={job}
-              openSplitModal={openSplitModal}
-              thereIsChunkOutsourced={thereIsChunkOutsourced}
-              {...sharedProps}
-            />
-          )}
+          <SingleChunkJob
+            job={job}
+            thereIsChunkOutsourced={thereIsChunkOutsourced}
+            {...sharedProps}
+          />
         </div>
       )
     })

@@ -64,7 +64,7 @@ const AnalyzeHeader = ({data, project}) => {
       html = (
         <div className="analysis-create">
           <div className="complete">
-            Analysis:
+            Analysis status:
             <Badge type={BADGE_TYPE.GREEN}>
               <Check size={20} />
               Complete

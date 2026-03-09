@@ -229,9 +229,9 @@ a.button-component-container {
 
 // Type modifiers
 .default {
-  --btnTextColor: #{colors.$grey700};
+  --btnTextColor: #{colors.$black};
   --btnTextColorDisabled: #{colors.$grey200};
-  --btnAltTextColor: #{colors.$grey700};
+  --btnAltTextColor: #{colors.$black};
   --btnAltTextColorHover: #{colors.$grey600};
   --btnAltTextColorDisabled: #{rgba(colors.$grey700, 0.12)};
 

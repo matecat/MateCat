@@ -2,9 +2,7 @@ import React from 'react'
 import {Popup} from 'semantic-ui-react'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import {ANALYSIS_WORKFLOW_TYPES} from '../../constants/Constants'
-import LabelWithTooltip from '../common/LabelWithTooltip'
-import Merge from '../../../img/icons/Merge'
-import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
+import {Button} from '../common/Button/Button'
 import OutsourceButton from './OutsourceButton'
 
 const SplitChunkJob = ({
@@ -14,7 +12,6 @@ const SplitChunkJob = ({
   openOutsource,
   outsourceJobId,
   showDetails,
-  openMergeModal,
   checkPayableChanged,
   copyJobLinkToClipboard,
   getDirectOpenButton,
@@ -50,14 +47,10 @@ const SplitChunkJob = ({
     const jidChunk = `${chunkAnalysis.id}-${index}`
 
     return (
-      <div
-        key={index}
-        className={`chunk ${openOutsourceClass}`}
-        onClick={showDetails(chunkAnalysis.id)}
-      >
-        <div className="title-job splitted">
-          <div className="job-id">{`Chunk ${index}`}</div>
-          <div className="translate-url">
+      <div key={index} className={`${openOutsourceClass}`}>
+        <div>
+          <div>{`Chunk ${index}`}</div>
+          <div>
             <input
               ref={(el) => (jobLinkRef.current[jidChunk] = el)}
               type="text"
@@ -81,17 +74,16 @@ const SplitChunkJob = ({
             />
           </div>
         </div>
-        <div className="titles-compare">
-          <div className="title-total-words ttw">
+        <div>
+          <div>
             <div>{chunkAnalysis.total_raw}</div>
           </div>
           {workflowType === ANALYSIS_WORKFLOW_TYPES.STANDARD && (
-            <div className="title-standard-words tsw">
+            <div>
               <div>{chunkAnalysis.total_industry}</div>
             </div>
           )}
           <div
-            className="title-matecat-words tmw"
             ref={(container) =>
               (containers.current[chunkAnalysis.id + index] = container)
             }
@@ -99,10 +91,8 @@ const SplitChunkJob = ({
             <div>{chunkAnalysis.total_equivalent}</div>
           </div>
         </div>
-        <div className="activity-icons">
-          <div
-            className={`activity-button ${config.jobAnalysis ? 'disable-outsource' : ''}`}
-          >
+        <div>
+          <div className={`${config.jobAnalysis ? 'disable-outsource' : ''}`}>
             {getDirectOpenButton(chunkAnalysis, `${job.id}-${index}`)}
           </div>
           {!config.jobAnalysis && (
@@ -131,40 +121,9 @@ const SplitChunkJob = ({
   })
 
   return (
-    <div className="compare-table">
-      <div className="job">
-        <div className="chunks">
-          <div className="chunk" onClick={showDetails(job.id)}>
-            <div className="title-job heading splitted">
-              <div className="job-info">
-                <div className="job-id">ID: {job.id}</div>
-                <div className="source-target">
-                  <LabelWithTooltip className="source-box">
-                    <span>{job.source_name}</span>
-                  </LabelWithTooltip>
-                  <div className="in-to">
-                    <i className="icon-chevron-right icon" />
-                  </div>
-                  <LabelWithTooltip className="target-box">
-                    <span>{job.target_name}</span>
-                  </LabelWithTooltip>
-                </div>
-              </div>
-            </div>
-            <div className="activity-icons splitted">
-              <Button
-                type={BUTTON_TYPE.PRIMARY}
-                mode={BUTTON_MODE.OUTLINE}
-                className="merge"
-                onClick={openMergeModal(job.id)}
-              >
-                <Merge size={18} />
-                Merge
-              </Button>
-            </div>
-          </div>
-          {chunksHtml}
-        </div>
+    <div>
+      <div>
+        <div>{chunksHtml}</div>
       </div>
     </div>
   )
