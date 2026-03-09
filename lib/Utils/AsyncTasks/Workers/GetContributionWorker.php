@@ -507,7 +507,7 @@ class GetContributionWorker extends AbstractWorker
 
                 if ($contributionStruct->mt_qe_workflow_enabled) {
                     // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-                    $mt_qe_config = new MTQEWorkflowParams(json_decode($queueElement->params->mt_qe_workflow_parameters ?? null, true) ?? []); // params or default configuration (NULL safe)
+                    $mt_qe_config = new MTQEWorkflowParams($queueElement->params->mt_qe_workflow_parameters ?? []); // params or default configuration (NULL safe)
                     $config['mt_qe_engine_id'] = $mt_qe_config->qe_model_version;
                 }
 
