@@ -51,10 +51,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: |
-          sed -i "s/git@github.com:/https:\/\/${{ secrets.GITHUB_TOKEN }}@github.com\//" .gitmodules
-          git submodule update --init --recursive
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+          submodules: recursive
 
       - name: Load services and build test node
         run: |
@@ -79,16 +78,16 @@ jobs:
         with:
           submodules: recursive
 
-#      - name: Configure AWS credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
-#          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
-#          aws-region: ${{ env.AWS_REGION }}
-#
-#      - name: Login to Amazon ECR
-#        id: login-ecr
-#        uses: aws-actions/amazon-ecr-login@v1
+      #      - name: Configure AWS credentials
+      #        uses: aws-actions/configure-aws-credentials@v1
+      #        with:
+      #          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
+      #          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
+      #          aws-region: ${{ env.AWS_REGION }}
+      #
+      #      - name: Login to Amazon ECR
+      #        id: login-ecr
+      #        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR for Development
         id: build-image
@@ -97,7 +96,7 @@ jobs:
           IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
           IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
           BUILD_NUMBER: ${{ github.run_number }}
-        
+
         run: |
           # Build a docker container and
           # push it to ECR so that it can
