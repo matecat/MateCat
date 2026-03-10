@@ -52,7 +52,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
           submodules: recursive
 
       - name: Load services and build test node
