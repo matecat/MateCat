@@ -49,10 +49,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository and submodules
+      - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          submodules: recursive
+      - name: Checkout submodules
+        run: |
+          sed -i "s/git@github.com:/https:\/\/${{ secrets.GITHUB_TOKEN }}@github.com\//" .gitmodules
+          git submodule update --init --recursive
 
       - name: Load services and build test node
         run: |
