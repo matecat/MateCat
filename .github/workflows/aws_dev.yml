@@ -1,0 +1,110 @@
+# This workflow will build and push a new container image to Amazon ECR,
+# and then will deploy a new task definition to Amazon ECS, when there is a push to the "develop" branch.
+#
+# To use this workflow, you will need to complete the following set-up steps:
+#
+# 1. Create an ECR repository to store your images.
+#    For example: `aws ecr create-repository --repository-name my-ecr-repo --region us-east-2`.
+#    Replace the value of the `ECR_REPOSITORY` environment variable in the workflow below with your repository's name.
+#    Replace the value of the `AWS_REGION` environment variable in the workflow below with your repository's region.
+#
+# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
+#    For example, follow the Getting Started guide on the ECS console:
+#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
+#    Replace the value of the `ECS_SERVICE` environment variable in the workflow below with the name you set for the Amazon ECS service.
+#    Replace the value of the `ECS_CLUSTER` environment variable in the workflow below with the name you set for the cluster.
+#
+# 3. Store your ECS task definition as a JSON file in your repository.
+#    The format should follow the output of `aws ecs register-task-definition --generate-cli-skeleton`.
+#    Replace the value of the `ECS_TASK_DEFINITION` environment variable in the workflow below with the path to the JSON file.
+#    Replace the value of the `CONTAINER_NAME` environment variable in the workflow below with the name of the container
+#    in the `containerDefinitions` section of the task definition.
+#
+# 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
+#    and best practices on handling the access key credentials.
+
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches: [ "develop" ]
+
+env:
+  AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
+  CONTAINER_NAME: MY_CONTAINER_NAME           # set this to the name of the container in the
+  # containerDefinitions section of your task definition
+  REPO_PATH: 208060995276.dkr.ecr.eu-central-1.amazonaws.com
+  APP_NAME: matecat
+
+
+permissions:
+  contents: read
+
+jobs:
+
+  tests:
+    name: Run tests in a test container
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Load services and build test node
+        run: |
+          docker-compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
+          docker-compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
+          
+          # keep logs for the base node
+          docker-compose -f docker/docker-compose-ci.yml build base-node
+          
+          # silent for test node
+          echo "Build test node"
+          docker-compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v1
+#        with:
+#          aws-access-key-id: ${{ secrets.BETA_AWS_ACCESS_KEY_ID  }}
+#          aws-secret-access-key: ${{ secrets.BETA_AWS_SECRET_ACCESS_KEY  }}
+#          aws-region: ${{ env.AWS_REGION }}
+#
+#      - name: Login to Amazon ECR
+#        id: login-ecr
+#        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR for Development
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_WEB_REPOSITORY: $REPO_PATH/matecat/matecat-web-node
+          IMAGE_DAEMONS_REPOSITORY: $REPO_PATH/matecat/matecat-daemons-node
+          BUILD_NUMBER: ${{ github.run_number }}
+        
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
+          
+          docker-compose -f docker/docker-compose-ci.yml build
+          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:latest
+          docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:$BUILD-$BUILD_NUMBER
+          
+          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:latest
+          docker tag matecat/matecat-daemons-node $IMAGE_DAEMONS_REPOSITORY:$BUILD-$BUILD_NUMBER
