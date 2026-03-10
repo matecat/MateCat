@@ -31,7 +31,7 @@ export const AiAlternatives = ({sid, editArea}) => {
       segmentId: sid,
       selectedText,
     }
-    // CommonUtils.dispatchTrackingEvents('LaraStyle', message)
+    CommonUtils.dispatchTrackingEvents('AiAlternatives', message)
   }
 
   const isDisabled =

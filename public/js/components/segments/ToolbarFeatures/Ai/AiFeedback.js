@@ -19,7 +19,7 @@ export const AiFeedback = ({sid}) => {
       jobId: config.id_job,
       segmentId: sid,
     }
-    // CommonUtils.dispatchTrackingEvents('LaraStyle', message)
+    CommonUtils.dispatchTrackingEvents('AiFeedback', message)
   }
 
   return (
