@@ -1,11 +1,22 @@
 <?php
 
-use Engines\DeepL\DeepLApiClient;
+namespace Utils\Engines;
 
-class Engines_DeepL extends Engines_AbstractEngine {
-    private $apiKey;
+use DomainException;
+use Exception;
+use Model\Projects\MetadataDao;
+use Utils\Engines\DeepL\DeepLApiClient;
+use Utils\Engines\DeepL\DeepLApiException;
+use Utils\Engines\Results\MTResponse;
+use Utils\Engines\Results\MyMemory\Matches;
 
-    public function setApiKey( $apiKey ) {
+class DeepL extends AbstractEngine
+{
+
+    private ?string $apiKey = null;
+
+    public function setApiKey(?string $apiKey): void
+    {
         $this->apiKey = $apiKey;
     }
 
@@ -13,152 +24,204 @@ class Engines_DeepL extends Engines_AbstractEngine {
      * @return DeepLApiClient
      * @throws Exception
      */
-    protected function _getClient() {
-        if ( $this->apiKey === null ) {
-            throw new Exception( "API ket not set" );
+    protected function _getClient(): DeepLApiClient
+    {
+        $this->apiKey = $this->engineRecord->extra_parameters['DeepL-Auth-Key'] ?? null;
+
+        if ($this->apiKey === null) {
+            throw new Exception("API ket not set");
         }
 
-        return DeepLApiClient::newInstance( $this->apiKey );
+        return DeepLApiClient::newInstance($this->apiKey);
     }
 
     /**
-     * @param       $rawValue
+     * @param mixed $rawValue
      * @param array $parameters
      * @param null $function
-     * @return Engines_Results_MT[]
+     *
+     * @return MTResponse[]
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
-        $rawValue    = json_decode( $rawValue, true );
-        $translation = $rawValue[ 'translations' ][ 0 ][ 'text' ];
-        $translation = $this->_resetSpecialStrings( html_entity_decode( $translation, ENT_QUOTES | 16 ) );
-        $source      = $parameters[ 'source_lang' ];
-        $target      = $parameters[ 'target_lang' ];
-        $segment     = $parameters[ 'text' ][ 0 ];
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    {
+        $rawValue = json_decode($rawValue, true);
 
-        return ( new Engines_Results_MyMemory_Matches(
-                $segment,
-                $translation,
-                "85%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        ) )->getMatches( 1, [], $source, $target );
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function get( $_config ) {
-        try {
-            $source = explode( "-", $_config[ 'source' ] );
-            $target = explode( "-", $_config[ 'target' ] );
-
-            $parameters = [
-                'text' => [
-                    $_config['segment'],
-                ],
-                'source_lang' => $source[0],
-                'target_lang' => $target[0],
-                'formality' => ($_config['formality'] ?: null),
-                'glossary_id' => ($_config['idGlossary'] ?: null)
-            ];
-
-            $headers = [
-                    'Authorization: DeepL-Auth-Key ' . $this->apiKey,
-                    'Content-Type: application/json'
-            ];
-
-            $this->_setAdditionalCurlParams(
+        if (($rawValue['responseStatus'] ?? 200) == 403) {
+            /*
+            [
+                'error' =>
                     [
-                            CURLOPT_POST           => true,
-                            CURLOPT_POSTFIELDS     => json_encode( $parameters ),
-                            CURLOPT_HTTPHEADER     => $headers,
-                            CURLOPT_RETURNTRANSFER => true,
-                            CURLOPT_HEADER         => false,
-                            CURLOPT_SSL_VERIFYPEER => true,
-                            CURLOPT_SSL_VERIFYHOST => 2
-                    ]
-            );
-
-            $this->call( "translate_relative_url", $parameters, true );
-
-            return $this->result;
-
-        } catch ( Exception $e ) {
-            return $this->GoogleTranslateFallback( $_config );
+                        'code' => 0,
+                        'message' => '  - Server Error (http status 403)',
+                        'response' => '{"message":"This account is not allowed to access the API. You can find more info in our docs: https://developers.deepl.com/docs/getting-started/auth"}',
+                    ],
+                'responseStatus' => 403,
+            ];
+            */
+            $error = json_decode($rawValue['error']['response'], true);
+            throw new Exception($error['message']);
         }
+
+        $translation = $rawValue['translations'][0]['text'];
+        $translation = html_entity_decode($translation, ENT_QUOTES | 16);
+        $source = $parameters['source_lang'];
+        $target = $parameters['target_lang'];
+        $segment = $parameters['text'][0];
+
+        return (new Matches([
+            'source' => $source,
+            'target' => $target,
+            'raw_segment' => $segment,
+            'raw_translation' => $translation,
+            'match' => "85%",
+            'created-by' => $this->getMTName(),
+            'create-date' => date("Y-m-d"),
+        ]))->getMatches(1);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws Exception
+     */
+    public function get(array $_config)
+    {
+        $source = explode("-", $_config['source']);
+        $target = explode("-", $_config['target']);
+
+        $extraParams = $this->getEngineRecord()->extra_parameters;
+
+        if (!isset($extraParams['DeepL-Auth-Key'])) {
+            throw new Exception("DeepL API key not set");
+        }
+
+        // glossaries (only for DeepL)
+        $metadataDao = new MetadataDao();
+        // null coalescing operator is used to avoid errors when validating the engine for the first time
+        $deepLFormality = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_formality');
+        $deepLIdGlossary = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_id_glossary');
+        $deepLEngineType = $metadataDao->setCacheTTL(86400)->get($_config['pid'], 'deepl_engine_type');
+
+        $parameters = [
+            'text' => [
+                $_config['segment'],
+            ],
+            'source_lang' => $source[0],
+            'target_lang' => $target[0],
+
+            // glossaries (only for DeepL)
+            'formality' => $deepLFormality?->value ?? null,
+            'glossary_id' => $deepLIdGlossary?->value ?? null,
+            'model_type' => $deepLEngineType?->value ?? null
+        ];
+
+        $this->_setAdditionalCurlParams(
+            [
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: DeepL-Auth-Key ' . $extraParams['DeepL-Auth-Key'],
+                    'Content-Type: application/json'
+                ],
+            ]
+        );
+
+        $this->call("translate_relative_url", $parameters, true, true);
+
+        return $this->result;
     }
 
     /**
      * @inheritDoc
      */
-    public function set( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+    public function set(mixed $_config)
+    {
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
      * @inheritDoc
      */
-    public function update( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+    public function update(mixed $_config)
+    {
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
      * @inheritDoc
      */
-    public function delete( $_config ) {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+    public function delete(mixed $_config): bool
+    {
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function glossaries() {
+    public function glossaries(): array
+    {
         return $this->_getClient()->allGlossaries();
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function getGlossary( $id ) {
-        return $this->_getClient()->getGlossary( $id );
+    public function getGlossary(string $id): array
+    {
+        return $this->_getClient()->getGlossary($id);
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function deleteGlossary( $id ) {
-        return $this->_getClient()->deleteGlossary( $id );
+    public function deleteGlossary(string $id): array
+    {
+        return $this->_getClient()->deleteGlossary($id);
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
+     * @throws Exception
      */
-    public function createGlossary( $data ) {
-        return $this->_getClient()->createGlossary( $data );
+    public function createGlossary(array $data): array
+    {
+        return $this->_getClient()->createGlossary($data);
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
-     * @return mixed
+     * @return array
      * @throws DeepLApiException
+     * @throws Exception
      */
-    public function getGlossaryEntries( $id ) {
-        return $this->_getClient()->getGlossaryEntries( $id );
+    public function getGlossaryEntries(string $id): array
+    {
+        return $this->_getClient()->getGlossaryEntries($id);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array
+    {
+        return [
+            'enable_mt_analysis',
+            'deepl_formality',
+            'deepl_id_glossary',
+            'deepl_engine_type',
+        ];
     }
 }
     

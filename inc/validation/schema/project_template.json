@@ -11,6 +11,9 @@
     "id_team": {
       "type": ["integer", "string"]
     },
+    "tm_prioritization": {
+      "type": "boolean"
+    },
     "pretranslate_100": {
       "type": "boolean"
     },
@@ -31,6 +34,16 @@
     },
     "target_language": {
       "type":  ["null", "array"]
+    },
+    "public_tm_penalty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "mt_quality_value_in_editor": {
+      "type": "number",
+      "minimum": 76,
+      "maximum": 102
     },
     "segmentation_rule": {
       "type": ["null", "object"]
@@ -57,6 +70,26 @@
     },
     "filters_template_id": {
       "type": ["null", "integer", "string"]
+    },
+    "character_counter_count_tags": {
+      "type": "boolean"
+    },
+    "character_counter_mode": {
+      "type": "string",
+      "enum": [
+        "google_ads",
+        "exclude_cjk",
+        "all_one"
+      ]
+    },
+    "dialect_strict": {
+      "type":  ["null", "boolean"]
+    },
+    "subfiltering_handlers": {
+      "$ref": "subfiltering_handlers.json"
+    },
+    "icu_enabled": {
+      "type": "boolean"
     }
   },
   "required": [
@@ -92,6 +125,12 @@
         },
         "w": {
           "type": "boolean"
+        },
+        "penalty": {
+          "type": "integer",
+          "nullable": true,
+          "maximum": 100,
+          "minimum": 0
         }
       }
     },

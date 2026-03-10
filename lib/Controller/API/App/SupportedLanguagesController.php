@@ -1,20 +1,22 @@
 <?php
 
 
-namespace API\App;
+namespace Controller\API\App;
 
 
-use API\Commons\KleinController;
-use Langs\Languages;
+use Controller\Abstracts\KleinController;
+use Matecat\Locales\Languages;
 
-class SupportedLanguagesController extends KleinController {
+class SupportedLanguagesController extends KleinController
+{
 
 
-    public function index() {
+    public function index(): void
+    {
         $lang_handler = Languages::getInstance();
-        $languages_array = $lang_handler->getEnabledLanguages() ;
+        $languages_array = $lang_handler->getEnabledLanguages();
         $this->response->json(
-                array_values( $languages_array )
+            array_values($languages_array)
         );
     }
 

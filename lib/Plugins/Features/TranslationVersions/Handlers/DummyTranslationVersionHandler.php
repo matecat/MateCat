@@ -7,36 +7,38 @@
  *
  */
 
-namespace Features\TranslationVersions\Handlers;
+namespace Plugins\Features\TranslationVersions\Handlers;
 
 
-use Features\TranslationVersions\VersionHandlerInterface;
-use Translations_SegmentTranslationStruct;
+use Model\Translations\SegmentTranslationStruct;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
-class DummyTranslationVersionHandler implements VersionHandlerInterface {
-
-    /**
-     * @param Translations_SegmentTranslationStruct $propagation
-     * @param                                       $propagated_ids
-     */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $propagated_ids ) {}
+class DummyTranslationVersionHandler implements VersionHandlerInterface
+{
 
     /**
      * Evaluates the need to save a new translation version to database.
-     * If so, sets the new version number on $new_translation.
+     * If so, set the new version number on $new_translation.
      *
-     * Never set new Version
+     * Never set a new Version
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
      * @return bool
      */
-    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
+    public function saveVersionAndIncrement(SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation): bool
+    {
         return false;
     }
 
-    public function storeTranslationEvent( $params ) {}
+    public function storeTranslationEvent(array $params): void
+    {
+    }
 
+    public function propagateTranslation(SegmentTranslationStruct $translationStruct): array
+    {
+        return [];
+    }
 
 }

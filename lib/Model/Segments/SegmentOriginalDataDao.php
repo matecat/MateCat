@@ -1,65 +1,76 @@
 <?php
 
-class Segments_SegmentOriginalDataDao extends DataAccess_AbstractDao {
+namespace Model\Segments;
+
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use ReflectionException;
+
+class SegmentOriginalDataDao extends AbstractDao
+{
 
     /**
      * @param int $id_segment
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct
+     * @return SegmentOriginalDataStruct|null
+     * @throws ReflectionException
      */
-    public static function getBySegmentId( $id_segment, $ttl = 86400 ) {
-
+    public static function getBySegmentId(int $id_segment, int $ttl = 86400): ?SegmentOriginalDataStruct
+    {
         $thisDao = new self();
-        $conn    = $thisDao->getDatabaseHandler();
-        $stmt    = $conn->getConnection()->prepare( "SELECT * FROM segment_original_data WHERE id_segment = ? " );
+        $conn = $thisDao->getDatabaseHandler();
+        $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_original_data WHERE id_segment = ? ");
 
-        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
-                new Segments_SegmentOriginalDataStruct(),
-                [ $id_segment ]
-        );
-
-        return !empty( $result ) ? $result[ 0 ] : null;
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+            $stmt,
+            SegmentOriginalDataStruct::class,
+            [$id_segment]
+        )[0] ?? null;
     }
 
     /**
-     * @param     $id_segment
+     * @param int $id_segment
      * @param int $ttl
      *
      * @return array
+     * @throws ReflectionException
      */
-    public static function getSegmentDataRefMap( $id_segment, $ttl = 86400 ) {
-        $dataRefMap = self::getBySegmentId( $id_segment, $ttl );
+    public static function getSegmentDataRefMap(int $id_segment, int $ttl = 86400): array
+    {
+        $dataRefMap = self::getBySegmentId($id_segment, $ttl);
 
-        if ( empty( $dataRefMap ) ) {
+        if (empty($dataRefMap)) {
             return [];
         }
 
-        $dataRefMapArray = json_decode( $dataRefMap->map, true );
+        $dataRefMapArray = $dataRefMap->getMap();
 
-        return ( !empty( $dataRefMapArray ) ) ? $dataRefMapArray : [];
+        return (!empty($dataRefMapArray)) ? $dataRefMapArray : [];
     }
 
     /**
-     * @param int   $id_segment
+     * @param int $id_segment
      * @param array $map
      */
-    public static function insertRecord( $id_segment, array $map ) {
+    public static function insertRecord(int $id_segment, array $map): void
+    {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "INSERT INTO segment_original_data " .
-                " ( id_segment, map  ) VALUES " .
-                " ( :id_segment, :map ) "
+        $stmt = $conn->prepare(
+            "INSERT INTO segment_original_data " .
+            " ( id_segment, map  ) VALUES " .
+            " ( :id_segment, :map ) "
         );
 
-        // remove any carriage return or extra space from map
-        $json   = json_encode( $map );
-        $string = str_replace( [ "\\n", "\\r" ], '', $json );
-        $string = trim( preg_replace( '/\s+/', ' ', $string ) );
+        // remove any carriage return or extra space from the map
+        $json = json_encode($map);
+        $string = str_replace(["\\n", "\\r"], '', $json);
+        $string = trim(preg_replace('/\s+/', ' ', $string));
 
-        $stmt->execute( [
-                'id_segment' => $id_segment,
-                'map'        => $string
-        ] );
+        $stmt->execute([
+            'id_segment' => $id_segment,
+            'map' => $string
+        ]);
     }
 }
 

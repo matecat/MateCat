@@ -1,14 +1,14 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use ActivityLog\ActivityLogDao;
-use ActivityLog\ActivityLogStruct;
-use Database;
+use Model\ActivityLog\ActivityLogDao;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\DataAccess\Database;
 use PDOException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
 
 /**
  * Created by PhpStorm.
@@ -16,29 +16,28 @@ use TaskRunner\Commons\QueueElement;
  * Date: 13/06/16
  * Time: 11:49
  */
-class ActivityLogWorker extends AbstractWorker {
+class ActivityLogWorker extends AbstractWorker
+{
 
-    public function process( AbstractElement $queueElement ) {
-
+    public function process(AbstractElement $queueElement): void
+    {
         /**
          * @var $queueElement QueueElement
          */
-        $this->_checkForReQueueEnd( $queueElement );
+        $this->_checkForReQueueEnd($queueElement);
 
-        $logEvent = new ActivityLogStruct( $queueElement->params->toArray() );
+        $logEvent = new ActivityLogStruct($queueElement->params->toArray());
 
         //re initialize DB if socked is closed
         $this->_checkDatabaseConnection();
 
-        $this->_writeLog( $logEvent );
-
+        $this->_writeLog($logEvent);
     }
 
-    protected function _writeLog( ActivityLogStruct $logEvent ) {
-
+    protected function _writeLog(ActivityLogStruct $logEvent): void
+    {
         $logActivityDao = new ActivityLogDao();
-        $logActivityDao->create( $logEvent );
-
+        $logActivityDao->create($logEvent);
     }
 
     /**
@@ -52,19 +51,18 @@ class ActivityLogWorker extends AbstractWorker {
      * </code>
      *
      */
-    protected function _checkDatabaseConnection() {
-
+    protected function _checkDatabaseConnection(): void
+    {
         $db = Database::obtain();
         try {
             $db->ping();
-        } catch ( PDOException $e ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} " );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Database connection reloaded. " );
+        } catch (PDOException $e) {
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} ");
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Database connection reloaded. ");
             $db->close();
             //reconnect
             $db->getConnection();
         }
-
     }
 
 }

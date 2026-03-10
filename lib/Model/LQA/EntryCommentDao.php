@@ -1,51 +1,61 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use PDO;
 
-class EntryCommentDao extends \DataAccess_AbstractDao {
+class EntryCommentDao extends AbstractDao
+{
 
-    public function findByIssueId( $id_issue ) {
-        $sql  = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
-                " ORDER BY create_date DESC ";
+    /**
+     * @param $id_issue
+     *
+     * @return EntryCommentStruct[]
+     */
+    public function findByIssueId($id_issue): array
+    {
+        $sql = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
+            " ORDER BY create_date DESC ";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
-        $stmt->execute( [ $id_issue ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
+        $stmt->execute([$id_issue]);
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
-     * @return mixed
-     * @throws \ReflectionException
+     * @return EntryCommentStruct
      */
-    public function createComment( $data ) {
-        $struct              = new EntryCommentStruct( $data );
-        $struct->create_date = date( 'Y-m-d H:i:s' );
+    public function createComment(array $data): EntryCommentStruct
+    {
+        $struct = new EntryCommentStruct($data);
+        $struct->create_date = date('Y-m-d H:i:s');
 
 
         $sql = "INSERT INTO qa_entry_comments " .
-                " ( uid, id_qa_entry, create_date, comment, source_page ) " .
-                " VALUES " .
-                " ( :uid, :id_qa_entry, :create_date, :comment, :source_page ) ";
+            " ( uid, id_qa_entry, create_date, comment, source_page ) " .
+            " VALUES " .
+            " ( :uid, :id_qa_entry, :create_date, :comment, :source_page ) ";
 
         $conn = Database::obtain()->getConnection();
         Database::obtain()->begin();
 
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
-        $result = $stmt->execute( $struct->toArray(
-                [ 'uid', 'id_qa_entry', 'create_date', 'comment', 'source_page' ]
-        ) );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
+        $result = $stmt->execute(
+            $struct->toArray(
+                ['uid', 'id_qa_entry', 'create_date', 'comment', 'source_page']
+            )
+        );
         $lastId = $conn->lastInsertId();
 
-        if ( $result ) {
-            EntryDao::updateRepliesCount( $struct->id_qa_entry );
+        if ($result) {
+            EntryDao::updateRepliesCount($struct->id_qa_entry);
         }
         $struct->id = $lastId;
 
@@ -54,29 +64,61 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
         return $struct;
     }
 
-    public function findById( $id ) {
-        $sql  = "SELECT * FROM qa_entry_comments WHERE id = ? ";
+    public function findById($id): ?EntryCommentStruct
+    {
+        $sql = "SELECT * FROM qa_entry_comments WHERE id = ? ";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
-        $stmt->execute( [ $id ] );
+        $stmt = $conn->prepare($sql);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryCommentStruct::class);
+        $stmt->execute([$id]);
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
-    public function fetchCommentsGroupedByIssueIds( $ids ) {
+    /**
+     * Fetches comments grouped by issue IDs.
+     *
+     * @param array $ids
+     *
+     * @return array
+     */
+    public function fetchCommentsGroupedByIssueIds(array $ids): array
+    {
         $sql = "SELECT id_qa_entry, qa_entry_comments.* FROM qa_entry_comments WHERE id_qa_entry " .
-                " IN ( " . implode( ', ', $ids ) . " ) " .
-                " ORDER BY id_qa_entry, id ";
+            " IN ( " . implode(', ', $ids) . " ) " .
+            " ORDER BY id_qa_entry, id ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
         $stmt->execute();
 
-        return $stmt->fetchAll( PDO::FETCH_GROUP | PDO::FETCH_ASSOC );
+        return $stmt->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
     }
 
-    protected function _buildResult( array $array_result ) {
+    /**
+     * Moves comments from one QA entry to another by updating the database.
+     *
+     * @param int $from The ID of the QA entry from which the comments are to be moved.
+     * @param int $to The ID of the QA entry to which the comments are to be moved.
+     * @return int The number of rows affected by the operation.
+     */
+    public function move(int $from, int $to): int
+    {
+        $sql = "UPDATE qa_entry_comments SET id_qa_entry = :to
+               WHERE id_qa_entry = :from ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'from' => $from,
+            'to' => $to
+        ]);
+
+        return $stmt->rowCount();
+    }
+
+    protected function _buildResult(array $array_result)
+    {
     }
 
 }

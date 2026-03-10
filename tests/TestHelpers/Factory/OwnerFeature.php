@@ -1,18 +1,24 @@
 <?php
 
-class Factory_OwnerFeature extends Factory_Base {
+use Model\DataAccess\Database;
+use Model\OwnerFeatures\OwnerFeatureDao;
+use Model\OwnerFeatures\OwnerFeatureStruct;
 
-    static function create( $values ) {
-        $values = array_merge( [
-                'uid'          => 1,
-                'feature_code' => 'project_completion',
-                'options'      => '{}',
-                'enabled'      => true,
-        ], $values );
+class Factory_OwnerFeature extends Factory_Base
+{
 
-        $dao    = new OwnerFeatures_OwnerFeatureDao( Database::obtain() );
-        $struct = new OwnerFeatures_OwnerFeatureStruct( $values );
+    static function create($values)
+    {
+        $values = array_merge([
+            'uid' => 1,
+            'feature_code' => 'project_completion',
+            'options' => '{}',
+            'enabled' => true,
+        ], $values);
 
-        return $dao->create( $struct );
+        $dao = new OwnerFeatureDao(Database::obtain());
+        $struct = new OwnerFeatureStruct($values);
+
+        return $dao->create($struct);
     }
 }

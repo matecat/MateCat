@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddJobMetadata extends AbstractMatecatMigration  {
 
     public $sql_up = <<<EOF

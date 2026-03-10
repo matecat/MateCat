@@ -1,58 +1,62 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use API\Commons\Exceptions\NotFoundException;
-use API\V2\BaseChunkController;
-use DataAccess\ShapelessConcreteStruct;
-use Translations_SegmentTranslationDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Translations\SegmentTranslationDao;
+use ReflectionException;
 
-class IssueCheckController extends BaseChunkController {
+class IssueCheckController extends KleinController
+{
+    use ChunkNotFoundHandlerTrait;
 
     /**
      * @throws NotFoundException
+     * @throws ReflectionException
      */
-    public function segments() {
-
+    public function segments(): void
+    {
         $result = [
-                'modified_segments_count' => 0,
-                'issue_count'             => 0,
-                'modified_segments'       => []
+            'modified_segments_count' => 0,
+            'issue_count' => 0,
+            'modified_segments' => []
         ];
 
         // params
-        $id_job      = $this->request->param( 'id_job' );
-        $password    = $this->request->param( 'password' );
-        $source_page = $this->request->param( 'source_page', 2 );
+        $id_job = $this->request->param('id_job');
+        $password = $this->request->param('password');
+        $source_page = $this->request->param('source_page', 2);
 
         // find a job
-        $job = $this->getJob( $id_job, $password );
+        $job = $this->getJob($id_job, $password);
 
-        if ( null === $job ) {
-            throw new NotFoundException( 'Job not found.' );
+        if (null === $job) {
+            throw new NotFoundException('Job not found.');
         }
 
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $modifiedSegments = ( new Translations_SegmentTranslationDao() )
-                ->setCacheTTL( 60 * 5 )
-                ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page );
+        $modifiedSegments = (new SegmentTranslationDao())
+            ->setCacheTTL(60 * 5)
+            ->getSegmentTranslationsModifiedByRevisorWithIssueCount($id_job, $job->password, $source_page);
 
-        $result[ 'modified_segments_count' ] = count( $modifiedSegments );
+        $result['modified_segments_count'] = count($modifiedSegments);
 
-        foreach ( $modifiedSegments as $modifiedSegment ) {
-
+        foreach ($modifiedSegments as $modifiedSegment) {
             /** @var ShapelessConcreteStruct $modifiedSegment */
-            $result[ 'modified_segments' ][] = [
-                    'id_segment'  => (int)$modifiedSegment->id_segment,
-                    'issue_count' => (int)$modifiedSegment->q_count,
+            $result['modified_segments'][] = [
+                'id_segment' => (int)$modifiedSegment->id_segment,
+                'issue_count' => (int)$modifiedSegment->q_count,
             ];
 
-            $result[ 'issue_count' ] = (int)$result[ 'issue_count' ] + (int)$modifiedSegment->q_count;
+            $result['issue_count'] = (int)$result['issue_count'] + (int)$modifiedSegment->q_count;
         }
 
-        $this->response->json( $result );
+        $this->response->json($result);
     }
 }
 

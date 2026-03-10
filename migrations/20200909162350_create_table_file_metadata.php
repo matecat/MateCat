@@ -1,6 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use migrations\AbstractMatecatMigration;
 
 class CreateTableFileMetadata extends AbstractMatecatMigration {
     public $sql_up = [ 'CREATE TABLE `file_metadata` (

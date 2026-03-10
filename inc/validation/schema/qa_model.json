@@ -51,6 +51,10 @@
           "items": {
             "$ref": "#/definitions/severity"
           }
+        },
+        "sort": {
+          "type": "integer",
+          "nullable": true
         }
       },
       "required": ["code", "label", "severities"]
@@ -74,6 +78,10 @@
             "0.05",
             "19.95"
           ]
+        },
+        "sort": {
+          "type": "integer",
+          "nullable": true
         }
       },
       "required": ["code", "label", "penalty"]

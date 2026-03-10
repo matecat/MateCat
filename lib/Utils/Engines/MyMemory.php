@@ -1,10 +1,37 @@
 <?php
 
-use API\Commons\Exceptions\AuthenticationError;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+namespace Utils\Engines;
+
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Exception;
+use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\Users\UserStruct;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\AnalyzeResponse;
+use Utils\Engines\Results\MyMemory\AuthKeyResponse;
+use Utils\Engines\Results\MyMemory\CheckGlossaryResponse;
+use Utils\Engines\Results\MyMemory\CreateUserResponse;
+use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
+use Utils\Engines\Results\MyMemory\DomainsResponse;
+use Utils\Engines\Results\MyMemory\ExportResponse;
+use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
+use Utils\Engines\Results\MyMemory\GetGlossaryResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
+use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
+use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
+use Utils\Engines\Results\MyMemory\TagProjectionResponse;
+use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
+use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.
@@ -13,31 +40,44 @@ use TaskRunner\Exceptions\ReQueueException;
  * Time: 18.53
  *
  */
-class Engines_MyMemory extends Engines_AbstractEngine {
+class MyMemory extends AbstractEngine
+{
+
+    /**
+     * @inheritdoc
+     * @see AbstractEngine::$_isAdaptiveMT
+     * @var bool
+     */
+    protected bool $_isAdaptiveMT = false;
+
+    public function isTMS(): bool
+    {
+        return true;
+    }
 
     /**
      * @var string
      */
-    protected $content_type = 'json';
+    protected string $content_type = 'json';
 
     /**
      * @var array
      */
-    protected $_config = [
-            'dataRefMap'    => [],
-            'segment'       => null,
-            'translation'   => null,
-            'tnote'         => null,
-            'source'        => null,
-            'target'        => null,
-            'email'         => null,
-            'prop'          => null,
-            'get_mt'        => 1,
-            'id_user'       => null,
-            'num_result'    => 3,
-            'mt_only'       => false,
-            'isConcordance' => false,
-            'isGlossary'    => false,
+    protected array $_config = [
+        'dataRefMap' => [],
+        'segment' => null,
+        'translation' => null,
+        'tnote' => null,
+        'source' => null,
+        'target' => null,
+        'email' => null,
+        'prop' => null,
+        'get_mt' => 1,
+        'id_user' => null,
+        'num_result' => 3,
+        'mt_only' => false,
+        'isConcordance' => false,
+        'isGlossary' => false,
     ];
 
     /**
@@ -45,257 +85,251 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @throws Exception
      */
-    public function __construct( $engineRecord ) {
-        parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "TM" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a TMS engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+    public function __construct($engineRecord)
+    {
+        parent::__construct($engineRecord);
+        if ($this->getEngineRecord()->type != EngineConstants::TM) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a TMS engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
     }
 
     /**
-     * @param       $rawValue
+     * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
-     * @return Engines_Results_AbstractResponse
+     * @return TMSAbstractResponse
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
-
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): TMSAbstractResponse
+    {
         $functionName = $function;
 
-        if ( is_string( $rawValue ) ) {
-            $decoded = json_decode( $rawValue, true );
+        if (is_string($rawValue)) {
+            $decoded = json_decode($rawValue, true);
         } else {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        $dataRefMap = isset( $this->_config[ 'dataRefMap' ] ) ? $this->_config[ 'dataRefMap' ] : [];
+        $dataRefMap = $this->_config['dataRefMap'] ?? [];
 
-        switch ( $functionName ) {
-
+        switch ($functionName) {
             case 'glossary_domains_relative_url':
-                $result_object = Engines_Results_MyMemory_DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = DomainsResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'glossary_check_relative_url':
-                $result_object = Engines_Results_MyMemory_CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = CheckGlossaryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'glossary_update_relative_url':
-                $result_object = Engines_Results_MyMemory_UpdateGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = UpdateGlossaryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'glossary_delete_relative_url':
-                $result_object = Engines_Results_MyMemory_DeleteGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = DeleteGlossaryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'glossary_set_relative_url':
-                $result_object = Engines_Results_MyMemory_SetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = SetGlossaryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'glossary_get_relative_url':
-                $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = GetGlossaryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'glossary_search_relative_url':
-                $result_object = Engines_Results_MyMemory_SearchGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = SearchGlossaryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'glossary_keys_relative_url':
-                $result_object = Engines_Results_MyMemory_KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = KeysGlossaryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'tags_projection' :
-                $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = TagProjectionResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'api_key_check_auth_url':
-                $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = AuthKeyResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'api_key_create_user_url':
-                $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = CreateUserResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
 
-            case 'glossary_import_status_relative_url':
             case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
-                $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = FileImportAndStatusResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'tmx_export_email_url' :
             case 'glossary_export_relative_url' :
-                $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = ExportResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'analyze_url':
-                $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = AnalyzeResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             case 'contribute_relative_url':
+                $result_object = SetContributionResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
+                break;
             case 'update_relative_url':
-                $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = UpdateContributionResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
             default:
 
-                if ( !empty( $decoded[ 'matches' ] ) ) {
-                    foreach ( $decoded[ 'matches' ] as $pos => $match ) {
-                        $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
-                        $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
+                if (!empty($decoded['matches'])) {
+                    foreach ($decoded['matches'] as $pos => $match) {
+                        $decoded['matches'][$pos]['segment'] = $match['segment'];
+                        $decoded['matches'][$pos]['translation'] = $match['translation'];
                     }
                 }
 
-                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = GetMemoryResponse::getInstance($decoded, $this->featureSet, $dataRefMap);
                 break;
         }
 
         return $result_object;
     }
 
-    /**
-     * This method is used for help to rebuild result from MyMemory.
-     * Because when in CURL you send something using method POST and value's param start with "@"
-     * he assumes you are sending a file.
-     *
-     * Passing prefix you left before, this method, rebuild result putting prefix at start of translated phrase.
-     *
-     * @param $prefix
-     *
-     * @return array
-     */
-    private function rebuildResult( $prefix ) {
-
-        if ( !empty( $this->result->responseData[ 'translatedText' ] ) ) {
-            $this->result->responseData[ 'translatedText' ] = $prefix . $this->result->responseData[ 'translatedText' ];
-        }
-
-        if ( !empty( $this->result->matches ) ) {
-            $matches_keys = [ 'raw_segment', 'segment', 'translation', 'raw_translation' ];
-            foreach ( $this->result->matches as $match ) {
-                foreach ( $matches_keys as $match_key ) {
-                    $match->$match_key = $prefix . $match->$match_key;
+    private function possiblyOverrideMtPenalty(): void
+    {
+        if (!empty($this->result->matches)) {
+            /** @var $match Matches */
+            foreach ($this->result->matches as $match) {
+                if (stripos($match->created_by, InternalMatchesConstants::MT) !== false) {
+                    $match->match = $this->getStandardMtPenaltyString();
                 }
             }
         }
-
-        return $this->result;
-
     }
 
+
     /**
-     * @param $_config
+     * @param array $_config
      *
-     * @return array
-     * @throws NotFoundException
+     * @return GetMemoryResponse
      * @throws AuthenticationError
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ValidationError
      */
-    public function get( $_config ) {
+    public function get(array $_config): GetMemoryResponse
+    {
+        $parameters = [];
+        $parameters['q'] = $_config['segment'];
+        $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
+        $parameters['de'] = $_config['email'];
+        $parameters['mt'] = $_config['get_mt'];
+        $parameters['numres'] = $_config['num_result'];
+        $parameters['client_id'] = $_config['uid'] ?? 0;
 
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        if ( preg_match( "/^(-?@-?)/", $_config[ 'segment' ], $segment_file_chr ) ) {
-            $_config[ 'segment' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+        // TM prioritization
+        $parameters['priority_key'] = (isset($_config['priority_key']) && $_config['priority_key']) ? 1 : 0;
+
+        // public_tm_penalty
+        if (isset($_config['public_tm_penalty']) && is_numeric($_config['public_tm_penalty'])) {
+            $_config['penalty_key'][] = [
+                'key' => 'public',
+                'penalty' => $_config['public_tm_penalty'] / 100,
+            ];
         }
 
-        $parameters                = [];
-        $parameters[ 'q' ]         = $_config[ 'segment' ];
-        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]        = $_config[ 'email' ];
-        $parameters[ 'mt' ]        = $_config[ 'get_mt' ];
-        $parameters[ 'numres' ]    = $_config[ 'num_result' ];
-        $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
-
-        if ( isset( $_config[ 'dialect_strict' ] ) ) {
-            $parameters[ 'dialect_strict' ] = $_config[ 'dialect_strict' ];
+        if (!empty($_config['penalty_key'])) {
+            $parameters['penalty_key'] = json_encode($_config['penalty_key']);
         }
 
-        ( !empty( $_config[ 'onlyprivate' ] ) ? $parameters[ 'onlyprivate' ] = 1 : null );
-        ( !empty( $_config[ 'isConcordance' ] ) ? $parameters[ 'conc' ] = 'true' : null );
-        ( !empty( $_config[ 'isConcordance' ] ) ? $parameters[ 'extended' ] = '1' : null );
-        ( !empty( $_config[ 'mt_only' ] ) ? $parameters[ 'mtonly' ] = '1' : null );
-
-        if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
-            $parameters[ 'context_after' ]  = ltrim( $_config[ 'context_after' ], "@-" );
-            $parameters[ 'context_before' ] = ltrim( $_config[ 'context_before' ], "@-" );
+        if (isset($_config['dialect_strict'])) {
+            $parameters['dialect_strict'] = $_config['dialect_strict'];
         }
 
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
+        (!empty($_config['onlyprivate']) ? $parameters['onlyprivate'] = 1 : null);
+        (!empty($_config['isConcordance']) ? $parameters['conc'] = 'true' : null);
+        (!empty($_config['isConcordance']) ? $parameters['extended'] = '1' : null);
+        (!empty($_config['mt_only']) ? $parameters['mtonly'] = '1' : null);
+
+        if (isset($_config['context_after']) || isset($_config['context_before'])) {
+            $parameters['context_after'] = $_config['context_after'] ?? '';
+            $parameters['context_before'] = $_config['context_before'] ?? '';
+        }
+
+        if (!empty($_config['id_user'])) {
+            if (!is_array($_config['id_user'])) {
+                $_config['id_user'] = [$_config['id_user']];
             }
-            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
-        $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
+        // Here we pass the subfiltering configuration to the API.
+        // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
+        // We use the JSON to pass a nullable value.
+        $parameters[JobsMetadataDao::SUBFILTERING_HANDLERS] = json_encode(
+            $_config[JobsMetadataDao::SUBFILTERING_HANDLERS] ?? null
+        ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
 
-        $this->call( "translate_relative_url", $parameters, true );
+        $parameters = $this->featureSet->filter('filterMyMemoryGetParameters', $parameters, $_config);
 
-        if ( isset( $segment_file_chr[ 1 ] ) ) {
-            $this->rebuildResult( $segment_file_chr[ 1 ] );
-        }
+        $this->call("translate_relative_url", $parameters, true);
+
+        $this->possiblyOverrideMtPenalty();
 
         return $this->result;
-
     }
 
     /**
      * @param $_config
      *
-     * @return array|bool
+     * @return int
      */
-    public function set( $_config ) {
-        $parameters                = [];
-        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'tnote' ]     = $_config[ 'tnote' ];
-        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]        = $_config[ 'email' ];
-        $parameters[ 'mt' ]        = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
-        $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
-        $parameters[ 'prop' ]      = $_config[ 'prop' ];
+    public function set($_config): ?SetContributionResponse
+    {
+        $parameters = [];
+        $parameters['seg'] = $_config['segment'] ?? '';
+        $parameters['tra'] = $_config['translation'] ?? '';
+        $parameters['tnote'] = $_config['tnote'];
+        $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
+        $parameters['de'] = $_config['email'];
+        $parameters['mt'] = $_config['set_mt'] ?? true;
+        $parameters['client_id'] = $_config['uid'] ?? 0;
+        $parameters['prop'] = $_config['prop'];
 
-        if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
-            $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_after' ] );
-            $parameters[ 'context_before' ] = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_before' ] );
+        if (isset($_config['context_after']) || isset($_config['context_before'])) {
+            $parameters['context_after'] = $_config['context_after'] ?? '';
+            $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
+        if (!empty($_config['id_user'])) {
+            if (!is_array($_config['id_user'])) {
+                $_config['id_user'] = [$_config['id_user']];
             }
-            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
-        $this->call( 'contribute_relative_url', $parameters, true );
+        $this->call('contribute_relative_url', $parameters, true);
 
-        if ( $this->result->responseStatus != "200" ) {
-            return false;
-        }
-
-        return $this->result->responseDetails[ 0 ]; // return the MyMemory ID
-
+        return $this->result;
     }
 
-    public function update( $_config ) {
+    public function update($_config): UpdateContributionResponse
+    {
+        $parameters = [];
+        $parameters['seg'] = $_config['segment'] ?? '';
+        $parameters['tra'] = $_config['translation'] ?? '';
+        $parameters['newseg'] = $_config['newsegment'] ?? '';
+        $parameters['newtra'] = $_config['newtranslation'] ?? '';
+        $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
+        $parameters['prop'] = $_config['prop'];
+        $parameters['client_id'] = $_config['uid'] ?? 0;
+        $parameters['de'] = $_config['email'];
+        $parameters['mt'] = $_config['set_mt'] ?? true;
+        $parameters['spiceMatch'] = $_config['spiceMatch'];
 
-        $parameters                = [];
-        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'newseg' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
-        $parameters[ 'newtra' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
-        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'prop' ]      = $_config[ 'prop' ];
-        $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
-        $parameters[ 'de' ]        = $_config[ 'email' ];
-        $parameters[ 'mt' ]        = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
-
-        if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
-            $parameters[ 'context_after' ]  = ( !empty( $_config[ 'context_after' ] ) ) ? preg_replace( "/^(-?@-?)/", "", $_config[ 'context_after' ] ) : null;
-            $parameters[ 'context_before' ] = ( !empty( $_config[ 'context_before' ] ) ) ? preg_replace( "/^(-?@-?)/", "", $_config[ 'context_before' ] ) : null;
+        if (isset($_config['context_after']) || isset($_config['context_before'])) {
+            $parameters['context_after'] = $_config['context_after'] ?? '';
+            $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
+        if (!empty($_config['id_user'])) {
+            if (!is_array($_config['id_user'])) {
+                $_config['id_user'] = [$_config['id_user']];
             }
-            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
-        $this->call( "update_relative_url", $parameters, true );
+        $this->call("update_relative_url", $parameters, true);
 
         // Let the caller handle the error management.
         return $this->result;
-
     }
 
     /**
@@ -303,39 +337,58 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @return bool
      */
-    public function delete( $_config ) {
+    public function delete($_config): bool
+    {
+        $parameters = [];
+        $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
+        $parameters['de'] = $_config['email'];
 
-        $parameters               = [];
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]       = $_config[ 'email' ];
-
-        if ( isset( $_config[ 'segment' ] ) and isset( $_config[ 'translation' ] ) ) {
-            $parameters[ 'seg' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-            $parameters[ 'tra' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        if (isset($_config['segment']) and isset($_config['translation'])) {
+            $parameters['seg'] = $_config['segment'];
+            $parameters['tra'] = $_config['translation'];
         }
 
-        if ( isset( $_config[ 'id_match' ] ) ) {
-            $parameters[ 'id' ] = $_config[ 'id_match' ];
+        if (isset($_config['id_match'])) {
+            $parameters['id'] = $_config['id_match'];
         }
 
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
+        if (!empty($_config['id_user'])) {
+            if (!is_array($_config['id_user'])) {
+                $_config['id_user'] = [$_config['id_user']];
             }
-            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
-        $this->call( "delete_relative_url", $parameters, true );
+        $this->call("delete_relative_url", $parameters, true);
 
-        if ( $this->result->responseStatus != "200" &&
-                ( $this->result->responseStatus != "404" ||
-                        $this->result->responseDetails != "NO ID FOUND" )
+        if ($this->result->responseStatus != "200" &&
+            ($this->result->responseStatus != "404" ||
+                $this->result->responseDetails != "NO ID FOUND")
         ) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Check the entry status on myMemory
+     *
+     * @param string $uuid
+     *
+     * @return FileImportAndStatusResponse
+     */
+    public function entryStatus(string $uuid): TMSAbstractResponse
+    {
+        // 1 second timeout
+        $this->_setAdditionalCurlParams([
+                CURLOPT_TIMEOUT => 1
+            ]
+        );
+
+        $this->call("entry_status_relative_url", ['uuid' => $uuid]);
+
+        return $this->result;
     }
 
     /**
@@ -348,193 +401,156 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param string $key
      * @param string $name
      *
-     * @return Engines_Results_MyMemory_TmxResponse
+     * @return FileImportAndStatusResponse
      */
-    public function glossaryImport( string $file, string $key, string $name = '' ): Engines_Results_MyMemory_TmxResponse {
-
+    public function glossaryImport(string $file, string $key, string $name = ''): FileImportAndStatusResponse
+    {
         $postFields = [
-                'glossary' => $this->getCurlFile( $file ),
-                'key'      => trim( $key ),
+            'glossary' => $this->getCurlFile($file),
+            'key' => trim($key),
+            'de' => AppConfig::$MYMEMORY_API_KEY,
         ];
 
-        if ( $name and $name !== '' ) {
-            $postFields[ 'key_name' ] = $name;
+        if ($name and $name !== '') {
+            $postFields['key_name'] = $name;
         }
 
-        $this->call( "glossary_import_relative_url", $postFields, true );
+        $this->call("glossary_import_relative_url", $postFields, true);
 
         /**
-         * @var Engines_Results_MyMemory_TmxResponse
+         * @var FileImportAndStatusResponse
          */
         return $this->result;
     }
 
     /**
-     * @param $uuid
+     * @param string $key
+     * @param string $keyName
+     * @param string $userEmail
+     * @param string $userName
      *
-     * @return array
+     * @return ExportResponse
      */
-    public function getGlossaryImportStatus( $uuid ) {
-        $this->call( 'glossary_import_status_relative_url', [
-                'uuid' => $uuid
-        ] );
+    public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
+    {
+        $this->call('glossary_export_relative_url', [
+            'key' => $key,
+            'key_name' => $keyName,
+            'user_name' => $userName,
+            'user_email' => $userEmail,
+        ], true);
 
         return $this->result;
     }
 
     /**
-     * @param $key
-     * @param $keyName
-     * @param $userEmail
-     * @param $userName
+     * @param string $source
+     * @param string $target
+     * @param string $sourceLanguage
+     * @param string $targetLanguage
+     * @param array|null $keys
      *
-     * @return Engines_Results_MyMemory_ExportResponse
+     * @return CheckGlossaryResponse
      */
-    public function glossaryExport( $key, $keyName, $userEmail, $userName ) {
-        $this->call( 'glossary_export_relative_url', [
-                'key'        => $key,
-                'key_name'   => $keyName,
-                'user_name'  => $userName,
-                'user_email' => $userEmail,
-        ], true );
-
-        return $this->result;
-    }
-
-    /**
-     * Poll MM for obtain the status of a write operation
-     * using a cyclic barrier
-     * (import, update, set, delete)
-     *
-     * @param $uuid
-     * @param $relativeUrl
-     */
-    private function pollForStatus( $uuid, $relativeUrl ) {
-        $limit     = 10;
-        $sleep     = 1;
-        $startTime = time();
-
-        do {
-
-            $this->call( $relativeUrl, [
-                    'uuid' => $uuid
-            ] );
-
-            if ( $this->result->responseStatus === 202 ) {
-                sleep( $sleep );
-            }
-
-        } while ( $this->result->responseStatus === 202 and ( time() - $startTime ) <= $limit );
-    }
-
-    /**
-     * @param       $source
-     * @param       $target
-     * @param       $sourceLanguage
-     * @param       $targetLanguage
-     * @param array $keys
-     *
-     * @return array
-     */
-    public function glossaryCheck( $source, $target, $sourceLanguage, $targetLanguage, $keys = [] ) {
+    public function glossaryCheck(string $source, string $target, string $sourceLanguage, string $targetLanguage, ?array $keys = []): CheckGlossaryResponse
+    {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
-                'source'          => $source,
-                'target'          => $target,
-                'source_language' => $sourceLanguage,
-                'target_language' => $targetLanguage,
-                'keys'            => $keys,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            'source' => $source,
+            'target' => $target,
+            'source_language' => $sourceLanguage,
+            'target_language' => $targetLanguage,
+            'keys' => $keys,
         ];
-        $this->call( "glossary_check_relative_url", $payload, true, true );
+        $this->call("glossary_check_relative_url", $payload, true, true);
 
         return $this->result;
     }
 
     /**
-     * @param array $keys
+     * @param array|null $keys
      *
-     * @return array
+     * @return DomainsResponse
      */
-    public function glossaryDomains( $keys = [] ) {
+    public function glossaryDomains(?array $keys = []): DomainsResponse
+    {
         $payload = [
-                'de'   => INIT::$MYMEMORY_API_KEY,
-                'keys' => $keys,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            'keys' => $keys,
         ];
-        $this->call( "glossary_domains_relative_url", $payload, true, true );
+        $this->call("glossary_domains_relative_url", $payload, true, true);
 
         return $this->result;
     }
 
     /**
-     * @param $idSegment
-     * @param $idJob
-     * @param $password
-     * @param $term
+     * @param string $idSegment
+     * @param string $idJob
+     * @param string $password
+     * @param array $term
      *
-     * @return array
+     * @return DeleteGlossaryResponse
      */
-    public function glossaryDelete( $idSegment, $idJob, $password, $term ) {
+    public function glossaryDelete(string $idSegment, string $idJob, string $password, array $term): DeleteGlossaryResponse
+    {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
-                "id_segment" => $idSegment,
-                "id_job"     => $idJob,
-                "password"   => $password,
-                "term"       => $term,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            "id_segment" => $idSegment,
+            "id_job" => $idJob,
+            "password" => $password,
+            "term" => $term,
         ];
-        $this->call( "glossary_delete_relative_url", $payload, true, true );
-
-        if ( $this->result->responseData === 'OK' and isset( $this->result->responseDetails ) ) {
-            $uuid = $this->result->responseDetails;
-            $this->pollForStatus( $uuid, 'glossary_entry_status_relative_url' );
-        }
+        $this->call("glossary_delete_relative_url", $payload, true, true);
 
         return $this->result;
     }
 
     /**
-     * @param $id_job
-     * @param $id_segment
-     * @param $source
-     * @param $sourceLanguage
-     * @param $targetLanguage
-     * @param $keys
+     * @param string $id_job
+     * @param string $id_segment
+     * @param string $source
+     * @param string $sourceLanguage
+     * @param string $targetLanguage
+     * @param array|null $keys
      *
-     * @return array
+     * @return GetGlossaryResponse
      */
-    public function glossaryGet( $id_job, $id_segment, $source, $sourceLanguage, $targetLanguage, $keys ) {
+    public function glossaryGet(string $id_job, string $id_segment, string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): GetGlossaryResponse
+    {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
-                "id_job"          => $id_job,
-                "id_segment"      => $id_segment,
-                "source"          => $source,
-                "source_language" => $sourceLanguage,
-                "target_language" => $targetLanguage,
-                "keys"            => $keys,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            "id_job" => $id_job,
+            "id_segment" => $id_segment,
+            "source" => $source,
+            "source_language" => $sourceLanguage,
+            "target_language" => $targetLanguage,
+            "keys" => $keys,
         ];
 
-        $this->call( "glossary_get_relative_url", $payload, true, true );
+        $this->call("glossary_get_relative_url", $payload, true, true);
 
         return $this->result;
     }
 
     /**
-     * @param $source
-     * @param $sourceLanguage
-     * @param $targetLanguage
-     * @param $keys
+     * @param string $source
+     * @param string $sourceLanguage
+     * @param string $targetLanguage
+     * @param array|null $keys
      *
-     * @return array
+     * @return SearchGlossaryResponse
      */
-    public function glossarySearch( $source, $sourceLanguage, $targetLanguage, $keys ) {
+    public function glossarySearch(string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): SearchGlossaryResponse
+    {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
-                "source"          => $source,
-                "source_language" => $sourceLanguage,
-                "target_language" => $targetLanguage,
-                "keys"            => $keys,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            "source" => $source,
+            "source_language" => $sourceLanguage,
+            "target_language" => $targetLanguage,
+            "keys" => $keys,
         ];
 
-        $this->call( "glossary_search_relative_url", $payload, true, true );
+        $this->call("glossary_search_relative_url", $payload, true, true);
 
         return $this->result;
     }
@@ -542,87 +558,92 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * @param string $sourceLanguage
      * @param string $targetLanguage
-     * @param array  $keys
+     * @param array|null $keys
      *
-     * @return array
+     * @return KeysGlossaryResponse
      */
-    public function glossaryKeys( $sourceLanguage, $targetLanguage, $keys = [] ) {
+    public function glossaryKeys(string $sourceLanguage, string $targetLanguage, ?array $keys = []): KeysGlossaryResponse
+    {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
-                'source_language' => $sourceLanguage,
-                'target_language' => $targetLanguage,
-                'keys'            => $keys,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            'source_language' => $sourceLanguage,
+            'target_language' => $targetLanguage,
+            'keys' => $keys,
         ];
-        $this->call( "glossary_keys_relative_url", $payload, true, true );
+        $this->call("glossary_keys_relative_url", $payload, true, true);
 
         return $this->result;
     }
 
     /**
-     * @param $idSegment
-     * @param $idJob
-     * @param $password
-     * @param $term
+     * @param string $idSegment
+     * @param string $idJob
+     * @param string $password
+     * @param array $term
      *
-     * @return array
+     * @return SetGlossaryResponse
      */
-    public function glossarySet( $idSegment, $idJob, $password, $term ) {
+    public function glossarySet(string $idSegment, string $idJob, string $password, array $term): SetGlossaryResponse
+    {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
-                "id_segment" => $idSegment,
-                "id_job"     => $idJob,
-                "password"   => $password,
-                "term"       => $term,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            "id_segment" => $idSegment,
+            "id_job" => $idJob,
+            "password" => $password,
+            "term" => $term,
         ];
 
-        $this->call( "glossary_set_relative_url", $payload, true, true );
+        $this->call("glossary_set_relative_url", $payload, true, true);
 
         return $this->result;
     }
 
     /**
-     * @param $idSegment
-     * @param $idJob
-     * @param $password
-     * @param $term
+     * @param string $idSegment
+     * @param string $idJob
+     * @param string $password
+     * @param array $term
      *
-     * @return array
+     * @return UpdateGlossaryResponse
      */
-    public function glossaryUpdate( $idSegment, $idJob, $password, $term ) {
+    public function glossaryUpdate(string $idSegment, string $idJob, string $password, array $term): UpdateGlossaryResponse
+    {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
-                "id_segment" => $idSegment,
-                "id_job"     => $idJob,
-                "password"   => $password,
-                "term"       => $term,
+            'de' => AppConfig::$MYMEMORY_API_KEY,
+            "id_segment" => $idSegment,
+            "id_job" => $idJob,
+            "password" => $password,
+            "term" => $term,
         ];
-        $this->call( "glossary_update_relative_url", $payload, true, true );
-
-        if ( $this->result->responseData === 'OK' and isset( $this->result->responseDetails ) ) {
-            $uuid = $this->result->responseDetails;
-            $this->pollForStatus( $uuid, 'glossary_entry_status_relative_url' );
-        }
+        $this->call("glossary_update_relative_url", $payload, true, true);
 
         return $this->result;
     }
 
-    public function import( $file, $key, $name = false ) {
-
+    /**
+     *
+     * @param string $filePath
+     * @param string $memoryKey
+     * @param UserStruct $user * Not used
+     *
+     * @return array|mixed
+     */
+    public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
+    {
         $postFields = [
-                'tmx'  => $this->getCurlFile( $file ),
-                'name' => $name,
-                'key'  => trim( $key )
+            'tmx' => $this->getCurlFile($filePath),
+            'key' => trim($memoryKey)
         ];
 
-        $this->call( "tmx_import_relative_url", $postFields, true );
+        $this->call("tmx_import_relative_url", $postFields, true);
 
         return $this->result;
     }
 
-    public function getStatus( $uuid ) {
-
-        $parameters = [ 'uuid' => trim( $uuid ) ];
-        $this->call( 'tmx_status_relative_url', $parameters );
+    public function getImportStatus($uuid)
+    {
+        $parameters = ['uuid' => trim($uuid)];
+        $this->call('tmx_status_relative_url', $parameters);
 
         return $this->result;
     }
@@ -630,40 +651,40 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * Calls the MyMemory endpoint to send the TMX download URL to the user e-mail
      *
-     * @param $key
-     * @param $name
-     * @param $userEmail
-     * @param $userName
-     * @param $userSurname
-     * @param $strip_tags
+     * @param string $key
+     * @param string $name
+     * @param string $userEmail
+     * @param string $userName
+     * @param string $userSurname
+     * @param bool|null $strip_tags
      *
-     * @return Engines_Results_MyMemory_ExportResponse
+     * @return ExportResponse
      * @throws Exception
-     *
      */
-    public function emailExport( $key, $name, $userEmail, $userName, $userSurname, $strip_tags = false ) {
+    public function emailExport(string $key, string $name, string $userEmail, string $userName, string $userSurname, ?bool $strip_tags = false): ExportResponse
+    {
         $parameters = [];
 
-        $parameters[ 'key' ]        = trim( $key );
-        $parameters[ 'user_email' ] = trim( $userEmail );
-        $parameters[ 'user_name' ]  = trim( $userName ) . " " . trim( $userSurname );
-        ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
-        $parameters[ 'zip_name' ] = $parameters[ 'zip_name' ] . ".zip";
+        $parameters['key'] = trim($key);
+        $parameters['user_email'] = trim($userEmail);
+        $parameters['user_name'] = trim($userName) . " " . trim($userSurname);
+        (!empty($name) ? $parameters['zip_name'] = $name : $parameters['zip_name'] = $key);
+        $parameters['zip_name'] = $parameters['zip_name'] . ".zip";
 
-        if ( $strip_tags ) {
-            $parameters[ 'strip_tags' ] = 1;
+        if ($strip_tags) {
+            $parameters['strip_tags'] = 1;
         }
 
-        $this->call( 'tmx_export_email_url', $parameters );
+        $this->call('tmx_export_email_url', $parameters);
 
         /**
-         * $result Engines_Results_MyMemory_ExportResponse
+         * $result ExportResponse
          */
-        if ( $this->result->responseStatus >= 400 ) {
-            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+        if ($this->result->responseStatus >= 400) {
+            throw new Exception($this->result->error->message, $this->result->responseStatus);
         }
 
-        Log::doJsonLog( 'TMX exported to E-mail.' );
+        $this->logger->debug('TMX exported to E-mail.');
 
         return $this->result;
     }
@@ -672,23 +693,22 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * @throws Exception
      */
-    public function createMyMemoryKey() {
-
+    public function createMyMemoryKey()
+    {
         //query db
-        $this->call( 'api_key_create_user_url' );
+        $this->call('api_key_create_user_url');
 
-        if ( !$this->result instanceof Engines_Results_MyMemory_CreateUserResponse ) {
-            if ( empty( $this->result ) || $this->result[ 'error' ] || $this->result[ 'error' ][ 'code' ] != 200 ) {
-                throw new Exception( "Private TM key .", -1 );
+        if (!$this->result instanceof CreateUserResponse) {
+            if (empty($this->result) || $this->result['error'] || $this->result['error']['code'] != 200) {
+                throw new Exception("Private TM key .", -1);
             }
         }
 
-        unset( $this->result->responseStatus );
-        unset( $this->result->responseDetails );
-        unset( $this->result->responseData );
+        unset($this->result->responseStatus);
+        unset($this->result->responseDetails);
+        unset($this->result->responseData);
 
         return $this->result;
-
     }
 
     /**
@@ -696,122 +716,108 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * Filter Validate returns true/false for correct/not correct key and NULL is returned for all non-boolean values. ( 404, html, etc. )
      *
-     * @param $apiKey
+     * @param string $apiKey
      *
      * @return bool|null
      * @throws Exception
      */
-    public function checkCorrectKey( $apiKey ) {
-
+    public function checkCorrectKey(string $apiKey): ?bool
+    {
         $postFields = [
-                'key' => trim( $apiKey )
+            'key' => trim($apiKey)
         ];
 
-        //query db
-//        $this->doQuery( 'api_key_check_auth', $postFields );
-        $this->call( 'api_key_check_auth_url', $postFields );
+        $this->call('api_key_check_auth_url', $postFields);
 
-        if ( !$this->result->responseStatus == 200 ) {
-            Log::doJsonLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
-            throw new Exception( "Error: The private TM key you entered ( $apiKey ) seems to be invalid. Please, check that the key is correct.", -2 );
+        if (!$this->result->responseStatus == 200) {
+            $this->logger->debug("Error: The check for MyMemory private key correctness failed: " . $this->result['error']['message'] . " ErrNum: " . $this->result['error']['code']);
+            throw new Exception("Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2);
         }
 
-        $isValidKey = filter_var( $this->result->responseData, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+        $isValidKey = filter_var($this->result->responseData, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
-        if ( $isValidKey === null ) {
-            throw new Exception( "Error: The private TM key you entered seems to be invalid: $apiKey", -3 );
+        if ($isValidKey === null) {
+            throw new Exception("Error: The private TM key you entered seems to be invalid: $apiKey", -3);
         }
 
         return $isValidKey;
-
     }
 
     /******************************************/
-
-    public function fastAnalysis( $segs_array ) {
-
-        if ( !is_array( $segs_array ) ) {
-            return null;
-        }
-
-        $this->_setAdditionalCurlParams( [
-                        CURLOPT_TIMEOUT => 300
-                ]
+    /**
+     * Calls the MyMemory Fast Analysis endpoint to analyze a document
+     *
+     * @param array $segs_array
+     *
+     * @return AnalyzeResponse
+     * @throws Exception
+     */
+    public function fastAnalysis(array $segs_array): AnalyzeResponse
+    {
+        $this->_setAdditionalCurlParams([
+                CURLOPT_TIMEOUT => 300
+            ]
         );
 
-        $this->engineRecord[ 'base_url' ] = "https://analyze.mymemory.translated.net/api/v1";
+        $this->getEngineRecord()['base_url'] = "https://analyze.mymemory.translated.net/api/v1";
 
-        $this->call( "analyze_url", array_values( $segs_array ), true, true );
+        $this->call("analyze_url", array_values($segs_array), true, true);
 
         return $this->result;
-
     }
 
     /**
      * MyMemory private endpoint
      *
-     * @param $config
+     * @param array $config
      *
-     * @return array|Engines_Results_MyMemory_TagProjectionResponse
+     * @return TagProjectionResponse
      */
-    public function getTagProjection( $config ) {
-
+    public function getTagProjection(array $config): TagProjectionResponse
+    {
         // set dataRefMap needed to instance
-        // Engines_Results_MyMemory_TagProjectionResponse class
-        $this->_config[ 'dataRefMap' ] = isset( $config[ 'dataRefMap' ] ) ? $config[ 'dataRefMap' ] : [];
+        // TagProjectionResponse class
+        $this->_config['dataRefMap'] = $config['dataRefMap'] ?? [];
 
         //tag replace
-        $source_string = $config[ 'source' ];
-        $target_string = $config[ 'target' ];
-//        $re2 = '<ph id\s*=\s*["\']mtc_[0-9]+["\'] ctype\s*=\s*["\']x-([0-9a-zA-Z\-]+)["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>';
-//        preg_match_all("/" . $re2 .'/siU', $source_string, $source_matches_tag,PREG_OFFSET_CAPTURE, 0);
-//        preg_match_all("/" . $re2 .'/siU', $target_string, $target_matches_tag,PREG_OFFSET_CAPTURE, 0);
-//
-//        $map=[];
-//        foreach ($source_matches_tag[0] as $source_key=>$source_tag){
-//            foreach ($target_matches_tag[0] as $target_tag){
-//                if($source_tag[0] == $target_tag[0]){
-//                    $replace = md5($source_matches_tag[2][$source_key][0]);
-//                    $source_string = str_replace($source_tag[0], $replace, $source_string);
-//                    $target_string = str_replace($source_tag[0], $replace, $target_string);
-//                    $map[$replace] = $source_tag[0];
-//                }
-//            }
-//        }
+        $source_string = $config['source'];
+        $target_string = $config['target'];
 
         //formatting strip
-        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
+        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\xc2\xa0|\xE2|\x81|\xA0)+';
         //trim chars that would have been lost with the guess tag
-        preg_match( "/" . $re . '$/', $target_string, $r_matches, PREG_OFFSET_CAPTURE );
-        preg_match( "/^" . $re . '/', $target_string, $l_matches, PREG_OFFSET_CAPTURE );
-        $r_index   = ( isset( $r_matches[ 0 ][ 1 ] ) ) ? $r_matches[ 0 ][ 1 ] : mb_strlen( $target_string );
-        $l_index   = ( isset( $l_matches[ 0 ][ 1 ] ) ) ? (int)$l_matches[ 0 ][ 1 ] + mb_strlen( $l_matches[ 0 ][ 0 ] ) : 0;
-        $r_matches = ( isset( $r_matches[ 0 ][ 0 ] ) ) ? $r_matches[ 0 ][ 0 ] : '';
-        $l_matches = ( isset( $l_matches[ 0 ][ 0 ] ) ) ? $l_matches[ 0 ][ 0 ] : '';
+        preg_match("/" . $re . '$/', $target_string, $r_matches, PREG_OFFSET_CAPTURE);
+        preg_match("/^" . $re . '/', $target_string, $l_matches, PREG_OFFSET_CAPTURE);
+        $r_index = (isset($r_matches[0][1])) ? $r_matches[0][1] : mb_strlen($target_string);
+        $l_index = (isset($l_matches[0][1])) ? (int)$l_matches[0][1] + mb_strlen($l_matches[0][0]) : 0;
+        $r_matches = (isset($r_matches[0][0])) ? $r_matches[0][0] : '';
+        $l_matches = (isset($l_matches[0][0])) ? $l_matches[0][0] : '';
 
-        $parameters           = [];
-        $parameters[ 's' ]    = $source_string;
-        $parameters[ 't' ]    = mb_substr( $target_string, $l_index, $r_index - $l_index );
-        $parameters[ 'hint' ] = $config[ 'suggestion' ];
+        $parameters = [];
+        $parameters['s'] = $source_string;
+        $parameters['t'] = mb_substr($target_string, $l_index, $r_index - $l_index);
+        $parameters['hint'] = $config['suggestion'];
 
-        $this->_setAdditionalCurlParams( [
-                CURLOPT_FOLLOWLOCATION => true,
-        ] );
+        $this->_setAdditionalCurlParams([
+            CURLOPT_FOLLOWLOCATION => true,
+        ]);
 
-        $this->engineRecord->base_url                    = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
-        $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
-        $this->call( 'tags_projection', $parameters );
+        $this->getEngineRecord()->base_url = parse_url($this->getEngineRecord()->base_url, PHP_URL_HOST) . ":10000";
+        $this->getEngineRecord()->others['tags_projection'] .= '/' . $config['source_lang'] . "/" . $config['target_lang'] . "/";
+        $this->call('tags_projection', $parameters);
 
-        if ( !empty( $this->result->responseData ) ) {
-            //formatting replace
+        if (!empty($this->result->responseData)) {
             $this->result->responseData = $l_matches . $this->result->responseData . $r_matches;
-            //tag replace
-//            foreach ($map as $key=>$value){
-//                $this->result->responseData = str_replace($key, $value, $this->result->responseData);
-//            }
         }
 
         return $this->result;
+    }
 
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array
+    {
+        return [];
     }
 }

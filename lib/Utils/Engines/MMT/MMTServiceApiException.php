@@ -6,29 +6,35 @@
  * Time: 08:59
  */
 
-namespace Engines\MMT;
+namespace Utils\Engines\MMT;
 
-class MMTServiceApiException extends \Exception {
+use Exception;
 
-    public static function fromJSONResponse( $json ) {
-        $code    = isset( $json[ 'status' ] ) ? intval( $json[ 'status' ] ) : 500;
-        $type    = isset( $json[ 'error' ][ 'type' ] ) ? $json[ 'error' ][ 'type' ] : 'UnknownException';
-        $message = isset( $json[ 'error' ][ 'message' ] ) ? $json[ 'error' ][ 'message' ] : '';
+class MMTServiceApiException extends Exception
+{
 
-        return new self( $type, $code, $message );
+    public static function fromJSONResponse(array $json): MMTServiceApiException
+    {
+        $code = isset($json['status']) ? intval($json['status']) : 500;
+        $type = $json['error']['type'] ?? 'UnknownException';
+        $message = $json['error']['message'] ?? '';
+
+        return new self($type, $code, $message);
     }
 
     private $type;
 
-    public function __construct( $type, $code, $message = "" ) {
-        parent::__construct( "($type) $message", $code );
+    public function __construct(?string $type = '', ?int $code = 0, ?string $message = "")
+    {
+        parent::__construct("($type) $message", $code);
         $this->type = $type;
     }
 
     /**
      * @return string
      */
-    public function getType() {
+    public function getType(): string
+    {
         return $this->type;
     }
 

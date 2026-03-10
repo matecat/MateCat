@@ -3,20 +3,27 @@
  * Created by PhpStorm.
  */
 
+namespace Utils\Shop;
+
+use ArrayObject;
+use DomainException;
+use LogicException;
+
 /**
- * Abstract parent for Items to use with Shop_Cart class
+ * Abstract parent for Items to use with Cart class
  *
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 17/04/14
  * Time: 16.44
  *
  */
-abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterface {
+abstract class AbstractItem extends ArrayObject implements ItemInterface
+{
 
     /**
      * This is the real storage for cart items
      *
-     * These fields are mandatory to use with Class Shop_Cart
+     * These fields are mandatory to use with Class Cart
      *
      * <pre>
      * $__storage = array(
@@ -29,36 +36,52 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * @var array
      */
-    protected $__storage = [
-            '_id_type_class' => null,
-            'id'             => null,
-            'quantity'       => null,
-            'price'          => null,
+    protected array $__storage = [
+        '_id_type_class' => null,
+        'id' => null,
+        'quantity' => null,
+        'price' => null,
     ];
+
+    /**
+     * @param $storage array{_id_type_class: class-string, ...string: string}
+     *
+     *
+     * @return AbstractItem
+     */
+    public static function getInflate($storage): AbstractItem
+    {
+        $obj = new $storage['_id_type_class']();
+        foreach ($storage as $key => $value) {
+            $obj->offsetSet($key, $value);
+        }
+
+        return $obj;
+    }
 
     /**
      * Class Constructor
      *
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
-        $value = get_class( $this );
+        $value = get_class($this);
 
         //prepare the structure to accept  the value
         //this key is mandatory for Cart Class because of $calledClass::getInflate( $storage );
-        $this->__storage[ '_id_type_class' ] = $value;
+        $this->__storage['_id_type_class'] = $value;
 
         //set the value
-        $this->offsetSet( '_id_type_class', $value );
+        $this->offsetSet('_id_type_class', $value);
 
         /*
          * Prepare the storage object by using self::$__storage keys definitions
          */
-        foreach ( $this->__storage as $key => $value ) {
-            $this->offsetSet( $key, $value );
+        foreach ($this->__storage as $key => $value) {
+            $this->offsetSet($key, $value);
         }
-
     }
 
     /**
@@ -66,7 +89,8 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * @return array
      */
-    public function getStorage() {
+    public function getStorage(): array
+    {
         return $this->getArrayCopy();
     }
 
@@ -75,10 +99,10 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * Only items defined in the concrete Item class will be added and/or permitted
      *
-     * @param mixed $offset <p>
+     * @param mixed $key <p>
      *                      The offset to assign the value to.
      *                      </p>
-     * @param mixed $value  <p>
+     * @param mixed $value <p>
      *                      The value to set.
      *                      </p>
      *
@@ -90,19 +114,18 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
      *
      */
-    public function offsetSet( $offset, $value ) {
-
-        if ( empty( $offset ) ) {
-            throw new LogicException( "Can not assign a value to an EMPTY key." );
+    public function offsetSet(mixed $key, mixed $value): void
+    {
+        if (empty($key)) {
+            throw new LogicException("Can not assign a value to an EMPTY key.");
         }
 
-        if ( !array_key_exists( $offset, $this->__storage ) ) {
-            throw new DomainException( "Field $offset does not exists in " . __CLASS__ . " structure." );
+        if (!array_key_exists($key, $this->__storage)) {
+            throw new DomainException("Field $key does not exists in " . __CLASS__ . " structure.");
         }
 
-        $value = filter_var( $value, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES );
-        parent::offsetSet( $offset, $value );
-
+        $value = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES);
+        parent::offsetSet($key, $value);
     }
 
     /**
@@ -110,7 +133,7 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * Only items defined in the concrete Item class will be accepted
      *
-     * @param mixed $offset <p>
+     * @param mixed $key <p>
      *                      The offset to unset.
      *                      </p>
      *
@@ -122,11 +145,12 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      * @see  $__storage
      *
      */
-    public function offsetUnset( $offset ) {
-        if ( array_key_exists( $offset, $this->__storage ) ) {
-            parent::offsetUnset( $offset );
+    public function offsetUnset(mixed $key): void
+    {
+        if (array_key_exists($key, $this->__storage)) {
+            parent::offsetUnset($key);
         } else {
-            throw new DomainException( "Field $offset does not exists in " . __CLASS__ . " structure." );
+            throw new DomainException("Field $key does not exists in " . __CLASS__ . " structure.");
         }
     }
 

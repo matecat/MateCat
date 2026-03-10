@@ -172,7 +172,7 @@
   &.small {
     font-size: 12px;
     line-height: 1.3;
-    display: inline-block;
+    display: -webkit-inline-flex;
     /*opacity: 1;*/
     &:hover {
       cursor: default !important;
@@ -189,6 +189,7 @@
       border-left-width: 7px;
       border-top-width: 7.5px;
       border-bottom-width: 7.5px;
+      top: 1px;
     }
     &.tag-nbsp {
       font-size: 14px;

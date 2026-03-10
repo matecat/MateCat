@@ -7,15 +7,16 @@
  *
  */
 
-namespace RemoteFiles;
+namespace Model\RemoteFiles;
 
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-class RemoteFileServiceNameStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class RemoteFileServiceNameStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public $id_project;
-    public $service;
+    public int $id_project;
+    public string $service;
 
 }

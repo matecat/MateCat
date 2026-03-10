@@ -1,50 +1,53 @@
 <?php
 
-namespace Features\ReviewExtended\Email;
+namespace Plugins\Features\ReviewExtended\Email;
 
-use Email\AbstractEmail;
 use Exception;
-use INIT;
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
+use Utils\Email\AbstractEmail;
+use Utils\Registry\AppConfig;
 
-class BatchReviewProcessorAlertEmail extends AbstractEmail {
+class BatchReviewProcessorAlertEmail extends AbstractEmail
+{
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var ChunkReviewStruct
      */
-    private $chunkReview;
+    private ChunkReviewStruct $chunkReview;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $title = 'Alert from batch review processor';
+    protected ?string $title = 'Alert from batch review processor';
 
     /**
      * BatchEventCreatorAlertEmail constructor.
      *
-     * @param Jobs_JobStruct    $chunk
+     * @param JobStruct $chunk
      * @param ChunkReviewStruct $chunkReview
      */
-    public function __construct( Jobs_JobStruct $chunk, ChunkReviewStruct $chunkReview ) {
-        $this->chunk       = $chunk;
+    public function __construct(JobStruct $chunk, ChunkReviewStruct $chunkReview)
+    {
+        $this->chunk = $chunk;
         $this->chunkReview = $chunkReview;
-        $this->_setlayout( 'empty_skeleton.html' );
-        $this->_settemplate( 'ReviewExtended/batch_review_processor_alert.html' );
+        $this->_setlayout('empty_skeleton.html');
+        $this->_settemplate('ReviewExtended/batch_review_processor_alert.html');
     }
 
     /**
      * @return array
      */
-    protected function _getTemplateVariables(): array {
+    protected function _getTemplateVariables(): array
+    {
         return [
-                'chunkId'       => $this->chunk->id,
-                'chunkReviewId' => $this->chunkReview->id,
+            'chunkId' => $this->chunk->id,
+            'chunkReviewId' => $this->chunkReview->id,
         ];
     }
 
@@ -52,12 +55,13 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
      * @return void
      * @throws Exception
      */
-    public function send() {
-        $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+    public function send(): void
+    {
+        $mailConf = @parse_ini_file(AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true);
 
-        if ( !empty( $mailConf[ 'email_list' ] ) ) {
-            foreach ( $mailConf[ 'email_list' ] as $email => $uName ) {
-                $this->sendTo( $email, $uName );
+        if (!empty($mailConf['email_list'])) {
+            foreach ($mailConf['email_list'] as $email => $uName) {
+                $this->sendTo($email, $uName);
             }
         }
     }

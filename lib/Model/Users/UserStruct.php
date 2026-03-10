@@ -1,12 +1,18 @@
 <?php
 
-use ConnectedServices\OauthTokenEncryption;
+namespace Model\Users;
+
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
-use Teams\MembershipDao;
-use Teams\TeamDao;
-use Teams\TeamStruct;
-use Users\MetadataDao;
-use Users\MetadataStruct;
+use Exception;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
+use ReflectionException;
+use stdClass;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.
@@ -14,83 +20,98 @@ use Users\MetadataStruct;
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public ?int    $uid                           = null;
-    public ?string $email                         = null;
-    public ?string $create_date                   = null;
-    public ?string $first_name                    = null;
-    public ?string $last_name                     = null;
-    public ?string $salt                          = null;
-    public ?string $pass                          = null;
-    public ?string $oauth_access_token            = null;
-    public ?string $email_confirmed_at            = null;
-    public ?string $confirmation_token            = null;
+    public ?int $uid = null;
+    public ?string $email = null;
+    public ?string $create_date = null;
+    public ?string $first_name = null;
+    public ?string $last_name = null;
+    public ?string $salt = null;
+    public ?string $pass = null;
+    public ?string $oauth_access_token = null;
+    public ?string $email_confirmed_at = null;
+    public ?string $confirmation_token = null;
     public ?string $confirmation_token_created_at = null;
 
     /**
-     * Sometimes we send around empty UserStruct to signify Anonymous user.
-     * This a convenience method to encapsulate the logic that defines an anonymous user.
-     * We check for uid not to be empty. Additional check on email to be sure we don't consider the user anonymous
-     * when it's submitting registration info.
-     *
-     * This logic may change in the future if we decide to keep anonymous users inside database
-     * (i.e. !is_null($this->uid)).
-     *
      * @return bool
      */
-    public function isAnonymous(): bool {
-        return is_null( $this->uid ) && is_null( $this->email );
+    public function isAnonymous(): bool
+    {
+        return !$this->isLogged();
     }
 
-    public function clearAuthToken() {
-        $this->confirmation_token            = null;
+    /**
+     * @return bool
+     */
+    public function isLogged(): bool
+    {
+        return !empty($this->uid) &&
+            !empty($this->email) &&
+            !empty($this->first_name) &&
+            !empty($this->last_name);
+    }
+
+    public function clearAuthToken(): void
+    {
+        $this->confirmation_token = null;
         $this->confirmation_token_created_at = null;
     }
 
-    public function initAuthToken() {
-        $this->confirmation_token            = Utils::randomString( 50, true );
-        $this->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
+    public function initAuthToken(): void
+    {
+        $this->confirmation_token = Utils::randomString(50, true);
+        $this->confirmation_token_created_at = Utils::mysqlTimestamp(time());
     }
 
-    public static function getStruct(): Users_UserStruct {
-        return new Users_UserStruct();
+    public static function getStruct(): UserStruct
+    {
+        return new UserStruct();
     }
 
-    public function everSignedIn(): bool {
-        return !( is_null( $this->email_confirmed_at ) && is_null( $this->oauth_access_token ) );
+    public function everSignedIn(): bool
+    {
+        return !(is_null($this->email_confirmed_at) && is_null($this->oauth_access_token));
     }
 
-    public function fullName(): string {
-        return trim( $this->first_name . ' ' . $this->last_name );
+    public function fullName(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
     }
 
-    public function shortName(): string {
-        return trim( mb_substr( $this->first_name, 0, 1 ) . mb_substr( $this->last_name, 0, 1 ) );
+    public function shortName(): string
+    {
+        return trim(mb_substr($this->first_name, 0, 1) . mb_substr($this->last_name, 0, 1));
     }
 
-    public function getEmail(): ?string {
+    public function getEmail(): ?string
+    {
         return $this->email;
     }
 
     /**
      * @return ?int
      */
-    public function getUid(): ?int {
+    public function getUid(): ?int
+    {
         return $this->uid;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getFirstName(): ?string {
+    public function getFirstName(): ?string
+    {
         return $this->first_name;
     }
 
     /**
      * @return string|null
      */
-    public function getLastName(): ?string {
+    public function getLastName(): ?string
+    {
         return $this->last_name;
     }
 
@@ -98,50 +119,70 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function getPersonalTeam(): TeamStruct {
+    public function getPersonalTeam(): TeamStruct
+    {
         $oDao = new TeamDao();
-        $oDao->setCacheTTL( 60 * 60 * 24 );
+        $oDao->setCacheTTL(60 * 60 * 24);
 
-        return $oDao->getPersonalByUser( $this );
+        return $oDao->getPersonalByUser($this);
     }
 
     /**
      * @return TeamStruct[]|null
      * @throws ReflectionException
      */
-    public function getUserTeams(): ?array {
+    public function getUserTeams(): ?array
+    {
         $mDao = new MembershipDao();
-        $mDao->setCacheTTL( 60 * 60 * 24 );
+        $mDao->setCacheTTL(60 * 60 * 24);
 
-        return $mDao->findUserTeams( $this );
+        return $mDao->findUserTeams($this);
+    }
+
+    /**
+     * @param $teamId
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function belongsToTeam($teamId): bool
+    {
+        foreach ($this->getUserTeams() as $team) {
+            if ($team->id === $teamId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
      * @return array
      */
-    public function getMetadataAsKeyValue(): array {
-        $dao        = new MetadataDao();
-        $collection = $dao->getAllByUid( $this->uid );
-        $data       = [];
+    public function getMetadataAsKeyValue(): array
+    {
+        $dao = new MetadataDao();
+        $collection = $dao->getAllByUid($this->uid);
+        $data = [];
 
         /** @var MetadataStruct $record */
-        foreach ( $collection as $record ) {
-            $data[ $record->key ] = $record->getValue();
+        foreach ($collection as $record) {
+            $data[$record->key] = $record->getValue();
         }
 
         $mandatory = [
-                'dictation'              => 0,
-                'show_whitespace'        => 0,
-                'guess_tags'             => 1,
-                'lexiqa'                 => 1,
-                'character_counter'      => 0,
-                'ai_assistant'           => 0,
-                'cross_language_matches' => new stdClass(),
+            'dictation' => 0,
+            'show_whitespace' => 0,
+            'guess_tags' => 1,
+            'lexiqa' => 1,
+            'character_counter' => 0,
+            'ai_assistant' => 0,
+            'cross_language_matches' => new stdClass(),
         ];
 
-        foreach ( $mandatory as $key => $value ) {
-            if ( !isset( $data[ $key ] ) ) {
-                $data[ $key ] = is_numeric( $value ) ? (int)$value : $value;
+        foreach ($mandatory as $key => $value) {
+            if (!isset($data[$key])) {
+                $data[$key] = is_numeric($value) ? (int)$value : $value;
             }
         }
 
@@ -155,8 +196,9 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      *
      * @return bool
      */
-    public function passwordMatch( $password ): bool {
-        return Utils::verifyPass( $password, $this->salt, $this->pass );
+    public function passwordMatch($password): bool
+    {
+        return Utils::verifyPass($password, $this->salt, $this->pass);
     }
 
     /**
@@ -164,32 +206,35 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      *
      * @return null|string
      * @throws EnvironmentIsBrokenException
+     * @throws Exception
      */
-    public function getDecryptedOauthAccessToken(): ?string {
+    public function getDecryptedOauthAccessToken(): ?string
+    {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
-        return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
+        return $oauthTokenEncryption->decrypt($this->oauth_access_token);
     }
 
     /**
-     * @param null $field
+     * @param string|null $field
      *
      * @return mixed
+     * @throws EnvironmentIsBrokenException
      * @throws Exception
      */
-    public function getDecodedOauthAccessToken( $field = null ) {
-        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), true );
+    public function getDecodedOauthAccessToken(?string $field = null): mixed
+    {
+        $decoded = json_decode($this->getDecryptedOauthAccessToken(), true);
 
-        if ( $field ) {
-            if ( array_key_exists( $field, $decoded ) ) {
-                return $decoded[ $field ];
+        if ($field) {
+            if (array_key_exists($field, $decoded)) {
+                return $decoded[$field];
             } else {
-                throw new Exception( 'key not found on token: ' . $field );
+                throw new Exception('key not found on token: ' . $field);
             }
         }
 
         return $decoded;
     }
-
 
 }

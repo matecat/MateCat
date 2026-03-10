@@ -1,9 +1,10 @@
 <?php
 
-namespace Exceptions;
+namespace Model\Exceptions;
 
 use Exception;
 
-class AuthorizationError extends Exception {
+class AuthorizationError extends Exception
+{
 
 }

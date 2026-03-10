@@ -1,0 +1,50 @@
+@use '../../commons/colors';
+
+.options-box {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  padding: 10px 0;
+
+  &:first-child {
+    padding: 0 0 10px;
+  }
+}
+
+.tooltip-options {
+  cursor: help;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #000;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.options-select-container {
+  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.option-dropdown-with-descrition {
+  .dropdown__option span {
+    white-space: unset;
+    overflow: unset;
+    text-overflow: unset;
+  }
+
+  .custom-dropdown {
+    padding-top: 0;
+  }
+}
+.option-dropdown-with-descrition-select-content {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+
+  > p {
+    font-weight: normal;
+    color: colors.$grey6;
+  }
+}

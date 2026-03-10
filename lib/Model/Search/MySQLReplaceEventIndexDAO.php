@@ -1,53 +1,60 @@
 <?php
 
-use Search\ReplaceEventCurrentVersionStruct;
+namespace Model\Search;
 
-class Search_MySQLReplaceEventIndexDAO extends DataAccess_AbstractDao implements Search_ReplaceEventIndexDAOInterface {
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 
-    const STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
-    const TABLE       = 'replace_events_current_version';
+class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface
+{
+
+    const string STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
+    const string TABLE = 'replace_events_current_version';
 
     /**
-     * @param $idJob
+     * @param int $idJob
      *
      * @return int
      */
-    public function getActualIndex( $idJob ) {
-        $conn  = Database::obtain()->getConnection();
+    public function getActualIndex(int $idJob): int
+    {
+        $conn = Database::obtain()->getConnection();
         $query = "SELECT version as v FROM " . self::TABLE . " WHERE id_job=:id_job";
-        $stmt  = $conn->prepare( $query );
-        $stmt->execute( [
-                ':id_job' => $idJob,
-        ] );
+        $stmt = $conn->prepare($query);
+        $stmt->execute([
+            ':id_job' => $idJob,
+        ]);
 
-        return (int)$stmt->fetch()[ 0 ][ 'v' ];
+        return (int)$stmt->fetch()[0]['v'];
     }
 
     /**
-     * @param $id_job
-     * @param $version
+     * @param int $id_job
+     * @param int $version
      *
      * @return int
      */
-    public function save( $id_job, $version ) {
+    public function save(int $id_job, int $version): int
+    {
         $conn = Database::obtain()->getConnection();
 
-        if ( 0 !== $this->getActualIndex( $id_job ) ) {
+        if (0 !== $this->getActualIndex($id_job)) {
             $query = "UPDATE " . self::TABLE . " SET version = :version WHERE id_job=:id_job";
         } else {
             $query = "INSERT INTO " . self::TABLE . " (`version`, `id_job`) VALUES (:version, :id_job)";
         }
 
-        $stmt = $conn->prepare( $query );
-        $stmt->execute( [
-                ':id_job'  => $id_job,
-                ':version' => $version,
-        ] );
+        $stmt = $conn->prepare($query);
+        $stmt->execute([
+            ':id_job' => $id_job,
+            ':version' => $version,
+        ]);
 
         return $stmt->rowCount();
     }
 
-    public function setTtl( $ttl ) {
+    public function setTtl(int $ttl): void
+    {
         // TODO: Implement setTtl() method.
     }
 }

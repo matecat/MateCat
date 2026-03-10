@@ -7,11 +7,12 @@
  *
  */
 
-namespace Constants;
+namespace Utils\Constants;
 
 
-class Ices {
+class Ices
+{
 
-    public static $iceLockDisabledForTargetLangs = [];
+    public static array $iceLockDisabledForTargetLangs = [];
 
 }

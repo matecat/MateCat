@@ -1,108 +1,119 @@
 <?php
 
-class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
-    /**
-     * @param int    $id_file
-     * @param int    $id_job
-     * @param string $remote_id
-     * @param        $connected_service_id
-     * @param int    $is_original
-     *
-     * @throws Exception
-     */
-    public static function insert( $id_file, $id_job, $remote_id, $connected_service_id, $is_original = 0 ) {
-        $data                  = [];
-        $data[ 'id_file' ]     = (int)$id_file;
-        $data[ 'id_job' ]      = (int)$id_job;
-        $data[ 'remote_id' ]   = (string)$remote_id;
-        $data[ 'is_original' ] = $is_original;
+namespace Model\RemoteFiles;
 
-        $data[ 'connected_service_id' ] = $connected_service_id;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use PDO;
+
+class RemoteFileDao extends AbstractDao
+{
+    /**
+     * @param int $id_file
+     * @param int $id_job
+     * @param string $remote_id
+     * @param int $connected_service_id
+     * @param int $is_original
+     */
+    public static function insert(int $id_file, int $id_job, string $remote_id, int $connected_service_id, int $is_original = 0): void
+    {
+        $data = [];
+        $data['id_file'] = $id_file;
+        $data['id_job'] = $id_job;
+        $data['remote_id'] = $remote_id;
+        $data['is_original'] = $is_original;
+
+        $data['connected_service_id'] = $connected_service_id;
 
         $db = Database::obtain();
-        $db->insert( 'remote_files', $data );
+        $db->insert('remote_files', $data);
     }
 
     /**
-     * @param $id_job
+     * @param int $id_job
      *
-     * @return RemoteFiles_RemoteFileStruct[]
+     * @return RemoteFileStruct[]
      */
-    public static function getByJobId( $id_job ) {
+    public static function getByJobId(int $id_job): array
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM remote_files " .
-                " WHERE id_job = :id_job " .
-                "   AND is_original = 0 "
+            "SELECT * FROM remote_files " .
+            " WHERE id_job = :id_job " .
+            "   AND is_original = 0 "
         );
 
-        $stmt->execute( [ 'id_job' => $id_job ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, RemoteFiles_RemoteFileStruct::class );
+        $stmt->execute(['id_job' => $id_job]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
         return $stmt->fetchAll();
     }
 
 
     /**
-     * @param $id_job
+     * @param int $id_job
      *
-     * @return RemoteFiles_RemoteFileStruct[]
+     * @return RemoteFileStruct[]
      */
-    public static function getOriginalsByJobId( $id_job ) {
+    public static function getOriginalsByJobId(int $id_job): array
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT r.* FROM remote_files r " .
-                " INNER JOIN files_job fj " .
-                "    ON r.id_file = fj.id_file " .
-                " WHERE fj.id_job = :id_job " .
-                "   AND r.is_original = 1 " .
-                " ORDER BY r.id_file "
+            "SELECT r.* FROM remote_files r " .
+            " INNER JOIN files_job fj " .
+            "    ON r.id_file = fj.id_file " .
+            " WHERE fj.id_job = :id_job " .
+            "   AND r.is_original = 1 " .
+            " ORDER BY r.id_file "
         );
 
-        $stmt->execute( [ 'id_job' => $id_job ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'RemoteFiles_RemoteFileStruct' );
+        $stmt->execute(['id_job' => $id_job]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param $id_file
+     * @param int $id_file
+     * @param int $is_original
      *
-     * @return RemoteFiles_RemoteFileStruct[]
+     * @return RemoteFileStruct[]
      */
-    public static function getByFileId( $id_file, $is_original = 0 ) {
+    public static function getByFileId(int $id_file, int $is_original = 0): array
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM remote_files " .
-                " WHERE id_file = :id_file " .
-                "   AND is_original = :is_original "
+            "SELECT * FROM remote_files " .
+            " WHERE id_file = :id_file " .
+            "   AND is_original = :is_original "
         );
 
-        $stmt->execute( [ 'id_file' => $id_file, 'is_original' => $is_original ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'RemoteFiles_RemoteFileStruct' );
+        $stmt->execute(['id_file' => $id_file, 'is_original' => $is_original]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param $id_file
-     * @param $id_job
+     * @param int $id_file
+     * @param int $id_job
      *
-     * @return RemoteFiles_RemoteFileStruct
+     * @return RemoteFileStruct|null
      */
-    public static function getByFileAndJob( $id_file, $id_job ): RemoteFiles_RemoteFileStruct {
+    public static function getByFileAndJob(int $id_file, int $id_job): ?RemoteFileStruct
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM remote_files " .
-                " WHERE id_file = :id_file " .
-                "   AND id_job = :id_job" .
-                "   AND is_original = 0 "
+            "SELECT * FROM remote_files " .
+            " WHERE id_file = :id_file " .
+            "   AND id_job = :id_job" .
+            "   AND is_original = 0 "
         );
 
-        $stmt->execute( [ 'id_file' => $id_file, 'id_job' => $id_job ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'RemoteFiles_RemoteFileStruct' );
+        $stmt->execute(['id_file' => $id_file, 'id_job' => $id_job]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, RemoteFileStruct::class);
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**
@@ -110,30 +121,31 @@ class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
      *
      * @return boolean
      */
-    public static function jobHasRemoteFiles( $id_job ) {
+    public static function jobHasRemoteFiles(int $id_job): bool
+    {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "  SELECT count(id) "
-                . "  FROM remote_files "
-                . " WHERE id_job = :id_job "
-                . "   AND is_original = 0 "
+            "  SELECT count(id) "
+            . "  FROM remote_files "
+            . " WHERE id_job = :id_job "
+            . "   AND is_original = 0 "
         );
-        $stmt->setFetchMode( PDO::FETCH_NUM );
-        $stmt->execute( [ 'id_job' => $id_job ] );
+        $stmt->setFetchMode(PDO::FETCH_NUM);
+        $stmt->execute(['id_job' => $id_job]);
 
         $result = $stmt->fetch();
 
-        $countRemoteFiles = $result[ 0 ];
+        $countRemoteFiles = $result[0];
 
-        if ( $countRemoteFiles > 0 ) {
+        if ($countRemoteFiles > 0) {
             return true;
         }
 
         return false;
     }
 
-    protected function _buildResult( array $array_result ) {
-        return null;
+    protected function _buildResult(array $array_result): void
+    {
     }
 }
 

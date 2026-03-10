@@ -7,12 +7,12 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
-use AMQHandler;
 use Exception;
-use INIT;
-use Log;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 
 /**
  * The abstract Daemon definition.
@@ -23,7 +23,8 @@ use Log;
  * - Provide log method for the concrete classes
  *
  */
-abstract class AbstractDaemon {
+abstract class AbstractDaemon
+{
 
     use SignalHandlerTrait;
 
@@ -69,45 +70,42 @@ abstract class AbstractDaemon {
      *
      * @var ContextList
      */
-    protected $_queueContextList = [];
+    protected ContextList $_queueContextList;
+
+    /**
+     * @var MatecatLogger
+     */
+    protected MatecatLogger $logger;
 
     /**
      * AbstractDaemon constructor.
      *
      * @param ?string $configFile
      * @param ?string $contextIndex
+     *
+     * @throws Exception
      */
-    protected function __construct( string $configFile = null, string $contextIndex = null ) {
-        INIT::$PRINT_ERRORS = true;
+    protected function __construct(string $configFile = null, ?string $contextIndex = null)
+    {
+        AppConfig::$PRINT_ERRORS = true;
         $this->myProcessPid = posix_getpid();
     }
 
     /**
      * Singleton Pattern, Unique Instance of This  ( Concrete class )
      *
-     * @param $config_file mixed
-     * @param $queueIndex
+     * @param ?string $config_file
+     * @param string|null $queueIndex
      *
      * @return static
+     * @throws Exception
      */
-    public static function getInstance( $config_file = null, $queueIndex = null ): AbstractDaemon {
-
-        $__INSTANCE = new static( $config_file, $queueIndex );
+    public static function getInstance(?string $config_file = null, ?string $queueIndex = null): AbstractDaemon
+    {
+        $__INSTANCE = new static($config_file, $queueIndex);
         $__INSTANCE->installHandler();
 
         return $__INSTANCE;
-    }
-
-    /**
-     * Log method
-     *
-     * @param $msg
-     */
-    protected function _logTimeStampedMsg( $msg ) {
-        if ( INIT::$DEBUG ) {
-            echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $msg ) . "\n";
-        }
-        Log::doJsonLog( $msg );
     }
 
     /**
@@ -115,18 +113,18 @@ abstract class AbstractDaemon {
      *
      * @param array|null $args
      *
-     * @return mixed
+     * @return void
      */
-    abstract public function main( array $args = null );
+    abstract public function main(array $args = null): void;
 
     /**
      * Needed to be abstract and static despite the strict standards because it will be called from signal handler
-     * @return mixed
+     * @return void
      */
-    abstract public function cleanShutDown();
+    abstract public function cleanShutDown(): void;
 
     /**
-     * Every cycle reload and update Daemon configuration.
+     * Every cycle reloads and updates Daemon configuration.
      * @return void
      * @throws Exception
      */
@@ -135,8 +133,9 @@ abstract class AbstractDaemon {
     /**
      * @throws Exception
      */
-    public function getConfiguration(): Configuration {
-        return new Configuration( $this->_configFile, $this->_contextIndex );
+    public function getConfiguration(): Configuration
+    {
+        return new Configuration($this->_configFile, $this->_contextIndex);
     }
 
 }

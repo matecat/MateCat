@@ -5,6 +5,17 @@
     "payable_rate_template_name": {
       "type": "string"
     },
+    "uid": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
     "breakdowns": {
       "type": "object",
       "$ref": "#/definitions/breakdowns"

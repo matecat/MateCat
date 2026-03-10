@@ -1,19 +1,23 @@
 <?php
+
+namespace Utils\Engines\Results\MyMemory;
+
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 04/03/15
  * Time: 11.50
  */
+class SetContributionResponse extends TMSAbstractResponse
+{
 
-class Engines_Results_MyMemory_SetContributionResponse extends Engines_Results_AbstractResponse {
-
-    public function __construct( $response ) {
-
-        $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
-        $this->responseDetails = isset( $response[ 'responseDetails' ] ) ? $response[ 'responseDetails' ] : '';
-        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
-
+    public function __construct($response)
+    {
+        $this->responseData = $response['responseData'] ?? '';
+        $this->responseDetails = $response['responseDetails'] ?? '';
+        $this->responseStatus = (int)($response['responseStatus'] ?? 200);
     }
 
 } 

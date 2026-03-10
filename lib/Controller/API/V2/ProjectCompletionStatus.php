@@ -1,54 +1,59 @@
 <?php
 
-namespace API\V2 ;
+namespace Controller\API\V2;
 
-use API\Commons\KleinController;
-use API\Commons\Validators\ProjectPasswordValidator;
-use API\Commons\Validators\ProjectValidator;
-use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
-use Projects_ProjectStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Controller\API\Commons\Validators\ProjectValidator;
+use Exception;
+use Model\Projects\ProjectStruct;
+use Plugins\Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 
-class ProjectCompletionStatus extends KleinController {
+class ProjectCompletionStatus extends KleinController
+{
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    private $project ;
+    private ProjectStruct $project;
 
-    public function afterConstruct() {
+    public function afterConstruct(): void
+    {
+        $projectValidator = new ProjectValidator($this);
 
-        $projectValidator = new ProjectValidator( $this );
-
-        if ( $this->request->paramsNamed()[ 'password' ] ) {
-            $projectPasswordValidator = new ProjectPasswordValidator( $this );
-            $projectPasswordValidator->onSuccess( function () use ( $projectPasswordValidator, $projectValidator ) {
+        if ($this->request->paramsNamed()['password']) {
+            $projectPasswordValidator = new ProjectPasswordValidator($this);
+            $projectPasswordValidator->onSuccess(function () use ($projectPasswordValidator, $projectValidator) {
                 $this->project = $projectPasswordValidator->getProject();
                 $projectValidator->setProject($this->project);
-            } );
+            });
 
-            $this->appendValidator( $projectPasswordValidator );
+            $this->appendValidator($projectPasswordValidator);
         }
 
-        if($this->getUser()){
-            $projectValidator->setUser( $this->getUser() );
+        if ($this->getUser()) {
+            $projectValidator->setUser($this->getUser());
         }
 
-        $projectValidator->setIdProject( $this->request->id_project );
-        $projectValidator->setFeature( 'project_completion' );
+        $projectValidator->setIdProject($this->request->param('id_project'));
+        $projectValidator->setFeature('project_completion');
 
-        $projectValidator->onSuccess( function () use ( $projectValidator ) {
+        $projectValidator->onSuccess(function () use ($projectValidator) {
             $this->project = $projectValidator->getProject();
-        } );
+        });
 
-        $this->appendValidator( $projectValidator );
+        $this->appendValidator($projectValidator);
     }
 
-    public function status() {
-
-        $model = new ProjectCompletionStatusModel( $this->project ) ;
-        $this->response->json( [
+    /**
+     * @throws Exception
+     */
+    public function status(): void
+    {
+        $model = new ProjectCompletionStatusModel($this->project);
+        $this->response->json([
             'project_status' => $model->getStatus()
-        ] ) ;
+        ]);
     }
 
 }

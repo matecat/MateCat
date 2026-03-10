@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class JobsStats extends AbstractMatecatMigration
 {
 

@@ -1,58 +1,55 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 /**
  * @deprecated use Validators\ChunkPasswordValidator
  */
 
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
-use Jobs_JobDao;
-use Jobs_JobStruct;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use ReflectionException;
 
-class JobPasswordValidator extends Base {
+class JobPasswordValidator extends Base
+{
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private Jobs_JobStruct $jStruct;
+    private JobStruct $jStruct;
 
     /**
-     * @var KleinController
-     */
-    protected $controller;
-
-
-    public function __construct( KleinController $controller ) {
-
-        parent::__construct( $controller->getRequest() );
-        $this->controller = $controller;
-
-        $this->jStruct           = new Jobs_JobStruct();
-        $this->jStruct->id       = $this->controller->params[ 'id_job' ];
-        $this->jStruct->password = $this->controller->params[ 'password' ];
-        $this->jStruct           = ( new Jobs_JobDao() )->setCacheTTL( 60 * 60 * 24 )->read( $this->jStruct )[ 0 ];
-
-        $this->controller->setChunk( $this->jStruct );
-
-    }
-
-    /**
-     * @return mixed|void
+     * @return void
      * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws \Model\Exceptions\NotFoundException
      */
-    protected function _validate() {
+    protected function _validate(): void
+    {
+        $filterArgs = [
+            'id_job' => [
+                'filter' => FILTER_SANITIZE_NUMBER_INT,
+                ['filter' => FILTER_VALIDATE_INT]
+            ],
+            'password' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+        ];
 
-        if ( empty( $this->jStruct ) ) {
-            throw new NotFoundException( "Not Found.", 404 );
-        }
+        $postInput = (object)filter_var_array($this->controller->params, $filterArgs);
 
+        $this->jStruct = ChunkDao::getByIdAndPassword($postInput->id_job, $postInput->password);
+
+        $this->controller->params['id_job'] = $postInput->id_job;
+        $this->controller->params['password'] = $postInput->password;
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getJob() {
+    public function getJob(): JobStruct
+    {
         return $this->jStruct;
     }
 

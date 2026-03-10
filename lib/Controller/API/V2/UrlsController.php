@@ -6,64 +6,66 @@
  * Time: 15:11
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use API\Commons\KleinController;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
-use API\V2\Json\ProjectUrls;
-use DataAccess\ShapelessConcreteStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Exception;
+use Model\Projects\ProjectDao;
+use View\API\V2\Json\ProjectUrls;
 
-class UrlsController extends KleinController {
+class UrlsController extends KleinController
+{
 
     /**
      * @var ProjectPasswordValidator
      */
-    private $validator;
+    private ProjectPasswordValidator $validator;
 
-    public function urls() {
+    /**
+     * @throws Exception
+     */
+    public function urls(): void
+    {
+        $this->featureSet->loadForProject($this->validator->getProject());
 
-        $this->featureSet->loadForProject( $this->validator->getProject() );
-
-        // @TODO is correct here?
         $jobCheck = 0;
-        foreach ($this->validator->getProject()->getJobs() as $job){
+        foreach ($this->validator->getProject()->getJobs() as $job) {
             if (!$job->isDeleted()) {
                 $jobCheck++;
             }
         }
 
-        if($jobCheck === 0){
-            $this->response->status()->setCode( 404 );
-            $this->response->json( [
+        if ($jobCheck === 0) {
+            $this->response->status()->setCode(404);
+            $this->response->json([
                 'errors' => [
-                        'code' => 0,
-                        'message' => 'No project found.'
+                    'code' => 0,
+                    'message' => 'No project found.'
                 ]
-            ] );
+            ]);
             exit();
         }
 
-        /**
-         * @var $projectData ShapelessConcreteStruct[]
-         */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->validator->getProject()->id );
+        $projectData = (new ProjectDao())->setCacheTTL(60 * 60)->getProjectData($this->validator->getProject()->id);
 
-        $formatted = new ProjectUrls( $projectData );
+        $formatted = new ProjectUrls($projectData);
 
-        $formatted = $this->featureSet->filter( 'projectUrls', $formatted );
+        $formatted = $this->featureSet->filter('projectUrls', $formatted);
 
-        $this->response->json( [ 'urls' => $formatted->render() ] );
-
+        $this->response->json(['urls' => $formatted->render()]);
     }
 
-    protected function validateRequest() {
+    protected function validateRequest(): void
+    {
         $this->validator->validate();
     }
 
-    protected function afterConstruct() {
-        $this->validator = new ProjectPasswordValidator( $this );
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->validator = new ProjectPasswordValidator($this);
+        $this->appendValidator(new LoginValidator($this));
     }
 
 }

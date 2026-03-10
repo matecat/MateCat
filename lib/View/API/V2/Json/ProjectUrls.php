@@ -6,30 +6,36 @@
  * Time: 15:57
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
-use DataAccess\ShapelessConcreteStruct;
 use Exception;
-use Routes;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use ReflectionException;
+use Utils\Url\CanonicalRoutes;
 
-class ProjectUrls {
+class ProjectUrls
+{
 
-    protected $data;
-    protected $jobs   = [];
-    protected $files  = [];
-    protected $chunks = [];
+    protected array $data;
+    protected array $jobs = [];
+    protected array $files = [];
+    protected array $chunks = [];
 
     /*
      * @var array
      */
-    private $formatted = [ 'files' => [], 'jobs' => [] ];
+    private array $formatted = ['files' => [], 'jobs' => []];
 
     /**
      * ProjectUrls constructor.
      *
      * @param $data ShapelessConcreteStruct[]
      */
-    public function __construct( $data ) {
+    public function __construct(array $data)
+    {
         $this->data = $data;
     }
 
@@ -39,45 +45,43 @@ class ProjectUrls {
      * @return array
      * @throws Exception
      */
-    public function render( $keyAssoc = false ) {
-
-        foreach ( $this->data as $record ) {
-
-            if ( !array_key_exists( $record[ 'id_file' ], $this->files ) ) {
-                $this->files[ $record[ 'id_file' ] ] = [
-                        'id'                       => $record[ 'id_file' ],
-                        'name'                     => $record[ 'filename' ],
-                        'original_download_url'    => $this->downloadOriginalUrl( $record ),
-                        'translation_download_url' => $this->downloadFileTranslationUrl( $record ),
-                        'xliff_download_url'       => $this->downloadXliffUrl( $record )
+    public function render(bool $keyAssoc = false): array
+    {
+        foreach ($this->data as $record) {
+            if (!array_key_exists($record['id_file'], $this->files)) {
+                $this->files[$record['id_file']] = [
+                    'id' => $record['id_file'],
+                    'name' => $record['filename'],
+                    'original_download_url' => $this->downloadOriginalUrl($record),
+                    'translation_download_url' => $this->downloadFileTranslationUrl($record),
+                    'xliff_download_url' => $this->downloadXliffUrl($record)
                 ];
             }
 
-            if ( !array_key_exists( $record[ 'jid' ], $this->jobs ) ) {
-                $this->jobs[ $record[ 'jid' ] ] = [
-                        'id'                       => $record[ 'jid' ],
-                        'target_lang'              => $record[ 'target' ],
-                        'original_download_url'    => $this->downloadOriginalUrl( $record ),
-                        'translation_download_url' => $this->downloadTranslationUrl( $record ),
-                        'xliff_download_url'       => $this->downloadXliffUrl( $record ),
-                        'chunks'                   => []
+            if (!array_key_exists($record['jid'], $this->jobs)) {
+                $this->jobs[$record['jid']] = [
+                    'id' => $record['jid'],
+                    'target_lang' => $record['target'],
+                    'original_download_url' => $this->downloadOriginalUrl($record),
+                    'translation_download_url' => $this->downloadTranslationUrl($record),
+                    'xliff_download_url' => $this->downloadXliffUrl($record),
+                    'chunks' => []
                 ];
             }
 
-            $this->generateChunkUrls( $record );
-
+            $this->generateChunkUrls($record);
         }
 
         //maintain index association for external array access
-        if ( !$keyAssoc ) {
-            $this->formatted[ 'jobs' ] = array_values( $this->jobs );
-            foreach ( $this->formatted[ 'jobs' ] as &$chunks ) {
-                $chunks[ 'chunks' ] = array_values( $chunks[ 'chunks' ] );
+        if (!$keyAssoc) {
+            $this->formatted['jobs'] = array_values($this->jobs);
+            foreach ($this->formatted['jobs'] as &$chunks) {
+                $chunks['chunks'] = array_values($chunks['chunks']);
             }
-            $this->formatted[ 'files' ] = array_values( $this->files );
+            $this->formatted['files'] = array_values($this->files);
         } else {
-            $this->formatted[ 'jobs' ]  = $this->jobs;
-            $this->formatted[ 'files' ] = $this->files;
+            $this->formatted['jobs'] = $this->jobs;
+            $this->formatted['files'] = $this->files;
         }
 
         // start over for jobs
@@ -85,25 +89,45 @@ class ProjectUrls {
         return $this->formatted;
     }
 
+
     /**
+     * @throws ReflectionException
      * @throws Exception
      */
-    protected function generateChunkUrls( $record ) {
+    protected function generateChunkUrls(ShapelessConcreteStruct $record): void
+    {
+        if (!array_key_exists($record['jpassword'], $this->chunks)) {
+            $this->chunks[$record['jpassword']] = 1;
 
-        if ( !array_key_exists( $record[ 'jpassword' ], $this->chunks ) ) {
-            $this->chunks[ $record[ 'jpassword' ] ] = 1;
-
-            $this->jobs[ $record[ 'jid' ] ][ 'chunks' ][ $record[ 'jpassword' ] ][ 'translate_url' ]  = $this->translateUrl( $record );
-            $this->jobs[ $record[ 'jid' ] ][ 'chunks' ][ $record[ 'jpassword' ] ][ 'revise_urls' ] [] = [
-                    'revision_number' => 1,
-                    'url'             => $this->reviseUrl( $record )
+            $this->jobs[$record['jid']]['chunks'][$record['jpassword']] = [
+                'password' => $record['jpassword'],
+                'translate_url' => $this->translateUrl($record),
             ];
 
-        }
+            $reviews = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $record['jid'], 'password' => $record['jpassword']]), 60 * 10);
 
+            foreach ($reviews as $review) {
+                $revisionNumber = ReviewUtils::sourcePageToRevisionNumber($review->source_page);
+                $reviseUrl = CanonicalRoutes::revise(
+                    $record['name'],
+                    $record['jid'],
+                    $review->review_password,
+                    $record['source'],
+                    $record['target'],
+                    ['revision_number' => $revisionNumber]
+                );
+
+                $this->jobs[$record['jid']]['chunks'][$record['jpassword']] ['revise_urls'] [] = [
+                    'revision_number' => $revisionNumber,
+                    'url' => $reviseUrl
+                ];
+            }
+        }
     }
 
-    public function getData() {
+
+    public function getData(): array
+    {
         return $this->data;
     }
 
@@ -111,67 +135,73 @@ class ProjectUrls {
     /**
      * @throws Exception
      */
-    protected function downloadOriginalUrl( $record ) {
-        return Routes::downloadOriginal(
-                $record[ 'jid' ],
-                $record[ 'jpassword' ],
-                $record[ 'id_file' ]
+    protected function downloadOriginalUrl(ShapelessConcreteStruct $record): string
+    {
+        return CanonicalRoutes::downloadOriginal(
+            $record['jid'],
+            $record['jpassword'],
+            $record['id_file']
         );
     }
 
     /**
      * @throws Exception
      */
-    protected function downloadXliffUrl( $record ) {
-        return Routes::downloadXliff(
-                $record[ 'jid' ],
-                $record[ 'jpassword' ]
+    protected function downloadXliffUrl(ShapelessConcreteStruct $record): string
+    {
+        return CanonicalRoutes::downloadXliff(
+            $record['jid'],
+            $record['jpassword']
         );
     }
 
     /**
      * @throws Exception
      */
-    protected function downloadFileTranslationUrl( $record ) {
-        return Routes::downloadTranslation(
-                $record[ 'jid' ],
-                $record[ 'jpassword' ]
+    protected function downloadFileTranslationUrl(ShapelessConcreteStruct $record): string
+    {
+        return CanonicalRoutes::downloadTranslation(
+            $record['jid'],
+            $record['jpassword']
         );
     }
 
     /**
      * @throws Exception
      */
-    protected function downloadTranslationUrl( $record ) {
-        return Routes::downloadTranslation(
-                $record[ 'jid' ],
-                $record[ 'jpassword' ]
+    protected function downloadTranslationUrl(ShapelessConcreteStruct $record): string
+    {
+        return CanonicalRoutes::downloadTranslation(
+            $record['jid'],
+            $record['jpassword']
         );
     }
 
     /**
      * @throws Exception
      */
-    protected function translateUrl( $record ) {
-        return Routes::translate(
-                $record[ 'name' ],
-                $record[ 'jid' ],
-                $record[ 'jpassword' ],
-                $record[ 'source' ],
-                $record[ 'target' ]
+    protected function translateUrl(ShapelessConcreteStruct $record): string
+    {
+        return CanonicalRoutes::translate(
+            $record['name'],
+            $record['jid'],
+            $record['jpassword'],
+            $record['source'],
+            $record['target']
         );
     }
 
     /**
      * @throws Exception
      */
-    protected function reviseUrl( $record ) {
-        return Routes::revise(
-                $record[ 'name' ],
-                $record[ 'jid' ],
-                $record[ 'jpassword' ],
-                $record[ 'source' ],
-                $record[ 'target' ]
+    protected function reviseUrl(ShapelessConcreteStruct $record): string
+    {
+        return CanonicalRoutes::revise(
+            $record['name'],
+            $record['jid'],
+            $record['jpassword'],
+            $record['source'],
+            $record['target']
         );
     }
 }

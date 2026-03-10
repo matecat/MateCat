@@ -7,71 +7,82 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 
-class SegmentTranslationMismatches {
+class SegmentTranslationMismatches
+{
 
-    protected $data;
-    protected $thereArePropagations;
-    protected $featureSet;
+    protected array $data;
+    protected int $thereArePropagations;
+    protected ?FeatureSet $featureSet;
+    private JobStruct $jobStruct;
 
     /**
      * SegmentTranslationMismatches constructor.
-     * from query: getWarning( id_job, password )
+     * from query: getWarning(id_job, password)
      *
-     * @param                  $Translation_mismatches
-     * @param                  $thereArePropagations
-     * @param \FeatureSet|null $featureSet
-     *
-     * @throws \Exception
+     * @param array $Translation_mismatches
+     * @param JobStruct $jobStruct
+     * @param int $thereArePropagations
+     * @param FeatureSet|null $featureSet
      */
-    public function __construct( $Translation_mismatches, $thereArePropagations, \FeatureSet $featureSet = null ) {
-        $this->data                 = $Translation_mismatches;
+    public function __construct(array $Translation_mismatches, JobStruct $jobStruct, int $thereArePropagations, FeatureSet $featureSet = null)
+    {
+        $this->data = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
-        if ( $featureSet == null ) {
-            $featureSet = new \FeatureSet();
+        if ($featureSet == null) {
+            $featureSet = new FeatureSet();
         }
         $this->featureSet = $featureSet;
+        $this->jobStruct = $jobStruct;
     }
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function render() {
-
+    public function render(): array
+    {
         $result = [
-                'editable'       => [],
-                'not_editable'   => [],
-                'prop_available' => $this->thereArePropagations
+            'editable' => [],
+            'not_editable' => [],
+            'prop_available' => $this->thereArePropagations
         ];
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
+        $metadataDao = new MetadataDao();
 
-        foreach ( $this->data as $position => $row ) {
+        foreach ($this->data as $row) {
+            $Filter = MateCatFilter::getInstance(
+                $featureSet,
+                $row['source'],
+                $row['target'],
+                [],
+                $metadataDao->getSubfilteringCustomHandlers($this->jobStruct->id, $this->jobStruct->password)
+            );
 
-            $Filter = MateCatFilter::getInstance( $featureSet, $row[ 'source' ], $row[ 'target' ], [] );
-
-            if ( $row[ 'editable' ] ) {
-                $result[ 'editable' ][] = [
-                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
-                        'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
+            if ($row['editable']) {
+                $result['editable'][] = [
+                    'translation' => $Filter->fromLayer0ToLayer2($row['translation']),
+                    'TOT' => $row['TOT'],
+                    'involved_id' => explode(",", $row['involved_id'])
                 ];
             } else {
-                $result[ 'not_editable' ][] = [
-                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
-                        'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
+                $result['not_editable'][] = [
+                    'translation' => $Filter->fromLayer0ToLayer2($row['translation']),
+                    'TOT' => $row['TOT'],
+                    'involved_id' => explode(",", $row['involved_id'])
                 ];
             }
-
         }
 
         return $result;
-
     }
 
 }

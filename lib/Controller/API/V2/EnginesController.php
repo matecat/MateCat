@@ -7,33 +7,38 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use API\Commons\KleinController;
-use API\Commons\Validators\LoginValidator;
-use API\V2\Json\Engine;
-use Database;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use Model\DataAccess\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
+use View\API\V2\Json\Engine;
 
-class EnginesController extends KleinController {
+class EnginesController extends KleinController
+{
 
-    public function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    public function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
-    public function listEngines(){
-
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
+    /**
+     * @throws Exception
+     */
+    public function listEngines(): void
+    {
+        $engineDAO = new EngineDAO(Database::obtain());
+        $engineStruct = EngineStruct::getStruct();
         $engineStruct->uid = $this->user->uid;
         $engineStruct->active = true;
 
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-        $formatter = new Engine( $eng );
-        $this->response->json( $formatter->render() );
-
+        $eng = $engineDAO->setCacheTTL(60 * 5)->read($engineStruct);
+        $formatter = new Engine($eng);
+        $this->response->json($formatter->render());
     }
 
 }

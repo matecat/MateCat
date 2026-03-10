@@ -7,29 +7,20 @@
  *
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 
-class LoginValidator extends Base {
+class LoginValidator extends Base
+{
 
     /**
-     * @var KleinController
+     * @return void
+     * @throws AuthenticationError
      */
-    protected $controller;
-
-    public function __construct( KleinController $controller ) {
-
-        parent::__construct( $controller->getRequest() );
-        $this->controller = $controller;
-
-    }
-
-    public function _validate() {
-//        if( !$this->controller->isLoggedIn() ){
-//            throw new AuthenticationError( "Invalid Login.", 401 );
-//        }
+    public function _validate(): void
+    {
+        $this->controller->isLoggedIn() ?: throw new AuthenticationError("Invalid Login.", 401);
     }
 }

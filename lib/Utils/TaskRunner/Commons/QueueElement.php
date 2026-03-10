@@ -7,47 +7,33 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
 /**
  * Class QueueElement
  * @package TaskRunner\Commons
  */
-class QueueElement extends AbstractElement {
+class QueueElement extends AbstractElement
+{
 
     /**
      * Worker class definition to be loaded by Executor
      * @var string
      */
-    public $classLoad;
+    public string $classLoad;
 
     /**
      * Data needed to execute the work
      *
      * @var Params
      */
-    public $params;
+    public Params $params;
 
     /**
      * Number of times the element is re-queued
      *
      * @var int
      */
-    public $reQueueNum = 0;
-
-    /**
-     * Optional message for the re-queue
-     *
-     * @var string
-     */
-    public $reQueueMessage = '';
-
-    /**
-     * Magic method to serialize this object
-     * @return string
-     */
-    public function __toString() {
-        return json_encode( $this );
-    }
+    public int $reQueueNum = 0;
 
 }

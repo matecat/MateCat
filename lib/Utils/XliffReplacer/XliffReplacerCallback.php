@@ -1,100 +1,136 @@
 <?php
 
-namespace XliffReplacer;
+namespace Utils\XliffReplacer;
 
 use Exception;
-use Features;
-use FeatureSet;
-use LQA\QA;
+use Matecat\ICU\MessagePatternComparator;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
+use Utils\LQA\ICUSourceSegmentChecker;
+use Utils\LQA\QA;
 
-class XliffReplacerCallback implements XliffReplacerCallbackInterface {
+class XliffReplacerCallback implements XliffReplacerCallbackInterface
+{
+    use ICUSourceSegmentChecker;
+
 
     /**
-     * @var MateCatFilter
+     * @var array
      */
-    private $filter;
+    private array $subfilteringCustomHandlers;
 
 
     /**
      * @var string
      */
-    private $sourceLang;
+    private string $sourceLang;
 
     /**
      * @var string
      */
-    private $targetLang;
+    private string $targetLang;
 
-    /**
-     * @var Features
-     */
-    private $featureSet;
+    private FeatureSet $featureSet;
+    private ?JobStruct $jobStruct;
 
     /**
      * XliffReplacerCallback constructor.
      *
      * @param FeatureSet $featureSet
-     * @param string     $sourceLang
-     * @param string     $targetLang
-     *
-     * @throws Exception
+     * @param string $sourceLang
+     * @param string $targetLang
+     * @param JobStruct $jobStruct
      */
-    public function __construct( FeatureSet $featureSet, $sourceLang, $targetLang ) {
-        $this->filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
+    public function __construct(FeatureSet $featureSet, string $sourceLang, string $targetLang, JobStruct $jobStruct)
+    {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
+        $this->jobStruct = $jobStruct;
+
+        $metadataDao = new MetadataDao();
+        $this->subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers($jobStruct->id, $jobStruct->password);
+
     }
 
     /**
      * @inheritDoc
      * @throws Exception
      */
-    public function thereAreErrors( int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null ): bool {
+    public function thereAreErrors(int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null): bool
+    {
 
-        // if there are ERR_SIZE_RESTRICTION errors, return true
-        if ( $error !== null ) {
-            $errors = json_decode( $error );
+        // TODO implement the syntax check algorithms in the backend too and count characters at runtime instead of use the stored values
+        //  because some segments might not have been opened and the error list could be empty
 
-            if ( $errors ) {
-                foreach ( $errors as $err ) {
-                    if ( isset( $err->outcome ) and $err->outcome === QA::ERR_SIZE_RESTRICTION ) {
+        // If there are ERR_SIZE_RESTRICTION errors, return true.
+        // This check is here because, at this point, the backend doesn't know the segment's character count.
+        // It is calculated only on the frontend, using an algorithm implemented only on the frontend.
+        // Since we need the string length to check for the error in the QA class, we can't compute it here.
+        // We get the error from `segment_translations.serialized_errors_list`.
+        if ($error !== null) {
+            $errors = json_decode($error);
+
+            if ($errors) {
+                foreach ($errors as $err) {
+                    if (isset($err->outcome) and $err->outcome === QA::ERR_SIZE_RESTRICTION) {
                         return true;
                     }
                 }
             }
         }
 
-        $segment     = $this->filter->fromLayer0ToLayer1( $segment );
-        $translation = $this->filter->fromLayer0ToLayer1( $translation );
+        $filter = MateCatFilter::getInstance(
+            $this->featureSet,
+            $this->sourceLang,
+            $this->targetLang,
+            $dataRefMap ?? [],
+            $this->subfilteringCustomHandlers,
+            $this->sourceContainsIcu($this->jobStruct->getProject(), $this->jobStruct, $segment)
+        );
 
+        $segment = $filter->fromLayer0ToLayer1($segment);
+        $translation = $filter->fromLayer0ToLayer1($translation);
+
+        // In Matecat, some special characters are mapped in data_ref_map (for example, &#39;)
+        // and can be omitted in the target.
+        // In this case, |||UNTRANSLATED_CONTENT_START||| should not be found in the target.
         //
-        // ------------------------------------
-        // NOTE 2021-01-25
-        // ------------------------------------
-        //
-        // In Matecat there are some special characters mapped in data_ref_map (like &#39; for example)
-        // that can be omitted in the target.
-        // In this case no |||UNTRANSLATED_CONTENT_START||| should be found in the target
-        //
-        // To skip these characters QA class needs replaced version of segment and target for _addThisElementToDomMap() function
-        //
-        if ( !empty( $dataRefMap ) ) {
-            $dataRefReplacer = new DataRefReplacer( $dataRefMap );
-            $segment         = $dataRefReplacer->replace( $segment );
-            $translation     = $dataRefReplacer->replace( $translation );
+        // To skip these characters, the QA class needs the replaced versions of the segment and the target
+        // for the _addThisElementToDomMap() function.
+        if (!empty($dataRefMap)) {
+            $dataRefReplacer = new DataRefReplacer($dataRefMap);
+            $segment = $dataRefReplacer->replace($segment);
+            $translation = $dataRefReplacer->replace($translation);
         }
 
-        $check = new QA ( $segment, $translation );
-        $check->setFeatureSet( $this->featureSet );
-        $check->setTargetSegLang( $this->targetLang );
-        $check->setSourceSegLang( $this->sourceLang );
-        $check->setIdSegment( $segmentId );
+        // We must perform a new validation here, ignoring `$error` from `segment_translations.serialized_errors_list`
+        // because some segments might not have been opened and the error list could be empty.
+        $check = new QA(
+            $segment,
+            $translation,
+            MessagePatternComparator::fromValidators(
+                $this->icuSourcePatternValidator,
+                new MessagePatternValidator(
+                    $this->jobStruct->target,
+                    $translation
+                )
+            ),
+            // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
+            $this->sourceContainsIcu
+        ); // Layer 1 here
+
+        $check->setFeatureSet($this->featureSet);
+        $check->setTargetSegLang($this->targetLang);
+        $check->setSourceSegLang($this->sourceLang);
         $check->performConsistencyCheck();
 
         return $check->thereAreErrors();
     }
+
 }

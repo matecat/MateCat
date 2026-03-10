@@ -1,10 +1,10 @@
 
-@import '../../commons/colors';
-@import 'SigninPage';
-@import 'Login';
-@import 'Register';
-@import 'ForgotPassword';
-@import 'PasswordReset';
+@use '../../commons/colors';
+@use 'SigninPage';
+@use 'Login';
+@use 'Register';
+@use 'ForgotPassword';
+@use 'PasswordReset';
 
 .onboarding-controls {
   position: absolute;
@@ -27,7 +27,7 @@
       }
 
       p {
-        color: $grey7;
+        color: colors.$grey7;
       }
 
 
@@ -54,14 +54,14 @@
       height: 20px;
       line-height: 20px;
       border-radius: 50%;
-      background-color: $grey7;
-      color: $white;
+      background-color: colors.$grey7;
+      color: colors.$white;
     }
   }
 }
 .form-errorMessage {
   font-size: 14px;
-  color: $redDefault;
+  color: colors.$redDefault;
   text-align: center;
   padding-left: 2px;
 }

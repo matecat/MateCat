@@ -9,6 +9,13 @@
     "name": {
       "type": "string"
     },
+    "uid": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
     "rules": {
       "type": [
         "object"

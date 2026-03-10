@@ -7,11 +7,12 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
 use ArrayAccess;
 use DomainException;
 use stdClass;
+use Stringable;
 
 /**
  * Class AbstractElement
@@ -20,18 +21,20 @@ use stdClass;
  *
  * @package TaskRunner\Commons
  */
-abstract class AbstractElement extends stdClass implements ArrayAccess {
+abstract class AbstractElement extends stdClass implements ArrayAccess, Stringable
+{
 
     /**
      * AbstractElement constructor.
      *
      * @param array $array_params
      */
-    public function __construct( array $array_params = [] ) {
-        if ( $array_params != null ) {
-            foreach ( $array_params as $property => $value ) {
-                if ( is_array( $value ) ) {
-                    $value = new Params( $value );
+    public function __construct(array $array_params = [])
+    {
+        if ($array_params != null) {
+            foreach ($array_params as $property => $value) {
+                if (is_array($value)) {
+                    $value = new Params($value);
                 }
                 $this->$property = $value;
             }
@@ -41,19 +44,12 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
     /**
      * __set() is run when writing data to inaccessible properties
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
      */
-    public function __set( $name, $value ) {
-        throw new DomainException( 'Unknown property ' . $name );
-    }
-
-    /**
-     * Object to Array conversion method
-     * @return array
-     */
-    public function toArray() {
-        return (array)$this;
+    public function __set(string $name, mixed $value): void
+    {
+        throw new DomainException('Unknown property ' . $name);
     }
 
     /**
@@ -63,8 +59,9 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      *
      * @return bool
      */
-    public function offsetExists( $offset ) {
-        return property_exists( $this, $offset );
+    public function offsetExists(mixed $offset): bool
+    {
+        return property_exists($this, $offset);
     }
 
     /**
@@ -74,8 +71,9 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      *
      * @return null
      */
-    public function offsetGet( $offset ) {
-        if ( $this->offsetExists( $offset ) ) {
+    public function offsetGet(mixed $offset): mixed
+    {
+        if ($this->offsetExists($offset)) {
             return $this->$offset;
         }
 
@@ -88,8 +86,9 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet( $offset, $value ) {
-        if ( $this->offsetExists( $offset ) ) {
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        if ($this->offsetExists($offset)) {
             $this->$offset = $value;
         }
     }
@@ -99,10 +98,38 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      *
      * @param mixed $offset
      */
-    public function offsetUnset( $offset ) {
-        if ( $this->offsetExists( $offset ) ) {
+    public function offsetUnset(mixed $offset): void
+    {
+        if ($this->offsetExists($offset)) {
             $this->$offset = null;
         }
+    }
+
+    /**
+     * Recursive Object to Array conversion method
+     */
+    public function toArray(): array
+    {
+        $nestedParamsObject = [];
+        foreach ($this as $key => $item) {
+            if ($item instanceof AbstractElement) {
+                $nestedParamsObject[$key] = $item->toArray();
+            } else {
+                $nestedParamsObject[$key] = $item;
+            }
+        }
+
+        return $nestedParamsObject;
+    }
+
+    /**
+     * Magic to string method
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return json_encode($this);
     }
 
 }

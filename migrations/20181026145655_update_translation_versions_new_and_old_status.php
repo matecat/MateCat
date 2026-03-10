@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class UpdateTranslationVersionsNewAndOldStatus extends AbstractMatecatMigration {
     public $sql_up = [
             "ALTER TABLE `segment_translation_versions` ADD COLUMN old_status INT(11) DEFAULT NULL, ADD COLUMN new_status INT(11) DEFAULT NULL, algorithm=INPLACE, lock=NONE"

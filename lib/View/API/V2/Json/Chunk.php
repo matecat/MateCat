@@ -6,30 +6,32 @@
  * Time: 10:41
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobStruct;
 
-class Chunk extends Job {
+class Chunk extends Job
+{
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return array
      * @throws Exception
      * @throws NotFoundException
      */
-    public function renderOne( Jobs_JobStruct $chunk ) {
-        $project    = $chunk->getProject();
+    public function renderOne(JobStruct $chunk): array
+    {
+        $project = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
         return [
-                'job' => [
-                        'id'     => (int)$chunk->id,
-                        'chunks' => [ $this->renderItem( $chunk, $project, $featureSet ) ]
-                ]
+            'job' => [
+                'id' => (int)$chunk->id,
+                'chunks' => [$this->renderItem($chunk, $project, $featureSet)]
+            ]
         ];
     }
 

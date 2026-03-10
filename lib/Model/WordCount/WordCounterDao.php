@@ -7,32 +7,33 @@
  *
  */
 
-namespace WordCount;
+namespace Model\WordCount;
 
 
-use DataAccess_AbstractDao;
-use Database;
-use Log;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use PDO;
 use PDOException;
+use Utils\Logger\LoggerFactory;
 
-class WordCounterDao extends DataAccess_AbstractDao {
+class WordCounterDao extends AbstractDao
+{
 
     /**
      * Update the word count for the job
      *
-     * We perform an update in join with jobs table
+     * We perform an update in join with the `jobs` table
      * because we want to update the word count only for the current chunk
      *
      * Update the status of segment_translation is needed to avoid duplicated calls
-     * ( The second call fails for status condition )
+     * (The second call fails for status condition)
      *
      * @param WordCountStruct $wStruct
      *
      * @return int
      */
-    public static function updateWordCount( WordCountStruct $wStruct ) {
-
+    public static function updateWordCount(WordCountStruct $wStruct)
+    {
         $db = Database::obtain();
 
         //Update in Transaction
@@ -53,69 +54,67 @@ class WordCounterDao extends DataAccess_AbstractDao {
                   AND j.password = :password";
 
         $bind_keys = [
-                'newWords'           => $wStruct->getNewWords(),
-                'draftWords'         => $wStruct->getDraftWords(),
-                'translatedWords'    => $wStruct->getTranslatedWords(),
-                'approvedWords'      => $wStruct->getApprovedWords(),
-                'approved2Words'     => $wStruct->getApproved2Words(),
-                'rejectedWords'      => $wStruct->getRejectedWords(),
-                'newRawWords'        => $wStruct->getNewRawWords(),
-                'draftRawWords'      => $wStruct->getDraftRawWords(),
-                'translatedRawWords' => $wStruct->getTranslatedRawWords(),
-                'approvedRawWords'   => $wStruct->getApprovedRawWords(),
-                'approved2RawWords'  => $wStruct->getApproved2RawWords(),
-                'rejectedRawWords'   => $wStruct->getRejectedRawWords(),
-                'id_job'             => $wStruct->getIdJob(),
-                'password'           => $wStruct->getJobPassword()
+            'newWords' => $wStruct->getNewWords(),
+            'draftWords' => $wStruct->getDraftWords(),
+            'translatedWords' => $wStruct->getTranslatedWords(),
+            'approvedWords' => $wStruct->getApprovedWords(),
+            'approved2Words' => $wStruct->getApproved2Words(),
+            'rejectedWords' => $wStruct->getRejectedWords(),
+            'newRawWords' => $wStruct->getNewRawWords(),
+            'draftRawWords' => $wStruct->getDraftRawWords(),
+            'translatedRawWords' => $wStruct->getTranslatedRawWords(),
+            'approvedRawWords' => $wStruct->getApprovedRawWords(),
+            'approved2RawWords' => $wStruct->getApproved2RawWords(),
+            'rejectedRawWords' => $wStruct->getRejectedRawWords(),
+            'id_job' => $wStruct->getIdJob(),
+            'password' => $wStruct->getJobPassword()
         ];
 
         try {
-            $stmt = $db->getConnection()->prepare( $query );
-            $stmt->execute( $bind_keys );
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            $stmt = $db->getConnection()->prepare($query);
+            $stmt->execute($bind_keys);
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
 
             return $e->getCode() * -1;
         }
 
         return $stmt->rowCount();
-
     }
 
-    public function initializeWordCount( WordCountStruct $wStruct ) {
-
+    public function initializeWordCount(WordCountStruct $wStruct)
+    {
         $db = Database::obtain();
 
-        $data                       = [];
-        $data[ 'new_words' ]        = $wStruct->getNewWords();
-        $data[ 'draft_words' ]      = $wStruct->getDraftWords();
-        $data[ 'translated_words' ] = $wStruct->getTranslatedWords();
-        $data[ 'approved_words' ]   = $wStruct->getApprovedWords();
-        $data[ 'approved2_words' ]  = $wStruct->getApproved2Words();
-        $data[ 'rejected_words' ]   = $wStruct->getRejectedWords();
+        $data = [];
+        $data['new_words'] = $wStruct->getNewWords();
+        $data['draft_words'] = $wStruct->getDraftWords();
+        $data['translated_words'] = $wStruct->getTranslatedWords();
+        $data['approved_words'] = $wStruct->getApprovedWords();
+        $data['approved2_words'] = $wStruct->getApproved2Words();
+        $data['rejected_words'] = $wStruct->getRejectedWords();
 
-        $data[ 'new_raw_words' ]        = $wStruct->getNewRawWords();
-        $data[ 'draft_raw_words' ]      = $wStruct->getDraftRawWords();
-        $data[ 'translated_raw_words' ] = $wStruct->getTranslatedRawWords();
-        $data[ 'approved_raw_words' ]   = $wStruct->getApprovedRawWords();
-        $data[ 'approved2_raw_words' ]  = $wStruct->getApproved2RawWords();
-        $data[ 'rejected_raw_words' ]   = $wStruct->getRejectedRawWords();
+        $data['new_raw_words'] = $wStruct->getNewRawWords();
+        $data['draft_raw_words'] = $wStruct->getDraftRawWords();
+        $data['translated_raw_words'] = $wStruct->getTranslatedRawWords();
+        $data['approved_raw_words'] = $wStruct->getApprovedRawWords();
+        $data['approved2_raw_words'] = $wStruct->getApproved2RawWords();
+        $data['rejected_raw_words'] = $wStruct->getRejectedRawWords();
 
         $where = [
-                'id'       => $wStruct->getIdJob(),
-                'password' => $wStruct->getJobPassword()
+            'id' => $wStruct->getIdJob(),
+            'password' => $wStruct->getJobPassword()
         ];
 
         try {
-            $db->update( 'jobs', $data, $where );
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            $db->update('jobs', $data, $where);
+        } catch (PDOException $e) {
+            LoggerFactory::doJsonLog($e->getMessage());
 
             return $e->getCode() * -1;
         }
 
-        return $db->affected_rows;
-
+        return $db->rowCount();
     }
 
     /**
@@ -124,15 +123,14 @@ class WordCounterDao extends DataAccess_AbstractDao {
      * Leave untouched for getSegmentsController, split job recalculation
      * because of file level granularity in payable words
      *
-     * @param      $id_job
-     * @param null $id_file
-     * @param null $jPassword
+     * @param int $id_job
+     * @param int|null $id_file
+     * @param string|null $jPassword
      *
      * @return array
-     *
      */
-    public function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
-
+    public function getStatsForJob(int $id_job, ?int $id_file = null, ?string $jPassword = null): array
+    {
         /*
          * -- TOTAL field is not used, but we keep here to easy check the values and for documentation
          *
@@ -188,21 +186,21 @@ class WordCounterDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain();
 
-        $bind_values = [ 'id_job' => $id_job ];
+        $bind_values = ['id_job' => $id_job];
 
-        if ( !empty( $jPassword ) ) {
-            $bind_values[ 'password' ] = $jPassword;
-            $query                     .= " and j.password = :password";
+        if (!empty($jPassword)) {
+            $bind_values['password'] = $jPassword;
+            $query .= " and j.password = :password";
         }
 
-        if ( !empty( $id_file ) ) {
-            $bind_values[ 'id_file' ] = $id_file;
-            $query                    .= " and fj.id_file = :id_file";
+        if (!empty($id_file)) {
+            $bind_values['id_file'] = $id_file;
+            $query .= " and fj.id_file = :id_file";
         }
 
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( $bind_values );
+        $stmt = $db->getConnection()->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute($bind_values);
         $results = $stmt->fetchAll();
         $stmt->closeCursor();
 

@@ -1,31 +1,36 @@
 <?php
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
-class Propagation {
+use Model\Propagation\PropagationTotalStruct;
+
+class Propagation
+{
 
     /**
-     * @var \Propagation_PropagationTotalStruct
+     * @var PropagationTotalStruct
      */
     private $propagation_PropagationTotalStruct;
 
     /**
      * Propagation constructor.
      *
-     * @param \Propagation_PropagationTotalStruct $propagation_PropagationTotalStruct
+     * @param PropagationTotalStruct $propagation_PropagationTotalStruct
      */
-    public function __construct( \Propagation_PropagationTotalStruct $propagation_PropagationTotalStruct ) {
+    public function __construct(PropagationTotalStruct $propagation_PropagationTotalStruct)
+    {
         $this->propagation_PropagationTotalStruct = $propagation_PropagationTotalStruct;
     }
 
     /**
      * @return array
      */
-    public function render() {
+    public function render(): array
+    {
         return [
-                'totals'                   => $this->propagation_PropagationTotalStruct->getTotals(),
-                'propagated_ids'           => $this->propagation_PropagationTotalStruct->getPropagatedIds(),
-                'segments_for_propagation' => $this->propagation_PropagationTotalStruct->getSegmentsForPropagation(),
+            'totals' => $this->propagation_PropagationTotalStruct->getTotals(),
+            'propagated_ids' => $this->propagation_PropagationTotalStruct->getPropagatedIds(),
+            'segments_for_propagation' => $this->propagation_PropagationTotalStruct->getSegmentsForPropagation(),
         ];
     }
 }

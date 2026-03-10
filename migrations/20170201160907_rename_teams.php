@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class RenameTeams extends AbstractMatecatMigration
 {
 

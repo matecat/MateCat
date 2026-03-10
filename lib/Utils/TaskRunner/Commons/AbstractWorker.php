@@ -7,29 +7,33 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
-use AMQHandler;
-use Database;
-use INIT;
+use Exception;
+use Model\DataAccess\Database;
 use PDOException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Message;
-use TaskRunner\Exceptions\EndQueueException;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EmptyElementException;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class AbstractWorker
  * @package TaskRunner\Commons
  */
-abstract class AbstractWorker implements SplSubject {
+abstract class AbstractWorker implements SplSubject
+{
 
-    const ERR_REQUEUE_END   = 1;
-    const ERR_REQUEUE       = 2;
-    const ERR_EMPTY_ELEMENT = 3;
+    const int ERR_REQUEUE_END = 1;
+    const int ERR_REQUEUE = 2;
+    const int ERR_EMPTY_ELEMENT = 3;
 
     /**
-     * Observers container
+     * Observer container
      *
      * @var SplObserver[]
      */
@@ -40,7 +44,7 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @var string|array
      */
-    protected $_logMsg;
+    protected string|array $_logMsg;
 
     /**
      * This process ID
@@ -74,30 +78,34 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @param AMQHandler $queueHandler
      */
-    public function __construct( AMQHandler $queueHandler ) {
+    public function __construct(AMQHandler $queueHandler)
+    {
         $this->_queueHandler = $queueHandler;
     }
 
     /**
-     * Set the caller pid. Needed to log the process Id.
+     * Set the caller pid. Needed to log the process ID.
      *
-     * @param $_myPid
+     * @param string $_myPid
      */
-    public function setPid( $_myPid ) {
+    public function setPid(string $_myPid): void
+    {
         $this->_workerPid = $_myPid;
     }
 
     /**
      * @param Context $context
      */
-    public function setContext( Context $context ) {
+    public function setContext(Context $context): void
+    {
         $this->_myContext = $context;
     }
 
     /**
      * @return Context
      */
-    public function getContext(): Context {
+    public function getContext(): Context
+    {
         return $this->_myContext;
     }
 
@@ -107,7 +115,8 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @return string
      */
-    public function getLoggerName(): string {
+    public function getLoggerName(): string
+    {
         return $this->_myContext->loggerName;
     }
 
@@ -116,9 +125,12 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @param $queueElement AbstractElement
      *
-     * @return mixed
+     * @return void
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws EmptyElementException
      */
-    abstract public function process( AbstractElement $queueElement );
+    abstract public function process(AbstractElement $queueElement): void;
 
     /**
      * Attach an SplObserver
@@ -131,8 +143,9 @@ abstract class AbstractWorker implements SplSubject {
      * @return void
      * @since 5.1.0
      */
-    public function attach( SplObserver $observer ) {
-        $this->_observer[ spl_object_hash( $observer ) ] = $observer;
+    public function attach(SplObserver $observer): void
+    {
+        $this->_observer[spl_object_hash($observer)] = $observer;
     }
 
     /**
@@ -146,8 +159,9 @@ abstract class AbstractWorker implements SplSubject {
      * @return void
      * @since 5.1.0
      */
-    public function detach( SplObserver $observer ) {
-        unset( $this->_observer[ spl_object_hash( $observer ) ] );
+    public function detach(SplObserver $observer): void
+    {
+        unset($this->_observer[spl_object_hash($observer)]);
     }
 
     /**
@@ -156,9 +170,10 @@ abstract class AbstractWorker implements SplSubject {
      * @return void
      * @since 5.1.0
      */
-    public function notify() {
-        foreach ( $this->_observer as $observer ) {
-            $observer->update( $this );
+    public function notify(): void
+    {
+        foreach ($this->_observer as $observer) {
+            $observer->update($this);
         }
     }
 
@@ -166,7 +181,8 @@ abstract class AbstractWorker implements SplSubject {
      * Method used by the Observer to get the logging message
      * @return string|array
      */
-    public function getLogMsg() {
+    public function getLogMsg(): array|string
+    {
         return $this->_logMsg;
     }
 
@@ -175,24 +191,26 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @param $msg array|string
      */
-    protected function _doLog( $msg ) {
+    protected function _doLog(array|string $msg): void
+    {
         $this->_logMsg = $msg;
         $this->notify();
     }
 
     /**
-     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
+     * Check how many times the element was re-queued and raise an Exception when the limit is reached (100 times)
      *
      * @param QueueElement $queueElement
      *
      * @return void
      * @throws EndQueueException
      */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ) {
-        if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= $this->maxRequeueNum ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip." );
-            $this->_endQueueCallback( $queueElement );
-        } elseif ( isset( $queueElement->reQueueNum ) ) {
+    protected function _checkForReQueueEnd(QueueElement $queueElement): void
+    {
+        if (isset($queueElement->reQueueNum) && $queueElement->reQueueNum >= $this->maxRequeueNum) {
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip.");
+            $this->_endQueueCallback($queueElement);
+        } elseif (isset($queueElement->reQueueNum)) {
 //            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
     }
@@ -202,45 +220,46 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @throws EndQueueException
      */
-    protected function _endQueueCallback( QueueElement $queueElement ) {
-        throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
+    protected function _endQueueCallback(QueueElement $queueElement)
+    {
+        throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END);
     }
 
     /**
      * Check the connection.
-     * MySql timeout close the socket and throws Exception in the nex read/write access
+     * MySql timeout closes the socket and throws Exception in the nex read/write access
      *
      * <code>
      * By default, the server closes the connection after eight hours if nothing has happened.
-     * You can change the time limit by setting thewait_timeout variable when you start mysqld.
+     * You can change the time limit by setting the wait_timeout variable when you start mysql.
      * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
      * </code>
      *
      */
-    protected function _checkDatabaseConnection() {
-
+    protected function _checkDatabaseConnection(): void
+    {
         $db = Database::obtain();
         try {
             $db->ping();
-        } catch ( PDOException $e ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} " );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Database connection reloaded. " );
+        } catch (PDOException $e) {
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} ");
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Database connection reloaded. ");
             $db->close();
             //reconnect
             $db->getConnection();
         }
-
     }
 
     /**
      * @param $_object
      *
+     * @throws Exception
      */
-    protected function publishToSseTopic( $_object ) {
-
-        $message = json_encode( $_object );
-        AMQHandler::getNewInstanceForDaemons()->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
-        $this->_doLog( $message );
-
+    protected function publishToNodeJsClients($_object): void
+    {
+        $message = json_encode($_object);
+        AMQHandler::getNewInstanceForDaemons()->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message, ['persistent' => 'false']));
+        $this->_doLog($message);
     }
+
 }

@@ -1,20 +1,23 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use API\Commons\KleinController;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectAccessValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
-use API\V2\Json\Project;
-use API\V2\Json\ProjectAnonymous;
-use Constants_JobStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessTokenValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
-use Jobs_JobDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use Translations_SegmentTranslationDao;
-use Utils;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
+use ReflectionException;
+use Throwable;
+use Utils\Constants\JobStatus;
+use Utils\Tools\Utils;
+use View\API\V2\Json\Project;
 
 /**
  * This controller can be called as Anonymous, but only if you already know the id and the password
@@ -22,130 +25,179 @@ use Utils;
  * Class ProjectsController
  * @package API\V2
  */
-class ProjectsController extends KleinController {
+class ProjectsController extends KleinController
+{
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    private $project;
+    private ProjectStruct $project;
 
     /**
-     * @var ProjectPasswordValidator
+     * @return void
+     * @throws ReflectionException
+     * @throws Exception
      */
-    private $projectValidator;
-
-    public function get() {
-
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-            $formatted->setUser( $this->user );
-            if ( !empty( $this->api_key ) ) {
-                $formatted->setCalledFromApi( true );
-            }
+    public function get(): void
+    {
+        $formatted = new Project();
+        $formatted->setUser($this->user);
+        if (!empty($this->api_key)) {
+            $formatted->setCalledFromApi(true);
         }
 
-        $this->featureSet->loadForProject( $this->project );
-        $projectOutputFields = $formatted->renderItem( $this->project );
-        $this->response->json( [ 'project' => $projectOutputFields ] );
-
+        $this->featureSet->loadForProject($this->project);
+        $projectOutputFields = $formatted->renderItem($this->project);
+        $this->response->json(['project' => $projectOutputFields]);
     }
 
-    public function setDueDate() {
+    /**
+     * @throws ReflectionException
+     */
+    public function setDueDate(): void
+    {
         $this->updateDueDate();
     }
 
-    public function updateDueDate() {
+    /**
+     * @throws ReflectionException
+     */
+    public function updateDueDate(): void
+    {
         if (
-                array_key_exists( "due_date", $this->params )
-                &&
-                is_numeric( $this->params[ 'due_date' ] )
-                &&
-                $this->params[ 'due_date' ] > time()
+            array_key_exists("due_date", $this->params)
+            &&
+            is_numeric($this->params['due_date'])
+            &&
+            $this->params['due_date'] > time()
         ) {
+            $due_date = Utils::mysqlTimestamp($this->params['due_date']);
+            $project_dao = new ProjectDao;
+            $project_dao->updateField($this->project, "due_date", $due_date);
+        }
 
-            $due_date    = \Utils::mysqlTimestamp( $this->params[ 'due_date' ] );
-            $project_dao = new Projects_ProjectDao;
-            $project_dao->updateField( $this->project, "due_date", $due_date );
-        }
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-        }
+        $formatted = new Project();
 
         //$this->response->json( $this->project->toArray() );
-        $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
+        $this->response->json(['project' => $formatted->renderItem($this->project)]);
     }
 
-    public function deleteDueDate() {
-        $project_dao = new Projects_ProjectDao;
-        $project_dao->updateField( $this->project, "due_date", null );
+    /**
+     * @throws ReflectionException
+     */
+    public function deleteDueDate(): void
+    {
+        $project_dao = new ProjectDao;
+        $project_dao->updateField($this->project, "due_date", null);
 
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-        }
-        $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
+        $formatted = new Project();
+        $this->response->json(['project' => $formatted->renderItem($this->project)]);
     }
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
-    public function cancel() {
-        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
+    public function cancel(): void
+    {
+        $this->changeStatus(JobStatus::STATUS_CANCELLED);
     }
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
-    public function archive() {
-        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
+    public function archive(): void
+    {
+        $this->changeStatus(JobStatus::STATUS_ARCHIVED);
     }
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
-    public function active() {
-        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
+    public function active(): void
+    {
+        $this->changeStatus(JobStatus::STATUS_ACTIVE);
     }
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
-    protected function changeStatus( $status ) {
+    public function delete(): void
+    {
+        $this->changeStatus(JobStatus::STATUS_DELETED);
+    }
 
-        ( new ProjectAccessValidator( $this, $this->project ) )->validate();
+    /**
+     * @throws Exception
+     * @throws Throwable
+     */
+    protected function changeStatus($status): void
+    {
+        (new ProjectAccessValidator($this, $this->project))->validate();
 
         $chunks = $this->project->getJobs();
 
-        foreach ( $chunks as $chunk ) {
-
+        foreach ($chunks as $chunk) {
             // update a job only if it is NOT deleted
-            if ( !$chunk->isDeleted() ) {
-                Jobs_JobDao::updateJobStatus( $chunk, $status );
+            if (!$chunk->isDeleted()) {
+                JobDao::updateJobStatus($chunk, $status);
 
-                $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
-                Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+                $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob($chunk);
+                SegmentTranslationDao::updateLastTranslationDateByIdList($lastSegmentsList, Utils::mysqlTimestamp(time()));
             }
         }
 
-        $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
-
+        $this->response->json(['code' => 1, 'data' => "OK", 'status' => $status]);
     }
 
-    protected function afterConstruct() {
+    /**
+     * Handles the initialization process after object construction by setting up
+     * project validation, error handling, and appending necessary validators.
+     *
+     * This method performs the following steps:
+     * - Creates a `ProjectPasswordValidator` instance to validate the project password.
+     * - Defines success and failure callbacks for the password validator:
+     *   - On success, retrieves and assigns the validated project to the `$project` property.
+     *   - On failure, checks if the exception is a `NotFoundException` and attempts to validate
+     *     the project using a `ProjectAccessTokenValidator`. If validation succeeds, assigns
+     *     the validated project to the `$project` property. Otherwise, rethrows the exception.
+     * - Appends a `LoginValidator` and the `ProjectPasswordValidator` to the list of validators.
+     *
+     * @return void
+     * @throws Throwable If the project is not found and no valid access token is provided.
+     * @throws Exception For other validation failures or unexpected errors.
+     */
+    protected function afterConstruct(): void
+    {
+        // Initialize the project password validator.
+        $projectValidator = (new ProjectPasswordValidator($this));
 
-        $projectValidator = ( new ProjectPasswordValidator( $this ) );
-
-        $projectValidator->onSuccess( function () use ( $projectValidator ) {
+        // Define the success callback for the password validator.
+        $projectValidator->onSuccess(function () use ($projectValidator) {
             $this->project = $projectValidator->getProject();
-        } );
+        })
+            // Define the failure callback for the password validator.
+            ->onFailure(function (Throwable $exception) {
+                if ($exception instanceof NotFoundException && !empty($this->request->param('project_access_token'))) {
+                    // If the project is not found, attempt validation using an access token.
+                    $projectByTokenValidator = new ProjectAccessTokenValidator($this);
+                    $projectByTokenValidator->onSuccess(function () use ($projectByTokenValidator) {
+                        $this->project = $projectByTokenValidator->getProject();
+                    })->validate();
+                } else {
+                    // Rethrow the exception for other validation failures.
+                    throw $exception;
+                }
+            });
 
-        $this->appendValidator( $projectValidator );
-        $this->appendValidator( new LoginValidator( $this ) );
+        // Append the login validator to the list of validators.
+        $this->appendValidator(new LoginValidator($this));
+
+        // Append the project password validator to the list of validators.
+        $this->appendValidator($projectValidator);
     }
 
 }

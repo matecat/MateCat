@@ -1,6 +1,7 @@
 <?php
 
 route(
-    '/webhooks/oauth/response/[:provider]', 'GET',
-    [ '\oauthResponseHandlerController', 'response']
+    '/webhooks/oauth/response/[:provider]',
+    'GET',
+    ['Controller\Views\OauthResponseHandlerController', 'response']
 );

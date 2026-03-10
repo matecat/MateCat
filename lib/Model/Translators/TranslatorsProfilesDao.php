@@ -7,18 +7,22 @@
  *
  */
 
-namespace Translators;
+namespace Model\Translators;
 
 
-class TranslatorsProfilesDao extends \DataAccess_AbstractDao {
+use Model\DataAccess\AbstractDao;
+use ReflectionException;
 
-    const TABLE       = "translator_profiles";
-    const STRUCT_TYPE = "TranslatorProfilesStruct";
+class TranslatorsProfilesDao extends AbstractDao
+{
 
-    protected static array $auto_increment_field = [ 'id' ];
-    protected static array $primary_keys         = [ 'id' ];
+    const string TABLE = "translator_profiles";
+    const string STRUCT_TYPE = TranslatorProfilesStruct::class;
 
-    protected static $_query_by_uid_src_trg_rev = "
+    protected static array $auto_increment_field = ['id'];
+    protected static array $primary_keys = ['id'];
+
+    protected static string $_query_by_uid_src_trg_rev = "
         SELECT * FROM translator_profiles 
         WHERE uid_translator = :uid_translator 
         AND source = :source 
@@ -31,23 +35,25 @@ class TranslatorsProfilesDao extends \DataAccess_AbstractDao {
      * @param TranslatorProfilesStruct $profile
      *
      * @return TranslatorProfilesStruct
+     * @throws ReflectionException
      * @internal param $id
      *
      */
-    public function getByProfile( TranslatorProfilesStruct $profile ) {
+    public function getByProfile(TranslatorProfilesStruct $profile): ?TranslatorProfilesStruct
+    {
+        $stmt = $this->_getStatementForQuery(self::$_query_by_uid_src_trg_rev);
 
-        $stmt = $this->_getStatementForQuery( self::$_query_by_uid_src_trg_rev );
+        return $this->_fetchObjectMap(
+            $stmt,
+            TranslatorProfilesStruct::class,
+            [
+                'uid_translator' => $profile->uid_translator,
+                'source' => $profile->source,
+                'target' => $profile->target,
+                'is_revision' => $profile->is_revision,
 
-        return @$this->_fetchObject( $stmt,
-                $profile,
-                [
-                        'uid_translator' => $profile->uid_translator,
-                        'source'         => $profile->source,
-                        'target'         => $profile->target,
-                        'is_revision'    => $profile->is_revision,
-
-                ]
-        )[ 0 ];
+            ]
+        )[0] ?? null;
     }
 
 }

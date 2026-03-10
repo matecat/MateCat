@@ -1,63 +1,69 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
 use Exception;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, QAModelInterface {
+class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface
+{
 
-    public $id;
-    public $label;
-    public $create_date;
-    public $pass_type;
-    public $pass_options;
+    public ?int $id = null;
+    public string $label;
+    public string $create_date;
+    public string $pass_type;
+    public string $pass_options;
 
-    public $hash;
+    public string $hash;
 
-    public $qa_model_template_id;
-    public $uid;
+    public ?int $qa_model_template_id = null;
+    public ?int $uid = null; // nullable for backward compatibility
 
     /**
-     * Returns the serialized representation of categires and subcategories.
+     * Returns the serialized representation of categories and subcategories.
      *
-     * @return string
+     * @return array
      */
-    public function getSerializedCategories() {
-        return json_encode( [ 'categories' => CategoryDao::getCategoriesAndSeverities( $this->id ) ], JSON_HEX_APOS );
+    public function getSerializedCategories(): array
+    {
+        return ['categories' => CategoryDao::getCategoriesAndSeverities($this->id)];
     }
 
-    public function getCategoriesAndSeverities() {
-        return CategoryDao::getCategoriesAndSeverities( $this->id );
+    public function getCategoriesAndSeverities(): array
+    {
+        return CategoryDao::getCategoriesAndSeverities($this->id);
     }
 
     /**
      * @return CategoryStruct[]
      */
-    public function getCategories() {
-        return CategoryDao::getCategoriesByModel( $this );
+    public function getCategories(): array
+    {
+        return CategoryDao::getCategoriesByModel($this);
     }
 
     /**
      * @return mixed
      */
-    public function getPassOptions() {
-        return json_decode( $this->pass_options );
+    public function getPassOptions(): mixed
+    {
+        return json_decode($this->pass_options);
     }
 
     /**
      * @return int[]
      * @throws Exception
      */
-    public function getLimit() {
-        $options = json_decode( $this->pass_options, true );
+    public function getLimit(): array
+    {
+        $options = json_decode($this->pass_options, true);
 
-        if ( !array_key_exists( 'limit', $options ) ) {
-            throw new Exception( 'limit is not defined in JSON options' );
+        if (!array_key_exists('limit', $options)) {
+            throw new Exception('limit is not defined in JSON options');
         }
 
-        return $this->normalizeLimits( $options[ 'limit' ] );
+        return $this->normalizeLimits($options['limit']);
     }
 
     /**
@@ -65,15 +71,15 @@ class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcce
      *
      * Ex: {"limit":{"1":"8","2":"5"}} is normalized to [0 => 8, 1 => 5]
      *
-     * @param $limits
+     * @param array $limits
      *
      * @return array
      */
-    private function normalizeLimits( $limits ) {
-
+    private function normalizeLimits(array $limits): array
+    {
         $normalized = [];
 
-        foreach ( $limits as $limit ) {
+        foreach ($limits as $limit) {
             $normalized[] = (int)$limit;
         }
 
@@ -83,37 +89,36 @@ class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcce
     /**
      * @return array
      */
-    public function getDecodedModel() {
-
+    public function getDecodedModel(): array
+    {
         $categoriesArray = [];
-        foreach ( $this->getCategories() as $categoryStruct ) {
-
+        foreach ($this->getCategories() as $categoryStruct) {
             $category = $categoryStruct->toArrayWithJsonDecoded();
 
-            if ( !empty( $category ) ) {
+            if (!empty($category)) {
                 $categoriesArray[] = [
-                        'id'         => (int)$category[ 'id' ],
-                        'label'      => $category[ 'label' ],
-                        'code'       => ( $category[ 'options' ][ 'code' ] ?? null ),
-                        'severities' => $category[ 'severities' ],
+                    'id' => (int)$category['id'],
+                    'label' => $category['label'],
+                    'code' => ($category['options']['code'] ?? null),
+                    'severities' => $category['severities'],
                 ];
             }
         }
 
         return [
-                'model' => [
-                        "id"                => (int)$this->id,
-                        "uid"               => (int)$this->uid,
-                        "template_model_id" => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
-                        "version"           => 1,
-                        "label"             => $this->label,
-                        "create_date"       => $this->create_date,
-                        "categories"        => $categoriesArray,
-                        "passfail"          => [
-                                'type'    => $this->pass_type,
-                                'options' => $this->getPassOptions()
-                        ],
-                ]
+            'model' => [
+                "id" => (int)$this->id,
+                "uid" => $this->uid,
+                "template_model_id" => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
+                "version" => 1,
+                "label" => $this->label,
+                "create_date" => $this->create_date,
+                "categories" => $categoriesArray,
+                "passfail" => [
+                    'type' => $this->pass_type,
+                    'options' => $this->getPassOptions()
+                ],
+            ]
         ];
     }
 }

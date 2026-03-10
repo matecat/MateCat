@@ -1,4 +1,10 @@
 <?php
+
+namespace Model\Users;
+
+use stdClass;
+use Stringable;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -6,31 +12,31 @@
  * Time: 18.45
  *
  */
+class ClientUserFacade extends stdClass implements Stringable
+{
 
-class Users_ClientUserFacade extends stdClass {
-
-    public $uid;
-    public $email;
-    public $first_name;
-    public $last_name;
+    public int $uid;
+    public string $email;
+    public string $first_name;
+    public string $last_name;
 
     /**
      * ClientUserFacade constructor.
      *
-     * @param Users_UserStruct $userStruct
+     * @param UserStruct $userStruct
      */
-    public function __construct( Users_UserStruct $userStruct ) {
-
-        foreach ( $userStruct as $property => $value ) {
-            if ( property_exists( $this, $property ) ) {
+    public function __construct(UserStruct $userStruct)
+    {
+        foreach ($userStruct as $property => $value) {
+            if (property_exists($this, $property)) {
                 $this->$property = $value;
             }
         }
-
     }
 
-    public function __toString() {
-        return json_encode( $this );
+    public function __toString(): string
+    {
+        return json_encode($this);
     }
 
 }

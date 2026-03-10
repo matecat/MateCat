@@ -1,86 +1,73 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Constants\ConversionHandlerStatus;
 use Exception;
+use Utils\Constants\ConversionHandlerStatus;
 
-class ConvertedFileModel implements \JsonSerializable {
+class ConvertedFileModel
+{
     /**
      * @var int
      */
-    private $code;
+    private int $code = ConversionHandlerStatus::NOT_CONVERTED;
 
     /**
-     * @var array
+     * @var ?string
      */
-    private $errors;
+    private ?string $message = null;
 
     /**
-     * @var array
+     * @var string
      */
-    private $warnings;
+    private string $name;
 
     /**
-     * @var array
+     * @var InternalHashPaths|null
      */
-    private $data;
+    private ?InternalHashPaths $_internal_conversion_hashes = null;
+
+    private int $size = 0;
+
+    private bool $isZipContent = false;
+
+    private array $pdfAnalysis = [];
 
     /**
      * ConvertFileModel constructor.
      *
-     * @param null $code
+     * @param ?int $code
      *
      * @throws Exception
      */
-    public function __construct( $code = null ) {
-        if ( empty( $code ) ) {
-            $this->code = ConversionHandlerStatus::NOT_CONVERTED;
-        } else {
-            $this->changeCode( $code );
+    public function __construct(?int $code = null)
+    {
+        if (!empty($code)) {
+            $this->setErrorCode($code);
         }
-
-        $this->warnings = [];
-        $this->errors   = [];
-        $this->data     = [];
     }
 
     /**
-     * @param $code
+     * @param int $code
      *
      * @return bool
      */
-    private function validateCode( $code ) {
-        $allowed = [
-                ConversionHandlerStatus::ZIP_HANDLING,
-                ConversionHandlerStatus::OK,
-                ConversionHandlerStatus::NOT_CONVERTED,
-                ConversionHandlerStatus::INVALID_FILE,
-                ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
-                ConversionHandlerStatus::SOURCE_ERROR,
-                ConversionHandlerStatus::TARGET_ERROR,
-                ConversionHandlerStatus::UPLOAD_ERROR,
-                ConversionHandlerStatus::MISCONFIGURATION,
-                ConversionHandlerStatus::INVALID_TOKEN,
-                ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
-                ConversionHandlerStatus::OCR_WARNING,
-                ConversionHandlerStatus::OCR_ERROR,
-                ConversionHandlerStatus::GENERIC_ERROR,
-                ConversionHandlerStatus::FILESYSTEM_ERROR,
-                ConversionHandlerStatus::S3_ERROR,
-        ];
+    private function validateCode(int $code): bool
+    {
+        $allowed = array_merge(ConversionHandlerStatus::errorCodes, ConversionHandlerStatus::warningCodes, [ConversionHandlerStatus::OK]);
 
-        return in_array( $code, $allowed );
+        return in_array($code, $allowed);
     }
 
     /**
-     * @param $code
+     * @param int $code
      *
      * @throws Exception
      */
-    public function changeCode( $code ) {
-        if ( !$this->validateCode( $code ) ) {
-            throw new Exception( $code . ' is not a valid code' );
+    public function setErrorCode(int $code): void
+    {
+        if (!$this->validateCode($code)) {
+            throw new Exception($code . ' is not a valid code');
         }
 
         $this->code = $code;
@@ -89,91 +76,163 @@ class ConvertedFileModel implements \JsonSerializable {
     /**
      * @return int
      */
-    public function getCode() {
+    public function getCode(): int
+    {
         return $this->code;
     }
 
     /**
      * @return bool
      */
-    public function hasAnErrorCode() {
-        return $this->code <= 0;
-    }
-
-    /**
-     * @param string $messageError
-     * @param null   $debug
-     */
-    public function addError( $messageError, $debug = null ) {
-        $this->errors[] = [
-                'code'    => $this->code,
-                'message' => $messageError,
-                'debug'   => $debug,
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function getErrors() {
-        return $this->errors;
+    public function isError(): bool
+    {
+        return in_array($this->code, ConversionHandlerStatus::errorCodes, true);
     }
 
     /**
      * @return bool
      */
-    public function hasErrors() {
-        return !empty( $this->errors );
+    public function isWarning(): bool
+    {
+        return in_array($this->code, ConversionHandlerStatus::warningCodes, true);
     }
 
     /**
      * @param string $messageError
      */
-    public function addWarning( $messageError ) {
-        $this->warnings[] = [
-                'code'    => $this->code,
-                'message' => $messageError,
-        ];
+    public function setErrorMessage(string $messageError): void
+    {
+        $this->message = $messageError;
     }
 
     /**
-     * @return array
+     * @return string|null
      */
-    public function getWarnings() {
-        return $this->warnings;
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     * @param bool $isZipContent
+     */
+    public function setFileName(string $name, bool $isZipContent = false): void
+    {
+        $this->name = $name;
+        $this->zipContent($isZipContent);
+    }
+
+    /**
+     * @return int
+     */
+    public function getSize(): int
+    {
+        return $this->size;
     }
 
     /**
      * @return bool
      */
-    public function hasWarnings() {
-        return !empty( $this->warnings );
+    public function isZipContent(): bool
+    {
+        return $this->isZipContent;
+    }
+
+    /**
+     * @param bool $isZipContent
+     *
+     */
+    public function zipContent(bool $isZipContent = true): void
+    {
+        $this->isZipContent = $isZipContent;
+    }
+
+    /**
+     * @param int $size
+     *
+     */
+    public function setSize(int $size): void
+    {
+        $this->size = $size;
     }
 
     /**
      * @return array
      */
-    public function getData() {
-        return $this->data;
+    public function getPdfAnalysis(): array
+    {
+        return $this->pdfAnalysis;
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param array $pdfAnalysis
      */
-    public function addData( $key, $value ) {
-        $this->data[ $key ] = $value;
+    public function setPdfAnalysis(array $pdfAnalysis): void
+    {
+        $this->pdfAnalysis = $pdfAnalysis;
     }
 
     /**
-     * @return array
+     * @param InternalHashPaths $data
+     *
+     * @return void
      */
-    public function jsonSerialize() {
+    public function addConversionHashes(InternalHashPaths $data): void
+    {
+        $this->_internal_conversion_hashes = $data;
+    }
+
+    /**
+     * @return InternalHashPaths
+     */
+    public function getConversionHashes(): InternalHashPaths
+    {
+        return $this->_internal_conversion_hashes ?? new InternalHashPaths([]);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasConversionHashes(): bool
+    {
+        return !empty($this->_internal_conversion_hashes) && !$this->_internal_conversion_hashes->isEmpty();
+    }
+
+    /**
+     * Returns a minimal error representation of this model as an array.
+     *
+     * @return array{code: int, message: string|null, name: string}
+     */
+    public function asError(): array
+    {
         return [
-                'code'     => $this->getCode(),
-                'errors'   => $this->getErrors(),
-                'warnings' => $this->getWarnings(),
-                'data'     => $this->getData(),
+            'code' => $this->getCode(),
+            'message' => $this->getMessage(),
+            'name' => $this->getName(),
         ];
     }
+
+    /**
+     * Returns the result data of this file as an array, suitable for the API response.
+     *
+     * @return array{name: string, size: int, pdfAnalysis: array}
+     */
+    public function getResult(): array
+    {
+        return [
+            'name' => $this->getName(),
+            'size' => $this->getSize(),
+            'pdfAnalysis' => $this->getPdfAnalysis(),
+        ];
+    }
+
 }

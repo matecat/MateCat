@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .popover-component-container {
   position: relative;
@@ -15,7 +15,7 @@
   background-color: transparent;
   text-decoration: none;
   white-space: nowrap;
-  color: $white;
+  color: colors.$white;
   cursor: pointer;
 
   &:focus {
@@ -32,10 +32,10 @@
 
   z-index: 4;
   border-radius: 8px;
-  box-shadow: 0 0 24px rgba($black, 0.15);
+  box-shadow: 0 0 24px rgba(colors.$black, 0.15);
   overflow: hidden;
-  background-color: $white;
-  border: 1px solid $grey4;
+  background-color: colors.$white;
+  border: 1px solid colors.$grey4;
 
   &.popover-component-left {
     left: 0;
@@ -63,8 +63,8 @@
   align-items: center;
   border-radius: 4px 4px 0 0;
   padding: 12px 16px;
-  background-color: $white;
-  color: $black;
+  background-color: colors.$white;
+  color: colors.$black;
 }
 
 .popover-component-title {
@@ -81,7 +81,7 @@
 .popover-component-body {
   max-height: calc(100vh - 124px);
   padding: 0 16px;
-  color: $grey6;
+  color: colors.$grey6;
   overflow-y: auto;
 }
 

@@ -1,40 +1,31 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\KleinController;
-use Projects_ProjectStruct;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Model\Projects\ProjectStruct;
+use Model\Teams\MembershipDao;
+use ReflectionException;
 
-class ProjectAccessValidator extends Base {
-
-    /**
-     * @var TeamStruct
-     */
-    private $team;
+class ProjectAccessValidator extends Base
+{
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    private $project;
-
-    /**
-     * @var KleinController
-     */
-    protected $controller;
+    private ProjectStruct $project;
 
     /**
      * Class constructor.
      *
-     * @param KleinController        $controller The KleinController object.
-     * @param Projects_ProjectStruct $project    The Projects_ProjectStruct object.
+     * @param KleinController $controller The KleinController object.
+     * @param ProjectStruct $project The ProjectStruct object.
      */
-    public function __construct( KleinController $controller, Projects_ProjectStruct $project ) {
-        $this->controller = $controller;
-        $this->project    = $project;
-        parent::__construct( $controller->getRequest() );
+    public function __construct(KleinController $controller, ProjectStruct $project)
+    {
+        parent::__construct($controller);
+        $this->project = $project;
     }
 
 
@@ -47,25 +38,27 @@ class ProjectAccessValidator extends Base {
      *   If no such team exists, an AuthorizationError is thrown.
      * - If a 'setTeam' method exists on the controller, the found team is set on the controller.
      *
-     * @throws AuthorizationError If a user is not logged-in or if the user does not belong to the team.
      * @return void
+     * @throws AuthorizationError If a user is not logged-in or if the user does not belong to the team.
+     * @throws ReflectionException
      */
-    protected function _validate() {
-
-        if( empty( $this->controller->getUser() ) ){
-            throw new AuthorizationError( "Not Authorized. You must be logged in.", 401 );
+    protected function _validate(): void
+    {
+        if (empty($this->controller->getUser())) {
+            throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
         }
 
-        $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndUser(
-                $this->project->id_team, $this->controller->getUser()
+        $team = (new MembershipDao())->setCacheTTL(60 * 10)->findTeamByIdAndUser(
+            $this->project->id_team,
+            $this->controller->getUser()
         );
 
-        if ( empty( $this->team ) ) {
-            throw new AuthorizationError( "Not Authorized, the user does not belong to team " . $this->project->id_team, 401 );
+        if (empty($team)) {
+            throw new AuthorizationError("Not Authorized, the user does not belong to team " . $this->project->id_team, 401);
         }
 
-        if ( method_exists( $this->controller, 'setTeam' ) ) {
-            $this->controller->setTeam( $this->team );
+        if (method_exists($this->controller, 'setTeam')) {
+            $this->controller->setTeam($team);
         }
     }
 }

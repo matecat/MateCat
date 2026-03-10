@@ -1,101 +1,71 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use API\Commons\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Exceptions\NotFoundException;
-use LQA\ModelDao;
-use Projects_ProjectStruct;
-use QAModelTemplate\QAModelTemplateDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Model\Exceptions\NotFoundException;
+use Model\LQA\ModelDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use ReflectionException;
 
-class QualityFrameworkController extends KleinController {
+class QualityFrameworkController extends KleinController
+{
 
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * Render a QF from project credentials
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    public function project() {
+    public function project(): void
+    {
+        $idProject = $this->request->param('id_project');
+        $password = $this->request->param('password');
+        $project = (new ProjectDao())->findByIdAndPassword($idProject, $password);
 
-        $idProject = $this->request->param( 'id_project' );
-        $password  = $this->request->param( 'password' );
-
-        try {
-            $project = ( new \Projects_ProjectDao() )->findByIdAndPassword( $idProject, $password );
-        } catch ( NotFoundException $exception ) {
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => $exception->getMessage()
-                    ]
-            ] );
-            exit();
-        }
-
-        $this->response->json( $this->renderQualityFramework( $project ) );
-        exit();
+        $this->response->json($this->renderQualityFramework($project));
     }
 
     /**
-     * Render a QF from job credentials
-     */
-    public function job() {
-
-        $idJob    = $this->request->param( 'id_job' );
-        $password = $this->request->param( 'password' );
-
-        $job = \CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
-
-        if ( $job === null ) {
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => 'Job not found'
-                    ]
-            ] );
-            exit();
-        }
-
-        $this->response->json( $this->renderQualityFramework( $job->getProject() ) );
-        exit();
-    }
-
-    /**
-     * @param Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return array
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    private function renderQualityFramework( Projects_ProjectStruct $projectStruct ) {
+    private function renderQualityFramework(ProjectStruct $projectStruct): array
+    {
         $idQaModel = $projectStruct->id_qa_model;
-        $qaModel   = ModelDao::findById( $idQaModel );
 
-        if ( $qaModel === null ) {
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => 'QAModel not found'
-                    ]
-            ] );
-            exit();
+        if ($idQaModel === null) {
+            throw new NotFoundException('QAModel not found');
         }
 
-        $json                     = $qaModel->getDecodedModel();
-        $json[ 'template_model' ] = null;
+        $qaModel = ModelDao::findById($idQaModel);
 
-        if ( $qaModel->qa_model_template_id ) {
+        if ($qaModel === null) {
+            throw new NotFoundException('QAModel not found');
+        }
 
-            $parentTemplate = QAModelTemplateDao::get( [ 'id' => $qaModel->qa_model_template_id, 'uid' => $this->getUser()->uid ] );
+        $json = $qaModel->getDecodedModel();
+        $json['template_model'] = null;
 
-            if ( $parentTemplate === null ) {
+        if ($qaModel->qa_model_template_id) {
+            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id, 'uid' => $this->getUser()->uid]);
+
+            if ($parentTemplate === null) {
                 return $json;
             }
 
-            $json[ 'template_model' ] = $parentTemplate->getDecodedModel()[ 'model' ];
-
+            $json['template_model'] = $parentTemplate->getDecodedModel()['model'];
         }
 
         return $json;

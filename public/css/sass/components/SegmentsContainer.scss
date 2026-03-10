@@ -1,3 +1,4 @@
+@use "../commons/colors";
 .virtual-list {
   width: 100%;
   height: 100%;
@@ -8,6 +9,10 @@
     display: inline-block;
     width: 100%;
     height: auto;
+
+    section.editor {
+      border: 1px solid colors.$grey2;
+    }
   }
 
   .last-row > :last-child {
@@ -15,6 +20,52 @@
   }
   .last-row .review-balloon-container {
     padding-bottom: 100px;
+  }
+
+  .row-border-radius-top {
+    section {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border-top-color: colors.$grey2 !important;
+
+      .body {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        overflow: hidden;
+      }
+    }
+
+    section.opened {
+      margin-top: 8px;
+    }
+  }
+
+  .row-border-radius-bottom {
+    section {
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+
+      &.editor {
+        .footer {
+          .tab {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+          }
+        }
+      }
+    }
+
+    section.opened {
+      margin-bottom: 8px;
+    }
+
+    section:not(.editor) {
+      .body {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        overflow: hidden;
+      }
+    }
   }
 }
 
@@ -24,5 +75,5 @@
   > :not(:first-child)
   > div
   > :first-child:not(.editor) {
-  border-top-color: #d9e0e8 !important;
+  border-top-color: colors.$grey3;
 }

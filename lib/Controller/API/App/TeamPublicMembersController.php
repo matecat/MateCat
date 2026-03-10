@@ -1,27 +1,32 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use API\Commons\KleinController;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\TeamAccessValidator;
-use API\V2\Json\Membership;
-use Teams\MembershipDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
+use Model\Teams\MembershipDao;
+use ReflectionException;
+use View\API\V2\Json\Membership;
 
-class TeamPublicMembersController extends KleinController {
+class TeamPublicMembersController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
-        $this->appendValidator( new TeamAccessValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $this->appendValidator(new TeamAccessValidator($this));
     }
 
     /**
-     * Get team members list
+     * Get a team members list
+     * @throws ReflectionException
      */
-    public function publicList() {
-        $memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $this->request->id_team );
-        $formatter   = new Membership( $memberships );
-        $this->response->json( $formatter->renderPublic() );
+    public function publicList(): void
+    {
+        $memberships = (new MembershipDao())->setCacheTTL(60 * 60 * 24)->getMemberListByTeamId($this->request->param('id_team'));
+        $formatter = new Membership($memberships);
+        $this->response->json($formatter->renderPublic());
     }
 
 }

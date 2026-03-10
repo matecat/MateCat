@@ -1,13 +1,14 @@
 <?php
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-class FilesJobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class FilesJobStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public $id_file;
-    public $id_job;
+    public int $id_file;
+    public int $id_job;
 
 }

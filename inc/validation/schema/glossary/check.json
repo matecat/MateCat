@@ -15,16 +15,19 @@
       "type": "string"
     },
     "source": {
-      "type": "string"
+      "type": "string",
+      "minLength" : 1
     },
     "target": {
       "type": "string"
     },
     "source_language": {
-      "type": "string"
+      "type": "string",
+      "minLength" : 2
     },
     "target_language": {
-      "type": "string"
+      "type": "string",
+      "minLength" : 2
     },
     "keys": {
       "type": "array",

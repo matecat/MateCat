@@ -6,48 +6,57 @@
  * Time: 15:24
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\JobPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\SegmentTranslation;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use ReflectionException;
+use View\API\V2\Json\SegmentVersion;
 
-use API\Commons\Validators\JobPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\SegmentTranslation;
-use API\V2\Json\SegmentVersion;
-use Chunks_ChunkDao;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Jobs_JobStruct;
+class ReviseTranslationIssuesController extends KleinController
+{
+    use ChunkNotFoundHandlerTrait;
 
-class ReviseTranslationIssuesController extends BaseChunkController {
-
-    public function afterConstruct() {
-        $validator = new JobPasswordValidator( $this );
-        $validator->onSuccess( function () use ( $validator ) {
-            $this->featureSet->loadForProject( $validator->getJob()->getProject() );
-        } );
-        $this->appendValidator( $validator );
-        $this->appendValidator( new SegmentTranslation( $this->request ) );
-        $this->appendValidator( new LoginValidator( $this ) );
+    /**
+     */
+    public function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+        $validator = new JobPasswordValidator($this);
+        $validator->onSuccess(function () use ($validator) {
+            $this->featureSet->loadForProject($validator->getJob()->getProject());
+            $this->chunk = $validator->getJob();
+        });
+        $this->appendValidator($validator);
+        $this->appendValidator(new SegmentTranslation($this));
     }
 
-    public function index() {
-        $records = ( new TranslationVersionDao() )->setCacheTTL( 0 )->getVersionsForRevision(
-                $this->request->id_job,
-                $this->request->id_segment
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
+    public function index(): void
+    {
+        $records = (new TranslationVersionDao())->setCacheTTL(0)->getVersionsForRevision(
+            $this->request->param('id_job'),
+            $this->request->param('id_segment')
         );
 
-        $chunk = Chunks_ChunkDao::getByIdAndPassword( $this->params[ 'id_job' ], $this->params[ 'password' ] );
+        $chunk = ChunkDao::getByIdAndPassword($this->params['id_job'], $this->params['password']);
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
 
-        $version_formatter = new SegmentVersion( $chunk, $records, true, $this->featureSet );
-        $this->response->json( [ 'versions' => $version_formatter->render() ] );
+        $version_formatter = new SegmentVersion($chunk, $records, true, $this->featureSet);
+        $this->response->json(['versions' => $version_formatter->render()]);
     }
 
-    /**
-     * @param Jobs_JobStruct $chunk
-     */
-    public function setChunk( Jobs_JobStruct $chunk = null ) {
-        $this->chunk = $chunk;
-    }
 }

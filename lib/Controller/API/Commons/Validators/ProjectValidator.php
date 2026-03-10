@@ -1,39 +1,40 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
-use ApiKeys_ApiKeyStruct;
-use Log;
-use Projects_ProjectStruct;
-use Users_UserStruct;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
+use ReflectionException;
 
 /**
  * @daprecated this should extend Base
  *
  * Class ProjectValidator
- * @package API\V2\Validators
+ * @package    API\V2\Validators
  */
-class ProjectValidator extends Base {
+class ProjectValidator extends Base
+{
 
     /**
-     * @var Users_UserStruct
+     * @var ?UserStruct
      */
-    private $user;
+    private ?UserStruct $user = null;
 
     /**
      * @var int
      */
-    private $id_project;
+    private int $id_project;
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ) {
+    public function setUser(UserStruct $user): ProjectValidator
+    {
         $this->user = $user;
 
         return $this;
@@ -44,76 +45,76 @@ class ProjectValidator extends Base {
      *
      * @return $this
      */
-    public function setIdProject( $id_project ) {
+    public function setIdProject($id_project): ProjectValidator
+    {
         $this->id_project = $id_project;
 
         return $this;
     }
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ?ProjectStruct
      */
-    private $project;
-    private $feature;
+    private ?ProjectStruct $project = null;
+    private ?string $feature = null;
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      */
-    public function setProject(Projects_ProjectStruct $project) {
+    public function setProject(ProjectStruct $project)
+    {
         $this->project = $project;
     }
 
-    public function getProject() {
+    public function getProject(): ProjectStruct
+    {
         return $this->project;
     }
 
-    public function setFeature( $feature ) {
+    public function setFeature($feature)
+    {
         $this->feature = $feature;
     }
-
-    public function __construct( KleinController $controller ) {}
 
     /**
      * @return mixed|void
      * @throws AuthenticationError
      * @throws NotFoundException
+     * @throws ReflectionException
      */
-    protected function _validate() {
-
-        if(!$this->project){
-            $this->project = \Projects_ProjectDao::findById( $this->id_project );
+    protected function _validate(): void
+    {
+        if (!$this->project) {
+            $this->project = ProjectDao::findById($this->id_project);
         }
 
-        if ( $this->project == false ) {
-            throw new NotFoundException( "Project not found.", 404 );
+        if (empty($this->project)) {
+            throw new NotFoundException("Project not found.", 404);
         }
 
-        if ( !$this->validateFeatureEnabled() ) {
-            throw new NotFoundException( "Feature not enabled on this project.", 404 );
+        if (!$this->validateFeatureEnabled()) {
+            throw new NotFoundException("Feature not enabled on this project.", 404);
         }
 
-        if( !$this->inProjectScope() ){
-            throw new NotFoundException( "You are not allowed to access to this project", 403 );
+        if (!$this->inProjectScope()) {
+            throw new NotFoundException("You are not allowed to access to this project", 403);
         }
-
     }
 
-    private function validateFeatureEnabled() {
-        return $this->feature == null || $this->project->isFeatureEnabled( $this->feature );
+    private function validateFeatureEnabled(): bool
+    {
+        return $this->feature == null || $this->project->isFeatureEnabled($this->feature);
     }
 
     /**
      * @return bool
      * @throws AuthenticationError
      */
-    private function inProjectScope() {
-
-        if( !$this->user ){
-            throw new AuthenticationError( "Invalid API key", 401 );
+    private function inProjectScope(): bool
+    {
+        if (!$this->user) {
+            throw new AuthenticationError("Invalid API key", 401);
         }
-
-        Log::doJsonLog( $this->user->email );
-        Log::doJsonLog( $this->project->id_customer );
 
         return $this->user->email == $this->project->id_customer;
     }

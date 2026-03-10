@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 body section.muted {
   background: #f2f4f7;
   cursor: not-allowed;
@@ -148,7 +149,7 @@ section.muted .segment-side-buttons {
       display: block;
       color: #4d4d4d;
       //TODO: Transform in SCSS Component for all INPUT TYPES
-      input {
+      input:not(.input--invisible) {
         border-radius: 2px !important;
         border: 1px solid rgba(34, 36, 38, 0.15) !important;
         box-shadow: inset 0 1px 3px #ddd !important;
@@ -182,6 +183,41 @@ section.muted .segment-side-buttons {
           .filter-dropdown {
             display: flex;
             align-items: center;
+            .select {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              gap: 5px;
+              padding: 9px 30px 9px 12px;
+              border-radius: 40px;
+              height: 38px;
+            }
+            li.dropdown__option {
+              padding: 8px;
+            }
+            .dropdown__option span {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 16px;
+            }
+            .custom-dropdown.select__dropdown {
+              background-color: #fff;
+              min-width: 120px;
+            }
+            .filter-category .select__dropdown-wrapper {
+              width: unset;
+            }
+            .select__dropdown {
+              background-color: #fff;
+              min-width: 120px;
+            }
+            .switch-container-outer {
+              padding: 0 10px;
+            }
+            .switch-container input:checked + span {
+              background-color: colors.$grey7;
+            }
             &:nth-child(2) {
               margin-left: 15px;
             }
@@ -270,20 +306,20 @@ section.muted .segment-side-buttons {
                   background: #ffffff;
                 }
                 &.draft-color {
-                  background: $grey1;
+                  background: colors.$grey1;
                 }
                 &.translated-color,
                 &.post-edited-color {
-                  background: $translatedBlue;
+                  background: colors.$translatedBlue;
                 }
                 &.approved-color {
-                  background: $approvedGreen;
+                  background: colors.$approvedGreen;
                 }
                 &.approved-2ndpass-color {
-                  background: $approved2Green;
+                  background: colors.$approved2Green;
                 }
                 &.rejected-color {
-                  background: $rebuttedRed;
+                  background: colors.$rebuttedRed;
                 }
               }
             }
@@ -306,47 +342,27 @@ section.muted .segment-side-buttons {
                 }
               }
             }
-            .filter-data-sample {
-              display: flex;
-              align-items: center;
-              .percent-item {
-                margin-left: 5px;
+
+            .percent-item {
+              margin-left: 5px;
+            }
+
+            .item,
+            .text {
+              .type-item,
+              .order-item {
+                display: inline-block;
               }
-              .menu {
-                width: 220px;
-                .head-dropdown {
-                  label {
-                    display: inline-block;
-                    width: 60%;
-                    position: relative;
-                    font-size: 12px;
-                    top: 16px;
-                  }
-                  input {
-                    width: 40%;
-                    display: inline-block;
-                    right: 0;
-                    padding: 5px 10px;
-                    margin-top: 10px;
-                  }
-                }
-              }
-              .item,
-              .text {
-                .type-item,
-                .order-item {
-                  display: inline-block;
-                }
-                .order-item {
-                  float: right;
-                }
-              }
-              .text {
-                .order-item {
-                  margin-left: 2px;
-                }
+              .order-item {
+                float: right;
               }
             }
+            .text {
+              .order-item {
+                margin-left: 2px;
+              }
+            }
+
           }
           .clear-filter-element {
             margin-left: 13px;
@@ -398,7 +414,7 @@ section.muted .segment-side-buttons {
               .loader {
                 width: 20px;
                 height: 20px;
-                background: url(../../img/loading.gif) 0 0 no-repeat !important;
+                background: url(/public/img/loading.gif) 0 0 no-repeat !important;
                 position: absolute;
                 bottom: 0px;
                 display: block;
@@ -418,24 +434,102 @@ section.muted .segment-side-buttons {
       width: 11px;
     }
   }
-  .ui.dropdown .menu > .head-dropdown {
-    padding: 0em 1.14285714rem;
-    color: rgba(0, 0, 0, 0.85);
-    font-size: 0.78571429em;
-    font-weight: bold;
-    text-transform: uppercase;
+}
+
+.data-sample-dropdown-container {
+  position: relative;
+
+  .dropdown {
+    position: absolute;
+    visibility: hidden;
+    z-index: 1;
+    background-color: white;
+    margin-top: 5px;
+    min-width: 250px;
+    right: 0;
+    max-height: 450px;
+    overflow: auto;
+    opacity: 0;
+    transition: opacity 0.2s linear;
+    box-shadow: 0px 2px 3px 0px rgba(34, 36, 38, 0.15);
+    .divider {
+      width: 90%;
+      position: absolute;
+      background-color: lightgray;
+      height: 1px;
+      bottom: 0;
+    }
+    &.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+
+      > li {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        padding: 10px;
+        position: relative;
+        &:hover {
+          background-color: colors.$grey4;
+        }
+        &.active {
+          background-color: colors.$grey8;
+        }
+      }
+    }
   }
 
-  .ui.dropdown .menu {
-    width: 200px;
-    padding: 8px;
-    .item {
-      font-size: 16px;
-      border-radius: 2px;
-      padding: 8px !important;
-      &:hover {
-        color: #0055b8;
+  .trigger-button {
+    position: relative;
+    transition: padding 0.2s ease-out;
+    font-weight: normal !important;
+    border-radius: 40px;
+    height: 38px !important;
+    &:disabled {
+      box-shadow: unset !important;
+      border: 1px solid colors.$grey8;
+      color: colors.$grey6 !important;
+      opacity: 0.5;
+      svg {
+        color: colors.$grey6 !important;
+        opacity: 0.5;
       }
     }
   }
 }
+
+.sample-size-item {
+  &:hover {
+    background-color: unset !important;
+    cursor: default !important;
+  }
+}
+.sample-size-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  justify-content: space-around;
+}
+
+.sample-size-container span {
+  width: 100px;
+  font-weight: bold;
+}
+
+.sample-size-container input[type="number"] {
+  width: 70px;
+  padding: 8px;
+}
+
+
+

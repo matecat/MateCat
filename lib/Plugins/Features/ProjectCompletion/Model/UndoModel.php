@@ -6,20 +6,21 @@
  * Time: 12:57
  */
 
-namespace Features\ProjectCompletion\Model;
+namespace Plugins\Features\ProjectCompletion\Model;
 
 
-class UndoModel {
+class UndoModel
+{
 
     /**
-     * @var \Chunks_ChunkCompletionEventStruct
+     * @var \Model\ChunksCompletion\ChunkCompletionEventStruct
      */
-    protected $event ;
+    protected $event;
 
-    public function __construct($event) {
-        $this->event = $event ;
+    public function __construct($event)
+    {
+        $this->event = $event;
     }
-
 
 
 }

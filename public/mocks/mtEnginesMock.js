@@ -10,7 +10,7 @@ export const mtEnginesMock = [
     id: 6,
     name: 'Test MT',
     type: 'MT',
-    description: 'AltLang Engine',
+    description: 'AltLang EnginesFactory',
     engine_type: 'AltLang',
   },
   {
@@ -138,10 +138,6 @@ export const engineListMock = [
     id: 'googletranslate',
   },
   {name: 'Intento', id: 'intento'},
-  {
-    name: 'Microsoft Translator Hub',
-    id: 'microsofthub',
-  },
   {name: 'SmartMATE', id: 'smartmate'},
   {name: 'Yandex.Translate', id: 'yandextranslate'},
 ]

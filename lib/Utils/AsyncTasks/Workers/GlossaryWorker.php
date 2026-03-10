@@ -1,38 +1,34 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use Database;
-use Engine;
-use Engines_AbstractEngine;
-use Engines_MyMemory;
-use Engines_Results_MyMemory_CheckGlossaryResponse;
-use Engines_Results_MyMemory_DomainsResponse;
-use Engines_Results_MyMemory_GetGlossaryResponse;
-use Engines_Results_MyMemory_KeysGlossaryResponse;
-use Engines_Results_MyMemory_SearchGlossaryResponse;
-use Engines_Results_MyMemory_SetGlossaryResponse;
-use Engines_Results_MyMemory_UpdateGlossaryResponse;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
 use Exception;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 use Stomp\Exception\StompException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Exceptions\EndQueueException;
-use Users_UserStruct;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
-class GlossaryWorker extends AbstractWorker {
+/**
+ * Class GlossaryWorker
+ * @package Utils\AsyncTasks\Workers
+ *
+ */
+class GlossaryWorker extends AbstractWorker
+{
 
-    const CHECK_ACTION   = 'check';
-    const DELETE_ACTION  = 'delete';
-    const GET_ACTION     = 'get';
-    const KEYS_ACTION    = 'keys';
-    const SET_ACTION     = 'set';
-    const UPDATE_ACTION  = 'update';
-    const DOMAINS_ACTION = 'domains';
-    const SEARCH_ACTION  = 'search';
+    const string CHECK_ACTION = 'check';
+    const string DELETE_ACTION = 'delete';
+    const string GET_ACTION = 'get';
+    const string KEYS_ACTION = 'keys';
+    const string SET_ACTION = 'set';
+    const string UPDATE_ACTION = 'update';
+    const string DOMAINS_ACTION = 'domains';
+    const string SEARCH_ACTION = 'search';
 
     /**
      * @param AbstractElement $queueElement
@@ -40,286 +36,302 @@ class GlossaryWorker extends AbstractWorker {
      * @return void
      * @throws Exception
      */
-    public function process( AbstractElement $queueElement ) {
-
-        $params  = $queueElement->params->toArray();
-        $action  = $params[ 'action' ];
-        $payload = $params[ 'payload' ];
-
-        $allowedActions = [
-                self::CHECK_ACTION,
-                self::DELETE_ACTION,
-                self::DOMAINS_ACTION,
-                self::GET_ACTION,
-                self::SEARCH_ACTION,
-                self::SET_ACTION,
-                self::KEYS_ACTION,
-                self::UPDATE_ACTION,
-        ];
-
-        if ( false === in_array( $action, $allowedActions ) ) {
-            throw new EndQueueException( $action . ' is not an allowed action. ' );
-        }
+    public function process(AbstractElement $queueElement): void
+    {
+        /**
+         * @var $queueElement QueueElement
+         */
+        $params = $queueElement->params->toArray();
+        $action = $params['action'];
+        $payload = $params['payload'];
 
         $this->_checkDatabaseConnection();
 
-        $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
+        $this->_doLog('GLOSSARY: ' . $action . ' action invoked with payload ' . json_encode($payload));
 
-        $this->{$action}( $payload );
+        switch ($action) {
+            case self::CHECK_ACTION:
+                $this->check($payload);
+                break;
+            case self::DELETE_ACTION:
+                $this->delete($payload);
+                break;
+            case self::DOMAINS_ACTION:
+                $this->domains($payload);
+                break;
+            case self::GET_ACTION:
+                $this->get($payload);
+                break;
+            case self::KEYS_ACTION:
+                $this->keys($payload);
+                break;
+            case self::SEARCH_ACTION:
+                $this->search($payload);
+                break;
+            case self::SET_ACTION:
+                $this->set($payload);
+                break;
+            case self::UPDATE_ACTION:
+                $this->update($payload);
+                break;
+            default:
+                throw new EndQueueException($action . ' is not an allowed action. ');
+        }
     }
 
     /**
      * Check a key on MyMemory
      *
-     * @param $payload
+     * @param array{
+     *     jobData: array{
+     *       id: int,
+     *        password: string
+     *     },
+     *     id_client: string,
+     *     source: string,
+     *     target: string,
+     *     source_language: string,
+     *     target_language: string,
+     *     keys: array<string>,
+     *     id_segment?: string
+     * } $payload
      *
      * @throws Exception
      */
-    private function check( $payload ) {
-
+    private function check(array $payload): void
+    {
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_CheckGlossaryResponse $response */
-        $response = $client->glossaryCheck( $payload[ 'source' ], $payload[ 'target' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
-        $matches  = $response->matches;
+        $response = $client->glossaryCheck($payload['source'], $payload['target'], $payload['source_language'], $payload['target_language'], $payload['keys']);
+        $matches = $response->matches;
 
-        if ( empty( $matches[ 'id_segment' ] ) ) {
-            $id_segment              = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
-            $matches[ 'id_segment' ] = $id_segment;
+        if (empty($matches['id_segment'])) {
+            $id_segment = $payload['id_segment'] ?? null;
+            $matches['id_segment'] = $id_segment;
         }
 
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_check',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $matches
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_check',
+                $payload['id_client'],
+                $payload['jobData'],
+                $matches
+            )
         );
     }
 
     /**
      * Delete a key from MyMemory
      *
-     * @param $payload
+     * @param array{
+     *     jobData: array{
+     *        id: int,
+     *        password: string
+     *     },
+     *     id_client: string,
+     *     id_job: int,
+     *     password: string,
+     *     term: array<string>,
+     *     id_segment: string
+     * } $payload
      *
      * @throws Exception
      */
-    private function delete( $payload ) {
-
+    private function delete(array $payload): void
+    {
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_UpdateGlossaryResponse $response */
-        $response   = $client->glossaryDelete( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+        /** @var UpdateGlossaryResponse $response */
+        $response = $client->glossaryDelete($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
 
         $message = [
-                'id_segment' => $id_segment,
-                'payload'    => null,
+            'id_segment' => $payload['id_segment'],
+            'payload' => null,
         ];
 
-        if ( $response->responseStatus != 200 ) {
+        if ($response->responseStatus >= 300) {
+            $errMessage = "Error, please try later";
 
-            switch ( $response->responseStatus ) {
-                case 202:
-                    $errMessage = "MyMemory is busy, please try later";
-                    break;
-
-                default:
-                    $errMessage = "Error, please try later";
-            }
-
-            $message[ 'error' ] = [
-                    'code'    => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
-        if ( $response->responseStatus == 200 ) {
-            $message[ 'payload' ] = $payload;
+        if ($response->responseStatus < 300) {
+            $message['payload'] = $payload;
         }
 
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_delete',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_delete',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
     /**
      * Exposes domains from MyMemory
      *
-     * @param $payload
+     * @param array{
+     *     jobData: array{
+     *       id: int,
+     *        password: string
+     *     },
+     *     id_client: string,
+     *     source: string,
+     *     target: string,
+     *     source_language: string,
+     *     target_language: string,
+     *     keys: array<string>,
+     *     id_segment?: string
+     * } $payload
      *
      * @throws StompException
      * @throws Exception
      */
-    private function domains( $payload ) {
+    private function domains(array $payload): void
+    {
+        $message = [];
+        $id_segment = $payload['id_segment'] ?? null;
+        $client = $this->getMyMemoryClient();
 
-        $message    = [];
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
-        $client     = $this->getMyMemoryClient();
+        $domains = $client->glossaryDomains($payload['keys']);
 
-        /** @var Engines_Results_MyMemory_DomainsResponse $domains */
-        $domains = $client->glossaryDomains( $payload[ 'keys' ] );
+        $message['entries'] = (!empty($domains->entries)) ? $domains->entries : [];
+        $message['id_segment'] = $id_segment;
 
-        $message[ 'entries' ]    = ( !empty( $domains->entries ) ) ? $domains->entries : [];
-        $message[ 'id_segment' ] = $id_segment;
-
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_domains',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_domains',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
     /**
      * Get a key from MyMemory
      *
-     * @param $payload
+     * @param array $payload
      *
+     * @throws EndQueueException
      * @throws Exception
      */
-    private function get( $payload ) {
-
+    private function get(array $payload): void
+    {
         if (
-                empty( $payload[ 'source' ] ) ||
-                empty( $payload[ 'id_segment' ] ) ||
-                empty( $payload[ 'source' ] ) ||
-                empty ( $payload[ 'source_language' ] ) ||
-                empty ( $payload[ 'target_language' ] )
+            empty($payload['id_segment']) ||
+            empty($payload['source']) ||
+            empty($payload['source_language']) ||
+            empty($payload['target_language'])
         ) {
-            throw new EndQueueException( "Invalid Payload" );
+            throw new EndQueueException("Invalid Payload");
         }
 
         $keys = [];
-        foreach ( $payload[ 'tmKeys' ] as $key ) {
-            $keys[] = $key[ 'key' ];
+        foreach ($payload['tmKeys'] as $key) {
+            $keys[] = $key['key'];
         }
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet(
-                $payload[ 'id_job' ],
-                $payload[ 'id_segment' ],
-                $payload[ 'source' ],
-                $payload[ 'source_language' ],
-                $payload[ 'target_language' ],
-                $keys
+            $payload['id_job'],
+            $payload['id_segment'],
+            $payload['source'],
+            $payload['source_language'],
+            $payload['target_language'],
+            $keys
         );
-        $matches  = $response->matches;
-        $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
+        $matches = $response->matches;
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_get',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $matches
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_get',
+                $payload['id_client'],
+                $payload['jobData'],
+                $matches
+            )
         );
     }
 
     /**
      * Check a key on MyMemory
      *
-     * @param $payload
+     * @param array $payload
      *
      * @throws Exception
      */
-    private function keys( $payload ) {
-
+    private function keys(array $payload): void
+    {
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_KeysGlossaryResponse $response */
-        $response = $client->glossaryKeys( $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
+        $response = $client->glossaryKeys($payload['source_language'], $payload['target_language'], $payload['keys']);
 
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_keys',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        [
-                                'has_glossary' => $response->hasGlossary()
-                        ]
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_keys',
+                $payload['id_client'],
+                $payload['jobData'],
+                [
+                    'has_glossary' => $response->hasGlossary()
+                ]
+            )
         );
     }
 
     /**
      * Search sentence in MyMemory
      *
-     * @param $payload
+     * @param array $payload
      *
-     * @throws StompException
+     * @throws EndQueueException
      * @throws Exception
      */
-    private function search( $payload ) {
+    private function search(array $payload): void
+    {
         $keys = [];
-        foreach ( $payload[ 'tmKeys' ] as $key ) {
-            $keys[] = $key[ 'key' ];
+        foreach ($payload['tmKeys'] as $key) {
+            $keys[] = $key['key'];
         }
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_SearchGlossaryResponse $response */
-        $response = $client->glossarySearch( $payload[ 'sentence' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $keys );
-        $matches  = $response->matches;
-        $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
+        $response = $client->glossarySearch($payload['sentence'], $payload['source_language'], $payload['target_language'], $keys);
+        $matches = $response->matches;
+        $matches = $this->formatGetGlossaryMatches($matches, $payload);
 
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_search',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $matches
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_search',
+                $payload['id_client'],
+                $payload['jobData'],
+                $matches
+            )
         );
     }
 
     /**
-     * @param $matches
-     * @param $payload
+     * @param array $matches
+     * @param array $payload
      *
      * @return array
      * @throws EndQueueException
      */
-    private function formatGetGlossaryMatches( $matches, $payload ) {
-        $tmKeys = $payload[ 'tmKeys' ];
-
-        if ( !is_array( $matches ) ) {
-            $this->_doLog( "Invalid response received from Glossary (not an array). This is the payload that was sent: " . json_encode( $payload ) . ". Got back from MM: " . $matches );
-            throw new EndQueueException( "Invalid response received from Glossary (not an array)" );
+    private function formatGetGlossaryMatches(array $matches, array $payload): array
+    {
+        if (empty($matches)) {
+            throw new EndQueueException("Empty response received from Glossary");
         }
 
-        if ( empty( $matches ) ) {
-            throw new EndQueueException( "Empty response received from Glossary" );
-        }
-
-        if ( $matches[ 'id_segment' ] === null or $matches[ 'id_segment' ] === "" ) {
-            $matches[ 'id_segment' ] = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
-        }
-
-        // could not have metadata, suppress warning
-        $key = @$matches[ 'terms' ][ 'metadata' ][ 'key' ];
-
-        foreach ( $tmKeys as $tmKey ) {
-            if ( $tmKey[ 'key' ] === $key and $tmKey[ 'is_shared' ] === false ) {
-
-                $keyLength   = strlen( $key );
-                $last_digits = substr( $key, -8 );
-                $key         = str_repeat( "*", $keyLength - 8 ) . $last_digits;
-
-                $matches[ 'terms' ][ 'metadata' ][ 'key' ] = $key;
-            }
+        if ($matches['id_segment'] === null or $matches['id_segment'] === "") {
+            $matches['id_segment'] = $payload['id_segment'] ?? null;
         }
 
         return $matches;
@@ -328,141 +340,121 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * Set a key in MyMemory
      *
-     * @param $payload
+     * @param array $payload
      *
      * @throws Exception
      */
-    private function set( $payload ) {
-
+    private function set(array $payload): void
+    {
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_SetGlossaryResponse $response */
-        $response   = $client->glossarySet( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+        $response = $client->glossarySet($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
+        $id_segment = $payload['id_segment'] ?? null;
 
         $message = [
-                'id_segment' => $id_segment,
-                'payload'    => null,
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
 
-        if ( $response->responseStatus != 200 ) {
+        if ($response->responseStatus >= 300) {
+            $errMessage = "Error, please try later";
 
-            switch ( $response->responseStatus ) {
-                case 202:
-                    $errMessage = "MyMemory is busy, please try later";
-                    break;
-
-                default:
-                    $errMessage = "Error, please try later";
-            }
-
-            $message[ 'error' ] = [
-                    'code'    => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
-        if ( $response->responseStatus == 200 ) {
-
+        if ($response->responseStatus < 300) {
             // reduce $payload['term']['matching_words'] to simple array
-            $matchingWords        = $payload[ 'term' ][ 'matching_words' ];
+            $matchingWords = $payload['term']['matching_words'] ?? [];
             $matchingWordsAsArray = [];
 
-            foreach ( $matchingWords as $matchingWord ) {
+            foreach ($matchingWords as $matchingWord) {
                 $matchingWordsAsArray[] = $matchingWord;
             }
 
-            $payload[ 'term' ][ 'matching_words' ] = $matchingWordsAsArray;
+            $payload['term']['matching_words'] = $matchingWordsAsArray;
 
             // reduce $payload['term']['metadata']['keys'] to simple array
-            $keys        = $payload[ 'term' ][ 'metadata' ][ 'keys' ];
+            $keys = $payload['term']['metadata']['keys'];
             $keysAsArray = [];
 
-            foreach ( $keys as $key ) {
+            foreach ($keys as $key) {
                 $keysAsArray[] = $key;
             }
 
-            $payload[ 'term' ][ 'metadata' ][ 'keys' ] = $keysAsArray;
+            $payload['term']['metadata']['keys'] = $keysAsArray;
 
-            // return term_id
-            if ( isset( $response->responseData[ 'id_glossary_term' ] ) and null !== $response->responseData[ 'id_glossary_term' ] ) {
-                $payload[ 'term' ][ 'term_id' ] = $response->responseData[ 'id_glossary_term' ];
-            }
+            $payload['request_id'] = $response->responseDetails;
 
-            $message[ 'payload' ] = $payload;
+            $message['payload'] = $payload;
         }
 
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_set',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_set',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
     /**
      * Update a key from MyMemory
      *
-     * @param $payload
+     * @param array $payload
      *
      * @throws Exception
      */
-    private function update( $payload ) {
-
+    private function update(array $payload): void
+    {
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_UpdateGlossaryResponse $response */
-        $response   = $client->glossaryUpdate( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+        $response = $client->glossaryUpdate($payload['id_segment'], $payload['id_job'], $payload['password'], $payload['term']);
+        $id_segment = $payload['id_segment'] ?? null;
 
         $message = [
-                'id_segment' => $id_segment,
-                'payload'    => null,
+            'id_segment' => $id_segment,
+            'payload' => null,
         ];
 
-        if ( $response->responseStatus != 200 ) {
+        if ($response->responseStatus >= 300) {
+            $errMessage = match ($response->responseStatus) {
+                202 => "MyMemory is busy, please try later",
+                default => "Error, please try later",
+            };
 
-            switch ( $response->responseStatus ) {
-                case 202:
-                    $errMessage = "MyMemory is busy, please try later";
-                    break;
-
-                default:
-                    $errMessage = "Error, please try later";
-            }
-
-            $message[ 'error' ] = [
-                    'code'    => $response->responseStatus,
-                    'message' => $errMessage,
-                    'payload' => $payload,
+            $message['error'] = [
+                'code' => $response->responseStatus,
+                'message' => $errMessage,
+                'payload' => $payload,
             ];
         }
 
-        if ( $response->responseStatus == 200 ) {
-
+        if ($response->responseStatus < 300) {
             // reduce $payload['term']['matching_words'] to simple array
-            $matchingWords        = $payload[ 'term' ][ 'matching_words' ];
+            $matchingWords = $payload['term']['matching_words'];
             $matchingWordsAsArray = [];
 
-            foreach ( $matchingWords as $matchingWord ) {
+            foreach ($matchingWords as $matchingWord) {
                 $matchingWordsAsArray[] = $matchingWord;
             }
 
-            $payload[ 'term' ][ 'matching_words' ] = $matchingWordsAsArray;
-
-            $message[ 'payload' ] = $payload;
+            $payload['term']['matching_words'] = $matchingWordsAsArray;
+            $payload['request_id'] = $response->responseDetails;
+            $message['payload'] = $payload;
         }
 
-        $this->publishToSseTopic(
-                $this->setResponsePayload(
-                        'glossary_update',
-                        $payload[ 'id_client' ],
-                        $payload[ 'jobData' ],
-                        $message
-                )
+        $this->publishToNodeJsClients(
+            $this->setResponsePayload(
+                'glossary_update',
+                $payload['id_client'],
+                $payload['jobData'],
+                $message
+            )
         );
     }
 
@@ -474,75 +466,40 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @return array
      */
-    private function setResponsePayload( $type, $id_client, $jobData, $message ) {
-
+    private function setResponsePayload($type, $id_client, $jobData, $message): array
+    {
         return [
-                '_type' => $type,
-                'data'  => [
-                        'payload'   => $message,
-                        'id_client' => $id_client,
-                        'id_job'    => $jobData[ 'id' ],
-                        'passwords' => $jobData[ 'password' ]
-                ]
+            '_type' => $type,
+            'data' => [
+                'payload' => $message,
+                'id_client' => $id_client,
+                'id_job' => $jobData['id'],
+                'passwords' => $jobData['password']
+            ]
         ];
-    }
-
-    /**
-     * @param $featuresString
-     *
-     * @return FeatureSet
-     * @throws Exception
-     */
-    private function getFeatureSetFromString( $featuresString ) {
-        $featureSet = new FeatureSet();
-        $featureSet->loadFromString( $featuresString );
-
-        return $featureSet;
     }
 
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_AbstractEngine
+     * @return MyMemory
      * @throws Exception
      */
-    private function getEngine( FeatureSet $featureSet ) {
-        $_TMS = Engine::getInstance( 1 );
-        $_TMS->setFeatureSet( $featureSet );
+    private function getEngine(FeatureSet $featureSet): MyMemory
+    {
+        $_TMS = EnginesFactory::getInstance(1);
+        $_TMS->setFeatureSet($featureSet);
 
+        /** @var MyMemory $_TMS */
         return $_TMS;
     }
 
     /**
-     * @param $array
-     *
-     * @return Users_UserStruct
-     */
-    private function getUser( $array ) {
-        return new Users_UserStruct( [
-                'uid'         => $array[ 'uid' ],
-                'email'       => $array[ 'email' ],
-                '$first_name' => $array[ 'first_name' ],
-                'last_name'   => $array[ 'last_name' ],
-        ] );
-    }
-
-    /**
-     * @return Engines_MyMemory
+     * @return MyMemory
      * @throws Exception
      */
-    private function getMyMemoryClient() {
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->id = 1;
-
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $engineRecord = @$eng[ 0 ];
-
-        return new Engines_MyMemory( $engineRecord );
+    private function getMyMemoryClient(): MyMemory
+    {
+        return $this->getEngine(new FeatureSet());
     }
 }

@@ -7,76 +7,68 @@
  *
  */
 
-namespace Search;
+namespace Model\Search;
 
-use DataAccess\ShapelessConcreteStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use stdClass;
 
-class SearchQueryParamsStruct extends ShapelessConcreteStruct {
-
-    /**
-     * @var string
-     */
-    public $key;
+class SearchQueryParamsStruct extends ShapelessConcreteStruct
+{
 
     /**
-     * @var integer
+     * @var string|null
      */
-    public $job;
-
-    /**
-     * @var $password
-     */
-    public $password;
-
-    /**
-     * @var string
-     */
-    public $searchWhere;
-
-    /**
-     * @var string
-     */
-    public $target;
-
-    /**
-     * @var string
-     */
-    public $source;
-
-    /**
-     * @var string
-     */
-    public $replacement;
-
-    /**
-     * @var string
-     */
-    public $status;
-
-    /**
-     * @var bool
-     */
-    public $isMatchCaseRequested;
-
-    /**
-     * @var bool
-     */
-    public $isExactMatchRequested;
-
-
-    /**
-     * @var string|\stdClass
-     */
-    public $matchCase;
-
-    /**
-     * @var string|\stdClass
-     */
-    public $exactMatch;
+    public ?string $key = null;
 
     /**
      * @var integer
      */
-    public $sourcePage;
+    public int $job;
+
+    /**
+     * @var string $password
+     */
+    public string $password;
+
+    /**
+     * @var string|null
+     */
+    public ?string $target = null;
+
+    /**
+     * @var string|null
+     */
+    public ?string $source = null;
+
+    /**
+     * @var ?string
+     */
+    public ?string $replacement = null;
+
+    /**
+     * @var ?string
+     */
+    public ?string $status = null;
+
+    /**
+     * @var bool
+     */
+    public bool $isMatchCaseRequested;
+
+    /**
+     * @var bool
+     */
+    public bool $isExactMatchRequested;
+
+
+    /**
+     * @var ?stdClass
+     */
+    public ?stdClass $matchCase = null;
+
+    /**
+     * @var ?stdClass
+     */
+    public ?stdClass $exactMatch = null;
 
 }

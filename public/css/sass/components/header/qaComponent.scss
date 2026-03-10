@@ -1,3 +1,4 @@
+@use '../../commons/colors';
 /********** QA Component **********/
 .qa-wrapper {
   position: relative;
@@ -214,16 +215,21 @@
           padding: 10px;
           color: #000000 !important;
           font-family: calibri;
+          display: flex;
+          gap: 4px;
+          &.error svg {
+            color: colors.$red800;
+          }
+          &.warning svg {
+            color: colors.$orangeDefault;
+          }
           &:hover {
             background: #f2f4f7 !important;
           }
           &.mc-bg-gray {
             background: #f2f4f7 !important;
           }
-          i {
-            position: relative;
-            top: 2px;
-          }
+
         }
       }
       .qa-lexiqa-info {

@@ -1,4 +1,7 @@
 <?php
+
+namespace Utils\Constants;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -6,21 +9,21 @@
  * Time: 14.47
  *
  */
+class Teams
+{
 
+    const string PERSONAL = 'personal';
+    const string GENERAL = 'general';
 
-class Constants_Teams {
-
-    const PERSONAL = 'personal';
-    const GENERAL  = 'general';
-
-    protected static $TYPES = [
-            self::PERSONAL,
-            self::GENERAL
+    protected static array $TYPES = [
+        self::PERSONAL,
+        self::GENERAL
     ];
 
 
-    public static function isAllowedType( $type ) {
-        return in_array( strtolower( $type ), self::$TYPES );
+    public static function isAllowedType($type): bool
+    {
+        return in_array(strtolower($type), self::$TYPES);
     }
 
 }

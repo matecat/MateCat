@@ -7,12 +7,13 @@
  *
  */
 
-namespace TaskRunner\Exceptions;
+namespace Utils\TaskRunner\Exceptions;
 
 /**
  * Class FrameException
  * @package TaskRunner\Exceptions
  */
-class FrameException extends \Exception {
+class FrameException extends \Exception
+{
 
 }

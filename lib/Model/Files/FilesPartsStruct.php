@@ -1,15 +1,16 @@
 <?php
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-class FilesPartsStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class FilesPartsStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public $id;
-    public $id_file;
-    public $key;
-    public $value;
+    public ?int $id = null;
+    public int $id_file;
+    public string $tag_key;
+    public string $tag_value;
 
 }

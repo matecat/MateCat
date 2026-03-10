@@ -1,9 +1,10 @@
 <?php
 
-namespace Exceptions;
+namespace Model\Exceptions;
 
 use Exception;
 
-class NotFoundException extends Exception {
+class NotFoundException extends Exception
+{
 
 }

@@ -1,44 +1,48 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use API\Commons\KleinController;
-use API\Commons\Validators\LoginValidator;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use Model\DataAccess\Database;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
-class TmKeyManagementController extends KleinController {
+class TmKeyManagementController extends KleinController
+{
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginValidator( $this ) );
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
     }
 
     /**
      * Return all the keys of the user
      */
-    public function getByUser(){
-
+    public function getByUser(): void
+    {
         try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( \Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->user->uid ) );
-            $keyList = $_keyDao->read( $dh );
+            $_keyDao = new MemoryKeyDao(Database::obtain());
+            $dh = new MemoryKeyStruct(['uid' => $this->user->uid]);
+            $keyList = $_keyDao->read($dh);
 
             $list = ['tm_keys' => []];
-            foreach ($keyList as $key){
+            foreach ($keyList as $key) {
                 $list['tm_keys'][] = $key->tm_key;
             }
 
-            $this->response->json( $list );
+            $this->response->json($list);
             exit();
-
-        } catch (\Exception $exception){
-            $this->response->status()->setCode( 500 );
-            $this->response->json( [
+        } catch (Exception $exception) {
+            $this->response->status()->setCode(500);
+            $this->response->json([
                 'errors' => [
                     $exception->getMessage()
                 ]
-            ] );
+            ]);
             exit();
         }
     }
+
 }

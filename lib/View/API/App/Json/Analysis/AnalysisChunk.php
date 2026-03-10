@@ -7,58 +7,61 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
-use Engine;
 use Exception;
-use Jobs_JobStruct;
 use JsonSerializable;
-use TmKeyManagement_Filter;
-use Url\JobUrlBuilder;
-use Users_UserStruct;
+use Model\Analysis\Constants\ConstantsInterface;
+use Model\Jobs\JobStruct;
+use Model\Users\UserStruct;
+use Utils\Engines\EnginesFactory;
+use Utils\TmKeyManagement\Filter;
+use Utils\Url\JobUrlBuilder;
 
-class AnalysisChunk implements JsonSerializable {
+class AnalysisChunk implements JsonSerializable
+{
 
     /**
      * @var AnalysisJobSummary
      */
-    protected $summary = null;
+    protected AnalysisJobSummary $summary;
 
     /**
      * @var AnalysisFile[]
      */
-    protected $files = [];
+    protected array $files = [];
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected $chunkStruct;
+    protected JobStruct $chunkStruct;
     /**
-     * @var mixed
+     * @var string
      */
-    protected $projectName;
+    protected string $projectName;
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
 
     /**
      * @var int
      */
-    protected $total_raw = 0;
+    protected int $total_raw = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected $total_equivalent = 0;
+    protected float $total_equivalent = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected $total_industry = 0;
+    protected float $total_industry = 0;
 
-    public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user ) {
+    public function __construct(JobStruct $chunkStruct, $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass)
+    {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
-        $this->user        = $user;
-        $this->summary     = new AnalysisJobSummary();
+        $this->user = $user;
+        $this->summary = new AnalysisJobSummary($matchConstantsClass);
     }
 
     /**
@@ -66,8 +69,9 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return $this
      */
-    public function setFile( AnalysisFile $file ) {
-        $this->files[ $file->getId() ] = $file;
+    public function setFile(AnalysisFile $file): AnalysisChunk
+    {
+        $this->files[$file->getId()] = $file;
 
         return $this;
     }
@@ -75,32 +79,35 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @throws Exception
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array
+    {
         return [
-                'password'         => $this->chunkStruct->password,
-                'status'           => $this->chunkStruct->status,
-                'engines'          => $this->getEngines(),
-                'memory_keys'      => $this->getMemoryKeys(),
-                'urls'             => JobUrlBuilder::createFromJobStructAndProjectName( $this->chunkStruct, $this->projectName )->getUrls(),
-                'files'            => array_values( $this->files ),
-                'summary'          => $this->summary,
-                'total_raw'        => $this->total_raw,
-                'total_equivalent' => round( $this->total_equivalent ),
-                'total_industry'   => round( $this->total_industry ),
+            'password' => $this->chunkStruct->password,
+            'status' => $this->chunkStruct->status,
+            'engines' => $this->getEngines(),
+            'memory_keys' => $this->getMemoryKeys(),
+            'urls' => JobUrlBuilder::createFromJobStructAndProjectName($this->chunkStruct, $this->projectName)->getUrls(),
+            'files' => array_values($this->files),
+            'summary' => $this->summary,
+            'total_raw' => $this->total_raw,
+            'total_equivalent' => round($this->total_equivalent),
+            'total_industry' => max(round($this->total_industry), round($this->total_equivalent)),
         ];
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getChunkStruct() {
+    public function getChunkStruct(): JobStruct
+    {
         return $this->chunkStruct;
     }
 
     /**
      * @return string
      */
-    public function getPassword() {
+    public function getPassword(): string
+    {
         return $this->chunkStruct->password;
     }
 
@@ -109,33 +116,44 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return bool
      */
-    public function hasFile( $id ) {
-        return array_key_exists( $id, $this->files );
+    public function hasFile($id): bool
+    {
+        return array_key_exists($id, $this->files);
     }
 
     /**
-     * @return AnalysisFile[]|null
+     * @return AnalysisFile[]
      */
-    public function getFiles() {
+    public function getFiles(): array
+    {
         return $this->files;
     }
 
     /**
      * @throws Exception
      */
-    private function getEngines() {
-
+    private function getEngines(): array
+    {
         // this can happen even when fast analysis is not completed
-        if ( !is_numeric( $this->chunkStruct->id_tms ) || !is_numeric( $this->chunkStruct->id_mt_engine ) ) {
+        if (!is_numeric($this->chunkStruct->id_tms) || !is_numeric($this->chunkStruct->id_mt_engine)) {
             return [];
         }
 
-        $tmEngine = Engine::getInstance( $this->chunkStruct->id_tms );
-        $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
+        try {
+            $tmEngine = EnginesFactory::getInstance($this->chunkStruct->id_tms);
+        } catch (Exception) {
+            $tmEngine = null;
+        }
+
+        try {
+            $mtEngine = EnginesFactory::getInstance($this->chunkStruct->id_mt_engine);
+        } catch (Exception) {
+            $mtEngine = null;
+        }
 
         return [
-                'tm' => ( new \API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRow() ),
-                'mt' => ( new \API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRow() )
+            'tm' => $tmEngine?->getEngineRecord()->arrayRepresentation(),
+            'mt' => $mtEngine?->getEngineRecord()->arrayRepresentation(),
         ];
     }
 
@@ -143,18 +161,19 @@ class AnalysisChunk implements JsonSerializable {
      * @return array
      * @throws Exception
      */
-    private function getMemoryKeys() {
+    private function getMemoryKeys(): array
+    {
         $tmKeys = [];
 
         // this can happen even when fast analysis is not completed
-        if ( empty( $this->chunkStruct->tm_keys ) ) {
+        if (empty($this->chunkStruct->tm_keys)) {
             return $tmKeys;
         }
 
-        $jobKeys = $this->chunkStruct->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+        $jobKeys = $this->chunkStruct->getClientKeys($this->user, Filter::OWNER)['job_keys'];
 
-        foreach ( $jobKeys as $tmKey ) {
-            $tmKeys[][ trim( $tmKey->name ) ] = trim( $tmKey->key );
+        foreach ($jobKeys as $tmKey) {
+            $tmKeys[][trim($tmKey->name)] = trim($tmKey->key);
         }
 
         return $tmKeys;
@@ -163,34 +182,38 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @return AnalysisJobSummary
      */
-    public function getSummary() {
+    public function getSummary(): AnalysisJobSummary
+    {
         return $this->summary;
     }
 
     /**
-     * @param $raw
+     * @param int $raw
      *
      * @return void
      */
-    public function incrementRaw( $raw ) {
-        $this->total_raw += (int)$raw;
+    public function incrementRaw(int $raw): void
+    {
+        $this->total_raw += $raw;
     }
 
     /**
-     * @param $equivalent
+     * @param float $equivalent
      *
      * @return void
      */
-    public function incrementEquivalent( $equivalent ) {
+    public function incrementEquivalent(float $equivalent): void
+    {
         $this->total_equivalent += $equivalent;
     }
 
     /**
-     * @param $industry
+     * @param float $industry
      *
      * @return void
      */
-    public function incrementIndustry( $industry ) {
+    public function incrementIndustry(float $industry): void
+    {
         $this->total_industry += $industry;
     }
 

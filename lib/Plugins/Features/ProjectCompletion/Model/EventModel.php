@@ -6,60 +6,73 @@
  * Time: 12:01
  */
 
-namespace Features\ProjectCompletion\Model ;
+namespace Plugins\Features\ProjectCompletion\Model;
 
-use Chunks_ChunkCompletionEventDao;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
-use Features\ProjectCompletion\CompletionEventStruct;
-use FeatureSet;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use ReflectionException;
 
 
-class EventModel {
+class EventModel
+{
 
     /**
      * @var CompletionEventStruct
      */
-    protected $eventStruct ;
+    protected CompletionEventStruct $eventStruct;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected $chunk ;
-    protected $chunkCompletionEventId ;
+    protected JobStruct $chunk;
+    protected ?int $chunkCompletionEventId = null;
 
 
-
-    public function __construct( Jobs_JobStruct $chunk, CompletionEventStruct $eventStruct ) {
-        $this->eventStruct = $eventStruct ;
-        $this->chunk = $chunk ;
+    public function __construct(JobStruct $chunk, CompletionEventStruct $eventStruct)
+    {
+        $this->eventStruct = $eventStruct;
+        $this->chunk = $chunk;
     }
 
-    public function save() {
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function save(): void
+    {
         $this->_checkStatusIsValid();
 
-        $this->chunkCompletionEventId = Chunks_ChunkCompletionEventDao::createFromChunk(
-                $this->chunk, $this->eventStruct
+        $this->chunkCompletionEventId = ChunkCompletionEventDao::createFromChunk(
+            $this->chunk,
+            $this->eventStruct
         );
 
-        $featureSet = new FeatureSet() ;
-        $featureSet->loadForProject( Projects_ProjectDao::findById($this->chunk->id_project ) );
-        $featureSet->run('project_completion_event_saved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId );
+        $featureSet = new FeatureSet();
+        $featureSet->loadForProject(ProjectDao::findById($this->chunk->id_project));
+        $featureSet->run('project_completion_event_saved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId);
     }
 
-    public function getChunkCompletionEventId() {
-        return $this->chunkCompletionEventId ;
+    public function getChunkCompletionEventId(): ?int
+    {
+        return $this->chunkCompletionEventId;
     }
 
-    private function _checkStatusIsValid() {
-        $dao = new Chunks_ChunkCompletionEventDao();
-        $current_phase = $dao->currentPhase( $this->chunk );
+    /**
+     * @throws Exception
+     */
+    private function _checkStatusIsValid(): void
+    {
+        $dao = new ChunkCompletionEventDao();
+        $current_phase = $dao->currentPhase($this->chunk);
 
         if (
-                (  $this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
-                ( !$this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::TRANSLATE )
+            ($this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::REVISE) ||
+            (!$this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::TRANSLATE)
         ) {
-            throw new Exception('Cannot save event, current status mismatch.') ;
+            throw new Exception('Cannot save event, current status mismatch.');
         }
     }
 }

@@ -1,10 +1,11 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
-use Constants\XliffTranslationStatus;
+use Utils\Constants\XliffTranslationStatus;
 
-class Xliff20Rule extends AbstractXliffRule {
+class Xliff20Rule extends AbstractXliffRule
+{
 
     /**
      * @see https://docs.oasis-open.org/xliff/xliff-core/v2.0/xliff-core-v2.0.html

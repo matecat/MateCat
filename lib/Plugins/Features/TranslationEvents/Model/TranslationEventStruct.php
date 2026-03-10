@@ -6,23 +6,24 @@
  * Time: 17:24
  */
 
-namespace Features\TranslationEvents\Model;
+namespace Plugins\Features\TranslationEvents\Model;
 
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-class TranslationEventStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct  {
+class TranslationEventStruct extends AbstractDaoSilentStruct implements IDaoStruct
+{
 
-    public $id ;
-    public $uid ;
-    public $id_segment ;
-    public $id_job ;
-    public $version_number ;
-    public $source_page ;
-    public $status ;
-    public $final_revision ;
-    public $create_date ;
-    public $time_to_edit ;
+    public ?int $id = null;
+    public int $uid;
+    public int $id_segment;
+    public int $id_job;
+    public int $version_number = 0;
+    public int $source_page;
+    public string $status;
+    public int $final_revision = 0;
+    public string $create_date;
+    public ?int $time_to_edit = null;
 
 }

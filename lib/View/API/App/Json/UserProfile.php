@@ -7,33 +7,37 @@
  *
  */
 
-namespace API\App\Json;
+namespace View\API\App\Json;
 
-use API\V2\Json\Team;
-use API\V2\Json\User;
-use ConnectedServices\ConnectedServiceStruct;
-use Teams\TeamStruct;
-use Users_UserStruct;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
+use Model\ConnectedServices\ConnectedServiceStruct;
+use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
+use ReflectionException;
+use View\API\V2\Json\Team;
+use View\API\V2\Json\User;
 
-class UserProfile {
+class UserProfile
+{
 
     /**
-     * @param Users_UserStruct              $user
-     * @param TeamStruct[]                  $teams
+     * @param UserStruct $user
+     * @param TeamStruct[] $teams
      * @param ConnectedServiceStruct[]|null $servicesStruct
-     * @param array                         $userMetadata
+     * @param array $userMetadata
      *
      * @return array
+     * @throws ReflectionException
+     * @throws EnvironmentIsBrokenException
      */
-    public function renderItem( Users_UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = [] ) {
-
+    public function renderItem(UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = []): array
+    {
         return [
-                'user'               => User::renderItem( $user ),
-                'connected_services' => ( new ConnectedService( $servicesStruct ) )->render(),
-                'teams'              => ( new Team() )->render( $teams ),
-                'metadata'           => ( empty( $userMetadata ) ? null : $userMetadata ),
+            'user' => User::renderItem($user),
+            'connected_services' => (new ConnectedService($servicesStruct))->render(),
+            'teams' => (new Team())->render($teams),
+            'metadata' => (empty($userMetadata) ? null : $userMetadata),
         ];
-
     }
 
 }

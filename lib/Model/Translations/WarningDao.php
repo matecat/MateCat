@@ -1,15 +1,17 @@
 <?php
 
 
-namespace Translations;
+namespace Model\Translations;
 
-use Constants_TranslationStatus;
-use DataAccess\ShapelessConcreteStruct;
-use Jobs\WarningsCountStruct;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
+use Model\Jobs\WarningsCountStruct;
+use Model\Warnings\GlobalWarningStruct;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
-class WarningDao extends \DataAccess_AbstractDao {
+class WarningDao extends AbstractDao
+{
 
     protected string $_query_warnings_by_chunk = "
           SELECT count(1) AS count, jobs.id AS id_job, jobs.password
@@ -23,14 +25,14 @@ class WarningDao extends \DataAccess_AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function getWarningsByProjectIds( $projectIds ): array {
+    public function getWarningsByProjectIds($projectIds): array
+    {
+        $statuses[] = TranslationStatus::STATUS_TRANSLATED;
+        $statuses[] = TranslationStatus::STATUS_APPROVED;
 
-        $statuses[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-        $statuses[] = Constants_TranslationStatus::STATUS_APPROVED;
-
-        $arrayCount   = count( $projectIds );
-        $rowCount     = ( $arrayCount ? $arrayCount - 1 : 0 );
-        $placeholders = sprintf( "?%s", str_repeat( ",?", $rowCount ) );
+        $arrayCount = count($projectIds);
+        $rowCount = ($arrayCount ? $arrayCount - 1 : 0);
+        $placeholders = sprintf("?%s", str_repeat(",?", $rowCount));
 
         $sql = "
         SELECT 	COUNT( jobs.id ) as count,
@@ -45,51 +47,49 @@ class WarningDao extends \DataAccess_AbstractDao {
                         GROUP BY id_job, password;
         ";
 
-        $params = array_merge( $projectIds, $statuses );
+        $params = array_merge($projectIds, $statuses);
 
         $con = $this->database->getConnection();
 
-        $stmt = $con->prepare( $sql );
+        $stmt = $con->prepare($sql);
 
-        return $this->_fetchObject( $stmt, new WarningsCountStruct(), $params );
-
+        return $this->_fetchObjectMap($stmt, WarningsCountStruct::class, $params);
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return int
      */
-    public function getErrorsByChunk( Jobs_JobStruct $chunk ): int {
+    public function getErrorsByChunk(JobStruct $chunk): int
+    {
         $con = $this->database->getConnection();
 
-        $stmt = $con->prepare( $this->_query_warnings_by_chunk );
-        $stmt->execute( [
-                'id'       => $chunk->id,
-                'password' => $chunk->password,
-                'level'    => WarningModel::ERROR,
-                'status'   => Constants_TranslationStatus::STATUS_NEW
-        ] );
+        $stmt = $con->prepare($this->_query_warnings_by_chunk);
+        $stmt->execute([
+            'id' => $chunk->id,
+            'password' => $chunk->password,
+            'level' => WarningModel::ERROR,
+            'status' => TranslationStatus::STATUS_NEW
+        ]);
 
-        $result = $stmt->fetch();
-        if ( $result ) {
-            return $result[ 'count' ];
-        } else {
-            return 0;
-        }
+        $result = $stmt->fetch() ?: [];
+
+        return $result['count'] ?? 0;
     }
 
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult(array $array_result)
+    {
         // TODO: Implement _buildResult() method.
     }
 
     /**
      * @throws ReflectionException
      */
-    public static function getWarningsByJobIdAndPassword( $jid, $jpassword ): array {
-
+    public static function getWarningsByJobIdAndPassword($jid, $jpassword): array
+    {
         $thisDao = new self();
-        $db      = $thisDao->getDatabaseHandler();
+        $db = $thisDao->getDatabaseHandler();
 
         $query = "SELECT id_segment, serialized_errors_list
 		FROM segment_translations
@@ -100,15 +100,12 @@ class WarningDao extends \DataAccess_AbstractDao {
 		-- following is a condition on bitmask to filter by severity ERROR
 		  AND warning & 1 = 1 ";
 
-        $stmt = $db->getConnection()->prepare( $query );
+        $stmt = $db->getConnection()->prepare($query);
 
-        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-                'id_job'         => $jid,
-                'password'       => $jpassword,
-                'segment_status' => Constants_TranslationStatus::STATUS_NEW
-        ] );
-
+        return $thisDao->_fetchObjectMap($stmt, GlobalWarningStruct::class, [
+            'id_job' => $jid,
+            'password' => $jpassword,
+            'segment_status' => TranslationStatus::STATUS_NEW
+        ]);
     }
-
-
 }

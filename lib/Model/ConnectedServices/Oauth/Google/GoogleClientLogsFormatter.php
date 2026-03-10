@@ -1,0 +1,38 @@
+<?php
+
+namespace Model\ConnectedServices\Oauth\Google;
+
+use Monolog\Formatter\FormatterInterface;
+use Monolog\LogRecord;
+
+class GoogleClientLogsFormatter implements FormatterInterface
+{
+
+    /**
+     * Formats a log record.
+     *
+     * @param LogRecord $record A record to format
+     *
+     * @return mixed The formatted record
+     */
+    public function format(LogRecord $record): string
+    {
+        return json_encode($record) . PHP_EOL;
+    }
+
+    /**
+     * Formats a set of log records.
+     *
+     * @param array $records A set of records to format
+     *
+     * @return array The formatted set of records
+     */
+    public function formatBatch(array $records): array
+    {
+        foreach ($records as $key => $record) {
+            $records[$key] = $this->format($record);
+        }
+
+        return $records;
+    }
+}

@@ -7,10 +7,11 @@
  *
  */
 
-namespace Filters\DTO;
+namespace Model\Filters\DTO;
 
-interface IDto {
+interface IDto
+{
 
-    public function fromArray( $data );
+    public function fromArray(array $data): void;
 
 }

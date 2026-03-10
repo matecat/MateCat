@@ -1,4 +1,7 @@
 <?php
+
+namespace Utils\Constants;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -6,8 +9,8 @@
  * Time: 19.08
  *
  */
-
-class Constants_JobStatus {
+class JobStatus
+{
 
     /**
      * Created by PhpStorm.
@@ -17,20 +20,21 @@ class Constants_JobStatus {
      *
      */
 
-    const STATUS_ACTIVE    = 'active';
-    const STATUS_ARCHIVED  = 'archived';
-    const STATUS_CANCELLED = 'cancelled';
-    const STATUS_DELETED   = 'deleted';
+    const string STATUS_ACTIVE = 'active';
+    const string STATUS_ARCHIVED = 'archived';
+    const string STATUS_CANCELLED = 'cancelled';
+    const string STATUS_DELETED = 'deleted';
 
-    public static $ALLOWED_STATUSES = [
-            self::STATUS_ACTIVE,
-            self::STATUS_ARCHIVED,
-            self::STATUS_CANCELLED,
-            self::STATUS_DELETED
+    public static array $ALLOWED_STATUSES = [
+        self::STATUS_ACTIVE,
+        self::STATUS_ARCHIVED,
+        self::STATUS_CANCELLED,
+        self::STATUS_DELETED
     ];
 
-    public static function isAllowedStatus( $status ) {
-        return in_array( strtolower( $status ), self::$ALLOWED_STATUSES );
+    public static function isAllowedStatus(string $status): bool
+    {
+        return in_array(strtolower($status), self::$ALLOWED_STATUSES);
     }
 
 } 

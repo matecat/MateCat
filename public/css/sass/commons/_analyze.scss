@@ -1,11 +1,13 @@
+@use '../commons/colors';
 // rewrite semantic CSS
-html, body {
+html,
+body {
   height: 100%;
 }
 body.analyze {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: $grey5;
+  background-color: colors.$grey5;
   overflow-x: auto;
   overflow-y: hidden;
   font-size: 14px;
@@ -27,7 +29,7 @@ body.analyze {
 
   .project {
     .scroll {
-      background-color: $grey2;
+      background-color: colors.$grey2;
       width: 40px;
       height: 40px;
       position: fixed;
@@ -49,7 +51,7 @@ body.analyze {
     }
 
     .project-header {
-      background: $grey4;
+      background: colors.$grey4;
       padding-bottom: 10px;
       margin-bottom: 0;
       .left-analysis {
@@ -72,12 +74,12 @@ body.analyze {
           left: -45px;
           max-width: 100%;
           min-width: 0;
-          background-color: $grey2;
+          background-color: colors.$grey2;
           color: #000000;
           border-radius: 0 2px 2px 0;
           padding-right: 15px;
           &:after {
-            border-right-color: $grey1 !important;
+            border-right-color: colors.$grey1 !important;
           }
           .project-id,
           .project-name {
@@ -120,13 +122,13 @@ body.analyze {
               display: inline-block;
               margin-bottom: 0;
               span {
-                color: $greenDefault;
+                color: colors.$greenDefault;
                 padding: 5px 2px 5px 0;
                 margin-left: 4px;
                 border-radius: 15px;
               }
               i {
-                color: $greenDefault;
+                color: colors.$greenDefault;
                 position: relative;
                 top: 2px;
               }
@@ -171,7 +173,7 @@ body.analyze {
         .word-percent {
           position: relative;
           padding: 15px 15px 10px 20px;
-          border: 1px solid $greenDefault;
+          border: 1px solid colors.$greenDefault;
           top: 27px;
           font-size: 16px;
           margin-bottom: 25px;
@@ -200,11 +202,6 @@ body.analyze {
             }
             &:focus {
               text-decoration: none;
-            }
-          }
-          .custom {
-            &.popup {
-              min-width: 90%;
             }
           }
         }
@@ -262,10 +259,16 @@ body.analyze {
 
     .project-top {
       padding: 45px 15px 15px;
-      background-color: $grey5;
+      background-color: colors.$grey5;
       margin: 0 -1rem 0;
+      &.type-mtqe {
+        .title-total-words,
+        .title-matecat-words {
+          width: 50% !important;
+        }
+      }
       .compare-table {
-        background-color: $grey3;
+        background-color: colors.$grey3;
         margin-bottom: 1px;
         .updated-count {
           background-color: #f9ffb5;
@@ -408,6 +411,13 @@ body.analyze {
               left: 2px;
             }
           }
+          .title-standard-words-help-icon {
+            cursor: help;
+
+            svg {
+              color: colors.$linkBlue;
+            }
+          }
         }
         .title-matecat-words {
           h5 {
@@ -415,7 +425,7 @@ body.analyze {
           }
         }
         &.jobs {
-          background-color: $grey5;
+          background-color: colors.$grey5;
           z-index: 0;
           position: relative;
           .job {
@@ -527,7 +537,7 @@ body.analyze {
             &.outsource-translation-disabled {
               span,
               a {
-                color: $grey;
+                color: colors.$grey;
               }
             }
             a {
@@ -545,6 +555,11 @@ body.analyze {
                 margin-left: 2px;
               }
             }
+          }
+          .split {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
           }
           .split,
           .merge {
@@ -632,7 +647,7 @@ body.analyze {
       .analyze-report {
         text-align: center;
         width: 100%;
-        background-color: $grey3;
+        background-color: colors.$grey3;
         margin: 0 auto;
         position: relative;
         top: 30px;
@@ -666,7 +681,7 @@ body.analyze {
             top: 3px;
             position: relative;
             transition: 0.3s ease;
-            color: $black;
+            color: colors.$black;
             &.open {
               -webkit-transform: rotate(180deg);
               -moz-transform: rotate(180deg);
@@ -681,7 +696,7 @@ body.analyze {
     }
     .job-id {
       display: inline-block;
-      color: $grey1;
+      color: colors.$grey1;
       font-size: 12px;
       position: relative;
       line-height: 35px;
@@ -764,7 +779,7 @@ body.analyze {
 
     .project-body {
       margin-top: 0;
-      background-color: $grey3;
+      background-color: colors.$grey3;
       margin: 0 -1rem 0;
       margin-left: 1px;
       margin-right: 1px;
@@ -773,11 +788,11 @@ body.analyze {
         margin-top: 35px;
         margin-bottom: 20px;
         .job-header {
-          background-color: $white !important;
+          background-color: colors.$white !important;
           padding: 0 0 !important;
         }
         .job-body {
-          background-color: $grey5;
+          background-color: colors.$grey5;
           .chunks {
             overflow-x: auto;
             .chunk-container {
@@ -790,7 +805,7 @@ body.analyze {
                 &.show-details {
                   .chunks-analyze,
                   .chunk-analyze-container > div {
-                    background-color: $grey4 !important;
+                    background-color: colors.$grey4 !important;
                   }
                 }
                 &.outsource-open {
@@ -951,7 +966,7 @@ body.analyze {
 
 @media only screen and (min-width: 1200px) {
   .ui.container:not(.fluid) {
-    width: 1140px !important;;
+    width: 1140px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -960,7 +975,7 @@ body.analyze {
 
 @media only screen and (min-width: 1380px) {
   .ui.container:not(.fluid) {
-    width: 1280px !important;;
+    width: 1280px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -1074,81 +1089,5 @@ body.analyze {
       max-height 0.5s ease,
       padding 1s ease,
       opacity 1s ease;
-  }
-}
-
-/* Footer */
-.normal-foo {
-  background-color: $grey4;
-  min-width: 992px;
-
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  .footer-body {
-    display: grid;
-    position: relative;
-    grid-column-gap: 24px;
-    grid-template-columns: 0.6fr 0.6fr 1fr;
-    align-items: center;
-    padding: 16px 64px;
-    height: 77px;
-    .info {
-      display: grid;
-      align-items: center;
-      grid-template-columns: 40px auto;
-      grid-column-gap: 8px;
-      .logo {
-        background-position: center;
-        background-size: cover;
-      }
-      .description {
-        color: $grey1;
-        font-weight: 100;
-        font-size: 12px;
-        text-align: left;
-        line-height: 14px;
-        .link {
-          color: #00aee4;
-          text-decoration: underline;
-        }
-      }
-    }
-  }
-  .side-info {
-    padding: 0 16px;
-    position: absolute;
-    display: grid;
-    align-items: center;
-    bottom: 0;
-    right: 0;
-    width: 419px;
-    height: 35px;
-    box-shadow: -2px -2px 12px 0 rgba(198, 198, 198, 0.5);
-    background-color: #ffffff;
-    .side-info-body {
-      display: grid;
-      grid-template-columns: 80px 80px 80px;
-      align-items: center;
-      .item {
-        a {
-          margin: 0;
-          padding: 0;
-          color: $grey1;
-          display: block;
-          text-decoration: underline;
-          text-align: left;
-        }
-      }
-    }
-  }
-}
-
-#action-manage {
-  opacity: 0.8;
-  &:hover {
-    opacity: 1;
   }
 }

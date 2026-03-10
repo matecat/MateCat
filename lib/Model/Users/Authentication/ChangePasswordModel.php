@@ -7,61 +7,61 @@
  *
  */
 
-namespace Users\Authentication;
+namespace Model\Users\Authentication;
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
-use Users_UserDao;
-use Users_UserStruct;
-use Utils;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use ReflectionException;
+use Utils\Tools\Utils;
 
-class ChangePasswordModel {
+class ChangePasswordModel
+{
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
     private $user;
 
-    public function __construct( Users_UserStruct $user ) {
+    public function __construct(UserStruct $user)
+    {
         $this->user = $user;
     }
 
     /**
      * @param $old_password
      * @param $new_password
-     * @param $new_password_confirmation
      *
      * @throws ValidationError
+     * @throws ReflectionException
      * @throws Exception
      */
-    public function changePassword( $old_password, $new_password, $new_password_confirmation ) {
-
-        if ( !Utils::verifyPass( $old_password, $this->user->salt, $this->user->pass ) ) {
-            throw new ValidationError( "Invalid password" );
+    public function changePassword($old_password, $new_password): void
+    {
+        if (!Utils::verifyPass($old_password, $this->user->salt, $this->user->pass)) {
+            throw new ValidationError("Invalid password");
         }
 
-        if ( $old_password === $new_password ) {
-            throw new ValidationError( "New password cannot be the same as your old password" );
+        if ($old_password === $new_password) {
+            throw new ValidationError("New password cannot be the same as your old password");
         }
 
-        UserPasswordValidator::validatePassword( $new_password, $new_password_confirmation );
-
-        $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt );
+        $this->user->pass = Utils::encryptPass($new_password, $this->user->salt);
 
         $fieldsToUpdate = [
-                'fields' => [ 'pass' ]
+            'fields' => ['pass']
         ];
 
         // update email_confirmed_at only if it's null
-        if ( null === $this->user->email_confirmed_at ) {
-            $this->user->email_confirmed_at = date( 'Y-m-d H:i:s' );
-            $fieldsToUpdate[ 'fields' ][]   = 'email_confirmed_at';
+        if (null === $this->user->email_confirmed_at) {
+            $this->user->email_confirmed_at = date('Y-m-d H:i:s');
+            $fieldsToUpdate['fields'][] = 'email_confirmed_at';
         }
 
-        Users_UserDao::updateStruct( $this->user, $fieldsToUpdate );
-        ( new Users_UserDao )->destroyCacheByEmail( $this->user->email );
-        ( new Users_UserDao )->destroyCacheByUid( $this->user->uid );
-
+        UserDao::updateStruct($this->user, $fieldsToUpdate);
+        (new UserDao)->destroyCacheByEmail($this->user->email);
+        (new UserDao)->destroyCacheByUid($this->user->uid);
     }
 
 }

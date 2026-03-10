@@ -1,16 +1,17 @@
 <?php
 
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use API\Commons\KleinController;
-use INIT;
+use Controller\Abstracts\KleinController;
+use Utils\Registry\AppConfig;
 
-class SupportedFilesController extends KleinController {
+class SupportedFilesController extends KleinController
+{
 
 
-    public function index()
+    public function index(): void
     {
         $this->response->json(
             $this->getFileList()
@@ -20,21 +21,21 @@ class SupportedFilesController extends KleinController {
     /**
      * @return array
      */
-    private function getFileList()
+    private function getFileList(): array
     {
         $ret = [];
 
-        foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
+        foreach (AppConfig::$SUPPORTED_FILE_TYPES as $key => $value) {
             $val = [];
-            foreach ( $value as $ext => $info ) {
+            foreach ($value as $ext => $info) {
                 $val[] = [
-                    'ext'   => $ext,
-                    'class' => $info[ 2 ]
+                    'ext' => $ext,
+                    'class' => $info[2]
                 ];
             }
 
-            $val = array_chunk( $val, 1 );
-            $ret[ $key ] = $val;
+            $val = array_chunk($val, 1);
+            $ret[$key] = $val;
         }
 
         return $ret;

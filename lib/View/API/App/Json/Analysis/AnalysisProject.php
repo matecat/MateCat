@@ -7,76 +7,90 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
 use JsonSerializable;
+use Model\Analysis\Constants\ConstantsInterface;
 
-class AnalysisProject implements JsonSerializable {
+class AnalysisProject implements JsonSerializable
+{
 
     /**
      * @var string
      */
-    protected $name = null;
+    protected string $name;
 
     /**
-     * @var
+     * @var string
      */
-    protected $status;
+    protected string $status;
 
     /**
      * @var AnalysisJob[]
      */
-    protected $jobs = [];
+    protected array $jobs = [];
     /**
      * @var AnalysisProjectSummary
      */
-    protected $summary = null;
+    protected AnalysisProjectSummary $summary;
     /**
      * @var string
      */
-    private $analyzeLink;
+    private string $analyzeLink;
     /**
      * @var string
      */
-    private $createDate;
+    private string $createDate;
     /**
-     * @var mixed
+     * @var string
      */
-    protected $subject;
+    protected string $subject;
+    /**
+     * @var string
+     */
+    protected string $workflow_type;
 
-    public function __construct( $name, $status, $create_date, $subject, AnalysisProjectSummary $summary ) {
-        $this->name       = $name;
-        $this->status     = $status;
-        $this->summary    = $summary;
-        $this->subject    = $subject;
+    public function __construct(string $name, string $status, string $create_date, string $subject, AnalysisProjectSummary $summary, ConstantsInterface $matchConstantsClass)
+    {
+        $this->name = $name;
+        $this->status = $status;
+        $this->summary = $summary;
+        $this->subject = $subject;
         $this->createDate = $create_date;
+        $this->workflow_type = $matchConstantsClass::getWorkflowType();
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getStatus() {
+    public function getStatus(): string
+    {
         return $this->status;
     }
 
     /**
-     * @param mixed $status
+     * @param string $status
+     *
+     * @return void
      */
-    public function setStatus( $status ) {
+    public function setStatus(string $status): void
+    {
         $this->status = $status;
     }
 
     /**
      * @return string
      */
-    public function getAnalyzeLink() {
+    public function getAnalyzeLink(): string
+    {
         return $this->analyzeLink;
     }
 
     /**
      * @param string $analyzeLink
      */
-    public function setAnalyzeLink( $analyzeLink ) {
+    public function setAnalyzeLink(string $analyzeLink): void
+    {
         $this->analyzeLink = $analyzeLink;
     }
 
@@ -85,68 +99,79 @@ class AnalysisProject implements JsonSerializable {
      *
      * @return $this
      */
-    public function setJob( AnalysisJob $job ) {
-        $this->jobs[ $job->getId() ] = $job;
+    public function setJob(AnalysisJob $job): AnalysisProject
+    {
+        $this->jobs[$job->getId()] = $job;
 
         return $this;
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return bool
      */
-    public function hasJob( $id ) {
-        return array_key_exists( $id, $this->jobs );
+    public function hasJob(string $id): bool
+    {
+        return array_key_exists($id, $this->jobs);
     }
 
     /**
+     * @param $id
+     *
      * @return AnalysisJob
      */
-    public function getJob( $id ) {
-        return $this->jobs[ $id ];
+    public function getJob($id): AnalysisJob
+    {
+        return $this->jobs[$id];
     }
 
     /**
      * @return AnalysisJob[]
      */
-    public function getJobs() {
+    public function getJobs(): array
+    {
         return $this->jobs;
     }
 
     /**
      * @return AnalysisProjectSummary
      */
-    public function getSummary() {
+    public function getSummary(): AnalysisProjectSummary
+    {
         return $this->summary;
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getName() {
+    public function getName(): string
+    {
         return $this->name;
     }
 
     /**
      * @return string
      */
-    public function getCreateDate() {
+    public function getCreateDate(): string
+    {
         return $this->createDate;
     }
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array
+    {
         return [
-                'name'        => $this->name,
-                'status'      => $this->status,
-                'create_date' => $this->createDate,
-                'subject'     => $this->subject,
-                'jobs'        => array_values( $this->jobs ),
-                'summary'     => $this->summary,
-                'analyze_url' => $this->analyzeLink
+            'name' => $this->name,
+            'status' => $this->status,
+            'create_date' => $this->createDate,
+            'subject' => $this->subject,
+            'workflow_type' => $this->workflow_type,
+            'jobs' => array_values($this->jobs),
+            'summary' => $this->summary,
+            'analyze_url' => $this->analyzeLink
         ];
     }
 }

@@ -1,53 +1,58 @@
 <?php
 
-namespace LQA\BxExG;
+namespace Utils\LQA\BxExG;
 
-class Element {
+class Element
+{
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $name;
+    public ?string $name = null;
 
     /**
      * @var array
      */
-    public $attributes = [];
+    public array $attributes = [];
 
     /**
      * @var Element[]
      */
-    public $children = [];
+    public array $children = [];
 
     /**
      * @param Element $anotherElement
      *
      * @return bool
      */
-    public function correspondsTo( Element $anotherElement ) {
+    public function correspondsTo(Element $anotherElement): bool
+    {
         return $this->name === $anotherElement->name and $this->attributes === $anotherElement->attributes;
     }
 
     /**
      * @return bool
      */
-    public function isG() {
+    public function isG(): bool
+    {
         return $this->name === 'g';
     }
 
     /**
      * @return bool
      */
-    public function isExOrBx() {
+    public function isExOrBx(): bool
+    {
         return $this->name === 'ex' or $this->name === 'bx';
     }
 
     /**
      * @return int
      */
-    public function getTotalTagsCount() {
+    public function getTotalTagsCount(): int
+    {
         $count = 1;
-        $count += $this->incrementTagsCount( $this );
+        $count += $this->incrementTagsCount($this);
 
         return $count;
     }
@@ -57,12 +62,13 @@ class Element {
      *
      * @return int
      */
-    private function incrementTagsCount( Element $element ) {
+    private function incrementTagsCount(Element $element): int
+    {
         $c = 0;
 
-        foreach ( $element->children as $child ) {
+        foreach ($element->children as $child) {
             $c++;
-            $c += $this->incrementTagsCount( $child );
+            $c += $this->incrementTagsCount($child);
         }
 
         return $c;
@@ -71,8 +77,9 @@ class Element {
     /**
      * @return bool
      */
-    public function hasNestedBxOrEx() {
-        return $this->searchForNestedBxOrEx( $this->children );
+    public function hasNestedBxOrEx(): bool
+    {
+        return $this->searchForNestedBxOrEx($this->children);
     }
 
     /**
@@ -80,13 +87,14 @@ class Element {
      *
      * @return bool
      */
-    private function searchForNestedBxOrEx( $children ) {
-        foreach ( $children as $child ) {
-            if ( $child->isExOrBx() ) {
+    private function searchForNestedBxOrEx($children): bool
+    {
+        foreach ($children as $child) {
+            if ($child->isExOrBx()) {
                 return true;
             }
 
-            return $this->searchForNestedBxOrEx( $child->children );
+            return $this->searchForNestedBxOrEx($child->children);
         }
 
         return false;

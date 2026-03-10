@@ -7,15 +7,25 @@
  *
  */
 
-abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements DataAccess_IDaoStruct, Countable {
+namespace Model\DataAccess;
 
-    use \DataAccess\RecursiveArrayCopy;
+use Countable;
+use DomainException;
+use ReflectionObject;
+use ReflectionProperty;
+use stdClass;
+
+abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable
+{
+
+    use RecursiveArrayCopy;
 
     protected array $cached_results = [];
 
-    public function __construct( array $array_params = [] ) {
-        if ( $array_params != null ) {
-            foreach ( $array_params as $property => $value ) {
+    public function __construct(array $array_params = [])
+    {
+        if ($array_params != null) {
+            foreach ($array_params as $property => $value) {
                 $this->$property = $value;
             }
         }
@@ -28,9 +38,10 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * @return void
      * @throws DomainException
      */
-    public function __set( $name, $value ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Unknown property ' . $name );
+    public function __set($name, $value)
+    {
+        if (!property_exists($this, $name)) {
+            throw new DomainException('Unknown property ' . $name);
         }
     }
 
@@ -48,7 +59,8 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * $model->clear()->foo(); // clears the cache and returns fresh data
      *
      */
-    public function clear(): DataAccess_AbstractDaoObjectStruct {
+    public function clear(): AbstractDaoObjectStruct
+    {
         $this->cached_results = [];
 
         return $this;
@@ -58,17 +70,19 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * This method makes it possible to define methods on child classes
      * whose result is cached on the instance.
      *
-     * @param $method_name
-     * @param $params
-     * @param $function
+     * @param string $cache_key_name
+     * @param callable $function
      *
      * @return mixed
      *
      */
-    protected function cachable( string $method_name, $params, callable $function ) {
-        $resultset = $this->cached_results[ $method_name ] ?? null;
-        if ( $resultset == null ) {
-            $resultset = $this->cached_results[ $method_name ] = call_user_func( $function, $params );
+    protected function cachable(string $cache_key_name, callable $function)
+    {
+        /** @var  $resultset ?T */
+        $resultset = $this->cached_results[$cache_key_name] ?? null;
+        if ($resultset == null) {
+            /** @var  $resultset ?T */
+            $resultset = $this->cached_results[$cache_key_name] = call_user_func($function);
         }
 
         return $resultset;
@@ -80,16 +94,18 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * @return mixed
      * @throws DomainException
      */
-    public function __get( $name ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Trying to get an undefined property ' . $name );
+    public function __get($name)
+    {
+        if (!property_exists($this, $name)) {
+            throw new DomainException('Trying to get an undefined property ' . $name);
         }
 
         return $this->$name;
     }
 
-    public function setTimestamp( $attribute, $timestamp ) {
-        $this->$attribute = date( 'c', $timestamp );
+    public function setTimestamp($attribute, $timestamp)
+    {
+        $this->$attribute = date('c', $timestamp);
     }
 
     /**
@@ -97,15 +113,16 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      *
      * @return array
      */
-    public function getArrayCopy() {
+    public function getArrayCopy()
+    {
         return $this->toArray();
     }
 
-    public function count(): int {
-        $reflectionClass = new ReflectionObject( $this );
+    public function count(): int
+    {
+        $reflectionClass = new ReflectionObject($this);
 
-        return count( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) );
+        return count($reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC));
     }
-
 
 } 

@@ -6,81 +6,87 @@
  * Time: 00:02
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
-use API\Commons\KleinController;
-use Exceptions\NotFoundException;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Controller\Abstracts\KleinController;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use ReflectionException;
 
-class ProjectPasswordValidator extends Base {
+class ProjectPasswordValidator extends Base
+{
     /**
-     * @var Projects_ProjectStruct
+     * @var ?ProjectStruct
      */
-    private $project;
+    private ?ProjectStruct $project = null;
 
-    private $id_project;
-    private $password;
+    private int $id_project;
+    private ?string $password;
 
-    public function __construct( KleinController $controller ) {
+    public function __construct(KleinController $controller)
+    {
+        $filterArgs = [
+            'id_project' => [
+                'filter' => FILTER_SANITIZE_NUMBER_INT,
+                ['filter' => FILTER_VALIDATE_INT]
+            ],
+            'password' => [
+                'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
+                'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ],
+        ];
 
-        $filterArgs = array(
-                'id_project' => array(
-                        'filter' => FILTER_SANITIZE_NUMBER_INT
-                ),
-                'password'   => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
-
-        $postInput = (object)filter_var_array( $controller->params, $filterArgs );
+        $postInput = (object)filter_var_array($controller->params, $filterArgs);
 
         $this->id_project = $postInput->id_project;
-        $this->password   = $postInput->password;
+        $this->password = $postInput->password;
 
-        $controller->params[ 'id_project' ] = $this->id_project;
-        $controller->params[ 'password' ]   = $this->password;
+        $controller->params['id_project'] = $this->id_project;
+        $controller->params['password'] = $this->password;
 
-        parent::__construct( $controller->getRequest() );
+        parent::__construct($controller);
     }
 
     /**
-     * @return bool|mixed
-     * @throws \Exceptions\NotFoundException
+     * @return void
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    public function _validate() {
-
-        $this->project = Projects_ProjectDao::findByIdAndPassword(
-                $this->id_project,
-                $this->password
-        );
-
-        if ( !$this->project ) {
-            throw new NotFoundException();
+    public function _validate(): void
+    {
+        if (!$this->password) {
+            throw new NotFoundException("No project found.", 404);
         }
 
-        return true;
+        $this->project = ProjectDao::findByIdAndPassword(
+            $this->id_project,
+            $this->password
+        );
     }
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ?ProjectStruct
      */
-    public function getProject() {
+    public function getProject(): ?ProjectStruct
+    {
         return $this->project;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getIdProject() {
+    public function getIdProject(): int
+    {
         return $this->id_project;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getPassword() {
+    public function getPassword(): string
+    {
         return $this->password;
     }
 

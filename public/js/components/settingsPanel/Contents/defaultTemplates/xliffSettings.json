@@ -1,0 +1,77 @@
+{
+  "id": 0,
+  "uid": 1,
+  "name": "Matecat original settings",
+  "rules": {
+    "xliff12": [
+      {
+        "states": [
+          "new",
+          "needs-adaptation",
+          "needs-l10n",
+          "needs-translation",
+          "mt-suggestion",
+          "fuzzy-match",
+          "exact-match",
+          "leveraged-glossary",
+          "leveraged-inherited",
+          "leveraged-mt",
+          "leveraged-repository",
+          "leveraged-tm",
+          "rejected-grammar",
+          "rejected-spelling"
+        ],
+        "analysis": "new"
+      },
+      {
+        "states": [
+          "translated",
+          "needs-review-adaptation",
+          "needs-review-l10n",
+          "needs-review-translation"
+        ],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "translated"
+      },
+      {
+        "states": ["signed-off"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved"
+      },
+      {
+        "states": ["final"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved2"
+      }
+    ],
+    "xliff20": [
+      {
+        "states": ["initial"],
+        "analysis": "new"
+      },
+      {
+        "states": ["translated"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "translated"
+      },
+      {
+        "states": ["reviewed"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved"
+      },
+      {
+        "states": ["final"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved2"
+      }
+    ]
+  },
+  "createdAt": "2024-07-29T17:18:05+02:00",
+  "modifiedAt": "2024-08-08T15:44:45+02:00"
+}

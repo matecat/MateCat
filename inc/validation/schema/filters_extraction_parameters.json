@@ -2,6 +2,13 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "uid": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
     "name": {
       "type": "string"
     },
@@ -100,6 +107,28 @@
           "nullable": true
         },
         "do_not_translate_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "inner_content_type": {
+          "type": ["null", "string"],
+          "enum": [
+            null,
+            "text/html",
+            "text/xml",
+            "application/xml",
+            "text/csv",
+            "application/json",
+            "text/markdown",
+            "text/x-markdown"
+          ],
+          "nullable": true
+        },
+        "context_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "character_limit": {
           "type": "array",
           "nullable": true
         }
@@ -234,6 +263,17 @@
           }
         }
       },
+      "additionalProperties": false
+    },
+    "dita": {
+      "type": "object",
+      "properties": {
+        "do_not_translate_elements": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "required": ["do_not_translate_elements"],
       "additionalProperties": false
     }
   }

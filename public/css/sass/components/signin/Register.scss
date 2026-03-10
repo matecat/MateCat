@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .register-component {
   display: flex;
@@ -31,7 +31,7 @@
 
         svg {
           flex-shrink: 0;
-          color: $translatedBlue;
+          color: colors.$translatedBlue;
         }
       }
     }
@@ -51,14 +51,14 @@
     h4 {
       font-size: 16px;
       font-weight: bold;
-      color: $grey7;
+      color: colors.$grey7;
       text-align: center;
       margin: 0;
     }
   }
 
   .register-divider {
-    color: $grey7;
+    color: colors.$grey7;
     display: flex;
     align-items: center;
     width: 100%;
@@ -66,7 +66,7 @@
     div {
       flex-grow: 1;
       height: 1px;
-      background-color: $grey8;
+      background-color: colors.$grey8;
     }
 
     span {
@@ -101,7 +101,7 @@
 
         > span {
           display: flex;
-          color: $grey7;
+          color: colors.$grey7;
         }
       }
     }
@@ -109,7 +109,7 @@
     .terms-and-conditions-error {
       font-size: 12px;
       text-align: left;
-      color: $redDefault;
+      color: colors.$redDefault;
     }
   }
 
@@ -117,7 +117,7 @@
     display: flex;
     justify-content: center;
     font-size: 16px;
-    color: $grey7;
+    color: colors.$grey7;
   }
 }
 
@@ -140,7 +140,7 @@
   }
 
   p {
-    color: $grey7;
+    color: colors.$grey7;
   }
 
   .footer-buttons {
@@ -153,6 +153,6 @@
 
   .email-sent-again {
     text-align: center;
-    color: $grey7;
+    color: colors.$grey7;
   }
 }

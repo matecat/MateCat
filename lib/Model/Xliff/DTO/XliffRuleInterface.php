@@ -1,18 +1,19 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
 use Exception;
 
-interface XliffRuleInterface {
+interface XliffRuleInterface
+{
 
     /**
-     * @param $type
+     * @param string|null $type
      *
      * @return string[]
      * @throws Exception
      */
-    public function getStates( $type = null ): array;
+    public function getStates(?string $type = null): array;
 
     /**
      * @return string
@@ -21,12 +22,12 @@ interface XliffRuleInterface {
     public function asEditorStatus(): string;
 
     /**
-     * @param string|null $source
-     * @param string|null $target
+     * @param string $source
+     * @param string $target
      *
      * @return bool
      */
-    public function isTranslated( string $source = null, string $target = null ): bool;
+    public function isTranslated(string $source, string $target): bool;
 
     /**
      * @return string
@@ -35,21 +36,21 @@ interface XliffRuleInterface {
     public function asMatchType(): string;
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float
      * @throws Exception
      */
-    public function asStandardWordCount( int $raw_word_count, array $payable_rates ): float;
+    public function asStandardWordCount(int $raw_word_count, array $payable_rates): float;
 
     /**
-     * @param int   $raw_word_count
+     * @param int $raw_word_count
      * @param array $payable_rates
      *
      * @return float
      * @throws Exception
      */
-    public function asEquivalentWordCount( int $raw_word_count, array $payable_rates ): float;
+    public function asEquivalentWordCount(int $raw_word_count, array $payable_rates): float;
 
 }

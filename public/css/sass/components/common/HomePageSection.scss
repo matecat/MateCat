@@ -1,25 +1,29 @@
-@import "../../commons/colors";
+@use "../../commons/colors";
 .home-page-section {
   .layout-bottom {
     height: 260px;
     padding: 48px 0;
     display: flex;
     flex-direction: column;
-    background-color: $darkBlue;
+    background-color: colors.$darkBlue;
     align-items: center;
     gap: 8px;
     h3 {
       font-size: 32px;
       font-weight: 700;
       line-height: 48px;
-      color: $white;
+      color: colors.$white;
       margin: 0;
     }
     span {
       font-size: 18px;
       line-height: 28px;
-      color: $white;
+      color: colors.$white;
       margin-bottom: 16px;
+    }
+    button {
+      height: 56px;
+      line-height: 56px;
     }
   }
 }
@@ -50,6 +54,7 @@
       .content-box_header {
         display: flex;
         gap: 16px;
+        align-items: center;
         h3 {
           margin-top: 0;
           font-size: 28px;
@@ -64,7 +69,7 @@
       p {
         font-size: 18px;
         line-height: 24px;
-        color: $grey6;
+        color: colors.$grey6;
       }
     }
   }

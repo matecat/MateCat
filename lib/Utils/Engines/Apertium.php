@@ -1,5 +1,10 @@
 <?php
 
+namespace Utils\Engines;
+
+use Exception;
+use Utils\Constants\EngineConstants;
+
 /**
  * Created by PhpStorm.
  * @property string client_secret
@@ -8,126 +13,117 @@
  * Time: 12.17
  *
  */
+class Apertium extends AbstractEngine
+{
 
-class Engines_Apertium extends Engines_AbstractEngine {
-
-    protected $_config = [
-            'segment' => null,
-            'source'  => null,
-            'target'  => null,
-            'key'     => null,
+    protected array $_config = [
+        'segment' => null,
+        'source' => null,
+        'target' => null,
+        'key' => null,
     ];
 
-    public function __construct( $engineRecord ) {
-        parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+    /**
+     * @throws Exception
+     */
+    public function __construct($engineRecord)
+    {
+        parent::__construct($engineRecord);
+        if ($this->getEngineRecord()->type != EngineConstants::MT) {
+            throw new Exception("Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}");
         }
     }
 
     /**
-     * @param $lang
+     * @param string $lang
      *
-     * @return mixed
-     * @throws Exception
+     * @return string
      */
-    protected function _fixLangCode( $lang ) {
+    protected function _fixLangCode(string $lang): string
+    {
         return $lang;
     }
 
     /**
-     * @param       $rawValue
+     * @param mixed $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
-     * @return array|Engines_Results_MT
+     * @return array
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array
+    {
         $all_args = func_get_args();
 
-        if ( is_string( $rawValue ) ) {
-            $original = json_decode( $all_args[ 1 ][ "data" ], true );
-            $decoded  = json_decode( $rawValue, true );
-            $decoded  = [
-                    'data' => [
-                            "translations" => [
-                                    [ 'translatedText' => $this->_resetSpecialStrings( $decoded[ "text" ] ) ]
-                            ]
+        if (is_string($rawValue)) {
+            $original = json_decode($all_args[1]["data"], true);
+            $decoded = json_decode($rawValue, true);
+            $decoded = [
+                'data' => [
+                    "translations" => [
+                        ['translatedText' => $decoded["text"]]
                     ]
+                ]
             ];
         } else {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        $mt_result = new Engines_Results_MT( $decoded );
-
-        if ( $mt_result->error->code < 0 ) {
-            $mt_result            = $mt_result->get_as_array();
-            $mt_result[ 'error' ] = (array)$mt_result[ 'error' ];
-
-            return $mt_result;
-        }
-
-        $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_preserveSpecialStrings( $original[ "text" ] ),
-                $mt_result->translatedText,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        );
-
-        $mt_res = $mt_match_res->getMatches();
-
-        return $mt_res;
-
+        return $this->_composeMTResponseAsMatch($original["text"], $decoded);
     }
 
-    public function get( $_config ) {
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-
-        $param_data = json_encode( [
-                "mtsystem" => "apertium",
-                "src"      => $_config[ 'source' ],
-                "trg"      => $_config[ 'target' ],
-                "text"     => $_config[ 'segment' ]
-        ] );
+    public function get(array $_config)
+    {
+        $param_data = json_encode([
+            "mtsystem" => "apertium",
+            "src" => $_config['source'],
+            "trg" => $_config['target'],
+            "text" => $_config['segment']
+        ]);
 
         $parameters = [];
-        if ( $this->client_secret != '' && $this->client_secret != null ) {
-            $parameters[ 'key' ] = $this->client_secret;
+        if ($this->client_secret != '' && $this->client_secret != null) {
+            $parameters['key'] = $this->client_secret;
         }
-        $parameters[ 'func' ] = "translate";
-        $parameters[ 'data' ] = $param_data;
+        $parameters['func'] = "translate";
+        $parameters['data'] = $param_data;
 
-        $this->_setAdditionalCurlParams( [
-                        CURLOPT_POST           => true,
-                        CURLOPT_RETURNTRANSFER => true
-                ]
+        $this->_setAdditionalCurlParams([
+                CURLOPT_POST => true,
+                CURLOPT_RETURNTRANSFER => true
+            ]
         );
-        $this->call( "translate_relative_url", $parameters, false );
+        $this->call("translate_relative_url", $parameters, false);
 
         return $this->result;
-
     }
 
-    public function set( $_config ) {
-
+    public function set($_config): bool
+    {
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
-
+    public function update($_config): bool
+    {
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
-
+    public function delete($_config): bool
+    {
         //if engine does not implement DELETE method, exit
         return true;
-
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationParameters(): array
+    {
+        return [
+            'enable_mt_analysis',
+        ];
+    }
 }

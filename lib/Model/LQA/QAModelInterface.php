@@ -1,13 +1,14 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-interface QAModelInterface {
+interface QAModelInterface
+{
 
     /**
      * @return array
      */
-    public function getDecodedModel();
+    public function getDecodedModel(): array;
 }
 
 

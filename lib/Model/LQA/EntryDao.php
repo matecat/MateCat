@@ -1,28 +1,32 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
-use Database;
-use Exceptions\ValidationError;
-use Jobs_JobStruct;
-use Log;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use PDO;
-use Utils;
+use ReflectionException;
+use Utils\Logger\LoggerFactory;
+use Utils\Tools\Utils;
 
-class EntryDao extends DataAccess_AbstractDao {
-    protected function _buildResult( array $array_result ) {
+class EntryDao extends AbstractDao
+{
+    protected function _buildResult(array $array_result)
+    {
     }
 
     /**
      * @param array $ids
      *
-     * @return array
+     * @return ShapelessConcreteStruct[]
      */
-    public static function getBySegmentIds( array $ids = [] ) {
-        $sql  = "SELECT 
+    public static function getBySegmentIds(array $ids = []): array
+    {
+        $sql = "SELECT 
             q.id_job,
             q.id_segment,
             q.source_page,
@@ -38,75 +42,70 @@ class EntryDao extends DataAccess_AbstractDao {
             qa_categories cat ON q.id_category = cat.id
         WHERE
             q.deleted_at IS NULL
-                AND q.id_segment IN ( " . implode( ', ', $ids ) . " ) ";
+                AND q.id_segment IN ( " . implode(', ', $ids) . " ) ";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
         $stmt->execute();
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ShapelessConcreteStruct::class );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ShapelessConcreteStruct::class);
 
         return $stmt->fetchAll();
     }
 
-    public static function updateRepliesCount( $id ) {
+    public static function updateRepliesCount($id): bool
+    {
         $sql = "UPDATE qa_entries SET replies_count = " .
-                " ( SELECT count(*) FROM " .
-                " qa_entry_comments WHERE id_qa_entry = :id " .
-                " ) WHERE id = :id ";
+            " ( SELECT count(*) FROM " .
+            " qa_entry_comments WHERE id_qa_entry = :id " .
+            " ) WHERE id = :id ";
 
-        Log::doJsonLog( $sql );
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        return $stmt->execute( [ 'id' => $id ] );
-    }
-
-    public static function hardDeleteEntry( EntryStruct $record ) {
-        $sql = "DELETE FROM qa_entries WHERE id = :id ";
+        LoggerFactory::doJsonLog($sql);
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
 
-        return $stmt->execute( [ 'id' => $record->id ] );
+        return $stmt->execute(['id' => $id]);
     }
 
-    public static function deleteEntry( EntryStruct $record ) {
+    public static function deleteEntry(EntryStruct $record): bool
+    {
         $sql = "UPDATE qa_entries SET deleted_at = :deleted_at WHERE id = :id ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
 
-        return $stmt->execute( [
-                'id'         => $record->id,
-                'deleted_at' => Utils::mysqlTimestamp( time() )
-        ] );
+        return $stmt->execute([
+            'id' => $record->id,
+            'deleted_at' => Utils::mysqlTimestamp(time())
+        ]);
     }
 
     /**
      * @param $id
      *
-     * @return EntryStruct
+     * @return ?EntryStruct
      */
-    public static function findById( $id ) {
+    public static function findById($id): ?EntryStruct
+    {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
-                " FROM qa_entries " .
-                " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
-                " WHERE qa_entries.id = :id AND qa_entries.deleted_at IS NULL LIMIT 1";
+            " FROM qa_entries " .
+            " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
+            " WHERE qa_entries.id = :id AND qa_entries.deleted_at IS NULL LIMIT 1";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [ 'id' => $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryStruct::class);
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
-     * @return EntryStruct[]
+     * @return ShapelessConcreteStruct[]
      */
-    public static function findAllByChunk( Jobs_JobStruct $chunk ) {
+    public static function findAllByChunk(JobStruct $chunk): array
+    {
         $sql = "SELECT qa_entries.*, qa_categories.label as category_label FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment
@@ -119,119 +118,151 @@ class EntryDao extends DataAccess_AbstractDao {
             qa_entries.id_job = :id AND jobs.password = :password ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [ 'id' => $chunk->id, 'password' => $chunk->password ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $chunk->id, 'password' => $chunk->password]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ShapelessConcreteStruct::class);
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param      $id_segment
-     * @param null $source_page
+     * @param int $id_segment
+     * @param int $id_job
+     * @param int $source_page
      *
-     * @return array
+     * @return EntryWithCategoryStruct[]
      */
-    public static function findAllBySegmentId( $id_segment, $source_page = null ) {
-
-        $sql = "SELECT * FROM qa_entries WHERE qa_entries.deleted_at IS NULL AND id_segment = :id_segment ";
-
-        $data = [ 'id_segment' => $id_segment ];
-        if ( !is_null( $source_page ) ) {
-            $data[ 'source_page' ] = $source_page;
-            $sql                   .= " AND source_page = :source_page ";
-        }
-
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( $data );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
-
-        return $stmt->fetchAll();
-    }
-
-    public static function findByIdSegmentAndSourcePage( $id_segment, $id_job, $source_page ) {
+    public static function findByIdSegmentAndSourcePage(int $id_segment, int $id_job, int $source_page): array
+    {
         $sql = "SELECT qa_entries.*, qa_categories.label as category " .
-                " FROM qa_entries " .
-                " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
-                " WHERE id_job = :id_job AND id_segment = :id_segment " .
-                " AND qa_entries.deleted_at IS NULL " .
-                " AND qa_entries.source_page = :source_page " .
-                " ORDER BY create_date DESC ";
+            " FROM qa_entries " .
+            " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
+            " WHERE id_job = :id_job AND id_segment = :id_segment " .
+            " AND qa_entries.deleted_at IS NULL " .
+            " AND qa_entries.source_page = :source_page " .
+            " ORDER BY create_date DESC ";
 
         $opts = [
-                'id_segment'  => $id_segment,
-                'id_job'      => $id_job,
-                'source_page' => $source_page
+            'id_segment' => $id_segment,
+            'id_job' => $id_job,
+            'source_page' => $source_page
         ];
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( $opts );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($opts);
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryWithCategoryStruct' );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryWithCategoryStruct::class);
 
         return $stmt->fetchAll();
     }
 
-    public static function findAllByTranslationVersion( $id_segment, $id_job, $version ) {
+    /**
+     * @param int $id_segment
+     * @param int $id_job
+     * @param int $version
+     *
+     * @return EntryStruct[]
+     */
+    public static function findAllByTranslationVersion(int $id_segment, int $id_job, int $version): array
+    {
         $sql = "SELECT qa_entries.*, qa_categories.label as category " .
-                " FROM qa_entries " .
-                " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
-                " WHERE id_job = :id_job AND id_segment = :id_segment " .
-                " AND qa_entries.deleted_at IS NULL " .
-                " AND translation_version = :translation_version " .
-                " ORDER BY create_date DESC ";
+            " FROM qa_entries " .
+            " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
+            " WHERE id_job = :id_job AND id_segment = :id_segment " .
+            " AND qa_entries.deleted_at IS NULL " .
+            " AND translation_version = :translation_version " .
+            " ORDER BY create_date DESC ";
 
         $opts = [
-                'id_segment'          => $id_segment,
-                'id_job'              => $id_job,
-                'translation_version' => $version
+            'id_segment' => $id_segment,
+            'id_job' => $id_job,
+            'translation_version' => $version
         ];
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( $opts );
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($opts);
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, EntryStruct::class);
 
         return $stmt->fetchAll();
-    }
-
-    public static function getCountByIdJobAndSourcePage( $id_job, $source_page ) {
-        $sql = "SELECT count(qa_entries.id) as count  " .
-                " FROM qa_entries " .
-                " WHERE id_job = :id_job " .
-                " AND qa_entries.deleted_at IS NULL " .
-                " AND source_page = :source_page ";
-
-        $opts = [
-                'id_job'      => $id_job,
-                'source_page' => $source_page
-        ];
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( $opts );
-
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-
-        return $stmt->fetch();
     }
 
     /**
      * @param EntryStruct $entryStruct
      *
      * @return EntryStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
      * @throws ValidationError
      */
-    public static function createEntry( EntryStruct $entryStruct ) {
-
-        $entryStruct = self::ensureStartAndStopPositionAreOrdered( $entryStruct );
+    public static function modifyEntry(EntryStruct $entryStruct): EntryStruct
+    {
+        $entryStruct = self::ensureStartAndStopPositionAreOrdered($entryStruct);
         $entryStruct->setDefaults();
 
-        $sql  = "INSERT INTO qa_entries 
+        $sql  = "UPDATE qa_entries SET 
+                id_segment=:id_segment,
+                id_job=:id_job,
+                id_category=:id_category,
+                severity=:severity,
+                translation_version=:translation_version,
+                start_node=:start_node,
+                start_offset=:start_offset,
+                end_node=:end_node,
+                end_offset=:end_offset,
+                is_full_segment=:is_full_segment,
+                penalty_points=:penalty_points,
+                comment=:comment,
+                target_text=:target_text,
+                uid=:uid,
+                source_page=:source_page 
+                WHERE id = :id; 
+        ";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+
+        $values = $entryStruct->toArray(
+            [
+                'id',
+                'id_segment',
+                'id_job',
+                'id_category',
+                'severity',
+                'translation_version',
+                'start_node',
+                'start_offset',
+                'end_node',
+                'end_offset',
+                'is_full_segment',
+                'penalty_points',
+                'comment',
+                'target_text',
+                'uid',
+                'source_page'
+            ]
+        );
+
+        $stmt->execute($values);
+
+        return $entryStruct;
+    }
+
+    /**
+     * @param EntryStruct $entryStruct
+     *
+     * @return EntryStruct
+     * @throws ReflectionException
+     * @throws ValidationError
+     * @throws NotFoundException
+     */
+    public static function createEntry(EntryStruct $entryStruct): EntryStruct
+    {
+        $entryStruct = self::ensureStartAndStopPositionAreOrdered($entryStruct);
+        $entryStruct->setDefaults();
+
+        $sql = "INSERT INTO qa_entries 
              ( 
              id_segment, id_job, id_category, severity, 
              translation_version, start_node, start_offset, 
@@ -257,18 +288,29 @@ class EntryDao extends DataAccess_AbstractDao {
              ); 
         ";
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
 
         $values = $entryStruct->toArray(
-                [
-                        'id_segment', 'id_job', 'id_category', 'severity',
-                        'translation_version', 'start_node', 'start_offset',
-                        'end_node', 'end_offset', 'is_full_segment',
-                        'penalty_points', 'comment', 'target_text', 'uid', 'source_page'
-                ]
+            [
+                'id_segment',
+                'id_job',
+                'id_category',
+                'severity',
+                'translation_version',
+                'start_node',
+                'start_offset',
+                'end_node',
+                'end_offset',
+                'is_full_segment',
+                'penalty_points',
+                'comment',
+                'target_text',
+                'uid',
+                'source_page'
+            ]
         );
 
-        $stmt->execute( $values );
+        $stmt->execute($values);
         $lastId = $conn->lastInsertId();
 
         $entryStruct->id = $lastId;
@@ -277,98 +319,65 @@ class EntryDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * This funciton is to ensure that start and stop nodes and offsets are
+     * This function is to ensure that start and stop nodes and offsets are
      * from the minor to the major.
      *
-     * In normal selection ( left to right )
+     * In normal selection (left to right)
      * start and stop nodes are always ordered from minor to major.
      * When selection is done right to left, nodes may be provided in inverse
-     * order ( from major to minor).
+     * order (from major to minor).
      *
      * This silent correction of provided data is to reduce the amount of work
      * required on the clients.
      *
-     * @return EntryStruct
+     * @param EntryStruct $entryStruct
      *
+     * @return EntryStruct
      */
-    private static function ensureStartAndStopPositionAreOrdered( $entryStruct ) {
+    private static function ensureStartAndStopPositionAreOrdered(EntryStruct $entryStruct): EntryStruct
+    {
+        LoggerFactory::doJsonLog($entryStruct);
 
-        Log::doJsonLog( $entryStruct );
-
-        if ( $entryStruct->start_node == $entryStruct->end_node ) {
-            // if start node and stop node are the same, just order the offsets if needed
-            if ( intval( $entryStruct->start_offset ) > intval( $entryStruct->end_offset ) ) {
-                $tmp                       = $entryStruct->start_offset;
+        if ($entryStruct->start_node == $entryStruct->end_node) {
+            // if start node and stop node are the same, order the offsets if needed
+            if (intval($entryStruct->start_offset) > intval($entryStruct->end_offset)) {
+                $tmp = $entryStruct->start_offset;
                 $entryStruct->start_offset = $entryStruct->end_offset;
-                $entryStruct->end_offset   = $tmp;
-                unset( $tmp );
+                $entryStruct->end_offset = $tmp;
+                unset($tmp);
             }
+        } elseif (intval($entryStruct->start_node > intval($entryStruct->end_node))) {
+            // in this case selection was backward, invert both nodes and
+            // offsets.
+            $tmp = $entryStruct->start_offset;
+            $entryStruct->start_offset = $entryStruct->end_offset;
+            $entryStruct->end_offset = $tmp;
+
+            $tmp = $entryStruct->start_node;
+            $entryStruct->start_node = $entryStruct->end_node;
+            $entryStruct->end_node = $tmp;
         } else {
-            if ( intval( $entryStruct->start_node > intval( $entryStruct->end_node ) ) ) {
-                // in this case selection was backward, invert both nodes and
-                // offsets.
-                $tmp                       = $entryStruct->start_offset;
-                $entryStruct->start_offset = $entryStruct->end_offset;
-                $entryStruct->end_offset   = $tmp;
-
-                $tmp                     = $entryStruct->start_node;
-                $entryStruct->start_node = $entryStruct->end_node;
-                $entryStruct->end_node   = $tmp;
-            } else {
-                // in any other case leave everything as is
-            }
+            // in any other case leave everything as is
         }
 
         return $entryStruct;
-
     }
 
     /**
-     * Function to update the rebutted_at column
+     * @param int $id_job
+     * @param string $password
+     * @param int $revisionNumber
+     * @param int|null $idFilePart
+     * @param int $ttl
      *
-     * @param Integer $id        ID of the Entry
-     * @param Boolean $isToRebut If true rebut, else undo rebut
-     *
-     * @return EntryStruct
-     *
+     * @return ShapelessConcreteStruct[]
+     * @throws ReflectionException
      */
-    public function updateRebutted( $id, $isToRebut ) {
-        $rebutted_at = null;
-
-        if ( $isToRebut === true ) {
-            $rebutted_at = date( 'Y-m-d H:i:s' );
-        }
-
-        $sql = "  UPDATE qa_entries "
-                . "   SET rebutted_at = :rebutted_at "
-                . " WHERE id = :id ; ";
-
-        $opts = [
-                'rebutted_at' => $rebutted_at,
-                'id'          => $id
-        ];
-
-        $stmt = $this->database->prepare( $sql );
-
-        $stmt->execute( $opts );
-
-        return $this->findById( $opts[ 'id' ] );
-    }
-
-    /**
-     * @param      $id_job
-     * @param      $password
-     * @param      $revisionNumber
-     * @param null $idFilePart
-     * @param int  $ttl
-     *
-     * @return DataAccess_IDaoStruct[]
-     */
-    public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0 ) {
-
+    public function getIssuesGroupedByIdFilePart(int $id_job, string $password, int $revisionNumber, int $idFilePart = null, int $ttl = 0): array
+    {
         $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $sql     = "SELECT
+        $conn = Database::obtain()->getConnection();
+        $sql = "SELECT
                 s.internal_id as content_id,
                 s.id as segment_id,
                 e.severity as severity_label,
@@ -392,18 +401,18 @@ class EntryDao extends DataAccess_AbstractDao {
                     AND e.deleted_at IS NULL";
 
         $params = [
-                'id_job'         => $id_job,
-                'password'       => $password,
-                'revisionNumber' => $revisionNumber
+            'id_job' => $id_job,
+            'password' => $password,
+            'revisionNumber' => $revisionNumber
         ];
 
-        if ( $idFilePart ) {
-            $sql                      .= " AND id_file_part = :id_file_part";
-            $params[ 'id_file_part' ] = $idFilePart;
+        if ($idFilePart) {
+            $sql .= " AND id_file_part = :id_file_part";
+            $params['id_file_part'] = $idFilePart;
         }
 
-        $stmt = $conn->prepare( $sql );
+        $stmt = $conn->prepare($sql);
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
+        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $params);
     }
 }

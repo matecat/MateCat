@@ -1,5 +1,25 @@
 <?php
 
+namespace Utils\Engines;
+
+use CURLFile;
+use DomainException;
+use Exception;
+use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\GoogleTranslateStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+use stdClass;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MTResponse;
+use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
+use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -7,55 +27,96 @@
  * Time: 11.59
  *
  */
-abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
+abstract class AbstractEngine implements EngineInterface
+{
 
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
-    protected $engineRecord;
+    protected EngineStruct $engineRecord;
 
-    protected $className;
-    protected $_config = [];
-    protected $result  = [];
-    protected $error   = [];
+    protected string $className;
+    protected array $_config = [];
+    /**
+     * @var mixed
+     */
+    protected $result = []; // this cannot be forced to be an array, engines may use different types
+    protected array $error = [];
 
-    protected $curl_additional_params = [];
+    protected array $curl_additional_params = [];
 
-    protected $_patterns_found = [];
+    protected bool $_isAnalysis = false;
+    protected bool $_skipAnalysis = true;
 
-    protected $_isAnalysis   = false;
-    protected $_skipAnalysis = false;
+    /**
+     * @var bool True if the engine can receive contributions through a `set/update` method.
+     */
+    protected bool $_isAdaptiveMT = false;
 
     /**
      * @var bool
      */
-    protected $logging      = true;
-    protected $content_type = 'xml';
+    protected bool $logging = true;
+    protected string $content_type = 'xml';
 
-    protected $featureSet;
+    protected ?FeatureSet $featureSet = null;
+    protected ?int $mt_penalty = null;
 
-    const GET_REQUEST_TIMEOUT = 10;
+    const int GET_REQUEST_TIMEOUT = 10;
+    protected MatecatLogger $logger;
 
-    public function __construct( $engineRecord ) {
+    public function __construct($engineRecord)
+    {
         $this->engineRecord = $engineRecord;
-        $this->className    = get_class( $this );
+        $this->className = get_class($this);
 
         $this->curl_additional_params = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
+            CURLOPT_HEADER => false,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
+            CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2
         ];
 
         $this->featureSet = new FeatureSet();
+        /**
+         * Set the initial value to a specific log file, if not already initialized by the Executor.
+         * This is useful when engines are used outside the TaskRunner context
+         * @see \Utils\TaskRunner\Executor::__construct()
+         */
+        $this->logger = LoggerFactory::getLogger('engines');
     }
 
-    public function setFeatureSet( FeatureSet $fSet = null ) {
-        if ( $fSet != null ) {
+    /**
+     * @param int|null $mt_penalty
+     *
+     * @return $this
+     */
+    public function setMTPenalty(?int $mt_penalty = null): AbstractEngine
+    {
+        $this->mt_penalty = $mt_penalty;
+
+        return $this;
+    }
+
+    public function setFeatureSet(FeatureSet $fSet = null): void
+    {
+        if ($fSet != null) {
             $this->featureSet = $fSet;
         }
+    }
+
+    /**
+     * @param ?bool $bool
+     *
+     * @return $this
+     */
+    public function setAnalysis(bool $bool = true): AbstractEngine
+    {
+        $this->_isAnalysis = filter_var($bool, FILTER_VALIDATE_BOOLEAN);
+
+        return $this;
     }
 
     /**
@@ -63,8 +124,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return $this
      */
-    public function setAnalysis( $bool = true ) {
-        $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
+    public function setSkipAnalysis(bool $bool = true): AbstractEngine
+    {
+        $this->_skipAnalysis = $bool;
 
         return $this;
     }
@@ -72,35 +134,22 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     /**
      * Override when some string languages are different
      *
-     * @param $lang
-     *
-     * @return mixed
-     */
-    protected function _fixLangCode( $lang ) {
-        $l = explode( "-", strtolower( trim( $lang ) ) );
-
-        return $l[ 0 ];
-    }
-
-    /**
-     *
-     *
-     * @param $_string
+     * @param string $lang
      *
      * @return string
      */
-    public function _preserveSpecialStrings( $_string ) {
-        return $_string;
-    }
+    protected function _fixLangCode(string $lang): string
+    {
+        $l = explode("-", strtolower(trim($lang)));
 
-    public function _resetSpecialStrings( $_string ) {
-        return $_string;
+        return $l[0];
     }
 
     /**
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public function getEngineRecord() {
+    public function getEngineRecord(): EngineStruct
+    {
         return $this->engineRecord;
     }
 
@@ -109,13 +158,14 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return null
      */
-    public function __get( $key ) {
-        if ( property_exists( $this->engineRecord, $key ) ) {
+    public function __get($key)
+    {
+        if (property_exists($this->engineRecord, $key)) {
             return $this->engineRecord->$key;
-        } elseif ( array_key_exists( $key, $this->engineRecord->others ) ) {
-            return $this->engineRecord->others[ $key ];
-        } elseif ( array_key_exists( $key, $this->engineRecord->extra_parameters ) ) {
-            return $this->engineRecord->extra_parameters[ $key ];
+        } elseif (array_key_exists($key, $this->engineRecord->others)) {
+            return $this->engineRecord->others[$key];
+        } elseif (array_key_exists($key, $this->engineRecord->extra_parameters)) {
+            return $this->engineRecord->extra_parameters[$key];
         } else {
             return null;
         }
@@ -125,30 +175,43 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      * @param $key
      * @param $value
      */
-    public function __set( $key, $value ) {
-        if ( property_exists( $this->engineRecord, $key ) ) {
+    public function __set($key, $value)
+    {
+        if (property_exists($this->engineRecord, $key)) {
             $this->engineRecord->$key = $value;
-        } elseif ( array_key_exists( $key, $this->engineRecord->others ) ) {
-            $this->engineRecord->others[ $key ] = $value;
-        } elseif ( array_key_exists( $key, $this->engineRecord->extra_parameters ) ) {
-            $this->engineRecord->extra_parameters[ $key ] = $value;
+        } elseif (array_key_exists($key, $this->engineRecord->others)) {
+            $this->engineRecord->others[$key] = $value;
+        } elseif (array_key_exists($key, $this->engineRecord->extra_parameters)) {
+            $this->engineRecord->extra_parameters[$key] = $value;
         } else {
-            throw new DomainException( "Property $key does not exists in " . get_class( $this ) );
+            throw new DomainException("Property $key does not exists in " . get_class($this));
         }
     }
 
-    abstract protected function _decode( $rawValue, array $parameters = [], $function = null );
+    /**
+     * @return array
+     */
+    abstract public function getConfigurationParameters(): array;
+
+    /**
+     * @param mixed $rawValue
+     * @param array $parameters
+     * @param null $function
+     *
+     * @return array|TMSAbstractResponse
+     */
+    abstract protected function _decode(mixed $rawValue, array $parameters = [], $function = null): array|TMSAbstractResponse;
 
     /**
      * @param string $url
-     * @param array  $curl_options
+     * @param array $curl_options
      *
-     * @return array|bool|string|null
+     * @return string|bool|null
      */
-    public function _call( $url, array $curl_options = [] ) {
-
-        $mh       = new MultiCurlHandler();
-        $uniq_uid = uniqid( '', true );
+    public function _call(string $url, array $curl_options = []): string|bool|null
+    {
+        $mh = new MultiCurlHandler();
+        $uniq_uid = uniqid('', true);
 
         /*
          * Append array elements from the second array
@@ -157,130 +220,157 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
          *
          * Use the + array union operator
          */
-        $resourceHash = $mh->createResource( $url,
-                $this->curl_additional_params + $curl_options, $uniq_uid
+        $resourceHash = $mh->createResource(
+            $url,
+            $this->curl_additional_params + $curl_options,
+            $uniq_uid
         );
 
         $mh->multiExec();
 
-        if ( $mh->hasError( $resourceHash ) ) {
-            $curl_error       = $mh->getError( $resourceHash );
-            $responseRawValue = $mh->getSingleContent( $resourceHash );
-            $rawValue         = [
-                    'error'          => [
-                            'code'     => -$curl_error[ 'errno' ],
-                            'message'  => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error[ 'http_code' ] . ")",
-                            'response' => $responseRawValue // Some useful info might still be contained in the response body
-                    ],
-                    'responseStatus' => $curl_error[ 'http_code' ]
-            ]; //return negative number
+        if ($mh->hasError($resourceHash)) {
+            $curl_error = $mh->getError($resourceHash);
+            $responseRawValue = $mh->getSingleContent($resourceHash);
+            $rawValue = json_encode([
+                'error' => [
+                    'code' => -(int)$curl_error['errno'],
+                    'message' => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error['http_code'] . ")",
+                    'response' => $responseRawValue // Some useful info might still be contained in the response body
+                ],
+                'responseStatus' => (int)$curl_error['http_code']
+            ]); //return a negative number
         } else {
-            $rawValue = $mh->getSingleContent( $resourceHash );
+            $rawValue = $mh->getSingleContent($resourceHash);
         }
 
         $mh->multiCurlCloseAll();
 
-        if ( $this->logging ) {
-            $log = $mh->getSingleLog( $resourceHash );
-            if ( $this->content_type == 'json' ) {
-                $log[ 'response' ] = json_decode( $rawValue, true );
+        if ($this->logging) {
+            $log = $mh->getSingleLog($resourceHash);
+            if ($this->content_type == 'json' && !$mh->hasError($resourceHash)) {
+                $log['response'] = json_decode($rawValue, true);
             } else {
-                $log[ 'response' ] = $rawValue;
+                $log['response'] = $rawValue;
             }
-            Log::doJsonLog( $log );
+            $this->logger->debug($log);
         }
 
         return $rawValue;
-
     }
 
-    public function call( $function, array $parameters = [], $isPostRequest = false, $isJsonRequest = false ) {
-
-        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+    /**
+     * @param string $function
+     * @param array $parameters
+     * @param bool $isPostRequest
+     * @param bool $isJsonRequest
+     *
+     * @return void
+     */
+    public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false): void
+    {
+        if ($this->_isAnalysis && $this->_skipAnalysis) {
             $this->result = [];
 
             return;
         }
 
         $this->error = []; // reset last error
-        if ( !$this->$function ) {
-            //Log::doJsonLog( 'Requested method ' . $function . ' not Found.' );
+        if (!$this->$function) {
             $this->result = [
-                    'error' => [
-                            'code'    => -43,
-                            'message' => " Bad Method Call. Requested method '$function' not Found."
-                    ]
-            ]; //return negative number
+                'error' => [
+                    'code' => -43,
+                    'message' => " Bad Method Call. Requested method '$function' not Found."
+                ]
+            ]; //return a negative number
 
             return;
         }
 
-        if ( $isPostRequest ) {
-            $function = strtolower( trim( $function ) );
-            $url      = "{$this->engineRecord['base_url']}/" . $this->$function;
+        $function = strtolower(trim($function));
+
+        if ($isPostRequest) {
+            $url = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = [
-                    CURLOPT_POSTFIELDS  => ( !$isJsonRequest ? $parameters : json_encode( $parameters ) ),
-                    CURLINFO_HEADER_OUT => true,
-                    CURLOPT_TIMEOUT     => 120
+                CURLOPT_POSTFIELDS => (!$isJsonRequest ? $parameters : json_encode($parameters)),
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT => 120
             ];
         } else {
-            $function = strtolower( trim( $function ) );
-            $url      = "{$this->engineRecord['base_url']}/" . $this->$function . "?";
-            $url      .= http_build_query( $parameters );
+            $url = "{$this->engineRecord['base_url']}/" . $this->$function . "?";
+            $url .= http_build_query($parameters);
             $curl_opt = [
-                    CURLOPT_HTTPGET => true,
-                    CURLOPT_TIMEOUT => static::GET_REQUEST_TIMEOUT
+                CURLOPT_HTTPGET => true,
+                CURLOPT_TIMEOUT => static::GET_REQUEST_TIMEOUT
             ];
         }
 
-        $rawValue = $this->_call( $url, $curl_opt );
+        $rawValue = $this->_call($url, $curl_opt);
 
         /*
          * $parameters['segment'] is used in MT engines,
-         * they does not return original segment, only the translation.
-         * Taken when needed as "variadic function parameter" ( func_get_args )
+         * they do not return the original segment, only the translation.
+         * Taken when needed as "variadic function parameter" (func_get_args)
          * 
          * Pass the called $function also
         */
-        $this->result = $this->_decode( $rawValue, $parameters, $function );
-
+        $this->result = $this->_decode($rawValue, $parameters, $function);
     }
 
-    public function _setAdditionalCurlParams( array $curlOptParams = [] ) {
-
+    public function _setAdditionalCurlParams(array $curlOptParams = []): void
+    {
         /*
-         * Append array elements from the second array
-         * to the first array while not overwriting the elements from
-         * the first array and not re-indexing
+         * Append array elements from the second array to the first array while not
+         * overwriting the elements from the first array and not re-indexing.
          *
-         * In this case we CAN NOT use the + array union operator because if there is a file handler in the $curlOptParams
-         * the resource is duplicated and the reference to the first one is lost with + operator, in this way the CURLOPT_FILE does not works
+         * In this case, we cannot use the + array union operator because if there is
+         * a file handler in the $curlOptParams, the resource is duplicated, and the
+         * reference to the first one is lost.
+         * In this way, the CURLOPT_FILE does not work.
          */
-        foreach ( $curlOptParams as $key => $value ) {
-            $this->curl_additional_params[ $key ] = $value;
+        foreach ($curlOptParams as $key => $value) {
+            $this->curl_additional_params[$key] = $value;
         }
-
     }
 
-    public function getConfigStruct() {
+    public function getConfigStruct(): array
+    {
         return $this->_config;
     }
 
-    public function getPenalty() {
-        return $this->engineRecord->penalty;
-    }
-
-    public function getName() {
-        return $this->engineRecord->name;
+    public function getMtPenalty(): int
+    {
+        return $this->mt_penalty ?? ($this->engineRecord->penalty ?: 14);
     }
 
     /**
-     * Read Only
-     *
-     * @return EnginesModel_EngineStruct
+     * @return string
      */
-    public function getEngineRow() {
-        return clone $this->engineRecord;
+    public function getStandardMtPenaltyString(): string
+    {
+        return 100 - $this->getMtPenalty() . "%";
+    }
+
+    public function getName(): string
+    {
+        return $this->engineRecord->name;
+    }
+
+    public function getMTName(string $forceName = ''): string
+    {
+        if (!empty($forceName)) {
+            return "MT-" . $forceName;
+        }
+        return "MT-" . $this->getName();
+    }
+
+    public function isTMS(): bool
+    {
+        return false;
+    }
+
+    public function isAdaptiveMT(): bool
+    {
+        return $this->_isAdaptiveMT && !$this->isTMS();
     }
 
     /**
@@ -288,50 +378,159 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @param $file
      *
-     * @return CURLFile|string
+     * @return CURLFile
      */
-    protected function getCurlFile( $file ) {
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 and class_exists( '\\CURLFile' ) ) {
-
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             */
-            if ( version_compare( PHP_VERSION, '7.0.0' ) < 0 ) {
-                $options[ CURLOPT_SAFE_UPLOAD ] = true;
-                $this->_setAdditionalCurlParams( $options );
-            }
-
-            return new CURLFile( realpath( $file ) );
-        }
-
-        return "@" . realpath( $file );
+    protected function getCurlFile($file): CURLFile
+    {
+        return new CURLFile(realpath($file));
     }
 
     /**
-     * @param $_config
+     * @param array $_config
      *
-     * @return array|Engines_Results_AbstractResponse
+     * @return array|TMSAbstractResponse
+     * @throws Exception
      */
-    protected function GoogleTranslateFallback( $_config ) {
+    protected function GoogleTranslateFallback(array $_config): TMSAbstractResponse|array
+    {
+        try {
+            /**
+             * Create a record of type GoogleTranslate
+             */
+            $newEngineStruct = GoogleTranslateStruct::getStruct();
 
-        /**
-         * Create a record of type GoogleTranslate
-         */
-        $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
+            $newEngineStruct->name = "Generic";
+            $newEngineStruct->uid = 0;
+            $newEngineStruct->type = EngineConstants::MT;
+            $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
+            $newEngineStruct->others = [];
 
-        $newEngineStruct->name                                = "Generic";
-        $newEngineStruct->uid                                 = 0;
-        $newEngineStruct->type                                = Constants_Engines::MT;
-        $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
-        $newEngineStruct->others                              = [];
+            $gtEngine = EnginesFactory::createTempInstance($newEngineStruct);
 
-        $gtEngine = Engine::createTempInstance( $newEngineStruct );
+            /**
+             * @var $gtEngine GoogleTranslate
+             */
+            return $gtEngine->get($_config);
+        } catch (Exception) {
+            return [];
+        }
+    }
 
-        /**
-         * @var $gtEngine Engines_GoogleTranslate
-         */
-        return $gtEngine->get( $_config );
+    /**
+     * @param string $filePath
+     * @param string $memoryKey
+     * @param UserStruct $user
+     *
+     * @return void
+     */
+    public function importMemory(string $filePath, string $memoryKey, UserStruct $user)
+    {
+    }
 
+    /**
+     * @param array $projectRow
+     * @param array|null $segments
+     *
+     * @return void
+     */
+    public function syncMemories(array $projectRow, ?array $segments = [])
+    {
+    }
+
+    /**
+     * @param MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     *
+     * @return ?array Returns the memory, otherwise null.
+     * @throws Exception
+     */
+    public function memoryExists(MemoryKeyStruct $memoryKey): ?array
+    {
+        return null;
+    }
+
+    /**
+     * @param array $memoryKey
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function deleteMemory(array $memoryKey): array
+    {
+        return [];
+    }
+
+    /**
+     * Determines if the provided memory belongs to the caller.
+     *
+     *
+     * @param MemoryKeyStruct $memoryKey *
+     *
+     * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
+     */
+    public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array
+    {
+        return null;
+    }
+
+    /**
+     * @param string $source
+     * @param string $target
+     * @param string $sentence
+     * @param string $translation
+     * @param string $mt_qe_engine_id
+     *
+     * @return float|null
+     */
+    public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default'): ?float
+    {
+        return null;
+    }
+
+    /**
+     * @param string $raw_segment
+     * @param array $decoded
+     * @param int $layerNum
+     *
+     * @return array
+     * @throws Exception
+     */
+    protected function _composeMTResponseAsMatch(string $raw_segment, array $decoded, int $layerNum = 1): array
+    {
+        $mt_result = new MTResponse($decoded);
+
+        if ($mt_result->error->code < 0) {
+            $mt_result = $mt_result->get_as_array();
+            $mt_result['error'] = (array)$mt_result['error'];
+
+            return $mt_result;
+        }
+
+        $mt_match_res = new Matches([
+            'raw_segment' => $raw_segment,
+            'raw_translation' => $mt_result->translatedText,
+            'match' => $this->getStandardMtPenaltyString(),
+            'created-by' => $this->getMTName(),
+            'create-date' => date("Y-m-d")
+        ]);
+
+        return $mt_match_res->getMatches($layerNum);
+    }
+
+    /**
+     * Validate extra params
+     *
+     * @param stdClass $extra
+     *
+     * @return bool
+     */
+    public function validateConfigurationParams(stdClass $extra): bool
+    {
+        foreach (array_keys(get_object_vars($extra)) as $key) {
+            if (!in_array($key, $this->getConfigurationParameters())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

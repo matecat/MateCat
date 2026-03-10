@@ -6,47 +6,39 @@
  * Time: 10:57
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
-use API\Commons\KleinController;
-use Exceptions\NotFoundException;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectStruct;
 
-class TeamProjectValidator extends Base {
-
-
-    /**
-     * @var KleinController
-     */
-    protected $controller;
+class TeamProjectValidator extends Base
+{
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected $project;
-
-    public function __construct( KleinController $controller ) {
-        parent::__construct( $controller->getRequest() );
-    }
+    protected ProjectStruct $project;
 
     /**
      * @throws NotFoundException
      */
-    public function _validate() {
-
-        if ( empty( $this->project ) || empty( $this->project->id )  ) {
-            throw new NotFoundException( "Not Found", 404 );
+    public function _validate(): void
+    {
+        if (empty($this->project) || empty($this->project->id)) {
+            throw new NotFoundException("Not Found", 404);
         }
-
     }
 
     /**
-     * @param \Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return TeamProjectValidator
      */
-    public function setProject( \Projects_ProjectStruct $project ){
+    public function setProject(ProjectStruct $project): TeamProjectValidator
+    {
         $this->project = $project;
+
         return $this;
     }
 

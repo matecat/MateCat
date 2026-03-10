@@ -1,66 +1,76 @@
 <?php
 
-use Search\ReplaceEventStruct;
+namespace Utils\Search;
 
-class Search_ReplaceHistory {
+use Model\Search\ReplaceEventDAOInterface;
+use Model\Search\ReplaceEventIndexDAOInterface;
+use Model\Search\ReplaceEventStruct;
+use Model\Translations\SegmentTranslationDao;
+
+class ReplaceHistory
+{
 
     /**
      * @var int
      */
-    private $idJob;
+    private int $idJob;
 
     /**
-     * @var Search_ReplaceEventDAOInterface
+     * @var ReplaceEventDAOInterface
      */
-    private $replaceEventDAO;
+    private ReplaceEventDAOInterface $replaceEventDAO;
 
     /**
-     * @var Search_ReplaceEventIndexDAOInterface
+     * @var ReplaceEventIndexDAOInterface
      */
-    private $replaceEventIndexDAO;
+    private ReplaceEventIndexDAOInterface $replaceEventIndexDAO;
 
     /**
-     * Search_ReplaceHistory constructor.
+     * ReplaceHistory constructor.
      *
-     * @param                                      $idJob
-     * @param Search_ReplaceEventDAOInterface      $replaceEventDAO
-     * @param Search_ReplaceEventIndexDAOInterface $replaceEventIndexDAO
-     * @param null                                 $ttl
+     * @param int $idJob
+     * @param ReplaceEventDAOInterface $replaceEventDAO
+     * @param ReplaceEventIndexDAOInterface $replaceEventIndexDAO
+     * @param int $ttl
      */
-    public function __construct( $idJob, Search_ReplaceEventDAOInterface $replaceEventDAO, Search_ReplaceEventIndexDAOInterface $replaceEventIndexDAO, $ttl = null ) {
-        $this->idJob                = $idJob;
-        $this->replaceEventDAO      = $replaceEventDAO;
+    public function __construct(int $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDAOInterface $replaceEventIndexDAO, int $ttl = 0)
+    {
+        $this->idJob = $idJob;
+        $this->replaceEventDAO = $replaceEventDAO;
         $this->replaceEventIndexDAO = $replaceEventIndexDAO;
 
-        if ( $ttl ) {
-            $this->replaceEventDAO->setTtl( $ttl );
-            $this->replaceEventIndexDAO->setTtl( $ttl );
+        if ($ttl) {
+            $this->replaceEventDAO->setTtl($ttl);
+            $this->replaceEventIndexDAO->setTtl($ttl);
         }
     }
 
     /**
-     * @param $version
+     * @param int $version
      *
      * @return ReplaceEventStruct[]
      */
-    public function get( $version ) {
-        return $this->replaceEventDAO->getEvents( $this->idJob, $version );
+    public function get(int $version): array
+    {
+        return $this->replaceEventDAO->getEvents($this->idJob, $version);
     }
 
     /**
      * @return int
      */
-    public function getCursor() {
-        return $this->replaceEventIndexDAO->getActualIndex( $this->idJob );
+    public function getCursor(): int
+    {
+        return $this->replaceEventIndexDAO->getActualIndex($this->idJob);
     }
 
     /**
      * @return int
      */
-    public function redo() {
+    public function redo(): int
+    {
         $versionToMove = $this->getCursor() + 1;
 
-        return $this->_moveToVersion( $versionToMove );
+        return $this->_moveToVersion($versionToMove);
     }
 
     /**
@@ -68,17 +78,19 @@ class Search_ReplaceHistory {
      *
      * @return int
      */
-    public function save( ReplaceEventStruct $eventStruct ) {
-        return $this->replaceEventDAO->save( $eventStruct );
+    public function save(ReplaceEventStruct $eventStruct): int
+    {
+        return $this->replaceEventDAO->save($eventStruct);
     }
 
     /**
      * @return int
      */
-    public function undo() {
+    public function undo(): int
+    {
         $versionToMove = $this->getCursor() - 1;
 
-        return $this->_moveToVersion( $versionToMove );
+        return $this->_moveToVersion($versionToMove);
     }
 
     /**
@@ -86,13 +98,14 @@ class Search_ReplaceHistory {
      *
      * @return int
      */
-    private function _moveToVersion( $versionToMove ) {
-        $events = $this->get( $versionToMove );
+    private function _moveToVersion($versionToMove): int
+    {
+        $events = $this->get($versionToMove);
 
-        if ( count( $events ) > 0 ) {
-            $replacedEvents = Translations_SegmentTranslationDao::rebuildFromReplaceEvents( $events );
+        if (count($events) > 0) {
+            $replacedEvents = SegmentTranslationDao::rebuildFromReplaceEvents($events);
 
-            $this->replaceEventIndexDAO->save( $this->idJob, $versionToMove );
+            $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
 
             return $replacedEvents;
         }
@@ -103,7 +116,8 @@ class Search_ReplaceHistory {
     /**
      * @param $versionToMove
      */
-    public function updateIndex( $versionToMove ) {
-        $this->replaceEventIndexDAO->save( $this->idJob, $versionToMove );
+    public function updateIndex($versionToMove): void
+    {
+        $this->replaceEventIndexDAO->save($this->idJob, $versionToMove);
     }
 }
