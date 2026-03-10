@@ -12,7 +12,8 @@ import Cookies from 'js-cookie'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import ApplicationStore from '../../stores/ApplicationStore'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
-import ArrowDown from '../../../../../img/icons/ArrowDown'
+import IconDown from '../icons/IconDown'
+
 export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const [results, setResults] = useState(undefined)
   const [isExtended, setIsExtended] = useState(
@@ -166,7 +167,7 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
       size={BUTTON_SIZE.SMALL}
       onClick={toggleExtendend}
     >
-      <ArrowDown />
+      <IconDown />
       {isExtended ? 'Fewer' : 'More'}
     </Button>
   )

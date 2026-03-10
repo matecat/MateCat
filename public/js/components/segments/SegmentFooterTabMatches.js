@@ -16,8 +16,8 @@ import ApplicationStore from '../../stores/ApplicationStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
-import ArrowDown from '../../../../../img/icons/ArrowDown'
 import Tooltip from '../common/Tooltip'
+import IconDown from '../icons/IconDown'
 
 const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
 
@@ -445,7 +445,7 @@ class SegmentFooterTabMatches extends React.Component {
         size={BUTTON_SIZE.SMALL}
         onClick={this.toggleExtendend}
       >
-        <ArrowDown />
+        <IconDown />
         {isExtended ? 'Fewer' : 'More'}
       </Button>
     )
