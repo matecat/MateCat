@@ -445,7 +445,7 @@ class SegmentFooterTabMatches extends React.Component {
         size={BUTTON_SIZE.SMALL}
         onClick={this.toggleExtendend}
       >
-        <IconDown />
+        <IconDown size={18} />
         {isExtended ? 'Fewer' : 'More'}
       </Button>
     )

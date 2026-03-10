@@ -167,7 +167,7 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
       size={BUTTON_SIZE.SMALL}
       onClick={toggleExtendend}
     >
-      <IconDown />
+      <IconDown size={18} />
       {isExtended ? 'Fewer' : 'More'}
     </Button>
   )
