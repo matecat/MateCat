@@ -57,15 +57,15 @@ jobs:
 
       - name: Load services and build test node
         run: |
-          docker-compose -f docker/docker-compose-ci.yml build mysql redis # > /dev/null 2>&1
-          docker-compose -f docker/docker-compose-ci.yml create mysql redis # > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml build mysql redis # > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml create mysql redis # > /dev/null 2>&1
           
           # keep logs for the base node
-          docker-compose -f docker/docker-compose-ci.yml build base-node
+          docker compose -f docker/docker-compose-ci.yml build base-node
           
           # silent for test node
           echo "Build test node"
-          docker-compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
 
   deploy:
     name: Deploy
@@ -103,7 +103,7 @@ jobs:
           # be deployed to ECS.
           BUILD=$(awk 'NF>1 {print $3}' inc/version.ini | sed 's/"//g')
           
-          docker-compose -f docker/docker-compose-ci.yml build
+          docker compose -f docker/docker-compose-ci.yml build
           docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:latest
           docker tag matecat/matecat-web-node $IMAGE_WEB_REPOSITORY:$BUILD-$BUILD_NUMBER
           
