@@ -176,8 +176,8 @@ abstract class AbstractController extends BaseKleinViewController
         $payload['id_job'] = (int)$id_job;
         $payload['password'] = $password;
         $payload['currency'] = $item['currency'];
-        $payload['price'] = $this->calculatePrice($item);  //with_revision
-        $payload['delivery_date'] = $this->calculateDeliveryDate($item);  //with_revision
+        $payload['price'] = $this->calculatePrice($item);
+        $payload['delivery_date'] = $this->calculateDeliveryDate($item);
         $payload['quote_pid'] = $item['quote_pid'];
 
         $JWT = new SimpleJWT(
