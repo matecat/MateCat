@@ -57,8 +57,8 @@ jobs:
 
       - name: Load services and build test node
         run: |
-          docker compose -f docker/docker-compose-ci.yml build mysql redis # > /dev/null 2>&1
-          docker compose -f docker/docker-compose-ci.yml create mysql redis # > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
           
           # keep logs for the base node
           docker compose -f docker/docker-compose-ci.yml build base-node
@@ -67,15 +67,20 @@ jobs:
           echo "Build test node"
           docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
 
+          # Run tests
+          docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
+
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
-
+    environment: develop
+    needs:
+      - tests
     steps:
-      - name: Checkout repository and submodules
+      - name: Checkout repository
         uses: actions/checkout@v2
         with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT }}'
           submodules: recursive
 
       #      - name: Configure AWS credentials
