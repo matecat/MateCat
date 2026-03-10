@@ -175,8 +175,8 @@ abstract class AbstractController extends BaseKleinViewController
         $payload['id_job'] = (int)$id_job;
         $payload['password'] = $password;
         $payload['currency'] = $item['currency'];
-        $payload['price'] = round($item['price'], PHP_ROUND_HALF_UP);
-        $payload['delivery_date'] = $item['delivery'];
+        $payload['price'] = $this->calculatePrice($item);
+        $payload['delivery_date'] = $this->calculateDeliveryDate($item);
         $payload['quote_pid'] = $item['quote_pid'];
 
         $JWT = new SimpleJWT(
@@ -197,4 +197,41 @@ abstract class AbstractController extends BaseKleinViewController
         ]);
     }
 
+    /**
+     * Calculates the total price for a given item.
+     *
+     * @param array $item The item data, including price and optional additional price (r_price).
+     * @return float The calculated total price, rounded to the nearest integer.
+     */
+    private function calculatePrice($item): float
+    {
+        if(empty($item['price'])){
+            return 0;
+        }
+
+        $price = $item['price'];
+
+        if(!empty($item['r_price'])){
+            $price = $price + $item['r_price'];
+        }
+
+        return round($price, PHP_ROUND_HALF_UP);
+    }
+
+    /**
+     * Calculates the delivery date for a given item.
+     *
+     * @param array $item The item for which the delivery date is being calculated.
+     *                     This array should include either 'r_delivery' or 'delivery' keys.
+     * @return string|null Returns the delivery date specified in 'r_delivery' if present,
+     *                     otherwise falls back to 'delivery'. Returns null if neither key is present.
+     */
+    private function calculateDeliveryDate($item): ?string
+    {
+        if(!empty($item['r_delivery'])){
+            return $item['r_delivery'];
+        }
+
+        return $item['delivery'];
+    }
 }
