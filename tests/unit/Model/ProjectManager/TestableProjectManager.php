@@ -4,9 +4,11 @@ namespace unit\Model\ProjectManager;
 
 use ArrayObject;
 use Exception;
+use Model\Jobs\JobStruct;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectManager\ProjectManager;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Xliff\DTO\XliffRulesModel;
@@ -155,6 +157,31 @@ class TestableProjectManager extends ProjectManager
     public function callSaveMetadata(): void
     {
         $this->saveMetadata();
+    }
+
+    // ── saveJobsMetadata() testing support ──────────────────────────
+
+    private ?JobsMetadataDao $jobsMetadataDaoOverride = null;
+
+    /**
+     * Inject a mock/stub JobsMetadataDao for saveJobsMetadata() tests.
+     */
+    public function setJobsMetadataDao(JobsMetadataDao $dao): void
+    {
+        $this->jobsMetadataDaoOverride = $dao;
+    }
+
+    protected function createJobsMetadataDao(): JobsMetadataDao
+    {
+        return $this->jobsMetadataDaoOverride ?? parent::createJobsMetadataDao();
+    }
+
+    /**
+     * Public wrapper to invoke the protected saveJobsMetadata().
+     */
+    public function callSaveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
+    {
+        $this->saveJobsMetadata($newJob, $projectStructure);
     }
 }
 

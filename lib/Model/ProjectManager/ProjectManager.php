@@ -426,9 +426,9 @@ class ProjectManager
     /**
      * @throws ReflectionException
      */
-    private function saveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
+    protected function saveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
     {
-        $jobsMetadataDao = new JobsMetadataDao();
+        $jobsMetadataDao = $this->createJobsMetadataDao();
 
         // public_tm_penalty
         if (isset ($projectStructure['public_tm_penalty'])) {
@@ -573,6 +573,14 @@ class ProjectManager
     protected function createProjectsMetadataDao(): ProjectsMetadataDao
     {
         return new ProjectsMetadataDao();
+    }
+
+    /**
+     * Factory method for JobsMetadataDao — overridable in tests.
+     */
+    protected function createJobsMetadataDao(): JobsMetadataDao
+    {
+        return new JobsMetadataDao();
     }
 
     /**
