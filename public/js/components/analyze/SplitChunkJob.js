@@ -2,8 +2,14 @@ import React from 'react'
 import {Popup} from 'semantic-ui-react'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import {ANALYSIS_WORKFLOW_TYPES} from '../../constants/Constants'
-import {Button} from '../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 import OutsourceButton from './OutsourceButton'
+import CopyIcon from '../../../img/icons/CopyIcon'
 
 const SplitChunkJob = ({
   job,
@@ -43,14 +49,13 @@ const SplitChunkJob = ({
       )
     checkPayableChanged(job.id + index, chunkAnalysis.total_equivalent)
 
-    const openOutsourceClass = isOutsourceOpen ? 'openOutsource' : ''
     const jidChunk = `${chunkAnalysis.id}-${index}`
 
     return (
-      <div key={index} className={`${openOutsourceClass}`}>
-        <div>
-          <div>{`Chunk ${index}`}</div>
-          <div>
+      <div key={index} className="project-card__content">
+        <div className="project-card__header-info">
+          <div className="project-card__chunkName">{`Chunk ${index}`}</div>
+          <div className="project-card__header-link">
             <input
               ref={(el) => (jobLinkRef.current[jidChunk] = el)}
               type="text"
@@ -65,16 +70,19 @@ const SplitChunkJob = ({
               position="top center"
               trigger={
                 <Button
-                  onClick={copyJobLinkToClipboard(jidChunk)}
-                  className="copy"
+                  size={BUTTON_SIZE.ICON_XSMALL}
+                  mode={BUTTON_MODE.GHOST}
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={copyJobLinkToClipboard(job.id)}
+                  data-position="top center"
                 >
-                  <i className="icon-link icon" />
+                  <CopyIcon size={16} />
                 </Button>
               }
             />
           </div>
         </div>
-        <div>
+        <div className="project-card__count">
           <div>
             <div>{chunkAnalysis.total_raw}</div>
           </div>
@@ -91,10 +99,7 @@ const SplitChunkJob = ({
             <div>{chunkAnalysis.total_equivalent}</div>
           </div>
         </div>
-        <div>
-          <div className={`${config.jobAnalysis ? 'disable-outsource' : ''}`}>
-            {getDirectOpenButton(chunkAnalysis, `${job.id}-${index}`)}
-          </div>
+        <div className="project-card__header-actions">
           {!config.jobAnalysis && (
             <OutsourceButton
               chunk={chunkAnalysis}
@@ -103,6 +108,14 @@ const SplitChunkJob = ({
               openOutsourceModal={handleOpenOutsourceModal}
             />
           )}
+          <Button
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.SMALL}
+            onClick={showDetails(job.id)}
+          >
+            Details
+          </Button>
+          {getDirectOpenButton(chunkAnalysis, `${job.id}-${index}`)}
         </div>
         <OutsourceContainer
           project={project}
@@ -120,13 +133,7 @@ const SplitChunkJob = ({
     )
   })
 
-  return (
-    <div>
-      <div>
-        <div>{chunksHtml}</div>
-      </div>
-    </div>
-  )
+  return chunksHtml
 }
 
 export default SplitChunkJob

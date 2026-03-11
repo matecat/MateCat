@@ -1,7 +1,6 @@
 import React, {useRef, useEffect, useCallback} from 'react'
 import {ANALYSIS_STATUS} from '../../constants/Constants'
 import {Popup} from 'semantic-ui-react'
-import HelpCircle from '../../../img/icons/HelpCircle'
 import {downloadAnalysisReport} from '../../api/downloadAnalysisReport'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {Badge, BADGE_TYPE} from '../common/Badge'
@@ -70,7 +69,10 @@ const AnalyzeHeader = ({data, project}) => {
               Complete
             </Badge>
           </div>
-          <a className={'downloadAnalysisReport'}>
+          <a
+            className={'downloadAnalysisReport'}
+            onClick={handleDownloadAnalysisReport}
+          >
             Download Analysis Report
             <Download size={16} />
           </a>

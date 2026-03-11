@@ -6,6 +6,7 @@ import UserStore from '../../stores/UserStore'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import CompareTableHeader from './CompareTableHeader'
 import SingleChunkJob from './SingleChunkJob'
+import SplitChunkJob from './SplitChunkJob'
 
 const AnalyzeChunksResume = ({
   project,
@@ -207,11 +208,11 @@ const AnalyzeChunksResume = ({
             thereIsChunkOutsourced={thereIsChunkOutsourced}
             {...sharedProps}
           />
-          <SingleChunkJob
-            job={job}
-            thereIsChunkOutsourced={thereIsChunkOutsourced}
-            {...sharedProps}
-          />
+          {isSplit ? (
+            <SplitChunkJob job={job} {...sharedProps} />
+          ) : (
+            <SingleChunkJob job={job} {...sharedProps} />
+          )}
         </div>
       )
     })

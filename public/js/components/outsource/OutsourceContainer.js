@@ -96,13 +96,10 @@ class OutsourceContainer extends React.Component {
             timeout={{enter: 500, exit: 300}}
           >
             <div
-              className={
-                'outsource-container ui grid shadow-1 ' +
-                outsourceContainerClass
-              }
+              className={'outsource-container ' + outsourceContainerClass}
               ref={(container) => (this.container = container)}
             >
-              <div className=" outsource-header sixteen wide column ">
+              <div className=" outsource-header ">
                 {this.props.idJobLabel ? (
                   <div className="job-id" title="Job Id">
                     ID: {this.props.idJobLabel}
@@ -138,11 +135,8 @@ class OutsourceContainer extends React.Component {
                 {/*  <b>Subject</b>: {this.props.job.get('subject_printable')}*/}
                 {/*</div>*/}
               </div>
-              <div className="sixteen wide column">
-                <div
-                  className="ui grid"
-                  ref={(container) => (this.container = container)}
-                >
+              <div className="outsource-content">
+                <div ref={(container) => (this.container = container)}>
                   {this.props.showTranslatorBox ? (
                     <AssignToTranslator
                       job={this.props.job}

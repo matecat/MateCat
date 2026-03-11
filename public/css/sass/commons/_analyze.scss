@@ -239,6 +239,29 @@ body.analyze {
           width: 300px;
           flex-direction: column;
           align-items: flex-start;
+          .project-card__chunkName {
+            margin-bottom: 4px;
+            font: variables.$font-style-small;
+          }
+          .project-card__header-link {
+            display: flex;
+            width: 100%;
+            padding: 4px 8px;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            border-radius: variables.$border-radius-default;
+            background: colors.$grey50;
+            color: colors.$blue500;
+            input {
+              all: unset;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              font: variables.$font-style-xsmall;
+              white-space: nowrap;
+              width: 100%;
+            }
+          }
           .project-card__header-languages {
             display: flex;
             align-items: center;

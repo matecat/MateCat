@@ -7,6 +7,10 @@
 .outsource-container {
   padding: 0px !important;
   border-radius: variables.$border-radius-default;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: stretch;
+  width: 100%;
   //margin-right: -2% !important;
   //box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
   //overflow: hidden;
@@ -19,6 +23,8 @@
     z-index: 1;
     border-radius: variables.$border-radius-default
       variables.$border-radius-default 0 0;
+    width: 100%;
+
     .job-id {
       color: colors.$grey400;
     }
@@ -54,6 +60,9 @@
       font-size: 16px;
       float: right;
     }
+  }
+  .outsource-content {
+    width: 100%;
   }
   &.transitionOutsource-enter {
     height: 0;
@@ -857,7 +866,6 @@
             .customer-box-info {
               width: 90%;
               display: inline-block;
-              position: absolute;
               opacity: 0;
               &.fade-in {
                 transition: 1.5s;
@@ -909,7 +917,6 @@
         .request-box {
           width: 45%;
           .title-request {
-            position: absolute;
             right: 30px;
             bottom: 60px;
             h3 {
@@ -919,7 +926,6 @@
           }
           .request-info-box {
             color: colors.$grey400;
-            position: absolute;
             bottom: 20px;
             right: 30px;
             .mobile-mail-box,

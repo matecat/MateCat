@@ -27,6 +27,7 @@ const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
           mode={BUTTON_MODE.GHOST}
           size={BUTTON_SIZE.SMALL}
           disabled={true}
+          style={{fontWeight: 500}}
         >
           <TranslatedIcon size={16} />
           <div>Buy Translation</div>
@@ -39,6 +40,7 @@ const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
       size={BUTTON_SIZE.SMALL}
       disabled={status !== ANALYSIS_STATUS.DONE}
       onClick={openOutsourceModal(index, chunk)}
+      style={{fontWeight: 500}}
     >
       <TranslatedIcon size={16} />
       <div>Buy Translation</div>
