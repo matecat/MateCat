@@ -13,7 +13,6 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectManager\ProjectManager;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
-use Model\Segments\SegmentMetadataStruct;
 use Model\Teams\TeamDao;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionClass;
@@ -189,66 +188,6 @@ class TestableProjectManager extends ProjectManager
     public function callSaveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
     {
         $this->saveJobsMetadata($newJob, $projectStructure);
-    }
-
-    // ── Step 11a: pure-data methods testing support ─────────────────
-
-    /**
-     * Public wrapper to invoke the protected _cleanSegmentsMetadata().
-     */
-    public function callCleanSegmentsMetadata(): void
-    {
-        $this->_cleanSegmentsMetadata();
-    }
-
-    /**
-     * Public wrapper to invoke the private __setSegmentIdForNotes() via reflection.
-     * @throws ReflectionException
-     */
-    public function callSetSegmentIdForNotes(array $row): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('__setSegmentIdForNotes');
-        $method->invoke($this, $row);
-    }
-
-    /**
-     * Public wrapper to invoke the private __setSegmentIdForContexts() via reflection.
-     * @throws ReflectionException
-     */
-    public function callSetSegmentIdForContexts(array $row): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('__setSegmentIdForContexts');
-        $method->invoke($this, $row);
-    }
-
-    /**
-     * Public wrapper to invoke the protected _saveSegmentMetadata().
-     */
-    public function callSaveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
-    {
-        $this->_saveSegmentMetadata($id_segment, $metadataStruct);
-    }
-
-    /** @var SegmentMetadataStruct[] Captured persist calls */
-    private array $persistedSegmentMetadata = [];
-
-    /**
-     * Override persistSegmentMetadata to capture calls instead of hitting the DB.
-     */
-    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
-    {
-        $this->persistedSegmentMetadata[] = $metadataStruct;
-    }
-
-    /**
-     * Get captured segment metadata persist calls.
-     * @return SegmentMetadataStruct[]
-     */
-    public function getPersistedSegmentMetadata(): array
-    {
-        return $this->persistedSegmentMetadata;
     }
 
     // ── Step 11b: setters / getters / config methods testing support ──

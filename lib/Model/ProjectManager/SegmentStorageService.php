@@ -1,0 +1,330 @@
+<?php
+
+namespace Model\ProjectManager;
+
+use ArrayObject;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
+use Model\FeaturesBase\FeatureSet;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataStruct;
+use Model\Segments\SegmentOriginalDataDao;
+use Model\Segments\SegmentOriginalDataStruct;
+use Throwable;
+use Utils\Logger\MatecatLogger;
+use View\API\Commons\Error;
+
+/**
+ * Encapsulates segment storage logic that was previously embedded in
+ * {@see ProjectManager}.
+ *
+ * This class is responsible for:
+ *  - Reserving sequence IDs for segments and tracking min/max boundaries
+ *  - Processing and persisting segment original data maps
+ *  - Saving segment metadata records
+ *  - Bulk-inserting segment rows via SegmentDao
+ *  - Linking segment IDs to notes, contexts, and translations
+ *  - Building the segments_metadata analysis array
+ *  - Cleaning segments_metadata (removing non-cattool segments)
+ *
+ * All mutations to projectStructure are performed on the ArrayObject passed
+ * to the public methods, which is the same mutable structure used by ProjectManager.
+ */
+class SegmentStorageService
+{
+    private IDatabase $dbHandler;
+    private FeatureSet $features;
+    private MatecatLogger $logger;
+
+    /**
+     * Tracks first/last segment IDs across all files.
+     * Written by storeSegments(), read by ProjectManager::_createJobs().
+     *
+     * @var array{job_first_segment?: int, job_last_segment?: int}
+     */
+    private array $minMaxSegmentsId = [];
+
+    public function __construct(
+        IDatabase     $dbHandler,
+        FeatureSet    $features,
+        MatecatLogger $logger,
+    ) {
+        $this->dbHandler = $dbHandler;
+        $this->features  = $features;
+        $this->logger    = $logger;
+    }
+
+    // ── Public API ──────────────────────────────────────────────────
+
+    /**
+     * Get the accumulated min/max segment ID boundaries.
+     *
+     * @return array{job_first_segment?: int, job_last_segment?: int}
+     */
+    public function getMinMaxSegmentsId(): array
+    {
+        return $this->minMaxSegmentsId;
+    }
+
+    /**
+     * Store segments for a single file: reserve IDs, persist original data
+     * and metadata, bulk-insert segment rows, and link IDs to notes/contexts/translations.
+     * @throws \Exception
+     */
+    public function storeSegments(string|int $fid, ArrayObject $projectStructure): void
+    {
+        if (count($projectStructure['segments'][$fid]) == 0) {
+            return;
+        }
+
+        $this->log("Segments: Total Rows to insert: " . count($projectStructure['segments'][$fid]));
+        $sequenceIds = $this->dbHandler->nextSequence(Database::SEQ_ID_SEGMENT, count($projectStructure['segments'][$fid]));
+        $this->log("Id sequence reserved.");
+
+        // Update/Initialize the min-max sequences id
+        if (!isset($this->minMaxSegmentsId['job_first_segment'])) {
+            $this->minMaxSegmentsId['job_first_segment'] = reset($sequenceIds);
+        }
+
+        // Update the last id; if there is another cycle this value gets overwritten
+        $this->minMaxSegmentsId['job_last_segment'] = end($sequenceIds);
+
+        $segments_metadata = [];
+        foreach ($sequenceIds as $position => $id_segment) {
+            /**
+             * @var $projectStructure['segments'][$fid][$position] \Model\Segments\SegmentStruct
+             */
+            $projectStructure['segments'][$fid][$position]->id = $id_segment;
+
+            /** @var ?SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            $segmentOriginalDataStruct = $projectStructure['segments-original-data'][$fid][$position] ?? new SegmentOriginalDataStruct(
+            ); // If not set, create an empty struct to be safe. Avoid 'Call to a member function getMap() on null'
+
+            if (!empty($segmentOriginalDataStruct->getMap())) {
+                // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
+                // to allow the correct tag handling by the plugins
+                $map = $this->features->filter('sanitizeOriginalDataMap', $segmentOriginalDataStruct->getMap());
+
+                // persist original data map if present
+                $this->insertOriginalDataRecord($id_segment, $map);
+
+                $projectStructure['segments'][$fid][$position]->segment = $this->features->filter(
+                    'correctTagErrors',
+                    $projectStructure['segments'][$fid][$position]->segment,
+                    $map
+                );
+            }
+
+            /** @var SegmentMetadataStruct $segmentMetadataStruct */
+            $segmentMetadataStruct = @$projectStructure['segments-meta-data'][$fid][$position];
+
+            if (isset($segmentMetadataStruct) and !empty($segmentMetadataStruct)) {
+                $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
+            }
+
+            if (!isset($projectStructure['file_segments_count'] [$fid])) {
+                $projectStructure['file_segments_count'] [$fid] = 0;
+            }
+            $projectStructure['file_segments_count'] [$fid]++;
+
+            $_metadata = [
+                'id'                => $id_segment,
+                'internal_id'       => SegmentExtractor::sanitizedUnitId($projectStructure['segments'][$fid][$position]->internal_id, $fid),
+                'segment'           => $projectStructure['segments'][$fid][$position]->segment,
+                'segment_hash'      => $projectStructure['segments'][$fid][$position]->segment_hash,
+                'raw_word_count'    => $projectStructure['segments'][$fid][$position]->raw_word_count,
+                'xliff_mrk_id'      => $projectStructure['segments'][$fid][$position]->xliff_mrk_id,
+                'show_in_cattool'   => $projectStructure['segments'][$fid][$position]->show_in_cattool,
+                'additional_params' => null,
+                'file_id'           => $fid,
+            ];
+
+            /*
+             * This hook allows plugins to manipulate data analysis content, should be not allowed to change existing data
+             * but only to eventually add new fields
+             */
+            $_metadata = $this->features->filter('appendFieldToAnalysisObject', $_metadata, $projectStructure);
+
+            $segments_metadata[] = $_metadata;
+        }
+
+        $segmentsDao = $this->createSegmentDao();
+        // split the query in to chunks if there are too much segments
+        $segmentsDao->createList($projectStructure['segments'][$fid]->getArrayCopy());
+
+        // free memory
+        $projectStructure['segments'][$fid]->exchangeArray([]);
+
+        // Here we make a query for the last inserted segments. This is the point where we
+        // can read the id of the segments table to reference it in other inserts in other tables.
+        if (!(
+            empty($projectStructure['notes']) &&
+            empty($projectStructure['translations'])
+        )) {
+            // internal counter for the segmented translations ( mrk in target )
+            $array_internal_segmentation_counter = [];
+
+            foreach ($segments_metadata as $row) {
+                // The following call is to save `id_segment` for notes,
+                // to be used later to insert the record in notes table.
+                $this->setSegmentIdForNotes($row, $projectStructure);
+                $this->setSegmentIdForContexts($row, $projectStructure);
+
+                // The following block of code is for translations
+                if ($projectStructure['translations']->offsetExists($row['internal_id'])) {
+                    if (!array_key_exists($row['internal_id'], $array_internal_segmentation_counter)) {
+                        // if we don't have segmentation, we have not mrk ID,
+                        // so work with positional indexes ( should be only one row )
+                        if (empty($row['xliff_mrk_id'])) {
+                            $array_internal_segmentation_counter[$row['internal_id']] = 0;
+                        } else {
+                            // we have the mark id use them
+                            $array_internal_segmentation_counter[$row['internal_id']] = $row['xliff_mrk_id'];
+                        }
+                    } elseif (empty($row['xliff_mrk_id'])) {
+                        // if we don't have segmentation, we have not mrk ID,
+                        // so work with positional indexes
+                        // (should be only one row but if we are here, let's increment it)
+                        $array_internal_segmentation_counter[$row['internal_id']]++;
+                    } else {
+                        // we have the mark id use them
+                        $array_internal_segmentation_counter[$row['internal_id']] = $row['xliff_mrk_id'];
+                    }
+
+                    // set this var only for easy reading
+                    $short_var_counter = $array_internal_segmentation_counter[$row['internal_id']];
+
+                    if (!$projectStructure['translations'][$row['internal_id']]->offsetExists($short_var_counter)) {
+                        continue;
+                    }
+
+                    $projectStructure['translations'][$row['internal_id']][$short_var_counter]->offsetSet(0, $row['id']);
+                    $projectStructure['translations'][$row['internal_id']][$short_var_counter]->offsetSet(1, $row['internal_id']);
+                    /**
+                     * WARNING offset 2 is the target translation
+                     */
+                    $projectStructure['translations'][$row['internal_id']][$short_var_counter]->offsetSet(3, $row['segment_hash']);
+                    /**
+                     * WARNING offset 4 is the Trans-Unit
+                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
+                     */
+                    $projectStructure['translations'][$row['internal_id']][$short_var_counter]->offsetSet(5, $row['file_id']);
+                    /**
+                     * WARNING Offset 6 is possibly the MRK order position.
+                     */
+
+                    // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
+                    /*
+                     * Commented because of
+                     *
+                     * https://app.asana.com/0/1134617950425092/1202822242420298
+                     */
+                    // unset( $segments_metadata[ $k ] );
+                }
+            }
+        }
+
+        // merge segments_metadata for every file in the project
+        $projectStructure['segments_metadata']->exchangeArray(
+            array_merge($projectStructure['segments_metadata']->getArrayCopy(), $segments_metadata)
+        );
+    }
+
+    /**
+     * Remove segments with show_in_cattool == false from segments_metadata.
+     * Called before inserting pre-translations.
+     */
+    public function cleanSegmentsMetadata(ArrayObject $projectStructure): void
+    {
+        $projectStructure['segments_metadata']->exchangeArray(
+            array_filter($projectStructure['segments_metadata']->getArrayCopy(), function ($value) {
+                return $value['show_in_cattool'] == 1;
+            })
+        );
+    }
+
+    // ── Factory methods (overridable in tests) ──────────────────────
+
+    /**
+     * Create a new SegmentDao instance.
+     */
+    protected function createSegmentDao(): SegmentDao
+    {
+        return new SegmentDao();
+    }
+
+    /**
+     * Persist an original data map for a segment.
+     * Wraps the static DAO call so tests can override.
+     */
+    protected function insertOriginalDataRecord(int $id_segment, array $map): void
+    {
+        SegmentOriginalDataDao::insertRecord($id_segment, $map);
+    }
+
+    /**
+     * Persist a single segment metadata record.
+     * Protected so test subclasses can override to capture calls.
+     */
+    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
+    {
+        SegmentMetadataDao::save($metadataStruct);
+    }
+
+    // ── Private helpers ─────────────────────────────────────────────
+
+    /**
+     * Validate and persist segment metadata if the struct has valid key/value.
+     */
+    protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
+    {
+        if ($metadataStruct !== null and
+            isset($metadataStruct->meta_key) and $metadataStruct->meta_key !== '' and
+            isset($metadataStruct->meta_value) and $metadataStruct->meta_value !== ''
+        ) {
+            $metadataStruct->id_segment = $id_segment;
+            $this->persistSegmentMetadata($metadataStruct);
+        }
+    }
+
+    /**
+     * Link segment ID to notes entries for later insertion.
+     */
+    private function setSegmentIdForNotes(array $row, ArrayObject $projectStructure): void
+    {
+        $internal_id = $row['internal_id'];
+
+        if ($projectStructure['notes']->offsetExists($internal_id)) {
+            if (count($projectStructure['notes'][$internal_id]['json']) != 0) {
+                $projectStructure['notes'][$internal_id]['json_segment_ids'][] = $row['id'];
+            } else {
+                $projectStructure['notes'][$internal_id]['segment_ids'][] = $row['id'];
+            }
+        }
+    }
+
+    /**
+     * Link segment ID to context-group entries for later insertion.
+     */
+    private function setSegmentIdForContexts(array $row, ArrayObject $projectStructure): void
+    {
+        $internal_id = $row['internal_id'];
+
+        if ($projectStructure['context-group']->offsetExists($internal_id)) {
+            $projectStructure['context-group'][$internal_id]['context_json_segment_ids'][] = $row['id'];
+        }
+    }
+
+    /**
+     * Internal logging helper.
+     */
+    private function log(mixed $_msg, ?Throwable $exception = null): void
+    {
+        if (!$exception) {
+            $this->logger->debug($_msg);
+        } else {
+            $this->logger->debug($_msg, (new Error($exception))->render(true));
+        }
+    }
+}
