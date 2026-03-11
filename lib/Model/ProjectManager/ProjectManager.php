@@ -1965,8 +1965,6 @@ class ProjectManager
 
                     $trans_unit_reference = self::sanitizedUnitId($xliff_trans_unit['attr']['id'], $fid);
 
-                    // check if there is original data
-                    $segmentOriginalData = [];
                     $dataRefMap = [];
 
                     if (isset($xliff_trans_unit['original-data']) and !empty($xliff_trans_unit['original-data'])) {
@@ -2063,75 +2061,23 @@ class ProjectManager
                                 }
                             }
 
-                            //
-                            // -------------------------------------
-                            // START SEGMENTS META
-                            // -------------------------------------
-                            //
-
-                            $metadataStruct = new SegmentMetadataStruct();
-
-                            // check if there is sizeRestriction
-                            if (isset($xliff_trans_unit['attr']['sizeRestriction']) and $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
-                                $metadataStruct->meta_key = 'sizeRestriction';
-                                $metadataStruct->meta_value = $xliff_trans_unit['attr']['sizeRestriction'];
-                            }
-
-                            $this->projectStructure['segments-meta-data'][$fid]->append($metadataStruct);
-
-                            //
-                            // -------------------------------------
-                            // END SEGMENTS META
-                            // -------------------------------------
-                            //
-
-                            //
-                            // -------------------------------------
-                            // START SEGMENTS ORIGINAL DATA
-                            // -------------------------------------
-                            //
-
-                            // if its empty pass create a SegmentOriginalDataStruct with no data
-                            $segmentOriginalDataStruct = (new SegmentOriginalDataStruct)->setMap($dataRefMap ?? []);
-                            $this->projectStructure['segments-original-data'][$fid]->append($segmentOriginalDataStruct);
-
-                            //
-                            // -------------------------------------
-                            // END SEGMENTS ORIGINAL DATA
-                            // -------------------------------------
-                            //
-
-                            $sizeRestriction = null;
-                            if (isset($xliff_trans_unit['attr']['sizeRestriction']) and $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
-                                $sizeRestriction = $xliff_trans_unit['attr']['sizeRestriction'];
-                            }
-
-                            $segmentHash = $this->createSegmentHash($seg_source['raw-content'], $dataRefMap, $sizeRestriction);
-
-                            // segment struct
-                            $segStruct = new SegmentStruct([
-                                'id_file' => $fid,
-                                'id_file_part' => (isset($filePartsId)) ? $filePartsId : null,
-                                'id_project' => $this->projectStructure['id_project'],
-                                'internal_id' => $xliff_trans_unit['attr']['id'],
-                                'xliff_mrk_id' => $seg_source['mid'],
-                                'xliff_ext_prec_tags' => $seg_source['ext-prec-tags'],
-                                'xliff_mrk_ext_prec_tags' => $seg_source['mrk-ext-prec-tags'],
-                                'segment' => $this->filter->fromRawXliffToLayer0($seg_source['raw-content']),
-                                'segment_hash' => $segmentHash,
-                                'xliff_mrk_ext_succ_tags' => $seg_source['mrk-ext-succ-tags'],
-                                'xliff_ext_succ_tags' => $seg_source['ext-succ-tags'],
-                                'raw_word_count' => $wordCount,
-                                'show_in_cattool' => $show_in_cattool
-                            ]);
-
-                            $this->projectStructure['segments'][$fid]->append($segStruct);
-
-                            //increment counter for word count
-                            $this->files_word_count += $wordCount;
+                            $counters = $this->buildAndAppendSegment(
+                                fid:                  $fid,
+                                filePartsId:          $filePartsId ?? null,
+                                xliff_trans_unit:     $xliff_trans_unit,
+                                rawContent:           $seg_source['raw-content'],
+                                dataRefMap:           $dataRefMap,
+                                wordCount:            $wordCount,
+                                showInCattool:        $show_in_cattool,
+                                xliffMrkId:           $seg_source['mid'],
+                                xliffExtPrecTags:     $seg_source['ext-prec-tags'],
+                                xliffMrkExtPrecTags:  $seg_source['mrk-ext-prec-tags'],
+                                xliffMrkExtSuccTags:  $seg_source['mrk-ext-succ-tags'],
+                                xliffExtSuccTags:     $seg_source['ext-succ-tags'],
+                            );
 
                             //increment the counter for not empty segments
-                            $_fileCounter_Show_In_Cattool += $show_in_cattool;
+                            $_fileCounter_Show_In_Cattool += $counters['show_in_cattool'];
                         } // end foreach seg-source
 
                         try {
@@ -2198,65 +2144,20 @@ class ProjectManager
                             );
                         }
 
-                        //
-                        // -------------------------------------
-                        // START SEGMENTS META
-                        // -------------------------------------
-                        //
-                        $metadataStruct = new SegmentMetadataStruct();
-
-                        // check if there is sizeRestriction
-                        if (isset($xliff_trans_unit['attr']['sizeRestriction']) and $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
-                            $metadataStruct->meta_key = 'sizeRestriction';
-                            $metadataStruct->meta_value = $xliff_trans_unit['attr']['sizeRestriction'];
-                        }
-
-                        $this->projectStructure['segments-meta-data'][$fid]->append($metadataStruct);
-
-                        //
-                        // -------------------------------------
-                        // END SEGMENTS META
-                        // -------------------------------------
-                        //
-
-
-                        // segment original data
-                        if (!empty($segmentOriginalData)) {
-                            // this seems not to be used, SegmentOriginalDataStruct do not have a 'data' key.
-                            $segmentOriginalDataStruct = new SegmentOriginalDataStruct([
-                                'data' => $segmentOriginalData,
-                            ]);
-
-                            $this->projectStructure['segments-original-data'][$fid]->append($segmentOriginalDataStruct);
-                        }
-
-                        $sizeRestriction = null;
-                        if (isset($xliff_trans_unit['attr']['sizeRestriction']) and $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
-                            $sizeRestriction = $xliff_trans_unit['attr']['sizeRestriction'];
-                        }
-
-                        $segmentHash = $this->createSegmentHash($xliff_trans_unit['source']['raw-content'], $segmentOriginalData, $sizeRestriction);
-
-                        $segStruct = new SegmentStruct([
-                            'id_file' => $fid,
-                            'id_file_part' => (isset($filePartsId)) ? $filePartsId : null,
-                            'id_project' => $this->projectStructure['id_project'],
-                            'internal_id' => $xliff_trans_unit['attr']['id'],
-                            'xliff_ext_prec_tags' => (!is_null($prec_tags) ? $prec_tags : null),
-                            'segment' => $this->filter->fromRawXliffToLayer0($xliff_trans_unit['source']['raw-content']),
-                            'segment_hash' => $segmentHash,
-                            'xliff_ext_succ_tags' => (!is_null($succ_tags) ? $succ_tags : null),
-                            'raw_word_count' => $wordCount,
-                            'show_in_cattool' => $show_in_cattool
-                        ]);
-
-                        $this->projectStructure['segments'][$fid]->append($segStruct);
-
-                        //increment counter for word count
-                        $this->files_word_count += $wordCount;
+                        $counters = $this->buildAndAppendSegment(
+                            fid:              $fid,
+                            filePartsId:      $filePartsId ?? null,
+                            xliff_trans_unit: $xliff_trans_unit,
+                            rawContent:       $xliff_trans_unit['source']['raw-content'],
+                            dataRefMap:       $dataRefMap,
+                            wordCount:        $wordCount,
+                            showInCattool:    $show_in_cattool,
+                            xliffExtPrecTags: $prec_tags,
+                            xliffExtSuccTags: $succ_tags,
+                        );
 
                         //increment the counter for not empty segments
-                        $_fileCounter_Show_In_Cattool += $show_in_cattool;
+                        $_fileCounter_Show_In_Cattool += $counters['show_in_cattool'];
                     }
                 }
             }
@@ -2272,6 +2173,98 @@ class ProjectManager
             //increment global counter
             $this->show_in_cattool_segs_counter += $_fileCounter_Show_In_Cattool;
         }
+    }
+
+    /**
+     * Extract the sizeRestriction value from a trans-unit's attributes.
+     *
+     * Returns the value as an int if present and > 0, null otherwise.
+     */
+    private function getSizeRestrictionValue(array $xliff_trans_unit): ?int
+    {
+        if (isset($xliff_trans_unit['attr']['sizeRestriction']) and $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
+            return (int) $xliff_trans_unit['attr']['sizeRestriction'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Build a SegmentStruct, its metadata, and original-data struct, then
+     * append everything to the projectStructure arrays and update counters.
+     *
+     * This consolidates the duplicated tail of both the seg-source and
+     * non-seg-source branches in _extractSegments().
+     *
+     * @param int $fid File ID
+     * @param int|null $filePartsId File-parts ID (if applicable)
+     * @param array $xliff_trans_unit The parsed trans-unit array
+     * @param string $rawContent The stripped source segment content
+     * @param array $dataRefMap Flattened id→raw-content map for original data
+     * @param float $wordCount Pre-computed word count
+     * @param int $showInCattool 1 or 0
+     * @param string|null $xliffMrkId mrk mid (seg-source only, null otherwise)
+     * @param string|null $xliffExtPrecTags External preceding tags
+     * @param string|null $xliffMrkExtPrecTags mrk-level preceding tags (seg-source only)
+     * @param string|null $xliffMrkExtSuccTags mrk-level succeeding tags (seg-source only)
+     * @param string|null $xliffExtSuccTags External succeeding tags
+     *
+     * @return array{word_count: float, show_in_cattool: int} The values for counter accumulation
+     * @throws Exception
+     */
+    private function buildAndAppendSegment(
+        int     $fid,
+        ?int    $filePartsId,
+        array   $xliff_trans_unit,
+        string  $rawContent,
+        array   $dataRefMap,
+        float   $wordCount,
+        int     $showInCattool,
+        ?string $xliffMrkId = null,
+        ?string $xliffExtPrecTags = null,
+        ?string $xliffMrkExtPrecTags = null,
+        ?string $xliffMrkExtSuccTags = null,
+        ?string $xliffExtSuccTags = null,
+    ): array {
+        // --- Segment metadata (sizeRestriction) ---
+        $metadataStruct = new SegmentMetadataStruct();
+        $sizeRestriction = $this->getSizeRestrictionValue($xliff_trans_unit);
+        if ($sizeRestriction !== null) {
+            $metadataStruct->meta_key = 'sizeRestriction';
+            $metadataStruct->meta_value = $sizeRestriction;
+        }
+        $this->projectStructure['segments-meta-data'][$fid]->append($metadataStruct);
+
+        // --- Segment original data ---
+        $segmentOriginalDataStruct = (new SegmentOriginalDataStruct())->setMap($dataRefMap);
+        $this->projectStructure['segments-original-data'][$fid]->append($segmentOriginalDataStruct);
+
+        // --- Segment hash ---
+        $segmentHash = $this->createSegmentHash($rawContent, $dataRefMap, $sizeRestriction);
+
+        // --- SegmentStruct ---
+        $segStruct = new SegmentStruct([
+            'id_file'                 => $fid,
+            'id_file_part'            => $filePartsId,
+            'id_project'              => $this->projectStructure['id_project'],
+            'internal_id'             => $xliff_trans_unit['attr']['id'],
+            'xliff_mrk_id'            => $xliffMrkId,
+            'xliff_ext_prec_tags'     => $xliffExtPrecTags,
+            'xliff_mrk_ext_prec_tags' => $xliffMrkExtPrecTags,
+            'segment'                 => $this->filter->fromRawXliffToLayer0($rawContent),
+            'segment_hash'            => $segmentHash,
+            'xliff_mrk_ext_succ_tags' => $xliffMrkExtSuccTags,
+            'xliff_ext_succ_tags'     => $xliffExtSuccTags,
+            'raw_word_count'          => $wordCount,
+            'show_in_cattool'         => $showInCattool,
+        ]);
+
+        $this->projectStructure['segments'][$fid]->append($segStruct);
+
+        // --- Update counters ---
+        $this->files_word_count += $wordCount;
+
+        return ['word_count' => $wordCount, 'show_in_cattool' => $showInCattool];
     }
 
     /**
