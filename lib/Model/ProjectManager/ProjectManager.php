@@ -560,50 +560,6 @@ class ProjectManager
             }
         }
 
-        // add MMT Glossaries here
-        if (!empty($this->projectStructure['mmt_glossaries']) && $this->projectStructure['mmt_glossaries']) {
-            $dao->set(
-                $this->projectStructure['id_project'],
-                'mmt_glossaries',
-                $this->projectStructure['mmt_glossaries']
-            );
-        }
-
-        // add Lara Style here
-        if (!empty($this->projectStructure['lara_style']) && $this->projectStructure['lara_style']) {
-            $dao->set(
-                $this->projectStructure['id_project'],
-                'lara_style',
-                $this->projectStructure['lara_style']
-            );
-        }
-
-        // add Lara Glossaries here
-        if (!empty($this->projectStructure['lara_glossaries']) && $this->projectStructure['lara_glossaries']) {
-            $dao->set(
-                $this->projectStructure['id_project'],
-                'lara_glossaries',
-                $this->projectStructure['lara_glossaries']
-            );
-        }
-
-        // add DeepL params here
-        if (!empty($this->projectStructure['deepl_formality']) && $this->projectStructure['deepl_formality']) {
-            $dao->set(
-                $this->projectStructure['id_project'],
-                'deepl_formality',
-                $this->projectStructure['deepl_formality']
-            );
-        }
-
-        if (!empty($this->projectStructure['deepl_id_glossary']) && $this->projectStructure['deepl_id_glossary']) {
-            $dao->set(
-                $this->projectStructure['id_project'],
-                'deepl_id_glossary',
-                $this->projectStructure['deepl_id_glossary']
-            );
-        }
-
         /** Duplicate the JobsMetadataDao::SUBFILTERING_HANDLERS in project metadata for easier retrieval.
          * During the analysis of the project, there is no need to query the JobsMetadataDao.
          * Configuration about handlers can be changed later in the job settings.

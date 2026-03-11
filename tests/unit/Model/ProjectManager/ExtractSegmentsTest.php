@@ -1,0 +1,655 @@
+<?php
+
+namespace unit\Model\ProjectManager;
+
+use Exception;
+use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
+use Model\Files\MetadataDao;
+use Model\Segments\SegmentStruct;
+use PHPUnit\Framework\Attributes\Test;
+use TestHelpers\AbstractTest;
+use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
+
+/**
+ * Unit tests for {@see \Model\ProjectManager\ProjectManager::_extractSegments()}.
+ *
+ * These tests provide a safety net before refactoring the duplicated code
+ * in the seg-source and non-seg-source branches.
+ *
+ * Test coverage breakdown:
+ *
+ * | Area                   | Tests | What's covered                                                                                                                   |
+ * |------------------------|-------|----------------------------------------------------------------------------------------------------------------------------------|
+ * | **Seg-source path**    | 11    | Segment count, mrk IDs, internal ID, word count, show_in_cattool, translations, original data, metadata, sizeRestriction,        |
+ * |                        |       | segment hash, content filtering, file ID                                                                                         |
+ * | **Non-seg-source path**| 8     | Segment count, null mrk fields, word count, show_in_cattool, translations, metadata, sizeRestriction, internal ID,               |
+ * |                        |       | content filtering, file ID                                                                                                       |
+ * | **Notes & context**    | 4     | Note extraction, structure, `from` attribute, context-group                                                                      |
+ * | **Edge cases**         | 8     | Empty file exception, xliff-info population, segment hash format, existing sdlxliff fixture with mrk+notes                      |
+ *
+ * @see REFACTORING_PLAN.md — Step 0
+ */
+class ExtractSegmentsTest extends AbstractTest
+{
+    private const string FIXTURES_DIR = TEST_DIR . '/resources/files/xliff/';
+
+    private TestableProjectManager $pm;
+    private FeatureSet $featureSet;
+    private MateCatFilter $filter;
+    private MetadataDao $metadataDao;
+    private MatecatLogger $logger;
+    private string $originalFileStorageMethod;
+
+    /**
+     * @throws Exception
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        // Force local filesystem mode to avoid S3 calls in getXliffFileContent
+        $this->originalFileStorageMethod = AppConfig::$FILE_STORAGE_METHOD;
+        AppConfig::$FILE_STORAGE_METHOD  = 'fs';
+
+        $this->featureSet = new FeatureSet();
+        /** @var MatecatFilter $filter */
+        $filter = MateCatFilter::getInstance($this->featureSet, 'en-US', 'it-IT');
+        $this->filter = $filter;
+        $this->metadataDao = $this->createStub(MetadataDao::class);
+        $this->logger = $this->createStub(MatecatLogger::class);
+
+        $this->pm = new TestableProjectManager();
+        $this->pm->initForTest(
+            $this->filter,
+            $this->featureSet,
+            $this->metadataDao,
+            $this->logger,
+        );
+    }
+
+    public function tearDown(): void
+    {
+        // Restore the original storage method
+        AppConfig::$FILE_STORAGE_METHOD = $this->originalFileStorageMethod;
+        parent::tearDown();
+    }
+
+    // =========================================================================
+    // 0a. Seg-source path tests
+    // =========================================================================
+
+    #[Test]
+    public function testSegSourceCreatesCorrectNumberOfSegments(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // The file has 1 trans-unit with 2 <mrk> segments
+        $segments = $ps['segments'][$fid];
+        $this->assertCount(2, $segments);
+    }
+
+    #[Test]
+    public function testSegSourceSegmentsHaveCorrectMrkIds(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        /** @var SegmentStruct $seg1 */
+        $seg1 = $segments[1];
+
+        $this->assertEquals('0', $seg0->xliff_mrk_id);
+        $this->assertEquals('1', $seg1->xliff_mrk_id);
+    }
+
+    #[Test]
+    public function testSegSourceSegmentsHaveCorrectInternalId(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        $this->assertEquals('tu1', $seg0->internal_id);
+    }
+
+    #[Test]
+    public function testSegSourceWordCountIsPositive(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $this->assertGreaterThan(0, $this->pm->getFilesWordCount());
+    }
+
+    #[Test]
+    public function testSegSourceShowInCattoolCounterIncremented(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        // Both segments have content, so show_in_cattool should be 2
+        $this->assertEquals(2, $this->pm->getShowInCattoolSegsCounter());
+    }
+
+    #[Test]
+    public function testSegSourceTotalSegmentsIncremented(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        // 1 trans-unit in the file
+        $this->assertEquals(1, $this->pm->getTotalSegments());
+    }
+
+    #[Test]
+    public function testSegSourcePreTranslationsAreStored(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // The trans-unit has both source and target with mrk tags
+        // Translations should be stored with the unit reference key
+        $translations = $ps['translations'];
+        $this->assertGreaterThan(0, count($translations));
+    }
+
+    #[Test]
+    public function testSegSourceSegmentsOriginalDataCreated(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // segments-original-data should have entries for this fid
+        $this->assertTrue($ps['segments-original-data']->offsetExists($fid));
+
+        // seg-source branch always appends a SegmentOriginalDataStruct for each mrk
+        $originalData = $ps['segments-original-data'][$fid];
+        $this->assertCount(2, $originalData);
+    }
+
+    #[Test]
+    public function testSegSourceSegmentsMetaDataCreated(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // segments-meta-data should have entries for this fid (one per mrk)
+        $this->assertTrue($ps['segments-meta-data']->offsetExists($fid));
+        $this->assertCount(2, $ps['segments-meta-data'][$fid]);
+    }
+
+    #[Test]
+    public function testSegSourceWithSizeRestrictionStoresMetadata(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-with-size-restriction.xliff',
+            'original_filename' => 'seg-source-with-size-restriction.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $metaData = $ps['segments-meta-data'][$fid];
+
+        // Both mrk segments should have sizeRestriction metadata
+        $foundSizeRestriction = false;
+        foreach ($metaData as $meta) {
+            if (isset($meta->meta_key) && $meta->meta_key === 'sizeRestriction') {
+                $foundSizeRestriction = true;
+                $this->assertEquals('80', $meta->meta_value);
+            }
+        }
+
+        $this->assertTrue($foundSizeRestriction, 'sizeRestriction metadata not found');
+    }
+
+    #[Test]
+    public function testSegSourceSegmentHashDiffersWithSizeRestriction(): void
+    {
+        // Extract without sizeRestriction
+        $fid1 = 1;
+        $this->pm->callExtractSegments($fid1, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $hashWithout = $this->pm->getTestProjectStructure()['segments'][$fid1][0]->segment_hash;
+
+        // Create a new PM instance for the second test
+        $pm2 = new TestableProjectManager();
+        $pm2->initForTest($this->filter, $this->featureSet, $this->metadataDao, $this->logger);
+
+        $fid2 = 2;
+        $pm2->callExtractSegments($fid2, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-with-size-restriction.xliff',
+            'original_filename' => 'seg-source-with-size-restriction.xliff',
+        ]);
+
+        $hashWith = $pm2->getTestProjectStructure()['segments'][$fid2][0]->segment_hash;
+
+        // Same source text but different sizeRestriction should produce different hashes
+        $this->assertNotEquals($hashWithout, $hashWith);
+    }
+
+    // =========================================================================
+    // 0b. Non-seg-source path tests
+    // =========================================================================
+
+    #[Test]
+    public function testNoSegSourceCreatesCorrectNumberOfSegments(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        // 2 trans-units, each without seg-source → 2 segments
+        $this->assertCount(2, $segments);
+    }
+
+    #[Test]
+    public function testNoSegSourceSegmentsHaveNullMrkId(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        $this->assertNull($seg0->xliff_mrk_id);
+        $this->assertNull($seg0->xliff_mrk_ext_prec_tags);
+        $this->assertNull($seg0->xliff_mrk_ext_succ_tags);
+    }
+
+    #[Test]
+    public function testNoSegSourceWordCountIsPositive(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $this->assertGreaterThan(0, $this->pm->getFilesWordCount());
+    }
+
+    #[Test]
+    public function testNoSegSourceShowInCattoolCounterIncremented(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        // Both trans-units have source content
+        $this->assertEquals(2, $this->pm->getShowInCattoolSegsCounter());
+    }
+
+    #[Test]
+    public function testNoSegSourcePreTranslationsStoredForTranslatedTarget(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // tu1 has target with state="translated", tu2 has no target
+        // XliffRulesModel with default rules: "translated" state should be treated as translated
+        $translations = $ps['translations'];
+        $this->assertGreaterThan(0, count($translations));
+    }
+
+    #[Test]
+    public function testNoSegSourceSegmentsMetaDataCreated(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $this->assertTrue($ps['segments-meta-data']->offsetExists($fid));
+        $this->assertCount(2, $ps['segments-meta-data'][$fid]);
+    }
+
+    #[Test]
+    public function testNoSegSourceWithSizeRestrictionStoresMetadata(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'with-size-restriction.xliff',
+            'original_filename' => 'with-size-restriction.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $metaData = $ps['segments-meta-data'][$fid];
+
+        $foundSizeRestriction = false;
+        foreach ($metaData as $meta) {
+            if (isset($meta->meta_key) && $meta->meta_key === 'sizeRestriction') {
+                $foundSizeRestriction = true;
+                $this->assertEquals('100', $meta->meta_value);
+            }
+        }
+
+        $this->assertTrue($foundSizeRestriction, 'sizeRestriction metadata not found');
+    }
+
+    #[Test]
+    public function testNoSegSourceSegmentHasCorrectInternalId(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        $this->assertEquals('tu1', $seg0->internal_id);
+
+        /** @var SegmentStruct $seg1 */
+        $seg1 = $segments[1];
+        $this->assertEquals('tu2', $seg1->internal_id);
+    }
+
+    // =========================================================================
+    // 0b. Notes and context-group tests
+    // =========================================================================
+
+    #[Test]
+    public function testNotesAreExtracted(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'with-notes-and-context.xliff',
+            'original_filename' => 'with-notes-and-context.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $notes = $ps['notes'];
+
+        // Both trans-units have notes
+        $this->assertGreaterThan(0, count($notes));
+    }
+
+    #[Test]
+    public function testNotesHaveCorrectStructure(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'with-notes-and-context.xliff',
+            'original_filename' => 'with-notes-and-context.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $notes = $ps['notes'];
+
+        // tu1 has 2 notes. The key is "{fid}|{tu_id}"
+        $tu1Key = $fid . '|tu1';
+        $this->assertTrue($notes->offsetExists($tu1Key), "Notes key '$tu1Key' should exist");
+
+        $tu1Notes = $notes[$tu1Key];
+        $this->assertTrue($tu1Notes->offsetExists('entries'));
+        $this->assertCount(2, $tu1Notes['entries']);
+    }
+
+    #[Test]
+    public function testNotesFromAttributeIsPreserved(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'with-notes-and-context.xliff',
+            'original_filename' => 'with-notes-and-context.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $notes = $ps['notes'];
+
+        $tu1Key = $fid . '|tu1';
+        $tu1From = $notes[$tu1Key]['from']['entries'];
+
+        // First note has no 'from' → 'NO_FROM'
+        // Second note has from="developer"
+        $this->assertEquals('NO_FROM', $tu1From[0]);
+        $this->assertEquals('developer', $tu1From[1]);
+    }
+
+    #[Test]
+    public function testContextGroupIsExtracted(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'with-notes-and-context.xliff',
+            'original_filename' => 'with-notes-and-context.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $contextGroup = $ps['context-group'];
+
+        $tu1Key = $fid . '|tu1';
+        $this->assertTrue($contextGroup->offsetExists($tu1Key), "Context-group key '$tu1Key' should exist");
+
+        $tu1Ctx = $contextGroup[$tu1Key];
+        $this->assertTrue($tu1Ctx->offsetExists('context_json'));
+        $this->assertTrue($tu1Ctx->offsetExists('context_json_segment_ids'));
+    }
+
+    // =========================================================================
+    // Edge cases
+    // =========================================================================
+
+    #[Test]
+    public function testEmptyFileThrowsException(): void
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'xliff_test_');
+        file_put_contents(
+            $tmpFile,
+            '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file original="empty.txt" source-language="en-US" target-language="it-IT" datatype="plaintext"><body></body></file></xliff>'
+        );
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(-1);
+
+        try {
+            $this->pm->callExtractSegments(99, [
+                'path_cached_xliff' => $tmpFile,
+                'original_filename' => 'empty.xliff',
+            ]);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
+    #[Test]
+    public function testXliffInfoIsPopulated(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // current-xliff-info should have an entry for this fid
+        $this->assertArrayHasKey($fid, $ps['current-xliff-info']);
+        $this->assertArrayHasKey('version', $ps['current-xliff-info'][$fid]);
+    }
+
+    #[Test]
+    public function testSegSourceSegmentContentIsFilteredToLayer0(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+
+        // The segment content should be a non-empty string (filtered from raw XLIFF to Layer 0)
+        $this->assertNotEmpty($seg0->segment);
+        $this->assertIsString($seg0->segment);
+    }
+
+    #[Test]
+    public function testNoSegSourceSegmentContentIsFilteredToLayer0(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+
+        $this->assertNotEmpty($seg0->segment);
+        $this->assertIsString($seg0->segment);
+    }
+
+    #[Test]
+    public function testSegmentHashIsNotEmpty(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+
+        $this->assertNotEmpty($seg0->segment_hash);
+        $this->assertEquals(32, strlen($seg0->segment_hash), 'segment_hash should be an md5 (32 hex chars)');
+    }
+
+    #[Test]
+    public function testSegSourceFileIdIsSet(): void
+    {
+        $fid = 42;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        $this->assertEquals($fid, $seg0->id_file);
+    }
+
+    #[Test]
+    public function testNoSegSourceFileIdIsSet(): void
+    {
+        $fid = 42;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        $this->assertEquals($fid, $seg0->id_file);
+    }
+
+    #[Test]
+    public function testExistingXliffWithMrkAndNotes(): void
+    {
+        // Use the existing test fixture that has seg-source with mrk and a note
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'sdlxliff-with-mrk-and-note.xlf.sdlxliff',
+            'original_filename' => 'sdlxliff-with-mrk-and-note.xlf.sdlxliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps['segments'][$fid];
+
+        // The sdlxliff has 1 trans-unit with 2 mrk segments
+        $this->assertCount(2, $segments);
+
+        // Verify notes are extracted
+        $notes = $ps['notes'];
+        $this->assertGreaterThan(0, count($notes));
+    }
+}
+

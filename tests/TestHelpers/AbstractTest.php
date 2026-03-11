@@ -4,6 +4,7 @@ namespace TestHelpers;
 
 use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 /**
  * User: domenico
@@ -14,10 +15,10 @@ use PHPUnit\Framework\TestCase;
 abstract class AbstractTest extends TestCase
 {
 
-    protected $thisTest;
+    protected float $thisTest;
 
-    protected $databaseInstance;
-    protected $reflectedMethod;
+    protected IDatabase $databaseInstance;
+    protected ReflectionMethod $reflectedMethod;
 
     public function setUp(): void
     {
@@ -33,9 +34,10 @@ abstract class AbstractTest extends TestCase
     }
 
     /**
+     * @param IDatabase $database_instance
      * @return mixed
      */
-    protected function getTheLastInsertIdByQuery(IDatabase $database_instance)
+    protected function getTheLastInsertIdByQuery(IDatabase $database_instance): mixed
     {
         $stmt = $database_instance->getConnection()->query("SELECT LAST_INSERT_ID()");
         $stmt->execute();
@@ -67,7 +69,7 @@ abstract class AbstractTest extends TestCase
      * @return string
      *
      */
-    protected function getRawQuery(array $preparedQuery)
+    protected function getRawQuery(array $preparedQuery): string
     {
         $rawQuery = $preparedQuery[0];
         foreach ($preparedQuery[1] as $key => $value) {
