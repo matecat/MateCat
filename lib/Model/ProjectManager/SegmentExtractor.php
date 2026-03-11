@@ -3,11 +3,14 @@
 namespace Model\ProjectManager;
 
 use ArrayObject;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FilesPartsDao;
 use Model\Files\FilesPartsStruct;
@@ -22,6 +25,9 @@ use Throwable;
 use Utils\Engines\EnginesFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\CatUtils;
 
 /**
  * Encapsulates the segment extraction logic that was previously embedded in
@@ -494,14 +500,20 @@ class SegmentExtractor
      * unicode entity restoration, trim+strip, isTranslated check, and
      * layer-0 conversion.
      *
-     * @param string      $sourceRawContent  Source segment after stripExternal
-     * @param string      $targetRawContent  Target raw content before stripExternal
-     * @param array       $xliff_trans_unit  The parsed trans-unit
-     * @param int         $fid               File ID
-     * @param ?int        $position          mrk position (for seg-target), null for non-segmented
-     * @param ArrayObject $projectStructure  The mutable project structure
+     * @param string $sourceRawContent Source segment after stripExternal
+     * @param string $targetRawContent Target raw content before stripExternal
+     * @param array $xliff_trans_unit The parsed trans-unit
+     * @param int $fid File ID
+     * @param ?int $position mrk position (for seg-target), null for non-segmented
+     * @param ArrayObject $projectStructure The mutable project structure
      *
      * @return ?array{target: string, target_extract_external: array} Null if not a valid pre-translation
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws Exception
      */
     private function detectPreTranslation(
         string      $sourceRawContent,
@@ -750,6 +762,7 @@ class SegmentExtractor
     /**
      * Decide if a source/target pair should be considered translated,
      * based on user-defined XLIFF rules.
+     * @throws Exception
      */
     private function isTranslated(
         ?string     $source,
@@ -774,6 +787,7 @@ class SegmentExtractor
      * Manage alternative translations (alt-trans) for a trans-unit.
      *
      * Sends matching alt-trans entries to the TM engine for each writable key.
+     * @throws Exception
      */
     private function manageAlternativeTranslations(array $xliff_trans_unit, ?array $xliff_file_attributes, ArrayObject $projectStructure): void
     {

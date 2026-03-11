@@ -153,6 +153,11 @@ class ProjectManager
     protected ?SegmentStorageService $segmentStorageService = null;
 
     /**
+     * @var ProjectManagerModel|null
+     */
+    protected ?ProjectManagerModel $projectManagerModel = null;
+
+    /**
      * ProjectManager constructor.
      *
      * @param ArrayObject|null $projectStructure
@@ -401,6 +406,30 @@ class ProjectManager
         }
 
         return $this->segmentStorageService;
+    }
+
+    /**
+     * Factory method for creating a ProjectManagerModel instance.
+     * Override in tests to inject a mock/stub.
+     */
+    protected function createProjectManagerModel(): ProjectManagerModel
+    {
+        return new ProjectManagerModel(
+            $this->dbHandler,
+            $this->logger,
+        );
+    }
+
+    /**
+     * Get or lazily create the ProjectManagerModel instance.
+     */
+    protected function getProjectManagerModel(): ProjectManagerModel
+    {
+        if ($this->projectManagerModel === null) {
+            $this->projectManagerModel = $this->createProjectManagerModel();
+        }
+
+        return $this->projectManagerModel;
     }
 
     /**
@@ -727,7 +756,7 @@ class ProjectManager
      */
     private function __createProjectRecord(): void
     {
-        $this->project = ProjectManagerModel::createProjectRecord($this->projectStructure);
+        $this->project = $this->getProjectManagerModel()->createProjectRecord($this->projectStructure);
     }
 
     /**
@@ -1589,7 +1618,7 @@ class ProjectManager
                 // get metadata
                 $meta = isset($this->projectStructure['array_files_meta'][$pos]) ? $this->projectStructure['array_files_meta'][$pos] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
-                $fid = ProjectManagerModel::insertFile($this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path);
+                $fid = $this->getProjectManagerModel()->insertFile($this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path);
 
                 if ($this->gdriveSession) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName($originalFileName);
@@ -1755,7 +1784,7 @@ class ProjectManager
 
         // Executing the Query
         if (!empty($query_translations_values)) {
-            ProjectManagerModel::insertPreTranslations($query_translations_values);
+            $this->getProjectManagerModel()->insertPreTranslations($query_translations_values);
         }
 
         // We do not create Chunk reviews since this is a task for postProjectCreate
@@ -1796,8 +1825,8 @@ class ProjectManager
     private function insertSegmentNotesForFile(): void
     {
         $this->projectStructure = $this->features->filter('handleJsonNotesBeforeInsert', $this->projectStructure);
-        ProjectManagerModel::bulkInsertSegmentNotes($this->projectStructure['notes']);
-        ProjectManagerModel::bulkInsertSegmentMetaDataFromAttributes($this->projectStructure['notes']);
+        $this->getProjectManagerModel()->bulkInsertSegmentNotes($this->projectStructure['notes']);
+        $this->getProjectManagerModel()->bulkInsertSegmentMetaDataFromAttributes($this->projectStructure['notes']);
     }
 
     /**
@@ -1811,7 +1840,7 @@ class ProjectManager
     private function insertContextsForFile(): void
     {
         $this->features->filter('handleTUContextGroups', $this->projectStructure);
-        ProjectManagerModel::bulkInsertContextsGroups($this->projectStructure);
+        $this->getProjectManagerModel()->bulkInsertContextsGroups($this->projectStructure);
     }
 
 }

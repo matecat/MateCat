@@ -19,11 +19,20 @@ use PDOException;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
-use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Tools\Utils;
 
 class ProjectManagerModel
 {
+    use LogsMessages;
+
+    private Database $dbHandler;
+
+    public function __construct(Database $dbHandler, MatecatLogger $logger)
+    {
+        $this->dbHandler = $dbHandler;
+        $this->logger = $logger;
+    }
 
     /**
      * Creates record in projects table and instantiates the project struct
@@ -33,8 +42,9 @@ class ProjectManagerModel
      *
      * @return ProjectStruct
      * @throws ReflectionException
+     * @throws Exception
      */
-    public static function createProjectRecord(ArrayObject $projectStructure): ProjectStruct
+    public function createProjectRecord(ArrayObject $projectStructure): ProjectStruct
     {
         $data = [];
         $data['id'] = $projectStructure['id_project'];
@@ -50,11 +60,10 @@ class ProjectManagerModel
         $data['instance_id'] = !is_null($projectStructure['instance_id']) ? $projectStructure['instance_id'] : null;
         $data['due_date'] = !is_null($projectStructure['due_date']) ? $projectStructure['due_date'] : null;
 
-        $db = Database::obtain();
-        $db->begin();
-        $projectId = $db->insert('projects', $data);
+        $this->dbHandler->begin();
+        $projectId = $this->dbHandler->insert('projects', $data);
         $project = ProjectDao::findById($projectId);
-        $db->commit();
+        $this->dbHandler->commit();
 
         return $project;
     }
@@ -69,7 +78,7 @@ class ProjectManagerModel
      * @return string
      * @throws Exception
      */
-    public static function insertFile(ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null): string
+    public function insertFile(ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null): string
     {
         $data = [];
         $data['id_project'] = $projectStructure['id_project'];
@@ -79,12 +88,10 @@ class ProjectManagerModel
         $data['sha1_original_file'] = $fileDateSha1Path;
         $data['is_converted'] = isset($meta['mustBeConverted']) ? (int)$meta['mustBeConverted'] : 0;
 
-        $db = Database::obtain();
-
         try {
-            $idFile = $db->insert('files', $data);
+            $idFile = $this->dbHandler->insert('files', $data);
         } catch (PDOException $e) {
-            LoggerFactory::getLogger('project_manager')->debug("Database insert error: {$e->getMessage()} ");
+            $this->log("Database insert error: {$e->getMessage()} ", $e);
             throw new Exception("Database insert file error: {$e->getMessage()} ", -$e->getCode());
         }
 
@@ -95,10 +102,8 @@ class ProjectManagerModel
      * @param $query_translations_values
      * @throws Exception
      */
-    public static function insertPreTranslations(&$query_translations_values): void
+    public function insertPreTranslations(&$query_translations_values): void
     {
-        $dbHandler = Database::obtain();
-
         $baseQuery = "
                 INSERT INTO segment_translations (
                         id_segment, 
@@ -122,22 +127,22 @@ class ProjectManagerModel
 
         $tuple_marks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
-        LoggerFactory::getLogger('project_manager')->debug("Pre-Translations: Total Rows to insert: " . count($query_translations_values));
+        $this->log("Pre-Translations: Total Rows to insert: " . count($query_translations_values));
 
         //split the query in to chunks if there are too many segments
         $query_translations_values = array_chunk($query_translations_values, 100);
 
-        LoggerFactory::getLogger('project_manager')->debug("Pre-Translations: Total Queries to execute: " . count($query_translations_values));
+        $this->log("Pre-Translations: Total Queries to execute: " . count($query_translations_values));
 
         foreach ($query_translations_values as $i => $chunk) {
             try {
                 $query = $baseQuery . rtrim(str_repeat($tuple_marks . ", ", count($chunk)), ", ");
-                $stmt = $dbHandler->getConnection()->prepare($query);
+                $stmt = $this->dbHandler->getConnection()->prepare($query);
                 $stmt->execute(iterator_to_array(new RecursiveIteratorIterator(new RecursiveArrayIterator($chunk)), false));
 
-                LoggerFactory::getLogger('project_manager')->debug("Pre-Translations: Executed Query " . ($i + 1));
+                $this->log("Pre-Translations: Executed Query " . ($i + 1));
             } catch (PDOException $e) {
-                LoggerFactory::getLogger('project_manager')->debug("Segment import - DB Error: " . $e->getMessage() . " - \n");
+                $this->log("Segment import - DB Error: " . $e->getMessage() . " - \n", $e);
                 throw new PDOException("Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2);
             }
         }
@@ -148,7 +153,7 @@ class ProjectManagerModel
      *
      * @throws Exception
      */
-    public static function bulkInsertSegmentNotes($notes)
+    public function bulkInsertSegmentNotes($notes): void
     {
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES ";
 
@@ -199,9 +204,9 @@ class ProjectManagerModel
         }
 
         $chunked = array_chunk($insert_values, $chunk_size);
-        LoggerFactory::getLogger('project_manager')->debug("Notes: Total Rows to insert: " . count($chunked));
+        $this->log("Notes: Total Rows to insert: " . count($chunked));
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->dbHandler->getConnection();
 
         try {
             foreach ($chunked as $i => $chunk) {
@@ -209,13 +214,13 @@ class ProjectManagerModel
                 $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
-                LoggerFactory::getLogger('project_manager')->debug("Notes: Executed Query " . ($i + 1));
+                $this->log("Notes: Executed Query " . ($i + 1));
             }
         } catch (Exception $e) {
-            LoggerFactory::getLogger('project_manager')->debug("Notes import - DB Error: " . $e->getMessage());
-            LoggerFactory::getLogger('project_manager')->debug("Notes import - Statement: " . $stmt->queryString);
-            LoggerFactory::getLogger('project_manager')->debug("Notes Chunk Dump: " . var_export($chunk, true));
-            LoggerFactory::getLogger('project_manager')->debug("Notes Flattened Values Dump: " . var_export($flattened_values, true));
+            $this->log("Notes import - DB Error: " . $e->getMessage());
+            $this->log("Notes import - Statement: " . $stmt->queryString);
+            $this->log("Notes Chunk Dump: " . var_export($chunk, true));
+            $this->log("Notes Flattened Values Dump: " . var_export($flattened_values, true));
             throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);
         }
     }
@@ -225,7 +230,7 @@ class ProjectManagerModel
      *
      * @throws Exception
      */
-    public static function bulkInsertSegmentMetaDataFromAttributes($notes): void
+    public function bulkInsertSegmentMetaDataFromAttributes($notes): void
     {
         $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
 
@@ -268,9 +273,9 @@ class ProjectManagerModel
         }
 
         $chunked = array_chunk($insert_values, $chunk_size);
-        LoggerFactory::getLogger('project_manager')->debug("Notes attributes: Total Rows to insert: " . count($chunked));
+        $this->log("Notes attributes: Total Rows to insert: " . count($chunked));
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->dbHandler->getConnection();
 
         try {
             foreach ($chunked as $i => $chunk) {
@@ -278,13 +283,13 @@ class ProjectManagerModel
                 $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
-                LoggerFactory::getLogger('project_manager')->debug("Notes attributes: Executed Query " . ($i + 1));
+                $this->log("Notes attributes: Executed Query " . ($i + 1));
             }
         } catch (Exception $e) {
-            LoggerFactory::getLogger('project_manager')->debug("Notes attributes import - DB Error: " . $e->getMessage());
-            LoggerFactory::getLogger('project_manager')->debug("Notes attributes import - Statement: " . $stmt->queryString);
-            LoggerFactory::getLogger('project_manager')->debug("Notes attributes Chunk Dump: " . var_export($chunk, true));
-            LoggerFactory::getLogger('project_manager')->debug("Notes attributes Flattened Values Dump: " . var_export($flattened_values, true));
+            $this->log("Notes attributes import - DB Error: " . $e->getMessage());
+            $this->log("Notes attributes import - Statement: " . $stmt->queryString);
+            $this->log("Notes attributes Chunk Dump: " . var_export($chunk, true));
+            $this->log("Notes attributes Flattened Values Dump: " . var_export($flattened_values, true));
             throw new Exception("Notes attributes import - DB Error: " . $e->getMessage(), 0, $e);
         }
     }
@@ -312,7 +317,7 @@ class ProjectManagerModel
      *
      * @throws Exception
      */
-    public static function bulkInsertContextsGroups($projectStructure): void
+    public function bulkInsertContextsGroups($projectStructure): void
     {
         $template = " INSERT INTO context_groups ( id_project, id_segment, context_json ) VALUES ";
 
@@ -331,9 +336,9 @@ class ProjectManagerModel
         }
 
         $chunked = array_chunk($insert_values, $chunk_size);
-        LoggerFactory::getLogger('project_manager')->debug("Notes: Total Rows to insert: " . count($chunked));
+        $this->log("Notes: Total Rows to insert: " . count($chunked));
 
-        $conn = Database::obtain()->getConnection();
+        $conn = $this->dbHandler->getConnection();
 
         try {
             foreach ($chunked as $i => $chunk) {
@@ -341,13 +346,13 @@ class ProjectManagerModel
                 $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
-                LoggerFactory::getLogger('project_manager')->debug("Notes: Executed Query " . ($i + 1));
+                $this->log("Notes: Executed Query " . ($i + 1));
             }
         } catch (Exception $e) {
-            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups import - DB Error: " . $e->getMessage());
-            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups import - Statement: " . $stmt->queryString);
-            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups Chunk Dump: " . var_export($chunk, true));
-            LoggerFactory::getLogger('project_manager')->debug("Trans-Unit Context Groups Flattened Values Dump: " . var_export($flattened_values, true));
+            $this->log("Trans-Unit Context Groups import - DB Error: " . $e->getMessage());
+            $this->log("Trans-Unit Context Groups import - Statement: " . $stmt->queryString);
+            $this->log("Trans-Unit Context Groups Chunk Dump: " . var_export($chunk, true));
+            $this->log("Trans-Unit Context Groups Flattened Values Dump: " . var_export($flattened_values, true));
             throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);
         }
     }
