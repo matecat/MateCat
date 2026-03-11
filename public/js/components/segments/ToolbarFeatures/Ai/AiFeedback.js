@@ -5,7 +5,6 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CommonUtils from '../../../../utils/commonUtils'
 import Feedback from '../../../icons/Feedback'
-import {is} from 'immutable'
 
 export const AiFeedback = ({sid, isIconsBundled}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)

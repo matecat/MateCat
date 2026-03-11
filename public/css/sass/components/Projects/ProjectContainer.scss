@@ -1,0 +1,50 @@
+@use '../../commons/colors';
+@use '../../commons/variables';
+
+.project-container {
+  display: flex;
+  flex-direction: column;
+  background-color: colors.$white;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.project-container-header {
+  display: flex;
+  padding: 7px 24px;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+  background-color: colors.$grey50;
+}
+
+.project-container-header-name {
+  display: flex;
+  align-items: center;
+
+  h6 {
+    font-weight: bold;
+  }
+}
+
+.project-container-form-edit-name {
+  display: inline-block;
+
+  fieldset {
+    border: unset;
+    margin: 0;
+    padding: 0;
+  }
+
+  input[type='text'] {
+    height: 28px;
+    min-width: 250px;
+    max-width: 400px;
+    border-radius: variables.$border-radius-default;
+    &:active,
+    &:focus {
+      box-shadow: unset;
+      border: 1px solid colors.$grey500;
+    }
+  }
+}

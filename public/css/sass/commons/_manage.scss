@@ -9,7 +9,7 @@ body {
 body.manage {
   min-width: 1200px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: colors.$grey50;
+  background-color: colors.$grey100;
   overflow-y: hidden;
   overflow-x: auto;
   font-size: 14px;
@@ -976,34 +976,6 @@ div#manage-container {
   font-size: 14px;
 }
 
-.project-container-button-edit-name {
-  width: 30px !important;
-  height: 30px !important;
-  line-height: 30px !important;
-}
-
-.project-container-form-edit-name {
-  display: inline-block;
-
-  fieldset {
-    border: unset;
-    margin: 0;
-    padding: 0;
-  }
-
-  input[type='text'] {
-    height: 28px;
-    min-width: 250px;
-    max-width: 400px;
-    border-radius: variables.$border-radius-default;
-    &:active,
-    &:focus {
-      box-shadow: unset;
-      border: 1px solid colors.$grey500;
-    }
-  }
-}
-
 .project-title-editing-name-mode {
   > .label {
     padding-top: 1px !important;
@@ -1021,4 +993,10 @@ ul {
 
 .project-container-checkbox-hidden {
   opacity: 0;
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
