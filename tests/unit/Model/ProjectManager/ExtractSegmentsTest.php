@@ -13,7 +13,7 @@ use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
- * Unit tests for {@see \Model\ProjectManager\ProjectManager::_extractSegments()}.
+ * Unit tests for {@see \Model\ProjectManager\ProjectManager::extractSegments()}.
  *
  * These tests provide a safety net before refactoring the duplicated code
  * in the seg-source and non-seg-source branches.

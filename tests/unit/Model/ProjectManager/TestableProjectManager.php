@@ -83,7 +83,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function callExtractSegments(int $fid, array $file_info): void
     {
-        $this->_extractSegments($fid, $file_info);
+        $this->extractSegments($fid, $file_info);
     }
 
     /**
@@ -234,7 +234,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function callInsertInstructions(int $fid, string $value): void
     {
-        $this->_insertInstructions($fid, $value);
+        $this->insertInstructions($fid, $value);
     }
 
     /**
@@ -242,7 +242,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function callCheckForProjectAssignment(): void
     {
-        $this->__checkForProjectAssignment();
+        $this->checkForProjectAssignment();
     }
 
     private ?TeamDao $teamDaoOverride = null;

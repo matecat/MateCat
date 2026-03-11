@@ -31,7 +31,7 @@ use Utils\Tools\CatUtils;
 
 /**
  * Encapsulates the segment extraction logic that was previously embedded in
- * {@see ProjectManager::_extractSegments()} and its helper methods.
+ * {@see ProjectManager::extractSegments()} and its helper methods.
  *
  * This class is responsible for:
  *  - Parsing XLIFF file content

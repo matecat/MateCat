@@ -29,7 +29,7 @@ class ProjectManagerModel
 
     private IDatabase $dbHandler;
 
-    public function __construct(Database $dbHandler, MatecatLogger $logger)
+    public function __construct(IDatabase $dbHandler, MatecatLogger $logger)
     {
         $this->dbHandler = $dbHandler;
         $this->logger = $logger;
