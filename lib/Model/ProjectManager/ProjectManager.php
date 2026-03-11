@@ -699,7 +699,7 @@ class ProjectManager
      * @throws ReflectionException
      * @throws ValidationError
      */
-    private function __checkForProjectAssignment(): void
+    protected function __checkForProjectAssignment(): void
     {
         if (!empty($this->projectStructure['uid'])) {
             //if this is a logged user, set the user as project assignee
@@ -713,9 +713,17 @@ class ProjectManager
             );
 
             //clean the cache for the team member list of assigned projects
-            $teamDao = new TeamDao();
+            $teamDao = $this->createTeamDao();
             $teamDao->destroyCacheAssignee($this->projectStructure['team']);
         }
+    }
+
+    /**
+     * Factory method for TeamDao — overridable in tests.
+     */
+    protected function createTeamDao(): TeamDao
+    {
+        return new TeamDao();
     }
 
     /**

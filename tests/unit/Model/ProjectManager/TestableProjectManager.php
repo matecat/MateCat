@@ -4,16 +4,17 @@ namespace unit\Model\ProjectManager;
 
 use ArrayObject;
 use Exception;
-use Model\Jobs\JobStruct;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectManager\ProjectManager;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentMetadataStruct;
+use Model\Teams\TeamDao;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionClass;
 use ReflectionException;
@@ -285,6 +286,39 @@ class TestableProjectManager extends ProjectManager
     public function getProject(): ?ProjectStruct
     {
         return $this->project;
+    }
+
+    // ── Step 11c: _insertInstructions / __checkForProjectAssignment ──
+
+    /**
+     * Public wrapper to invoke the protected _insertInstructions().
+     */
+    public function callInsertInstructions(int $fid, string $value): void
+    {
+        $this->_insertInstructions($fid, $value);
+    }
+
+    /**
+     * Public wrapper to invoke the protected __checkForProjectAssignment().
+     */
+    public function callCheckForProjectAssignment(): void
+    {
+        $this->__checkForProjectAssignment();
+    }
+
+    private ?TeamDao $teamDaoOverride = null;
+
+    /**
+     * Inject a mock/stub TeamDao for __checkForProjectAssignment() tests.
+     */
+    public function setTeamDao(TeamDao $dao): void
+    {
+        $this->teamDaoOverride = $dao;
+    }
+
+    protected function createTeamDao(): TeamDao
+    {
+        return $this->teamDaoOverride ?? parent::createTeamDao();
     }
 }
 

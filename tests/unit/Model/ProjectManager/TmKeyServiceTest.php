@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectManager;
 
-use ArrayObject;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\ProjectManager\TmKeyService;
@@ -13,7 +12,7 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub as MockStub;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -29,7 +28,7 @@ use Utils\TMS\TMSService;
  *  - Error recording into projectStructure
  */
 #[AllowMockObjectsWithoutExpectations]
-class TmKeyServiceTest extends TestCase
+class TmKeyServiceTest extends AbstractTest
 {
     private TMSService&MockObject $tmxService;
     private IDatabase&MockStub $dbHandler;

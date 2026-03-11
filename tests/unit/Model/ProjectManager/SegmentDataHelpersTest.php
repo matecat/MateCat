@@ -8,8 +8,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
-use Utils\Collections\RecursiveArrayObject;
+use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -20,7 +19,7 @@ use Utils\Logger\MatecatLogger;
  *  - __setSegmentIdForContexts()
  *  - _saveSegmentMetadata()
  */
-class SegmentDataHelpersTest extends TestCase
+class SegmentDataHelpersTest extends AbstractTest
 {
     private TestableProjectManager $pm;
 

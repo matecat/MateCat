@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectManager;
 
-use ArrayObject;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -12,7 +11,7 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
@@ -27,7 +26,7 @@ use Utils\Registry\AppConfig;
  * - saveFeaturesInMetadata()
  */
 #[AllowMockObjectsWithoutExpectations]
-class SettersGettersConfigTest extends TestCase
+class SettersGettersConfigTest extends AbstractTest
 {
     private TestableProjectManager $pm;
 

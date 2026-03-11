@@ -21,13 +21,13 @@ abstract class AbstractTest extends TestCase
     protected IDatabase $databaseInstance;
     protected ReflectionMethod $reflectedMethod;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->thisTestStartingTime = microtime(true);
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         $resultTime = microtime(true) - $this->thisTestStartingTime ?? microtime(true);
