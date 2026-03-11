@@ -15,9 +15,7 @@ use DomainException;
 use Exception;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
-
 use Model\ActivityLog\ActivityLogStruct;
-use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
@@ -48,12 +46,8 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
-use Model\Segments\SegmentStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
-use Model\Translators\TranslatorsModel;
-use Model\Users\UserDao;
-use Model\WordCount\CounterModel;
 use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateStruct;
 use Plugins\Features\SecondPassReview;
@@ -62,7 +56,6 @@ use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
-use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\ProjectStatus;
@@ -72,7 +65,6 @@ use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\LQA\QA;
 use Utils\Registry\AppConfig;
-use Utils\Shop\Cart;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -154,6 +146,11 @@ class ProjectManager
      * @var TmKeyService|null
      */
     protected ?TmKeyService $tmKeyService = null;
+
+    /**
+     * @var JobSplitMergeService|null
+     */
+    protected ?JobSplitMergeService $jobSplitMergeService = null;
 
     /**
      * ProjectManager constructor.
@@ -353,6 +350,31 @@ class ProjectManager
         }
 
         return $this->tmKeyService;
+    }
+
+    /**
+     * Factory method for creating a JobSplitMergeService instance.
+     * Override in tests to inject a mock/stub.
+     */
+    protected function createJobSplitMergeService(): JobSplitMergeService
+    {
+        return new JobSplitMergeService(
+            $this->dbHandler,
+            $this->features,
+            $this->logger,
+        );
+    }
+
+    /**
+     * Get or lazily create the JobSplitMergeService instance.
+     */
+    protected function getJobSplitMergeService(): JobSplitMergeService
+    {
+        if ($this->jobSplitMergeService === null) {
+            $this->jobSplitMergeService = $this->createJobSplitMergeService();
+        }
+
+        return $this->jobSplitMergeService;
     }
 
     protected function _log($_msg, ?Throwable $exception = null): void
@@ -724,22 +746,6 @@ class ProjectManager
     protected function createTeamDao(): TeamDao
     {
         return new TeamDao();
-    }
-
-    /**
-     * Factory method for JobDao — overridable in tests.
-     */
-    protected function createJobDao(): JobDao
-    {
-        return new JobDao();
-    }
-
-    /**
-     * Wrapper around the static JobDao::getByIdAndPassword() — overridable in tests.
-     */
-    protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
-    {
-        return JobDao::getByIdAndPassword($id, $password);
     }
 
     /**
@@ -1458,8 +1464,9 @@ class ProjectManager
     }
 
     /**
+     * Build a job split structure, minimum split value are 2 chunks.
      *
-     * Build a job split structure, minimum split value are 2 chunks
+     * Delegates to {@see JobSplitMergeService::getSplitData()}.
      *
      * @param ArrayObject $projectStructure
      * @param int $num_split
@@ -1476,242 +1483,13 @@ class ProjectManager
         array $requestedWordsPerSplit = [],
         string $count_type = ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE
     ): ArrayObject {
-        if ($num_split < 2) {
-            throw new Exception('Minimum Chunk number for split is 2.', -2);
-        }
-
-        if (!empty($requestedWordsPerSplit) && count($requestedWordsPerSplit) != $num_split) {
-            throw new Exception("Requested words per chunk and Number of chunks not consistent.", -3);
-        }
-
-        if (!empty($requestedWordsPerSplit) && !AppConfig::$VOLUME_ANALYSIS_ENABLED) {
-            throw new Exception("Requested words per chunk available only for Matecat PRO version", -4);
-        }
-
-        $rows = $this->createJobDao()->getSplitData($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
-
-        if (empty($rows)) {
-            throw new Exception('No segments found for job ' . $projectStructure['job_to_split'], -5);
-        }
-
-        $row_totals = array_pop($rows); //get the last row (ROLLUP)
-        unset($row_totals['id']);
-
-        if (empty($row_totals['job_first_segment']) || empty($row_totals['job_last_segment'])) {
-            throw new Exception('Wrong job id or password. Job segment range not found.', -6);
-        }
-
-        $total_words = $row_totals[$count_type];
-
-        // if the requested $count_type is empty (for example, equivalent raw count = 0),
-        // switch to the other one
-        if ($total_words < $num_split) {
-            $new_count_type = ($count_type === ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE) ? ProjectsMetadataDao::SPLIT_RAW_WORD_TYPE : ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
-            $total_words = $row_totals[$new_count_type];
-            $count_type = $new_count_type;
-        }
-
-        // if the total number of words is < the number of chunks, throw an exception
-        if ($total_words < $num_split) {
-            throw new Exception('The number of words is insufficient for the requested amount of chunks.', -6);
-        }
-
-        if (empty($requestedWordsPerSplit)) {
-            /*
-             * Simple Split with a pretty equivalent number of words per chunk
-             */
-            $words_per_job = array_fill(0, $num_split, round($total_words / $num_split));
-        } else {
-            /*
-             * User defined words per chunk, needs some checks and control structures
-             */
-            $words_per_job = $requestedWordsPerSplit;
-        }
-
-        $counter = [];
-        $chunk = 0;
-
-        $reverse_count = ['standard_word_count' => 0, 'eq_word_count' => 0, 'raw_word_count' => 0];
-
-        foreach ($rows as $row) {
-            if (!array_key_exists($chunk, $counter)) {
-                $counter[$chunk] = [
-                    'standard_word_count' => 0,
-                    'eq_word_count' => 0,
-                    'raw_word_count' => 0,
-                    'segment_start' => $row['id'],
-                    'segment_end' => 0,
-                    'last_opened_segment' => 0,
-                ];
-            }
-
-            $counter[$chunk]['standard_word_count'] += $row['standard_word_count'];
-            $counter[$chunk]['eq_word_count'] += $row['eq_word_count'];
-            $counter[$chunk]['raw_word_count'] += $row['raw_word_count'];
-            $counter[$chunk]['segment_end'] = $row['id'];
-
-            //if the last_opened segment is not set and if that segment can be shown in cattool
-            //set that segment as the default last visited
-            ($counter[$chunk]['last_opened_segment'] == 0 && $row['show_in_cattool'] == 1 ? $counter[$chunk]['last_opened_segment'] = $row['id'] : null);
-
-            //check for wanted words per job.
-            //create a chunk when we reach the requested number of words,
-            //and we are below the requested number of splits.
-            //in this manner, we add to the last chunk all rests
-            if ($counter[$chunk][$count_type] >= $words_per_job[$chunk] && $chunk < $num_split - 1 /* chunk is zero-based */) {
-                $counter[$chunk]['standard_word_count'] = (int)$counter[$chunk]['standard_word_count'];
-                $counter[$chunk]['eq_word_count'] = (int)$counter[$chunk]['eq_word_count'];
-                $counter[$chunk]['raw_word_count'] = (int)$counter[$chunk]['raw_word_count'];
-
-                $reverse_count['standard_word_count'] += (int)$counter[$chunk]['standard_word_count'];
-                $reverse_count['eq_word_count'] += (int)$counter[$chunk]['eq_word_count'];
-                $reverse_count['raw_word_count'] += (int)$counter[$chunk]['raw_word_count'];
-
-                $chunk++;
-            }
-        }
-
-        if ($total_words > $reverse_count[$count_type]) {
-            if (!empty($counter[$chunk])) {
-                $counter[$chunk]['standard_word_count'] = round($row_totals['standard_word_count'] - $reverse_count['standard_word_count']);
-                $counter[$chunk]['eq_word_count'] = round($row_totals['eq_word_count'] - $reverse_count['eq_word_count']);
-                $counter[$chunk]['raw_word_count'] = round($row_totals['raw_word_count'] - $reverse_count['raw_word_count']);
-            } else {
-                $counter[$chunk - 1]['standard_word_count'] += round($row_totals['standard_word_count'] - $reverse_count['standard_word_count']);
-                $counter[$chunk - 1]['eq_word_count'] += round($row_totals['eq_word_count'] - $reverse_count['eq_word_count']);
-                $counter[$chunk - 1]['raw_word_count'] += round($row_totals['raw_word_count'] - $reverse_count['raw_word_count']);
-            }
-        }
-
-        if (count($counter) < 2) {
-            throw new Exception('The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7);
-        }
-
-        $chunk = $this->getJobByIdAndPassword($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
-        $row_totals['standard_analysis_count'] = $chunk->standard_analysis_wc;
-
-        $result = array_merge($row_totals->getArrayCopy(), ['chunks' => $counter]);
-
-        $projectStructure['split_result'] = new ArrayObject($result);
-
-        return $projectStructure['split_result'];
+        return $this->getJobSplitMergeService()->getSplitData($projectStructure, $num_split, $requestedWordsPerSplit, $count_type);
     }
 
     /**
-     * Do the split based on previous getSplitData analysis
-     * It clones the original job in the right number of chunks and fill these rows with:
-     * first/last segments of every chunk, last opened segment as the first segment of the new job
-     * and the timestamp of creation
+     * Apply the new job structure.
      *
-     * @param ArrayObject $projectStructure
-     *
-     * @throws Exception
-     */
-    protected function _splitJob(ArrayObject $projectStructure): void
-    {
-        // init JobDao
-        $jobDao = new JobDao();
-
-        // job to split
-        $jobToSplit = JobDao::getByIdAndPassword($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
-
-        $translatorModel = new TranslatorsModel($jobToSplit);
-        $jTranslatorStruct = $translatorModel->getTranslator(0); // no cache
-        if (!empty($jTranslatorStruct) && !empty($this->projectStructure['uid'])) {
-            $translatorModel
-                ->setUserInvite((new UserDao())->setCacheTTL(60 * 60)->getByUid($this->projectStructure['uid']))
-                ->setDeliveryDate($jTranslatorStruct->delivery_date)
-                ->setJobOwnerTimezone($jTranslatorStruct->job_owner_timezone)
-                ->setEmail($jTranslatorStruct->email)
-                ->setNewJobPassword(Utils::randomString());
-
-            $translatorModel->update();
-        }
-
-        $chunks = $projectStructure['split_result']['chunks'];
-
-        // update the first chunk of the job to split
-        $jobDao->updateStdWcAndTotalWc($jobToSplit->id, $chunks[0]['standard_word_count'], $chunks[0]['raw_word_count']);
-
-        $newJobList = [];
-
-        // create the other chunks of the job to split
-        foreach ($chunks as $contents) {
-            $newJob = clone $jobToSplit;
-
-            //IF THIS IS NOT the original job, UPDATE relevant fields
-            if ($contents['segment_start'] != $projectStructure['split_result']['job_first_segment']) {
-                //next insert
-                $newJob['password'] = Utils::randomString();
-                $newJob['create_date'] = date('Y-m-d H:i:s');
-                $newJob['avg_post_editing_effort'] = 0;
-                $newJob['total_time_to_edit'] = 0;
-            }
-
-            $newJob['last_opened_segment'] = $contents['last_opened_segment'];
-            $newJob['job_first_segment'] = $contents['segment_start'];
-            $newJob['job_last_segment'] = $contents['segment_end'];
-            $newJob['standard_analysis_wc'] = $contents['standard_word_count'];
-            $newJob['total_raw_wc'] = $contents['raw_word_count'];
-
-            $stmt = $jobDao->getSplitJobPreparedStatement($newJob);
-            $stmt->execute();
-
-            $wCountManager = new CounterModel();
-            $wCountManager->initializeJobWordCount($newJob->id, $newJob->password);
-
-            if ($this->dbHandler->rowCount() == 0) {
-                $msg = "Failed to split job into " . count($projectStructure['split_result']['chunks']) . " chunks\n";
-                $msg .= "Tried to perform SQL: \n" . print_r($stmt->queryString, true) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r($newJob, true) . "\n";
-                $this->_log($msg);
-                throw new Exception('Failed to insert job chunk, project damaged.', -8);
-            }
-
-            $newJobList[] = $newJob;
-
-            $stmt->closeCursor();
-            unset($stmt);
-
-            //add here the job id to list
-            $projectStructure['array_jobs']['job_list']->append($projectStructure['job_to_split']);
-            //add here passwords to list
-            $projectStructure['array_jobs']['job_pass']->append($newJob['password']);
-
-            $projectStructure['array_jobs']['job_segments']->offsetSet($projectStructure['job_to_split'] . "-" . $newJob['password'], new ArrayObject([
-                $contents['segment_start'],
-                $contents['segment_end']
-            ]));
-        }
-
-        foreach ($newJobList as $job) {
-            /**
-             * Async worker to re-count avg-PEE and total-TTE for split jobs
-             */
-            try {
-                WorkerClient::enqueue('JOBS', JobsWorker::class, $job->getArrayCopy(), ['persistent' => WorkerClient::$_HANDLER->persistent]);
-            } catch (Exception $e) {
-                # Handle the error, logging, ...
-                $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
-                $output .= "{$e->getMessage()}";
-                $output .= var_export($job, true);
-                $this->_log($output, $e);
-            }
-        }
-
-        (new JobDao())->destroyCacheByProjectId($projectStructure['id_project']);
-
-        $projectStruct = $jobToSplit->getProject(60 * 10);
-        (new ProjectDao())->destroyCacheForProjectData($projectStruct->id, $projectStruct->password);
-        AnalysisDao::destroyCacheByProjectId($projectStructure['id_project']);
-
-        Cart::getInstance('outsource_to_external_cache')->deleteCart();
-
-        $this->features->run('postJobSplitted', $projectStructure);
-    }
-
-    /**
-     * Apply new structure of the job
+     * Delegates to {@see JobSplitMergeService::applySplit()}.
      *
      * @param ArrayObject $projectStructure
      *
@@ -1719,14 +1497,15 @@ class ProjectManager
      */
     public function applySplit(ArrayObject $projectStructure): void
     {
-        Cart::getInstance('outsource_to_external_cache')->emptyCart();
-
-        Database::obtain()->begin();
-        $this->_splitJob($projectStructure);
-        $this->dbHandler->getConnection()->commit();
+        $uid = $this->projectStructure['uid'] ?? null;
+        $this->getJobSplitMergeService()->applySplit($projectStructure, $uid);
     }
 
     /**
+     * Merge all job chunks back into a single job.
+     *
+     * Delegates to {@see JobSplitMergeService::mergeALL()}.
+     *
      * @param ArrayObject $projectStructure
      * @param JobStruct[] $jobStructs
      *
@@ -1734,84 +1513,7 @@ class ProjectManager
      */
     public function mergeALL(ArrayObject $projectStructure, array $jobStructs): void
     {
-        $metadata_dao = new ProjectsMetadataDao();
-        $metadata_dao->cleanupChunksOptions($jobStructs);
-
-        //get the min and
-        $first_job = reset($jobStructs);
-        $job_first_segment = $first_job['job_first_segment'];
-
-        //the max segment from the job list
-        $last_job = end($jobStructs);
-        $job_last_segment = $last_job['job_last_segment'];
-
-        //change values of the first job
-        $first_job['job_first_segment'] = $job_first_segment; // redundant
-        $first_job['job_last_segment'] = $job_last_segment;
-
-        //get the min and
-        $total_raw_wc = 0;
-        $standard_word_count = 0;
-
-        //merge TM keys: preserve only owner's keys
-        $tm_keys = [];
-        foreach ($jobStructs as $chunk_info) {
-            $tm_keys[] = $chunk_info['tm_keys'];
-            $total_raw_wc = $total_raw_wc + $chunk_info['total_raw_wc'];
-            $standard_word_count = $standard_word_count + $chunk_info['standard_analysis_wc'];
-        }
-
-        try {
-            $owner_tm_keys = TmKeyManager::getOwnerKeys($tm_keys);
-
-            foreach ($owner_tm_keys as $i => $owner_key) {
-                $owner_key->complete_format = true;
-                $owner_tm_keys[$i] = $owner_key->toArray();
-            }
-
-            $first_job['tm_keys'] = json_encode($owner_tm_keys);
-        } catch (Exception $e) {
-            $this->_log(__METHOD__ . " -> Merge Jobs error - TM key problem", $e);
-        }
-
-        $totalAvgPee = 0;
-        $totalTimeToEdit = 0;
-        foreach ($jobStructs as $_jStruct) {
-            $totalAvgPee += $_jStruct->avg_post_editing_effort;
-            $totalTimeToEdit += $_jStruct->total_time_to_edit;
-        }
-        $first_job['avg_post_editing_effort'] = $totalAvgPee;
-        $first_job['total_time_to_edit'] = $totalTimeToEdit;
-
-        Database::obtain()->begin();
-
-        if ($first_job->getTranslator()) {
-            //Update the password in the struct and in the database for the first job
-            JobDao::updateForMerge($first_job, Utils::randomString());
-            Cart::getInstance('outsource_to_external_cache')->emptyCart();
-        } else {
-            JobDao::updateForMerge($first_job, false);
-        }
-
-        JobDao::deleteOnMerge($first_job);
-
-        $wCountManager = new CounterModel();
-        $wCountManager->initializeJobWordCount($first_job['id'], $first_job['password']);
-
-        $chunk = new JobStruct($first_job->toArray());
-        $this->features->run('postJobMerged', $projectStructure, $chunk);
-
-        $jobDao = new JobDao();
-
-        $jobDao->updateStdWcAndTotalWc($first_job['id'], $standard_word_count, $total_raw_wc);
-
-        $this->dbHandler->getConnection()->commit();
-
-        $jobDao->destroyCacheByProjectId($projectStructure['id_project']);
-        AnalysisDao::destroyCacheByProjectId($projectStructure['id_project']);
-
-        $projectStruct = $jobStructs[0]->getProject(60 * 10);
-        (new ProjectDao())->destroyCacheForProjectData($projectStruct->id, $projectStruct->password);
+        $this->getJobSplitMergeService()->mergeALL($projectStructure, $jobStructs);
     }
 
     /**

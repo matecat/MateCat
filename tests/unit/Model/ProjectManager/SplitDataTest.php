@@ -4,10 +4,9 @@ namespace unit\Model\ProjectManager;
 
 use ArrayObject;
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
-use Model\Files\MetadataDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -19,7 +18,7 @@ use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
- * Step 11d — Tests for ProjectManager::getSplitData()
+ * Step 11d/12 — Tests for JobSplitMergeService::getSplitData()
  *
  * Covers:
  *  - Input validation (num_split, requestedWordsPerSplit, VOLUME_ANALYSIS)
@@ -34,26 +33,22 @@ use Utils\Registry\AppConfig;
 #[AllowMockObjectsWithoutExpectations]
 class SplitDataTest extends AbstractTest
 {
-    private TestableProjectManager $pm;
+    private TestableJobSplitMergeService $service;
     private JobDao&MockObject $jobDaoMock;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->pm = new TestableProjectManager();
+        $dbHandler = $this->createStub(IDatabase::class);
+        $features  = $this->createStub(FeatureSet::class);
+        $logger    = $this->createStub(MatecatLogger::class);
 
-
-        $filter   = $this->createStub(MateCatFilter::class);
-        $features = $this->createStub(FeatureSet::class);
-        $metaDao  = $this->createStub(MetadataDao::class);
-        $logger   = $this->createStub(MatecatLogger::class);
-
-        $this->pm->initForTest($filter, $features, $metaDao, $logger);
+        $this->service = new TestableJobSplitMergeService($dbHandler, $features, $logger);
 
         // Mock JobDao for getSplitData() DB calls
         $this->jobDaoMock = $this->createMock(JobDao::class);
-        $this->pm->setJobDao($this->jobDaoMock);
+        $this->service->setJobDao($this->jobDaoMock);
 
         // Default JobStruct for getJobByIdAndPassword
         $jobStruct = new JobStruct();
@@ -65,7 +60,7 @@ class SplitDataTest extends AbstractTest
         $jobStruct->source = 'en-US';
         $jobStruct->target = 'it-IT';
         $jobStruct->standard_analysis_wc = 500;
-        $this->pm->setJobByIdAndPassword($jobStruct);
+        $this->service->setJobByIdAndPassword($jobStruct);
     }
 
     /**
@@ -135,7 +130,7 @@ class SplitDataTest extends AbstractTest
         $this->expectExceptionCode(-2);
         $this->expectExceptionMessage('Minimum Chunk number for split is 2');
 
-        $this->pm->getSplitData($this->makeProjectStructure(), 1);
+        $this->service->getSplitData($this->makeProjectStructure(), 1);
     }
 
     #[Test]
@@ -145,7 +140,7 @@ class SplitDataTest extends AbstractTest
         $this->expectExceptionCode(-3);
         $this->expectExceptionMessage('not consistent');
 
-        $this->pm->getSplitData($this->makeProjectStructure(), 3, [100, 200]);
+        $this->service->getSplitData($this->makeProjectStructure(), 3, [100, 200]);
     }
 
     #[Test]
@@ -160,7 +155,7 @@ class SplitDataTest extends AbstractTest
             $this->expectExceptionCode(-4);
             $this->expectExceptionMessage('Matecat PRO');
 
-            $this->pm->getSplitData($this->makeProjectStructure(), 2, [100, 200]);
+            $this->service->getSplitData($this->makeProjectStructure(), 2, [100, 200]);
         } finally {
             AppConfig::$VOLUME_ANALYSIS_ENABLED = $original;
         }
@@ -175,7 +170,7 @@ class SplitDataTest extends AbstractTest
         $this->expectExceptionCode(-5);
         $this->expectExceptionMessage('No segments found');
 
-        $this->pm->getSplitData($this->makeProjectStructure());
+        $this->service->getSplitData($this->makeProjectStructure());
     }
 
     #[Test]
@@ -188,7 +183,7 @@ class SplitDataTest extends AbstractTest
         $this->expectExceptionCode(-6);
         $this->expectExceptionMessage('Wrong job id or password');
 
-        $this->pm->getSplitData($this->makeProjectStructure());
+        $this->service->getSplitData($this->makeProjectStructure());
     }
 
     #[Test]
@@ -201,7 +196,7 @@ class SplitDataTest extends AbstractTest
         $this->expectExceptionCode(-6);
         $this->expectExceptionMessage('Wrong job id or password');
 
-        $this->pm->getSplitData($this->makeProjectStructure());
+        $this->service->getSplitData($this->makeProjectStructure());
     }
 
     #[Test]
@@ -217,7 +212,7 @@ class SplitDataTest extends AbstractTest
         $this->expectExceptionCode(-6);
         $this->expectExceptionMessage('insufficient');
 
-        $this->pm->getSplitData($this->makeProjectStructure(), 3);
+        $this->service->getSplitData($this->makeProjectStructure(), 3);
     }
 
     // ── Count type fallback ──
@@ -232,7 +227,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn([$row1, $row2, $rollup]);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
         $chunks = $result['chunks'];
 
         // Should have created 2 chunks using raw_word_count
@@ -249,7 +244,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn([$row1, $row2, $rollup]);
 
-        $result = $this->pm->getSplitData(
+        $result = $this->service->getSplitData(
             $this->makeProjectStructure(),
             2,
             [],
@@ -275,7 +270,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
         $chunks = $result['chunks'];
 
         $this->assertCount(2, $chunks);
@@ -298,7 +293,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn([$row1, $row2, $row3, $row4, $rollup]);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
         $chunks = $result['chunks'];
 
         // First chunk: last_opened_segment should be 2 (first visible)
@@ -318,7 +313,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 3);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 3);
         $chunks = $result['chunks'];
 
         $this->assertCount(3, $chunks);
@@ -342,7 +337,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2, [30, 70]);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2, [30, 70]);
         $chunks = $result['chunks'];
 
         $this->assertCount(2, $chunks);
@@ -367,7 +362,7 @@ class SplitDataTest extends AbstractTest
         $this->expectExceptionCode(-7);
         $this->expectExceptionMessage('too large');
 
-        $this->pm->getSplitData($this->makeProjectStructure(), 2, [60, 40]);
+        $this->service->getSplitData($this->makeProjectStructure(), 2, [60, 40]);
     }
 
     // ── Result structure ──
@@ -384,7 +379,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
 
         // standard_analysis_count comes from jobStruct->standard_analysis_wc = 500
         $this->assertEquals(500, $result['standard_analysis_count']);
@@ -402,7 +397,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
 
         // Should contain totals from rollup
         $resultArr = (array)$result;
@@ -426,7 +421,7 @@ class SplitDataTest extends AbstractTest
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
         $ps = $this->makeProjectStructure();
-        $result = $this->pm->getSplitData($ps, 2);
+        $result = $this->service->getSplitData($ps, 2);
 
         $this->assertSame($result, $ps['split_result']);
     }
@@ -443,7 +438,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
 
         $this->assertInstanceOf(ArrayObject::class, $result);
     }
@@ -464,7 +459,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn($rows);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
         $chunks = $result['chunks'];
 
         // Total eq across chunks should equal rollup total (105)
@@ -486,7 +481,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn([$row1, $row2, $rollup]);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
         $chunks = $result['chunks'];
 
         // All hidden → last_opened_segment stays at 0
@@ -506,7 +501,7 @@ class SplitDataTest extends AbstractTest
 
         $this->jobDaoMock->method('getSplitData')->willReturn([$row1, $row2, $rollup]);
 
-        $result = $this->pm->getSplitData($this->makeProjectStructure(), 2);
+        $result = $this->service->getSplitData($this->makeProjectStructure(), 2);
         $chunks = $result['chunks'];
 
         $this->assertCount(2, $chunks);
