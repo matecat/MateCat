@@ -1017,16 +1017,6 @@ class ProjectManager
                         $this->logger->error('No files inserted in DB', [$_originalFileNames, $sha1_original, $cachedXliffFilePathName]);
                         throw new Exception('Files could not be saved in database.', -6);
                     }
-
-                    // pdfAnalysis
-                    foreach ($filesStructure as $fid => $fileStructure) {
-                        $pos = array_search($fileStructure['original_filename'], $this->projectStructure['array_files']);
-                        $meta = isset($this->projectStructure['array_files_meta'][$pos]) ? $this->projectStructure['array_files_meta'][$pos] : null;
-
-                        if ($meta !== null and isset($meta['pdfAnalysis'])) {
-                            $this->filesMetadataDao->insert($this->projectStructure['id_project'], $fid, 'pdfAnalysis', json_encode($meta['pdfAnalysis']));
-                        }
-                    }
                 } catch (Throwable $e) {
                     if ($e->getCode() == -10) {
                         //Failed to store the original Zip
