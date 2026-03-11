@@ -11,13 +11,11 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Throwable;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
-use View\API\Commons\Error;
 
 /**
  * Encapsulates TM key validation, key-ring management, and TMX upload logic
@@ -34,9 +32,10 @@ use View\API\Commons\Error;
  */
 class TmKeyService
 {
+    use LogsMessages;
+
     private TMSService $tmxServiceWrapper;
     private IDatabase $dbHandler;
-    private MatecatLogger $logger;
 
     /**
      * Callback to download a single file from S3 queue storage.
@@ -275,14 +274,5 @@ class TmKeyService
             "code"    => $code,
             "message" => $message,
         ];
-    }
-
-    private function log(string $_msg, ?Throwable $exception = null): void
-    {
-        if (!$exception) {
-            $this->logger->debug($_msg);
-        } else {
-            $this->logger->debug($_msg, (new Error($exception))->render(true));
-        }
     }
 }

@@ -16,7 +16,6 @@ use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
 use ReflectionException;
-use Throwable;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\Logger\MatecatLogger;
@@ -24,7 +23,6 @@ use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\Tools\Utils;
-use View\API\Commons\Error;
 
 /**
  * Encapsulates job split and merge logic that was previously embedded in
@@ -40,9 +38,10 @@ use View\API\Commons\Error;
  */
 class JobSplitMergeService
 {
+    use LogsMessages;
+
     private IDatabase $dbHandler;
     private FeatureSet $features;
-    private MatecatLogger $logger;
 
     public function __construct(
         IDatabase     $dbHandler,
@@ -188,17 +187,6 @@ class JobSplitMergeService
     protected function getProjectForCacheInvalidation(JobStruct $job): ProjectStruct
     {
         return $job->getProject(60 * 10);
-    }
-
-    // ── Logging ─────────────────────────────────────────────────────
-
-    private function _log(string $_msg, ?Throwable $exception = null): void
-    {
-        if (!$exception) {
-            $this->logger->debug($_msg);
-        } else {
-            $this->logger->debug($_msg, (new Error($exception))->render(true));
-        }
     }
 
     // ── Public API ──────────────────────────────────────────────────
@@ -431,7 +419,7 @@ class JobSplitMergeService
                 $msg = "Failed to split job into " . count($projectStructure['split_result']['chunks']) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r($stmt->queryString, true) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r($newJob, true) . "\n";
-                $this->_log($msg);
+                $this->log($msg);
                 throw new Exception('Failed to insert job chunk, project damaged.', -8);
             }
 
@@ -462,7 +450,7 @@ class JobSplitMergeService
                 $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
                 $output .= "{$e->getMessage()}";
                 $output .= var_export($job, true);
-                $this->_log($output, $e);
+                $this->log($output, $e);
             }
         }
 
@@ -524,7 +512,7 @@ class JobSplitMergeService
 
             $first_job['tm_keys'] = json_encode($owner_tm_keys);
         } catch (Exception $e) {
-            $this->_log(__METHOD__ . " -> Merge Jobs error - TM key problem", $e);
+            $this->log(__METHOD__ . " -> Merge Jobs error - TM key problem", $e);
         }
 
         $totalAvgPee = 0;

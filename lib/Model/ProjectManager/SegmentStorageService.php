@@ -11,9 +11,7 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
-use Throwable;
 use Utils\Logger\MatecatLogger;
-use View\API\Commons\Error;
 
 /**
  * Encapsulates segment storage logic that was previously embedded in
@@ -33,9 +31,10 @@ use View\API\Commons\Error;
  */
 class SegmentStorageService
 {
+    use LogsMessages;
+
     private IDatabase $dbHandler;
     private FeatureSet $features;
-    private MatecatLogger $logger;
 
     /**
      * Tracks first/last segment IDs across all files.
@@ -313,18 +312,6 @@ class SegmentStorageService
 
         if ($projectStructure['context-group']->offsetExists($internal_id)) {
             $projectStructure['context-group'][$internal_id]['context_json_segment_ids'][] = $row['id'];
-        }
-    }
-
-    /**
-     * Internal logging helper.
-     */
-    private function log(mixed $_msg, ?Throwable $exception = null): void
-    {
-        if (!$exception) {
-            $this->logger->debug($_msg);
-        } else {
-            $this->logger->debug($_msg, (new Error($exception))->render(true));
         }
     }
 }

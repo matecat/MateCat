@@ -67,10 +67,10 @@ use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
-use View\API\Commons\Error;
 
 class ProjectManager
 {
+    use LogsMessages;
 
     /**
      * Counter from the total number of segments in the project with the flag (show_in_cattool == true)
@@ -130,7 +130,6 @@ class ProjectManager
      * @var MetadataDao
      */
     protected MetadataDao $filesMetadataDao;
-    private MatecatLogger $logger;
 
     /**
      * Lazily created extractor for segment extraction.
@@ -402,15 +401,6 @@ class ProjectManager
         }
 
         return $this->segmentStorageService;
-    }
-
-    protected function _log($_msg, ?Throwable $exception = null): void
-    {
-        if (!$exception) {
-            $this->logger->debug($_msg);
-        } else {
-            $this->logger->debug($_msg, (new Error($exception))->render(true));
-        }
     }
 
     /**
@@ -804,7 +794,7 @@ class ProjectManager
          * @var ArrayObject $this ->projectStructure['result']['errors']
          */
         if ($this->projectStructure['result']['errors']->count()) {
-            $this->_log($this->projectStructure['result']['errors']);
+            $this->log($this->projectStructure['result']['errors']);
 
             throw new EndQueueException("Invalid Project found.");
         }
@@ -852,12 +842,12 @@ class ProjectManager
 
         $uploadDir = $this->uploadDir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'];
 
-        $this->_log($uploadDir);
+        $this->log($uploadDir);
 
         //we are going to access the storage, get a model object to manipulate it
         $linkFiles = $fs->getHashesFromDir($this->uploadDir);
 
-        $this->_log($linkFiles);
+        $this->log($linkFiles);
 
         /*
             loop through all input files to
@@ -866,7 +856,7 @@ class ProjectManager
         try {
             $this->getTmKeyService()->pushTMXToMyMemory($this->projectStructure, $this->uploadDir);
         } catch (Exception $e) {
-            $this->_log($e->getMessage(), $e);
+            $this->log($e->getMessage(), $e);
 
             //exit project creation
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
@@ -937,7 +927,7 @@ class ProjectManager
         try {
             $this->_zipFileHandling($linkFiles);
         } catch (Exception $e) {
-            $this->_log($e->getMessage(), $e);
+            $this->log($e->getMessage(), $e);
             //Zip file Handling
             $this->addProjectError($e->getCode(), $e->getMessage());
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
@@ -1062,13 +1052,13 @@ class ProjectManager
                 try {
                     $this->_extractSegments($fid, $file_info);
                 } catch (Exception $e) {
-                    $this->_log($totalFilesStructure);
-                    $this->_log("Count fileSt.: " . count($totalFilesStructure));
-                    $this->_log("Exceptions: " . $exceptionsFound);
-                    $this->_log("Failed to parse " . $file_info['original_filename'], $e);
+                    $this->log($totalFilesStructure);
+                    $this->log("Count fileSt.: " . count($totalFilesStructure));
+                    $this->log("Exceptions: " . $exceptionsFound);
+                    $this->log("Failed to parse " . $file_info['original_filename'], $e);
 
                     if ($e->getCode() == -1 && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
-                        $this->_log("No text to translate in the file {$e->getMessage()}.");
+                        $this->log("No text to translate in the file {$e->getMessage()}.");
                         $exceptionsFound += 1;
                         unset($totalFilesStructure[$fid]);
                         continue;
@@ -1118,7 +1108,7 @@ class ProjectManager
                 $this->addProjectError($e->getCode(), $e->getMessage());
             }
 
-            $this->_log("Exception", $e);
+            $this->log("Exception", $e);
 
             //EXIT
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
@@ -1127,7 +1117,7 @@ class ProjectManager
         $this->projectStructure['status'] = (AppConfig::$VOLUME_ANALYSIS_ENABLED) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
         if ($this->show_in_cattool_segs_counter == 0) {
-            $this->_log("Segment Search: No segments in this project - \n");
+            $this->log("Segment Search: No segments in this project - \n");
             $this->projectStructure['status'] = ProjectStatus::STATUS_EMPTY;
         }
 
@@ -1191,11 +1181,11 @@ class ProjectManager
 
         try {
             if (AbstractFilesStorage::isOnS3()) {
-                $this->_log('Deleting folder' . $this->uploadDir . ' from S3');
+                $this->log('Deleting folder' . $this->uploadDir . ' from S3');
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue($this->uploadDir);
             } else {
-                $this->_log('Deleting folder' . $this->uploadDir . ' from filesystem');
+                $this->log('Deleting folder' . $this->uploadDir . ' from filesystem');
                 Utils::deleteDir($this->uploadDir);
                 if (is_dir($this->uploadDir . '_converted')) {
                     Utils::deleteDir($this->uploadDir . '_converted');
@@ -1211,7 +1201,7 @@ class ProjectManager
             $output .= "Aborting...\n";
             $output .= "</pre>";
 
-            $this->_log($output, $e);
+            $this->log($output, $e);
 
             Utils::sendErrMailReport($output, $e->getMessage());
         }
@@ -1240,12 +1230,12 @@ class ProjectManager
 
     private function __clearFailedProject(Exception $e): void
     {
-        $this->_log($e->getMessage(), $e);
-        $this->_log("Deleting Records.");
+        $this->log($e->getMessage(), $e);
+        $this->log("Deleting Records.");
         (new ProjectDao())->deleteFailedProject($this->projectStructure['id_project']);
         (new FileDao())->deleteFailedProjectFiles($this->projectStructure['file_id_list']->getArrayCopy());
-        $this->_log("Deleted Project ID: " . $this->projectStructure['id_project']);
-        $this->_log("Deleted Files ID: " . json_encode($this->projectStructure['file_id_list']->getArrayCopy()));
+        $this->log("Deleted Project ID: " . $this->projectStructure['id_project']);
+        $this->log("Deleted Files ID: " . json_encode($this->projectStructure['file_id_list']->getArrayCopy()));
     }
 
     /**
@@ -1305,7 +1295,7 @@ class ProjectManager
             # Handle the error, logging, ...
             $output = "**** Activity Log failed. AMQ Connection Error. **** ";
             $output .= var_export($activity, true);
-            $this->_log($output, $e);
+            $this->log($output, $e);
         }
     }
 
@@ -1346,7 +1336,7 @@ class ProjectManager
             );
 
             if (!$result) {
-                $this->_log("Failed to store the Zip file $zipHash - \n");
+                $this->log("Failed to store the Zip file $zipHash - \n");
                 throw new Exception("Failed to store the original Zip $zipHash ", -10);
                 //Exit
             }
@@ -1413,7 +1403,7 @@ class ProjectManager
                 throw new Exception('Job cannot be created. No segments found!');
             }
 
-            $this->_log($projectStructure['private_tm_key']);
+            $this->log($projectStructure['private_tm_key']);
 
             $projectStructure['tm_keys'] = json_encode($tm_key);
 

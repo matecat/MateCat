@@ -22,8 +22,6 @@ use Throwable;
 use Utils\Engines\EnginesFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
-use Utils\Tools\CatUtils;
-use View\API\Commons\Error;
 
 /**
  * Encapsulates the segment extraction logic that was previously embedded in
@@ -43,6 +41,8 @@ use View\API\Commons\Error;
  */
 class SegmentExtractor
 {
+    use LogsMessages;
+
     /**
      * Configuration for segment notes handling
      */
@@ -68,8 +68,9 @@ class SegmentExtractor
         private readonly MateCatFilter $filter,
         private readonly FeatureSet    $features,
         private readonly MetadataDao   $filesMetadataDao,
-        private readonly MatecatLogger $logger,
+        MatecatLogger                  $logger,
     ) {
+        $this->logger = $logger;
     }
 
     // ── Public API ──────────────────────────────────────────────────
@@ -451,15 +452,6 @@ class SegmentExtractor
     }
 
     // ── Private helpers ─────────────────────────────────────────────
-
-    private function log(string $_msg, ?Throwable $exception = null): void
-    {
-        if (!$exception) {
-            $this->logger->debug($_msg);
-        } else {
-            $this->logger->debug($_msg, (new Error($exception))->render(true));
-        }
-    }
 
     /**
      * Extract the sizeRestriction value from a trans-unit's attributes.
