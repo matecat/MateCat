@@ -13,15 +13,15 @@ use TestHelpers\AbstractTest;
  */
 class GetStructTest extends AbstractTest
 {
-    protected ReflectionClass $reflector;
     protected ReflectionMethod $method;
+    protected EngineStruct $engineStruct;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->engineStruct = new EngineStruct;
-        $this->reflector = new ReflectionClass($this->engineStruct);
-        $this->method = $this->reflector->getMethod("getStruct");
+        $reflector = new ReflectionClass($this->engineStruct);
+        $this->method = $reflector->getMethod("getStruct");
     }
 
     /**

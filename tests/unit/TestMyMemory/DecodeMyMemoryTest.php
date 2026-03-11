@@ -19,8 +19,8 @@ use Utils\Registry\AppConfig;
  */
 class DecodeMyMemoryTest extends AbstractTest
 {
-    protected ReflectionClass $reflector;
     protected ReflectionMethod $method;
+    protected MyMemory $myMemory;
 
     /**
      * @throws ReflectionException
@@ -41,8 +41,8 @@ class DecodeMyMemoryTest extends AbstractTest
 
 
         $this->myMemory = new MyMemory($engine_struct_param);
-        $this->reflector = new ReflectionClass($this->myMemory);
-        $this->method = $this->reflector->getMethod("_decode");
+        $reflector = new ReflectionClass($this->myMemory);
+        $this->method = $reflector->getMethod("_decode");
     }
 
     /**
@@ -163,8 +163,8 @@ LABEL;
         /**
          * check of protected property
          */
-        $this->reflector = new ReflectionClass($actual_result);
-        $property = $this->reflector->getProperty('_rawResponse');
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
 
 
         $this->assertEquals("", $property->getValue($actual_result));
@@ -226,8 +226,8 @@ LABEL;
         /**
          * check of protected property
          */
-        $this->reflector = new ReflectionClass($actual_result);
-        $property = $this->reflector->getProperty('_rawResponse');
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
 
 
         $this->assertEquals("", $property->getValue($actual_result));
@@ -281,8 +281,8 @@ LAB;
         /**
          * check of protected property
          */
-        $this->reflector = new ReflectionClass($actual_result);
-        $property = $this->reflector->getProperty('_rawResponse');
+        $reflector = new ReflectionClass($actual_result);
+        $property = $reflector->getProperty('_rawResponse');
 
 
         $this->assertEquals("", $property->getValue($actual_result));

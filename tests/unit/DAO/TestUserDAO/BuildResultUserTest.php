@@ -17,6 +17,7 @@ use Utils\Registry\AppConfig;
 class BuildResultUserTest extends AbstractTest
 {
     protected ReflectionMethod $method;
+    protected UserDao $userDao;
 
     /**
      */

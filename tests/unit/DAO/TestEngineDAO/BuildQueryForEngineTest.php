@@ -18,20 +18,19 @@ use Utils\Registry\AppConfig;
 class BuildQueryForEngineTest extends AbstractTest
 {
 
-    protected ReflectionClass $reflector;
     protected ReflectionMethod $method;
     protected EngineStruct $engine_struct;
+    protected EngineDAO $engineDAO;
 
     /**
-     * @throws ReflectionException
      */
     public function setUp(): void
     {
         parent::setUp();
         $this->engineDAO = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
-        $this->reflector = new ReflectionClass($this->engineDAO);
+        $reflector = new ReflectionClass($this->engineDAO);
         $this->engine_struct = new EngineStruct();
-        $this->method = $this->reflector->getMethod("_buildQueryForEngine");
+        $this->method = $reflector->getMethod("_buildQueryForEngine");
     }
 
     /**
