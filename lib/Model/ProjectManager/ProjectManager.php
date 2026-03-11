@@ -484,10 +484,10 @@ class ProjectManager
      *
      * @throws Exception
      */
-    private function saveMetadata(): void
+    protected function saveMetadata(): void
     {
         $options = $this->projectStructure['metadata'];
-        $dao = new ProjectsMetadataDao();
+        $dao = $this->createProjectsMetadataDao();
 
         // "From API" flag
         if (isset($this->projectStructure[ProjectsMetadataDao::FROM_API]) and $this->projectStructure[ProjectsMetadataDao::FROM_API]) {
@@ -565,6 +565,14 @@ class ProjectManager
             JobsMetadataDao::SUBFILTERING_HANDLERS,
             $this->projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]
         );
+    }
+
+    /**
+     * Factory method for ProjectsMetadataDao — overridable in tests.
+     */
+    protected function createProjectsMetadataDao(): ProjectsMetadataDao
+    {
+        return new ProjectsMetadataDao();
     }
 
     /**

@@ -8,6 +8,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\ProjectManager\ProjectManager;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionClass;
 use Utils\Collections\RecursiveArrayObject;
@@ -129,6 +130,31 @@ class TestableProjectManager extends ProjectManager
     public function setProjectStructureValue(string $key, mixed $value): void
     {
         $this->projectStructure[$key] = $value;
+    }
+
+    // ── saveMetadata() testing support ──────────────────────────────
+
+    private ?ProjectsMetadataDao $projectsMetadataDaoOverride = null;
+
+    /**
+     * Inject a mock/stub ProjectsMetadataDao for saveMetadata() tests.
+     */
+    public function setProjectsMetadataDao(ProjectsMetadataDao $dao): void
+    {
+        $this->projectsMetadataDaoOverride = $dao;
+    }
+
+    protected function createProjectsMetadataDao(): ProjectsMetadataDao
+    {
+        return $this->projectsMetadataDaoOverride ?? parent::createProjectsMetadataDao();
+    }
+
+    /**
+     * Public wrapper to invoke the protected saveMetadata().
+     */
+    public function callSaveMetadata(): void
+    {
+        $this->saveMetadata();
     }
 }
 
