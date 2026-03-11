@@ -1,6 +1,9 @@
 import React from 'react'
 import OutsourceContainer from '../outsource/OutsourceContainer'
-import {ANALYSIS_WORKFLOW_TYPES} from '../../constants/Constants'
+import {
+  ANALYSIS_STATUS,
+  ANALYSIS_WORKFLOW_TYPES,
+} from '../../constants/Constants'
 import {
   Button,
   BUTTON_MODE,
@@ -96,7 +99,7 @@ const SingleChunkJob = ({
           </div>
         </div>
         <div className="project-card__header-actions">
-          {!config.jobAnalysis && (
+          {!config.jobAnalysis && status === ANALYSIS_STATUS.DONE && (
             <OutsourceButton
               chunk={chunkAnalysis}
               index={chunkAnalysis.id}

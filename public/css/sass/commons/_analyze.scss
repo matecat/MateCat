@@ -86,11 +86,16 @@ body.analyze {
           .analysis-progressbar {
             width: 100%;
             .progress-wrapper {
-              background-color: rgba(colors.$green400, 0.24);
+              background-color: rgba(colors.$blue500, 0.24);
               .progress {
-                background-color: colors.$green400;
+                background-color: colors.$blue500;
               }
             }
+          }
+          .not-complete.failed {
+            padding-left: 15px;
+            border-left: 1px solid colors.$grey300;
+            margin-left: 15px;
           }
           .complete {
             display: flex;
@@ -148,7 +153,9 @@ body.analyze {
           align-items: center;
           gap: 12px;
           align-self: stretch;
-
+          &.in-progress h2 {
+            color: colors.$blue500;
+          }
         }
         .content {
           display: flex;
@@ -298,10 +305,28 @@ body.analyze {
             align-items: center;
             gap: 4px;
             color: colors.$grey700;
+
             &:last-child {
                font-weight: 700;
                color: colors.$black;
             }
+          }
+
+        }
+        @media screen and (max-width: 1300px) {
+          .project-card__count > div {
+            width: 140px
+          }
+          .project-card__header-info {
+            width: 200px;
+          }
+        }
+        @media screen and (max-width: 1200px) {
+          .project-card__count > div {
+            width: 140px
+          }
+          .project-card__header-info {
+            width: 150px;
           }
         }
         .project-card__header {

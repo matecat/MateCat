@@ -33,7 +33,16 @@ const AnalyzeHeader = ({data, project}) => {
     }
     return (
       <div className="analysis-create">
-        <span className="not-complete">{analyzerNotRunningErrorString}</span>
+        <div className="complete">
+          Analysis status:
+          <Badge type={BADGE_TYPE.RED}>
+            <Check size={20} />
+            Failed
+          </Badge>
+        </div>
+        <span className="not-complete failed">
+          {analyzerNotRunningErrorString}
+        </span>
       </div>
     )
   }, [])
@@ -195,6 +204,11 @@ const AnalyzeHeader = ({data, project}) => {
   }, [data])
 
   const getWordscount = useCallback(() => {
+    const status = data.get('status')
+    const inProgress =
+      status === ANALYSIS_STATUS.FAST_OK &&
+      data.get('in_queue_before') === 0 &&
+      lastProgressSegmentsRef.current !== data.get('total_segments')
     const tooltipText = (
       <span>
         Matecat suggests MT only when it helps thanks to a dynamic penalty
@@ -207,7 +221,6 @@ const AnalyzeHeader = ({data, project}) => {
       </span>
     )
 
-    const status = data.get('status')
     let raw_words = data.get('total_raw'),
       weightedWords = ''
     if (
@@ -232,7 +245,7 @@ const AnalyzeHeader = ({data, project}) => {
 
     return (
       <div className="word-count">
-        <div className="percent">
+        <div className={`percent ${inProgress ? 'in-progress' : ''}`}>
           <h2>{saving_perc}</h2>
           <div className="content">
             Saving on word count
@@ -264,6 +277,7 @@ const AnalyzeHeader = ({data, project}) => {
             total={100}
             progress={progress}
             size={PROGRESS_BAR_SIZE.SMALL}
+            showProgress={true}
             label={
               <div>
                 Searching for TM Matches
