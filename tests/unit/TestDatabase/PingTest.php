@@ -19,7 +19,7 @@ class PingTest extends AbstractTest
     /**
      * @var Database|IDatabase
      */
-    protected $databaseInstance;
+    protected IDatabase|Database $databaseInstance;
 
     public function setUp(): void
     {

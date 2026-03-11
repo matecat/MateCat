@@ -8,7 +8,7 @@ use Utils\Registry\AppConfig;
 
 /**
  * @group  regression
- * @covers \Model\DataAccess\Database::useDb
+ * @covers Database::useDb
  * User: dinies
  * Date: 12/04/16
  * Time: 16.49
@@ -17,9 +17,9 @@ class UseDbTest extends AbstractTest
 {
 
     /**
-     * @var \Model\DataAccess\Database|IDatabase
+     * @var Database|IDatabase
      */
-    protected $databaseInstance;
+    protected IDatabase|Database $databaseInstance;
 
     public function setUp(): void
     {

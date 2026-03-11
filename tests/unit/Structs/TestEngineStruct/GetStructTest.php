@@ -13,26 +13,25 @@ use TestHelpers\AbstractTest;
  */
 class GetStructTest extends AbstractTest
 {
-    protected $array_param;
-    protected $reflector;
-    protected $method;
+    protected ReflectionClass $reflector;
+    protected ReflectionMethod $method;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = new EngineStruct;
-        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->engineStruct = new EngineStruct;
+        $this->reflector = new ReflectionClass($this->engineStruct);
         $this->method = $this->reflector->getMethod("getStruct");
     }
 
     /**
-     * @return EngineStruct
-     * It returns a EngineStruct
+     * It returns an EngineStruct
      * @group  regression
      * @covers EngineStruct::getStruct
+     * @throws ReflectionException
      */
     public function test_getStruct_simple()
     {
-        $this->assertTrue($this->method->invoke($this->databaseInstance, null) instanceof EngineStruct);
+        $this->assertTrue($this->method->invoke($this->engineStruct, null) instanceof EngineStruct);
     }
 }

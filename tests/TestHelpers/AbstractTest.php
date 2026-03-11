@@ -2,6 +2,7 @@
 
 namespace TestHelpers;
 
+use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
@@ -15,7 +16,7 @@ use ReflectionMethod;
 abstract class AbstractTest extends TestCase
 {
 
-    protected float $thisTest;
+    protected ?float $thisTestStartingTime = null;
 
     protected IDatabase $databaseInstance;
     protected ReflectionMethod $reflectedMethod;
@@ -23,13 +24,13 @@ abstract class AbstractTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->thisTest = microtime(true);
+        $this->thisTestStartingTime = microtime(true);
     }
 
     public function tearDown(): void
     {
         parent::tearDown();
-        $resultTime = microtime(true) - $this->thisTest;
+        $resultTime = microtime(true) - $this->thisTestStartingTime ?? microtime(true);
         echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . $resultTime . " seconds.\n";
     }
 

@@ -17,27 +17,28 @@ use Utils\Registry\AppConfig;
 class BuildResultEngineTest extends AbstractTest
 {
 
-    protected $array_param;
-    protected $reflector;
-    protected $method;
+    protected ReflectionMethod $method;
+    protected EngineDAO $engineDao;
 
-
+    /**
+     */
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
-        $this->reflector = new ReflectionClass($this->databaseInstance);
-        $this->method = $this->reflector->getMethod("_buildResult");
+        $this->engineDao = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $reflector = new ReflectionClass($this->engineDao);
+        $this->method = $reflector->getMethod("_buildResult");
     }
 
     /**
      * This test builds an engine object from an array that describes the properties
      * @group  regression
      * @covers EngineDAO::_buildResult
+     * @throws ReflectionException
      */
     public function test_build_result_from_simple_array()
     {
-        $this->array_param = [
+        $array_param = [
             0 =>
                 [
                     'id' => "0",
@@ -59,7 +60,7 @@ class BuildResultEngineTest extends AbstractTest
                 ]
         ];
 
-        $actual_array_of_engine_structures = $this->method->invoke($this->databaseInstance, $this->array_param);
+        $actual_array_of_engine_structures = $this->method->invoke($this->engineDao, $array_param);
         $actual_engine_struct = $actual_array_of_engine_structures['0'];
         $this->assertTrue($actual_engine_struct instanceof EngineStruct);
 

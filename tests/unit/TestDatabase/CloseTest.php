@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -15,7 +16,7 @@ use Utils\Registry\AppConfig;
 class CloseTest extends AbstractTest
 {
 
-    protected $databaseInstance;
+    protected IDatabase $databaseInstance;
 
     public function setUp(): void
     {

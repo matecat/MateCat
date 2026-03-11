@@ -19,14 +19,13 @@ use Utils\Registry\AppConfig;
  */
 class DecodeMyMemoryTest extends AbstractTest
 {
-    /**
-     * @var EngineStruct
-     */
-    protected $engine_struct_param;
-    protected $reflector;
-    protected $method;
-    protected $array_param;
+    protected ReflectionClass $reflector;
+    protected ReflectionMethod $method;
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -38,11 +37,11 @@ class DecodeMyMemoryTest extends AbstractTest
         /**
          * @var $engineRecord EngineStruct
          */
-        $this->engine_struct_param = $eng[0];
+        $engine_struct_param = $eng[0];
 
 
-        $this->databaseInstance = new MyMemory($this->engine_struct_param);
-        $this->reflector = new ReflectionClass($this->databaseInstance);
+        $this->myMemory = new MyMemory($engine_struct_param);
+        $this->reflector = new ReflectionClass($this->myMemory);
         $this->method = $this->reflector->getMethod("_decode");
     }
 
@@ -50,6 +49,7 @@ class DecodeMyMemoryTest extends AbstractTest
      * It tests the behaviour of the decoding of json input.
      * @group   regression
      * @covers  MyMemory::_decode
+     * @throws ReflectionException
      */
     public function test__decode_with_json_in_input_deusch_segment()
     {
@@ -57,7 +57,7 @@ class DecodeMyMemoryTest extends AbstractTest
 {"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":"235","matches":[]}
 LAB;
 
-        $this->array_param = [
+        $array_params = [
             'q' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
             'langpair' => "en-US|fr-FR",
             'de' => "demo@matecat.com",
@@ -66,7 +66,7 @@ LAB;
         ];
         $input_function_purpose = "gloss_get_relative_url";
 
-        $actual_result = $this->method->invoke($this->databaseInstance, $json_input, $this->array_param, $input_function_purpose);
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
 
         /**
          * general check on the keys of TSM object returned
@@ -84,6 +84,7 @@ LAB;
      * It tests the behaviour of the decoding of json input.
      * @group   regression
      * @covers  MyMemory::_decode
+     * @throws ReflectionException
      */
     public function test__decode_with_json_in_input_from_italian_to_aragonese_segment_with_private_TM()
     {
@@ -91,7 +92,7 @@ LAB;
 {"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":null,"matches":[]}
 LAB;
 
-        $this->array_param = [
+        $array_params = [
             'q' => "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.",
             'langpair' => "it-IT|an-ES",
             'de' => "demo@matecat.com",
@@ -101,7 +102,7 @@ LAB;
         ];
         $input_function_purpose = "translate_relative_url";
 
-        $actual_result = $this->method->invoke($this->databaseInstance, $json_input, $this->array_param, $input_function_purpose);
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
         /**
          * general check on the keys of GetMemoryResponse object returned
          */
@@ -118,6 +119,7 @@ LAB;
      * It tests the behaviour of the decoding of json input.
      * @group   regression
      * @covers  MyMemory::_decode
+     * @throws ReflectionException
      */
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_1()
     {
@@ -130,7 +132,7 @@ LAB;
 LABEL;
 
 
-        $this->array_param = [
+        $array_params = [
             'seg' => "Il Sistema registra le informazioni sul nuovo film.",
             'tra' => "The system records the information on the new movie.",
             'tnote' => null,
@@ -142,7 +144,7 @@ LABEL;
 
         $input_function_purpose = "contribute_relative_url";
 
-        $actual_result = $this->method->invoke($this->databaseInstance, $json_input, $this->array_param, $input_function_purpose);
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
         /**
          * general check on the keys of SetContributionResponse object returned
          */
@@ -154,7 +156,6 @@ LABEL;
         $this->assertTrue(property_exists($actual_result, 'error'));
         $this->assertTrue(property_exists($actual_result, '_rawResponse'));
 
-        $this->assertTrue($actual_result instanceof SetContributionResponse);
         $this->assertEquals(200, $actual_result->responseStatus);
         $this->assertEquals(['0' => 484525156], $actual_result->responseDetails);
         $this->assertEquals("OK", $actual_result->responseData);
@@ -174,6 +175,7 @@ LABEL;
      * It tests the behaviour of the decoding of json input.
      * @group   regression
      * @covers  MyMemory::_decode
+     * @throws ReflectionException
      */
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_2()
     {
@@ -192,7 +194,7 @@ For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with 
 LABEL;
 
 
-        $this->array_param = [
+        $array_params = [
             'seg' => $segment,
             'tra' => $translation,
             'tnote' => null,
@@ -204,7 +206,7 @@ LABEL;
 
         $input_function_purpose = "contribute_relative_url";
 
-        $actual_result = $this->method->invoke($this->databaseInstance, $json_input, $this->array_param, $input_function_purpose);
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
         /**
          * general check on the keys of SetContributionResponse object returned
          */
@@ -236,6 +238,7 @@ LABEL;
      * It tests the behaviour of the decoding of json input.
      * @group   regression
      * @covers  MyMemory::_decode
+     * @throws ReflectionException
      */
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_delete_method_check()
     {
@@ -243,7 +246,7 @@ LABEL;
 {"responseStatus":200,"responseData":"Found and deleted 1 segments"}
 LAB;
 
-        $this->array_param = [
+        $array_params = [
             'seg' => "Il Sistema registra le informazioni sul nuovo film.",
             'tra' => "The system records the information on the new movie.",
             'langpair' => "IT|EN",
@@ -254,9 +257,9 @@ LAB;
         $input_function_purpose = "delete_relative_url";
 
         /**
-         * @var GetMemoryResponse
+         * @var $actual_result GetMemoryResponse
          */
-        $actual_result = $this->method->invoke($this->databaseInstance, $json_input, $this->array_param, $input_function_purpose);
+        $actual_result = $this->method->invoke($this->myMemory, $json_input, $array_params, $input_function_purpose);
 
 
         /**

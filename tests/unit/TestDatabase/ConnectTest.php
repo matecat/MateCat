@@ -15,13 +15,13 @@ use Utils\Registry\AppConfig;
  */
 class ConnectTest extends AbstractTest
 {
-    protected $reflector;
-    protected $property;
+    protected ReflectionClass $reflector;
+    protected ReflectionProperty $property;
 
     /**
-     * @var \Model\DataAccess\Database|IDatabase
+     * @var IDatabase
      */
-    protected $databaseInstance;
+    protected IDatabase $databaseInstance;
 
     /**
      * @throws ReflectionException
