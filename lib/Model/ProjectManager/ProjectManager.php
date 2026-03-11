@@ -727,6 +727,22 @@ class ProjectManager
     }
 
     /**
+     * Factory method for JobDao — overridable in tests.
+     */
+    protected function createJobDao(): JobDao
+    {
+        return new JobDao();
+    }
+
+    /**
+     * Wrapper around the static JobDao::getByIdAndPassword() — overridable in tests.
+     */
+    protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
+    {
+        return JobDao::getByIdAndPassword($id, $password);
+    }
+
+    /**
      * @return void
      * @throws Exception
      * @throws Throwable
@@ -1472,7 +1488,7 @@ class ProjectManager
             throw new Exception("Requested words per chunk available only for Matecat PRO version", -4);
         }
 
-        $rows = (new JobDao())->getSplitData($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
+        $rows = $this->createJobDao()->getSplitData($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
 
         if (empty($rows)) {
             throw new Exception('No segments found for job ' . $projectStructure['job_to_split'], -5);
@@ -1571,7 +1587,7 @@ class ProjectManager
             throw new Exception('The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7);
         }
 
-        $chunk = JobDao::getByIdAndPassword($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
+        $chunk = $this->getJobByIdAndPassword($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
         $row_totals['standard_analysis_count'] = $chunk->standard_analysis_wc;
 
         $result = array_merge($row_totals->getArrayCopy(), ['chunks' => $counter]);

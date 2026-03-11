@@ -8,6 +8,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectManager\ProjectManager;
@@ -319,6 +320,38 @@ class TestableProjectManager extends ProjectManager
     protected function createTeamDao(): TeamDao
     {
         return $this->teamDaoOverride ?? parent::createTeamDao();
+    }
+
+    // ── Step 11d: getSplitData testing support ──
+
+    private ?JobDao $jobDaoOverride = null;
+
+    /**
+     * Inject a mock/stub JobDao for getSplitData() tests.
+     */
+    public function setJobDao(JobDao $dao): void
+    {
+        $this->jobDaoOverride = $dao;
+    }
+
+    protected function createJobDao(): JobDao
+    {
+        return $this->jobDaoOverride ?? parent::createJobDao();
+    }
+
+    private ?JobStruct $jobByIdAndPasswordOverride = null;
+
+    /**
+     * Inject a JobStruct to return from getJobByIdAndPassword().
+     */
+    public function setJobByIdAndPassword(?JobStruct $job): void
+    {
+        $this->jobByIdAndPasswordOverride = $job;
+    }
+
+    protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
+    {
+        return $this->jobByIdAndPasswordOverride ?? parent::getJobByIdAndPassword($id, $password);
     }
 }
 
