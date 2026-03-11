@@ -342,10 +342,7 @@ class ProjectManager
     protected function _validateUploadToken(): void
     {
         if (!isset($this->projectStructure['uploadToken']) || !Utils::isTokenValid($this->projectStructure['uploadToken'])) {
-            $this->projectStructure['result']['errors'][] = [
-                "code" => -19,
-                "message" => "Invalid Upload Token."
-            ];
+            $this->addProjectError(-19, "Invalid Upload Token.");
             throw new Exception("Invalid Upload Token.", -19);
         }
     }
@@ -369,10 +366,7 @@ class ProjectManager
             // when the request comes from the ProjectCreation daemon, it is already an ArrayObject
             $this->projectStructure['xliff_parameters'] = XliffRulesModel::fromArrayObject($this->projectStructure['xliff_parameters']);
         } catch (DomainException $ex) {
-            $this->projectStructure['result']['errors'][] = [
-                "code" => $ex->getCode(),
-                "message" => $ex->getMessage()
-            ];
+            $this->addProjectError($ex->getCode(), $ex->getMessage());
             throw $ex;
         }
     }
@@ -615,6 +609,19 @@ class ProjectManager
     }
 
     /**
+     * Append an error entry to projectStructure['result']['errors'].
+     *
+     * Centralises the ~19 occurrences of the duplicated append pattern.
+     */
+    protected function addProjectError(int $code, string $message): void
+    {
+        $this->projectStructure['result']['errors'][] = [
+            "code" => $code,
+            "message" => $message,
+        ];
+    }
+
+    /**
      * Creates record in projects tabele and instantiates the project struct
      * internally.
      *
@@ -789,10 +796,7 @@ class ProjectManager
                     $fs->makeCachePackage($sha1, $this->projectStructure['source_language'], null, $filePathName);
                     $this->logger->debug("File $fileName converted to cache");
                 } catch (Exception $e) {
-                    $this->projectStructure['result']['errors'][] = [
-                        "code" => -230,
-                        "message" => $e->getMessage()
-                    ];
+                    $this->addProjectError(-230, $e->getMessage());
                 }
 
                 // put reference to cache in the upload dir to link cache to session
@@ -819,10 +823,7 @@ class ProjectManager
         } catch (Exception $e) {
             $this->_log($e->getMessage(), $e);
             //Zip file Handling
-            $this->projectStructure['result']['errors'][] = [
-                "code" => $e->getCode(),
-                "message" => $e->getMessage()
-            ];
+            $this->addProjectError($e->getCode(), $e->getMessage());
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
 
@@ -897,53 +898,33 @@ class ProjectManager
                 } catch (Throwable $e) {
                     if ($e->getCode() == -10) {
                         //Failed to store the original Zip
-                        $this->projectStructure['result']['errors'][] = [
-                            "code" => -10,
-                            "message" => $e->getMessage()
-                        ];
+                        $this->addProjectError(-10, $e->getMessage());
                     } elseif ($e->getCode() == -11) {
-                        $this->projectStructure['result']['errors'][] = [
-                            "code" => $e->getCode(),
-                            "message" => "Failed to store reference files on disk. Permission denied"
-                        ];
+                        $this->addProjectError($e->getCode(), "Failed to store reference files on disk. Permission denied");
                     } elseif ($e->getCode() == -12) {
-                        $this->projectStructure['result']['errors'][] = [
-                            "code" => $e->getCode(),
-                            "message" => "Failed to store reference files in database"
-                        ];
+                        $this->addProjectError($e->getCode(), "Failed to store reference files in database");
                     } // SEVERE EXCEPTIONS HERE
                     elseif ($e->getCode() == -6) {
                         //"File isn't found on server after upload."
-                        $this->projectStructure['result']['errors'][] = [
-                            "code" => $e->getCode(),
-                            "message" => $e->getMessage()
-                        ];
+                        $this->addProjectError($e->getCode(), $e->getMessage());
                     } elseif ($e->getCode() == -3) {
-                        $this->projectStructure['result']['errors'][] = [
-                            "code" => -16,
-                            "message" => "File not found. Failed to save XLIFF conversion on disk."
-                        ];
+                        $this->addProjectError(-16, "File not found. Failed to save XLIFF conversion on disk.");
                     } elseif ($e->getCode() == -13) {
-                        $this->projectStructure['result']['errors'][] = [
-                            "code" => $e->getCode(),
-                            "message" => $e->getMessage()
-                        ];
+                        $this->addProjectError($e->getCode(), $e->getMessage());
                         //we cannot write to disk!! Break project creation
                     } // S3 EXCEPTIONS HERE
                     elseif ($e->getCode() == -200) {
-                        $this->projectStructure['result']['errors'][] = [
-                            "code" => -200,
-                            "message" => $e->getMessage()
-                        ];
+                        $this->addProjectError(-200, $e->getMessage());
                     } elseif ($e->getCode() == 0) {
                         // check for 'Invalid copy source encoding' error
                         $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
 
                         if (str_contains($e->getMessage(), $copyErrorMsg)) {
-                            $this->projectStructure['result']['errors'][] = [
-                                "code" => -200,
-                                "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
-                            ];
+                            $this->addProjectError(
+                                -200,
+                                'There was a problem during the upload of your file(s). Please, ' .
+                                'try to rename your file(s) avoiding non-standard characters'
+                            );
                         }
                     }
                     $this->__clearFailedProject($e);
@@ -1005,32 +986,20 @@ class ProjectManager
             $this->writeFastAnalysisData();
         } catch (Throwable $e) {
             if ($e->getCode() == -1) {
-                $this->projectStructure['result']['errors'][] = [
-                    "code" => -1,
-                    "message" => "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."
-                ];
+                $this->addProjectError(-1, "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . ".");
                 if (AppConfig::$FILE_STORAGE_METHOD != 's3') {
                     $fs->deleteHashFromUploadDir($this->uploadDir, $linkFile ?? '');
                 }
             } elseif ($e->getCode() == -4) {
-                $this->projectStructure['result']['errors'][] = [
-                    "code" => -7,
-                    "message" => "Xliff Import Error: {$e->getMessage()}"
-                ];
+                $this->addProjectError(-7, "Xliff Import Error: {$e->getMessage()}");
             } elseif ($e->getCode() == 400) {
                 $message = (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage();
 
                 //invalid Trans-unit value found empty ID
-                $this->projectStructure['result']['errors'][] = [
-                    "code" => $e->getCode(),
-                    "message" => $message,
-                ];
+                $this->addProjectError($e->getCode(), $message);
             } else {
                 //Generic error
-                $this->projectStructure['result']['errors'][] = [
-                    "code" => $e->getCode(),
-                    "message" => $e->getMessage()
-                ];
+                $this->addProjectError($e->getCode(), $e->getMessage());
             }
 
             $this->_log("Exception", $e);
@@ -1288,10 +1257,7 @@ class ProjectManager
                         continue;
                     }
                 } catch (Exception $e) {
-                    $this->projectStructure['result']['errors'][] = [
-                        "code" => $e->getCode(),
-                        "message" => $e->getMessage()
-                    ];
+                    $this->addProjectError($e->getCode(), $e->getMessage());
 
                     throw new Exception($e);
                 }
@@ -1333,10 +1299,7 @@ class ProjectManager
                     //waiting for "$fileName" to be loaded into MyMemory
                     sleep(3);
                 } catch (Exception $e) {
-                    $this->projectStructure['result']['errors'][] = [
-                        "code" => $e->getCode(),
-                        "message" => $e->getMessage()
-                    ];
+                    $this->addProjectError($e->getCode(), $e->getMessage());
 
                     $this->_log($e->getMessage(), $e);
 
@@ -2062,18 +2025,18 @@ class ProjectManager
                             }
 
                             $counters = $this->buildAndAppendSegment(
-                                fid:                  $fid,
-                                filePartsId:          $filePartsId ?? null,
-                                xliff_trans_unit:     $xliff_trans_unit,
-                                rawContent:           $seg_source['raw-content'],
-                                dataRefMap:           $dataRefMap,
-                                wordCount:            $wordCount,
-                                showInCattool:        $show_in_cattool,
-                                xliffMrkId:           $seg_source['mid'],
-                                xliffExtPrecTags:     $seg_source['ext-prec-tags'],
-                                xliffMrkExtPrecTags:  $seg_source['mrk-ext-prec-tags'],
-                                xliffMrkExtSuccTags:  $seg_source['mrk-ext-succ-tags'],
-                                xliffExtSuccTags:     $seg_source['ext-succ-tags'],
+                                fid: $fid,
+                                filePartsId: $filePartsId ?? null,
+                                xliff_trans_unit: $xliff_trans_unit,
+                                rawContent: $seg_source['raw-content'],
+                                dataRefMap: $dataRefMap,
+                                wordCount: $wordCount,
+                                showInCattool: $show_in_cattool,
+                                xliffMrkId: $seg_source['mid'],
+                                xliffExtPrecTags: $seg_source['ext-prec-tags'],
+                                xliffMrkExtPrecTags: $seg_source['mrk-ext-prec-tags'],
+                                xliffMrkExtSuccTags: $seg_source['mrk-ext-succ-tags'],
+                                xliffExtSuccTags: $seg_source['ext-succ-tags'],
                             );
 
                             //increment the counter for not empty segments
@@ -2145,13 +2108,13 @@ class ProjectManager
                         }
 
                         $counters = $this->buildAndAppendSegment(
-                            fid:              $fid,
-                            filePartsId:      $filePartsId ?? null,
+                            fid: $fid,
+                            filePartsId: $filePartsId ?? null,
                             xliff_trans_unit: $xliff_trans_unit,
-                            rawContent:       $xliff_trans_unit['source']['raw-content'],
-                            dataRefMap:       $dataRefMap,
-                            wordCount:        $wordCount,
-                            showInCattool:    $show_in_cattool,
+                            rawContent: $xliff_trans_unit['source']['raw-content'],
+                            dataRefMap: $dataRefMap,
+                            wordCount: $wordCount,
+                            showInCattool: $show_in_cattool,
                             xliffExtPrecTags: $prec_tags,
                             xliffExtSuccTags: $succ_tags,
                         );
@@ -2183,7 +2146,7 @@ class ProjectManager
     private function getSizeRestrictionValue(array $xliff_trans_unit): ?int
     {
         if (isset($xliff_trans_unit['attr']['sizeRestriction']) and $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
-            return (int) $xliff_trans_unit['attr']['sizeRestriction'];
+            return (int)$xliff_trans_unit['attr']['sizeRestriction'];
         }
 
         return null;
@@ -2213,13 +2176,13 @@ class ProjectManager
      * @throws Exception
      */
     private function buildAndAppendSegment(
-        int     $fid,
-        ?int    $filePartsId,
-        array   $xliff_trans_unit,
-        string  $rawContent,
-        array   $dataRefMap,
-        float   $wordCount,
-        int     $showInCattool,
+        int $fid,
+        ?int $filePartsId,
+        array $xliff_trans_unit,
+        string $rawContent,
+        array $dataRefMap,
+        float $wordCount,
+        int $showInCattool,
         ?string $xliffMrkId = null,
         ?string $xliffExtPrecTags = null,
         ?string $xliffMrkExtPrecTags = null,
@@ -2244,19 +2207,19 @@ class ProjectManager
 
         // --- SegmentStruct ---
         $segStruct = new SegmentStruct([
-            'id_file'                 => $fid,
-            'id_file_part'            => $filePartsId,
-            'id_project'              => $this->projectStructure['id_project'],
-            'internal_id'             => $xliff_trans_unit['attr']['id'],
-            'xliff_mrk_id'            => $xliffMrkId,
-            'xliff_ext_prec_tags'     => $xliffExtPrecTags,
+            'id_file' => $fid,
+            'id_file_part' => $filePartsId,
+            'id_project' => $this->projectStructure['id_project'],
+            'internal_id' => $xliff_trans_unit['attr']['id'],
+            'xliff_mrk_id' => $xliffMrkId,
+            'xliff_ext_prec_tags' => $xliffExtPrecTags,
             'xliff_mrk_ext_prec_tags' => $xliffMrkExtPrecTags,
-            'segment'                 => $this->filter->fromRawXliffToLayer0($rawContent),
-            'segment_hash'            => $segmentHash,
+            'segment' => $this->filter->fromRawXliffToLayer0($rawContent),
+            'segment_hash' => $segmentHash,
             'xliff_mrk_ext_succ_tags' => $xliffMrkExtSuccTags,
-            'xliff_ext_succ_tags'     => $xliffExtSuccTags,
-            'raw_word_count'          => $wordCount,
-            'show_in_cattool'         => $showInCattool,
+            'xliff_ext_succ_tags' => $xliffExtSuccTags,
+            'raw_word_count' => $wordCount,
+            'show_in_cattool' => $showInCattool,
         ]);
 
         $this->projectStructure['segments'][$fid]->append($segStruct);
@@ -3020,10 +2983,7 @@ class ProjectManager
                     throw new Exception("TM key is not valid: " . $_tmKey['key'], -4);
                 }
             } catch (Exception $e) {
-                $this->projectStructure['result']['errors'][] = [
-                    "code" => $e->getCode(),
-                    "message" => $e->getMessage()
-                ];
+                $this->addProjectError($e->getCode(), $e->getMessage());
 
                 return;
             }

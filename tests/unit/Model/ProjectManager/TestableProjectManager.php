@@ -3,6 +3,7 @@
 namespace unit\Model\ProjectManager;
 
 use ArrayObject;
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
@@ -35,42 +36,43 @@ class TestableProjectManager extends ProjectManager
      * Initialize the testable instance with mocked/stubbed dependencies.
      */
     public function initForTest(
-        MateCatFilter    $filter,
-        FeatureSet       $features,
-        MetadataDao      $filesMetadataDao,
-        MatecatLogger    $logger,
+        MateCatFilter $filter,
+        FeatureSet $features,
+        MetadataDao $filesMetadataDao,
+        MatecatLogger $logger,
         ?XliffRulesModel $xliffParameters = null,
     ): void {
-        $this->filter           = $filter;
-        $this->features         = $features;
+        $this->filter = $filter;
+        $this->features = $features;
         $this->filesMetadataDao = $filesMetadataDao;
 
         // Use reflection to set the private logger
-        $ref        = new ReflectionClass(ProjectManager::class);
+        $ref = new ReflectionClass(ProjectManager::class);
         $loggerProp = $ref->getProperty('logger');
         $loggerProp->setValue($this, $logger);
 
         // Initialize the projectStructure with all keys needed by _extractSegments
         $this->projectStructure = new RecursiveArrayObject([
-            'id_project'             => 999,
-            'source_language'        => 'en-US',
-            'target_language'        => new RecursiveArrayObject(['it-IT']),
-            'segments'               => new ArrayObject(),
+            'id_project' => 999,
+            'source_language' => 'en-US',
+            'target_language' => new RecursiveArrayObject(['it-IT']),
+            'segments' => new ArrayObject(),
             'segments-original-data' => new ArrayObject(),
-            'segments-meta-data'     => new ArrayObject(),
-            'file-part-id'           => new ArrayObject(),
-            'file-metadata'          => new ArrayObject(),
-            'translations'           => new ArrayObject(),
-            'notes'                  => new ArrayObject(),
-            'context-group'          => new ArrayObject(),
-            'current-xliff-info'     => [],
-            'xliff_parameters'       => $xliffParameters ?? new XliffRulesModel(),
-            'result'                 => ['errors' => []],
+            'segments-meta-data' => new ArrayObject(),
+            'file-part-id' => new ArrayObject(),
+            'file-metadata' => new ArrayObject(),
+            'translations' => new ArrayObject(),
+            'notes' => new ArrayObject(),
+            'context-group' => new ArrayObject(),
+            'current-xliff-info' => [],
+            'xliff_parameters' => $xliffParameters ?? new XliffRulesModel(),
+            'result' => ['errors' => []],
         ]);
     }
 
     /**
      * Public wrapper to invoke the protected _extractSegments.
+     * @throws Exception
      */
     public function callExtractSegments(int $fid, array $file_info): void
     {
@@ -101,6 +103,32 @@ class TestableProjectManager extends ProjectManager
     public function getTotalSegments(): int
     {
         return $this->total_segments;
+    }
+
+    /**
+     * Public wrapper to invoke the protected _validateUploadToken.
+     * @throws Exception
+     */
+    public function callValidateUploadToken(): void
+    {
+        $this->_validateUploadToken();
+    }
+
+    /**
+     * Public wrapper to invoke the protected _validateXliffParameters.
+     * @throws Exception
+     */
+    public function callValidateXliffParameters(): void
+    {
+        $this->_validateXliffParameters();
+    }
+
+    /**
+     * Set a specific key in projectStructure for testing.
+     */
+    public function setProjectStructureValue(string $key, mixed $value): void
+    {
+        $this->projectStructure[$key] = $value;
     }
 }
 
