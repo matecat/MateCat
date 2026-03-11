@@ -51,8 +51,6 @@ use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
-use Model\TmKeyManagement\MemoryKeyDao;
-use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
@@ -78,8 +76,6 @@ use Utils\Shop\Cart;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
-use Utils\TmKeyManagement\TmKeyStruct;
-use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
@@ -153,6 +149,11 @@ class ProjectManager
      * @var SegmentExtractor|null
      */
     protected ?SegmentExtractor $segmentExtractor = null;
+
+    /**
+     * @var TmKeyService|null
+     */
+    protected ?TmKeyService $tmKeyService = null;
 
     /**
      * ProjectManager constructor.
@@ -326,6 +327,32 @@ class ProjectManager
         }
 
         return $this->segmentExtractor;
+    }
+
+    /**
+     * Factory method to create a TmKeyService.
+     * Protected so test subclasses can override for injection.
+     */
+    protected function createTmKeyService(): TmKeyService
+    {
+        return new TmKeyService(
+            $this->tmxServiceWrapper,
+            $this->dbHandler,
+            $this->logger,
+            fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
+        );
+    }
+
+    /**
+     * Get or lazily create the TmKeyService instance.
+     */
+    protected function getTmKeyService(): TmKeyService
+    {
+        if ($this->tmKeyService === null) {
+            $this->tmKeyService = $this->createTmKeyService();
+        }
+
+        return $this->tmKeyService;
     }
 
     protected function _log($_msg, ?Throwable $exception = null): void
@@ -758,7 +785,7 @@ class ProjectManager
         unset($sortedMeta);
 
         if (count($this->projectStructure['private_tm_key'])) {
-            $this->setPrivateTMKeys($firstTMXFileName);
+            $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
 
             if (count($this->projectStructure['result']['errors']) > 0) {
                 // This return value was introduced after a refactoring
@@ -780,7 +807,7 @@ class ProjectManager
             1) upload INSERT INTMX and Glossaries
         */
         try {
-            $this->_pushTMXToMyMemory();
+            $this->getTmKeyService()->pushTMXToMyMemory($this->projectStructure, $this->uploadDir);
         } catch (Exception $e) {
             $this->_log($e->getMessage(), $e);
 
@@ -1244,105 +1271,6 @@ class ProjectManager
                 ),
             ]
         );
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function _pushTMXToMyMemory(): void
-    {
-        $memoryFiles = [];
-
-        // If there is no private TM key defined in the project structure,
-        // or the nested indexes don't exist, stop and do nothing.
-        if (empty($this->projectStructure['private_tm_key'][0]['key'] ?? null)) {
-            return;
-        }
-
-        //TMX Management
-        if (!empty($this->projectStructure['array_files'])) {
-            foreach ($this->projectStructure['array_files'] as $pos => $fileName) {
-                // get corresponding meta
-                $meta = $this->projectStructure['array_files_meta'][$pos];
-
-                $ext = $meta['extension'];
-
-                try {
-                    if ('tmx' == $ext) {
-                        $file = new TMSFile(
-                            "$this->uploadDir/$fileName",
-                            $this->projectStructure['private_tm_key'][0]['key'],
-                            $fileName,
-                            $pos
-                        );
-
-                        $memoryFiles[] = $file;
-
-                        if (AppConfig::$FILE_STORAGE_METHOD == 's3') {
-                            $this->getSingleS3QueueFile($fileName);
-                        }
-
-                        $userStruct = (new UserDao())->setCacheTTL(60 * 60)->getByUid($this->projectStructure['uid']);
-                        $this->tmxServiceWrapper->addTmxInMyMemory($file, $userStruct);
-                    } else {
-                        //don't call the postPushTMX for normal files
-                        continue;
-                    }
-                } catch (Exception $e) {
-                    $this->addProjectError($e->getCode(), $e->getMessage());
-
-                    throw new Exception($e);
-                }
-            }
-        }
-
-        /**
-         * @throws Exception
-         */
-        $this->_loopForTMXLoadStatus($memoryFiles);
-    }
-
-    /**
-     * @param $memoryFiles TMSFile[]
-     *
-     * @throws Exception
-     */
-    protected function _loopForTMXLoadStatus(array $memoryFiles): void
-    {
-        $time = strtotime('+30 minutes');
-
-        //TMX Management
-        /****************/
-        //loop again through files to check for TMX loading
-        foreach ($memoryFiles as $file) {
-            //is the TM loaded?
-            //wait until the current TMX is loaded
-            while (true) {
-                try {
-                    $result = $this->tmxServiceWrapper->tmxUploadStatus($file->getUuid());
-
-                    if ($result['completed'] || strtotime('now') > $time) {
-                        //"$fileName" has been loaded into MyMemory"
-                        // OR the indexer is down or stopped for maintenance
-                        // exit the loop, the import will be executed at a later time
-                        break;
-                    }
-
-                    //waiting for "$fileName" to be loaded into MyMemory
-                    sleep(3);
-                } catch (Exception $e) {
-                    $this->addProjectError($e->getCode(), $e->getMessage());
-
-                    $this->_log($e->getMessage(), $e);
-
-                    //exit project creation
-                    throw new Exception($e);
-                }
-            }
-
-            unset($this->projectStructure['array_files'][$file->getPosition()]);
-            unset($this->projectStructure['array_files_meta'][$file->getPosition()]);
-        }
     }
 
     /**
@@ -2349,79 +2277,6 @@ class ProjectManager
     protected static function sanitizedUnitId(string $trans_unitID, string $fid): string
     {
         return SegmentExtractor::sanitizedUnitId($trans_unitID, $fid);
-    }
-
-    /**
-     *
-     * What this function does:
-     *
-     * 1. validate the input private keys
-     * 2. set the primary key into the engine object
-     * 3. check if the user is logged and if so add the new keys to his keyring
-     * 4. ensure tm_user and tm_pass are populated even if missing
-     * 5. insert translator
-     * 6. run a callback to plugins to filter the private_tm_key value
-     *
-     * @param string|null $firstTMXFileName
-     *
-     */
-    private function setPrivateTMKeys(?string $firstTMXFileName = ''): void
-    {
-        foreach ($this->projectStructure['private_tm_key'] as $_tmKey) {
-            try {
-                $keyExists = $this->tmxServiceWrapper->checkCorrectKey($_tmKey['key']);
-
-                if (!isset($keyExists) || $keyExists === false) {
-                    $this->_log(__METHOD__ . " -> TM key is not valid.");
-
-                    throw new Exception("TM key is not valid: " . $_tmKey['key'], -4);
-                }
-            } catch (Exception $e) {
-                $this->addProjectError($e->getCode(), $e->getMessage());
-
-                return;
-            }
-        }
-
-        //check if the MyMemory keys provided by the user are already associated to him.
-        $mkDao = new MemoryKeyDao($this->dbHandler);
-        $userMemoryKeys = $mkDao->getKeyringOwnerKeysByUid($this->projectStructure['uid']);
-        $userTmKeys = [];
-        $memoryKeysToBeInserted = [];
-
-        //extract user tm keys
-        foreach ($userMemoryKeys as $_memoKey) {
-            $userTmKeys[] = $_memoKey->tm_key->key;
-        }
-
-        foreach ($this->projectStructure['private_tm_key'] as $_tmKey) {
-            if (!in_array($_tmKey['key'], $userTmKeys)) {
-                $newMemoryKey = new MemoryKeyStruct();
-                $newTmKey = new TmKeyStruct();
-                $newTmKey->key = $_tmKey['key'];
-                $newTmKey->tm = true;
-                $newTmKey->glos = true;
-
-                // THIS IS A NEW KEY and must be inserted into the user keyring
-                // So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
-                // assign TMX name to the key
-
-                // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with empty name
-                $newTmKey->name = (!empty($_tmKey['name']) ? str_replace("{{pid}}", $this->projectStructure['id_project'], $_tmKey['name']) : $firstTMXFileName);
-
-                $newMemoryKey->tm_key = $newTmKey;
-                $newMemoryKey->uid = $this->projectStructure['uid'];
-
-                $memoryKeysToBeInserted[] = $newMemoryKey;
-            } else {
-                $this->_log('skip insertion');
-            }
-        }
-        try {
-            $mkDao->createList($memoryKeysToBeInserted);
-        } catch (Exception $e) {
-            $this->_log($e->getMessage(), $e);
-        }
     }
 
 }
