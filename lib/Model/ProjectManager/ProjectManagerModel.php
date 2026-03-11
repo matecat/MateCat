@@ -13,6 +13,7 @@ namespace Model\ProjectManager;
 use ArrayObject;
 use Exception;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PDOException;
@@ -26,7 +27,7 @@ class ProjectManagerModel
 {
     use LogsMessages;
 
-    private Database $dbHandler;
+    private IDatabase $dbHandler;
 
     public function __construct(Database $dbHandler, MatecatLogger $logger)
     {
@@ -35,7 +36,7 @@ class ProjectManagerModel
     }
 
     /**
-     * Creates record in projects table and instantiates the project struct
+     * Creates a record in the projects table and instantiates the project struct
      * internally.
      *
      * @param ArrayObject $projectStructure

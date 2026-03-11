@@ -3,15 +3,23 @@
 namespace Model\ProjectManager;
 
 use ArrayObject;
+use Exception;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
+use Model\Xliff\DTO\XliffRulesModel;
+use ReflectionException;
+use Utils\Constants\XliffTranslationStatus;
 use Utils\Logger\MatecatLogger;
+use Utils\LQA\QA;
 
 /**
  * Encapsulates segment storage logic that was previously embedded in
@@ -35,6 +43,8 @@ class SegmentStorageService
 
     private IDatabase $dbHandler;
     private FeatureSet $features;
+    private MateCatFilter $filter;
+    private ProjectManagerModel $projectManagerModel;
 
     /**
      * Tracks first/last segment IDs across all files.
@@ -45,13 +55,17 @@ class SegmentStorageService
     private array $minMaxSegmentsId = [];
 
     public function __construct(
-        IDatabase     $dbHandler,
-        FeatureSet    $features,
-        MatecatLogger $logger,
+        IDatabase            $dbHandler,
+        FeatureSet           $features,
+        MatecatLogger        $logger,
+        MateCatFilter        $filter,
+        ProjectManagerModel  $projectManagerModel,
     ) {
-        $this->dbHandler = $dbHandler;
-        $this->features  = $features;
-        $this->logger    = $logger;
+        $this->dbHandler            = $dbHandler;
+        $this->features             = $features;
+        $this->logger               = $logger;
+        $this->filter               = $filter;
+        $this->projectManagerModel  = $projectManagerModel;
     }
 
     // ── Public API ──────────────────────────────────────────────────
@@ -69,7 +83,7 @@ class SegmentStorageService
     /**
      * Store segments for a single file: reserve IDs, persist original data
      * and metadata, bulk-insert segment rows, and link IDs to notes/contexts/translations.
-     * @throws \Exception
+     * @throws Exception
      */
     public function storeSegments(string|int $fid, ArrayObject $projectStructure): void
     {
@@ -243,6 +257,125 @@ class SegmentStorageService
         );
     }
 
+    /**
+     * Process pre-translated segments from XLIFF and insert them as translations.
+     *
+     * For each translation entry, this method:
+     *  - Looks up the segment from the DB
+     *  - Resolves XLIFF state/state-qualifier to determine editor status and match type
+     *  - Runs QA checks on the translation
+     *  - Builds an SQL values array for bulk insert
+     *  - Sets the create_2_pass_review flag when a final-state translation is found
+     *
+     * @param JobStruct   $job              The job these translations belong to
+     * @param ArrayObject $projectStructure The mutable project structure
+     *
+     * @throws Exception
+     */
+    public function insertPreTranslations(JobStruct $job, ArrayObject $projectStructure): void
+    {
+        $jid = $job->id;
+        $this->cleanSegmentsMetadata($projectStructure);
+
+        $createSecondPassReview = false;
+
+        $query_translations_values = [];
+        foreach ($projectStructure['translations'] as $struct) {
+            if (empty($struct)) {
+                continue;
+            }
+
+            // array of segmented translations
+            foreach ($struct as $translation_row) {
+                $position = (isset($translation_row[6])) ? $translation_row[6] : null;
+                $segment = $this->createSegmentDao()->getById($translation_row[0]);
+
+                // This condition is meant to debug an issue with the segment id that returns false from dao.
+                // SegmentDao::getById returns false if the id is not found in the database
+                // Skip the segment and lose the translation if the segment id is not found in the database
+                if (!$segment) {
+                    continue;
+                }
+
+                if (is_string($projectStructure['array_jobs']['payable_rates'][$jid])) {
+                    $payable_rates = json_decode($projectStructure['array_jobs']['payable_rates'][$jid], true);
+                } else {
+                    $payable_rates = $projectStructure['array_jobs']['payable_rates'][$jid];
+                }
+
+                /**
+                 * @var $configModel XliffRulesModel
+                 */
+                $configModel = $projectStructure['xliff_parameters'];
+                $stateValues = SegmentExtractor::getTargetStatesFromTransUnit($translation_row[4], $position);
+
+                $rule = $configModel->getMatchingRule(
+                    $projectStructure['current-xliff-info'][$translation_row[5] /* file_id */]['version'],
+                    $stateValues['state'],
+                    $stateValues['state-qualifier']
+                );
+
+                if (XliffTranslationStatus::isFinalState($stateValues['state'])) {
+                    $createSecondPassReview = true;
+                }
+
+                // Use QA to get target segment
+                $chunk = $this->getChunksByJobId($jid)[0];
+                $source = $segment->segment;
+                $target = $translation_row[2];
+
+                $source = $this->filter->fromLayer0ToLayer1($source);
+                $target = $this->filter->fromLayer0ToLayer1($target);
+
+                $check = new QA($source, $target);
+                $check->setFeatureSet($this->features);
+                $check->setSourceSegLang($chunk->source);
+                $check->setTargetSegLang($chunk->target);
+                $check->performConsistencyCheck();
+
+                if (!$check->thereAreErrors()) {
+                    $translation = $check->getTrgNormalized();
+                } else {
+                    $translation = $check->getTargetSeg();
+                }
+
+                /* WARNING: do not change the order of the keys */
+                $sql_values = [
+                    'id_segment'            => $translation_row[0],
+                    'id_job'                => $jid,
+                    'segment_hash'          => $translation_row[3],
+                    'status'                => $rule->asEditorStatus(),
+                    'translation'           => $this->filter->fromLayer1ToLayer0($translation),
+                    'suggestion'            => $this->filter->fromLayer1ToLayer0($translation),
+                    'locked'                => 0, // not allowed to change locked status for pre-translations
+                    'match_type'            => $rule->asMatchType(),
+                    'eq_word_count'         => $rule->asEquivalentWordCount($segment->raw_word_count, $payable_rates),
+                    'serialized_errors_list' => ($check->thereAreErrors()) ? $check->getErrorsJSON() : '',
+                    'warning'               => ($check->thereAreErrors()) ? 1 : 0,
+                    'suggestion_match'      => null,
+                    'standard_word_count'   => $rule->asStandardWordCount($segment->raw_word_count, $payable_rates),
+                    'version_number'        => 0,
+                ];
+
+                $query_translations_values[] = $sql_values;
+            }
+        }
+
+        // Executing the Query
+        if (!empty($query_translations_values)) {
+            $this->projectManagerModel->insertPreTranslations($query_translations_values);
+        }
+
+        // We do not create Chunk reviews since this is a task for postProjectCreate
+        // Create a R2 for the job is state is 'final',
+        if ($createSecondPassReview) {
+            $projectStructure['create_2_pass_review'] = true;
+        }
+
+        //clean translations and queries
+        unset($query_translations_values);
+    }
+
     // ── Factory methods (overridable in tests) ──────────────────────
 
     /**
@@ -251,6 +384,18 @@ class SegmentStorageService
     protected function createSegmentDao(): SegmentDao
     {
         return new SegmentDao();
+    }
+
+    /**
+     * Look up job chunks by job ID.
+     * Protected so test subclasses can override to avoid DB access.
+     *
+     * @return JobStruct[]
+     * @throws ReflectionException
+     */
+    protected function getChunksByJobId(int $jobId): array
+    {
+        return ChunkDao::getByJobID($jobId);
     }
 
     /**

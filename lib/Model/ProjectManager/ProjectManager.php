@@ -32,7 +32,6 @@ use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\S3FilesStorage;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
@@ -41,7 +40,6 @@ use Model\PayableRates\CustomPayableRateStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
-use Model\Segments\SegmentDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Xliff\DTO\XliffRulesModel;
@@ -55,11 +53,8 @@ use Utils\AsyncTasks\Workers\ActivityLogWorker;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\ProjectStatus;
-use Utils\Constants\XliffTranslationStatus;
 use Utils\Engines\MyMemory;
 use Utils\Logger\LoggerFactory;
-use Utils\Logger\MatecatLogger;
-use Utils\LQA\QA;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -392,6 +387,8 @@ class ProjectManager
             $this->dbHandler,
             $this->features,
             $this->logger,
+            $this->filter,
+            $this->getProjectManagerModel(),
         );
     }
 
@@ -1480,7 +1477,7 @@ class ProjectManager
 
                 //prepare pre-translated segments queries
                 if (!empty($projectStructure['translations'])) {
-                    $this->insertPreTranslations($newJob, $projectStructure);
+                    $this->getSegmentStorageService()->insertPreTranslations($newJob, $projectStructure);
                 }
             } catch (Exception $e) {
                 $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
@@ -1685,127 +1682,6 @@ class ProjectManager
     {
         $this->getSegmentStorageService()->storeSegments($fid, $this->projectStructure);
         $this->min_max_segments_id = $this->getSegmentStorageService()->getMinMaxSegmentsId();
-    }
-
-    /**
-     * @param JobStruct $job
-     * @param ArrayObject $projectStructure
-     *
-     * @throws Exception
-     */
-    protected function insertPreTranslations(JobStruct $job, ArrayObject $projectStructure): void
-    {
-        $jid = $job->id;
-        $this->getSegmentStorageService()->cleanSegmentsMetadata($this->projectStructure);
-
-        $createSecondPassReview = false;
-
-        $query_translations_values = [];
-        foreach ($this->projectStructure['translations'] as $struct) {
-            if (empty($struct)) {
-                continue;
-            }
-
-            // array of segmented translations
-            foreach ($struct as $translation_row) {
-                $position = (isset($translation_row[6])) ? $translation_row[6] : null;
-                $segment = (new SegmentDao())->getById($translation_row [0]);
-
-                // This condition is meant to debug an issue with the segment id that returns false from dao.
-                // SegmentDao::getById returns false if the id is not found in the database
-                // Skip the segment and lose the translation if the segment id is not found in the database
-                if (!$segment) {
-                    continue;
-                }
-
-                if (is_string($this->projectStructure['array_jobs']['payable_rates'][$jid])) {
-                    $payable_rates = json_decode($this->projectStructure['array_jobs']['payable_rates'][$jid], true);
-                } else {
-                    $payable_rates = $this->projectStructure['array_jobs']['payable_rates'][$jid];
-                }
-
-                /**
-                 * @var $configModel XliffRulesModel
-                 */
-                $configModel = $this->projectStructure['xliff_parameters'];
-                $stateValues = $this->getTargetStatesFromTransUnit($translation_row[4], $position);
-
-                $rule = $configModel->getMatchingRule(
-                    $this->projectStructure['current-xliff-info'][$translation_row[5] /* file_id */]['version'],
-                    $stateValues['state'],
-                    $stateValues['state-qualifier']
-                );
-
-                if (XliffTranslationStatus::isFinalState($stateValues['state'])) {
-                    $createSecondPassReview = true;
-                }
-
-                // Use QA to get target segment
-                $chunk = ChunkDao::getByJobID($jid)[0];
-                $source = $segment->segment;
-                $target = $translation_row [2];
-
-                $source = $this->filter->fromLayer0ToLayer1($source);
-                $target = $this->filter->fromLayer0ToLayer1($target);
-
-                $check = new QA($source, $target);
-                $check->setFeatureSet($this->features);
-                $check->setSourceSegLang($chunk->source);
-                $check->setTargetSegLang($chunk->target);
-                $check->performConsistencyCheck();
-
-                if (!$check->thereAreErrors()) {
-                    $translation = $check->getTrgNormalized();
-                } else {
-                    $translation = $check->getTargetSeg();
-                }
-
-                /* WARNING: do not change the order of the keys */
-                $sql_values = [
-                    'id_segment' => $translation_row [0],
-                    'id_job' => $jid,
-                    'segment_hash' => $translation_row [3],
-                    'status' => $rule->asEditorStatus(),
-                    'translation' => $this->filter->fromLayer1ToLayer0($translation),
-                    'suggestion' => $this->filter->fromLayer1ToLayer0($translation),
-                    'locked' => 0, // not allowed to change locked status for pre-translations
-                    'match_type' => $rule->asMatchType(),
-                    'eq_word_count' => $rule->asEquivalentWordCount($segment->raw_word_count, $payable_rates),
-                    'serialized_errors_list' => ($check->thereAreErrors()) ? $check->getErrorsJSON() : '',
-                    'warning' => ($check->thereAreErrors()) ? 1 : 0,
-                    'suggestion_match' => null,
-                    'standard_word_count' => $rule->asStandardWordCount($segment->raw_word_count, $payable_rates),
-                    'version_number' => 0,
-                ];
-
-                $query_translations_values[] = $sql_values;
-            }
-        }
-
-        // Executing the Query
-        if (!empty($query_translations_values)) {
-            $this->getProjectManagerModel()->insertPreTranslations($query_translations_values);
-        }
-
-        // We do not create Chunk reviews since this is a task for postProjectCreate
-        // Create a R2 for the job is state is 'final',
-        if ($createSecondPassReview) {
-            $projectStructure['create_2_pass_review'] = true;
-        }
-
-        //clean translations and queries
-        unset($query_translations_values);
-    }
-
-    /**
-     * @param array $trans_unit
-     * @param int|null $position
-     *
-     * @return array
-     */
-    protected function getTargetStatesFromTransUnit(array $trans_unit, ?int $position = null): array
-    {
-        return SegmentExtractor::getTargetStatesFromTransUnit($trans_unit, $position);
     }
 
     /**

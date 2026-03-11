@@ -2,8 +2,11 @@
 
 namespace unit\Model\ProjectManager;
 
+use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\ProjectManager\ProjectManagerModel;
 use Model\ProjectManager\SegmentStorageService;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataStruct;
@@ -24,12 +27,17 @@ class TestableSegmentStorageService extends SegmentStorageService
     /** @var ?SegmentDao Injectable SegmentDao for tests */
     private ?SegmentDao $segmentDao = null;
 
+    /** @var ?array Injectable chunk results for getChunksByJobId */
+    private ?array $chunksByJobIdResult = null;
+
     public function __construct(
-        IDatabase     $dbHandler,
-        FeatureSet    $features,
-        MatecatLogger $logger,
+        IDatabase            $dbHandler,
+        FeatureSet           $features,
+        MatecatLogger        $logger,
+        MateCatFilter        $filter,
+        ProjectManagerModel  $projectManagerModel,
     ) {
-        parent::__construct($dbHandler, $features, $logger);
+        parent::__construct($dbHandler, $features, $logger, $filter, $projectManagerModel);
     }
 
     /**
@@ -88,5 +96,23 @@ class TestableSegmentStorageService extends SegmentStorageService
     protected function createSegmentDao(): SegmentDao
     {
         return $this->segmentDao ?? parent::createSegmentDao();
+    }
+
+    /**
+     * Inject chunk results for getChunksByJobId.
+     *
+     * @param JobStruct[] $chunks
+     */
+    public function setChunksByJobIdResult(array $chunks): void
+    {
+        $this->chunksByJobIdResult = $chunks;
+    }
+
+    /**
+     * Override to return injected chunks instead of hitting the DB.
+     */
+    protected function getChunksByJobId(int $jobId): array
+    {
+        return $this->chunksByJobIdResult ?? parent::getChunksByJobId($jobId);
     }
 }

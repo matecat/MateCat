@@ -3,8 +3,10 @@
 namespace unit\Model\ProjectManager;
 
 use ArrayObject;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\ProjectManager\ProjectManagerModel;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
@@ -41,11 +43,15 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->dbHandler = $this->createMock(Database::class);
         $this->features  = $this->createMock(FeatureSet::class);
         $logger          = $this->createStub(MatecatLogger::class);
+        $filter          = $this->createStub(MateCatFilter::class);
+        $pmModel         = $this->createStub(ProjectManagerModel::class);
 
         $this->service = new TestableSegmentStorageService(
             $this->dbHandler,
             $this->features,
             $logger,
+            $filter,
+            $pmModel,
         );
 
         // Inject a stub SegmentDao so createList() doesn't hit the DB

@@ -3,8 +3,10 @@
 namespace unit\Model\ProjectManager;
 
 use ArrayObject;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\ProjectManager\ProjectManagerModel;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
@@ -28,6 +30,8 @@ class SegmentDataHelpersTest extends AbstractTest
             $this->createStub(IDatabase::class),
             $this->createStub(FeatureSet::class),
             $this->createStub(MatecatLogger::class),
+            $this->createStub(MateCatFilter::class),
+            $this->createStub(ProjectManagerModel::class),
         );
     }
 
