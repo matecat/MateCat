@@ -118,259 +118,7 @@ class SegmentExtractor
 
         // Creating the Query
         foreach ($xliff['files'] as $xliff_file) {
-            // save external-file attribute
-            if (isset($xliff_file['attr']['external-file'])) {
-                $externalFile = $xliff_file['attr']['external-file'];
-                $this->filesMetadataDao->insert($projectStructure['id_project'], $fid, 'mtc:references', $externalFile);
-            }
-
-            // save x-jsont* datatype
-            if (isset($xliff_file['attr']['data-type'])) {
-                $dataType = $xliff_file['attr']['data-type'];
-
-                if (str_contains($dataType, 'x-jsont')) {
-                    $this->filesMetadataDao->insert($projectStructure['id_project'], $fid, 'data-type', $dataType);
-                }
-            }
-
-            if (!array_key_exists('trans-units', $xliff_file)) {
-                continue;
-            }
-
-            // files-part
-            $filePartsId = null;
-            if (isset($xliff_file['attr']['original'])) {
-                $filesPartsStruct           = new FilesPartsStruct();
-                $filesPartsStruct->id_file  = $fid;
-                $filesPartsStruct->tag_key  = 'original';
-                $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
-
-                $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
-
-                // save `custom` meta data
-                if (isset($xliff_file['attr']['custom']) and !empty($xliff_file['attr']['custom'])) {
-                    $this->filesMetadataDao->bulkInsert($projectStructure['id_project'], $fid, $xliff_file['attr']['custom'], $filePartsId);
-                }
-            }
-
-            foreach ($xliff_file['trans-units'] as $xliff_trans_unit) {
-                // initialize flag
-                $show_in_cattool = 1;
-
-                if (!isset($xliff_trans_unit['attr']['translate'])) {
-                    $xliff_trans_unit['attr']['translate'] = 'yes';
-                }
-
-                if ($xliff_trans_unit['attr']['translate'] == "no") {
-                    // No segments to translate — skip this trans-unit entirely
-                    continue;
-                }
-
-                $this->manageAlternativeTranslations($xliff_trans_unit, $xliff_file['attr'], $projectStructure);
-
-                $trans_unit_reference = self::sanitizedUnitId($xliff_trans_unit['attr']['id'], $fid);
-
-                $dataRefMap = [];
-
-                if (isset($xliff_trans_unit['original-data']) and !empty($xliff_trans_unit['original-data'])) {
-                    $segmentOriginalData = $xliff_trans_unit['original-data'];
-                    foreach ($segmentOriginalData as $datum) {
-                        if (isset($datum['attr']['id'])) {
-                            $dataRefMap[$datum['attr']['id']] = $datum['raw-content'];
-                        }
-                    }
-                }
-
-                // If the XLIFF is already segmented (has <seg-source>)
-                if (isset($xliff_trans_unit['seg-source'])) {
-                    foreach ($xliff_trans_unit['seg-source'] as $position => $seg_source) {
-                        // rest flag because if the first mrk of the seg-source is not translatable the rest of
-                        // mrk in the list will not be too!!!
-                        $show_in_cattool = 1;
-
-                        $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $projectStructure['source_language'], $this->filter);
-                        $wordCount = $this->features->filter('wordCount', $wordCount);
-
-                        // init tags
-                        $seg_source['mrk-ext-prec-tags'] = '';
-                        $seg_source['mrk-ext-succ-tags'] = '';
-
-                        if (empty($wordCount)) {
-                            $show_in_cattool = 0;
-                        } else {
-                            $extract_external                = $this->stripExternal($seg_source['raw-content']);
-                            $seg_source['mrk-ext-prec-tags'] = $extract_external['prec'];
-                            $seg_source['mrk-ext-succ-tags'] = $extract_external['succ'];
-                            $seg_source['raw-content']       = $extract_external['seg'];
-
-                            if (isset($xliff_trans_unit['seg-target'][$position]['raw-content'])) {
-                                if ($this->features->filter('populatePreTranslations', true)) {
-                                    $stateValues = self::getTargetStatesFromTransUnit($xliff_trans_unit, $position);
-
-                                    $target_extract_external = $this->stripExternal($xliff_trans_unit['seg-target'][$position]['raw-content']);
-
-                                    //
-                                    // -----------------------------------------------
-                                    // NOTE 2020-06-16
-                                    // -----------------------------------------------
-                                    //
-                                    // before calling html_entity_decode function we convert
-                                    // all unicode entities with no corresponding HTML entity
-                                    //
-                                    $extract_external['seg']         = CatUtils::restoreUnicodeEntitiesToOriginalValues($extract_external['seg']);
-                                    $target_extract_external['seg']  = CatUtils::restoreUnicodeEntitiesToOriginalValues($target_extract_external['seg']);
-
-                                    // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
-                                    // AND IF IT IS ONLY A CHAR? like "*" ?
-                                    // we can't distinguish if it is translated or not
-                                    // this means that we lose the tags id inside the target if different from source
-                                    $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded($extract_external['seg']);
-                                    $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($target_extract_external['seg']);
-
-                                    if ($this->isTranslated(
-                                            $src,
-                                            $trg,
-                                            $fid,
-                                            $stateValues['state'],
-                                            $stateValues['state-qualifier'],
-                                            $projectStructure,
-                                        ) && !empty($trg)
-                                    ) { // treat 0,1,2... as translated content!
-
-                                        $target = $this->filter->fromRawXliffToLayer0($target_extract_external['seg']);
-
-                                        // add an empty string to avoid casting to int: 0001 -> 1
-                                        // useful for idiom internal xliff id
-                                        if (!$projectStructure['translations']->offsetExists($trans_unit_reference)) {
-                                            $projectStructure['translations']->offsetSet($trans_unit_reference, new ArrayObject());
-                                        }
-
-                                        /**
-                                         * Trans-Unit
-                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
-                                         */
-                                        $projectStructure['translations'][$trans_unit_reference]->offsetSet(
-                                            $seg_source['mid'],
-                                            new ArrayObject([
-                                                2 => $target,
-                                                4 => $xliff_trans_unit,
-                                                6 => $position, // this value is the mrk positional order
-                                            ])
-                                        );
-
-                                        // seg-source and target translation can have different mrk id
-                                        // override the seg-source surrounding mrk-id with them of target
-                                        $seg_source['mrk-ext-prec-tags'] = $target_extract_external['prec'];
-                                        $seg_source['mrk-ext-succ-tags'] = $target_extract_external['succ'];
-                                    }
-                                }
-                            }
-                        }
-
-                        $counters = $this->buildAndAppendSegment(
-                            fid: $fid,
-                            filePartsId: $filePartsId,
-                            xliff_trans_unit: $xliff_trans_unit,
-                            rawContent: $seg_source['raw-content'],
-                            dataRefMap: $dataRefMap,
-                            wordCount: $wordCount,
-                            showInCattool: $show_in_cattool,
-                            projectStructure: $projectStructure,
-                            xliffMrkId: $seg_source['mid'],
-                            xliffExtPrecTags: $seg_source['ext-prec-tags'],
-                            xliffMrkExtPrecTags: $seg_source['mrk-ext-prec-tags'],
-                            xliffMrkExtSuccTags: $seg_source['mrk-ext-succ-tags'],
-                            xliffExtSuccTags: $seg_source['ext-succ-tags'],
-                        );
-
-                        // increment the counter for not empty segments
-                        $_fileCounter_Show_In_Cattool += $counters['show_in_cattool'];
-                    } // end foreach seg-source
-
-                    try {
-                        $this->addNotesToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
-                        $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
-                    } catch (Exception $exception) {
-                        throw new Exception($exception->getMessage(), -1);
-                    }
-                } else {
-                    $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $projectStructure['source_language'], $this->filter);
-
-                    $prec_tags = null;
-                    $succ_tags = null;
-                    if (empty($wordCount)) {
-                        $show_in_cattool = 0;
-                    } else {
-                        $extract_external                                = $this->stripExternal($xliff_trans_unit['source']['raw-content']);
-                        $prec_tags                                       = empty($extract_external['prec']) ? null : $extract_external['prec'];
-                        $succ_tags                                       = empty($extract_external['succ']) ? null : $extract_external['succ'];
-                        $xliff_trans_unit['source']['raw-content']       = $extract_external['seg'];
-
-                        if (isset($xliff_trans_unit['target']['raw-content'])) {
-                            $stateValues = self::getTargetStatesFromTransUnit($xliff_trans_unit);
-
-                            $target_extract_external = $this->stripExternal($xliff_trans_unit['target']['raw-content']);
-
-                            if ($this->isTranslated(
-                                    $xliff_trans_unit['source']['raw-content'],
-                                    $target_extract_external['seg'],
-                                    $fid,
-                                    $stateValues['state'],
-                                    $stateValues['state-qualifier'],
-                                    $projectStructure,
-                                ) && !empty($target_extract_external['seg'])
-                            ) {
-                                $target = $this->filter->fromRawXliffToLayer0($target_extract_external['seg']);
-
-                                // add an empty string to avoid casting to int: 0001 -> 1
-                                // useful for idiom internal xliff id
-                                if (!$projectStructure['translations']->offsetExists($trans_unit_reference)) {
-                                    $projectStructure['translations']->offsetSet($trans_unit_reference, new ArrayObject());
-                                }
-
-                                /**
-                                 * Trans-Unit
-                                 * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
-                                 */
-                                $projectStructure['translations'][$trans_unit_reference]->append(
-                                    new ArrayObject([
-                                        2 => $target,
-                                        4 => $xliff_trans_unit,
-                                    ])
-                                );
-                            }
-                        }
-                    }
-
-                    try {
-                        $this->addNotesToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
-                        $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
-                    } catch (Exception $exception) {
-                        throw new Exception(
-                            $exception->getMessage(),
-                            $exception->getCode() ?? -1
-                        );
-                    }
-
-                    $counters = $this->buildAndAppendSegment(
-                        fid: $fid,
-                        filePartsId: $filePartsId,
-                        xliff_trans_unit: $xliff_trans_unit,
-                        rawContent: $xliff_trans_unit['source']['raw-content'],
-                        dataRefMap: $dataRefMap,
-                        wordCount: $wordCount,
-                        showInCattool: $show_in_cattool,
-                        projectStructure: $projectStructure,
-                        xliffExtPrecTags: $prec_tags,
-                        xliffExtSuccTags: $succ_tags,
-                    );
-
-                    // increment the counter for not empty segments
-                    $_fileCounter_Show_In_Cattool += $counters['show_in_cattool'];
-                }
-            }
-
-            $this->totalSegments += count($xliff_file['trans-units']);
+            $_fileCounter_Show_In_Cattool += $this->processXliffFile($xliff_file, $fid, $projectStructure);
         }
 
         // use generic
@@ -381,6 +129,265 @@ class SegmentExtractor
             // increment global counter
             $this->showInCattoolSegsCounter += $_fileCounter_Show_In_Cattool;
         }
+    }
+
+    /**
+     * Process a single <file> element from the parsed XLIFF structure.
+     *
+     * Handles metadata persistence, file-parts creation, and delegates
+     * to the seg-source / non-seg-source trans-unit processing branches.
+     *
+     * @return int Number of segments marked as show-in-cattool in this file element
+     * @throws Exception
+     */
+    private function processXliffFile(array $xliff_file, int $fid, ArrayObject $projectStructure): int
+    {
+        // save external-file attribute
+        if (isset($xliff_file['attr']['external-file'])) {
+            $externalFile = $xliff_file['attr']['external-file'];
+            $this->filesMetadataDao->insert($projectStructure['id_project'], $fid, 'mtc:references', $externalFile);
+        }
+
+        // save x-jsont* datatype
+        if (isset($xliff_file['attr']['data-type'])) {
+            $dataType = $xliff_file['attr']['data-type'];
+
+            if (str_contains($dataType, 'x-jsont')) {
+                $this->filesMetadataDao->insert($projectStructure['id_project'], $fid, 'data-type', $dataType);
+            }
+        }
+
+        if (!array_key_exists('trans-units', $xliff_file)) {
+            return 0;
+        }
+
+        // files-part
+        $filePartsId = null;
+        if (isset($xliff_file['attr']['original'])) {
+            $filesPartsStruct           = new FilesPartsStruct();
+            $filesPartsStruct->id_file  = $fid;
+            $filesPartsStruct->tag_key  = 'original';
+            $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
+
+            $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
+
+            // save `custom` meta data
+            if (isset($xliff_file['attr']['custom']) and !empty($xliff_file['attr']['custom'])) {
+                $this->filesMetadataDao->bulkInsert($projectStructure['id_project'], $fid, $xliff_file['attr']['custom'], $filePartsId);
+            }
+        }
+
+        $fileCounterShowInCattool = 0;
+
+        foreach ($xliff_file['trans-units'] as $xliff_trans_unit) {
+            if (!isset($xliff_trans_unit['attr']['translate'])) {
+                $xliff_trans_unit['attr']['translate'] = 'yes';
+            }
+
+            if ($xliff_trans_unit['attr']['translate'] == "no") {
+                // No segments to translate — skip this trans-unit entirely
+                continue;
+            }
+
+            $this->manageAlternativeTranslations($xliff_trans_unit, $xliff_file['attr'], $projectStructure);
+
+            $trans_unit_reference = self::sanitizedUnitId($xliff_trans_unit['attr']['id'], $fid);
+
+            $dataRefMap = $this->buildDataRefMap($xliff_trans_unit);
+
+            // If the XLIFF is already segmented (has <seg-source>)
+            if (isset($xliff_trans_unit['seg-source'])) {
+                $fileCounterShowInCattool += $this->processSegSourceTransUnit(
+                    $xliff_trans_unit, $trans_unit_reference, $dataRefMap, $fid, $filePartsId, $projectStructure,
+                );
+            } else {
+                $fileCounterShowInCattool += $this->processNonSegSourceTransUnit(
+                    $xliff_trans_unit, $trans_unit_reference, $dataRefMap, $fid, $filePartsId, $projectStructure,
+                );
+            }
+        }
+
+        $this->totalSegments += count($xliff_file['trans-units']);
+
+        return $fileCounterShowInCattool;
+    }
+
+    /**
+     * Process a segmented (seg-source) trans-unit.
+     *
+     * Iterates over mrk elements in seg-source, handles pre-translations with
+     * unicode entity restoration and trimming, and appends segments.
+     *
+     * @return int Number of show-in-cattool segments produced
+     * @throws Exception
+     */
+    private function processSegSourceTransUnit(
+        array       $xliff_trans_unit,
+        string      $trans_unit_reference,
+        array       $dataRefMap,
+        int         $fid,
+        ?int        $filePartsId,
+        ArrayObject $projectStructure,
+    ): int {
+        $cattoolCount = 0;
+
+        foreach ($xliff_trans_unit['seg-source'] as $position => $seg_source) {
+            // reset flag because if the first mrk of the seg-source is not translatable the rest of
+            // mrk in the list will not be too!!!
+            $show_in_cattool = 1;
+
+            $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $projectStructure['source_language'], $this->filter);
+            $wordCount = $this->features->filter('wordCount', $wordCount);
+
+            // init tags
+            $seg_source['mrk-ext-prec-tags'] = '';
+            $seg_source['mrk-ext-succ-tags'] = '';
+
+            if (empty($wordCount)) {
+                $show_in_cattool = 0;
+            } else {
+                $extract_external                = $this->stripExternal($seg_source['raw-content']);
+                $seg_source['mrk-ext-prec-tags'] = $extract_external['prec'];
+                $seg_source['mrk-ext-succ-tags'] = $extract_external['succ'];
+                $seg_source['raw-content']       = $extract_external['seg'];
+
+                if (isset($xliff_trans_unit['seg-target'][$position]['raw-content'])) {
+                    $preTranslation = $this->detectPreTranslation(
+                        $extract_external['seg'],
+                        $xliff_trans_unit['seg-target'][$position]['raw-content'],
+                        $xliff_trans_unit,
+                        $fid,
+                        $position,
+                        $projectStructure,
+                    );
+
+                    if ($preTranslation !== null) {
+                        if (!$projectStructure['translations']->offsetExists($trans_unit_reference)) {
+                            $projectStructure['translations']->offsetSet($trans_unit_reference, new ArrayObject());
+                        }
+
+                        /**
+                         * Trans-Unit
+                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
+                         */
+                        $projectStructure['translations'][$trans_unit_reference]->offsetSet(
+                            $seg_source['mid'],
+                            new ArrayObject([
+                                2 => $preTranslation['target'],
+                                4 => $xliff_trans_unit,
+                                6 => $position, // this value is the mrk positional order
+                            ])
+                        );
+
+                        // seg-source and target translation can have different mrk id
+                        // override the seg-source surrounding mrk-id with them of target
+                        $seg_source['mrk-ext-prec-tags'] = $preTranslation['target_extract_external']['prec'];
+                        $seg_source['mrk-ext-succ-tags'] = $preTranslation['target_extract_external']['succ'];
+                    }
+                }
+            }
+
+            $counters = $this->buildAndAppendSegment(
+                fid: $fid,
+                filePartsId: $filePartsId,
+                xliff_trans_unit: $xliff_trans_unit,
+                rawContent: $seg_source['raw-content'],
+                dataRefMap: $dataRefMap,
+                wordCount: $wordCount,
+                showInCattool: $show_in_cattool,
+                projectStructure: $projectStructure,
+                xliffMrkId: $seg_source['mid'],
+                xliffExtPrecTags: $seg_source['ext-prec-tags'],
+                xliffMrkExtPrecTags: $seg_source['mrk-ext-prec-tags'],
+                xliffMrkExtSuccTags: $seg_source['mrk-ext-succ-tags'],
+                xliffExtSuccTags: $seg_source['ext-succ-tags'],
+            );
+
+            // increment the counter for not empty segments
+            $cattoolCount += $counters['show_in_cattool'];
+        } // end foreach seg-source
+
+        $this->extractNotesAndContexts($xliff_trans_unit, $fid, $projectStructure);
+
+        return $cattoolCount;
+    }
+
+    /**
+     * Process a non-segmented (no seg-source) trans-unit.
+     *
+     * Handles word count, external tag stripping, pre-translation detection,
+     * notes/context extraction, and segment creation.
+     *
+     * @return int Number of show-in-cattool segments produced (0 or 1)
+     * @throws Exception
+     */
+    private function processNonSegSourceTransUnit(
+        array       $xliff_trans_unit,
+        string      $trans_unit_reference,
+        array       $dataRefMap,
+        int         $fid,
+        ?int        $filePartsId,
+        ArrayObject $projectStructure,
+    ): int {
+        $show_in_cattool = 1;
+
+        $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $projectStructure['source_language'], $this->filter);
+
+        $prec_tags = null;
+        $succ_tags = null;
+        if (empty($wordCount)) {
+            $show_in_cattool = 0;
+        } else {
+            $extract_external                                = $this->stripExternal($xliff_trans_unit['source']['raw-content']);
+            $prec_tags                                       = empty($extract_external['prec']) ? null : $extract_external['prec'];
+            $succ_tags                                       = empty($extract_external['succ']) ? null : $extract_external['succ'];
+            $xliff_trans_unit['source']['raw-content']       = $extract_external['seg'];
+
+            if (isset($xliff_trans_unit['target']['raw-content'])) {
+                $preTranslation = $this->detectPreTranslation(
+                    $extract_external['seg'],
+                    $xliff_trans_unit['target']['raw-content'],
+                    $xliff_trans_unit,
+                    $fid,
+                    null,
+                    $projectStructure,
+                );
+
+                if ($preTranslation !== null) {
+                    if (!$projectStructure['translations']->offsetExists($trans_unit_reference)) {
+                        $projectStructure['translations']->offsetSet($trans_unit_reference, new ArrayObject());
+                    }
+
+                    /**
+                     * Trans-Unit
+                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
+                     */
+                    $projectStructure['translations'][$trans_unit_reference]->append(
+                        new ArrayObject([
+                            2 => $preTranslation['target'],
+                            4 => $xliff_trans_unit,
+                        ])
+                    );
+                }
+            }
+        }
+
+        $this->extractNotesAndContexts($xliff_trans_unit, $fid, $projectStructure);
+
+        $counters = $this->buildAndAppendSegment(
+            fid: $fid,
+            filePartsId: $filePartsId,
+            xliff_trans_unit: $xliff_trans_unit,
+            rawContent: $xliff_trans_unit['source']['raw-content'],
+            dataRefMap: $dataRefMap,
+            wordCount: $wordCount,
+            showInCattool: $show_in_cattool,
+            projectStructure: $projectStructure,
+            xliffExtPrecTags: $prec_tags,
+            xliffExtSuccTags: $succ_tags,
+        );
+
+        return $counters['show_in_cattool'];
     }
 
     // ── Counter getters ─────────────────────────────────────────────
@@ -466,6 +473,75 @@ class SegmentExtractor
         }
 
         return null;
+    }
+
+    /**
+     * Build a dataRef map from the trans-unit's original-data entries.
+     *
+     * @return array<string, string> Map of data-ref ID to raw content
+     */
+    private function buildDataRefMap(array $xliff_trans_unit): array
+    {
+        $dataRefMap = [];
+
+        if (isset($xliff_trans_unit['original-data']) and !empty($xliff_trans_unit['original-data'])) {
+            foreach ($xliff_trans_unit['original-data'] as $datum) {
+                if (isset($datum['attr']['id'])) {
+                    $dataRefMap[$datum['attr']['id']] = $datum['raw-content'];
+                }
+            }
+        }
+
+        return $dataRefMap;
+    }
+
+    /**
+     * Detect whether a target qualifies as a pre-translation.
+     *
+     * Applies the full pipeline: populatePreTranslations feature gate,
+     * unicode entity restoration, trim+strip, isTranslated check, and
+     * layer-0 conversion.
+     *
+     * @param string      $sourceRawContent  Source segment after stripExternal
+     * @param string      $targetRawContent  Target raw content before stripExternal
+     * @param array       $xliff_trans_unit  The parsed trans-unit
+     * @param int         $fid               File ID
+     * @param ?int        $position          mrk position (for seg-target), null for non-segmented
+     * @param ArrayObject $projectStructure  The mutable project structure
+     *
+     * @return ?array{target: string, target_extract_external: array} Null if not a valid pre-translation
+     */
+    private function detectPreTranslation(
+        string      $sourceRawContent,
+        string      $targetRawContent,
+        array       $xliff_trans_unit,
+        int         $fid,
+        ?int        $position,
+        ArrayObject $projectStructure,
+    ): ?array {
+        if (!$this->features->filter('populatePreTranslations', true)) {
+            return null;
+        }
+
+        $stateValues = self::getTargetStatesFromTransUnit($xliff_trans_unit, $position);
+
+        $target_extract_external = $this->stripExternal($targetRawContent);
+
+        // restore unicode entities before html_entity_decode comparison
+        $sourceRawContent               = CatUtils::restoreUnicodeEntitiesToOriginalValues($sourceRawContent);
+        $target_extract_external['seg'] = CatUtils::restoreUnicodeEntitiesToOriginalValues($target_extract_external['seg']);
+
+        $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded($sourceRawContent);
+        $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($target_extract_external['seg']);
+
+        if (!$this->isTranslated($src, $trg, $fid, $stateValues['state'], $stateValues['state-qualifier'], $projectStructure) || empty($trg)) {
+            return null;
+        }
+
+        return [
+            'target'                  => $this->filter->fromRawXliffToLayer0($target_extract_external['seg']),
+            'target_extract_external' => $target_extract_external,
+        ];
     }
 
     /**
@@ -580,6 +656,24 @@ class SegmentExtractor
     {
         // Definitely DISABLED
         return ['prec' => null, 'seg' => $segment, 'succ' => null];
+    }
+
+    /**
+     * Extract notes and context-group data from a trans-unit.
+     *
+     * Wraps addNotesToProjectStructure() and addTUnitContextsToProjectStructure()
+     * with consistent error handling.
+     *
+     * @throws Exception
+     */
+    private function extractNotesAndContexts(array $xliff_trans_unit, int $fid, ArrayObject $projectStructure): void
+    {
+        try {
+            $this->addNotesToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
+            $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
+        } catch (Exception $exception) {
+            throw new Exception($exception->getMessage(), -1);
+        }
     }
 
     /**
