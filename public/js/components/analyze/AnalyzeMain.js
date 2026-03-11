@@ -74,6 +74,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
                 openAnalysisReport={openAnalysisReport}
               />
               <div className="project-body">
+                <h5>Job details</h5>
                 <ProjectAnalyze
                   volumeAnalysis={volumeAnalysis.get('jobs')}
                   project={project}

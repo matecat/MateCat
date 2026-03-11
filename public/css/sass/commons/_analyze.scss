@@ -317,52 +317,25 @@ body.analyze {
     }
 
     .project-body {
-      background-color: colors.$grey150;
-      margin: 0 auto;
-      border-radius: variables.$border-radius-default;
-
+      background-color: colors.$grey50;
+      display: flex;
+      padding: 8px 16px 16px 16px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      align-self: stretch;
+      border-radius: variables.$border-radius-big;
+      h5 {
+        font-size: 16px;
+      }
       .job {
-        padding: 0 15px;
-        margin-top: 35px;
-        margin-bottom: 20px;
-
-        .job-header {
-          background-color: colors.$white !important;
-          padding: 0 0 !important;
-        }
-
-        .job-body {
-          background-color: colors.$grey50;
-          border-radius: variables.$border-radius-default;
-          overflow: hidden;
-
-          .chunks {
-            overflow-x: auto;
-
-            .chunk-container {
-              padding-top: 0;
-              overflow-x: auto;
-              min-width: 1200px;
-
-              .analysis {
-                //padding-top: 60px;
-                margin-top: 0;
-
-                &.show-details {
-                  .chunks-analyze,
-                  .chunk-analyze-container > div {
-                    background-color: colors.$grey100 !important;
-                  }
-                }
-
-                &.outsource-open {
-                  margin-left: -35px;
-                  margin-right: -35px;
-                }
-              }
-            }
-          }
-        }
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        align-self: stretch;
+        border-radius: variables.$border-radius-default;
+        border: 1px solid colors.$grey150;
+        overflow: hidden;
       }
     }
   }

@@ -52,70 +52,72 @@ const SplitChunkJob = ({
     const jidChunk = `${chunkAnalysis.id}-${index}`
 
     return (
-      <div key={index} className="project-card__content">
-        <div className="project-card__header-info">
-          <div className="project-card__chunkName">{`Chunk ${index}`}</div>
-          <div className="project-card__header-link">
-            <input
-              ref={(el) => (jobLinkRef.current[jidChunk] = el)}
-              type="text"
-              readOnly
-              value={encodeURI(chunkAnalysis.urls.t)}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <Popup
-              content="Copied to Clipboard!"
-              on="click"
-              pinned
-              position="top center"
-              trigger={
-                <Button
-                  size={BUTTON_SIZE.ICON_XSMALL}
-                  mode={BUTTON_MODE.GHOST}
-                  type={BUTTON_TYPE.PRIMARY}
-                  onClick={copyJobLinkToClipboard(job.id)}
-                  data-position="top center"
-                >
-                  <CopyIcon size={16} />
-                </Button>
-              }
-            />
-          </div>
-        </div>
-        <div className="project-card__count">
-          <div>
-            <div>{chunkAnalysis.total_raw}</div>
-          </div>
-          {workflowType === ANALYSIS_WORKFLOW_TYPES.STANDARD && (
-            <div>
-              <div>{chunkAnalysis.total_industry}</div>
+      <>
+        <div key={index} className="project-card__content">
+          <div className="project-card__header-info">
+            <div className="project-card__chunkName">{`Chunk ${index}`}</div>
+            <div className="project-card__header-link">
+              <input
+                ref={(el) => (jobLinkRef.current[jidChunk] = el)}
+                type="text"
+                readOnly
+                value={encodeURI(chunkAnalysis.urls.t)}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <Popup
+                content="Copied to Clipboard!"
+                on="click"
+                pinned
+                position="top center"
+                trigger={
+                  <Button
+                    size={BUTTON_SIZE.ICON_XSMALL}
+                    mode={BUTTON_MODE.GHOST}
+                    type={BUTTON_TYPE.PRIMARY}
+                    onClick={copyJobLinkToClipboard(job.id)}
+                    data-position="top center"
+                  >
+                    <CopyIcon size={16} />
+                  </Button>
+                }
+              />
             </div>
-          )}
-          <div
-            ref={(container) =>
-              (containers.current[chunkAnalysis.id + index] = container)
-            }
-          >
-            <div>{chunkAnalysis.total_equivalent}</div>
           </div>
-        </div>
-        <div className="project-card__header-actions">
-          {!config.jobAnalysis && (
-            <OutsourceButton
-              chunk={chunkAnalysis}
-              index={`${chunkAnalysis.id}-${index}`}
-              status={status}
-              openOutsourceModal={handleOpenOutsourceModal}
-            />
-          )}
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.SMALL}
-            onClick={showDetails(job.id)}
-          >
-            Details
-          </Button>
-          {getDirectOpenButton(chunkAnalysis, `${job.id}-${index}`)}
+          <div className="project-card__count">
+            <div>
+              <div>{chunkAnalysis.total_raw}</div>
+            </div>
+            {workflowType === ANALYSIS_WORKFLOW_TYPES.STANDARD && (
+              <div>
+                <div>{chunkAnalysis.total_industry}</div>
+              </div>
+            )}
+            <div
+              ref={(container) =>
+                (containers.current[chunkAnalysis.id + index] = container)
+              }
+            >
+              <div>{chunkAnalysis.total_equivalent}</div>
+            </div>
+          </div>
+          <div className="project-card__header-actions">
+            {!config.jobAnalysis && (
+              <OutsourceButton
+                chunk={chunkAnalysis}
+                index={`${chunkAnalysis.id}-${index}`}
+                status={status}
+                openOutsourceModal={handleOpenOutsourceModal}
+              />
+            )}
+            <Button
+              mode={BUTTON_MODE.OUTLINE}
+              size={BUTTON_SIZE.SMALL}
+              onClick={showDetails(job.id)}
+            >
+              Details
+            </Button>
+            {getDirectOpenButton(chunkAnalysis, `${job.id}-${index}`)}
+          </div>
         </div>
         <OutsourceContainer
           project={project}
@@ -129,7 +131,7 @@ const SplitChunkJob = ({
           outsourceJobId={outsourceJobId}
           standardWC={chunkAnalysis.total_equivalent}
         />
-      </div>
+      </>
     )
   })
 

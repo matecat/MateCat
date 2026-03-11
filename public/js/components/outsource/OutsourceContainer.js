@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback, useEffect, useRef} from 'react'
 import Cookies from 'js-cookie'
 import $ from 'jquery'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
@@ -7,162 +7,154 @@ import AssignToTranslator from './AssignToTranslator'
 import OutsourceVendor from './OutsourceVendor'
 import {Popup} from 'semantic-ui-react'
 
-class OutsourceContainer extends React.Component {
-  constructor(props) {
-    super(props)
-    this.handleDocumentClick = this.handleDocumentClick.bind(this)
-    this._handleEscKey = this._handleEscKey.bind(this)
-    this.checkTimezone()
+const checkTimezone = () => {
+  let timezoneToShow = Cookies.get('matecat_timezone')
+  if (!timezoneToShow) {
+    timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
+    Cookies.set('matecat_timezone', timezoneToShow, {secure: true})
   }
+}
 
-  allowHTML(string) {
-    return {__html: string}
-  }
+const OutsourceContainer = ({
+  openOutsource,
+  showTranslatorBox,
+  idJobLabel,
+  job,
+  standardWC,
+  url,
+  project,
+  extendedView,
+  onClickOutside,
+}) => {
+  const containerRef = useRef(null)
 
-  checkTimezone() {
-    var timezoneToShow = Cookies.get('matecat_timezone')
-    if (!timezoneToShow) {
-      timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
-      Cookies.set('matecat_timezone', timezoneToShow, {secure: true})
-    }
-  }
+  checkTimezone()
 
-  handleDocumentClick(evt) {
-    evt.stopPropagation()
-    const parentClass = '.outsource-container'
-    if (
-      this.container &&
-      !this.container.contains(evt.target) &&
-      !$(evt.target).hasClass('open-view-more') &&
-      !$(evt.target).hasClass('outsource-goBack') &&
-      !$(evt.target).hasClass('faster') &&
-      !$(evt.target).hasClass('need-it-faster-close') &&
-      !$(evt.target).hasClass('need-it-faster-close-icon') &&
-      !$(evt.target).hasClass('get-price') &&
-      !$(evt.target).hasClass('react-datepicker__day') &&
-      !evt.target.closest('.dropdown__list') &&
-      !evt.target.closest(parentClass)
-    ) {
-      this.props.onClickOutside(evt)
-    }
-  }
+  const handleDocumentClick = useCallback(
+    (evt) => {
+      evt.stopPropagation()
+      const parentClass = '.outsource-container'
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(evt.target) &&
+        !$(evt.target).hasClass('open-view-more') &&
+        !$(evt.target).hasClass('outsource-goBack') &&
+        !$(evt.target).hasClass('faster') &&
+        !$(evt.target).hasClass('need-it-faster-close') &&
+        !$(evt.target).hasClass('need-it-faster-close-icon') &&
+        !$(evt.target).hasClass('get-price') &&
+        !$(evt.target).hasClass('react-datepicker__day') &&
+        !evt.target.closest('.dropdown__list') &&
+        !evt.target.closest(parentClass)
+      ) {
+        onClickOutside(evt)
+      }
+    },
+    [onClickOutside],
+  )
 
-  _handleEscKey(event) {
-    if (event.keyCode === 27) {
-      event.preventDefault()
-      event.stopPropagation()
-      this.props.onClickOutside()
-    }
-  }
+  const handleEscKey = useCallback(
+    (event) => {
+      if (event.keyCode === 27) {
+        event.preventDefault()
+        event.stopPropagation()
+        onClickOutside()
+      }
+    },
+    [onClickOutside],
+  )
 
-  componentDidMount() {}
-
-  componentWillUnmount() {
-    window.removeEventListener('mousedown', this.handleDocumentClick)
-    window.removeEventListener('keydown', this._handleEscKey)
-  }
-
-  componentDidUpdate() {
-    let self = this
-    if (this.props.openOutsource || this.props.showTranslatorBox) {
-      setTimeout(function () {
-        window.addEventListener('mousedown', self.handleDocumentClick)
-        window.addEventListener('keydown', self._handleEscKey)
-        self.container && self.container.scrollIntoView({block: 'center'})
+  useEffect(() => {
+    if (openOutsource || showTranslatorBox) {
+      const timer = setTimeout(() => {
+        window.addEventListener('mousedown', handleDocumentClick)
+        window.addEventListener('keydown', handleEscKey)
+        containerRef.current &&
+          containerRef.current.scrollIntoView({block: 'center'})
       }, 500)
+      return () => {
+        clearTimeout(timer)
+        window.removeEventListener('mousedown', handleDocumentClick)
+        window.removeEventListener('keydown', handleEscKey)
+      }
     } else {
-      window.removeEventListener('mousedown', self.handleDocumentClick)
-      window.removeEventListener('keydown', self._handleEscKey)
+      window.removeEventListener('mousedown', handleDocumentClick)
+      window.removeEventListener('keydown', handleEscKey)
     }
-  }
+  }, [openOutsource, showTranslatorBox, handleDocumentClick, handleEscKey])
 
-  render() {
-    let outsourceContainerClass =
-      !config.enable_outsource ||
-      (this.props.showTranslatorBox && !this.props.openOutsource)
-        ? 'no-outsource'
-        : this.props.showTranslatorBox && this.props.openOutsource
-          ? 'showTranslator'
-          : this.props.openOutsource
-            ? 'showOutsource'
-            : ''
+  const outsourceContainerClass =
+    !config.enable_outsource || (showTranslatorBox && !openOutsource)
+      ? 'no-outsource'
+      : showTranslatorBox && openOutsource
+        ? 'showTranslator'
+        : openOutsource
+          ? 'showOutsource'
+          : ''
 
-    return (
-      <TransitionGroup>
-        {this.props.openOutsource || this.props.showTranslatorBox ? (
-          <CSSTransition
-            key={this.props.idJobLabel}
-            classNames="transitionOutsource"
-            timeout={{enter: 500, exit: 300}}
+  return (
+    <TransitionGroup>
+      {openOutsource || showTranslatorBox ? (
+        <CSSTransition
+          key={idJobLabel}
+          classNames="transitionOutsource"
+          timeout={{enter: 500, exit: 300}}
+        >
+          <div
+            className={'outsource-container ' + outsourceContainerClass}
+            ref={containerRef}
           >
-            <div
-              className={'outsource-container ' + outsourceContainerClass}
-              ref={(container) => (this.container = container)}
-            >
-              <div className=" outsource-header ">
-                {this.props.idJobLabel ? (
-                  <div className="job-id" title="Job Id">
-                    ID: {this.props.idJobLabel}
-                  </div>
-                ) : null}
-                <Popup
-                  content={
-                    this.props.job.get('sourceTxt') +
-                    ' > ' +
-                    this.props.job.get('targetTxt')
-                  }
-                  trigger={
-                    <div className="source-target languages-tooltip">
-                      <div className="source-box">
-                        {this.props.job.get('sourceTxt')}
-                      </div>
-                      <div className="in-to">
-                        <i className="icon-chevron-right icon" />
-                      </div>
-                      <div className="target-box">
-                        {this.props.job.get('targetTxt')}
-                      </div>
-                    </div>
-                  }
-                />
-
-                <div className="job-payable">
-                  <div>
-                    <span id="words">{this.props.standardWC}</span> words
-                  </div>
+            <div className=" outsource-header ">
+              {idJobLabel ? (
+                <div className="job-id" title="Job Id">
+                  ID: {idJobLabel}
                 </div>
-                {/*<div className="project-subject">*/}
-                {/*  <b>Subject</b>: {this.props.job.get('subject_printable')}*/}
-                {/*</div>*/}
-              </div>
-              <div className="outsource-content">
-                <div ref={(container) => (this.container = container)}>
-                  {this.props.showTranslatorBox ? (
-                    <AssignToTranslator
-                      job={this.props.job}
-                      url={this.props.url}
-                      project={this.props.project}
-                      closeOutsource={this.props.onClickOutside}
-                    />
-                  ) : null}
-                  {config.enable_outsource && this.props.openOutsource ? (
-                    <OutsourceVendor
-                      project={this.props.project}
-                      job={this.props.job}
-                      extendedView={this.props.extendedView}
-                      standardWC={this.props.standardWC}
-                      translatorsNumber={this.translatorsNumber}
-                    />
-                  ) : null}
+              ) : null}
+              <Popup
+                content={job.get('sourceTxt') + ' > ' + job.get('targetTxt')}
+                trigger={
+                  <div className="source-target languages-tooltip">
+                    <div className="source-box">{job.get('sourceTxt')}</div>
+                    <div className="in-to">
+                      <i className="icon-chevron-right icon" />
+                    </div>
+                    <div className="target-box">{job.get('targetTxt')}</div>
+                  </div>
+                }
+              />
+              <div className="job-payable">
+                <div>
+                  <span id="words">{standardWC}</span> words
                 </div>
               </div>
             </div>
-          </CSSTransition>
-        ) : null}
-      </TransitionGroup>
-    )
-  }
+            <div className="outsource-content">
+              <div ref={containerRef}>
+                {showTranslatorBox ? (
+                  <AssignToTranslator
+                    job={job}
+                    url={url}
+                    project={project}
+                    closeOutsource={onClickOutside}
+                  />
+                ) : null}
+                {config.enable_outsource && openOutsource ? (
+                  <OutsourceVendor
+                    project={project}
+                    job={job}
+                    extendedView={extendedView}
+                    standardWC={standardWC}
+                  />
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </CSSTransition>
+      ) : null}
+    </TransitionGroup>
+  )
 }
+
 OutsourceContainer.defaultProps = {
   showTranslatorBox: true,
   extendedView: true,

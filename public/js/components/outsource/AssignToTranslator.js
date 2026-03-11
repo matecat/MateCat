@@ -1,5 +1,4 @@
-import React from 'react'
-import $ from 'jquery'
+import React, {useCallback, useRef, useState} from 'react'
 import Cookies from 'js-cookie'
 import DatePicker from 'react-datepicker'
 import {GMTSelect} from './GMTSelect'
@@ -12,142 +11,113 @@ import 'react-datepicker/dist/react-datepicker.css'
 import {Select} from '../common/Select'
 import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
-class AssignToTranslator extends React.Component {
-  constructor(props) {
-    super(props)
-    let time = 12
-    if (this.props.job.get('translator')) {
-      let date = CommonUtils.getGMTDate(
-        this.props.job.get('translator').get('delivery_timestamp') * 1000,
+const timeOptions = [
+  {name: '1:00 AM', id: '1'},
+  {name: '2:00 AM', id: '2'},
+  {name: '3:00 AM', id: '3'},
+  {name: '4:00 AM', id: '4'},
+  {name: '5:00 AM', id: '5'},
+  {name: '6:00 AM', id: '6'},
+  {name: '7:00 AM', id: '7'},
+  {name: '8:00 AM', id: '8'},
+  {name: '9:00 AM', id: '9'},
+  {name: '10:00 AM', id: '10'},
+  {name: '11:00 AM', id: '11'},
+  {name: '12:00 AM', id: '12'},
+  {name: '1:00 PM', id: '13'},
+  {name: '2:00 PM', id: '14'},
+  {name: '3:00 PM', id: '15'},
+  {name: '4:00 PM', id: '16'},
+  {name: '5:00 PM', id: '17'},
+  {name: '6:00 PM', id: '18'},
+  {name: '7:00 PM', id: '19'},
+  {name: '8:00 PM', id: '20'},
+  {name: '9:00 PM', id: '21'},
+  {name: '10:00 PM', id: '22'},
+  {name: '11:00 PM', id: '23'},
+  {name: '12:00 PM', id: '24'},
+]
+const AssignToTranslator = ({job, url, project, closeOutsource}) => {
+  const getInitialTime = () => {
+    if (job.get('translator')) {
+      const date = CommonUtils.getGMTDate(
+        job.get('translator').get('delivery_timestamp') * 1000,
       )
-      time = date.time.split(':')[0]
+      return parseInt(date.time.split(':')[0])
     }
-    this.state = {
-      timezone: Cookies.get('matecat_timezone'),
-      deliveryDate: this.props.job.get('translator')
-        ? new Date(
-            this.props.job.get('translator').get('delivery_timestamp') * 1000,
-          )
-        : new Date(),
-      time: parseInt(time),
-    }
+    return 12
   }
 
-  shareJob() {
-    //Check email and validations errors
+  const [timezone, setTimezone] = useState(Cookies.get('matecat_timezone'))
+  const [deliveryDate, setDeliveryDate] = useState(
+    job.get('translator')
+      ? new Date(job.get('translator').get('delivery_timestamp') * 1000)
+      : new Date(),
+  )
+  const [time, setTime] = useState(getInitialTime())
+  const [isSendDisabled, setIsSendDisabled] = useState(true)
 
-    let date = this.state.deliveryDate
-    let time = this.state.time
-    date.setHours(time)
-    date.setMinutes(0)
+  const emailRef = useRef(null)
 
-    let email = this.email.value
-    const job = this.props.job.toJS()
-    const project = this.props.project.toJS()
-    addJobTranslator(email, date, this.state.timezone, job)
-      .then((data) => {
-        ModalsActions.onCloseModal()
-        if (data.job) {
-          this.checkShareToTranslatorResponse(data, email, date, job, project)
-        } else {
-          this.showShareTranslatorError()
-        }
-      })
-      .catch(() => {
-        this.showShareTranslatorError()
-      })
-    this.props.closeOutsource()
-  }
-
-  checkShareToTranslatorResponse(response, mail, date, job, project) {
-    let message = ''
-    if (job.translator) {
-      let newDate = new Date(date)
-      let oldDate = new Date(job.translator.delivery_date)
-      if (oldDate.getTime() !== newDate.getTime()) {
-        message = this.shareToTranslatorDateChangeNotification(
-          mail,
-          oldDate,
-          newDate,
-        )
-      } else if (job.translator.email !== mail) {
-        message = this.shareToTranslatorMailChangeNotification(mail, job)
-      } else {
-        message = this.shareToTranslatorNotification(mail, job)
-      }
+  const checkSendToTranslatorButton = useCallback(() => {
+    if (
+      emailRef.current?.value.length > 0 &&
+      CommonUtils.checkEmail(emailRef.current.value)
+    ) {
+      setIsSendDisabled(false)
+      return true
     } else {
-      message = this.shareToTranslatorNotification(mail, job)
+      setIsSendDisabled(true)
+      return false
     }
-    const notification = {
-      title: message.title,
-      text: message.text,
-      type: 'success',
-      position: 'bl',
-      allowHtml: true,
-      timer: 10000,
-    }
-    CatToolActions.addNotification(notification)
-    ManageActions.changeJobPasswordFromOutsource(
-      project,
-      job,
-      job.password,
-      response.job.password,
-    )
-    ManageActions.assignTranslator(
-      project.id,
-      job.id,
-      job.password,
-      response.job.translator,
-    )
-  }
-  shareToTranslatorMailChangeNotification(mail, job) {
-    return {
-      title:
-        'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
-      text:
-        '<div style="margin-top: 16px;">To: <a href="mailto:' +
-        mail +
-        '">' +
-        mail +
-        '</a> ' +
-        '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-        '<div class style="display: inline-block; font-size: 14px; color: grey;">(' +
-        job.id +
-        ')</div> ' +
-        '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-        '<div class="source-box" style="display: inherit;">' +
-        job.sourceTxt +
-        '</div> ' +
-        '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
-        '<div class="target-box" style="display: inherit;">' +
-        job.targetTxt +
-        '</div> </div> </div></div>',
-    }
-  }
-  shareToTranslatorNotification(mail, job) {
-    return {
-      title: 'Job sent',
-      text:
-        '<div style="margin-top: 16px;">To: <a href="mailto:' +
-        mail +
-        '">' +
-        mail +
-        '</a> ' +
-        '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-        '<div class style="display: inline-block; font-size: 14px; color: grey;">' +
-        job.id +
-        ' </div> ' +
-        '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-        '<div class="source-box" style="display: inherit;">' +
-        job.sourceTxt +
-        '</div> ' +
-        '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
-        '<div class="target-box" style="display: inherit;">' +
-        job.targetTxt +
-        '</div> </div> </div></div>',
-    }
-  }
-  shareToTranslatorDateChangeNotification(email, oldDate, newDate) {
+  }, [])
+
+  const shareToTranslatorMailChangeNotification = (mail, jobData) => ({
+    title:
+      'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
+    text:
+      '<div style="margin-top: 16px;">To: <a href="mailto:' +
+      mail +
+      '">' +
+      mail +
+      '</a> ' +
+      '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+      '<div class style="display: inline-block; font-size: 14px; color: grey;">(' +
+      jobData.id +
+      ')</div> ' +
+      '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+      '<div class="source-box" style="display: inherit;">' +
+      jobData.sourceTxt +
+      '</div> ' +
+      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+      '<div class="target-box" style="display: inherit;">' +
+      jobData.targetTxt +
+      '</div> </div> </div></div>',
+  })
+
+  const shareToTranslatorNotification = (mail, jobData) => ({
+    title: 'Job sent',
+    text:
+      '<div style="margin-top: 16px;">To: <a href="mailto:' +
+      mail +
+      '">' +
+      mail +
+      '</a> ' +
+      '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+      '<div class style="display: inline-block; font-size: 14px; color: grey;">' +
+      jobData.id +
+      ' </div> ' +
+      '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+      '<div class="source-box" style="display: inherit;">' +
+      jobData.sourceTxt +
+      '</div> ' +
+      '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+      '<div class="target-box" style="display: inherit;">' +
+      jobData.targetTxt +
+      '</div> </div> </div></div>',
+  })
+
+  const shareToTranslatorDateChangeNotification = (email, oldDate, newDate) => {
     oldDate = CommonUtils.formatDate(oldDate, 'yyyy-MM-d hh:mm a')
     oldDate = CommonUtils.getGMTDate(oldDate)
     newDate = CommonUtils.formatDate(newDate, 'yyyy-MM-d hh:mm a')
@@ -190,139 +160,168 @@ class AssignToTranslator extends React.Component {
         '</a> </div></div>',
     }
   }
-  showShareTranslatorError() {
+
+  const showShareTranslatorError = () => {
     ModalsActions.onCloseModal()
-    const notification = {
+    CatToolActions.addNotification({
       title: 'Problems sending the job',
       text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
       type: 'error',
       position: 'bl',
       allowHtml: true,
       timer: 10000,
-    }
-    CatToolActions.addNotification(notification)
-  }
-
-  GmtSelectChanged(value) {
-    this.checkSendToTranslatorButton()
-    this.setState({
-      timezone: value,
     })
   }
 
-  checkSendToTranslatorButton() {
-    if (
-      this.email.value.length > 0 &&
-      CommonUtils.checkEmail(this.email.value)
-    ) {
-      $(this.sendButton).removeClass('disabled')
-      return true
+  const checkShareToTranslatorResponse = (
+    response,
+    mail,
+    date,
+    jobData,
+    projectData,
+  ) => {
+    let message = ''
+    if (jobData.translator) {
+      const newDate = new Date(date)
+      const oldDate = new Date(jobData.translator.delivery_date)
+      if (oldDate.getTime() !== newDate.getTime()) {
+        message = shareToTranslatorDateChangeNotification(
+          mail,
+          oldDate,
+          newDate,
+        )
+      } else if (jobData.translator.email !== mail) {
+        message = shareToTranslatorMailChangeNotification(mail, jobData)
+      } else {
+        message = shareToTranslatorNotification(mail, jobData)
+      }
     } else {
-      $(this.sendButton).addClass('disabled')
+      message = shareToTranslatorNotification(mail, jobData)
     }
+    CatToolActions.addNotification({
+      title: message.title,
+      text: message.text,
+      type: 'success',
+      position: 'bl',
+      allowHtml: true,
+      timer: 10000,
+    })
+    ManageActions.changeJobPasswordFromOutsource(
+      projectData,
+      jobData,
+      jobData.password,
+      response.job.password,
+    )
+    ManageActions.assignTranslator(
+      projectData.id,
+      jobData.id,
+      jobData.password,
+      response.job.translator,
+    )
   }
 
-  render() {
-    let translatorEmail = ''
-    if (this.props.job.get('translator')) {
-      translatorEmail = this.props.job.get('translator').get('email')
-    }
-    const timeOptions = [
-      {name: '1:00 AM', id: '1'},
-      {name: '2:00 AM', id: '2'},
-      {name: '3:00 AM', id: '3'},
-      {name: '4:00 AM', id: '4'},
-      {name: '5:00 AM', id: '5'},
-      {name: '6:00 AM', id: '6'},
-      {name: '7:00 AM', id: '7'},
-      {name: '8:00 AM', id: '8'},
-      {name: '9:00 AM', id: '9'},
-      {name: '10:00 AM', id: '10'},
-      {name: '11:00 AM', id: '11'},
-      {name: '12:00 AM', id: '12'},
-      {name: '1:00 PM', id: '13'},
-      {name: '2:00 PM', id: '14'},
-      {name: '3:00 PM', id: '15'},
-      {name: '4:00 PM', id: '16'},
-      {name: '5:00 PM', id: '17'},
-      {name: '6:00 PM', id: '18'},
-      {name: '7:00 PM', id: '19'},
-      {name: '8:00 PM', id: '20'},
-      {name: '9:00 PM', id: '21'},
-      {name: '10:00 PM', id: '22'},
-      {name: '11:00 PM', id: '23'},
-      {name: '12:00 PM', id: '24'},
-    ]
-    return (
-      <div className="assign-job-translator sixteen wide column">
-        <div className="title">Assign Job to translator</div>
-        <div className="title-url">
-          <div className="translator-assignee">
-            <div className="ui form">
-              <div className="fields">
-                <div className="field translator-email">
-                  <label>Translator email</label>
-                  <input
-                    type="email"
-                    placeholder="translator@email.com"
-                    defaultValue={translatorEmail}
-                    ref={(email) => (this.email = email)}
-                    onKeyUp={this.checkSendToTranslatorButton.bind(this)}
-                  />
-                </div>
-                <div className="field translator-delivery ">
-                  <label>Delivery date</label>
-                  <div className="ui calendar">
-                    <div className="ui input">
-                      <DatePicker
-                        selected={this.state.deliveryDate}
-                        onChange={(date) => {
-                          this.setState({
-                            deliveryDate: date,
-                          })
-                          this.checkSendToTranslatorButton()
-                        }}
-                      />
-                    </div>
+  const shareJob = () => {
+    const date = new Date(deliveryDate)
+    date.setHours(time)
+    date.setMinutes(0)
+
+    const email = emailRef.current.value
+    const jobData = job.toJS()
+    const projectData = project.toJS()
+
+    addJobTranslator(email, date, timezone, jobData)
+      .then((data) => {
+        ModalsActions.onCloseModal()
+        if (data.job) {
+          checkShareToTranslatorResponse(
+            data,
+            email,
+            date,
+            jobData,
+            projectData,
+          )
+        } else {
+          showShareTranslatorError()
+        }
+      })
+      .catch(() => {
+        showShareTranslatorError()
+      })
+    closeOutsource()
+  }
+
+  const translatorEmail = job.get('translator')
+    ? job.get('translator').get('email')
+    : ''
+
+  return (
+    <div className="assign-job-translator sixteen wide column">
+      <div className="title">Assign Job to translator</div>
+      <div className="title-url">
+        <div className="translator-assignee">
+          <div className="ui form">
+            <div className="fields">
+              <div className="field translator-email">
+                <label>Translator email</label>
+                <input
+                  type="email"
+                  placeholder="translator@email.com"
+                  defaultValue={translatorEmail}
+                  ref={emailRef}
+                  onKeyUp={checkSendToTranslatorButton}
+                />
+              </div>
+              <div className="field translator-delivery ">
+                <label>Delivery date</label>
+                <div className="ui calendar">
+                  <div className="ui input">
+                    <DatePicker
+                      selected={deliveryDate}
+                      onChange={(date) => {
+                        setDeliveryDate(date)
+                        checkSendToTranslatorButton()
+                      }}
+                    />
                   </div>
                 </div>
-                <div className="field translator-time">
-                  <Select
-                    label="Time"
-                    onSelect={({id}) => {
-                      this.setState({
-                        time: parseInt(id),
-                      })
-                      this.checkSendToTranslatorButton()
-                    }}
-                    activeOption={timeOptions.find(
-                      ({id}) => parseInt(id) === this.state.time,
-                    )}
-                    options={timeOptions}
-                  />
-                </div>
-                <div className="field gmt">
-                  <GMTSelect
-                    changeValue={this.GmtSelectChanged.bind(this)}
-                    showLabel={true}
-                  />
-                </div>
-                <div className="field send-job-box">
-                  <Button
-                    type={BUTTON_TYPE.PRIMARY}
-                    onClick={this.shareJob.bind(this)}
-                    ref={(send) => (this.sendButton = send)}
-                  >
-                    Send Job to Translator
-                  </Button>
-                </div>
+              </div>
+              <div className="field translator-time">
+                <Select
+                  label="Time"
+                  onSelect={({id}) => {
+                    setTime(parseInt(id))
+                    checkSendToTranslatorButton()
+                  }}
+                  activeOption={timeOptions.find(
+                    ({id}) => parseInt(id) === time,
+                  )}
+                  options={timeOptions}
+                />
+              </div>
+              <div className="field gmt">
+                <GMTSelect
+                  changeValue={(value) => {
+                    checkSendToTranslatorButton()
+                    setTimezone(value)
+                  }}
+                  showLabel={true}
+                />
+              </div>
+              <div className="field send-job-box">
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={shareJob}
+                  disabled={isSendDisabled}
+                >
+                  Send Job to Translator
+                </Button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
 export default AssignToTranslator
