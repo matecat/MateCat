@@ -442,7 +442,7 @@ class ProjectManager
     /**
      * @throws Exception
      */
-    private function reloadFeatures(): void
+    protected function reloadFeatures(): void
     {
         $this->features = new FeatureSet();
         $this->features->loadForProject($this->project);
@@ -457,9 +457,9 @@ class ProjectManager
      * Save features in project metadata
      * @throws ReflectionException
      */
-    private function saveFeaturesInMetadata(): void
+    protected function saveFeaturesInMetadata(): void
     {
-        $dao = new ProjectsMetadataDao();
+        $dao = $this->createProjectsMetadataDao();
 
         $featureCodes = $this->features->getCodes();
         if (!empty($featureCodes)) {
@@ -2097,8 +2097,17 @@ class ProjectManager
             isset($metadataStruct->meta_value) and $metadataStruct->meta_value !== ''
         ) {
             $metadataStruct->id_segment = $id_segment;
-            SegmentMetadataDao::save($metadataStruct);
+            $this->persistSegmentMetadata($metadataStruct);
         }
+    }
+
+    /**
+     * Persist a single segment metadata record.
+     * Protected so test subclasses can override to capture calls.
+     */
+    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
+    {
+        SegmentMetadataDao::save($metadataStruct);
     }
 
     /**

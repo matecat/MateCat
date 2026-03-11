@@ -6,13 +6,17 @@ use ArrayObject;
 use Exception;
 use Model\Jobs\JobStruct;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectManager\ProjectManager;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentMetadataStruct;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionClass;
+use ReflectionException;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 
@@ -153,6 +157,7 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the protected saveMetadata().
+     * @throws Exception
      */
     public function callSaveMetadata(): void
     {
@@ -178,10 +183,108 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the protected saveJobsMetadata().
+     * @throws ReflectionException
      */
     public function callSaveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
     {
         $this->saveJobsMetadata($newJob, $projectStructure);
+    }
+
+    // ── Step 11a: pure-data methods testing support ─────────────────
+
+    /**
+     * Public wrapper to invoke the protected _cleanSegmentsMetadata().
+     */
+    public function callCleanSegmentsMetadata(): void
+    {
+        $this->_cleanSegmentsMetadata();
+    }
+
+    /**
+     * Public wrapper to invoke the private __setSegmentIdForNotes() via reflection.
+     * @throws ReflectionException
+     */
+    public function callSetSegmentIdForNotes(array $row): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('__setSegmentIdForNotes');
+        $method->invoke($this, $row);
+    }
+
+    /**
+     * Public wrapper to invoke the private __setSegmentIdForContexts() via reflection.
+     * @throws ReflectionException
+     */
+    public function callSetSegmentIdForContexts(array $row): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('__setSegmentIdForContexts');
+        $method->invoke($this, $row);
+    }
+
+    /**
+     * Public wrapper to invoke the protected _saveSegmentMetadata().
+     */
+    public function callSaveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
+    {
+        $this->_saveSegmentMetadata($id_segment, $metadataStruct);
+    }
+
+    /** @var SegmentMetadataStruct[] Captured persist calls */
+    private array $persistedSegmentMetadata = [];
+
+    /**
+     * Override persistSegmentMetadata to capture calls instead of hitting the DB.
+     */
+    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
+    {
+        $this->persistedSegmentMetadata[] = $metadataStruct;
+    }
+
+    /**
+     * Get captured segment metadata persist calls.
+     * @return SegmentMetadataStruct[]
+     */
+    public function getPersistedSegmentMetadata(): array
+    {
+        return $this->persistedSegmentMetadata;
+    }
+
+    // ── Step 11b: setters / getters / config methods testing support ──
+
+    /**
+     * Public wrapper to invoke the protected _getRequestedFeatures().
+     * @return BasicFeatureStruct[]
+     */
+    public function callGetRequestedFeatures(): array
+    {
+        return $this->_getRequestedFeatures();
+    }
+
+    /**
+     * Public wrapper to invoke the protected saveFeaturesInMetadata().
+     * @throws ReflectionException
+     */
+    public function callSaveFeaturesInMetadata(): void
+    {
+        $this->saveFeaturesInMetadata();
+    }
+
+    /**
+     * Override reloadFeatures() to avoid DB hit in tests.
+     * Does nothing — the features property is already injected via initForTest().
+     */
+    protected function reloadFeatures(): void
+    {
+        // no-op: features already set by test
+    }
+
+    /**
+     * Expose the project property for assertions.
+     */
+    public function getProject(): ?ProjectStruct
+    {
+        return $this->project;
     }
 }
 
