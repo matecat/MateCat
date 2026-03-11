@@ -430,27 +430,22 @@ class ProjectManager
     {
         $jobsMetadataDao = $this->createJobsMetadataDao();
 
-        // public_tm_penalty
-        if (isset ($projectStructure['public_tm_penalty'])) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure['public_tm_penalty']);
+        // Simple key-value metadata with optional transformation
+        $simpleKeys = [
+            'public_tm_penalty'            => null,
+            'character_counter_count_tags'  => fn($v) => $v ? 1 : 0,
+            'character_counter_mode'        => null,
+            'tm_prioritization'            => fn($v) => $v ? 1 : 0,
+        ];
+
+        foreach ($simpleKeys as $key => $transformer) {
+            if (isset($projectStructure[$key])) {
+                $value = $transformer ? $transformer($projectStructure[$key]) : $projectStructure[$key];
+                $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $value);
+            }
         }
 
-        // character_counter_count_tags
-        if (isset($projectStructure['character_counter_count_tags'])) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'character_counter_count_tags', ($projectStructure['character_counter_count_tags'] ? "1" : "0"));
-        }
-
-        // character_counter_mode
-        if (isset($projectStructure['character_counter_mode'])) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'character_counter_mode', $projectStructure['character_counter_mode']);
-        }
-
-        // tm_prioritization
-        if (isset($projectStructure['tm_prioritization'])) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'tm_prioritization', $projectStructure['tm_prioritization'] ? 1 : 0);
-        }
-
-        // dialect_strict
+        // dialect_strict — per-language matching logic
         if (isset($projectStructure['dialect_strict'])) {
             $dialectStrictObj = json_decode($projectStructure['dialect_strict'], true);
 

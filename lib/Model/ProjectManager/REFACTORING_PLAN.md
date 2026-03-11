@@ -16,7 +16,7 @@
 | 1 | Delete dead code in `saveMetadata()` | HIGH | ✅ Done |
 | 2 | Extract shared segment-processing logic from `_extractSegments()` | HIGH | ✅ Done |
 | 3 | Extract error-recording helper (`addProjectError`) | MEDIUM | ✅ Done |
-| 4 | Consolidate `saveJobsMetadata()` | LOW | ⬜ Ready (0c, 0d done) |
+| 4 | Consolidate `saveJobsMetadata()` | LOW | ✅ Done |
 | 5 | [Optional] Extract `_extractSegments()` into a separate class | OPTIONAL | ⬜ Pending |
 
 ### Coverage summary (86 tests, 208 assertions)
@@ -188,22 +188,23 @@ $this->projectStructure['result']['errors'][] = [
 
 ---
 
-## Step 4: Consolidate `saveJobsMetadata()`
+## Step 4: Consolidate `saveJobsMetadata()` — ✅ DONE
 
-### What's duplicated
+### What was duplicated
 Four `if (isset(...)) { $jobsMetadataDao->set(...) }` blocks for:
 - `public_tm_penalty`
 - `character_counter_count_tags` (coerced to `"1"`/`"0"`)
 - `character_counter_mode`
 - `tm_prioritization` (coerced to `1`/`0`)
 
-### Proposed refactoring
+### What was done
+Replaced the four repetitive blocks with a data-driven `$simpleKeys` map + loop:
 ```php
 $simpleKeys = [
-    'public_tm_penalty'          => null,
-    'character_counter_count_tags' => fn($v) => $v ? "1" : "0",
-    'character_counter_mode'     => null,
-    'tm_prioritization'          => fn($v) => $v ? 1 : 0,
+    'public_tm_penalty'            => null,
+    'character_counter_count_tags'  => fn($v) => $v ? "1" : "0",
+    'character_counter_mode'        => null,
+    'tm_prioritization'            => fn($v) => $v ? 1 : 0,
 ];
 
 foreach ($simpleKeys as $key => $transformer) {
@@ -213,7 +214,10 @@ foreach ($simpleKeys as $key => $transformer) {
     }
 }
 ```
-Keep `dialect_strict` separate (has per-language matching logic).
+
+`dialect_strict` (per-language matching) and `SUBFILTERING_HANDLERS` (unconditional) remain unchanged.
+
+All 86 tests (208 assertions) pass with zero changes to test expectations.
 
 ---
 
