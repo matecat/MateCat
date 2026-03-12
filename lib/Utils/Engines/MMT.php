@@ -683,12 +683,14 @@ class MMT extends AbstractEngine
         $cacheTtl = 60 * 60 * 24 * 30;
 
         // Common metadata loading
-        $metadataDao = new MetadataDao();
-        $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
+        if(!empty($id_job)){
+            $metadataDao = new MetadataDao();
+            $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
 
-        $mt_context = array_pop($contextRs);
-        if (!empty($mt_context)) {
-            $config['mt_context'] = $mt_context->value;
+            $mt_context = array_pop($contextRs);
+            if (!empty($mt_context)) {
+                $config['mt_context'] = $mt_context->value;
+            }
         }
 
         // Common config values
