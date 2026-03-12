@@ -706,15 +706,15 @@ ul.suggestion-item.graysmall:last-child {
   .segment-footer-tab-more-button {
     margin-left: auto;
     margin-right: auto;
-    background-color: colors.$grey4 !important;
-    color: colors.$grey6 !important;
+    background-color: colors.$grey100 !important;
+    color: colors.$grey700 !important;
     gap: 0;
     padding-right: 16px !important;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
 
     &:hover {
-      background-color: colors.$grey9 !important;
+      background-color: colors.$grey75 !important;
     }
 
     &.segment-footer-tab-more-button-extended-mode {
