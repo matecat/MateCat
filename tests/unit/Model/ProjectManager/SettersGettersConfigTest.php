@@ -7,7 +7,6 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
-use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -20,7 +19,6 @@ use Utils\Registry\AppConfig;
  * Step 11b – Tests for setter / getter / config methods:
  *
  * - setTeam()
- * - setProjectAndReLoadFeatures()
  * - _getRequestedFeatures()
  * - getAnalyzeURL()
  * - saveFeaturesInMetadata()
@@ -70,45 +68,6 @@ class SettersGettersConfigTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
         $this->assertSame($team2, $ps['team']);
         $this->assertSame(2, $ps['id_team']);
-    }
-
-    // ── setProjectAndReLoadFeatures() ──────────────────────────────
-
-    #[Test]
-    public function setProjectAndReLoadFeaturesSetsProjectAndCopiesIds(): void
-    {
-        $project              = new ProjectStruct();
-        $project->id          = 123;
-        $project->id_customer = 'customer_abc';
-
-        $this->pm->setProjectAndReLoadFeatures($project);
-
-        $this->assertSame($project, $this->pm->getProject());
-
-        $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(123, $ps['id_project']);
-        $this->assertSame('customer_abc', $ps['id_customer']);
-    }
-
-    #[Test]
-    public function setProjectAndReLoadFeaturesOverwritesPreviousProject(): void
-    {
-        $p1              = new ProjectStruct();
-        $p1->id          = 10;
-        $p1->id_customer = 'cust_10';
-
-        $p2              = new ProjectStruct();
-        $p2->id          = 20;
-        $p2->id_customer = 'cust_20';
-
-        $this->pm->setProjectAndReLoadFeatures($p1);
-        $this->pm->setProjectAndReLoadFeatures($p2);
-
-        $this->assertSame($p2, $this->pm->getProject());
-
-        $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(20, $ps['id_project']);
-        $this->assertSame('cust_20', $ps['id_customer']);
     }
 
     // ── _getRequestedFeatures() ────────────────────────────────────

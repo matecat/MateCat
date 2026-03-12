@@ -214,15 +214,6 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Override reloadFeatures() to avoid DB hit in tests.
-     * Does nothing — the features property is already injected via initForTest().
-     */
-    protected function reloadFeatures(): void
-    {
-        // no-op: features already set by test
-    }
-
-    /**
      * Expose the project property for assertions.
      */
     public function getProject(): ?ProjectStruct

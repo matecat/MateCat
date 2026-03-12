@@ -429,26 +429,6 @@ class ProjectManager
         $this->projectStructure['id_team'] = $team->id;
     }
 
-    /**
-     * @throws Exception
-     */
-    public function setProjectAndReLoadFeatures(ProjectStruct $pStruct): void
-    {
-        $this->project = $pStruct;
-        $this->projectStructure['id_project'] = $this->project->id;
-        $this->projectStructure['id_customer'] = $this->project->id_customer;
-        $this->reloadFeatures();
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function reloadFeatures(): void
-    {
-        $this->features = new FeatureSet();
-        $this->features->loadForProject($this->project);
-    }
-
     public function getProjectStructure(): RecursiveArrayObject|ArrayObject
     {
         return $this->projectStructure;
