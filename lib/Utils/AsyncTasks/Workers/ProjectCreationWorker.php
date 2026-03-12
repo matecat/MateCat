@@ -14,7 +14,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
-use Model\ProjectManager\ProjectManager;
+use Model\ProjectCreation\ProjectManager;
 use PDOException;
 use ReflectionException;
 use Throwable;

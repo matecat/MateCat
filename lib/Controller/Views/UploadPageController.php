@@ -14,7 +14,7 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\GDrive\GDriveController;
 use Exception;
 use Matecat\Locales\LanguageDomains;
-use Model\ProjectManager\ProjectOptionsSanitizer;
+use Model\ProjectCreation\ProjectOptionsSanitizer;
 use Utils\Constants\Constants;
 use Utils\Engines\Intento;
 use Utils\Registry\AppConfig;

@@ -32,7 +32,7 @@ use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
-use Model\ProjectManager\ProjectManager;
+use Model\ProjectCreation\ProjectManager;
 use Model\Projects\MetadataDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;

@@ -11,7 +11,7 @@ namespace Utils\ActiveMQ\ClientHelpers;
 
 use ArrayObject;
 use Exception;
-use Model\ProjectManager\ProjectManager;
+use Model\ProjectCreation\ProjectManager;
 use Predis\Response\Status;
 use ReflectionException;
 use Utils\ActiveMQ\WorkerClient;

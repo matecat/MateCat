@@ -25,7 +25,7 @@ use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
-use Model\ProjectManager\ProjectOptionsSanitizer;
+use Model\ProjectCreation\ProjectOptionsSanitizer;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;

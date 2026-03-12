@@ -14,7 +14,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\Jobs\JobDao;
-use Model\ProjectManager\JobSplitMergeManager;
+use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\Projects\ProjectStruct;
 
 

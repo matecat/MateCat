@@ -4,7 +4,7 @@
 namespace Model\Jobs;
 
 use Exception;
-use Model\ProjectManager\ProjectOptionsSanitizer;
+use Model\ProjectCreation\ProjectOptionsSanitizer;
 use Model\Projects\MetadataDao;
 use ReflectionException;
 

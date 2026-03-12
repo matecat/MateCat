@@ -19,7 +19,7 @@ use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
-use Model\ProjectManager\ProjectManager;
+use Model\ProjectCreation\ProjectManager;
 use Model\Projects\MetadataDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
