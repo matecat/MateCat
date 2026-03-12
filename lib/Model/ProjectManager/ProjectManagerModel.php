@@ -12,7 +12,6 @@ namespace Model\ProjectManager;
 
 use ArrayObject;
 use Exception;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -39,27 +38,30 @@ class ProjectManagerModel
      * Creates a record in the projects table and instantiates the project struct
      * internally.
      *
-     * @param ArrayObject $projectStructure
+     * @param ProjectCreationConfig $config  Typed init-only configuration
+     * @param int|null              $idTeam     Set by controller via setTeam()
+     * @param string                $status     Pipeline status at creation time
+     * @param int|null              $idAssignee Set by checkForProjectAssignment()
      *
      * @return ProjectStruct
      * @throws ReflectionException
      * @throws Exception
      */
-    public function createProjectRecord(ArrayObject $projectStructure): ProjectStruct
+    public function createProjectRecord(ProjectCreationConfig $config, ?int $idTeam, string $status, ?int $idAssignee): ProjectStruct
     {
         $data = [];
-        $data['id'] = $projectStructure['id_project'];
-        $data['id_customer'] = $projectStructure['id_customer'];
-        $data['id_team'] = $projectStructure['id_team'];
-        $data['name'] = $projectStructure['project_name'];
-        $data['create_date'] = $projectStructure['create_date'];
-        $data['status_analysis'] = $projectStructure['status'];
-        $data['password'] = $projectStructure['ppassword'];
-        $data['pretranslate_100'] = $projectStructure['pretranslate_100'];
-        $data['remote_ip_address'] = empty($projectStructure['user_ip']) ? 'UNKNOWN' : $projectStructure['user_ip'];
-        $data['id_assignee'] = $projectStructure['id_assignee'];
-        $data['instance_id'] = !is_null($projectStructure['instance_id']) ? $projectStructure['instance_id'] : null;
-        $data['due_date'] = !is_null($projectStructure['due_date']) ? $projectStructure['due_date'] : null;
+        $data['id'] = $config->idProject;
+        $data['id_customer'] = $config->idCustomer;
+        $data['id_team'] = $idTeam;
+        $data['name'] = $config->projectName;
+        $data['create_date'] = $config->createDate;
+        $data['status_analysis'] = $status;
+        $data['password'] = $config->ppassword;
+        $data['pretranslate_100'] = $config->pretranslate100;
+        $data['remote_ip_address'] = empty($config->userIp) ? 'UNKNOWN' : $config->userIp;
+        $data['id_assignee'] = $idAssignee;
+        $data['instance_id'] = $config->instanceId ?: null;
+        $data['due_date'] = $config->dueDate;
 
         $this->dbHandler->begin();
         $projectId = $this->dbHandler->insert('projects', $data);
@@ -70,21 +72,22 @@ class ProjectManagerModel
     }
 
     /**
-     * @param ArrayObject $projectStructure
-     * @param string $file_name
-     * @param string $mime_type
-     * @param string $fileDateSha1Path
+     * @param int         $idProject
+     * @param string      $sourceLanguage
+     * @param string      $file_name
+     * @param string      $mime_type
+     * @param string      $fileDateSha1Path
      * @param ArrayObject|null $meta
      *
      * @return string
      * @throws Exception
      */
-    public function insertFile(ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null): string
+    public function insertFile(int $idProject, string $sourceLanguage, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null): string
     {
         $data = [];
-        $data['id_project'] = $projectStructure['id_project'];
+        $data['id_project'] = $idProject;
         $data['filename'] = $file_name;
-        $data['source_language'] = $projectStructure['source_language'];
+        $data['source_language'] = $sourceLanguage;
         $data['mime_type'] = $mime_type;
         $data['sha1_original_file'] = $fileDateSha1Path;
         $data['is_converted'] = isset($meta['mustBeConverted']) ? (int)$meta['mustBeConverted'] : 0;
@@ -314,25 +317,24 @@ class ProjectManagerModel
     }
 
     /**
-     * @param $projectStructure
+     * @param int   $idProject
+     * @param array $contextGroups
      *
      * @throws Exception
      */
-    public function bulkInsertContextsGroups($projectStructure): void
+    public function bulkInsertContextsGroups(int $idProject, array $contextGroups): void
     {
         $template = " INSERT INTO context_groups ( id_project, id_segment, context_json ) VALUES ";
 
         $insert_values = [];
         $chunk_size = 30;
 
-        $id_project = $projectStructure['id_project'];
-
-        foreach ($projectStructure['context-group'] as $v) {
+        foreach ($contextGroups as $v) {
             $context_json = json_encode($v['context_json']);
             $segments = $v['context_json_segment_ids'];
 
             foreach ($segments as $id_segment) {
-                $insert_values[] = [$id_project, $id_segment, $context_json];
+                $insert_values[] = [$idProject, $id_segment, $context_json];
             }
         }
 

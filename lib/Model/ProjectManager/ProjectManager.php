@@ -688,7 +688,12 @@ class ProjectManager
      */
     private function createProjectRecord(): void
     {
-        $this->project = $this->getProjectManagerModel()->createProjectRecord($this->projectStructure);
+        $this->project = $this->getProjectManagerModel()->createProjectRecord(
+            $this->config,
+            $this->projectStructure['id_team'],
+            $this->projectStructure['status'],
+            $this->projectStructure['id_assignee'],
+        );
     }
 
     /**
@@ -1364,7 +1369,7 @@ class ProjectManager
         //begin with zip hashes manipulation
         foreach ($linkFiles['zipHashes'] as $zipHash) {
             $result = $fs->linkZipToProject(
-                $this->projectStructure['create_date'],
+                $this->config->createDate,
                 $zipHash,
                 $this->config->idProject
             );
@@ -1558,7 +1563,7 @@ class ProjectManager
     {
         $fs = FilesStorageFactory::create();
 
-        $yearMonthPath = date_create($this->projectStructure['create_date'])->format('Ymd');
+        $yearMonthPath = date_create($this->config->createDate)->format('Ymd');
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
 
         //return structure
@@ -1570,7 +1575,7 @@ class ProjectManager
                 // get metadata
                 $meta = isset($this->projectStructure['array_files_meta'][$pos]) ? $this->projectStructure['array_files_meta'][$pos] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
-                $fid = $this->getProjectManagerModel()->insertFile($this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path);
+                $fid = $this->getProjectManagerModel()->insertFile($this->config->idProject, $this->config->sourceLanguage, $originalFileName, $mimeType, $fileDateSha1Path);
 
                 if ($this->gdriveSession) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName($originalFileName);
@@ -1671,7 +1676,10 @@ class ProjectManager
     private function insertContextsForFile(): void
     {
         $this->features->filter('handleTUContextGroups', $this->projectStructure);
-        $this->getProjectManagerModel()->bulkInsertContextsGroups($this->projectStructure);
+        $this->getProjectManagerModel()->bulkInsertContextsGroups(
+            $this->config->idProject,
+            (array) $this->projectStructure['context-group'],
+        );
     }
 
 }

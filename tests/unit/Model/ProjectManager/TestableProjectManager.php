@@ -22,6 +22,7 @@ use ReflectionClass;
 use ReflectionException;
 use Throwable;
 use Utils\Collections\RecursiveArrayObject;
+use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -78,6 +79,10 @@ class TestableProjectManager extends ProjectManager
             'current-xliff-info' => [],
             'xliff_parameters' => $xliffParameters ?? new XliffRulesModel(),
             'result' => ['errors' => []],
+            // Mutable pipeline keys needed by createProjectRecord() caller
+            'status' => ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+            'id_team' => null,
+            'id_assignee' => null,
         ]);
 
         $this->refreshConfig();

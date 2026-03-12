@@ -5,10 +5,12 @@ namespace unit\Model\ProjectManager;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\ProjectManager\ProjectCreationConfig;
 use Model\ProjectManager\ProjectManagerModel;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
+use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -17,7 +19,7 @@ use Utils\Logger\MatecatLogger;
  * Verifies:
  * - Delegates to ProjectManagerModel::createProjectRecord()
  * - Stores the returned ProjectStruct in $this->project
- * - Passes the projectStructure to the model
+ * - Passes the config DTO plus mutable pipeline keys to the model
  */
 class CreateProjectRecordTest extends AbstractTest
 {
@@ -55,26 +57,43 @@ class CreateProjectRecordTest extends AbstractTest
     }
 
     #[Test]
-    public function passesProjectStructureToModel(): void
+    public function passesConfigAndMutableKeysToModel(): void
     {
-        $capturedStructure = null;
+        $capturedConfig = null;
+        $capturedIdTeam = null;
+        $capturedStatus = null;
+        $capturedIdAssignee = null;
 
         $model = $this->createMock(ProjectManagerModel::class);
         $model->expects($this->once())
             ->method('createProjectRecord')
-            ->willReturnCallback(function ($ps) use (&$capturedStructure) {
-                $capturedStructure = $ps;
+            ->willReturnCallback(function (
+                ProjectCreationConfig $config,
+                ?int $idTeam,
+                string $status,
+                ?int $idAssignee
+            ) use (&$capturedConfig, &$capturedIdTeam, &$capturedStatus, &$capturedIdAssignee) {
+                $capturedConfig = $config;
+                $capturedIdTeam = $idTeam;
+                $capturedStatus = $status;
+                $capturedIdAssignee = $idAssignee;
 
                 return new ProjectStruct(['id' => 1]);
             });
 
         $this->pm->setProjectManagerModel($model);
         $this->pm->setProjectStructureValue('project_name', 'My Project');
+        $this->pm->setProjectStructureValue('id_team', 7);
+        $this->pm->setProjectStructureValue('id_assignee', 42);
 
         $this->pm->callCreateProjectRecord();
 
-        $this->assertSame('My Project', $capturedStructure['project_name']);
-        $this->assertSame(999, $capturedStructure['id_project']);
+        $this->assertInstanceOf(ProjectCreationConfig::class, $capturedConfig);
+        $this->assertSame('My Project', $capturedConfig->projectName);
+        $this->assertSame(999, $capturedConfig->idProject);
+        $this->assertSame(7, $capturedIdTeam);
+        $this->assertSame(ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS, $capturedStatus);
+        $this->assertSame(42, $capturedIdAssignee);
     }
 
     #[Test]

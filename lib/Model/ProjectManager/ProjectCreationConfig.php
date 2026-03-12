@@ -11,7 +11,7 @@ use ArrayObject;
  * before calling {@see ProjectManager::createProject()}.  Every property
  * is `readonly` because the creation pipeline never modifies these values.
  *
- * Keys that mutate mid-pipeline (e.g. `tm_keys`, `xliff_parameters`,
+ * Keys that mutate a mid-pipeline (e.g. `tm_keys`, `xliff_parameters`,
  * `status`, `team`, `array_files`) are deliberately excluded and remain
  * in the mutable `$projectStructure` ArrayObject for now.
  *
@@ -30,6 +30,8 @@ class ProjectCreationConfig
     public readonly string  $idCustomer;
     public readonly string  $owner;
     public readonly bool    $userIsLogged;
+    public readonly string  $createDate;
+    public readonly int     $instanceId;
 
     // ── Project metadata ────────────────────────────────────────────
 
@@ -99,7 +101,7 @@ class ProjectCreationConfig
 
     /**
      * Catch-all for engine configuration params not covered by explicit
-     * properties (e.g. future engine-specific keys from
+     * properties (e.g., future engine-specific keys from
      * {@see \Engines_AbstractEngine::getConfigurationParameters()}).
      *
      * @var array<string, mixed>
@@ -124,6 +126,8 @@ class ProjectCreationConfig
             idCustomer:   (string) ($ps['id_customer'] ?? 'translated_user'),
             owner:        (string) ($ps['owner'] ?? ''),
             userIsLogged: (bool) ($ps['userIsLogged'] ?? false),
+            createDate:   (string) ($ps['create_date'] ?? date('Y-m-d H:i:s')),
+            instanceId:   (int) ($ps['instance_id'] ?? 0),
 
             projectName:    $ps['project_name'] ?? null,
             sourceLanguage: $ps['source_language'] ?? null,
@@ -193,6 +197,8 @@ class ProjectCreationConfig
         string  $idCustomer   = 'translated_user',
         string  $owner        = '',
         bool    $userIsLogged = false,
+        string  $createDate   = '',
+        int     $instanceId   = 0,
 
         // Project metadata
         ?string $projectName    = null,
@@ -258,6 +264,8 @@ class ProjectCreationConfig
         $this->idCustomer   = $idCustomer;
         $this->owner        = $owner;
         $this->userIsLogged = $userIsLogged;
+        $this->createDate   = $createDate;
+        $this->instanceId   = $instanceId;
 
         $this->projectName    = $projectName;
         $this->sourceLanguage = $sourceLanguage;
@@ -364,6 +372,8 @@ class ProjectCreationConfig
             'id_customer'       => $this->idCustomer,
             'owner'             => $this->owner,
             'userIsLogged'      => $this->userIsLogged,
+            'create_date'       => $this->createDate,
+            'instance_id'       => $this->instanceId,
 
             'project_name'      => $this->projectName,
             'source_language'   => $this->sourceLanguage,

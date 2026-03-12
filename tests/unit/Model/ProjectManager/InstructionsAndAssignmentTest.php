@@ -132,7 +132,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $this->pm->callCheckForProjectAssignment();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertArrayNotHasKey('id_assignee', $ps->getArrayCopy());
+        $this->assertNull($ps['id_assignee']);
     }
 
     #[Test]
