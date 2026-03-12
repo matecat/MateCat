@@ -24,11 +24,6 @@
     }
   }
 
-  &:disabled {
-    box-shadow: unset !important;
-    border: 1px solid colors.$grey200;
-  }
-
   &:hover:not(:disabled):not(.not-assignee) {
     padding-right: 32px !important;
 
