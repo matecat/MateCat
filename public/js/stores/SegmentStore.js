@@ -460,14 +460,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments = this._segments.setIn([index, 'versions'], fromJS(versions))
     return this._segments.get(index)
   },
-  lockUnlockEditArea(sid) {
+  lockUnlockEditArea(sid, value) {
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
     let segment = this._segments.get(index)
     let lockedEditArea = segment.get('edit_area_locked')
     this._segments = this._segments.setIn(
       [index, 'edit_area_locked'],
-      !lockedEditArea,
+      typeof value !== 'undefined' ? value : !lockedEditArea,
     )
   },
   setToggleBulkOption: function (sid) {
@@ -1469,7 +1469,14 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.LOCK_EDIT_AREA:
-      SegmentStore.lockUnlockEditArea(action.id, action.fid)
+      SegmentStore.lockUnlockEditArea(action.id)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
+      break
+    case SegmentConstants.UNLOCK_EDIT_AREA:
+      SegmentStore.lockUnlockEditArea(action.id, false)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,

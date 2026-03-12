@@ -2,13 +2,13 @@
 
 namespace Utils\Constants;
 
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\Altlang;
 use Utils\Engines\Apertium;
 use Utils\Engines\DeepL;
 use Utils\Engines\GoogleTranslate;
 use Utils\Engines\Intento;
 use Utils\Engines\Lara;
-use Utils\Engines\MicrosoftHub;
 use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\SmartMATE;
@@ -27,16 +27,16 @@ class EngineConstants
     const string TM = "TM";
     const string NONE = "NONE";
 
-    const MY_MEMORY = 'Match';
-    const APERTIUM = 'Apertium';
-    const ALTLANG = 'Altlang';
-    const SMART_MATE = 'SmartMATE';
-    const YANDEX_TRANSLATE = 'YandexTranslate';
-    const MMT = 'MMT';
-    const LARA = 'Lara';
-    const DEEPL = 'DeepL';
-    const GOOGLE_TRANSLATE = 'GoogleTranslate';
-    const INTENTO = 'Intento';
+    const string MY_MEMORY = 'MyMemory';
+    const string APERTIUM = 'Apertium';
+    const string ALTLANG = 'Altlang';
+    const string SMART_MATE = 'SmartMATE';
+    const string YANDEX_TRANSLATE = 'YandexTranslate';
+    const string MMT = 'MMT';
+    const string LARA = 'Lara';
+    const string DEEPL = 'DeepL';
+    const string GOOGLE_TRANSLATE = 'GoogleTranslate';
+    const string INTENTO = 'Intento';
 
     protected static array $ENGINES_LIST = [
         MyMemory::class => MyMemory::class,
@@ -52,7 +52,7 @@ class EngineConstants
     ];
 
     /**
-     * @return array
+     * @return AbstractEngine[]
      */
     public static function getAvailableEnginesList(): array
     {

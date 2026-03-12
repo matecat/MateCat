@@ -87,6 +87,9 @@
     },
     "subfiltering_handlers": {
       "$ref": "subfiltering_handlers.json"
+    },
+    "icu_enabled": {
+      "type": "boolean"
     }
   },
   "required": [

@@ -26,6 +26,7 @@ import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
 import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
 import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
+import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -38,6 +39,7 @@ export const TAB = {
   LARA_STYLES: 'laraStyles',
   AI_ALTERNATIVES: 'aiAlternatives',
   AI_FEEDBACK: 'aiFeedback',
+  ICU: 'icu',
 }
 
 const TAB_ITEMS = {
@@ -105,6 +107,12 @@ const TAB_ITEMS = {
     isLoading: false,
     isEnableCloseButton: true,
   },
+  [TAB.ICU]: {
+    label: 'ICU',
+    code: 'icu',
+    tabClass: 'icu-validator',
+    isLoading: false,
+  },
 }
 const DELAY_MESSAGE = 7000
 
@@ -114,13 +122,14 @@ function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
+  const currentSegment = SegmentStore.getCurrentSegment()
   const [tabItems, setTabItems] = useState(
     Object.entries(TAB_ITEMS).map(([key, value]) => ({
       ...value,
       name: key,
-      enabled: false,
-      visible: false,
-      open: false,
+      enabled: !!(key === TAB.ICU && currentSegment?.icu),
+      visible: !!(key === TAB.ICU && currentSegment?.icu),
+      open: !!(key === TAB.ICU && currentSegment?.icu),
       elements: [],
       label:
         value.code === 'tm'
@@ -530,6 +539,16 @@ function SegmentFooter() {
       case 'larastyles':
         return (
           <SegmentFooterTabLaraStyles
+            key={'container_' + tab.code}
+            code={tab.code}
+            active_class={openClass}
+            tab_class={tab.tabClass}
+            segment={segment}
+          />
+        )
+      case 'icu':
+        return (
+          <SegmentFooterTabIcu
             key={'container_' + tab.code}
             code={tab.code}
             active_class={openClass}

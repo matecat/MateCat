@@ -235,7 +235,6 @@ class Bootstrap
      */
     public static function shutdownFunctionHandler(): never
     {
-        $logger = LoggerFactory::getLogger('exception_handler');
 
         $errorType = [
             E_CORE_ERROR => 'E_CORE_ERROR',

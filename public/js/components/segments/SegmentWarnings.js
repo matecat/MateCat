@@ -87,10 +87,10 @@ class SegmentWarnings extends React.Component {
               <ul>
                 <li className="icon-column">{icon}</li>
                 <li className="content-column">
-                  <p>
-                    {el.debug}
-                    {/*<b>({warnings_count[el.outcome]})</b>*/}
-                  </p>
+                  <p dangerouslySetInnerHTML={{__html: el.debug}} />
+                  {/*  {el.debug}*/}
+                  {/*  /!*<b>({warnings_count[el.outcome]})</b>*!/*/}
+                  {/*</p>*/}
                   {el.tip !== '' ? (
                     <p className="error-solution">
                       <b>{el.tip}</b>

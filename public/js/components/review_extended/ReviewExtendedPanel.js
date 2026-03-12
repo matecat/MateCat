@@ -41,6 +41,7 @@ class ReviewExtendedPanel extends React.Component {
       showAddIssueMessage: false,
       showAddIssueToSelectedTextMessage: false,
     })
+    SegmentActions.unlockEditArea(this.props.segment.sid)
   }
 
   getAllIssues() {

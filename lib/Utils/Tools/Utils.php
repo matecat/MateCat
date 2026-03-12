@@ -2,7 +2,6 @@
 
 namespace Utils\Tools;
 
-use Behat\Transliterator\Transliterator;
 use DateTime;
 use DirectoryIterator;
 use DOMDocument;
@@ -13,6 +12,7 @@ use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Transliterator;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
 use Utils\Constants\Constants;
@@ -27,7 +27,7 @@ class Utils
 
     public static function getSourcePageFromReferer(): int
     {
-        return self::returnSourcePageAsInt(parse_url($_SERVER['HTTP_REFERER'] ?? null));
+        return self::returnSourcePageAsInt(parse_url($_SERVER['HTTP_REFERER'] ?? ''));
     }
 
 
@@ -36,7 +36,7 @@ class Utils
      */
     public static function getSourcePage(): int
     {
-        return self::returnSourcePageAsInt(parse_url($_SERVER['REQUEST_URI'] ?? null));
+        return self::returnSourcePageAsInt(parse_url($_SERVER['REQUEST_URI'] ?? ''));
     }
 
     /**
@@ -175,24 +175,23 @@ class Utils
     }
 
     /**
-     * @param $string
+     * Converts a string to a friendly slug for URLs.
      *
-     * @return string
+     * @param string $string The input string to convert.
+     *
+     * @return string The friendly slug.
      */
-    public static function friendly_slug($string): string
+    public static function friendlySlug(string $string): string
     {
         // everything to lower and no spaces begin or end
         $string = strtolower(trim($string));
 
         //replace accent characters, depends on your language is needed
-        $string = Utils::replace_accents($string);
+        $string = Utils::transliterate($string);
 
         // adding - for spaces and union characters
         $find = [' ', '&', '\r\n', '\n', '+', ','];
         $string = str_replace($find, '-', $string);
-
-        // transliterate string
-        $string = Transliterator::transliterate($string);
 
         // avoid empty strings
         if (empty($string)) {
@@ -207,436 +206,28 @@ class Utils
         return preg_replace($find, $repl, $string);
     }
 
-    public static function replace_accents($var): string
-    { //replace it for accents catalan spanish and more
-        $a = [
-            'À',
-            'Á',
-            'Â',
-            'Ã',
-            'Ä',
-            'Å',
-            'Æ',
-            'Ç',
-            'È',
-            'É',
-            'Ê',
-            'Ë',
-            'Ì',
-            'Í',
-            'Î',
-            'Ï',
-            'Ð',
-            'Ñ',
-            'Ò',
-            'Ó',
-            'Ô',
-            'Õ',
-            'Ö',
-            'Ø',
-            'Ù',
-            'Ú',
-            'Û',
-            'Ü',
-            'Ý',
-            'ß',
-            'à',
-            'á',
-            'â',
-            'ã',
-            'ä',
-            'å',
-            'æ',
-            'ç',
-            'è',
-            'é',
-            'ê',
-            'ë',
-            'ì',
-            'í',
-            'î',
-            'ï',
-            'ñ',
-            'ò',
-            'ó',
-            'ô',
-            'õ',
-            'ö',
-            'ø',
-            'ù',
-            'ú',
-            'û',
-            'ü',
-            'ý',
-            'ÿ',
-            'Ā',
-            'ā',
-            'Ă',
-            'ă',
-            'Ą',
-            'ą',
-            'Ć',
-            'ć',
-            'Ĉ',
-            'ĉ',
-            'Ċ',
-            'ċ',
-            'Č',
-            'č',
-            'Ď',
-            'ď',
-            'Đ',
-            'đ',
-            'Ē',
-            'ē',
-            'Ĕ',
-            'ĕ',
-            'Ė',
-            'ė',
-            'Ę',
-            'ę',
-            'Ě',
-            'ě',
-            'Ĝ',
-            'ĝ',
-            'Ğ',
-            'ğ',
-            'Ġ',
-            'ġ',
-            'Ģ',
-            'ģ',
-            'Ĥ',
-            'ĥ',
-            'Ħ',
-            'ħ',
-            'Ĩ',
-            'ĩ',
-            'Ī',
-            'ī',
-            'Ĭ',
-            'ĭ',
-            'Į',
-            'į',
-            'İ',
-            'ı',
-            'Ĳ',
-            'ĳ',
-            'Ĵ',
-            'ĵ',
-            'Ķ',
-            'ķ',
-            'Ĺ',
-            'ĺ',
-            'Ļ',
-            'ļ',
-            'Ľ',
-            'ľ',
-            'Ŀ',
-            'ŀ',
-            'Ł',
-            'ł',
-            'Ń',
-            'ń',
-            'Ņ',
-            'ņ',
-            'Ň',
-            'ň',
-            'ŉ',
-            'Ō',
-            'ō',
-            'Ŏ',
-            'ŏ',
-            'Ő',
-            'ő',
-            'Œ',
-            'œ',
-            'Ŕ',
-            'ŕ',
-            'Ŗ',
-            'ŗ',
-            'Ř',
-            'ř',
-            'Ś',
-            'ś',
-            'Ŝ',
-            'ŝ',
-            'Ş',
-            'ş',
-            'Š',
-            'š',
-            'Ţ',
-            'ţ',
-            'Ť',
-            'ť',
-            'Ŧ',
-            'ŧ',
-            'Ũ',
-            'ũ',
-            'Ū',
-            'ū',
-            'Ŭ',
-            'ŭ',
-            'Ů',
-            'ů',
-            'Ű',
-            'ű',
-            'Ų',
-            'ų',
-            'Ŵ',
-            'ŵ',
-            'Ŷ',
-            'ŷ',
-            'Ÿ',
-            'Ź',
-            'ź',
-            'Ż',
-            'ż',
-            'Ž',
-            'ž',
-            'ſ',
-            'ƒ',
-            'Ơ',
-            'ơ',
-            'Ư',
-            'ư',
-            'Ǎ',
-            'ǎ',
-            'Ǐ',
-            'ǐ',
-            'Ǒ',
-            'ǒ',
-            'Ǔ',
-            'ǔ',
-            'Ǖ',
-            'ǖ',
-            'Ǘ',
-            'ǘ',
-            'Ǚ',
-            'ǚ',
-            'Ǜ',
-            'ǜ',
-            'Ǻ',
-            'ǻ',
-            'Ǽ',
-            'ǽ',
-            'Ǿ',
-            'ǿ'
-        ];
-        $b = [
-            'A',
-            'A',
-            'A',
-            'A',
-            'A',
-            'A',
-            'AE',
-            'C',
-            'E',
-            'E',
-            'E',
-            'E',
-            'I',
-            'I',
-            'I',
-            'I',
-            'D',
-            'N',
-            'O',
-            'O',
-            'O',
-            'O',
-            'O',
-            'O',
-            'U',
-            'U',
-            'U',
-            'U',
-            'Y',
-            's',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'ae',
-            'c',
-            'e',
-            'e',
-            'e',
-            'e',
-            'i',
-            'i',
-            'i',
-            'i',
-            'n',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'u',
-            'u',
-            'u',
-            'u',
-            'y',
-            'y',
-            'A',
-            'a',
-            'A',
-            'a',
-            'A',
-            'a',
-            'C',
-            'c',
-            'C',
-            'c',
-            'C',
-            'c',
-            'C',
-            'c',
-            'D',
-            'd',
-            'D',
-            'd',
-            'E',
-            'e',
-            'E',
-            'e',
-            'E',
-            'e',
-            'E',
-            'e',
-            'E',
-            'e',
-            'G',
-            'g',
-            'G',
-            'g',
-            'G',
-            'g',
-            'G',
-            'g',
-            'H',
-            'h',
-            'H',
-            'h',
-            'I',
-            'i',
-            'I',
-            'i',
-            'I',
-            'i',
-            'I',
-            'i',
-            'I',
-            'i',
-            'IJ',
-            'ij',
-            'J',
-            'j',
-            'K',
-            'k',
-            'L',
-            'l',
-            'L',
-            'l',
-            'L',
-            'l',
-            'L',
-            'l',
-            'l',
-            'l',
-            'N',
-            'n',
-            'N',
-            'n',
-            'N',
-            'n',
-            'n',
-            'O',
-            'o',
-            'O',
-            'o',
-            'O',
-            'o',
-            'OE',
-            'oe',
-            'R',
-            'r',
-            'R',
-            'r',
-            'R',
-            'r',
-            'S',
-            's',
-            'S',
-            's',
-            'S',
-            's',
-            'S',
-            's',
-            'T',
-            't',
-            'T',
-            't',
-            'T',
-            't',
-            'U',
-            'u',
-            'U',
-            'u',
-            'U',
-            'u',
-            'U',
-            'u',
-            'U',
-            'u',
-            'U',
-            'u',
-            'W',
-            'w',
-            'Y',
-            'y',
-            'Y',
-            'Z',
-            'z',
-            'Z',
-            'z',
-            'Z',
-            'z',
-            's',
-            'f',
-            'O',
-            'o',
-            'U',
-            'u',
-            'A',
-            'a',
-            'I',
-            'i',
-            'O',
-            'o',
-            'U',
-            'u',
-            'U',
-            'u',
-            'U',
-            'u',
-            'U',
-            'u',
-            'U',
-            'u',
-            'A',
-            'a',
-            'AE',
-            'ae',
-            'O',
-            'o'
-        ];
+    /**
+     * Replace accented characters with their ASCII equivalents.
+     *
+     * Uses the PHP intl extension's Transliterator to convert accented characters
+     * (Latin extended characters) to their basic ASCII equivalents.
+     *
+     * @param string $var The input string containing accented characters.
+     *
+     * @return string The string with accents removed/replaced.
+     */
+    public static function transliterate(string $var): string
+    {
+        $transliterator = Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC; Latin-ASCII;');
 
-        return str_replace($a, $b, $var);
+        if ($transliterator === null) {
+            // Fallback if transliterator creation fails
+            // @codeCoverageIgnoreStart
+            return $var;
+            // @codeCoverageIgnoreEnd
+        }
+
+        return $transliterator->transliterate($var) ?: $var;
     }
 
     public static function encryptPass($clear_pass, $salt): string
@@ -654,7 +245,7 @@ class Utils
     }
 
     /**
-     * Generate 128bit password with real uniqueness over single process instance
+     * Generate a 128bit password with real uniqueness over a single process instance
      *   N.B. Concurrent requests can collide (Ex: fork)
      *
      * Minimum Password Length of 12 Characters
@@ -684,16 +275,6 @@ class Utils
         }
 
         return $pwd;
-    }
-
-    /**
-     * @param $string
-     *
-     * @return bool
-     */
-    public static function isJson($string): bool
-    {
-        return json_validate($string);
     }
 
     public static function mysqlTimestamp($time): string
@@ -863,11 +444,7 @@ class Utils
     public static function uuid4()
     {
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
-        if (PHP_MAJOR_VERSION >= 7) {
-            $data = random_bytes(16);
-        } else {
-            $data = openssl_random_pseudo_bytes(16);
-        }
+        $data = random_bytes(16);
 
         assert(strlen($data) == 16);
 
@@ -949,25 +526,120 @@ class Utils
 
 
     /**
-     * Check if a file name is valid to prevent directory traversal attacks.
+     * Validates if the given file name is valid, according to various rules, including
+     * checks for empty names, control characters, invalid characters in file systems,
+     * reserved names, and length limitations.
      *
-     * @param string $fileUpName The file name to check.
+     * Two values are checked throughout this function:
+     *  - $fileName: the raw input as received (maybe URL-encoded)
+     *  - $decoded: the fully URL-decoded version (all encoding layers stripped)
      *
-     * @return bool Returns true if the file name is valid, false otherwise.
+     * Both must be checked because an attacker can bypass raw-string checks by
+     * encoding dangerous characters. For example, `../` can be submitted as
+     * `..%2F` or `..%252F` (double-encoded), which would pass a check on $fileName
+     * alone but reveal the real path after decoding.
+     *
+     * Checks that only apply to $fileName (not $decoded):
+     *  - Control characters and newlines: these are dangerous as-is in the raw input
+     *    and decoding does not change them (they are not URL-encoded by browsers).
+     *  - Reserved names and length: these apply to what the filesystem actually receives,
+     *    which is the raw $fileName, not the decoded form.
+     *
+     * @param string $fileName The file name to validate.
+     *
+     * @return bool Returns true if the file name is valid, otherwise false.
      */
-    public static function isValidFileName(string $fileUpName): bool
+    public static function isValidFileName(string $fileName): bool
     {
-        if (
-            stripos($fileUpName, '../') !== false ||
-            stripos($fileUpName, '/../') !== false ||
-            stripos($fileUpName, '/..') !== false ||
-            stripos($fileUpName, '%2E%2E%2F') !== false ||
-            stripos($fileUpName, '%2F%2E%2E%2F') !== false ||
-            stripos($fileUpName, '%2F%2E%2E') !== false ||
-            stripos($fileUpName, '.') === 0 ||
-            stripos($fileUpName, '%2E') === 0
-        ) {
-            //Directory Traversal!
+        // Fully URL-decode $fileName by looping until the string stops changing.
+        // A single urldecode() call would only strip one layer of encoding, missing
+        // double-encoded payloads like %252F (%25 → %, then %2F → /).
+        // The loop handles any arbitrary depth of encoding.
+        $decoded = $fileName;
+        $prev = null;
+        while ($prev !== $decoded) {
+            $prev = $decoded;
+            $decoded = urldecode($decoded);
+        }
+
+        // Reject empty names or names made entirely of spaces.
+        // Both $fileName and $decoded are checked because a name like "%20" decodes
+        // to a single space and must also be rejected.
+        if (trim($fileName) === '' || trim($decoded) === '') {
+            return false;
+        }
+
+        // Reject null bytes (\0).
+        // Null bytes can truncate file paths in C-based system calls (e.g., fopen),
+        // allowing an attacker to bypass extension checks (e.g., "shell.php\0.jpg").
+        // %00 in $fileName decodes to \0 in $decoded, so both must be checked.
+        if (str_contains($fileName, "\0") || str_contains($decoded, "\0")) {
+            return false;
+        }
+
+        // Reject control characters (0x00 - 0x1F, 0x7F) in the raw input only.
+        // Browsers do not URL-encode control characters, so they appear as-is in
+        // $fileName. The decoded form is covered by the null byte check above.
+        if (preg_match('/[\x00-\x1F\x7F]/', $fileName)) {
+            return false;
+        }
+
+        // Reject newline and carriage return characters in the raw input only.
+        // These can break HTTP headers or log injection and are not URL-encoded
+        // by well-behaved clients, so checking $fileName is sufficient here.
+        if (preg_match('/[\r\n]/', $fileName)) {
+            return false;
+        }
+
+        // Reject directory traversal sequences.
+        // Both $fileName and $decoded must be checked because traversal sequences
+        // like "../" can be encoded as "%2E%2E%2F" or "%252E%252E%252F" to bypass
+        // a check on the raw string alone.
+        $traversalPatterns = [
+            '/\.\.[\\/]/',  // ../ or ..\ — traverse up from a directory
+            '/[\\/]\.\./',  // /.. or \.. — traverse up after a separator
+            '/^\.\.?$/',    // exactly "." or ".." as the full filename
+            '/^\./',        // starts with "." — hidden file or relative path entry
+        ];
+
+        foreach ($traversalPatterns as $pattern) {
+            if (preg_match($pattern, $fileName) || preg_match($pattern, $decoded)) {
+                return false;
+            }
+        }
+
+        // Reject characters that are illegal in Windows and/or Linux filesystems.
+        // Both $fileName and $decoded must be checked: "/" and "\" can be encoded
+        // as %2F and %5C respectively, which would pass a check on $fileName alone
+        // but become path separators after decoding, enabling path injection.
+        $invalidChars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|', "\0"];
+        foreach ($invalidChars as $char) {
+            if (str_contains($fileName, $char) || str_contains($decoded, $char)) {
+                return false;
+            }
+        }
+
+        // Reject Windows reserved device names (case-insensitive, with or without extension).
+        // These names refer to system devices (e.g., CON, NUL, COM1) and cannot be used
+        // as filenames on Windows regardless of extension (e.g., "NUL.txt" is also reserved).
+        // Only $fileName is checked here: encoding cannot produce a reserved name like "CON"
+        // from a safe input, so $decoded would give the same result.
+        $reserved = [
+            'CON', 'PRN', 'AUX', 'NUL',
+            'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+            'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+        ];
+
+        $nameWithoutExt = pathinfo($fileName, PATHINFO_BASENAME);
+        if (in_array(strtoupper($nameWithoutExt), $reserved, true)) {
+            return false;
+        }
+
+        // Reject names exceeding 255 bytes (the limit on most filesystems: ext4, NTFS, APFS).
+        // Only $fileName is checked because the filesystem receives the raw value, not the
+        // decoded one. A long encoded string may be short after decoding, but the raw length
+        // is what matters for storage.
+        if (strlen($fileName) > 255) {
             return false;
         }
 
@@ -975,9 +647,10 @@ class Utils
     }
 
     /**
-     * @param $dirPath
+     * @param string $dirPath
+     * @throws Exception
      */
-    public static function deleteDir($dirPath): void
+    public static function deleteDir(string $dirPath): void
     {
         if (is_dir($dirPath)) {
             $iterator = new DirectoryIterator($dirPath);
@@ -1004,50 +677,21 @@ class Utils
     }
 
     /**
-     * Call the output in JSON format
+     * Removes the Byte Order Mark (BOM) from the beginning of a string based on the specified UTF encoding.
      *
-     * @param bool $raise
+     * @param string $string The string from which the BOM should be removed.
+     * @param int $utf The UTF encoding of the string (e.g., 8, 16, or 32). Defaults to 8.
      *
-     * @return string
-     * @throws Exception
-     * @deprecated Use the JSON_THROW_ON_ERROR flag on json_decode() instead or json_last_error_msg() directly to get the error message.
-     * @see        https://www.php.net/manual/en/function.json-decode.php
-     * @see        https://www.php.net/manual/en/json.constants.php
-     *
+     * @return string The string with the BOM removed.
      */
-    public static function raiseJsonExceptionError(bool $raise = true): string
-    {
-        if (function_exists("json_last_error")) {
-            $error = json_last_error();
-            if ($raise && $error != JSON_ERROR_NONE) {
-                throw new Exception(json_last_error_msg(), $error);
-            }
-
-            return json_last_error_msg();
-        }
-
-        throw new Exception("json_last_error() function not found");
-    }
-
-    // Previously in FileFormatConverter
-    //remove UTF-8 BOM
-    public static function stripFileBOM($string, $utf = 8): string
+    public static function stripFileBOM(string $string, int $utf = 8): string
     {
         //depending on encoding, different slices are to be cut
-        switch ($utf) {
-            case 16:
-                $string = substr($string, 2);
-                break;
-            case 32:
-                $string = substr($string, 4);
-                break;
-            case 8:
-            default:
-                $string = substr($string, 3);
-                break;
-        }
-
-        return $string;
+        return match ($utf) {
+            16 => substr($string, 2),
+            32 => substr($string, 4),
+            default => substr($string, 3),
+        };
     }
 
     public static function stripBOM(string $string): string
@@ -1059,13 +703,12 @@ class Utils
     /**
      * uploadDirFromSessionCookie
      *
-     * @oaram $guid string
-     * @param $guid
+     * @param string $guid
      * @param $file_name string|null optional file name to append to the upload path
      *
      * @return string
      */
-    public static function uploadDirFromSessionCookie($guid, string $file_name = null): string
+    public static function uploadDirFromSessionCookie(string $guid, string $file_name = null): string
     {
         return AppConfig::$UPLOAD_REPOSITORY . "/" .
             $guid . '/' .
@@ -1094,7 +737,7 @@ class Utils
             $description = $sug_source;
         } elseif (preg_match("/[a-f0-9]{8,}/", $key)) { // md5 Key
             // This condition is for md5 keys
-            $description = self::keyNameFromUserKeyring($uid, $key);
+            $description = self::keyNameFromUserKeyring($key, $uid);
 
             if (empty($description)) {
                 $description = self::getDefaultKeyDescription($key, $job_tm_keys);
@@ -1111,7 +754,7 @@ class Utils
     /**
      * @throws Exception
      */
-    public static function keyNameFromUserKeyring($uid, $key): ?string
+    public static function keyNameFromUserKeyring(string $key, ?int $uid = null): ?string
     {
         if ($uid === null) {
             return null;
@@ -1140,7 +783,7 @@ class Utils
     }
 
     /**
-     * Returns description for a key. If not found then default to "Private TM".
+     * Returns description for a key. If not found, then default to "Private TM".
      *
      * @param string $key
      * @param string $job_tm_keys
@@ -1170,27 +813,14 @@ class Utils
     }
 
     /**
-     * stringsAreEqual
-     *
-     * @param string $stringA
-     * @param string $stringB
-     *
-     * @return bool
-     */
-    public static function stringsAreEqual(string $stringA, string $stringB): bool
-    {
-        return $stringA == $stringB;
-    }
-
-    /**
      * shortcut to htmlentities (UTF-8 charset)
      * avoiding double-encoding
      *
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    public static function htmlentitiesToUft8WithoutDoubleEncoding($string): string
+    public static function htmlentitiesToUft8WithoutDoubleEncoding(string $string): string
     {
         return htmlentities($string, ENT_QUOTES, 'UTF-8', false);
     }
@@ -1224,10 +854,15 @@ class Utils
      */
     public static function stripTagsPreservingHrefs(string $html): string
     {
+        $encoding = mb_detect_encoding($html);
+        if ($encoding !== 'UTF-8') {
+            $html = mb_convert_encoding($html, 'UTF-8');
+        }
+
         $htmlDom = new DOMDocument('1.0', 'UTF-8');
         $htmlDom->formatOutput = false;
 
-        @$htmlDom->loadHTML($html);
+        @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $html);
 
         $links = $htmlDom->getElementsByTagName('a');
         $images = $htmlDom->getElementsByTagName('img');
@@ -1251,7 +886,6 @@ class Utils
         }
 
         $html = $htmlDom->saveHtml($htmlDom->documentElement);
-        $html = mb_convert_encoding($html, 'ISO-8859-15', 'UTF-8');
 
         $strippedHtml = strip_tags($html);
         $strippedHtml = ltrim($strippedHtml);
@@ -1260,11 +894,15 @@ class Utils
     }
 
     /**
-     * @param $list
+     * Validates a comma-separated list of email addresses.
      *
-     * @return array
+     * @param string $list Comma-separated list of email addresses.
+     *
+     * @return array Valid email addresses.
+     *
+     * @throws InvalidArgumentException If any email in the list is not valid.
      */
-    public static function validateEmailList($list): array
+    public static function validateEmailList(string $list): array
     {
         $aValid = [];
         foreach (explode(',', $list) as $sEmailAddress) {
@@ -1284,58 +922,4 @@ class Utils
         return array_keys($aValid);
     }
 
-    /**
-     * @param array $arr
-     *
-     * @return bool
-     */
-    public static function arrayIsList(array $arr): bool
-    {
-        if ($arr === []) {
-            return true;
-        }
-
-        return array_keys($arr) === range(0, count($arr) - 1);
-    }
-
-    /**
-     * @param string $nameString
-     *
-     * @return bool|string
-     */
-    public static function sanitizeName(string $nameString)
-    {
-        $nameString = preg_replace('/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString);
-        $nameString = preg_replace('/_{2,}/', "_", $nameString);
-        $nameString = str_replace('_.', ".", $nameString);
-
-        // project name validation
-        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
-
-        if (!preg_match($pattern, $nameString)) {
-            return false;
-        }
-
-        return $nameString;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return int|mixed
-     */
-    public static function formatStringValue(string $value = ""): mixed
-    {
-        $value = html_entity_decode($value);
-
-        if (is_numeric($value)) {
-            return (int)$value;
-        }
-
-        if (Utils::isJson($value)) {
-            return json_decode($value);
-        }
-
-        return $value;
-    }
 }

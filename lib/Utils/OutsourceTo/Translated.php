@@ -4,12 +4,12 @@ namespace Utils\OutsourceTo;
 
 use Controller\Abstracts\Authentication\SessionStarter;
 use Exception;
+use Matecat\Locales\LanguageDomains;
 use Model\Analysis\Status;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use ReflectionException;
-use Utils\Langs\LanguageDomains;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;

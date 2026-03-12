@@ -25,7 +25,7 @@ class ChunkOptionsModel
     public function __construct(JobStruct $chunk)
     {
         $this->chunk = $chunk;
-        $this->project_metadata = $chunk->getProject()->getMetadataAsKeyValue();
+        $this->project_metadata = $chunk->getProject()->getAllMetadataAsKeyValue();
     }
 
     /**
@@ -76,7 +76,7 @@ class ChunkOptionsModel
             $dao->set($this->chunk->id_project, MetadataDao::buildChunkKey($key, $this->chunk), $value);
         }
 
-        $this->project_metadata = $this->chunk->getProject()->getMetadataAsKeyValue();
+        $this->project_metadata = $this->chunk->getProject()->getAllMetadataAsKeyValue();
     }
 
     /**

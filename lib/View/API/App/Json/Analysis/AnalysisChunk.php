@@ -17,7 +17,6 @@ use Model\Users\UserStruct;
 use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\Filter;
 use Utils\Url\JobUrlBuilder;
-use View\API\V2\Json\Engine;
 
 class AnalysisChunk implements JsonSerializable
 {

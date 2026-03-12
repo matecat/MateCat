@@ -7,7 +7,7 @@
  *
  */
 
-namespace Utils\LQA;
+namespace Utils\LQA\QA;
 
 
 use Stringable;
@@ -42,7 +42,7 @@ class ErrObject implements Stringable
      * Outputs externally the error tip
      * @return string
      */
-    public function getTip()
+    public function getTip(): string
     {
         return $this->tip;
     }
@@ -61,7 +61,9 @@ class ErrObject implements Stringable
         $errObj->orig_debug = $errors['debug'];
         $errObj->debug = $errors['debug'];
 
-        (!empty($errors['tip'])) ? $errObj->tip = $errors['tip'] : null;
+        if ( !empty( $errors[ 'tip' ] ) ) {
+            $errObj->tip = $errors[ 'tip' ];
+        }
 
         return $errObj;
     }

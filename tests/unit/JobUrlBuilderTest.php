@@ -2,6 +2,7 @@
 
 
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use TestHelpers\AbstractTest;
@@ -13,9 +14,12 @@ class JobUrlBuilderTest extends AbstractTest
 {
 
     /**
-     * @var \Model\DataAccess\Database
+     * @var Database|IDatabase
      */
-    protected $database_instance;
+    protected IDatabase|Database $database_instance;
+
+    protected ?ProjectStruct $project = null;
+    protected ?JobStruct $job = null;
 
     public function setUp(): void
     {
@@ -58,23 +62,24 @@ class JobUrlBuilderTest extends AbstractTest
         $this->assertFalse($jobUrlStruct->hasSecondPassReview());
     }
 
-    public function testBuildTranslationUrlFromCredentials() {
-        $job          = new JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs ORDER BY id DESC LIMIT 1" )->fetch() );
-        $jobUrlStruct = JobUrlBuilder::createFromJobStructAndProjectName( $job, 'fake name', [
-                'id_segment' => 1
-        ] );
+    public function testBuildTranslationUrlFromCredentials()
+    {
+        $job = new JobStruct($this->database_instance->getConnection()->query("SELECT * FROM jobs ORDER BY id DESC LIMIT 1")->fetch());
+        $jobUrlStruct = JobUrlBuilder::createFromJobStructAndProjectName($job, 'fake name', [
+            'id_segment' => 1
+        ]);
 
-        $this->assertInstanceOf( JobUrls::class, $jobUrlStruct );
-        $this->assertNotNull( $jobUrlStruct->getTranslationUrl() );
-        $this->assertTrue( strpos( $jobUrlStruct->getTranslationUrl(), 'fake-name' ) !== false );
-        $this->assertEquals( $jobUrlStruct->getUrlByRevisionNumber(), $jobUrlStruct->getTranslationUrl() );
-        $this->assertNull( $jobUrlStruct->getReviseUrl() );
-        $this->assertNull( $jobUrlStruct->getRevise2Url() );
-        $this->assertNull( $jobUrlStruct->getUrlByRevisionNumber( 1 ) );
-        $this->assertNull( $jobUrlStruct->getUrlByRevisionNumber( 2 ) );
-        $this->assertNull( $jobUrlStruct->getUrlByRevisionNumber( "1" ) );
-        $this->assertNull( $jobUrlStruct->getUrlByRevisionNumber( "2" ) );
-        $this->assertFalse( $jobUrlStruct->hasReview() );
-        $this->assertFalse( $jobUrlStruct->hasSecondPassReview() );
+        $this->assertInstanceOf(JobUrls::class, $jobUrlStruct);
+        $this->assertNotNull($jobUrlStruct->getTranslationUrl());
+        $this->assertTrue(strpos($jobUrlStruct->getTranslationUrl(), 'fake-name') !== false);
+        $this->assertEquals($jobUrlStruct->getUrlByRevisionNumber(), $jobUrlStruct->getTranslationUrl());
+        $this->assertNull($jobUrlStruct->getReviseUrl());
+        $this->assertNull($jobUrlStruct->getRevise2Url());
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber(1));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber(2));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber("1"));
+        $this->assertNull($jobUrlStruct->getUrlByRevisionNumber("2"));
+        $this->assertFalse($jobUrlStruct->hasReview());
+        $this->assertFalse($jobUrlStruct->hasSecondPassReview());
     }
 }

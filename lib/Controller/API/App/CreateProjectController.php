@@ -6,8 +6,10 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
+use Controller\Traits\ValidatesDialectStrictTrait;
 use Exception;
 use InvalidArgumentException;
+use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -31,11 +33,8 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
-use Utils\Engines\Validators\DeeplFormalityValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
-use Utils\Engines\Validators\IntentoRoutingValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -48,6 +47,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 {
 
     use ScanDirectoryForConvertedFiles;
+    use ValidatesDialectStrictTrait;
 
     private array $data = [];
     private array $metadata = [];
@@ -176,7 +176,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         //reserve a project id from the sequence
         $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
-        $projectStructure['ppassword'] = Utils::randomString(12);
+        $projectStructure['ppassword'] = Utils::randomString();
 
         $projectManager->sanitizeProjectStructure();
         $fs::moveFileFromUploadSessionToQueuePath($_COOKIE['upload_token']);
@@ -268,6 +268,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
 
+        $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+
         $array_keys = json_decode($private_keys_list, true);
         $array_keys = array_values(array_merge($array_keys['ownergroup'], $array_keys['mine'], $array_keys['anonymous']));
 
@@ -329,7 +331,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         );
 
         // validate Lara style
-        if($engineStruct instanceof Lara){
+        if ($engineStruct instanceof Lara) {
             $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
         }
 
@@ -398,7 +400,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode(
                 $this->validateSubfilteringOptions($this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]'))
             ),
-
+            'icu_enabled' => $icu_enabled,
         ];
 
         if ($disable_tms_engine_flag) {
@@ -525,6 +527,8 @@ class CreateProjectController extends AbstractStatefulKleinController
             $options[MetadataDao::MT_QUALITY_VALUE_IN_EDITOR] = $data['mt_quality_value_in_editor'];
         }
 
+        $options[MetadataDao::ICU_ENABLED] = $data['icu_enabled'];
+
         $this->metadata = $options;
     }
 
@@ -635,50 +639,6 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * Validate DeepL params
-     *
-     * @param null $deepl_formality
-     *
-     * @return string|null
-     */
-    private function validateDeepLFormalityParams($deepl_formality = null): ?string
-    {
-        if (!empty($deepl_formality)) {
-            $allowedFormalities = [
-                'default',
-                'prefer_less',
-                'prefer_more'
-            ];
-
-            if (!in_array($deepl_formality, $allowedFormalities)) {
-                throw new InvalidArgumentException("Not allowed value of DeepL formality", -6);
-            }
-
-            return $deepl_formality;
-        }
-
-        return null;
-    }
-
-    private function validateDeepLEngineType(?string $deepl_engine_type = null): ?string
-    {
-        if (!empty($deepl_engine_type)) {
-            $allowedEngineTypes = [
-                'prefer_quality_optimized',
-                'latency_optimized',
-            ];
-
-            if (!in_array($deepl_engine_type, $allowedEngineTypes)) {
-                throw new InvalidArgumentException("Not allowed value of DeepL engine type", -7);
-            }
-
-            return $deepl_engine_type;
-        }
-
-        return null;
-    }
-
-    /**
      * @param null $qa_model_template
      * @param null $qa_model_template_id
      *
@@ -760,50 +720,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         return $payableRateModelTemplate;
     }
 
-    /**
-     * Validate `dialect_strict` param
-     *
-     * Example: {"it-IT": true, "en-US": false, "fr-FR": false}
-     *
-     * @param Languages $lang_handler
-     * @param null $dialect_strict
-     *
-     * @return string|null
-     */
-    private function validateDialectStrictParam(Languages $lang_handler, $dialect_strict = null): ?string
-    {
-        if (!empty($dialect_strict)) {
-            $dialect_strict = trim(html_entity_decode($dialect_strict));
-
-            // first check if `dialect_strict` is a valid JSON
-            if (!Utils::isJson($dialect_strict)) {
-                throw new InvalidArgumentException("dialect_strict is not a valid JSON");
-            }
-
-            $dialectStrictObj = json_decode($dialect_strict, true);
-
-            foreach ($dialectStrictObj as $lang => $value) {
-
-                try {
-                    $lang_handler->validateLanguage($lang);
-                } catch (Exception $e) {
-                    throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, language, ' . $lang . ' is not supported'
-                    );
-                }
-
-                if (!is_bool($value)) {
-                    throw new InvalidArgumentException(
-                        'Wrong `dialect_strict` object, not boolean declared value for ' . $lang
-                    );
-                }
-            }
-
-            $dialect_strict = html_entity_decode($dialect_strict);
-        }
-
-        return $dialect_strict;
-    }
 
     /**
      * @param null $filters_extraction_parameters

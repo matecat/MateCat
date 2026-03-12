@@ -5,7 +5,7 @@ namespace Controller\API\V2;
 
 
 use Controller\Abstracts\KleinController;
-use Utils\Langs\Languages;
+use Matecat\Locales\Languages;
 
 class SupportedLanguagesController extends KleinController
 {

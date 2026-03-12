@@ -15,6 +15,7 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Utils\Engines\AbstractEngine;
@@ -92,7 +93,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public bool $mt_evaluation = false;
     public int $mt_quality_value_in_editor = 86;
     public bool $mt_qe_workflow_enabled = false;
-    public ?string $mt_qe_workflow_parameters = null;
+    public ?array $mt_qe_workflow_parameters = null;
 
     public ?int $public_tm_penalty = null;
 

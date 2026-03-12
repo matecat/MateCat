@@ -250,7 +250,7 @@ class S3FilesStorage extends AbstractFilesStorage
     {
         if (!$originalPath) {
             $force_extension = "";
-            $fileType = XliffProprietaryDetect::getInfo($xliffPath);
+            $fileType = (new XliffProprietaryDetect())->getInfo($xliffPath);
             if (!$fileType['proprietary'] && $fileType['info']['extension'] != 'sdlxliff') {
                 $force_extension = '.sdlxliff';
             }

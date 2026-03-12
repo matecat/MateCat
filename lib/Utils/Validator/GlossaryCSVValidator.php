@@ -2,8 +2,8 @@
 
 namespace Utils\Validator;
 
+use Matecat\Locales\Languages;
 use Utils\Files\CSV;
-use Utils\Langs\Languages;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;

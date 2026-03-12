@@ -108,7 +108,7 @@ class UploadHandler
     protected static function _validateFileName(string $fileName): void
     {
         if (!Utils::isValidFileName($fileName)) {
-            throw new Exception("Invalid File Name");
+            throw new Exception("Invalid file name: $fileName");
         }
     }
 
@@ -172,7 +172,7 @@ class UploadHandler
         if (is_int($this->options['max_number_of_files']) && (
                 count($this->get_file_objects()) >= $this->options['max_number_of_files'])
         ) {
-            $file->error = 'maxNumberOfFiles';
+            $file->error = 'Too many files uploaded. Please remove this file to continue.';
 
             return false;
         }

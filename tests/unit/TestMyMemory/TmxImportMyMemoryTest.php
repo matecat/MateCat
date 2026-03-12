@@ -24,7 +24,7 @@ use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
-use Utils\Langs\Languages;
+use Matecat\Locales\Languages;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;

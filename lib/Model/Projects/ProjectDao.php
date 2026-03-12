@@ -72,6 +72,8 @@ class ProjectDao extends AbstractDao
      */
     protected static string $_sql_get_projects_for_team = "SELECT * FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
 
+    protected static string $sql_find_by_id = " SELECT * FROM projects WHERE id = :id ";
+
     /**
      * @param ProjectStruct $project
      * @param string $field
@@ -357,7 +359,7 @@ class ProjectDao extends AbstractDao
     public static function exists(int $id): bool
     {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(" SELECT id FROM projects WHERE id = :id ");
+        $stmt = $conn->prepare(self::$sql_find_by_id);
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -375,7 +377,7 @@ class ProjectDao extends AbstractDao
     {
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(" SELECT * FROM projects WHERE id = :id ");
+        $stmt = $conn->prepare(self::$sql_find_by_id);
 
         return $thisDao->_destroyObjectCache($stmt, ProjectStruct::class, ['id' => $id]);
     }

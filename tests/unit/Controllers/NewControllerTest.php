@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionClass;
@@ -28,6 +29,9 @@ class NewControllerTest extends AbstractTest
      * @var UserStruct
      */
     private UserStruct $user;
+
+    private ?IDatabase $database_instance = null;
+    private $id_engine = null;
 
     public function setUp(): void
     {
@@ -102,11 +106,11 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
-    public function testValidateTheRequestWithValidParameters() {
-
+    public function testValidateTheRequestWithValidParameters()
+    {
         $user = $this->createMock(UserStruct::class);
-        $user->expects( $this->once() )->method( 'getPersonalTeam' )->willReturn( new TeamStruct() );
-        $user->expects( $this->once() )->method( 'getEmail' )->willReturn( "test-email@translated.com" );
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
 
         $this->requestMock = new Request(
             [],
