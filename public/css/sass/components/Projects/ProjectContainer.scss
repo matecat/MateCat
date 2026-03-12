@@ -11,19 +11,35 @@
 
 .project-container-header {
   display: flex;
+  justify-content: space-between;
   padding: 7px 24px;
   align-items: center;
-  gap: 16px;
   align-self: stretch;
   background-color: colors.$grey50;
+}
+
+.project-container-header-sx,
+.project-container-header-dx {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.project-container-header-dx {
+  gap: 8px;
 }
 
 .project-container-header-name {
   display: flex;
   align-items: center;
+  gap: 2px;
 
   h6 {
     font-weight: bold;
+  }
+
+  &:has(> form) {
+    gap: 8px;
   }
 }
 
@@ -46,5 +62,28 @@
       box-shadow: unset;
       border: 1px solid colors.$grey500;
     }
+  }
+}
+
+.project-container-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+}
+
+.project-team-dropdown,
+.user-project-dropdown {
+  border-radius: 999px !important;
+  font-weight: normal !important;
+}
+
+.project-menu-dropdown {
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+
+  &:hover {
+    background-color: rgba(colors.$grey200, 1) !important;
   }
 }

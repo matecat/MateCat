@@ -5,8 +5,5 @@
   grid-template-columns: 20px 180px auto 140px 100px 1fr auto auto auto;
   padding: 24px;
   gap: 8px;
-
-  &:not(last-child) {
-    border-bottom: 1px solid colors.$grey100;
-  }
+  border-bottom: 1px solid colors.$grey100;
 }
