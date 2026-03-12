@@ -104,50 +104,22 @@ const OutsourceContainer = ({
             className={'outsource-container ' + outsourceContainerClass}
             ref={containerRef}
           >
-            <div className=" outsource-header ">
-              {idJobLabel ? (
-                <div className="job-id" title="Job Id">
-                  ID: {idJobLabel}
-                </div>
-              ) : null}
-              <Popup
-                content={job.get('sourceTxt') + ' > ' + job.get('targetTxt')}
-                trigger={
-                  <div className="source-target languages-tooltip">
-                    <div className="source-box">{job.get('sourceTxt')}</div>
-                    <div className="in-to">
-                      <i className="icon-chevron-right icon" />
-                    </div>
-                    <div className="target-box">{job.get('targetTxt')}</div>
-                  </div>
-                }
+            {showTranslatorBox ? (
+              <AssignToTranslator
+                job={job}
+                url={url}
+                project={project}
+                closeOutsource={onClickOutside}
               />
-              <div className="job-payable">
-                <div>
-                  <span id="words">{standardWC}</span> words
-                </div>
-              </div>
-            </div>
-            <div className="outsource-content">
-              <div ref={containerRef}>
-                {showTranslatorBox ? (
-                  <AssignToTranslator
-                    job={job}
-                    url={url}
-                    project={project}
-                    closeOutsource={onClickOutside}
-                  />
-                ) : null}
-                {config.enable_outsource && openOutsource ? (
-                  <OutsourceVendor
-                    project={project}
-                    job={job}
-                    extendedView={extendedView}
-                    standardWC={standardWC}
-                  />
-                ) : null}
-              </div>
-            </div>
+            ) : null}
+            {config.enable_outsource && openOutsource ? (
+              <OutsourceVendor
+                project={project}
+                job={job}
+                extendedView={extendedView}
+                standardWC={standardWC}
+              />
+            ) : null}
           </div>
         </CSSTransition>
       ) : null}
