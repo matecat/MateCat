@@ -370,24 +370,15 @@ class ProjectManager
     }
 
     /**
-     * Factory method for creating a ProjectManagerModel instance.
-     * Override in tests to inject a mock/stub.
-     */
-    protected function createProjectManagerModel(): ProjectManagerModel
-    {
-        return new ProjectManagerModel(
-            $this->dbHandler,
-            $this->logger,
-        );
-    }
-
-    /**
      * Get or lazily create the ProjectManagerModel instance.
      */
     protected function getProjectManagerModel(): ProjectManagerModel
     {
         if ($this->projectManagerModel === null) {
-            $this->projectManagerModel = $this->createProjectManagerModel();
+            $this->projectManagerModel = new ProjectManagerModel(
+                $this->dbHandler,
+                $this->logger,
+            );
         }
 
         return $this->projectManagerModel;
@@ -488,7 +479,7 @@ class ProjectManager
      */
     protected function saveFeaturesInMetadata(): void
     {
-        $dao = $this->createProjectsMetadataDao();
+        $dao = $this->getProjectsMetadataDao();
 
         $featureCodes = $this->features->getCodes();
         if (!empty($featureCodes)) {
@@ -505,7 +496,7 @@ class ProjectManager
      */
     protected function saveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
     {
-        $jobsMetadataDao = $this->createJobsMetadataDao();
+        $jobsMetadataDao = $this->getJobsMetadataDao();
 
         // Simple key-value metadata with optional transformation
         $simpleKeys = [
@@ -559,7 +550,7 @@ class ProjectManager
     protected function saveMetadata(): void
     {
         $options = $this->projectStructure['metadata'];
-        $dao = $this->createProjectsMetadataDao();
+        $dao = $this->getProjectsMetadataDao();
 
         // "From API" flag
         if (isset($this->projectStructure[ProjectsMetadataDao::FROM_API]) and $this->projectStructure[ProjectsMetadataDao::FROM_API]) {
@@ -640,17 +631,17 @@ class ProjectManager
     }
 
     /**
-     * Factory method for ProjectsMetadataDao — overridable in tests.
+     * Get a ProjectsMetadataDao instance — overridable in tests.
      */
-    protected function createProjectsMetadataDao(): ProjectsMetadataDao
+    protected function getProjectsMetadataDao(): ProjectsMetadataDao
     {
         return new ProjectsMetadataDao();
     }
 
     /**
-     * Factory method for JobsMetadataDao — overridable in tests.
+     * Get a JobsMetadataDao instance — overridable in tests.
      */
-    protected function createJobsMetadataDao(): JobsMetadataDao
+    protected function getJobsMetadataDao(): JobsMetadataDao
     {
         return new JobsMetadataDao();
     }
@@ -742,15 +733,15 @@ class ProjectManager
             );
 
             //clean the cache for the team member list of assigned projects
-            $teamDao = $this->createTeamDao();
+            $teamDao = $this->getTeamDao();
             $teamDao->destroyCacheAssignee($this->projectStructure['team']);
         }
     }
 
     /**
-     * Factory method for TeamDao — overridable in tests.
+     * Get a TeamDao instance — overridable in tests.
      */
-    protected function createTeamDao(): TeamDao
+    protected function getTeamDao(): TeamDao
     {
         return new TeamDao();
     }

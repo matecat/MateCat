@@ -153,9 +153,9 @@ class TestableProjectManager extends ProjectManager
         $this->projectsMetadataDaoOverride = $dao;
     }
 
-    protected function createProjectsMetadataDao(): ProjectsMetadataDao
+    protected function getProjectsMetadataDao(): ProjectsMetadataDao
     {
-        return $this->projectsMetadataDaoOverride ?? parent::createProjectsMetadataDao();
+        return $this->projectsMetadataDaoOverride ?? parent::getProjectsMetadataDao();
     }
 
     /**
@@ -179,9 +179,9 @@ class TestableProjectManager extends ProjectManager
         $this->jobsMetadataDaoOverride = $dao;
     }
 
-    protected function createJobsMetadataDao(): JobsMetadataDao
+    protected function getJobsMetadataDao(): JobsMetadataDao
     {
-        return $this->jobsMetadataDaoOverride ?? parent::createJobsMetadataDao();
+        return $this->jobsMetadataDaoOverride ?? parent::getJobsMetadataDao();
     }
 
     /**
@@ -258,9 +258,9 @@ class TestableProjectManager extends ProjectManager
         $this->teamDaoOverride = $dao;
     }
 
-    protected function createTeamDao(): TeamDao
+    protected function getTeamDao(): TeamDao
     {
-        return $this->teamDaoOverride ?? parent::createTeamDao();
+        return $this->teamDaoOverride ?? parent::getTeamDao();
     }
 
     // ── Step 12: additional private/protected methods testing support ──
@@ -381,16 +381,9 @@ class TestableProjectManager extends ProjectManager
 
     // ── ProjectManagerModel override ──
 
-    private ?ProjectManagerModel $projectManagerModelOverride = null;
-
     public function setProjectManagerModel(ProjectManagerModel $model): void
     {
-        $this->projectManagerModelOverride = $model;
-    }
-
-    protected function createProjectManagerModel(): ProjectManagerModel
-    {
-        return $this->projectManagerModelOverride ?? parent::createProjectManagerModel();
+        $this->projectManagerModel = $model;
     }
 
     // ── Step 13: additional private methods testing support ──
