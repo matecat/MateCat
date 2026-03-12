@@ -300,44 +300,21 @@ class ProjectManager
     }
 
     /**
-     * Factory method to create a SegmentExtractor.
-     * Protected so test subclasses can override for injection.
-     */
-    protected function createSegmentExtractor(): SegmentExtractor
-    {
-        return new SegmentExtractor(
-            $this->filter,
-            $this->features,
-            $this->filesMetadataDao,
-            $this->logger,
-        );
-    }
-
-    /**
      * Get or lazily create the SegmentExtractor instance.
      * The same instance is reused across all files so counters accumulate.
      */
     protected function getSegmentExtractor(): SegmentExtractor
     {
         if ($this->segmentExtractor === null) {
-            $this->segmentExtractor = $this->createSegmentExtractor();
+            $this->segmentExtractor = new SegmentExtractor(
+                $this->filter,
+                $this->features,
+                $this->filesMetadataDao,
+                $this->logger,
+            );
         }
 
         return $this->segmentExtractor;
-    }
-
-    /**
-     * Factory method to create a TmKeyService.
-     * Protected so test subclasses can override for injection.
-     */
-    protected function createTmKeyService(): TmKeyService
-    {
-        return new TmKeyService(
-            $this->tmxServiceWrapper,
-            $this->dbHandler,
-            $this->logger,
-            fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
-        );
     }
 
     /**
@@ -346,23 +323,15 @@ class ProjectManager
     protected function getTmKeyService(): TmKeyService
     {
         if ($this->tmKeyService === null) {
-            $this->tmKeyService = $this->createTmKeyService();
+            $this->tmKeyService = new TmKeyService(
+                $this->tmxServiceWrapper,
+                $this->dbHandler,
+                $this->logger,
+                fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
+            );
         }
 
         return $this->tmKeyService;
-    }
-
-    /**
-     * Factory method for creating a JobSplitMergeService instance.
-     * Override in tests to inject a mock/stub.
-     */
-    protected function createJobSplitMergeService(): JobSplitMergeService
-    {
-        return new JobSplitMergeService(
-            $this->dbHandler,
-            $this->features,
-            $this->logger,
-        );
     }
 
     /**
@@ -371,25 +340,14 @@ class ProjectManager
     protected function getJobSplitMergeService(): JobSplitMergeService
     {
         if ($this->jobSplitMergeService === null) {
-            $this->jobSplitMergeService = $this->createJobSplitMergeService();
+            $this->jobSplitMergeService = new JobSplitMergeService(
+                $this->dbHandler,
+                $this->features,
+                $this->logger,
+            );
         }
 
         return $this->jobSplitMergeService;
-    }
-
-    /**
-     * Factory method for creating a SegmentStorageService instance.
-     * Override in tests to inject a mock/stub.
-     */
-    protected function createSegmentStorageService(): SegmentStorageService
-    {
-        return new SegmentStorageService(
-            $this->dbHandler,
-            $this->features,
-            $this->logger,
-            $this->filter,
-            $this->getProjectManagerModel(),
-        );
     }
 
     /**
@@ -399,7 +357,13 @@ class ProjectManager
     protected function getSegmentStorageService(): SegmentStorageService
     {
         if ($this->segmentStorageService === null) {
-            $this->segmentStorageService = $this->createSegmentStorageService();
+            $this->segmentStorageService = new SegmentStorageService(
+                $this->dbHandler,
+                $this->features,
+                $this->logger,
+                $this->filter,
+                $this->getProjectManagerModel(),
+            );
         }
 
         return $this->segmentStorageService;
