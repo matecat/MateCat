@@ -9,6 +9,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\ProjectManager\SplitMergeProjectData;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -64,15 +65,15 @@ class SplitDataTest extends AbstractTest
     }
 
     /**
-     * Helper: create a projectStructure ArrayObject for getSplitData.
+     * Helper: create a SplitMergeProjectData DTO for getSplitData.
      */
-    private function makeProjectStructure(): ArrayObject
+    private function makeProjectStructure(): SplitMergeProjectData
     {
-        return new ArrayObject([
-            'job_to_split'      => 100,
-            'job_to_split_pass' => 'abc',
-            'split_result'      => null,
-        ]);
+        $data = new SplitMergeProjectData(999);
+        $data->jobToSplit     = 100;
+        $data->jobToSplitPass = 'abc';
+
+        return $data;
     }
 
     /**
@@ -423,7 +424,7 @@ class SplitDataTest extends AbstractTest
         $ps = $this->makeProjectStructure();
         $result = $this->service->getSplitData($ps, 2);
 
-        $this->assertSame($result, $ps['split_result']);
+        $this->assertSame($result, $ps->splitResult);
     }
 
     #[Test]

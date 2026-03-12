@@ -33,8 +33,10 @@ use Utils\Tools\Utils;
  *  - Applying a split (cloning job rows for each chunk)
  *  - Merging all chunks back into a single job
  *
- * All mutations to projectStructure are performed on the ArrayObject passed
- * to the public methods, which is the same mutable structure used by ProjectManager.
+ * All mutations are performed on the {@see SplitMergeProjectData} DTO passed
+ * to the public methods. FeatureSet hooks receive an ArrayObject snapshot
+ * via {@see SplitMergeProjectData::toArrayObject()} for backward compatibility
+ * with external plugins.
  */
 class JobSplitMergeService
 {
@@ -194,21 +196,21 @@ class JobSplitMergeService
     /**
      * Compute split data: chunk boundaries and word counts.
      *
-     * Analyse the job segments and decide how to distribute them across
+     * Analyze the job segments and decide how to distribute them across
      * $num_split chunks, either evenly or according to the caller-specified
      * $requestedWordsPerSplit distribution.
      *
-     * @param ArrayObject $projectStructure
-     * @param int         $num_split              Number of chunks (minimum 2)
-     * @param array       $requestedWordsPerSplit Optional per-chunk word targets
-     * @param string      $count_type             Which word-count column to use
+     * @param SplitMergeProjectData $data
+     * @param int                   $num_split              Number of chunks (minimum 2)
+     * @param array                 $requestedWordsPerSplit Optional per-chunk word targets
+     * @param string                $count_type             Which word-count column to use
      *
-     * @return ArrayObject The split result (also stored in $projectStructure['split_result'])
+     * @return ArrayObject The split result (also stored in $data->splitResult)
      *
      * @throws Exception
      */
     public function getSplitData(
-        ArrayObject $projectStructure,
+        SplitMergeProjectData $data,
         int $num_split = 2,
         array $requestedWordsPerSplit = [],
         string $count_type = ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE
@@ -225,10 +227,10 @@ class JobSplitMergeService
             throw new Exception("Requested words per chunk available only for Matecat PRO version", -4);
         }
 
-        $rows = $this->createJobDao()->getSplitData($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
+        $rows = $this->createJobDao()->getSplitData($data->jobToSplit, $data->jobToSplitPass);
 
         if (empty($rows)) {
-            throw new Exception('No segments found for job ' . $projectStructure['job_to_split'], -5);
+            throw new Exception('No segments found for job ' . $data->jobToSplit, -5);
         }
 
         $row_totals = array_pop($rows); //get the last row (ROLLUP)
@@ -324,51 +326,51 @@ class JobSplitMergeService
             throw new Exception('The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7);
         }
 
-        $chunk = $this->getJobByIdAndPassword($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
+        $chunk = $this->getJobByIdAndPassword($data->jobToSplit, $data->jobToSplitPass);
         $row_totals['standard_analysis_count'] = $chunk->standard_analysis_wc;
 
         $result = array_merge($row_totals->getArrayCopy(), ['chunks' => $counter]);
 
-        $projectStructure['split_result'] = new ArrayObject($result);
+        $data->splitResult = new ArrayObject($result);
 
-        return $projectStructure['split_result'];
+        return $data->splitResult;
     }
 
     /**
-     * Apply new structure of the job: empty cart, begin transaction, split, commit.
+     * Apply a new structure of the job: empty cart, begin transaction, split, commit.
      *
-     * @param ArrayObject $projectStructure
-     * @param int|null    $uid The user ID performing the split (nullable)
+     * @param SplitMergeProjectData $data
+     * @param int|null              $uid The user ID performing the split (nullable)
      *
      * @throws Exception
      */
-    public function applySplit(ArrayObject $projectStructure, ?int $uid = null): void
+    public function applySplit(SplitMergeProjectData $data, ?int $uid = null): void
     {
         $this->getCart()->emptyCart();
 
         $this->beginTransaction();
-        $this->splitJob($projectStructure, $uid);
+        $this->splitJob($data, $uid);
         $this->dbHandler->commit();
     }
 
     /**
      * Do the split based on previous getSplitData analysis.
-     * It clones the original job in the right number of chunks and fill these rows with:
-     * first/last segments of every chunk, last opened segment as the first segment of the new job
+     * It clones the original job in the right number of chunks and fills these rows with:
+     * first/last segments of every chunk, last opened segment as the first segment of the new job,
      * and the timestamp of creation.
      *
-     * @param ArrayObject $projectStructure
-     * @param int|null    $uid The user ID performing the split (previously accessed via $this->projectStructure['uid'])
+     * @param SplitMergeProjectData $data
+     * @param int|null              $uid The user ID performing the split
      *
      * @throws Exception
      */
-    public function splitJob(ArrayObject $projectStructure, ?int $uid = null): void
+    public function splitJob(SplitMergeProjectData $data, ?int $uid = null): void
     {
         // init JobDao
         $jobDao = $this->createJobDao();
 
         // job to split
-        $jobToSplit = $this->getJobByIdAndPassword($projectStructure['job_to_split'], $projectStructure['job_to_split_pass']);
+        $jobToSplit = $this->getJobByIdAndPassword($data->jobToSplit, $data->jobToSplitPass);
 
         $translatorModel = $this->createTranslatorsModel($jobToSplit);
         $jTranslatorStruct = $translatorModel->getTranslator(0); // no cache
@@ -383,7 +385,7 @@ class JobSplitMergeService
             $translatorModel->update();
         }
 
-        $chunks = $projectStructure['split_result']['chunks'];
+        $chunks = $data->splitResult['chunks'];
 
         // update the first chunk of the job to split
         $jobDao->updateStdWcAndTotalWc($jobToSplit->id, $chunks[0]['standard_word_count'], $chunks[0]['raw_word_count']);
@@ -395,7 +397,7 @@ class JobSplitMergeService
             $newJob = clone $jobToSplit;
 
             //IF THIS IS NOT the original job, UPDATE relevant fields
-            if ($contents['segment_start'] != $projectStructure['split_result']['job_first_segment']) {
+            if ($contents['segment_start'] != $data->splitResult['job_first_segment']) {
                 //next insert
                 $newJob['password'] = $this->generateRandomString();
                 $newJob['create_date'] = date('Y-m-d H:i:s');
@@ -416,7 +418,7 @@ class JobSplitMergeService
             $wCountManager->initializeJobWordCount($newJob->id, $newJob->password);
 
             if ($this->dbHandler->rowCount() == 0) {
-                $msg = "Failed to split job into " . count($projectStructure['split_result']['chunks']) . " chunks\n";
+                $msg = "Failed to split job into " . count($data->splitResult['chunks']) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r($stmt->queryString, true) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r($newJob, true) . "\n";
                 $this->log($msg);
@@ -429,11 +431,11 @@ class JobSplitMergeService
             unset($stmt);
 
             //add here the job id to list
-            $projectStructure['array_jobs']['job_list']->append($projectStructure['job_to_split']);
+            $data->jobList->append($data->jobToSplit);
             //add here passwords to list
-            $projectStructure['array_jobs']['job_pass']->append($newJob['password']);
+            $data->jobPass->append($newJob['password']);
 
-            $projectStructure['array_jobs']['job_segments']->offsetSet($projectStructure['job_to_split'] . "-" . $newJob['password'], new ArrayObject([
+            $data->jobSegments->offsetSet($data->jobToSplit . "-" . $newJob['password'], new ArrayObject([
                 $contents['segment_start'],
                 $contents['segment_end']
             ]));
@@ -454,26 +456,26 @@ class JobSplitMergeService
             }
         }
 
-        $this->createJobDao()->destroyCacheByProjectId($projectStructure['id_project']);
+        $this->createJobDao()->destroyCacheByProjectId($data->idProject);
 
         $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id, $projectStruct->password);
-        $this->destroyAnalysisCacheByProjectId($projectStructure['id_project']);
+        $this->destroyAnalysisCacheByProjectId($data->idProject);
 
         $this->getCart()->deleteCart();
 
-        $this->features->run('postJobSplitted', $projectStructure);
+        $this->features->run('postJobSplitted', $data->toArrayObject());
     }
 
     /**
      * Merge all job chunks back into a single job.
      *
-     * @param ArrayObject $projectStructure
-     * @param JobStruct[] $jobStructs
+     * @param SplitMergeProjectData $data
+     * @param JobStruct[]           $jobStructs
      *
      * @throws Exception
      */
-    public function mergeALL(ArrayObject $projectStructure, array $jobStructs): void
+    public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {
         $metadata_dao = $this->createProjectsMetadataDao();
         $metadata_dao->cleanupChunksOptions($jobStructs);
@@ -540,7 +542,7 @@ class JobSplitMergeService
         $wCountManager->initializeJobWordCount($first_job['id'], $first_job['password']);
 
         $chunk = new JobStruct($first_job->toArray());
-        $this->features->run('postJobMerged', $projectStructure, $chunk);
+        $this->features->run('postJobMerged', $data->toArrayObject(), $chunk);
 
         $jobDao = $this->createJobDao();
 
@@ -548,8 +550,8 @@ class JobSplitMergeService
 
         $this->dbHandler->commit();
 
-        $jobDao->destroyCacheByProjectId($projectStructure['id_project']);
-        $this->destroyAnalysisCacheByProjectId($projectStructure['id_project']);
+        $jobDao->destroyCacheByProjectId($data->idProject);
+        $this->destroyAnalysisCacheByProjectId($data->idProject);
 
         $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
         $this->createProjectDao()->destroyCacheForProjectData($projectStruct->id, $projectStruct->password);

@@ -2,7 +2,6 @@
 
 namespace Controller\API\V2;
 
-use ArrayObject;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -11,6 +10,7 @@ use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\ProjectManager\JobSplitMergeManager;
+use Model\ProjectManager\SplitMergeProjectData;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -36,19 +36,19 @@ class SplitJobController extends KleinController
             $request['split_raw_words']
         );
 
-        /** @var  $pStruct ArrayObject */
-        $pStruct = $projectStructure['pStruct'];
-        /** @var  $pManager JobSplitMergeManager */
+        /** @var SplitMergeProjectData $data */
+        $data = $projectStructure['data'];
+        /** @var JobSplitMergeManager $pManager */
         $pManager = $projectStructure['pManager'];
-        /** @var $project ProjectStruct */
+        /** @var ProjectStruct $project */
         $project = $projectStructure['project'];
 
         $jobStructs = $this->checkMergeAccess($request['job_id'], $project->getJobs());
-        $pStruct['job_to_merge'] = $request['job_id'];
-        $pManager->mergeALL($pStruct, $jobStructs);
+        $data->jobToMerge = $request['job_id'];
+        $pManager->mergeALL($data, $jobStructs);
 
         $this->response->json([
-            "data" => $pStruct['split_result']
+            "data" => $data->splitResult
         ]);
     }
 
@@ -64,11 +64,11 @@ class SplitJobController extends KleinController
         }
 
         /** @var  $pManager JobSplitMergeManager */
-        /** @var  $pStruct ArrayObject */
-        [, $pStruct] = $this->checkSplit($request);
+        /** @var  $data SplitMergeProjectData */
+        [, $data] = $this->checkSplit($request);
 
         $this->response->json([
-            "data" => $pStruct['split_result']
+            "data" => $data->splitResult
         ]);
     }
 
@@ -84,16 +84,17 @@ class SplitJobController extends KleinController
         }
 
         /** @var  $pManager JobSplitMergeManager */
-        /** @var  $pStruct ArrayObject */
-        [$pManager, $pStruct] = $this->checkSplit($request);
-        $pManager->applySplit($pStruct);
+        /** @var  $data SplitMergeProjectData */
+        [$pManager, $data] = $this->checkSplit($request);
+        $pManager->applySplit($data);
 
         $this->response->json([
-            "data" => $pStruct['split_result']
+            "data" => $data->splitResult
         ]);
     }
 
     /**
+     * @return array{0: JobSplitMergeManager, 1: SplitMergeProjectData}
      * @throws Exception
      */
     private function checkSplit(array $request): array
@@ -104,22 +105,22 @@ class SplitJobController extends KleinController
             $request['split_raw_words']
         );
 
-        /** @var  $pStruct ArrayObject */
-        $pStruct = $projectStructure['pStruct'];
-        /** @var  $pManager JobSplitMergeManager */
+        /** @var SplitMergeProjectData $data */
+        $data = $projectStructure['data'];
+        /** @var JobSplitMergeManager $pManager */
         $pManager = $projectStructure['pManager'];
-        /** @var $project ProjectStruct */
+        /** @var ProjectStruct $project */
         $project = $projectStructure['project'];
         $count_type = $projectStructure['count_type'];
 
         $this->checkSplitAccess($project, $request['job_id'], $request['job_pass'], $project->getJobs());
 
-        $pStruct['job_to_split'] = $request['job_id'];
-        $pStruct['job_to_split_pass'] = $request['job_pass'];
+        $data->jobToSplit = $request['job_id'];
+        $data->jobToSplitPass = $request['job_pass'];
 
-        $pManager->getSplitData($pStruct, $request['num_split'], $request['split_values'], $count_type);
+        $pManager->getSplitData($data, $request['num_split'], $request['split_values'], $count_type);
 
-        return [$pManager, $pStruct];
+        return [$pManager, $data];
     }
 
     /**
@@ -185,10 +186,10 @@ class SplitJobController extends KleinController
 
         $pManager = new JobSplitMergeManager($project_struct);
 
-        $pStruct = $pManager->getProjectStructure();
+        $data = $pManager->getProjectData();
 
         return [
-            'pStruct' => $pStruct,
+            'data' => $data,
             'pManager' => $pManager,
             'count_type' => $count_type,
             'project' => $project_struct,

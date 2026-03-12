@@ -8,6 +8,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\ProjectManager\SplitMergeProjectData;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -92,24 +93,19 @@ class SplitJobMergeTest extends AbstractTest
     }
 
     /**
-     * Helper: build a projectStructure for splitJob with split_result pre-populated.
+     * Helper: build a SplitMergeProjectData for splitJob with split_result pre-populated.
      */
-    private function makeSplitProjectStructure(array $chunks = []): ArrayObject
+    private function makeSplitProjectStructure(array $chunks = []): SplitMergeProjectData
     {
-        return new ArrayObject([
-            'id_project'       => 999,
-            'job_to_split'     => 100,
-            'job_to_split_pass' => 'origpass',
-            'split_result'     => new ArrayObject([
-                'job_first_segment' => 1,
-                'chunks'            => $chunks,
-            ]),
-            'array_jobs' => new ArrayObject([
-                'job_list'     => new ArrayObject(),
-                'job_pass'     => new ArrayObject(),
-                'job_segments' => new ArrayObject(),
-            ]),
+        $data = new SplitMergeProjectData(999);
+        $data->jobToSplit     = 100;
+        $data->jobToSplitPass = 'origpass';
+        $data->splitResult    = new ArrayObject([
+            'job_first_segment' => 1,
+            'chunks'            => $chunks,
         ]);
+
+        return $data;
     }
 
     private function makeTwoChunks(): array
@@ -187,14 +183,14 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->splitJob($ps);
 
         // Should have 2 entries in job_list and job_pass
-        $this->assertCount(2, $ps['array_jobs']['job_list']);
-        $this->assertCount(2, $ps['array_jobs']['job_pass']);
-        $this->assertCount(2, $ps['array_jobs']['job_segments']);
+        $this->assertCount(2, $ps->jobList);
+        $this->assertCount(2, $ps->jobPass);
+        $this->assertCount(2, $ps->jobSegments);
 
         // First chunk retains original password
-        $this->assertEquals('origpass', $ps['array_jobs']['job_pass'][0]);
+        $this->assertEquals('origpass', $ps->jobPass[0]);
         // Second chunk gets new password
-        $this->assertEquals('pass_chunk2', $ps['array_jobs']['job_pass'][1]);
+        $this->assertEquals('pass_chunk2', $ps->jobPass[1]);
     }
 
     /**
@@ -328,7 +324,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->features->expects($this->once())
             ->method('run')
-            ->with('postJobSplitted', $ps);
+            ->with('postJobSplitted', $this->isInstanceOf(ArrayObject::class));
 
         $this->service->splitJob($ps);
     }
@@ -345,17 +341,17 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->service->splitJob($ps);
 
-        $segments = $ps['array_jobs']['job_segments'];
+        $segments = $ps->jobSegments;
 
         // First chunk: key is "100-origpass"
         $firstKey = '100-origpass';
-        $this->assertTrue($segments->offsetExists($firstKey), "Expected key '$firstKey' in job_segments");
+        $this->assertTrue($segments->offsetExists($firstKey), "Expected key '$firstKey' in jobSegments");
         $this->assertEquals(1, $segments[$firstKey][0]);
         $this->assertEquals(50, $segments[$firstKey][1]);
 
         // Second chunk: key is "100-pass_chunk2"
         $secondKey = '100-pass_chunk2';
-        $this->assertTrue($segments->offsetExists($secondKey), "Expected key '$secondKey' in job_segments");
+        $this->assertTrue($segments->offsetExists($secondKey), "Expected key '$secondKey' in jobSegments");
         $this->assertEquals(51, $segments[$secondKey][0]);
         $this->assertEquals(100, $segments[$secondKey][1]);
     }
@@ -464,7 +460,7 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         // Capture the job passed to updateForMerge
         $this->service->mergeALL($ps, $chunks);
@@ -482,7 +478,7 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         // Expect updateStdWcAndTotalWc with summed values: 250+250=500, 300+300=600
         $this->jobDaoMock->expects($this->once())
@@ -500,7 +496,7 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->service->mergeALL($ps, $chunks);
 
@@ -517,7 +513,7 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->service->mergeALL($ps, $chunks);
 
@@ -534,7 +530,7 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->service->mergeALL($ps, $chunks);
 
@@ -551,7 +547,7 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->counterModelMock->expects($this->once())
             ->method('initializeJobWordCount')
@@ -568,13 +564,13 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->features->expects($this->once())
             ->method('run')
             ->with(
                 'postJobMerged',
-                $ps,
+                $this->isInstanceOf(ArrayObject::class),
                 $this->isInstanceOf(JobStruct::class)
             );
 
@@ -589,7 +585,7 @@ class SplitJobMergeTest extends AbstractTest
     {
         $this->setupMergeStubs();
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->jobDaoMock->expects($this->once())
             ->method('destroyCacheByProjectId')
@@ -621,7 +617,7 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->setProjectsMetadataDao($metadataDao);
 
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->service->mergeALL($ps, $chunks);
     }
@@ -646,7 +642,7 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->setOwnerKeysThrows(true);
 
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         // Should NOT throw — the error is caught and logged
         $this->service->mergeALL($ps, $chunks);
@@ -675,7 +671,7 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->setProjectsMetadataDao($metadataDao);
 
         $chunks = $this->makeJobChunksForMerge();
-        $ps = new ArrayObject(['id_project' => 999]);
+        $ps = new SplitMergeProjectData(999);
 
         $this->service->mergeALL($ps, $chunks);
     }

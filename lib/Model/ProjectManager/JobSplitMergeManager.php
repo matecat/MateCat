@@ -9,7 +9,6 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\LoggerFactory;
 
 /**
@@ -22,11 +21,11 @@ use Utils\Logger\LoggerFactory;
  *
  * Usage:
  *   $manager = new JobSplitMergeManager($projectStruct);
- *   $pStruct = $manager->getProjectStructure();
- *   $manager->getSplitData($pStruct, 3);
- *   $manager->applySplit($pStruct);
+ *   $data = $manager->getProjectData();
+ *   $manager->getSplitData($data, 3);
+ *   $manager->applySplit($data);
  *   // or
- *   $manager->mergeALL($pStruct, $jobStructs);
+ *   $manager->mergeALL($data, $jobStructs);
  */
 class JobSplitMergeManager
 {
@@ -36,7 +35,7 @@ class JobSplitMergeManager
 
     protected ProjectStruct $project;
 
-    protected ArrayObject $projectStructure;
+    protected SplitMergeProjectData $projectData;
 
     protected ?JobSplitMergeService $jobSplitMergeService = null;
 
@@ -48,39 +47,29 @@ class JobSplitMergeManager
         $this->logger  = LoggerFactory::getLogger('job_split_merge_manager');
         $this->project = $project;
 
-        $this->projectStructure = new RecursiveArrayObject([
-            'id_project'          => $project->id,
-            'id_customer'         => $project->id_customer,
-            'uid'                 => null,
-            'array_jobs'          => [
-                'job_list'     => [],
-                'job_pass'     => [],
-                'job_segments' => [],
-            ],
-            'split_result'        => null,
-            'job_to_split'        => null,
-            'job_to_split_pass'   => null,
-            'job_to_merge'        => null,
-        ]);
+        $this->projectData = new SplitMergeProjectData(
+            (int)$project->id,
+            $project->id_customer,
+        );
 
         $this->features = new FeatureSet();
         $this->features->loadForProject($this->project);
     }
 
     /**
-     * @return RecursiveArrayObject|ArrayObject
+     * Return the typed DTO carrying a split / merge state.
      */
-    public function getProjectStructure(): RecursiveArrayObject|ArrayObject
+    public function getProjectData(): SplitMergeProjectData
     {
-        return $this->projectStructure;
+        return $this->projectData;
     }
 
     /**
-     * Build a job split structure, minimum split value are 2 chunks.
+     * Build a job split structure, the minimum split value is 2 chunks.
      *
      * Delegates to {@see JobSplitMergeService::getSplitData()}.
      *
-     * @param ArrayObject $projectStructure
+     * @param SplitMergeProjectData $data
      * @param int $num_split
      * @param array $requestedWordsPerSplit Matecat Equivalent Words (Only valid for Pro Version)
      * @param string $count_type
@@ -90,12 +79,12 @@ class JobSplitMergeManager
      * @throws Exception
      */
     public function getSplitData(
-        ArrayObject $projectStructure,
+        SplitMergeProjectData $data,
         int $num_split = 2,
         array $requestedWordsPerSplit = [],
         string $count_type = ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE
     ): ArrayObject {
-        return $this->getJobSplitMergeService()->getSplitData($projectStructure, $num_split, $requestedWordsPerSplit, $count_type);
+        return $this->getJobSplitMergeService()->getSplitData($data, $num_split, $requestedWordsPerSplit, $count_type);
     }
 
     /**
@@ -103,14 +92,13 @@ class JobSplitMergeManager
      *
      * Delegates to {@see JobSplitMergeService::applySplit()}.
      *
-     * @param ArrayObject $projectStructure
+     * @param SplitMergeProjectData $data
      *
      * @throws Exception
      */
-    public function applySplit(ArrayObject $projectStructure): void
+    public function applySplit(SplitMergeProjectData $data): void
     {
-        $uid = $this->projectStructure['uid'] ?? null;
-        $this->getJobSplitMergeService()->applySplit($projectStructure, $uid);
+        $this->getJobSplitMergeService()->applySplit($data, $data->uid);
     }
 
     /**
@@ -118,14 +106,14 @@ class JobSplitMergeManager
      *
      * Delegates to {@see JobSplitMergeService::mergeALL()}.
      *
-     * @param ArrayObject $projectStructure
+     * @param SplitMergeProjectData $data
      * @param JobStruct[] $jobStructs
      *
      * @throws Exception
      */
-    public function mergeALL(ArrayObject $projectStructure, array $jobStructs): void
+    public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {
-        $this->getJobSplitMergeService()->mergeALL($projectStructure, $jobStructs);
+        $this->getJobSplitMergeService()->mergeALL($data, $jobStructs);
     }
 
     /**

@@ -32,11 +32,10 @@ class JobMergeController extends KleinController
     {
         $pManager = new JobSplitMergeManager($this->project);
 
-        $pStruct = $pManager->getProjectStructure();
-        $pStruct['id_customer'] = $this->project->id_customer;
-        $pStruct['job_to_merge'] = (int)$this->request->param('id_job');
+        $data = $pManager->getProjectData();
+        $data->jobToMerge = (int)$this->request->param('id_job');
 
-        $pManager->mergeALL($pStruct, $this->jobList);
+        $pManager->mergeALL($data, $this->jobList);
 
         $this->response->code(200);
         $this->response->json(['success' => true]);
