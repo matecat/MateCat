@@ -27,6 +27,7 @@ class CreateProjectRecordTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->pm = new TestableProjectManager();
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),

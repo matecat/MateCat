@@ -29,6 +29,7 @@ class InsertFileInstructionsTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $features = $this->createStub(FeatureSet::class);
         $features->method('filter')->willReturnArgument(1);
 

@@ -31,6 +31,7 @@ class CleanupUploadDirectoryTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->savedStorageMethod = AppConfig::$FILE_STORAGE_METHOD ?? '';
 
         $this->pm = new TestableProjectManager();
@@ -45,6 +46,7 @@ class CleanupUploadDirectoryTest extends AbstractTest
     protected function tearDown(): void
     {
         AppConfig::$FILE_STORAGE_METHOD = $this->savedStorageMethod;
+        parent::tearDown();
     }
 
     #[Test]

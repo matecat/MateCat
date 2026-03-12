@@ -40,6 +40,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->dbHandler = $this->createMock(Database::class);
         $this->features  = $this->createMock(FeatureSet::class);
         $logger          = $this->createStub(MatecatLogger::class);

@@ -68,6 +68,7 @@ class TestableProjectManager extends ProjectManager
             'id_project' => 999,
             'source_language' => 'en-US',
             'target_language' => new RecursiveArrayObject(['it-IT']),
+            'private_tm_key' => [],
             'segments' => new ArrayObject(),
             'segments-original-data' => new ArrayObject(),
             'segments-meta-data' => new ArrayObject(),

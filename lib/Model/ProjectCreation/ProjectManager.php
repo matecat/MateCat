@@ -11,12 +11,12 @@ namespace Model\ProjectCreation;
 
 use ArrayObject;
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use Model\Concerns\LogsMessages;
 use DomainException;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\PayableRates;
+use Model\Concerns\LogsMessages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Conversion\ZipArchiveHandler;
@@ -282,6 +282,7 @@ class ProjectManager
     {
         if ($this->segmentExtractor === null) {
             $this->segmentExtractor = new SegmentExtractor(
+                $this->config,
                 $this->filter,
                 $this->features,
                 $this->filesMetadataDao,

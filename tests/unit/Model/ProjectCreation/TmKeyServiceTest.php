@@ -42,6 +42,7 @@ class TmKeyServiceTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->tmxService   = $this->createMock(TMSService::class);
         $this->dbHandler    = $this->createStub(IDatabase::class);
         $this->logger       = $this->createStub(MatecatLogger::class);

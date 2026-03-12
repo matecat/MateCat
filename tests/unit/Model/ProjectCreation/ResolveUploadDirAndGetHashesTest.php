@@ -26,6 +26,7 @@ class ResolveUploadDirAndGetHashesTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->savedQueueRepo = AppConfig::$QUEUE_PROJECT_REPOSITORY ?? '';
 
         $this->pm = new TestableProjectManager();
@@ -40,6 +41,7 @@ class ResolveUploadDirAndGetHashesTest extends AbstractTest
     protected function tearDown(): void
     {
         AppConfig::$QUEUE_PROJECT_REPOSITORY = $this->savedQueueRepo;
+        parent::tearDown();
     }
 
     #[Test]

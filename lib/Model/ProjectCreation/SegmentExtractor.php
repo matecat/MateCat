@@ -69,13 +69,25 @@ class SegmentExtractor
     private int $showInCattoolSegsCounter = 0;
 
     public function __construct(
-        private readonly MateCatFilter $filter,
-        private readonly FeatureSet    $features,
-        private readonly MetadataDao   $filesMetadataDao,
-        MatecatLogger                  $logger,
+        private readonly ProjectCreationConfig $config,
+        private readonly MateCatFilter         $filter,
+        private readonly FeatureSet            $features,
+        private readonly MetadataDao           $filesMetadataDao,
+        MatecatLogger                          $logger,
     ) {
         $this->logger = $logger;
     }
+
+    /**
+     * The project ID from config, guaranteed non-null once {@see extract()} is called.
+     * Cached locally to avoid repeated null checks on the readonly DTO property.
+     */
+    private int $idProject;
+
+    /**
+     * The source language from config, guaranteed non-null once {@see extract()} is called.
+     */
+    private string $sourceLanguage;
 
     // ── Public API ──────────────────────────────────────────────────
 
@@ -92,6 +104,15 @@ class SegmentExtractor
      */
     public function extract(int $fid, array $file_info, ArrayObject $projectStructure): void
     {
+        // Cache config values that must be set by the time extraction runs.
+        // These are nullable in the DTO (project may not exist yet at config build time),
+        // but are always set before extractSegments() is called in the pipeline.
+        if ($this->config->idProject === null || $this->config->sourceLanguage === null) {
+            throw new RuntimeException('idProject and sourceLanguage must be set before extraction');
+        }
+        $this->idProject      = $this->config->idProject;
+        $this->sourceLanguage = $this->config->sourceLanguage;
+
         $xliff_file_content = $this->getXliffFileContent($file_info['path_cached_xliff']);
 
         if ($xliff_file_content === false) {
@@ -155,7 +176,7 @@ class SegmentExtractor
         // save external-file attribute
         if (isset($xliff_file['attr']['external-file'])) {
             $externalFile = $xliff_file['attr']['external-file'];
-            $this->filesMetadataDao->insert($projectStructure['id_project'], $fid, 'mtc:references', $externalFile);
+            $this->filesMetadataDao->insert($this->idProject, $fid, 'mtc:references', $externalFile);
         }
 
         // save x-jsont* datatype
@@ -163,7 +184,7 @@ class SegmentExtractor
             $dataType = $xliff_file['attr']['data-type'];
 
             if (str_contains($dataType, 'x-jsont')) {
-                $this->filesMetadataDao->insert($projectStructure['id_project'], $fid, 'data-type', $dataType);
+                $this->filesMetadataDao->insert($this->idProject, $fid, 'data-type', $dataType);
             }
         }
 
@@ -183,7 +204,7 @@ class SegmentExtractor
 
             // save `custom` meta data
             if (isset($xliff_file['attr']['custom']) and !empty($xliff_file['attr']['custom'])) {
-                $this->filesMetadataDao->bulkInsert($projectStructure['id_project'], $fid, $xliff_file['attr']['custom'], $filePartsId);
+                $this->filesMetadataDao->bulkInsert($this->idProject, $fid, $xliff_file['attr']['custom'], $filePartsId);
             }
         }
 
@@ -250,7 +271,7 @@ class SegmentExtractor
             // mrk in the list will not be too!!!
             $show_in_cattool = 1;
 
-            $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $projectStructure['source_language'], $this->filter);
+            $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
             $wordCount = $this->features->filter('wordCount', $wordCount);
 
             // init tags
@@ -349,7 +370,7 @@ class SegmentExtractor
     ): int {
         $show_in_cattool = 1;
 
-        $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $projectStructure['source_language'], $this->filter);
+        $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
         $prec_tags = null;
         $succ_tags = null;
@@ -600,7 +621,7 @@ class SegmentExtractor
         $segStruct = new SegmentStruct([
             'id_file'                => $fid,
             'id_file_part'           => $filePartsId,
-            'id_project'             => $projectStructure['id_project'],
+            'id_project'             => $this->idProject,
             'internal_id'            => $xliff_trans_unit['attr']['id'],
             'xliff_mrk_id'           => $xliffMrkId,
             'xliff_ext_prec_tags'    => $xliffExtPrecTags,
@@ -832,12 +853,14 @@ class SegmentExtractor
      */
     private function manageAlternativeTranslations(array $xliff_trans_unit, ?array $xliff_file_attributes, ArrayObject $projectStructure): void
     {
+        $privateTmKeys = $this->config->privateTmKey;
+
         // Source and target language are mandatory, moreover do not set matches on public area
         if (
             !isset($xliff_trans_unit['alt-trans']) ||
             empty($xliff_file_attributes['source-language']) ||
             empty($xliff_file_attributes['target-language']) ||
-            count($projectStructure['private_tm_key']) == 0 ||
+            empty($privateTmKeys) ||
             $this->features->filter('doNotManageAlternativeTranslations', true, $xliff_trans_unit, $xliff_file_attributes)
         ) {
             return;
@@ -847,7 +870,7 @@ class SegmentExtractor
         $engine = EnginesFactory::getInstance(1, MyMemory::class);
         $config = $engine->getConfigStruct();
 
-        foreach ($projectStructure['private_tm_key'] as $tm_info) {
+        foreach ($privateTmKeys as $tm_info) {
             if ($tm_info['w'] == 1) {
                 $config['id_user'][] = $tm_info['key'];
             }

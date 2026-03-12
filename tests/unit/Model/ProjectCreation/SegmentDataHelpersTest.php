@@ -26,6 +26,7 @@ class SegmentDataHelpersTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->service = new TestableSegmentStorageService(
             $this->createStub(IDatabase::class),
             $this->createStub(FeatureSet::class),

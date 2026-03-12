@@ -31,6 +31,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->originalFileStorageMethod = AppConfig::$FILE_STORAGE_METHOD;
         AppConfig::$FILE_STORAGE_METHOD = 'fs';
 

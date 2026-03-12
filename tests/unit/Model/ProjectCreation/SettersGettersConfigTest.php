@@ -30,6 +30,7 @@ class SettersGettersConfigTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $filter   = $this->createStub(MateCatFilter::class);
         $features = $this->createStub(FeatureSet::class);
         $dao      = $this->createStub(MetadataDao::class);

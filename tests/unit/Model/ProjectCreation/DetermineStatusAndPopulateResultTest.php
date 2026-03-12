@@ -28,6 +28,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->originalVolumeAnalysis = AppConfig::$VOLUME_ANALYSIS_ENABLED;
 
         $this->pm = new TestableProjectManager();
