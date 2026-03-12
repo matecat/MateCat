@@ -108,18 +108,18 @@ distinct change with its own subject line:
 ## Type Reference
 
 | Type     | Title                    | Emoji | Description                                                                                            | Example Scopes (non-exaustive)                                |
-|----------|--------------------------|-------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| build    | Builds                   | 🏗️   | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
+| -------- | ------------------------ | ----- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| build    | Builds                   | 🏗️    | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
 | chore    | Chores                   | 🔧    | Other changes that don't modify src or test files                                                      | scripts, config                                               |
 | ci       | Continuous Integrations  | 👷    | Changes to our CI configuration files and scripts                                                      | Travis, Circle, BrowserStack, SauceLabs,github actions, husky |
 | docs     | Documentation            | 📝    | Documentation only changes                                                                             | README, API                                                   |
-| feat     | Features                 | ✨     | A new feature                                                                                          | user, payment, gallery                                        |
+| feat     | Features                 | ✨    | A new feature                                                                                          | user, payment, gallery                                        |
 | fix      | Bug Fixes                | 🐛    | A bug fix                                                                                              | auth, data                                                    |
-| perf     | Performance Improvements | ⚡️    | A code change that improves performance                                                                | query, cache                                                  |
+| perf     | Performance Improvements | ⚡️   | A code change that improves performance                                                                | query, cache                                                  |
 | refactor | Code Refactoring         | ♻️    | A code change that neither fixes a bug nor adds a feature                                              | utils, helpers                                                |
-| revert   | Reverts                  | ⏪️    | Reverts a previous commit                                                                              | query, utils,                                                 |
+| revert   | Reverts                  | ⏪️   | Reverts a previous commit                                                                              | query, utils,                                                 |
 | style    | Styles                   | 💄    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) | formatting                                                    |
-| test     | Tests                    | ✅     | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
+| test     | Tests                    | ✅    | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
 | i18n     |                          | 🌐    | Internationalization                                                                                   | locale, translation                                           |
 
 ## More information about types
@@ -220,9 +220,9 @@ Format: `<emoji> <type>[optional (<scope>)]: <description>`
 - AVOID vague qualifiers like "for clarity", "for consistency", "improve readability" unless the diff explicitly shows
   formatting/style changes
 - ONLY include reasoning (the "why") when:
-    - It is provided in [Additional Context](#additional-context)
-    - It is clearly noticeable from the code context or commit scope
-    - It is objectively verifiable from the diff itself
+  - It is provided in [Additional Context](#additional-context)
+  - It is clearly noticeable from the code context or commit scope
+  - It is objectively verifiable from the diff itself
 - Omit the body entirely if the subject line is self-explanatory and no [Additional Context](#additional-context) is
   provided
 - Must be in English
@@ -722,3 +722,9 @@ return (
 
 Remember: All output MUST be in the English language. You are to act as a pure commit message generator. Your response
 should contain NOTHING but the commit message itself.
+
+## Approval Workflow
+
+1. **NEVER commit directly.** Always present the proposed commit message to the user first.
+2. Wait for the user's explicit approval before running `git commit`.
+3. When you receive the approval, do NOT use `-A` flag for git commit, ALWAYS use lowercase `-a` flag.
