@@ -17,8 +17,12 @@ use Utils\Registry\AppConfig;
 /**
  * Unit tests for {@see \Model\ProjectManager\ProjectManager::saveJobsMetadata()}.
  *
- * Tests verify that job-level metadata from `$projectStructure` is correctly
- * collected, transformed, and persisted via `JobsMetadataDao::set()`.
+ * Tests verify that job-level metadata from `$this->config` (ProjectCreationConfig DTO)
+ * is correctly collected, transformed, and persisted via `JobsMetadataDao::set()`.
+ *
+ * Values are set via `setProjectStructureValue()` which refreshes the typed config DTO.
+ * The ArrayObject parameter to `saveJobsMetadata()` is kept for backward compatibility
+ * but Group A keys are now read from the DTO.
  *
  * @see REFACTORING_PLAN.md — Step 0d
  */
@@ -58,6 +62,12 @@ class SaveJobsMetadataTest extends AbstractTest
         $this->pm = new TestableProjectManager();
         $this->pm->initForTest($filter, $featureSet, $filesMetadataDao, $logger);
 
+        // Set the default subfiltering_handlers (always required)
+        $this->pm->setProjectStructureValue(
+            JobsMetadataDao::SUBFILTERING_HANDLERS,
+            '[]'
+        );
+
         // Create a stub JobsMetadataDao that records set() calls
         $this->daoSetCalls = [];
         $stubDao = $this->createStub(JobsMetadataDao::class);
@@ -91,16 +101,17 @@ class SaveJobsMetadataTest extends AbstractTest
     // =========================================================================
 
     /**
-     * Build an ArrayObject simulating the relevant slice of $projectStructure.
-     * SUBFILTERING_HANDLERS is always required (unconditional).
+     * Set values on the project manager's projectStructure (and config DTO),
+     * then invoke saveJobsMetadata.
      */
-    private function buildProjectStructure(array $extras = []): ArrayObject
+    private function setConfigAndSave(array $extras = []): void
     {
-        $base = [
-            JobsMetadataDao::SUBFILTERING_HANDLERS => '[]',
-        ];
-
-        return new ArrayObject(array_merge($base, $extras));
+        foreach ($extras as $key => $value) {
+            $this->pm->setProjectStructureValue($key, $value);
+        }
+        // The ArrayObject param is kept for the method signature but Group A
+        // keys are now read from $this->config.
+        $this->pm->callSaveJobsMetadata($this->job, new ArrayObject());
     }
 
     /**
@@ -136,8 +147,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testSubfilteringHandlersIsAlwaysPersisted(): void
     {
-        $ps = $this->buildProjectStructure();
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave();
 
         $calls = $this->findDaoCallsByKey(JobsMetadataDao::SUBFILTERING_HANDLERS);
         $this->assertCount(1, $calls);
@@ -148,10 +158,9 @@ class SaveJobsMetadataTest extends AbstractTest
     public function testSubfilteringHandlersWithNonEmptyValue(): void
     {
         $handlers = json_encode([['handler' => 'some_handler']]);
-        $ps = $this->buildProjectStructure([
+        $this->setConfigAndSave([
             JobsMetadataDao::SUBFILTERING_HANDLERS => $handlers,
         ]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
 
         $calls = $this->findDaoCallsByKey(JobsMetadataDao::SUBFILTERING_HANDLERS);
         $this->assertCount(1, $calls);
@@ -165,13 +174,12 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testAllDaoSetCallsUseCorrectJobIdAndPassword(): void
     {
-        $ps = $this->buildProjectStructure([
+        $this->setConfigAndSave([
             'public_tm_penalty'           => '5',
             'character_counter_count_tags' => true,
             'character_counter_mode'       => 'source',
             'tm_prioritization'           => true,
         ]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
 
         $this->assertGreaterThan(1, count($this->daoSetCalls));
         $this->assertAllCallsUseJobCredentials();
@@ -184,8 +192,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testEmptyProjectStructureOnlyPersistsSubfilteringHandlers(): void
     {
-        $ps = $this->buildProjectStructure();
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave();
 
         $this->assertCount(1, $this->daoSetCalls);
         $this->assertSame(JobsMetadataDao::SUBFILTERING_HANDLERS, $this->daoSetCalls[0][2]);
@@ -198,8 +205,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testPublicTmPenaltyIsPersistedWhenSet(): void
     {
-        $ps = $this->buildProjectStructure(['public_tm_penalty' => '15']);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['public_tm_penalty' => '15']);
 
         $calls = $this->findDaoCallsByKey('public_tm_penalty');
         $this->assertCount(1, $calls);
@@ -209,8 +215,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testPublicTmPenaltyIsNotPersistedWhenNotSet(): void
     {
-        $ps = $this->buildProjectStructure();
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave();
 
         $calls = $this->findDaoCallsByKey('public_tm_penalty');
         $this->assertCount(0, $calls);
@@ -223,8 +228,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCharacterCounterCountTagsTruthyPersistsOne(): void
     {
-        $ps = $this->buildProjectStructure(['character_counter_count_tags' => true]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['character_counter_count_tags' => true]);
 
         $calls = $this->findDaoCallsByKey('character_counter_count_tags');
         $this->assertCount(1, $calls);
@@ -234,8 +238,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCharacterCounterCountTagsFalsyPersistsZero(): void
     {
-        $ps = $this->buildProjectStructure(['character_counter_count_tags' => false]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['character_counter_count_tags' => false]);
 
         $calls = $this->findDaoCallsByKey('character_counter_count_tags');
         $this->assertCount(1, $calls);
@@ -245,8 +248,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCharacterCounterCountTagsNotPersistedWhenNotSet(): void
     {
-        $ps = $this->buildProjectStructure();
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave();
 
         $calls = $this->findDaoCallsByKey('character_counter_count_tags');
         $this->assertCount(0, $calls);
@@ -259,8 +261,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCharacterCounterModeIsPersistedWhenSet(): void
     {
-        $ps = $this->buildProjectStructure(['character_counter_mode' => 'source']);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['character_counter_mode' => 'source']);
 
         $calls = $this->findDaoCallsByKey('character_counter_mode');
         $this->assertCount(1, $calls);
@@ -270,8 +271,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCharacterCounterModeIsNotPersistedWhenNotSet(): void
     {
-        $ps = $this->buildProjectStructure();
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave();
 
         $calls = $this->findDaoCallsByKey('character_counter_mode');
         $this->assertCount(0, $calls);
@@ -284,8 +284,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testTmPrioritizationTruthyPersistsOne(): void
     {
-        $ps = $this->buildProjectStructure(['tm_prioritization' => true]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['tm_prioritization' => true]);
 
         $calls = $this->findDaoCallsByKey('tm_prioritization');
         $this->assertCount(1, $calls);
@@ -297,8 +296,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testTmPrioritizationFalsyPersistsZero(): void
     {
-        $ps = $this->buildProjectStructure(['tm_prioritization' => false]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['tm_prioritization' => false]);
 
         $calls = $this->findDaoCallsByKey('tm_prioritization');
         $this->assertCount(1, $calls);
@@ -310,8 +308,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testTmPrioritizationNotPersistedWhenNotSet(): void
     {
-        $ps = $this->buildProjectStructure();
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave();
 
         $calls = $this->findDaoCallsByKey('tm_prioritization');
         $this->assertCount(0, $calls);
@@ -325,8 +322,7 @@ class SaveJobsMetadataTest extends AbstractTest
     public function testDialectStrictPersistsMatchingLanguageValue(): void
     {
         $dialectJson = json_encode(['it-IT' => 'strict_value', 'fr-FR' => 'other_value']);
-        $ps = $this->buildProjectStructure(['dialect_strict' => $dialectJson]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
         $calls = $this->findDaoCallsByKey('dialect_strict');
         $this->assertCount(1, $calls);
@@ -337,8 +333,7 @@ class SaveJobsMetadataTest extends AbstractTest
     public function testDialectStrictDoesNotPersistNonMatchingLanguage(): void
     {
         $dialectJson = json_encode(['fr-FR' => 'french_value', 'de-DE' => 'german_value']);
-        $ps = $this->buildProjectStructure(['dialect_strict' => $dialectJson]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
         $calls = $this->findDaoCallsByKey('dialect_strict');
         $this->assertCount(0, $calls);
@@ -350,11 +345,10 @@ class SaveJobsMetadataTest extends AbstractTest
         // The code does trim($lang) === trim($newJob->target), so whitespace
         // around the key should still match
         $dialectJson = json_encode([' it-IT ' => 'trimmed_value']);
-        $ps = $this->buildProjectStructure(['dialect_strict' => $dialectJson]);
 
         // Also set target with trailing whitespace to test trim on both sides
         $this->job->target = ' it-IT ';
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
         $calls = $this->findDaoCallsByKey('dialect_strict');
         $this->assertCount(1, $calls);
@@ -364,8 +358,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testDialectStrictNotPersistedWhenNotSet(): void
     {
-        $ps = $this->buildProjectStructure();
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave();
 
         $calls = $this->findDaoCallsByKey('dialect_strict');
         $this->assertCount(0, $calls);
@@ -379,8 +372,7 @@ class SaveJobsMetadataTest extends AbstractTest
             'it-IT' => 'italian_value',
             'fr-FR' => 'french_value',
         ]);
-        $ps = $this->buildProjectStructure(['dialect_strict' => $dialectJson]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
         $calls = $this->findDaoCallsByKey('dialect_strict');
         $this->assertCount(1, $calls);
@@ -396,7 +388,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $dialectJson = json_encode(['it-IT' => 'strict']);
         $handlers = json_encode([['handler' => 'xliff']]);
-        $ps = $this->buildProjectStructure([
+        $this->setConfigAndSave([
             'public_tm_penalty'           => '10',
             'character_counter_count_tags' => true,
             'character_counter_mode'       => 'target',
@@ -404,7 +396,6 @@ class SaveJobsMetadataTest extends AbstractTest
             'dialect_strict'              => $dialectJson,
             JobsMetadataDao::SUBFILTERING_HANDLERS => $handlers,
         ]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
 
         // Should have 6 DAO calls total:
         // public_tm_penalty, character_counter_count_tags, character_counter_mode,
@@ -442,8 +433,7 @@ class SaveJobsMetadataTest extends AbstractTest
     public function testCharacterCounterCountTagsWithIntegerOnePersistsOne(): void
     {
         // The code uses ternary `? "1" : "0"` — integer 1 is truthy
-        $ps = $this->buildProjectStructure(['character_counter_count_tags' => 1]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['character_counter_count_tags' => 1]);
 
         $calls = $this->findDaoCallsByKey('character_counter_count_tags');
         $this->assertCount(1, $calls);
@@ -454,8 +444,7 @@ class SaveJobsMetadataTest extends AbstractTest
     public function testCharacterCounterCountTagsWithIntegerZeroPersistsZero(): void
     {
         // Integer 0 is falsy
-        $ps = $this->buildProjectStructure(['character_counter_count_tags' => 0]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['character_counter_count_tags' => 0]);
 
         $calls = $this->findDaoCallsByKey('character_counter_count_tags');
         $this->assertCount(1, $calls);
@@ -466,8 +455,7 @@ class SaveJobsMetadataTest extends AbstractTest
     public function testTmPrioritizationWithStringOnePersistsOne(): void
     {
         // String "1" is truthy — ternary will produce int 1, coerced to "1"
-        $ps = $this->buildProjectStructure(['tm_prioritization' => '1']);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['tm_prioritization' => '1']);
 
         $calls = $this->findDaoCallsByKey('tm_prioritization');
         $this->assertCount(1, $calls);
@@ -477,8 +465,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testDialectStrictWithEmptyJsonObjectPersistsNothing(): void
     {
-        $ps = $this->buildProjectStructure(['dialect_strict' => '{}']);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
+        $this->setConfigAndSave(['dialect_strict' => '{}']);
 
         $calls = $this->findDaoCallsByKey('dialect_strict');
         $this->assertCount(0, $calls);
@@ -488,14 +475,13 @@ class SaveJobsMetadataTest extends AbstractTest
     public function testDaoCallOrderMatchesCodeOrder(): void
     {
         $dialectJson = json_encode(['it-IT' => 'yes']);
-        $ps = $this->buildProjectStructure([
+        $this->setConfigAndSave([
             'public_tm_penalty'           => '5',
             'character_counter_count_tags' => true,
             'character_counter_mode'       => 'source',
             'tm_prioritization'           => true,
             'dialect_strict'              => $dialectJson,
         ]);
-        $this->pm->callSaveJobsMetadata($this->job, $ps);
 
         // The code processes keys in this order:
         // 1. public_tm_penalty

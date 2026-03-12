@@ -11,6 +11,7 @@ use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\ProjectManager\ProjectCreationConfig;
 use Model\ProjectManager\ProjectManager;
 use Model\ProjectManager\ProjectManagerModel;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -78,6 +79,8 @@ class TestableProjectManager extends ProjectManager
             'xliff_parameters' => $xliffParameters ?? new XliffRulesModel(),
             'result' => ['errors' => []],
         ]);
+
+        $this->refreshConfig();
     }
 
     /**
@@ -134,11 +137,24 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
+     * Re-extract the typed ProjectCreationConfig DTO from the current
+     * projectStructure.  Call this after modifying projectStructure keys
+     * that are read via `$this->config` in the production code.
+     */
+    public function refreshConfig(): void
+    {
+        $this->config = ProjectCreationConfig::fromArrayObject($this->projectStructure);
+    }
+
+    /**
      * Set a specific key in projectStructure for testing.
+     * Automatically refreshes the typed config DTO so that reads
+     * via `$this->config` reflect the updated value.
      */
     public function setProjectStructureValue(string $key, mixed $value): void
     {
         $this->projectStructure[$key] = $value;
+        $this->refreshConfig();
     }
 
     // ── saveMetadata() testing support ──────────────────────────────

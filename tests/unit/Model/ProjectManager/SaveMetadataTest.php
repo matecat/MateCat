@@ -150,14 +150,17 @@ class SaveMetadataTest extends AbstractTest
     // =========================================================================
 
     #[Test]
-    public function testEmptyMetadataOnlyPersistsSubfilteringHandlers(): void
+    public function testEmptyMetadataOnlyPersistsSubfilteringHandlersAndDefaults(): void
     {
         // metadata is already empty by default (RecursiveArrayObject wrapping [])
         $this->pm->callSaveMetadata();
 
-        // Only the unconditional subfiltering_handlers call should be made
-        self::assertCount(1, $this->daoSetCalls);
-        self::assertSame('subfiltering_handlers', $this->daoSetCalls[0][1]);
+        // pretranslate_101 always exists (DTO default = 1), plus subfiltering_handlers
+        self::assertCount(2, $this->daoSetCalls);
+
+        $keys = array_map(fn(array $call) => $call[1], $this->daoSetCalls);
+        self::assertContains('pretranslate_101', $keys);
+        self::assertContains('subfiltering_handlers', $keys);
     }
 
     // =========================================================================
@@ -403,8 +406,8 @@ class SaveMetadataTest extends AbstractTest
 
         $this->pm->callSaveMetadata();
 
-        // 3 custom keys + 1 subfiltering_handlers = 4 total calls
-        self::assertCount(4, $this->daoSetCalls);
+        // 3 custom keys + 1 pretranslate_101 (DTO default) + 1 subfiltering_handlers = 5 total calls
+        self::assertCount(5, $this->daoSetCalls);
 
         self::assertSame('value_1', $this->getPersistedValue('custom_key_1'));
         self::assertSame('value_2', $this->getPersistedValue('custom_key_2'));

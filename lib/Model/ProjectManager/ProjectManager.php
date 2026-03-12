@@ -148,6 +148,13 @@ class ProjectManager
     protected ?ProjectManagerModel $projectManagerModel = null;
 
     /**
+     * Typed, readonly configuration extracted from `$projectStructure`.
+     * Holds the ~34 INIT-ONLY keys that controllers set before
+     * `createProject()` and the pipeline only reads.
+     */
+    protected ProjectCreationConfig $config;
+
+    /**
      * ProjectManager constructor.
      *
      * @param ArrayObject|null $projectStructure
@@ -291,6 +298,12 @@ class ProjectManager
 
         $this->projectStructure['array_files_meta'] = $array_files_meta;
 
+        // Extract read-only config keys into the typed DTO.
+        // During the dual-write phase the same values remain in
+        // $projectStructure, so existing code and FeatureSet hooks
+        // keep working unchanged.
+        $this->config = ProjectCreationConfig::fromArrayObject($this->projectStructure);
+
         $this->filesMetadataDao = new MetadataDao();
     }
 
@@ -390,7 +403,7 @@ class ProjectManager
      */
     protected function validateUploadToken(): void
     {
-        if (!isset($this->projectStructure['uploadToken']) || !Utils::isTokenValid($this->projectStructure['uploadToken'])) {
+        if (!isset($this->config->uploadToken) || !Utils::isTokenValid($this->config->uploadToken)) {
             $this->addProjectError(-19, "Invalid Upload Token.");
             throw new Exception("Invalid Upload Token.", -19);
         }
@@ -435,6 +448,14 @@ class ProjectManager
     }
 
     /**
+     * Typed, readonly configuration for the creation path.
+     */
+    public function getConfig(): ProjectCreationConfig
+    {
+        return $this->config;
+    }
+
+    /**
      * Save features in project metadata
      * @throws ReflectionException
      */
@@ -445,7 +466,7 @@ class ProjectManager
         $featureCodes = $this->features->getCodes();
         if (!empty($featureCodes)) {
             $dao->set(
-                $this->projectStructure['id_project'],
+                $this->config->idProject,
                 ProjectsMetadataDao::FEATURES_KEY,
                 implode(',', $featureCodes)
             );
@@ -459,24 +480,23 @@ class ProjectManager
     {
         $jobsMetadataDao = $this->getJobsMetadataDao();
 
-        // Simple key-value metadata with optional transformation
-        $simpleKeys = [
-            'public_tm_penalty'            => null,
-            'character_counter_count_tags'  => fn($v) => $v ? 1 : 0,
-            'character_counter_mode'        => null,
-            'tm_prioritization'            => fn($v) => $v ? 1 : 0,
-        ];
-
-        foreach ($simpleKeys as $key => $transformer) {
-            if (isset($projectStructure[$key])) {
-                $value = $transformer ? $transformer($projectStructure[$key]) : $projectStructure[$key];
-                $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $value);
-            }
+        // Simple key-value metadata — read from typed DTO
+        if (isset($this->config->publicTmPenalty)) {
+            $jobsMetadataDao->set($newJob->id, $newJob->password, 'public_tm_penalty', $this->config->publicTmPenalty);
+        }
+        if ($this->config->characterCounterCountTags !== null) {
+            $jobsMetadataDao->set($newJob->id, $newJob->password, 'character_counter_count_tags', $this->config->characterCounterCountTags ? 1 : 0);
+        }
+        if ($this->config->characterCounterMode !== null) {
+            $jobsMetadataDao->set($newJob->id, $newJob->password, 'character_counter_mode', $this->config->characterCounterMode);
+        }
+        if ($this->config->tmPrioritization !== null) {
+            $jobsMetadataDao->set($newJob->id, $newJob->password, 'tm_prioritization', $this->config->tmPrioritization ? 1 : 0);
         }
 
         // dialect_strict — per-language matching logic
-        if (isset($projectStructure['dialect_strict'])) {
-            $dialectStrictObj = json_decode($projectStructure['dialect_strict'], true);
+        if ($this->config->dialectStrict !== null) {
+            $dialectStrictObj = json_decode($this->config->dialectStrict, true);
 
             foreach ($dialectStrictObj as $lang => $value) {
                 if (trim($lang) === trim($newJob->target)) {
@@ -494,7 +514,7 @@ class ProjectManager
             $newJob->id,
             $newJob->password,
             JobsMetadataDao::SUBFILTERING_HANDLERS,
-            $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]
+            $this->config->subfilteringHandlers
         );
     }
 
@@ -510,11 +530,11 @@ class ProjectManager
      */
     protected function saveMetadata(): void
     {
-        $options = $this->projectStructure['metadata'];
+        $options = new ArrayObject($this->config->metadata);
         $dao = $this->getProjectsMetadataDao();
 
         // "From API" flag
-        if (isset($this->projectStructure[ProjectsMetadataDao::FROM_API]) and $this->projectStructure[ProjectsMetadataDao::FROM_API]) {
+        if ($this->config->fromApi) {
             $options[ProjectsMetadataDao::FROM_API] = true;
         }
 
@@ -525,8 +545,8 @@ class ProjectManager
         }
 
         // pretranslate_101
-        if (isset($this->projectStructure[ProjectsMetadataDao::PRETRANSLATE_101])) {
-            $options[ProjectsMetadataDao::PRETRANSLATE_101] = $this->projectStructure[ProjectsMetadataDao::PRETRANSLATE_101];
+        if (isset($this->config->pretranslate101)) {
+            $options[ProjectsMetadataDao::PRETRANSLATE_101] = $this->config->pretranslate101;
         }
 
         // mt evaluation => ice_mt already in metadata
@@ -541,11 +561,11 @@ class ProjectManager
          */
         $this->features->loadProjectDependenciesFromProjectMetadata($options);
 
-        if (isset($this->projectStructure[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS]) && $this->projectStructure[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS]) {
-            $options[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS] = json_encode($this->projectStructure[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS]);
+        if ($this->config->filtersExtractionParameters) {
+            $options[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS] = json_encode($this->config->filtersExtractionParameters);
         }
 
-        if ($this->projectStructure['sanitize_project_options']) {
+        if ($this->config->sanitizeProjectOptions) {
             $options = $this->sanitizeProjectOptions($options);
         }
 
@@ -563,15 +583,16 @@ class ProjectManager
         }
 
         foreach ($extraKeys as $extraKey) {
-            if (!empty($this->projectStructure[$extraKey]) && $this->projectStructure[$extraKey]) {
-                $options[$extraKey] = $this->projectStructure[$extraKey];
+            $engineValue = $this->config->getEngineConfigValue($extraKey);
+            if (!empty($engineValue)) {
+                $options[$extraKey] = $engineValue;
             }
         }
 
         if (!empty($options)) {
             foreach ($options as $key => $value) {
                 $dao->set(
-                    $this->projectStructure['id_project'],
+                    $this->config->idProject,
                     $key,
                     $value
                 );
@@ -585,9 +606,9 @@ class ProjectManager
          * @see ProjectManager::saveJobsMetadata()
          */
         $dao->set(
-            $this->projectStructure['id_project'],
+            $this->config->idProject,
             JobsMetadataDao::SUBFILTERING_HANDLERS,
-            $this->projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]
+            $this->config->subfilteringHandlers
         );
     }
 
@@ -613,16 +634,14 @@ class ProjectManager
      * @return array
      * @throws Exception
      */
-    private function sanitizeProjectOptions(ArrayObject $options): array
+    private function sanitizeProjectOptions(array|ArrayObject $options): array
     {
-        $sanitizer = new ProjectOptionsSanitizer($options->getArrayCopy());
-
-        /** @var $langs RecursiveArrayObject */
-        $langs = $this->projectStructure['target_language'];
+        $optionsArray = ($options instanceof ArrayObject) ? $options->getArrayCopy() : $options;
+        $sanitizer = new ProjectOptionsSanitizer($optionsArray);
 
         $sanitizer->setLanguages(
-            $this->projectStructure['source_language'],
-            $langs->getArrayCopy()
+            $this->config->sourceLanguage,
+            $this->config->targetLanguage
         );
 
         return $sanitizer->sanitize();
@@ -682,9 +701,9 @@ class ProjectManager
      */
     protected function checkForProjectAssignment(): void
     {
-        if (!empty($this->projectStructure['uid'])) {
+        if (!empty($this->config->uid)) {
             //if this is a logged user, set the user as project assignee
-            $this->projectStructure['id_assignee'] = $this->projectStructure['uid'];
+            $this->projectStructure['id_assignee'] = $this->config->uid;
 
             /**
              * Normalize ArrayObject team in TeamStruct
@@ -813,7 +832,7 @@ class ProjectManager
      */
     private function setPrivateTmKeysOrFail(string $firstTMXFileName): void
     {
-        if (count($this->projectStructure['private_tm_key'])) {
+        if (count($this->config->privateTmKey)) {
             $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
 
             if (count($this->projectStructure['result']['errors']) > 0) {
@@ -829,7 +848,7 @@ class ProjectManager
      */
     private function resolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
     {
-        $this->uploadDir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'];
+        $this->uploadDir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->config->uploadToken;
         $this->log($this->uploadDir);
 
         $linkFiles = $fs->getHashesFromDir($this->uploadDir);
@@ -876,7 +895,7 @@ class ProjectManager
             $sha1 = sha1_file($filePathName);
 
             try {
-                $fs->makeCachePackage($sha1, $this->projectStructure['source_language'], null, $filePathName);
+                $fs->makeCachePackage($sha1, $this->config->sourceLanguage, null, $filePathName);
                 $this->logger->debug("File $fileName converted to cache");
             } catch (Exception $e) {
                 $this->addProjectError(-230, $e->getMessage());
@@ -884,11 +903,11 @@ class ProjectManager
 
             $fs->linkSessionToCacheForAlreadyConvertedFiles(
                 $sha1,
-                $this->projectStructure['uploadToken'],
+                $this->config->uploadToken,
                 $fileName
             );
 
-            $hashKey = $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure['source_language'];
+            $hashKey = $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->config->sourceLanguage;
             $linkFiles['conversionHashes']['sha'][] = $hashKey;
             $linkFiles['conversionHashes']['fileName'][$hashKey][] = $fileName;
             $linkFiles['conversionHashes']['sha'] = array_unique($linkFiles['conversionHashes']['sha']);
@@ -1124,14 +1143,14 @@ class ProjectManager
 
         $this->projectStructure['result']['code'] = 1;
         $this->projectStructure['result']['data'] = "OK";
-        $this->projectStructure['result']['ppassword'] = $this->projectStructure['ppassword'];
+        $this->projectStructure['result']['ppassword'] = $this->config->ppassword;
         $this->projectStructure['result']['password'] = $this->projectStructure['array_jobs']['job_pass'];
         $this->projectStructure['result']['id_job'] = $this->projectStructure['array_jobs']['job_list'];
         $this->projectStructure['result']['job_segments'] = $this->projectStructure['array_jobs']['job_segments'];
-        $this->projectStructure['result']['id_project'] = $this->projectStructure['id_project'];
-        $this->projectStructure['result']['project_name'] = $this->projectStructure['project_name'];
-        $this->projectStructure['result']['source_language'] = $this->projectStructure['source_language'];
-        $this->projectStructure['result']['target_language'] = $this->projectStructure['target_language'];
+        $this->projectStructure['result']['id_project'] = $this->config->idProject;
+        $this->projectStructure['result']['project_name'] = $this->config->projectName;
+        $this->projectStructure['result']['source_language'] = $this->config->sourceLanguage;
+        $this->projectStructure['result']['target_language'] = $this->config->targetLanguage;
         $this->projectStructure['result']['status'] = $this->projectStructure['status'];
     }
 
@@ -1148,8 +1167,8 @@ class ProjectManager
         foreach ($totalFilesStructure as $fid => $file_info) {
             foreach ($array_files as $index => $filename) {
                 if ($file_info['original_filename'] === $filename) {
-                    if (isset($this->projectStructure['instructions'][$index]) && !empty($this->projectStructure['instructions'][$index])) {
-                        $this->insertInstructions($fid, $this->projectStructure['instructions'][$index]);
+                    if (isset($this->config->instructions[$index]) && !empty($this->config->instructions[$index])) {
+                        $this->insertInstructions($fid, $this->config->instructions[$index]);
                     }
                 }
             }
@@ -1168,13 +1187,13 @@ class ProjectManager
 
         Database::obtain()->begin();
 
-        (new ProjectDao())->destroyCacheForProjectData($this->projectStructure['id_project'], $this->projectStructure['ppassword']);
-        (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData($this->projectStructure['id_project'], $this->projectStructure['ppassword']);
+        (new ProjectDao())->destroyCacheForProjectData($this->config->idProject, $this->config->ppassword);
+        (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData($this->config->idProject, $this->config->ppassword);
 
         $this->features->run('postProjectCreate', $this->projectStructure);
 
         ProjectDao::updateAnalysisStatus(
-            $this->projectStructure['id_project'],
+            $this->config->idProject,
             $this->projectStructure['status'],
             $this->files_word_count * count($this->projectStructure['array_jobs']['job_languages'])
         );
@@ -1247,9 +1266,9 @@ class ProjectManager
     {
         $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
-        (new ProjectDao())->deleteFailedProject($this->projectStructure['id_project']);
+        (new ProjectDao())->deleteFailedProject($this->config->idProject);
         (new FileDao())->deleteFailedProjectFiles($this->projectStructure['file_id_list']->getArrayCopy());
-        $this->log("Deleted Project ID: " . $this->projectStructure['id_project']);
+        $this->log("Deleted Project ID: " . $this->config->idProject);
         $this->log("Deleted Files ID: " . json_encode($this->projectStructure['file_id_list']->getArrayCopy()));
     }
 
@@ -1276,7 +1295,7 @@ class ProjectManager
             unset($segmentElement['show_in_cattool']);
 
             $segmentElement['jsid'] = $segmentElement['id'] . "-" . $job_id_passes;
-            $segmentElement['source'] = $this->projectStructure['source_language'];
+            $segmentElement['source'] = $this->config->sourceLanguage;
             $segmentElement['target'] = implode(",", $this->projectStructure['array_jobs']['job_languages']->getArrayCopy());
             $segmentElement['payable_rates'] = $this->projectStructure['array_jobs']['payable_rates']->getArrayCopy();
             $segmentElement['segment'] = $this->filter->fromLayer0ToLayer1($segmentElement['segment']);
@@ -1292,10 +1311,10 @@ class ProjectManager
     private function pushActivityLog(): void
     {
         $activity = new ActivityLogStruct();
-        $activity->id_project = $this->projectStructure['id_project'];
+        $activity->id_project = $this->config->idProject;
         $activity->action = ActivityLogStruct::PROJECT_CREATED;
-        $activity->ip = $this->projectStructure['user_ip'];
-        $activity->uid = $this->projectStructure['uid'];
+        $activity->ip = $this->config->userIp;
+        $activity->uid = $this->config->uid;
         $activity->event_date = date('Y-m-d H:i:s');
 
         try {
@@ -1322,14 +1341,14 @@ class ProjectManager
     {
         return CanonicalRoutes::analyze(
             [
-                'project_name' => $this->projectStructure['project_name'],
-                'id_project' => $this->projectStructure['id_project'],
-                'password' => $this->projectStructure['ppassword']
+                'project_name' => $this->config->projectName,
+                'id_project' => $this->config->idProject,
+                'password' => $this->config->ppassword
             ],
             [
-                'http_host' => (is_null($this->projectStructure['HTTP_HOST']) ?
+                'http_host' => (is_null($this->config->httpHost) ?
                     AppConfig::$HTTPHOST :
-                    $this->projectStructure['HTTP_HOST']
+                    $this->config->httpHost
                 ),
             ]
         );
@@ -1347,7 +1366,7 @@ class ProjectManager
             $result = $fs->linkZipToProject(
                 $this->projectStructure['create_date'],
                 $zipHash,
-                $this->projectStructure['id_project']
+                $this->config->idProject
             );
 
             if (!$result) {
@@ -1372,32 +1391,32 @@ class ProjectManager
     {
         foreach ($projectStructure['target_language'] as $target) {
             // get payable rates from mt_qe_workflow, this takes the priority over the other payable rates
-            if ($projectStructure['mt_qe_workflow_payable_rate']) {
+            if ($this->config->mtQeWorkflowPayableRate) {
                 $payableRatesTemplate = null;
-                $payableRates = json_encode($projectStructure['mt_qe_workflow_payable_rate']);
-            } elseif (isset($projectStructure['payable_rate_model']) and !empty($projectStructure['payable_rate_model'])) {
+                $payableRates = json_encode($this->config->mtQeWorkflowPayableRate);
+            } elseif (isset($this->config->payableRateModel) and !empty($this->config->payableRateModel)) {
                 // get payable rates
                 $payableRatesTemplate = new CustomPayableRateStruct();
-                $payableRatesTemplate->hydrateFromJSON(json_encode($projectStructure['payable_rate_model']));
-                $payableRates = $payableRatesTemplate->getPayableRates($projectStructure['source_language'], $target);
+                $payableRatesTemplate->hydrateFromJSON(json_encode($this->config->payableRateModel));
+                $payableRates = $payableRatesTemplate->getPayableRates($this->config->sourceLanguage, $target);
                 $payableRates = json_encode($payableRates);
-            } elseif (isset($projectStructure['payable_rate_model_id']) and !empty($projectStructure['payable_rate_model_id'])) {
+            } elseif (isset($this->config->payableRateModelId) and !empty($this->config->payableRateModelId)) {
                 // get payable rates
-                $payableRatesTemplate = CustomPayableRateDao::getById($projectStructure['payable_rate_model_id']);
-                $payableRates = $payableRatesTemplate->getPayableRates($projectStructure['source_language'], $target);
+                $payableRatesTemplate = CustomPayableRateDao::getById($this->config->payableRateModelId);
+                $payableRates = $payableRatesTemplate->getPayableRates($this->config->sourceLanguage, $target);
                 $payableRates = json_encode($payableRates);
             } else {
                 $payableRatesTemplate = null;
-                $payableRates = PayableRates::getPayableRates($projectStructure['source_language'], $target);
-                $payableRates = json_encode($this->features->filter("filterPayableRates", $payableRates, $projectStructure['source_language'], $target));
+                $payableRates = PayableRates::getPayableRates($this->config->sourceLanguage, $target);
+                $payableRates = json_encode($this->features->filter("filterPayableRates", $payableRates, $this->config->sourceLanguage, $target));
             }
 
             $password = Utils::randomString();
 
             $tm_key = [];
 
-            if (!empty($projectStructure['private_tm_key'])) {
-                foreach ($projectStructure['private_tm_key'] as $tmKeyObj) {
+            if (!empty($this->config->privateTmKey)) {
+                foreach ($this->config->privateTmKey as $tmKeyObj) {
                     $newTmKey = TmKeyManager::getTmKeyStructure();
                     $newTmKey->complete_format = true;
                     $newTmKey->tm = true;
@@ -1418,30 +1437,30 @@ class ProjectManager
                 throw new Exception('Job cannot be created. No segments found!');
             }
 
-            $this->log($projectStructure['private_tm_key']);
+            $this->log($this->config->privateTmKey);
 
             $projectStructure['tm_keys'] = json_encode($tm_key);
 
             // Replace {{pid}} with project ID for new keys created with an empty name
-            $projectStructure['tm_keys'] = str_replace("{{pid}}", $projectStructure['id_project'], $projectStructure['tm_keys']);
+            $projectStructure['tm_keys'] = str_replace("{{pid}}", $this->config->idProject, $projectStructure['tm_keys']);
 
             $newJob = new JobStruct();
             $newJob->password = $password;
-            $newJob->id_project = $projectStructure['id_project'];
-            $newJob->source = $projectStructure['source_language'];
+            $newJob->id_project = $this->config->idProject;
+            $newJob->source = $this->config->sourceLanguage;
             $newJob->target = $target;
-            $newJob->id_tms = $projectStructure['tms_engine'] ?? 1;
-            $newJob->id_mt_engine = $projectStructure['target_language_mt_engine_association'][$target];
+            $newJob->id_tms = $this->config->tmsEngine ?? 1;
+            $newJob->id_mt_engine = $this->config->targetLanguageMtEngineAssociation[$target];
             $newJob->create_date = date("Y-m-d H:i:s");
             $newJob->last_update = date("Y-m-d H:i:s");
-            $newJob->subject = $projectStructure['job_subject'];
-            $newJob->owner = $projectStructure['owner'];
+            $newJob->subject = $this->config->jobSubject;
+            $newJob->owner = $this->config->owner;
             $newJob->job_first_segment = $this->min_max_segments_id['job_first_segment'];
             $newJob->job_last_segment = $this->min_max_segments_id['job_last_segment'];
             $newJob->tm_keys = $projectStructure['tm_keys'];
             $newJob->payable_rates = $payableRates;
             $newJob->total_raw_wc = $this->files_word_count;
-            $newJob->only_private_tm = (int)$projectStructure['only_private'];
+            $newJob->only_private_tm = (int)$this->config->onlyPrivate;
 
             $this->features->run('validateJobCreation', $newJob, $projectStructure);
             $newJob = JobDao::createFromStruct($newJob);
@@ -1455,9 +1474,9 @@ class ProjectManager
             $this->saveJobsMetadata($newJob, $projectStructure);
 
             try {
-                if (isset($projectStructure['payable_rate_model_id']) and !empty($projectStructure['payable_rate_model_id']) and $payableRatesTemplate !== null) {
+                if (isset($this->config->payableRateModelId) and !empty($this->config->payableRateModelId) and $payableRatesTemplate !== null) {
                     CustomPayableRateDao::assocModelToJob(
-                        $projectStructure['payable_rate_model_id'],
+                        $this->config->payableRateModelId,
                         $newJob->id,
                         $payableRatesTemplate->version,
                         $payableRatesTemplate->name
@@ -1563,7 +1582,7 @@ class ProjectManager
 
                 $moved = $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
-                    $this->projectStructure['source_language'],
+                    $this->config->sourceLanguage,
                     $fid,
                     $originalFileName
                 );
@@ -1577,7 +1596,7 @@ class ProjectManager
 
                 // pdfAnalysis
                 if (!empty($meta['pdfAnalysis'])) {
-                    $this->filesMetadataDao->insert($this->projectStructure['id_project'], $fid, 'pdfAnalysis', json_encode($meta['pdfAnalysis']));
+                    $this->filesMetadataDao->insert($this->config->idProject, $fid, 'pdfAnalysis', json_encode($meta['pdfAnalysis']));
                 }
 
                 $fileStructures[$fid] = [
@@ -1607,7 +1626,7 @@ class ProjectManager
     {
         $value = $this->features->filter('decodeInstructions', $value);
 
-        $this->filesMetadataDao->insert($this->projectStructure['id_project'], $fid, 'instructions', $value);
+        $this->filesMetadataDao->insert($this->config->idProject, $fid, 'instructions', $value);
     }
 
     /**
