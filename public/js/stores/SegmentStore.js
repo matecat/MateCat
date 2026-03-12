@@ -2030,7 +2030,11 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
       break
     case SegmentConstants.LARA_STYLES:
-      SegmentStore.emitChange(SegmentConstants.LARA_STYLES, {
+    case SegmentConstants.AI_ALTERNATIVES:
+    case SegmentConstants.AI_FEEDBACK:
+    case SegmentConstants.AI_ALTERNATIVES_SUGGESTION:
+    case SegmentConstants.AI_FEEDBACK_SUGGESTION:
+      SegmentStore.emitChange(action.actionType, {
         ...action,
       })
       break

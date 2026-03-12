@@ -120,6 +120,11 @@ class AppConfig
     public static int $MAX_NUM_FILES = 100;
     public static int $MAX_SOURCE_WORDS = 250000;
 
+    public static string $GEMINI_API_KEY = '';
+    public static string $GEMINI_API_MODEL = '';
+
+    public static int $GEMINI_TIMEOUT = 30; //seconds
+
     /**
      * OPENAI configuration
      */

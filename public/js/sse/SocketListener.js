@@ -171,6 +171,18 @@ const SocketListener = ({isAuthenticated, userId}) => {
         hasError: Boolean(data?.has_error),
       })
     },
+    ai_assistant_alternative_translations: (data) => {
+      SegmentActions.aiAlternativeSuggestion({
+        sid: data.id_segment,
+        data,
+      })
+    },
+    ai_assistant_feedback: (data) => {
+      SegmentActions.aiFeedbackSuggestion({
+        sid: data.id_segment,
+        data,
+      })
+    },
     global_messages: (data) => {
       const message = data.message
       if (

@@ -129,6 +129,26 @@ export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
   return text
 }
 
+export const excludeSomeTagsFromText = (text, excludeTags = []) => {
+  try {
+    for (let key in tagSignatures) {
+      const {placeholderRegex, regex, type} = tagSignatures[key]
+      const shouldExcludeTag = excludeTags.some((value) => value === type)
+
+      if (shouldExcludeTag) {
+        const globalRegex = placeholderRegex
+          ? new RegExp(placeholderRegex.source, placeholderRegex.flags + 'g')
+          : new RegExp(regex)
+
+        text = text.replace(globalRegex, '')
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing tag in transformTagsToHtml function')
+  }
+  return text
+}
+
 export const transformTagsToLexiqaText = (text) => {
   const tagsStruct = matchTagStructure(text).sort((a, b) =>
     a.offset > b.offset ? 1 : -1,
