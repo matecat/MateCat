@@ -1799,16 +1799,16 @@
         },
         {
             "name": "matecat/lara-php",
-            "version": "v2.0.0-beta.1",
+            "version": "v2.0.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/lara-php.git",
-                "reference": "a0acbc3b7eea774356547bf156d00096c2587000"
+                "reference": "08266e0592f719e24d9d486e4e05d9c65a59b1e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/lara-php/zipball/a0acbc3b7eea774356547bf156d00096c2587000",
-                "reference": "a0acbc3b7eea774356547bf156d00096c2587000",
+                "url": "https://api.github.com/repos/matecat/lara-php/zipball/08266e0592f719e24d9d486e4e05d9c65a59b1e5",
+                "reference": "08266e0592f719e24d9d486e4e05d9c65a59b1e5",
                 "shasum": ""
             },
             "require": {
@@ -1842,9 +1842,9 @@
             "homepage": "https://laratranslate.com/",
             "support": {
                 "issues": "https://github.com/matecat/lara-php/issues",
-                "source": "https://github.com/matecat/lara-php/tree/v2.0.0-beta.1"
+                "source": "https://github.com/matecat/lara-php/tree/v2.0.0-beta.2"
             },
-            "time": "2026-01-23T12:09:00+00:00"
+            "time": "2026-03-12T14:08:03+00:00"
         },
         {
             "name": "matecat/simple-s3",
