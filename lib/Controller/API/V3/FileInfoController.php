@@ -112,7 +112,7 @@ class FileInfoController extends KleinController
         $instructions = $this->request->param('instructions');
         $filesInfoUtility = new FilesInfoUtility($this->chunk);
 
-        $instructions = $this->featureSet->filter('decodeInstructions', $instructions);
+        $instructions = html_entity_decode($instructions);
 
         if (empty($instructions)) {
             throw new InvalidArgumentException("Empty instructions provided");
