@@ -8,15 +8,18 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\FilesStorage\AbstractFilesStorage;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectManager\ProjectManager;
+use Model\ProjectManager\ProjectManagerModel;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionClass;
 use ReflectionException;
+use Throwable;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 
@@ -118,7 +121,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function callValidateUploadToken(): void
     {
-        $this->_validateUploadToken();
+        $this->validateUploadToken();
     }
 
     /**
@@ -127,7 +130,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function callValidateXliffParameters(): void
     {
-        $this->_validateXliffParameters();
+        $this->validateXliffParameters();
     }
 
     /**
@@ -198,7 +201,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function callGetRequestedFeatures(): array
     {
-        return $this->_getRequestedFeatures();
+        return $this->getRequestedFeatures();
     }
 
     /**
@@ -258,6 +261,207 @@ class TestableProjectManager extends ProjectManager
     protected function createTeamDao(): TeamDao
     {
         return $this->teamDaoOverride ?? parent::createTeamDao();
+    }
+
+    // ── Step 12: additional private/protected methods testing support ──
+
+    /**
+     * Public wrapper to invoke the private sortFilesWithTmxFirst().
+     */
+    public function callSortFilesWithTmxFirst(): string
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('sortFilesWithTmxFirst');
+
+        return $method->invoke($this);
+    }
+
+    /**
+     * Public wrapper to invoke the private determineStatusAndPopulateResult().
+     */
+    public function callDetermineStatusAndPopulateResult(): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('determineStatusAndPopulateResult');
+        $method->invoke($this);
+    }
+
+    /**
+     * Set the show_in_cattool_segs_counter for testing.
+     */
+    public function setShowInCattoolSegsCounter(int $value): void
+    {
+        $this->show_in_cattool_segs_counter = $value;
+    }
+
+    /**
+     * Public wrapper to invoke the private mapFileInsertionError().
+     */
+    public function callMapFileInsertionError(Throwable $e): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('mapFileInsertionError');
+        $method->invoke($this, $e);
+    }
+
+    /**
+     * Public wrapper to invoke the private mapSegmentExtractionError().
+     */
+    public function callMapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('mapSegmentExtractionError');
+        $method->invoke($this, $e, $fs, $linkFile);
+    }
+
+    /**
+     * Set the uploadDir for testing.
+     */
+    public function setUploadDir(string $dir): void
+    {
+        $this->uploadDir = $dir;
+    }
+
+    /**
+     * Public wrapper to invoke the private validateCachedXliff().
+     */
+    public function callValidateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('validateCachedXliff');
+        $method->invoke($this, $cachedXliffFilePathName, $_originalFileNames, $linkFiles);
+    }
+
+    /**
+     * Public wrapper to invoke the private validateBeforeCreation().
+     */
+    public function callValidateBeforeCreation(): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('validateBeforeCreation');
+        $method->invoke($this);
+    }
+
+    /**
+     * Public wrapper to invoke the private insertFileInstructions().
+     */
+    public function callInsertFileInstructions(array $totalFilesStructure): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('insertFileInstructions');
+        $method->invoke($this, $totalFilesStructure);
+    }
+
+    /**
+     * Public wrapper to invoke the private sanitizeProjectOptions().
+     */
+    public function callSanitizeProjectOptions(): array
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('sanitizeProjectOptions');
+
+        return $method->invoke($this, $this->projectStructure['metadata']);
+    }
+
+    /**
+     * Set files_word_count for testing.
+     */
+    public function setFilesWordCount(int $value): void
+    {
+        $this->files_word_count = $value;
+    }
+
+    /**
+     * Set min_max_segments_id for testing.
+     */
+    public function setMinMaxSegmentsId(array $value): void
+    {
+        $this->min_max_segments_id = $value;
+    }
+
+    // ── ProjectManagerModel override ──
+
+    private ?ProjectManagerModel $projectManagerModelOverride = null;
+
+    public function setProjectManagerModel(ProjectManagerModel $model): void
+    {
+        $this->projectManagerModelOverride = $model;
+    }
+
+    protected function createProjectManagerModel(): ProjectManagerModel
+    {
+        return $this->projectManagerModelOverride ?? parent::createProjectManagerModel();
+    }
+
+    // ── Step 13: additional private methods testing support ──
+
+    /**
+     * Public wrapper to invoke the private createProjectRecord().
+     */
+    public function callCreateProjectRecord(): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('createProjectRecord');
+        $method->invoke($this);
+    }
+
+    /**
+     * Public wrapper to invoke the private resolveUploadDirAndGetHashes().
+     */
+    public function callResolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('resolveUploadDirAndGetHashes');
+
+        return $method->invoke($this, $fs);
+    }
+
+    /**
+     * Public wrapper to invoke the private handleZipFiles().
+     */
+    public function callHandleZipFiles(array $linkFiles): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('handleZipFiles');
+        $method->invoke($this, $linkFiles);
+    }
+
+    /**
+     * Override _zipFileHandling so handleZipFiles() tests can control behavior.
+     * By default, does nothing. Set a callback via setZipFileHandlingCallback().
+     *
+     * @var callable|null
+     */
+    private $zipFileHandlingCallback = null;
+
+    public function setZipFileHandlingCallback(?callable $callback): void
+    {
+        $this->zipFileHandlingCallback = $callback;
+    }
+
+    protected function zipFileHandling($linkFiles): void
+    {
+        if ($this->zipFileHandlingCallback !== null) {
+            ($this->zipFileHandlingCallback)($linkFiles);
+        }
+    }
+
+    /**
+     * Public wrapper to invoke the private cleanupUploadDirectory().
+     */
+    public function callCleanupUploadDirectory(AbstractFilesStorage $fs): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('cleanupUploadDirectory');
+        $method->invoke($this, $fs);
+    }
+
+    /**
+     * Get the uploadDir value for assertions.
+     */
+    public function getUploadDir(): string
+    {
+        return $this->uploadDir;
     }
 }
 

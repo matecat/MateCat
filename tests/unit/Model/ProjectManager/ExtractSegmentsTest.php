@@ -80,6 +80,9 @@ class ExtractSegmentsTest extends AbstractTest
     // 0a. Seg-source path tests
     // =========================================================================
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceCreatesCorrectNumberOfSegments(): void
     {
@@ -96,6 +99,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertCount(2, $segments);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceSegmentsHaveCorrectMrkIds(): void
     {
@@ -117,6 +123,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals('1', $seg1->xliff_mrk_id);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceSegmentsHaveCorrectInternalId(): void
     {
@@ -134,6 +143,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals('tu1', $seg0->internal_id);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceWordCountIsPositive(): void
     {
@@ -146,6 +158,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertGreaterThan(0, $this->pm->getFilesWordCount());
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceShowInCattoolCounterIncremented(): void
     {
@@ -159,6 +174,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals(2, $this->pm->getShowInCattoolSegsCounter());
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceTotalSegmentsIncremented(): void
     {
@@ -172,6 +190,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals(1, $this->pm->getTotalSegments());
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourcePreTranslationsAreStored(): void
     {
@@ -189,6 +210,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertGreaterThan(0, count($translations));
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceSegmentsOriginalDataCreated(): void
     {
@@ -208,6 +232,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertCount(2, $originalData);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceSegmentsMetaDataCreated(): void
     {
@@ -224,6 +251,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertCount(2, $ps['segments-meta-data'][$fid]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceWithSizeRestrictionStoresMetadata(): void
     {
@@ -248,6 +278,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertTrue($foundSizeRestriction, 'sizeRestriction metadata not found');
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceSegmentHashDiffersWithSizeRestriction(): void
     {
@@ -280,6 +313,9 @@ class ExtractSegmentsTest extends AbstractTest
     // 0b. Non-seg-source path tests
     // =========================================================================
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceCreatesCorrectNumberOfSegments(): void
     {
@@ -296,6 +332,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertCount(2, $segments);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceSegmentsHaveNullMrkId(): void
     {
@@ -315,6 +354,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertNull($seg0->xliff_mrk_ext_succ_tags);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceWordCountIsPositive(): void
     {
@@ -327,6 +369,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertGreaterThan(0, $this->pm->getFilesWordCount());
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceShowInCattoolCounterIncremented(): void
     {
@@ -340,6 +385,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals(2, $this->pm->getShowInCattoolSegsCounter());
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourcePreTranslationsStoredForTranslatedTarget(): void
     {
@@ -357,6 +405,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertGreaterThan(0, count($translations));
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceSegmentsMetaDataCreated(): void
     {
@@ -371,6 +422,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertCount(2, $ps['segments-meta-data'][$fid]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceWithSizeRestrictionStoresMetadata(): void
     {
@@ -394,6 +448,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertTrue($foundSizeRestriction, 'sizeRestriction metadata not found');
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceSegmentHasCorrectInternalId(): void
     {
@@ -419,6 +476,9 @@ class ExtractSegmentsTest extends AbstractTest
     // 0b. Notes and context-group tests
     // =========================================================================
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNotesAreExtracted(): void
     {
@@ -435,6 +495,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertGreaterThan(0, count($notes));
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNotesHaveCorrectStructure(): void
     {
@@ -456,6 +519,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertCount(2, $tu1Notes['entries']);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNotesFromAttributeIsPreserved(): void
     {
@@ -477,6 +543,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals('developer', $tu1From[1]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testContextGroupIsExtracted(): void
     {
@@ -523,6 +592,9 @@ class ExtractSegmentsTest extends AbstractTest
         }
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testXliffInfoIsPopulated(): void
     {
@@ -539,6 +611,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertArrayHasKey('version', $ps['current-xliff-info'][$fid]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceSegmentContentIsFilteredToLayer0(): void
     {
@@ -559,6 +634,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertIsString($seg0->segment);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceSegmentContentIsFilteredToLayer0(): void
     {
@@ -578,6 +656,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertIsString($seg0->segment);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegmentHashIsNotEmpty(): void
     {
@@ -597,6 +678,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals(32, strlen($seg0->segment_hash), 'segment_hash should be an md5 (32 hex chars)');
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testSegSourceFileIdIsSet(): void
     {
@@ -614,6 +698,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals($fid, $seg0->id_file);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testNoSegSourceFileIdIsSet(): void
     {
@@ -631,6 +718,9 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertEquals($fid, $seg0->id_file);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function testExistingXliffWithMrkAndNotes(): void
     {

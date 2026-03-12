@@ -8,7 +8,7 @@ use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
+use TestHelpers\AbstractTest;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 
@@ -18,7 +18,7 @@ use Utils\Logger\MatecatLogger;
  * - _insertInstructions()
  * - __checkForProjectAssignment()
  */
-class InstructionsAndAssignmentTest extends TestCase
+class InstructionsAndAssignmentTest extends AbstractTest
 {
     private TestableProjectManager $pm;
 

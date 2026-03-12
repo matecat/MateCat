@@ -8,6 +8,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translators\TranslatorsModel;
@@ -35,7 +36,6 @@ class SplitJobMergeTest extends AbstractTest
     private JobDao&MockObject $jobDaoMock;
     private Cart&MockObject $cartMock;
     private CounterModel&MockObject $counterModelMock;
-    private ProjectDao&MockObject $projectDaoMock;
 
     protected function setUp(): void
     {
@@ -56,8 +56,8 @@ class SplitJobMergeTest extends AbstractTest
         $this->counterModelMock = $this->createMock(CounterModel::class);
         $this->service->setCounterModel($this->counterModelMock);
 
-        $this->projectDaoMock = $this->createMock(ProjectDao::class);
-        $this->service->setProjectDao($this->projectDaoMock);
+        $projectDaoMock = $this->createMock(ProjectDao::class);
+        $this->service->setProjectDao($projectDaoMock);
 
         // Default: no translator on the job being split
         $translatorModel = $this->createMock(TranslatorsModel::class);
@@ -94,14 +94,14 @@ class SplitJobMergeTest extends AbstractTest
     /**
      * Helper: build a projectStructure for splitJob with split_result pre-populated.
      */
-    private function makeSplitProjectStructure(array $chunks = [], ?int $jobFirstSegment = 1): ArrayObject
+    private function makeSplitProjectStructure(array $chunks = []): ArrayObject
     {
         return new ArrayObject([
             'id_project'       => 999,
             'job_to_split'     => 100,
             'job_to_split_pass' => 'origpass',
             'split_result'     => new ArrayObject([
-                'job_first_segment' => $jobFirstSegment,
+                'job_first_segment' => 1,
                 'chunks'            => $chunks,
             ]),
             'array_jobs' => new ArrayObject([
@@ -157,6 +157,9 @@ class SplitJobMergeTest extends AbstractTest
     // splitJob tests
     // ────────────────────────────────────────────────────────────────
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobUpdatesFirstChunkWordCounts(): void
     {
@@ -171,6 +174,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->splitJob($ps);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobCreatesChunksWithCorrectSegmentBoundaries(): void
     {
@@ -191,20 +197,22 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals('pass_chunk2', $ps['array_jobs']['job_pass'][1]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobKeepsOriginalPasswordForFirstChunk(): void
     {
         $this->setupSplitJobStubs();
         $chunks = $this->makeTwoChunks();
-        $ps = $this->makeSplitProjectStructure($chunks, 1);
+        $ps = $this->makeSplitProjectStructure($chunks);
 
         // The first chunk's segment_start == job_first_segment, so password is NOT changed
         $stmtArgs = [];
         $this->jobDaoMock->method('getSplitJobPreparedStatement')
             ->willReturnCallback(function ($newJob) use (&$stmtArgs) {
                 $stmtArgs[] = clone $newJob;
-                $stmt = $this->createMock(PDOStatement::class);
-                return $stmt;
+                return $this->createMock(PDOStatement::class);
             });
 
         $this->service->splitJob($ps);
@@ -239,6 +247,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->splitJob($ps);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobInitializesWordCountForEachChunk(): void
     {
@@ -252,6 +263,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->splitJob($ps);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobEnqueuesWorkerForEachChunk(): void
     {
@@ -267,6 +281,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals('JOBS', $enqueued[1]['queue']);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobDestroysJobAndAnalysisCaches(): void
     {
@@ -284,6 +301,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobDeletesCartAfterSplit(): void
     {
@@ -296,6 +316,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->splitJob($ps);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobRunsPostJobSplittedFeatureHook(): void
     {
@@ -310,6 +333,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->splitJob($ps);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function splitJobSetsSegmentRangesInJobSegments(): void
     {
@@ -338,6 +364,9 @@ class SplitJobMergeTest extends AbstractTest
     // applySplit tests
     // ────────────────────────────────────────────────────────────────
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function applySplitEmptiesCartBeforeSplit(): void
     {
@@ -357,6 +386,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertTrue($this->service->wasBeginTransactionCalled());
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function applySplitCommitsTransaction(): void
     {
@@ -420,10 +452,13 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->service->setOwnerKeysResult([]);
 
-        $metadataDao = $this->createMock(\Model\Projects\MetadataDao::class);
+        $metadataDao = $this->createMock(MetadataDao::class);
         $this->service->setProjectsMetadataDao($metadataDao);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLSetsJobSegmentRangeToMinMax(): void
     {
@@ -439,6 +474,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals(100, $chunks[0]['job_last_segment']);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLSumsRawAndStandardWordCounts(): void
     {
@@ -454,6 +492,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->mergeALL($ps, $chunks);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLSumsAvgPeeAndTimeToEdit(): void
     {
@@ -468,6 +509,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals(3000, $chunks[0]['total_time_to_edit']);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLCallsUpdateForMergeWithFalseWhenNoTranslator(): void
     {
@@ -482,6 +526,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertFalse($calls[0]['newPassword']);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLCallsDeleteOnMerge(): void
     {
@@ -496,6 +543,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals(100, $deletes[0]->id);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLInitializesWordCount(): void
     {
@@ -510,6 +560,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->mergeALL($ps, $chunks);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLRunsPostJobMergedFeatureHook(): void
     {
@@ -528,6 +581,9 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->mergeALL($ps, $chunks);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLDestroysJobAndAnalysisCaches(): void
     {
@@ -545,6 +601,10 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLCommitsTransaction(): void
     {
@@ -557,7 +617,7 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->setProjectForCacheInvalidation($projectStruct);
 
         $this->service->setOwnerKeysResult([]);
-        $metadataDao = $this->createMock(\Model\Projects\MetadataDao::class);
+        $metadataDao = $this->createMock(MetadataDao::class);
         $this->service->setProjectsMetadataDao($metadataDao);
 
         $chunks = $this->makeJobChunksForMerge();
@@ -566,6 +626,10 @@ class SplitJobMergeTest extends AbstractTest
         $this->service->mergeALL($ps, $chunks);
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLHandlesTmKeyManagerErrorGracefully(): void
     {
@@ -575,7 +639,7 @@ class SplitJobMergeTest extends AbstractTest
         $projectStruct->password = 'projpass';
         $this->service->setProjectForCacheInvalidation($projectStruct);
 
-        $metadataDao = $this->createMock(\Model\Projects\MetadataDao::class);
+        $metadataDao = $this->createMock(MetadataDao::class);
         $this->service->setProjectsMetadataDao($metadataDao);
 
         // getOwnerKeys will throw → method should catch and continue
@@ -591,6 +655,10 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals('[{"key":"abc123","r":true,"w":true}]', $chunks[0]['tm_keys']);
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     #[Test]
     public function mergeALLCleansUpChunksOptionsMetadata(): void
     {
@@ -602,7 +670,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->service->setOwnerKeysResult([]);
 
-        $metadataDao = $this->createMock(\Model\Projects\MetadataDao::class);
+        $metadataDao = $this->createMock(MetadataDao::class);
         $metadataDao->expects($this->once())->method('cleanupChunksOptions');
         $this->service->setProjectsMetadataDao($metadataDao);
 

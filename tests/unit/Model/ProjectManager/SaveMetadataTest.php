@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectManager;
 
-use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;

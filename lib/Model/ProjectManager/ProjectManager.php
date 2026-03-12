@@ -264,7 +264,7 @@ class ProjectManager
 
         $this->dbHandler = Database::obtain();
 
-        $this->features = new FeatureSet($this->_getRequestedFeatures());
+        $this->features = new FeatureSet($this->getRequestedFeatures());
 
         if (!empty($this->projectStructure['id_customer'])) {
             $this->features->loadAutoActivableOwnerFeatures($this->projectStructure['id_customer']);
@@ -432,7 +432,7 @@ class ProjectManager
     /**
      * @return array
      */
-    protected function _getRequestedFeatures(): array
+    protected function getRequestedFeatures(): array
     {
         $features = [];
         if (count($this->projectStructure['project_features']) != 0) {
@@ -452,7 +452,7 @@ class ProjectManager
     /**
      * @throws Exception
      */
-    protected function _validateUploadToken(): void
+    protected function validateUploadToken(): void
     {
         if (!isset($this->projectStructure['uploadToken']) || !Utils::isTokenValid($this->projectStructure['uploadToken'])) {
             $this->addProjectError(-19, "Invalid Upload Token.");
@@ -464,7 +464,7 @@ class ProjectManager
      * @return void
      * @throws Exception
      */
-    protected function _validateXliffParameters(): void
+    protected function validateXliffParameters(): void
     {
         try {
             // when the request comes from api or ajax
@@ -726,8 +726,8 @@ class ProjectManager
     {
         $this->projectStructure['result']['errors'] = new ArrayObject();
 
-        $this->_validateUploadToken();
-        $this->_validateXliffParameters();
+        $this->validateUploadToken();
+        $this->validateXliffParameters();
 
         $this->projectStructure['project_features'] = new ArrayObject($this->projectStructure['project_features']);
     }
@@ -987,7 +987,7 @@ class ProjectManager
     private function handleZipFiles(array $linkFiles): void
     {
         try {
-            $this->_zipFileHandling($linkFiles);
+            $this->zipFileHandling($linkFiles);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e);
             $this->addProjectError($e->getCode(), $e->getMessage());
@@ -1422,7 +1422,7 @@ class ProjectManager
     /**
      * @throws Exception
      */
-    protected function _zipFileHandling($linkFiles): void
+    protected function zipFileHandling($linkFiles): void
     {
         $fs = FilesStorageFactory::create();
 
