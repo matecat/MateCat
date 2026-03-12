@@ -14,7 +14,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\Jobs\JobDao;
-use Model\ProjectManager\ProjectManager;
+use Model\ProjectManager\JobSplitMergeManager;
 use Model\Projects\ProjectStruct;
 
 
@@ -30,8 +30,8 @@ class JobMergeController extends KleinController
      */
     public function merge(): void
     {
-        $pManager = new ProjectManager();
-        $pManager->setProjectAndReLoadFeatures($this->project);
+        $pManager = new JobSplitMergeManager();
+        $pManager->loadProject($this->project);
 
         $pStruct = $pManager->getProjectStructure();
         $pStruct['id_customer'] = $this->project->id_customer;

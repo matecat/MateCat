@@ -138,11 +138,6 @@ class ProjectManager
     protected ?TmKeyService $tmKeyService = null;
 
     /**
-     * @var JobSplitMergeService|null
-     */
-    protected ?JobSplitMergeService $jobSplitMergeService = null;
-
-    /**
      * @var SegmentStorageService|null
      */
     protected ?SegmentStorageService $segmentStorageService = null;
@@ -334,21 +329,7 @@ class ProjectManager
         return $this->tmKeyService;
     }
 
-    /**
-     * Get or lazily create the JobSplitMergeService instance.
-     */
-    protected function getJobSplitMergeService(): JobSplitMergeService
-    {
-        if ($this->jobSplitMergeService === null) {
-            $this->jobSplitMergeService = new JobSplitMergeService(
-                $this->dbHandler,
-                $this->features,
-                $this->logger,
-            );
-        }
 
-        return $this->jobSplitMergeService;
-    }
 
     /**
      * Get or lazily create the SegmentStorageService instance.
@@ -1532,59 +1513,6 @@ class ProjectManager
 
         //Clean Translation array
         $this->projectStructure['translations']->exchangeArray([]);
-    }
-
-    /**
-     * Build a job split structure, minimum split value are 2 chunks.
-     *
-     * Delegates to {@see JobSplitMergeService::getSplitData()}.
-     *
-     * @param ArrayObject $projectStructure
-     * @param int $num_split
-     * @param array $requestedWordsPerSplit Matecat Equivalent Words (Only valid for Pro Version)
-     * @param string $count_type
-     *
-     * @return ArrayObject
-     *
-     * @throws Exception
-     */
-    public function getSplitData(
-        ArrayObject $projectStructure,
-        int $num_split = 2,
-        array $requestedWordsPerSplit = [],
-        string $count_type = ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE
-    ): ArrayObject {
-        return $this->getJobSplitMergeService()->getSplitData($projectStructure, $num_split, $requestedWordsPerSplit, $count_type);
-    }
-
-    /**
-     * Apply the new job structure.
-     *
-     * Delegates to {@see JobSplitMergeService::applySplit()}.
-     *
-     * @param ArrayObject $projectStructure
-     *
-     * @throws Exception
-     */
-    public function applySplit(ArrayObject $projectStructure): void
-    {
-        $uid = $this->projectStructure['uid'] ?? null;
-        $this->getJobSplitMergeService()->applySplit($projectStructure, $uid);
-    }
-
-    /**
-     * Merge all job chunks back into a single job.
-     *
-     * Delegates to {@see JobSplitMergeService::mergeALL()}.
-     *
-     * @param ArrayObject $projectStructure
-     * @param JobStruct[] $jobStructs
-     *
-     * @throws Exception
-     */
-    public function mergeALL(ArrayObject $projectStructure, array $jobStructs): void
-    {
-        $this->getJobSplitMergeService()->mergeALL($projectStructure, $jobStructs);
     }
 
     /**

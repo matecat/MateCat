@@ -10,7 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
-use Model\ProjectManager\ProjectManager;
+use Model\ProjectManager\JobSplitMergeManager;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -38,7 +38,7 @@ class SplitJobController extends KleinController
 
         /** @var  $pStruct ArrayObject */
         $pStruct = $projectStructure['pStruct'];
-        /** @var  $pManager ProjectManager */
+        /** @var  $pManager JobSplitMergeManager */
         $pManager = $projectStructure['pManager'];
         /** @var $project ProjectStruct */
         $project = $projectStructure['project'];
@@ -63,7 +63,7 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        /** @var  $pManager ProjectManager */
+        /** @var  $pManager JobSplitMergeManager */
         /** @var  $pStruct ArrayObject */
         [, $pStruct] = $this->checkSplit($request);
 
@@ -83,7 +83,7 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        /** @var  $pManager ProjectManager */
+        /** @var  $pManager JobSplitMergeManager */
         /** @var  $pStruct ArrayObject */
         [$pManager, $pStruct] = $this->checkSplit($request);
         $pManager->applySplit($pStruct);
@@ -106,7 +106,7 @@ class SplitJobController extends KleinController
 
         /** @var  $pStruct ArrayObject */
         $pStruct = $projectStructure['pStruct'];
-        /** @var  $pManager ProjectManager */
+        /** @var  $pManager JobSplitMergeManager */
         $pManager = $projectStructure['pManager'];
         /** @var $project ProjectStruct */
         $project = $projectStructure['project'];
@@ -183,8 +183,8 @@ class SplitJobController extends KleinController
         $count_type = $split_raw_words ? MetadataDao::SPLIT_RAW_WORD_TYPE : MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
         $project_struct = ProjectDao::findByIdAndPassword($project_id, $project_pass, 60 * 60);
 
-        $pManager = new ProjectManager();
-        $pManager->setProjectAndReLoadFeatures($project_struct);
+        $pManager = new JobSplitMergeManager();
+        $pManager->loadProject($project_struct);
 
         $pStruct = $pManager->getProjectStructure();
 
