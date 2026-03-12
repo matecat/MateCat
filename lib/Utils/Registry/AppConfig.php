@@ -102,7 +102,7 @@ class AppConfig
     public static string $TMP_DOWNLOAD;
     public static string $TEMPLATE_ROOT;
     public static string $UTILS_ROOT;
-    public static int $DEFAULT_NUM_RESULTS_FROM_TM = 3;
+    public static int $DEFAULT_NUM_RESULTS_FROM_TM = 10;
     public static string $AUTHSECRET;
     public static string $AUTHSECRET_PATH;
 
@@ -335,7 +335,6 @@ class AppConfig
         // Overridable defaults
         self::$ROOT = $rootPath; // Accessible by Apache/PHP
         self::$BASEURL = "/"; // Accessible by the browser
-        self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$TRACKING_CODES_VIEW_PATH = self::$ROOT . "/lib/View/templates";
 
         // Detects if the script is running via Command Line Interface (CLI) to flag the instance as a daemon/background worker

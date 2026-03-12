@@ -197,6 +197,15 @@ const SegmentUtils = {
       translation = SegmentUtils.collectSplittedTranslations(sid)
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
     }
+
+    const suggetionArray = segment.contributions.matches.filter(
+      (match, index) =>
+        index <
+        (segment.choosenSuggestionIndex > 3
+          ? segment.choosenSuggestionIndex
+          : 3),
+    )
+
     return {
       id_segment: segment.sid,
       id_job: config.id_job,
@@ -228,7 +237,7 @@ const SegmentUtils = {
         segment.contributions &&
         !config.isReview &&
         segment.choosenSuggestionIndex
-          ? JSON.stringify(segment.contributions.matches)
+          ? JSON.stringify(suggetionArray)
           : undefined,
     }
   },
