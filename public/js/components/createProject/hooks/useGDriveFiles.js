@@ -83,15 +83,11 @@ export function useGDriveFiles({
   }, [currentFiltersExtractionParameters, extractionParameterTemplateId])
   const pickerCallback = useCallback(
     (data) => {
-      if (
-        data[google.picker.Response.ACTION] === google.picker.Action.CANCEL
-      ) {
+      if (data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
         if (files.length === 0) setOpenGDrive(false)
         return
       }
-      if (
-        data[google.picker.Response.ACTION] === google.picker.Action.PICKED
-      ) {
+      if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
         const exportIds = data[google.picker.Response.DOCUMENTS].map(
           (doc) => doc.id,
         )
@@ -203,6 +199,10 @@ export function useGDriveFiles({
         'No more files can be loaded (the limit of ' +
           config.maxNumberFiles +
           ' has been exceeded).',
+      )
+    } else if (files.length > config.maxNumberFiles) {
+      CreateProjectActions.showError(
+        `Maximum ${config.maxNumberFiles} files allowed. Please remove all files with errors from the list below.`,
       )
     }
     if (files.length === 0) {

@@ -2,7 +2,7 @@
   "scripts": {
     "preversion": "",
     "version": "sed -i \"s/version .*/version = \\\"v${npm_package_version}\\\"/g\" ./inc/version.ini",
-    "postversion": "git add ./inc/version.ini && git commit --amend --no-edit && git tag -d v${npm_package_version} && git tag v${npm_package_version}",
+    "postversion": "git add ./inc/version.ini && git commit --amend --no-edit && git tag -d v${npm_package_version} && git tag -a v${npm_package_version} -m'v${npm_package_version}'",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
     "test": "jest --watchAll",
@@ -20,7 +20,7 @@
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-popover": "^1.1.15",
-    "@translated/lara": "1.8.0-beta.4",
+    "@translated/lara": "1.8.0",
     "classnames": "^2.2.6",
     "crypto-js": "^4.1.1",
     "diff-match-patch": "^1.0.5",
@@ -62,7 +62,7 @@
     "@babel/plugin-transform-runtime": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
-    "@sentry/webpack-plugin": "4.9.0",
+    "@sentry/webpack-plugin": "4.9.1",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
@@ -91,7 +91,7 @@
     "msw": "^2.7.3",
     "prettier": "^3.0.0",
     "sass": "^1.66.0",
-    "sass-loader": "16.0.6",
+    "sass-loader": "16.0.7",
     "style-loader": "4.0.0",
     "terser-webpack-plugin": "^5.3.11",
     "thread-loader": "^4.0.4",
@@ -106,5 +106,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.5.26"
+  "version": "3.5.36"
 }

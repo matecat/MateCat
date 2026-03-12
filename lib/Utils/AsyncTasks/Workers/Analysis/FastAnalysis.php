@@ -11,6 +11,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -446,7 +447,7 @@ class FastAnalysis extends AbstractDaemon
      * @param bool $perform_Tms_Analysis
      * @param bool|null $mt_evaluation
      * @param bool|null $mt_qe_workflow_enabled
-     * @param string|null $mt_qe_workflow_parameters
+     * @param MTQEWorkflowParams|null $mt_qe_workflow_parameters
      * @param int|null $mt_quality_value_in_editor
      * @param array|null $subfiltering_handlers
      * @return int
@@ -460,7 +461,7 @@ class FastAnalysis extends AbstractDaemon
         bool $perform_Tms_Analysis = true,
         ?bool $mt_evaluation = false,
         ?bool $mt_qe_workflow_enabled = false,
-        ?string $mt_qe_workflow_parameters = "",
+        ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
         ?int $mt_quality_value_in_editor = 85,
         ?array $subfiltering_handlers = []
     ): int {

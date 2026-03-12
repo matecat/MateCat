@@ -20,9 +20,9 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
 
 
     /**
-     * @var array
+     * @var ?array
      */
-    private array $subfilteringCustomHandlers;
+    private ?array $subfilteringCustomHandlers;
 
 
     /**
