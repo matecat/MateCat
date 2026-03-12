@@ -10,8 +10,6 @@ use Matecat\Locales\Languages;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
 use Utils\Engines\Lara;
-use Utils\Langs\InvalidLanguageException;
-use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 
 class AIAssistantController extends KleinController

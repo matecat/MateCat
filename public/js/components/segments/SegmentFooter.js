@@ -24,9 +24,9 @@ import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
-import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
 import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
+import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -36,10 +36,10 @@ export const TAB = {
   MESSAGES: 'messages',
   MULTIMATCHES: 'multiMatches',
   AI_ASSISTANT: 'AiAssistant',
-  LARA_STYLES: 'LaraStyles',
-  ICU: 'icu',
+  LARA_STYLES: 'laraStyles',
   AI_ALTERNATIVES: 'aiAlternatives',
   AI_FEEDBACK: 'aiFeedback',
+  ICU: 'icu',
 }
 
 const TAB_ITEMS = {
@@ -97,6 +97,13 @@ const TAB_ITEMS = {
     label: 'Lara styles',
     code: 'larastyles',
     tabClass: 'lara-styles',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'Ai alternatives',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
     isLoading: false,
     isEnableCloseButton: true,
   },

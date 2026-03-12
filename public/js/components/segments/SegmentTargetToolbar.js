@@ -62,6 +62,10 @@ export const SegmentTargetToolbar = ({
       ? [
           {
             group: 0,
+            component: <AiFeedback {...{key: 'aifeedback', sid}} />,
+          },
+          {
+            group: 0,
             component: (
               <AiFeedback {...{key: 'aifeedback', sid, isIconsBundled}} />
             ),
@@ -78,6 +82,12 @@ export const SegmentTargetToolbar = ({
               <AiAlternatives
                 {...{key: 'aialternatives', sid, editArea, isIconsBundled}}
               />
+            ),
+          },
+          {
+            group: 0,
+            component: (
+              <AiAlternatives {...{key: 'aialternatives', sid, editArea}} />
             ),
           },
         ]
@@ -145,6 +155,7 @@ export const SegmentTargetToolbar = ({
                   callback={addMissingSourceTagsToTarget}
                 />
                 {getIconButton({
+                  key: 'copymissingtags',
                   title: `Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`,
                   children: <AddTagsIcon />,
                   onClick: addMissingSourceTagsToTarget,

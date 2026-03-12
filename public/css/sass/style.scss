@@ -702,6 +702,33 @@ ul.suggestion-item.graysmall:last-child {
   overflow: auto;
 }
 
+.tab {
+  .segment-footer-tab-more-button {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: colors.$grey4 !important;
+    color: colors.$grey6 !important;
+    gap: 0;
+    padding-right: 16px !important;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+
+    &:hover {
+      background-color: colors.$grey9 !important;
+    }
+
+    &.segment-footer-tab-more-button-extended-mode {
+      svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .segment-footer-tab-concordance-results {
+    overflow: hidden;
+  }
+}
+
 /*submenu*/
 .submenu {
   background: colors.$white;
@@ -839,6 +866,8 @@ section.loaded .submenu {
 
 .sub-editor.matches .overflow {
   min-height: 50px;
+  max-height: 424px;
+  overflow-y: auto;
 }
 .sub-editor.matches .overflow span.loader {
   bottom: 20px;
