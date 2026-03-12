@@ -11,7 +11,6 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\LoggerFactory;
-use Utils\Logger\MatecatLogger;
 
 /**
  * Top-level manager for job split and merge operations.
@@ -22,8 +21,7 @@ use Utils\Logger\MatecatLogger;
  * storage, segment extraction, TMS, MateCatFilter, etc.).
  *
  * Usage:
- *   $manager = new JobSplitMergeManager();
- *   $manager->loadProject($projectStruct);
+ *   $manager = new JobSplitMergeManager($projectStruct);
  *   $pStruct = $manager->getProjectStructure();
  *   $manager->getSplitData($pStruct, 3);
  *   $manager->applySplit($pStruct);
@@ -45,15 +43,16 @@ class JobSplitMergeManager
     /**
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(ProjectStruct $project)
     {
-        $this->logger = LoggerFactory::getLogger('job_split_merge_manager');
+        $this->logger  = LoggerFactory::getLogger('job_split_merge_manager');
+        $this->project = $project;
 
         $this->projectStructure = new RecursiveArrayObject([
-            'id_project'   => null,
-            'id_customer'  => null,
-            'uid'          => null,
-            'array_jobs'   => [
+            'id_project'          => $project->id,
+            'id_customer'         => $project->id_customer,
+            'uid'                 => null,
+            'array_jobs'          => [
                 'job_list'     => [],
                 'job_pass'     => [],
                 'job_segments' => [],
@@ -63,24 +62,6 @@ class JobSplitMergeManager
             'job_to_split_pass'   => null,
             'job_to_merge'        => null,
         ]);
-
-        $this->features = new FeatureSet();
-    }
-
-    /**
-     * Load a project and reload its feature set.
-     *
-     * This is the equivalent of the old
-     * {@see ProjectManager::setProjectAndReLoadFeatures()} for the
-     * split/merge workflow.
-     *
-     * @throws Exception
-     */
-    public function loadProject(ProjectStruct $project): void
-    {
-        $this->project = $project;
-        $this->projectStructure['id_project']  = $project->id;
-        $this->projectStructure['id_customer'] = $project->id_customer;
 
         $this->features = new FeatureSet();
         $this->features->loadForProject($this->project);

@@ -183,8 +183,7 @@ class SplitJobController extends KleinController
         $count_type = $split_raw_words ? MetadataDao::SPLIT_RAW_WORD_TYPE : MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
         $project_struct = ProjectDao::findByIdAndPassword($project_id, $project_pass, 60 * 60);
 
-        $pManager = new JobSplitMergeManager();
-        $pManager->loadProject($project_struct);
+        $pManager = new JobSplitMergeManager($project_struct);
 
         $pStruct = $pManager->getProjectStructure();
 
