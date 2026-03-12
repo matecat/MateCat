@@ -40,6 +40,8 @@ class SplitMergeProjectData
     /**
      * Result of getSplitData(): chunk boundaries and word counts.
      * Null until getSplitData() populates it.
+     *
+     * @var ArrayObject<string, mixed>|null
      */
     public ?ArrayObject $splitResult = null;
 
@@ -57,7 +59,7 @@ class SplitMergeProjectData
 
     /**
      * Segment ranges keyed by "jobId-password".
-     * @var ArrayObject<string, ArrayObject>
+     * @var ArrayObject<string, mixed>
      */
     public ArrayObject $jobSegments;
 
@@ -77,6 +79,8 @@ class SplitMergeProjectData
      * Plugins receiving `postJobSplitted` / `postJobMerged` expect an
      * ArrayObject with keys like 'id_project', 'array_jobs', etc.
      * This method reconstructs that shape from typed properties.
+     *
+     * @return ArrayObject<string, mixed>
      */
     public function toArrayObject(): ArrayObject
     {

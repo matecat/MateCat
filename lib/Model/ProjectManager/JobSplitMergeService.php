@@ -101,6 +101,8 @@ class JobSplitMergeService
 
     /**
      * Wrapper around static TmKeyManager call — overridable in tests.
+     * @param array<int, string> $tmKeys
+     * @return array<int, mixed> $tmKeys
      * @throws Exception
      */
     protected function getOwnerKeys(array $tmKeys): array
@@ -112,7 +114,7 @@ class JobSplitMergeService
      * Wrapper around static JobDao::updateForMerge() — overridable in tests.
      * @throws Exception
      */
-    protected function updateForMerge(JobStruct $job, string|false $newPassword): void
+    protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
         JobDao::updateForMerge($job, $newPassword);
     }
@@ -175,6 +177,7 @@ class JobSplitMergeService
 
     /**
      * Enqueue a worker job — overridable in tests.
+     * @param array<string, mixed> $data
      */
     protected function enqueueWorker(string $queue, string $workerClass, array $data): void
     {
@@ -200,12 +203,11 @@ class JobSplitMergeService
      * $num_split chunks, either evenly or according to the caller-specified
      * $requestedWordsPerSplit distribution.
      *
-     * @param SplitMergeProjectData $data
      * @param int                   $num_split              Number of chunks (minimum 2)
-     * @param array                 $requestedWordsPerSplit Optional per-chunk word targets
+     * @param array<int, float|int>  $requestedWordsPerSplit Optional per-chunk word targets
      * @param string                $count_type             Which word-count column to use
      *
-     * @return ArrayObject The split result (also stored in $data->splitResult)
+     * @return ArrayObject<string, mixed> The split result (also stored in $data->splitResult)
      *
      * @throws Exception
      */
@@ -227,7 +229,7 @@ class JobSplitMergeService
             throw new Exception("Requested words per chunk available only for Matecat PRO version", -4);
         }
 
-        $rows = $this->createJobDao()->getSplitData($data->jobToSplit, $data->jobToSplitPass);
+        $rows = $this->createJobDao()->getSplitData((int) $data->jobToSplit, (string) $data->jobToSplitPass);
 
         if (empty($rows)) {
             throw new Exception('No segments found for job ' . $data->jobToSplit, -5);
@@ -317,8 +319,8 @@ class JobSplitMergeService
                 $counter[$chunk]['raw_word_count'] = round($row_totals['raw_word_count'] - $reverse_count['raw_word_count']);
             } else {
                 $counter[$chunk - 1]['standard_word_count'] += round($row_totals['standard_word_count'] - $reverse_count['standard_word_count']);
-                $counter[$chunk - 1]['eq_word_count'] += round($row_totals['eq_word_count'] - $reverse_count['eq_word_count']);
-                $counter[$chunk - 1]['raw_word_count'] += round($row_totals['raw_word_count'] - $reverse_count['raw_word_count']);
+                $counter[$chunk - 1]['eq_word_count'] = ($counter[$chunk - 1]['eq_word_count'] ?? 0) + round(($row_totals['eq_word_count'] ?? 0) - $reverse_count['eq_word_count']);
+                $counter[$chunk - 1]['raw_word_count'] = ($counter[$chunk - 1]['raw_word_count'] ?? 0) + round(($row_totals['raw_word_count'] ?? 0) - $reverse_count['raw_word_count']);
             }
         }
 
@@ -326,7 +328,10 @@ class JobSplitMergeService
             throw new Exception('The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7);
         }
 
-        $chunk = $this->getJobByIdAndPassword($data->jobToSplit, $data->jobToSplitPass);
+        $chunk = $this->getJobByIdAndPassword((int) $data->jobToSplit, (string) $data->jobToSplitPass);
+        if ($chunk === null) {
+            throw new Exception('Job not found for id ' . $data->jobToSplit, -5);
+        }
         $row_totals['standard_analysis_count'] = $chunk->standard_analysis_wc;
 
         $result = array_merge($row_totals->getArrayCopy(), ['chunks' => $counter]);
@@ -339,7 +344,6 @@ class JobSplitMergeService
     /**
      * Apply a new structure of the job: empty cart, begin transaction, split, commit.
      *
-     * @param SplitMergeProjectData $data
      * @param int|null              $uid The user ID performing the split (nullable)
      *
      * @throws Exception
@@ -359,7 +363,6 @@ class JobSplitMergeService
      * first/last segments of every chunk, last opened segment as the first segment of the new job,
      * and the timestamp of creation.
      *
-     * @param SplitMergeProjectData $data
      * @param int|null              $uid The user ID performing the split
      *
      * @throws Exception
@@ -370,13 +373,20 @@ class JobSplitMergeService
         $jobDao = $this->createJobDao();
 
         // job to split
-        $jobToSplit = $this->getJobByIdAndPassword($data->jobToSplit, $data->jobToSplitPass);
+        $jobToSplit = $this->getJobByIdAndPassword((int) $data->jobToSplit, (string) $data->jobToSplitPass);
+        if ($jobToSplit === null) {
+            throw new Exception('Job not found for id ' . $data->jobToSplit, -8);
+        }
 
         $translatorModel = $this->createTranslatorsModel($jobToSplit);
         $jTranslatorStruct = $translatorModel->getTranslator(0); // no cache
         if (!empty($jTranslatorStruct) && !empty($uid)) {
+            $userStruct = $this->createUserDao()->setCacheTTL(60 * 60)->getByUid($uid);
+            if ($userStruct === null) {
+                throw new Exception('User not found for uid ' . $uid, -8);
+            }
             $translatorModel
-                ->setUserInvite($this->createUserDao()->setCacheTTL(60 * 60)->getByUid($uid))
+                ->setUserInvite($userStruct)
                 ->setDeliveryDate($jTranslatorStruct->delivery_date)
                 ->setJobOwnerTimezone($jTranslatorStruct->job_owner_timezone)
                 ->setEmail($jTranslatorStruct->email)
@@ -385,10 +395,14 @@ class JobSplitMergeService
             $translatorModel->update();
         }
 
+        if ($data->splitResult === null) {
+            throw new Exception('Split result not available. Call getSplitData() first.', -8);
+        }
+
         $chunks = $data->splitResult['chunks'];
 
         // update the first chunk of the job to split
-        $jobDao->updateStdWcAndTotalWc($jobToSplit->id, $chunks[0]['standard_word_count'], $chunks[0]['raw_word_count']);
+        $jobDao->updateStdWcAndTotalWc((int) $jobToSplit->id, $chunks[0]['standard_word_count'], $chunks[0]['raw_word_count']);
 
         $newJobList = [];
 
@@ -415,7 +429,7 @@ class JobSplitMergeService
             $stmt->execute();
 
             $wCountManager = $this->createCounterModel();
-            $wCountManager->initializeJobWordCount($newJob->id, $newJob->password);
+            $wCountManager->initializeJobWordCount((int) $newJob->id, (string) $newJob->password);
 
             if ($this->dbHandler->rowCount() == 0) {
                 $msg = "Failed to split job into " . count($data->splitResult['chunks']) . " chunks\n";
@@ -431,7 +445,7 @@ class JobSplitMergeService
             unset($stmt);
 
             //add here the job id to list
-            $data->jobList->append($data->jobToSplit);
+            $data->jobList->append((int) $data->jobToSplit);
             //add here passwords to list
             $data->jobPass->append($newJob['password']);
 
@@ -470,7 +484,6 @@ class JobSplitMergeService
     /**
      * Merge all job chunks back into a single job.
      *
-     * @param SplitMergeProjectData $data
      * @param JobStruct[]           $jobStructs
      *
      * @throws Exception
@@ -482,14 +495,18 @@ class JobSplitMergeService
 
         //get the min and
         $first_job = reset($jobStructs);
-        $job_first_segment = $first_job['job_first_segment'];
+        if ($first_job === false) {
+            throw new Exception('No job chunks to merge.', -9);
+        }
 
         //the max segment from the job list
         $last_job = end($jobStructs);
+        if ($last_job === false) {
+            throw new Exception('No job chunks to merge.', -9);
+        }
         $job_last_segment = $last_job['job_last_segment'];
 
         //change values of the first job
-        $first_job['job_first_segment'] = $job_first_segment; // redundant
         $first_job['job_last_segment'] = $job_last_segment;
 
         //get the min and
@@ -533,20 +550,20 @@ class JobSplitMergeService
             $this->updateForMerge($first_job, $this->generateRandomString());
             $this->getCart()->emptyCart();
         } else {
-            $this->updateForMerge($first_job, false);
+            $this->updateForMerge($first_job, '');
         }
 
         $this->deleteOnMerge($first_job);
 
         $wCountManager = $this->createCounterModel();
-        $wCountManager->initializeJobWordCount($first_job['id'], $first_job['password']);
+        $wCountManager->initializeJobWordCount((int) $first_job['id'], (string) $first_job['password']);
 
         $chunk = new JobStruct($first_job->toArray());
         $this->features->run('postJobMerged', $data->toArrayObject(), $chunk);
 
         $jobDao = $this->createJobDao();
 
-        $jobDao->updateStdWcAndTotalWc($first_job['id'], $standard_word_count, $total_raw_wc);
+        $jobDao->updateStdWcAndTotalWc((int) $first_job['id'], $standard_word_count, $total_raw_wc);
 
         $this->dbHandler->commit();
 

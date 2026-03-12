@@ -3,14 +3,11 @@
 namespace Model\ProjectManager;
 
 use ArrayObject;
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use Model\Exceptions\NotFoundException;
-use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FilesPartsDao;
 use Model\Files\FilesPartsStruct;
@@ -21,12 +18,12 @@ use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use Model\Xliff\DTO\XliffRulesModel;
+use RuntimeException;
 use Throwable;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
-use Utils\TaskRunner\Exceptions\EndQueueException;
-use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
 
 /**
@@ -87,9 +84,8 @@ class SegmentExtractor
      * This is the main entry point, equivalent to the former
      * ProjectManager::_extractSegments().
      *
-     * @param int         $fid              File ID
-     * @param array       $file_info        Must contain 'path_cached_xliff' and 'original_filename'
-     * @param ArrayObject $projectStructure The mutable project structure (segments, translations, notes, etc.)
+     * @param array<string, mixed>      $file_info
+     * @param ArrayObject<string, mixed> $projectStructure
      *
      * @throws Exception
      */
@@ -97,10 +93,13 @@ class SegmentExtractor
     {
         $xliff_file_content = $this->getXliffFileContent($file_info['path_cached_xliff']);
 
+        if ($xliff_file_content === false) {
+            throw new RuntimeException("Failed to read XLIFF file: " . $file_info['path_cached_xliff']);
+        }
+
         // create Structure for multiple files
         $projectStructure['segments']->offsetSet($fid, new ArrayObject([]));
         $projectStructure['segments-original-data']->offsetSet($fid, new ArrayObject([]));
-        $projectStructure['file-part-id']->offsetSet($fid, new ArrayObject([]));
         $projectStructure['segments-meta-data']->offsetSet($fid, new ArrayObject([]));
 
         $xliffParser = new XliffParser();
@@ -143,6 +142,9 @@ class SegmentExtractor
      *
      * Handles metadata persistence, file-parts creation, and delegates
      * to the seg-source / non-seg-source trans-unit processing branches.
+     *
+     * @param array<string, mixed>       $xliff_file
+     * @param ArrayObject<string, mixed> $projectStructure
      *
      * @return int Number of segments marked as show-in-cattool in this file element
      * @throws Exception
@@ -224,6 +226,10 @@ class SegmentExtractor
      *
      * Iterates over mrk elements in seg-source, handles pre-translations with
      * unicode entity restoration and trimming, and appends segments.
+     *
+     * @param array<string, mixed>       $xliff_trans_unit
+     * @param array<string, string>      $dataRefMap
+     * @param ArrayObject<string, mixed> $projectStructure
      *
      * @return int Number of show-in-cattool segments produced
      * @throws Exception
@@ -325,6 +331,10 @@ class SegmentExtractor
      * Handles word count, external tag stripping, pre-translation detection,
      * notes/context extraction, and segment creation.
      *
+     * @param array<string, mixed>       $xliff_trans_unit
+     * @param array<string, string>      $dataRefMap
+     * @param ArrayObject<string, mixed> $projectStructure
+     *
      * @return int Number of show-in-cattool segments produced (0 or 1)
      * @throws Exception
      */
@@ -421,7 +431,7 @@ class SegmentExtractor
      *
      * Public static because it is also needed by ProjectManager::_storeSegments().
      */
-    public static function sanitizedUnitId(string $trans_unitID, string $fid): string
+    public static function sanitizedUnitId(string $trans_unitID, int $fid): string
     {
         return $fid . "|" . $trans_unitID;
     }
@@ -431,8 +441,8 @@ class SegmentExtractor
      *
      * Public static because it is also needed by ProjectManager::_insertPreTranslations().
      *
-     * @param array    $trans_unit The parsed trans-unit
-     * @param int|null $position   mrk position (for seg-target), null for non-segmented
+     * @param array<string, mixed> $trans_unit The parsed trans-unit
+     * @param int|null             $position   mrk position (for seg-target), null for non-segmented
      *
      * @return array{state: ?string, state-qualifier: ?string}
      */
@@ -463,6 +473,8 @@ class SegmentExtractor
      * Extract the sizeRestriction value from a trans-unit's attributes.
      *
      * Returns the value as an int if present and > 0, null otherwise.
+     *
+     * @param array<string, mixed> $xliff_trans_unit
      */
     private function getSizeRestrictionValue(array $xliff_trans_unit): ?int
     {
@@ -475,6 +487,8 @@ class SegmentExtractor
 
     /**
      * Build a dataRef map from the trans-unit's original-data entries.
+     *
+     * @param array<string, mixed> $xliff_trans_unit
      *
      * @return array<string, string> Map of data-ref ID to raw content
      */
@@ -500,19 +514,10 @@ class SegmentExtractor
      * unicode entity restoration, trim+strip, isTranslated check, and
      * layer-0 conversion.
      *
-     * @param string $sourceRawContent Source segment after stripExternal
-     * @param string $targetRawContent Target raw content before stripExternal
-     * @param array $xliff_trans_unit The parsed trans-unit
-     * @param int $fid File ID
-     * @param ?int $position mrk position (for seg-target), null for non-segmented
-     * @param ArrayObject $projectStructure The mutable project structure
+     * @param array<string, mixed>       $xliff_trans_unit
+     * @param ArrayObject<string, mixed> $projectStructure
      *
-     * @return ?array{target: string, target_extract_external: array} Null if not a valid pre-translation
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
+     * @return array<string, mixed>|null Null if not a valid pre-translation
      * @throws Exception
      */
     private function detectPreTranslation(
@@ -552,6 +557,10 @@ class SegmentExtractor
      * Build a SegmentStruct, its metadata, and original-data struct, then
      * append everything to the projectStructure arrays and update counters.
      *
+     * @param array<string, mixed>       $xliff_trans_unit
+     * @param array<string, string>      $dataRefMap
+     * @param ArrayObject<string, mixed> $projectStructure
+     *
      * @return array{word_count: float, show_in_cattool: int}
      * @throws Exception
      */
@@ -575,7 +584,7 @@ class SegmentExtractor
         $sizeRestriction = $this->getSizeRestrictionValue($xliff_trans_unit);
         if ($sizeRestriction !== null) {
             $metadataStruct->meta_key   = 'sizeRestriction';
-            $metadataStruct->meta_value = $sizeRestriction;
+            $metadataStruct->meta_value = (string)$sizeRestriction;
         }
         $projectStructure['segments-meta-data'][$fid]->append($metadataStruct);
 
@@ -606,7 +615,7 @@ class SegmentExtractor
         $projectStructure['segments'][$fid]->append($segStruct);
 
         // --- Update counters ---
-        $this->filesWordCount += $wordCount;
+        $this->filesWordCount += (int)$wordCount;
 
         return ['word_count' => $wordCount, 'show_in_cattool' => $showInCattool];
     }
@@ -614,6 +623,8 @@ class SegmentExtractor
     /**
      * Compute a segment hash, incorporating original-data and sizeRestriction
      * when present to avoid collisions.
+     *
+     * @param array<string, string>|null $dataRefMap
      */
     private function createSegmentHash(string $rawContent, ?array $dataRefMap = null, ?int $sizeRestriction = null): string
     {
@@ -625,7 +636,7 @@ class SegmentExtractor
         }
 
         if (!empty($sizeRestriction)) {
-            $segmentToBeHashed .= $segmentToBeHashed . '{"sizeRestriction": ' . $sizeRestriction . '}';
+            $segmentToBeHashed .= '{"sizeRestriction": ' . $sizeRestriction . '}';
         }
 
         return md5($segmentToBeHashed);
@@ -636,25 +647,30 @@ class SegmentExtractor
      *
      * @throws Exception
      */
-    private function getXliffFileContent(string $xliff_file_content): false|string
+    private function getXliffFileContent(string $xliffFilePath): false|string
     {
         if (AbstractFilesStorage::isOnS3()) {
             $s3Client = S3FilesStorage::getStaticS3Client();
 
             if ($s3Client->hasEncoder()) {
-                $xliff_file_content = $s3Client->getEncoder()->decode($xliff_file_content);
+                $encoder = $s3Client->getEncoder();
+                if ($encoder !== null) {
+                    $xliffFilePath = $encoder->decode($xliffFilePath);
+                }
             }
 
-            return $s3Client->openItem(['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliff_file_content]);
+            return $s3Client->openItem(['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliffFilePath]);
         }
 
-        return file_get_contents($xliff_file_content);
+        return file_get_contents($xliffFilePath);
     }
 
     /**
      * Strip external tags from a segment.
      *
      * Currently disabled — always returns the segment unchanged with null prec/succ.
+     *
+     * @return array<string, mixed>
      */
     private function stripExternal(string $segment): array
     {
@@ -667,6 +683,9 @@ class SegmentExtractor
      *
      * Wraps addNotesToProjectStructure() and addTUnitContextsToProjectStructure()
      * with consistent error handling.
+     *
+     * @param array<string, mixed>       $xliff_trans_unit
+     * @param ArrayObject<string, mixed> $projectStructure
      *
      * @throws Exception
      */
@@ -682,6 +701,9 @@ class SegmentExtractor
 
     /**
      * Add notes from a trans-unit to the projectStructure.
+     *
+     * @param array<string, mixed>       $trans_unit
+     * @param ArrayObject<string, mixed> $projectStructure
      *
      * @throws Exception
      */
@@ -735,6 +757,9 @@ class SegmentExtractor
 
     /**
      * Add context-group data from a trans-unit to the projectStructure.
+     *
+     * @param array<string, mixed>       $trans_unit
+     * @param ArrayObject<string, mixed> $projectStructure
      */
     private function addTUnitContextsToProjectStructure(array $trans_unit, int $fid, ArrayObject $projectStructure): void
     {
@@ -751,6 +776,8 @@ class SegmentExtractor
 
     /**
      * Initialize a nested ArrayObject in projectStructure if it does not already exist.
+     *
+     * @param ArrayObject<string, mixed> $projectStructure
      */
     private function initArrayObject(string $key, string $id, ArrayObject $projectStructure): void
     {
@@ -762,6 +789,14 @@ class SegmentExtractor
     /**
      * Decide if a source/target pair should be considered translated,
      * based on user-defined XLIFF rules.
+     *
+     * @param string|null $source
+     * @param string|null $target
+     * @param int|null $file_id
+     * @param string|null $state
+     * @param string|null $stateQualifier
+     * @param ArrayObject<string, mixed> $projectStructure
+     * @return bool
      * @throws Exception
      */
     private function isTranslated(
@@ -780,13 +815,18 @@ class SegmentExtractor
             $stateQualifier
         );
 
-        return $rule->isTranslated($source, $target);
+        return $rule->isTranslated($source ?? '', $target ?? '');
     }
 
     /**
      * Manage alternative translations (alt-trans) for a trans-unit.
      *
      * Sends matching alt-trans entries to the TM engine for each writable key.
+     *
+     * @param array<string, mixed>       $xliff_trans_unit
+     * @param array<string, mixed>|null  $xliff_file_attributes
+     * @param ArrayObject<string, mixed> $projectStructure
+     *
      * @throws Exception
      */
     private function manageAlternativeTranslations(array $xliff_trans_unit, ?array $xliff_file_attributes, ArrayObject $projectStructure): void
@@ -803,14 +843,12 @@ class SegmentExtractor
         }
 
         // set the contribution for every key in the job belonging to the user
-        $engine = EnginesFactory::getInstance(1);
+        $engine = EnginesFactory::getInstance(1, MyMemory::class);
         $config = $engine->getConfigStruct();
 
-        if (count($projectStructure['private_tm_key']) != 0) {
-            foreach ($projectStructure['private_tm_key'] as $tm_info) {
-                if ($tm_info['w'] == 1) {
-                    $config['id_user'][] = $tm_info['key'];
-                }
+        foreach ($projectStructure['private_tm_key'] as $tm_info) {
+            if ($tm_info['w'] == 1) {
+                $config['id_user'][] = $tm_info['key'];
             }
         }
 
@@ -842,11 +880,13 @@ class SegmentExtractor
             $target_extract_external = $this->stripExternal($altTrans['target']); // WIP to remove function
 
             // wrong alt-trans content: source == target
-            if ($source_extract_external['seg'] == $target_extract_external['seg']) {
+            if (is_array($source_extract_external) && isset($source_extract_external['seg']) && $source_extract_external['seg'] == $target_extract_external['seg']) {
                 continue;
             }
 
-            $config['segment']        = $this->filter->fromRawXliffToLayer0($this->filter->fromLayer0ToLayer1($source_extract_external['seg']));
+            $config['segment']        = is_array($source_extract_external) && isset($source_extract_external['seg'])
+                ? $this->filter->fromRawXliffToLayer0($this->filter->fromLayer0ToLayer1($source_extract_external['seg']))
+                : '';
             $config['translation']    = $this->filter->fromRawXliffToLayer0($this->filter->fromLayer0ToLayer1($target_extract_external['seg']));
             $config['context_after']  = null;
             $config['context_before'] = null;

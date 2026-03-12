@@ -13,7 +13,6 @@ use ArrayObject;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use DomainException;
 use Exception;
-use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\PayableRates;
@@ -69,17 +68,14 @@ class ProjectManager
 
     /**
      * Counter from the total number of segments in the project with the flag (show_in_cattool == true)
-     *
-     * @var int
      */
     protected int $show_in_cattool_segs_counter = 0;
     protected int $files_word_count = 0;
     protected int $total_segments = 0;
+    /** @var array<string, int> */
     protected array $min_max_segments_id = [];
 
-    /**
-     * @var ArrayObject
-     */
+    /** @var ArrayObject<string, mixed> */
     protected ArrayObject $projectStructure;
 
     protected TMSService $tmxServiceWrapper;
@@ -92,59 +88,29 @@ class ProjectManager
        1-still checking, but no useful TM for this project have been found, so far (no one matches this project langpair)
      */
 
-    protected Languages $langService;
-
-    /**
-     * @var ProjectStruct
-     */
     protected ProjectStruct $project;
 
-    /**
-     * @var ?Session
-     */
     protected ?Session $gdriveSession = null;
 
-    /**
-     * @var FeatureSet
-     */
     protected FeatureSet $features;
 
     const string TRANSLATED_USER = 'translated_user';
 
-    /**
-     * @var IDatabase
-     */
     protected IDatabase $dbHandler;
 
-    /**
-     * @var MateCatFilter
-     */
     protected MateCatFilter $filter;
 
-    /**
-     * @var MetadataDao
-     */
     protected MetadataDao $filesMetadataDao;
 
     /**
      * Lazily created extractor for segment extraction.
-     * @var SegmentExtractor|null
      */
     protected ?SegmentExtractor $segmentExtractor = null;
 
-    /**
-     * @var TmKeyService|null
-     */
     protected ?TmKeyService $tmKeyService = null;
 
-    /**
-     * @var SegmentStorageService|null
-     */
     protected ?SegmentStorageService $segmentStorageService = null;
 
-    /**
-     * @var ProjectManagerModel|null
-     */
     protected ?ProjectManagerModel $projectManagerModel = null;
 
     /**
@@ -157,12 +123,14 @@ class ProjectManager
     /**
      * ProjectManager constructor.
      *
-     * @param ArrayObject|null $projectStructure
+     * @param ArrayObject<string, mixed>|null $projectStructure
      *
      * @throws Exception
      * @throws NotFoundException
      * @throws AuthenticationError
      * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     public function __construct(ArrayObject $projectStructure = null)
     {
@@ -224,7 +192,7 @@ class ProjectManager
                     'metadata' => [],
                     'id_assignee' => null,
                     'session' => ($_SESSION ?? false),
-                    'instance_id' => (!is_null(AppConfig::$INSTANCE_ID) ? AppConfig::$INSTANCE_ID : 0),
+                    'instance_id' => AppConfig::$INSTANCE_ID,
                     'id_team' => null,
                     'team' => null,
                     'sanitize_project_options' => true,
@@ -261,8 +229,6 @@ class ProjectManager
 
         //get the TMX management component from the factory
         $this->tmxServiceWrapper = new TMSService();
-
-        $this->langService = Languages::getInstance();
 
         $this->dbHandler = Database::obtain();
 
@@ -379,16 +345,14 @@ class ProjectManager
     }
 
     /**
-     * @return array
+     * @return list<BasicFeatureStruct>
      */
     protected function getRequestedFeatures(): array
     {
         $features = [];
         if (count($this->projectStructure['project_features']) != 0) {
             foreach ($this->projectStructure['project_features'] as $key => $feature) {
-                /**
-                 * @var $feature RecursiveArrayObject
-                 */
+                /** @var RecursiveArrayObject $feature */
                 $this->projectStructure['project_features'][$key] = new BasicFeatureStruct($feature->getArrayCopy());
             }
 
@@ -410,7 +374,6 @@ class ProjectManager
     }
 
     /**
-     * @return void
      * @throws Exception
      */
     protected function validateXliffParameters(): void
@@ -426,33 +389,27 @@ class ProjectManager
             }
 
             // when the request comes from the ProjectCreation daemon, it is already an ArrayObject
-            $this->projectStructure['xliff_parameters'] = XliffRulesModel::fromArrayObject($this->projectStructure['xliff_parameters']);
+            /** @var RecursiveArrayObject $xliffParams */
+            $xliffParams = $this->projectStructure['xliff_parameters'];
+            $this->projectStructure['xliff_parameters'] = XliffRulesModel::fromArrayObject($xliffParams);
         } catch (DomainException $ex) {
             $this->addProjectError($ex->getCode(), $ex->getMessage());
             throw $ex;
         }
     }
 
-    /**
-     * @param TeamStruct $team
-     */
     public function setTeam(TeamStruct $team): void
     {
         $this->projectStructure['team'] = $team;
         $this->projectStructure['id_team'] = $team->id;
     }
 
+    /**
+     * @return RecursiveArrayObject|ArrayObject<string, mixed>
+     */
     public function getProjectStructure(): RecursiveArrayObject|ArrayObject
     {
         return $this->projectStructure;
-    }
-
-    /**
-     * Typed, readonly configuration for the creation path.
-     */
-    public function getConfig(): ProjectCreationConfig
-    {
-        return $this->config;
     }
 
     /**
@@ -466,7 +423,7 @@ class ProjectManager
         $featureCodes = $this->features->getCodes();
         if (!empty($featureCodes)) {
             $dao->set(
-                $this->config->idProject,
+                (int) $this->config->idProject,
                 ProjectsMetadataDao::FEATURES_KEY,
                 implode(',', $featureCodes)
             );
@@ -476,22 +433,22 @@ class ProjectManager
     /**
      * @throws ReflectionException
      */
-    protected function saveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
+    protected function saveJobsMetadata(JobStruct $newJob): void
     {
         $jobsMetadataDao = $this->getJobsMetadataDao();
 
         // Simple key-value metadata — read from typed DTO
         if (isset($this->config->publicTmPenalty)) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'public_tm_penalty', $this->config->publicTmPenalty);
+            $jobsMetadataDao->set((int) $newJob->id, (string) $newJob->password, 'public_tm_penalty', (string) $this->config->publicTmPenalty);
         }
         if ($this->config->characterCounterCountTags !== null) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'character_counter_count_tags', $this->config->characterCounterCountTags ? 1 : 0);
+            $jobsMetadataDao->set((int) $newJob->id, (string) $newJob->password, 'character_counter_count_tags', (string) ($this->config->characterCounterCountTags ? 1 : 0));
         }
         if ($this->config->characterCounterMode !== null) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'character_counter_mode', $this->config->characterCounterMode);
+            $jobsMetadataDao->set((int) $newJob->id, (string) $newJob->password, 'character_counter_mode', $this->config->characterCounterMode);
         }
         if ($this->config->tmPrioritization !== null) {
-            $jobsMetadataDao->set($newJob->id, $newJob->password, 'tm_prioritization', $this->config->tmPrioritization ? 1 : 0);
+            $jobsMetadataDao->set((int) $newJob->id, (string) $newJob->password, 'tm_prioritization', (string) ($this->config->tmPrioritization ? 1 : 0));
         }
 
         // dialect_strict — per-language matching logic
@@ -500,7 +457,7 @@ class ProjectManager
 
             foreach ($dialectStrictObj as $lang => $value) {
                 if (trim($lang) === trim($newJob->target)) {
-                    $jobsMetadataDao->set($newJob->id, $newJob->password, 'dialect_strict', $value);
+                    $jobsMetadataDao->set((int) $newJob->id, (string) $newJob->password, 'dialect_strict', (string) $value);
                 }
             }
         }
@@ -511,10 +468,10 @@ class ProjectManager
          * But the analysis must everytime be performed with the current configuration.
          */
         $jobsMetadataDao->set(
-            $newJob->id,
-            $newJob->password,
+            (int) $newJob->id,
+            (string) $newJob->password,
             JobsMetadataDao::SUBFILTERING_HANDLERS,
-            $this->config->subfilteringHandlers
+            (string) $this->config->subfilteringHandlers
         );
     }
 
@@ -592,7 +549,7 @@ class ProjectManager
         if (!empty($options)) {
             foreach ($options as $key => $value) {
                 $dao->set(
-                    $this->config->idProject,
+                    (int) $this->config->idProject,
                     $key,
                     $value
                 );
@@ -606,9 +563,9 @@ class ProjectManager
          * @see ProjectManager::saveJobsMetadata()
          */
         $dao->set(
-            $this->config->idProject,
+            (int) $this->config->idProject,
             JobsMetadataDao::SUBFILTERING_HANDLERS,
-            $this->config->subfilteringHandlers
+            (string) $this->config->subfilteringHandlers
         );
     }
 
@@ -629,9 +586,9 @@ class ProjectManager
     }
 
     /**
-     * @param ArrayObject $options
+     * @param array<string, mixed>|ArrayObject<string, mixed> $options
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     private function sanitizeProjectOptions(array|ArrayObject $options): array
@@ -640,8 +597,8 @@ class ProjectManager
         $sanitizer = new ProjectOptionsSanitizer($optionsArray);
 
         $sanitizer->setLanguages(
-            $this->config->sourceLanguage,
-            $this->config->targetLanguage
+            (string) $this->config->sourceLanguage,
+            array_values($this->config->targetLanguage ?? [])
         );
 
         return $sanitizer->sanitize();
@@ -684,7 +641,7 @@ class ProjectManager
      * Creates record in projects tabele and instantiates the project struct
      * internally.
      *
-     * @throws ReflectionException
+     * @throws ReflectionException|Exception
      */
     private function createProjectRecord(): void
     {
@@ -732,7 +689,6 @@ class ProjectManager
     }
 
     /**
-     * @return void
      * @throws Exception
      * @throws Throwable
      */
@@ -849,7 +805,7 @@ class ProjectManager
     /**
      * Resolve the upload directory from config + upload token, and retrieve file hashes from storage.
      *
-     * @return array The link files structure with conversion hashes and zip hashes.
+     * @return array<string, mixed> The link files structure with conversion hashes and zip hashes.
      */
     private function resolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
     {
@@ -880,6 +836,9 @@ class ProjectManager
     /**
      * For files that don't need conversion, create cache packages and add them to conversionHashes.
      * Downloads from S3 if the file is missing locally.
+     *
+     * @param array<string, mixed> $linkFiles
+     *
      * @throws Exception
      */
     private function cacheNonConvertedFiles(AbstractFilesStorage $fs, array &$linkFiles): void
@@ -898,9 +857,13 @@ class ProjectManager
             }
 
             $sha1 = sha1_file($filePathName);
+            if ($sha1 === false) {
+                $this->addProjectError(-230, "Failed to compute hash for file $fileName");
+                continue;
+            }
 
             try {
-                $fs->makeCachePackage($sha1, $this->config->sourceLanguage, null, $filePathName);
+                $fs->makeCachePackage($sha1, (string) $this->config->sourceLanguage, null, $filePathName);
                 $this->logger->debug("File $fileName converted to cache");
             } catch (Exception $e) {
                 $this->addProjectError(-230, $e->getMessage());
@@ -908,7 +871,7 @@ class ProjectManager
 
             $fs->linkSessionToCacheForAlreadyConvertedFiles(
                 $sha1,
-                $this->config->uploadToken,
+                (string) $this->config->uploadToken,
                 $fileName
             );
 
@@ -921,6 +884,8 @@ class ProjectManager
 
     /**
      * Link zip file hashes to the project. Aborts on failure.
+     *
+     * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
      */
@@ -938,7 +903,9 @@ class ProjectManager
     /**
      * Resolve conversion hashes, validate cached XLIFF files, and insert file records into DB.
      *
-     * @return array The accumulated file structures keyed by file ID.
+     * @param array<string, mixed> $linkFiles
+     *
+     * @return array<int, array<string, mixed>> The accumulated file structures keyed by file ID.
      *
      * @throws EndQueueException
      */
@@ -961,12 +928,12 @@ class ProjectManager
                 continue;
             }
 
-            $cachedXliffFilePathName = $fs->getXliffFromCache($sha1_original, $lang);
+            $cachedXliffFilePathName = $fs->getXliffFromCache($sha1_original, $lang) ?: null;
             $_originalFileNames = $linkFiles['conversionHashes']['fileName'][$linkFile];
 
             try {
                 $this->validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
-                $filesStructure = $this->insertFiles($_originalFileNames, $sha1_original, $cachedXliffFilePathName);
+                $filesStructure = $this->insertFiles($_originalFileNames, $sha1_original, (string) $cachedXliffFilePathName);
 
                 if (count($filesStructure ?: []) === 0) {
                     $this->logger->error('No files inserted in DB', [$_originalFileNames, $sha1_original, $cachedXliffFilePathName]);
@@ -987,6 +954,9 @@ class ProjectManager
     /**
      * Validate that a cached XLIFF file exists and has a valid extension.
      *
+     * @param list<string> $_originalFileNames
+     * @param array<string, mixed> $linkFiles
+     *
      * @throws Exception
      */
     private function validateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
@@ -1000,13 +970,13 @@ class ProjectManager
             if (!$cachedXliffFilePathName) {
                 throw new Exception(sprintf('Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)), -6);
             }
-        } elseif (!file_exists($cachedXliffFilePathName)) {
+        } elseif ($cachedXliffFilePathName === null || !file_exists($cachedXliffFilePathName)) {
             throw new Exception(sprintf('File %s not found on server after upload.', $cachedXliffFilePathName), -6);
         }
 
         $info = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName);
 
-        if (!in_array($info['extension'], ['xliff', 'sdlxliff', 'xlf'])) {
+        if (!in_array($info['extension'] ?? '', ['xliff', 'sdlxliff', 'xlf'])) {
             throw new Exception("Failed to find converted Xliff", -3);
         }
     }
@@ -1048,7 +1018,8 @@ class ProjectManager
      * Extract segments from all files, create project record, store segments, create jobs, and write analysis data.
      * Tolerates individual file extraction failures in multi-file projects.
      *
-     * @param array $totalFilesStructure Modified by reference — failed files are removed.
+     * @param array<int, array<string, mixed>> $totalFilesStructure Modified by reference — failed files are removed.
+     * @param array<string, mixed> $linkFiles
      *
      * @throws EndQueueException
      */
@@ -1162,6 +1133,8 @@ class ProjectManager
     /**
      * Insert file-level instruction notes, matching files back to their original order.
      *
+     * @param array<int, array<string, mixed>> $totalFilesStructure
+     *
      * @throws Exception
      *
      */
@@ -1192,8 +1165,8 @@ class ProjectManager
 
         Database::obtain()->begin();
 
-        (new ProjectDao())->destroyCacheForProjectData($this->config->idProject, $this->config->ppassword);
-        (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData($this->config->idProject, $this->config->ppassword);
+        (new ProjectDao())->destroyCacheForProjectData((int) $this->config->idProject, $this->config->ppassword);
+        (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int) $this->config->idProject, $this->config->ppassword);
 
         $this->features->run('postProjectCreate', $this->projectStructure);
 
@@ -1218,7 +1191,7 @@ class ProjectManager
         try {
             if (AbstractFilesStorage::isOnS3()) {
                 $this->log('Deleting folder' . $this->uploadDir . ' from S3');
-                /** @var $fs S3FilesStorage */
+        /** @var S3FilesStorage $fs */
                 $fs->deleteQueue($this->uploadDir);
             } else {
                 $this->log('Deleting folder' . $this->uploadDir . ' from filesystem');
@@ -1247,11 +1220,11 @@ class ProjectManager
     }
 
     /**
-     * @param $fileName
+     * @param string $fileName
      *
      * @throws Exception
      */
-    public function getSingleS3QueueFile($fileName): void
+    public function getSingleS3QueueFile(string $fileName): void
     {
         $fs = FilesStorageFactory::create();
 
@@ -1259,15 +1232,15 @@ class ProjectManager
             mkdir($this->uploadDir, 0755);
         }
 
-        /** @var $fs S3FilesStorage */
+        /** @var S3FilesStorage $fs */
         $client = $fs::getStaticS3Client();
         $params['bucket'] = AppConfig::$AWS_STORAGE_BASE_BUCKET;
-        $params['key'] = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName($fs->getTheLastPartOfKey($this->uploadDir)) . DIRECTORY_SEPARATOR . $fileName;
+        $params['key'] = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName((string) $fs->getTheLastPartOfKey($this->uploadDir)) . DIRECTORY_SEPARATOR . $fileName;
         $params['save_as'] = "$this->uploadDir/$fileName";
         $client->downloadItem($params);
     }
 
-    private function clearFailedProject(Exception $e): void
+    private function clearFailedProject(Throwable $e): void
     {
         $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
@@ -1286,10 +1259,11 @@ class ProjectManager
             array_reduce(
                 array_keys($this->projectStructure['array_jobs']['job_segments']->getArrayCopy()),
                 function ($acc, $value) {
-                    $acc .= "," . strtr($value, '-', ':');
+                    $acc .= "," . strtr((string) $value, '-', ':');
 
                     return $acc;
-                }
+                },
+                ''
             ),
             ","
         );
@@ -1307,7 +1281,7 @@ class ProjectManager
         }
 
         $fs = FilesStorageFactory::create();
-        $fs::storeFastAnalysisFile($this->project->id, $this->projectStructure['segments_metadata']->getArrayCopy());
+        $fs::storeFastAnalysisFile((string) $this->project->id, $this->projectStructure['segments_metadata']->getArrayCopy());
 
         //free memory
         unset($this->projectStructure['segments_metadata']);
@@ -1318,7 +1292,7 @@ class ProjectManager
         $activity = new ActivityLogStruct();
         $activity->id_project = $this->config->idProject;
         $activity->action = ActivityLogStruct::PROJECT_CREATED;
-        $activity->ip = $this->config->userIp;
+        $activity->ip = $this->config->userIp ?? '';
         $activity->uid = $this->config->uid;
         $activity->event_date = date('Y-m-d H:i:s');
 
@@ -1339,7 +1313,6 @@ class ProjectManager
     }
 
     /**
-     * @return string
      * @throws Exception
      */
     public function getAnalyzeURL(): string
@@ -1360,9 +1333,11 @@ class ProjectManager
     }
 
     /**
+     * @param array<string, mixed> $linkFiles
+     *
      * @throws Exception
      */
-    protected function zipFileHandling($linkFiles): void
+    protected function zipFileHandling(array $linkFiles): void
     {
         $fs = FilesStorageFactory::create();
 
@@ -1371,7 +1346,7 @@ class ProjectManager
             $result = $fs->linkZipToProject(
                 $this->config->createDate,
                 $zipHash,
-                $this->config->idProject
+                (string) $this->config->idProject
             );
 
             if (!$result) {
@@ -1384,6 +1359,8 @@ class ProjectManager
     }
 
     /**
+     * @param ArrayObject<string, mixed> $projectStructure
+     *
      * @throws NotFoundException
      * @throws EndQueueException
      * @throws ReQueueException
@@ -1398,22 +1375,25 @@ class ProjectManager
             // get payable rates from mt_qe_workflow, this takes the priority over the other payable rates
             if ($this->config->mtQeWorkflowPayableRate) {
                 $payableRatesTemplate = null;
-                $payableRates = json_encode($this->config->mtQeWorkflowPayableRate);
+                $payableRates = (string) json_encode($this->config->mtQeWorkflowPayableRate);
             } elseif (isset($this->config->payableRateModel) and !empty($this->config->payableRateModel)) {
                 // get payable rates
                 $payableRatesTemplate = new CustomPayableRateStruct();
-                $payableRatesTemplate->hydrateFromJSON(json_encode($this->config->payableRateModel));
-                $payableRates = $payableRatesTemplate->getPayableRates($this->config->sourceLanguage, $target);
-                $payableRates = json_encode($payableRates);
+                $payableRatesTemplate->hydrateFromJSON((string) json_encode($this->config->payableRateModel));
+                $payableRates = $payableRatesTemplate->getPayableRates((string) $this->config->sourceLanguage, $target);
+                $payableRates = (string) json_encode($payableRates);
             } elseif (isset($this->config->payableRateModelId) and !empty($this->config->payableRateModelId)) {
                 // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById($this->config->payableRateModelId);
-                $payableRates = $payableRatesTemplate->getPayableRates($this->config->sourceLanguage, $target);
-                $payableRates = json_encode($payableRates);
+                if ($payableRatesTemplate === null) {
+                    throw new Exception("Payable rate model not found: {$this->config->payableRateModelId}");
+                }
+                $payableRates = $payableRatesTemplate->getPayableRates((string) $this->config->sourceLanguage, $target);
+                $payableRates = (string) json_encode($payableRates);
             } else {
                 $payableRatesTemplate = null;
-                $payableRates = PayableRates::getPayableRates($this->config->sourceLanguage, $target);
-                $payableRates = json_encode($this->features->filter("filterPayableRates", $payableRates, $this->config->sourceLanguage, $target));
+                $payableRates = PayableRates::getPayableRates((string) $this->config->sourceLanguage, $target);
+                $payableRates = (string) json_encode($this->features->filter("filterPayableRates", $payableRates, $this->config->sourceLanguage, $target));
             }
 
             $password = Utils::randomString();
@@ -1444,15 +1424,15 @@ class ProjectManager
 
             $this->log($this->config->privateTmKey);
 
-            $projectStructure['tm_keys'] = json_encode($tm_key);
+            $projectStructure['tm_keys'] = (string) json_encode($tm_key);
 
             // Replace {{pid}} with project ID for new keys created with an empty name
-            $projectStructure['tm_keys'] = str_replace("{{pid}}", $this->config->idProject, $projectStructure['tm_keys']);
+            $projectStructure['tm_keys'] = str_replace("{{pid}}", (string) $this->config->idProject, (string) $projectStructure['tm_keys']);
 
             $newJob = new JobStruct();
             $newJob->password = $password;
-            $newJob->id_project = $this->config->idProject;
-            $newJob->source = $this->config->sourceLanguage;
+            $newJob->id_project = (int) $this->config->idProject;
+            $newJob->source = (string) $this->config->sourceLanguage;
             $newJob->target = $target;
             $newJob->id_tms = $this->config->tmsEngine ?? 1;
             $newJob->id_mt_engine = $this->config->targetLanguageMtEngineAssociation[$target];
@@ -1462,8 +1442,8 @@ class ProjectManager
             $newJob->owner = $this->config->owner;
             $newJob->job_first_segment = $this->min_max_segments_id['job_first_segment'];
             $newJob->job_last_segment = $this->min_max_segments_id['job_last_segment'];
-            $newJob->tm_keys = $projectStructure['tm_keys'];
-            $newJob->payable_rates = $payableRates;
+            $newJob->tm_keys = (string) $projectStructure['tm_keys'];
+            $newJob->payable_rates = (string) $payableRates;
             $newJob->total_raw_wc = $this->files_word_count;
             $newJob->only_private_tm = (int)$this->config->onlyPrivate;
 
@@ -1476,13 +1456,13 @@ class ProjectManager
             $projectStructure['array_jobs']['job_languages']->offsetSet($newJob->id, $newJob->id . ":" . $target);
             $projectStructure['array_jobs']['payable_rates']->offsetSet($newJob->id, $payableRates);
 
-            $this->saveJobsMetadata($newJob, $projectStructure);
+            $this->saveJobsMetadata($newJob);
 
             try {
                 if (isset($this->config->payableRateModelId) and !empty($this->config->payableRateModelId) and $payableRatesTemplate !== null) {
                     CustomPayableRateDao::assocModelToJob(
                         $this->config->payableRateModelId,
-                        $newJob->id,
+                        (int) $newJob->id,
                         $payableRatesTemplate->version,
                         $payableRatesTemplate->name
                     );
@@ -1498,11 +1478,11 @@ class ProjectManager
             }
 
             foreach ($projectStructure['file_id_list'] as $fid) {
-                FileDao::insertFilesJob($newJob->id, $fid);
+                FileDao::insertFilesJob((int) $newJob->id, $fid);
 
                 if ($this->gdriveSession && $this->gdriveSession->hasFiles()) {
                     $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
-                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, $newJob->id, $client);
+                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int) $newJob->id, $client);
                 }
             }
         }
@@ -1520,19 +1500,11 @@ class ProjectManager
     }
 
     /**
-     * Extract sources and pre-translations from an xliff file and put them in Database
+     * Extract sources and pre-translations from an xliff file and put them in Database.
      *
-     * @param int $fid
-     * @param array $file_info
+     * @param array<string, mixed> $file_info
      *
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ReflectionException
-     * @throws ValidationError
      * @throws Exception
-     *
      */
     protected function extractSegments(int $fid, array $file_info): void
     {
@@ -1545,25 +1517,31 @@ class ProjectManager
      */
     private function syncCountersFromExtractor(): void
     {
-        $extractor                       = $this->getSegmentExtractor();
-        $this->files_word_count          = $extractor->getFilesWordCount();
-        $this->total_segments            = $extractor->getTotalSegments();
+        $extractor                          = $this->getSegmentExtractor();
+        $this->files_word_count             = $extractor->getFilesWordCount();
+        $this->total_segments               = $extractor->getTotalSegments();
         $this->show_in_cattool_segs_counter = $extractor->getShowInCattoolSegsCounter();
     }
 
     /**
-     * @param $_originalFileNames
-     * @param $sha1_original (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
-     * @param $cachedXliffFilePathName (example: 91/7f/7b03c8f54350fb65387bda25fbada43ff7d8!!it-it/work/test_2.txt.sdlxliff)
+     * Insert files into the database, moving them from cache to the file directory.
      *
-     * @return array
+     * @param list<string> $_originalFileNames
+     * @param string       $sha1_original          e.g. 917f7b03c8f54350fb65387bda25fbada43ff7d8
+     * @param string       $cachedXliffFilePathName e.g. 91/7f/...!!it-it/work/test_2.txt.sdlxliff
+     *
+     * @return array<int, array<string, mixed>>
      * @throws Exception
      */
-    protected function insertFiles($_originalFileNames, $sha1_original, $cachedXliffFilePathName): array
+    protected function insertFiles(array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
     {
         $fs = FilesStorageFactory::create();
 
-        $yearMonthPath = date_create($this->config->createDate)->format('Ymd');
+        $createDate = date_create($this->config->createDate);
+        if ($createDate === false) {
+            throw new Exception('Invalid create_date for project');
+        }
+        $yearMonthPath = $createDate->format('Ymd');
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
 
         //return structure
@@ -1573,9 +1551,11 @@ class ProjectManager
             // avoid blank filenames
             if (!empty($originalFileName)) {
                 // get metadata
-                $meta = isset($this->projectStructure['array_files_meta'][$pos]) ? $this->projectStructure['array_files_meta'][$pos] : null;
+                $meta = $this->projectStructure['array_files_meta'][$pos] ?? null;
+                /** @var string $mimeType */
                 $mimeType = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
-                $fid = $this->getProjectManagerModel()->insertFile($this->config->idProject, $this->config->sourceLanguage, $originalFileName, $mimeType, $fileDateSha1Path);
+                $fidStr = $this->getProjectManagerModel()->insertFile((int) $this->config->idProject, (string) $this->config->sourceLanguage, $originalFileName, $mimeType, $fileDateSha1Path);
+                $fid = (int) $fidStr;
 
                 if ($this->gdriveSession) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName($originalFileName);
@@ -1587,8 +1567,8 @@ class ProjectManager
 
                 $moved = $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
-                    $this->config->sourceLanguage,
-                    $fid,
+                    (string) $this->config->sourceLanguage,
+                    $fidStr,
                     $originalFileName
                 );
 
@@ -1601,7 +1581,7 @@ class ProjectManager
 
                 // pdfAnalysis
                 if (!empty($meta['pdfAnalysis'])) {
-                    $this->filesMetadataDao->insert($this->config->idProject, $fid, 'pdfAnalysis', json_encode($meta['pdfAnalysis']));
+                    $this->filesMetadataDao->insert((int) $this->config->idProject, $fid, 'pdfAnalysis', (string) json_encode($meta['pdfAnalysis']));
                 }
 
                 $fileStructures[$fid] = [
@@ -1617,8 +1597,7 @@ class ProjectManager
     }
 
     /**
-     * @param $fid
-     * @param $value
+     * @param array<string, mixed>|string $value
      *
      * @throws AuthenticationError
      * @throws EndQueueException
@@ -1627,34 +1606,23 @@ class ProjectManager
      * @throws ReflectionException
      * @throws ValidationError
      */
-    protected function insertInstructions($fid, $value): void
+    protected function insertInstructions(int $fid, array|string $value): void
     {
         $value = $this->features->filter('decodeInstructions', $value);
 
-        $this->filesMetadataDao->insert($this->config->idProject, $fid, 'instructions', $value);
+        $this->filesMetadataDao->insert((int) $this->config->idProject, $fid, 'instructions', (string) $value);
     }
 
     /**
      * Store segments for a file — delegates to SegmentStorageService.
      * @throws Exception
      */
-    protected function storeSegments($fid): void
+    protected function storeSegments(int $fid): void
     {
         $this->getSegmentStorageService()->storeSegments($fid, $this->projectStructure);
         $this->min_max_segments_id = $this->getSegmentStorageService()->getMinMaxSegmentsId();
     }
 
-    /**
-     * setSegmentIdForNotes
-     *
-     * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one Matecat segment, due to the <mrk> tags.
-     *
-     * Example:
-     * ['notes'][ $internal_id] => array( 'aaa' );
-     * ['notes'][ $internal_id] => array( 'aaa', 'yyy' ); // in case of mrk tags
-     *
-     */
     /**
      * @throws Exception
      */
@@ -1677,7 +1645,7 @@ class ProjectManager
     {
         $this->features->filter('handleTUContextGroups', $this->projectStructure);
         $this->getProjectManagerModel()->bulkInsertContextsGroups(
-            $this->config->idProject,
+            (int) $this->config->idProject,
             (array) $this->projectStructure['context-group'],
         );
     }

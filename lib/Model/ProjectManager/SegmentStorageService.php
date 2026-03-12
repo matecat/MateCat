@@ -83,6 +83,10 @@ class SegmentStorageService
     /**
      * Store segments for a single file: reserve IDs, persist original data
      * and metadata, bulk-insert segment rows, and link IDs to notes/contexts/translations.
+     *
+     * @param string|int                   $fid
+     * @param ArrayObject<string, mixed>   $projectStructure
+     *
      * @throws Exception
      */
     public function storeSegments(string|int $fid, ArrayObject $projectStructure): void
@@ -97,27 +101,26 @@ class SegmentStorageService
 
         // Update/Initialize the min-max sequences id
         if (!isset($this->minMaxSegmentsId['job_first_segment'])) {
-            $this->minMaxSegmentsId['job_first_segment'] = reset($sequenceIds);
+            $this->minMaxSegmentsId['job_first_segment'] = (int) reset($sequenceIds);
         }
 
         // Update the last id; if there is another cycle this value gets overwritten
-        $this->minMaxSegmentsId['job_last_segment'] = end($sequenceIds);
+        $this->minMaxSegmentsId['job_last_segment'] = (int) end($sequenceIds);
 
         $segments_metadata = [];
         foreach ($sequenceIds as $position => $id_segment) {
-            /**
-             * @var $projectStructure['segments'][$fid][$position] \Model\Segments\SegmentStruct
-             */
+            // $projectStructure['segments'][$fid][$position] is a \Model\Segments\SegmentStruct
             $projectStructure['segments'][$fid][$position]->id = $id_segment;
 
-            /** @var ?SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            /** @var SegmentOriginalDataStruct $segmentOriginalDataStruct */
             $segmentOriginalDataStruct = $projectStructure['segments-original-data'][$fid][$position] ?? new SegmentOriginalDataStruct(
             ); // If not set, create an empty struct to be safe. Avoid 'Call to a member function getMap() on null'
 
-            if (!empty($segmentOriginalDataStruct->getMap())) {
+            $originalDataMap = $segmentOriginalDataStruct->getMap();
+            if (!empty($originalDataMap)) {
                 // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
                 // to allow the correct tag handling by the plugins
-                $map = $this->features->filter('sanitizeOriginalDataMap', $segmentOriginalDataStruct->getMap());
+                $map = $this->features->filter('sanitizeOriginalDataMap', $originalDataMap);
 
                 // persist original data map if present
                 $this->insertOriginalDataRecord($id_segment, $map);
@@ -129,10 +132,10 @@ class SegmentStorageService
                 );
             }
 
-            /** @var SegmentMetadataStruct $segmentMetadataStruct */
-            $segmentMetadataStruct = @$projectStructure['segments-meta-data'][$fid][$position];
+            /** @var ?SegmentMetadataStruct $segmentMetadataStruct */
+            $segmentMetadataStruct = $projectStructure['segments-meta-data'][$fid][$position] ?? null;
 
-            if (isset($segmentMetadataStruct) and !empty($segmentMetadataStruct)) {
+            if ($segmentMetadataStruct !== null) {
                 $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
             }
 
@@ -143,7 +146,7 @@ class SegmentStorageService
 
             $_metadata = [
                 'id'                => $id_segment,
-                'internal_id'       => SegmentExtractor::sanitizedUnitId($projectStructure['segments'][$fid][$position]->internal_id, $fid),
+                'internal_id'       => SegmentExtractor::sanitizedUnitId($projectStructure['segments'][$fid][$position]->internal_id, (int)$fid),
                 'segment'           => $projectStructure['segments'][$fid][$position]->segment,
                 'segment_hash'      => $projectStructure['segments'][$fid][$position]->segment_hash,
                 'raw_word_count'    => $projectStructure['segments'][$fid][$position]->raw_word_count,
@@ -247,6 +250,8 @@ class SegmentStorageService
     /**
      * Remove segments with show_in_cattool == false from segments_metadata.
      * Called before inserting pre-translations.
+     *
+     * @param ArrayObject<string, mixed> $projectStructure
      */
     public function cleanSegmentsMetadata(ArrayObject $projectStructure): void
     {
@@ -267,8 +272,8 @@ class SegmentStorageService
      *  - Builds an SQL values array for bulk insert
      *  - Sets the create_2_pass_review flag when a final-state translation is found
      *
-     * @param JobStruct   $job              The job these translations belong to
-     * @param ArrayObject $projectStructure The mutable project structure
+     * @param JobStruct                    $job              The job these translations belong to
+     * @param ArrayObject<string, mixed>   $projectStructure The mutable project structure
      *
      * @throws Exception
      */
@@ -303,9 +308,7 @@ class SegmentStorageService
                     $payable_rates = $projectStructure['array_jobs']['payable_rates'][$jid];
                 }
 
-                /**
-                 * @var $configModel XliffRulesModel
-                 */
+                /** @var XliffRulesModel $configModel */
                 $configModel = $projectStructure['xliff_parameters'];
                 $stateValues = SegmentExtractor::getTargetStatesFromTransUnit($translation_row[4], $position);
 
@@ -320,7 +323,7 @@ class SegmentStorageService
                 }
 
                 // Use QA to get target segment
-                $chunk = $this->getChunksByJobId($jid)[0];
+                $chunk = $this->getChunksByJobId((int)$jid)[0];
                 $source = $segment->segment;
                 $target = $translation_row[2];
 
@@ -372,8 +375,6 @@ class SegmentStorageService
             $projectStructure['create_2_pass_review'] = true;
         }
 
-        //clean translations and queries
-        unset($query_translations_values);
     }
 
     // ── Factory methods (overridable in tests) ──────────────────────
@@ -401,6 +402,9 @@ class SegmentStorageService
     /**
      * Persist an original data map for a segment.
      * Wraps the static DAO call so tests can override.
+     *
+     * @param int                    $id_segment
+     * @param array<string, mixed>   $map
      */
     protected function insertOriginalDataRecord(int $id_segment, array $map): void
     {
@@ -427,13 +431,16 @@ class SegmentStorageService
             isset($metadataStruct->meta_key) and $metadataStruct->meta_key !== '' and
             isset($metadataStruct->meta_value) and $metadataStruct->meta_value !== ''
         ) {
-            $metadataStruct->id_segment = $id_segment;
+            $metadataStruct->id_segment = (string)$id_segment;
             $this->persistSegmentMetadata($metadataStruct);
         }
     }
 
     /**
      * Link segment ID to notes entries for later insertion.
+     *
+     * @param array<string, mixed>         $row
+     * @param ArrayObject<string, mixed>   $projectStructure
      */
     private function setSegmentIdForNotes(array $row, ArrayObject $projectStructure): void
     {
@@ -450,6 +457,9 @@ class SegmentStorageService
 
     /**
      * Link segment ID to context-group entries for later insertion.
+     *
+     * @param array<string, mixed>         $row
+     * @param ArrayObject<string, mixed>   $projectStructure
      */
     private function setSegmentIdForContexts(array $row, ArrayObject $projectStructure): void
     {

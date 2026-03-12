@@ -7,14 +7,19 @@ use Exception;
 class ProjectOptionsSanitizer
 {
 
+    /** @var array<string, mixed> */
     private array $options;
+    /** @var array<string, mixed> */
     private array $sanitized = [];
 
     private ?string $source_lang = null;
-    private ?array $target_lang = [];
+    /** @var list<string> */
+    private array $target_lang = [];
 
+    /** @var list<string> */
     private array $boolean_keys = ['speech2text', 'lexiqa', 'tag_projection'];
 
+    /** @var list<string> */
     public static array $lexiQA_allowed_languages = [
         'af-ZA',
         'sq-AL',
@@ -106,6 +111,8 @@ class ProjectOptionsSanitizer
     ];
     /**
      * All combinations of languages for Tag Projection
+     *
+     * @var array<string, string>
      */
     public static array $tag_projection_allowed_languages = [
         'en-de' => 'English - German',
@@ -165,16 +172,16 @@ class ProjectOptionsSanitizer
     ];
 
 
+    /**
+     * @param array<string, mixed> $input_options
+     */
     public function __construct(array $input_options)
     {
         $this->options = $input_options;
     }
 
     /**
-     * @param string $source
-     * @param array $target
-     *
-     * @throws Exception
+     * @param list<string> $target
      */
     public function setLanguages(string $source, array $target): void
     {
@@ -186,7 +193,7 @@ class ProjectOptionsSanitizer
      * This method populates an array of sanitized input options. Known keys are sanitized.
      * Unknown keys are let as they are and copied to the sanitized array.
      *
-     * @return array
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function sanitize(): array
@@ -260,16 +267,14 @@ class ProjectOptionsSanitizer
     }
 
     /**
-     * @param array $langs
-     *
-     * @return bool
+     * @param list<string> $langs
      * @throws Exception
      */
     private function checkSourceAndTargetAreInCombination(array $langs): bool
     {
         $this->__ensureLanguagesAreSet();
 
-        $all_langs = array_merge($this->target_lang, [$this->source_lang]);
+        $all_langs = array_merge($this->target_lang ?? [], [$this->source_lang]);
         $all_langs = array_unique($all_langs);
         $found = count(array_intersect($langs, $all_langs));
 
@@ -277,6 +282,7 @@ class ProjectOptionsSanitizer
     }
 
     /**
+     * @param array<string, string> $langs
      * @throws Exception
      */
     private function checkSourceAndTargetAreInCombinationForTagProjection(array $langs): bool
@@ -285,9 +291,9 @@ class ProjectOptionsSanitizer
 
         $lang_combination = [];
         $found = false;
-        foreach ($this->target_lang as $value) {
-            $lang_combination[] = explode('-', $value)[0] . '-' . explode('-', $this->source_lang)[0];
-            $lang_combination[] = explode('-', $this->source_lang)[0] . '-' . explode('-', $value)[0];
+        foreach ($this->target_lang ?? [] as $value) {
+            $lang_combination[] = explode('-', $value)[0] . '-' . explode('-', $this->source_lang ?? '')[0];
+            $lang_combination[] = explode('-', $this->source_lang ?? '')[0] . '-' . explode('-', $value)[0];
         }
 
         foreach ($lang_combination as $langPair) {
@@ -305,7 +311,7 @@ class ProjectOptionsSanitizer
      */
     private function __ensureLanguagesAreSet(): void
     {
-        if (is_null($this->target_lang) || empty($this->source_lang)) {
+        if (empty($this->target_lang) || empty($this->source_lang)) {
             throw  new Exception('Trying to sanitize options, but languages are not set');
         }
     }

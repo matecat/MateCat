@@ -16,9 +16,10 @@ use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use PDOException;
+use PDOStatement;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
-use ReflectionException;
+use RuntimeException;
 use Utils\Logger\MatecatLogger;
 use Utils\Tools\Utils;
 
@@ -38,13 +39,6 @@ class ProjectManagerModel
      * Creates a record in the projects table and instantiates the project struct
      * internally.
      *
-     * @param ProjectCreationConfig $config  Typed init-only configuration
-     * @param int|null              $idTeam     Set by controller via setTeam()
-     * @param string                $status     Pipeline status at creation time
-     * @param int|null              $idAssignee Set by checkForProjectAssignment()
-     *
-     * @return ProjectStruct
-     * @throws ReflectionException
      * @throws Exception
      */
     public function createProjectRecord(ProjectCreationConfig $config, ?int $idTeam, string $status, ?int $idAssignee): ProjectStruct
@@ -68,21 +62,17 @@ class ProjectManagerModel
         $project = ProjectDao::findById($projectId);
         $this->dbHandler->commit();
 
+        if ($project === null) {
+            throw new RuntimeException("Failed to retrieve project after insert (id: $projectId)");
+        }
+
         return $project;
     }
 
     /**
-     * @param int         $idProject
-     * @param string      $sourceLanguage
-     * @param string      $file_name
-     * @param string      $mime_type
-     * @param string      $fileDateSha1Path
-     * @param ArrayObject|null $meta
-     *
-     * @return string
      * @throws Exception
      */
-    public function insertFile(int $idProject, string $sourceLanguage, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null): string
+    public function insertFile(int $idProject, string $sourceLanguage, string $file_name, string $mime_type, string $fileDateSha1Path): string
     {
         $data = [];
         $data['id_project'] = $idProject;
@@ -90,7 +80,7 @@ class ProjectManagerModel
         $data['source_language'] = $sourceLanguage;
         $data['mime_type'] = $mime_type;
         $data['sha1_original_file'] = $fileDateSha1Path;
-        $data['is_converted'] = isset($meta['mustBeConverted']) ? (int)$meta['mustBeConverted'] : 0;
+        $data['is_converted'] = 0;
 
         try {
             $idFile = $this->dbHandler->insert('files', $data);
@@ -103,10 +93,11 @@ class ProjectManagerModel
     }
 
     /**
-     * @param $query_translations_values
-     * @throws Exception
+     * @param list<array<string, mixed>> $query_translations_values
+     * @param-out list<list<array<string, mixed>>> $query_translations_values
+     * @throws PDOException
      */
-    public function insertPreTranslations(&$query_translations_values): void
+    public function insertPreTranslations(array &$query_translations_values): void
     {
         $baseQuery = "
                 INSERT INTO segment_translations (
@@ -147,17 +138,17 @@ class ProjectManagerModel
                 $this->log("Pre-Translations: Executed Query " . ($i + 1));
             } catch (PDOException $e) {
                 $this->log("Segment import - DB Error: " . $e->getMessage() . " - \n", $e);
-                throw new PDOException("Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2);
+                throw new PDOException("Translations Segment import - DB Error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
             }
         }
     }
 
     /**
-     * @param $notes
+     * @param array<int, array<string, mixed>>|ArrayObject<int, array<string, mixed>> $notes
      *
      * @throws Exception
      */
-    public function bulkInsertSegmentNotes($notes): void
+    public function bulkInsertSegmentNotes(array|ArrayObject $notes): void
     {
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES ";
 
@@ -211,6 +202,8 @@ class ProjectManagerModel
         $this->log("Notes: Total Rows to insert: " . count($chunked));
 
         $conn = $this->dbHandler->getConnection();
+        $stmt = null;
+        $flattened_values = [];
 
         try {
             foreach ($chunked as $i => $chunk) {
@@ -222,7 +215,7 @@ class ProjectManagerModel
             }
         } catch (Exception $e) {
             $this->log("Notes import - DB Error: " . $e->getMessage());
-            $this->log("Notes import - Statement: " . $stmt->queryString);
+            $this->log("Notes import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
             $this->log("Notes Chunk Dump: " . var_export($chunk, true));
             $this->log("Notes Flattened Values Dump: " . var_export($flattened_values, true));
             throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);
@@ -230,11 +223,11 @@ class ProjectManagerModel
     }
 
     /**
-     * @param $notes
+     * @param array<int, array<string, mixed>>|ArrayObject<int, array<string, mixed>> $notes
      *
      * @throws Exception
      */
-    public function bulkInsertSegmentMetaDataFromAttributes($notes): void
+    public function bulkInsertSegmentMetaDataFromAttributes(array|ArrayObject $notes): void
     {
         $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
 
@@ -280,6 +273,8 @@ class ProjectManagerModel
         $this->log("Notes attributes: Total Rows to insert: " . count($chunked));
 
         $conn = $this->dbHandler->getConnection();
+        $stmt = null;
+        $flattened_values = [];
 
         try {
             foreach ($chunked as $i => $chunk) {
@@ -291,7 +286,7 @@ class ProjectManagerModel
             }
         } catch (Exception $e) {
             $this->log("Notes attributes import - DB Error: " . $e->getMessage());
-            $this->log("Notes attributes import - Statement: " . $stmt->queryString);
+            $this->log("Notes attributes import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
             $this->log("Notes attributes Chunk Dump: " . var_export($chunk, true));
             $this->log("Notes attributes Flattened Values Dump: " . var_export($flattened_values, true));
             throw new Exception("Notes attributes import - DB Error: " . $e->getMessage(), 0, $e);
@@ -299,11 +294,10 @@ class ProjectManagerModel
     }
 
     /**
-     * @param $metaKey
-     *
+     * @param string $metaKey
      * @return bool
      */
-    private static function isAMetadata($metaKey): bool
+    private static function isAMetadata(string $metaKey): bool
     {
         $metaDataKeys = [
             'id_request',
@@ -317,8 +311,7 @@ class ProjectManagerModel
     }
 
     /**
-     * @param int   $idProject
-     * @param array $contextGroups
+     * @param array<int, array<string, mixed>> $contextGroups
      *
      * @throws Exception
      */
@@ -342,6 +335,8 @@ class ProjectManagerModel
         $this->log("Notes: Total Rows to insert: " . count($chunked));
 
         $conn = $this->dbHandler->getConnection();
+        $stmt = null;
+        $flattened_values = [];
 
         try {
             foreach ($chunked as $i => $chunk) {
@@ -353,7 +348,7 @@ class ProjectManagerModel
             }
         } catch (Exception $e) {
             $this->log("Trans-Unit Context Groups import - DB Error: " . $e->getMessage());
-            $this->log("Trans-Unit Context Groups import - Statement: " . $stmt->queryString);
+            $this->log("Trans-Unit Context Groups import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
             $this->log("Trans-Unit Context Groups Chunk Dump: " . var_export($chunk, true));
             $this->log("Trans-Unit Context Groups Flattened Values Dump: " . var_export($flattened_values, true));
             throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);

@@ -211,7 +211,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function callSaveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
     {
-        $this->saveJobsMetadata($newJob, $projectStructure);
+        $this->saveJobsMetadata($newJob);
     }
 
     // ── Step 11b: setters / getters / config methods testing support ──

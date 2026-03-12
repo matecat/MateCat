@@ -116,6 +116,8 @@ class ProjectCreationConfig
      * This is the primary factory path during Phase 2: the ProjectManager
      * constructor extracts a `ProjectCreationConfig` from the existing
      * ArrayObject while keeping backward compatibility.
+     *
+     * @param ArrayObject<string, mixed> $ps
      */
     public static function fromArrayObject(ArrayObject $ps): self
     {
@@ -132,7 +134,7 @@ class ProjectCreationConfig
             projectName:    $ps['project_name'] ?? null,
             sourceLanguage: $ps['source_language'] ?? null,
             targetLanguage: isset($ps['target_language'])
-                ? (is_array($ps['target_language']) ? $ps['target_language'] : (array) $ps['target_language'])
+                ? array_values(is_array($ps['target_language']) ? $ps['target_language'] : (array) $ps['target_language'])
                 : null,
             jobSubject:     (string) ($ps['job_subject'] ?? 'general'),
             dueDate:        $ps['due_date'] ?? null,
@@ -189,6 +191,13 @@ class ProjectCreationConfig
         );
     }
 
+    /**
+     * @param list<string>|null         $targetLanguage
+     * @param array<string, mixed>      $metadata
+     * @param array<string, mixed>|null $instructions
+     * @param array<string, int>        $targetLanguageMtEngineAssociation
+     * @param array<string, mixed>      $dynamicEngineParams
+     */
     public function __construct(
         // Identity
         ?int    $idProject    = null,

@@ -69,12 +69,9 @@ class JobSplitMergeManager
      *
      * Delegates to {@see JobSplitMergeService::getSplitData()}.
      *
-     * @param SplitMergeProjectData $data
-     * @param int $num_split
-     * @param array $requestedWordsPerSplit Matecat Equivalent Words (Only valid for Pro Version)
-     * @param string $count_type
+     * @param list<int> $requestedWordsPerSplit Matecat Equivalent Words (Only valid for Pro Version)
      *
-     * @return ArrayObject
+     * @return ArrayObject<string, mixed>
      *
      * @throws Exception
      */
@@ -92,8 +89,6 @@ class JobSplitMergeManager
      *
      * Delegates to {@see JobSplitMergeService::applySplit()}.
      *
-     * @param SplitMergeProjectData $data
-     *
      * @throws Exception
      */
     public function applySplit(SplitMergeProjectData $data): void
@@ -106,7 +101,6 @@ class JobSplitMergeManager
      *
      * Delegates to {@see JobSplitMergeService::mergeALL()}.
      *
-     * @param SplitMergeProjectData $data
      * @param JobStruct[] $jobStructs
      *
      * @throws Exception

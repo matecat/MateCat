@@ -519,7 +519,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $calls = $this->service->getUpdateForMergeCalls();
         $this->assertCount(1, $calls);
-        $this->assertFalse($calls[0]['newPassword']);
+        $this->assertSame('', $calls[0]['newPassword']);
     }
 
     /**

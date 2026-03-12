@@ -224,13 +224,13 @@ class TestableJobSplitMergeService extends JobSplitMergeService
 
     // ── updateForMerge / deleteOnMerge ──
 
-    protected function updateForMerge(JobStruct $job, string|false $newPassword): void
+    protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
         $this->updateForMergeCalls[] = ['job' => $job, 'newPassword' => $newPassword];
     }
 
     /**
-     * @return array{job: JobStruct, newPassword: string|false}[]
+     * @return array{job: JobStruct, newPassword: string}[]
      */
     public function getUpdateForMergeCalls(): array
     {
