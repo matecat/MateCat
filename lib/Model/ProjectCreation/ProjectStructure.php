@@ -50,7 +50,7 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     // TM/MT configuration
     public ?int    $mt_engine = null;
     public ?int    $tms_engine = null;
-    public mixed   $private_tm_key = [];
+    public array   $private_tm_key = [];
     public int     $pretranslate_100 = 0;
     public int     $pretranslate_101 = 1;
     public int     $only_private = 0;
@@ -122,10 +122,6 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public array $segments_metadata = [];
     /** @var array<int, array<int, mixed>> */
     public array $segments_meta_data = [];
-    /** @var array<int, mixed> */
-    public array $file_part_id = [];
-    /** @var array<int, mixed> */
-    public array $file_metadata = [];
     /** @var array<int, mixed> */
     public array $translations = [];
     /** @var array<int, mixed> */

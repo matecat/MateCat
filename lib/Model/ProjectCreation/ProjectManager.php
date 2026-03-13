@@ -1170,7 +1170,7 @@ class ProjectManager
         }
 
         $fs = FilesStorageFactory::create();
-        $fs::storeFastAnalysisFile((string) $this->project->id, (array) $this->projectStructure->segments_metadata);
+        $fs::storeFastAnalysisFile((string) $this->project->id, $this->projectStructure->segments_metadata);
 
         //free memory
         $this->projectStructure->segments_metadata = [];

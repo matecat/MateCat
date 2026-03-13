@@ -8,7 +8,6 @@
 
 namespace Model\ConnectedServices\GDrive;
 
-use ArrayObject;
 use DirectoryIterator;
 use Exception;
 use FilesystemIterator;
@@ -218,9 +217,6 @@ class Session
     {
         if (is_null($this->token)) {
             if ($this->session['user'] !== null) {
-                if ($this->session['user'] instanceof ArrayObject) { // comes from CLI (ProjectManager)
-                    $this->session['user'] = new UserStruct($this->session['user']->getArrayCopy());
-                }
                 $this->token = $this->getTokenByUser($this->session['user']);
             }
         }

@@ -35,9 +35,8 @@ use Utils\Tools\Utils;
  *  - Merging all chunks back into a single job
  *
  * All mutations are performed on the {@see SplitMergeProjectData} DTO passed
- * to the public methods. FeatureSet hooks receive an ArrayObject snapshot
- * via {@see SplitMergeProjectData::toArrayObject()} for backward compatibility
- * with external plugins.
+ * to the public methods. FeatureSet hooks receive the SplitMergeProjectData
+ * directly.
  */
 class JobSplitMergeService
 {

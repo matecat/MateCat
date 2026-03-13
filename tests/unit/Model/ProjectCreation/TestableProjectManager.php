@@ -70,8 +70,6 @@ class TestableProjectManager extends ProjectManager
             'segments' => [],
             'segments_original_data' => [],
             'segments_meta_data' => [],
-            'file_part_id' => [],
-            'file_metadata' => [],
             'translations' => [],
             'notes' => [],
             'context_group' => [],

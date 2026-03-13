@@ -39,7 +39,7 @@ use Utils\Tools\CatUtils;
  *  - Computing segment hashes
  *  - Tracking word count and segment counters
  *
- * All mutations to projectStructure are performed on the ArrayObject passed
+ * All mutations to projectStructure are performed on the ProjectStructure DTO passed
  * to {@see extract()}, which is the same mutable structure used by ProjectManager.
  */
 class SegmentExtractor

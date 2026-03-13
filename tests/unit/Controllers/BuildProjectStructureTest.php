@@ -106,7 +106,7 @@ class BuildProjectStructureTest extends AbstractTest
         return array_merge([
             'project_name'                          => 'Test Project',
             'subject'                               => 'general',
-            'private_tm_key'                        => 0,
+            'private_tm_key'                        => [],
             'tm_prioritization'                     => null,
             'source_lang'                           => 'en-US',
             'target_lang'                           => 'fr-FR,de-DE',
@@ -504,7 +504,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsPrivateTmKey(): void
     {
         $request = $this->makeNewControllerRequest([
-            'private_tm_key' => 'abc-key-123',
+            'private_tm_key' => [['key' => 'abc-key-123', 'name' => 'My TM']],
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -516,7 +516,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('abc-key-123', $ps->private_tm_key);
+        $this->assertSame([['key' => 'abc-key-123', 'name' => 'My TM']], $ps->private_tm_key);
     }
 
     #[Test]
@@ -1160,7 +1160,7 @@ class BuildProjectStructureTest extends AbstractTest
     {
         return array_merge([
             'project_name'                          => 'Created Project',
-            'private_tm_key'                        => 0,
+            'private_tm_key'                        => [],
             'source_lang'                           => 'en-US',
             'target_lang'                           => 'it-IT',
             'job_subject'                           => 'general',
@@ -1494,7 +1494,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsPrivateTmKey(): void
     {
         $data = $this->makeCreateControllerData([
-            'private_tm_key' => 'my-secret-key',
+            'private_tm_key' => [['key' => 'my-secret-key', 'name' => 'Secret TM']],
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1508,7 +1508,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('my-secret-key', $ps->private_tm_key);
+        $this->assertSame([['key' => 'my-secret-key', 'name' => 'Secret TM']], $ps->private_tm_key);
     }
 
     #[Test]

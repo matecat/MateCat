@@ -16,7 +16,7 @@ use TestHelpers\AbstractTest;
  *  - T2:      tm_keys type consistency (stays array, not re-assigned as JSON string)
  *  - D1:      GDrive Session dead code (session['user'] is never ArrayObject after toArray)
  *  - D3:      getRequestedFeatures dead code (project_features elements are never ArrayObject)
- *  - D5:      Unused properties file_part_id / file_metadata stay at default through pipeline
+ *  - D5:      Removed properties file_part_id / file_metadata verified as gone
  *  - N3/N4:   TmKeyService fragility with empty private_tm_key
  *  - Serialization round-trip through toArray() → new ProjectStructure()
  */
@@ -450,57 +450,32 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     }
 
     // ──────────────────────────────────────────────────────────────
-    // D5: Unused properties — file_part_id and file_metadata
+    // D5: Removed properties — file_part_id and file_metadata
     //
-    // These have no read/write sites and should stay at default []
-    // through a typical pipeline.
+    // These properties were removed from ProjectStructure because
+    // they had zero production reads/writes. Verify they are gone.
     // ──────────────────────────────────────────────────────────────
 
     #[Test]
-    public function filePartIdDefaultIsEmptyArray(): void
+    public function filePartIdPropertyWasRemoved(): void
     {
         $ps = new ProjectStructure();
 
-        self::assertIsArray($ps->file_part_id);
-        self::assertEmpty($ps->file_part_id);
+        $this->expectException(\DomainException::class);
+        $this->expectExceptionMessage('Unknown property');
+
+        $ps->file_part_id = [];
     }
 
     #[Test]
-    public function fileMetadataDefaultIsEmptyArray(): void
+    public function fileMetadataPropertyWasRemoved(): void
     {
         $ps = new ProjectStructure();
 
-        self::assertIsArray($ps->file_metadata);
-        self::assertEmpty($ps->file_metadata);
-    }
+        $this->expectException(\DomainException::class);
+        $this->expectExceptionMessage('Unknown property');
 
-    #[Test]
-    public function unusedPropertiesStayAtDefaultThroughTypicalPipeline(): void
-    {
-        // Simulate typical pipeline: set the properties that actually get used,
-        // leave file_part_id and file_metadata untouched.
-        $ps = new ProjectStructure([
-            'id_project'      => 123,
-            'project_name'    => 'Test Project',
-            'source_language' => 'en-US',
-            'target_language' => ['it-IT', 'fr-FR'],
-            'private_tm_key'  => [['key' => 'abc', 'name' => 'TM']],
-            'array_files'     => ['doc.xlf'],
-            'array_files_meta' => [['extension' => 'xlf']],
-        ]);
-
-        // file_part_id and file_metadata remain at default
-        self::assertEmpty($ps->file_part_id);
-        self::assertEmpty($ps->file_metadata);
-
-        // Even after toArray round-trip
-        $arr = $ps->toArray();
-        self::assertEmpty($arr['file_part_id']);
-        self::assertEmpty($arr['file_metadata']);
-
-        $ps2 = new ProjectStructure($arr);
-        self::assertEmpty($ps2->file_part_id);
-        self::assertEmpty($ps2->file_metadata);
+        $ps->file_metadata = [];
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -791,8 +766,6 @@ class AuditCleanupAndPluginsTest extends AbstractTest
         self::assertSame([], $restored->tm_keys);
         self::assertSame([], $restored->project_features);
         self::assertEmpty($restored->notes);
-        self::assertEmpty($restored->file_part_id);
-        self::assertEmpty($restored->file_metadata);
         self::assertNull($restored->session);
         self::assertSame(['errors' => [], 'data' => []], $restored->result);
         self::assertFalse($restored->create_2_pass_review);
