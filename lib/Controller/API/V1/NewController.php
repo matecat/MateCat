@@ -33,7 +33,9 @@ use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao;
+use Model\Users\UserStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -47,6 +49,7 @@ use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
@@ -143,24 +146,104 @@ class NewController extends KleinController
         $filesFound = $this->getFilesList(FilesStorageFactory::create(), $arFiles, $uploadDir);
 
         $projectManager = new ProjectManager();
-        $projectStructure = $projectManager->getProjectStructure();
+        $engine = EnginesFactory::getInstance($request['mt_engine']);
+
+        $projectStructure = $this->buildProjectStructure(
+            $request,
+            $filesFound,
+            $uploadFile->getDirUploadToken(),
+            $this->user,
+            $engine,
+        );
+
+        $projectManager->setProjectStructure($projectStructure);
+        $projectManager->setTeam($request['team']);
+        $projectManager->sanitizeProjectStructure();
+
+        $fs::moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
+
+        //reserve a project id from the sequence
+        $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure['ppassword'] = Utils::randomString();
+
+        // flag to mark the project "from API"
+        $projectStructure['from_api'] = true;
+
+        ProjectQueue::sendProject($projectStructure);
+
+        $result['errors'] = $this->pollForCreationResult($projectStructure);
+
+        if ($result == null) {
+            throw new TimeoutException('Project Creation Failure');
+        }
+
+        if (!empty($result['errors'])) {
+            throw new RuntimeException('Project Creation Failure');
+        }
+
+        $this->response->json([
+            'status' => 'OK',
+            'message' => 'Success',
+            'id_project' => $projectStructure['id_project'],
+            'project_pass' => $projectStructure['ppassword'],
+            'new_keys' => $request['new_keys'],
+            'analyze_url' => $projectManager->getAnalyzeURL()
+        ]);
+    }
+
+    /**
+     * @param $projectStructure
+     *
+     * @return array
+     */
+    private function pollForCreationResult($projectStructure): array
+    {
+        return $projectStructure['result']['errors'];
+    }
+
+    /**
+     * Build a {@see ProjectStructure} from a validated request array.
+     *
+     * This method performs the pure mapping from the validated request data
+     * (produced by {@see validateTheRequest()}) to a ProjectStructure DTO.
+     * Side-effecting operations (database sequence, random password, queue
+     * submission, project sanitization) are intentionally left in
+     * {@see create()}.
+     *
+     * @param array          $request     Validated request data from validateTheRequest()
+     * @param array          $filesFound  Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param string         $uploadToken Upload directory token
+     * @param UserStruct     $user        Authenticated user
+     * @param AbstractEngine $engine      MT engine instance (for getConfigurationParameters())
+     *
+     * @return ProjectStructure
+     */
+    protected function buildProjectStructure(
+        array $request,
+        array $filesFound,
+        string $uploadToken,
+        UserStruct $user,
+        AbstractEngine $engine,
+    ): ProjectStructure {
+        $projectStructure = new ProjectStructure();
+
         $projectStructure['sanitize_project_options'] = false;
         $projectStructure['project_name'] = $request['project_name'];
         $projectStructure['job_subject'] = $request['subject'];
         $projectStructure['private_tm_key'] = $request['private_tm_key'];
         $projectStructure['tm_prioritization'] = $request['tm_prioritization'];
-        $projectStructure['uploadToken'] = $uploadFile->getDirUploadToken();
-        $projectStructure['array_files'] = $filesFound['arrayFiles']; //list of file names
-        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta']; //list of file metadata
+        $projectStructure['uploadToken'] = $uploadToken;
+        $projectStructure['array_files'] = $filesFound['arrayFiles'];
+        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta'];
         $projectStructure['source_language'] = $request['source_lang'];
         $projectStructure['target_language'] = explode(',', $request['target_lang']);
         $projectStructure['mt_engine'] = $request['mt_engine'];
         $projectStructure['tms_engine'] = $request['tms_engine'];
         $projectStructure['status'] = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure['owner'] = $this->user->email;
+        $projectStructure['owner'] = $user->email;
         $projectStructure['metadata'] = $request['metadata'];
         $projectStructure['public_tm_penalty'] = $request['public_tm_penalty'];
-        $projectStructure['pretranslate_100'] = (int)!!$request['pretranslate_100']; // Force pretranslate_100 to be 0 or 1
+        $projectStructure['pretranslate_100'] = (int)!!$request['pretranslate_100'];
         $projectStructure['pretranslate_101'] = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
 
         //default gets all public matches from TM
@@ -174,9 +257,8 @@ class NewController extends KleinController
         $projectStructure['target_language_mt_engine_association'] = $request['target_language_mt_engine_association'];
         $projectStructure['instructions'] = $request['instructions'];
         $projectStructure['userIsLogged'] = true;
-        $projectStructure['uid'] = $this->user->getUid();
-        $projectStructure['id_customer'] = $this->user->getEmail();
-        $projectManager->setTeam($request['team']);
+        $projectStructure['uid'] = $user->getUid();
+        $projectStructure['id_customer'] = $user->getEmail();
 
         $projectStructure['character_counter_mode'] = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
         $projectStructure['character_counter_count_tags'] = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
@@ -199,8 +281,6 @@ class NewController extends KleinController
         }
 
         // MT Extra params
-        $engine = EnginesFactory::getInstance($request['mt_engine']);
-
         foreach ($engine->getConfigurationParameters() as $param) {
             if ($request[$param] !== null) {
                 $projectStructure[$param] = $request[$param];
@@ -243,47 +323,7 @@ class NewController extends KleinController
         //set features override
         $projectStructure['project_features'] = $request['project_features'];
 
-        $projectManager->sanitizeProjectStructure();
-
-        $fs::moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
-
-        //reserve a project id from the sequence
-        $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
-        $projectStructure['ppassword'] = Utils::randomString();
-
-        // flag to mark the project "from API"
-        $projectStructure['from_api'] = true;
-
-        ProjectQueue::sendProject($projectStructure);
-
-        $result['errors'] = $this->pollForCreationResult($projectStructure);
-
-        if ($result == null) {
-            throw new TimeoutException('Project Creation Failure');
-        }
-
-        if (!empty($result['errors'])) {
-            throw new RuntimeException('Project Creation Failure');
-        }
-
-        $this->response->json([
-            'status' => 'OK',
-            'message' => 'Success',
-            'id_project' => $projectStructure['id_project'],
-            'project_pass' => $projectStructure['ppassword'],
-            'new_keys' => $request['new_keys'],
-            'analyze_url' => $projectManager->getAnalyzeURL()
-        ]);
-    }
-
-    /**
-     * @param $projectStructure
-     *
-     * @return array
-     */
-    private function pollForCreationResult($projectStructure): array
-    {
-        return $projectStructure['result']['errors'];
+        return $projectStructure;
     }
 
     /**

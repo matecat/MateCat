@@ -20,15 +20,18 @@ use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Model\Xliff\XliffConfigTemplateStruct;
 use Plugins\Features\ProjectCompletion;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
@@ -104,75 +107,22 @@ class CreateProjectController extends AbstractStatefulKleinController
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
         $projectManager = new ProjectManager();
-        $projectStructure = $projectManager->getProjectStructure();
-
-        $projectStructure['project_name'] = $this->data['project_name'];
-        $projectStructure['private_tm_key'] = $this->data['private_tm_key'];
-        $projectStructure['uploadToken'] = $_COOKIE['upload_token'];
-        $projectStructure['array_files'] = $filesFound['arrayFiles']; //list of file names
-        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta']; //list of file metadata
-        $projectStructure['source_language'] = $this->data['source_lang'];
-        $projectStructure['target_language'] = explode(',', $this->data['target_lang']);
-        $projectStructure['job_subject'] = $this->data['job_subject'];
-        $projectStructure['mt_engine'] = $this->data['mt_engine'];
-        $projectStructure['tms_engine'] = $this->data['tms_engine'] ?? 1;
-        $projectStructure['status'] = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure['public_tm_penalty'] = $this->data['public_tm_penalty'];
-        $projectStructure['pretranslate_100'] = $this->data['pretranslate_100'];
-        $projectStructure['pretranslate_101'] = $this->data['pretranslate_101'];
-        $projectStructure['dialect_strict'] = $this->data['dialect_strict'];
-        $projectStructure['only_private'] = $this->data['only_private'];
-        $projectStructure['due_date'] = $this->data['due_date'];
-        $projectStructure['target_language_mt_engine_association'] = $this->data['target_language_mt_engine_association'];
-        $projectStructure['user_ip'] = Utils::getRealIpAddr();
-        $projectStructure['HTTP_HOST'] = AppConfig::$HTTPHOST;
-        $projectStructure['tm_prioritization'] = (!empty($this->data['tm_prioritization'])) ? $this->data['tm_prioritization'] : null;
-        $projectStructure['character_counter_mode'] = (!empty($this->data['character_counter_mode'])) ? $this->data['character_counter_mode'] : null;
-        $projectStructure['character_counter_count_tags'] = (!empty($this->data['character_counter_count_tags'])) ? $this->data['character_counter_count_tags'] : null;
-        $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $this->data[JobsMetadataDao::SUBFILTERING_HANDLERS];
-
-        // GDrive session instance
-        if (isset($_SESSION["gdrive_session"])) {
-            $projectStructure['session'] = $_SESSION["gdrive_session"];
-            $projectStructure->session['uid'] = $this->user->uid;
-        }
-
-        // MT Extra params
         $engine = EnginesFactory::getInstance($this->data['mt_engine']);
 
-        foreach ($engine->getConfigurationParameters() as $param) {
-            if ($this->data[$param] !== null) {
-                $projectStructure[$param] = $this->data[$param];
-            }
-        }
+        $gdriveSession = $_SESSION["gdrive_session"] ?? null;
 
-        if (!empty($this->data['filters_extraction_parameters'])) {
-            $projectStructure['filters_extraction_parameters'] = $this->data['filters_extraction_parameters'];
-        }
+        $projectStructure = $this->buildProjectStructure(
+            $this->data,
+            $this->metadata,
+            $filesFound,
+            $_COOKIE['upload_token'],
+            $this->user,
+            $engine,
+            $gdriveSession,
+        );
 
-        if (!empty($this->data['xliff_parameters'])) {
-            $projectStructure['xliff_parameters'] = $this->data['xliff_parameters'];
-        }
-
-        // with the qa template id
-        if (!empty($this->data['qa_model_template'])) {
-            $projectStructure['qa_model_template'] = $this->data['qa_model_template']->getDecodedModel();
-        }
-
-        if (!empty($this->data['payable_rate_model_template'])) {
-            $projectStructure['payable_rate_model'] = $this->data['payable_rate_model_template'];
-            $projectStructure['payable_rate_model_id'] = $this->data['payable_rate_model_template']->id;
-        }
-
-        $projectStructure['metadata'] = $this->metadata;
-        $projectStructure['userIsLogged'] = true;
-        $projectStructure['uid'] = $this->user->uid;
-        $projectStructure['id_customer'] = $this->user->email;
-        $projectStructure['owner'] = $this->user->email;
-        $projectManager->setTeam($this->data['team']); // set the team object to avoid a useless query
-
-        //set features override
-        $projectStructure['project_features'] = $this->data['project_features'];
+        $projectManager->setProjectStructure($projectStructure);
+        $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence
         $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
@@ -188,7 +138,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         $this->response->json([
             'data' => [
-                'id_project' => (int)$projectStructure['id_project'],
+                'id_project' => $projectStructure['id_project'],
                 'password' => $projectStructure['ppassword']
             ],
             'errors' => [],
@@ -842,6 +792,104 @@ class CreateProjectController extends AbstractStatefulKleinController
         }
 
         return $team;
+    }
+
+    /**
+     * Build a {@see ProjectStructure} from validated request data.
+     *
+     * This method performs the pure mapping from the validated request data
+     * (produced by {@see validateTheRequest()}) and metadata to a
+     * ProjectStructure DTO. Side-effecting operations (database sequence,
+     * random password, queue submission, project sanitization) are
+     * intentionally left in {@see create()}.
+     *
+     * @param array          $data         Validated request data from validateTheRequest()
+     * @param array          $metadata     Project metadata from setMetadataFromPostInput()
+     * @param array          $filesFound   Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param string         $uploadToken  Upload directory token
+     * @param UserStruct     $user         Authenticated user
+     * @param AbstractEngine $engine       MT engine instance (for getConfigurationParameters())
+     * @param array|null     $gdriveSession GDrive session data from $_SESSION, or null
+     *
+     * @return ProjectStructure
+     */
+    protected function buildProjectStructure(
+        array $data,
+        array $metadata,
+        array $filesFound,
+        string $uploadToken,
+        UserStruct $user,
+        AbstractEngine $engine,
+        ?array $gdriveSession,
+    ): ProjectStructure {
+        $projectStructure = new ProjectStructure();
+
+        $projectStructure['project_name'] = $data['project_name'];
+        $projectStructure['private_tm_key'] = $data['private_tm_key'];
+        $projectStructure['uploadToken'] = $uploadToken;
+        $projectStructure['array_files'] = $filesFound['arrayFiles'];
+        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta'];
+        $projectStructure['source_language'] = $data['source_lang'];
+        $projectStructure['target_language'] = explode(',', $data['target_lang']);
+        $projectStructure['job_subject'] = $data['job_subject'];
+        $projectStructure['mt_engine'] = $data['mt_engine'];
+        $projectStructure['tms_engine'] = $data['tms_engine'] ?? 1;
+        $projectStructure['status'] = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure['public_tm_penalty'] = $data['public_tm_penalty'];
+        $projectStructure['pretranslate_100'] = $data['pretranslate_100'];
+        $projectStructure['pretranslate_101'] = $data['pretranslate_101'];
+        $projectStructure['dialect_strict'] = $data['dialect_strict'];
+        $projectStructure['only_private'] = $data['only_private'];
+        $projectStructure['due_date'] = $data['due_date'];
+        $projectStructure['target_language_mt_engine_association'] = $data['target_language_mt_engine_association'];
+        $projectStructure['user_ip'] = Utils::getRealIpAddr();
+        $projectStructure['HTTP_HOST'] = AppConfig::$HTTPHOST;
+        $projectStructure['tm_prioritization'] = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;
+        $projectStructure['character_counter_mode'] = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
+        $projectStructure['character_counter_count_tags'] = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
+        $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $data[JobsMetadataDao::SUBFILTERING_HANDLERS];
+
+        // GDrive session
+        if ($gdriveSession !== null) {
+            $projectStructure['session'] = $gdriveSession;
+            $projectStructure->session['uid'] = $user->uid;
+        }
+
+        // MT Extra params
+        foreach ($engine->getConfigurationParameters() as $param) {
+            if ($data[$param] !== null) {
+                $projectStructure[$param] = $data[$param];
+            }
+        }
+
+        if (!empty($data['filters_extraction_parameters'])) {
+            $projectStructure['filters_extraction_parameters'] = $data['filters_extraction_parameters'];
+        }
+
+        if (!empty($data['xliff_parameters'])) {
+            $projectStructure['xliff_parameters'] = $data['xliff_parameters'];
+        }
+
+        // with the qa template id
+        if (!empty($data['qa_model_template'])) {
+            $projectStructure['qa_model_template'] = $data['qa_model_template']->getDecodedModel();
+        }
+
+        if (!empty($data['payable_rate_model_template'])) {
+            $projectStructure['payable_rate_model'] = $data['payable_rate_model_template'];
+            $projectStructure['payable_rate_model_id'] = $data['payable_rate_model_template']->id;
+        }
+
+        $projectStructure['metadata'] = $metadata;
+        $projectStructure['userIsLogged'] = true;
+        $projectStructure['uid'] = $user->uid;
+        $projectStructure['id_customer'] = $user->email;
+        $projectStructure['owner'] = $user->email;
+
+        //set features override
+        $projectStructure['project_features'] = $data['project_features'];
+
+        return $projectStructure;
     }
 
     private function clearSessionFiles(): void

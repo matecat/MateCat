@@ -316,6 +316,11 @@ class ProjectManager
         return $this->projectStructure;
     }
 
+    public function setProjectStructure(ProjectStructure $projectStructure): void
+    {
+        $this->projectStructure = $projectStructure;
+    }
+
     /**
      * Save features in project metadata
      * @throws ReflectionException
