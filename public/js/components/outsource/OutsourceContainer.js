@@ -5,7 +5,6 @@ import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import AssignToTranslator from './AssignToTranslator'
 import OutsourceVendor from './OutsourceVendor'
-import {Popup} from 'semantic-ui-react'
 
 const checkTimezone = () => {
   let timezoneToShow = Cookies.get('matecat_timezone')

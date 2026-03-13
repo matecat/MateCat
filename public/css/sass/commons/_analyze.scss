@@ -19,8 +19,8 @@ body.analyze {
 }
 
 .project-list {
-  height: 100%;
-  positon: relative;
+  height: calc(100% - 60px);
+  position: relative;
   overflow-y: auto;
 }
 
