@@ -7,7 +7,6 @@ use Exception;
 use JsonSerializable;
 use LogicException;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
-use Model\DataAccess\RecursiveArrayObject;
 use Utils\Constants\TranslationStatus;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
@@ -142,13 +141,13 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param \Model\DataAccess\RecursiveArrayObject $structure
+     * @param array{states: string[], analysis: string, editor?: string|null, match_category?: string|null} $structure
      *
      * @return AbstractXliffRule
      */
-    public static function fromArrayObject(RecursiveArrayobject $structure): AbstractXliffRule
+    public static function fromArray(array $structure): AbstractXliffRule
     {
-        return new static($structure['states']->getArrayCopy(), $structure['analysis'], $structure['editor'] ?? null, $structure['match_category'] ?? null);
+        return new static($structure['states'], $structure['analysis'], $structure['editor'] ?? null, $structure['match_category'] ?? null);
     }
 
     /**

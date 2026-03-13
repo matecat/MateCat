@@ -153,8 +153,8 @@ class ErrorRecordingTest extends AbstractTest
     #[Test]
     public function testValidateXliffParametersDoesNotRecordErrorWhenValid(): void
     {
-        // _validateXliffParameters expects an ArrayObject or array, not XliffRulesModel
-        // (it calls XliffRulesModel::fromArrayObject() internally)
+        // _validateXliffParameters expects an array, not XliffRulesModel
+        // (it calls XliffRulesModel::fromArray() internally)
         $this->pm->setProjectStructureValue('xliff_parameters', []);
 
         // Should not throw

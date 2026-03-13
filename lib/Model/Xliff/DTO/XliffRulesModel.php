@@ -5,7 +5,6 @@ namespace Model\Xliff\DTO;
 use DomainException;
 use Exception;
 use JsonSerializable;
-use Model\DataAccess\RecursiveArrayObject;
 
 class XliffRulesModel implements JsonSerializable
 {
@@ -55,12 +54,12 @@ class XliffRulesModel implements JsonSerializable
     }
 
     /**
-     * @param \Model\DataAccess\RecursiveArrayObject $structure
+     * @param array<string, array<int, array{states: string[], analysis: string, editor?: string|null, match_category?: string|null}>> $structure
      *
      * @return static
      * @throws Exception
      */
-    public static function fromArrayObject(RecursiveArrayobject $structure): XliffRulesModel
+    public static function fromArray(array $structure): XliffRulesModel
     {
         $self = new static();
         foreach ($structure as $ruleType => $ruleSet) {
@@ -73,7 +72,7 @@ class XliffRulesModel implements JsonSerializable
             }
 
             foreach ($ruleSet as $rule) {
-                $self->addRule($ruleClass::fromArrayObject($rule));
+                $self->addRule($ruleClass::fromArray($rule));
             }
         }
 

@@ -22,7 +22,6 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
-use Model\DataAccess\RecursiveArrayObject;
 use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -288,19 +287,18 @@ class ProjectManager
     protected function validateXliffParameters(): void
     {
         try {
-            // when the request comes from api or ajax
-            if (!$this->projectStructure['xliff_parameters'] instanceof ArrayObject) {
-                if (is_array($this->projectStructure['xliff_parameters'])) {
-                    $this->projectStructure['xliff_parameters'] = new RecursiveArrayObject($this->projectStructure['xliff_parameters']);
-                } else {
-                    throw new DomainException("Invalid xliff_parameters value found.", 400);
-                }
+            $xliffParams = $this->projectStructure->xliff_parameters;
+
+            if ($xliffParams instanceof XliffRulesModel) {
+                // already validated (e.g. from a previous call)
+                return;
             }
 
-            // when the request comes from the ProjectCreation daemon, it is already an ArrayObject
-            /** @var \Model\DataAccess\RecursiveArrayObject $xliffParams */
-            $xliffParams = $this->projectStructure['xliff_parameters'];
-            $this->projectStructure['xliff_parameters'] = XliffRulesModel::fromArrayObject($xliffParams);
+            if (!is_array($xliffParams)) {
+                throw new DomainException("Invalid xliff_parameters value found.", 400);
+            }
+
+            $this->projectStructure->xliff_parameters = XliffRulesModel::fromArray($xliffParams);
         } catch (DomainException $ex) {
             $this->addProjectError($ex->getCode(), $ex->getMessage());
             throw $ex;
