@@ -7,16 +7,15 @@ import useOutsourceQuote from '../../hooks/useOutsourceQuote'
 import useCurrencyRates from '../../hooks/useCurrencyRates'
 
 import OutsourceInfo from './OutsourceInfo'
-import {GMTSelect} from './GMTSelect'
 import OutsourceLoader from './components/OutsourceLoader'
 import ServiceBox from './components/ServiceBox'
 import TranslatorDetails from './components/TranslatorDetails'
 import RevisionCheckbox from './components/RevisionCheckbox'
 import DeliverySection from './components/DeliverySection'
 import OrderBox from './components/OrderBox'
-import ConfirmDelivery from './components/ConfirmDelivery'
 import CommonUtils from '../../utils/commonUtils'
 import UserStore from '../../stores/UserStore'
+import {Badge, BADGE_MODE, BADGE_TYPE} from '../common/Badge'
 
 const QUOTE_NOT_AVAILABLE_MESSAGE =
   'Quote not available, please contact us at info@translated.net or call +39 06 90 254 001'
@@ -235,6 +234,7 @@ const OutsourceVendor = ({
     onDateChange: setDeliveryDate,
     onTimeChange: setSelectedTime,
     onGetNewRates: getNewRates,
+    extendedView,
   }
 
   if (errorOutsource) {
@@ -283,6 +283,7 @@ const OutsourceVendor = ({
           onChangeTimezone={changeTimezone}
           translatorsNumber={translatorsNumber}
           orderBoxProps={orderBoxProps}
+          deliveryProps={deliveryProps}
         />
       )}
 
@@ -362,69 +363,34 @@ const ExtendedView = ({
 const CompactView = ({
   outsource,
   errorQuote,
-  outsourceConfirmed,
-  jobOutsourced,
-  delivery,
-  email,
   onViewMore,
-  onGoBack,
-  onChangeTimezone,
+  deliveryProps,
   translatorsNumber,
   orderBoxProps,
 }) => (
-  <div className="outsource-to-vendor-reduced sixteen wide column">
+  <>
     {outsource ? (
-      <div className="reduced-boxes">
-        <div className="container-reduced">
-          <div className="title-reduced">Let us do it for you</div>
-
-          <div className="payment-service">
-            <ServiceBox compact />
-            <div className="view-more">
-              <a className="open-view-more" onClick={onViewMore}>
-                + view more
-              </a>
+      <div className="payment-details-box">
+        <div className="delivery-order">
+          <div>
+            <div className={'compact-view-header'}>Let us do it for you</div>
+            <div className={'order-badge-container'}>
+              Outsource: <Badge>PM</Badge>+
+              <Badge type={BADGE_TYPE.PRIMARY}>Translation</Badge>+
+              <Badge type={BADGE_TYPE.GREEN}>Revision</Badge>
             </div>
+            <a onClick={onViewMore}>+ View More</a>
           </div>
-
-          {!errorQuote ? (
-            <div className="delivery-order">
-              <div className="delivery-box">
-                <label>Delivery date:</label>
-                <div>
-                  <div className="delivery-date">
-                    {delivery.day + ' ' + delivery.month}
-                  </div>
-                  <div className="atdd">at</div>
-                  <div className="delivery-time">{delivery.time}</div>
-                  <div className="gmt">
-                    <GMTSelect direction="up" changeValue={onChangeTimezone} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="delivery-order-not-available">
-              <div className="quote-not-available-message">
-                {QUOTE_NOT_AVAILABLE_MESSAGE}
-              </div>
-            </div>
-          )}
+          <DeliverySection {...deliveryProps} />
+          {!errorQuote && <OrderBox {...orderBoxProps} />}
         </div>
-
-        {!errorQuote && <OrderBox {...orderBoxProps} />}
-
-        {jobOutsourced && (
-          <div className="confirm-delivery-box">
-            <div className="confirm-title">Order sent correctly</div>
-            <p>Thank you for choosing our Outsource service.</p>
-          </div>
-        )}
       </div>
     ) : (
-      <OutsourceLoader translatorsNumber={translatorsNumber} />
+      <div className="payment-details-box">
+        <OutsourceLoader translatorsNumber={translatorsNumber} />
+      </div>
     )}
-  </div>
+  </>
 )
 
 export default OutsourceVendor

@@ -26,6 +26,7 @@ const DeliverySection = ({
   onDateChange,
   onTimeChange,
   onGetNewRates,
+  extendedView,
 }) => {
   if (errorQuote) {
     return (
@@ -66,6 +67,7 @@ const DeliverySection = ({
             >
               Get Price
             </Button>
+
             <Button mode={BUTTON_MODE.OUTLINE} onClick={onToggleNeedItFaster}>
               Close
             </Button>
@@ -110,9 +112,11 @@ const DeliverySection = ({
                 </div>
               </div>
             )}
-            <div className="faster" onClick={onToggleNeedItFaster}>
-              Need it faster?
-            </div>
+            {extendedView && (
+              <div className="faster" onClick={onToggleNeedItFaster}>
+                Need it faster?
+              </div>
+            )}
           </div>
         )}
       </div>

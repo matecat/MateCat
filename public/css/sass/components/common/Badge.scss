@@ -23,8 +23,9 @@
 // Type and Mode modifiers
 .badge-black {
   &.badge-default {
-    background-color: rgba(colors.$black, 0.5);
-    color: colors.$white;
+    border: solid 1px colors.$grey400;
+    background-color: rgba(colors.$grey400, 0.3);
+    color: colors.$black;
   }
 
   &.badge-full {
