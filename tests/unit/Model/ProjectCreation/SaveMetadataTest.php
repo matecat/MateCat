@@ -151,7 +151,7 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testEmptyMetadataOnlyPersistsSubfilteringHandlersAndDefaults(): void
     {
-        // metadata is already empty by default (RecursiveArrayObject wrapping [])
+        // metadata is already empty by default in ProjectStructure
         $this->pm->callSaveMetadata();
 
         // pretranslate_101 always exists (DTO default = 1), plus subfiltering_handlers

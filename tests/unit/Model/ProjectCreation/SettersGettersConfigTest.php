@@ -83,7 +83,7 @@ class SettersGettersConfigTest extends AbstractTest
     }
 
     #[Test]
-    public function getRequestedFeaturesConvertsRecursiveArrayObjectsToBasicFeatureStructs(): void
+    public function getRequestedFeaturesConvertsArraysToBasicFeatureStructs(): void
     {
         $features = [
             ['feature_code' => 'translation_versions', 'options' => null],

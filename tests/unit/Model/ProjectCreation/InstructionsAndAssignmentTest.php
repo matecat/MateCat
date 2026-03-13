@@ -2,8 +2,8 @@
 
 namespace unit\Model\ProjectCreation;
 
+use ArrayObject;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\DataAccess\RecursiveArrayObject;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
@@ -235,10 +235,10 @@ class InstructionsAndAssignmentTest extends AbstractTest
     }
 
     #[Test]
-    public function checkForProjectAssignmentUsesRecursiveArrayObjectTeam(): void
+    public function checkForProjectAssignmentUsesArrayObjectTeam(): void
     {
-        // Team stored as RecursiveArrayObject (as it would come from project creation)
-        $teamRAO = new RecursiveArrayObject([
+        // Team stored as ArrayObject (testing normalization of non-TeamStruct objects)
+        $teamAO = new ArrayObject([
             'id'         => 15,
             'name'       => 'RAO Team',
             'created_by' => 2,
@@ -256,7 +256,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
             $this->createStub(MatecatLogger::class),
         );
         $this->pm->setProjectStructureValue('uid', 33);
-        $this->pm->setProjectStructureValue('team', $teamRAO);
+        $this->pm->setProjectStructureValue('team', $teamAO);
 
         $teamDao = $this->createStub(TeamDao::class);
         $this->pm->setTeamDao($teamDao);

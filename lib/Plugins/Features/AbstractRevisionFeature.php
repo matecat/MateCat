@@ -9,7 +9,6 @@ use Exception;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\Database;
-use Model\DataAccess\RecursiveArrayObject;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
@@ -427,10 +426,10 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     private function setQaModelFromJsonFile(ProjectStructure $projectStructure): void
     {
-        /** @var RecursiveArrayObject $model_json */
+        /** @var array<string, mixed> $model_json */
         $model_json = $projectStructure['features']['quality_framework'];
 
-        $model_record = ModelDao::createModelFromJsonDefinition($model_json->toArray());
+        $model_record = ModelDao::createModelFromJsonDefinition($model_json);
 
         $project = ProjectDao::findById(
             $projectStructure['id_project']
@@ -490,17 +489,15 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * @param ProjectStructure $projectStructure
      * @param string|null $jsonPath
      *
-     * @return \Model\DataAccess\RecursiveArrayObject
+     * @return array<string, mixed>
      */
-    private static function loadModelFromPathOrDefault(ProjectStructure $projectStructure, ?string $jsonPath): RecursiveArrayObject
+    private static function loadModelFromPathOrDefault(ProjectStructure $projectStructure, ?string $jsonPath): array
     {
-        if (empty($qa_model)) {
-            // Use null coalescing to simplify fallback logic
-            $path = $jsonPath ?? AppConfig::$ROOT . '/inc/qa_model.json';
-            $qa_model = file_get_contents($path);
-        }
+        // Use null coalescing to simplify fallback logic
+        $path = $jsonPath ?? AppConfig::$ROOT . '/inc/qa_model.json';
+        $qa_model = file_get_contents($path);
 
-        $decoded_model = new RecursiveArrayObject(json_decode($qa_model, true));
+        $decoded_model = json_decode($qa_model, true);
         // Set the user ID to allow ownership in the QA models table
         $decoded_model['model']['uid'] = $projectStructure['uid'];
 

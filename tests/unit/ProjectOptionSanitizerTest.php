@@ -89,7 +89,7 @@ class ProjectOptionSanitizerTest extends AbstractTest
         ], $sanitizer->sanitize());
     }
 
-    function testLexiQaWorksWithRecursiveArrayObject()
+    function testLexiQaWorksWithBooleanTrue()
     {
         $sanitizer = new ProjectOptionsSanitizer(['lexiqa' => true]);
         $sanitizer->setLanguages('en-US', ['en-GB']);
