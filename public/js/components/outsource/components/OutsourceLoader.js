@@ -8,11 +8,10 @@ const OutsourceLoader = ({translatorsNumber}) => {
 
   return (
     <div className="translated-loader">
-      <img src="../../public/img/loader-matecat-translated-outsource.gif" />
+      <img src="/public/img/loader-matecat-translated-outsource.gif" />
       <div className="text-loader-outsource">{msg}</div>
     </div>
   )
 }
 
 export default OutsourceLoader
-

@@ -14,18 +14,14 @@ const RevisionCheckbox = ({
   return (
     <div className="revision-box">
       <div className="add-revision">
-        <div className={'ui checkbox ' + checkboxDisabledClass}>
-          <input
-            type="checkbox"
-            checked={revision}
-            onChange={onToggle}
-          />
+        <div className={'revision-checkbox ' + checkboxDisabledClass}>
+          <input type="checkbox" checked={revision} onChange={onToggle} />
           <label>Add Revision</label>
         </div>
       </div>
       {!outsourceConfirmed && (
         <div className="job-price">
-          {priceCurrencySymbol}{' '}
+          + {priceCurrencySymbol}{' '}
           {formatPriceWithCommas(getCurrencyPrice(revisionPrice))}
         </div>
       )}
@@ -34,4 +30,3 @@ const RevisionCheckbox = ({
 }
 
 export default RevisionCheckbox
-

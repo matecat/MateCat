@@ -1,7 +1,12 @@
 import React from 'react'
 
 import {DropdownMenu} from '../../common/DropdownMenu/DropdownMenu'
-import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../common/Button/Button'
 import {currencies, formatPriceWithCommas} from '../outsourceConstants'
 
 const OrderBox = ({
@@ -23,10 +28,11 @@ const OrderBox = ({
         toggleButtonProps={{
           children: (
             <a className="price-pw">
-              about {priceCurrencySymbol} {pricePWord} / word
+              = {priceCurrencySymbol} {pricePWord} / word
             </a>
           ),
           mode: BUTTON_MODE.LINK,
+          size: BUTTON_SIZE.LINK_MEDIUM,
         }}
         items={Object.keys(currencies).map((key) => ({
           label: currencies[key].name,
@@ -34,38 +40,35 @@ const OrderBox = ({
         }))}
       />
     </div>
-    <div className="order-button-outsource">
-      {!outsourceConfirmed ? (
-        <Button
-          type={BUTTON_TYPE.SUCCESS}
-          className="open-order"
-          id="accept-outsource-quote"
-          onClick={onSendOutsource}
-        >
-          Order now
-        </Button>
-      ) : !jobOutsourced ? (
-        <Button
-          type={BUTTON_TYPE.SUCCESS}
-          className="open-order"
-          id="accept-outsource-quote"
-          onClick={onSendOutsource}
-        >
-          Confirm
-        </Button>
-      ) : (
-        <Button
-          type={BUTTON_TYPE.SUCCESS}
-          className="open-outsourced"
-          id="accept-outsource-quote"
-          onClick={onOpenOutsourcePage}
-        >
-          View status
-        </Button>
-      )}
-    </div>
+    {!outsourceConfirmed ? (
+      <Button
+        type={BUTTON_TYPE.SUCCESS}
+        className="open-order"
+        id="accept-outsource-quote"
+        onClick={onSendOutsource}
+      >
+        Order now
+      </Button>
+    ) : !jobOutsourced ? (
+      <Button
+        type={BUTTON_TYPE.SUCCESS}
+        className="open-order"
+        id="accept-outsource-quote"
+        onClick={onSendOutsource}
+      >
+        Confirm
+      </Button>
+    ) : (
+      <Button
+        type={BUTTON_TYPE.SUCCESS}
+        className="open-outsourced"
+        id="accept-outsource-quote"
+        onClick={onOpenOutsourcePage}
+      >
+        View status
+      </Button>
+    )}
   </div>
 )
 
 export default OrderBox
-

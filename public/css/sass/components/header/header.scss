@@ -18,7 +18,7 @@ header {
     border: 1px solid colors.$white;
 
     &.revision-r1 {
-      background: colors.$green400;
+      background: colors.$green800;
     }
     &.revision-r2 {
       background: colors.$purple500;
@@ -116,7 +116,7 @@ header {
       }
 
       &.button-badge-success {
-        background-color: colors.$green400;
+        background-color: colors.$green800;
         color: colors.$white;
       }
     }

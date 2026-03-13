@@ -60,6 +60,7 @@
     padding: 9px 46px 9px 12px;
     border-radius: variables.$border-radius-default;
     color: colors.$black;
+    background: rgba(colors.$grey600, 0.07);
   }
 
   .dropdown__list {
@@ -91,7 +92,7 @@
     float: right;
     clear: both;
     position: relative;
-    width: 160px;
+    width: 250px;
   }
 
   .delivery-order,
@@ -363,12 +364,15 @@
     .fiducial-logo, svg {
       color: colors.$grey400;
     }
+
     .service-box {
       display: flex;
     }
+
     .project-management {
       font-weight: 700;
     }
+
     .fiducial-logo {
       display: flex;
       align-items: center;
@@ -379,11 +383,19 @@
   .payment-details-box {
     background-color: colors.$white;
     display: flex;
-    padding: variables.$border-radius-big;
+    padding: 16px;
     flex-direction: column;
     align-items: flex-start;
     align-self: stretch;
     border: 1px solid colors.$grey100;
+    font: variables.$font-style-small;
+    border-radius: variables.$border-radius-big;
+    min-height: 150px;
+    position: relative;
+    .translator-job-details__title {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
 
     .translator-job-details {
       display: flex;
@@ -392,142 +404,113 @@
       align-items: center;
       align-self: stretch;
       justify-content: space-between;
-      .translator-details-box {
-        display: flex;
-        flex-direction: column;
+      border-bottom: 1px solid colors.$grey100;
 
-        .translator-details {
-          display: flex;
-          flex-direction: row;
-          font: variables.$font-style-small
-        }
-        .translator-avatar {
-          display: flex;
-          width: 40px;
-          height: 40px;
-          padding: 8px;
-          justify-content: center;
-          align-items: center;
-          gap: 8px;
-          flex-shrink: 0;
-          border-radius: 1248.75px;
-          background: colors.$grey100;
-        }
-        .translator-info {
-          display: flex;
-          flex-direction: column;
-        }
+      .translator-details {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        width: 60%;
+        align-items: center;
+        border-right: 1px solid colors.$grey100;
+
       }
 
-      .job-details-box {
-        display: inline-block;
-        width: 44% !important;
-        vertical-align: middle;
-        padding: 0 0 0 15px;
-        position: relative;
+      .translator-avatar {
+        display: flex;
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        border-radius: 1248.75px;
+        background: colors.$grey100;
+        color: colors.$grey800;
+        font-size: 15px;
+      }
 
-        .source-target-outsource {
-          display: inline-block;
-          width: 68%;
-          font-size: 18px;
+      .translator-info {
+        display: flex;
+        flex-direction: column;
+      }
 
-          .source-box {
-            display: inline-block;
-          }
+      .translator-words {
+        color: colors.$blue500;
+      }
 
-          .in-to {
-            display: inline-block;
-            font-size: 16px;
+      .translator-words, .translator-feedback {
+        font: variables.$font-size-xsmall;
+      }
 
-            i {
-              position: relative;
-              top: 1px;
-              margin: 0;
-              font-weight: 100;
-              font-size: 13px;
-              color: colors.$grey700;
-            }
-          }
 
-          .target-box {
-            display: inline-block;
-          }
+      .source-target-outsource {
+        display: flex;
+        align-items: center;
+        font: variables.$font-style-base;
+        font-weight: 700;
+      }
 
-          @media only screen and (max-width: 1199px) and (min-width: 992px) {
-            font-size: 16px;
-            .in-to {
-              font-size: 13px;
-            }
-          }
-        }
 
-        .job-payment {
-          display: inline-block;
-          width: 32%;
-          text-align: right;
-          padding-right: 28px;
-
-          .not-payable {
-            text-decoration: line-through;
-            font-size: 16px;
-            position: absolute;
-            top: -17px;
-            width: 30%;
-            padding-right: 28px;
-          }
-
-          .payable {
-            font-size: 18px;
-          }
-        }
+      .job-payment {
+        text-align: right;
+        color: colors.$grey400;
+        font: variables.$font-style-base;
       }
 
       .job-price {
-        display: inline-block;
-        vertical-align: middle;
-        width: 18%;
         font-size: 20px;
-        text-align: center;
+        font-weight: 700;
+        line-height: 28px;
       }
     }
 
     .revision-box {
-      padding: 4px 0px;
-      background-color: colors.$grey300;
-      margin-bottom: 10px;
-      height: 28px;
-      border-radius: variables.$border-radius-default;
+      display: flex;
+      padding: 8px 0;
+      justify-content: flex-end;
+      align-items: center;
+      align-self: stretch;
+      border-bottom: 1px solid colors.$grey100;
+      gap: 200px;
 
       .add-revision {
-        display: inline-block;
-        width: 82%;
-        text-align: right;
-        padding-right: 28px;
+        .revision-checkbox {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
 
-        .checkbox {
+        input {
+          width: 16px;
+          height: 16px;
+          padding: 3px;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
         }
       }
 
       .job-price {
-        display: inline-block;
-        font-size: 20px;
-        text-align: center;
-        width: 18%;
+        font: variables.$font-style-base;
+        font-weight: 700;
       }
     }
 
     .delivery-order {
-      width: 82%;
-      text-align: right;
-      display: inline-block;
-      vertical-align: top;
-      margin-top: 15px;
-      padding-right: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+      padding: 16px;
 
       .delivery-box {
-        text-align: right;
-        display: inline-block;
-        font-size: 23px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        align-self: stretch;
+        gap: 4px;
 
         span.select {
           box-shadow: inset 0 1px 3px colors.$grey200;
@@ -540,32 +523,36 @@
         }
 
         label {
-          font-size: 16px;
-          display: inline-block;
-          vertical-align: middle;
-          font-weight: 100;
-          padding: 5px;
-        }
-
-        .atdd {
-          display: inline-block;
-          font-weight: 100;
+          font: variables.$font-style-xsmall;
+          color: colors.$grey400;
         }
 
         .delivery-date {
-          display: inline-block;
-          padding: 5px;
+          font-size: 20px;
+          font-style: normal;
+          font-weight: 700;
+          line-height: 28px;
         }
 
-        .delivery-time {
-          display: inline-block;
-          padding: 5px 15px 5px 5px;
+        .delivery-options {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          align-self: stretch;
+        }
+
+        .faster {
+          color: colors.$blue500;
+          text-decoration: underline;
+
+          &:hover {
+            text-decoration: none;
+          }
         }
 
         .need-it-faster {
           font-size: 16px;
-          margin-top: 15px;
-          padding-right: 5px;
+          cursor: pointer;
         }
 
         .need-it-faster-message {
@@ -578,12 +565,13 @@
         .errors-date {
           font-weight: 100;
           font-size: 14px;
-          display: inline-block;
+          display: flex;
           margin-right: 6px;
           text-align: right;
+          gap: 4px;
 
           &.past-date {
-            color: red;
+            color: colors.$red500;
           }
 
           &.too-far-date {
@@ -608,123 +596,77 @@
           }
         }
       }
-
-      @media only screen and (max-width: 1199px) and (min-width: 992px) {
-        width: 79%;
-      }
-      @media only screen and (max-width: 991px) and (min-width: 768px) {
-        width: 79%;
-      }
     }
 
     .need-it-faster-box {
-      margin-top: 0 !important;
-
-      .need-it-faster-close {
-        position: relative;
-        top: -29px;
-        left: 12px;
-        text-align: center;
-        padding: 5px 4px;
-        margin: 0;
-        width: 115px;
-        height: 115px;
-        border-radius: 15px;
-        background: white;
-
-        i {
-          margin: 0;
-          position: relative;
-          top: 2px;
-          font-size: 15px;
-          background: colors.$grey300;
-          color: colors.$black;
-        }
+      input {
+        height: 40px;
+        border-radius: variables.$border-radius-default;
+        padding: 9px 46px 9px 12px;
       }
 
-      .delivery-box {
-        padding: 14px 15px;
-        text-align: left;
-        border: 1px solid colors.$grey300;
+      .fields {
+        display: flex;
+        align-items: center;
+        gap: 8px;
 
-        > div {
+        .field-buttons {
           display: flex;
-          align-items: center;
+          gap: 8px;
+          margin-top: 25px;
         }
 
-        .fields {
-          .field {
-            label {
-              font-weight: unset;
-              font-size: unset;
+        .field {
+          display: flex;
+          flex-direction: column;
+
+          label {
+            font-weight: unset;
+            font-size: unset;
+            margin-bottom: 4px;
+          }
+
+          input[type='text'],
+          input[type='email'] {
+            border: 1px solid colors.$grey200;
+            font-family: Calibri, Arial, Helvetica, sans-serif;
+
+            &:focus {
+              border-color: colors.$blue300;
             }
 
-            input[type='text'],
-            input[type='email'] {
-              box-shadow: inset 0 1px 3px colors.$grey200;
+            &:active {
+              border-color: colors.$blue300;
+            }
+          }
+
+          &.input-time {
+            width: 130px;
+
+            .selection.dropdown {
+              width: 100%;
+              min-width: 101px !important;
               border: 1px solid colors.$grey200;
-              font-family: Calibri, Arial, Helvetica, sans-serif;
+              box-shadow: inset 0 1px 3px colors.$grey200;
 
-              &:focus {
-                border-color: colors.$blue300;
+              .text {
+                font-weight: 100 !important;
               }
 
-              &:active {
-                border-color: colors.$blue300;
-              }
-            }
-
-            &.input-time {
-              width: 130px;
-
-              .selection.dropdown {
-                width: 100%;
-                min-width: 101px !important;
-                border: 1px solid colors.$grey200;
-                box-shadow: inset 0 1px 3px colors.$grey200;
-
-                .text {
-                  font-weight: 100 !important;
-                }
-
-                .menu {
-                  height: 210px;
-                }
-              }
-            }
-
-            &.gmt {
-              position: relative;
-              width: 165px;
-              margin-right: 20px;
-            }
-
-            .get-price {
-              font-family: Calibri, Arial, Helvetica, sans-serif;
-              padding: 9px 11px;
-              vertical-align: top;
-              font-size: 18px;
-              border: 1px solid colors.$blue500;
-              box-shadow: none !important;
-              background-color: colors.$white !important;
-              font-weight: 700;
-              margin-top: 33px;
-
-              &:hover {
-                text-decoration: none;
-                //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                border: 1px solid colors.$blue500;
-                background-color: colors.$grey150;
-              }
-
-              &:focus {
-                box-shadow: none !important;
-                background-color: colors.$grey150 !important;
+              .menu {
+                height: 210px;
               }
             }
           }
+
+          &.gmt {
+            position: relative;
+            width: 250px;
+            margin-right: 20px;
+          }
         }
       }
+
     }
 
     .delivery-order-not-available {
@@ -742,31 +684,37 @@
     }
 
     .order-box-outsource {
-      display: inline-block;
-      width: 18%;
-      min-width: 199px;
+      display: flex;
+      width: 260px;
+      padding: 16px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 8px;
+      border-radius: variables.$border-radius-big;
+      background-color: rgba(colors.$green800, 0.08);
+
+      #accept-outsource-quote {
+        width: 100%;
+      }
 
       .order-box {
-        background-color: colors.$green300;
-        height: 70px;
-        text-align: center;
-        margin-bottom: 5px;
         display: flex;
-        flex-direction: column;
+        height: 28px;
+        justify-content: space-between;
         align-items: center;
-        padding: 16px;
-        border-radius: variables.$border-radius-default;
+        align-self: stretch;
 
         .price-pw {
           font-size: 16px;
-          color: colors.$black;
-          font-weight: 100;
           cursor: pointer;
         }
 
         .outsource-price {
-          font-size: 26px;
+          font-size: 28px;
+          line-height: 20px;
           font-weight: 700;
+          color: colors.$green1000;
         }
 
         .content {
@@ -790,12 +738,6 @@
         }
       }
 
-      @media only screen and (max-width: 1199px) and (min-width: 992px) {
-        width: 21%;
-      }
-      @media only screen and (max-width: 991px) and (min-width: 768px) {
-        width: 21%;
-      }
     }
   }
 
@@ -816,13 +758,23 @@
   }
 
   .customer-request {
+    display: flex;
+    padding: 16px;
+    justify-content: space-between;
+    align-items: flex-start;
+    align-self: stretch;
+    border-radius: 16px;
+    border: 1px solid colors.$grey100;
+    background: colors.$white;
+
     .customer-box {
-      padding: 0 15px 15px;
-      position: relative;
-      overflow: hidden;
-      width: 55%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
 
       .title-pointer {
+        align-self: flex-end;
+
         h3 {
           display: inline-block;
           width: 50%;
@@ -854,30 +806,36 @@
       }
 
       .slider-box {
-        min-height: 110px;
-        position: relative;
-        border: 1px solid colors.$grey400;
-        padding: 15px 0px;
+        display: flex;
+        width: 512px;
+        padding: 16px 16px 16px 48px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        align-self: stretch;
         border-radius: variables.$border-radius-default;
-
-        .appendix {
-          display: inline-block;
-          width: 8%;
-          vertical-align: top;
-          font-size: 28px;
-          position: relative;
-          top: -3px;
-          color: colors.$grey400;
-          right: 13px;
-          background: colors.$grey75;
-          padding: 6px 2px;
-          text-align: center;
+        border: 1px solid colors.$grey100;
+        position: relative;
+        height: 135px;
+        @media (max-width: 1200px) {
+          width: 430px;
+        }
+        .quote {
+          position: absolute;
+          left: 8px;
+          top: 8px;
+          font-size: 64px;
+          line-height: 72px;
+          font-weight: 700;
+          color: colors.$grey700;
         }
 
         .customer-box-info {
           width: 90%;
           display: inline-block;
           opacity: 0;
+          position: absolute;
+          padding-right: 16px;
 
           &.fade-in {
             transition: 1.5s;
@@ -891,8 +849,7 @@
           }
 
           .customer-info {
-            width: 55%;
-            display: inline-block;
+            display: flex;
 
             .customer-photo {
               display: inline-block;
@@ -915,20 +872,15 @@
           }
 
           .customer-corporate-logo {
-            display: inline-block;
-            width: 45%;
-            text-align: right;
-            vertical-align: middle;
+            margin-left: auto;
 
             img {
               width: auto;
-              vertical-align: middle;
-              padding: 6px;
-              height: 40px;
+              height: 20px;
             }
 
             .c-export {
-              height: 30px !important;
+              height: 15px !important;
             }
           }
         }
@@ -936,100 +888,95 @@
     }
 
     .request-box {
-      width: 45%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
 
       .title-request {
-        right: 30px;
-        bottom: 60px;
-
-        h3 {
-          margin-bottom: 5px;
-          padding-left: 30px;
-        }
+        font-size: 20px;
+        line-height: 28px;
+        font-weight: 700;
       }
 
       .request-info-box {
-        color: colors.$grey400;
-        bottom: 20px;
-        right: 30px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
 
-        .mobile-mail-box,
-        .account-box {
-          .list {
-            display: flex;
+
+        .item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          .icon {
+            padding-right: 0;
+            margin-right: 5px;
           }
 
-          .item {
-            padding: 0;
+          .content {
+            padding-left: 0;
 
-            .icon {
-              padding-right: 0;
-              margin-right: 5px;
+            .header,
+            .description {
+              font-family: Calibri, Arial, Helvetica, sans-serif;
+              color: inherit;
             }
 
-            .content {
-              padding-left: 0;
-
-              .header,
-              .description {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                color: inherit;
-              }
-
-              a {
-                color: colors.$black !important;
-              }
+            a {
+              color: colors.$black !important;
             }
           }
+        }
 
-          .call {
-            .icon {
-              margin-right: 0;
-            }
+        .call {
+          .icon {
+            margin-right: 0;
+          }
+        }
+
+        .send-email {
+        }
+
+        .open-chat {
+          i {
+            position: relative;
+            font-size: 16px;
           }
 
-          .send-email {
-          }
-
-          .open-chat {
-            i {
+          .content {
+            .button {
+              font-family: Calibri, Arial, Helvetica, sans-serif;
+              border: 1px solid colors.$grey200;
+              background: colors.$grey75;
               position: relative;
-              font-size: 16px;
-            }
+              top: 5px;
+              width: 100%;
+              margin-right: 0;
+              padding: 9px 10px;
 
-            .content {
-              .button {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                border: 1px solid colors.$grey200;
-                background: colors.$grey75;
+              .sign {
+                width: 10px;
+                height: 10px;
+                display: inline-block;
+                vertical-align: baseline;
+                margin-right: 5px;
+                border-radius: 50%;
                 position: relative;
-                top: 5px;
-                width: 100%;
-                margin-right: 0;
-                padding: 9px 10px;
+                top: 1px;
 
-                .sign {
-                  width: 10px;
-                  height: 10px;
-                  display: inline-block;
-                  vertical-align: baseline;
-                  margin-right: 5px;
-                  border-radius: 50%;
-                  position: relative;
-                  top: 1px;
+                &.online-item {
+                  background-color: colors.$blue500;
+                }
 
-                  &.online-item {
-                    background-color: colors.$blue500;
-                  }
-
-                  &.offline-item {
-                    background-color: gray;
-                  }
+                &.offline-item {
+                  background-color: gray;
                 }
               }
             }
           }
         }
+
       }
     }
   }

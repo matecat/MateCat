@@ -59,13 +59,13 @@
 }
 
 .like {
-  color: colors.$green400;
+  color: colors.$green800;
   margin-right: 8px;
 
   &:hover,
   &.active {
-    border-color: colors.$green400;
-    background-color: rgba(colors.$green400, 0.1);
+    border-color: colors.$green800;
+    background-color: rgba(colors.$green800, 0.1);
   }
 }
 

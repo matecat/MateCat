@@ -429,7 +429,7 @@ header {
                   margin-right: 10px;
                   margin-top: 5px;
                   &.revision-1 {
-                    background: colors.$green400;
+                    background: colors.$green800;
                   }
                   &.revision-2 {
                     background: colors.$purple500;
@@ -516,7 +516,7 @@ header {
                       //}
                       //.status-approved {
                       //  font-size: 20px;
-                      //  color: colors.$green400;
+                      //  color: colors.$green800;
                       //  &.approved-r2 {
                       //    color: colors.$purple500;
                       //  }
@@ -627,7 +627,7 @@ header {
                         }
                         &.qr-revised {
                           b {
-                            color: colors.$green400;
+                            color: colors.$green800;
                           }
                         }
                         &.qr-revised-2ndpass {
@@ -698,7 +698,7 @@ header {
                                   font-size: 16px;
                                   margin-bottom: 0;
                                   .re-revisor {
-                                    color: colors.$green400;
+                                    color: colors.$green800;
                                   }
                                   .re-revisor2 {
                                     color: colors.$purple500;
@@ -826,7 +826,7 @@ header {
     }
 
     &.approved-color {
-      background: colors.$green400;
+      background: colors.$green800;
     }
 
     &.rejected-color {
@@ -834,7 +834,7 @@ header {
     }
 
     &.revision-color {
-      background: colors.$green400;
+      background: colors.$green800;
     }
 
     &.second-revision-color,
@@ -1063,7 +1063,7 @@ header {
 }
 
 .per-green {
-  background: colors.$green400 !important;
+  background: colors.$green800 !important;
   color: colors.$white !important;
 }
 

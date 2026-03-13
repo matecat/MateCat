@@ -19,48 +19,47 @@ $margin-xxl: 64px;
 
 .layout__container {
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
   box-sizing: border-box;
   // Mobile portrait (Xs) — > 320px: 4 columns, 16px margins, 100% width
   @media (min-width: $breakpoint-xs) {
-    padding-left: $margin-xs;
-    padding-right: $margin-xs;
+    //padding-left: $margin-xs;
+    //padding-right: $margin-xs;
     max-width: 100%;
   }
 
   // Mobile landscape (Sm) — > 480px: 8 columns, 16px margins, 100% width
   @media (min-width: $breakpoint-sm) {
-    padding-left: $margin-sm;
-    padding-right: $margin-sm;
+    //padding-left: $margin-sm;
+    //padding-right: $margin-sm;
     max-width: 100%;
   }
 
   // Tablet (Md) — > 768px: 8 columns, 24px margins, 100% width
   @media (min-width: $breakpoint-md) {
-    padding-left: $margin-md;
-    padding-right: $margin-md;
+    //padding-left: $margin-md;
+    //padding-right: $margin-md;
     max-width: 100%;
   }
 
   // Small Desktop (Lg) — > 1024px: 12 columns, 48px margins, 1280px max
   @media (min-width: $breakpoint-lg) {
-    padding-left: $margin-lg;
-    padding-right: $margin-lg;
+    //padding-left: $margin-lg;
+    //padding-right: $margin-lg;
     max-width: $grid-width-lg ;
   }
 
   // Desktop (Xl) — > 1600px: 12 columns, 64px margins, 1280px max
   @media (min-width: $breakpoint-xl) {
-    padding-left: $margin-xl;
-    padding-right: $margin-xl;
+    //padding-left: $margin-xl;
+    //padding-right: $margin-xl;
     max-width: $grid-width-lg ;
   }
 
   // Large Desktop (Xxl) — > 1920px: 12 columns, 64px margins, 1280px max (REM scaling)
   @media (min-width: $breakpoint-xxl) {
-    padding-left: $margin-xxl;
-    padding-right: $margin-xxl;
+    //padding-left: $margin-xxl;
+    //padding-right: $margin-xxl;
     max-width: $grid-width-lg ;
   }
 }

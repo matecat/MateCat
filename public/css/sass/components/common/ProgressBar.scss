@@ -68,10 +68,10 @@
 
     &.complete {
       .progress {
-        background-color: colors.$green400;
+        background-color: colors.$green800;
       }
       .labelProgress span {
-        color: colors.$green400;
+        color: colors.$green800;
       }
     }
   }

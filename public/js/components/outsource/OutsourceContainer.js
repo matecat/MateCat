@@ -93,12 +93,13 @@ const OutsourceContainer = ({
           : ''
 
   return (
-    <TransitionGroup>
+    <TransitionGroup style={{width: '100%'}}>
       {openOutsource || showTranslatorBox ? (
         <CSSTransition
           key={idJobLabel}
           classNames="transitionOutsource"
           timeout={{enter: 500, exit: 300}}
+          style={{width: '100%'}}
         >
           <div
             className={'outsource-container ' + outsourceContainerClass}

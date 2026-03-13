@@ -10,11 +10,16 @@ const TranslatorDetails = ({
   priceCurrencySymbol,
   getCurrencyPrice,
 }) => (
-  <div className="translator-job-details">
-    {chunkQuote.get('t_name') !== '' ? (
-      <>
-        <div className="translator-details-box">
-          <div>Best identified translator for this job:</div>
+  <>
+    {chunkQuote.get('t_name') !== '' && (
+      <div className={'translator-job-details__title'}>
+        Best identified translator for this job:
+      </div>
+    )}
+
+    <div className="translator-job-details">
+      {chunkQuote.get('t_name') !== '' ? (
+        <>
           <div className="translator-details">
             <div className="translator-avatar">
               {chunkQuote.get('t_name').charAt(0)}
@@ -23,46 +28,40 @@ const TranslatorDetails = ({
               <div>
                 <b>{chunkQuote.get('t_name')}</b> by Translated
               </div>
-              <div>{translatedWords} words translated last 12 months</div>
-              <div>
+              <div className={'translator-words'}>
+                {translatedWords} words translated last 12 months
+              </div>
+              <div className={'translator-feedback'}>
                 {chunkQuote.get('t_experience_years')} years of experience
               </div>
             </div>
           </div>
-        </div>
-      </>
-    ) : (
-      <div className="translator-details-box">
+        </>
+      ) : (
         <div className="translator-no-found">
           <p>
             Translated uses the <b>most qualified translator</b> <br /> and{' '}
             <b>keeps using the same translator for your next projects. </b>
           </p>
         </div>
-      </div>
-    )}
+      )}
 
-    <div className="job-details-box">
       <div className="source-target-outsource st-details">
-        <div className="source-box">{job.get('source')}</div>
-        <div className="in-to">
-          <ChevronRight size={16} />
-        </div>
-        <div className="target-box">{job.get('target')}</div>
+        {job.get('source')}
+        <ChevronRight size={16} />
+        {job.get('target')}
       </div>
-    </div>
-    <div className="job-payment">
-      <div className="payable">
+      <div className="job-payment">
         {numberWithCommas(chunkQuote.get('words'))} words
       </div>
+      {!outsourceConfirmed && (
+        <div className="job-price">
+          {priceCurrencySymbol}{' '}
+          {formatPriceWithCommas(getCurrencyPrice(chunkQuote.get('price')))}
+        </div>
+      )}
     </div>
-    {!outsourceConfirmed && (
-      <div className="job-price">
-        {priceCurrencySymbol}{' '}
-        {formatPriceWithCommas(getCurrencyPrice(chunkQuote.get('price')))}
-      </div>
-    )}
-  </div>
+  </>
 )
 
 export default TranslatorDetails

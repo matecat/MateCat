@@ -285,20 +285,20 @@ a.button-component-container {
 .success {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};
-  --btnAltTextColor: #{colors.$green400};
+  --btnAltTextColor: #{colors.$green800};
   --btnAltTextColorHover: #{colors.$green600};
   --btnAltTextColorDisabled: #{rgba(colors.$green200, 0.24)};
 
-  --btnBorderColor: #{rgba(colors.$green400, 0.24)};
-  --btnBorderColorHover: #{colors.$green400};
-  --btnBorderColorActive: #{colors.$green400};
-  --btnBorderColorDisabled: #{rgba(colors.$green400, 0.24)};
+  --btnBorderColor: #{rgba(colors.$green800, 0.24)};
+  --btnBorderColorHover: #{colors.$green800};
+  --btnBorderColorActive: #{colors.$green800};
+  --btnBorderColorDisabled: #{rgba(colors.$green800, 0.24)};
 
-  --btnBgColor: #{colors.$green400};
+  --btnBgColor: #{colors.$green800};
   --btnBgColorAlt: #{colors.$green600};
-  --btnBgColorSemitrans: #{rgba(colors.$green400, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba(colors.$green400, 0.24)};
-  --btnBgColorOutline: #{rgba(colors.$green400, 0.5)};
+  --btnBgColorSemitrans: #{rgba(colors.$green800, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$green800, 0.24)};
+  --btnBgColorOutline: #{rgba(colors.$green800, 0.5)};
 }
 .warning {
   --btnTextColor: #{colors.$white};

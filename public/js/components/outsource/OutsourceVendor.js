@@ -344,33 +344,16 @@ const ExtendedView = ({
           getCurrencyPrice={getCurrencyPrice}
           revisionPrice={chunkQuote.get('r_price')}
         />
-
-        <DeliverySection {...deliveryProps} />
-
-        {!deliveryProps.needItFaster && !deliveryProps.errorQuote && (
-          <ConfirmDelivery
-            outsourceConfirmed={outsourceConfirmed}
-            jobOutsourced={jobOutsourced}
-            email={email}
-            onGoBack={onGoBack}
-            extendedMessage
-          />
-        )}
-
-        {!errorQuote && <OrderBox {...orderBoxProps} />}
+        <div className="delivery-order">
+          <DeliverySection {...deliveryProps} />
+          {!errorQuote && <OrderBox {...orderBoxProps} />}
+        </div>
       </div>
     ) : (
       <div className="payment-details-box">
         <OutsourceLoader translatorsNumber={translatorsNumber} />
       </div>
     )}
-
-    <div className="easy-pay-box">
-      <h4 className="easy-pay">
-        Easy payments:{' '}
-        <span>Pay a single monthly invoice within 30 days of receipt</span>
-      </h4>
-    </div>
     <OutsourceInfo />
   </>
 )
@@ -427,13 +410,6 @@ const CompactView = ({
               </div>
             </div>
           )}
-
-          <ConfirmDelivery
-            outsourceConfirmed={outsourceConfirmed && !jobOutsourced}
-            jobOutsourced={false}
-            email={email}
-            onGoBack={onGoBack}
-          />
         </div>
 
         {!errorQuote && <OrderBox {...orderBoxProps} />}

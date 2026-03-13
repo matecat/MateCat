@@ -63,12 +63,12 @@
   }
 
   &.badge-full {
-    background-color: rgba(colors.$green400, 0.72);
+    background-color: rgba(colors.$green800, 0.72);
     color: colors.$white;
   }
 
   &.badge-outline {
-    border: solid 1px colors.$green400;
+    border: solid 1px colors.$green800;
     color: colors.$green700;
   }
 }

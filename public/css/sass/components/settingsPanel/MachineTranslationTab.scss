@@ -154,11 +154,11 @@
   }
 
   .green-button {
-    background-color: colors.$green400 !important;
+    background-color: colors.$green800 !important;
     color: white !important;
 
     &:hover {
-      background-color: rgba($color: colors.$green400, $alpha: 0.9) !important;
+      background-color: rgba($color: colors.$green800, $alpha: 0.9) !important;
     }
   }
 }

@@ -8,6 +8,8 @@ import HelpCircle from '../../../../img/icons/HelpCircle'
 import {timeOptions} from '../outsourceConstants'
 
 import 'react-datepicker/dist/react-datepicker.css'
+import IconClose from '../../icons/IconClose'
+import Close from '../../../../img/icons/Close'
 
 const DeliverySection = ({
   delivery,
@@ -38,48 +40,35 @@ const DeliverySection = ({
 
   if (needItFaster) {
     return (
-      <div className="delivery-order need-it-faster-box">
-        <a className="need-it-faster-close" onClick={onToggleNeedItFaster}>
-          <i className="icon-cancel3 icon need-it-faster-close-icon" />
-        </a>
-        <div className="delivery-box">
-          <div className="ui form">
-            <div className="fields">
-              <div className="field">
-                <label>Delivery Date</label>
-                <div className="ui calendar">
-                  <div className="ui input">
-                    <DatePicker
-                      selected={deliveryDate}
-                      onChange={onDateChange}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="field input-time">
-                <Select
-                  label="Time"
-                  onSelect={({id}) => onTimeChange(id)}
-                  activeOption={timeOptions.find(
-                    ({id}) => id === selectedTime,
-                  )}
-                  options={timeOptions}
-                />
-              </div>
-              <div className="field gmt">
-                <GMTSelect showLabel={true} changeValue={onChangeTimezone} />
-              </div>
-              <div className="field">
-                <Button
-                  type={BUTTON_TYPE.PRIMARY}
-                  mode={BUTTON_MODE.OUTLINE}
-                  className="get-price"
-                  onClick={onGetNewRates}
-                >
-                  Get Price
-                </Button>
-              </div>
-            </div>
+      <div className="need-it-faster-box">
+        <div className="fields">
+          <div className="field">
+            <label>Delivery Date</label>
+            <DatePicker selected={deliveryDate} onChange={onDateChange} />
+          </div>
+          <div className="field input-time">
+            <Select
+              label="Time"
+              onSelect={({id}) => onTimeChange(id)}
+              activeOption={timeOptions.find(({id}) => id === selectedTime)}
+              options={timeOptions}
+            />
+          </div>
+          <div className="field gmt">
+            <GMTSelect showLabel={true} changeValue={onChangeTimezone} />
+          </div>
+          <div className="field-buttons">
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              mode={BUTTON_MODE.OUTLINE}
+              className="get-price"
+              onClick={onGetNewRates}
+            >
+              Get Price
+            </Button>
+            <Button mode={BUTTON_MODE.OUTLINE} onClick={onToggleNeedItFaster}>
+              Close
+            </Button>
           </div>
         </div>
       </div>
@@ -87,18 +76,15 @@ const DeliverySection = ({
   }
 
   return (
-    <div className="delivery-order">
-      <div className="delivery-box">
-        <label>Delivery date:</label>
-        <div className="delivery-date">
-          {delivery.day + ' ' + delivery.month}
-        </div>
-        <div className="atdd">at</div>
-        <div className="delivery-time">{delivery.time}</div>
+    <div className="delivery-box">
+      <label>Delivery date:</label>
+      <div className={'delivery-date'}>
+        {delivery.day + ' ' + delivery.month} at {delivery.time}
+      </div>
+      <div className={'delivery-options'}>
         <div className="gmt">
           <GMTSelect changeValue={onChangeTimezone} />
         </div>
-
         {!outsourceConfirmed && (
           <div className="need-it-faster">
             {errorPastDate && (
@@ -124,9 +110,9 @@ const DeliverySection = ({
                 </div>
               </div>
             )}
-            <a className="faster" onClick={onToggleNeedItFaster}>
+            <div className="faster" onClick={onToggleNeedItFaster}>
               Need it faster?
-            </a>
+            </div>
           </div>
         )}
       </div>
@@ -135,4 +121,3 @@ const DeliverySection = ({
 }
 
 export default DeliverySection
-

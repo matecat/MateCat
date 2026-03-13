@@ -236,13 +236,13 @@
   }
 
   &.tag-clicked {
-    background-color: colors.$green400;
+    background-color: colors.$green800;
     opacity: 1;
     &:before {
-      border-left-color: colors.$green400;
+      border-left-color: colors.$green800;
     }
     &:after {
-      border-right-color: colors.$green400;
+      border-right-color: colors.$green800;
     }
   }
 

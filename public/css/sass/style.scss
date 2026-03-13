@@ -238,7 +238,7 @@ section.opened .warnings {
 }
 
 .approved-bar {
-  background-color: colors.$green400;
+  background-color: colors.$green800;
 }
 .approved-bar-2nd-pass {
   background-color: colors.$purple500;
@@ -261,7 +261,7 @@ section.opened .warnings {
 }
 
 .approved-backgruond {
-  background-color: colors.$green400;
+  background-color: colors.$green800;
 }
 
 .rejected-foreground {
@@ -269,7 +269,7 @@ section.opened .warnings {
 }
 
 .approved-foreground {
-  color: colors.$green400;
+  color: colors.$green800;
 }
 
 .meter > a {
@@ -1585,7 +1585,7 @@ section.status-translated .status {
 }
 
 section.status-approved .status {
-  background-color: colors.$green400 !important;
+  background-color: colors.$green800 !important;
 }
 
 section.status-approved2 .status {
@@ -1648,7 +1648,7 @@ section.opened.editor .status {
 }
 
 .per-green {
-  background: colors.$green400 !important;
+  background: colors.$green800 !important;
   color: colors.$white !important;
 }
 
