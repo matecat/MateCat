@@ -108,7 +108,7 @@ class ProjectCreationWorker extends AbstractWorker
     protected function _publishResults(): void
     {
         ProjectQueue::publishResults($this->projectStructure);
-        $this->_doLog("Project creation completed: " . $this->projectStructure['id_project']);
+        $this->_doLog("Project creation completed: " . $this->projectStructure->id_project);
         $this->projectStructure = new ProjectStructure();
     }
 

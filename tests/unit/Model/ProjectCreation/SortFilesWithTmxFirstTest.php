@@ -57,7 +57,7 @@ class SortFilesWithTmxFirstTest extends AbstractTest
         $result = $this->pm->callSortFilesWithTmxFirst();
 
         $this->assertSame('', $result);
-        $this->assertSame([], (array) $this->pm->getTestProjectStructure()['array_files']);
+        $this->assertSame([], (array) $this->pm->getTestProjectStructure()->array_files);
     }
 
     #[Test]
@@ -73,7 +73,7 @@ class SortFilesWithTmxFirstTest extends AbstractTest
         $result = $this->pm->callSortFilesWithTmxFirst();
 
         $this->assertSame('', $result);
-        $this->assertSame(['a.docx', 'b.docx', 'c.docx'], (array) $this->pm->getTestProjectStructure()['array_files']);
+        $this->assertSame(['a.docx', 'b.docx', 'c.docx'], (array) $this->pm->getTestProjectStructure()->array_files);
     }
 
     #[Test]
@@ -90,7 +90,7 @@ class SortFilesWithTmxFirstTest extends AbstractTest
 
         $this->assertSame('memory.tmx', $result);
 
-        $files = array_values((array) $this->pm->getTestProjectStructure()['array_files']);
+        $files = array_values((array) $this->pm->getTestProjectStructure()->array_files);
         $this->assertSame('memory.tmx', $files[0]);
     }
 
@@ -125,7 +125,7 @@ class SortFilesWithTmxFirstTest extends AbstractTest
         $this->assertSame('', $result);
 
         // But glossary should be first
-        $files = array_values((array) $this->pm->getTestProjectStructure()['array_files']);
+        $files = array_values((array) $this->pm->getTestProjectStructure()->array_files);
         $this->assertSame('glossary.csv', $files[0]);
     }
 
@@ -144,8 +144,8 @@ class SortFilesWithTmxFirstTest extends AbstractTest
         $this->pm->callSortFilesWithTmxFirst();
 
         $ps    = $this->pm->getTestProjectStructure();
-        $files = array_values((array) $ps['array_files']);
-        $metas = array_values((array) $ps['array_files_meta']);
+        $files = array_values((array) $ps->array_files);
+        $metas = array_values((array) $ps->array_files_meta);
 
         // Memory files should be at front (order among them: glossary pushed first, then tmx pushed first)
         // Regular files keep order at end
@@ -184,7 +184,7 @@ class SortFilesWithTmxFirstTest extends AbstractTest
         $this->assertSame('memory.tmx', $result);
 
         // Both memory files should be at front
-        $files = array_values((array) $this->pm->getTestProjectStructure()['array_files']);
+        $files = array_values((array) $this->pm->getTestProjectStructure()->array_files);
         $this->assertSame('a.docx', end($files));
     }
 

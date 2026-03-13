@@ -125,8 +125,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence
-        $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
-        $projectStructure['ppassword'] = Utils::randomString();
+        $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->ppassword = Utils::randomString();
 
         $projectManager->sanitizeProjectStructure();
         $fs::moveFileFromUploadSessionToQueuePath($_COOKIE['upload_token']);
@@ -134,12 +134,12 @@ class CreateProjectController extends AbstractStatefulKleinController
         ProjectQueue::sendProject($projectStructure);
 
         $this->clearSessionFiles();
-        $this->assignLastCreatedPid($projectStructure['id_project']);
+        $this->assignLastCreatedPid($projectStructure->id_project);
 
         $this->response->json([
             'data' => [
-                'id_project' => $projectStructure['id_project'],
-                'password' => $projectStructure['ppassword']
+                'id_project' => $projectStructure->id_project,
+                'password' => $projectStructure->ppassword
             ],
             'errors' => [],
         ]);
@@ -824,70 +824,70 @@ class CreateProjectController extends AbstractStatefulKleinController
     ): ProjectStructure {
         $projectStructure = new ProjectStructure();
 
-        $projectStructure['project_name'] = $data['project_name'];
-        $projectStructure['private_tm_key'] = $data['private_tm_key'];
-        $projectStructure['uploadToken'] = $uploadToken;
-        $projectStructure['array_files'] = $filesFound['arrayFiles'];
-        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta'];
-        $projectStructure['source_language'] = $data['source_lang'];
-        $projectStructure['target_language'] = explode(',', $data['target_lang']);
-        $projectStructure['job_subject'] = $data['job_subject'];
-        $projectStructure['mt_engine'] = $data['mt_engine'];
-        $projectStructure['tms_engine'] = $data['tms_engine'] ?? 1;
-        $projectStructure['status'] = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure['public_tm_penalty'] = $data['public_tm_penalty'];
-        $projectStructure['pretranslate_100'] = $data['pretranslate_100'];
-        $projectStructure['pretranslate_101'] = $data['pretranslate_101'];
-        $projectStructure['dialect_strict'] = $data['dialect_strict'];
-        $projectStructure['only_private'] = $data['only_private'];
-        $projectStructure['due_date'] = $data['due_date'];
-        $projectStructure['target_language_mt_engine_association'] = $data['target_language_mt_engine_association'];
-        $projectStructure['user_ip'] = Utils::getRealIpAddr();
-        $projectStructure['HTTP_HOST'] = AppConfig::$HTTPHOST;
-        $projectStructure['tm_prioritization'] = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;
-        $projectStructure['character_counter_mode'] = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
-        $projectStructure['character_counter_count_tags'] = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
-        $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $data[JobsMetadataDao::SUBFILTERING_HANDLERS];
+        $projectStructure->project_name = $data['project_name'];
+        $projectStructure->private_tm_key = $data['private_tm_key'];
+        $projectStructure->uploadToken = $uploadToken;
+        $projectStructure->array_files = $filesFound['arrayFiles'];
+        $projectStructure->array_files_meta = $filesFound['arrayFilesMeta'];
+        $projectStructure->source_language = $data['source_lang'];
+        $projectStructure->target_language = explode(',', $data['target_lang']);
+        $projectStructure->job_subject = $data['job_subject'];
+        $projectStructure->mt_engine = $data['mt_engine'];
+        $projectStructure->tms_engine = $data['tms_engine'] ?? 1;
+        $projectStructure->status = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure->public_tm_penalty = $data['public_tm_penalty'];
+        $projectStructure->pretranslate_100 = $data['pretranslate_100'];
+        $projectStructure->pretranslate_101 = $data['pretranslate_101'];
+        $projectStructure->dialect_strict = $data['dialect_strict'];
+        $projectStructure->only_private = $data['only_private'];
+        $projectStructure->due_date = $data['due_date'];
+        $projectStructure->target_language_mt_engine_association = $data['target_language_mt_engine_association'];
+        $projectStructure->user_ip = Utils::getRealIpAddr();
+        $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
+        $projectStructure->tm_prioritization = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;
+        $projectStructure->character_counter_mode = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
+        $projectStructure->character_counter_count_tags = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
+        $projectStructure->subfiltering_handlers = $data[JobsMetadataDao::SUBFILTERING_HANDLERS];
 
         // GDrive session
         if ($gdriveSession !== null) {
-            $projectStructure['session'] = $gdriveSession;
+            $projectStructure->session = $gdriveSession;
             $projectStructure->session['uid'] = $user->uid;
         }
 
         // MT Extra params
         foreach ($engine->getConfigurationParameters() as $param) {
             if ($data[$param] !== null) {
-                $projectStructure[$param] = $data[$param];
+                $projectStructure->$param = $data[$param];
             }
         }
 
         if (!empty($data['filters_extraction_parameters'])) {
-            $projectStructure['filters_extraction_parameters'] = $data['filters_extraction_parameters'];
+            $projectStructure->filters_extraction_parameters = $data['filters_extraction_parameters'];
         }
 
         if (!empty($data['xliff_parameters'])) {
-            $projectStructure['xliff_parameters'] = $data['xliff_parameters'];
+            $projectStructure->xliff_parameters = $data['xliff_parameters'];
         }
 
         // with the qa template id
         if (!empty($data['qa_model_template'])) {
-            $projectStructure['qa_model_template'] = $data['qa_model_template']->getDecodedModel();
+            $projectStructure->qa_model_template = $data['qa_model_template']->getDecodedModel();
         }
 
         if (!empty($data['payable_rate_model_template'])) {
-            $projectStructure['payable_rate_model'] = $data['payable_rate_model_template'];
-            $projectStructure['payable_rate_model_id'] = $data['payable_rate_model_template']->id;
+            $projectStructure->payable_rate_model = $data['payable_rate_model_template'];
+            $projectStructure->payable_rate_model_id = $data['payable_rate_model_template']->id;
         }
 
-        $projectStructure['metadata'] = $metadata;
-        $projectStructure['userIsLogged'] = true;
-        $projectStructure['uid'] = $user->uid;
-        $projectStructure['id_customer'] = $user->email;
-        $projectStructure['owner'] = $user->email;
+        $projectStructure->metadata = $metadata;
+        $projectStructure->userIsLogged = true;
+        $projectStructure->uid = $user->uid;
+        $projectStructure->id_customer = $user->email;
+        $projectStructure->owner = $user->email;
 
         //set features override
-        $projectStructure['project_features'] = $data['project_features'];
+        $projectStructure->project_features = $data['project_features'];
 
         return $projectStructure;
     }

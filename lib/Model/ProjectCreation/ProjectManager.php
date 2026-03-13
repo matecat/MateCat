@@ -143,35 +143,35 @@ class ProjectManager
 
         $this->features = new FeatureSet($this->getRequestedFeatures());
 
-        if (!empty($this->projectStructure['id_customer'])) {
-            $this->features->loadAutoActivableOwnerFeatures($this->projectStructure['id_customer']);
+        if (!empty($this->projectStructure->id_customer)) {
+            $this->features->loadAutoActivableOwnerFeatures($this->projectStructure->id_customer);
         }
 
         /** @var MateCatFilter $filter */
         $filter = MateCatFilter::getInstance(
             $this->features,
-            $this->projectStructure['source_language'],
-            $this->projectStructure['target_language'],
+            $this->projectStructure->source_language,
+            $this->projectStructure->target_language,
             [],
-            json_decode($this->projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] ?? 'null')
+            json_decode($this->projectStructure->subfiltering_handlers ?? 'null')
         );
         $this->filter = $filter;
 
-        $this->projectStructure['array_files'] = $this->features->filter(
+        $this->projectStructure->array_files = $this->features->filter(
             'filter_project_manager_array_files',
-            $this->projectStructure['array_files'],
+            $this->projectStructure->array_files,
             $this->projectStructure
         );
 
         // sync array_files_meta
         $array_files_meta = [];
-        foreach ($this->projectStructure['array_files_meta'] as $fileMeta) {
-            if (in_array($fileMeta['basename'], (array)$this->projectStructure['array_files'])) {
+        foreach ($this->projectStructure->array_files_meta as $fileMeta) {
+            if (in_array($fileMeta['basename'], (array)$this->projectStructure->array_files)) {
                 $array_files_meta[] = $fileMeta;
             }
         }
 
-        $this->projectStructure['array_files_meta'] = $array_files_meta;
+        $this->projectStructure->array_files_meta = $array_files_meta;
 
         $this->filesMetadataDao = new MetadataDao();
     }
@@ -254,7 +254,7 @@ class ProjectManager
     protected function getRequestedFeatures(): array
     {
         $features = [];
-        $projectFeatures = $this->projectStructure['project_features'];
+        $projectFeatures = $this->projectStructure->project_features;
         if (count($projectFeatures) != 0) {
             foreach ($projectFeatures as $feature) {
                 if ($feature instanceof BasicFeatureStruct) {
@@ -307,8 +307,8 @@ class ProjectManager
 
     public function setTeam(TeamStruct $team): void
     {
-        $this->projectStructure['team'] = $team;
-        $this->projectStructure['id_team'] = $team->id;
+        $this->projectStructure->team = $team;
+        $this->projectStructure->id_team = $team->id;
     }
 
     public function getProjectStructure(): ProjectStructure
@@ -405,8 +405,8 @@ class ProjectManager
         }
 
         // xliff_parameters
-        if (isset($this->projectStructure[ProjectsMetadataDao::XLIFF_PARAMETERS]) and $this->projectStructure[ProjectsMetadataDao::XLIFF_PARAMETERS] instanceof XliffConfigTemplateStruct) {
-            $configModel = $this->projectStructure[ProjectsMetadataDao::XLIFF_PARAMETERS];
+        if (isset($this->projectStructure->xliff_parameters) and $this->projectStructure->xliff_parameters instanceof XliffConfigTemplateStruct) {
+            $configModel = $this->projectStructure->xliff_parameters;
             $options[ProjectsMetadataDao::XLIFF_PARAMETERS] = json_encode($configModel);
         }
 
@@ -453,7 +453,7 @@ class ProjectManager
         }
 
         foreach ($extraKeys as $extraKey) {
-            $engineValue = $this->projectStructure[$extraKey];
+            $engineValue = $this->projectStructure->$extraKey;
             if (!empty($engineValue)) {
                 $options[$extraKey] = $engineValue;
             }
@@ -525,14 +525,14 @@ class ProjectManager
      */
     public function sanitizeProjectStructure(): void
     {
-        $this->projectStructure['result'] = ['errors' => [], 'data' => []];
+        $this->projectStructure->result = ['errors' => [], 'data' => []];
 
         $this->validateUploadToken();
         $this->validateXliffParameters();
     }
 
     /**
-     * Append an error entry to projectStructure['result']['errors'].
+     * Append an error entry to projectStructure->result['errors'].
      *
      * Centralises the ~19 occurrences of the duplicated append pattern.
      */
@@ -554,9 +554,9 @@ class ProjectManager
     {
         $this->project = $this->getProjectManagerModel()->createProjectRecord(
             $this->projectStructure,
-            $this->projectStructure['id_team'],
-            $this->projectStructure['status'],
-            $this->projectStructure['id_assignee'],
+            $this->projectStructure->id_team,
+            $this->projectStructure->status,
+            $this->projectStructure->id_assignee,
         );
     }
 
@@ -572,18 +572,18 @@ class ProjectManager
     {
         if (!empty($this->projectStructure->uid)) {
             //if this is a logged user, set the user as project assignee
-            $this->projectStructure['id_assignee'] = $this->projectStructure->uid;
+            $this->projectStructure->id_assignee = $this->projectStructure->uid;
 
             /**
              * Normalize ArrayObject team in TeamStruct
              */
-            $this->projectStructure['team'] = new TeamStruct(
-                $this->features->filter('filter_team_for_project_creation', $this->projectStructure['team']->getArrayCopy())
+            $this->projectStructure->team = new TeamStruct(
+                $this->features->filter('filter_team_for_project_creation', $this->projectStructure->team->getArrayCopy())
             );
 
             //clean the cache for the team member list of assigned projects
             $teamDao = $this->getTeamDao();
-            $teamDao->destroyCacheAssignee($this->projectStructure['team']);
+            $teamDao->destroyCacheAssignee($this->projectStructure->team);
         }
     }
 
@@ -632,8 +632,8 @@ class ProjectManager
      */
     private function initGdriveSession(): void
     {
-        if (!empty($this->projectStructure['session']['uid'])) {
-            $this->gdriveSession = Session::getInstanceForCLI($this->projectStructure['session']->getArrayCopy());
+        if (!empty($this->projectStructure->session['uid'])) {
+            $this->gdriveSession = Session::getInstanceForCLI($this->projectStructure->session->getArrayCopy());
         }
     }
 
@@ -655,8 +655,8 @@ class ProjectManager
         SecondPassReview::loadAndValidateQualityFramework($this->projectStructure);
         $this->features->run('validateProjectCreation', $this->projectStructure);
 
-        if (count($this->projectStructure['result']['errors']) > 0) {
-            $this->log($this->projectStructure['result']['errors']);
+        if (count($this->projectStructure->result['errors']) > 0) {
+            $this->log($this->projectStructure->result['errors']);
 
             throw new EndQueueException("Invalid Project found.");
         }
@@ -671,8 +671,8 @@ class ProjectManager
         $sortedMeta = [];
         $firstTMXFileName = "";
 
-        foreach ($this->projectStructure['array_files'] as $pos => $fileName) {
-            $meta = $this->projectStructure['array_files_meta'][$pos];
+        foreach ($this->projectStructure->array_files as $pos => $fileName) {
+            $meta = $this->projectStructure->array_files_meta[$pos];
 
             if ($meta['getMemoryType']) {
                 if ($meta['isTMX']) {
@@ -687,8 +687,8 @@ class ProjectManager
             }
         }
 
-        $this->projectStructure['array_files'] = $sortedFiles;
-        $this->projectStructure['array_files_meta'] = $sortedMeta;
+        $this->projectStructure->array_files = $sortedFiles;
+        $this->projectStructure->array_files_meta = $sortedMeta;
 
         return $firstTMXFileName ?? '';
     }
@@ -703,7 +703,7 @@ class ProjectManager
         if (count($this->projectStructure->private_tm_key)) {
             $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
 
-            if (count($this->projectStructure['result']['errors']) > 0) {
+            if (count($this->projectStructure->result['errors']) > 0) {
                 throw new EndQueueException("Invalid Project found.");
             }
         }
@@ -750,8 +750,8 @@ class ProjectManager
      */
     private function cacheNonConvertedFiles(AbstractFilesStorage $fs, array &$linkFiles): void
     {
-        foreach ($this->projectStructure['array_files'] as $pos => $fileName) {
-            $meta = $this->projectStructure['array_files_meta'][$pos];
+        foreach ($this->projectStructure->array_files as $pos => $fileName) {
+            $meta = $this->projectStructure->array_files_meta[$pos];
 
             if ($meta['mustBeConverted']) {
                 continue;
@@ -1017,11 +1017,11 @@ class ProjectManager
      */
     private function determineStatusAndPopulateResult(): void
     {
-        $this->projectStructure['status'] = (AppConfig::$VOLUME_ANALYSIS_ENABLED) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
+        $this->projectStructure->status = (AppConfig::$VOLUME_ANALYSIS_ENABLED) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
         if ($this->show_in_cattool_segs_counter == 0) {
             $this->log("Segment Search: No segments in this project - \n");
-            $this->projectStructure['status'] = ProjectStatus::STATUS_EMPTY;
+            $this->projectStructure->status = ProjectStatus::STATUS_EMPTY;
         }
 
         $this->projectStructure->result['code'] = 1;
@@ -1034,7 +1034,7 @@ class ProjectManager
         $this->projectStructure->result['project_name'] = $this->projectStructure->project_name;
         $this->projectStructure->result['source_language'] = $this->projectStructure->source_language;
         $this->projectStructure->result['target_language'] = $this->projectStructure->target_language;
-        $this->projectStructure->result['status'] = $this->projectStructure['status'];
+        $this->projectStructure->result['status'] = $this->projectStructure->status;
     }
 
     /**
@@ -1047,7 +1047,7 @@ class ProjectManager
      */
     private function insertFileInstructions(array $totalFilesStructure): void
     {
-        $array_files = $this->getProjectStructure()['array_files'];
+        $array_files = $this->getProjectStructure()->array_files;
 
         foreach ($totalFilesStructure as $fid => $file_info) {
             foreach ($array_files as $index => $filename) {
@@ -1079,8 +1079,8 @@ class ProjectManager
 
         ProjectDao::updateAnalysisStatus(
             $this->projectStructure->id_project,
-            $this->projectStructure['status'],
-            $this->files_word_count * count($this->projectStructure['array_jobs']['job_languages'])
+            $this->projectStructure->status,
+            $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])
         );
 
         $this->pushActivityLog();
@@ -1152,9 +1152,9 @@ class ProjectManager
         $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
         (new ProjectDao())->deleteFailedProject($this->projectStructure->id_project);
-        (new FileDao())->deleteFailedProjectFiles($this->projectStructure['file_id_list']->getArrayCopy());
+        (new FileDao())->deleteFailedProjectFiles($this->projectStructure->file_id_list->getArrayCopy());
         $this->log("Deleted Project ID: " . $this->projectStructure->id_project);
-        $this->log("Deleted Files ID: " . json_encode($this->projectStructure['file_id_list']->getArrayCopy()));
+        $this->log("Deleted Files ID: " . json_encode($this->projectStructure->file_id_list->getArrayCopy()));
     }
 
     /**
@@ -1175,7 +1175,7 @@ class ProjectManager
             ","
         );
 
-        foreach ($this->projectStructure['segments_metadata'] as &$segmentElement) {
+        foreach ($this->projectStructure->segments_metadata as &$segmentElement) {
             unset($segmentElement['internal_id']);
             unset($segmentElement['xliff_mrk_id']);
             unset($segmentElement['show_in_cattool']);
@@ -1188,10 +1188,10 @@ class ProjectManager
         }
 
         $fs = FilesStorageFactory::create();
-        $fs::storeFastAnalysisFile((string) $this->project->id, $this->projectStructure['segments_metadata']->getArrayCopy());
+        $fs::storeFastAnalysisFile((string) $this->project->id, $this->projectStructure->segments_metadata->getArrayCopy());
 
         //free memory
-        unset($this->projectStructure['segments_metadata']);
+        unset($this->projectStructure->segments_metadata);
     }
 
     private function pushActivityLog(): void
@@ -1276,7 +1276,7 @@ class ProjectManager
      */
     protected function createJobs(ProjectStructure $projectStructure): void
     {
-        foreach ($projectStructure['target_language'] as $target) {
+        foreach ($projectStructure->target_language as $target) {
             // get payable rates from mt_qe_workflow, this takes the priority over the other payable rates
             if ($this->projectStructure->mt_qe_workflow_payable_rate) {
                 $payableRatesTemplate = null;
@@ -1329,10 +1329,10 @@ class ProjectManager
 
             $this->log($this->projectStructure->private_tm_key);
 
-            $projectStructure['tm_keys'] = (string) json_encode($tm_key);
+            $projectStructure->tm_keys = (string) json_encode($tm_key);
 
             // Replace {{pid}} with project ID for new keys created with an empty name
-            $projectStructure['tm_keys'] = str_replace("{{pid}}", (string) $this->projectStructure->id_project, (string) $projectStructure['tm_keys']);
+            $projectStructure->tm_keys = str_replace("{{pid}}", (string) $this->projectStructure->id_project, (string) $projectStructure->tm_keys);
 
             $newJob = new JobStruct();
             $newJob->password = $password;
@@ -1347,7 +1347,7 @@ class ProjectManager
             $newJob->owner = $this->projectStructure->owner;
             $newJob->job_first_segment = $this->min_max_segments_id['job_first_segment'];
             $newJob->job_last_segment = $this->min_max_segments_id['job_last_segment'];
-            $newJob->tm_keys = (string) $projectStructure['tm_keys'];
+            $newJob->tm_keys = (string) $projectStructure->tm_keys;
             $newJob->payable_rates = (string) $payableRates;
             $newJob->total_raw_wc = $this->files_word_count;
             $newJob->only_private_tm = (int)$this->projectStructure->only_private;
@@ -1374,7 +1374,7 @@ class ProjectManager
                 }
 
                 //prepare pre-translated segments queries
-                if (!empty($projectStructure['translations'])) {
+                if (!empty($projectStructure->translations)) {
                     $this->getSegmentStorageService()->insertPreTranslations($newJob, $projectStructure);
                 }
             } catch (Exception $e) {
@@ -1382,7 +1382,7 @@ class ProjectManager
                 Utils::sendErrMailReport($msg);
             }
 
-            foreach ($projectStructure['file_id_list'] as $fid) {
+            foreach ($projectStructure->file_id_list as $fid) {
                 FileDao::insertFilesJob((int) $newJob->id, $fid);
 
                 if ($this->gdriveSession && $this->gdriveSession->hasFiles()) {
@@ -1392,16 +1392,16 @@ class ProjectManager
             }
         }
 
-        if (!empty($this->projectStructure['notes'])) {
+        if (!empty($this->projectStructure->notes)) {
             $this->insertSegmentNotesForFile();
         }
 
-        if (!empty($this->projectStructure['context_group'])) {
+        if (!empty($this->projectStructure->context_group)) {
             $this->insertContextsForFile();
         }
 
         //Clean Translation array
-        $this->projectStructure['translations']->exchangeArray([]);
+        $this->projectStructure->translations->exchangeArray([]);
     }
 
     /**
@@ -1456,7 +1456,7 @@ class ProjectManager
             // avoid blank filenames
             if (!empty($originalFileName)) {
                 // get metadata
-                $meta = $this->projectStructure['array_files_meta'][$pos] ?? null;
+                $meta = $this->projectStructure->array_files_meta[$pos] ?? null;
                 /** @var string $mimeType */
                 $mimeType = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
                 $fidStr = $this->getProjectManagerModel()->insertFile((int) $this->projectStructure->id_project, (string) $this->projectStructure->source_language, $originalFileName, $mimeType, $fileDateSha1Path);
@@ -1482,7 +1482,7 @@ class ProjectManager
                     throw new Exception('Project creation failed. Please refresh page and retry.', -200);
                 }
 
-                $this->projectStructure['file_id_list']->append($fid);
+                $this->projectStructure->file_id_list->append($fid);
 
                 // pdfAnalysis
                 if (!empty($meta['pdfAnalysis'])) {
@@ -1534,8 +1534,8 @@ class ProjectManager
     private function insertSegmentNotesForFile(): void
     {
         $this->projectStructure = $this->features->filter('handleJsonNotesBeforeInsert', $this->projectStructure);
-        $this->getProjectManagerModel()->bulkInsertSegmentNotes($this->projectStructure['notes']);
-        $this->getProjectManagerModel()->bulkInsertSegmentMetaDataFromAttributes($this->projectStructure['notes']);
+        $this->getProjectManagerModel()->bulkInsertSegmentNotes($this->projectStructure->notes);
+        $this->getProjectManagerModel()->bulkInsertSegmentMetaDataFromAttributes($this->projectStructure->notes);
     }
 
     /**
@@ -1551,7 +1551,7 @@ class ProjectManager
         $this->features->filter('handleTUContextGroups', $this->projectStructure);
         $this->getProjectManagerModel()->bulkInsertContextsGroups(
             (int) $this->projectStructure->id_project,
-            (array) $this->projectStructure['context_group'],
+            (array) $this->projectStructure->context_group,
         );
     }
 

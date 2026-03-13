@@ -75,7 +75,7 @@ class ValidateBeforeCreationTest extends AbstractTest
         $features->method('run')
             ->willReturnCallback(function (string $method, $ps) {
                 if ($method === 'validateProjectCreation') {
-                    $ps['result']['errors'][] = ['code' => -99, 'message' => 'Validation failed'];
+                    $ps->result['errors'][] = ['code' => -99, 'message' => 'Validation failed'];
                 }
             });
 
@@ -127,7 +127,7 @@ class ValidateBeforeCreationTest extends AbstractTest
         $this->pm->callValidateBeforeCreation();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(42, $ps['id_assignee']);
+        $this->assertSame(42, $ps->id_assignee);
     }
 
     #[Test]

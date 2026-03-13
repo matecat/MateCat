@@ -163,11 +163,11 @@ class NewController extends KleinController
         $fs::moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
 
         //reserve a project id from the sequence
-        $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
-        $projectStructure['ppassword'] = Utils::randomString();
+        $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
+        $projectStructure->ppassword = Utils::randomString();
 
         // flag to mark the project "from API"
-        $projectStructure['from_api'] = true;
+        $projectStructure->from_api = true;
 
         ProjectQueue::sendProject($projectStructure);
 
@@ -184,8 +184,8 @@ class NewController extends KleinController
         $this->response->json([
             'status' => 'OK',
             'message' => 'Success',
-            'id_project' => $projectStructure['id_project'],
-            'project_pass' => $projectStructure['ppassword'],
+            'id_project' => $projectStructure->id_project,
+            'project_pass' => $projectStructure->ppassword,
             'new_keys' => $request['new_keys'],
             'analyze_url' => $projectManager->getAnalyzeURL()
         ]);
@@ -198,7 +198,7 @@ class NewController extends KleinController
      */
     private function pollForCreationResult($projectStructure): array
     {
-        return $projectStructure['result']['errors'];
+        return $projectStructure->result['errors'];
     }
 
     /**
@@ -227,101 +227,101 @@ class NewController extends KleinController
     ): ProjectStructure {
         $projectStructure = new ProjectStructure();
 
-        $projectStructure['sanitize_project_options'] = false;
-        $projectStructure['project_name'] = $request['project_name'];
-        $projectStructure['job_subject'] = $request['subject'];
-        $projectStructure['private_tm_key'] = $request['private_tm_key'];
-        $projectStructure['tm_prioritization'] = $request['tm_prioritization'];
-        $projectStructure['uploadToken'] = $uploadToken;
-        $projectStructure['array_files'] = $filesFound['arrayFiles'];
-        $projectStructure['array_files_meta'] = $filesFound['arrayFilesMeta'];
-        $projectStructure['source_language'] = $request['source_lang'];
-        $projectStructure['target_language'] = explode(',', $request['target_lang']);
-        $projectStructure['mt_engine'] = $request['mt_engine'];
-        $projectStructure['tms_engine'] = $request['tms_engine'];
-        $projectStructure['status'] = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure['owner'] = $user->email;
-        $projectStructure['metadata'] = $request['metadata'];
-        $projectStructure['public_tm_penalty'] = $request['public_tm_penalty'];
-        $projectStructure['pretranslate_100'] = (int)!!$request['pretranslate_100'];
-        $projectStructure['pretranslate_101'] = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
+        $projectStructure->sanitize_project_options = false;
+        $projectStructure->project_name = $request['project_name'];
+        $projectStructure->job_subject = $request['subject'];
+        $projectStructure->private_tm_key = $request['private_tm_key'];
+        $projectStructure->tm_prioritization = $request['tm_prioritization'];
+        $projectStructure->uploadToken = $uploadToken;
+        $projectStructure->array_files = $filesFound['arrayFiles'];
+        $projectStructure->array_files_meta = $filesFound['arrayFilesMeta'];
+        $projectStructure->source_language = $request['source_lang'];
+        $projectStructure->target_language = explode(',', $request['target_lang']);
+        $projectStructure->mt_engine = $request['mt_engine'];
+        $projectStructure->tms_engine = $request['tms_engine'];
+        $projectStructure->status = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure->owner = $user->email;
+        $projectStructure->metadata = $request['metadata'];
+        $projectStructure->public_tm_penalty = $request['public_tm_penalty'];
+        $projectStructure->pretranslate_100 = (int)!!$request['pretranslate_100'];
+        $projectStructure->pretranslate_101 = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
 
         //default gets all public matches from TM
-        $projectStructure['only_private'] = (isset($request['get_public_matches']) && !$request['get_public_matches']);
+        $projectStructure->only_private = (isset($request['get_public_matches']) && !$request['get_public_matches']);
 
-        $projectStructure['user_ip'] = Utils::getRealIpAddr();
-        $projectStructure['HTTP_HOST'] = AppConfig::$HTTPHOST;
-        $projectStructure['due_date'] = (empty($request['due_date']) ? null : Utils::mysqlTimestamp(
+        $projectStructure->user_ip = Utils::getRealIpAddr();
+        $projectStructure->HTTP_HOST = AppConfig::$HTTPHOST;
+        $projectStructure->due_date = (empty($request['due_date']) ? null : Utils::mysqlTimestamp(
             $request['due_date']
         ));
-        $projectStructure['target_language_mt_engine_association'] = $request['target_language_mt_engine_association'];
-        $projectStructure['instructions'] = $request['instructions'];
-        $projectStructure['userIsLogged'] = true;
-        $projectStructure['uid'] = $user->getUid();
-        $projectStructure['id_customer'] = $user->getEmail();
+        $projectStructure->target_language_mt_engine_association = $request['target_language_mt_engine_association'];
+        $projectStructure->instructions = $request['instructions'];
+        $projectStructure->userIsLogged = true;
+        $projectStructure->uid = $user->getUid();
+        $projectStructure->id_customer = $user->getEmail();
 
-        $projectStructure['character_counter_mode'] = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
-        $projectStructure['character_counter_count_tags'] = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
+        $projectStructure->character_counter_mode = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
+        $projectStructure->character_counter_count_tags = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
 
-        $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
+        $projectStructure->subfiltering_handlers = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
 
         // Lara glossaries
         if ($request['lara_glossaries']) {
-            $projectStructure['lara_glossaries'] = $request['lara_glossaries'];
+            $projectStructure->lara_glossaries = $request['lara_glossaries'];
         }
 
         // Lara style
         if ($request['lara_style']) {
-            $projectStructure['lara_style'] = $request['lara_style'];
+            $projectStructure->lara_style = $request['lara_style'];
         }
 
         // mmtGlossaries
         if ($request['mmt_glossaries']) {
-            $projectStructure['mmt_glossaries'] = $request['mmt_glossaries'];
+            $projectStructure->mmt_glossaries = $request['mmt_glossaries'];
         }
 
         // MT Extra params
         foreach ($engine->getConfigurationParameters() as $param) {
             if ($request[$param] !== null) {
-                $projectStructure[$param] = $request[$param];
+                $projectStructure->{$param} = $request[$param];
             }
         }
 
         // with the qa template id
         if ($request['qaModelTemplate']) {
-            $projectStructure['qa_model_template'] = $request['qaModelTemplate']->getDecodedModel();
+            $projectStructure->qa_model_template = $request['qaModelTemplate']->getDecodedModel();
         }
 
         if ($request['qaModel']) {
-            $projectStructure['qa_model'] = $request['qaModel']->getDecodedModel();
+            $projectStructure->qa_model = $request['qaModel']->getDecodedModel();
         }
 
         if ($request['mt_qe_workflow_payable_rate']) {
-            $projectStructure['mt_qe_workflow_payable_rate'] = $request['mt_qe_workflow_payable_rate'];
+            $projectStructure->mt_qe_workflow_payable_rate = $request['mt_qe_workflow_payable_rate'];
         }
 
         if ($request['payableRateModelTemplate']) {
-            $projectStructure['payable_rate_model_id'] = $request['payableRateModelTemplate']->id;
+            $projectStructure->payable_rate_model_id = $request['payableRateModelTemplate']->id;
         }
 
         if ($request['dialect_strict']) {
-            $projectStructure['dialect_strict'] = $request['dialect_strict'];
+            $projectStructure->dialect_strict = $request['dialect_strict'];
         }
 
         if ($request['filters_extraction_parameters']) {
-            $projectStructure['filters_extraction_parameters'] = $request['filters_extraction_parameters'];
+            $projectStructure->filters_extraction_parameters = $request['filters_extraction_parameters'];
         }
 
         if ($request['xliff_parameters']) {
-            $projectStructure['xliff_parameters'] = $request['xliff_parameters'];
+            $projectStructure->xliff_parameters = $request['xliff_parameters'];
         }
 
         if ($request['mt_evaluation']) {
-            $projectStructure['mt_evaluation'] = true;
+            $projectStructure->mt_evaluation = true;
         }
 
         //set features override
-        $projectStructure['project_features'] = $request['project_features'];
+        $projectStructure->project_features = $request['project_features'];
 
         return $projectStructure;
     }

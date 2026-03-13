@@ -69,7 +69,7 @@ class TmKeyService
      */
     public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {
-        foreach ($projectStructure['private_tm_key'] as $_tmKey) {
+        foreach ($projectStructure->private_tm_key as $_tmKey) {
             try {
                 $keyExists = $this->tmxServiceWrapper->checkCorrectKey($_tmKey['key']);
 
@@ -86,7 +86,7 @@ class TmKeyService
         }
 
         //check if the MyMemory keys provided by the user are already associated to him.
-        $userMemoryKeys = $this->getKeyringOwnerKeys($projectStructure['uid']);
+        $userMemoryKeys = $this->getKeyringOwnerKeys($projectStructure->uid);
         $userTmKeys     = [];
         $memoryKeysToBeInserted = [];
 
@@ -97,7 +97,7 @@ class TmKeyService
             }
         }
 
-        foreach ($projectStructure['private_tm_key'] as $_tmKey) {
+        foreach ($projectStructure->private_tm_key as $_tmKey) {
             if (!in_array($_tmKey['key'], $userTmKeys)) {
                 $newMemoryKey     = new MemoryKeyStruct();
                 $newTmKey         = new TmKeyStruct();
@@ -110,10 +110,10 @@ class TmKeyService
                 // assign TMX name to the key
 
                 // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with empty name
-                $newTmKey->name = (!empty($_tmKey['name']) ? (string)str_replace("{{pid}}", (string)$projectStructure['id_project'], $_tmKey['name']) : $firstTMXFileName);
+                $newTmKey->name = (!empty($_tmKey['name']) ? (string)str_replace("{{pid}}", (string)$projectStructure->id_project, $_tmKey['name']) : $firstTMXFileName);
 
                 $newMemoryKey->tm_key = $newTmKey;
-                $newMemoryKey->uid    = $projectStructure['uid'];
+                $newMemoryKey->uid    = $projectStructure->uid;
 
                 $memoryKeysToBeInserted[] = $newMemoryKey;
             } else {
@@ -144,15 +144,15 @@ class TmKeyService
 
         // If there is no private TM key defined in the project structure,
         // or the nested indexes don't exist, stop and do nothing.
-        if (empty($projectStructure['private_tm_key'][0]['key'] ?? null)) {
+        if (empty($projectStructure->private_tm_key[0]['key'] ?? null)) {
             return;
         }
 
         //TMX Management
-        if (!empty($projectStructure['array_files'])) {
-            foreach ($projectStructure['array_files'] as $pos => $fileName) {
+        if (!empty($projectStructure->array_files)) {
+            foreach ($projectStructure->array_files as $pos => $fileName) {
                 // get corresponding meta
-                $meta = $projectStructure['array_files_meta'][$pos];
+                $meta = $projectStructure->array_files_meta[$pos];
 
                 $ext = $meta['extension'];
 
@@ -160,7 +160,7 @@ class TmKeyService
                     if ('tmx' == $ext) {
                         $file = new TMSFile(
                             "$uploadDir/$fileName",
-                            $projectStructure['private_tm_key'][0]['key'],
+                            $projectStructure->private_tm_key[0]['key'],
                             $fileName,
                             $pos
                         );
@@ -171,9 +171,9 @@ class TmKeyService
                             ($this->s3QueueFileDownloader)($fileName);
                         }
 
-                        $userStruct = $this->getUserByUid($projectStructure['uid']);
+                        $userStruct = $this->getUserByUid($projectStructure->uid);
                         if ($userStruct === null) {
-                            throw new Exception("User not found for uid: " . $projectStructure['uid']);
+                            throw new Exception("User not found for uid: " . $projectStructure->uid);
                         }
                         $this->tmxServiceWrapper->addTmxInMyMemory($file, $userStruct);
                     } else {

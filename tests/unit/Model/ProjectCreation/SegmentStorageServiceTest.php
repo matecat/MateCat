@@ -133,7 +133,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->service->storeSegments($fid, $ps);
 
         self::assertEmpty($this->service->getMinMaxSegmentsId());
-        self::assertCount(0, $ps['segments_metadata']);
+        self::assertCount(0, $ps->segments_metadata);
     }
 
     // ── Sequence ID reservation ─────────────────────────────────────
@@ -198,12 +198,12 @@ class SegmentStorageServiceTest extends AbstractTest
         ]);
 
         // Add second file's segments to the same structure
-        $ps1['segments'][$fid2] = new ArrayObject([
+        $ps1->segments[$fid2] = new ArrayObject([
             $this->makeSegment($fid2, 'u4'),
             $this->makeSegment($fid2, 'u5'),
         ]);
-        $ps1['segments_original_data'][$fid2] = [];
-        $ps1['segments_meta_data'][$fid2] = [];
+        $ps1->segments_original_data[$fid2] = [];
+        $ps1->segments_meta_data[$fid2] = [];
 
         $this->service->storeSegments($fid1, $ps1);
         $this->service->storeSegments($fid2, $ps1);
@@ -344,7 +344,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertSame(3, $ps['file_segments_count'][$fid]);
+        self::assertSame(3, $ps->file_segments_count[$fid]);
     }
 
     // ── Analysis metadata building ──────────────────────────────────
@@ -361,7 +361,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $this->service->storeSegments($fid, $ps);
 
-        $metadata = $ps['segments_metadata']->getArrayCopy();
+        $metadata = $ps->segments_metadata->getArrayCopy();
         self::assertCount(1, $metadata);
 
         $entry = $metadata[0];
@@ -397,7 +397,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $this->service->storeSegments($fid, $ps);
 
-        $metadata = $ps['segments_metadata']->getArrayCopy();
+        $metadata = $ps->segments_metadata->getArrayCopy();
         self::assertSame('custom_value', $metadata[0]['custom_field']);
     }
 
@@ -415,11 +415,11 @@ class SegmentStorageServiceTest extends AbstractTest
             $this->makeSegment($fid, 'u2'),
         ]);
 
-        self::assertCount(2, $ps['segments'][$fid]);
+        self::assertCount(2, $ps->segments[$fid]);
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertCount(0, $ps['segments'][$fid]);
+        self::assertCount(0, $ps->segments[$fid]);
     }
 
     // ── Notes linking ───────────────────────────────────────────────
@@ -437,7 +437,7 @@ class SegmentStorageServiceTest extends AbstractTest
         // Internal ID will be sanitized as "$fid|u1"
         $sanitizedId = "$fid|u1";
 
-        $ps['notes'] = new ArrayObject([
+        $ps->notes = new ArrayObject([
             $sanitizedId => [
                 'json' => [],
                 'segment_ids' => [],
@@ -447,7 +447,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertSame([1100], $ps['notes'][$sanitizedId]['segment_ids']);
+        self::assertSame([1100], $ps->notes[$sanitizedId]['segment_ids']);
     }
 
     #[Test]
@@ -462,7 +462,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $sanitizedId = "$fid|u1";
 
-        $ps['notes'] = new ArrayObject([
+        $ps->notes = new ArrayObject([
             $sanitizedId => [
                 'json' => ['some json note'],
                 'segment_ids' => [],
@@ -472,8 +472,8 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertSame([1200], $ps['notes'][$sanitizedId]['json_segment_ids']);
-        self::assertEmpty($ps['notes'][$sanitizedId]['segment_ids']);
+        self::assertSame([1200], $ps->notes[$sanitizedId]['json_segment_ids']);
+        self::assertEmpty($ps->notes[$sanitizedId]['segment_ids']);
     }
 
     // ── Context-group linking ───────────────────────────────────────
@@ -490,7 +490,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $sanitizedId = "$fid|u1";
 
-        $ps['context_group'] = new ArrayObject([
+        $ps->context_group = new ArrayObject([
             $sanitizedId => [
                 'context_json_segment_ids' => [],
             ],
@@ -498,7 +498,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertSame([1300], $ps['context_group'][$sanitizedId]['context_json_segment_ids']);
+        self::assertSame([1300], $ps->context_group[$sanitizedId]['context_json_segment_ids']);
     }
 
     // ── Translation linking ─────────────────────────────────────────
@@ -517,7 +517,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         // Translation structure: translations[internal_id][counter] = ArrayObject([0 => id, 1 => internal_id, 2 => target, 3 => hash, 4 => trans_unit, 5 => file_id, 6 => position])
         $translationRow = new ArrayObject([null, null, 'Ciao mondo', null, '<trans-unit/>', null, null]);
-        $ps['translations'] = new ArrayObject([
+        $ps->translations = new ArrayObject([
             $sanitizedId => new ArrayObject([
                 0 => $translationRow,
             ]),
@@ -550,7 +550,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         // Translation exists for this internal_id but not for mrk position 5
         $translationRow = new ArrayObject([null, null, 'Target', null, '<tu/>', null, null]);
-        $ps['translations'] = new ArrayObject([
+        $ps->translations = new ArrayObject([
             $sanitizedId => new ArrayObject([
                 0 => $translationRow, // position 0, not 5
             ]),
@@ -595,13 +595,13 @@ class SegmentStorageServiceTest extends AbstractTest
         ]);
 
         $this->service->storeSegments($fid1, $ps);
-        self::assertCount(2, $ps['segments_metadata']);
+        self::assertCount(2, $ps->segments_metadata);
 
         $this->service->storeSegments($fid2, $ps);
-        self::assertCount(3, $ps['segments_metadata']);
+        self::assertCount(3, $ps->segments_metadata);
 
         // Verify IDs are correct
-        $ids = array_column($ps['segments_metadata']->getArrayCopy(), 'id');
+        $ids = array_column($ps->segments_metadata->getArrayCopy(), 'id');
         self::assertSame([100, 101, 200], $ids);
     }
 
@@ -622,7 +622,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         // Translation at mrk position 2
         $translationRow = new ArrayObject([null, null, 'Ciao', null, '<tu/>', null, null]);
-        $ps['translations'] = new ArrayObject([
+        $ps->translations = new ArrayObject([
             $sanitizedId => new ArrayObject([
                 '2' => $translationRow,
             ]),
@@ -652,7 +652,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $row0 = new ArrayObject([null, null, 'Parte uno', null, '<tu/>', null, null]);
         $row1 = new ArrayObject([null, null, 'Parte due', null, '<tu/>', null, null]);
 
-        $ps['translations'] = new ArrayObject([
+        $ps->translations = new ArrayObject([
             $sanitizedId => new ArrayObject([
                 0 => $row0,
                 1 => $row1,
@@ -676,13 +676,13 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $ps = $this->makeProjectStructure($fid, [$this->makeSegment($fid, 'u1')]);
         // Ensure both are truly empty
-        $ps['notes'] = new ArrayObject();
-        $ps['translations'] = new ArrayObject();
+        $ps->notes = new ArrayObject();
+        $ps->translations = new ArrayObject();
 
         $this->service->storeSegments($fid, $ps);
 
         // Should complete without error, metadata should still be built
-        self::assertCount(1, $ps['segments_metadata']);
+        self::assertCount(1, $ps->segments_metadata);
     }
 
     // ── cleanSegmentsMetadata (on service directly) ─────────────────
@@ -700,7 +700,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        $result = $ps['segments_metadata']->getArrayCopy();
+        $result = $ps->segments_metadata->getArrayCopy();
         self::assertCount(2, $result);
         $ids = array_column($result, 'id');
         self::assertSame([1, 3], $ids);

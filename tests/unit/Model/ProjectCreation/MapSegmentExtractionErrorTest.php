@@ -65,7 +65,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
             'someLinkFile'
         );
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-1, $errors[0]['code']);
         $this->assertStringContainsString('No text to translate', $errors[0]['message']);
@@ -85,7 +85,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
             'linkFile'
         );
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-1, $errors[0]['code']);
     }
@@ -103,7 +103,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
             ''
         );
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-7, $errors[0]['code']);
         $this->assertSame('Xliff Import Error: Parsing failed', $errors[0]['message']);
@@ -120,7 +120,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
 
         $this->pm->callMapSegmentExtractionError($ex, $fs, '');
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(400, $errors[0]['code']);
         $this->assertStringContainsString('Root cause', $errors[0]['message']);
@@ -138,7 +138,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
             ''
         );
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(400, $errors[0]['code']);
         $this->assertSame('Validation failed', $errors[0]['message']);
@@ -157,7 +157,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
             ''
         );
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(128, $errors[0]['code']);
         $this->assertSame('Unexpected error', $errors[0]['message']);
@@ -174,7 +174,7 @@ class MapSegmentExtractionErrorTest extends AbstractTest
             ''
         );
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(0, $errors[0]['code']);
     }

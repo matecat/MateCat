@@ -172,14 +172,14 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         $this->assertInstanceOf(ProjectStructure::class, $ps);
-        $this->assertSame('My Great Project', $ps['project_name']);
-        $this->assertSame('legal', $ps['job_subject']);
-        $this->assertSame('it-IT', $ps['source_language']);
-        $this->assertSame(['en-US', 'fr-FR'], $ps['target_language']);
-        $this->assertSame(2, $ps['mt_engine']);
-        $this->assertSame(1, $ps['tms_engine']);
-        $this->assertSame(1, $ps['pretranslate_100']);
-        $this->assertSame('upload-token-abc', $ps['uploadToken']);
+        $this->assertSame('My Great Project', $ps->project_name);
+        $this->assertSame('legal', $ps->job_subject);
+        $this->assertSame('it-IT', $ps->source_language);
+        $this->assertSame(['en-US', 'fr-FR'], $ps->target_language);
+        $this->assertSame(2, $ps->mt_engine);
+        $this->assertSame(1, $ps->tms_engine);
+        $this->assertSame(1, $ps->pretranslate_100);
+        $this->assertSame('upload-token-abc', $ps->uploadToken);
     }
 
     #[Test]
@@ -199,8 +199,8 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(['a.docx', 'b.pdf'], $ps['array_files']);
-        $this->assertSame([['size' => 100], ['size' => 200]], $ps['array_files_meta']);
+        $this->assertSame(['a.docx', 'b.pdf'], $ps->array_files);
+        $this->assertSame([['size' => 100], ['size' => 200]], $ps->array_files_meta);
     }
 
     #[Test]
@@ -217,10 +217,10 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertTrue($ps['userIsLogged']);
-        $this->assertSame(42, $ps['uid']);
-        $this->assertSame('test@example.com', $ps['id_customer']);
-        $this->assertSame('test@example.com', $ps['owner']);
+        $this->assertTrue($ps->userIsLogged);
+        $this->assertSame(42, $ps->uid);
+        $this->assertSame('test@example.com', $ps->id_customer);
+        $this->assertSame('test@example.com', $ps->owner);
     }
 
     #[Test]
@@ -237,7 +237,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS, $ps['status']);
+        $this->assertSame(ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS, $ps->status);
     }
 
     #[Test]
@@ -254,7 +254,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertFalse($ps['sanitize_project_options']);
+        $this->assertFalse($ps->sanitize_project_options);
     }
 
     #[Test]
@@ -273,7 +273,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(['ja-JP', 'ko-KR', 'zh-CN'], $ps['target_language']);
+        $this->assertSame(['ja-JP', 'ko-KR', 'zh-CN'], $ps->target_language);
     }
 
     #[Test]
@@ -293,7 +293,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(1, $ps['only_private']);
+        $this->assertSame(1, $ps->only_private);
     }
 
     #[Test]
@@ -313,7 +313,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(0, $ps['only_private']);
+        $this->assertSame(0, $ps->only_private);
     }
 
     #[Test]
@@ -333,7 +333,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(1, $ps['pretranslate_101']);
+        $this->assertSame(1, $ps->pretranslate_101);
     }
 
     #[Test]
@@ -352,7 +352,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(0, $ps['pretranslate_101']);
+        $this->assertSame(0, $ps->pretranslate_101);
     }
 
     #[Test]
@@ -379,8 +379,8 @@ class BuildProjectStructureTest extends AbstractTest
             $engine,
         );
 
-        $this->assertSame('glossary-123', $ps['mmt_glossaries']);
-        $this->assertSame('more', $ps['deepl_formality']);
+        $this->assertSame('glossary-123', $ps->mmt_glossaries);
+        $this->assertSame('more', $ps->deepl_formality);
     }
 
     #[Test]
@@ -405,7 +405,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // The default from ProjectStructure should remain
-        $this->assertNull($ps['mmt_glossaries']);
+        $this->assertNull($ps->mmt_glossaries);
     }
 
     #[Test]
@@ -428,11 +428,11 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('glossary-abc', $ps['lara_glossaries']);
-        $this->assertSame('formal', $ps['lara_style']);
-        $this->assertSame('mmt-456', $ps['mmt_glossaries']);
-        $this->assertSame('strict', $ps['dialect_strict']);
-        $this->assertTrue($ps['mt_evaluation']);
+        $this->assertSame('glossary-abc', $ps->lara_glossaries);
+        $this->assertSame('formal', $ps->lara_style);
+        $this->assertSame('mmt-456', $ps->mmt_glossaries);
+        $this->assertSame('strict', $ps->dialect_strict);
+        $this->assertTrue($ps->mt_evaluation);
     }
 
     #[Test]
@@ -451,14 +451,14 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // These should remain at their ProjectStructure defaults (null)
-        $this->assertNull($ps['lara_glossaries']);
-        $this->assertNull($ps['lara_style']);
-        $this->assertNull($ps['mmt_glossaries']);
-        $this->assertNull($ps['dialect_strict']);
-        $this->assertNull($ps['mt_evaluation']);
-        $this->assertNull($ps['filters_extraction_parameters']);
+        $this->assertNull($ps->lara_glossaries);
+        $this->assertNull($ps->lara_style);
+        $this->assertNull($ps->mmt_glossaries);
+        $this->assertNull($ps->dialect_strict);
+        $this->assertNull($ps->mt_evaluation);
+        $this->assertNull($ps->filters_extraction_parameters);
         // xliff_parameters defaults to [] on ProjectStructure, not null
-        $this->assertSame([], $ps['xliff_parameters']);
+        $this->assertSame([], $ps->xliff_parameters);
     }
 
     #[Test]
@@ -478,7 +478,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame($features, $ps['project_features']);
+        $this->assertSame($features, $ps->project_features);
     }
 
     #[Test]
@@ -497,7 +497,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('twig,markup', $ps['subfiltering_handlers']);
+        $this->assertSame('twig,markup', $ps->subfiltering_handlers);
     }
 
     #[Test]
@@ -516,7 +516,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('abc-key-123', $ps['private_tm_key']);
+        $this->assertSame('abc-key-123', $ps->private_tm_key);
     }
 
     #[Test]
@@ -535,7 +535,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('high', $ps['tm_prioritization']);
+        $this->assertSame('high', $ps->tm_prioritization);
     }
 
     #[Test]
@@ -555,7 +555,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame($meta, $ps['metadata']);
+        $this->assertSame($meta, $ps->metadata);
     }
 
     #[Test]
@@ -574,7 +574,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(15, $ps['public_tm_penalty']);
+        $this->assertSame(15, $ps->public_tm_penalty);
     }
 
     #[Test]
@@ -593,7 +593,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(0, $ps['only_private']);
+        $this->assertSame(0, $ps->only_private);
     }
 
     #[Test]
@@ -613,7 +613,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('192.168.1.100', $ps['user_ip']);
+        $this->assertSame('192.168.1.100', $ps->user_ip);
 
         unset($_SERVER['REMOTE_ADDR']);
     }
@@ -634,7 +634,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['due_date']);
+        $this->assertNull($ps->due_date);
     }
 
     #[Test]
@@ -656,7 +656,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // Should be a formatted MySQL datetime string
-        $this->assertSame('2026-06-15 10:30:00', $ps['due_date']);
+        $this->assertSame('2026-06-15 10:30:00', $ps->due_date);
     }
 
     #[Test]
@@ -676,7 +676,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame($instructions, $ps['instructions']);
+        $this->assertSame($instructions, $ps->instructions);
     }
 
     #[Test]
@@ -695,7 +695,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['instructions']);
+        $this->assertNull($ps->instructions);
     }
 
     #[Test]
@@ -714,7 +714,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('source', $ps['character_counter_mode']);
+        $this->assertSame('source', $ps->character_counter_mode);
     }
 
     #[Test]
@@ -733,7 +733,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertTrue($ps['character_counter_count_tags']);
+        $this->assertTrue($ps->character_counter_count_tags);
     }
 
     #[Test]
@@ -755,7 +755,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(['categories' => ['style']], $ps['qa_model_template']);
+        $this->assertSame(['categories' => ['style']], $ps->qa_model_template);
     }
 
     #[Test]
@@ -774,7 +774,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['qa_model_template']);
+        $this->assertNull($ps->qa_model_template);
     }
 
     #[Test]
@@ -796,7 +796,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(['model' => 'data'], $ps['qa_model']);
+        $this->assertSame(['model' => 'data'], $ps->qa_model);
     }
 
     #[Test]
@@ -815,7 +815,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['qa_model']);
+        $this->assertNull($ps->qa_model);
     }
 
     #[Test]
@@ -834,7 +834,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('rate-template-42', $ps['mt_qe_workflow_payable_rate']);
+        $this->assertSame('rate-template-42', $ps->mt_qe_workflow_payable_rate);
     }
 
     #[Test]
@@ -853,7 +853,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['mt_qe_workflow_payable_rate']);
+        $this->assertNull($ps->mt_qe_workflow_payable_rate);
     }
 
     #[Test]
@@ -875,7 +875,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(77, $ps['payable_rate_model_id']);
+        $this->assertSame(77, $ps->payable_rate_model_id);
     }
 
     #[Test]
@@ -894,7 +894,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['payable_rate_model_id']);
+        $this->assertNull($ps->payable_rate_model_id);
     }
 
     #[Test]
@@ -913,7 +913,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('{"key":"value"}', $ps['filters_extraction_parameters']);
+        $this->assertSame('{"key":"value"}', $ps->filters_extraction_parameters);
     }
 
     #[Test]
@@ -932,7 +932,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('{"xliff":"config"}', $ps['xliff_parameters']);
+        $this->assertSame('{"xliff":"config"}', $ps->xliff_parameters);
     }
 
     #[Test]
@@ -952,7 +952,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // mt_evaluation defaults to null, falsy doesn't set it
-        $this->assertNull($ps['mt_evaluation']);
+        $this->assertNull($ps->mt_evaluation);
     }
 
     #[Test]
@@ -972,7 +972,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame($assoc, $ps['target_language_mt_engine_association']);
+        $this->assertSame($assoc, $ps->target_language_mt_engine_association);
     }
 
     #[Test]
@@ -992,7 +992,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['due_date']);
+        $this->assertNull($ps->due_date);
     }
 
     #[Test]
@@ -1012,7 +1012,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['due_date']);
+        $this->assertNull($ps->due_date);
     }
 
     #[Test]
@@ -1029,7 +1029,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(AppConfig::$HTTPHOST, $ps['HTTP_HOST']);
+        $this->assertSame(AppConfig::$HTTPHOST, $ps->HTTP_HOST);
     }
 
     #[Test]
@@ -1049,7 +1049,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(1, $ps['pretranslate_100']);
+        $this->assertSame(1, $ps->pretranslate_100);
     }
 
     #[Test]
@@ -1069,7 +1069,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame(0, $ps['pretranslate_100']);
+        $this->assertSame(0, $ps->pretranslate_100);
     }
 
     #[Test]
@@ -1089,7 +1089,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['lara_glossaries']);
+        $this->assertNull($ps->lara_glossaries);
     }
 
     #[Test]
@@ -1108,7 +1108,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['lara_style']);
+        $this->assertNull($ps->lara_style);
     }
 
     #[Test]
@@ -1127,7 +1127,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['mmt_glossaries']);
+        $this->assertNull($ps->mmt_glossaries);
     }
 
     #[Test]
@@ -1146,7 +1146,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertNull($ps['dialect_strict']);
+        $this->assertNull($ps->dialect_strict);
     }
 
     // ──────────────────────────────────────────────────────────────────
@@ -1209,12 +1209,12 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         $this->assertInstanceOf(ProjectStructure::class, $ps);
-        $this->assertSame('My Created Project', $ps['project_name']);
-        $this->assertSame('medical', $ps['job_subject']);
-        $this->assertSame('de-DE', $ps['source_language']);
-        $this->assertSame(['en-US', 'fr-FR'], $ps['target_language']);
-        $this->assertSame(3, $ps['mt_engine']);
-        $this->assertSame('upload-token-xyz', $ps['uploadToken']);
+        $this->assertSame('My Created Project', $ps->project_name);
+        $this->assertSame('medical', $ps->job_subject);
+        $this->assertSame('de-DE', $ps->source_language);
+        $this->assertSame(['en-US', 'fr-FR'], $ps->target_language);
+        $this->assertSame(3, $ps->mt_engine);
+        $this->assertSame('upload-token-xyz', $ps->uploadToken);
     }
 
     #[Test]
@@ -1233,10 +1233,10 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertTrue($ps['userIsLogged']);
-        $this->assertSame(42, $ps['uid']);
-        $this->assertSame('test@example.com', $ps['id_customer']);
-        $this->assertSame('test@example.com', $ps['owner']);
+        $this->assertTrue($ps->userIsLogged);
+        $this->assertSame(42, $ps->uid);
+        $this->assertSame('test@example.com', $ps->id_customer);
+        $this->assertSame('test@example.com', $ps->owner);
     }
 
     #[Test]
@@ -1255,7 +1255,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS, $ps['status']);
+        $this->assertSame(ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS, $ps->status);
     }
 
     #[Test]
@@ -1275,7 +1275,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame($metadata, $ps['metadata']);
+        $this->assertSame($metadata, $ps->metadata);
     }
 
     #[Test]
@@ -1295,8 +1295,8 @@ class BuildProjectStructureTest extends AbstractTest
             $gdriveSession,
         );
 
-        $this->assertNotNull($ps['session']);
-        $this->assertSame('gdrive@test.com', $ps['session']['service_account']);
+        $this->assertNotNull($ps->session);
+        $this->assertSame('gdrive@test.com', $ps->session['service_account']);
         // uid should be injected into the session
         $this->assertSame(42, $ps->session['uid']);
     }
@@ -1317,7 +1317,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertNull($ps['session']);
+        $this->assertNull($ps->session);
     }
 
     #[Test]
@@ -1345,8 +1345,8 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('less', $ps['deepl_formality']);
-        $this->assertSame('gl-789', $ps['deepl_id_glossary']);
+        $this->assertSame('less', $ps->deepl_formality);
+        $this->assertSame('gl-789', $ps->deepl_id_glossary);
     }
 
     #[Test]
@@ -1372,7 +1372,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertNull($ps['deepl_formality']);
+        $this->assertNull($ps->deepl_formality);
     }
 
     #[Test]
@@ -1395,9 +1395,9 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('strict', $ps['dialect_strict']);
-        $this->assertSame('{"some": "param"}', $ps['filters_extraction_parameters']);
-        $this->assertSame('{"xliff": "param"}', $ps['xliff_parameters']);
+        $this->assertSame('strict', $ps->dialect_strict);
+        $this->assertSame('{"some": "param"}', $ps->filters_extraction_parameters);
+        $this->assertSame('{"xliff": "param"}', $ps->xliff_parameters);
     }
 
     #[Test]
@@ -1417,7 +1417,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(1, $ps['tms_engine']);
+        $this->assertSame(1, $ps->tms_engine);
     }
 
     #[Test]
@@ -1439,7 +1439,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame($features, $ps['project_features']);
+        $this->assertSame($features, $ps->project_features);
     }
 
     #[Test]
@@ -1464,8 +1464,8 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame($payableRateStub, $ps['payable_rate_model']);
-        $this->assertSame(99, $ps['payable_rate_model_id']);
+        $this->assertSame($payableRateStub, $ps->payable_rate_model);
+        $this->assertSame(99, $ps->payable_rate_model_id);
     }
 
     #[Test]
@@ -1486,8 +1486,8 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertNull($ps['payable_rate_model']);
-        $this->assertNull($ps['payable_rate_model_id']);
+        $this->assertNull($ps->payable_rate_model);
+        $this->assertNull($ps->payable_rate_model_id);
     }
 
     #[Test]
@@ -1508,7 +1508,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('my-secret-key', $ps['private_tm_key']);
+        $this->assertSame('my-secret-key', $ps->private_tm_key);
     }
 
     #[Test]
@@ -1529,7 +1529,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(20, $ps['public_tm_penalty']);
+        $this->assertSame(20, $ps->public_tm_penalty);
     }
 
     #[Test]
@@ -1551,8 +1551,8 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(1, $ps['pretranslate_100']);
-        $this->assertSame(0, $ps['pretranslate_101']);
+        $this->assertSame(1, $ps->pretranslate_100);
+        $this->assertSame(0, $ps->pretranslate_101);
     }
 
     #[Test]
@@ -1574,7 +1574,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // bool true coerced to int 1 by ProjectStructure's int property
-        $this->assertSame(1, $ps['only_private']);
+        $this->assertSame(1, $ps->only_private);
     }
 
     #[Test]
@@ -1595,7 +1595,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('2026-12-25 00:00:00', $ps['due_date']);
+        $this->assertSame('2026-12-25 00:00:00', $ps->due_date);
     }
 
     #[Test]
@@ -1617,7 +1617,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame($assoc, $ps['target_language_mt_engine_association']);
+        $this->assertSame($assoc, $ps->target_language_mt_engine_association);
     }
 
     #[Test]
@@ -1638,7 +1638,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('10.0.0.50', $ps['user_ip']);
+        $this->assertSame('10.0.0.50', $ps->user_ip);
 
         unset($_SERVER['REMOTE_ADDR']);
     }
@@ -1661,7 +1661,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('enabled', $ps['tm_prioritization']);
+        $this->assertSame('enabled', $ps->tm_prioritization);
     }
 
     #[Test]
@@ -1683,7 +1683,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // empty('') is true => null
-        $this->assertNull($ps['tm_prioritization']);
+        $this->assertNull($ps->tm_prioritization);
     }
 
     #[Test]
@@ -1704,7 +1704,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('source', $ps['character_counter_mode']);
+        $this->assertSame('source', $ps->character_counter_mode);
     }
 
     #[Test]
@@ -1725,7 +1725,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertNull($ps['character_counter_mode']);
+        $this->assertNull($ps->character_counter_mode);
     }
 
     #[Test]
@@ -1746,7 +1746,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertTrue($ps['character_counter_count_tags']);
+        $this->assertTrue($ps->character_counter_count_tags);
     }
 
     #[Test]
@@ -1767,7 +1767,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertNull($ps['character_counter_count_tags']);
+        $this->assertNull($ps->character_counter_count_tags);
     }
 
     #[Test]
@@ -1788,7 +1788,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('twig,markup', $ps['subfiltering_handlers']);
+        $this->assertSame('twig,markup', $ps->subfiltering_handlers);
     }
 
     #[Test]
@@ -1809,7 +1809,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertNull($ps['filters_extraction_parameters']);
+        $this->assertNull($ps->filters_extraction_parameters);
     }
 
     #[Test]
@@ -1830,7 +1830,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame([], $ps['xliff_parameters']);
+        $this->assertSame([], $ps->xliff_parameters);
     }
 
     #[Test]
@@ -1854,7 +1854,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(['categories' => ['accuracy']], $ps['qa_model_template']);
+        $this->assertSame(['categories' => ['accuracy']], $ps->qa_model_template);
     }
 
     #[Test]
@@ -1875,7 +1875,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertNull($ps['qa_model_template']);
+        $this->assertNull($ps->qa_model_template);
     }
 
     #[Test]
@@ -1894,7 +1894,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(AppConfig::$HTTPHOST, $ps['HTTP_HOST']);
+        $this->assertSame(AppConfig::$HTTPHOST, $ps->HTTP_HOST);
     }
 
     #[Test]
@@ -1916,8 +1916,8 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(['doc1.xliff', 'doc2.xliff'], $ps['array_files']);
-        $this->assertSame([['size' => 500], ['size' => 600]], $ps['array_files_meta']);
+        $this->assertSame(['doc1.xliff', 'doc2.xliff'], $ps->array_files);
+        $this->assertSame([['size' => 500], ['size' => 600]], $ps->array_files_meta);
     }
 
     #[Test]
@@ -1938,7 +1938,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame(['ja-JP', 'ko-KR', 'zh-CN'], $ps['target_language']);
+        $this->assertSame(['ja-JP', 'ko-KR', 'zh-CN'], $ps->target_language);
     }
 
     #[Test]
@@ -1959,7 +1959,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('relaxed', $ps['dialect_strict']);
+        $this->assertSame('relaxed', $ps->dialect_strict);
     }
 
     // ──────────────────────────────────────────────────────────────────
@@ -1992,7 +1992,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // Both should pick up AppConfig::$HTTPHOST (whatever its current value is)
-        $this->assertSame($ps1['HTTP_HOST'], $ps2['HTTP_HOST']);
+        $this->assertSame($ps1->HTTP_HOST, $ps2->HTTP_HOST);
     }
 
     #[Test]

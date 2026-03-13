@@ -133,7 +133,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $this->pm->callCheckForProjectAssignment();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertNull($ps['id_assignee']);
+        $this->assertNull($ps->id_assignee);
     }
 
     #[Test]
@@ -171,7 +171,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $this->pm->callCheckForProjectAssignment();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(55, $ps['id_assignee']);
+        $this->assertSame(55, $ps->id_assignee);
     }
 
     #[Test]
@@ -200,7 +200,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $this->pm->callCheckForProjectAssignment();
 
         $ps = $this->pm->getTestProjectStructure();
-        $resultTeam = $ps['team'];
+        $resultTeam = $ps->team;
         $this->assertInstanceOf(TeamStruct::class, $resultTeam);
         $this->assertSame('Filtered', $resultTeam->name);
         $this->assertSame(7, $resultTeam->id);
@@ -264,7 +264,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $this->pm->callCheckForProjectAssignment();
 
         $ps = $this->pm->getTestProjectStructure();
-        $resultTeam = $ps['team'];
+        $resultTeam = $ps->team;
         $this->assertInstanceOf(TeamStruct::class, $resultTeam);
         $this->assertSame(15, $resultTeam->id);
         $this->assertSame('RAO Team', $resultTeam->name);

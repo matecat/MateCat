@@ -144,7 +144,7 @@ class TestableProjectManager extends ProjectManager
      */
     public function setProjectStructureValue(string $key, mixed $value): void
     {
-        $this->projectStructure[$key] = $value;
+        $this->projectStructure->$key = $value;
     }
 
     // ── saveMetadata() testing support ──────────────────────────────
@@ -357,7 +357,7 @@ class TestableProjectManager extends ProjectManager
         $ref = new ReflectionClass(ProjectManager::class);
         $method = $ref->getMethod('sanitizeProjectOptions');
 
-        return $method->invoke($this, $this->projectStructure['metadata']);
+        return $method->invoke($this, $this->projectStructure->metadata);
     }
 
     /**

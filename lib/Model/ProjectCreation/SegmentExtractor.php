@@ -120,9 +120,9 @@ class SegmentExtractor
         }
 
         // create Structure for multiple files
-        $projectStructure['segments']->offsetSet($fid, new ArrayObject([]));
-        $projectStructure['segments_original_data']->offsetSet($fid, new ArrayObject([]));
-        $projectStructure['segments_meta_data']->offsetSet($fid, new ArrayObject([]));
+        $projectStructure->segments->offsetSet($fid, new ArrayObject([]));
+        $projectStructure->segments_original_data->offsetSet($fid, new ArrayObject([]));
+        $projectStructure->segments_meta_data->offsetSet($fid, new ArrayObject([]));
 
         $xliffParser = new XliffParser();
 
@@ -150,7 +150,7 @@ class SegmentExtractor
         }
 
         // use generic
-        if (count($projectStructure['segments'][$fid]) == 0 || $_fileCounter_Show_In_Cattool == 0) {
+        if (count($projectStructure->segments[$fid]) == 0 || $_fileCounter_Show_In_Cattool == 0) {
             $this->log("Segment import - no segments found in {$file_info[ 'original_filename' ]}\n");
             throw new Exception($file_info['original_filename'], -1);
         } else {
@@ -297,15 +297,15 @@ class SegmentExtractor
                     );
 
                     if ($preTranslation !== null) {
-                        if (!$projectStructure['translations']->offsetExists($trans_unit_reference)) {
-                            $projectStructure['translations']->offsetSet($trans_unit_reference, new ArrayObject());
+                        if (!$projectStructure->translations->offsetExists($trans_unit_reference)) {
+                            $projectStructure->translations->offsetSet($trans_unit_reference, new ArrayObject());
                         }
 
                         /**
                          * Trans-Unit
                          * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                          */
-                        $projectStructure['translations'][$trans_unit_reference]->offsetSet(
+                        $projectStructure->translations[$trans_unit_reference]->offsetSet(
                             $seg_source['mid'],
                             new ArrayObject([
                                 2 => $preTranslation['target'],
@@ -393,15 +393,15 @@ class SegmentExtractor
                 );
 
                 if ($preTranslation !== null) {
-                    if (!$projectStructure['translations']->offsetExists($trans_unit_reference)) {
-                        $projectStructure['translations']->offsetSet($trans_unit_reference, new ArrayObject());
+                    if (!$projectStructure->translations->offsetExists($trans_unit_reference)) {
+                        $projectStructure->translations->offsetSet($trans_unit_reference, new ArrayObject());
                     }
 
                     /**
                      * Trans-Unit
                      * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                      */
-                    $projectStructure['translations'][$trans_unit_reference]->append(
+                    $projectStructure->translations[$trans_unit_reference]->append(
                         new ArrayObject([
                             2 => $preTranslation['target'],
                             4 => $xliff_trans_unit,
@@ -608,11 +608,11 @@ class SegmentExtractor
             $metadataStruct->meta_key   = 'sizeRestriction';
             $metadataStruct->meta_value = (string)$sizeRestriction;
         }
-        $projectStructure['segments_meta_data'][$fid]->append($metadataStruct);
+        $projectStructure->segments_meta_data[$fid]->append($metadataStruct);
 
         // --- Segment original data ---
         $segmentOriginalDataStruct = (new SegmentOriginalDataStruct())->setMap($dataRefMap);
-        $projectStructure['segments_original_data'][$fid]->append($segmentOriginalDataStruct);
+        $projectStructure->segments_original_data[$fid]->append($segmentOriginalDataStruct);
 
         // --- Segment hash ---
         $segmentHash = $this->createSegmentHash($rawContent, $dataRefMap, $sizeRestriction);
@@ -634,7 +634,7 @@ class SegmentExtractor
             'show_in_cattool'        => $showInCattool,
         ]);
 
-        $projectStructure['segments'][$fid]->append($segStruct);
+        $projectStructure->segments[$fid]->append($segStruct);
 
         // --- Update counters ---
         $this->filesWordCount += (int)$wordCount;
@@ -755,23 +755,23 @@ class SegmentExtractor
                     throw new Exception(' you reached the maximum size for a single segment note (' . self::SEGMENT_NOTES_MAX_SIZE . ' bytes)');
                 }
 
-                if (!$projectStructure['notes'][$internal_id]->offsetExists('entries')) {
-                    $projectStructure['notes'][$internal_id]->offsetSet('from', new ArrayObject());
-                    $projectStructure['notes'][$internal_id]['from']->offsetSet('entries', new ArrayObject());
-                    $projectStructure['notes'][$internal_id]['from']->offsetSet('json', new ArrayObject());
-                    $projectStructure['notes'][$internal_id]->offsetSet('entries', new ArrayObject());
-                    $projectStructure['notes'][$internal_id]->offsetSet('json', new ArrayObject());
-                    $projectStructure['notes'][$internal_id]->offsetSet('json_segment_ids', new ArrayObject());
-                    $projectStructure['notes'][$internal_id]->offsetSet('segment_ids', new ArrayObject());
+                if (!$projectStructure->notes[$internal_id]->offsetExists('entries')) {
+                    $projectStructure->notes[$internal_id]->offsetSet('from', new ArrayObject());
+                    $projectStructure->notes[$internal_id]['from']->offsetSet('entries', new ArrayObject());
+                    $projectStructure->notes[$internal_id]['from']->offsetSet('json', new ArrayObject());
+                    $projectStructure->notes[$internal_id]->offsetSet('entries', new ArrayObject());
+                    $projectStructure->notes[$internal_id]->offsetSet('json', new ArrayObject());
+                    $projectStructure->notes[$internal_id]->offsetSet('json_segment_ids', new ArrayObject());
+                    $projectStructure->notes[$internal_id]->offsetSet('segment_ids', new ArrayObject());
                 }
 
-                $projectStructure['notes'][$internal_id][$noteKey]->append($noteContent);
+                $projectStructure->notes[$internal_id][$noteKey]->append($noteContent);
 
                 // import segments metadata from the `from` attribute
                 if (isset($note['from'])) {
-                    $projectStructure['notes'][$internal_id]['from'][$noteKey]->append($note['from']);
+                    $projectStructure->notes[$internal_id]['from'][$noteKey]->append($note['from']);
                 } else {
-                    $projectStructure['notes'][$internal_id]['from'][$noteKey]->append('NO_FROM');
+                    $projectStructure->notes[$internal_id]['from'][$noteKey]->append('NO_FROM');
                 }
             }
         }
@@ -789,9 +789,9 @@ class SegmentExtractor
         if (isset($trans_unit['context-group'])) {
             $this->initArrayObject('context_group', $internal_id, $projectStructure);
 
-            if (!$projectStructure['context_group'][$internal_id]->offsetExists('context_json')) {
-                $projectStructure['context_group'][$internal_id]->offsetSet('context_json', $trans_unit['context-group']);
-                $projectStructure['context_group'][$internal_id]->offsetSet('context_json_segment_ids', new ArrayObject()); // because of mrk tags, same context can be owned by different segments
+            if (!$projectStructure->context_group[$internal_id]->offsetExists('context_json')) {
+                $projectStructure->context_group[$internal_id]->offsetSet('context_json', $trans_unit['context-group']);
+                $projectStructure->context_group[$internal_id]->offsetSet('context_json_segment_ids', new ArrayObject()); // because of mrk tags, same context can be owned by different segments
             }
         }
     }
@@ -803,8 +803,8 @@ class SegmentExtractor
      */
     private function initArrayObject(string $key, string $id, ProjectStructure $projectStructure): void
     {
-        if (!$projectStructure[$key]->offsetExists($id)) {
-            $projectStructure[$key]->offsetSet($id, new ArrayObject());
+        if (!$projectStructure->$key->offsetExists($id)) {
+            $projectStructure->$key->offsetSet($id, new ArrayObject());
         }
     }
 
@@ -830,9 +830,9 @@ class SegmentExtractor
         ProjectStructure $projectStructure,
     ): bool {
         /** @var XliffRulesModel $configModel */
-        $configModel = $projectStructure['xliff_parameters'];
+        $configModel = $projectStructure->xliff_parameters;
         $rule        = $configModel->getMatchingRule(
-            $projectStructure['current_xliff_info'][$file_id]['version'],
+            $projectStructure->current_xliff_info[$file_id]['version'],
             $state,
             $stateQualifier
         );

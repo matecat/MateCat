@@ -78,7 +78,7 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->setPrivateTMKeys($ps, '');
 
-        $errors = $ps['result']['errors'];
+        $errors = $ps->result['errors'];
         self::assertCount(1, $errors);
         self::assertSame(-4, $errors[0]['code']);
         self::assertStringContainsString('bad-key', $errors[0]['message']);
@@ -95,8 +95,8 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->setPrivateTMKeys($ps, '');
 
-        self::assertCount(1, $ps['result']['errors']);
-        self::assertSame(-4, $ps['result']['errors'][0]['code']);
+        self::assertCount(1, $ps->result['errors']);
+        self::assertSame(-4, $ps->result['errors'][0]['code']);
     }
 
     #[Test]
@@ -111,7 +111,7 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->setPrivateTMKeys($ps, '');
 
-        $errors = $ps['result']['errors'];
+        $errors = $ps->result['errors'];
         self::assertCount(1, $errors);
         self::assertSame(-99, $errors[0]['code']);
         self::assertSame("API down", $errors[0]['message']);
@@ -130,8 +130,8 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->setPrivateTMKeys($ps, '');
 
-        self::assertCount(1, $ps['result']['errors']);
-        self::assertStringContainsString('bad-key', $ps['result']['errors'][0]['message']);
+        self::assertCount(1, $ps->result['errors']);
+        self::assertStringContainsString('bad-key', $ps->result['errors'][0]['message']);
     }
 
     #[Test]
@@ -179,7 +179,7 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->setPrivateTMKeys($ps, 'fallback.tmx');
 
-        self::assertEmpty($ps['result']['errors']);
+        self::assertEmpty($ps->result['errors']);
     }
 
     #[Test]
@@ -262,7 +262,7 @@ class TmKeyServiceTest extends AbstractTest
         $this->service->setPrivateTMKeys($ps, '');
 
         // No project errors — the exception is just logged
-        self::assertEmpty($ps['result']['errors']);
+        self::assertEmpty($ps->result['errors']);
     }
 
     #[Test]
@@ -276,7 +276,7 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->setPrivateTMKeys($ps, '');
 
-        self::assertEmpty($ps['result']['errors']);
+        self::assertEmpty($ps->result['errors']);
     }
 
     #[Test]
@@ -291,7 +291,7 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->setPrivateTMKeys($ps, '');
 
-        self::assertEmpty($ps['result']['errors']);
+        self::assertEmpty($ps->result['errors']);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -372,8 +372,8 @@ class TmKeyServiceTest extends AbstractTest
 
         self::assertNotNull($caughtException, 'Expected exception to be thrown');
         // Verify error was recorded before re-throw
-        self::assertCount(1, $ps['result']['errors']);
-        self::assertSame(-5, $ps['result']['errors'][0]['code']);
+        self::assertCount(1, $ps->result['errors']);
+        self::assertSame(-5, $ps->result['errors'][0]['code']);
     }
 
     #[Test]
@@ -391,7 +391,7 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->service->pushTMXToMyMemory($ps, '/tmp/upload');
 
-        self::assertEmpty($ps['result']['errors']);
+        self::assertEmpty($ps->result['errors']);
     }
 
     // ──────────────────────────────────────────────────────────────

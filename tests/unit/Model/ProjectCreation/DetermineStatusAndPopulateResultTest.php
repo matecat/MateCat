@@ -69,7 +69,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->callDetermineStatusAndPopulateResult();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_NEW, $ps['status']);
+        $this->assertSame(ProjectStatus::STATUS_NEW, $ps->status);
     }
 
     #[Test]
@@ -81,7 +81,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->callDetermineStatusAndPopulateResult();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_NOT_TO_ANALYZE, $ps['status']);
+        $this->assertSame(ProjectStatus::STATUS_NOT_TO_ANALYZE, $ps->status);
     }
 
     #[Test]
@@ -93,7 +93,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->callDetermineStatusAndPopulateResult();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_EMPTY, $ps['status']);
+        $this->assertSame(ProjectStatus::STATUS_EMPTY, $ps->status);
     }
 
     #[Test]
@@ -105,7 +105,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->callDetermineStatusAndPopulateResult();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_EMPTY, $ps['status']);
+        $this->assertSame(ProjectStatus::STATUS_EMPTY, $ps->status);
     }
 
     // ── Result structure population ─────────────────────────────────
@@ -116,7 +116,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame(1, $result['code']);
     }
 
@@ -126,7 +126,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('OK', $result['data']);
     }
 
@@ -136,7 +136,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('proj_pass', $result['ppassword']);
     }
 
@@ -146,7 +146,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $jobPass = $result['password'];
         $this->assertCount(1, $jobPass);
     }
@@ -157,7 +157,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $jobList = $result['id_job'];
         $this->assertCount(1, $jobList);
     }
@@ -168,7 +168,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame(999, $result['id_project']);
     }
 
@@ -178,7 +178,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('Test Project', $result['project_name']);
     }
 
@@ -188,7 +188,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('en-US', $result['source_language']);
     }
 
@@ -198,7 +198,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertNotNull($result['target_language']);
     }
 
@@ -211,7 +211,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->callDetermineStatusAndPopulateResult();
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame($ps['status'], $ps['result']['status']);
+        $this->assertSame($ps->status, $ps->result['status']);
     }
 
     #[Test]
@@ -220,7 +220,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setShowInCattoolSegsCounter(1);
         $this->pm->callDetermineStatusAndPopulateResult();
 
-        $result = $this->pm->getTestProjectStructure()['result'];
+        $result = $this->pm->getTestProjectStructure()->result;
         $this->assertArrayHasKey('job_segments', $result);
     }
 }

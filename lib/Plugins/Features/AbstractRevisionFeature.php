@@ -196,13 +196,13 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     protected function createChunkReviewRecords(ProjectStructure $projectStructure): void
     {
-        $project = ProjectDao::findById($projectStructure['id_project']);
-        foreach ($projectStructure['array_jobs']['job_list'] as $id_job) {
+        $project = ProjectDao::findById($projectStructure->id_project);
+        foreach ($projectStructure->array_jobs['job_list'] as $id_job) {
             $chunkStruct = JobDao::getById($id_job);
 
             $iMax = 3;
 
-            if (isset($projectStructure['create_2_pass_review']) && $projectStructure['create_2_pass_review']) {
+            if (isset($projectStructure->create_2_pass_review) && $projectStructure->create_2_pass_review) {
                 $iMax = 4;
             }
 
@@ -427,12 +427,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
     private function setQaModelFromJsonFile(ProjectStructure $projectStructure): void
     {
         /** @var array<string, mixed> $model_json */
-        $model_json = $projectStructure['features']['quality_framework'];
+        $model_json = $projectStructure->features['quality_framework'];
 
         $model_record = ModelDao::createModelFromJsonDefinition($model_json);
 
         $project = ProjectDao::findById(
-            $projectStructure['id_project']
+            $projectStructure->id_project
         );
 
         $dao = new ProjectDao(Database::obtain());
@@ -457,7 +457,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
 
         // Use Null Coalescing Operator to simplify checks for template or model
-        $decoded_model = $projectStructure['qa_model_template'] ?? $projectStructure['qa_model'];
+        $decoded_model = $projectStructure->qa_model_template ?? $projectStructure->qa_model;
 
         // Still empty?
         if (empty($decoded_model)) {
@@ -473,14 +473,14 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
 
         // Initialize features if not already set
-        if (!isset($projectStructure['features'])) {
-            $projectStructure['features'] = [];
+        if (!isset($projectStructure->features)) {
+            $projectStructure->features = [];
         }
 
         // Append the QA model to the project structure
-        $features = $projectStructure['features'];
+        $features = $projectStructure->features;
         $features['quality_framework'] = $decoded_model;
-        $projectStructure['features'] = $features;
+        $projectStructure->features = $features;
     }
 
     /**
@@ -499,7 +499,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         $decoded_model = json_decode($qa_model, true);
         // Set the user ID to allow ownership in the QA models table
-        $decoded_model['model']['uid'] = $projectStructure['uid'];
+        $decoded_model['model']['uid'] = $projectStructure->uid;
 
         return $decoded_model;
     }

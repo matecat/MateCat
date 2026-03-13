@@ -2,11 +2,9 @@
 
 namespace Model\ProjectCreation;
 
-use ArrayAccess;
 use ArrayObject;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
-use Model\DataAccess\ArrayAccessTrait;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Xliff\DTO\XliffRulesModel;
 
@@ -15,21 +13,14 @@ use Model\Xliff\DTO\XliffRulesModel;
  * single data bus for the project creation pipeline.
  *
  * Extends {@see AbstractDaoObjectStruct} for strict property enforcement
- * (throws DomainException on unknown property access, both direct and via
- * array-access syntax) and implements {@see ArrayAccess} via
- * {@see ArrayAccessTrait} so existing `$projectStructure['key']` syntax
- * continues working unchanged.
+ * (throws DomainException on unknown property access).
  *
  * This is a fully closed DTO — all valid properties are declared as public
- * class properties.  Writing to an undeclared key (via `$dto->x = ...` or
- * `$dto['x'] = ...`) throws immediately, catching typos and stale keys at
- * runtime.
- *
- * @implements ArrayAccess<string, mixed>
+ * class properties.  Writing to an undeclared key (via `$dto->x = ...`)
+ * throws immediately, catching typos and stale keys at runtime.
  */
-class ProjectStructure extends AbstractDaoObjectStruct implements ArrayAccess, JsonSerializable
+class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializable
 {
-    use ArrayAccessTrait;
 
     // ── Group A: Init-only keys (49 keys) ───────────────────────────
 

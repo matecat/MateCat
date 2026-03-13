@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use ArrayAccess;
 use ArrayObject;
 use DomainException;
 use JsonSerializable;
@@ -12,11 +11,6 @@ use TestHelpers\AbstractTest;
 
 /**
  * Safety-net tests for the {@see ProjectStructure} DTO.
- *
- * These tests document the current contract so that the upcoming
- * removal of {@see ArrayAccess} can be verified: any test that
- * exercises array-access syntax (`$ps['key']`) documents a site
- * that must be migrated to arrow syntax (`$ps->key`) first.
  *
  * @covers \Model\ProjectCreation\ProjectStructure
  */
@@ -115,104 +109,28 @@ class ProjectStructureTest extends AbstractTest
         $_ = $ps->nonexistent_property;
     }
 
-    // ── Array-access syntax (current behavior, pre-migration) ────
+    // ── isset() via arrow syntax ───────────────────────────────
 
     #[Test]
-    public function arrayAccessWriteAndReadKnownProperty(): void
-    {
-        $ps = new ProjectStructure();
-        $ps['project_name'] = 'ArrayAccess Test';
-
-        $this->assertSame('ArrayAccess Test', $ps['project_name']);
-        // Verify the value is also accessible via arrow
-        $this->assertSame('ArrayAccess Test', $ps->project_name);
-    }
-
-    #[Test]
-    public function arrayAccessWriteUnknownKeyThrowsDomainException(): void
+    public function issetViaArrowReturnsTrueForDeclaredProperty(): void
     {
         $ps = new ProjectStructure();
 
-        $this->expectException(DomainException::class);
-
-        $ps['nonexistent_key'] = 'value';
+        // These properties have non-null defaults, so isset() returns true
+        $this->assertTrue(isset($ps->id_customer));    // default: 'translated_user'
+        $this->assertTrue(isset($ps->job_subject));     // default: 'general'
+        $this->assertTrue(isset($ps->result));          // default: ['errors' => [], 'data' => []]
     }
 
     #[Test]
-    public function arrayAccessReadUnknownKeyThrowsDomainException(): void
-    {
-        $ps = new ProjectStructure();
-
-        $this->expectException(DomainException::class);
-
-        $_ = $ps['nonexistent_key'];
-    }
-
-    #[Test]
-    public function arrayAccessAndArrowAreEquivalent(): void
-    {
-        $ps = new ProjectStructure();
-
-        // Write via arrow, read via array-access
-        $ps->uid = 99;
-        $this->assertSame(99, $ps['uid']);
-
-        // Write via array-access, read via arrow
-        $ps['source_language'] = 'fr-FR';
-        $this->assertSame('fr-FR', $ps->source_language);
-    }
-
-    // ── isset() / offsetExists ───────────────────────────────────
-
-    #[Test]
-    public function issetViaBracketReturnsTrueForDeclaredProperty(): void
-    {
-        $ps = new ProjectStructure();
-
-        $this->assertTrue(isset($ps['project_name']));
-        $this->assertTrue(isset($ps['id_project']));
-        $this->assertTrue(isset($ps['result']));
-    }
-
-    #[Test]
-    public function issetViaBracketReturnsTrueForNullValuedProperty(): void
+    public function issetViaArrowReturnsTrueForNullValuedProperty(): void
     {
         $ps = new ProjectStructure();
 
         // ppassword defaults to null — property_exists() still returns true
         $this->assertNull($ps->ppassword);
-        $this->assertTrue(isset($ps['ppassword']));
-    }
-
-    #[Test]
-    public function issetViaBracketReturnsFalseForUndeclaredProperty(): void
-    {
-        $ps = new ProjectStructure();
-
-        $this->assertFalse(isset($ps['totally_nonexistent']));
-    }
-
-    // ── unset() / offsetUnset ────────────────────────────────────
-
-    #[Test]
-    public function unsetViaBracketSetsPropertyToNull(): void
-    {
-        $ps = new ProjectStructure();
-        $ps->project_name = 'ToBeUnset';
-
-        unset($ps['project_name']);
-
-        $this->assertNull($ps->project_name);
-    }
-
-    #[Test]
-    public function unsetViaBracketOnUndeclaredKeyThrows(): void
-    {
-        $ps = new ProjectStructure();
-
-        $this->expectException(DomainException::class);
-
-        unset($ps['nonexistent']);
+        // Note: isset() on a declared but null property returns false in PHP
+        $this->assertFalse(isset($ps->ppassword));
     }
 
     // ── toArray() ────────────────────────────────────────────────
@@ -348,19 +266,6 @@ class ProjectStructureTest extends AbstractTest
     }
 
     #[Test]
-    public function nestedWriteViaArrayAccessIsLost(): void
-    {
-        $ps = new ProjectStructure();
-
-        // Array-access via offsetGet returns by value — nested writes
-        // modify a temporary copy and are silently lost.
-        // This documents the known limitation (Discovery #19).
-        @$ps['result']['errors'][] = ['code' => 1, 'message' => 'lost'];
-
-        $this->assertCount(0, $ps->result['errors'], 'Nested write via array-access should be lost');
-    }
-
-    #[Test]
     public function arrayJobsNestedWriteViaArrowSyntax(): void
     {
         $ps = new ProjectStructure();
@@ -419,16 +324,6 @@ class ProjectStructureTest extends AbstractTest
         $ps = new ProjectStructure(['project_name' => 'Copy Test']);
 
         $this->assertSame($ps->toArray(), $ps->getArrayCopy());
-    }
-
-    // ── Implements ArrayAccess (pre-migration contract) ──────────
-
-    #[Test]
-    public function implementsArrayAccessInterface(): void
-    {
-        $ps = new ProjectStructure();
-
-        $this->assertInstanceOf(ArrayAccess::class, $ps);
     }
 
     // ── Edge cases ───────────────────────────────────────────────

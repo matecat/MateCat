@@ -64,9 +64,9 @@ class ProjectQueue
      */
     public static function publishResults(ProjectStructure $projectStructure): Status
     {
-        $hashKey = sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure['id_project']);
+        $hashKey = sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure->id_project);
 
-        return (new RedisHandler())->getConnection()->set($hashKey, json_encode($projectStructure['result'], 60 * 60 * 24 * 7)); //store for 7 days
+        return (new RedisHandler())->getConnection()->set($hashKey, json_encode($projectStructure->result, 60 * 60 * 24 * 7)); //store for 7 days
 
     }
 

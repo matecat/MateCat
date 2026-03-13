@@ -50,8 +50,8 @@ class SettersGettersConfigTest extends AbstractTest
         $this->pm->setTeam($team);
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame($team, $ps['team']);
-        $this->assertSame(42, $ps['id_team']);
+        $this->assertSame($team, $ps->team);
+        $this->assertSame(42, $ps->id_team);
     }
 
     #[Test]
@@ -66,8 +66,8 @@ class SettersGettersConfigTest extends AbstractTest
         $this->pm->setTeam($team2);
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame($team2, $ps['team']);
-        $this->assertSame(2, $ps['id_team']);
+        $this->assertSame($team2, $ps->team);
+        $this->assertSame(2, $ps->id_team);
     }
 
     // ── _getRequestedFeatures() ────────────────────────────────────

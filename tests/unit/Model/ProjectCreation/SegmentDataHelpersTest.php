@@ -53,7 +53,7 @@ class SegmentDataHelpersTest extends AbstractTest
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        self::assertCount(2, $ps['segments_metadata']);
+        self::assertCount(2, $ps->segments_metadata);
     }
 
     #[Test]
@@ -69,7 +69,7 @@ class SegmentDataHelpersTest extends AbstractTest
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        $result = $ps['segments_metadata']->getArrayCopy();
+        $result = $ps->segments_metadata->getArrayCopy();
         self::assertCount(2, $result);
         // array_filter preserves keys, so check values
         $ids = array_column($result, 'id');
@@ -88,7 +88,7 @@ class SegmentDataHelpersTest extends AbstractTest
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        self::assertCount(0, $ps['segments_metadata']);
+        self::assertCount(0, $ps->segments_metadata);
     }
 
     #[Test]
@@ -100,7 +100,7 @@ class SegmentDataHelpersTest extends AbstractTest
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        self::assertCount(0, $ps['segments_metadata']);
+        self::assertCount(0, $ps->segments_metadata);
     }
 
     #[Test]
@@ -118,7 +118,7 @@ class SegmentDataHelpersTest extends AbstractTest
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        $result = $ps['segments_metadata']->getArrayCopy();
+        $result = $ps->segments_metadata->getArrayCopy();
         $ids = array_column($result, 'id');
         self::assertSame([1, 2], $ids);
     }
@@ -145,8 +145,8 @@ class SegmentDataHelpersTest extends AbstractTest
             $ps,
         ]);
 
-        self::assertSame([42], $ps['notes']['unit-1']['segment_ids']);
-        self::assertEmpty($ps['notes']['unit-1']['json_segment_ids']);
+        self::assertSame([42], $ps->notes['unit-1']['segment_ids']);
+        self::assertEmpty($ps->notes['unit-1']['json_segment_ids']);
     }
 
     #[Test]
@@ -167,8 +167,8 @@ class SegmentDataHelpersTest extends AbstractTest
             $ps,
         ]);
 
-        self::assertSame([99], $ps['notes']['unit-1']['json_segment_ids']);
-        self::assertEmpty($ps['notes']['unit-1']['segment_ids']);
+        self::assertSame([99], $ps->notes['unit-1']['json_segment_ids']);
+        self::assertEmpty($ps->notes['unit-1']['segment_ids']);
     }
 
     #[Test]
@@ -187,7 +187,7 @@ class SegmentDataHelpersTest extends AbstractTest
         $this->invokePrivateMethod('setSegmentIdForNotes', [['internal_id' => 'unit-1', 'id' => 20], $ps]);
         $this->invokePrivateMethod('setSegmentIdForNotes', [['internal_id' => 'unit-1', 'id' => 30], $ps]);
 
-        self::assertSame([10, 20, 30], $ps['notes']['unit-1']['segment_ids']);
+        self::assertSame([10, 20, 30], $ps->notes['unit-1']['segment_ids']);
     }
 
     #[Test]
@@ -209,8 +209,8 @@ class SegmentDataHelpersTest extends AbstractTest
             $ps,
         ]);
 
-        self::assertEmpty($ps['notes']['unit-1']['segment_ids']);
-        self::assertEmpty($ps['notes']['unit-1']['json_segment_ids']);
+        self::assertEmpty($ps->notes['unit-1']['segment_ids']);
+        self::assertEmpty($ps->notes['unit-1']['json_segment_ids']);
     }
 
     #[Test]
@@ -234,8 +234,8 @@ class SegmentDataHelpersTest extends AbstractTest
         $this->invokePrivateMethod('setSegmentIdForNotes', [['internal_id' => 'unit-A', 'id' => 1], $ps]);
         $this->invokePrivateMethod('setSegmentIdForNotes', [['internal_id' => 'unit-B', 'id' => 2], $ps]);
 
-        self::assertSame([1], $ps['notes']['unit-A']['json_segment_ids']);
-        self::assertSame([2], $ps['notes']['unit-B']['segment_ids']);
+        self::assertSame([1], $ps->notes['unit-A']['json_segment_ids']);
+        self::assertSame([2], $ps->notes['unit-B']['segment_ids']);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -258,7 +258,7 @@ class SegmentDataHelpersTest extends AbstractTest
             $ps,
         ]);
 
-        self::assertSame([55], $ps['context_group']['unit-1']['context_json_segment_ids']);
+        self::assertSame([55], $ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
     #[Test]
@@ -275,7 +275,7 @@ class SegmentDataHelpersTest extends AbstractTest
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-1', 'id' => 20], $ps]);
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-1', 'id' => 30], $ps]);
 
-        self::assertSame([10, 20, 30], $ps['context_group']['unit-1']['context_json_segment_ids']);
+        self::assertSame([10, 20, 30], $ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
     #[Test]
@@ -294,7 +294,7 @@ class SegmentDataHelpersTest extends AbstractTest
             $ps,
         ]);
 
-        self::assertEmpty($ps['context_group']['unit-1']['context_json_segment_ids']);
+        self::assertEmpty($ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
     #[Test]
@@ -310,8 +310,8 @@ class SegmentDataHelpersTest extends AbstractTest
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-A', 'id' => 1], $ps]);
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-B', 'id' => 2], $ps]);
 
-        self::assertSame([1], $ps['context_group']['unit-A']['context_json_segment_ids']);
-        self::assertSame([2], $ps['context_group']['unit-B']['context_json_segment_ids']);
+        self::assertSame([1], $ps->context_group['unit-A']['context_json_segment_ids']);
+        self::assertSame([2], $ps->context_group['unit-B']['context_json_segment_ids']);
     }
 
     // ──────────────────────────────────────────────────────────────

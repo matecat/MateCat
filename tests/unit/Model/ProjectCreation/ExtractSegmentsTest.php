@@ -95,7 +95,7 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // The file has 1 trans-unit with 2 <mrk> segments
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
         $this->assertCount(2, $segments);
     }
 
@@ -112,7 +112,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -136,7 +136,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -206,7 +206,7 @@ class ExtractSegmentsTest extends AbstractTest
 
         // The trans-unit has both source and target with mrk tags
         // Translations should be stored with the unit reference key
-        $translations = $ps['translations'];
+        $translations = $ps->translations;
         $this->assertGreaterThan(0, count($translations));
     }
 
@@ -225,10 +225,10 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // segments-original-data should have entries for this fid
-        $this->assertTrue($ps['segments_original_data']->offsetExists($fid));
+        $this->assertTrue($ps->segments_original_data->offsetExists($fid));
 
         // seg-source branch always appends a SegmentOriginalDataStruct for each mrk
-        $originalData = $ps['segments_original_data'][$fid];
+        $originalData = $ps->segments_original_data[$fid];
         $this->assertCount(2, $originalData);
     }
 
@@ -247,8 +247,8 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // segments-meta-data should have entries for this fid (one per mrk)
-        $this->assertTrue($ps['segments_meta_data']->offsetExists($fid));
-        $this->assertCount(2, $ps['segments_meta_data'][$fid]);
+        $this->assertTrue($ps->segments_meta_data->offsetExists($fid));
+        $this->assertCount(2, $ps->segments_meta_data[$fid]);
     }
 
     /**
@@ -264,7 +264,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $metaData = $ps['segments_meta_data'][$fid];
+        $metaData = $ps->segments_meta_data[$fid];
 
         // Both mrk segments should have sizeRestriction metadata
         $foundSizeRestriction = false;
@@ -291,7 +291,7 @@ class ExtractSegmentsTest extends AbstractTest
             'original_filename' => 'seg-source-simple.xliff',
         ]);
 
-        $hashWithout = $this->pm->getTestProjectStructure()['segments'][$fid1][0]->segment_hash;
+        $hashWithout = $this->pm->getTestProjectStructure()->segments[$fid1][0]->segment_hash;
 
         // Create a new PM instance for the second test
         $pm2 = new TestableProjectManager();
@@ -303,7 +303,7 @@ class ExtractSegmentsTest extends AbstractTest
             'original_filename' => 'seg-source-with-size-restriction.xliff',
         ]);
 
-        $hashWith = $pm2->getTestProjectStructure()['segments'][$fid2][0]->segment_hash;
+        $hashWith = $pm2->getTestProjectStructure()->segments[$fid2][0]->segment_hash;
 
         // Same source text but different sizeRestriction should produce different hashes
         $this->assertNotEquals($hashWithout, $hashWith);
@@ -326,7 +326,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         // 2 trans-units, each without seg-source → 2 segments
         $this->assertCount(2, $segments);
@@ -345,7 +345,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -401,7 +401,7 @@ class ExtractSegmentsTest extends AbstractTest
 
         // tu1 has target with state="translated", tu2 has no target
         // XliffRulesModel with default rules: "translated" state should be treated as translated
-        $translations = $ps['translations'];
+        $translations = $ps->translations;
         $this->assertGreaterThan(0, count($translations));
     }
 
@@ -418,8 +418,8 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertTrue($ps['segments_meta_data']->offsetExists($fid));
-        $this->assertCount(2, $ps['segments_meta_data'][$fid]);
+        $this->assertTrue($ps->segments_meta_data->offsetExists($fid));
+        $this->assertCount(2, $ps->segments_meta_data[$fid]);
     }
 
     /**
@@ -435,7 +435,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $metaData = $ps['segments_meta_data'][$fid];
+        $metaData = $ps->segments_meta_data[$fid];
 
         $foundSizeRestriction = false;
         foreach ($metaData as $meta) {
@@ -461,7 +461,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -489,7 +489,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $notes = $ps['notes'];
+        $notes = $ps->notes;
 
         // Both trans-units have notes
         $this->assertGreaterThan(0, count($notes));
@@ -508,7 +508,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $notes = $ps['notes'];
+        $notes = $ps->notes;
 
         // tu1 has 2 notes. The key is "{fid}|{tu_id}"
         $tu1Key = $fid . '|tu1';
@@ -532,7 +532,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $notes = $ps['notes'];
+        $notes = $ps->notes;
 
         $tu1Key = $fid . '|tu1';
         $tu1From = $notes[$tu1Key]['from']['entries'];
@@ -556,7 +556,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $contextGroup = $ps['context_group'];
+        $contextGroup = $ps->context_group;
 
         $tu1Key = $fid . '|tu1';
         $this->assertTrue($contextGroup->offsetExists($tu1Key), "Context-group key '$tu1Key' should exist");
@@ -607,8 +607,8 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // current-xliff-info should have an entry for this fid
-        $this->assertArrayHasKey($fid, $ps['current_xliff_info']);
-        $this->assertArrayHasKey('version', $ps['current_xliff_info'][$fid]);
+        $this->assertArrayHasKey($fid, $ps->current_xliff_info);
+        $this->assertArrayHasKey('version', $ps->current_xliff_info[$fid]);
     }
 
     /**
@@ -624,7 +624,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -647,7 +647,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -669,7 +669,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -691,7 +691,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -711,7 +711,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         /** @var SegmentStruct $seg0 */
         $seg0 = $segments[0];
@@ -732,13 +732,13 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $segments = $ps['segments'][$fid];
+        $segments = $ps->segments[$fid];
 
         // The sdlxliff has 1 trans-unit with 2 mrk segments
         $this->assertCount(2, $segments);
 
         // Verify notes are extracted
-        $notes = $ps['notes'];
+        $notes = $ps->notes;
         $this->assertGreaterThan(0, count($notes));
     }
 }

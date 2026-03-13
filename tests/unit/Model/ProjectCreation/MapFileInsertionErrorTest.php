@@ -40,7 +40,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('Original error -10', -10));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-10, $errors[0]['code']);
         $this->assertSame('Original error -10', $errors[0]['message']);
@@ -51,7 +51,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('Something', -11));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-11, $errors[0]['code']);
         $this->assertSame('Failed to store reference files on disk. Permission denied', $errors[0]['message']);
@@ -62,7 +62,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('DB Error', -12));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-12, $errors[0]['code']);
         $this->assertSame('Failed to store reference files in database', $errors[0]['message']);
@@ -73,7 +73,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('Not found message', -6));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-6, $errors[0]['code']);
         $this->assertSame('Not found message', $errors[0]['message']);
@@ -84,7 +84,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('XLIFF not found', -3));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-16, $errors[0]['code']);
         $this->assertSame('File not found. Failed to save XLIFF conversion on disk.', $errors[0]['message']);
@@ -95,7 +95,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('Custom -13 error', -13));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-13, $errors[0]['code']);
         $this->assertSame('Custom -13 error', $errors[0]['message']);
@@ -106,7 +106,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('Move failed', -200));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-200, $errors[0]['code']);
         $this->assertSame('Move failed', $errors[0]['message']);
@@ -118,7 +118,7 @@ class MapFileInsertionErrorTest extends AbstractTest
         $msg = 'Something went wrong: <Message>Invalid copy source encoding.</Message>';
         $this->pm->callMapFileInsertionError(new Exception($msg, 0));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-200, $errors[0]['code']);
         $this->assertStringContainsString('rename your file(s)', $errors[0]['message']);
@@ -129,7 +129,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('generic error', 0));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(0, $errors);
     }
 
@@ -138,7 +138,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new Exception('unknown', -999));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(0, $errors);
     }
 
@@ -147,7 +147,7 @@ class MapFileInsertionErrorTest extends AbstractTest
     {
         $this->pm->callMapFileInsertionError(new RuntimeException('Runtime -10', -10));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-10, $errors[0]['code']);
     }
@@ -158,7 +158,7 @@ class MapFileInsertionErrorTest extends AbstractTest
         $this->pm->callMapFileInsertionError(new Exception('First', -10));
         $this->pm->callMapFileInsertionError(new Exception('Second', -6));
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(2, $errors);
         $this->assertSame(-10, $errors[0]['code']);
         $this->assertSame(-6, $errors[1]['code']);

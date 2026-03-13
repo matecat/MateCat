@@ -69,7 +69,7 @@ class ErrorRecordingTest extends AbstractTest
             // expected
         }
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertEquals(-19, $errors[0]['code']);
         $this->assertEquals('Invalid Upload Token.', $errors[0]['message']);
@@ -87,7 +87,7 @@ class ErrorRecordingTest extends AbstractTest
             // expected
         }
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertEquals(-19, $errors[0]['code']);
     }
@@ -111,7 +111,7 @@ class ErrorRecordingTest extends AbstractTest
         // Should not throw
         $this->pm->callValidateUploadToken();
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(0, $errors);
     }
 
@@ -132,7 +132,7 @@ class ErrorRecordingTest extends AbstractTest
             // expected
         }
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertEquals(400, $errors[0]['code']);
         $this->assertEquals('Invalid xliff_parameters value found.', $errors[0]['message']);
@@ -160,7 +160,7 @@ class ErrorRecordingTest extends AbstractTest
         // Should not throw
         $this->pm->callValidateXliffParameters();
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(0, $errors);
     }
 
@@ -176,7 +176,7 @@ class ErrorRecordingTest extends AbstractTest
     {
         // Pre-populate errors with a plain array entry
         $ps = $this->pm->getTestProjectStructure();
-        $ps['result']['errors'][] = ['code' => -999, 'message' => 'pre-existing error'];
+        $ps->result['errors'][] = ['code' => -999, 'message' => 'pre-existing error'];
 
         // Add required keys for sanitizeProjectStructure
         $this->pm->setProjectStructureValue('uploadToken', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890');
@@ -185,7 +185,7 @@ class ErrorRecordingTest extends AbstractTest
 
         $this->pm->sanitizeProjectStructure();
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
 
         // Errors should have been reset to a fresh empty array (pre-existing error is gone)
         $this->assertIsArray($errors);
@@ -205,7 +205,7 @@ class ErrorRecordingTest extends AbstractTest
             // expected
         }
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
 
         // Errors should be an array (reset happened before validation)
         $this->assertIsArray($errors);
@@ -231,7 +231,7 @@ class ErrorRecordingTest extends AbstractTest
             // expected
         }
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertIsArray($errors);
         $this->assertCount(1, $errors);
         $this->assertEquals(400, $errors[0]['code']);
@@ -250,7 +250,7 @@ class ErrorRecordingTest extends AbstractTest
             // expected
         }
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $error = $errors[0];
 
         $this->assertArrayHasKey('code', $error);

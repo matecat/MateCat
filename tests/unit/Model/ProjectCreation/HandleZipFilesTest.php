@@ -46,7 +46,7 @@ class HandleZipFilesTest extends AbstractTest
     {
         // Default callback is null, which means _zipFileHandling does nothing
         $this->pm->callHandleZipFiles(['zipHashes' => ['hash1']]);
-        $this->assertCount(0, $this->pm->getTestProjectStructure()['result']['errors']);
+        $this->assertCount(0, $this->pm->getTestProjectStructure()->result['errors']);
     }
 
     #[Test]
@@ -76,7 +76,7 @@ class HandleZipFilesTest extends AbstractTest
             // expected
         }
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-5, $errors[0]['code']);
         $this->assertSame('Storage error', $errors[0]['message']);
@@ -122,7 +122,7 @@ class HandleZipFilesTest extends AbstractTest
 
         $this->pm->callHandleZipFiles(['zipHashes' => ['h1', 'h2', 'h3']]);
 
-        $errors = $this->pm->getTestProjectStructure()['result']['errors'];
+        $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(0, $errors);
     }
 
