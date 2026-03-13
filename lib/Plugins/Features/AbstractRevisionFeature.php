@@ -2,7 +2,6 @@
 
 namespace Plugins\Features;
 
-use ArrayObject;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
@@ -14,6 +13,7 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelDao;
@@ -217,12 +217,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      *
-     * @param ArrayObject $projectStructure
+     * @param SplitMergeProjectData $projectStructure
      *
      * @throws Exception
      *
      */
-    public function postJobSplitted(ArrayObject $projectStructure): void
+    public function postJobSplitted(SplitMergeProjectData $projectStructure): void
     {
         /**
          * By definition, when running postJobSplitted callback, the job is not split.
@@ -231,9 +231,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
          *
          */
 
-        $id_job = $projectStructure['job_to_split'];
+        $id_job = $projectStructure->jobToSplit;
         $previousRevisionRecords = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure['id_project'], 86400);
+        $project = ProjectDao::findById($projectStructure->idProject, 86400);
 
         ChunkReviewDao::deleteByJobId($id_job);
 
@@ -270,16 +270,16 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      *
-     * @param ArrayObject $projectStructure
+     * @param SplitMergeProjectData $projectStructure
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    public function postJobMerged(ArrayObject $projectStructure): void
+    public function postJobMerged(SplitMergeProjectData $projectStructure): void
     {
-        $id_job = $projectStructure['job_to_merge'];
+        $id_job = $projectStructure->jobToMerge;
         $old_reviews = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure['id_project'], 86400);
+        $project = ProjectDao::findById($projectStructure->idProject, 86400);
 
         $reviewGroupedData = [];
 

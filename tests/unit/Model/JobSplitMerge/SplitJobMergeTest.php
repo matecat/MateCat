@@ -324,7 +324,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->features->expects($this->once())
             ->method('run')
-            ->with('postJobSplitted', $this->isInstanceOf(ArrayObject::class));
+            ->with('postJobSplitted', $this->isInstanceOf(SplitMergeProjectData::class));
 
         $this->service->splitJob($ps);
     }
@@ -570,7 +570,7 @@ class SplitJobMergeTest extends AbstractTest
             ->method('run')
             ->with(
                 'postJobMerged',
-                $this->isInstanceOf(ArrayObject::class),
+                $this->isInstanceOf(SplitMergeProjectData::class),
                 $this->isInstanceOf(JobStruct::class)
             );
 

@@ -69,31 +69,4 @@ class SplitMergeProjectData
         $this->jobPass     = new ArrayObject();
         $this->jobSegments = new ArrayObject();
     }
-
-    /**
-     * Convert to an ArrayObject for backward-compatible FeatureSet hooks.
-     *
-     * Plugins receiving `postJobSplitted` / `postJobMerged` expect an
-     * ArrayObject with keys like 'id_project', 'array_jobs', etc.
-     * This method reconstructs that shape from typed properties.
-     *
-     * @return ArrayObject<string, mixed>
-     */
-    public function toArrayObject(): ArrayObject
-    {
-        return new ArrayObject([
-            'id_project'        => $this->idProject,
-            'id_customer'       => $this->idCustomer,
-            'uid'               => $this->uid,
-            'job_to_split'      => $this->jobToSplit,
-            'job_to_split_pass' => $this->jobToSplitPass,
-            'job_to_merge'      => $this->jobToMerge,
-            'split_result'      => $this->splitResult,
-            'array_jobs'        => new ArrayObject([
-                'job_list'     => $this->jobList,
-                'job_pass'     => $this->jobPass,
-                'job_segments' => $this->jobSegments,
-            ]),
-        ]);
-    }
 }

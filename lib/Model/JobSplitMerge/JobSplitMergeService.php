@@ -478,7 +478,7 @@ class JobSplitMergeService
 
         $this->getCart()->deleteCart();
 
-        $this->features->run('postJobSplitted', $data->toArrayObject());
+        $this->features->run('postJobSplitted', $data);
     }
 
     /**
@@ -559,7 +559,7 @@ class JobSplitMergeService
         $wCountManager->initializeJobWordCount((int) $first_job['id'], (string) $first_job['password']);
 
         $chunk = new JobStruct($first_job->toArray());
-        $this->features->run('postJobMerged', $data->toArrayObject(), $chunk);
+        $this->features->run('postJobMerged', $data, $chunk);
 
         $jobDao = $this->createJobDao();
 
