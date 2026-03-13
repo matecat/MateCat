@@ -1,11 +1,7 @@
 import React, {useCallback, useRef, useState} from 'react'
-import {isNull} from 'lodash/lang'
 import Cookies from 'js-cookie'
-import $ from 'jquery'
-
 import useOutsourceQuote from '../../hooks/useOutsourceQuote'
 import useCurrencyRates from '../../hooks/useCurrencyRates'
-
 import OutsourceInfo from './OutsourceInfo'
 import OutsourceLoader from './components/OutsourceLoader'
 import ServiceBox from './components/ServiceBox'
@@ -15,7 +11,8 @@ import DeliverySection from './components/DeliverySection'
 import OrderBox from './components/OrderBox'
 import CommonUtils from '../../utils/commonUtils'
 import UserStore from '../../stores/UserStore'
-import {Badge, BADGE_MODE, BADGE_TYPE} from '../common/Badge'
+import {Badge, BADGE_TYPE} from '../common/Badge'
+import {formatWithCommas} from './outsourceConstants'
 
 const QUOTE_NOT_AVAILABLE_MESSAGE =
   'Quote not available, please contact us at info@translated.net or call +39 06 90 254 001'
@@ -28,11 +25,11 @@ const OutsourceVendor = ({
   translatorsNumber,
 }) => {
   const [extendedView, setExtendedView] = useState(extendedViewProp)
-  const [timezone, setTimezone] = useState(Cookies.get('matecat_timezone'))
   const [needItFaster, setNeedItFaster] = useState(false)
   const [errorPastDate, setErrorPastDate] = useState(false)
 
   const outsourceFormRef = useRef(null)
+  const timezoneRef = useRef(Cookies.get('matecat_timezone'))
 
   // --- Hooks ---
   const {
@@ -41,8 +38,6 @@ const OutsourceVendor = ({
     getPriceCurrencySymbol,
     onCurrencyChange,
   } = useCurrencyRates()
-
-  const quote = useOutsourceQuote({job, project, getCurrentCurrency})
 
   const {
     outsource,
@@ -67,59 +62,51 @@ const OutsourceVendor = ({
     selectedDateRef,
     fetchQuote,
     toggleRevision,
-    goBack,
     updateTimezoneRef,
     getDeliveryDateFromQuote,
     checkChosenDateIsAfter,
-  } = quote
+  } = useOutsourceQuote({job, project, getCurrentCurrency})
 
   // --- Derived values ---
   const priceCurrencySymbol =
     outsource && chunkQuote ? getPriceCurrencySymbol(chunkQuote) : ''
 
-  const getPrice = useCallback(() => {
-    if (!isNull(job.get('outsource'))) {
-      const price = job.get('outsource').get('price')
-      return getCurrencyPrice(parseFloat(price))
-    } else if (outsource && chunkQuote) {
-      const price = revision
-        ? parseFloat(chunkQuote.get('r_price')) +
-          parseFloat(chunkQuote.get('price'))
-        : parseFloat(chunkQuote.get('price'))
-      return getCurrencyPrice(parseFloat(price))
+  const price = (() => {
+    if (job.get('outsource') != null) {
+      return getCurrencyPrice(parseFloat(job.get('outsource').get('price')))
     }
-  }, [job, outsource, chunkQuote, revision, getCurrencyPrice])
-
-  const getPricePW = useCallback(
-    (price) => {
-      if (outsource && price) {
-        return (parseFloat(price) / standardWC)
-          .toFixed(3)
-          .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
-      }
-    },
-    [outsource, standardWC],
-  )
-
-  const getTranslatedWords = useCallback(() => {
     if (outsource && chunkQuote) {
-      return chunkQuote
-        .get('t_words_total')
-        .toString()
-        .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+      const base = parseFloat(chunkQuote.get('price'))
+      const total = revision
+        ? base + parseFloat(chunkQuote.get('r_price'))
+        : base
+      return getCurrencyPrice(total)
     }
-  }, [outsource, chunkQuote])
+  })()
 
-  const getUserEmail = () => {
+  const pricePWord =
+    outsource && price
+      ? formatWithCommas((parseFloat(price) / standardWC).toFixed(3))
+      : undefined
+
+  const translatedWords =
+    outsource && chunkQuote
+      ? formatWithCommas(chunkQuote.get('t_words_total'))
+      : undefined
+
+  const delivery = getDeliveryDateFromQuote(revision)
+  const showDateMessage = checkChosenDateIsAfter()
+
+  const email = (() => {
     const userInfo = UserStore.getUser()
     return userInfo.user ? userInfo.user.email : ''
-  }
+  })()
 
   // --- Handlers ---
   const changeTimezone = useCallback(
     (value) => {
       Cookies.set('matecat_timezone', value, {secure: true})
-      setTimezone(value)
+      timezoneRef.current = value
       updateTimezoneRef(value)
     },
     [updateTimezoneRef],
@@ -136,12 +123,11 @@ const OutsourceVendor = ({
   )
 
   const getNewRates = useCallback(() => {
-    const date = deliveryDate
+    const date = new Date(deliveryDate)
     date.setHours(selectedTime)
-    date.setMinutes((2 - parseFloat(timezone)) * 60)
-    const timestamp = new Date(date).getTime()
-    const now = new Date().getTime()
-    if (timestamp < now) {
+    date.setMinutes((2 - parseFloat(timezoneRef.current)) * 60)
+    const timestamp = date.getTime()
+    if (timestamp < Date.now()) {
       selectedDateRef.current = null
       setErrorPastDate(true)
       setNeedItFaster(false)
@@ -152,36 +138,21 @@ const OutsourceVendor = ({
       setNeedItFaster(false)
       fetchQuote(timestamp)
     }
-  }, [
-    deliveryDate,
-    selectedTime,
-    timezone,
-    selectedDateRef,
-    setOutsource,
-    fetchQuote,
-  ])
+  }, [deliveryDate, selectedTime, selectedDateRef, setOutsource, fetchQuote])
 
   const sendOutsource = useCallback(() => {
     quoteResponseRef.current[0] = chunkQuote.toJS()
-
-    $(outsourceFormRef.current)
-      .find('input[name=url_ok]')
-      .attr('value', urlOkRef.current)
-    $(outsourceFormRef.current)
-      .find('input[name=url_ko]')
-      .attr('value', urlKoRef.current)
-    $(outsourceFormRef.current)
-      .find('input[name=confirm_urls]')
-      .attr('value', confirmUrlsRef.current)
-    $(outsourceFormRef.current)
-      .find('input[name=data_key]')
-      .attr('value', dataKeyRef.current)
-
-    $(outsourceFormRef.current)
-      .find('input[name=quoteData]')
-      .attr('value', JSON.stringify(quoteResponseRef.current))
-    $(outsourceFormRef.current).submit()
-    $(outsourceFormRef.current).find('input[name=quoteData]').attr('value', '')
+    const form = outsourceFormRef.current
+    form.querySelector('input[name=url_ok]').value = urlOkRef.current
+    form.querySelector('input[name=url_ko]').value = urlKoRef.current
+    form.querySelector('input[name=confirm_urls]').value =
+      confirmUrlsRef.current
+    form.querySelector('input[name=data_key]').value = dataKeyRef.current
+    form.querySelector('input[name=quoteData]').value = JSON.stringify(
+      quoteResponseRef.current,
+    )
+    form.submit()
+    form.querySelector('input[name=quoteData]').value = ''
 
     CommonUtils.dispatchAnalyticsEvents({
       event: 'outsource_clicked',
@@ -201,13 +172,6 @@ const OutsourceVendor = ({
   }, [job])
 
   // --- Shared props for sub-components ---
-  const price = getPrice()
-  const pricePWord = getPricePW(price)
-  const delivery = getDeliveryDateFromQuote(revision)
-  const showDateMessage = checkChosenDateIsAfter()
-  const email = getUserEmail()
-  const translatedWords = getTranslatedWords()
-
   const orderBoxProps = {
     price,
     priceCurrencySymbol,
@@ -257,15 +221,12 @@ const OutsourceVendor = ({
           revision={revision}
           chunkQuote={chunkQuote}
           outsourceConfirmed={outsourceConfirmed}
-          jobOutsourced={jobOutsourced}
           errorQuote={errorQuote}
           job={job}
           translatedWords={translatedWords}
           priceCurrencySymbol={priceCurrencySymbol}
           getCurrencyPrice={getCurrencyPrice}
           onToggleRevision={toggleRevision}
-          email={email}
-          onGoBack={goBack}
           translatorsNumber={translatorsNumber}
           deliveryProps={deliveryProps}
           orderBoxProps={orderBoxProps}
@@ -274,13 +235,7 @@ const OutsourceVendor = ({
         <CompactView
           outsource={outsource}
           errorQuote={errorQuote}
-          outsourceConfirmed={outsourceConfirmed}
-          jobOutsourced={jobOutsourced}
-          delivery={delivery}
-          email={email}
           onViewMore={() => setExtendedView(true)}
-          onGoBack={goBack}
-          onChangeTimezone={changeTimezone}
           translatorsNumber={translatorsNumber}
           orderBoxProps={orderBoxProps}
           deliveryProps={deliveryProps}
@@ -310,15 +265,12 @@ const ExtendedView = ({
   revision,
   chunkQuote,
   outsourceConfirmed,
-  jobOutsourced,
   errorQuote,
   job,
   translatedWords,
   priceCurrencySymbol,
   getCurrencyPrice,
   onToggleRevision,
-  email,
-  onGoBack,
   translatorsNumber,
   deliveryProps,
   orderBoxProps,

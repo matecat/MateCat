@@ -155,19 +155,20 @@
   }
 
   .assign-job-translator {
-    background-color: colors.$grey200;
-    padding: 10px 15px 35px;
-    width: 100%;
-
+    background-color: colors.$white;
+    display: flex;
+    padding: 16px;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 16px;
+    border: 1px solid colors.$grey100;
     .title {
-      display: inline-block;
-      padding: 15px 15px 15px 25px;
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 700;
-      width: 25%;
-      vertical-align: top;
-      position: relative;
-      top: 24px;
+      line-height: 24px;
     }
 
     .title-url {
@@ -195,9 +196,10 @@
               font-size: 14px;
 
               label {
-                padding-left: 15px;
                 font-size: 14px;
-                font-weight: bold;
+                line-height: 20px;
+                margin-bottom: 8px;
+                font-weight: 400;
               }
 
               input[type='text'],
@@ -219,29 +221,7 @@
               }
 
               &.send-job-box {
-                padding: 0 15px 0 10px;
-                padding-top: 22px;
-                width: 28%;
-
-                .send-job {
-                  font-family: Calibri, Arial, Helvetica, sans-serif;
-                  font-size: 16px;
-                  padding: 10px 17px;
-                  margin: 0;
-                  float: right;
-                  width: 97%;
-                  min-width: 199px;
-                  top: 1px;
-                  position: relative;
-                }
-              }
-
-              &.translator-email {
-                width: 31%;
-              }
-
-              &.translator-delivery {
-                width: 21%;
+                align-content: flex-end;
               }
 
               &.translator-time {

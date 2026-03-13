@@ -8,8 +8,6 @@ import HelpCircle from '../../../../img/icons/HelpCircle'
 import {timeOptions} from '../outsourceConstants'
 
 import 'react-datepicker/dist/react-datepicker.css'
-import IconClose from '../../icons/IconClose'
-import Close from '../../../../img/icons/Close'
 
 const DeliverySection = ({
   delivery,

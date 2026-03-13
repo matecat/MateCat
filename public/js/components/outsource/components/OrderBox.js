@@ -7,7 +7,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../common/Button/Button'
-import {currencies, formatPriceWithCommas} from '../outsourceConstants'
+import {currencies, formatWithCommas} from '../outsourceConstants'
 
 const OrderBox = ({
   price,
@@ -22,7 +22,7 @@ const OrderBox = ({
   <div className="order-box-outsource">
     <div className="order-box">
       <div className="outsource-price">
-        {priceCurrencySymbol} {formatPriceWithCommas(price)}
+        {priceCurrencySymbol} {formatWithCommas(price)}
       </div>
       <DropdownMenu
         toggleButtonProps={{

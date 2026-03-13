@@ -1,5 +1,5 @@
 import React from 'react'
-import {formatPriceWithCommas} from '../outsourceConstants'
+import {formatWithCommas} from '../outsourceConstants'
 
 const RevisionCheckbox = ({
   revision,
@@ -22,7 +22,7 @@ const RevisionCheckbox = ({
       {!outsourceConfirmed && (
         <div className="job-price">
           + {priceCurrencySymbol}{' '}
-          {formatPriceWithCommas(getCurrencyPrice(revisionPrice))}
+          {formatWithCommas(getCurrencyPrice(revisionPrice))}
         </div>
       )}
     </div>

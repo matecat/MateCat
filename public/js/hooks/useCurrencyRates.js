@@ -1,9 +1,5 @@
 import {useState, useEffect, useCallback, useMemo} from 'react'
 import Cookies from 'js-cookie'
-import {isUndefined} from 'lodash'
-import {isNull} from 'lodash/lang'
-import $ from 'jquery'
-
 import {getChangeRates} from '../api/getChangeRates'
 import {currencies} from '../components/outsource/outsourceConstants'
 
@@ -13,14 +9,14 @@ import {currencies} from '../components/outsource/outsourceConstants'
 const useCurrencyRates = () => {
   const initialChangeRates = useMemo(() => {
     const stored = Cookies.get('matecat_changeRates')
-    return !isUndefined(stored) && !isNull(stored) ? $.parseJSON(stored) : {}
+    return stored != null ? JSON.parse(stored) : {}
   }, [])
 
   const [changeRates, setChangeRates] = useState(initialChangeRates)
 
   const getCurrentCurrency = useCallback(() => {
     const currency = Cookies.get('matecat_currency')
-    if (!isUndefined(currency) && !isNull(currency) && currency !== 'null') {
+    if (currency != null && currency !== 'null') {
       return currency
     }
     Cookies.set('matecat_currency', 'EUR', {secure: true})
@@ -56,10 +52,10 @@ const useCurrencyRates = () => {
   // Fetch exchange rates on mount if not cached
   useEffect(() => {
     const stored = Cookies.get('matecat_changeRates')
-    if (isUndefined(stored) || isNull(stored) || stored === 'null') {
+    if (stored == null || stored === 'null') {
       getChangeRates().then((response) => {
-        const rates = $.parseJSON(response.data)
-        if (!isUndefined(rates)) {
+        const rates = JSON.parse(response.data)
+        if (rates != null) {
           setChangeRates(rates)
           Cookies.set('matecat_changeRates', response.data, {
             expires: 1,

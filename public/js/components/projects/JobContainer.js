@@ -914,7 +914,6 @@ class JobContainer extends React.Component {
         <OutsourceContainer
           project={this.props.project}
           job={this.props.job}
-          url={this.getTranslateUrl()}
           showTranslatorBox={this.state.showTranslatorBox}
           extendedView={this.state.extendedView}
           onClickOutside={this.closeOutsourceModal.bind(this)}

@@ -10,42 +10,16 @@ import ManageActions from '../../actions/ManageActions'
 import 'react-datepicker/dist/react-datepicker.css'
 import {Select} from '../common/Select'
 import {Button, BUTTON_TYPE} from '../common/Button/Button'
-
-const timeOptions = [
-  {name: '1:00 AM', id: '1'},
-  {name: '2:00 AM', id: '2'},
-  {name: '3:00 AM', id: '3'},
-  {name: '4:00 AM', id: '4'},
-  {name: '5:00 AM', id: '5'},
-  {name: '6:00 AM', id: '6'},
-  {name: '7:00 AM', id: '7'},
-  {name: '8:00 AM', id: '8'},
-  {name: '9:00 AM', id: '9'},
-  {name: '10:00 AM', id: '10'},
-  {name: '11:00 AM', id: '11'},
-  {name: '12:00 AM', id: '12'},
-  {name: '1:00 PM', id: '13'},
-  {name: '2:00 PM', id: '14'},
-  {name: '3:00 PM', id: '15'},
-  {name: '4:00 PM', id: '16'},
-  {name: '5:00 PM', id: '17'},
-  {name: '6:00 PM', id: '18'},
-  {name: '7:00 PM', id: '19'},
-  {name: '8:00 PM', id: '20'},
-  {name: '9:00 PM', id: '21'},
-  {name: '10:00 PM', id: '22'},
-  {name: '11:00 PM', id: '23'},
-  {name: '12:00 PM', id: '24'},
-]
-const AssignToTranslator = ({job, url, project, closeOutsource}) => {
+import {timeOptions} from './outsourceConstants'
+const AssignToTranslator = ({job, project, closeOutsource}) => {
   const getInitialTime = () => {
     if (job.get('translator')) {
       const date = CommonUtils.getGMTDate(
         job.get('translator').get('delivery_timestamp') * 1000,
       )
-      return parseInt(date.time.split(':')[0])
+      return date.time.split(':')[0]
     }
-    return 12
+    return '12'
   }
 
   const [timezone, setTimezone] = useState(Cookies.get('matecat_timezone'))
@@ -222,7 +196,7 @@ const AssignToTranslator = ({job, url, project, closeOutsource}) => {
 
   const shareJob = () => {
     const date = new Date(deliveryDate)
-    date.setHours(time)
+    date.setHours(parseInt(time))
     date.setMinutes(0)
 
     const email = emailRef.current.value
@@ -289,12 +263,10 @@ const AssignToTranslator = ({job, url, project, closeOutsource}) => {
                 <Select
                   label="Time"
                   onSelect={({id}) => {
-                    setTime(parseInt(id))
+                    setTime(id)
                     checkSendToTranslatorButton()
                   }}
-                  activeOption={timeOptions.find(
-                    ({id}) => parseInt(id) === time,
-                  )}
+                  activeOption={timeOptions.find(({id}) => id === time)}
                   options={timeOptions}
                 />
               </div>

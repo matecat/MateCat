@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useRef} from 'react'
 import Cookies from 'js-cookie'
-import $ from 'jquery'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import AssignToTranslator from './AssignToTranslator'
@@ -14,37 +13,43 @@ const checkTimezone = () => {
   }
 }
 
+const IGNORED_CLICK_CLASSES = [
+  'open-view-more',
+  'outsource-goBack',
+  'faster',
+  'need-it-faster-close',
+  'need-it-faster-close-icon',
+  'get-price',
+  'react-datepicker__day',
+]
+
 const OutsourceContainer = ({
   openOutsource,
-  showTranslatorBox,
+  showTranslatorBox = true,
   idJobLabel,
   job,
   standardWC,
-  url,
   project,
-  extendedView,
+  extendedView = true,
   onClickOutside,
 }) => {
   const containerRef = useRef(null)
 
-  checkTimezone()
+  useEffect(() => {
+    checkTimezone()
+  }, [])
 
   const handleDocumentClick = useCallback(
     (evt) => {
       evt.stopPropagation()
-      const parentClass = '.outsource-container'
       if (
         containerRef.current &&
         !containerRef.current.contains(evt.target) &&
-        !$(evt.target).hasClass('open-view-more') &&
-        !$(evt.target).hasClass('outsource-goBack') &&
-        !$(evt.target).hasClass('faster') &&
-        !$(evt.target).hasClass('need-it-faster-close') &&
-        !$(evt.target).hasClass('need-it-faster-close-icon') &&
-        !$(evt.target).hasClass('get-price') &&
-        !$(evt.target).hasClass('react-datepicker__day') &&
+        !IGNORED_CLICK_CLASSES.some((cls) =>
+          evt.target.classList.contains(cls),
+        ) &&
         !evt.target.closest('.dropdown__list') &&
-        !evt.target.closest(parentClass)
+        !evt.target.closest('.outsource-container')
       ) {
         onClickOutside(evt)
       }
@@ -68,8 +73,7 @@ const OutsourceContainer = ({
       const timer = setTimeout(() => {
         window.addEventListener('mousedown', handleDocumentClick)
         window.addEventListener('keydown', handleEscKey)
-        containerRef.current &&
-          containerRef.current.scrollIntoView({block: 'center'})
+        containerRef.current?.scrollIntoView({block: 'center'})
       }, 500)
       return () => {
         clearTimeout(timer)
@@ -107,7 +111,6 @@ const OutsourceContainer = ({
             {showTranslatorBox ? (
               <AssignToTranslator
                 job={job}
-                url={url}
                 project={project}
                 closeOutsource={onClickOutside}
               />
@@ -125,11 +128,6 @@ const OutsourceContainer = ({
       ) : null}
     </TransitionGroup>
   )
-}
-
-OutsourceContainer.defaultProps = {
-  showTranslatorBox: true,
-  extendedView: true,
 }
 
 export default OutsourceContainer

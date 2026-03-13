@@ -125,7 +125,6 @@ const SplitChunkJob = ({
         <OutsourceContainer
           project={project}
           job={chunkJob}
-          url={chunkAnalysis.urls.t}
           showTranslatorBox={false}
           extendedView={true}
           onClickOutside={closeOutsourceModal}

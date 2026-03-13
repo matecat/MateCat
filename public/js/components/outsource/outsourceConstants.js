@@ -24,7 +24,7 @@ export const timeOptions = [
   {name: '9:00 AM', id: '9'},
   {name: '10:00 AM', id: '10'},
   {name: '11:00 AM', id: '11'},
-  {name: '12:00 AM', id: '12'},
+  {name: '12:00 PM', id: '12'},
   {name: '1:00 PM', id: '13'},
   {name: '2:00 PM', id: '14'},
   {name: '3:00 PM', id: '15'},
@@ -36,9 +36,6 @@ export const timeOptions = [
   {name: '9:00 PM', id: '21'},
 ]
 
-export const numberWithCommas = (x) =>
-  x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-
-export const formatPriceWithCommas = (price) =>
-  price.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+export const formatWithCommas = (value) =>
+  String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 

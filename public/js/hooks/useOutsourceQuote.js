@@ -1,7 +1,6 @@
 import {useState, useEffect, useRef, useCallback} from 'react'
 import {fromJS} from 'immutable'
 import Cookies from 'js-cookie'
-import {isNull} from 'lodash/lang'
 
 import {getOutsourceQuote} from '../api/getOutsourceQuote'
 import CommonUtils from '../utils/commonUtils'
@@ -137,7 +136,7 @@ const useOutsourceQuote = ({job, project, getCurrentCurrency}) => {
 
   const getDeliveryDateFromQuote = useCallback(
     (isRevision) => {
-      if (!isNull(job.get('outsource'))) {
+      if (job.get('outsource') != null) {
         return CommonUtils.getGMTDate(job.get('outsource').get('delivery_date'))
       } else if (chunkQuote) {
         if (isRevision && chunkQuote.get('r_delivery')) {
@@ -176,9 +175,6 @@ const useOutsourceQuote = ({job, project, getCurrentCurrency}) => {
     })
   }, [fetchQuote])
 
-  const confirmOutsource = useCallback(() => setOutsourceConfirmed(true), [])
-  const goBack = useCallback(() => setOutsourceConfirmed(false), [])
-
   return {
     // State
     outsource,
@@ -207,8 +203,6 @@ const useOutsourceQuote = ({job, project, getCurrentCurrency}) => {
     // Actions
     fetchQuote,
     toggleRevision,
-    confirmOutsource,
-    goBack,
     updateTimezoneRef,
 
     // Derived

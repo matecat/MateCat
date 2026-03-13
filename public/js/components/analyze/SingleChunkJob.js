@@ -120,10 +120,9 @@ const SingleChunkJob = ({
       <OutsourceContainer
         project={project}
         job={chunkJob}
-        url={chunkAnalysis.urls.t}
         standardWC={chunkAnalysis.total_equivalent}
         showTranslatorBox={false}
-        extendedView={false}
+        extendedView={true}
         onClickOutside={closeOutsourceModal}
         openOutsource={isOutsourceOpen}
         idJobLabel={job.id}

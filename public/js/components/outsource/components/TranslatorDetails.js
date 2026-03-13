@@ -1,5 +1,5 @@
 import React from 'react'
-import {numberWithCommas, formatPriceWithCommas} from '../outsourceConstants'
+import {formatWithCommas} from '../outsourceConstants'
 import ChevronRight from '../../../../img/icons/ChevronRight'
 
 const TranslatorDetails = ({
@@ -52,12 +52,12 @@ const TranslatorDetails = ({
         {job.get('target')}
       </div>
       <div className="job-payment">
-        {numberWithCommas(chunkQuote.get('words'))} words
+        {formatWithCommas(chunkQuote.get('words'))} words
       </div>
       {!outsourceConfirmed && (
         <div className="job-price">
           {priceCurrencySymbol}{' '}
-          {formatPriceWithCommas(getCurrencyPrice(chunkQuote.get('price')))}
+          {formatWithCommas(getCurrencyPrice(chunkQuote.get('price')))}
         </div>
       )}
     </div>
