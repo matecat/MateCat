@@ -7,7 +7,7 @@ use ArrayObject;
 /**
  * Typed DTO for split/merge operations.
  *
- * Replaces the untyped {@see \Utils\Collections\RecursiveArrayObject} that
+ * Replaces the untyped {@see \Model\DataAccess\RecursiveArrayObject} that
  * {@see JobSplitMergeManager} previously used to carry state between
  * controllers, the manager, and {@see JobSplitMergeService}.
  *

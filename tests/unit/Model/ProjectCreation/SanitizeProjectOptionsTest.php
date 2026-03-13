@@ -8,7 +8,6 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -39,7 +38,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     public function emptyMetadataReturnsArray(): void
     {
         $this->pm->setProjectStructureValue('metadata', new ArrayObject([]));
-        $this->pm->setProjectStructureValue('target_language', new RecursiveArrayObject(['it-IT']));
+        $this->pm->setProjectStructureValue('target_language', ['it-IT']);
 
         $result = $this->pm->callSanitizeProjectOptions();
 
@@ -50,7 +49,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     public function sanitizerReceivesSourceAndTargetLanguages(): void
     {
         $this->pm->setProjectStructureValue('source_language', 'en-US');
-        $this->pm->setProjectStructureValue('target_language', new RecursiveArrayObject(['de-DE', 'fr-FR']));
+        $this->pm->setProjectStructureValue('target_language', ['de-DE', 'fr-FR']);
         $this->pm->setProjectStructureValue('metadata', new ArrayObject([
             'lexiqa' => true,
             'tag_projection' => true,
@@ -66,7 +65,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     #[Test]
     public function preservesUnrelatedMetadataKeys(): void
     {
-        $this->pm->setProjectStructureValue('target_language', new RecursiveArrayObject(['it-IT']));
+        $this->pm->setProjectStructureValue('target_language', ['it-IT']);
         $this->pm->setProjectStructureValue('metadata', new ArrayObject([
             'custom_key' => 'custom_value',
         ]));
@@ -83,7 +82,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     public function multipleTargetLanguagesArePassed(): void
     {
         $this->pm->setProjectStructureValue('source_language', 'en-US');
-        $this->pm->setProjectStructureValue('target_language', new RecursiveArrayObject(['it-IT', 'es-ES', 'de-DE']));
+        $this->pm->setProjectStructureValue('target_language', ['it-IT', 'es-ES', 'de-DE']);
         $this->pm->setProjectStructureValue('metadata', new ArrayObject([]));
 
         $result = $this->pm->callSanitizeProjectOptions();
@@ -94,7 +93,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     #[Test]
     public function resultIsPlainArrayNotArrayObject(): void
     {
-        $this->pm->setProjectStructureValue('target_language', new RecursiveArrayObject(['it-IT']));
+        $this->pm->setProjectStructureValue('target_language', ['it-IT']);
         $this->pm->setProjectStructureValue('metadata', new ArrayObject(['key' => 'val']));
 
         $result = $this->pm->callSanitizeProjectOptions();

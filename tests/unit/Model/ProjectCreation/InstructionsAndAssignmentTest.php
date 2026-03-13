@@ -3,13 +3,13 @@
 namespace unit\Model\ProjectCreation;
 
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\RecursiveArrayObject;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 
 /**

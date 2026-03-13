@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
@@ -46,6 +47,7 @@ class ConstructorMyMemoryTest extends AbstractTest
      * @covers  Engines_Moses::__construct
      * @throws Exception
      */
+    #[Test]
     public function test___construct_of_sub_engine_of_moses()
     {
         $myMemory = new MyMemory($this->engine_struct_param);
@@ -72,6 +74,7 @@ class ConstructorMyMemoryTest extends AbstractTest
      * @group   regression
      * @covers  Engines_Moses::__construct
      */
+    #[Test]
     public function test___construct_failure()
     {
         $this->engine_struct_param->type = "fooo";

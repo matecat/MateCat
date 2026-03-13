@@ -4,6 +4,7 @@ use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -44,6 +45,7 @@ class SanitizeInputTest extends AbstractTest
      * @covers Model\DataAccess\AbstractDao::_sanitizeInput
      * @throws ReflectionException
      */
+    #[Test]
     public function test__sanitizeInput_with_correct_type_and_param()
     {
         $this->struct_input = new EngineStruct();
@@ -63,6 +65,7 @@ LABEL;
      * @covers Model\DataAccess\AbstractDao::_sanitizeInput
      * @throws ReflectionException
      */
+    #[Test]
     public function test__sanitizeInput_with_wrong_param_not_instance_of_type()
     {
         $struct_input = new JobStruct();

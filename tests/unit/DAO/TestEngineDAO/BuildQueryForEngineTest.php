@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Constants\EngineConstants;
 use Utils\Registry\AppConfig;
@@ -39,6 +40,7 @@ class BuildQueryForEngineTest extends AbstractTest
      * @covers EngineDAO::_buildQueryForEngine
      * @throws ReflectionException
      */
+    #[Test]
     public function test__buildQueryForEngine_with_given_engine_struct_with_ID_initialized()
     {
         $this->engine_struct->id = 10;
@@ -53,6 +55,7 @@ class BuildQueryForEngineTest extends AbstractTest
      * @covers EngineDAO::_buildQueryForEngine
      * @throws ReflectionException
      */
+    #[Test]
     public function test__buildQueryForEngine_with_given_engine_struct_with_UID_inizialized()
     {
         $this->engine_struct->uid = 1;
@@ -67,6 +70,7 @@ class BuildQueryForEngineTest extends AbstractTest
      * @covers EngineDAO::_buildQueryForEngine
      * @throws ReflectionException
      */
+    #[Test]
     public function test__buildQueryForEngine_with_given_engine_struct_with_active_inizialized()
     {
         $this->engine_struct->active = 88;
@@ -81,6 +85,7 @@ class BuildQueryForEngineTest extends AbstractTest
      * @covers EngineDAO::_buildQueryForEngine
      * @throws ReflectionException
      */
+    #[Test]
     public function test__buildQueryForEngine_with_given_engine_struct_with_type_inizialized()
     {
         $this->engine_struct->type = EngineConstants::MT;
@@ -95,6 +100,7 @@ class BuildQueryForEngineTest extends AbstractTest
      * @covers EngineDAO::_buildQueryForEngine
      * @throws ReflectionException
      */
+    #[Test]
     public function test__buildQueryForEngine_with_given_engine_struct_with_uid_fake_null()
     {
         $this->engine_struct->uid = null;
@@ -109,6 +115,7 @@ class BuildQueryForEngineTest extends AbstractTest
      * @covers EngineDAO::_buildQueryForEngine
      * @throws ReflectionException
      */
+    #[Test]
     public function test__buildQueryForEngine_with_given_engine_struct_without_properties_inizialized()
     {
         $this->expectException('\Exception');

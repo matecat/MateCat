@@ -11,7 +11,6 @@ use Model\Teams\TeamStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
@@ -76,7 +75,7 @@ class SettersGettersConfigTest extends AbstractTest
     #[Test]
     public function getRequestedFeaturesReturnsEmptyWhenNoFeaturesSet(): void
     {
-        $this->pm->setProjectStructureValue('project_features', new RecursiveArrayObject());
+        $this->pm->setProjectStructureValue('project_features', []);
 
         $result = $this->pm->callGetRequestedFeatures();
 
@@ -86,10 +85,10 @@ class SettersGettersConfigTest extends AbstractTest
     #[Test]
     public function getRequestedFeaturesConvertsRecursiveArrayObjectsToBasicFeatureStructs(): void
     {
-        $features = new RecursiveArrayObject([
-            new RecursiveArrayObject(['feature_code' => 'translation_versions', 'options' => null]),
-            new RecursiveArrayObject(['feature_code' => 'review_extended', 'options' => '{"opt":1}']),
-        ]);
+        $features = [
+            ['feature_code' => 'translation_versions', 'options' => null],
+            ['feature_code' => 'review_extended', 'options' => '{"opt":1}'],
+        ];
         $this->pm->setProjectStructureValue('project_features', $features);
 
         $result = $this->pm->callGetRequestedFeatures();
@@ -105,9 +104,9 @@ class SettersGettersConfigTest extends AbstractTest
     #[Test]
     public function getRequestedFeaturesSingleFeature(): void
     {
-        $features = new RecursiveArrayObject([
-            new RecursiveArrayObject(['feature_code' => 'dqf', 'options' => null]),
-        ]);
+        $features = [
+            ['feature_code' => 'dqf', 'options' => null],
+        ];
         $this->pm->setProjectStructureValue('project_features', $features);
 
         $result = $this->pm->callGetRequestedFeatures();

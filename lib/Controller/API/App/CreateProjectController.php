@@ -134,7 +134,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         // GDrive session instance
         if (isset($_SESSION["gdrive_session"])) {
             $projectStructure['session'] = $_SESSION["gdrive_session"];
-            $projectStructure['session']['uid'] = $this->user->uid;
+            $projectStructure->session['uid'] = $this->user->uid;
         }
 
         // MT Extra params

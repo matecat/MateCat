@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use ArrayObject;
 use DomainException;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
@@ -10,7 +9,6 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
@@ -20,7 +18,7 @@ use Utils\Registry\AppConfig;
  * Tests cover:
  * - `_validateUploadToken()` — records error code -19 for missing/invalid tokens
  * - `_validateXliffParameters()` — records error from DomainException on invalid params
- * - `sanitizeProjectStructure()` — resets errors to ArrayObject, then validates
+ * - `sanitizeProjectStructure()` — resets errors to empty array, then validates
  * - General error array structure (code + message keys)
  *
  * @see REFACTORING_PLAN.md — Step 0e
@@ -157,7 +155,7 @@ class ErrorRecordingTest extends AbstractTest
     {
         // _validateXliffParameters expects an ArrayObject or array, not XliffRulesModel
         // (it calls XliffRulesModel::fromArrayObject() internally)
-        $this->pm->setProjectStructureValue('xliff_parameters', new RecursiveArrayObject());
+        $this->pm->setProjectStructureValue('xliff_parameters', []);
 
         // Should not throw
         $this->pm->callValidateXliffParameters();
@@ -182,15 +180,15 @@ class ErrorRecordingTest extends AbstractTest
 
         // Add required keys for sanitizeProjectStructure
         $this->pm->setProjectStructureValue('uploadToken', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890');
-        $this->pm->setProjectStructureValue('xliff_parameters', new RecursiveArrayObject());
+        $this->pm->setProjectStructureValue('xliff_parameters', []);
         $this->pm->setProjectStructureValue('project_features', []);
 
         $this->pm->sanitizeProjectStructure();
 
         $errors = $this->pm->getTestProjectStructure()['result']['errors'];
 
-        // Errors should have been reset to a fresh ArrayObject (pre-existing error is gone)
-        $this->assertInstanceOf(ArrayObject::class, $errors);
+        // Errors should have been reset to a fresh empty array (pre-existing error is gone)
+        $this->assertIsArray($errors);
         $this->assertCount(0, $errors);
     }
 
@@ -209,8 +207,8 @@ class ErrorRecordingTest extends AbstractTest
 
         $errors = $this->pm->getTestProjectStructure()['result']['errors'];
 
-        // Errors should be an ArrayObject (reset happened before validation)
-        $this->assertInstanceOf(ArrayObject::class, $errors);
+        // Errors should be an array (reset happened before validation)
+        $this->assertIsArray($errors);
         $this->assertCount(1, $errors);
         $this->assertEquals(-19, $errors[0]['code']);
     }
@@ -234,7 +232,7 @@ class ErrorRecordingTest extends AbstractTest
         }
 
         $errors = $this->pm->getTestProjectStructure()['result']['errors'];
-        $this->assertInstanceOf(ArrayObject::class, $errors);
+        $this->assertIsArray($errors);
         $this->assertCount(1, $errors);
         $this->assertEquals(400, $errors[0]['code']);
     }
@@ -271,11 +269,11 @@ class ErrorRecordingTest extends AbstractTest
             // expected
         }
 
-        // Manually append a second error to simulate another failure
+        // Manually append a second error using arrow syntax (offsetGet returns by value)
         $ps = $this->pm->getTestProjectStructure();
-        $ps['result']['errors'][] = ['code' => -999, 'message' => 'Second error'];
+        $ps->result['errors'][] = ['code' => -999, 'message' => 'Second error'];
 
-        $errors = $ps['result']['errors'];
+        $errors = $ps->result['errors'];
         $this->assertCount(2, $errors);
         $this->assertEquals(-19, $errors[0]['code']);
         $this->assertEquals(-999, $errors[1]['code']);

@@ -4,6 +4,7 @@ namespace unit\Model\ProjectCreation;
 
 use Exception;
 use Model\DataAccess\IDatabase;
+use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TmKeyService;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -13,7 +14,6 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub as MockStub;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
@@ -301,7 +301,7 @@ class TmKeyServiceTest extends AbstractTest
     #[Test]
     public function testPushTMXReturnsEarlyWhenNoPrivateKey(): void
     {
-        $ps = new RecursiveArrayObject([
+        $ps = new ProjectStructure([
             'private_tm_key'   => [],
             'array_files'      => ['file.xlf'],
             'array_files_meta' => [['extension' => 'xlf']],
@@ -317,7 +317,7 @@ class TmKeyServiceTest extends AbstractTest
     #[Test]
     public function testPushTMXReturnsEarlyWhenPrivateKeyIsEmpty(): void
     {
-        $ps = new RecursiveArrayObject([
+        $ps = new ProjectStructure([
             'private_tm_key'   => [['key' => '']],
             'array_files'      => ['file.xlf'],
             'array_files_meta' => [['extension' => 'xlf']],
@@ -333,7 +333,7 @@ class TmKeyServiceTest extends AbstractTest
     #[Test]
     public function testPushTMXSkipsNonTmxFiles(): void
     {
-        $ps = new RecursiveArrayObject([
+        $ps = new ProjectStructure([
             'private_tm_key'   => [['key' => 'abc123']],
             'array_files'      => ['doc.xlf', 'other.txt'],
             'array_files_meta' => [
@@ -352,7 +352,7 @@ class TmKeyServiceTest extends AbstractTest
     #[Test]
     public function testPushTMXRecordsErrorAndRethrowsOnUploadFailure(): void
     {
-        $ps = new RecursiveArrayObject([
+        $ps = new ProjectStructure([
             'private_tm_key'   => [['key' => 'abc123']],
             'array_files'      => ['my.tmx'],
             'array_files_meta' => [['extension' => 'tmx']],
@@ -379,7 +379,7 @@ class TmKeyServiceTest extends AbstractTest
     #[Test]
     public function testPushTMXReturnsEarlyWhenArrayFilesIsEmpty(): void
     {
-        $ps = new RecursiveArrayObject([
+        $ps = new ProjectStructure([
             'private_tm_key'   => [['key' => 'abc123']],
             'array_files'      => [],
             'array_files_meta' => [],
@@ -398,9 +398,9 @@ class TmKeyServiceTest extends AbstractTest
     // Helpers
     // ──────────────────────────────────────────────────────────────
 
-    private function makeProjectStructure(array $privateTmKeys): RecursiveArrayObject
+    private function makeProjectStructure(array $privateTmKeys): ProjectStructure
     {
-        return new RecursiveArrayObject([
+        return new ProjectStructure([
             'id_project'     => 999,
             'uid'            => 42,
             'private_tm_key' => $privateTmKeys,

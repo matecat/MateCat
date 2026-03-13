@@ -17,12 +17,11 @@ use Utils\Registry\AppConfig;
 /**
  * Unit tests for {@see \Model\ProjectCreation\ProjectManager::saveJobsMetadata()}.
  *
- * Tests verify that job-level metadata from `$this->config` (ProjectCreationConfig DTO)
+ * Tests verify that job-level metadata from `$this->projectStructure` (ProjectStructure DTO)
  * is correctly collected, transformed, and persisted via `JobsMetadataDao::set()`.
  *
- * Values are set via `setProjectStructureValue()` which refreshes the typed config DTO.
- * The ArrayObject parameter to `saveJobsMetadata()` is kept for backward compatibility
- * but Group A keys are now read from the DTO.
+ * Values are set via `setProjectStructureValue()` which updates the ProjectStructure directly.
+ * Group A keys are now typed properties on the ProjectStructure.
  *
  * @see REFACTORING_PLAN.md — Step 0d
  */

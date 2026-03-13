@@ -42,21 +42,21 @@ class ProjectManagerModel
      *
      * @throws Exception
      */
-    public function createProjectRecord(ProjectCreationConfig $config, ?int $idTeam, string $status, ?int $idAssignee): ProjectStruct
+    public function createProjectRecord(ProjectStructure $projectStructure, ?int $idTeam, string $status, ?int $idAssignee): ProjectStruct
     {
         $data = [];
-        $data['id'] = $config->idProject;
-        $data['id_customer'] = $config->idCustomer;
+        $data['id'] = $projectStructure->id_project;
+        $data['id_customer'] = $projectStructure->id_customer;
         $data['id_team'] = $idTeam;
-        $data['name'] = $config->projectName;
-        $data['create_date'] = $config->createDate;
+        $data['name'] = $projectStructure->project_name;
+        $data['create_date'] = $projectStructure->create_date;
         $data['status_analysis'] = $status;
-        $data['password'] = $config->ppassword;
-        $data['pretranslate_100'] = $config->pretranslate100;
-        $data['remote_ip_address'] = empty($config->userIp) ? 'UNKNOWN' : $config->userIp;
+        $data['password'] = $projectStructure->ppassword;
+        $data['pretranslate_100'] = $projectStructure->pretranslate_100;
+        $data['remote_ip_address'] = empty($projectStructure->user_ip) ? 'UNKNOWN' : $projectStructure->user_ip;
         $data['id_assignee'] = $idAssignee;
-        $data['instance_id'] = $config->instanceId ?: null;
-        $data['due_date'] = $config->dueDate;
+        $data['instance_id'] = $projectStructure->instance_id ?: null;
+        $data['due_date'] = $projectStructure->due_date;
 
         $this->dbHandler->begin();
         $projectId = $this->dbHandler->insert('projects', $data);

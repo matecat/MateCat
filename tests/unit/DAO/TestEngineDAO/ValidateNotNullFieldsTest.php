@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -58,6 +59,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
      * @covers EngineDAO::_validateNotNullFields
      * @throws ReflectionException
      */
+    #[Test]
     public function test__validateNotNullFields_base_url_field()
     {
         $this->engine_struct_param->base_url = null;
@@ -71,6 +73,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
      * TODO: this test fails until the source code will be fixed
      * @throws ReflectionException
      */
+    #[Test]
     public function test__validateNotNullFields_type_field_not_allowed_value_string()
     {
         $this->engine_struct_param->type = "bar";
@@ -83,6 +86,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
      * @covers EngineDAO::_validateNotNullFields
      * @throws ReflectionException
      */
+    #[Test]
     public function test__validateNotNullFields_type_field_int_not_present()
     {
         $this->engine_struct_param->type = 67;
@@ -95,6 +99,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
      * @covers EngineDAO::_validateNotNullFields
      * @throws ReflectionException
      */
+    #[Test]
     public function test__validateNotNullFields_type_value_not_between_types1()
     {
         $this->engine_struct_param->type = 'FooBar';
@@ -107,6 +112,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
      * @covers EngineDAO::_validateNotNullFields
      * TODO: this test fails until the source code will be fixed
      */
+    #[Test]
     public function test__validateNotNullFields_type_value_not_between_types2()
     {
         $this->engine_struct_param->type = 1000;

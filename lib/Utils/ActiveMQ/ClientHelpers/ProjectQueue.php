@@ -9,9 +9,9 @@
 
 namespace Utils\ActiveMQ\ClientHelpers;
 
-use ArrayObject;
 use Exception;
 use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
 use Predis\Response\Status;
 use ReflectionException;
 use Utils\ActiveMQ\WorkerClient;
@@ -29,17 +29,14 @@ class ProjectQueue
 {
 
     /**
-     * @param ArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @throws Exception
-     *
-     * //TODO externalize ProjectStruct from @see ProjectManager
-     *
      */
-    public static function sendProject(ArrayObject $projectStructure): void
+    public static function sendProject(ProjectStructure $projectStructure): void
     {
         try {
-            WorkerClient::enqueue('PROJECT_QUEUE', ProjectCreationWorker::class, $projectStructure->getArrayCopy(), ['persistent' => WorkerClient::$_HANDLER->persistent]);
+            WorkerClient::enqueue('PROJECT_QUEUE', ProjectCreationWorker::class, $projectStructure->toArray(), ['persistent' => WorkerClient::$_HANDLER->persistent]);
         } catch (Exception $e) {
             # Handle the error, logging, ...
             $output = "**** Project Enqueue failed. AMQ Connection Error. ****\n\t";
@@ -65,7 +62,7 @@ class ProjectQueue
     /**
      * @throws ReflectionException
      */
-    public static function publishResults(ArrayObject $projectStructure): Status
+    public static function publishResults(ProjectStructure $projectStructure): Status
     {
         $hashKey = sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure['id_project']);
 

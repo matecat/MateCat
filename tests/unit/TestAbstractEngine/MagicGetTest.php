@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
@@ -43,6 +44,7 @@ class MagicGetTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::__get
      */
+    #[Test]
     public function test_magic__get()
     {
         $this->assertEquals("DeepLingoTestEngine", $this->engine->name);
@@ -57,6 +59,7 @@ class MagicGetTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::__get
      */
+    #[Test]
     public function test_magic__get_with_not_existent_variable()
     {
         $this->assertNull($this->engine->notExistentVariable);

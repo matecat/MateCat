@@ -2,7 +2,6 @@
 
 namespace Model\ProjectCreation;
 
-use ArrayObject;
 use Closure;
 use Exception;
 use Model\Concerns\LogsMessages;
@@ -28,7 +27,7 @@ use Utils\TMS\TMSService;
  *  - Uploading TMX files to MyMemory
  *  - Polling for TMX upload completion status
  *
- * All mutations to projectStructure are performed on the ArrayObject passed
+ * All mutations to projectStructure are performed on the ProjectStructure passed
  * to the public methods, which is the same mutable structure used by ProjectManager.
  */
 class TmKeyService
@@ -66,9 +65,9 @@ class TmKeyService
      * On validation failure, the error is recorded in projectStructure and
      * the method returns early (callers should check for errors).
      *
-     * @param ArrayObject<string, mixed> $projectStructure
+     * @param ProjectStructure $projectStructure
      */
-    public function setPrivateTMKeys(ArrayObject $projectStructure, ?string $firstTMXFileName = ''): void
+    public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {
         foreach ($projectStructure['private_tm_key'] as $_tmKey) {
             try {
@@ -135,11 +134,11 @@ class TmKeyService
      * TMX files are removed from the project's array_files / array_files_meta
      * after successful upload so they are not processed as translation files.
      *
-     * @param ArrayObject<string, mixed> $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @throws Exception
      */
-    public function pushTMXToMyMemory(ArrayObject $projectStructure, string $uploadDir): void
+    public function pushTMXToMyMemory(ProjectStructure $projectStructure, string $uploadDir): void
     {
         $memoryFiles = [];
 
@@ -202,12 +201,12 @@ class TmKeyService
      * After each file completes (or times out), it is removed from the
      * project's array_files and array_files_meta lists.
      *
-     * @param ArrayObject<string, mixed> $projectStructure
+     * @param ProjectStructure $projectStructure
      * @param TMSFile[] $memoryFiles
      *
      * @throws Exception
      */
-    protected function loopForTMXLoadStatus(ArrayObject $projectStructure, array $memoryFiles): void
+    protected function loopForTMXLoadStatus(ProjectStructure $projectStructure, array $memoryFiles): void
     {
         $time = strtotime('+30 minutes');
 
@@ -244,8 +243,8 @@ class TmKeyService
                 }
             }
 
-            unset($projectStructure['array_files'][$file->getPosition()]);
-            unset($projectStructure['array_files_meta'][$file->getPosition()]);
+            unset($projectStructure->array_files[$file->getPosition()]);
+            unset($projectStructure->array_files_meta[$file->getPosition()]);
         }
     }
 
@@ -284,11 +283,11 @@ class TmKeyService
     }
 
     /**
-     * @param ArrayObject<string, mixed> $projectStructure
+     * @param ProjectStructure $projectStructure
      */
-    private function addProjectError(ArrayObject $projectStructure, int $code, string $message): void
+    private function addProjectError(ProjectStructure $projectStructure, int $code, string $message): void
     {
-        $projectStructure['result']['errors'][] = [
+        $projectStructure->result['errors'][] = [
             "code"    => $code,
             "message" => $message,
         ];

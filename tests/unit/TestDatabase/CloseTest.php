@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -35,6 +36,7 @@ class CloseTest extends AbstractTest
      * @covers \Model\DataAccess\Database::close
      * @throws ReflectionException
      */
+    #[Test]
     public function test_close()
     {
         $this->databaseInstance->close();

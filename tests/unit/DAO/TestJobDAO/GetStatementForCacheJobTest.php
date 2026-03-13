@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Jobs\JobDao;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -30,6 +31,7 @@ class GetStatementForCacheJobTest extends AbstractTest
         $this->method = $this->reflector->getMethod("_getStatementForQuery");
     }
 
+    #[Test]
     public function test__getStatementForCache()
     {
         $propReflection = $this->reflector->getProperty('_query_cache');

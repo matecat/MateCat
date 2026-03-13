@@ -7,6 +7,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectManagerModel;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
@@ -80,19 +81,19 @@ class SegmentStorageServiceTest extends AbstractTest
     }
 
     /**
-     * Create a basic project structure ArrayObject with all keys needed by storeSegments.
+     * Create a basic ProjectStructure with all keys needed by storeSegments.
      */
-    private function makeProjectStructure(int $fid, array $segments, array $originalData = [], array $metaData = []): ArrayObject
+    private function makeProjectStructure(int $fid, array $segments, array $originalData = [], array $metaData = []): ProjectStructure
     {
-        return new ArrayObject([
+        return new ProjectStructure([
             'segments'              => new ArrayObject([$fid => new ArrayObject($segments)]),
-            'segments-original-data' => new ArrayObject(array_key_exists($fid, $originalData) ? $originalData : [$fid => $originalData]),
-            'segments-meta-data'    => new ArrayObject(array_key_exists($fid, $metaData) ? $metaData : [$fid => $metaData]),
-            'file_segments_count'   => new ArrayObject(),
+            'segments_original_data' => new ArrayObject(array_key_exists($fid, $originalData) ? $originalData : [$fid => $originalData]),
+            'segments_meta_data'    => new ArrayObject(array_key_exists($fid, $metaData) ? $metaData : [$fid => $metaData]),
+            'file_segments_count'   => [],
             'segments_metadata'     => new ArrayObject([]),
             'notes'                 => new ArrayObject(),
             'translations'          => new ArrayObject(),
-            'context-group'         => new ArrayObject(),
+            'context_group'         => new ArrayObject(),
         ]);
     }
 
@@ -201,8 +202,8 @@ class SegmentStorageServiceTest extends AbstractTest
             $this->makeSegment($fid2, 'u4'),
             $this->makeSegment($fid2, 'u5'),
         ]);
-        $ps1['segments-original-data'][$fid2] = [];
-        $ps1['segments-meta-data'][$fid2] = [];
+        $ps1['segments_original_data'][$fid2] = [];
+        $ps1['segments_meta_data'][$fid2] = [];
 
         $this->service->storeSegments($fid1, $ps1);
         $this->service->storeSegments($fid2, $ps1);
@@ -489,7 +490,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $sanitizedId = "$fid|u1";
 
-        $ps['context-group'] = new ArrayObject([
+        $ps['context_group'] = new ArrayObject([
             $sanitizedId => [
                 'context_json_segment_ids' => [],
             ],
@@ -497,7 +498,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertSame([1300], $ps['context-group'][$sanitizedId]['context_json_segment_ids']);
+        self::assertSame([1300], $ps['context_group'][$sanitizedId]['context_json_segment_ids']);
     }
 
     // ── Translation linking ─────────────────────────────────────────
@@ -574,7 +575,7 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $this->stubFeaturesPassThrough();
 
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'segments'              => new ArrayObject([
                 $fid1 => new ArrayObject([
                     $this->makeSegment($fid1, 'u1'),
@@ -584,13 +585,13 @@ class SegmentStorageServiceTest extends AbstractTest
                     $this->makeSegment($fid2, 'u3'),
                 ]),
             ]),
-            'segments-original-data' => new ArrayObject([$fid1 => [], $fid2 => []]),
-            'segments-meta-data'    => new ArrayObject([$fid1 => [], $fid2 => []]),
-            'file_segments_count'   => new ArrayObject(),
+            'segments_original_data' => new ArrayObject([$fid1 => [], $fid2 => []]),
+            'segments_meta_data'    => new ArrayObject([$fid1 => [], $fid2 => []]),
+            'file_segments_count'   => [],
             'segments_metadata'     => new ArrayObject([]),
             'notes'                 => new ArrayObject(),
             'translations'          => new ArrayObject(),
-            'context-group'         => new ArrayObject(),
+            'context_group'         => new ArrayObject(),
         ]);
 
         $this->service->storeSegments($fid1, $ps);
@@ -689,7 +690,7 @@ class SegmentStorageServiceTest extends AbstractTest
     #[Test]
     public function cleanSegmentsMetadataRemovesNonCattoolSegments(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'segments_metadata' => new ArrayObject([
                 ['id' => 1, 'show_in_cattool' => 1],
                 ['id' => 2, 'show_in_cattool' => 0],

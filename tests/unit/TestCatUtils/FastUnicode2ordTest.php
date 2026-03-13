@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -27,6 +28,7 @@ class FastUnicode2ordTest extends AbstractTest
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_1()
     {
         $this->source_segment = <<<'LAB'
@@ -40,6 +42,7 @@ LAB;
      * @group regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_2()
     {
         $this->source_segment = <<<'LAB'
@@ -53,6 +56,7 @@ LAB;
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_3()
     {
         $this->source_segment = <<<'LAB'
@@ -66,6 +70,7 @@ LAB;
      * @group regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_4()
     {
         $this->source_segment = <<<'LAB'
@@ -79,6 +84,7 @@ LAB;
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_anomalyimput_swichcase1()
     {
         $this->source_segment = <<<'LAB'
@@ -92,6 +98,7 @@ LAB;
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_anomalyimput_swichcase2()
     {
         $this->source_segment = <<<'LAB'
@@ -105,6 +112,7 @@ LAB;
      * @group  regression
      * @covers CatUtils::fastUnicode2ord
      */
+    #[Test]
     public function test_fastUnicode2ord_anomalyimput_swichcase3()
     {
         $this->source_segment = <<<'LAB'

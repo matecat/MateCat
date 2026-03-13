@@ -5,6 +5,7 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 use Utils\Url\JobUrlBuilder;
@@ -42,6 +43,7 @@ class JobUrlBuilderTest extends AbstractTest
         $this->job = new JobStruct($this->database_instance->getConnection()->query("SELECT * FROM jobs ORDER BY id DESC LIMIT 1")->fetch());
     }
 
+    #[Test]
     public function testBuildTranslationUrl()
     {
         $job = new JobStruct($this->database_instance->getConnection()->query("SELECT * FROM jobs ORDER BY id DESC LIMIT 1")->fetch());
@@ -62,6 +64,7 @@ class JobUrlBuilderTest extends AbstractTest
         $this->assertFalse($jobUrlStruct->hasSecondPassReview());
     }
 
+    #[Test]
     public function testBuildTranslationUrlFromCredentials()
     {
         $job = new JobStruct($this->database_instance->getConnection()->query("SELECT * FROM jobs ORDER BY id DESC LIMIT 1")->fetch());

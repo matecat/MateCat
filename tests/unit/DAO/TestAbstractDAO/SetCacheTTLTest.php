@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -32,6 +33,7 @@ class SetCacheTTLTest extends AbstractTest
      * @group  regression
      * @covers Model\DataAccess\AbstractDao::setCacheTTL
      */
+    #[Test]
     public function test_setCacheTTL_to_value_not_zero()
     {
         $previous_TTL_value = $this->cache_TTL->getValue($this->dao);

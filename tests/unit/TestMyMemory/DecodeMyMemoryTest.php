@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
@@ -51,6 +52,7 @@ class DecodeMyMemoryTest extends AbstractTest
      * @covers  MyMemory::_decode
      * @throws ReflectionException
      */
+    #[Test]
     public function test__decode_with_json_in_input_deusch_segment()
     {
         $json_input = <<<LAB
@@ -86,6 +88,7 @@ LAB;
      * @covers  MyMemory::_decode
      * @throws ReflectionException
      */
+    #[Test]
     public function test__decode_with_json_in_input_from_italian_to_aragonese_segment_with_private_TM()
     {
         $json_input = <<<LAB
@@ -121,6 +124,7 @@ LAB;
      * @covers  MyMemory::_decode
      * @throws ReflectionException
      */
+    #[Test]
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_1()
     {
         $json_input = <<<LAB
@@ -177,6 +181,7 @@ LABEL;
      * @covers  MyMemory::_decode
      * @throws ReflectionException
      */
+    #[Test]
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_2()
     {
         $json_input = <<<LAB
@@ -240,6 +245,7 @@ LABEL;
      * @covers  MyMemory::_decode
      * @throws ReflectionException
      */
+    #[Test]
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_delete_method_check()
     {
         $json_input = <<<LAB

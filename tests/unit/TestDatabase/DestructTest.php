@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -31,6 +32,7 @@ class DestructTest extends AbstractTest
      * @covers \Model\DataAccess\Database::__destruct
      * @throws ReflectionException
      */
+    #[Test]
     public function test___destruct()
     {
         $instance_to_destruct = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);

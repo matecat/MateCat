@@ -225,10 +225,10 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // segments-original-data should have entries for this fid
-        $this->assertTrue($ps['segments-original-data']->offsetExists($fid));
+        $this->assertTrue($ps['segments_original_data']->offsetExists($fid));
 
         // seg-source branch always appends a SegmentOriginalDataStruct for each mrk
-        $originalData = $ps['segments-original-data'][$fid];
+        $originalData = $ps['segments_original_data'][$fid];
         $this->assertCount(2, $originalData);
     }
 
@@ -247,8 +247,8 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // segments-meta-data should have entries for this fid (one per mrk)
-        $this->assertTrue($ps['segments-meta-data']->offsetExists($fid));
-        $this->assertCount(2, $ps['segments-meta-data'][$fid]);
+        $this->assertTrue($ps['segments_meta_data']->offsetExists($fid));
+        $this->assertCount(2, $ps['segments_meta_data'][$fid]);
     }
 
     /**
@@ -264,7 +264,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $metaData = $ps['segments-meta-data'][$fid];
+        $metaData = $ps['segments_meta_data'][$fid];
 
         // Both mrk segments should have sizeRestriction metadata
         $foundSizeRestriction = false;
@@ -418,8 +418,8 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertTrue($ps['segments-meta-data']->offsetExists($fid));
-        $this->assertCount(2, $ps['segments-meta-data'][$fid]);
+        $this->assertTrue($ps['segments_meta_data']->offsetExists($fid));
+        $this->assertCount(2, $ps['segments_meta_data'][$fid]);
     }
 
     /**
@@ -435,7 +435,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $metaData = $ps['segments-meta-data'][$fid];
+        $metaData = $ps['segments_meta_data'][$fid];
 
         $foundSizeRestriction = false;
         foreach ($metaData as $meta) {
@@ -556,7 +556,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $contextGroup = $ps['context-group'];
+        $contextGroup = $ps['context_group'];
 
         $tu1Key = $fid . '|tu1';
         $this->assertTrue($contextGroup->offsetExists($tu1Key), "Context-group key '$tu1Key' should exist");
@@ -607,8 +607,8 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // current-xliff-info should have an entry for this fid
-        $this->assertArrayHasKey($fid, $ps['current-xliff-info']);
-        $this->assertArrayHasKey('version', $ps['current-xliff-info'][$fid]);
+        $this->assertArrayHasKey($fid, $ps['current_xliff_info']);
+        $this->assertArrayHasKey('version', $ps['current_xliff_info'][$fid]);
     }
 
     /**

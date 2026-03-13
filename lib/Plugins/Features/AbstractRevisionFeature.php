@@ -9,6 +9,7 @@ use Exception;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\Database;
+use Model\DataAccess\RecursiveArrayObject;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
@@ -17,6 +18,7 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelDao;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
@@ -25,7 +27,6 @@ use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use ReflectionException;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -138,11 +139,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * If so, then try to assign the defined qa_model.
      * If not, then try to find the qa_model from the project structure.
      *
-     * @param RecursiveArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @throws ReflectionException
      */
-    public function postProjectCreate(RecursiveArrayObject $projectStructure): void
+    public function postProjectCreate(ProjectStructure $projectStructure): void
     {
         if ($this instanceof ReviewExtended) {
             return;
@@ -189,12 +190,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
-     * @param ArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function createChunkReviewRecords(ArrayObject $projectStructure): void
+    protected function createChunkReviewRecords(ProjectStructure $projectStructure): void
     {
         $project = ProjectDao::findById($projectStructure['id_project']);
         foreach ($projectStructure['array_jobs']['job_list'] as $id_job) {
@@ -419,12 +420,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *  Sets the QA model fom the uploaded file which was previously validated
      *  and added to the project structure.
      *
-     * @param RecursiveArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @return void
      * @throws ReflectionException
      */
-    private function setQaModelFromJsonFile(RecursiveArrayObject $projectStructure): void
+    private function setQaModelFromJsonFile(ProjectStructure $projectStructure): void
     {
         /** @var RecursiveArrayObject $model_json */
         $model_json = $projectStructure['features']['quality_framework'];
@@ -446,11 +447,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * If validation fails, add errors to the projectStructure.
      *
-     * @param ArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      * @param string|null $jsonPath
      *
      */
-    public static function loadAndValidateQualityFramework(ArrayObject &$projectStructure, ?string $jsonPath = null): void
+    public static function loadAndValidateQualityFramework(ProjectStructure &$projectStructure, ?string $jsonPath = null): void
     {
         if (get_called_class() instanceof ReviewExtended || get_called_class() == ReviewExtended::class) {
             return;
@@ -466,7 +467,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         // If decoding the model failed, register the error
         if (empty($decoded_model)) {
-            $projectStructure['result']['errors'][] = [
+            $projectStructure->result['errors'][] = [
                 'code' => '-900',
                 'message' => 'QA model failed to decode'
             ];
@@ -478,18 +479,20 @@ abstract class AbstractRevisionFeature extends BaseFeature
         }
 
         // Append the QA model to the project structure
-        $projectStructure['features']['quality_framework'] = $decoded_model;
+        $features = $projectStructure['features'];
+        $features['quality_framework'] = $decoded_model;
+        $projectStructure['features'] = $features;
     }
 
     /**
      * Get a model from path or default
      *
-     * @param ArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      * @param string|null $jsonPath
      *
-     * @return RecursiveArrayObject
+     * @return \Model\DataAccess\RecursiveArrayObject
      */
-    private static function loadModelFromPathOrDefault(ArrayObject $projectStructure, ?string $jsonPath): RecursiveArrayObject
+    private static function loadModelFromPathOrDefault(ProjectStructure $projectStructure, ?string $jsonPath): RecursiveArrayObject
     {
         if (empty($qa_model)) {
             // Use null coalescing to simplify fallback logic

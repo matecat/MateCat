@@ -7,7 +7,6 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
@@ -43,14 +42,14 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->pm->setProjectStructureValue('ppassword', 'proj_pass');
         $this->pm->setProjectStructureValue('project_name', 'Test Project');
         $this->pm->setProjectStructureValue('source_language', 'en-US');
-        $this->pm->setProjectStructureValue('target_language', new RecursiveArrayObject(['it-IT']));
-        $this->pm->setProjectStructureValue('array_jobs', new RecursiveArrayObject([
-            'job_pass'     => new RecursiveArrayObject(['pass1']),
-            'job_list'     => new RecursiveArrayObject([101]),
-            'job_segments' => new RecursiveArrayObject(['101-pass1' => ['job_first_segment' => 1, 'job_last_segment' => 10]]),
-            'job_languages' => new RecursiveArrayObject(),
-            'payable_rates' => new RecursiveArrayObject(),
-        ]));
+        $this->pm->setProjectStructureValue('target_language', ['it-IT']);
+        $this->pm->setProjectStructureValue('array_jobs', [
+            'job_pass'     => ['pass1'],
+            'job_list'     => [101],
+            'job_segments' => ['101-pass1' => ['job_first_segment' => 1, 'job_last_segment' => 10]],
+            'job_languages' => [],
+            'payable_rates' => [],
+        ]);
     }
 
     protected function tearDown(): void

@@ -11,7 +11,6 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Xliff\XliffConfigTemplateStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
@@ -67,7 +66,7 @@ class SaveMetadataTest extends AbstractTest
         $this->pm->setProjectsMetadataDao($stubDao);
 
         // Set defaults needed by saveMetadata()
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([]));
+        $this->pm->setProjectStructureValue('metadata', []);
         $this->pm->setProjectStructureValue('sanitize_project_options', false);
         $this->pm->setProjectStructureValue(
             JobsMetadataDao::SUBFILTERING_HANDLERS,
@@ -134,9 +133,9 @@ class SaveMetadataTest extends AbstractTest
     public function testAllDaoSetCallsUseCorrectProjectId(): void
     {
         // Set a metadata key so there is at least one option to persist
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             'some_key' => 'some_value',
-        ]));
+        ]);
 
         $this->pm->callSaveMetadata();
 
@@ -248,10 +247,10 @@ class SaveMetadataTest extends AbstractTest
     {
         $params = ['model' => 'comet', 'threshold' => 0.8];
 
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED => true,
             ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS => $params,
-        ]));
+        ]);
 
         $this->pm->callSaveMetadata();
 
@@ -264,20 +263,17 @@ class SaveMetadataTest extends AbstractTest
     {
         $params = ['model' => 'comet', 'threshold' => 0.8];
 
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED => false,
             ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS => $params,
-        ]));
+        ]);
 
         $this->pm->callSaveMetadata();
 
-        // The parameters key should still be persisted (it's in metadata)
-        // but NOT json_encoded — it should be the original RecursiveArrayObject
+        // When workflow is disabled, raw array parameters are removed
+        // to prevent passing a non-string value to MetadataDao::set()
         $calls = $this->findDaoCallsByKey('mt_qe_workflow_parameters');
-        if (!empty($calls)) {
-            // If persisted, it should not be a JSON string
-            self::assertNotSame(json_encode($params), $calls[0][2]);
-        }
+        self::assertEmpty($calls, 'mt_qe_workflow_parameters should not be persisted when workflow is disabled');
     }
 
     // =========================================================================
@@ -358,10 +354,10 @@ class SaveMetadataTest extends AbstractTest
 
         // Set metadata with an invalid segmentation_rule that the sanitizer
         // should strip, and a valid speech2text that should pass through
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             'speech2text' => true,
             'segmentation_rule' => 'invalid_value',
-        ]));
+        ]);
 
         $this->pm->callSaveMetadata();
 
@@ -379,9 +375,9 @@ class SaveMetadataTest extends AbstractTest
     public function testSanitizeProjectOptionsIsSkippedWhenDisabled(): void
     {
         // sanitize_project_options is already false from setUp()
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             'segmentation_rule' => 'invalid_value',
-        ]));
+        ]);
 
         $this->pm->callSaveMetadata();
 
@@ -398,11 +394,11 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testAllMetadataOptionsArePersistedViaSet(): void
     {
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             'custom_key_1' => 'value_1',
             'custom_key_2' => 'value_2',
             'custom_key_3' => 'value_3',
-        ]));
+        ]);
 
         $this->pm->callSaveMetadata();
 
@@ -428,9 +424,9 @@ class SaveMetadataTest extends AbstractTest
             JobsMetadataDao::SUBFILTERING_HANDLERS,
             '[{"name":"handler1"}]'
         );
-        $this->pm->setProjectStructureValue('metadata', new RecursiveArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             'existing_option' => 'kept',
-        ]));
+        ]);
 
         $this->pm->callSaveMetadata();
 

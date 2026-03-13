@@ -3,6 +3,7 @@
 
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -40,6 +41,7 @@ class GetUpdatedValueTest extends AbstractTest
      * @covers CounterModel::getUpdatedValues
      * @group  regression
      */
+    #[Test]
     public function test_getUpdateValue_with_ice_match_no_changes()
     {
         $word_count_struct = @$this->getMockBuilder(WordCountStruct::class)->getMock();
@@ -78,6 +80,7 @@ class GetUpdatedValueTest extends AbstractTest
      * @covers CounterModel::getUpdatedValues
      * @group  regression
      */
+    #[Test]
     public function test_getUpdateValue_with_rejection()
     {
         $word_count_struct = new WordCountStruct();
@@ -125,6 +128,7 @@ class GetUpdatedValueTest extends AbstractTest
      * @covers CounterModel::getUpdatedValues
      * @group  regression
      */
+    #[Test]
     public function test_getUpdateValue_from_draft_to_approved()
     {
         $this->word_count_struct->setNewWords(0);
@@ -158,6 +162,7 @@ class GetUpdatedValueTest extends AbstractTest
      * @covers CounterModel::getUpdatedValues
      * @group  regression
      */
+    #[Test]
     public function test_getUpdateValue_with_null_argument()
     {
         $this->word_counter = new CounterModel();

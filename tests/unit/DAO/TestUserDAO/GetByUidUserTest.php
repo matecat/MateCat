@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -59,6 +60,7 @@ class GetByUidUserTest extends AbstractTest
         parent::tearDown();
     }
 
+    #[Test]
     public function test_getByUid()
     {
         $user = $this->user_Dao->getByUid($this->uid);

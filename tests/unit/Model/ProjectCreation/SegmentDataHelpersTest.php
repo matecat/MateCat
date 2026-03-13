@@ -7,6 +7,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectManagerModel;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
@@ -43,7 +44,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function cleanSegmentsMetadataKeepsShowInCattoolSegments(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'segments_metadata' => new ArrayObject([
                 ['id' => 1, 'show_in_cattool' => 1, 'meta_key' => 'a'],
                 ['id' => 2, 'show_in_cattool' => 1, 'meta_key' => 'b'],
@@ -58,7 +59,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function cleanSegmentsMetadataRemovesHiddenSegments(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'segments_metadata' => new ArrayObject([
                 ['id' => 1, 'show_in_cattool' => 1],
                 ['id' => 2, 'show_in_cattool' => 0],
@@ -78,7 +79,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function cleanSegmentsMetadataRemovesAllWhenNoneVisible(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'segments_metadata' => new ArrayObject([
                 ['id' => 1, 'show_in_cattool' => 0],
                 ['id' => 2, 'show_in_cattool' => 0],
@@ -93,7 +94,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function cleanSegmentsMetadataHandlesEmptyArrayObject(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'segments_metadata' => new ArrayObject([]),
         ]);
 
@@ -106,7 +107,7 @@ class SegmentDataHelpersTest extends AbstractTest
     public function cleanSegmentsMetadataUsesLooseComparisonForShowInCattool(): void
     {
         // show_in_cattool == 1 uses loose comparison, so "1" (string) should also pass
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'segments_metadata' => new ArrayObject([
                 ['id' => 1, 'show_in_cattool' => '1'],
                 ['id' => 2, 'show_in_cattool' => true],
@@ -129,7 +130,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function setSegmentIdForNotesAddsToSegmentIdsWhenJsonIsEmpty(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'notes' => new ArrayObject([
                 'unit-1' => [
                     'json' => [],
@@ -151,7 +152,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function setSegmentIdForNotesAddsToJsonSegmentIdsWhenJsonHasEntries(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'notes' => new ArrayObject([
                 'unit-1' => [
                     'json' => ['some note data'],
@@ -173,7 +174,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function setSegmentIdForNotesAppendsMultipleIds(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'notes' => new ArrayObject([
                 'unit-1' => [
                     'json' => [],
@@ -192,7 +193,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function setSegmentIdForNotesDoesNothingWhenInternalIdNotFound(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'notes' => new ArrayObject([
                 'unit-1' => [
                     'json' => [],
@@ -215,7 +216,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function setSegmentIdForNotesHandlesMultipleInternalIds(): void
     {
-        $ps = new ArrayObject([
+        $ps = new ProjectStructure([
             'notes' => new ArrayObject([
                 'unit-A' => [
                     'json' => ['note'],
@@ -244,8 +245,8 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function setSegmentIdForContextsAddsIdWhenInternalIdExists(): void
     {
-        $ps = new ArrayObject([
-            'context-group' => new ArrayObject([
+        $ps = new ProjectStructure([
+            'context_group' => new ArrayObject([
                 'unit-1' => [
                     'context_json_segment_ids' => [],
                 ],
@@ -257,14 +258,14 @@ class SegmentDataHelpersTest extends AbstractTest
             $ps,
         ]);
 
-        self::assertSame([55], $ps['context-group']['unit-1']['context_json_segment_ids']);
+        self::assertSame([55], $ps['context_group']['unit-1']['context_json_segment_ids']);
     }
 
     #[Test]
     public function setSegmentIdForContextsAppendsMultipleIds(): void
     {
-        $ps = new ArrayObject([
-            'context-group' => new ArrayObject([
+        $ps = new ProjectStructure([
+            'context_group' => new ArrayObject([
                 'unit-1' => [
                     'context_json_segment_ids' => [10],
                 ],
@@ -274,14 +275,14 @@ class SegmentDataHelpersTest extends AbstractTest
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-1', 'id' => 20], $ps]);
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-1', 'id' => 30], $ps]);
 
-        self::assertSame([10, 20, 30], $ps['context-group']['unit-1']['context_json_segment_ids']);
+        self::assertSame([10, 20, 30], $ps['context_group']['unit-1']['context_json_segment_ids']);
     }
 
     #[Test]
     public function setSegmentIdForContextsDoesNothingWhenInternalIdNotFound(): void
     {
-        $ps = new ArrayObject([
-            'context-group' => new ArrayObject([
+        $ps = new ProjectStructure([
+            'context_group' => new ArrayObject([
                 'unit-1' => [
                     'context_json_segment_ids' => [],
                 ],
@@ -293,14 +294,14 @@ class SegmentDataHelpersTest extends AbstractTest
             $ps,
         ]);
 
-        self::assertEmpty($ps['context-group']['unit-1']['context_json_segment_ids']);
+        self::assertEmpty($ps['context_group']['unit-1']['context_json_segment_ids']);
     }
 
     #[Test]
     public function setSegmentIdForContextsHandlesMultipleInternalIds(): void
     {
-        $ps = new ArrayObject([
-            'context-group' => new ArrayObject([
+        $ps = new ProjectStructure([
+            'context_group' => new ArrayObject([
                 'unit-A' => ['context_json_segment_ids' => []],
                 'unit-B' => ['context_json_segment_ids' => []],
             ]),
@@ -309,8 +310,8 @@ class SegmentDataHelpersTest extends AbstractTest
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-A', 'id' => 1], $ps]);
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-B', 'id' => 2], $ps]);
 
-        self::assertSame([1], $ps['context-group']['unit-A']['context_json_segment_ids']);
-        self::assertSame([2], $ps['context-group']['unit-B']['context_json_segment_ids']);
+        self::assertSame([1], $ps['context_group']['unit-A']['context_json_segment_ids']);
+        self::assertSame([2], $ps['context_group']['unit-B']['context_json_segment_ids']);
     }
 
     // ──────────────────────────────────────────────────────────────

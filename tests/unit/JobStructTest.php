@@ -5,6 +5,7 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -79,6 +80,7 @@ class JobStructTest extends AbstractTest
         $this->dao = new JobDao(Database::obtain());
     }
 
+    #[Test]
     public function testAutoIncrementOnCreate()
     {
         $jobStruct = $this->dao->createFromStruct($this->originalJobStruct);
@@ -89,11 +91,13 @@ class JobStructTest extends AbstractTest
 
     }
 
+    #[Test]
     public function testArrayAccessGet()
     {
         $this->assertEquals('0f020dee031d', $this->originalJobStruct['password']);
     }
 
+    #[Test]
     public function testArrayAccessSet()
     {
         $jobStruct = clone($this->originalJobStruct);
@@ -103,6 +107,7 @@ class JobStructTest extends AbstractTest
         $this->assertNotEquals($pass, $jobStruct['password']);
     }
 
+    #[Test]
     public function testArrayAccessUnset()
     {
         $jobStruct = clone($this->originalJobStruct);
@@ -111,12 +116,14 @@ class JobStructTest extends AbstractTest
         $this->assertNull($jobStruct['password']);
     }
 
+    #[Test]
     public function testArrayAccessOffsetExists()
     {
         $this->assertEmpty($this->originalJobStruct['status_translator']);
         $this->assertTrue(isset($this->originalJobStruct['status_translator']));
     }
 
+    #[Test]
     public function testPropertyAccess()
     {
         $jobStruct = clone($this->originalJobStruct);

@@ -5,7 +5,7 @@ namespace unit\Model\ProjectCreation;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
-use Model\ProjectCreation\ProjectCreationConfig;
+use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -69,12 +69,12 @@ class CreateProjectRecordTest extends AbstractTest
         $model->expects($this->once())
             ->method('createProjectRecord')
             ->willReturnCallback(function (
-                ProjectCreationConfig $config,
+                ProjectStructure $projectStructure,
                 ?int $idTeam,
                 string $status,
                 ?int $idAssignee
             ) use (&$capturedConfig, &$capturedIdTeam, &$capturedStatus, &$capturedIdAssignee) {
-                $capturedConfig = $config;
+                $capturedConfig = $projectStructure;
                 $capturedIdTeam = $idTeam;
                 $capturedStatus = $status;
                 $capturedIdAssignee = $idAssignee;
@@ -89,9 +89,9 @@ class CreateProjectRecordTest extends AbstractTest
 
         $this->pm->callCreateProjectRecord();
 
-        $this->assertInstanceOf(ProjectCreationConfig::class, $capturedConfig);
-        $this->assertSame('My Project', $capturedConfig->projectName);
-        $this->assertSame(999, $capturedConfig->idProject);
+        $this->assertInstanceOf(ProjectStructure::class, $capturedConfig);
+        $this->assertSame('My Project', $capturedConfig->project_name);
+        $this->assertSame(999, $capturedConfig->id_project);
         $this->assertSame(7, $capturedIdTeam);
         $this->assertSame(ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS, $capturedStatus);
         $this->assertSame(42, $capturedIdAssignee);

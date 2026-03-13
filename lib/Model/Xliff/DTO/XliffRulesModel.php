@@ -5,7 +5,7 @@ namespace Model\Xliff\DTO;
 use DomainException;
 use Exception;
 use JsonSerializable;
-use Utils\Collections\RecursiveArrayObject;
+use Model\DataAccess\RecursiveArrayObject;
 
 class XliffRulesModel implements JsonSerializable
 {
@@ -55,7 +55,7 @@ class XliffRulesModel implements JsonSerializable
     }
 
     /**
-     * @param RecursiveArrayObject $structure
+     * @param \Model\DataAccess\RecursiveArrayObject $structure
      *
      * @return static
      * @throws Exception

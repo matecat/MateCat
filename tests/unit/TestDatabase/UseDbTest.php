@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -39,6 +40,7 @@ class UseDbTest extends AbstractTest
      * @group  regression
      * @covers Database::useDb
      */
+    #[Test]
     public function test_useDb_check_private_variable()
     {
         $this->databaseInstance->useDb('information_schema');

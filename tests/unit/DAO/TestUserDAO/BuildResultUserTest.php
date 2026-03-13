@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -35,6 +36,7 @@ class BuildResultUserTest extends AbstractTest
      * @covers UserDao::_buildResult
      * @throws ReflectionException
      */
+    #[Test]
     public function test_build_result_from_simple_array()
     {
         $array_param = [

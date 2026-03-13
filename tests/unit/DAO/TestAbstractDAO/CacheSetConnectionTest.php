@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
+use PHPUnit\Framework\Attributes\Test;
 use Predis\Connection\Resource\Exception\StreamInitException;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -49,6 +50,7 @@ class CacheSetConnectionTest extends AbstractTest
      * @covers Model\DataAccess\AbstractDao::_cacheSetConnection
      * @throws ReflectionException
      */
+    #[Test]
     public function test_set_connection_after_creation_of_engine()
     {
         $this->cache_conn->setValue($this->dao, null);
@@ -62,6 +64,7 @@ class CacheSetConnectionTest extends AbstractTest
      * @covers Model\DataAccess\AbstractDao::_cacheSetConnection
      * @throws ReflectionException
      */
+    #[Test]
     public function test_set_connection_with_wrong_global_constant()
     {
         $this->cache_conn->setValue($this->dao, null);

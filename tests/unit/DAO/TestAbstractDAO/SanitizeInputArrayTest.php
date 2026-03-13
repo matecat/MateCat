@@ -5,6 +5,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -39,6 +40,7 @@ class SanitizeInputArrayTest extends AbstractTest
      * @group  regression
      * @covers Model\DataAccess\AbstractDao::_sanitizeInputArray
      */
+    #[Test]
     public function test__sanitizeInputArray_with_correct_structs_that_match_with_the_given_type()
     {
         $first_struct = new EngineStruct();
@@ -62,6 +64,7 @@ class SanitizeInputArrayTest extends AbstractTest
      * @group  regression
      * @covers Model\DataAccess\AbstractDao::_sanitizeInputArray
      */
+    #[Test]
     public function test__sanitizeInputArray_with_wrong_struct_that_dont_match_with_the_given_type()
     {
         $first_struct = new EngineStruct();

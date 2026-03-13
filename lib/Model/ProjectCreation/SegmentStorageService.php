@@ -2,7 +2,6 @@
 
 namespace Model\ProjectCreation;
 
-use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Concerns\LogsMessages;
@@ -35,7 +34,7 @@ use Utils\LQA\QA;
  *  - Building the segments_metadata analysis array
  *  - Cleaning segments_metadata (removing non-cattool segments)
  *
- * All mutations to projectStructure are performed on the ArrayObject passed
+ * All mutations to projectStructure are performed on the ProjectStructure passed
  * to the public methods, which is the same mutable structure used by ProjectManager.
  */
 class SegmentStorageService
@@ -85,12 +84,12 @@ class SegmentStorageService
      * Store segments for a single file: reserve IDs, persist original data
      * and metadata, bulk-insert segment rows, and link IDs to notes/contexts/translations.
      *
-     * @param string|int                   $fid
-     * @param ArrayObject<string, mixed>   $projectStructure
+     * @param string|int          $fid
+     * @param ProjectStructure    $projectStructure
      *
      * @throws Exception
      */
-    public function storeSegments(string|int $fid, ArrayObject $projectStructure): void
+    public function storeSegments(string|int $fid, ProjectStructure $projectStructure): void
     {
         if (count($projectStructure['segments'][$fid]) == 0) {
             return;
@@ -114,7 +113,7 @@ class SegmentStorageService
             $projectStructure['segments'][$fid][$position]->id = $id_segment;
 
             /** @var SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = $projectStructure['segments-original-data'][$fid][$position] ?? new SegmentOriginalDataStruct(
+            $segmentOriginalDataStruct = $projectStructure['segments_original_data'][$fid][$position] ?? new SegmentOriginalDataStruct(
             ); // If not set, create an empty struct to be safe. Avoid 'Call to a member function getMap() on null'
 
             $originalDataMap = $segmentOriginalDataStruct->getMap();
@@ -134,16 +133,16 @@ class SegmentStorageService
             }
 
             /** @var ?SegmentMetadataStruct $segmentMetadataStruct */
-            $segmentMetadataStruct = $projectStructure['segments-meta-data'][$fid][$position] ?? null;
+            $segmentMetadataStruct = $projectStructure['segments_meta_data'][$fid][$position] ?? null;
 
             if ($segmentMetadataStruct !== null) {
                 $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
             }
 
-            if (!isset($projectStructure['file_segments_count'] [$fid])) {
-                $projectStructure['file_segments_count'] [$fid] = 0;
+            if (!isset($projectStructure->file_segments_count[$fid])) {
+                $projectStructure->file_segments_count[$fid] = 0;
             }
-            $projectStructure['file_segments_count'] [$fid]++;
+            $projectStructure->file_segments_count[$fid]++;
 
             $_metadata = [
                 'id'                => $id_segment,
@@ -252,9 +251,9 @@ class SegmentStorageService
      * Remove segments with show_in_cattool == false from segments_metadata.
      * Called before inserting pre-translations.
      *
-     * @param ArrayObject<string, mixed> $projectStructure
+     * @param ProjectStructure $projectStructure
      */
-    public function cleanSegmentsMetadata(ArrayObject $projectStructure): void
+    public function cleanSegmentsMetadata(ProjectStructure $projectStructure): void
     {
         $projectStructure['segments_metadata']->exchangeArray(
             array_filter($projectStructure['segments_metadata']->getArrayCopy(), function ($value) {
@@ -273,12 +272,12 @@ class SegmentStorageService
      *  - Builds an SQL values array for bulk insert
      *  - Sets the create_2_pass_review flag when a final-state translation is found
      *
-     * @param JobStruct                    $job              The job these translations belong to
-     * @param ArrayObject<string, mixed>   $projectStructure The mutable project structure
+     * @param JobStruct            $job              The job these translations belong to
+     * @param ProjectStructure     $projectStructure The mutable project structure
      *
      * @throws Exception
      */
-    public function insertPreTranslations(JobStruct $job, ArrayObject $projectStructure): void
+    public function insertPreTranslations(JobStruct $job, ProjectStructure $projectStructure): void
     {
         $jid = $job->id;
         $this->cleanSegmentsMetadata($projectStructure);
@@ -314,7 +313,7 @@ class SegmentStorageService
                 $stateValues = SegmentExtractor::getTargetStatesFromTransUnit($translation_row[4], $position);
 
                 $rule = $configModel->getMatchingRule(
-                    $projectStructure['current-xliff-info'][$translation_row[5] /* file_id */]['version'],
+                    $projectStructure['current_xliff_info'][$translation_row[5] /* file_id */]['version'],
                     $stateValues['state'],
                     $stateValues['state-qualifier']
                 );
@@ -440,10 +439,10 @@ class SegmentStorageService
     /**
      * Link segment ID to notes entries for later insertion.
      *
-     * @param array<string, mixed>         $row
-     * @param ArrayObject<string, mixed>   $projectStructure
+     * @param array<string, mixed>   $row
+     * @param ProjectStructure       $projectStructure
      */
-    private function setSegmentIdForNotes(array $row, ArrayObject $projectStructure): void
+    private function setSegmentIdForNotes(array $row, ProjectStructure $projectStructure): void
     {
         $internal_id = $row['internal_id'];
 
@@ -459,15 +458,15 @@ class SegmentStorageService
     /**
      * Link segment ID to context-group entries for later insertion.
      *
-     * @param array<string, mixed>         $row
-     * @param ArrayObject<string, mixed>   $projectStructure
+     * @param array<string, mixed>   $row
+     * @param ProjectStructure       $projectStructure
      */
-    private function setSegmentIdForContexts(array $row, ArrayObject $projectStructure): void
+    private function setSegmentIdForContexts(array $row, ProjectStructure $projectStructure): void
     {
         $internal_id = $row['internal_id'];
 
-        if ($projectStructure['context-group']->offsetExists($internal_id)) {
-            $projectStructure['context-group'][$internal_id]['context_json_segment_ids'][] = $row['id'];
+        if ($projectStructure['context_group']->offsetExists($internal_id)) {
+            $projectStructure['context_group'][$internal_id]['context_json_segment_ids'][] = $row['id'];
         }
     }
 }

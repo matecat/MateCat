@@ -3,6 +3,7 @@
 namespace unit\TestCatUtils;
 
 use Exception;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -11,6 +12,7 @@ class SegmentRawWordCountTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testSegmentRawWordCount()
     {
         $links = <<<H

@@ -31,7 +31,7 @@ abstract class AbstractTest extends TestCase
     {
         parent::tearDown();
         $resultTime = microtime(true) - $this->thisTestStartingTime ?? microtime(true);
-        echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . $resultTime . " seconds.\n";
+        echo " " . str_pad(get_class($this) . "::" . $this->name(), 35) . " - Did in " . round($resultTime, 6) . " seconds.\n";
     }
 
     /**

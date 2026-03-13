@@ -11,9 +11,9 @@ use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
-use Model\ProjectCreation\ProjectCreationConfig;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectManagerModel;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
@@ -21,7 +21,6 @@ use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionClass;
 use ReflectionException;
 use Throwable;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
 
@@ -64,20 +63,20 @@ class TestableProjectManager extends ProjectManager
         $loggerProp->setValue($this, $logger);
 
         // Initialize the projectStructure with all keys needed by _extractSegments
-        $this->projectStructure = new RecursiveArrayObject([
+        $this->projectStructure = new ProjectStructure([
             'id_project' => 999,
             'source_language' => 'en-US',
-            'target_language' => new RecursiveArrayObject(['it-IT']),
+            'target_language' => ['it-IT'],
             'private_tm_key' => [],
             'segments' => new ArrayObject(),
-            'segments-original-data' => new ArrayObject(),
-            'segments-meta-data' => new ArrayObject(),
-            'file-part-id' => new ArrayObject(),
-            'file-metadata' => new ArrayObject(),
+            'segments_original_data' => new ArrayObject(),
+            'segments_meta_data' => new ArrayObject(),
+            'file_part_id' => new ArrayObject(),
+            'file_metadata' => new ArrayObject(),
             'translations' => new ArrayObject(),
             'notes' => new ArrayObject(),
-            'context-group' => new ArrayObject(),
-            'current-xliff-info' => [],
+            'context_group' => new ArrayObject(),
+            'current_xliff_info' => [],
             'xliff_parameters' => $xliffParameters ?? new XliffRulesModel(),
             'result' => ['errors' => []],
             // Mutable pipeline keys needed by createProjectRecord() caller
@@ -85,8 +84,6 @@ class TestableProjectManager extends ProjectManager
             'id_team' => null,
             'id_assignee' => null,
         ]);
-
-        $this->refreshConfig();
     }
 
     /**
@@ -101,7 +98,7 @@ class TestableProjectManager extends ProjectManager
     /**
      * Expose projectStructure for assertions.
      */
-    public function getTestProjectStructure(): RecursiveArrayObject|ArrayObject
+    public function getTestProjectStructure(): ProjectStructure
     {
         return $this->projectStructure;
     }
@@ -143,24 +140,11 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Re-extract the typed ProjectCreationConfig DTO from the current
-     * projectStructure.  Call this after modifying projectStructure keys
-     * that are read via `$this->config` in the production code.
-     */
-    public function refreshConfig(): void
-    {
-        $this->config = ProjectCreationConfig::fromArrayObject($this->projectStructure);
-    }
-
-    /**
      * Set a specific key in projectStructure for testing.
-     * Automatically refreshes the typed config DTO so that reads
-     * via `$this->config` reflect the updated value.
      */
     public function setProjectStructureValue(string $key, mixed $value): void
     {
         $this->projectStructure[$key] = $value;
-        $this->refreshConfig();
     }
 
     // ── saveMetadata() testing support ──────────────────────────────

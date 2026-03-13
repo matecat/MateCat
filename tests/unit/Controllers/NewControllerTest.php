@@ -11,6 +11,7 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -106,6 +107,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithValidParameters()
     {
         $user = $this->createMock(UserStruct::class);
@@ -151,6 +153,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithValidParametersAndMtDeepLEngine()
     {
         $this->user = $this->createMock(UserStruct::class);
@@ -196,6 +199,7 @@ class NewControllerTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithMissingFile()
     {
         $this->requestMock = new Request(
@@ -221,6 +225,7 @@ class NewControllerTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithInvalidParameters()
     {
         $this->requestMock = new Request(
@@ -250,6 +255,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithInvalidSourceLang()
     {
         $this->requestMock = new Request(
@@ -280,6 +286,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateSubfilteringOptionsReturnsNullForNone(): void
     {
         $controller = new NewController(
@@ -297,6 +304,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateSubfilteringOptionsReturnsNullForEmptyString(): void
     {
         $controller = new NewController(
@@ -314,6 +322,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateSubfilteringOptionsReturnsArrayForValidJson(): void
     {
         $controller = new NewController(
@@ -333,6 +342,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateSubfilteringOptionsReturnsEmptyArrayForEmptyJsonArray(): void
     {
         $controller = new NewController(
@@ -353,6 +363,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateSubfilteringOptionsThrowsForMalformedJson(): void
     {
         $controller = new NewController(

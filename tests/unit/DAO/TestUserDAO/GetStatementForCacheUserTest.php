@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -33,6 +34,7 @@ class GetStatementForCacheUserTest extends AbstractTest
     /**
      * @throws ReflectionException
      */
+    #[Test]
     public function test__getStatementForCache()
     {
         $query = "SELECT email FROM " . AppConfig::$DB_DATABASE . ".`users` WHERE uid='barandfoo';";

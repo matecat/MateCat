@@ -1,6 +1,6 @@
 <?php
 
-namespace Utils\Collections;
+namespace Model\DataAccess;
 
 use ArrayIterator;
 use ArrayObject;

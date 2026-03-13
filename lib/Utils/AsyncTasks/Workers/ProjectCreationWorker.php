@@ -13,13 +13,13 @@ namespace Utils\AsyncTasks\Workers;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Model\Exceptions\NotFoundException;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Exceptions\ValidationError;
 use Model\ProjectCreation\ProjectManager;
 use PDOException;
 use ReflectionException;
 use Throwable;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -29,7 +29,7 @@ use Utils\Tools\Utils;
 class ProjectCreationWorker extends AbstractWorker
 {
 
-    protected RecursiveArrayObject $projectStructure;
+    protected ProjectStructure $projectStructure;
 
     /**
      * @param AbstractElement $queueElement
@@ -97,7 +97,7 @@ class ProjectCreationWorker extends AbstractWorker
             throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  empty params found.", self::ERR_REQUEUE_END);
         }
 
-        $this->projectStructure = new RecursiveArrayObject($queueElement->params->toArray());
+        $this->projectStructure = new ProjectStructure($queueElement->params->toArray());
         $projectManager = new ProjectManager($this->projectStructure);
         $projectManager->createProject();
     }
@@ -109,7 +109,7 @@ class ProjectCreationWorker extends AbstractWorker
     {
         ProjectQueue::publishResults($this->projectStructure);
         $this->_doLog("Project creation completed: " . $this->projectStructure['id_project']);
-        $this->projectStructure = new RecursiveArrayObject();
+        $this->projectStructure = new ProjectStructure();
     }
 
 }

@@ -253,8 +253,6 @@ class NewController extends KleinController
         $projectStructure['id_project'] = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
         $projectStructure['ppassword'] = Utils::randomString();
 
-        $projectStructure = $this->featureSet->filter('addNewProjectStructureAttributes', $projectStructure, $_POST);
-
         // flag to mark the project "from API"
         $projectStructure['from_api'] = true;
 
@@ -287,7 +285,7 @@ class NewController extends KleinController
      */
     private function pollForCreationResult($projectStructure): array
     {
-        return $projectStructure['result']['errors']->getArrayCopy();
+        return $projectStructure['result']['errors'];
     }
 
     /**

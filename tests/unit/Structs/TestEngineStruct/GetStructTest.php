@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -30,6 +31,7 @@ class GetStructTest extends AbstractTest
      * @covers EngineStruct::getStruct
      * @throws ReflectionException
      */
+    #[Test]
     public function test_getStruct_simple()
     {
         $this->assertTrue($this->method->invoke($this->engineStruct, null) instanceof EngineStruct);

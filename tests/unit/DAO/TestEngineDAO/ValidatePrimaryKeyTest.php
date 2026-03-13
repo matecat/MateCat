@@ -4,6 +4,7 @@ use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -43,6 +44,7 @@ class ValidatePrimaryKeyTest extends AbstractTest
      * @doesNotPerformAssertions
      */
     #[doesNotPerformAssertions]
+    #[Test]
     public function test__validatePrimaryKey_valid_fields()
     {
         $this->engine_struct_param->id = 33;
@@ -57,6 +59,7 @@ class ValidatePrimaryKeyTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::_validatePrimaryKey
      */
+    #[Test]
     public function test__validatePrimaryKey_invalid_id()
     {
         $this->engine_struct_param->id = null;
@@ -71,6 +74,7 @@ class ValidatePrimaryKeyTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::_validatePrimaryKey
      */
+    #[Test]
     public function test__validatePrimaryKey_invalid_uid()
     {
         $this->engine_struct_param->id = 33;

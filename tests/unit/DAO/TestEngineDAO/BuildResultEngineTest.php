@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -36,6 +37,7 @@ class BuildResultEngineTest extends AbstractTest
      * @covers EngineDAO::_buildResult
      * @throws ReflectionException
      */
+    #[Test]
     public function test_build_result_from_simple_array()
     {
         $array_param = [
