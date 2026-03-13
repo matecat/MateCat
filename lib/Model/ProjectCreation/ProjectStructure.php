@@ -4,7 +4,6 @@ namespace Model\ProjectCreation;
 
 use ArrayAccess;
 use ArrayObject;
-use DomainException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\ArrayAccessTrait;
@@ -16,23 +15,21 @@ use Model\Xliff\DTO\XliffRulesModel;
  * single data bus for the project creation pipeline.
  *
  * Extends {@see AbstractDaoObjectStruct} for strict property enforcement
- * (throws {@see DomainException} on unknown direct property access) and
- * implements {@see ArrayAccess} via {@see ArrayAccessTrait} so existing
- * `$projectStructure['key']` syntax continues working unchanged.
+ * (throws DomainException on unknown property access, both direct and via
+ * array-access syntax) and implements {@see ArrayAccess} via
+ * {@see ArrayAccessTrait} so existing `$projectStructure['key']` syntax
+ * continues working unchanged.
  *
- * Unknown keys written via array-access syntax are stored in a private
- * overflow map ({@see $dynamicProperties}) — this supports the dynamic
- * engine configuration loop in controllers.
+ * This is a fully closed DTO — all valid properties are declared as public
+ * class properties.  Writing to an undeclared key (via `$dto->x = ...` or
+ * `$dto['x'] = ...`) throws immediately, catching typos and stale keys at
+ * runtime.
  *
  * @implements ArrayAccess<string, mixed>
  */
 class ProjectStructure extends AbstractDaoObjectStruct implements ArrayAccess, JsonSerializable
 {
-    use ArrayAccessTrait {
-        ArrayAccessTrait::offsetSet as private traitOffsetSet;
-        ArrayAccessTrait::offsetGet as private traitOffsetGet;
-        ArrayAccessTrait::offsetExists as private traitOffsetExists;
-    }
+    use ArrayAccessTrait;
 
     // ── Group A: Init-only keys (49 keys) ───────────────────────────
 
@@ -195,91 +192,13 @@ class ProjectStructure extends AbstractDaoObjectStruct implements ArrayAccess, J
     public ?string $character_counter = null;
     public ?string $ai_assistant = null;
 
-    // ── Dynamic properties overflow map ─────────────────────────────
+    // ── Plugin / revision pipeline keys ─────────────────────────────
 
-    /**
-     * Stores unknown keys written via array-access syntax.
-     * Used by the dynamic engine configuration loop in controllers
-     * and for backward-compatible keys like `private_tm_user`/`private_tm_pass`.
-     *
-     * @var array<string, mixed>
-     */
-    private array $dynamicProperties = [];
-
-    // ── Constructor ─────────────────────────────────────────────────
-
-    /**
-     * @param array<string, mixed> $array_params
-     */
-    public function __construct(array $array_params = [])
-    {
-        foreach ($array_params as $property => $value) {
-            if (property_exists($this, $property)) {
-                $this->$property = $value;
-            } else {
-                $this->dynamicProperties[$property] = $value;
-            }
-        }
-    }
-
-    // ── ArrayAccess overrides (overflow map support) ────────────────
-
-    /**
-     * Sets a value via array-access syntax.
-     * Known properties are set directly; unknown keys go to the overflow map.
-     */
-    public function offsetSet(mixed $offset, mixed $value): void
-    {
-        if (property_exists($this, (string) $offset)) {
-            $this->$offset = $value;
-        } else {
-            $this->dynamicProperties[(string) $offset] = $value;
-        }
-    }
-
-    /**
-     * Gets a value via array-access syntax.
-     * Known properties are returned directly; unknown keys are looked up
-     * in the overflow map.
-     *
-     * @throws DomainException if the key is not found anywhere
-     */
-    public function offsetGet(mixed $offset): mixed
-    {
-        if (property_exists($this, (string) $offset)) {
-            return $this->$offset;
-        }
-        if (array_key_exists((string) $offset, $this->dynamicProperties)) {
-            return $this->dynamicProperties[(string) $offset];
-        }
-
-        throw new DomainException('Unknown property ' . $offset);
-    }
-
-    /**
-     * Checks if a key exists via array-access syntax.
-     * Checks both declared properties and the overflow map.
-     */
-    public function offsetExists(mixed $offset): bool
-    {
-        return property_exists($this, (string) $offset)
-            || array_key_exists((string) $offset, $this->dynamicProperties);
-    }
+    /** @var array<string, mixed> Features collected during quality framework validation (e.g. quality_framework) */
+    public array   $features = [];
+    public bool    $create_2_pass_review = false;
 
     // ── Serialization ───────────────────────────────────────────────
-
-    /**
-     * Extends the base toArray() to include dynamic properties.
-     *
-     * @param string[]|null $mask
-     * @return array<string, mixed>
-     */
-    public function toArray(array $mask = null, object $class = null): array
-    {
-        $base = parent::toArray($mask, $class);
-
-        return array_merge($base, $this->dynamicProperties);
-    }
 
     /**
      * @return array<string, mixed>

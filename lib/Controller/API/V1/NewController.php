@@ -148,8 +148,6 @@ class NewController extends KleinController
         $projectStructure['project_name'] = $request['project_name'];
         $projectStructure['job_subject'] = $request['subject'];
         $projectStructure['private_tm_key'] = $request['private_tm_key'];
-        $projectStructure['private_tm_user'] = $request['private_tm_user'];
-        $projectStructure['private_tm_pass'] = $request['private_tm_pass'];
         $projectStructure['tm_prioritization'] = $request['tm_prioritization'];
         $projectStructure['uploadToken'] = $uploadFile->getDirUploadToken();
         $projectStructure['array_files'] = $filesFound['arrayFiles']; //list of file names
