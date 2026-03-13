@@ -167,16 +167,17 @@ class SegmentStorageService
 
         $segmentsDao = $this->createSegmentDao();
         // split the query in to chunks if there are too much segments
-        $segmentsDao->createList($projectStructure->segments[$fid]->getArrayCopy());
+        $segmentsDao->createList(array_values($projectStructure->segments[$fid]));
 
         // free memory
-        $projectStructure->segments[$fid]->exchangeArray([]);
+        $projectStructure->segments[$fid] = [];
 
         // Here we make a query for the last inserted segments. This is the point where we
         // can read the id of the segments table to reference it in other inserts in other tables.
         if (!(
             empty($projectStructure->notes) &&
-            empty($projectStructure->translations)
+            empty($projectStructure->translations) &&
+            empty($projectStructure->context_group)
         )) {
             // internal counter for the segmented translations ( mrk in target )
             $array_internal_segmentation_counter = [];
@@ -188,7 +189,7 @@ class SegmentStorageService
                 $this->setSegmentIdForContexts($row, $projectStructure);
 
                 // The following block of code is for translations
-                if ($projectStructure->translations->offsetExists($row['internal_id'])) {
+                if (isset($projectStructure->translations[$row['internal_id']])) {
                     if (!array_key_exists($row['internal_id'], $array_internal_segmentation_counter)) {
                         // if we don't have segmentation, we have not mrk ID,
                         // so work with positional indexes ( should be only one row )
@@ -211,21 +212,21 @@ class SegmentStorageService
                     // set this var only for easy reading
                     $short_var_counter = $array_internal_segmentation_counter[$row['internal_id']];
 
-                    if (!$projectStructure->translations[$row['internal_id']]->offsetExists($short_var_counter)) {
+                    if (!isset($projectStructure->translations[$row['internal_id']][$short_var_counter])) {
                         continue;
                     }
 
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter]->offsetSet(0, $row['id']);
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter]->offsetSet(1, $row['internal_id']);
+                    $projectStructure->translations[$row['internal_id']][$short_var_counter][0] = $row['id'];
+                    $projectStructure->translations[$row['internal_id']][$short_var_counter][1] = $row['internal_id'];
                     /**
                      * WARNING offset 2 is the target translation
                      */
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter]->offsetSet(3, $row['segment_hash']);
+                    $projectStructure->translations[$row['internal_id']][$short_var_counter][3] = $row['segment_hash'];
                     /**
                      * WARNING offset 4 is the Trans-Unit
                      * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                      */
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter]->offsetSet(5, $row['file_id']);
+                    $projectStructure->translations[$row['internal_id']][$short_var_counter][5] = $row['file_id'];
                     /**
                      * WARNING Offset 6 is possibly the MRK order position.
                      */
@@ -242,8 +243,9 @@ class SegmentStorageService
         }
 
         // merge segments_metadata for every file in the project
-        $projectStructure->segments_metadata->exchangeArray(
-            array_merge($projectStructure->segments_metadata->getArrayCopy(), $segments_metadata)
+        $projectStructure->segments_metadata = array_merge(
+            (array) $projectStructure->segments_metadata,
+            $segments_metadata
         );
     }
 
@@ -255,11 +257,12 @@ class SegmentStorageService
      */
     public function cleanSegmentsMetadata(ProjectStructure $projectStructure): void
     {
-        $projectStructure->segments_metadata->exchangeArray(
-            array_filter($projectStructure->segments_metadata->getArrayCopy(), function ($value) {
+        $projectStructure->segments_metadata = array_values(array_filter(
+            (array) $projectStructure->segments_metadata,
+            function ($value) {
                 return $value['show_in_cattool'] == 1;
-            })
-        );
+            }
+        ));
     }
 
     /**
@@ -446,7 +449,7 @@ class SegmentStorageService
     {
         $internal_id = $row['internal_id'];
 
-        if ($projectStructure->notes->offsetExists($internal_id)) {
+        if (isset($projectStructure->notes[$internal_id])) {
             if (count($projectStructure->notes[$internal_id]['json']) != 0) {
                 $projectStructure->notes[$internal_id]['json_segment_ids'][] = $row['id'];
             } else {
@@ -465,7 +468,7 @@ class SegmentStorageService
     {
         $internal_id = $row['internal_id'];
 
-        if ($projectStructure->context_group->offsetExists($internal_id)) {
+        if (isset($projectStructure->context_group[$internal_id])) {
             $projectStructure->context_group[$internal_id]['context_json_segment_ids'][] = $row['id'];
         }
     }

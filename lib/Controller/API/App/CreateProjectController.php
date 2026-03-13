@@ -106,7 +106,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE['upload_token'];
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
-        $projectManager = new ProjectManager();
         $engine = EnginesFactory::getInstance($this->data['mt_engine']);
 
         $gdriveSession = $_SESSION["gdrive_session"] ?? null;
@@ -121,7 +120,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $gdriveSession,
         );
 
-        $projectManager->setProjectStructure($projectStructure);
+        $projectManager = new ProjectManager($projectStructure);
         $projectManager->setTeam($this->data['team']);
 
         //reserve a project id from the sequence

@@ -9,15 +9,17 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Xliff\DTO\XliffRulesModel;
 
 /**
- * Typed DTO replacing {@see \Model\DataAccess\RecursiveArrayObject} as the
- * single data bus for the project creation pipeline.
+ * Typed, closed-schema DTO used as the canonical state container for project creation.
  *
- * Extends {@see AbstractDaoObjectStruct} for strict property enforcement
- * (throws DomainException on unknown property access).
+ * It carries the full lifecycle data for the pipeline: validated input, mutable
+ * processing state, per-file transient data, and final creation results.
  *
- * This is a fully closed DTO — all valid properties are declared as public
- * class properties.  Writing to an undeclared key (via `$dto->x = ...`)
- * throws immediately, catching typos and stale keys at runtime.
+ * By extending {@see AbstractDaoObjectStruct}, it enforces strict property access:
+ * only declared public fields are valid, and unknown keys fail fast to prevent
+ * silent state drift.
+ *
+ * Implements {@see JsonSerializable} to expose a stable array payload for queue
+ * transport, persistence, and API responses.
  */
 class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializable
 {
@@ -49,7 +51,7 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     // TM/MT configuration
     public ?int    $mt_engine = null;
     public ?int    $tms_engine = null;
-    public mixed   $private_tm_key = 0;
+    public mixed   $private_tm_key = [];
     public int     $pretranslate_100 = 0;
     public int     $pretranslate_101 = 1;
     public int     $only_private = 0;

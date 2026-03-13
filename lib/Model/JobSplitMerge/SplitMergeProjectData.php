@@ -5,21 +5,18 @@ namespace Model\JobSplitMerge;
 use ArrayObject;
 
 /**
- * Typed DTO for split/merge operations.
+ * Canonical typed DTO for the project-creation pipeline.
  *
- * Replaces the untyped {@see \Model\DataAccess\RecursiveArrayObject} that
- * {@see JobSplitMergeManager} previously used to carry state between
- * controllers, the manager, and {@see JobSplitMergeService}.
+ * It centralizes all project state exchanged across controllers and
+ * ProjectCreation services, including validated input, runtime pipeline data,
+ * per-file transient processing data, and final output/result payloads.
  *
- * This DTO holds exactly the 7 keys that the split/merge pipeline needs:
+ * By extending {@see AbstractDaoObjectStruct}, it enforces a closed schema:
+ * only declared public properties are allowed, and unknown property access
+ * fails fast, preventing silent key drift and typo-based bugs.
  *
- *  - Identity (read-only): idProject, idCustomer
- *  - Mutable input: uid, jobToSplit, jobToSplitPass, jobToMerge
- *  - Mutable output: splitResult, jobList, jobPass, jobSegments
- *
- * The {@see toArrayObject()} method produces an {@see ArrayObject} snapshot
- * for backward-compatible FeatureSet hooks (`postJobSplitted`, `postJobMerged`)
- * that external plugins may rely on.
+ * Implements {@see JsonSerializable} to provide a stable array representation
+ * for queue transport, persistence, and API responses.
  */
 class SplitMergeProjectData
 {

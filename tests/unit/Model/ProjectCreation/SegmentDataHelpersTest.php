@@ -45,10 +45,10 @@ class SegmentDataHelpersTest extends AbstractTest
     public function cleanSegmentsMetadataKeepsShowInCattoolSegments(): void
     {
         $ps = new ProjectStructure([
-            'segments_metadata' => new ArrayObject([
+            'segments_metadata' => [
                 ['id' => 1, 'show_in_cattool' => 1, 'meta_key' => 'a'],
                 ['id' => 2, 'show_in_cattool' => 1, 'meta_key' => 'b'],
-            ]),
+            ],
         ]);
 
         $this->service->cleanSegmentsMetadata($ps);
@@ -60,16 +60,16 @@ class SegmentDataHelpersTest extends AbstractTest
     public function cleanSegmentsMetadataRemovesHiddenSegments(): void
     {
         $ps = new ProjectStructure([
-            'segments_metadata' => new ArrayObject([
+            'segments_metadata' => [
                 ['id' => 1, 'show_in_cattool' => 1],
                 ['id' => 2, 'show_in_cattool' => 0],
                 ['id' => 3, 'show_in_cattool' => 1],
-            ]),
+            ],
         ]);
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        $result = $ps->segments_metadata->getArrayCopy();
+        $result = $ps->segments_metadata;
         self::assertCount(2, $result);
         // array_filter preserves keys, so check values
         $ids = array_column($result, 'id');
@@ -80,10 +80,10 @@ class SegmentDataHelpersTest extends AbstractTest
     public function cleanSegmentsMetadataRemovesAllWhenNoneVisible(): void
     {
         $ps = new ProjectStructure([
-            'segments_metadata' => new ArrayObject([
+            'segments_metadata' => [
                 ['id' => 1, 'show_in_cattool' => 0],
                 ['id' => 2, 'show_in_cattool' => 0],
-            ]),
+            ],
         ]);
 
         $this->service->cleanSegmentsMetadata($ps);
@@ -92,10 +92,10 @@ class SegmentDataHelpersTest extends AbstractTest
     }
 
     #[Test]
-    public function cleanSegmentsMetadataHandlesEmptyArrayObject(): void
+    public function cleanSegmentsMetadataHandlesEmptyArray(): void
     {
         $ps = new ProjectStructure([
-            'segments_metadata' => new ArrayObject([]),
+            'segments_metadata' => [],
         ]);
 
         $this->service->cleanSegmentsMetadata($ps);
@@ -108,17 +108,17 @@ class SegmentDataHelpersTest extends AbstractTest
     {
         // show_in_cattool == 1 uses loose comparison, so "1" (string) should also pass
         $ps = new ProjectStructure([
-            'segments_metadata' => new ArrayObject([
+            'segments_metadata' => [
                 ['id' => 1, 'show_in_cattool' => '1'],
                 ['id' => 2, 'show_in_cattool' => true],
                 ['id' => 3, 'show_in_cattool' => '0'],
                 ['id' => 4, 'show_in_cattool' => false],
-            ]),
+            ],
         ]);
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        $result = $ps->segments_metadata->getArrayCopy();
+        $result = $ps->segments_metadata;
         $ids = array_column($result, 'id');
         self::assertSame([1, 2], $ids);
     }

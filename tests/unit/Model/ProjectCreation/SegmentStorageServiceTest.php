@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use ArrayObject;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
@@ -86,14 +85,14 @@ class SegmentStorageServiceTest extends AbstractTest
     private function makeProjectStructure(int $fid, array $segments, array $originalData = [], array $metaData = []): ProjectStructure
     {
         return new ProjectStructure([
-            'segments'              => new ArrayObject([$fid => new ArrayObject($segments)]),
-            'segments_original_data' => new ArrayObject(array_key_exists($fid, $originalData) ? $originalData : [$fid => $originalData]),
-            'segments_meta_data'    => new ArrayObject(array_key_exists($fid, $metaData) ? $metaData : [$fid => $metaData]),
+            'segments'              => [$fid => $segments],
+            'segments_original_data' => array_key_exists($fid, $originalData) ? $originalData : [$fid => $originalData],
+            'segments_meta_data'    => array_key_exists($fid, $metaData) ? $metaData : [$fid => $metaData],
             'file_segments_count'   => [],
-            'segments_metadata'     => new ArrayObject([]),
-            'notes'                 => new ArrayObject(),
-            'translations'          => new ArrayObject(),
-            'context_group'         => new ArrayObject(),
+            'segments_metadata'     => [],
+            'notes'                 => [],
+            'translations'          => [],
+            'context_group'         => [],
         ]);
     }
 
@@ -198,10 +197,10 @@ class SegmentStorageServiceTest extends AbstractTest
         ]);
 
         // Add second file's segments to the same structure
-        $ps1->segments[$fid2] = new ArrayObject([
+        $ps1->segments[$fid2] = [
             $this->makeSegment($fid2, 'u4'),
             $this->makeSegment($fid2, 'u5'),
-        ]);
+        ];
         $ps1->segments_original_data[$fid2] = [];
         $ps1->segments_meta_data[$fid2] = [];
 
@@ -228,7 +227,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg1, $seg2]);
         $this->service->storeSegments($fid, $ps);
 
-        // After storeSegments, the segments ArrayObject is cleared,
+        // After storeSegments, the segments array is cleared,
         // but the IDs were set on the original structs which we still hold references to
         self::assertSame(200, $seg1->id);
         self::assertSame(201, $seg2->id);
@@ -361,7 +360,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $this->service->storeSegments($fid, $ps);
 
-        $metadata = $ps->segments_metadata->getArrayCopy();
+        $metadata = $ps->segments_metadata;
         self::assertCount(1, $metadata);
 
         $entry = $metadata[0];
@@ -397,7 +396,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $this->service->storeSegments($fid, $ps);
 
-        $metadata = $ps->segments_metadata->getArrayCopy();
+        $metadata = $ps->segments_metadata;
         self::assertSame('custom_value', $metadata[0]['custom_field']);
     }
 
@@ -437,13 +436,13 @@ class SegmentStorageServiceTest extends AbstractTest
         // Internal ID will be sanitized as "$fid|u1"
         $sanitizedId = "$fid|u1";
 
-        $ps->notes = new ArrayObject([
+        $ps->notes = [
             $sanitizedId => [
                 'json' => [],
                 'segment_ids' => [],
                 'json_segment_ids' => [],
             ],
-        ]);
+        ];
 
         $this->service->storeSegments($fid, $ps);
 
@@ -462,13 +461,13 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $sanitizedId = "$fid|u1";
 
-        $ps->notes = new ArrayObject([
+        $ps->notes = [
             $sanitizedId => [
                 'json' => ['some json note'],
                 'segment_ids' => [],
                 'json_segment_ids' => [],
             ],
-        ]);
+        ];
 
         $this->service->storeSegments($fid, $ps);
 
@@ -490,11 +489,11 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $sanitizedId = "$fid|u1";
 
-        $ps->context_group = new ArrayObject([
+        $ps->context_group = [
             $sanitizedId => [
                 'context_json_segment_ids' => [],
             ],
-        ]);
+        ];
 
         $this->service->storeSegments($fid, $ps);
 
@@ -515,24 +514,24 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg]);
         $sanitizedId = "$fid|u1";
 
-        // Translation structure: translations[internal_id][counter] = ArrayObject([0 => id, 1 => internal_id, 2 => target, 3 => hash, 4 => trans_unit, 5 => file_id, 6 => position])
-        $translationRow = new ArrayObject([null, null, 'Ciao mondo', null, '<trans-unit/>', null, null]);
-        $ps->translations = new ArrayObject([
-            $sanitizedId => new ArrayObject([
+        // Translation structure: translations[internal_id][counter] = [0 => id, 1 => internal_id, 2 => target, 3 => hash, 4 => trans_unit, 5 => file_id, 6 => position]
+        $translationRow = [null, null, 'Ciao mondo', null, '<trans-unit/>', null, null];
+        $ps->translations = [
+            $sanitizedId => [
                 0 => $translationRow,
-            ]),
-        ]);
+            ],
+        ];
 
         $this->service->storeSegments($fid, $ps);
 
         // offset 0 = segment id
-        self::assertSame(1400, $translationRow[0]);
+        self::assertSame(1400, $ps->translations[$sanitizedId][0][0]);
         // offset 1 = internal_id
-        self::assertSame($sanitizedId, $translationRow[1]);
+        self::assertSame($sanitizedId, $ps->translations[$sanitizedId][0][1]);
         // offset 3 = segment_hash
-        self::assertSame(md5('Hello world'), $translationRow[3]);
+        self::assertSame(md5('Hello world'), $ps->translations[$sanitizedId][0][3]);
         // offset 5 = file_id
-        self::assertSame($fid, $translationRow[5]);
+        self::assertSame($fid, $ps->translations[$sanitizedId][0][5]);
     }
 
     #[Test]
@@ -549,17 +548,17 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation exists for this internal_id but not for mrk position 5
-        $translationRow = new ArrayObject([null, null, 'Target', null, '<tu/>', null, null]);
-        $ps->translations = new ArrayObject([
-            $sanitizedId => new ArrayObject([
+        $translationRow = [null, null, 'Target', null, '<tu/>', null, null];
+        $ps->translations = [
+            $sanitizedId => [
                 0 => $translationRow, // position 0, not 5
-            ]),
-        ]);
+            ],
+        ];
 
         $this->service->storeSegments($fid, $ps);
 
         // Translation should NOT be linked — offset 0 should remain null
-        self::assertNull($translationRow[0]);
+        self::assertNull($ps->translations[$sanitizedId][0][0]);
     }
 
     // ── Segments metadata accumulation across files ──────────────────
@@ -576,22 +575,22 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->stubFeaturesPassThrough();
 
         $ps = new ProjectStructure([
-            'segments'              => new ArrayObject([
-                $fid1 => new ArrayObject([
+            'segments'              => [
+                $fid1 => [
                     $this->makeSegment($fid1, 'u1'),
                     $this->makeSegment($fid1, 'u2'),
-                ]),
-                $fid2 => new ArrayObject([
+                ],
+                $fid2 => [
                     $this->makeSegment($fid2, 'u3'),
-                ]),
-            ]),
-            'segments_original_data' => new ArrayObject([$fid1 => [], $fid2 => []]),
-            'segments_meta_data'    => new ArrayObject([$fid1 => [], $fid2 => []]),
+                ],
+            ],
+            'segments_original_data' => [$fid1 => [], $fid2 => []],
+            'segments_meta_data'    => [$fid1 => [], $fid2 => []],
             'file_segments_count'   => [],
-            'segments_metadata'     => new ArrayObject([]),
-            'notes'                 => new ArrayObject(),
-            'translations'          => new ArrayObject(),
-            'context_group'         => new ArrayObject(),
+            'segments_metadata'     => [],
+            'notes'                 => [],
+            'translations'          => [],
+            'context_group'         => [],
         ]);
 
         $this->service->storeSegments($fid1, $ps);
@@ -601,7 +600,7 @@ class SegmentStorageServiceTest extends AbstractTest
         self::assertCount(3, $ps->segments_metadata);
 
         // Verify IDs are correct
-        $ids = array_column($ps->segments_metadata->getArrayCopy(), 'id');
+        $ids = array_column($ps->segments_metadata, 'id');
         self::assertSame([100, 101, 200], $ids);
     }
 
@@ -621,17 +620,17 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation at mrk position 2
-        $translationRow = new ArrayObject([null, null, 'Ciao', null, '<tu/>', null, null]);
-        $ps->translations = new ArrayObject([
-            $sanitizedId => new ArrayObject([
+        $translationRow = [null, null, 'Ciao', null, '<tu/>', null, null];
+        $ps->translations = [
+            $sanitizedId => [
                 '2' => $translationRow,
-            ]),
-        ]);
+            ],
+        ];
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertSame(1600, $translationRow[0]);
-        self::assertSame($sanitizedId, $translationRow[1]);
+        self::assertSame(1600, $ps->translations[$sanitizedId]['2'][0]);
+        self::assertSame($sanitizedId, $ps->translations[$sanitizedId]['2'][1]);
     }
 
     // ── Multiple segments same internal_id with positional counter ──
@@ -649,20 +648,20 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg1, $seg2]);
         $sanitizedId = "$fid|u1";
 
-        $row0 = new ArrayObject([null, null, 'Parte uno', null, '<tu/>', null, null]);
-        $row1 = new ArrayObject([null, null, 'Parte due', null, '<tu/>', null, null]);
+        $row0 = [null, null, 'Parte uno', null, '<tu/>', null, null];
+        $row1 = [null, null, 'Parte due', null, '<tu/>', null, null];
 
-        $ps->translations = new ArrayObject([
-            $sanitizedId => new ArrayObject([
+        $ps->translations = [
+            $sanitizedId => [
                 0 => $row0,
                 1 => $row1,
-            ]),
-        ]);
+            ],
+        ];
 
         $this->service->storeSegments($fid, $ps);
 
-        self::assertSame(1700, $row0[0]);
-        self::assertSame(1701, $row1[0]);
+        self::assertSame(1700, $ps->translations[$sanitizedId][0][0]);
+        self::assertSame(1701, $ps->translations[$sanitizedId][1][0]);
     }
 
     // ── No notes/translations: skip linking loop ────────────────────
@@ -676,8 +675,8 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $ps = $this->makeProjectStructure($fid, [$this->makeSegment($fid, 'u1')]);
         // Ensure both are truly empty
-        $ps->notes = new ArrayObject();
-        $ps->translations = new ArrayObject();
+        $ps->notes = [];
+        $ps->translations = [];
 
         $this->service->storeSegments($fid, $ps);
 
@@ -691,16 +690,16 @@ class SegmentStorageServiceTest extends AbstractTest
     public function cleanSegmentsMetadataRemovesNonCattoolSegments(): void
     {
         $ps = new ProjectStructure([
-            'segments_metadata' => new ArrayObject([
+            'segments_metadata' => [
                 ['id' => 1, 'show_in_cattool' => 1],
                 ['id' => 2, 'show_in_cattool' => 0],
                 ['id' => 3, 'show_in_cattool' => 1],
-            ]),
+            ],
         ]);
 
         $this->service->cleanSegmentsMetadata($ps);
 
-        $result = $ps->segments_metadata->getArrayCopy();
+        $result = $ps->segments_metadata;
         self::assertCount(2, $result);
         $ids = array_column($result, 'id');
         self::assertSame([1, 3], $ids);

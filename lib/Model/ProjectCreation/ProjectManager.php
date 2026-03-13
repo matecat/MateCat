@@ -122,17 +122,9 @@ class ProjectManager
      * @throws EndQueueException
      * @throws ReQueueException
      */
-    public function __construct(?ProjectStructure $projectStructure = null)
+    public function __construct(ProjectStructure $projectStructure)
     {
         $this->logger = LoggerFactory::getLogger('project_manager');
-
-        if ($projectStructure === null) {
-            $projectStructure = new ProjectStructure();
-            $projectStructure->create_date     = date('Y-m-d H:i:s');
-            $projectStructure->instance_id     = AppConfig::$INSTANCE_ID;
-            $projectStructure->session         = ($_SESSION ?? null);
-            $projectStructure->status          = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        }
 
         $this->projectStructure = $projectStructure;
 
@@ -311,15 +303,6 @@ class ProjectManager
         $this->projectStructure->id_team = $team->id;
     }
 
-    public function getProjectStructure(): ProjectStructure
-    {
-        return $this->projectStructure;
-    }
-
-    public function setProjectStructure(ProjectStructure $projectStructure): void
-    {
-        $this->projectStructure = $projectStructure;
-    }
 
     /**
      * Save features in project metadata
@@ -575,10 +558,13 @@ class ProjectManager
             $this->projectStructure->id_assignee = $this->projectStructure->uid;
 
             /**
-             * Normalize ArrayObject team in TeamStruct
+             * Normalize team (array or TeamStruct) into TeamStruct
              */
+            $teamData = $this->projectStructure->team instanceof TeamStruct
+                ? $this->projectStructure->team->getArrayCopy()
+                : (array) $this->projectStructure->team;
             $this->projectStructure->team = new TeamStruct(
-                $this->features->filter('filter_team_for_project_creation', $this->projectStructure->team->getArrayCopy())
+                $this->features->filter('filter_team_for_project_creation', $teamData)
             );
 
             //clean the cache for the team member list of assigned projects
@@ -633,7 +619,7 @@ class ProjectManager
     private function initGdriveSession(): void
     {
         if (!empty($this->projectStructure->session['uid'])) {
-            $this->gdriveSession = Session::getInstanceForCLI($this->projectStructure->session->getArrayCopy());
+            $this->gdriveSession = Session::getInstanceForCLI($this->projectStructure->session);
         }
     }
 
@@ -1047,7 +1033,7 @@ class ProjectManager
      */
     private function insertFileInstructions(array $totalFilesStructure): void
     {
-        $array_files = $this->getProjectStructure()->array_files;
+        $array_files = $this->projectStructure->array_files;
 
         foreach ($totalFilesStructure as $fid => $file_info) {
             foreach ($array_files as $index => $filename) {
@@ -1152,9 +1138,9 @@ class ProjectManager
         $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
         (new ProjectDao())->deleteFailedProject($this->projectStructure->id_project);
-        (new FileDao())->deleteFailedProjectFiles($this->projectStructure->file_id_list->getArrayCopy());
+        (new FileDao())->deleteFailedProjectFiles($this->projectStructure->file_id_list);
         $this->log("Deleted Project ID: " . $this->projectStructure->id_project);
-        $this->log("Deleted Files ID: " . json_encode($this->projectStructure->file_id_list->getArrayCopy()));
+        $this->log("Deleted Files ID: " . json_encode($this->projectStructure->file_id_list));
     }
 
     /**
@@ -1188,10 +1174,10 @@ class ProjectManager
         }
 
         $fs = FilesStorageFactory::create();
-        $fs::storeFastAnalysisFile((string) $this->project->id, $this->projectStructure->segments_metadata->getArrayCopy());
+        $fs::storeFastAnalysisFile((string) $this->project->id, (array) $this->projectStructure->segments_metadata);
 
         //free memory
-        unset($this->projectStructure->segments_metadata);
+        $this->projectStructure->segments_metadata = [];
     }
 
     private function pushActivityLog(): void
@@ -1329,10 +1315,10 @@ class ProjectManager
 
             $this->log($this->projectStructure->private_tm_key);
 
-            $projectStructure->tm_keys = (string) json_encode($tm_key);
+            $tmKeysJson = json_encode($tm_key);
 
             // Replace {{pid}} with project ID for new keys created with an empty name
-            $projectStructure->tm_keys = str_replace("{{pid}}", (string) $this->projectStructure->id_project, (string) $projectStructure->tm_keys);
+            $tmKeysJson = str_replace("{{pid}}", (string) $this->projectStructure->id_project, $tmKeysJson);
 
             $newJob = new JobStruct();
             $newJob->password = $password;
@@ -1347,10 +1333,10 @@ class ProjectManager
             $newJob->owner = $this->projectStructure->owner;
             $newJob->job_first_segment = $this->min_max_segments_id['job_first_segment'];
             $newJob->job_last_segment = $this->min_max_segments_id['job_last_segment'];
-            $newJob->tm_keys = (string) $projectStructure->tm_keys;
-            $newJob->payable_rates = (string) $payableRates;
+            $newJob->tm_keys = $tmKeysJson;
+            $newJob->payable_rates = $payableRates;
             $newJob->total_raw_wc = $this->files_word_count;
-            $newJob->only_private_tm = (int)$this->projectStructure->only_private;
+            $newJob->only_private_tm = $this->projectStructure->only_private;
 
             $this->features->run('validateJobCreation', $newJob, $projectStructure);
             $newJob = JobDao::createFromStruct($newJob);
@@ -1401,7 +1387,7 @@ class ProjectManager
         }
 
         //Clean Translation array
-        $this->projectStructure->translations->exchangeArray([]);
+        $this->projectStructure->translations = [];
     }
 
     /**
@@ -1482,7 +1468,7 @@ class ProjectManager
                     throw new Exception('Project creation failed. Please refresh page and retry.', -200);
                 }
 
-                $this->projectStructure->file_id_list->append($fid);
+                $this->projectStructure->file_id_list[] = $fid;
 
                 // pdfAnalysis
                 if (!empty($meta['pdfAnalysis'])) {

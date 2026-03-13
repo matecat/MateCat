@@ -145,7 +145,6 @@ class NewController extends KleinController
 
         $filesFound = $this->getFilesList(FilesStorageFactory::create(), $arFiles, $uploadDir);
 
-        $projectManager = new ProjectManager();
         $engine = EnginesFactory::getInstance($request['mt_engine']);
 
         $projectStructure = $this->buildProjectStructure(
@@ -156,7 +155,7 @@ class NewController extends KleinController
             $engine,
         );
 
-        $projectManager->setProjectStructure($projectStructure);
+        $projectManager = new ProjectManager($projectStructure);
         $projectManager->setTeam($request['team']);
         $projectManager->sanitizeProjectStructure();
 

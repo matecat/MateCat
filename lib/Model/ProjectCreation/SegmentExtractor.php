@@ -2,7 +2,6 @@
 
 namespace Model\ProjectCreation;
 
-use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
@@ -120,9 +119,9 @@ class SegmentExtractor
         }
 
         // create Structure for multiple files
-        $projectStructure->segments->offsetSet($fid, new ArrayObject([]));
-        $projectStructure->segments_original_data->offsetSet($fid, new ArrayObject([]));
-        $projectStructure->segments_meta_data->offsetSet($fid, new ArrayObject([]));
+        $projectStructure->segments[$fid] = [];
+        $projectStructure->segments_original_data[$fid] = [];
+        $projectStructure->segments_meta_data[$fid] = [];
 
         $xliffParser = new XliffParser();
 
@@ -297,22 +296,19 @@ class SegmentExtractor
                     );
 
                     if ($preTranslation !== null) {
-                        if (!$projectStructure->translations->offsetExists($trans_unit_reference)) {
-                            $projectStructure->translations->offsetSet($trans_unit_reference, new ArrayObject());
+                        if (!isset($projectStructure->translations[$trans_unit_reference])) {
+                            $projectStructure->translations[$trans_unit_reference] = [];
                         }
 
                         /**
                          * Trans-Unit
                          * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                          */
-                        $projectStructure->translations[$trans_unit_reference]->offsetSet(
-                            $seg_source['mid'],
-                            new ArrayObject([
-                                2 => $preTranslation['target'],
-                                4 => $xliff_trans_unit,
-                                6 => $position, // this value is the mrk positional order
-                            ])
-                        );
+                        $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] = [
+                            2 => $preTranslation['target'],
+                            4 => $xliff_trans_unit,
+                            6 => $position, // this value is the mrk positional order
+                        ];
 
                         // seg-source and target translation can have different mrk id
                         // override the seg-source surrounding mrk-id with them of target
@@ -393,20 +389,18 @@ class SegmentExtractor
                 );
 
                 if ($preTranslation !== null) {
-                    if (!$projectStructure->translations->offsetExists($trans_unit_reference)) {
-                        $projectStructure->translations->offsetSet($trans_unit_reference, new ArrayObject());
+                    if (!isset($projectStructure->translations[$trans_unit_reference])) {
+                        $projectStructure->translations[$trans_unit_reference] = [];
                     }
 
                     /**
                      * Trans-Unit
                      * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                      */
-                    $projectStructure->translations[$trans_unit_reference]->append(
-                        new ArrayObject([
-                            2 => $preTranslation['target'],
-                            4 => $xliff_trans_unit,
-                        ])
-                    );
+                    $projectStructure->translations[$trans_unit_reference][] = [
+                        2 => $preTranslation['target'],
+                        4 => $xliff_trans_unit,
+                    ];
                 }
             }
         }
@@ -608,11 +602,11 @@ class SegmentExtractor
             $metadataStruct->meta_key   = 'sizeRestriction';
             $metadataStruct->meta_value = (string)$sizeRestriction;
         }
-        $projectStructure->segments_meta_data[$fid]->append($metadataStruct);
+        $projectStructure->segments_meta_data[$fid][] = $metadataStruct;
 
         // --- Segment original data ---
         $segmentOriginalDataStruct = (new SegmentOriginalDataStruct())->setMap($dataRefMap);
-        $projectStructure->segments_original_data[$fid]->append($segmentOriginalDataStruct);
+        $projectStructure->segments_original_data[$fid][] = $segmentOriginalDataStruct;
 
         // --- Segment hash ---
         $segmentHash = $this->createSegmentHash($rawContent, $dataRefMap, $sizeRestriction);
@@ -634,7 +628,7 @@ class SegmentExtractor
             'show_in_cattool'        => $showInCattool,
         ]);
 
-        $projectStructure->segments[$fid]->append($segStruct);
+        $projectStructure->segments[$fid][] = $segStruct;
 
         // --- Update counters ---
         $this->filesWordCount += (int)$wordCount;
@@ -755,23 +749,23 @@ class SegmentExtractor
                     throw new Exception(' you reached the maximum size for a single segment note (' . self::SEGMENT_NOTES_MAX_SIZE . ' bytes)');
                 }
 
-                if (!$projectStructure->notes[$internal_id]->offsetExists('entries')) {
-                    $projectStructure->notes[$internal_id]->offsetSet('from', new ArrayObject());
-                    $projectStructure->notes[$internal_id]['from']->offsetSet('entries', new ArrayObject());
-                    $projectStructure->notes[$internal_id]['from']->offsetSet('json', new ArrayObject());
-                    $projectStructure->notes[$internal_id]->offsetSet('entries', new ArrayObject());
-                    $projectStructure->notes[$internal_id]->offsetSet('json', new ArrayObject());
-                    $projectStructure->notes[$internal_id]->offsetSet('json_segment_ids', new ArrayObject());
-                    $projectStructure->notes[$internal_id]->offsetSet('segment_ids', new ArrayObject());
+                if (!isset($projectStructure->notes[$internal_id]['entries'])) {
+                    $projectStructure->notes[$internal_id]['from'] = [];
+                    $projectStructure->notes[$internal_id]['from']['entries'] = [];
+                    $projectStructure->notes[$internal_id]['from']['json'] = [];
+                    $projectStructure->notes[$internal_id]['entries'] = [];
+                    $projectStructure->notes[$internal_id]['json'] = [];
+                    $projectStructure->notes[$internal_id]['json_segment_ids'] = [];
+                    $projectStructure->notes[$internal_id]['segment_ids'] = [];
                 }
 
-                $projectStructure->notes[$internal_id][$noteKey]->append($noteContent);
+                $projectStructure->notes[$internal_id][$noteKey][] = $noteContent;
 
                 // import segments metadata from the `from` attribute
                 if (isset($note['from'])) {
-                    $projectStructure->notes[$internal_id]['from'][$noteKey]->append($note['from']);
+                    $projectStructure->notes[$internal_id]['from'][$noteKey][] = $note['from'];
                 } else {
-                    $projectStructure->notes[$internal_id]['from'][$noteKey]->append('NO_FROM');
+                    $projectStructure->notes[$internal_id]['from'][$noteKey][] = 'NO_FROM';
                 }
             }
         }
@@ -789,9 +783,9 @@ class SegmentExtractor
         if (isset($trans_unit['context-group'])) {
             $this->initArrayObject('context_group', $internal_id, $projectStructure);
 
-            if (!$projectStructure->context_group[$internal_id]->offsetExists('context_json')) {
-                $projectStructure->context_group[$internal_id]->offsetSet('context_json', $trans_unit['context-group']);
-                $projectStructure->context_group[$internal_id]->offsetSet('context_json_segment_ids', new ArrayObject()); // because of mrk tags, same context can be owned by different segments
+            if (!isset($projectStructure->context_group[$internal_id]['context_json'])) {
+                $projectStructure->context_group[$internal_id]['context_json'] = $trans_unit['context-group'];
+                $projectStructure->context_group[$internal_id]['context_json_segment_ids'] = []; // because of mrk tags, same context can be owned by different segments
             }
         }
     }
@@ -803,8 +797,8 @@ class SegmentExtractor
      */
     private function initArrayObject(string $key, string $id, ProjectStructure $projectStructure): void
     {
-        if (!$projectStructure->$key->offsetExists($id)) {
-            $projectStructure->$key->offsetSet($id, new ArrayObject());
+        if (!array_key_exists($id, $projectStructure->$key)) {
+            $projectStructure->$key[$id] = [];
         }
     }
 

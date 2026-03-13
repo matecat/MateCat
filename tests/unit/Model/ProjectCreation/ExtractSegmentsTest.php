@@ -225,7 +225,7 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // segments-original-data should have entries for this fid
-        $this->assertTrue($ps->segments_original_data->offsetExists($fid));
+        $this->assertTrue(array_key_exists($fid, $ps->segments_original_data));
 
         // seg-source branch always appends a SegmentOriginalDataStruct for each mrk
         $originalData = $ps->segments_original_data[$fid];
@@ -247,7 +247,7 @@ class ExtractSegmentsTest extends AbstractTest
         $ps = $this->pm->getTestProjectStructure();
 
         // segments-meta-data should have entries for this fid (one per mrk)
-        $this->assertTrue($ps->segments_meta_data->offsetExists($fid));
+        $this->assertTrue(array_key_exists($fid, $ps->segments_meta_data));
         $this->assertCount(2, $ps->segments_meta_data[$fid]);
     }
 
@@ -418,7 +418,7 @@ class ExtractSegmentsTest extends AbstractTest
         ]);
 
         $ps = $this->pm->getTestProjectStructure();
-        $this->assertTrue($ps->segments_meta_data->offsetExists($fid));
+        $this->assertTrue(array_key_exists($fid, $ps->segments_meta_data));
         $this->assertCount(2, $ps->segments_meta_data[$fid]);
     }
 
@@ -512,10 +512,10 @@ class ExtractSegmentsTest extends AbstractTest
 
         // tu1 has 2 notes. The key is "{fid}|{tu_id}"
         $tu1Key = $fid . '|tu1';
-        $this->assertTrue($notes->offsetExists($tu1Key), "Notes key '$tu1Key' should exist");
+        $this->assertTrue(array_key_exists($tu1Key, $notes), "Notes key '$tu1Key' should exist");
 
         $tu1Notes = $notes[$tu1Key];
-        $this->assertTrue($tu1Notes->offsetExists('entries'));
+        $this->assertTrue(array_key_exists('entries', $tu1Notes));
         $this->assertCount(2, $tu1Notes['entries']);
     }
 
@@ -559,11 +559,11 @@ class ExtractSegmentsTest extends AbstractTest
         $contextGroup = $ps->context_group;
 
         $tu1Key = $fid . '|tu1';
-        $this->assertTrue($contextGroup->offsetExists($tu1Key), "Context-group key '$tu1Key' should exist");
+        $this->assertTrue(array_key_exists($tu1Key, $contextGroup), "Context-group key '$tu1Key' should exist");
 
         $tu1Ctx = $contextGroup[$tu1Key];
-        $this->assertTrue($tu1Ctx->offsetExists('context_json'));
-        $this->assertTrue($tu1Ctx->offsetExists('context_json_segment_ids'));
+        $this->assertTrue(array_key_exists('context_json', $tu1Ctx));
+        $this->assertTrue(array_key_exists('context_json_segment_ids', $tu1Ctx));
     }
 
     // =========================================================================
