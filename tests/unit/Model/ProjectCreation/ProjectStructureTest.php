@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use ArrayObject;
 use DomainException;
 use JsonSerializable;
 use Model\ProjectCreation\ProjectStructure;
@@ -291,29 +290,26 @@ class ProjectStructureTest extends AbstractTest
         $this->assertSame('OK', $ps->result['data']);
     }
 
-    // ── ArrayObject-typed properties ─────────────────────────────
+    // ── Array-typed pipeline properties ─────────────────────────────
 
     #[Test]
-    public function segmentsAcceptsArrayObject(): void
+    public function segmentsIsPlainArray(): void
     {
         $ps = new ProjectStructure();
-        $ao = new ArrayObject([1 => new ArrayObject(['seg' => 'hello'])]);
+        $ps->segments = [1 => ['seg' => 'hello']];
 
-        $ps->segments = $ao;
-
-        $this->assertInstanceOf(ArrayObject::class, $ps->segments);
+        $this->assertIsArray($ps->segments);
         $this->assertSame('hello', $ps->segments[1]['seg']);
     }
 
     #[Test]
-    public function metadataAcceptsArrayObject(): void
+    public function metadataIsPlainArray(): void
     {
         $ps = new ProjectStructure();
-        $ao = new ArrayObject(['key' => 'value']);
+        $ps->metadata = ['key' => 'value'];
 
-        $ps->metadata = $ao;
-
-        $this->assertInstanceOf(ArrayObject::class, $ps->metadata);
+        $this->assertIsArray($ps->metadata);
+        $this->assertSame('value', $ps->metadata['key']);
     }
 
     // ── getArrayCopy() compatibility ─────────────────────────────

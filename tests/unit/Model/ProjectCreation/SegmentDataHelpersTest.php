@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use ArrayObject;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
@@ -131,13 +130,13 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForNotesAddsToSegmentIdsWhenJsonIsEmpty(): void
     {
         $ps = new ProjectStructure([
-            'notes' => new ArrayObject([
+            'notes' => [
                 'unit-1' => [
                     'json' => [],
                     'segment_ids' => [],
                     'json_segment_ids' => [],
                 ],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForNotes', [
@@ -153,13 +152,13 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForNotesAddsToJsonSegmentIdsWhenJsonHasEntries(): void
     {
         $ps = new ProjectStructure([
-            'notes' => new ArrayObject([
+            'notes' => [
                 'unit-1' => [
                     'json' => ['some note data'],
                     'segment_ids' => [],
                     'json_segment_ids' => [],
                 ],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForNotes', [
@@ -175,13 +174,13 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForNotesAppendsMultipleIds(): void
     {
         $ps = new ProjectStructure([
-            'notes' => new ArrayObject([
+            'notes' => [
                 'unit-1' => [
                     'json' => [],
                     'segment_ids' => [10],
                     'json_segment_ids' => [],
                 ],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForNotes', [['internal_id' => 'unit-1', 'id' => 20], $ps]);
@@ -194,13 +193,13 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForNotesDoesNothingWhenInternalIdNotFound(): void
     {
         $ps = new ProjectStructure([
-            'notes' => new ArrayObject([
+            'notes' => [
                 'unit-1' => [
                     'json' => [],
                     'segment_ids' => [],
                     'json_segment_ids' => [],
                 ],
-            ]),
+            ],
         ]);
 
         // Different internal_id — no match
@@ -217,7 +216,7 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForNotesHandlesMultipleInternalIds(): void
     {
         $ps = new ProjectStructure([
-            'notes' => new ArrayObject([
+            'notes' => [
                 'unit-A' => [
                     'json' => ['note'],
                     'segment_ids' => [],
@@ -228,7 +227,7 @@ class SegmentDataHelpersTest extends AbstractTest
                     'segment_ids' => [],
                     'json_segment_ids' => [],
                 ],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForNotes', [['internal_id' => 'unit-A', 'id' => 1], $ps]);
@@ -246,11 +245,11 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForContextsAddsIdWhenInternalIdExists(): void
     {
         $ps = new ProjectStructure([
-            'context_group' => new ArrayObject([
+            'context_group' => [
                 'unit-1' => [
                     'context_json_segment_ids' => [],
                 ],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForContexts', [
@@ -265,11 +264,11 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForContextsAppendsMultipleIds(): void
     {
         $ps = new ProjectStructure([
-            'context_group' => new ArrayObject([
+            'context_group' => [
                 'unit-1' => [
                     'context_json_segment_ids' => [10],
                 ],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-1', 'id' => 20], $ps]);
@@ -282,11 +281,11 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForContextsDoesNothingWhenInternalIdNotFound(): void
     {
         $ps = new ProjectStructure([
-            'context_group' => new ArrayObject([
+            'context_group' => [
                 'unit-1' => [
                     'context_json_segment_ids' => [],
                 ],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForContexts', [
@@ -301,10 +300,10 @@ class SegmentDataHelpersTest extends AbstractTest
     public function setSegmentIdForContextsHandlesMultipleInternalIds(): void
     {
         $ps = new ProjectStructure([
-            'context_group' => new ArrayObject([
+            'context_group' => [
                 'unit-A' => ['context_json_segment_ids' => []],
                 'unit-B' => ['context_json_segment_ids' => []],
-            ]),
+            ],
         ]);
 
         $this->invokePrivateMethod('setSegmentIdForContexts', [['internal_id' => 'unit-A', 'id' => 1], $ps]);

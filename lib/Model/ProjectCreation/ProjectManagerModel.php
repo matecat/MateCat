@@ -10,7 +10,6 @@
 
 namespace Model\ProjectCreation;
 
-use ArrayObject;
 use Exception;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
@@ -145,11 +144,11 @@ class ProjectManagerModel
     }
 
     /**
-     * @param array<int, array<string, mixed>>|ArrayObject<int, array<string, mixed>> $notes
+     * @param array<int, array<string, mixed>> $notes
      *
      * @throws Exception
      */
-    public function bulkInsertSegmentNotes(array|ArrayObject $notes): void
+    public function bulkInsertSegmentNotes(array $notes): void
     {
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES ";
 
@@ -224,11 +223,11 @@ class ProjectManagerModel
     }
 
     /**
-     * @param array<int, array<string, mixed>>|ArrayObject<int, array<string, mixed>> $notes
+     * @param array<int, array<string, mixed>> $notes
      *
      * @throws Exception
      */
-    public function bulkInsertSegmentMetaDataFromAttributes(array|ArrayObject $notes): void
+    public function bulkInsertSegmentMetaDataFromAttributes(array $notes): void
     {
         $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
 

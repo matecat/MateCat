@@ -732,7 +732,7 @@ class SegmentExtractor
             }
 
             foreach ($trans_unit['notes'] as $note) {
-                $this->initArrayObject('notes', $internal_id, $projectStructure);
+                $this->initNestedArray('notes', $internal_id, $projectStructure);
 
                 $noteKey     = null;
                 $noteContent = null;
@@ -781,7 +781,7 @@ class SegmentExtractor
     {
         $internal_id = self::sanitizedUnitId($trans_unit['attr']['id'], $fid);
         if (isset($trans_unit['context-group'])) {
-            $this->initArrayObject('context_group', $internal_id, $projectStructure);
+            $this->initNestedArray('context_group', $internal_id, $projectStructure);
 
             if (!isset($projectStructure->context_group[$internal_id]['context_json'])) {
                 $projectStructure->context_group[$internal_id]['context_json'] = $trans_unit['context-group'];
@@ -791,11 +791,11 @@ class SegmentExtractor
     }
 
     /**
-     * Initialize a nested ArrayObject in projectStructure if it does not already exist.
+     * Initialize a nested array entry in projectStructure if it does not already exist.
      *
      * @param ProjectStructure      $projectStructure
      */
-    private function initArrayObject(string $key, string $id, ProjectStructure $projectStructure): void
+    private function initNestedArray(string $key, string $id, ProjectStructure $projectStructure): void
     {
         if (!array_key_exists($id, $projectStructure->$key)) {
             $projectStructure->$key[$id] = [];

@@ -37,7 +37,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     #[Test]
     public function emptyMetadataReturnsArray(): void
     {
-        $this->pm->setProjectStructureValue('metadata', new ArrayObject([]));
+        $this->pm->setProjectStructureValue('metadata', []);
         $this->pm->setProjectStructureValue('target_language', ['it-IT']);
 
         $result = $this->pm->callSanitizeProjectOptions();
@@ -50,10 +50,10 @@ class SanitizeProjectOptionsTest extends AbstractTest
     {
         $this->pm->setProjectStructureValue('source_language', 'en-US');
         $this->pm->setProjectStructureValue('target_language', ['de-DE', 'fr-FR']);
-        $this->pm->setProjectStructureValue('metadata', new ArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             'lexiqa' => true,
             'tag_projection' => true,
-        ]));
+        ]);
 
         $result = $this->pm->callSanitizeProjectOptions();
 
@@ -66,9 +66,9 @@ class SanitizeProjectOptionsTest extends AbstractTest
     public function preservesUnrelatedMetadataKeys(): void
     {
         $this->pm->setProjectStructureValue('target_language', ['it-IT']);
-        $this->pm->setProjectStructureValue('metadata', new ArrayObject([
+        $this->pm->setProjectStructureValue('metadata', [
             'custom_key' => 'custom_value',
-        ]));
+        ]);
 
         $result = $this->pm->callSanitizeProjectOptions();
 
@@ -83,7 +83,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     {
         $this->pm->setProjectStructureValue('source_language', 'en-US');
         $this->pm->setProjectStructureValue('target_language', ['it-IT', 'es-ES', 'de-DE']);
-        $this->pm->setProjectStructureValue('metadata', new ArrayObject([]));
+        $this->pm->setProjectStructureValue('metadata', []);
 
         $result = $this->pm->callSanitizeProjectOptions();
 
@@ -94,7 +94,7 @@ class SanitizeProjectOptionsTest extends AbstractTest
     public function resultIsPlainArrayNotArrayObject(): void
     {
         $this->pm->setProjectStructureValue('target_language', ['it-IT']);
-        $this->pm->setProjectStructureValue('metadata', new ArrayObject(['key' => 'val']));
+        $this->pm->setProjectStructureValue('metadata', ['key' => 'val']);
 
         $result = $this->pm->callSanitizeProjectOptions();
 

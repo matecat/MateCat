@@ -118,9 +118,10 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     }
 
     #[Test]
-    public function notesWorksWithArrayObjectInput(): void
+    public function notesRejectsArrayObjectInput(): void
     {
-        // Simulates pipeline state where SegmentExtractor sets notes as ArrayObject
+        // With array type, assigning ArrayObject throws TypeError.
+        $this->expectException(\TypeError::class);
         $notesAO = new ArrayObject([
             'unit-1' => new ArrayObject([
                 'entries' => new ArrayObject([
@@ -129,25 +130,9 @@ class AuditCleanupAndPluginsTest extends AbstractTest
             ]),
         ]);
 
-        $ps = new ProjectStructure([
+        new ProjectStructure([
             'notes' => $notesAO,
         ]);
-
-        // ArrayObject supports isset/offsetExists natively
-        self::assertTrue(isset($ps->notes['unit-1']));
-
-        // IMPORTANT: toArray() uses reflection on objects, which sees zero public
-        // properties on ArrayObject (its data lives in internal C storage).
-        // This means toArray() loses ArrayObject data — it becomes [].
-        // This documents a known limitation: ArrayObject properties must be
-        // converted to plain arrays BEFORE calling toArray() if data needs
-        // to survive serialization.
-        $arr = $ps->toArray();
-        self::assertIsArray($arr['notes']);
-        self::assertEmpty(
-            $arr['notes'],
-            'toArray() cannot extract data from ArrayObject via reflection — data is lost'
-        );
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -738,56 +723,15 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     }
 
     #[Test]
-    public function serializationRoundTripFlattensArrayObjectToPlainArray(): void
+    public function serializationRoundTripRejectsArrayObjectForTypedProperties(): void
     {
-        // Simulates pipeline state where extractors assign ArrayObject instances.
-        //
-        // IMPORTANT: toArray() uses reflection which cannot see ArrayObject's
-        // internal storage. So ArrayObject properties become empty [].
-        // This test documents this limitation and proves that the pipeline
-        // MUST convert ArrayObject to plain arrays before serialization.
-        $original = new ProjectStructure([
+        // With strict array types, assigning ArrayObject throws TypeError.
+        $this->expectException(\TypeError::class);
+        new ProjectStructure([
             'segments' => new ArrayObject([
                 1 => new ArrayObject(['sid' => 1, 'source' => 'Hello']),
-                2 => new ArrayObject(['sid' => 2, 'source' => 'World']),
-            ]),
-            'notes' => new ArrayObject([
-                'seg-1' => new ArrayObject([
-                    'entries' => new ArrayObject([
-                        new ArrayObject(['type' => 'comment', 'content' => 'Note text']),
-                    ]),
-                ]),
-            ]),
-            'context_group' => new ArrayObject([
-                'ctx-1' => new ArrayObject(['context_type' => 'x-pos', 'value' => '5']),
             ]),
         ]);
-
-        // Before toArray: properties are ArrayObject
-        self::assertInstanceOf(ArrayObject::class, $original->segments);
-        self::assertInstanceOf(ArrayObject::class, $original->notes);
-        self::assertInstanceOf(ArrayObject::class, $original->context_group);
-
-        // toArray() sees ArrayObject as object → uses reflection → no public properties → []
-        $serialized = $original->toArray();
-
-        self::assertIsArray($serialized['segments']);
-        self::assertEmpty($serialized['segments'], 'ArrayObject data is lost through reflection-based toArray()');
-        self::assertIsArray($serialized['notes']);
-        self::assertEmpty($serialized['notes']);
-        self::assertIsArray($serialized['context_group']);
-        self::assertEmpty($serialized['context_group']);
-
-        // Round-trip: reconstruct from flattened array
-        $restored = new ProjectStructure($serialized);
-
-        // After reconstruction, properties are plain empty arrays
-        self::assertIsArray($restored->segments);
-        self::assertIsArray($restored->notes);
-        self::assertIsArray($restored->context_group);
-        self::assertEmpty($restored->segments);
-        self::assertEmpty($restored->notes);
-        self::assertEmpty($restored->context_group);
     }
 
     #[Test]

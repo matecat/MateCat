@@ -9,7 +9,6 @@
 
 namespace Model\ProjectCreation;
 
-use ArrayObject;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use DomainException;
 use Exception;
@@ -252,9 +251,7 @@ class ProjectManager
                 if ($feature instanceof BasicFeatureStruct) {
                     $features[] = $feature;
                 } else {
-                    $features[] = new BasicFeatureStruct(
-                        $feature instanceof ArrayObject ? $feature->getArrayCopy() : (array)$feature
-                    );
+                    $features[] = new BasicFeatureStruct((array)$feature);
                 }
             }
         }
@@ -379,7 +376,7 @@ class ProjectManager
      */
     protected function saveMetadata(): void
     {
-        $options = new ArrayObject($this->projectStructure->metadata);
+        $options = $this->projectStructure->metadata;
         $dao = $this->getProjectsMetadataDao();
 
         // "From API" flag
@@ -482,15 +479,14 @@ class ProjectManager
     }
 
     /**
-     * @param array<string, mixed>|ArrayObject<string, mixed> $options
+     * @param array<string, mixed> $options
      *
      * @return array<string, mixed>
      * @throws Exception
      */
-    private function sanitizeProjectOptions(array|ArrayObject $options): array
+    private function sanitizeProjectOptions(array $options): array
     {
-        $optionsArray = ($options instanceof ArrayObject) ? $options->getArrayCopy() : $options;
-        $sanitizer = new ProjectOptionsSanitizer($optionsArray);
+        $sanitizer = new ProjectOptionsSanitizer($options);
 
         $sanitizer->setLanguages(
             (string) $this->projectStructure->source_language,

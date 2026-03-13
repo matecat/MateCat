@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -71,8 +70,8 @@ class TestableProjectManager extends ProjectManager
             'segments' => [],
             'segments_original_data' => [],
             'segments_meta_data' => [],
-            'file_part_id' => new ArrayObject(),
-            'file_metadata' => new ArrayObject(),
+            'file_part_id' => [],
+            'file_metadata' => [],
             'translations' => [],
             'notes' => [],
             'context_group' => [],
@@ -194,7 +193,7 @@ class TestableProjectManager extends ProjectManager
      * Public wrapper to invoke the protected saveJobsMetadata().
      * @throws ReflectionException
      */
-    public function callSaveJobsMetadata(JobStruct $newJob, ArrayObject $projectStructure): void
+    public function callSaveJobsMetadata(JobStruct $newJob): void
     {
         $this->saveJobsMetadata($newJob);
     }

@@ -2,7 +2,6 @@
 
 namespace Model\ProjectCreation;
 
-use ArrayObject;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -43,8 +42,8 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public ?array  $target_language = null;
     public string  $job_subject = 'general';
     public ?string $due_date = null;
-    /** @var ArrayObject<string, mixed>|array<string, mixed> */
-    public ArrayObject|array $metadata = [];
+    /** @var array<string, mixed> */
+    public array $metadata = [];
     /** @var string[]|null */
     public ?array  $instructions = null;
 
@@ -104,7 +103,7 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public ?int    $id_assignee = null;
     /** @var array<int, mixed> */
     public array   $tm_keys = [];
-    /** @var XliffRulesModel|ArrayObject<string, mixed>|array<string, mixed>|mixed */
+    /** @var XliffRulesModel|array<string, mixed>|mixed */
     public mixed $xliff_parameters = [];
     /** @var array<string, mixed>|null */
     public mixed   $session = null;
@@ -114,31 +113,25 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public int     $standard_word_count = 0;
 
     // ── Group C: Per-file transient state (14 keys) ─────────────────
-    //
-    // The first 9 properties below are typed ArrayObject|array because
-    // SegmentExtractor::extract() and SegmentStorageService assign
-    // ArrayObject instances at runtime (with nested ArrayObject children).
-    // They default to [] so freshly constructed DTOs serialise cleanly.
-    // A future refactoring may convert the pipeline to plain arrays.
 
-    /** @var ArrayObject<int, ArrayObject<int, mixed>>|array<int, array<int, mixed>> */
-    public ArrayObject|array $segments = [];
-    /** @var ArrayObject<int, ArrayObject<int, mixed>>|array<int, array<int, mixed>> */
-    public ArrayObject|array $segments_original_data = [];
-    /** @var ArrayObject<int, mixed>|array<int, mixed> */
-    public ArrayObject|array $segments_metadata = [];
-    /** @var ArrayObject<int, ArrayObject<int, mixed>>|array<int, array<int, mixed>> */
-    public ArrayObject|array $segments_meta_data = [];
-    /** @var ArrayObject<int, mixed>|array<int, mixed> */
-    public ArrayObject|array $file_part_id = [];
-    /** @var ArrayObject<int, mixed>|array<int, mixed> */
-    public ArrayObject|array $file_metadata = [];
-    /** @var ArrayObject<int, mixed>|array<int, mixed> */
-    public ArrayObject|array $translations = [];
-    /** @var ArrayObject<int, mixed>|array<int, mixed> */
-    public ArrayObject|array $notes = [];
-    /** @var ArrayObject<int, mixed>|array<int, mixed> */
-    public ArrayObject|array $context_group = [];
+    /** @var array<int, array<int, mixed>> */
+    public array $segments = [];
+    /** @var array<int, array<int, mixed>> */
+    public array $segments_original_data = [];
+    /** @var array<int, mixed> */
+    public array $segments_metadata = [];
+    /** @var array<int, array<int, mixed>> */
+    public array $segments_meta_data = [];
+    /** @var array<int, mixed> */
+    public array $file_part_id = [];
+    /** @var array<int, mixed> */
+    public array $file_metadata = [];
+    /** @var array<int, mixed> */
+    public array $translations = [];
+    /** @var array<int, mixed> */
+    public array $notes = [];
+    /** @var array<int, mixed> */
+    public array $context_group = [];
     /** @var string[] */
     public array   $array_files = [];
     /** @var array<int, array<string, mixed>> */

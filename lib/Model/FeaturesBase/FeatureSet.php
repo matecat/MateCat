@@ -2,7 +2,6 @@
 
 namespace Model\FeaturesBase;
 
-use ArrayObject;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
@@ -145,7 +144,7 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * @param ArrayObject $metadata
+     * @param array<string, mixed> $metadata
      *
      * @throws AuthenticationError
      * @throws EndQueueException
@@ -154,7 +153,7 @@ class FeatureSet implements FeatureSetInterface
      * @throws ValidationError
      * @throws Exception
      */
-    public function loadProjectDependenciesFromProjectMetadata(ArrayObject $metadata): void
+    public function loadProjectDependenciesFromProjectMetadata(array $metadata): void
     {
         $project_dependencies = [];
         $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata);

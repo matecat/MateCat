@@ -64,36 +64,26 @@ class ProjectManagerAuditTest extends AbstractTest
     }
 
     #[Test]
-    public function c1_segmentsMetadataArrayObjectStillWorksWithGetArrayCopy(): void
+    public function c1_segmentsMetadataRejectsArrayObject(): void
     {
-        // Verify backward compat: when an ArrayObject is used, getArrayCopy() still works.
+        // With array type, assigning ArrayObject throws TypeError.
+        $this->expectException(\TypeError::class);
         $ps = new ProjectStructure([
             'segments_metadata' => new ArrayObject([
                 ['id' => 1, 'segment' => 'Hello'],
             ]),
         ]);
-
-        $this->assertInstanceOf(ArrayObject::class, $ps->segments_metadata);
-        $copy = $ps->segments_metadata->getArrayCopy();
-        $this->assertIsArray($copy);
-        $this->assertCount(1, $copy);
     }
 
     #[Test]
-    public function c1_universalArrayCopyPatternWorksForBothTypes(): void
+    public function c1_plainArrayCastIsIdentityOperation(): void
     {
-        // After fix, the code should use a pattern that works for both array and ArrayObject.
-        // The simplest fix: (array) $ps->segments_metadata — works for both.
         $plainArray = [['id' => 1], ['id' => 2]];
-        $arrayObject = new ArrayObject([['id' => 3]]);
 
         $ps = new ProjectStructure(['segments_metadata' => $plainArray]);
-        $result1 = (array) $ps->segments_metadata;
-        $this->assertCount(2, $result1);
-
-        $ps->segments_metadata = $arrayObject;
-        $result2 = (array) $ps->segments_metadata;
-        $this->assertCount(1, $result2);
+        $result = (array) $ps->segments_metadata;
+        $this->assertCount(2, $result);
+        $this->assertSame($plainArray, $result);
     }
 
     // =========================================================================
@@ -183,26 +173,18 @@ class ProjectManagerAuditTest extends AbstractTest
     }
 
     #[Test]
-    public function c3_translationsArrayObjectExchangeArrayWorks(): void
+    public function c3_translationsRejectsArrayObject(): void
     {
-        // Backward compat: exchangeArray() works on ArrayObject.
+        // With array type, assigning ArrayObject throws TypeError.
+        $this->expectException(\TypeError::class);
         $ps = new ProjectStructure([
             'translations' => new ArrayObject(['key' => 'val']),
         ]);
-
-        $this->assertInstanceOf(ArrayObject::class, $ps->translations);
-        $ps->translations->exchangeArray([]);
-        $this->assertCount(0, $ps->translations);
     }
 
     #[Test]
-    public function c3_assignmentWorksForBothTypes(): void
+    public function c3_assignmentClearsTranslations(): void
     {
-        // The fix (= []) works universally for both array and ArrayObject.
-        $ps = new ProjectStructure(['translations' => new ArrayObject(['a', 'b'])]);
-        $ps->translations = [];
-        $this->assertSame([], $ps->translations);
-
         $ps = new ProjectStructure(['translations' => ['c', 'd']]);
         $ps->translations = [];
         $this->assertSame([], $ps->translations);

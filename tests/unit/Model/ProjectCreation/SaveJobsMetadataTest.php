@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use ArrayObject;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
@@ -108,9 +107,9 @@ class SaveJobsMetadataTest extends AbstractTest
         foreach ($extras as $key => $value) {
             $this->pm->setProjectStructureValue($key, $value);
         }
-        // The ArrayObject param is kept for the method signature but Group A
-        // keys are now read from $this->config.
-        $this->pm->callSaveJobsMetadata($this->job, new ArrayObject());
+        // The ArrayObject param was removed — Group A keys are now read
+        // from $this->config via the parent's instance property.
+        $this->pm->callSaveJobsMetadata($this->job);
     }
 
     /**
