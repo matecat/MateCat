@@ -95,7 +95,7 @@
     "style-loader": "4.0.0",
     "terser-webpack-plugin": "^5.3.11",
     "thread-loader": "^4.0.4",
-    "undici": "^5.28.2",
+    "undici": "^6.0.0",
     "web-streams-polyfill": "^4.1.0",
     "webpack": "5.104.1",
     "webpack-bundle-analyzer": "^4.10.2",
