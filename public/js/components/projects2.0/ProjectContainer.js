@@ -318,45 +318,6 @@ export const ProjectContainer = ({
         />
       )
     })
-
-    // return jobs.map((job, index) => {
-    //   let isChunk = false
-    //   if (tempIdsArray.indexOf(job.get('id')) > -1) {
-    //     isChunk = true
-    //     index++
-    //   } else if (
-    //     jobs.get(index + 1) &&
-    //     jobs.get(index + 1).get('id') === job.get('id')
-    //   ) {
-    //     //The first of the Chunk
-    //     isChunk = true
-    //     tempIdsArray.push(job.get('id'))
-    //     index = 1
-    //   } else {
-    //     index = 0
-    //   }
-
-    //   const lastAction = getLastJobAction(job.get('id'))
-    //   const isChunkOutsourced = thereIsChunkOutsourced(job.get('id'))
-
-    //   return (
-    //     <JobContainer
-    //       key={job.get('id') + '-' + index}
-    //       job={job}
-    //       index={index}
-    //       project={project}
-    //       jobsLenght={project.get('jobs').size}
-    //       changeStatusFn={changeStatusFn}
-    //       downloadTranslationFn={downloadTranslationFn}
-    //       isChunk={isChunk}
-    //       lastAction={lastAction}
-    //       isChunkOutsourced={isChunkOutsourced}
-    //       activityLogUrl={getActivityLogUrl()}
-    //       isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
-    //       onCheckedJob={onCheckedJob}
-    //     />
-    //   )
-    // })
   }
 
   const changeTeam = (value) => {
