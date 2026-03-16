@@ -49,7 +49,7 @@ import {CatToolInterface} from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
-import useContextReviewChannel from '../hooks/useContextReviewChannel'
+import ContextReviewChannel from '../utils/contextReviewChannel'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -80,13 +80,13 @@ function CatTool() {
 
   const startSegmentIdRef = useRef()
   const callbackAfterSegmentsResponseRef = useRef()
-  const {sendMessage} = useContextReviewChannel({
-    onMessage: (message) => {
+  useEffect(() => {
+    return ContextReviewChannel.onMessage((message) => {
       if (message.type === 'segmentClicked' && message.sid) {
         SegmentActions.openSegment(message.sid)
       }
-    },
-  })
+    })
+  }, [])
   const {isLoading: isLoadingSegments, result: segmentsResult} =
     useSegmentsLoader({
       segmentId: options?.segmentId
@@ -396,11 +396,11 @@ function CatTool() {
         target: seg.translation,
       })
     }
-    sendMessage({type: 'segments', segments: segmentsList})
+    ContextReviewChannel.sendMessage({type: 'segments', segments: segmentsList})
     if (config.isReview) {
       SegmentActions.addPreloadedIssuesToSegment()
     }
-  }, [segmentsResult, options?.openCurrentSegmentAfter, sendMessage])
+  }, [segmentsResult, options?.openCurrentSegmentAfter])
 
   // execute callback option from onRender action
   useEffect(() => {

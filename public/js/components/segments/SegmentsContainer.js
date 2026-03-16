@@ -27,7 +27,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import useContextReviewChannel from '../../hooks/useContextReviewChannel'
+import ContextReviewChannel from '../../utils/contextReviewChannel'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -178,7 +178,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
-  const {sendMessage} = useContextReviewChannel()
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
 
@@ -442,8 +441,8 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         target: seg.get('translation'),
       })
     }
-    sendMessage({type: 'segments', segments: segmentsList})
-  }, [segments, sendMessage])
+    ContextReviewChannel.sendMessage({type: 'segments', segments: segmentsList})
+  }, [segments])
 
   // add actions listener
   useEffect(() => {
@@ -464,7 +463,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       setScrollToSid(sid)
       setScrollToSelected(false)
       const segment = SegmentStore.getSegmentById(sid)
-      sendMessage({
+      ContextReviewChannel.sendMessage({
         type: 'highlight',
         sid,
         source: segment.get('segment'),

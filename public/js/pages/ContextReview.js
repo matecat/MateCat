@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react'
 import {mountPage} from './mountPage'
-import useContextReviewChannel from '../hooks/useContextReviewChannel'
+import ContextReviewChannel from '../utils/contextReviewChannel'
 import {
   clearHighlights,
   highlightBySid,
@@ -81,7 +81,10 @@ const ContextReview = () => {
     }
   }, [])
 
-  const {sendMessage} = useContextReviewChannel({onMessage: handleMessage})
+  // Subscribe to ContextReviewChannel messages
+  useEffect(() => {
+    return ContextReviewChannel.onMessage(handleMessage)
+  }, [handleMessage])
 
   // Parse the imported HTML string
   useEffect(() => {
@@ -128,7 +131,7 @@ const ContextReview = () => {
         'source',
       )
       if (sid != null) {
-        sendMessage({type: 'segmentClicked', sid})
+        ContextReviewChannel.sendMessage({type: 'segmentClicked', sid})
       }
     }
 
@@ -140,7 +143,7 @@ const ContextReview = () => {
         'target',
       )
       if (sid != null) {
-        sendMessage({type: 'segmentClicked', sid})
+        ContextReviewChannel.sendMessage({type: 'segmentClicked', sid})
       }
     }
 
@@ -159,7 +162,7 @@ const ContextReview = () => {
         targetContainer.removeEventListener('click', handleTargetClick)
       }
     }
-  }, [htmlContent, sendMessage])
+  }, [htmlContent])
 
   if (loading) {
     return (

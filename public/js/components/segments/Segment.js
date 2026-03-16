@@ -34,7 +34,6 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper/Applicatio
 import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import {SegmentQAIcon} from './SegmentQAIcon'
-import useContextReviewChannel from '../../hooks/useContextReviewChannel'
 
 const SegmentComponent = ({
   segment,
