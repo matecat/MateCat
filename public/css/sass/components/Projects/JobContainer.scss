@@ -6,4 +6,30 @@
   padding: 24px;
   gap: 8px;
   border-bottom: 1px solid colors.$grey100;
+
+  .chunks-job-container & {
+    border-bottom: unset;
+  }
+}
+
+.chunks-job-container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 8px;
+  border-bottom: 1px solid colors.$grey100;
+
+  .chunks-job-container-line {
+    display: flex;
+    gap: 8px;
+  }
+
+  .chunks-job-container-list {
+    padding-left: 8px;
+  }
+}
+
+.chunk-job-container {
+  grid-template-columns: 180px auto 140px 100px 1fr auto auto auto;
+  padding: 24px 24px 24px 15px;
 }

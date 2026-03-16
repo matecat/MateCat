@@ -14,11 +14,14 @@ export const JobContainer = ({
   const idJobLabel = !isChunk ? job.get('id') : job.get('id') + '-' + index
 
   return (
-    <div className="job-container">
-      <Checkbox
-        onChange={() => onCheckedJob(job.get('id'))}
-        value={isChecked ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
-      />
+    <div className={`job-container ${isChunk ? 'chunk-job-container' : ''}`}>
+      {!isChunk && (
+        <Checkbox
+          onChange={() => onCheckedJob(job.get('id'))}
+          value={isChecked ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+        />
+      )}
+
       <div>
         <div className="job-id" title="Job Id">
           <span>source - target</span>
