@@ -108,7 +108,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         $engine = EnginesFactory::getInstance($this->data['mt_engine']);
 
-        $gdriveSession = $_SESSION["gdrive_session"] ?? null;
+        $gdriveSession = $_SESSION[Session::SESSION_KEY] ?? null;
 
         $projectStructure = $this->buildProjectStructure(
             $this->data,
@@ -660,7 +660,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $payableRateModelTemplate->uid = $userId;
         } elseif (!empty($payable_rate_template_id) and $payable_rate_template_id > 0) {
             $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser($payable_rate_template_id, $userId);
-
+            $payableRateModelTemplate?->getBreakdownsArray();
             if (null === $payableRateModelTemplate) {
                 throw new InvalidArgumentException('Payable rate model id not valid');
             }
@@ -802,13 +802,13 @@ class CreateProjectController extends AbstractStatefulKleinController
      * random password, queue submission, project sanitization) are
      * intentionally left in {@see create()}.
      *
-     * @param array          $data         Validated request data from validateTheRequest()
-     * @param array          $metadata     Project metadata from setMetadataFromPostInput()
-     * @param array          $filesFound   Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
-     * @param string         $uploadToken  Upload directory token
-     * @param UserStruct     $user         Authenticated user
-     * @param AbstractEngine $engine       MT engine instance (for getConfigurationParameters())
-     * @param array|null     $gdriveSession GDrive session data from $_SESSION, or null
+     * @param array $data Validated request data from validateTheRequest()
+     * @param array $metadata Project metadata from setMetadataFromPostInput()
+     * @param array $filesFound Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param string $uploadToken Upload directory token
+     * @param UserStruct $user Authenticated user
+     * @param AbstractEngine $engine MT engine instance (for getConfigurationParameters())
+     * @param array|null $gdriveSession GDrive session data from $_SESSION, or null
      *
      * @return ProjectStructure
      */
@@ -852,6 +852,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         if ($gdriveSession !== null) {
             $projectStructure->session = $gdriveSession;
             $projectStructure->session['uid'] = $user->uid;
+            $projectStructure->session['user'] = $user;
         }
 
         // MT Extra params
@@ -875,7 +876,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         }
 
         if (!empty($data['payable_rate_model_template'])) {
-            $projectStructure->payable_rate_model = $data['payable_rate_model_template'];
+            //get an array representation of the payable rate model valid for serialization
+            $projectStructure->payable_rate_model = $data['payable_rate_model_template']->jsonSerialize();
             $projectStructure->payable_rate_model_id = $data['payable_rate_model_template']->id;
         }
 

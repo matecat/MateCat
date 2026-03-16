@@ -21,6 +21,7 @@ use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class ProjectManagerModel
@@ -54,7 +55,7 @@ class ProjectManagerModel
         $data['pretranslate_100'] = $projectStructure->pretranslate_100;
         $data['remote_ip_address'] = empty($projectStructure->user_ip) ? 'UNKNOWN' : $projectStructure->user_ip;
         $data['id_assignee'] = $idAssignee;
-        $data['instance_id'] = $projectStructure->instance_id ?: null;
+        $data['instance_id'] = $projectStructure->instance_id ?? (!is_null(AppConfig::$INSTANCE_ID) ? AppConfig::$INSTANCE_ID : 0);
         $data['due_date'] = $projectStructure->due_date;
 
         $this->dbHandler->begin();

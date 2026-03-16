@@ -28,7 +28,7 @@ class UploadPageController extends BaseKleinViewController
     /**
      * @throws Exception
      */
-    protected function renderView()
+    protected function renderView(): void
     {
         $guid = $this->checkDriveFilesOrGetGuid();
         if (!empty($guid)) {
@@ -101,7 +101,7 @@ class UploadPageController extends BaseKleinViewController
      *
      * @return void
      */
-    private function setEmptyCookieValueIfNoHistory(string $cookieName)
+    private function setEmptyCookieValueIfNoHistory(string $cookieName): void
     {
         if (!isset($_COOKIE[$cookieName])) {
             CookieManager::setCookie(
