@@ -241,23 +241,6 @@ class BuildProjectStructureTest extends AbstractTest
     }
 
     #[Test]
-    public function newControllerSetsSanitizeProjectOptionsFalse(): void
-    {
-        $request = $this->makeNewControllerRequest();
-        $filesFound = $this->makeFilesFound();
-
-        $ps = $this->newController->buildProjectStructure(
-            $request,
-            $filesFound,
-            'tok',
-            $this->user,
-            $this->engine,
-        );
-
-        $this->assertFalse($ps->sanitize_project_options);
-    }
-
-    #[Test]
     public function newControllerSplitsTargetLanguageOnComma(): void
     {
         $request = $this->makeNewControllerRequest([

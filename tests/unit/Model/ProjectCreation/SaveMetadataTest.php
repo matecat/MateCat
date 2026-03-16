@@ -67,7 +67,6 @@ class SaveMetadataTest extends AbstractTest
 
         // Set defaults needed by saveMetadata()
         $this->pm->setProjectStructureValue('metadata', []);
-        $this->pm->setProjectStructureValue('sanitize_project_options', false);
         $this->pm->setProjectStructureValue(
             JobsMetadataDao::SUBFILTERING_HANDLERS,
             '[]'
@@ -350,51 +349,6 @@ class SaveMetadataTest extends AbstractTest
 
         $calls = $this->findDaoCallsByKey('deepl_formality');
         self::assertEmpty($calls, 'deepl_formality should not be persisted when empty');
-    }
-
-    // =========================================================================
-    // sanitize_project_options branch
-    // =========================================================================
-
-    #[Test]
-    public function testSanitizeProjectOptionsIsAppliedWhenEnabled(): void
-    {
-        // Enable sanitization
-        $this->pm->setProjectStructureValue('sanitize_project_options', true);
-
-        // Set metadata with an invalid segmentation_rule that the sanitizer
-        // should strip, and a valid speech2text that should pass through
-        $this->pm->setProjectStructureValue('metadata', [
-            'speech2text' => true,
-            'segmentation_rule' => 'invalid_value',
-        ]);
-
-        $this->pm->callSaveMetadata();
-
-        // speech2text should be persisted (sanitizer casts bool→int→string '1')
-        $speech2textCalls = $this->findDaoCallsByKey('speech2text');
-        self::assertNotEmpty($speech2textCalls, 'speech2text should be persisted');
-        self::assertSame('1', $speech2textCalls[0][2]);
-
-        // segmentation_rule with invalid value should be removed by sanitizer
-        $segRuleCalls = $this->findDaoCallsByKey('segmentation_rule');
-        self::assertEmpty($segRuleCalls, 'invalid segmentation_rule should be stripped by sanitizer');
-    }
-
-    #[Test]
-    public function testSanitizeProjectOptionsIsSkippedWhenDisabled(): void
-    {
-        // sanitize_project_options is already false from setUp()
-        $this->pm->setProjectStructureValue('metadata', [
-            'segmentation_rule' => 'invalid_value',
-        ]);
-
-        $this->pm->callSaveMetadata();
-
-        // Without sanitization, the invalid value passes through unchanged
-        $segRuleCalls = $this->findDaoCallsByKey('segmentation_rule');
-        self::assertNotEmpty($segRuleCalls, 'segmentation_rule should be persisted when sanitizer is off');
-        self::assertSame('invalid_value', $segRuleCalls[0][2]);
     }
 
     // =========================================================================

@@ -347,17 +347,6 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private sanitizeProjectOptions().
-     */
-    public function callSanitizeProjectOptions(): array
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('sanitizeProjectOptions');
-
-        return $method->invoke($this, $this->projectStructure->metadata);
-    }
-
-    /**
      * Set files_word_count for testing.
      */
     public function setFilesWordCount(int $value): void

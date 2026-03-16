@@ -285,6 +285,20 @@ class SegmentStorageService
         $jid = $job->id;
         $this->cleanSegmentsMetadata($projectStructure);
 
+        // Hoist invariant lookups outside the loop to avoid N+1 queries
+        $segmentDao = $this->createSegmentDao();
+
+        $chunks = $this->getChunksByJobId((int)$jid);
+
+        if (empty($chunks)) {
+            throw new Exception("No Job found!!! $jid");
+        }
+
+        $chunk = $chunks[0];
+
+        $rawRates = $projectStructure->array_jobs['payable_rates'][$jid] ?? null;
+        $payable_rates = is_string($rawRates) ? json_decode($rawRates, true) : $rawRates;
+
         $createSecondPassReview = false;
 
         $query_translations_values = [];
@@ -296,19 +310,13 @@ class SegmentStorageService
             // array of segmented translations
             foreach ($struct as $translation_row) {
                 $position = (isset($translation_row[6])) ? $translation_row[6] : null;
-                $segment = $this->createSegmentDao()->getById($translation_row[0]);
+                $segment = $segmentDao->getById($translation_row[0]);
 
                 // This condition is meant to debug an issue with the segment id that returns false from dao.
                 // SegmentDao::getById returns false if the id is not found in the database
                 // Skip the segment and lose the translation if the segment id is not found in the database
                 if (!$segment) {
                     continue;
-                }
-
-                if (is_string($projectStructure->array_jobs['payable_rates'][$jid])) {
-                    $payable_rates = json_decode($projectStructure->array_jobs['payable_rates'][$jid], true);
-                } else {
-                    $payable_rates = $projectStructure->array_jobs['payable_rates'][$jid];
                 }
 
                 /** @var XliffRulesModel $configModel */
@@ -326,7 +334,6 @@ class SegmentStorageService
                 }
 
                 // Use QA to get target segment
-                $chunk = $this->getChunksByJobId((int)$jid)[0];
                 $source = $segment->segment;
                 $target = $translation_row[2];
 
