@@ -183,7 +183,7 @@ class TmKeyService
                 } catch (Exception $e) {
                     $this->addProjectError($projectStructure, $e->getCode(), $e->getMessage());
 
-                    throw new Exception($e);
+                    throw $e;
                 }
             }
         }
@@ -239,7 +239,7 @@ class TmKeyService
                     $this->log($e->getMessage(), $e);
 
                     //exit project creation
-                    throw new Exception($e);
+                    throw $e;
                 }
             }
 

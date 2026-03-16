@@ -950,6 +950,13 @@ class ProjectManager
                 }
             }
 
+            if ($this->total_segments === 0) {
+                throw new Exception(
+                    "No translatable content found in any uploaded file. The project cannot be created.",
+                    -1
+                );
+            }
+
             if ($this->files_word_count > AppConfig::$MAX_SOURCE_WORDS) {
                 throw new Exception("Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!", 128);
             }
@@ -1374,6 +1381,11 @@ class ProjectManager
             } catch (Exception $e) {
                 $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
                 Utils::sendErrMailReport($msg);
+                $this->log("Pre-translation insertion failed for job {$newJob->id}", $e);
+                $this->addProjectError(
+                    (int)$e->getCode(),
+                    "Pre-translations lost for job {$newJob->id}: " . $e->getMessage() . ". The project should be re-created."
+                );
             }
 
             foreach ($projectStructure->file_id_list as $fid) {
