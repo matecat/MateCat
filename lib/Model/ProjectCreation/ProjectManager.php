@@ -43,7 +43,6 @@ use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\DTO\XliffRulesModel;
-use Model\Xliff\XliffConfigTemplateStruct;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
 use Throwable;
@@ -342,7 +341,7 @@ class ProjectManager
 
         // dialect_strict — per-language matching logic
         if ($this->projectStructure->dialect_strict !== null) {
-            $dialectStrictObj = json_decode($this->projectStructure->dialect_strict, true);
+            $dialectStrictObj = json_decode($this->projectStructure->dialect_strict, true) ?? [];
 
             foreach ($dialectStrictObj as $lang => $value) {
                 if (trim($lang) === trim($newJob->target)) {
@@ -384,10 +383,15 @@ class ProjectManager
             $options[ProjectsMetadataDao::FROM_API] = true;
         }
 
-        // xliff_parameters
-        if (isset($this->projectStructure->xliff_parameters) and $this->projectStructure->xliff_parameters instanceof XliffConfigTemplateStruct) {
-            $configModel = $this->projectStructure->xliff_parameters;
-            $options[ProjectsMetadataDao::XLIFF_PARAMETERS] = json_encode($configModel);
+        // xliff_parameters — only persist when the model contains actual rules
+        if (
+            $this->projectStructure->xliff_parameters instanceof XliffRulesModel
+            && (
+                !empty($this->projectStructure->xliff_parameters->getRulesForVersion(1))
+                || !empty($this->projectStructure->xliff_parameters->getRulesForVersion(2))
+            )
+        ) {
+            $options[ProjectsMetadataDao::XLIFF_PARAMETERS] = json_encode($this->projectStructure->xliff_parameters);
         }
 
         // pretranslate_101
@@ -1381,10 +1385,10 @@ class ProjectManager
             } catch (Exception $e) {
                 $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
                 Utils::sendErrMailReport($msg);
-                $this->log("Pre-translation insertion failed for job {$newJob->id}", $e);
+                $this->log("Pre-translation insertion failed for job $newJob->id", $e);
                 $this->addProjectError(
                     (int)$e->getCode(),
-                    "Pre-translations lost for job {$newJob->id}: " . $e->getMessage() . ". The project should be re-created."
+                    "Pre-translations lost for job $newJob->id: " . $e->getMessage() . ". The project should be re-created."
                 );
             }
 

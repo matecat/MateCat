@@ -107,6 +107,11 @@ class ProjectCreationWorker extends AbstractWorker
      */
     protected function _publishResults(): void
     {
+        if (!isset($this->projectStructure)) {
+            $this->_doLog("Project creation failed before ProjectStructure was initialized; skipping result publication.");
+            return;
+        }
+
         ProjectQueue::publishResults($this->projectStructure);
         $this->_doLog("Project creation completed: " . $this->projectStructure->id_project);
         $this->projectStructure = new ProjectStructure();

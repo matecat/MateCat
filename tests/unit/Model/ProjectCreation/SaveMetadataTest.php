@@ -8,7 +8,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
-use Model\Xliff\XliffConfigTemplateStruct;
+use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
@@ -189,39 +189,49 @@ class SaveMetadataTest extends AbstractTest
     }
 
     // =========================================================================
-    // XLIFF_PARAMETERS — XliffConfigTemplateStruct JSON encoding
+    // XLIFF_PARAMETERS — XliffRulesModel JSON encoding
     // =========================================================================
 
     #[Test]
     public function testXliffParametersIsJsonEncodedWhenStruct(): void
     {
-        $struct = new XliffConfigTemplateStruct();
-        $struct->id = 42;
-        $struct->name = 'test-template';
-        $struct->uid = 7;
+        $model = XliffRulesModel::fromArray([
+            XliffRulesModel::XLIFF_12 => [
+                [
+                    'states'   => ['translated'],
+                    'analysis' => 'pre-translated',
+                    'editor'   => 'translated',
+                ],
+            ],
+        ]);
 
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::XLIFF_PARAMETERS, $struct);
+        $this->pm->setProjectStructureValue(ProjectsMetadataDao::XLIFF_PARAMETERS, $model);
 
         $this->pm->callSaveMetadata();
 
         $persisted = $this->getPersistedValue('xliff_parameters');
         $decoded = json_decode($persisted, true);
-        self::assertSame(42, $decoded['id']);
-        self::assertSame('test-template', $decoded['name']);
-        self::assertSame(7, $decoded['uid']);
+        self::assertIsArray($decoded);
+        self::assertArrayHasKey(XliffRulesModel::XLIFF_12, $decoded);
+        self::assertCount(1, $decoded[XliffRulesModel::XLIFF_12]);
+
+        $rule = $decoded[XliffRulesModel::XLIFF_12][0];
+        self::assertSame(['translated'], $rule['states']);
+        self::assertSame('pre-translated', $rule['analysis']);
+        self::assertSame('translated', $rule['editor']);
     }
 
     #[Test]
     public function testXliffParametersIsNotPersistedWhenNotStruct(): void
     {
-        // When xliff_parameters is not an XliffConfigTemplateStruct, it should
+        // When xliff_parameters is not an XliffRulesModel with rules, it should
         // not be added to options (the key won't exist in metadata)
         $this->pm->setProjectStructureValue(ProjectsMetadataDao::XLIFF_PARAMETERS, 'not-a-struct');
 
         $this->pm->callSaveMetadata();
 
         $calls = $this->findDaoCallsByKey('xliff_parameters');
-        self::assertEmpty($calls, 'xliff_parameters should not be persisted when not an XliffConfigTemplateStruct');
+        self::assertEmpty($calls, 'xliff_parameters should not be persisted when not an XliffRulesModel with rules');
     }
 
     // =========================================================================

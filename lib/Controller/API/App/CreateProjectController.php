@@ -103,7 +103,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs = FilesStorageFactory::create();
-        $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE['upload_token'];
+        $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->data['upload_token'];
         $filesFound = $this->getFilesList($fs, $this->data['file_names_list'], $uploadDir);
 
         $engine = EnginesFactory::getInstance($this->data['mt_engine']);
@@ -114,7 +114,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $this->data,
             $this->metadata,
             $filesFound,
-            $_COOKIE['upload_token'],
+            $this->data['upload_token'],
             $this->user,
             $engine,
             $gdriveSession,
@@ -127,8 +127,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->id_project = Database::obtain()->nextSequence(Database::SEQ_ID_PROJECT)[0];
         $projectStructure->ppassword = Utils::randomString();
 
-        $projectManager->sanitizeProjectStructure();
-        $fs::moveFileFromUploadSessionToQueuePath($_COOKIE['upload_token']);
+        $fs::moveFileFromUploadSessionToQueuePath($this->data['upload_token']);
 
         ProjectQueue::sendProject($projectStructure);
 
@@ -224,6 +223,10 @@ class CreateProjectController extends AbstractStatefulKleinController
 
         $arFiles = explode('@@SEP@@', html_entity_decode($file_name, ENT_QUOTES, 'UTF-8'));
 
+        if (!isset($_COOKIE['upload_token']) || !Utils::isTokenValid($_COOKIE['upload_token'])) {
+            throw new Exception("Invalid Upload Token.", -19);
+        }
+
         // Build project name from input or fallback:
         // - If empty or invalid, uses current datetime; if exactly 1 file, derives from that filename.
         // - Accepts an array of ['name' => <filePath>] items.
@@ -294,6 +297,7 @@ class CreateProjectController extends AbstractStatefulKleinController
          * @var mixed $data The data container allowing for versatile usage scenarios.
          */
         $data = [
+            'upload_token' => $_COOKIE['upload_token'],
             'file_name' => $file_name,
             'project_name' => $project_name,
             'source_lang' => $source_lang,
