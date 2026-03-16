@@ -205,8 +205,10 @@ class ProjectManagerModel
             }
         }
 
+        $this->log("Notes: Total Rows to insert: " . count($insert_values));
+
         $chunked = array_chunk($insert_values, $chunk_size);
-        $this->log("Notes: Total Rows to insert: " . count($chunked));
+        $this->log("Notes: Total Queries to execute: " . count($chunked));
 
         $conn = $this->dbHandler->getConnection();
         $stmt = null;
@@ -276,8 +278,10 @@ class ProjectManagerModel
             }
         }
 
+        $this->log("Segment Metadata: Total Rows to insert: " . count($insert_values));
+
         $chunked = array_chunk($insert_values, $chunk_size);
-        $this->log("Notes attributes: Total Rows to insert: " . count($chunked));
+        $this->log("Segment Metadata: Total Queries to execute: " . count($chunked));
 
         $conn = $this->dbHandler->getConnection();
         $stmt = null;
@@ -289,14 +293,14 @@ class ProjectManagerModel
                 $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
-                $this->log("Notes attributes: Executed Query " . ($i + 1));
+                $this->log("Segment Metadata: Executed Query " . ($i + 1));
             }
         } catch (Exception $e) {
-            $this->log("Notes attributes import - DB Error: " . $e->getMessage());
-            $this->log("Notes attributes import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
-            $this->log("Notes attributes Chunk Dump: " . var_export($chunk, true));
-            $this->log("Notes attributes Flattened Values Dump: " . var_export($flattened_values, true));
-            throw new Exception("Notes attributes import - DB Error: " . $e->getMessage(), 0, $e);
+            $this->log("Segment Metadata import - DB Error: " . $e->getMessage());
+            $this->log("Segment Metadata import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
+            $this->log("Segment Metadata Chunk Dump: " . var_export($chunk, true));
+            $this->log("Segment Metadata Flattened Values Dump: " . var_export($flattened_values, true));
+            throw new Exception("Segment Metadata import - DB Error: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -338,8 +342,10 @@ class ProjectManagerModel
             }
         }
 
+        $this->log("Context Groups: Total Rows to insert: " . count($insert_values));
+
         $chunked = array_chunk($insert_values, $chunk_size);
-        $this->log("Notes: Total Rows to insert: " . count($chunked));
+        $this->log("Context Groups: Total Queries to execute: " . count($chunked));
 
         $conn = $this->dbHandler->getConnection();
         $stmt = null;
@@ -351,14 +357,14 @@ class ProjectManagerModel
                 $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
                 $flattened_values = array_reduce($chunk, 'array_merge', []);
                 $stmt->execute($flattened_values);
-                $this->log("Notes: Executed Query " . ($i + 1));
+                $this->log("Context Groups: Executed Query " . ($i + 1));
             }
         } catch (Exception $e) {
-            $this->log("Trans-Unit Context Groups import - DB Error: " . $e->getMessage());
-            $this->log("Trans-Unit Context Groups import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
-            $this->log("Trans-Unit Context Groups Chunk Dump: " . var_export($chunk, true));
-            $this->log("Trans-Unit Context Groups Flattened Values Dump: " . var_export($flattened_values, true));
-            throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);
+            $this->log("Context Groups import - DB Error: " . $e->getMessage());
+            $this->log("Context Groups import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
+            $this->log("Context Groups Chunk Dump: " . var_export($chunk, true));
+            $this->log("Context Groups Flattened Values Dump: " . var_export($flattened_values, true));
+            throw new Exception("Context Groups import - DB Error: " . $e->getMessage(), 0, $e);
         }
     }
 

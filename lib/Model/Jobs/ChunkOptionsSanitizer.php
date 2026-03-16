@@ -267,6 +267,9 @@ class ChunkOptionsSanitizer
     }
 
     /**
+     * Check that the source language AND at least one target language are both
+     * present in the allowed list.
+     *
      * @param list<string> $langs
      * @throws Exception
      */
@@ -274,11 +277,19 @@ class ChunkOptionsSanitizer
     {
         $this->__ensureLanguagesAreSet();
 
-        $all_langs = array_merge($this->target_lang ?? [], [$this->source_lang]);
-        $all_langs = array_unique($all_langs);
-        $found = count(array_intersect($langs, $all_langs));
+        $allowedSet = array_flip($langs);
 
-        return $found >= 2;
+        if (!isset($allowedSet[$this->source_lang])) {
+            return false;
+        }
+
+        foreach ($this->target_lang as $target) {
+            if (isset($allowedSet[$target])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
