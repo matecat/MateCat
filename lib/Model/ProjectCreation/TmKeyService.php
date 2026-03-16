@@ -34,6 +34,10 @@ class TmKeyService
 {
     use LogsMessages;
 
+    private const int TMX_POLL_TIMEOUT_MINUTES   = 10;
+    private const int TMX_POLL_INITIAL_INTERVAL  = 3;
+    private const int TMX_POLL_MAX_INTERVAL      = 30;
+
     private TMSService $tmxServiceWrapper;
     private IDatabase $dbHandler;
 
@@ -197,9 +201,14 @@ class TmKeyService
     /**
      * Poll MyMemory for TMX upload completion status.
      *
-     * Waits up to 30 minutes per file, polling every 3 seconds.
+     * Waits up to {@see self::TMX_POLL_TIMEOUT_MINUTES} minutes per file,
+     * using exponential backoff (starting at {@see self::TMX_POLL_INITIAL_INTERVAL}s,
+     * capped at {@see self::TMX_POLL_MAX_INTERVAL}s).
+     *
      * After each file completes (or times out), it is removed from the
      * project's array_files and array_files_meta lists.
+     * On timeout, a project error is recorded, but the loop continues
+     * to the next file.
      *
      * @param ProjectStructure $projectStructure
      * @param TMSFile[] $memoryFiles
@@ -208,14 +217,11 @@ class TmKeyService
      */
     protected function loopForTMXLoadStatus(ProjectStructure $projectStructure, array $memoryFiles): void
     {
-        $time = strtotime('+30 minutes');
-
-        //TMX Management
-        /****************/
-        //loop again through files to check for TMX loading
         foreach ($memoryFiles as $file) {
-            //is the TM loaded?
-            //wait until the current TMX is loaded
+            $deadline     = strtotime('+' . self::TMX_POLL_TIMEOUT_MINUTES . ' minutes');
+            $pollInterval = self::TMX_POLL_INITIAL_INTERVAL;
+            $startTime    = time();
+
             while (true) {
                 try {
                     $uuid = $file->getUuid();
@@ -224,15 +230,27 @@ class TmKeyService
                     }
                     $result = $this->tmxServiceWrapper->tmxUploadStatus($uuid);
 
-                    if ($result['completed'] || strtotime('now') > $time) {
-                        //"$fileName" has been loaded into MyMemory"
-                        // OR the indexer is down or stopped for maintenance
-                        // exit the loop, the import will be executed at a later time
+                    if ($result['completed']) {
+                        $elapsed = time() - $startTime;
+                        $this->log("TMX import completed for \"{$file->getName()}\" in {$elapsed}s");
                         break;
                     }
 
-                    //waiting for "$fileName" to be loaded into MyMemory
-                    sleep(3);
+                    if (time() > $deadline) {
+                        $this->addProjectError(
+                            $projectStructure,
+                            -15,
+                            "TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName()
+                        );
+                        $this->log("TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName());
+                        break;
+                    }
+
+                    $elapsed = time() - $startTime;
+                    $this->log("Waiting for TMX \"{$file->getName()}\" — elapsed {$elapsed}s, next poll in {$pollInterval}s");
+
+                    sleep($pollInterval);
+                    $pollInterval = min($pollInterval * 2, self::TMX_POLL_MAX_INTERVAL);
                 } catch (Exception $e) {
                     $this->addProjectError($projectStructure, $e->getCode(), $e->getMessage());
 
