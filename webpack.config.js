@@ -213,6 +213,15 @@ const matecatConfig = async ({env}, {mode}) => {
             filename: 'fonts/[name][ext]',
           },
         },
+        {
+          test: /\.html$/i,
+          include: [path.resolve(__dirname)],
+          exclude: [
+            path.resolve(__dirname, 'lib/View'),
+            path.resolve(__dirname, 'node_modules'),
+          ],
+          type: 'asset/source',
+        },
       ],
     },
     entry: {

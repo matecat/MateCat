@@ -49,6 +49,7 @@ import {CatToolInterface} from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import useContextReviewChannel from '../hooks/useContextReviewChannel'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -79,7 +80,13 @@ function CatTool() {
 
   const startSegmentIdRef = useRef()
   const callbackAfterSegmentsResponseRef = useRef()
-
+  const {sendMessage} = useContextReviewChannel({
+    onMessage: (message) => {
+      if (message.type === 'segmentClicked' && message.sid) {
+        SegmentActions.openSegment(message.sid)
+      }
+    },
+  })
   const {isLoading: isLoadingSegments, result: segmentsResult} =
     useSegmentsLoader({
       segmentId: options?.segmentId
@@ -334,10 +341,6 @@ function CatTool() {
 
     const {segmentId, data} = segmentsResult
     if (where === 'center') {
-      // Init segments
-      // TODO: da verificare se serve: $(document).trigger('segments:load', data)
-      $(document).trigger('segments:load', data)
-
       if (
         !Object.entries(data.files)
           .map(([, value]) => value.segments)
@@ -381,10 +384,23 @@ function CatTool() {
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       CommonUtils.dispatchCustomEvent('segmentsAdded', {resp: data.files})
     }
+    const segmentsFlat = Object.entries(data.files)
+      .map(([, value]) => value.segments)
+      .flat()
+    const segmentsList = []
+    for (let i = 0; i < segmentsFlat.length; i++) {
+      const seg = segmentsFlat[i]
+      segmentsList.push({
+        sid: seg.sid,
+        source: seg.segment,
+        target: seg.translation,
+      })
+    }
+    sendMessage({type: 'segments', segments: segmentsList})
     if (config.isReview) {
       SegmentActions.addPreloadedIssuesToSegment()
     }
-  }, [segmentsResult, options?.openCurrentSegmentAfter])
+  }, [segmentsResult, options?.openCurrentSegmentAfter, sendMessage])
 
   // execute callback option from onRender action
   useEffect(() => {

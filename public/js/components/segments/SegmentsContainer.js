@@ -27,6 +27,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import useContextReviewChannel from '../../hooks/useContextReviewChannel'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -177,7 +178,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
-
+  const {sendMessage} = useContextReviewChannel()
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
 
@@ -429,6 +430,21 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     return () => window.removeEventListener('resize', onWindowResize)
   }, [])
 
+  // Send segment mappings to ContextReview when segments change
+  useEffect(() => {
+    if (!segments.size) return
+    const segmentsList = []
+    for (let i = 0; i < segments.size; i++) {
+      const seg = segments.get(i)
+      segmentsList.push({
+        sid: seg.get('sid'),
+        source: seg.get('segment'),
+        target: seg.get('translation'),
+      })
+    }
+    sendMessage({type: 'segments', segments: segmentsList})
+  }, [segments, sendMessage])
+
   // add actions listener
   useEffect(() => {
     let wasRemovedAllSegments = false
@@ -447,6 +463,13 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
       setScrollToSelected(false)
+      const segment = SegmentStore.getSegmentById(sid)
+      sendMessage({
+        type: 'highlight',
+        sid,
+        source: segment.get('segment'),
+        target: segment.get('translation'),
+      })
     }
     const scrollToSelectedSegment = (sid) => {
       setScrollToSid(sid)

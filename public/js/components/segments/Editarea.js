@@ -46,6 +46,7 @@ import {
 import {isMacOS} from '../../utils/Utils'
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 import textUtils from '../../utils/textUtils'
+import ContextReviewChannel from '../../utils/contextReviewChannel'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -361,6 +362,11 @@ class Editarea extends React.Component {
         missingTags,
         lxqDecodedTranslation,
       )
+      ContextReviewChannel.sendMessage({
+        type: 'updateTranslation',
+        sid: segment.sid,
+        target: plainText,
+      })
       this.props.updateCounter(
         DraftMatecatUtils.getCharactersCounter(
           this.getTextToApplyCounter(decodedSegment),
