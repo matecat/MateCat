@@ -118,6 +118,17 @@ const DeliverySection = ({
           </div>
         )}
       </div>
+      {outsourceConfirmed && (
+        <div className="confirm-delivery-box">
+          <div className="confirm-title">Order sent correctly</div>
+          <p>
+            Thank you for choosing our Outsource service
+            <br />
+            You will soon be contacted by a Account Manager to send you an
+            invoice
+          </p>
+        </div>
+      )}
     </div>
   )
 }

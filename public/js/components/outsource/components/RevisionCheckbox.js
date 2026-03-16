@@ -15,7 +15,12 @@ const RevisionCheckbox = ({
     <div className="revision-box">
       <div className="add-revision">
         <div className={'revision-checkbox ' + checkboxDisabledClass}>
-          <input type="checkbox" checked={revision} onChange={onToggle} />
+          <input
+            type="checkbox"
+            checked={revision}
+            onChange={onToggle}
+            disabled={outsourceConfirmed}
+          />
           <label>Add Revision</label>
         </div>
       </div>

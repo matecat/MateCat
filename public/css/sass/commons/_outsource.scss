@@ -139,10 +139,11 @@
   }
 
   .confirm-delivery-box {
-    background: colors.$green50;
-    padding: 9px 15px 3px;
-    text-align: right;
+    background: #d1e0d1;
+    padding: 8px;
     line-height: 20px;
+    border-radius: 8px;
+    margin-top: 8px;
 
     .confirm-title {
       font-size: 18px;
