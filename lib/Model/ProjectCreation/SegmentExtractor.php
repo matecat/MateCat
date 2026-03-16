@@ -745,6 +745,10 @@ class SegmentExtractor
                     $noteKey     = 'entries';
                 }
 
+                if ($noteKey === null) {
+                    continue;
+                }
+
                 if (strlen($noteContent) > self::SEGMENT_NOTES_MAX_SIZE) {
                     throw new Exception(' you reached the maximum size for a single segment note (' . self::SEGMENT_NOTES_MAX_SIZE . ' bytes)');
                 }

@@ -92,8 +92,6 @@ class ProjectManager
 
     protected FeatureSet $features;
 
-    const string TRANSLATED_USER = 'translated_user';
-
     protected IDatabase $dbHandler;
 
     protected MateCatFilter $filter;
