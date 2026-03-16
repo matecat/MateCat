@@ -101,10 +101,9 @@ class ProjectManagerModel
 
     /**
      * @param list<array<string, mixed>> $query_translations_values
-     * @param-out list<list<array<string, mixed>>> $query_translations_values
      * @throws PDOException
      */
-    public function insertPreTranslations(array &$query_translations_values): void
+    public function insertPreTranslations(array $query_translations_values): void
     {
         $baseQuery = "
                 INSERT INTO segment_translations (

@@ -378,7 +378,7 @@ class ProjectManager
 
         // "From API" flag
         if ($this->projectStructure->from_api) {
-            $options[ProjectsMetadataDao::FROM_API] = true;
+            $options[ProjectsMetadataDao::FROM_API] = '1';
         }
 
         // xliff_parameters — only persist when the model contains actual rules
@@ -394,7 +394,7 @@ class ProjectManager
 
         // pretranslate_101
         if (isset($this->projectStructure->pretranslate_101)) {
-            $options[ProjectsMetadataDao::PRETRANSLATE_101] = $this->projectStructure->pretranslate_101;
+            $options[ProjectsMetadataDao::PRETRANSLATE_101] = (string)$this->projectStructure->pretranslate_101;
         }
 
         // mt evaluation => ice_mt already in metadata
@@ -442,7 +442,7 @@ class ProjectManager
                 $dao->set(
                     (int)$this->projectStructure->id_project,
                     $key,
-                    $value
+                    (string)$value
                 );
             }
         }
@@ -567,25 +567,32 @@ class ProjectManager
 
         $fs = FilesStorageFactory::create();
 
-        $this->initGdriveSession();
-        $this->validateBeforeCreation();
+        try {
+            $this->initGdriveSession();
+            $this->validateBeforeCreation();
 
-        $firstTMXFileName = $this->sortFilesWithTmxFirst();
-        $this->setPrivateTmKeysOrFail($firstTMXFileName);
+            $firstTMXFileName = $this->sortFilesWithTmxFirst();
+            $this->setPrivateTmKeysOrFail($firstTMXFileName);
 
-        $linkFiles = $this->resolveUploadDirAndGetHashes($fs);
-        $this->pushTmxToMemory();
+            $linkFiles = $this->resolveUploadDirAndGetHashes($fs);
+            $this->pushTmxToMemory();
 
-        $this->cacheNonConvertedFiles($fs, $linkFiles);
-        $this->handleZipFiles($linkFiles);
+            $this->cacheNonConvertedFiles($fs, $linkFiles);
+            $this->handleZipFiles($linkFiles);
 
-        $totalFilesStructure = $this->resolveAndInsertFiles($fs, $linkFiles);
-        $this->extractSegmentsCreateProjectAndStoreData($fs, $totalFilesStructure, $linkFiles);
+            $totalFilesStructure = $this->resolveAndInsertFiles($fs, $linkFiles);
+            $this->extractSegmentsCreateProjectAndStoreData($fs, $totalFilesStructure, $linkFiles);
 
-        $this->determineStatusAndPopulateResult();
-        $this->insertFileInstructions($totalFilesStructure);
-        $this->finalizeProjectInTransaction();
-        $this->cleanupUploadDirectory($fs);
+            $this->determineStatusAndPopulateResult();
+            $this->insertFileInstructions($totalFilesStructure);
+            $this->finalizeProjectInTransaction();
+        } finally {
+            // Ensure upload directory is cleaned up even when an exception
+            // interrupts project creation, preventing orphaned temp files.
+            if (isset($this->uploadDir)) {
+                $this->cleanupUploadDirectory($fs);
+            }
+        }
     }
 
     /**
@@ -883,7 +890,11 @@ class ProjectManager
                     'There was a problem during the upload of your file(s). Please, ' .
                     'try to rename your file(s) avoiding non-standard characters'
                 );
+            } else {
+                $this->addProjectError($code, 'An unexpected error occurred during file processing: ' . $e->getMessage());
             }
+        } else {
+            $this->addProjectError($code, 'An unexpected error occurred during file insertion: ' . $e->getMessage());
         }
     }
 

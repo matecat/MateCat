@@ -125,21 +125,25 @@ class MapFileInsertionErrorTest extends AbstractTest
     }
 
     #[Test]
-    public function code0WithoutSpecialMessageDoesNotAddError(): void
+    public function code0WithoutSpecialMessageAddsGenericError(): void
     {
         $this->pm->callMapFileInsertionError(new Exception('generic error', 0));
 
         $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $this->assertCount(0, $errors);
+        $this->assertCount(1, $errors);
+        $this->assertSame(0, $errors[0]['code']);
+        $this->assertStringContainsString('generic error', $errors[0]['message']);
     }
 
     #[Test]
-    public function unknownCodeDoesNotAddError(): void
+    public function unknownCodeAddsGenericError(): void
     {
         $this->pm->callMapFileInsertionError(new Exception('unknown', -999));
 
         $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $this->assertCount(0, $errors);
+        $this->assertCount(1, $errors);
+        $this->assertSame(-999, $errors[0]['code']);
+        $this->assertStringContainsString('unknown', $errors[0]['message']);
     }
 
     #[Test]

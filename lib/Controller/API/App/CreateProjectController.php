@@ -253,7 +253,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $array_keys = array_values(array_intersect_key($array_keys, $_array_unique));
         }
 
-        $private_tm_key = array_filter($array_keys, self::sanitizeTmKeyArr(...));
+        $private_tm_key = array_map(self::sanitizeTmKeyArr(...), $array_keys);
         $mt_engine = ($mt_engine != null ? $mt_engine : 0);
         $only_private = (!is_null($get_public_matches) && !$get_public_matches);
         $due_date = (empty($due_date) ? null : Utils::mysqlTimestamp($due_date));
@@ -343,7 +343,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             'private_tm_key' => $private_tm_key,
             'only_private' => $only_private,
             'mt_quality_value_in_editor' => (!empty($mt_quality_value_in_editor)) ? $mt_quality_value_in_editor : 85,
-            'due_date' => (empty($due_date) ? null : Utils::mysqlTimestamp($due_date)),
+            'due_date' => $due_date,
             'file_names_list' => $arFiles,
             'public_tm_penalty' => $public_tm_penalty,
 
