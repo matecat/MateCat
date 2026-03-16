@@ -1,6 +1,6 @@
 <?php
 
-use Model\ProjectCreation\ProjectOptionsSanitizer;
+use Model\Jobs\ChunkOptionsSanitizer;
 use TestHelpers\AbstractTest;
 
 
@@ -15,21 +15,21 @@ class ProjectOptionSanitizerTest extends AbstractTest
 
     function testSpeech2TextIsTrue()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['speech2text' => true]);
+        $sanitizer = new ChunkOptionsSanitizer(['speech2text' => true]);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['speech2text' => 1], $result);
     }
 
     function testSpeech2TextIsNotTrue()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['speech2text' => false]);
+        $sanitizer = new ChunkOptionsSanitizer(['speech2text' => false]);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['speech2text' => 0], $result);
     }
 
     function testLexiQaIsLeftTrueForValidLanguageCombinations()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['lexiqa' => true]);
+        $sanitizer = new ChunkOptionsSanitizer(['lexiqa' => true]);
         $sanitizer->setLanguages('en-US', ['en-GB']);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['lexiqa' => 1], $result);
@@ -37,7 +37,7 @@ class ProjectOptionSanitizerTest extends AbstractTest
 
     function testLexiQaIsSanitizedForOddLanguages()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['lexiqa' => true]);
+        $sanitizer = new ChunkOptionsSanitizer(['lexiqa' => true]);
         $sanitizer->setLanguages('en-US', ['es-MX']);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['lexiqa' => 1], $result);
@@ -45,7 +45,7 @@ class ProjectOptionSanitizerTest extends AbstractTest
 
     function testTagProjecttionIsTrueForValidLanguages()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['tag_projection' => true]);
+        $sanitizer = new ChunkOptionsSanitizer(['tag_projection' => true]);
         $sanitizer->setLanguages('en-US', ['es-MX']);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['tag_projection' => 1], $result);
@@ -53,7 +53,7 @@ class ProjectOptionSanitizerTest extends AbstractTest
 
     function testTagProjecttionIsSanitizedForOddLanguages()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['tag_projection' => true]);
+        $sanitizer = new ChunkOptionsSanitizer(['tag_projection' => true]);
         $sanitizer->setLanguages('en-US', ['ru-RU']);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['tag_projection' => 1], $result);
@@ -61,21 +61,21 @@ class ProjectOptionSanitizerTest extends AbstractTest
 
     function testSegmentationRuleIsSetWhenValid()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['segmentation_rule' => 'patent']);
+        $sanitizer = new ChunkOptionsSanitizer(['segmentation_rule' => 'patent']);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['segmentation_rule' => 'patent'], $result);
     }
 
     function testSegmentationRuleIsSanitized()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['segmentation_rule' => 'invalid']);
+        $sanitizer = new ChunkOptionsSanitizer(['segmentation_rule' => 'invalid']);
         $result = $sanitizer->sanitize();
         $this->assertEquals([], $result);
     }
 
     function testUnknownKeysPassThrough()
     {
-        $sanitizer = new ProjectOptionsSanitizer([
+        $sanitizer = new ChunkOptionsSanitizer([
             'tag_projection' => true,
             'lexiqa' => false,
             'another_key_set_by_plugin' => 42
@@ -91,7 +91,7 @@ class ProjectOptionSanitizerTest extends AbstractTest
 
     function testLexiQaWorksWithBooleanTrue()
     {
-        $sanitizer = new ProjectOptionsSanitizer(['lexiqa' => true]);
+        $sanitizer = new ChunkOptionsSanitizer(['lexiqa' => true]);
         $sanitizer->setLanguages('en-US', ['en-GB']);
         $result = $sanitizer->sanitize();
         $this->assertEquals(['lexiqa' => 1], $result);

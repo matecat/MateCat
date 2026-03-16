@@ -475,14 +475,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         // new raw counter model
         $options = [MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW];
 
-        if (isset($data['speech2text'])) {
-            $options['speech2text'] = $data['speech2text'];
-        }
-
-        if (isset($data['segmentation_rule'])) {
-            $options['segmentation_rule'] = $data['segmentation_rule'];
-        }
-
         if (isset($data['mt_quality_value_in_editor'])) {
             $options[MetadataDao::MT_QUALITY_VALUE_IN_EDITOR] = $data['mt_quality_value_in_editor'];
         }

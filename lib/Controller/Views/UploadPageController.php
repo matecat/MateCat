@@ -14,7 +14,7 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\GDrive\GDriveController;
 use Exception;
 use Matecat\Locales\LanguageDomains;
-use Model\ProjectCreation\ProjectOptionsSanitizer;
+use Model\Jobs\ChunkOptionsSanitizer;
 use Utils\Constants\Constants;
 use Utils\Engines\Intento;
 use Utils\Registry\AppConfig;
@@ -47,7 +47,7 @@ class UploadPageController extends BaseKleinViewController
             'subjects' => new PHPTalMap(LanguageDomains::getInstance()->getEnabledDomains()),
             'formats_number' => $this->countSupportedFileTypes(),
             'translation_engines_intento_prov_json' => new PHPTalMap(Intento::getProviderList()),
-            'tag_projection_languages' => new PHPTalMap(ProjectOptionsSanitizer::$tag_projection_allowed_languages),
+            'tag_projection_languages' => new PHPTalMap(ChunkOptionsSanitizer::$tag_projection_allowed_languages),
             'developerKey' => AppConfig::$GOOGLE_OAUTH_BROWSER_API_KEY,
             'clientId' => AppConfig::$GOOGLE_OAUTH_CLIENT_ID
         ]);
@@ -56,7 +56,7 @@ class UploadPageController extends BaseKleinViewController
             $this->addParamsToView([
                     'lxq_license' => AppConfig::$LXQ_LICENSE,
                     'lxq_partnerid' => AppConfig::$LXQ_PARTNERID,
-                    'lexiqa_languages' => new PHPTalMap(ProjectOptionsSanitizer::$lexiQA_allowed_languages),
+                    'lexiqa_languages' => new PHPTalMap(ChunkOptionsSanitizer::$lexiQA_allowed_languages),
                     'lexiqaServer' => AppConfig::$LXQ_SERVER,
                 ]
             );

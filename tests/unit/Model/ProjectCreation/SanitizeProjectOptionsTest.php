@@ -14,7 +14,7 @@ use Utils\Logger\MatecatLogger;
  * Unit tests for {@see \Model\ProjectCreation\ProjectManager::sanitizeProjectOptions()}.
  *
  * Verifies:
- * - Delegates to ProjectOptionsSanitizer with source + target languages
+ * - Delegates to ChunkOptionsSanitizer with source + target languages
  * - Returns sanitized options array
  * - Handles various metadata combinations
  */

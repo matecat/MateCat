@@ -417,10 +417,6 @@ class ProjectManager
             $options[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS] = json_encode($this->projectStructure->filters_extraction_parameters);
         }
 
-        if ($this->projectStructure->sanitize_project_options) {
-            $options = $this->sanitizeProjectOptions($options);
-        }
-
         $extraKeys = [];
         // MT extra config parameters
         foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
@@ -481,24 +477,6 @@ class ProjectManager
     }
 
     /**
-     * @param array<string, mixed> $options
-     *
-     * @return array<string, mixed>
-     * @throws Exception
-     */
-    private function sanitizeProjectOptions(array $options): array
-    {
-        $sanitizer = new ProjectOptionsSanitizer($options);
-
-        $sanitizer->setLanguages(
-            (string)$this->projectStructure->source_language,
-            array_values($this->projectStructure->target_language ?? [])
-        );
-
-        return $sanitizer->sanitize();
-    }
-
-    /**
      * Perform sanitization of the projectStructure and assign errors.
      * Resets the error array to avoid further calls to pile up errors.
      *
@@ -507,7 +485,7 @@ class ProjectManager
     public function sanitizeProjectStructure(): void
     {
         $this->projectStructure->result = ['errors' => [], 'data' => []];
-
+// XXX Check if already needed (from NewController)
         $this->validateUploadToken();
         $this->validateXliffParameters();
     }

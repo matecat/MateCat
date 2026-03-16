@@ -226,7 +226,6 @@ class NewController extends KleinController
     ): ProjectStructure {
         $projectStructure = new ProjectStructure();
 
-        $projectStructure->sanitize_project_options = false;
         $projectStructure->project_name = $request['project_name'];
         $projectStructure->job_subject = $request['subject'];
         $projectStructure->private_tm_key = $request['private_tm_key'];
@@ -456,7 +455,7 @@ class NewController extends KleinController
         $target_lang = $this->validateTargetLangs($lang_handler, $target_lang);
         [$tms_engine, $engineStruct] = $this->validateEngines($tms_engine, $mt_engine);
         $subject = $this->validateSubject($subject);
-        $segmentation_rule = $this->validateSegmentationRules($segmentation_rule);
+        $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule);
         [$private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization] = $this->validateTmAndKeys(
             $private_tm_key,
             $private_tm_key_json
@@ -838,17 +837,6 @@ class NewController extends KleinController
         }
 
         return $assoc;
-    }
-
-    /**
-     * @param $segmentation_rule
-     *
-     * @return string|null
-     * @throws Exception
-     */
-    private function validateSegmentationRules($segmentation_rule): ?string
-    {
-        return Constants::validateSegmentationRules($segmentation_rule);
     }
 
     /**

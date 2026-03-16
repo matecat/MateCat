@@ -1,10 +1,10 @@
 <?php
 
-namespace Model\ProjectCreation;
+namespace Model\Jobs;
 
 use Exception;
 
-class ProjectOptionsSanitizer
+class ChunkOptionsSanitizer
 {
 
     /** @var array<string, mixed> */

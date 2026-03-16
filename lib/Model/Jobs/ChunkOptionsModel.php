@@ -4,7 +4,6 @@
 namespace Model\Jobs;
 
 use Exception;
-use Model\ProjectCreation\ProjectOptionsSanitizer;
 use Model\Projects\MetadataDao;
 use ReflectionException;
 
@@ -35,7 +34,7 @@ class ChunkOptionsModel
     {
         $value = $this->getByChunkOrProjectOption($key);
 
-        $sanitizer = new ProjectOptionsSanitizer([$key => $value]);
+        $sanitizer = new ChunkOptionsSanitizer([$key => $value]);
         $sanitizer->setLanguages($this->chunk->source, [$this->chunk->target]);
 
         $sanitized = $sanitizer->sanitize();
@@ -50,7 +49,7 @@ class ChunkOptionsModel
     {
         $filtered = array_intersect_key($options, array_flip(self::$valid_keys));
 
-        $sanitizer = new ProjectOptionsSanitizer($filtered);
+        $sanitizer = new ChunkOptionsSanitizer($filtered);
         $sanitizer->setLanguages($this->chunk->source, [$this->chunk->target]);
 
         $sanitized = $sanitizer->sanitize();

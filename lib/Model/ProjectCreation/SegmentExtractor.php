@@ -891,15 +891,15 @@ class SegmentExtractor
             }
 
             if (!empty($xliff_trans_unit['source'])) {
-                $source_extract_external = $this->stripExternal($xliff_trans_unit['source']['raw-content']); // WIP to remove function
+                $source_extract_external = $this->stripExternal($xliff_trans_unit['source']['raw-content']); // XXX to remove function
             }
 
             // Override with the alt-trans source value
             if (!empty($altTrans['source'])) {
-                $source_extract_external = $this->stripExternal($altTrans['source']); // WIP to remove function
+                $source_extract_external = $this->stripExternal($altTrans['source']); // XXX to remove function
             }
 
-            $target_extract_external = $this->stripExternal($altTrans['target']); // WIP to remove function
+            $target_extract_external = $this->stripExternal($altTrans['target']); // XXX to remove function
 
             // wrong alt-trans content: source == target
             if (is_array($source_extract_external) && isset($source_extract_external['seg']) && $source_extract_external['seg'] == $target_extract_external['seg']) {
