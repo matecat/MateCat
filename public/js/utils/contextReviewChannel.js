@@ -41,7 +41,7 @@ const ContextReviewChannel = {
   open() {
     if (this._channel) return
 
-    this._channel = new BroadcastChannel(CHANNEL_NAME)
+    this._channel = new BroadcastChannel(`${CHANNEL_NAME}-${config.password}`)
 
     this._channel.onmessage = (event) => {
       this._listeners.forEach((fn) => {
