@@ -1445,9 +1445,15 @@ class BuildProjectStructureTest extends AbstractTest
     #[Test]
     public function createControllerSetsPayableRateModelFields(): void
     {
-        // Create a stub with id property
-        $payableRateStub = new stdClass();
-        $payableRateStub->id = 99;
+        // Create a stub with id property and jsonSerialize() support
+        $payableRateStub = new class implements \JsonSerializable {
+            public int $id = 99;
+
+            public function jsonSerialize(): array
+            {
+                return ['id' => $this->id, 'breakdowns' => []];
+            }
+        };
 
         $data = $this->makeCreateControllerData([
             'payable_rate_model_template' => $payableRateStub,
@@ -1464,7 +1470,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame($payableRateStub, $ps->payable_rate_model);
+        $this->assertSame($payableRateStub->jsonSerialize(), $ps->payable_rate_model);
         $this->assertSame(99, $ps->payable_rate_model_id);
     }
 

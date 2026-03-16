@@ -59,9 +59,15 @@ class ProjectManagerModel
         $data['due_date'] = $projectStructure->due_date;
 
         $this->dbHandler->begin();
-        $projectId = $this->dbHandler->insert('projects', $data);
-        $project = ProjectDao::findById($projectId);
-        $this->dbHandler->commit();
+
+        try {
+            $projectId = $this->dbHandler->insert('projects', $data);
+            $project = ProjectDao::findById($projectId);
+            $this->dbHandler->commit();
+        } catch (Exception $e) {
+            $this->dbHandler->rollback();
+            throw $e;
+        }
 
         if ($project === null) {
             throw new RuntimeException("Failed to retrieve project after insert (id: $projectId)");

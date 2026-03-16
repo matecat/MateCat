@@ -903,9 +903,9 @@ class SegmentExtractor
             }
 
             $config['segment']        = is_array($source_extract_external) && isset($source_extract_external['seg'])
-                ? $this->filter->fromRawXliffToLayer0($this->filter->fromLayer0ToLayer1($source_extract_external['seg']))
+                ? $this->filter->fromRawXliffToLayer0($source_extract_external['seg'])
                 : '';
-            $config['translation']    = $this->filter->fromRawXliffToLayer0($this->filter->fromLayer0ToLayer1($target_extract_external['seg']));
+            $config['translation']    = $this->filter->fromRawXliffToLayer0($target_extract_external['seg']);
             $config['context_after']  = null;
             $config['context_before'] = null;
 

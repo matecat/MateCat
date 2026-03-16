@@ -1056,22 +1056,28 @@ class ProjectManager
             $this->projectStructure->result['analyze_url'] = $this->getAnalyzeURL();
         }
 
-        Database::obtain()->begin();
+        $db = Database::obtain();
+        $db->begin();
 
-        (new ProjectDao())->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
-        (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
+        try {
+            (new ProjectDao())->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
+            (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
-        $this->features->run('postProjectCreate', $this->projectStructure);
+            $this->features->run('postProjectCreate', $this->projectStructure);
 
-        ProjectDao::updateAnalysisStatus(
-            $this->projectStructure->id_project,
-            $this->projectStructure->status,
-            $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])
-        );
+            ProjectDao::updateAnalysisStatus(
+                $this->projectStructure->id_project,
+                $this->projectStructure->status,
+                $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])
+            );
 
-        $this->pushActivityLog();
+            $this->pushActivityLog();
 
-        Database::obtain()->commit();
+            $db->commit();
+        } catch (Exception $e) {
+            $db->rollback();
+            throw $e;
+        }
 
         $this->features->run('postProjectCommit', $this->projectStructure);
     }
