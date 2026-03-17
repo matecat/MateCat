@@ -298,14 +298,9 @@ class SegmentExtractor
             if (empty($wordCount)) {
                 $show_in_cattool = 0;
             } else {
-                $extract_external                = $this->stripExternal($seg_source['raw-content']);
-                $seg_source['mrk-ext-prec-tags'] = $extract_external['prec'];
-                $seg_source['mrk-ext-succ-tags'] = $extract_external['succ'];
-                $seg_source['raw-content']       = $extract_external['seg'];
-
                 if (isset($xliff_trans_unit['seg-target'][$position]['raw-content'])) {
                     $preTranslation = $this->detectPreTranslation(
-                        $extract_external['seg'],
+                        $seg_source['raw-content'],
                         $xliff_trans_unit['seg-target'][$position]['raw-content'],
                         $xliff_trans_unit,
                         $fid,
@@ -320,11 +315,6 @@ class SegmentExtractor
 
                         $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] =
                             new TranslationTuple($preTranslation['target'], $xliff_trans_unit, $position);
-
-                        // seg-source and target translation can have different mrk id
-                        // override the seg-source surrounding mrk-id with them of target
-                        $seg_source['mrk-ext-prec-tags'] = $preTranslation['target_extract_external']['prec'];
-                        $seg_source['mrk-ext-succ-tags'] = $preTranslation['target_extract_external']['succ'];
                     }
                 }
             }
@@ -357,7 +347,7 @@ class SegmentExtractor
     /**
      * Process a non-segmented (no seg-source) trans-unit.
      *
-     * Handles word count, external tag stripping, pre-translation detection,
+     * Handles word count, pre-translation detection,
      * notes/context extraction, and segment creation.
      *
      * @param array<string, mixed> $xliff_trans_unit
@@ -382,19 +372,12 @@ class SegmentExtractor
 
         $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
-        $prec_tags = null;
-        $succ_tags = null;
         if (empty($wordCount)) {
             $show_in_cattool = 0;
         } else {
-            $extract_external                                = $this->stripExternal($xliff_trans_unit['source']['raw-content']);
-            $prec_tags                                       = empty($extract_external['prec']) ? null : $extract_external['prec'];
-            $succ_tags                                       = empty($extract_external['succ']) ? null : $extract_external['succ'];
-            $xliff_trans_unit['source']['raw-content']       = $extract_external['seg'];
-
             if (isset($xliff_trans_unit['target']['raw-content'])) {
                 $preTranslation = $this->detectPreTranslation(
-                    $extract_external['seg'],
+                    $xliff_trans_unit['source']['raw-content'],
                     $xliff_trans_unit['target']['raw-content'],
                     $xliff_trans_unit,
                     $fid,
@@ -424,8 +407,6 @@ class SegmentExtractor
             wordCount: $wordCount,
             showInCattool: $show_in_cattool,
             projectStructure: $projectStructure,
-            xliffExtPrecTags: $prec_tags,
-            xliffExtSuccTags: $succ_tags,
         );
 
         return $counters['show_in_cattool'];
@@ -545,7 +526,7 @@ class SegmentExtractor
      * @param int|null $position
      * @param ProjectStructure $projectStructure
      *
-     * @return array<string, mixed>|null Null if not a valid pre-translation
+     * @return array{target: string}|null Null if not a valid pre-translation
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
@@ -567,22 +548,19 @@ class SegmentExtractor
 
         $stateValues = self::getTargetStatesFromTransUnit($xliff_trans_unit, $position);
 
-        $target_extract_external = $this->stripExternal($targetRawContent);
-
         // restore unicode entities before html_entity_decode comparison
-        $sourceRawContent               = CatUtils::restoreUnicodeEntitiesToOriginalValues($sourceRawContent);
-        $target_extract_external['seg'] = CatUtils::restoreUnicodeEntitiesToOriginalValues($target_extract_external['seg']);
+        $sourceRawContent = CatUtils::restoreUnicodeEntitiesToOriginalValues($sourceRawContent);
+        $targetRawContent = CatUtils::restoreUnicodeEntitiesToOriginalValues($targetRawContent);
 
         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded($sourceRawContent);
-        $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($target_extract_external['seg']);
+        $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($targetRawContent);
 
         if (!$this->isTranslated($src, $trg, $fid, $stateValues['state'], $stateValues['state-qualifier'], $projectStructure) || empty($trg)) {
             return null;
         }
 
         return [
-            'target'                  => $this->filter->fromRawXliffToLayer0($target_extract_external['seg']),
-            'target_extract_external' => $target_extract_external,
+            'target' => $this->filter->fromRawXliffToLayer0($targetRawContent),
         ];
     }
 
@@ -705,19 +683,6 @@ class SegmentExtractor
         }
 
         return file_get_contents($xliffFilePath);
-    }
-
-    /**
-     * Strip external tags from a segment.
-     *
-     * Currently, disabled — always returns the segment unchanged with null prec/succ.
-     *
-     * @return array<string, mixed>
-     */
-    private function stripExternal(string $segment): array
-    {
-        // Definitely DISABLED
-        return ['prec' => null, 'seg' => $segment, 'succ' => null];
     }
 
     /**
@@ -926,7 +891,7 @@ class SegmentExtractor
                 continue;
             }
 
-            $source_extract_external = '';
+            $sourceRaw = null;
 
             // Wrong alt-trans tag
             if ((empty($xliff_trans_unit['source'] /* theoretically impossible empty source */) && empty($altTrans['source'])) || empty($altTrans['target'])) {
@@ -934,25 +899,25 @@ class SegmentExtractor
             }
 
             if (!empty($xliff_trans_unit['source'])) {
-                $source_extract_external = $this->stripExternal($xliff_trans_unit['source']['raw-content']); // XXX to remove function
+                $sourceRaw = $xliff_trans_unit['source']['raw-content'];
             }
 
             // Override with the alt-trans source value
             if (!empty($altTrans['source'])) {
-                $source_extract_external = $this->stripExternal($altTrans['source']); // XXX to remove function
+                $sourceRaw = $altTrans['source'];
             }
 
-            $target_extract_external = $this->stripExternal($altTrans['target']); // XXX to remove function
+            $targetRaw = $altTrans['target'];
 
             // wrong alt-trans content: source == target
-            if (is_array($source_extract_external) && isset($source_extract_external['seg']) && $source_extract_external['seg'] == $target_extract_external['seg']) {
+            if ($sourceRaw !== null && $sourceRaw == $targetRaw) {
                 continue;
             }
 
-            $config['segment']        = is_array($source_extract_external) && isset($source_extract_external['seg'])
-                ? $this->filter->fromRawXliffToLayer0($source_extract_external['seg'])
+            $config['segment']        = $sourceRaw !== null
+                ? $this->filter->fromRawXliffToLayer0($sourceRaw)
                 : '';
-            $config['translation']    = $this->filter->fromRawXliffToLayer0($target_extract_external['seg']);
+            $config['translation']    = $this->filter->fromRawXliffToLayer0($targetRaw);
             $config['context_after']  = null;
             $config['context_before'] = null;
 
