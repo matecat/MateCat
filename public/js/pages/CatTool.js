@@ -53,6 +53,8 @@ import ContextReviewChannel from '../utils/contextReviewChannel'
 import useResizable from '../hooks/useResizable'
 import IconRedirect from '../components/icons/IconRedirect'
 import IconDown from '../components/icons/IconDown'
+import EyeIcon from '../../img/icons/EyeIcon'
+import {Button} from '../components/common/Button/Button'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -125,6 +127,37 @@ function CatTool() {
     return ContextReviewChannel.onMessage((message) => {
       if (message.type === 'segmentClicked' && message.sid) {
         SegmentActions.openSegment(message.sid)
+      }
+
+      if (message.type === 'requestSegments') {
+        const segments = SegmentStore.getAllSegments()
+        if (segments && segments.length) {
+          const segmentsList = []
+          for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i]
+            segmentsList.push({
+              sid: seg.sid,
+              source: seg.segment,
+              target: seg.gettranslation,
+            })
+          }
+          ContextReviewChannel.sendMessage({
+            type: 'segments',
+            segments: segmentsList,
+          })
+        }
+      }
+
+      if (message.type === 'loadMoreSegments' && message.where) {
+        const segmentId =
+          message.where === 'after'
+            ? SegmentStore.getLastSegmentId()
+            : SegmentStore.getFirstSegmentId()
+        setOptions((prevState) => ({
+          ...prevState,
+          segmentId,
+          where: message.where,
+        }))
       }
     })
   }, [])
@@ -602,22 +635,29 @@ function CatTool() {
           />
         )}
         <div className="context-review__header">
-          <span className="context-review__header-title">Context Review</span>
+          <span className="context-review__header-title">
+            <EyeIcon size={16} />
+            Preview
+          </span>
           <div className="context-review__header-actions">
-            <button
+            <Button
               className="context-review__header-btn"
               onClick={openPreviewInNewWindow}
               title="Open in new window"
             >
-              <IconRedirect size={14} />
-            </button>
-            <button
+              <IconRedirect size={16} />
+            </Button>
+
+            <Button
               className="context-review__header-btn"
               onClick={togglePreview}
               title={isPreviewOpen ? 'Close preview' : 'Open preview'}
             >
-              <IconDown size={14} />
-            </button>
+              <span className="context-review__header-close-label">
+                {isPreviewOpen ? 'Close' : 'Open'}
+              </span>
+              <IconDown size={16} />
+            </Button>
           </div>
         </div>
         {isPreviewOpen && (

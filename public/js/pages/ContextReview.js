@@ -100,6 +100,11 @@ const ContextReview = () => {
     return ContextReviewChannel.onMessage(handleMessage)
   }, [handleMessage])
 
+  // Request segments from CatTool on mount (covers case where ContextReview loads after CatTool)
+  useEffect(() => {
+    ContextReviewChannel.sendMessage({type: 'requestSegments'})
+  }, [])
+
   // Parse the imported HTML string
   useEffect(() => {
     try {
@@ -130,6 +135,82 @@ const ContextReview = () => {
       tagSegments(sourceRef.current, segments)
     }
   }, [segments, htmlContent, viewMode])
+
+  // Detect untagged nodes while scrolling and request more segments
+  useEffect(() => {
+    const panel = sourceRef.current || targetRef.current
+    if (!panel || !segments.length) return
+
+    const lastRequestRef = {before: 0, after: 0}
+    const THROTTLE_MS = 1000
+
+    const hasUntaggedNodesInViewport = (region) => {
+      const container = sourceRef.current || targetRef.current
+      if (!container) return false
+
+      const meaningfulEls = container.querySelectorAll(
+        'p, li, td, th, h1, h2, h3, h4',
+      )
+      const viewportMidY = window.innerHeight / 2
+
+      for (const el of meaningfulEls) {
+        const elRect = el.getBoundingClientRect()
+        // Check if element is visible in the window viewport
+        if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue
+
+        // Element is visible — check if it's in the requested region
+        const midY = (elRect.top + elRect.bottom) / 2
+        if (region === 'before' && midY > viewportMidY) continue
+        if (region === 'after' && midY < viewportMidY) continue
+
+        // Check if this element has tagged content (attribute on self or descendants)
+        if (
+          !el.hasAttribute('data-context-sid') &&
+          !el.querySelector('[data-context-sid]')
+        ) {
+          return true
+        }
+      }
+      return false
+    }
+
+    const handleScroll = () => {
+      const now = Date.now()
+      const scrollTop = window.scrollY
+      const scrollBottom =
+        document.documentElement.scrollHeight -
+        scrollTop -
+        window.innerHeight
+
+      // Near top → check for untagged nodes in upper half
+      if (scrollTop < 200 && now - lastRequestRef.before > THROTTLE_MS) {
+        if (hasUntaggedNodesInViewport('before')) {
+          lastRequestRef.before = now
+          ContextReviewChannel.sendMessage({
+            type: 'loadMoreSegments',
+            where: 'before',
+          })
+        }
+      }
+
+      // Near bottom → check for untagged nodes in lower half
+      if (scrollBottom < 200 && now - lastRequestRef.after > THROTTLE_MS) {
+        if (hasUntaggedNodesInViewport('after')) {
+          lastRequestRef.after = now
+          ContextReviewChannel.sendMessage({
+            type: 'loadMoreSegments',
+            where: 'after',
+          })
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [segments, viewMode])
 
   // Attach click listeners to both panels
   useEffect(() => {

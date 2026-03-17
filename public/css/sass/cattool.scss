@@ -46,54 +46,66 @@ body.cattool {
     }
   }
   .context-review__resize-handle {
-    width: 100%;
+    width: 100px;
     height: 6px;
+    border-radius: 16px;
     cursor: row-resize;
-    background-color: colors.$grey5;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    background-color: colors.$grey6;
     flex-shrink: 0;
     transition: background-color 0.15s;
+    margin: 0 auto;
     &:hover {
-      background-color: #bbb;
+      background-color: colors.$grey1;
     }
   }
   .context-review__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 32px;
-    padding: 0 100px;
-    background-color: #e8e8e8;
-    border-top: 1px solid #ccc;
+    padding: 8px 100px;
     flex-shrink: 0;
     user-select: none;
+    border: 1px solid colors.$grey4;
+    border-radius: 16px 16px 0 0;
+    background-color: colors.$white;
   }
   .context-review__header-title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: Calibri, sans-serif;
     font-size: 12px;
-    font-weight: 600;
-    color: #333;
+    font-weight: 700;
+    line-height: 1.33em;
+    color: colors.$black;
+    svg {
+      width: 16px;
+      height: 16px;
+    }
   }
   .context-review__header-actions {
     display: flex;
     align-items: center;
     gap: 4px;
   }
+  .context-review__header-close-label {
+    font-family: Calibri, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.33em;
+    color: colors.$grey7;
+  }
   .context-review__header-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
     height: 24px;
-    padding: 0;
     border: none;
-    border-radius: 4px;
     background: transparent;
-    color: #555;
     cursor: pointer;
-    &:hover {
-      background-color: #d0d0d0;
-      color: #222;
+    svg {
+      width: 16px;
+      height: 16px;
     }
   }
   .context-review__container {
@@ -102,6 +114,7 @@ body.cattool {
     iframe {
       width: 100%;
       height: 100%;
+      border: none;
     }
   }
 

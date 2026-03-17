@@ -1,7 +1,9 @@
 @use '../common/SegmentedControl';
+@use '../../commons/colors';
 .context-review-page {
   width: 100%;
   max-width: unset;
+
 }
 .context-review-container {
   margin: 0 auto;
@@ -12,13 +14,43 @@
 }
 
 .context-review-toolbar {
+  font-family: Calibri, Arial, Helvetica, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px 16px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid colors.$grey4;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: colors.$white;
+  .segmented-control__wrapper {
+    width: 430px;
+  }
+  .custom-segmented-control {
+    .segmented-control {
+      background-color: colors.$grey8;
+    }
+    .segmented-control__label {
+      line-height: 28px;
+    }
+    .segmented-control__cursor {
+      padding: 2px;
+    }
+    .segmented-control__cursor:before {
+      background-color: colors.$white;
+    }
+    .segmented-control input:checked + .segmented-control__label {
+      color: colors.$black;
+    }
+  }
+
+  .container-segmented-control {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 
 .context-review-panels {
@@ -37,20 +69,18 @@
 }
 
 .context-review-panel-header {
+  font-family: Calibri, Arial, Helvetica, sans-serif;
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #7f8c8d;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
   flex-shrink: 0;
 }
 
 .context-review-divider {
   width: 1px;
-  background-color: #d0d0d0;
+  background-color: colors.$grey4;
   flex-shrink: 0;
 }
 
@@ -72,7 +102,7 @@
     transition: background-color 0.15s ease;
 
     &:hover {
-      background-color: rgba(52, 152, 219, 0.08);
+      background-color: rgba(colors.$blue800, 0.08);
       border-radius: 2px;
     }
   }
@@ -84,7 +114,7 @@
   justify-content: center;
   min-height: 300px;
   font-size: 16px;
-  color: #7f8c8d;
+  color: colors.$grey1;
 }
 
 .context-review-error {
@@ -96,20 +126,20 @@
   text-align: center;
 
   h2 {
-    color: #e74c3c;
+    color: colors.$red800;
     margin-bottom: 12px;
     font-size: 20px;
   }
 
   p {
-    color: #7f8c8d;
+    color: colors.$grey1;
     font-size: 14px;
   }
 }
 
 // Highlight styles for matched text
 mark.context-review-highlight {
-  background-color: #fef08a;
+  background-color: colors.$orangeDefaultTransparent;
   color: inherit;
   padding: 1px 2px;
   border-radius: 2px;
@@ -117,7 +147,7 @@ mark.context-review-highlight {
 }
 
 mark.context-review-highlight--active {
-  background-color: #fb923c;
-  outline: 2px solid #ea580c;
+  background-color: colors.$warning;
+  outline: 2px solid colors.$warningHover;
   outline-offset: 1px;
 }

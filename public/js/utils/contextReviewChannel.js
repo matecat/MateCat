@@ -16,6 +16,10 @@ const CHANNEL_NAME = 'matecat-context-review'
  *     Updates the translation for a single segment in the target panel.
  * - ContextReview -> CatTool: {type: 'segmentClicked', sid: number}
  *     Reports which segment was clicked in either panel.
+ * - ContextReview -> CatTool: {type: 'requestSegments'}
+ *     Requests the current segment list (used when ContextReview loads after CatTool).
+ * - ContextReview -> CatTool: {type: 'loadMoreSegments', where: 'before'|'after'}
+ *     Requests loading more segments in the given direction when untagged nodes are visible.
  *
  * Usage:
  *   import ContextReviewChannel from '../../utils/contextReviewChannel'
