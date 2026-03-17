@@ -346,12 +346,14 @@ class ProjectManager
          * Configuration about handlers can be changed later in the job settings.
          * But the analysis must everytime be performed with the current configuration.
          */
-        $jobsMetadataDao->set(
-            (int)$newJob->id,
-            (string)$newJob->password,
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            (string)$this->projectStructure->subfiltering_handlers
-        );
+        if (!empty($this->projectStructure->subfiltering_handlers)) {
+            $jobsMetadataDao->set(
+                (int)$newJob->id,
+                (string)$newJob->password,
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $this->projectStructure->subfiltering_handlers
+            );
+        }
     }
 
     /**
@@ -446,11 +448,13 @@ class ProjectManager
          * But the analysis must everytime be performed with the current configuration.
          * @see ProjectManager::saveJobsMetadata()
          */
-        $dao->set(
-            (int)$this->projectStructure->id_project,
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            (string)$this->projectStructure->subfiltering_handlers
-        );
+        if (!empty($this->projectStructure->subfiltering_handlers)) {
+            $dao->set(
+                (int)$this->projectStructure->id_project,
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $this->projectStructure->subfiltering_handlers
+            );
+        }
     }
 
     /**

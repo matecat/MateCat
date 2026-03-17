@@ -50,7 +50,7 @@ class ProjectQueue
     /**
      * @throws ReflectionException
      */
-    public static function getPublishedResults($id_project)
+    public static function getPublishedResults($id_project): ?array
     {
         $redisHandler = (new RedisHandler())->getConnection();
         $response = json_decode($redisHandler->get(sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $id_project)) ?? 'null', true);
@@ -62,12 +62,14 @@ class ProjectQueue
     /**
      * @throws ReflectionException
      */
-    public static function publishResults(ProjectStructure $projectStructure): Status
+    public static function publishResults(ProjectStructure $projectStructure): ?Status
     {
-        $hashKey = sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure->id_project);
+        $hashKey  = sprintf(ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure->id_project);
+        $redis    = (new RedisHandler())->getConnection();
+        $response = $redis->set($hashKey, json_encode($projectStructure->result), 'EX', 60 * 60 * 24 * 7); //store for 7 days
+        $redis->disconnect();
 
-        return (new RedisHandler())->getConnection()->set($hashKey, json_encode($projectStructure->result), 'EX', 60 * 60 * 24 * 7); //store for 7 days
-
+        return $response;
     }
 
 }

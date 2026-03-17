@@ -703,7 +703,7 @@ class SegmentExtractor
             $this->addNotesToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
             $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
         } catch (Exception $exception) {
-            throw new Exception($exception->getMessage(), ProjectCreationError::NO_TRANSLATABLE_TEXT->value);
+            throw new Exception($exception->getMessage(), ProjectCreationError::NO_TRANSLATABLE_TEXT->value, $exception);
         }
     }
 
@@ -914,9 +914,15 @@ class SegmentExtractor
                 continue;
             }
 
-            $config['segment']        = $sourceRaw !== null
+            $config['segment'] = $sourceRaw !== null
                 ? $this->filter->fromRawXliffToLayer0($sourceRaw)
                 : '';
+
+            // skip TM submission when source is empty after filtering
+            if ($config['segment'] === '') {
+                continue;
+            }
+
             $config['translation']    = $this->filter->fromRawXliffToLayer0($targetRaw);
             $config['context_after']  = null;
             $config['context_before'] = null;
