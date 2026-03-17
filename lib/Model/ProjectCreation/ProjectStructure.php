@@ -65,7 +65,6 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public ?string $HTTP_HOST = null;
 
     // Options / flags
-    public bool    $sanitize_project_options = true;
     public ?bool   $from_api = null;
     public ?string $dialect_strict = null;
     public ?string $character_counter_mode = null;
@@ -124,9 +123,9 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public array $segments_meta_data = [];
     /** @var array<string, array<int|string, TranslationTuple>> */
     public array $translations = [];
-    /** @var array<int, mixed> */
+    /** @var array<int|string, mixed> */
     public array $notes = [];
-    /** @var array<int, mixed> */
+    /** @var array<int|string, mixed> */
     public array $context_group = [];
     /** @var string[] */
     public array   $array_files = [];

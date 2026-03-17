@@ -70,6 +70,7 @@ class TmKeyService
      * the method returns early (callers should check for errors).
      *
      * @param ProjectStructure $projectStructure
+     * @param string|null $firstTMXFileName
      */
     public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {
@@ -139,7 +140,8 @@ class TmKeyService
      * after successful upload so they are not processed as translation files.
      *
      * @param ProjectStructure $projectStructure
-     *
+     * @param string $uploadDir
+     * @throws ReflectionException
      * @throws Exception
      */
     public function pushTMXToMyMemory(ProjectStructure $projectStructure, string $uploadDir): void
@@ -302,6 +304,8 @@ class TmKeyService
 
     /**
      * @param ProjectStructure $projectStructure
+     * @param int $code
+     * @param string $message
      */
     private function addProjectError(ProjectStructure $projectStructure, int $code, string $message): void
     {

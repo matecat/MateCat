@@ -2,12 +2,16 @@
 
 namespace Model\ProjectCreation;
 
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Concerns\LogsMessages;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FilesPartsDao;
 use Model\Files\FilesPartsStruct;
@@ -18,12 +22,15 @@ use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use Model\Xliff\DTO\XliffRulesModel;
+use ReflectionException;
 use RuntimeException;
 use Throwable;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
 
 /**
@@ -96,8 +103,9 @@ class SegmentExtractor
      * This is the main entry point, equivalent to the former
      * ProjectManager::_extractSegments().
      *
+     * @param int $fid
      * @param array<string, mixed> $file_info
-     * @param ProjectStructure     $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @throws Exception
      */
@@ -164,10 +172,12 @@ class SegmentExtractor
      * Handles metadata persistence, file-parts creation, and delegates
      * to the seg-source / non-seg-source trans-unit processing branches.
      *
-     * @param array<string, mixed>  $xliff_file
-     * @param ProjectStructure      $projectStructure
+     * @param array<string, mixed> $xliff_file
+     * @param int $fid
+     * @param ProjectStructure $projectStructure
      *
      * @return int Number of segments marked as show-in-cattool in this file element
+     * @throws ReflectionException
      * @throws Exception
      */
     private function processXliffFile(array $xliff_file, int $fid, ProjectStructure $projectStructure): int
@@ -219,7 +229,7 @@ class SegmentExtractor
                 continue;
             }
 
-            $this->manageAlternativeTranslations($xliff_trans_unit, $xliff_file['attr'], $projectStructure);
+            $this->manageAlternativeTranslations($xliff_trans_unit, $xliff_file['attr']);
 
             $trans_unit_reference = self::sanitizedUnitId($xliff_trans_unit['attr']['id'], $fid);
 
@@ -246,13 +256,21 @@ class SegmentExtractor
      * Process a segmented (seg-source) trans-unit.
      *
      * Iterates over mrk elements in seg-source, handles pre-translations with
-     * unicode entity restoration and trimming, and appends segments.
+     * Unicode entity restoration and trimming, and appends segments.
      *
-     * @param array<string, mixed>       $xliff_trans_unit
-     * @param array<string, string>      $dataRefMap
-     * @param ProjectStructure      $projectStructure
+     * @param array<string, mixed> $xliff_trans_unit
+     * @param string $trans_unit_reference
+     * @param array<string, string> $dataRefMap
+     * @param int $fid
+     * @param int|null $filePartsId
+     * @param ProjectStructure $projectStructure
      *
      * @return int Number of show-in-cattool segments produced
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      * @throws Exception
      */
     private function processSegSourceTransUnit(
@@ -342,9 +360,12 @@ class SegmentExtractor
      * Handles word count, external tag stripping, pre-translation detection,
      * notes/context extraction, and segment creation.
      *
-     * @param array<string, mixed>       $xliff_trans_unit
-     * @param array<string, string>      $dataRefMap
-     * @param ProjectStructure      $projectStructure
+     * @param array<string, mixed> $xliff_trans_unit
+     * @param string $trans_unit_reference
+     * @param array<string, string> $dataRefMap
+     * @param int $fid
+     * @param int|null $filePartsId
+     * @param ProjectStructure $projectStructure
      *
      * @return int Number of show-in-cattool segments produced (0 or 1)
      * @throws Exception
@@ -517,10 +538,19 @@ class SegmentExtractor
      * unicode entity restoration, trim+strip, isTranslated check, and
      * layer-0 conversion.
      *
-     * @param array<string, mixed>       $xliff_trans_unit
-     * @param ProjectStructure      $projectStructure
+     * @param string $sourceRawContent
+     * @param string $targetRawContent
+     * @param array<string, mixed> $xliff_trans_unit
+     * @param int $fid
+     * @param int|null $position
+     * @param ProjectStructure $projectStructure
      *
      * @return array<string, mixed>|null Null if not a valid pre-translation
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      * @throws Exception
      */
     private function detectPreTranslation(
@@ -560,10 +590,19 @@ class SegmentExtractor
      * Build a SegmentStruct, its metadata, and original-data struct, then
      * append everything to the projectStructure arrays and update counters.
      *
-     * @param array<string, mixed>       $xliff_trans_unit
-     * @param array<string, string>      $dataRefMap
-     * @param ProjectStructure      $projectStructure
-     *
+     * @param int $fid
+     * @param int|null $filePartsId
+     * @param array<string, mixed> $xliff_trans_unit
+     * @param string $rawContent
+     * @param array<string, string> $dataRefMap
+     * @param float $wordCount
+     * @param int $showInCattool
+     * @param ProjectStructure $projectStructure
+     * @param string|null $xliffMrkId
+     * @param string|null $xliffExtPrecTags
+     * @param string|null $xliffMrkExtPrecTags
+     * @param string|null $xliffMrkExtSuccTags
+     * @param string|null $xliffExtSuccTags
      * @return array{word_count: float, show_in_cattool: int}
      * @throws Exception
      */
@@ -687,8 +726,9 @@ class SegmentExtractor
      * Wraps addNotesToProjectStructure() and addTUnitContextsToProjectStructure()
      * with consistent error handling.
      *
-     * @param array<string, mixed>       $xliff_trans_unit
-     * @param ProjectStructure      $projectStructure
+     * @param array<string, mixed> $xliff_trans_unit
+     * @param int $fid
+     * @param ProjectStructure $projectStructure
      *
      * @throws Exception
      */
@@ -705,8 +745,9 @@ class SegmentExtractor
     /**
      * Add notes from a trans-unit to the projectStructure.
      *
-     * @param array<string, mixed>       $trans_unit
-     * @param ProjectStructure      $projectStructure
+     * @param array<string, mixed> $trans_unit
+     * @param int $fid
+     * @param ProjectStructure $projectStructure
      *
      * @throws Exception
      */
@@ -765,8 +806,9 @@ class SegmentExtractor
     /**
      * Add context-group data from a trans-unit to the projectStructure.
      *
-     * @param array<string, mixed>       $trans_unit
-     * @param ProjectStructure      $projectStructure
+     * @param array<string, mixed> $trans_unit
+     * @param int $fid
+     * @param ProjectStructure $projectStructure
      */
     private function addTUnitContextsToProjectStructure(array $trans_unit, int $fid, ProjectStructure $projectStructure): void
     {
@@ -784,12 +826,27 @@ class SegmentExtractor
     /**
      * Initialize a nested array entry in projectStructure if it does not already exist.
      *
-     * @param ProjectStructure      $projectStructure
+     * @param string $key
+     * @param string $id
+     * @param ProjectStructure $projectStructure
      */
     private function initNestedArray(string $key, string $id, ProjectStructure $projectStructure): void
     {
-        if (!array_key_exists($id, $projectStructure->$key)) {
-            $projectStructure->$key[$id] = [];
+        switch ($key) {
+            case 'notes':
+                if (!array_key_exists($id, $projectStructure->notes)) {
+                    $projectStructure->notes[$id] = [];
+                }
+                return;
+
+            case 'context_group':
+                if (!array_key_exists($id, $projectStructure->context_group)) {
+                    $projectStructure->context_group[$id] = [];
+                }
+                return;
+
+            default:
+                throw new InvalidArgumentException('Invalid nested array key.');
         }
     }
 
@@ -832,11 +889,10 @@ class SegmentExtractor
      *
      * @param array<string, mixed>       $xliff_trans_unit
      * @param array<string, mixed>|null  $xliff_file_attributes
-     * @param ProjectStructure      $projectStructure
      *
      * @throws Exception
      */
-    private function manageAlternativeTranslations(array $xliff_trans_unit, ?array $xliff_file_attributes, ProjectStructure $projectStructure): void
+    private function manageAlternativeTranslations(array $xliff_trans_unit, ?array $xliff_file_attributes): void
     {
         $privateTmKeys = $this->config->private_tm_key;
 

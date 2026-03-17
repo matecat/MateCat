@@ -216,7 +216,6 @@ class SegmentStorageService
                         continue;
                     }
 
-                    /** @var TranslationTuple $tuple */
                     $tuple = $projectStructure->translations[$row['internal_id']][$short_var_counter];
                     $tuple->segmentId   = (int) $row['id'];
                     $tuple->internalId  = $row['internal_id'];
@@ -236,7 +235,7 @@ class SegmentStorageService
 
         // merge segments_metadata for every file in the project
         $projectStructure->segments_metadata = array_merge(
-            (array) $projectStructure->segments_metadata,
+            $projectStructure->segments_metadata,
             $segments_metadata
         );
     }
@@ -250,7 +249,7 @@ class SegmentStorageService
     public function cleanSegmentsMetadata(ProjectStructure $projectStructure): void
     {
         $projectStructure->segments_metadata = array_values(array_filter(
-            (array) $projectStructure->segments_metadata,
+            $projectStructure->segments_metadata,
             function ($value) {
                 return $value['show_in_cattool'] == 1;
             }
@@ -301,7 +300,6 @@ class SegmentStorageService
 
             // array of segmented translations
             foreach ($struct as $translationTuple) {
-                /** @var TranslationTuple $translationTuple */
                 $segment = $segmentDao->getById($translationTuple->segmentId);
 
                 // This condition is meant to debug an issue with the segment id that returns false from dao.
@@ -325,7 +323,7 @@ class SegmentStorageService
                     $createSecondPassReview = true;
                 }
 
-                // Use QA to get target segment
+                // Use QA to get a target segment
                 $source = $segment->segment;
                 $target = $translationTuple->target;
 
