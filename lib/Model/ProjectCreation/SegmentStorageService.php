@@ -427,9 +427,9 @@ class SegmentStorageService
      */
     protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
     {
-        if ($metadataStruct !== null and
-            isset($metadataStruct->meta_key) and $metadataStruct->meta_key !== '' and
-            isset($metadataStruct->meta_value) and $metadataStruct->meta_value !== ''
+        if ($metadataStruct !== null &&
+            isset($metadataStruct->meta_key) && $metadataStruct->meta_key !== '' &&
+            isset($metadataStruct->meta_value) && $metadataStruct->meta_value !== ''
         ) {
             $metadataStruct->id_segment = (string)$id_segment;
             $this->persistSegmentMetadata($metadataStruct);

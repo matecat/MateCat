@@ -254,7 +254,7 @@ class ChunkOptionsSanitizer
      */
     private function sanitizeLexiQA(): void
     {
-        $this->sanitized['lexiqa'] = ($this->options['lexiqa'] == true and $this->checkSourceAndTargetAreInCombination(self::$lexiQA_allowed_languages));
+        $this->sanitized['lexiqa'] = ($this->options['lexiqa'] == true && $this->checkSourceAndTargetAreInCombination(self::$lexiQA_allowed_languages));
     }
 
     /**
@@ -263,7 +263,7 @@ class ChunkOptionsSanitizer
      */
     private function sanitizeTagProjection(): void
     {
-        $this->sanitized['tag_projection'] = ($this->options['tag_projection'] == true and $this->checkSourceAndTargetAreInCombinationForTagProjection(self::$tag_projection_allowed_languages));
+        $this->sanitized['tag_projection'] = ($this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection(self::$tag_projection_allowed_languages));
     }
 
     /**

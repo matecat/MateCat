@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: domenico
- * Date: 22/10/13
- * Time: 17.25
- *
- */
 
 namespace Model\ProjectCreation;
 
@@ -732,7 +725,7 @@ class ProjectManager
 
             $filePathName = "$this->uploadDir/$fileName";
 
-            if (AbstractFilesStorage::isOnS3() and false === file_exists($filePathName)) {
+            if (AbstractFilesStorage::isOnS3() && false === file_exists($filePathName)) {
                 $this->getSingleS3QueueFile($fileName);
             }
 
@@ -1081,14 +1074,10 @@ class ProjectManager
                 }
             }
         } catch (Exception $e) {
-            $output = "<pre>\n";
-            $output .= " - Exception: " . print_r($e->getMessage(), true) . "\n";
-            $output .= " - REQUEST URI: " . print_r(@$_SERVER['REQUEST_URI'], true) . "\n";
-            $output .= " - REQUEST Message: " . print_r($_REQUEST, true) . "\n";
-            $output .= " - Trace: \n" . print_r($e->getTraceAsString(), true) . "\n";
-            $output .= "\n\t";
-            $output .= "Aborting...\n";
-            $output .= "</pre>";
+            $output  = "Exception: " . $e->getMessage() . "\n";
+            $output .= "REQUEST URI: " . ($_SERVER['REQUEST_URI'] ?? '(unavailable)') . "\n";
+            $output .= "REQUEST: " . print_r($_REQUEST, true) . "\n";
+            $output .= "Trace:\n" . $e->getTraceAsString() . "\n";
 
             $this->log($output, $e);
 
@@ -1256,13 +1245,13 @@ class ProjectManager
             if ($this->projectStructure->mt_qe_workflow_payable_rate) {
                 $payableRatesTemplate = null;
                 $payableRates = (string)json_encode($this->projectStructure->mt_qe_workflow_payable_rate);
-            } elseif (isset($this->projectStructure->payable_rate_model) and !empty($this->projectStructure->payable_rate_model)) {
+            } elseif (isset($this->projectStructure->payable_rate_model) && !empty($this->projectStructure->payable_rate_model)) {
                 // get payable rates
                 $payableRatesTemplate = new CustomPayableRateStruct();
                 $payableRatesTemplate->hydrateFromJSON((string)json_encode($this->projectStructure->payable_rate_model));
                 $payableRates = $payableRatesTemplate->getPayableRates((string)$this->projectStructure->source_language, $target);
                 $payableRates = (string)json_encode($payableRates);
-            } elseif (isset($this->projectStructure->payable_rate_model_id) and !empty($this->projectStructure->payable_rate_model_id)) {
+            } elseif (isset($this->projectStructure->payable_rate_model_id) && !empty($this->projectStructure->payable_rate_model_id)) {
                 // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById($this->projectStructure->payable_rate_model_id);
                 if ($payableRatesTemplate === null) {
@@ -1298,7 +1287,7 @@ class ProjectManager
             }
 
             // check for job_first_segment and job_last_segment existence
-            if (!isset($this->min_max_segments_id['job_first_segment']) or !isset($this->min_max_segments_id['job_last_segment'])) {
+            if (!isset($this->min_max_segments_id['job_first_segment']) || !isset($this->min_max_segments_id['job_last_segment'])) {
                 throw new Exception('Job cannot be created. No segments found!');
             }
 
@@ -1339,7 +1328,7 @@ class ProjectManager
             $this->saveJobsMetadata($newJob);
 
             try {
-                if (isset($this->projectStructure->payable_rate_model_id) and !empty($this->projectStructure->payable_rate_model_id) and $payableRatesTemplate !== null) {
+                if (isset($this->projectStructure->payable_rate_model_id) && !empty($this->projectStructure->payable_rate_model_id) && $payableRatesTemplate !== null) {
                     CustomPayableRateDao::assocModelToJob(
                         $this->projectStructure->payable_rate_model_id,
                         (int)$newJob->id,

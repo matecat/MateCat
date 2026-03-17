@@ -142,7 +142,7 @@ class SegmentExtractor
         }
 
         // Checking that parsing went well
-        if (isset($xliff['parser-errors']) or !isset($xliff['files'])) {
+        if (isset($xliff['parser-errors']) || !isset($xliff['files'])) {
             $this->log("Failed to parse " . $file_info['original_filename'] . join("\n", $xliff['parser-errors']));
             throw new Exception("Failed to parse " . $file_info['original_filename'], ProjectCreationError::XLIFF_PARSE_FAILURE->value);
         }
@@ -212,7 +212,7 @@ class SegmentExtractor
             $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
 
             // save `custom` meta data
-            if (isset($xliff_file['attr']['custom']) and !empty($xliff_file['attr']['custom'])) {
+            if (isset($xliff_file['attr']['custom']) && !empty($xliff_file['attr']['custom'])) {
                 $this->filesMetadataDao->bulkInsert($this->idProject, $fid, $xliff_file['attr']['custom'], $filePartsId);
             }
         }
@@ -457,15 +457,15 @@ class SegmentExtractor
         $state          = null;
         $stateQualifier = null;
 
-        if (isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])) {
+        if (isset($trans_unit['seg-target'][$position]['attr']) && isset($trans_unit['seg-target'][$position]['attr']['state'])) {
             $state = $trans_unit['seg-target'][$position]['attr']['state'];
-        } elseif (isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state'])) {
+        } elseif (isset($trans_unit['target']['attr']) && isset($trans_unit['target']['attr']['state'])) {
             $state = $trans_unit['target']['attr']['state'];
         }
 
-        if (isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state-qualifier'])) {
+        if (isset($trans_unit['seg-target'][$position]['attr']) && isset($trans_unit['seg-target'][$position]['attr']['state-qualifier'])) {
             $stateQualifier = $trans_unit['seg-target'][$position]['attr']['state-qualifier'];
-        } elseif (isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state-qualifier'])) {
+        } elseif (isset($trans_unit['target']['attr']) && isset($trans_unit['target']['attr']['state-qualifier'])) {
             $stateQualifier = $trans_unit['target']['attr']['state-qualifier'];
         }
 
@@ -483,7 +483,7 @@ class SegmentExtractor
      */
     private function getSizeRestrictionValue(array $xliff_trans_unit): ?int
     {
-        if (isset($xliff_trans_unit['attr']['sizeRestriction']) and $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
+        if (isset($xliff_trans_unit['attr']['sizeRestriction']) && $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
             return (int)$xliff_trans_unit['attr']['sizeRestriction'];
         }
 
@@ -501,7 +501,7 @@ class SegmentExtractor
     {
         $dataRefMap = [];
 
-        if (isset($xliff_trans_unit['original-data']) and !empty($xliff_trans_unit['original-data'])) {
+        if (isset($xliff_trans_unit['original-data']) && !empty($xliff_trans_unit['original-data'])) {
             foreach ($xliff_trans_unit['original-data'] as $datum) {
                 if (isset($datum['attr']['id'])) {
                     $dataRefMap[$datum['attr']['id']] = $datum['raw-content'];

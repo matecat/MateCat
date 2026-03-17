@@ -1,13 +1,5 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * @author ostico domenico@translated.net / ostico@gmail.com
- * Date: 13/06/19
- * Time: 12.35
- *
- */
-
 namespace Model\ProjectCreation;
 
 use Exception;
