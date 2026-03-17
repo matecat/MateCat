@@ -1434,13 +1434,13 @@ class ProjectManager
             if (!empty($originalFileName)) {
                 // get metadata
                 $meta = $this->projectStructure->array_files_meta[$pos] ?? null;
-                /** @var string $mimeType */
-                $mimeType = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
+                /** @var string $fileExtension */
+                $fileExtension = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
                 $fidStr = $this->getProjectManagerModel()->insertFile(
                     (int)$this->projectStructure->id_project,
                     (string)$this->projectStructure->source_language,
                     $originalFileName,
-                    $mimeType,
+                    $fileExtension,
                     $fileDateSha1Path
                 );
                 $fid = (int)$fidStr;
@@ -1476,7 +1476,7 @@ class ProjectManager
                     'fid' => $fid,
                     'original_filename' => $originalFileName,
                     'path_cached_xliff' => $cachedXliffFilePathName,
-                    'mime_type' => $mimeType
+                    'mime_type' => $fileExtension
                 ];
             }
         }

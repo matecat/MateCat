@@ -71,13 +71,13 @@ class ProjectManagerModel
     /**
      * @throws Exception
      */
-    public function insertFile(int $idProject, string $sourceLanguage, string $file_name, string $mime_type, string $fileDateSha1Path): string
+    public function insertFile(int $idProject, string $sourceLanguage, string $file_name, string $fileExtension, string $fileDateSha1Path): string
     {
         $data = [];
         $data['id_project'] = $idProject;
         $data['filename'] = $file_name;
         $data['source_language'] = $sourceLanguage;
-        $data['mime_type'] = $mime_type;
+        $data['mime_type'] = $fileExtension;
         $data['sha1_original_file'] = $fileDateSha1Path;
         $data['is_converted'] = 0;
 
