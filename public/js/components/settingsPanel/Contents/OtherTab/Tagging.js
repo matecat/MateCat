@@ -4,6 +4,7 @@ import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
+import SegmentStore from '../../../../stores/SegmentStore'
 
 export const taggingTypes = [
   {id: 'markup', name: 'Markup', code: '<text>', default: true},
@@ -125,7 +126,9 @@ export const Tagging = () => {
     )
     if (config.is_cattool && shouldUpdateRender) {
       SegmentActions.removeAllSegments()
-      CatToolActions.onRender({segmentToOpen: config.last_opened_segment})
+      CatToolActions.onRender({
+        segmentToOpen: SegmentStore.getCurrentSegmentId(),
+      })
     }
 
     if (config.is_cattool)
