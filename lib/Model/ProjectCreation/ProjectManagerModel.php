@@ -126,25 +126,58 @@ class ProjectManagerModel
                 )
                 VALUES ";
 
-        $tuple_marks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
+        $tupleMarks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
-        $this->log("Pre-Translations: Total Rows to insert: " . count($query_translations_values));
+        $this->executeBulkInsert($baseQuery, $tupleMarks, $query_translations_values, 100, 'Pre-Translations', -2);
+    }
 
-        //split the query in to chunks if there are too many segments
-        $query_translations_values = array_chunk($query_translations_values, 100);
+    /**
+     * Executes a chunked bulk INSERT, flattening each chunk of tuples into
+     * positional PDO parameters.
+     *
+     * @param string $insertTemplate SQL up to and including "VALUES "
+     * @param string $tupleMarks Placeholder tuple, e.g. "( ?, ?, ? )"
+     * @param list<list<mixed>> $insertValues Rows — each element is a flat tuple of column values
+     * @param int $chunkSize Max rows per INSERT statement
+     * @param string $label Human-readable label for logging/errors
+     * @param int $errorCode Code to attach to re-thrown PDOException
+     *
+     * @throws PDOException
+     */
+    private function executeBulkInsert(
+        string $insertTemplate,
+        string $tupleMarks,
+        array $insertValues,
+        int $chunkSize,
+        string $label,
+        int $errorCode
+    ): void {
+        $this->log("$label: Total Rows to insert: " . count($insertValues));
 
-        $this->log("Pre-Translations: Total Queries to execute: " . count($query_translations_values));
+        $chunked = array_chunk($insertValues, $chunkSize);
+        $this->log("$label: Total Queries to execute: " . count($chunked));
 
-        foreach ($query_translations_values as $i => $chunk) {
+        $conn = $this->dbHandler->getConnection();
+        $stmt = null;
+        $flattenedValues = [];
+
+        foreach ($chunked as $i => $chunk) {
             try {
-                $query = $baseQuery . rtrim(str_repeat($tuple_marks . ", ", count($chunk)), ", ");
-                $stmt = $this->dbHandler->getConnection()->prepare($query);
-                $stmt->execute(iterator_to_array(new RecursiveIteratorIterator(new RecursiveArrayIterator($chunk)), false));
+                $query = $insertTemplate . implode(', ', array_fill(0, count($chunk), $tupleMarks));
+                $stmt = $conn->prepare($query);
+                $flattenedValues = iterator_to_array(
+                    new RecursiveIteratorIterator(new RecursiveArrayIterator($chunk)),
+                    false
+                );
+                $stmt->execute($flattenedValues);
 
-                $this->log("Pre-Translations: Executed Query " . ($i + 1));
+                $this->log("$label: Executed Query " . ($i + 1));
             } catch (PDOException $e) {
-                $this->log("Segment import - DB Error: " . $e->getMessage() . " - \n", $e);
-                throw new PDOException("Translations Segment import - DB Error: " . $e->getMessage() . " - " . var_export($chunk, true), -2);
+                $this->log("$label import - DB Error: " . $e->getMessage(), $e);
+                $this->log("$label import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
+                $this->log("$label Chunk Dump: " . var_export($chunk, true));
+                $this->log("$label Flattened Values Dump: " . var_export($flattenedValues, true));
+                throw new PDOException("$label import - DB Error: " . $e->getMessage(), $errorCode, $e);
             }
         }
     }
@@ -152,14 +185,14 @@ class ProjectManagerModel
     /**
      * @param array<int, array<string, mixed>> $notes
      *
-     * @throws Exception
+     * @throws PDOException
      */
     public function bulkInsertSegmentNotes(array $notes): void
     {
         $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES ";
+        $tupleMarks = "( ?, ?, ?, ? )";
 
         $insert_values = [];
-        $chunk_size = 30;
 
         foreach ($notes as $internal_id => $v) {
             $attributes = $v['from'];
@@ -204,43 +237,20 @@ class ProjectManagerModel
             }
         }
 
-        $this->log("Notes: Total Rows to insert: " . count($insert_values));
-
-        $chunked = array_chunk($insert_values, $chunk_size);
-        $this->log("Notes: Total Queries to execute: " . count($chunked));
-
-        $conn = $this->dbHandler->getConnection();
-        $stmt = null;
-        $flattened_values = [];
-
-        try {
-            foreach ($chunked as $i => $chunk) {
-                $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ?, ? ) ");
-                $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
-                $flattened_values = array_reduce($chunk, 'array_merge', []);
-                $stmt->execute($flattened_values);
-                $this->log("Notes: Executed Query " . ($i + 1));
-            }
-        } catch (Exception $e) {
-            $this->log("Notes import - DB Error: " . $e->getMessage());
-            $this->log("Notes import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
-            $this->log("Notes Chunk Dump: " . var_export($chunk, true));
-            $this->log("Notes Flattened Values Dump: " . var_export($flattened_values, true));
-            throw new Exception("Notes import - DB Error: " . $e->getMessage(), 0, $e);
-        }
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Notes', -1);
     }
 
     /**
      * @param array<int, array<string, mixed>> $notes
      *
-     * @throws Exception
+     * @throws PDOException
      */
     public function bulkInsertSegmentMetaDataFromAttributes(array $notes): void
     {
         $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
+        $tupleMarks = "( ?, ?, ? )";
 
         $insert_values = [];
-        $chunk_size = 30;
 
         foreach ($notes as $v) {
             $attributes = $v['from'];
@@ -277,30 +287,7 @@ class ProjectManagerModel
             }
         }
 
-        $this->log("Segment Metadata: Total Rows to insert: " . count($insert_values));
-
-        $chunked = array_chunk($insert_values, $chunk_size);
-        $this->log("Segment Metadata: Total Queries to execute: " . count($chunked));
-
-        $conn = $this->dbHandler->getConnection();
-        $stmt = null;
-        $flattened_values = [];
-
-        try {
-            foreach ($chunked as $i => $chunk) {
-                $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ? ) ");
-                $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
-                $flattened_values = array_reduce($chunk, 'array_merge', []);
-                $stmt->execute($flattened_values);
-                $this->log("Segment Metadata: Executed Query " . ($i + 1));
-            }
-        } catch (Exception $e) {
-            $this->log("Segment Metadata import - DB Error: " . $e->getMessage());
-            $this->log("Segment Metadata import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
-            $this->log("Segment Metadata Chunk Dump: " . var_export($chunk, true));
-            $this->log("Segment Metadata Flattened Values Dump: " . var_export($flattened_values, true));
-            throw new Exception("Segment Metadata import - DB Error: " . $e->getMessage(), 0, $e);
-        }
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Segment Metadata', -3);
     }
 
     /**
@@ -323,14 +310,14 @@ class ProjectManagerModel
     /**
      * @param array<int, array<string, mixed>> $contextGroups
      *
-     * @throws Exception
+     * @throws PDOException
      */
     public function bulkInsertContextsGroups(int $idProject, array $contextGroups): void
     {
         $template = " INSERT INTO context_groups ( id_project, id_segment, context_json ) VALUES ";
+        $tupleMarks = "( ?, ?, ? )";
 
         $insert_values = [];
-        $chunk_size = 30;
 
         foreach ($contextGroups as $v) {
             $context_json = json_encode($v['context_json']);
@@ -341,30 +328,7 @@ class ProjectManagerModel
             }
         }
 
-        $this->log("Context Groups: Total Rows to insert: " . count($insert_values));
-
-        $chunked = array_chunk($insert_values, $chunk_size);
-        $this->log("Context Groups: Total Queries to execute: " . count($chunked));
-
-        $conn = $this->dbHandler->getConnection();
-        $stmt = null;
-        $flattened_values = [];
-
-        try {
-            foreach ($chunked as $i => $chunk) {
-                $values_sql_array = array_fill(0, count($chunk), " ( ?, ?, ? ) ");
-                $stmt = $conn->prepare($template . implode(', ', $values_sql_array));
-                $flattened_values = array_reduce($chunk, 'array_merge', []);
-                $stmt->execute($flattened_values);
-                $this->log("Context Groups: Executed Query " . ($i + 1));
-            }
-        } catch (Exception $e) {
-            $this->log("Context Groups import - DB Error: " . $e->getMessage());
-            $this->log("Context Groups import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
-            $this->log("Context Groups Chunk Dump: " . var_export($chunk, true));
-            $this->log("Context Groups Flattened Values Dump: " . var_export($flattened_values, true));
-            throw new Exception("Context Groups import - DB Error: " . $e->getMessage(), 0, $e);
-        }
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Context Groups', -4);
     }
 
 }
