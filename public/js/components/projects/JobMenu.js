@@ -8,7 +8,6 @@ import {
 import DotsHorizontal from '../../../img/icons/DotsHorizontal'
 import ChangePassword from '../../../img/icons/ChangePassword'
 import Archive from '../../../img/icons/Archive'
-import Refresh from '../../../img/icons/Refresh'
 import Trash from '../../../img/icons/Trash'
 import Split from '../../../img/icons/Split'
 import Merge from '../../../img/icons/Merge'
@@ -17,52 +16,76 @@ import QR from '../../../img/icons/QR'
 import Revise from '../../../img/icons/Revise'
 import {BUTTON_SIZE} from '../common/Button/Button'
 import FlipBackward from '../icons/FlipBackward'
-class JobMenu extends React.Component {
-  constructor(props) {
-    super(props)
-  }
+import PropTypes from 'prop-types'
 
-  openSecondPassUrl() {
-    if (
-      this.props.job.has('revise_passwords') &&
-      this.props.job.get('revise_passwords').size > 1
-    ) {
-      let url =
+const JobMenu = ({
+  job,
+  project,
+  jobId,
+  status,
+  qAReportUrl,
+  jobTMXUrl,
+  exportXliffUrl,
+  originalUrl,
+  reviseUrl,
+  isChunkOutsourced,
+  isChunk,
+  changePasswordFn,
+  openSplitModalFn,
+  openMergeModalFn,
+  getDownloadLabel,
+  disableDownload,
+  archiveJobFn,
+  cancelJobFn,
+  activateJobFn,
+  deleteJobFn,
+}) => {
+  const openSecondPassUrl = () => {
+    if (job.has('revise_passwords') && job.get('revise_passwords').size > 1) {
+      const url =
         config.hostpath +
         '/revise2/' +
-        this.props.project.get('name') +
+        project.get('name') +
         '/' +
-        this.props.job.get('source') +
+        job.get('source') +
         '-' +
-        this.props.job.get('target') +
+        job.get('target') +
         '/' +
-        this.props.jobId +
+        jobId +
         '-' +
-        this.props.job.get('revise_passwords').get(1).get('password')
+        job.get('revise_passwords').get(1).get('password')
       window.open(url)
     }
   }
 
-  getSecondPassReviewMenuLink() {
+  const retrieveSecondPassReviewLink = () => {
+    ManageActions.getSecondPassReview(
+      project.get('id'),
+      project.get('password'),
+      jobId,
+      job.get('password'),
+    ).then(() => {
+      openSecondPassUrl()
+    })
+  }
+
+  const getSecondPassReviewMenuLink = () => {
     if (
-      this.props.project.has('features') &&
-      this.props.project.get('features').indexOf('second_pass_review') > -1
+      project.has('features') &&
+      project.get('features').indexOf('second_pass_review') > -1
     ) {
-      if (
-        this.props.job.has('revise_passwords') &&
-        this.props.job.get('revise_passwords').size > 1
-      ) {
-        let url =
+      if (job.has('revise_passwords') && job.get('revise_passwords').size > 1) {
+        const url =
           '/revise2/' +
-          this.props.project.get('name') +
+          project.get('name') +
           '/' +
-          this.props.job.get('source') +
+          job.get('source') +
           '-' +
-          this.props.job.get('target') +
+          job.get('target') +
           '/' +
-          this.props.jobId +
+          jobId +
           '-' +
-          this.props.job.get('revise_passwords').get(1).get('password')
+          job.get('revise_passwords').get(1).get('password')
         return [
           {
             label: (
@@ -86,7 +109,7 @@ class JobMenu extends React.Component {
               </>
             ),
             onClick: () => {
-              this.retrieveSecondPassReviewLink()
+              retrieveSecondPassReviewLink()
             },
           },
         ]
@@ -95,254 +118,254 @@ class JobMenu extends React.Component {
     return ''
   }
 
-  retrieveSecondPassReviewLink() {
-    // event.preventDefault();
-    ManageActions.getSecondPassReview(
-      this.props.project.get('id'),
-      this.props.project.get('password'),
-      this.props.jobId,
-      this.props.job.get('password'),
-    ).then(() => {
-      this.openSecondPassUrl()
-    })
-  }
-
-  render() {
-    let qaReportUrl = this.props.qAReportUrl
-    let jobTMXUrl = this.props.jobTMXUrl
-    let exportXliffUrl = this.props.exportXliffUrl
-
-    let originalUrl = this.props.originalUrl
-
-    const items = [
-      ...(this.props.status === JOB_STATUS.ACTIVE
-        ? [
-            {
-              label: (
-                <>
-                  <ChangePassword size={18} />
-                  Change Password
-                </>
-              ),
-              items: [
-                {
-                  label: <>Translate</>,
-                  onClick: () => {
-                    this.props.changePasswordFn()
-                  },
-                },
-                {
-                  label: <>Revise</>,
-                  onClick: () => {
-                    this.props.changePasswordFn(1)
-                  },
-                },
-                ...(this.props.job.has('revise_passwords') &&
-                this.props.job.get('revise_passwords').size > 1
-                  ? [
-                      {
-                        label: <>Revise 2</>,
-                        onClick: () => {
-                          this.props.changePasswordFn(2)
-                        },
-                      },
-                    ]
-                  : []),
-              ],
-            },
-          ]
-        : []),
-      ...(!this.props.isChunkOutsourced &&
-      config.splitEnabled &&
-      !this.props.isChunk
-        ? [
-            {
-              label: (
-                <>
-                  <Split size={18} />
-                  Split
-                </>
-              ),
-              onClick: () => {
-                this.props.openSplitModalFn()
-              },
-            },
-          ]
-        : !this.props.isChunkOutsourced &&
-            config.splitEnabled &&
-            this.props.isChunk
-          ? [
+  const items = [
+    ...(status === JOB_STATUS.ACTIVE
+      ? [
+          {
+            label: (
+              <>
+                <ChangePassword size={18} />
+                Change Password
+              </>
+            ),
+            items: [
               {
-                label: (
-                  <>
-                    <Merge size={18} />
-                    Merge
-                  </>
-                ),
+                label: <>Translate</>,
                 onClick: () => {
-                  this.props.openMergeModalFn()
+                  changePasswordFn()
                 },
               },
-            ]
-          : []),
-      'separator',
-      {
-        label: (
-          <>
-            <Revise size={18} />
-            Revise
-          </>
-        ),
-        onClick: () => {
-          window.open(this.props.reviseUrl, '_blank')
-        },
-      },
-      ...this.getSecondPassReviewMenuLink(),
-      {
-        label: (
-          <>
-            <QR /> Quality report
-          </>
-        ),
-        onClick: () => {
-          window.open(qaReportUrl, '_blank')
-        },
-      },
-      'separator',
-      ...(this.props.getDownloadLabel
-        ? [
-            {
-              label: this.props.getDownloadLabel.label,
-              onClick: () => {
-                this.props.getDownloadLabel.action()
+              {
+                label: <>Revise</>,
+                onClick: () => {
+                  changePasswordFn(1)
+                },
               },
-              disabled: this.props.disableDownload,
+              ...(job.has('revise_passwords') &&
+              job.get('revise_passwords').size > 1
+                ? [
+                    {
+                      label: <>Revise 2</>,
+                      onClick: () => {
+                        changePasswordFn(2)
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        ]
+      : []),
+    ...(!isChunkOutsourced && config.splitEnabled && !isChunk
+      ? [
+          {
+            label: (
+              <>
+                <Split size={18} />
+                Split
+              </>
+            ),
+            onClick: () => {
+              openSplitModalFn()
             },
-          ]
-        : []),
-      {
-        label: (
-          <>
-            <Download size={18} /> Original
-          </>
-        ),
-        onClick: () => {
-          window.open(originalUrl, '_blank')
-        },
-      },
-      {
-        label: (
-          <>
-            <Download size={18} /> Export XLIFF
-          </>
-        ),
-        onClick: () => {
-          window.open(exportXliffUrl, '_blank')
-        },
-      },
-      {
-        label: (
-          <>
-            <Download size={18} /> Export job TMX
-          </>
-        ),
-        onClick: () => {
-          window.open(jobTMXUrl, '_blank')
-        },
-      },
-      'separator',
-      ...(this.props.status === JOB_STATUS.ACTIVE
+          },
+        ]
+      : !isChunkOutsourced && config.splitEnabled && isChunk
         ? [
             {
               label: (
                 <>
-                  <Archive size={18} />
-                  Archive job
+                  <Merge size={18} />
+                  Merge
                 </>
               ),
               onClick: () => {
-                this.props.archiveJobFn()
-              },
-            },
-            {
-              label: (
-                <>
-                  <Trash size={18} />
-                  Cancel job
-                </>
-              ),
-              onClick: () => {
-                this.props.cancelJobFn()
+                openMergeModalFn()
               },
             },
           ]
         : []),
-      ...(this.props.status === JOB_STATUS.ARCHIVED
-        ? [
-            {
-              label: (
-                <>
-                  <FlipBackward size={18} />
-                  Unarchive job
-                </>
-              ),
-              onClick: () => {
-                this.props.activateJobFn()
-              },
+    'separator',
+    {
+      label: (
+        <>
+          <Revise size={18} />
+          Revise
+        </>
+      ),
+      onClick: () => {
+        window.open(reviseUrl, '_blank')
+      },
+    },
+    ...getSecondPassReviewMenuLink(),
+    {
+      label: (
+        <>
+          <QR /> Quality report
+        </>
+      ),
+      onClick: () => {
+        window.open(qAReportUrl, '_blank')
+      },
+    },
+    'separator',
+    ...(getDownloadLabel
+      ? [
+          {
+            label: getDownloadLabel.label,
+            onClick: () => {
+              getDownloadLabel.action()
             },
-            {
-              label: (
-                <>
-                  <Trash size={18} />
-                  Cancel job
-                </>
-              ),
-              onClick: () => {
-                this.props.cancelJobFn()
-              },
+            disabled: disableDownload,
+          },
+        ]
+      : []),
+    {
+      label: (
+        <>
+          <Download size={18} /> Original
+        </>
+      ),
+      onClick: () => {
+        window.open(originalUrl, '_blank')
+      },
+    },
+    {
+      label: (
+        <>
+          <Download size={18} /> Export XLIFF
+        </>
+      ),
+      onClick: () => {
+        window.open(exportXliffUrl, '_blank')
+      },
+    },
+    {
+      label: (
+        <>
+          <Download size={18} /> Export job TMX
+        </>
+      ),
+      onClick: () => {
+        window.open(jobTMXUrl, '_blank')
+      },
+    },
+    'separator',
+    ...(status === JOB_STATUS.ACTIVE
+      ? [
+          {
+            label: (
+              <>
+                <Archive size={18} />
+                Archive job
+              </>
+            ),
+            onClick: () => {
+              archiveJobFn()
             },
-          ]
-        : []),
-      ...(this.props.status === JOB_STATUS.CANCELLED
-        ? [
-            {
-              label: (
-                <>
-                  <FlipBackward size={18} />
-                  Resume job
-                </>
-              ),
-              onClick: () => {
-                this.props.activateJobFn()
-              },
+          },
+          {
+            label: (
+              <>
+                <Trash size={18} />
+                Cancel job
+              </>
+            ),
+            onClick: () => {
+              cancelJobFn()
             },
-            {
-              label: (
-                <>
-                  <Trash size={18} />
-                  Delete job permanently
-                </>
-              ),
-              onClick: () => {
-                this.props.deleteJobFn()
-              },
+          },
+        ]
+      : []),
+    ...(status === JOB_STATUS.ARCHIVED
+      ? [
+          {
+            label: (
+              <>
+                <FlipBackward size={18} />
+                Unarchive job
+              </>
+            ),
+            onClick: () => {
+              activateJobFn()
             },
-          ]
-        : []),
-    ]
-    return (
-      <DropdownMenu
-        className="job-menu"
-        items={items}
-        toggleButtonProps={{
-          children: <DotsHorizontal size={18} />,
-          testId: 'job-menu-button',
-          size: BUTTON_SIZE.ICON_STANDARD,
-        }}
-        align={DROPDOWN_MENU_ALIGN.RIGHT}
-      />
-    )
-  }
+          },
+          {
+            label: (
+              <>
+                <Trash size={18} />
+                Cancel job
+              </>
+            ),
+            onClick: () => {
+              cancelJobFn()
+            },
+          },
+        ]
+      : []),
+    ...(status === JOB_STATUS.CANCELLED
+      ? [
+          {
+            label: (
+              <>
+                <FlipBackward size={18} />
+                Resume job
+              </>
+            ),
+            onClick: () => {
+              activateJobFn()
+            },
+          },
+          {
+            label: (
+              <>
+                <Trash size={18} />
+                Delete job permanently
+              </>
+            ),
+            onClick: () => {
+              deleteJobFn()
+            },
+          },
+        ]
+      : []),
+  ]
+
+  return (
+    <DropdownMenu
+      className="job-menu"
+      items={items}
+      toggleButtonProps={{
+        children: <DotsHorizontal size={16} />,
+        testId: 'job-menu-button',
+        size: BUTTON_SIZE.ICON_SMALL,
+      }}
+      align={DROPDOWN_MENU_ALIGN.RIGHT}
+    />
+  )
+}
+
+JobMenu.propTypes = {
+  job: PropTypes.object.isRequired,
+  project: PropTypes.object.isRequired,
+  jobId: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  qAReportUrl: PropTypes.string.isRequired,
+  jobTMXUrl: PropTypes.string.isRequired,
+  exportXliffUrl: PropTypes.string.isRequired,
+  originalUrl: PropTypes.string.isRequired,
+  reviseUrl: PropTypes.string.isRequired,
+  isChunkOutsourced: PropTypes.bool.isRequired,
+  isChunk: PropTypes.bool.isRequired,
+  changePasswordFn: PropTypes.func.isRequired,
+  openSplitModalFn: PropTypes.func.isRequired,
+  openMergeModalFn: PropTypes.func.isRequired,
+  getDownloadLabel: PropTypes.func,
+  disableDownload: PropTypes.bool.isRequired,
+  archiveJobFn: PropTypes.func.isRequired,
+  cancelJobFn: PropTypes.func.isRequired,
+  activateJobFn: PropTypes.func.isRequired,
+  deleteJobFn: PropTypes.func.isRequired,
 }
 
 export default JobMenu

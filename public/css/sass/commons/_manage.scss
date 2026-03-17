@@ -484,18 +484,6 @@ div#manage-container {
                 margin: unset !important;
                 min-width: unset !important;
               }
-              .job-activity-icons {
-                display: flex;
-                justify-content: center;
-                gap: 5px;
-              }
-              .tm-job.job-activity-icons {
-                a {
-                  i {
-                    vertical-align: inherit;
-                  }
-                }
-              }
               .outsource-job {
                 display: inline-block;
                 .translated-outsourced {

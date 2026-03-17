@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {JobContainer} from './JobContainer'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import IconDown from '../icons/IconDown'
 
 export const ChunksJobContainer = ({jobs, ...props}) => {
   return (
@@ -13,7 +14,11 @@ export const ChunksJobContainer = ({jobs, ...props}) => {
             props.isChecked ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED
           }
         />
-        <span>source - target</span>
+        <span className="job-languages-codes">
+          {jobs[0].get('source')}
+          <IconDown size={16} />
+          {jobs[0].get('target')}
+        </span>
       </div>
       <div className="chunks-job-container-list">
         {jobs.map((job, index) => (
