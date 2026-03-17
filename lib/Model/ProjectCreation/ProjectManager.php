@@ -788,43 +788,64 @@ class ProjectManager
      */
     private function resolveAndInsertFiles(AbstractFilesStorage $fs, array $linkFiles): array
     {
+        // Collect the DB/file structure created for all processed files.
         $totalFilesStructure = [];
 
+        // Stop early if there are no converted file hashes to resolve.
         if (!isset($linkFiles['conversionHashes']) || !isset($linkFiles['conversionHashes']['sha'])) {
             return $totalFilesStructure;
         }
 
+        // Process each converted-file reference produced during conversion.
         foreach ($linkFiles['conversionHashes']['sha'] as $linkFile) {
+            // Extract the hash+lang token from the path/identifier.
             $hashFile = AbstractFilesStorage::basename_fix($linkFile);
             $hashFile = explode(AbstractFilesStorage::OBJECTS_SAFE_DELIMITER, $hashFile);
 
+            // The first part is the original file hash, the second is the target language.
             $sha1_original = $hashFile[0];
             $lang = $hashFile[1] ?? '';
 
+            // Skip malformed entries with no language suffix.
             if (empty($lang)) {
                 continue;
             }
 
+            // Locate the converted XLIFF in cache/storage for this hash+language.
             $cachedXliffFilePathName = $fs->getXliffFromCache($sha1_original, $lang) ?: null;
+
+            // Get the original file names associated with this converted file.
             $_originalFileNames = $linkFiles['conversionHashes']['fileName'][$linkFile];
 
             try {
+                // Ensure original names exist and the cached converted file is valid.
                 $this->validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
+
+                // Insert file records using the original names and resolved XLIFF path.
                 $filesStructure = $this->insertFiles($_originalFileNames, $sha1_original, (string)$cachedXliffFilePathName);
 
+                // Treat "nothing inserted" as a hard failure.
                 if (count($filesStructure ?: []) === 0) {
                     $this->logger->error('No files inserted in DB', [$_originalFileNames, $sha1_original, $cachedXliffFilePathName]);
                     throw new Exception('Files could not be saved in database.', ProjectCreationError::FILE_NOT_FOUND->value);
                 }
             } catch (Throwable $e) {
+                // Normalize the error, clean the partial project state, and rethrow as queue failure.
                 $this->mapFileInsertionError($e);
                 $this->clearFailedProject($e);
                 throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
             }
 
+            // Merge inserted file info into the overall result.
+            // Note: += is intentional here — array_merge() would re-index the
+            // numeric keys, losing the $fid mapping that downstream consumers
+            // rely on. Key collisions cannot occur because $fid values are
+            // database auto-increment IDs, guaranteed unique across all
+            // insertFiles() calls within the same project.
             $totalFilesStructure += $filesStructure;
         }
 
+        // Return the combined structure for all successfully inserted files.
         return $totalFilesStructure;
     }
 
