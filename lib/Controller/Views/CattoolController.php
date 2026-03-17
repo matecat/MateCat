@@ -220,7 +220,7 @@ class CattoolController extends BaseKleinViewController
                     TranslationStatus::STATUS_APPROVED2 => 'Revised'
                 ]
             ),
-            'tag_projection_languages' => new PHPTalMap(ChunkOptionsSanitizer::$tag_projection_allowed_languages),
+            'tag_projection_languages' => new PHPTalMap(ChunkOptionsSanitizer::$tagProjectionAllowedLanguages),
             'targetIsCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->target)),
             'target_code' => $chunkStruct->target,
             'team_name' => $jobOwnership['team']->name,
@@ -257,7 +257,7 @@ class CattoolController extends BaseKleinViewController
             $this->addParamsToView([
                     'lxq_license' => AppConfig::$LXQ_LICENSE,
                     'lxq_partnerid' => AppConfig::$LXQ_PARTNERID,
-                    'lexiqa_languages' => new PHPTalMap(ChunkOptionsSanitizer::$lexiQA_allowed_languages),
+                    'lexiqa_languages' => new PHPTalMap(ChunkOptionsSanitizer::$lexiQaAllowedLanguages),
                     'lexiqaServer' => AppConfig::$LXQ_SERVER,
                 ]
             );

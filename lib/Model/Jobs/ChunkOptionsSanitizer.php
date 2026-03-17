@@ -12,15 +12,15 @@ class ChunkOptionsSanitizer
     /** @var array<string, mixed> */
     private array $sanitized = [];
 
-    private ?string $source_lang = null;
+    private ?string $sourceLang = null;
     /** @var list<string> */
-    private array $target_lang = [];
+    private array $targetLang = [];
 
     /** @var list<string> */
-    private array $boolean_keys = ['speech2text', 'lexiqa', 'tag_projection'];
+    private array $booleanKeys = ['speech2text', 'lexiqa', 'tag_projection'];
 
     /** @var list<string> */
-    public static array $lexiQA_allowed_languages = [
+    public static array $lexiQaAllowedLanguages = [
         'af-ZA',
         'sq-AL',
         'ar-SA',
@@ -114,7 +114,7 @@ class ChunkOptionsSanitizer
      *
      * @var array<string, string>
      */
-    public static array $tag_projection_allowed_languages = [
+    public static array $tagProjectionAllowedLanguages = [
         'en-de' => 'English - German',
         'en-es' => 'English - Spanish',
         'en-fr' => 'English - French',
@@ -173,11 +173,11 @@ class ChunkOptionsSanitizer
 
 
     /**
-     * @param array<string, mixed> $input_options
+     * @param array<string, mixed> $inputOptions
      */
-    public function __construct(array $input_options)
+    public function __construct(array $inputOptions)
     {
-        $this->options = $input_options;
+        $this->options = $inputOptions;
     }
 
     /**
@@ -185,8 +185,8 @@ class ChunkOptionsSanitizer
      */
     public function setLanguages(string $source, array $target): void
     {
-        $this->source_lang = $source;
-        $this->target_lang = $target;
+        $this->sourceLang = $source;
+        $this->targetLang = $target;
     }
 
     /**
@@ -221,7 +221,7 @@ class ChunkOptionsSanitizer
 
     private function convertBooleansToInt(): void
     {
-        foreach ($this->boolean_keys as $key) {
+        foreach ($this->booleanKeys as $key) {
             if (isset($this->sanitized [$key])) {
                 $this->sanitized[$key] = (int)$this->sanitized[$key];
             }
@@ -254,7 +254,7 @@ class ChunkOptionsSanitizer
      */
     private function sanitizeLexiQA(): void
     {
-        $this->sanitized['lexiqa'] = ($this->options['lexiqa'] == true && $this->checkSourceAndTargetAreInCombination(self::$lexiQA_allowed_languages));
+        $this->sanitized['lexiqa'] = ($this->options['lexiqa'] == true && $this->checkSourceAndTargetAreInCombination(self::$lexiQaAllowedLanguages));
     }
 
     /**
@@ -263,7 +263,7 @@ class ChunkOptionsSanitizer
      */
     private function sanitizeTagProjection(): void
     {
-        $this->sanitized['tag_projection'] = ($this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection(self::$tag_projection_allowed_languages));
+        $this->sanitized['tag_projection'] = ($this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection(self::$tagProjectionAllowedLanguages));
     }
 
     /**
@@ -275,15 +275,15 @@ class ChunkOptionsSanitizer
      */
     private function checkSourceAndTargetAreInCombination(array $langs): bool
     {
-        $this->__ensureLanguagesAreSet();
+        $this->ensureLanguagesAreSet();
 
         $allowedSet = array_flip($langs);
 
-        if (!isset($allowedSet[$this->source_lang])) {
+        if (!isset($allowedSet[$this->sourceLang])) {
             return false;
         }
 
-        foreach ($this->target_lang as $target) {
+        foreach ($this->targetLang as $target) {
             if (isset($allowedSet[$target])) {
                 return true;
             }
@@ -298,13 +298,13 @@ class ChunkOptionsSanitizer
      */
     private function checkSourceAndTargetAreInCombinationForTagProjection(array $langs): bool
     {
-        $this->__ensureLanguagesAreSet();
+        $this->ensureLanguagesAreSet();
 
         $lang_combination = [];
         $found = false;
-        foreach ($this->target_lang ?? [] as $value) {
-            $lang_combination[] = explode('-', $value)[0] . '-' . explode('-', $this->source_lang ?? '')[0];
-            $lang_combination[] = explode('-', $this->source_lang ?? '')[0] . '-' . explode('-', $value)[0];
+        foreach ($this->targetLang ?? [] as $value) {
+            $lang_combination[] = explode('-', $value)[0] . '-' . explode('-', $this->sourceLang ?? '')[0];
+            $lang_combination[] = explode('-', $this->sourceLang ?? '')[0] . '-' . explode('-', $value)[0];
         }
 
         foreach ($lang_combination as $langPair) {
@@ -320,9 +320,9 @@ class ChunkOptionsSanitizer
     /**
      * @throws Exception
      */
-    private function __ensureLanguagesAreSet(): void
+    private function ensureLanguagesAreSet(): void
     {
-        if (empty($this->target_lang) || empty($this->source_lang)) {
+        if (empty($this->targetLang) || empty($this->sourceLang)) {
             throw  new Exception('Trying to sanitize options, but languages are not set');
         }
     }

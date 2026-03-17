@@ -166,13 +166,6 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public mixed   $split_result = null;
     public ?int    $job_to_merge = null;
 
-    // ── Group G: Dead code candidates ───────────────────────────────
-
-    public ?string $dictation = null;
-    public ?string $show_whitespace = null;
-    public ?string $character_counter = null;
-    public ?string $ai_assistant = null;
-
     // ── Plugin / revision pipeline keys ─────────────────────────────
 
     /** @var array<string, mixed> Features collected during quality framework validation (e.g. quality_framework) */
