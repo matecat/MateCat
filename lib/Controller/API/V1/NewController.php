@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\HandlersSorter;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;
@@ -55,6 +56,7 @@ use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
+use Utils\Subfiltering\SubfilteringOptionsValidator;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -183,18 +185,6 @@ class NewController extends KleinController
 
         $projectStructure['character_counter_mode'] = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
         $projectStructure['character_counter_count_tags'] = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
-
-        // in case of empty subfilter handlers, use the default ones
-        if(empty($request[JobsMetadataDao::SUBFILTERING_HANDLERS]) || $request[JobsMetadataDao::SUBFILTERING_HANDLERS] === "[]"){
-            $request[JobsMetadataDao::SUBFILTERING_HANDLERS] = json_encode([
-                InjectableFiltersTags::markup,
-                InjectableFiltersTags::twig,
-                InjectableFiltersTags::double_snail,
-                InjectableFiltersTags::double_square,
-                InjectableFiltersTags::double_percent,
-            ]);
-        }
-
         $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
 
         // Lara glossaries
@@ -494,7 +484,7 @@ class NewController extends KleinController
          * Note:
          * - The values above are expected as strings (e.g., "[]"), not native PHP types.
          */
-        $subfiltering_handlers = $this->validateSubfilteringOptions(
+        $subfiltering_handlers =  SubfilteringOptionsValidator::validate(
             $this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]')
         ); // string value or default '[]'
 
@@ -826,36 +816,6 @@ class NewController extends KleinController
     private function validateSegmentationRules($segmentation_rule): ?string
     {
         return Constants::validateSegmentationRules($segmentation_rule);
-    }
-
-    /**
-     * Validates the provided subfiltering options by attempting to decode them as JSON.
-     *
-     * This method ensures that the input string is a valid JSON-encoded structure.
-     * If the decoding process encounters an error, it returns an empty array to enforce
-     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
-     *
-     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
-     *
-     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
-     * @throws Exception
-     */
-    private function validateSubfilteringOptions(string $subfiltering_handlers): ?array
-    {
-        if ($subfiltering_handlers == 'none') {
-            // subfiltering is disabled
-            $subfiltering_handlers = 'null';
-        }
-
-        $validatorObject = new JSONValidatorObject($subfiltering_handlers);
-        $validator = new JSONValidator('subfiltering_handlers.json', true);
-        $validator->validate($validatorObject);
-
-        if (is_null($validatorObject->getValue())) {
-            return null;
-        }
-
-        return $validatorObject->getValue();
     }
 
     /**

@@ -472,12 +472,17 @@ class ProjectManager
          * Configuration about handlers can be changed later in the job settings.
          * But the analysis must everytime be performed with the current configuration.
          */
-        $jobsMetadataDao->set(
-            $newJob->id,
-            $newJob->password,
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]
-        );
+        if(
+            !empty($projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]) &&
+            $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] !== "[]"
+        ){
+            $jobsMetadataDao->set(
+                $newJob->id,
+                $newJob->password,
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]
+            );
+        }
     }
 
     /**
@@ -610,11 +615,16 @@ class ProjectManager
          * But the analysis must everytime be performed with the current configuration.
          * @see ProjectManager::saveJobsMetadata()
          */
-        $dao->set(
-            $this->projectStructure['id_project'],
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            $this->projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]
-        );
+        if(
+            !empty($this->projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]) &&
+            $this->projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS] !== "[]"
+        ){
+            $dao->set(
+                $this->projectStructure['id_project'],
+                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                $this->projectStructure[JobsMetadataDao::SUBFILTERING_HANDLERS]
+            );
+        }
     }
 
     /**
