@@ -50,6 +50,9 @@ import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import ContextReviewChannel from '../utils/contextReviewChannel'
+import useResizable from '../hooks/useResizable'
+import IconRedirect from '../components/icons/IconRedirect'
+import IconDown from '../components/icons/IconDown'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -80,6 +83,44 @@ function CatTool() {
 
   const startSegmentIdRef = useRef()
   const callbackAfterSegmentsResponseRef = useRef()
+  const {
+    height: contextReviewHeight,
+    isDragging: isResizing,
+    handleMouseDown: onResizeMouseDown,
+  } = useResizable({initialHeight: 500, minHeight: 100})
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(true)
+  const contextReviewUrl =
+    'https://dev.matecat.com/context-review/300/cb41cb913ea7#103686'
+  const popupWindowRef = useRef(null)
+
+  const togglePreview = useCallback(() => {
+    setIsPreviewOpen((prev) => {
+      if (!prev && popupWindowRef.current && !popupWindowRef.current.closed) {
+        popupWindowRef.current.close()
+        popupWindowRef.current = null
+      }
+      return !prev
+    })
+  }, [])
+
+  const openPreviewInNewWindow = useCallback(() => {
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.focus()
+    } else {
+      const width = Math.round(window.screen.width * 0.8)
+      const height = Math.round(window.screen.height * 0.8)
+      const left = Math.round((window.screen.width - width) / 2)
+      const top = Math.round((window.screen.height - height) / 2)
+      popupWindowRef.current = window.open(
+        contextReviewUrl,
+        'contextReviewWindow',
+        `width=${width},height=${height},left=${left},top=${top}`,
+      )
+    }
+    setIsPreviewOpen(false)
+  }, [contextReviewUrl])
+
   useEffect(() => {
     return ContextReviewChannel.onMessage((message) => {
       if (message.type === 'segmentClicked' && message.sid) {
@@ -552,6 +593,45 @@ function CatTool() {
         </div>
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
+      </div>
+      <div id="context-review-wrapper">
+        {isPreviewOpen && (
+          <div
+            className="context-review__resize-handle"
+            onMouseDown={onResizeMouseDown}
+          />
+        )}
+        <div className="context-review__header">
+          <span className="context-review__header-title">Context Review</span>
+          <div className="context-review__header-actions">
+            <button
+              className="context-review__header-btn"
+              onClick={openPreviewInNewWindow}
+              title="Open in new window"
+            >
+              <IconRedirect size={14} />
+            </button>
+            <button
+              className="context-review__header-btn"
+              onClick={togglePreview}
+              title={isPreviewOpen ? 'Close preview' : 'Open preview'}
+            >
+              <IconDown size={14} />
+            </button>
+          </div>
+        </div>
+        {isPreviewOpen && (
+          <div
+            className="context-review__container"
+            id="context-review"
+            style={{
+              height: contextReviewHeight,
+              pointerEvents: isResizing ? 'none' : undefined,
+            }}
+          >
+            <iframe src={contextReviewUrl} />
+          </div>
+        )}
       </div>
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (

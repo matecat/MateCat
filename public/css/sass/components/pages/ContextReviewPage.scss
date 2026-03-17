@@ -1,3 +1,4 @@
+@use '../common/SegmentedControl';
 .context-review-page {
   width: 100%;
   max-width: unset;
@@ -8,6 +9,16 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.context-review-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .context-review-panels {

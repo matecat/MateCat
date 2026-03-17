@@ -7,7 +7,20 @@ import {
   findSegmentSidByClick,
   tagSegments,
 } from '../utils/contextReviewUtils'
+import {SegmentedControl} from '../components/common/SegmentedControl'
 import sampleHtml from '../../../sample-context-review.html'
+
+const VIEW_MODES = {
+  BOTH: 'both',
+  SOURCE: 'source',
+  TARGET: 'target',
+}
+
+const VIEW_OPTIONS = [
+  {id: VIEW_MODES.SOURCE, name: 'Source'},
+  {id: VIEW_MODES.TARGET, name: 'Translation'},
+  {id: VIEW_MODES.BOTH, name: 'Source&Target'},
+]
 
 /**
  * Parses the sample HTML string and extracts style + body content.
@@ -34,6 +47,7 @@ const ContextReview = () => {
   const [segments, setSegments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
 
   const sourceRef = useRef(null)
   const targetRef = useRef(null)
@@ -115,7 +129,7 @@ const ContextReview = () => {
       sourceRef.current.innerHTML = htmlContent
       tagSegments(sourceRef.current, segments)
     }
-  }, [segments, htmlContent])
+  }, [segments, htmlContent, viewMode])
 
   // Attach click listeners to both panels
   useEffect(() => {
@@ -162,7 +176,7 @@ const ContextReview = () => {
         targetContainer.removeEventListener('click', handleTargetClick)
       }
     }
-  }, [htmlContent])
+  }, [htmlContent, viewMode])
 
   if (loading) {
     return (
@@ -185,24 +199,39 @@ const ContextReview = () => {
 
   return (
     <div className="context-review-container">
+      <div className="context-review-toolbar">
+        <SegmentedControl
+          name="context-review-view-mode"
+          options={VIEW_OPTIONS}
+          selectedId={viewMode}
+          onChange={setViewMode}
+          compact
+        />
+      </div>
       <div className="context-review-panels">
-        <div className="context-review-panel">
-          <div className="context-review-panel-header">Source</div>
-          <div
-            ref={sourceRef}
-            className="context-review-content"
-            dangerouslySetInnerHTML={{__html: htmlContent}}
-          />
-        </div>
-        <div className="context-review-divider" />
-        <div className="context-review-panel">
-          <div className="context-review-panel-header">Translation</div>
-          <div
-            ref={targetRef}
-            className="context-review-content"
-            dangerouslySetInnerHTML={{__html: htmlContent}}
-          />
-        </div>
+        {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) && (
+          <div className="context-review-panel">
+            <div className="context-review-panel-header">Source</div>
+            <div
+              ref={sourceRef}
+              className="context-review-content"
+              dangerouslySetInnerHTML={{__html: htmlContent}}
+            />
+          </div>
+        )}
+        {viewMode === VIEW_MODES.BOTH && (
+          <div className="context-review-divider" />
+        )}
+        {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.TARGET) && (
+          <div className="context-review-panel">
+            <div className="context-review-panel-header">Translation</div>
+            <div
+              ref={targetRef}
+              className="context-review-content"
+              dangerouslySetInnerHTML={{__html: htmlContent}}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

@@ -414,19 +414,33 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
   // set width and height of area
   useEffect(() => {
-    const onWindowResize = () => {
+    const recalcHeight = () => {
       const headerHeight =
         document.getElementsByTagName('header')[0].offsetHeight
       const footerHeight =
         document.getElementsByTagName('footer')[0].offsetHeight
+      const wrapperEl = document.getElementById('context-review-wrapper')
+      const wrapperHeight = wrapperEl ? wrapperEl.offsetHeight : 0
 
-      setHeightArea(window.innerHeight - (headerHeight + footerHeight))
+      setHeightArea(
+        window.innerHeight - (headerHeight + footerHeight + wrapperHeight),
+      )
     }
 
-    onWindowResize()
-    window.addEventListener('resize', onWindowResize)
+    recalcHeight()
+    window.addEventListener('resize', recalcHeight)
 
-    return () => window.removeEventListener('resize', onWindowResize)
+    const wrapperEl = document.getElementById('context-review-wrapper')
+    let observer
+    if (wrapperEl) {
+      observer = new ResizeObserver(recalcHeight)
+      observer.observe(wrapperEl)
+    }
+
+    return () => {
+      window.removeEventListener('resize', recalcHeight)
+      if (observer) observer.disconnect()
+    }
   }, [])
 
   // Send segment mappings to ContextReview when segments change
