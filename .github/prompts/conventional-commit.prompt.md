@@ -46,7 +46,8 @@ The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL N
     the versions they were updated from and the versions to which they were updated to. When a diff includes both
     package manifest files (package.json, Cargo.toml, pyproject.toml, etc.) and lock files (pnpm-lock.yaml,
     package-lock.json, yarn.lock, Cargo.lock, poetry.lock, etc.), ONLY the direct dependencies explicitly changed in the
-    manifest file MUST be listed. Transitive dependency changes visible only in the lockfile MUST NOT be included, as they
+    manifest file MUST be listed. Transitive dependency changes visible only in the lockfile MUST NOT be included, as
+    they
     are automatic consequences of direct dependency updates.
 
 ## Output Format
@@ -108,18 +109,18 @@ distinct change with its own subject line:
 ## Type Reference
 
 | Type     | Title                    | Emoji | Description                                                                                            | Example Scopes (non-exaustive)                                |
-| -------- | ------------------------ | ----- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
-| build    | Builds                   | 🏗️    | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
+|----------|--------------------------|-------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| build    | Builds                   | 🏗️   | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
 | chore    | Chores                   | 🔧    | Other changes that don't modify src or test files                                                      | scripts, config                                               |
 | ci       | Continuous Integrations  | 👷    | Changes to our CI configuration files and scripts                                                      | Travis, Circle, BrowserStack, SauceLabs,github actions, husky |
 | docs     | Documentation            | 📝    | Documentation only changes                                                                             | README, API                                                   |
-| feat     | Features                 | ✨    | A new feature                                                                                          | user, payment, gallery                                        |
+| feat     | Features                 | ✨     | A new feature                                                                                          | user, payment, gallery                                        |
 | fix      | Bug Fixes                | 🐛    | A bug fix                                                                                              | auth, data                                                    |
-| perf     | Performance Improvements | ⚡️   | A code change that improves performance                                                                | query, cache                                                  |
+| perf     | Performance Improvements | ⚡️    | A code change that improves performance                                                                | query, cache                                                  |
 | refactor | Code Refactoring         | ♻️    | A code change that neither fixes a bug nor adds a feature                                              | utils, helpers                                                |
-| revert   | Reverts                  | ⏪️   | Reverts a previous commit                                                                              | query, utils,                                                 |
+| revert   | Reverts                  | ⏪️    | Reverts a previous commit                                                                              | query, utils,                                                 |
 | style    | Styles                   | 💄    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) | formatting                                                    |
-| test     | Tests                    | ✅    | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
+| test     | Tests                    | ✅     | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
 | i18n     |                          | 🌐    | Internationalization                                                                                   | locale, translation                                           |
 
 ## More information about types
@@ -220,9 +221,9 @@ Format: `<emoji> <type>[optional (<scope>)]: <description>`
 - AVOID vague qualifiers like "for clarity", "for consistency", "improve readability" unless the diff explicitly shows
   formatting/style changes
 - ONLY include reasoning (the "why") when:
-  - It is provided in [Additional Context](#additional-context)
-  - It is clearly noticeable from the code context or commit scope
-  - It is objectively verifiable from the diff itself
+    - It is provided in [Additional Context](#additional-context)
+    - It is clearly noticeable from the code context or commit scope
+    - It is objectively verifiable from the diff itself
 - Omit the body entirely if the subject line is self-explanatory and no [Additional Context](#additional-context) is
   provided
 - Must be in English

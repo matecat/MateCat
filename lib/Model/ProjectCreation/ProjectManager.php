@@ -133,7 +133,7 @@ class ProjectManager
         $filter = MateCatFilter::getInstance(
             $this->features,
             $this->projectStructure->source_language,
-            json_encode($this->projectStructure->target_language),
+            (string)json_encode($this->projectStructure->target_language),
             [],
             json_decode($this->projectStructure->subfiltering_handlers ?? 'null')
         );
@@ -507,7 +507,7 @@ class ProjectManager
         $this->project = $this->getProjectManagerModel()->createProjectRecord(
             $this->projectStructure,
             $this->projectStructure->id_team,
-            $this->projectStructure->status,
+            $this->projectStructure->status ?? ProjectStatus::STATUS_NEW,
             $this->projectStructure->id_assignee,
         );
     }
@@ -1113,9 +1113,13 @@ class ProjectManager
     {
         $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
-        (new ProjectDao())->deleteFailedProject($this->projectStructure->id_project);
+
+        if (isset($this->project)) {
+            (new ProjectDao())->deleteFailedProject($this->projectStructure->id_project);
+            $this->log("Deleted Project ID: " . $this->projectStructure->id_project);
+        }
+
         (new FileDao())->deleteFailedProjectFiles($this->projectStructure->file_id_list);
-        $this->log("Deleted Project ID: " . $this->projectStructure->id_project);
         $this->log("Deleted Files ID: " . json_encode($this->projectStructure->file_id_list));
     }
 
