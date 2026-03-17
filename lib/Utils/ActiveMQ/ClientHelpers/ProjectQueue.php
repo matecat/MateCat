@@ -10,7 +10,6 @@
 namespace Utils\ActiveMQ\ClientHelpers;
 
 use Exception;
-use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Predis\Response\Status;
 use ReflectionException;

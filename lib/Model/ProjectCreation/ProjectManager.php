@@ -1084,7 +1084,7 @@ class ProjectManager
     /**
      * Delete the upload directory from S3 or the local filesystem.
      */
-    private function cleanupUploadDirectory(AbstractFilesStorage $fs): void
+    private function cleanupUploadDirectory(AbstractFilesStorage $fs): void // XXX
     {
         try {
             if (AbstractFilesStorage::isOnS3()) {
