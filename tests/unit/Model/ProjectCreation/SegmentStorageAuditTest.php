@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
+use Model\ProjectCreation\TranslationTuple;
 
 /**
  * Audit tests for SegmentStorageService after migrating from ArrayObject to plain arrays.
@@ -209,15 +210,15 @@ class SegmentStorageAuditTest extends AbstractTest
         // Plain array translations — no ArrayObject at top level
         $ps->translations = [
             $sanitizedId => [
-                0 => [null, null, 'Ciao', null, '<trans-unit/>', null, null],
+                0 => new TranslationTuple('Ciao', ['<trans-unit/>']),
             ],
         ];
 
         // Must not call offsetExists() on a plain array
         $this->service->storeSegments($fid, $ps);
 
-        // Translation was linked: offset 0 = segment_id
-        self::assertSame(300, $ps->translations[$sanitizedId][0][0]);
+        // Translation was linked: segmentId
+        self::assertSame(300, $ps->translations[$sanitizedId][0]->segmentId);
     }
 
     #[Test]
@@ -233,7 +234,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // translations has entries but NOT for this segment's internal_id
         $ps->translations = [
             'other-id' => [
-                0 => [null, null, 'Target', null, '<tu/>', null, null],
+                0 => new TranslationTuple('Target', ['<tu/>']),
             ],
         ];
 
@@ -241,7 +242,7 @@ class SegmentStorageAuditTest extends AbstractTest
         $this->service->storeSegments($fid, $ps);
 
         // The unrelated translation should remain untouched
-        self::assertNull($ps->translations['other-id'][0][0]);
+        self::assertFalse((new \ReflectionProperty($ps->translations['other-id'][0], 'segmentId'))->isInitialized($ps->translations['other-id'][0]));
     }
 
     // ══════════════════════════════════════════════════════════════════
@@ -266,15 +267,15 @@ class SegmentStorageAuditTest extends AbstractTest
         // Translation exists for the internal_id but NOT for mrk position 5
         $ps->translations = [
             $sanitizedId => [
-                0 => [null, null, 'Target', null, '<tu/>', null, null],
+                0 => new TranslationTuple('Target', ['<tu/>']),
             ],
         ];
 
         // Must not call offsetExists() on a plain array — uses isset() instead
         $this->service->storeSegments($fid, $ps);
 
-        // mrk 5 doesn't exist, so offset 0 of translation[0] should stay null
-        self::assertNull($ps->translations[$sanitizedId][0][0]);
+        // mrk 5 doesn't exist, so segmentId of translation[0] should stay uninitialized
+        self::assertFalse((new \ReflectionProperty($ps->translations[$sanitizedId][0], 'segmentId'))->isInitialized($ps->translations[$sanitizedId][0]));
     }
 
     #[Test]
@@ -292,14 +293,14 @@ class SegmentStorageAuditTest extends AbstractTest
         // Translation at mrk position 2
         $ps->translations = [
             $sanitizedId => [
-                '2' => [null, null, 'Ciao', null, '<tu/>', null, null],
+                '2' => new TranslationTuple('Ciao', ['<tu/>']),
             ],
         ];
 
         $this->service->storeSegments($fid, $ps);
 
         // Should link because mrk 2 exists
-        self::assertSame(410, $ps->translations[$sanitizedId]['2'][0]);
+        self::assertSame(410, $ps->translations[$sanitizedId]['2']->segmentId);
     }
 
     // ══════════════════════════════════════════════════════════════════
@@ -327,15 +328,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // All 3 levels are plain arrays (no ArrayObject anywhere)
         $ps->translations = [
             $sanitizedId => [           // level 1: internal_id
-                0 => [                  // level 2: mrk counter
-                    null,               // 0: segment_id  (to be filled)
-                    null,               // 1: internal_id  (to be filled)
-                    'Ciao mondo',       // 2: target translation
-                    null,               // 3: segment_hash (to be filled)
-                    '<trans-unit/>',    // 4: trans-unit
-                    null,               // 5: file_id      (to be filled)
-                    null,               // 6: mrk position
-                ],
+                0 => new TranslationTuple('Ciao mondo', ['<trans-unit/>']),
             ],
         ];
 
@@ -343,15 +336,15 @@ class SegmentStorageAuditTest extends AbstractTest
 
         $translationRow = $ps->translations[$sanitizedId][0];
 
-        // Verify all 4 offsets were set correctly via plain array assignment
-        self::assertSame(500, $translationRow[0], 'offset 0 = segment_id');
-        self::assertSame($sanitizedId, $translationRow[1], 'offset 1 = internal_id');
-        self::assertSame(md5('Hello world'), $translationRow[3], 'offset 3 = segment_hash');
-        self::assertSame($fid, $translationRow[5], 'offset 5 = file_id');
+        // Verify all 4 properties were set correctly
+        self::assertSame(500, $translationRow->segmentId, 'segmentId');
+        self::assertSame($sanitizedId, $translationRow->internalId, 'internalId');
+        self::assertSame(md5('Hello world'), $translationRow->segmentHash, 'segmentHash');
+        self::assertSame($fid, $translationRow->fileId, 'fileId');
 
-        // Verify untouched offsets are preserved
-        self::assertSame('Ciao mondo', $translationRow[2], 'offset 2 = target translation unchanged');
-        self::assertSame('<trans-unit/>', $translationRow[4], 'offset 4 = trans-unit unchanged');
+        // Verify untouched properties are preserved
+        self::assertSame('Ciao mondo', $translationRow->target, 'target unchanged');
+        self::assertSame(['<trans-unit/>'], $translationRow->transUnit, 'transUnit unchanged');
     }
 
     #[Test]
@@ -370,24 +363,24 @@ class SegmentStorageAuditTest extends AbstractTest
         $ps = $this->makePlainArrayProjectStructure($fid, [$seg1, $seg2]);
         $ps->translations = [
             $sanitizedId => [
-                0 => [null, null, 'Parte uno', null, '<tu/>', null, null],
-                1 => [null, null, 'Parte due', null, '<tu/>', null, null],
+                0 => new TranslationTuple('Parte uno', ['<tu/>']),
+                1 => new TranslationTuple('Parte due', ['<tu/>']),
             ],
         ];
 
         $this->service->storeSegments($fid, $ps);
 
         // First segment (counter=0)
-        self::assertSame(600, $ps->translations[$sanitizedId][0][0]);
-        self::assertSame($sanitizedId, $ps->translations[$sanitizedId][0][1]);
-        self::assertSame(md5('Part one'), $ps->translations[$sanitizedId][0][3]);
-        self::assertSame($fid, $ps->translations[$sanitizedId][0][5]);
+        self::assertSame(600, $ps->translations[$sanitizedId][0]->segmentId);
+        self::assertSame($sanitizedId, $ps->translations[$sanitizedId][0]->internalId);
+        self::assertSame(md5('Part one'), $ps->translations[$sanitizedId][0]->segmentHash);
+        self::assertSame($fid, $ps->translations[$sanitizedId][0]->fileId);
 
         // Second segment (counter=1)
-        self::assertSame(601, $ps->translations[$sanitizedId][1][0]);
-        self::assertSame($sanitizedId, $ps->translations[$sanitizedId][1][1]);
-        self::assertSame(md5('Part two'), $ps->translations[$sanitizedId][1][3]);
-        self::assertSame($fid, $ps->translations[$sanitizedId][1][5]);
+        self::assertSame(601, $ps->translations[$sanitizedId][1]->segmentId);
+        self::assertSame($sanitizedId, $ps->translations[$sanitizedId][1]->internalId);
+        self::assertSame(md5('Part two'), $ps->translations[$sanitizedId][1]->segmentHash);
+        self::assertSame($fid, $ps->translations[$sanitizedId][1]->fileId);
     }
 
     // ══════════════════════════════════════════════════════════════════
@@ -786,11 +779,11 @@ class SegmentStorageAuditTest extends AbstractTest
             // C16/C17/C18: plain array translations (3-level nesting)
             'translations'           => [
                 $sanitizedU1 => [
-                    0 => [null, null, 'Ciao', null, '<tu/>', null, null],
-                    1 => [null, null, 'Mondo', null, '<tu/>', null, null],
+                    0 => new TranslationTuple('Ciao', ['<tu/>']),
+                    1 => new TranslationTuple('Mondo', ['<tu/>']),
                 ],
                 $sanitizedU2 => [
-                    0 => [null, null, 'Pippo', null, '<tu/>', null, null],
+                    0 => new TranslationTuple('Pippo', ['<tu/>']),
                 ],
             ],
             // C22: plain array context_group
@@ -812,24 +805,24 @@ class SegmentStorageAuditTest extends AbstractTest
         $ids = array_column($ps->segments_metadata, 'id');
         self::assertSame([900, 901, 902], $ids);
 
-        // C16/C17/C18: translation offsets set correctly
+        // C16/C17/C18: translation properties set correctly
         // u1, counter 0 → seg 900
-        self::assertSame(900, $ps->translations[$sanitizedU1][0][0]);
-        self::assertSame($sanitizedU1, $ps->translations[$sanitizedU1][0][1]);
-        self::assertSame(md5('Hello'), $ps->translations[$sanitizedU1][0][3]);
-        self::assertSame($fid, $ps->translations[$sanitizedU1][0][5]);
+        self::assertSame(900, $ps->translations[$sanitizedU1][0]->segmentId);
+        self::assertSame($sanitizedU1, $ps->translations[$sanitizedU1][0]->internalId);
+        self::assertSame(md5('Hello'), $ps->translations[$sanitizedU1][0]->segmentHash);
+        self::assertSame($fid, $ps->translations[$sanitizedU1][0]->fileId);
 
         // u1, counter 1 → seg 901
-        self::assertSame(901, $ps->translations[$sanitizedU1][1][0]);
-        self::assertSame($sanitizedU1, $ps->translations[$sanitizedU1][1][1]);
-        self::assertSame(md5('World'), $ps->translations[$sanitizedU1][1][3]);
-        self::assertSame($fid, $ps->translations[$sanitizedU1][1][5]);
+        self::assertSame(901, $ps->translations[$sanitizedU1][1]->segmentId);
+        self::assertSame($sanitizedU1, $ps->translations[$sanitizedU1][1]->internalId);
+        self::assertSame(md5('World'), $ps->translations[$sanitizedU1][1]->segmentHash);
+        self::assertSame($fid, $ps->translations[$sanitizedU1][1]->fileId);
 
         // u2, counter 0 → seg 902
-        self::assertSame(902, $ps->translations[$sanitizedU2][0][0]);
-        self::assertSame($sanitizedU2, $ps->translations[$sanitizedU2][0][1]);
-        self::assertSame(md5('Foo'), $ps->translations[$sanitizedU2][0][3]);
-        self::assertSame($fid, $ps->translations[$sanitizedU2][0][5]);
+        self::assertSame(902, $ps->translations[$sanitizedU2][0]->segmentId);
+        self::assertSame($sanitizedU2, $ps->translations[$sanitizedU2][0]->internalId);
+        self::assertSame(md5('Foo'), $ps->translations[$sanitizedU2][0]->segmentHash);
+        self::assertSame($fid, $ps->translations[$sanitizedU2][0]->fileId);
 
         // C21: notes linked
         self::assertSame([900, 901], $ps->notes[$sanitizedU1]['json_segment_ids']);

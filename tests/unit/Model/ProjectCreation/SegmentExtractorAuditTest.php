@@ -5,6 +5,7 @@ namespace unit\Model\ProjectCreation;
 use ArrayObject;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Segments\SegmentMetadataStruct;
+use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -231,16 +232,18 @@ class SegmentExtractorAuditTest extends AbstractTest
         }
 
         // Option B replacement for: $ps->translations[$ref]->offsetSet($mid, new ArrayObject([...]))
-        $this->ps->translations[$ref][$mid] = [
-            2 => 'Translated target text',
-            4 => ['attr' => ['id' => 'tu1']],
-            6 => 0,  // mrk positional order
-        ];
+        $this->ps->translations[$ref][$mid] = new TranslationTuple(
+            'Translated target text',
+            ['attr' => ['id' => 'tu1']],
+            0,
+        );
 
         $this->assertArrayHasKey($ref, $this->ps->translations);
         $this->assertArrayHasKey($mid, $this->ps->translations[$ref]);
-        $this->assertSame('Translated target text', $this->ps->translations[$ref][$mid][2]);
-        $this->assertSame(0, $this->ps->translations[$ref][$mid][6]);
+        $tuple = $this->ps->translations[$ref][$mid];
+        $this->assertInstanceOf(TranslationTuple::class, $tuple);
+        $this->assertSame('Translated target text', $tuple->target);
+        $this->assertSame(0, $tuple->mrkPosition);
     }
 
     // =========================================================================
@@ -264,13 +267,13 @@ class SegmentExtractorAuditTest extends AbstractTest
         }
 
         // Option B replacement for: $ps->translations[$ref]->append(new ArrayObject([...]))
-        $this->ps->translations[$ref][] = [
-            2 => 'Pre-translated target',
-            4 => ['attr' => ['id' => 'tu2']],
-        ];
+        $this->ps->translations[$ref][] = new TranslationTuple(
+            'Pre-translated target',
+            ['attr' => ['id' => 'tu2']],
+        );
 
         $this->assertCount(1, $this->ps->translations[$ref]);
-        $this->assertSame('Pre-translated target', $this->ps->translations[$ref][0][2]);
+        $this->assertSame('Pre-translated target', $this->ps->translations[$ref][0]->target);
     }
 
     #[Test]
@@ -280,18 +283,18 @@ class SegmentExtractorAuditTest extends AbstractTest
         $this->ps->translations[$ref] = [];
 
         // Multiple trans-units with the same reference should accumulate
-        $this->ps->translations[$ref][] = [
-            2 => 'First translation',
-            4 => ['attr' => ['id' => 'tu3']],
-        ];
-        $this->ps->translations[$ref][] = [
-            2 => 'Second translation',
-            4 => ['attr' => ['id' => 'tu3']],
-        ];
+        $this->ps->translations[$ref][] = new TranslationTuple(
+            'First translation',
+            ['attr' => ['id' => 'tu3']],
+        );
+        $this->ps->translations[$ref][] = new TranslationTuple(
+            'Second translation',
+            ['attr' => ['id' => 'tu3']],
+        );
 
         $this->assertCount(2, $this->ps->translations[$ref]);
-        $this->assertSame('First translation', $this->ps->translations[$ref][0][2]);
-        $this->assertSame('Second translation', $this->ps->translations[$ref][1][2]);
+        $this->assertSame('First translation', $this->ps->translations[$ref][0]->target);
+        $this->assertSame('Second translation', $this->ps->translations[$ref][1]->target);
     }
 
     // =========================================================================

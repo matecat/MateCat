@@ -216,20 +216,12 @@ class SegmentStorageService
                         continue;
                     }
 
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter][0] = $row['id'];
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter][1] = $row['internal_id'];
-                    /**
-                     * WARNING offset 2 is the target translation
-                     */
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter][3] = $row['segment_hash'];
-                    /**
-                     * WARNING offset 4 is the Trans-Unit
-                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
-                     */
-                    $projectStructure->translations[$row['internal_id']][$short_var_counter][5] = $row['file_id'];
-                    /**
-                     * WARNING Offset 6 is possibly the MRK order position.
-                     */
+                    /** @var TranslationTuple $tuple */
+                    $tuple = $projectStructure->translations[$row['internal_id']][$short_var_counter];
+                    $tuple->segmentId   = (int) $row['id'];
+                    $tuple->internalId  = $row['internal_id'];
+                    $tuple->segmentHash = $row['segment_hash'];
+                    $tuple->fileId      = (int) $row['file_id'];
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
                     /*
@@ -308,9 +300,9 @@ class SegmentStorageService
             }
 
             // array of segmented translations
-            foreach ($struct as $translation_row) {
-                $position = (isset($translation_row[6])) ? $translation_row[6] : null;
-                $segment = $segmentDao->getById($translation_row[0]);
+            foreach ($struct as $translationTuple) {
+                /** @var TranslationTuple $translationTuple */
+                $segment = $segmentDao->getById($translationTuple->segmentId);
 
                 // This condition is meant to debug an issue with the segment id that returns false from dao.
                 // SegmentDao::getById returns false if the id is not found in the database
@@ -321,10 +313,10 @@ class SegmentStorageService
 
                 /** @var XliffRulesModel $configModel */
                 $configModel = $projectStructure->xliff_parameters;
-                $stateValues = SegmentExtractor::getTargetStatesFromTransUnit($translation_row[4], $position);
+                $stateValues = SegmentExtractor::getTargetStatesFromTransUnit($translationTuple->transUnit, $translationTuple->mrkPosition);
 
                 $rule = $configModel->getMatchingRule(
-                    $projectStructure->current_xliff_info[$translation_row[5] /* file_id */]['version'],
+                    $projectStructure->current_xliff_info[$translationTuple->fileId]['version'],
                     $stateValues['state'],
                     $stateValues['state-qualifier']
                 );
@@ -335,7 +327,7 @@ class SegmentStorageService
 
                 // Use QA to get target segment
                 $source = $segment->segment;
-                $target = $translation_row[2];
+                $target = $translationTuple->target;
 
                 $source = $this->filter->fromLayer0ToLayer1($source);
                 $target = $this->filter->fromLayer0ToLayer1($target);
@@ -354,9 +346,9 @@ class SegmentStorageService
 
                 /* WARNING: do not change the order of the keys */
                 $sql_values = [
-                    'id_segment'            => $translation_row[0],
+                    'id_segment'            => $translationTuple->segmentId,
                     'id_job'                => $jid,
-                    'segment_hash'          => $translation_row[3],
+                    'segment_hash'          => $translationTuple->segmentHash,
                     'status'                => $rule->asEditorStatus(),
                     'translation'           => $this->filter->fromLayer1ToLayer0($translation),
                     'suggestion'            => $this->filter->fromLayer1ToLayer0($translation),

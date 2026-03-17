@@ -122,7 +122,7 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public array $segments_metadata = [];
     /** @var array<int, array<int, mixed>> */
     public array $segments_meta_data = [];
-    /** @var array<int, mixed> */
+    /** @var array<string, array<int|string, TranslationTuple>> */
     public array $translations = [];
     /** @var array<int, mixed> */
     public array $notes = [];

@@ -300,15 +300,8 @@ class SegmentExtractor
                             $projectStructure->translations[$trans_unit_reference] = [];
                         }
 
-                        /**
-                         * Trans-Unit
-                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
-                         */
-                        $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] = [
-                            2 => $preTranslation['target'],
-                            4 => $xliff_trans_unit,
-                            6 => $position, // this value is the mrk positional order
-                        ];
+                        $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] =
+                            new TranslationTuple($preTranslation['target'], $xliff_trans_unit, $position);
 
                         // seg-source and target translation can have different mrk id
                         // override the seg-source surrounding mrk-id with them of target
@@ -393,14 +386,8 @@ class SegmentExtractor
                         $projectStructure->translations[$trans_unit_reference] = [];
                     }
 
-                    /**
-                     * Trans-Unit
-                     * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
-                     */
-                    $projectStructure->translations[$trans_unit_reference][] = [
-                        2 => $preTranslation['target'],
-                        4 => $xliff_trans_unit,
-                    ];
+                    $projectStructure->translations[$trans_unit_reference][] =
+                        new TranslationTuple($preTranslation['target'], $xliff_trans_unit);
                 }
             }
         }
