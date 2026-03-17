@@ -44,7 +44,6 @@ use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
 use RuntimeException;
-use SebastianBergmann\Invoker\TimeoutException;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
@@ -170,13 +169,9 @@ class NewController extends KleinController
 
         ProjectQueue::sendProject($projectStructure);
 
-        $result['errors'] = $this->pollForCreationResult($projectStructure);
+        $errors = $projectStructure->result['errors'];
 
-        if ($result == null) {
-            throw new TimeoutException('Project Creation Failure');
-        }
-
-        if (!empty($result['errors'])) {
+        if (!empty($errors)) {
             throw new RuntimeException('Project Creation Failure');
         }
 
@@ -188,16 +183,6 @@ class NewController extends KleinController
             'new_keys' => $request['new_keys'],
             'analyze_url' => $projectManager->getAnalyzeURL()
         ]);
-    }
-
-    /**
-     * @param $projectStructure
-     *
-     * @return array
-     */
-    private function pollForCreationResult($projectStructure): array
-    {
-        return $projectStructure->result['errors'];
     }
 
     /**
