@@ -128,7 +128,7 @@ class ProjectManagerModel
 
         $tupleMarks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
-        $this->executeBulkInsert($baseQuery, $tupleMarks, $query_translations_values, 100, 'Pre-Translations', -2);
+        $this->executeBulkInsert($baseQuery, $tupleMarks, $query_translations_values, 100, 'Pre-Translations', ProjectCreationError::BULK_INSERT_PRE_TRANSLATIONS->value);
     }
 
     /**
@@ -237,7 +237,7 @@ class ProjectManagerModel
             }
         }
 
-        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Notes', -1);
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Notes', ProjectCreationError::BULK_INSERT_NOTES->value);
     }
 
     /**
@@ -287,7 +287,7 @@ class ProjectManagerModel
             }
         }
 
-        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Segment Metadata', -3);
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Segment Metadata', ProjectCreationError::BULK_INSERT_SEGMENT_METADATA->value);
     }
 
     /**
@@ -328,7 +328,7 @@ class ProjectManagerModel
             }
         }
 
-        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Context Groups', -4);
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Context Groups', ProjectCreationError::BULK_INSERT_CONTEXT_GROUPS->value);
     }
 
 }

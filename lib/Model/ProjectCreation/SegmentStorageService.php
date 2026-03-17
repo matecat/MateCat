@@ -81,7 +81,7 @@ class SegmentStorageService
     }
 
     /**
-     * Store segments for a single file: reserve IDs, persist original data
+     * Store segments in a single file: reserve IDs, persist original data
      * and metadata, bulk-insert segment rows, and link IDs to notes/contexts/translations.
      *
      * @param string|int          $fid
@@ -104,7 +104,7 @@ class SegmentStorageService
             $this->minMaxSegmentsId['job_first_segment'] = (int) reset($sequenceIds);
         }
 
-        // Update the last id; if there is another cycle this value gets overwritten
+        // Update the last id; if there is another cycle, this value gets overwritten
         $this->minMaxSegmentsId['job_last_segment'] = (int) end($sequenceIds);
 
         $segments_metadata = [];
@@ -122,7 +122,7 @@ class SegmentStorageService
                 // to allow the correct tag handling by the plugins
                 $map = $this->features->filter('sanitizeOriginalDataMap', $originalDataMap);
 
-                // persist original data map if present
+                // persist an original data map if present
                 $this->insertOriginalDataRecord($id_segment, $map);
 
                 $projectStructure->segments[$fid][$position]->segment = $this->features->filter(
@@ -166,7 +166,7 @@ class SegmentStorageService
         }
 
         $segmentsDao = $this->createSegmentDao();
-        // split the query in to chunks if there are too much segments
+        // split the query in to chunks if there are too many segments
         $segmentsDao->createList(array_values($projectStructure->segments[$fid]));
 
         // free memory
@@ -184,14 +184,14 @@ class SegmentStorageService
 
             foreach ($segments_metadata as $row) {
                 // The following call is to save `id_segment` for notes,
-                // to be used later to insert the record in notes table.
+                // to be used later to insert the record in the notes table.
                 $this->setSegmentIdForNotes($row, $projectStructure);
                 $this->setSegmentIdForContexts($row, $projectStructure);
 
                 // The following block of code is for translations
                 if (isset($projectStructure->translations[$row['internal_id']])) {
                     if (!array_key_exists($row['internal_id'], $array_internal_segmentation_counter)) {
-                        // if we don't have segmentation, we have not mrk ID,
+                        // if we don't have segmentation, we have no mrk ID,
                         // so work with positional indexes ( should be only one row )
                         if (empty($row['xliff_mrk_id'])) {
                             $array_internal_segmentation_counter[$row['internal_id']] = 0;
@@ -200,7 +200,7 @@ class SegmentStorageService
                             $array_internal_segmentation_counter[$row['internal_id']] = $row['xliff_mrk_id'];
                         }
                     } elseif (empty($row['xliff_mrk_id'])) {
-                        // if we don't have segmentation, we have not mrk ID,
+                        // if we don't have segmentation, we have no mrk ID,
                         // so work with positional indexes
                         // (should be only one row but if we are here, let's increment it)
                         $array_internal_segmentation_counter[$row['internal_id']]++;
@@ -222,7 +222,7 @@ class SegmentStorageService
                     $tuple->segmentHash = $row['segment_hash'];
                     $tuple->fileId      = (int) $row['file_id'];
 
-                    // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
+                    // Remove an existent translation, we won't send these segments to the analysis because it is marked as locked
                     /*
                      * Commented because of
                      *

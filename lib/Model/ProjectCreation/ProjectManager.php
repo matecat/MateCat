@@ -262,8 +262,8 @@ class ProjectManager
     protected function validateUploadToken(): void
     {
         if (!isset($this->projectStructure->uploadToken) || !Utils::isTokenValid($this->projectStructure->uploadToken)) {
-            $this->addProjectError(-19, "Invalid Upload Token.");
-            throw new Exception("Invalid Upload Token.", -19);
+            $this->addProjectError(ProjectCreationError::INVALID_UPLOAD_TOKEN->value, "Invalid Upload Token.");
+            throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
         }
     }
 
@@ -276,7 +276,7 @@ class ProjectManager
             $xliffParams = $this->projectStructure->xliff_parameters;
 
             if ($xliffParams instanceof XliffRulesModel) {
-                // already validated (e.g. from a previous call)
+                // already validated (e.g., from a previous call)
                 return;
             }
 
@@ -493,7 +493,7 @@ class ProjectManager
     /**
      * Append an error entry to projectStructure->result['errors'].
      *
-     * Centralises the ~19 occurrences of the duplicated append pattern.
+     * Centralizes the ~19 occurrences of the duplicated appended pattern.
      */
     protected function addProjectError(int $code, string $message): void
     {
@@ -504,7 +504,7 @@ class ProjectManager
     }
 
     /**
-     * Creates record in projects tabele and instantiates the project struct
+     * Creates a record in the projects table and instantiates the project struct
      * internally.
      *
      * @throws ReflectionException|Exception
@@ -534,7 +534,7 @@ class ProjectManager
             $this->projectStructure->id_assignee = $this->projectStructure->uid;
 
             /**
-             * Normalize team (array or TeamStruct) into TeamStruct
+             * Normalize a team (array or TeamStruct) into TeamStruct
              */
             $teamData = $this->projectStructure->team instanceof TeamStruct
                 ? $this->projectStructure->team->getArrayCopy()
@@ -587,7 +587,7 @@ class ProjectManager
             $this->insertFileInstructions($totalFilesStructure);
             $this->finalizeProjectInTransaction();
         } finally {
-            // Ensure upload directory is cleaned up even when an exception
+            // Ensure the upload directory is cleaned up even when an exception
             // interrupts project creation, preventing orphaned temp files.
             if (isset($this->uploadDir)) {
                 $this->cleanupUploadDirectory($fs);
@@ -738,7 +738,7 @@ class ProjectManager
 
             $sha1 = sha1_file($filePathName);
             if ($sha1 === false) {
-                $this->addProjectError(-230, "Failed to compute hash for file $fileName");
+                $this->addProjectError(ProjectCreationError::FILE_HASH_FAILED->value, "Failed to compute hash for file $fileName");
                 continue;
             }
 
@@ -746,7 +746,7 @@ class ProjectManager
                 $fs->makeCachePackage($sha1, (string)$this->projectStructure->source_language, null, $filePathName);
                 $this->logger->debug("File $fileName converted to cache");
             } catch (Exception $e) {
-                $this->addProjectError(-230, $e->getMessage());
+                $this->addProjectError(ProjectCreationError::FILE_HASH_FAILED->value, $e->getMessage());
             }
 
             $fs->linkSessionToCacheForAlreadyConvertedFiles(
@@ -817,7 +817,7 @@ class ProjectManager
 
                 if (count($filesStructure ?: []) === 0) {
                     $this->logger->error('No files inserted in DB', [$_originalFileNames, $sha1_original, $cachedXliffFilePathName]);
-                    throw new Exception('Files could not be saved in database.', -6);
+                    throw new Exception('Files could not be saved in database.', ProjectCreationError::FILE_NOT_FOUND->value);
                 }
             } catch (Throwable $e) {
                 $this->mapFileInsertionError($e);
@@ -843,21 +843,21 @@ class ProjectManager
     {
         if (count($_originalFileNames ?: []) === 0) {
             $this->logger->error('No hash files found', [$linkFiles['conversionHashes']]);
-            throw new Exception('No hash files found', -6);
+            throw new Exception('No hash files found', ProjectCreationError::FILE_NOT_FOUND->value);
         }
 
         if (AbstractFilesStorage::isOnS3()) {
             if (!$cachedXliffFilePathName) {
-                throw new Exception(sprintf('Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)), -6);
+                throw new Exception(sprintf('Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)), ProjectCreationError::FILE_NOT_FOUND->value);
             }
         } elseif ($cachedXliffFilePathName === null || !file_exists($cachedXliffFilePathName)) {
-            throw new Exception(sprintf('File %s not found on server after upload.', $cachedXliffFilePathName), -6);
+            throw new Exception(sprintf('File %s not found on server after upload.', $cachedXliffFilePathName), ProjectCreationError::FILE_NOT_FOUND->value);
         }
 
         $info = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName);
 
         if (!in_array($info['extension'] ?? '', ['xliff', 'sdlxliff', 'xlf'])) {
-            throw new Exception("Failed to find converted Xliff", -3);
+            throw new Exception("Failed to find converted Xliff", ProjectCreationError::XLIFF_NOT_FOUND->value);
         }
     }
 
@@ -868,34 +868,18 @@ class ProjectManager
     {
         $code = $e->getCode();
 
-        if ($code == -10) {
-            $this->addProjectError(-10, $e->getMessage());
-        } elseif ($code == -11) {
-            $this->addProjectError($code, "Failed to store reference files on disk. Permission denied");
-        } elseif ($code == -12) {
-            $this->addProjectError($code, "Failed to store reference files in database");
-        } elseif ($code == -6) {
-            $this->addProjectError($code, $e->getMessage());
-        } elseif ($code == -3) {
-            $this->addProjectError(-16, "File not found. Failed to save XLIFF conversion on disk.");
-        } elseif ($code == -13) {
-            $this->addProjectError($code, $e->getMessage());
-        } elseif ($code == -200) {
-            $this->addProjectError(-200, $e->getMessage());
-        } elseif ($code == 0) {
-            $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
-            if (str_contains($e->getMessage(), $copyErrorMsg)) {
-                $this->addProjectError(
-                    -200,
-                    'There was a problem during the upload of your file(s). Please, ' .
-                    'try to rename your file(s) avoiding non-standard characters'
-                );
-            } else {
-                $this->addProjectError($code, 'An unexpected error occurred during file processing: ' . $e->getMessage());
-            }
-        } else {
-            $this->addProjectError($code, 'An unexpected error occurred during file insertion: ' . $e->getMessage());
-        }
+        match (true) {
+            $code == ProjectCreationError::REFERENCE_FILES_DISK_ERROR->value => $this->addProjectError($code, "Failed to store reference files on disk. Permission denied"),
+            $code == ProjectCreationError::REFERENCE_FILES_DB_ERROR->value => $this->addProjectError($code, "Failed to store reference files in database"),
+            $code == ProjectCreationError::XLIFF_NOT_FOUND->value  => $this->addProjectError(ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value, "File not found. Failed to save XLIFF conversion on disk."),
+            $code == ProjectCreationError::GENERIC_ERROR->value && str_contains($e->getMessage(), '<Message>Invalid copy source encoding.</Message>') => $this->addProjectError(
+                ProjectCreationError::FILE_MOVE_FAILED->value,
+                'There was a problem during the upload of your file(s). Please, ' .
+                'try to rename your file(s) avoiding non-standard characters'
+            ),
+            in_array($code, [ProjectCreationError::ZIP_STORE_FAILED->value, ProjectCreationError::FILE_NOT_FOUND->value, ProjectCreationError::FILE_CACHE_ERROR->value, ProjectCreationError::FILE_MOVE_FAILED->value, ProjectCreationError::GENERIC_ERROR->value], true) => $this->addProjectError($code, $e->getMessage()),
+            default => $this->addProjectError($code, 'An unexpected error occurred during file insertion: ' . $e->getMessage()),
+        };
     }
 
     /**
@@ -915,8 +899,8 @@ class ProjectManager
         // $linkFile is needed in the error handler for hash cleanup
         $linkFile = '';
         if (isset($linkFiles['conversionHashes']['sha'])) {
-            $shas = $linkFiles['conversionHashes']['sha'];
-            $linkFile = end($shas) ?: '';
+            $shaSum = $linkFiles['conversionHashes']['sha'];
+            $linkFile = end($shaSum) ?: '';
         }
 
         try {
@@ -930,7 +914,7 @@ class ProjectManager
                     $this->log("Exceptions: " . $exceptionsFound);
                     $this->log("Failed to parse " . $file_info['original_filename'], $e);
 
-                    if ($e->getCode() == -1 && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
+                    if ($e->getCode() == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
                         $this->log("No text to translate in the file {$e->getMessage()}.");
                         $exceptionsFound += 1;
                         unset($totalFilesStructure[$fid]);
@@ -944,12 +928,12 @@ class ProjectManager
             if ($this->total_segments === 0) {
                 throw new Exception(
                     "No translatable content found in any uploaded file. The project cannot be created.",
-                    -1
+                    ProjectCreationError::NO_TRANSLATABLE_TEXT->value
                 );
             }
 
             if ($this->files_word_count > AppConfig::$MAX_SOURCE_WORDS) {
-                throw new Exception("Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!", 128);
+                throw new Exception("Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!", ProjectCreationError::MAX_WORDS_EXCEEDED->value);
             }
 
             $this->features->run("beforeProjectCreation", $this->projectStructure, [
@@ -979,18 +963,17 @@ class ProjectManager
      */
     private function mapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
     {
-        if ($e->getCode() == -1) {
-            $this->addProjectError(-1, "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . ".");
-            if (AppConfig::$FILE_STORAGE_METHOD != 's3') {
-                $fs->deleteHashFromUploadDir($this->uploadDir, $linkFile);
-            }
-        } elseif ($e->getCode() == -4) {
-            $this->addProjectError(-7, "Xliff Import Error: {$e->getMessage()}");
-        } elseif ($e->getCode() == 400) {
-            $message = (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage();
-            $this->addProjectError($e->getCode(), $message);
-        } else {
-            $this->addProjectError($e->getCode(), $e->getMessage());
+        $code = $e->getCode();
+
+        match ($code) {
+            ProjectCreationError::NO_TRANSLATABLE_TEXT->value => $this->addProjectError(ProjectCreationError::NO_TRANSLATABLE_TEXT->value, "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."),
+            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->addProjectError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "Xliff Import Error: {$e->getMessage()}"),
+            ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->addProjectError($code, (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage()),
+            default => $this->addProjectError($code, $e->getMessage()),
+        };
+
+        if ($code == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && AppConfig::$FILE_STORAGE_METHOD != 's3') {
+            $fs->deleteHashFromUploadDir($this->uploadDir, $linkFile);
         }
 
         $this->log("Exception", $e);
@@ -1250,7 +1233,7 @@ class ProjectManager
 
             if (!$result) {
                 $this->log("Failed to store the Zip file $zipHash - \n");
-                throw new Exception("Failed to store the original Zip $zipHash ", -10);
+                throw new Exception("Failed to store the original Zip $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
                 //Exit
             }
         } //end zip hashes manipulation
@@ -1402,7 +1385,7 @@ class ProjectManager
     }
 
     /**
-     * Extract sources and pre-translations from an xliff file and put them in Database.
+     * Extract sources and pre-translations from a xliff file and put them in Database.
      *
      * @param array<string, mixed> $file_info
      *
@@ -1426,7 +1409,7 @@ class ProjectManager
     }
 
     /**
-     * Insert files into the database, moving them from cache to the file directory.
+     * Insert files into the database, moving them from the cache to the file directory.
      *
      * @param list<string> $_originalFileNames
      * @param string $sha1_original e.g. 917f7b03c8f54350fb65387bda25fbada43ff7d8
@@ -1482,7 +1465,7 @@ class ProjectManager
 
                 // check if the files were moved
                 if (true !== $moved) {
-                    throw new Exception('Project creation failed. Please refresh page and retry.', -200);
+                    throw new Exception('Project creation failed. Please refresh page and retry.', ProjectCreationError::FILE_MOVE_FAILED->value);
                 }
 
                 $this->projectStructure->file_id_list[] = $fid;

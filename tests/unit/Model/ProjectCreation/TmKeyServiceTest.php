@@ -4,6 +4,7 @@ namespace unit\Model\ProjectCreation;
 
 use Exception;
 use Model\DataAccess\IDatabase;
+use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TmKeyService;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -80,7 +81,7 @@ class TmKeyServiceTest extends AbstractTest
 
         $errors = $ps->result['errors'];
         self::assertCount(1, $errors);
-        self::assertSame(-4, $errors[0]['code']);
+        self::assertSame(ProjectCreationError::TM_KEY_INVALID->value, $errors[0]['code']);
         self::assertStringContainsString('bad-key', $errors[0]['message']);
     }
 
@@ -96,7 +97,7 @@ class TmKeyServiceTest extends AbstractTest
         $this->service->setPrivateTMKeys($ps, '');
 
         self::assertCount(1, $ps->result['errors']);
-        self::assertSame(-4, $ps->result['errors'][0]['code']);
+        self::assertSame(ProjectCreationError::TM_KEY_INVALID->value, $ps->result['errors'][0]['code']);
     }
 
     #[Test]

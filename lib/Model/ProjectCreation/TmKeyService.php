@@ -66,7 +66,7 @@ class TmKeyService
      * into the user's key-ring. If a TMX file name is provided and the key has
      * no explicit name, the TMX file name is used as the key name.
      *
-     * On validation failure, the error is recorded in projectStructure and
+     * On validation failure, the error is recorded in projectStructure, and
      * the method returns early (callers should check for errors).
      *
      * @param ProjectStructure $projectStructure
@@ -81,7 +81,7 @@ class TmKeyService
                 if (!isset($keyExists) || $keyExists === false) {
                     $this->log(__METHOD__ . " -> TM key is not valid.");
 
-                    throw new Exception("TM key is not valid: " . $_tmKey['key'], -4);
+                    throw new Exception("TM key is not valid: " . $_tmKey['key'], ProjectCreationError::TM_KEY_INVALID->value);
                 }
             } catch (Exception $e) {
                 $this->addProjectError($projectStructure, $e->getCode(), $e->getMessage());
@@ -90,7 +90,7 @@ class TmKeyService
             }
         }
 
-        //check if the MyMemory keys provided by the user are already associated to him.
+        //check if the MyMemory keys provided by the user are already associated with him.
         $userMemoryKeys = $this->getKeyringOwnerKeys($projectStructure->uid);
         $userTmKeys     = [];
         $memoryKeysToBeInserted = [];
@@ -111,10 +111,10 @@ class TmKeyService
                 $newTmKey->glos   = true;
 
                 // THIS IS A NEW KEY and must be inserted into the user keyring
-                // So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                // So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty,
                 // assign TMX name to the key
 
-                // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with empty name
+                // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with an empty name
                 $newTmKey->name = (!empty($_tmKey['name']) ? (string)str_replace("{{pid}}", (string)$projectStructure->id_project, $_tmKey['name']) : $firstTMXFileName);
 
                 $newMemoryKey->tm_key = $newTmKey;
@@ -137,7 +137,7 @@ class TmKeyService
      * then poll for each upload to complete (or time out after 30 minutes).
      *
      * TMX files are removed from the project's array_files / array_files_meta
-     * after successful upload so they are not processed as translation files.
+     * after successful upload, so they are not processed as translation files.
      *
      * @param ProjectStructure $projectStructure
      * @param string $uploadDir
@@ -241,7 +241,7 @@ class TmKeyService
                     if (time() > $deadline) {
                         $this->addProjectError(
                             $projectStructure,
-                            -15,
+                            ProjectCreationError::TMX_IMPORT_TIMEOUT->value,
                             "TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName()
                         );
                         $this->log("TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName());

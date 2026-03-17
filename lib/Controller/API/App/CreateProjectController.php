@@ -543,7 +543,7 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * Check if MT engine (except MyMemory) belongs to user
+     * Check if MT engine (except MyMemory) belongs to the user
      *
      * @param int $mt_engine
      *

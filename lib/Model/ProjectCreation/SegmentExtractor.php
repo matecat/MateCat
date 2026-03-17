@@ -112,7 +112,7 @@ class SegmentExtractor
     public function extract(int $fid, array $file_info, ProjectStructure $projectStructure): void
     {
         // Cache config values that must be set by the time extraction runs.
-        // These are nullable in the DTO (project may not exist yet at config build time),
+        // These are nullable in the DTO (a project may not exist yet at config build time),
         // but are always set before extractSegments() is called in the pipeline.
         if ($this->config->id_project === null || $this->config->source_language === null) {
             throw new RuntimeException('idProject and sourceLanguage must be set before extraction');
@@ -138,13 +138,13 @@ class SegmentExtractor
             $xliffInfo = (new XliffProprietaryDetect())->getInfoByStringData($xliff_file_content);
             $projectStructure->current_xliff_info[$fid] = $xliffInfo;
         } catch (Throwable $e) {
-            throw new Exception("Failed to parse " . $file_info['original_filename'], ($e->getCode() != 0 ? $e->getCode() : -4), $e);
+            throw new Exception("Failed to parse " . $file_info['original_filename'], ($e->getCode() != 0 ? $e->getCode() : ProjectCreationError::XLIFF_PARSE_FAILURE->value), $e);
         }
 
         // Checking that parsing went well
         if (isset($xliff['parser-errors']) or !isset($xliff['files'])) {
             $this->log("Failed to parse " . $file_info['original_filename'] . join("\n", $xliff['parser-errors']));
-            throw new Exception("Failed to parse " . $file_info['original_filename'], -4);
+            throw new Exception("Failed to parse " . $file_info['original_filename'], ProjectCreationError::XLIFF_PARSE_FAILURE->value);
         }
 
         // needed to check if a file has only one segment
@@ -159,7 +159,7 @@ class SegmentExtractor
         // use generic
         if (count($projectStructure->segments[$fid]) == 0 || $_fileCounter_Show_In_Cattool == 0) {
             $this->log("Segment import - no segments found in {$file_info[ 'original_filename' ]}\n");
-            throw new Exception($file_info['original_filename'], -1);
+            throw new Exception($file_info['original_filename'], ProjectCreationError::NO_TRANSLATABLE_TEXT->value);
         } else {
             // increment global counter
             $this->showInCattoolSegsCounter += $_fileCounter_Show_In_Cattool;
@@ -453,7 +453,7 @@ class SegmentExtractor
     /**
      * Build a sanitized unit ID from the trans-unit ID and file ID.
      *
-     * Public static because it is also needed by ProjectManager::_storeSegments().
+     * Public static because it is also necessary for ProjectManager::_storeSegments().
      */
     public static function sanitizedUnitId(string $trans_unitID, int $fid): string
     {
@@ -463,7 +463,7 @@ class SegmentExtractor
     /**
      * Extract state and state-qualifier from a trans-unit's target attributes.
      *
-     * Public static because it is also needed by ProjectManager::_insertPreTranslations().
+     * Public static because it is also necessary by ProjectManager::_insertPreTranslations().
      *
      * @param array<string, mixed> $trans_unit The parsed trans-unit
      * @param int|null             $position   mrk position (for seg-target), null for non-segmented
@@ -588,7 +588,7 @@ class SegmentExtractor
 
     /**
      * Build a SegmentStruct, its metadata, and original-data struct, then
-     * append everything to the projectStructure arrays and update counters.
+     * append everything to the projectStructure arrays, and update counters.
      *
      * @param int $fid
      * @param int|null $filePartsId
@@ -685,7 +685,7 @@ class SegmentExtractor
     }
 
     /**
-     * Read XLIFF file content from local filesystem or S3.
+     * Read XLIFF file content from a local filesystem or S3.
      *
      * @throws Exception
      */
@@ -710,7 +710,7 @@ class SegmentExtractor
     /**
      * Strip external tags from a segment.
      *
-     * Currently disabled — always returns the segment unchanged with null prec/succ.
+     * Currently, disabled — always returns the segment unchanged with null prec/succ.
      *
      * @return array<string, mixed>
      */
@@ -738,7 +738,7 @@ class SegmentExtractor
             $this->addNotesToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
             $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $fid, $projectStructure);
         } catch (Exception $exception) {
-            throw new Exception($exception->getMessage(), -1);
+            throw new Exception($exception->getMessage(), ProjectCreationError::NO_TRANSLATABLE_TEXT->value);
         }
     }
 
@@ -756,7 +756,7 @@ class SegmentExtractor
         $internal_id = self::sanitizedUnitId($trans_unit['attr']['id'], $fid);
         if (isset($trans_unit['notes'])) {
             if (count($trans_unit['notes']) > self::SEGMENT_NOTES_LIMIT) {
-                throw new Exception('File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.', -44);
+                throw new Exception('File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.', ProjectCreationError::TOO_MANY_NOTES->value);
             }
 
             foreach ($trans_unit['notes'] as $note) {
@@ -818,7 +818,7 @@ class SegmentExtractor
 
             if (!isset($projectStructure->context_group[$internal_id]['context_json'])) {
                 $projectStructure->context_group[$internal_id]['context_json'] = $trans_unit['context-group'];
-                $projectStructure->context_group[$internal_id]['context_json_segment_ids'] = []; // because of mrk tags, same context can be owned by different segments
+                $projectStructure->context_group[$internal_id]['context_json_segment_ids'] = []; // because of mrk tags, the same context can be owned by different segments
             }
         }
     }
@@ -922,7 +922,7 @@ class SegmentExtractor
         $config['email']  = AppConfig::$MYMEMORY_API_KEY;
 
         foreach ($xliff_trans_unit['alt-trans'] as $altTrans) {
-            if (!empty($altTrans['attr']['match-quality']) && $altTrans['attr']['match-quality'] < '50') {
+            if (!empty($altTrans['attr']['match-quality']) && (float) $altTrans['attr']['match-quality'] < 50) {
                 continue;
             }
 
