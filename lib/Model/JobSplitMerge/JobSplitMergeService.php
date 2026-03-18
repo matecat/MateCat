@@ -458,10 +458,10 @@ class JobSplitMergeService
             ];
 
             foreach ($metadata as $key) {
-                $data = $jobsMetadataDao->get($jobToSplit->id, $jobToSplit->password, $key);
+                $_data = $jobsMetadataDao->get($jobToSplit->id, $jobToSplit->password, $key);
 
-                if (!empty($data)) {
-                    $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $data->value);
+                if (!empty($_data)) {
+                    $jobsMetadataDao->set($newJob->id, $newJob->password, $key, $_data->value);
                     $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey($jobToSplit->id, $jobToSplit->password, $key);
                 }
             }
