@@ -12,13 +12,13 @@ use InvalidArgumentException;
 use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
-use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
+use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao;
@@ -27,7 +27,6 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Model\Xliff\XliffConfigTemplateStruct;
-use Plugins\Features\ProjectCompletion;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
@@ -168,7 +167,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_SANITIZE_NUMBER_INT);
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);
         $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
-        $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $character_counter_count_tags = filter_var($this->request->param('character_counter_count_tags'), FILTER_VALIDATE_BOOLEAN);
@@ -231,7 +229,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $arFiles = explode('@@SEP@@', html_entity_decode($file_name, ENT_QUOTES, 'UTF-8'));
 
         if (!isset($_COOKIE['upload_token']) || !Utils::isTokenValid($_COOKIE['upload_token'])) {
-            throw new Exception("Invalid Upload Token.", -19);
+            throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
         }
 
         // Build project name from input or fallback:
@@ -254,19 +252,10 @@ class CreateProjectController extends AbstractStatefulKleinController
         }
 
         $private_tm_key = array_map(self::sanitizeTmKeyArr(...), $array_keys);
-        $mt_engine = ($mt_engine != null ? $mt_engine : 0);
         $only_private = (!is_null($get_public_matches) && !$get_public_matches);
         $due_date = (empty($due_date) ? null : Utils::mysqlTimestamp($due_date));
 
-        $engineStruct = null;
-        // any other engine than Match
-        if ($mt_engine !== null and $mt_engine > 1) {
-            try {
-                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
-            } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage());
-            }
-        }
+        ['mt_engine' => $mt_engine, 'engine' => $engineStruct] = $this->validateMtEngine($mt_engine);
 
         (new DeepLEngineOptionsValidator())->validate(
             EngineValidatorObject::fromArray(
@@ -325,7 +314,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             'deepl_id_glossary' => (!empty($deepl_id_glossary)) ? $deepl_id_glossary : null,
             'deepl_formality' => (!empty($deepl_formality)) ? $deepl_formality : null,
             'deepl_engine_type' => (!empty($deepl_engine_type)) ? $deepl_engine_type : null,
-            'project_completion' => $project_completion,
             'get_public_matches' => $get_public_matches,
             'character_counter_count_tags' => (!empty($character_counter_count_tags)) ? $character_counter_count_tags : null,
             'character_counter_mode' => (!empty($character_counter_mode)) ? $character_counter_mode : null,
@@ -388,7 +376,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         ) : null;
         $data['source_lang'] = $this->validateSourceLang(Languages::getInstance(), $data['source_lang']);
         $data['target_lang'] = $this->validateTargetLangs(Languages::getInstance(), $data['target_lang']);
-        $data['mt_engine'] = $this->validateUserMTEngine($data['mt_engine']);
         $data['mmt_glossaries'] = $this->validateMMTGlossaries($data['mmt_glossaries']);
         $data['qa_model_template'] = $this->validateQaModelTemplate(
             $data['qa_model_template'],
@@ -406,7 +393,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $data['xliff_parameters'],
             $data['xliff_parameters_template_id']
         );
-        $data['project_features'] = $this->appendFeaturesToProject($data['project_completion'], $data['mt_engine']);
+        $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
         $data['target_language_mt_engine_association'] = $this->generateTargetEngineAssociation(
             $data['target_lang'],
             $data['mt_engine']
@@ -416,6 +403,29 @@ class CreateProjectController extends AbstractStatefulKleinController
         $this->setMetadataFromPostInput($data);
 
         return $data;
+    }
+
+    /**
+     * Check if MT engine (except MyMemory) belongs to the user
+     *
+     * @param int|null $mt_engine
+     *
+     * @return array<int|string, AbstractEngine|null>
+     */
+    private function validateMtEngine(?int $mt_engine = 0): array
+    {
+        $mt_engine = ($mt_engine != null ? $mt_engine : 0);
+
+        $engineStruct = null;
+        // any other engine than Match
+        if ($mt_engine !== null and $mt_engine > 1) {
+            try {
+                $engineStruct = EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage());
+            }
+        }
+        return ['mt_engine' => $mt_engine, 'engine' => $engineStruct];
     }
 
     /**
@@ -543,26 +553,6 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * Check if MT engine (except MyMemory) belongs to the user
-     *
-     * @param int $mt_engine
-     *
-     * @return int
-     */
-    private function validateUserMTEngine(int $mt_engine): int
-    {
-        if ($mt_engine > 1) {
-            try {
-                EnginesFactory::getInstanceByIdAndUser($mt_engine, $this->user->uid);
-            } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage(), -2);
-            }
-        }
-
-        return $mt_engine;
-    }
-
-    /**
      * Validate `mmt_glossaries` string
      *
      * @param null $mmt_glossaries
@@ -676,10 +666,10 @@ class CreateProjectController extends AbstractStatefulKleinController
     /**
      * @param null $filters_extraction_parameters
      *
-     * @return mixed|null
+     * @return array|null
      * @throws Exception
      */
-    private function validateFiltersExtractionParameters($filters_extraction_parameters = null): mixed
+    private function validateFiltersExtractionParameters($filters_extraction_parameters = null): ?array
     {
         if (!empty($filters_extraction_parameters)) {
             $json = html_entity_decode($filters_extraction_parameters);
@@ -687,7 +677,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             $validator = new JSONValidator('filters_extraction_parameters.json', true);
             $validator->validate($validatorObject);
 
-            $filters_extraction_parameters = $validatorObject->getValue();
+            $filters_extraction_parameters = $validatorObject->getValue(true);
         }
 
         return $filters_extraction_parameters;
@@ -729,21 +719,14 @@ class CreateProjectController extends AbstractStatefulKleinController
     }
 
     /**
-     * @param bool $project_completion
      * @param int $mt_engine
      *
      * @return array
      * @throws Exception
      */
-    private function appendFeaturesToProject(bool $project_completion, int $mt_engine): array
+    private function appendFeaturesToProject(int $mt_engine): array
     {
         $projectFeatures = [];
-
-        if ($project_completion) {
-            $feature = new BasicFeatureStruct();
-            $feature->feature_code = ProjectCompletion::FEATURE_CODE;
-            $projectFeatures[$feature->feature_code] = $feature;
-        }
 
         return $this->featureSet->filter(
             'filterCreateProjectFeatures',

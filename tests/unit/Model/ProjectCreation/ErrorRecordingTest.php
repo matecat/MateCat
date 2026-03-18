@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use DomainException;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
@@ -16,10 +15,13 @@ use Utils\Registry\AppConfig;
  * Unit tests for the error recording pattern in {@see \Model\ProjectCreation\ProjectManager}.
  *
  * Tests cover:
- * - `_validateUploadToken()` — records error code -19 for missing/invalid tokens
- * - `_validateXliffParameters()` — records error from DomainException on invalid params
- * - `sanitizeProjectStructure()` — resets errors to empty array, then validates
+ * - `addProjectError()` — appends structured error entries to projectStructure->result['errors']
  * - General error array structure (code + message keys)
+ *
+ * Note: `sanitizeProjectStructure()`, `validateUploadToken()`, and `validateXliffParameters()`
+ * were removed as part of the controller-layer validation refactoring.
+ * Upload token validation now lives in the controllers (NewController, CreateProjectController).
+ * XliffRulesModel normalization is done inline at the top of `createProject()`.
  *
  * @see REFACTORING_PLAN.md — Step 0e
  */
@@ -55,19 +57,13 @@ class ErrorRecordingTest extends AbstractTest
     }
 
     // =========================================================================
-    // _validateUploadToken() — error recording
+    // addProjectError() — error recording
     // =========================================================================
 
     #[Test]
-    public function testValidateUploadTokenRecordsErrorWhenTokenMissing(): void
+    public function testAddProjectErrorAppendsToResultErrors(): void
     {
-        // uploadToken is not set in the default test projectStructure
-        try {
-            $this->pm->callValidateUploadToken();
-            $this->fail('Expected Exception was not thrown');
-        } catch (Exception) {
-            // expected
-        }
+        $this->pm->callAddProjectError(-19, 'Invalid Upload Token.');
 
         $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $this->assertCount(1, $errors);
@@ -76,165 +72,18 @@ class ErrorRecordingTest extends AbstractTest
     }
 
     #[Test]
-    public function testValidateUploadTokenRecordsErrorWhenTokenInvalid(): void
+    public function testAddProjectErrorDoesNotResetExistingErrors(): void
     {
-        $this->pm->setProjectStructureValue('uploadToken', 'not-a-valid-uuid');
+        // Pre-populate with an error
+        $this->pm->callAddProjectError(-999, 'First error');
 
-        try {
-            $this->pm->callValidateUploadToken();
-            $this->fail('Expected Exception was not thrown');
-        } catch (Exception) {
-            // expected
-        }
+        // Add another error — should NOT reset the first one
+        $this->pm->callAddProjectError(400, 'Second error');
 
         $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $this->assertCount(1, $errors);
-        $this->assertEquals(-19, $errors[0]['code']);
-    }
-
-    #[Test]
-    public function testValidateUploadTokenThrowsExceptionWithCode(): void
-    {
-        $this->expectException(Exception::class);
-        $this->expectExceptionCode(-19);
-        $this->expectExceptionMessage('Invalid Upload Token.');
-
-        $this->pm->callValidateUploadToken();
-    }
-
-    #[Test]
-    public function testValidateUploadTokenDoesNotRecordErrorWhenTokenValid(): void
-    {
-        // A valid UUID token
-        $this->pm->setProjectStructureValue('uploadToken', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890');
-
-        // Should not throw
-        $this->pm->callValidateUploadToken();
-
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $this->assertCount(0, $errors);
-    }
-
-    // =========================================================================
-    // _validateXliffParameters() — error recording
-    // =========================================================================
-
-    #[Test]
-    public function testValidateXliffParametersRecordsErrorForInvalidType(): void
-    {
-        // Set xliff_parameters to a string (not an array or ArrayObject)
-        $this->pm->setProjectStructureValue('xliff_parameters', 'invalid-string');
-
-        try {
-            $this->pm->callValidateXliffParameters();
-            $this->fail('Expected DomainException was not thrown');
-        } catch (DomainException) {
-            // expected
-        }
-
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $this->assertCount(1, $errors);
-        $this->assertEquals(400, $errors[0]['code']);
-        $this->assertEquals('Invalid xliff_parameters value found.', $errors[0]['message']);
-    }
-
-    #[Test]
-    public function testValidateXliffParametersRethrowsDomainException(): void
-    {
-        $this->pm->setProjectStructureValue('xliff_parameters', 'invalid-string');
-
-        $this->expectException(DomainException::class);
-        $this->expectExceptionCode(400);
-        $this->expectExceptionMessage('Invalid xliff_parameters value found.');
-
-        $this->pm->callValidateXliffParameters();
-    }
-
-    #[Test]
-    public function testValidateXliffParametersDoesNotRecordErrorWhenValid(): void
-    {
-        // _validateXliffParameters expects an array, not XliffRulesModel
-        // (it calls XliffRulesModel::fromArray() internally)
-        $this->pm->setProjectStructureValue('xliff_parameters', []);
-
-        // Should not throw
-        $this->pm->callValidateXliffParameters();
-
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $this->assertCount(0, $errors);
-    }
-
-    // =========================================================================
-    // sanitizeProjectStructure() — error reset + validation
-    // =========================================================================
-
-    /**
-     * @throws Exception
-     */
-    #[Test]
-    public function testSanitizeProjectStructureResetsErrorsToArrayObject(): void
-    {
-        // Pre-populate errors with a plain array entry
-        $ps = $this->pm->getTestProjectStructure();
-        $ps->result['errors'][] = ['code' => -999, 'message' => 'pre-existing error'];
-
-        // Add required keys for sanitizeProjectStructure
-        $this->pm->setProjectStructureValue('uploadToken', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890');
-        $this->pm->setProjectStructureValue('xliff_parameters', []);
-        $this->pm->setProjectStructureValue('project_features', []);
-
-        $this->pm->sanitizeProjectStructure();
-
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
-
-        // Errors should have been reset to a fresh empty array (pre-existing error is gone)
-        $this->assertIsArray($errors);
-        $this->assertCount(0, $errors);
-    }
-
-    #[Test]
-    public function testSanitizeProjectStructureRecordsErrorOnInvalidToken(): void
-    {
-        // No uploadToken set — should fail on _validateUploadToken
-        $this->pm->setProjectStructureValue('project_features', []);
-
-        try {
-            $this->pm->sanitizeProjectStructure();
-            $this->fail('Expected Exception was not thrown');
-        } catch (Exception) {
-            // expected
-        }
-
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
-
-        // Errors should be an array (reset happened before validation)
-        $this->assertIsArray($errors);
-        $this->assertCount(1, $errors);
-        $this->assertEquals(-19, $errors[0]['code']);
-    }
-
-    /**
-     * @throws Exception
-     */
-    #[Test]
-    public function testSanitizeProjectStructureRecordsErrorOnInvalidXliffParams(): void
-    {
-        // Valid token but invalid xliff_parameters
-        $this->pm->setProjectStructureValue('uploadToken', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890');
-        $this->pm->setProjectStructureValue('xliff_parameters', 42);
-        $this->pm->setProjectStructureValue('project_features', []);
-
-        try {
-            $this->pm->sanitizeProjectStructure();
-            $this->fail('Expected DomainException was not thrown');
-        } catch (DomainException) {
-            // expected
-        }
-
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $this->assertIsArray($errors);
-        $this->assertCount(1, $errors);
-        $this->assertEquals(400, $errors[0]['code']);
+        $this->assertCount(2, $errors);
+        $this->assertEquals(-999, $errors[0]['code']);
+        $this->assertEquals(400, $errors[1]['code']);
     }
 
     // =========================================================================
@@ -244,11 +93,7 @@ class ErrorRecordingTest extends AbstractTest
     #[Test]
     public function testErrorEntryHasCodeAndMessageKeys(): void
     {
-        try {
-            $this->pm->callValidateUploadToken();
-        } catch (Exception) {
-            // expected
-        }
+        $this->pm->callAddProjectError(-19, 'Invalid Upload Token.');
 
         $errors = $this->pm->getTestProjectStructure()->result['errors'];
         $error = $errors[0];
@@ -262,14 +107,10 @@ class ErrorRecordingTest extends AbstractTest
     #[Test]
     public function testMultipleErrorsAreAppended(): void
     {
-        // First error: invalid token
-        try {
-            $this->pm->callValidateUploadToken();
-        } catch (Exception) {
-            // expected
-        }
+        // First error
+        $this->pm->callAddProjectError(-19, 'Invalid Upload Token.');
 
-        // Manually append a second error using arrow syntax (offsetGet returns by value)
+        // Second error appended manually
         $ps = $this->pm->getTestProjectStructure();
         $ps->result['errors'][] = ['code' => -999, 'message' => 'Second error'];
 

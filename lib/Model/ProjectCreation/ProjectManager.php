@@ -3,7 +3,6 @@
 namespace Model\ProjectCreation;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use DomainException;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\ActivityLog\ActivityLogStruct;
@@ -249,41 +248,6 @@ class ProjectManager
         return $features;
     }
 
-    /**
-     * @throws Exception
-     */
-    protected function validateUploadToken(): void
-    {
-        if (!isset($this->projectStructure->uploadToken) || !Utils::isTokenValid($this->projectStructure->uploadToken)) {
-            $this->addProjectError(ProjectCreationError::INVALID_UPLOAD_TOKEN->value, "Invalid Upload Token.");
-            throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function validateXliffParameters(): void
-    {
-        try {
-            $xliffParams = $this->projectStructure->xliff_parameters;
-
-            if ($xliffParams instanceof XliffRulesModel) {
-                // already validated (e.g., from a previous call)
-                return;
-            }
-
-            if (!is_array($xliffParams)) {
-                throw new DomainException("Invalid xliff_parameters value found.", 400);
-            }
-
-            $this->projectStructure->xliff_parameters = XliffRulesModel::fromArray($xliffParams);
-        } catch (DomainException $ex) {
-            $this->addProjectError($ex->getCode(), $ex->getMessage());
-            throw $ex;
-        }
-    }
-
     public function setTeam(TeamStruct $team): void
     {
         $this->projectStructure->team = $team;
@@ -376,7 +340,9 @@ class ProjectManager
             $options[ProjectsMetadataDao::FROM_API] = '1';
         }
 
-        // xliff_parameters — only persist when the model contains actual rules
+        // xliff_parameters — only persist when the model contains actual rules.
+        // Guard with instanceof: createProject() normalizes to XliffRulesModel,
+        // but saveMetadata() is protected and may be called from other paths.
         if (
             $this->projectStructure->xliff_parameters instanceof XliffRulesModel
             && (
@@ -474,20 +440,6 @@ class ProjectManager
     }
 
     /**
-     * Perform sanitization of the projectStructure and assign errors.
-     * Resets the error array to avoid further calls to pile up errors.
-     *
-     * @throws Exception
-     */
-    public function sanitizeProjectStructure(): void
-    {
-        $this->projectStructure->result = ['errors' => [], 'data' => []];
-// XXX Check if already needed (from NewController)
-        $this->validateUploadToken();
-        $this->validateXliffParameters();
-    }
-
-    /**
      * Append an error entry to projectStructure->result['errors'].
      *
      * Centralizes the ~19 occurrences of the duplicated appended pattern.
@@ -560,7 +512,14 @@ class ProjectManager
      */
     public function createProject(): void
     {
-        $this->sanitizeProjectStructure();
+        // Normalize xliff_parameters: after queue deserialization this arrives as
+        // a plain array because XliffRulesModel::$ruleSets is private and
+        // RecursiveArrayCopy::toArray() only sees public properties.
+        if (!$this->projectStructure->xliff_parameters instanceof XliffRulesModel) {
+            $this->projectStructure->xliff_parameters = XliffRulesModel::fromArray(
+                is_array($this->projectStructure->xliff_parameters) ? $this->projectStructure->xliff_parameters : []
+            );
+        }
 
         $fs = FilesStorageFactory::create();
 

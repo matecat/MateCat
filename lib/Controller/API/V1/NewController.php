@@ -156,7 +156,6 @@ class NewController extends KleinController
 
         $projectManager = new ProjectManager($projectStructure);
         $projectManager->setTeam($request['team']);
-        $projectManager->sanitizeProjectStructure();
 
         $fs::moveFileFromUploadSessionToQueuePath($uploadFile->getDirUploadToken());
 
@@ -248,21 +247,6 @@ class NewController extends KleinController
 
         $projectStructure->subfiltering_handlers = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
 
-        // Lara glossaries
-        if ($request['lara_glossaries']) {
-            $projectStructure->lara_glossaries = $request['lara_glossaries'];
-        }
-
-        // Lara style
-        if ($request['lara_style']) {
-            $projectStructure->lara_style = $request['lara_style'];
-        }
-
-        // mmtGlossaries
-        if ($request['mmt_glossaries']) {
-            $projectStructure->mmt_glossaries = $request['mmt_glossaries'];
-        }
-
         // MT Extra params
         foreach ($engine->getConfigurationParameters() as $param) {
             if ($request[$param] !== null) {
@@ -292,7 +276,7 @@ class NewController extends KleinController
         }
 
         if ($request['filters_extraction_parameters']) {
-            $projectStructure->filters_extraction_parameters = $request['filters_extraction_parameters'];
+            $projectStructure->filters_extraction_parameters = $request['filters_extraction_parameters']->jsonSerialize();
         }
 
         if ($request['xliff_parameters']) {
@@ -527,10 +511,6 @@ class NewController extends KleinController
             $metadata['project_info'] = $project_info;
         }
 
-        if (!empty($dialect_strict)) {
-            $metadata['dialect_strict'] = $dialect_strict;
-        }
-
         if (!empty($speech2text)) {
             $metadata['speech2text'] = $speech2text;
         }
@@ -712,7 +692,7 @@ class NewController extends KleinController
         $subject = (!empty($subject)) ? $subject : 'general';
 
         if (empty($subjectMap[$subject])) {
-            throw new InvalidArgumentException("Subject not allowed: " . $subject, -3);
+            throw new InvalidArgumentException("Subject not allowed: " . $subject, -5);
         }
 
         return $subject;
@@ -744,7 +724,7 @@ class NewController extends KleinController
         try {
             return $lang_handler->validateLanguage($source_lang);
         } catch (Exception) {
-            throw new InvalidArgumentException("Missing source language.");
+            throw new InvalidArgumentException("Missing source language.", -3);
         }
     }
 
@@ -762,7 +742,7 @@ class NewController extends KleinController
         $targets = array_unique($targets);
 
         if (empty($targets)) {
-            throw new InvalidArgumentException("Missing target language.");
+            throw new InvalidArgumentException("Missing target language.", -4);
         }
 
         try {
@@ -773,7 +753,7 @@ class NewController extends KleinController
                 $targets
             );
         } catch (Exception $e) {
-            throw new InvalidArgumentException($e->getMessage());
+            throw new InvalidArgumentException($e->getMessage(), -4);
         }
 
         return implode(',', $normalizedTargets);
@@ -1156,7 +1136,7 @@ class NewController extends KleinController
 
                 return $mmtGlossaries;
             } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage());
+                throw new InvalidArgumentException($exception->getMessage(), -6);
             }
         }
 

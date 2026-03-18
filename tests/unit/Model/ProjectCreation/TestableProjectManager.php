@@ -119,21 +119,11 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the protected _validateUploadToken.
-     * @throws Exception
+     * Public wrapper to invoke the protected addProjectError().
      */
-    public function callValidateUploadToken(): void
+    public function callAddProjectError(int $code, string $message): void
     {
-        $this->validateUploadToken();
-    }
-
-    /**
-     * Public wrapper to invoke the protected _validateXliffParameters.
-     * @throws Exception
-     */
-    public function callValidateXliffParameters(): void
-    {
-        $this->validateXliffParameters();
+        $this->addProjectError($code, $message);
     }
 
     /**

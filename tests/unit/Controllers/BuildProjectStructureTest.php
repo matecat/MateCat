@@ -6,6 +6,7 @@ use Controller\API\App\CreateProjectController;
 use Controller\API\V1\NewController;
 use Klein\Request;
 use Klein\Response;
+use Model\Filters\FiltersConfigTemplateStruct;
 use Model\LQA\QAModelInterface;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Users\UserStruct;
@@ -394,6 +395,15 @@ class BuildProjectStructureTest extends AbstractTest
     #[Test]
     public function newControllerSetsOptionalFieldsWhenPresent(): void
     {
+        // Engine must declare lara_glossaries, lara_style, mmt_glossaries
+        // as configuration parameters so the generic loop picks them up.
+        $engine = $this->createStub(AbstractEngine::class);
+        $engine->method('getConfigurationParameters')->willReturn([
+            'lara_glossaries',
+            'lara_style',
+            'mmt_glossaries',
+        ]);
+
         $request = $this->makeNewControllerRequest([
             'lara_glossaries' => 'glossary-abc',
             'lara_style'      => 'formal',
@@ -408,7 +418,7 @@ class BuildProjectStructureTest extends AbstractTest
             $filesFound,
             'tok',
             $this->user,
-            $this->engine,
+            $engine,
         );
 
         $this->assertSame('glossary-abc', $ps->lara_glossaries);
@@ -883,8 +893,11 @@ class BuildProjectStructureTest extends AbstractTest
     #[Test]
     public function newControllerSetsFiltersExtractionParametersWhenTruthy(): void
     {
+        $filtersStruct = new FiltersConfigTemplateStruct();
+        $filtersStruct->hydrateAllDto(['json' => ['extract_arrays' => true]]);
+
         $request = $this->makeNewControllerRequest([
-            'filters_extraction_parameters' => '{"key":"value"}',
+            'filters_extraction_parameters' => $filtersStruct,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -896,7 +909,7 @@ class BuildProjectStructureTest extends AbstractTest
             $this->engine,
         );
 
-        $this->assertSame('{"key":"value"}', $ps->filters_extraction_parameters);
+        $this->assertSame($filtersStruct->jsonSerialize(), $ps->filters_extraction_parameters);
     }
 
     #[Test]
@@ -1363,7 +1376,7 @@ class BuildProjectStructureTest extends AbstractTest
     {
         $data = $this->makeCreateControllerData([
             'dialect_strict'                => 'strict',
-            'filters_extraction_parameters' => '{"some": "param"}',
+            'filters_extraction_parameters' => ['some' => 'param'],
             'xliff_parameters'              => '{"xliff": "param"}',
         ]);
         $filesFound = $this->makeFilesFound();
@@ -1379,7 +1392,7 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         $this->assertSame('strict', $ps->dialect_strict);
-        $this->assertSame('{"some": "param"}', $ps->filters_extraction_parameters);
+        $this->assertSame(['some' => 'param'], $ps->filters_extraction_parameters);
         $this->assertSame('{"xliff": "param"}', $ps->xliff_parameters);
     }
 
