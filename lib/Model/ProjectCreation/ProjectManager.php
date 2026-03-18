@@ -1200,10 +1200,8 @@ class ProjectManager
     }
 
     /**
-     * @throws Exception
-     */
-    /**
      * @return list<JobStruct>
+     * @throws Exception
      */
     protected function createJobs(): array
     {

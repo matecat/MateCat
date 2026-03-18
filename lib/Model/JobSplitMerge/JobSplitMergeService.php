@@ -452,9 +452,9 @@ class JobSplitMergeService
 
             // duplicate character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata
             $metadata = [
-                'character_counter_count_tags',
-                'character_counter_mode',
-                'subfiltering_handlers',
+                MetadataDao::CHARACTER_COUNTER_COUNT_TAGS,
+                MetadataDao::CHARACTER_COUNTER_MODE,
+                MetadataDao::SUBFILTERING_HANDLERS,
             ];
 
             foreach ($metadata as $key) {
@@ -571,9 +571,9 @@ class JobSplitMergeService
             if ($i > 0) {
                 // delete character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata (not from the first job)
                 $metadata = [
-                    'character_counter_count_tags',
-                    'character_counter_mode',
-                    'subfiltering_handlers',
+                    MetadataDao::CHARACTER_COUNTER_COUNT_TAGS,
+                    MetadataDao::CHARACTER_COUNTER_MODE,
+                    MetadataDao::SUBFILTERING_HANDLERS,
                 ];
 
                 foreach ($metadata as $key) {

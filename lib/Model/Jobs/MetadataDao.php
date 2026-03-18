@@ -20,6 +20,8 @@ class MetadataDao extends AbstractDao
     const string _query_metadata_by_job_password = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
     const string _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
     const string SUBFILTERING_HANDLERS = 'subfiltering_handlers';
+    const string CHARACTER_COUNTER_COUNT_TAGS = 'character_counter_count_tags';
+    const string CHARACTER_COUNTER_MODE = 'character_counter_mode';
 
     /**
      * @param int $id_job

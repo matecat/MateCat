@@ -6,6 +6,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\JobSplitMerge\JobSplitMergeService;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -28,6 +29,7 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     private ?CounterModel $counterModelOverride = null;
     private ?ProjectDao $projectDaoOverride = null;
     private ?ProjectsMetadataDao $projectsMetadataDaoOverride = null;
+    private ?JobsMetadataDao $jobsMetadataDaoOverride = null;
     private ?TranslatorsModel $translatorsModelOverride = null;
     private ?UserDao $userDaoOverride = null;
 
@@ -142,6 +144,18 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     protected function createProjectsMetadataDao(): ProjectsMetadataDao
     {
         return $this->projectsMetadataDaoOverride ?? parent::createProjectsMetadataDao();
+    }
+
+    // ── JobsMetadataDao ──
+
+    public function setJobsMetadataDao(JobsMetadataDao $dao): void
+    {
+        $this->jobsMetadataDaoOverride = $dao;
+    }
+
+    protected function createJobMetadataDao(): JobsMetadataDao
+    {
+        return $this->jobsMetadataDaoOverride ?? parent::createJobMetadataDao();
     }
 
     // ── TranslatorsModel ──
