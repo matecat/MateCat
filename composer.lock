@@ -1909,16 +1909,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.3",
+            "version": "v3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8"
+                "reference": "1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d9def10c51c966a9a20a0ea940b614804ff8fbd8",
-                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7",
+                "reference": "1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7",
                 "shasum": ""
             },
             "require": {
@@ -1928,7 +1928,7 @@
                 "matecat/emoji-to-entity-converter": "^2",
                 "matecat/xml-dom-parser": "^2",
                 "php": ">=8.3",
-                "phpstan/phpstan": "^2"
+                "phpstan/phpstan": "@stable"
             },
             "require-dev": {
                 "ext-json": "*",
@@ -1965,9 +1965,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.3"
+                "source": "https://github.com/matecat/subfiltering/tree/v3.0.4"
             },
-            "time": "2026-02-19T18:20:02+00:00"
+            "time": "2026-03-18T14:43:51+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
