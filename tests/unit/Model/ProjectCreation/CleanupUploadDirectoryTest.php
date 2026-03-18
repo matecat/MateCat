@@ -6,33 +6,26 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
-use Model\FilesStorage\S3FilesStorage;
+use Model\FilesStorage\AbstractFilesStorage;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
-use Utils\Registry\AppConfig;
 
 /**
  * Unit tests for {@see \Model\ProjectCreation\ProjectManager::cleanupUploadDirectory()}.
  *
- * Tests the S3 code path (where AbstractFilesStorage::isOnS3() returns true),
- * since the local filesystem path uses static Utils::deleteDir() and is_dir()
- * which cannot be intercepted without modifying production code.
- *
  * Verifies:
- * - S3 path: calls $fs->deleteQueue() with the upload directory
- * - S3 path: does not throw when deleteQueue succeeds
+ * - calls $fs->deleteQueue() with the upload directory
+ * - does not throw when deleteQueue succeeds
  * - Exception in deleteQueue is caught (does not propagate)
  */
 class CleanupUploadDirectoryTest extends AbstractTest
 {
     private TestableProjectManager $pm;
-    private string $savedStorageMethod;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->savedStorageMethod = AppConfig::$FILE_STORAGE_METHOD ?? '';
 
         $this->pm = new TestableProjectManager();
         $this->pm->initForTest(
@@ -43,19 +36,12 @@ class CleanupUploadDirectoryTest extends AbstractTest
         );
     }
 
-    protected function tearDown(): void
-    {
-        AppConfig::$FILE_STORAGE_METHOD = $this->savedStorageMethod;
-        parent::tearDown();
-    }
-
     #[Test]
-    public function s3PathCallsDeleteQueueWithUploadDir(): void
+    public function callsDeleteQueueWithUploadDir(): void
     {
-        AppConfig::$FILE_STORAGE_METHOD = 's3';
         $this->pm->setUploadDir('/tmp/test_upload_dir');
 
-        $fs = $this->createMock(S3FilesStorage::class);
+        $fs = $this->createMock(AbstractFilesStorage::class);
         $fs->expects($this->once())
             ->method('deleteQueue')
             ->with('/tmp/test_upload_dir');
@@ -64,12 +50,11 @@ class CleanupUploadDirectoryTest extends AbstractTest
     }
 
     #[Test]
-    public function s3PathDoesNotThrowOnSuccess(): void
+    public function doesNotThrowOnSuccess(): void
     {
-        AppConfig::$FILE_STORAGE_METHOD = 's3';
         $this->pm->setUploadDir('/tmp/dir');
 
-        $fs = $this->createStub(S3FilesStorage::class);
+        $fs = $this->createStub(AbstractFilesStorage::class);
 
         // Should not throw
         $this->pm->callCleanupUploadDirectory($fs);
@@ -77,14 +62,13 @@ class CleanupUploadDirectoryTest extends AbstractTest
     }
 
     #[Test]
-    public function s3PathCatchesExceptionFromDeleteQueue(): void
+    public function catchesExceptionFromDeleteQueue(): void
     {
-        AppConfig::$FILE_STORAGE_METHOD = 's3';
         $this->pm->setUploadDir('/tmp/failing_dir');
 
-        $fs = $this->createStub(S3FilesStorage::class);
+        $fs = $this->createStub(AbstractFilesStorage::class);
         $fs->method('deleteQueue')
-            ->willThrowException(new Exception('S3 delete failed'));
+            ->willThrowException(new Exception('delete failed'));
 
         // Should NOT throw — exception is caught internally
         $this->pm->callCleanupUploadDirectory($fs);
@@ -92,13 +76,12 @@ class CleanupUploadDirectoryTest extends AbstractTest
     }
 
     #[Test]
-    public function s3PathHandlesEmptyUploadDir(): void
+    public function handlesEmptyUploadDir(): void
     {
-        AppConfig::$FILE_STORAGE_METHOD = 's3';
         $this->pm->setUploadDir('');
 
         $capturedDir = null;
-        $fs = $this->createMock(S3FilesStorage::class);
+        $fs = $this->createMock(AbstractFilesStorage::class);
         $fs->expects($this->once())
             ->method('deleteQueue')
             ->willReturnCallback(function ($dir) use (&$capturedDir) {

@@ -1041,22 +1041,13 @@ class ProjectManager
     }
 
     /**
-     * Delete the upload directory from S3 or the local filesystem.
+     * Delete the upload directory via the storage abstraction.
      */
-    private function cleanupUploadDirectory(AbstractFilesStorage $fs): void // XXX
+    private function cleanupUploadDirectory(AbstractFilesStorage $fs): void
     {
         try {
-            if (AbstractFilesStorage::isOnS3()) {
-                $this->log('Deleting folder' . $this->uploadDir . ' from S3');
-                /** @var S3FilesStorage $fs */
-                $fs->deleteQueue($this->uploadDir);
-            } else {
-                $this->log('Deleting folder' . $this->uploadDir . ' from filesystem');
-                Utils::deleteDir($this->uploadDir);
-                if (is_dir($this->uploadDir . '_converted')) {
-                    Utils::deleteDir($this->uploadDir . '_converted');
-                }
-            }
+            $this->log('Deleting upload directory: ' . $this->uploadDir);
+            $fs->deleteQueue($this->uploadDir);
         } catch (Exception $e) {
             $output  = "Exception: " . $e->getMessage() . "\n";
             $output .= "REQUEST URI: " . ($_SERVER['REQUEST_URI'] ?? '(unavailable)') . "\n";

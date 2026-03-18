@@ -417,6 +417,17 @@ class FsFilesStorage extends AbstractFilesStorage
     }
 
     /**
+     * @inheritDoc
+     */
+    public function deleteQueue(string $uploadDir): void
+    {
+        Utils::deleteDir($uploadDir);
+        if (is_dir($uploadDir . '_converted')) {
+            Utils::deleteDir($uploadDir . '_converted');
+        }
+    }
+
+    /**
      **********************************************************************************************
      * 4. FAST ANALYSIS
      **********************************************************************************************
