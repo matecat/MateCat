@@ -17,7 +17,7 @@ class SubfilteringOptionsValidatorTest extends AbstractTest
     {
         $result = SubfilteringOptionsValidator::validate('none');
 
-        $this->assertEquals("null", $result);
+        $this->assertNull($result);
     }
 
     #[Test]
@@ -85,7 +85,7 @@ class SubfilteringOptionsValidatorTest extends AbstractTest
     {
         $result = SubfilteringOptionsValidator::validate('null');
 
-        $this->assertEquals("null", $result);
+        $this->assertNull($result);
     }
 
     #[Test]

@@ -22,11 +22,11 @@ class SubfilteringOptionsValidator
      * @return ?string The decoded JSON data as an associative array, or an empty array if an error occurs.
      * @throws Exception
      */
-    public static function validate(string $subfiltering_handlers): string|array|null
+    public static function validate(string $subfiltering_handlers): ?array
     {
         if ($subfiltering_handlers == 'none' || $subfiltering_handlers == 'null') {
             // subfiltering is disabled
-            return 'null';
+            return null;
         }
 
         // check if the string is equals to the default subfiltering handlers
