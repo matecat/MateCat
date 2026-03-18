@@ -92,8 +92,7 @@ function CatTool() {
   } = useResizable({initialHeight: 500, minHeight: 100})
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(true)
-  const contextReviewUrl =
-    'https://dev.matecat.com/context-review/300/cb41cb913ea7#103686'
+  const contextReviewUrl = `${window.origin}/context-review/${config.id_job}/${config.password}`
   const popupWindowRef = useRef(null)
 
   const togglePreview = useCallback(() => {
