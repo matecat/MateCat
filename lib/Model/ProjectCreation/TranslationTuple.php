@@ -12,15 +12,16 @@ namespace Model\ProjectCreation;
 class TranslationTuple
 {
     // Set by SegmentStorageService::storeSegments()
-    public int    $segmentId;
+    public int $segmentId;
     // This is not used, but the information is kept for completeness of information
     public string $internalId;
     public string $segmentHash;
-    public int    $fileId;
+    public int $fileId;
 
     public function __construct(
         public readonly string $target,
-        public readonly array  $transUnit,
-        public readonly ?int   $mrkPosition = null,
-    ) {}
+        public readonly array $transUnit,
+        public readonly ?int $mrkPosition = null,
+    ) {
+    }
 }

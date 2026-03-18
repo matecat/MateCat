@@ -34,9 +34,9 @@ class TmKeyService
 {
     use LogsMessages;
 
-    private const int TMX_POLL_TIMEOUT_MINUTES   = 10;
-    private const int TMX_POLL_INITIAL_INTERVAL  = 3;
-    private const int TMX_POLL_MAX_INTERVAL      = 30;
+    private const int TMX_POLL_TIMEOUT_MINUTES = 10;
+    private const int TMX_POLL_INITIAL_INTERVAL = 3;
+    private const int TMX_POLL_MAX_INTERVAL = 30;
 
     private TMSService $tmxServiceWrapper;
     private IDatabase $dbHandler;
@@ -50,14 +50,14 @@ class TmKeyService
     private Closure $s3QueueFileDownloader;
 
     public function __construct(
-        TMSService    $tmxServiceWrapper,
-        IDatabase     $dbHandler,
+        TMSService $tmxServiceWrapper,
+        IDatabase $dbHandler,
         MatecatLogger $logger,
-        Closure       $s3QueueFileDownloader,
+        Closure $s3QueueFileDownloader,
     ) {
-        $this->tmxServiceWrapper    = $tmxServiceWrapper;
-        $this->dbHandler            = $dbHandler;
-        $this->logger               = $logger;
+        $this->tmxServiceWrapper = $tmxServiceWrapper;
+        $this->dbHandler = $dbHandler;
+        $this->logger = $logger;
         $this->s3QueueFileDownloader = $s3QueueFileDownloader;
     }
 
@@ -92,7 +92,7 @@ class TmKeyService
 
         //check if the MyMemory keys provided by the user are already associated with him.
         $userMemoryKeys = $this->getKeyringOwnerKeys($projectStructure->uid);
-        $userTmKeys     = [];
+        $userTmKeys = [];
         $memoryKeysToBeInserted = [];
 
         //extract user tm keys
@@ -104,11 +104,11 @@ class TmKeyService
 
         foreach ($projectStructure->private_tm_key as $_tmKey) {
             if (!in_array($_tmKey['key'], $userTmKeys)) {
-                $newMemoryKey     = new MemoryKeyStruct();
-                $newTmKey         = new TmKeyStruct();
-                $newTmKey->key    = $_tmKey['key'];
-                $newTmKey->tm     = true;
-                $newTmKey->glos   = true;
+                $newMemoryKey = new MemoryKeyStruct();
+                $newTmKey = new TmKeyStruct();
+                $newTmKey->key = $_tmKey['key'];
+                $newTmKey->tm = true;
+                $newTmKey->glos = true;
 
                 // THIS IS A NEW KEY and must be inserted into the user keyring
                 // So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty,
@@ -118,7 +118,7 @@ class TmKeyService
                 $newTmKey->name = (!empty($_tmKey['name']) ? (string)str_replace("{{pid}}", (string)$projectStructure->id_project, $_tmKey['name']) : $firstTMXFileName);
 
                 $newMemoryKey->tm_key = $newTmKey;
-                $newMemoryKey->uid    = $projectStructure->uid;
+                $newMemoryKey->uid = $projectStructure->uid;
 
                 $memoryKeysToBeInserted[] = $newMemoryKey;
             } else {
@@ -220,9 +220,9 @@ class TmKeyService
     protected function loopForTMXLoadStatus(ProjectStructure $projectStructure, array $memoryFiles): void
     {
         foreach ($memoryFiles as $file) {
-            $deadline     = strtotime('+' . self::TMX_POLL_TIMEOUT_MINUTES . ' minutes');
+            $deadline = strtotime('+' . self::TMX_POLL_TIMEOUT_MINUTES . ' minutes');
             $pollInterval = self::TMX_POLL_INITIAL_INTERVAL;
-            $startTime    = time();
+            $startTime = time();
 
             while (true) {
                 try {
@@ -310,7 +310,7 @@ class TmKeyService
     private function addProjectError(ProjectStructure $projectStructure, int $code, string $message): void
     {
         $projectStructure->result['errors'][] = [
-            "code"    => $code,
+            "code" => $code,
             "message" => $message,
         ];
     }

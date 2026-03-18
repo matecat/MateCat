@@ -55,17 +55,17 @@ class SegmentStorageService
     private array $minMaxSegmentsId = [];
 
     public function __construct(
-        IDatabase            $dbHandler,
-        FeatureSet           $features,
-        MatecatLogger        $logger,
-        MateCatFilter        $filter,
-        ProjectManagerModel  $projectManagerModel,
+        IDatabase $dbHandler,
+        FeatureSet $features,
+        MatecatLogger $logger,
+        MateCatFilter $filter,
+        ProjectManagerModel $projectManagerModel,
     ) {
-        $this->dbHandler            = $dbHandler;
-        $this->features             = $features;
-        $this->logger               = $logger;
-        $this->filter               = $filter;
-        $this->projectManagerModel  = $projectManagerModel;
+        $this->dbHandler = $dbHandler;
+        $this->features = $features;
+        $this->logger = $logger;
+        $this->filter = $filter;
+        $this->projectManagerModel = $projectManagerModel;
     }
 
     // ── Public API ──────────────────────────────────────────────────
@@ -84,8 +84,8 @@ class SegmentStorageService
      * Store segments in a single file: reserve IDs, persist original data
      * and metadata, bulk-insert segment rows, and link IDs to notes/contexts/translations.
      *
-     * @param string|int          $fid
-     * @param ProjectStructure    $projectStructure
+     * @param string|int $fid
+     * @param ProjectStructure $projectStructure
      *
      * @throws Exception
      */
@@ -101,11 +101,11 @@ class SegmentStorageService
 
         // Update/Initialize the min-max sequences id
         if (!isset($this->minMaxSegmentsId['job_first_segment'])) {
-            $this->minMaxSegmentsId['job_first_segment'] = (int) reset($sequenceIds);
+            $this->minMaxSegmentsId['job_first_segment'] = (int)reset($sequenceIds);
         }
 
         // Update the last id; if there is another cycle, this value gets overwritten
-        $this->minMaxSegmentsId['job_last_segment'] = (int) end($sequenceIds);
+        $this->minMaxSegmentsId['job_last_segment'] = (int)end($sequenceIds);
 
         $segments_metadata = [];
         foreach ($sequenceIds as $position => $id_segment) {
@@ -145,15 +145,15 @@ class SegmentStorageService
             $projectStructure->file_segments_count[$fid]++;
 
             $_metadata = [
-                'id'                => $id_segment,
-                'internal_id'       => SegmentExtractor::sanitizedUnitId($projectStructure->segments[$fid][$position]->internal_id, (int)$fid),
-                'segment'           => $projectStructure->segments[$fid][$position]->segment,
-                'segment_hash'      => $projectStructure->segments[$fid][$position]->segment_hash,
-                'raw_word_count'    => $projectStructure->segments[$fid][$position]->raw_word_count,
-                'xliff_mrk_id'      => $projectStructure->segments[$fid][$position]->xliff_mrk_id,
-                'show_in_cattool'   => $projectStructure->segments[$fid][$position]->show_in_cattool,
+                'id' => $id_segment,
+                'internal_id' => SegmentExtractor::sanitizedUnitId($projectStructure->segments[$fid][$position]->internal_id, (int)$fid),
+                'segment' => $projectStructure->segments[$fid][$position]->segment,
+                'segment_hash' => $projectStructure->segments[$fid][$position]->segment_hash,
+                'raw_word_count' => $projectStructure->segments[$fid][$position]->raw_word_count,
+                'xliff_mrk_id' => $projectStructure->segments[$fid][$position]->xliff_mrk_id,
+                'show_in_cattool' => $projectStructure->segments[$fid][$position]->show_in_cattool,
                 'additional_params' => null,
-                'file_id'           => $fid,
+                'file_id' => $fid,
             ];
 
             /*
@@ -217,10 +217,10 @@ class SegmentStorageService
                     }
 
                     $tuple = $projectStructure->translations[$row['internal_id']][$short_var_counter];
-                    $tuple->segmentId   = (int) $row['id'];
-                    $tuple->internalId  = $row['internal_id'];
+                    $tuple->segmentId = (int)$row['id'];
+                    $tuple->internalId = $row['internal_id'];
                     $tuple->segmentHash = $row['segment_hash'];
-                    $tuple->fileId      = (int) $row['file_id'];
+                    $tuple->fileId = (int)$row['file_id'];
 
                     // Remove an existent translation, we won't send these segments to the analysis because it is marked as locked
                     /*
@@ -248,12 +248,14 @@ class SegmentStorageService
      */
     public function cleanSegmentsMetadata(ProjectStructure $projectStructure): void
     {
-        $projectStructure->segments_metadata = array_values(array_filter(
-            $projectStructure->segments_metadata,
-            function ($value) {
-                return $value['show_in_cattool'] == 1;
-            }
-        ));
+        $projectStructure->segments_metadata = array_values(
+            array_filter(
+                $projectStructure->segments_metadata,
+                function ($value) {
+                    return $value['show_in_cattool'] == 1;
+                }
+            )
+        );
     }
 
     /**
@@ -266,8 +268,8 @@ class SegmentStorageService
      *  - Builds an SQL values array for bulk insert
      *  - Sets the create_2_pass_review flag when a final-state translation is found
      *
-     * @param JobStruct            $job              The job these translations belong to
-     * @param ProjectStructure     $projectStructure The mutable project structure
+     * @param JobStruct $job The job these translations belong to
+     * @param ProjectStructure $projectStructure The mutable project structure
      *
      * @throws Exception
      */
@@ -344,20 +346,20 @@ class SegmentStorageService
 
                 /* WARNING: do not change the order of the keys */
                 $sql_values = [
-                    'id_segment'            => $translationTuple->segmentId,
-                    'id_job'                => $jid,
-                    'segment_hash'          => $translationTuple->segmentHash,
-                    'status'                => $rule->asEditorStatus(),
-                    'translation'           => $this->filter->fromLayer1ToLayer0($translation),
-                    'suggestion'            => $this->filter->fromLayer1ToLayer0($translation),
-                    'locked'                => 0, // not allowed to change locked status for pre-translations
-                    'match_type'            => $rule->asMatchType(),
-                    'eq_word_count'         => $rule->asEquivalentWordCount($segment->raw_word_count, $payable_rates),
+                    'id_segment' => $translationTuple->segmentId,
+                    'id_job' => $jid,
+                    'segment_hash' => $translationTuple->segmentHash,
+                    'status' => $rule->asEditorStatus(),
+                    'translation' => $this->filter->fromLayer1ToLayer0($translation),
+                    'suggestion' => $this->filter->fromLayer1ToLayer0($translation),
+                    'locked' => 0, // not allowed to change locked status for pre-translations
+                    'match_type' => $rule->asMatchType(),
+                    'eq_word_count' => $rule->asEquivalentWordCount($segment->raw_word_count, $payable_rates),
                     'serialized_errors_list' => ($check->thereAreErrors()) ? $check->getErrorsJSON() : '',
-                    'warning'               => ($check->thereAreErrors()) ? 1 : 0,
-                    'suggestion_match'      => null,
-                    'standard_word_count'   => $rule->asStandardWordCount($segment->raw_word_count, $payable_rates),
-                    'version_number'        => 0,
+                    'warning' => ($check->thereAreErrors()) ? 1 : 0,
+                    'suggestion_match' => null,
+                    'standard_word_count' => $rule->asStandardWordCount($segment->raw_word_count, $payable_rates),
+                    'version_number' => 0,
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -374,7 +376,6 @@ class SegmentStorageService
         if ($createSecondPassReview) {
             $projectStructure->create_2_pass_review = true;
         }
-
     }
 
     // ── Factory methods (overridable in tests) ──────────────────────
@@ -403,8 +404,8 @@ class SegmentStorageService
      * Persist an original data map for a segment.
      * Wraps the static DAO call so tests can override.
      *
-     * @param int                    $id_segment
-     * @param array<string, mixed>   $map
+     * @param int $id_segment
+     * @param array<string, mixed> $map
      */
     protected function insertOriginalDataRecord(int $id_segment, array $map): void
     {
@@ -439,8 +440,8 @@ class SegmentStorageService
     /**
      * Link segment ID to notes entries for later insertion.
      *
-     * @param array<string, mixed>   $row
-     * @param ProjectStructure       $projectStructure
+     * @param array<string, mixed> $row
+     * @param ProjectStructure $projectStructure
      */
     private function setSegmentIdForNotes(array $row, ProjectStructure $projectStructure): void
     {
@@ -458,8 +459,8 @@ class SegmentStorageService
     /**
      * Link segment ID to context-group entries for later insertion.
      *
-     * @param array<string, mixed>   $row
-     * @param ProjectStructure       $projectStructure
+     * @param array<string, mixed> $row
+     * @param ProjectStructure $projectStructure
      */
     private function setSegmentIdForContexts(array $row, ProjectStructure $projectStructure): void
     {

@@ -2,32 +2,56 @@
 
 namespace unit\Model\ProjectCreation;
 
-use Exception;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
-use Model\Files\MetadataDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\ProjectCreation\JobCreationService;
+use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
-use Utils\Registry\AppConfig;
 
 /**
- * Unit tests for {@see \Model\ProjectCreation\ProjectManager::saveJobsMetadata()}.
+ * A testable subclass of JobCreationService that allows injecting a mock JobsMetadataDao.
+ */
+class TestableJobCreationService extends JobCreationService
+{
+    private ?JobsMetadataDao $jobsMetadataDaoOverride = null;
+
+    public function setJobsMetadataDao(JobsMetadataDao $dao): void
+    {
+        $this->jobsMetadataDaoOverride = $dao;
+    }
+
+    protected function getJobsMetadataDao(): JobsMetadataDao
+    {
+        return $this->jobsMetadataDaoOverride ?? parent::getJobsMetadataDao();
+    }
+
+    /**
+     * Public wrapper to invoke the private saveJobsMetadata().
+     */
+    public function callSaveJobsMetadata(JobStruct $job, ProjectStructure $projectStructure): void
+    {
+        $ref = new ReflectionClass(JobCreationService::class);
+        $method = $ref->getMethod('saveJobsMetadata');
+        $method->invoke($this, $job, $projectStructure);
+    }
+}
+
+/**
+ * Unit tests for {@see \Model\ProjectCreation\JobCreationService::saveJobsMetadata()}.
  *
- * Tests verify that job-level metadata from `$this->projectStructure` (ProjectStructure DTO)
+ * Tests verify that job-level metadata from ProjectStructure DTO
  * is correctly collected, transformed, and persisted via `JobsMetadataDao::set()`.
- *
- * Values are set via `setProjectStructureValue()` which updates the ProjectStructure directly.
- * Group A keys are now typed properties on the ProjectStructure.
  *
  * @see REFACTORING_PLAN.md — Step 0d
  */
 class SaveJobsMetadataTest extends AbstractTest
 {
-    private TestableProjectManager $pm;
-    private string $originalFileStorageMethod;
+    private TestableJobCreationService $service;
+    private ProjectStructure $projectStructure;
     private JobStruct $job;
 
     /**
@@ -41,30 +65,25 @@ class SaveJobsMetadataTest extends AbstractTest
     private const JOB_ID       = 42;
     private const JOB_PASSWORD = 'abc123';
 
-    /**
-     * @throws Exception
-     */
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->originalFileStorageMethod = AppConfig::$FILE_STORAGE_METHOD;
-        AppConfig::$FILE_STORAGE_METHOD = 'fs';
-
-        $featureSet = new FeatureSet();
-        /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT');
-        $filesMetadataDao = $this->createStub(MetadataDao::class);
+        $featureSet = $this->createStub(FeatureSet::class);
         $logger = $this->createStub(MatecatLogger::class);
 
-        $this->pm = new TestableProjectManager();
-        $this->pm->initForTest($filter, $featureSet, $filesMetadataDao, $logger);
+        $this->service = new TestableJobCreationService($featureSet, $logger);
 
-        // Set the default subfiltering_handlers (always required)
-        $this->pm->setProjectStructureValue(
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            '[]'
-        );
+        // Build a ProjectStructure with defaults
+        $this->projectStructure = new ProjectStructure([
+            'id_project' => 999,
+            'source_language' => 'en-US',
+            'target_language' => ['it-IT'],
+            'private_tm_key' => [],
+            'result' => ['errors' => []],
+            // Default subfiltering_handlers (always required)
+            JobsMetadataDao::SUBFILTERING_HANDLERS => '[]',
+        ]);
 
         // Create a stub JobsMetadataDao that records set() calls
         $this->daoSetCalls = [];
@@ -75,7 +94,7 @@ class SaveJobsMetadataTest extends AbstractTest
 
                 return null;
             });
-        $this->pm->setJobsMetadataDao($stubDao);
+        $this->service->setJobsMetadataDao($stubDao);
 
         // Build a minimal JobStruct
         $this->job             = new JobStruct();
@@ -88,28 +107,19 @@ class SaveJobsMetadataTest extends AbstractTest
         $this->job->job_last_segment  = 10;
     }
 
-    public function tearDown(): void
-    {
-        AppConfig::$FILE_STORAGE_METHOD = $this->originalFileStorageMethod;
-        parent::tearDown();
-    }
-
     // =========================================================================
     // Helpers
     // =========================================================================
 
     /**
-     * Set values on the project manager's projectStructure (and config DTO),
-     * then invoke saveJobsMetadata.
+     * Set values on the projectStructure, then invoke saveJobsMetadata.
      */
     private function setConfigAndSave(array $extras = []): void
     {
         foreach ($extras as $key => $value) {
-            $this->pm->setProjectStructureValue($key, $value);
+            $this->projectStructure->$key = $value;
         }
-        // The ArrayObject param was removed — Group A keys are now read
-        // from $this->config via the parent's instance property.
-        $this->pm->callSaveJobsMetadata($this->job);
+        $this->service->callSaveJobsMetadata($this->job, $this->projectStructure);
     }
 
     /**
@@ -286,8 +296,6 @@ class SaveJobsMetadataTest extends AbstractTest
 
         $calls = $this->findDaoCallsByKey('tm_prioritization');
         $this->assertCount(1, $calls);
-        // The code passes `1` (int) but the DAO's `string $value` type-hint
-        // coerces it to "1" before our callback receives it.
         $this->assertSame('1', $calls[0][3]);
     }
 
@@ -298,8 +306,6 @@ class SaveJobsMetadataTest extends AbstractTest
 
         $calls = $this->findDaoCallsByKey('tm_prioritization');
         $this->assertCount(1, $calls);
-        // The code passes `0` (int) but the DAO's `string $value` type-hint
-        // coerces it to "0".
         $this->assertSame('0', $calls[0][3]);
     }
 
@@ -340,8 +346,6 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testDialectStrictTrimsWhitespaceForMatching(): void
     {
-        // The code does trim($lang) === trim($newJob->target), so whitespace
-        // around the key should still match
         $dialectJson = json_encode([' it-IT ' => 'trimmed_value']);
 
         // Also set target with trailing whitespace to test trim on both sides
@@ -430,7 +434,6 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCharacterCounterCountTagsWithIntegerOnePersistsOne(): void
     {
-        // The code uses ternary `? "1" : "0"` — integer 1 is truthy
         $this->setConfigAndSave(['character_counter_count_tags' => 1]);
 
         $calls = $this->findDaoCallsByKey('character_counter_count_tags');
@@ -441,7 +444,6 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCharacterCounterCountTagsWithIntegerZeroPersistsZero(): void
     {
-        // Integer 0 is falsy
         $this->setConfigAndSave(['character_counter_count_tags' => 0]);
 
         $calls = $this->findDaoCallsByKey('character_counter_count_tags');
@@ -452,7 +454,6 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testTmPrioritizationWithStringOnePersistsOne(): void
     {
-        // String "1" is truthy — ternary will produce int 1, coerced to "1"
         $this->setConfigAndSave(['tm_prioritization' => '1']);
 
         $calls = $this->findDaoCallsByKey('tm_prioritization');

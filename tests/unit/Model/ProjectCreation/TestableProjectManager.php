@@ -8,8 +8,7 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
-use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
@@ -160,30 +159,18 @@ class TestableProjectManager extends ProjectManager
         $this->saveMetadata();
     }
 
-    // ── saveJobsMetadata() testing support ──────────────────────────
+    // ── JobCreationService override ──────────────────────────────
 
-    private ?JobsMetadataDao $jobsMetadataDaoOverride = null;
+    private ?JobCreationService $jobCreationServiceOverride = null;
 
-    /**
-     * Inject a mock/stub JobsMetadataDao for saveJobsMetadata() tests.
-     */
-    public function setJobsMetadataDao(JobsMetadataDao $dao): void
+    public function setJobCreationService(JobCreationService $service): void
     {
-        $this->jobsMetadataDaoOverride = $dao;
+        $this->jobCreationServiceOverride = $service;
     }
 
-    protected function getJobsMetadataDao(): JobsMetadataDao
+    protected function getJobCreationService(): JobCreationService
     {
-        return $this->jobsMetadataDaoOverride ?? parent::getJobsMetadataDao();
-    }
-
-    /**
-     * Public wrapper to invoke the protected saveJobsMetadata().
-     * @throws ReflectionException
-     */
-    public function callSaveJobsMetadata(JobStruct $newJob): void
-    {
-        $this->saveJobsMetadata($newJob);
+        return $this->jobCreationServiceOverride ?? parent::getJobCreationService();
     }
 
     // ── Step 11b: setters / getters / config methods testing support ──

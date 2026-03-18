@@ -6,7 +6,6 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\ActivityLog\ActivityLogStruct;
-use Model\Analysis\PayableRates;
 use Model\Concerns\LogsMessages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
@@ -23,11 +22,8 @@ use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\S3FilesStorage;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
-use Model\PayableRates\CustomPayableRateDao;
-use Model\PayableRates\CustomPayableRateStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -48,7 +44,6 @@ use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
-use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
@@ -100,6 +95,8 @@ class ProjectManager
     protected ?SegmentStorageService $segmentStorageService = null;
 
     protected ?ProjectManagerModel $projectManagerModel = null;
+
+    protected ?JobCreationService $jobCreationService = null;
 
     /**
      * ProjectManager constructor.
@@ -229,6 +226,21 @@ class ProjectManager
     }
 
     /**
+     * Get or lazily create the JobCreationService instance.
+     */
+    protected function getJobCreationService(): JobCreationService
+    {
+        if ($this->jobCreationService === null) {
+            $this->jobCreationService = new JobCreationService(
+                $this->features,
+                $this->logger,
+            );
+        }
+
+        return $this->jobCreationService;
+    }
+
+    /**
      * @return list<BasicFeatureStruct>
      */
     protected function getRequestedFeatures(): array
@@ -269,53 +281,6 @@ class ProjectManager
                 (int)$this->projectStructure->id_project,
                 ProjectsMetadataDao::FEATURES_KEY,
                 implode(',', $featureCodes)
-            );
-        }
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    protected function saveJobsMetadata(JobStruct $newJob): void
-    {
-        $jobsMetadataDao = $this->getJobsMetadataDao();
-
-        // Simple key-value metadata — read from typed DTO
-        if (isset($this->projectStructure->public_tm_penalty)) {
-            $jobsMetadataDao->set((int)$newJob->id, (string)$newJob->password, 'public_tm_penalty', (string)$this->projectStructure->public_tm_penalty);
-        }
-        if ($this->projectStructure->character_counter_count_tags !== null) {
-            $jobsMetadataDao->set((int)$newJob->id, (string)$newJob->password, 'character_counter_count_tags', (string)($this->projectStructure->character_counter_count_tags ? 1 : 0));
-        }
-        if ($this->projectStructure->character_counter_mode !== null) {
-            $jobsMetadataDao->set((int)$newJob->id, (string)$newJob->password, 'character_counter_mode', $this->projectStructure->character_counter_mode);
-        }
-        if ($this->projectStructure->tm_prioritization !== null) {
-            $jobsMetadataDao->set((int)$newJob->id, (string)$newJob->password, 'tm_prioritization', (string)($this->projectStructure->tm_prioritization ? 1 : 0));
-        }
-
-        // dialect_strict — per-language matching logic
-        if ($this->projectStructure->dialect_strict !== null) {
-            $dialectStrictObj = json_decode($this->projectStructure->dialect_strict, true) ?? [];
-
-            foreach ($dialectStrictObj as $lang => $value) {
-                if (trim($lang) === trim($newJob->target)) {
-                    $jobsMetadataDao->set((int)$newJob->id, (string)$newJob->password, 'dialect_strict', (string)$value);
-                }
-            }
-        }
-
-        /**
-         * Save the subfiltering handlers in the JobsMetadataDao.
-         * Configuration about handlers can be changed later in the job settings.
-         * But the analysis must everytime be performed with the current configuration.
-         */
-        if (!empty($this->projectStructure->subfiltering_handlers)) {
-            $jobsMetadataDao->set(
-                (int)$newJob->id,
-                (string)$newJob->password,
-                JobsMetadataDao::SUBFILTERING_HANDLERS,
-                $this->projectStructure->subfiltering_handlers
             );
         }
     }
@@ -412,7 +377,7 @@ class ProjectManager
          * During the analysis of the project, there is no need to query the JobsMetadataDao.
          * Configuration about handlers can be changed later in the job settings.
          * But the analysis must everytime be performed with the current configuration.
-         * @see ProjectManager::saveJobsMetadata()
+         * @see JobCreationService::saveJobsMetadata()
          */
         if (!empty($this->projectStructure->subfiltering_handlers)) {
             $dao->set(
@@ -429,14 +394,6 @@ class ProjectManager
     protected function getProjectsMetadataDao(): ProjectsMetadataDao
     {
         return new ProjectsMetadataDao();
-    }
-
-    /**
-     * Get a JobsMetadataDao instance — overridable in tests.
-     */
-    protected function getJobsMetadataDao(): JobsMetadataDao
-    {
-        return new JobsMetadataDao();
     }
 
     /**
@@ -848,13 +805,26 @@ class ProjectManager
         match (true) {
             $code == ProjectCreationError::REFERENCE_FILES_DISK_ERROR->value => $this->addProjectError($code, "Failed to store reference files on disk. Permission denied"),
             $code == ProjectCreationError::REFERENCE_FILES_DB_ERROR->value => $this->addProjectError($code, "Failed to store reference files in database"),
-            $code == ProjectCreationError::XLIFF_NOT_FOUND->value  => $this->addProjectError(ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value, "File not found. Failed to save XLIFF conversion on disk."),
+            $code == ProjectCreationError::XLIFF_NOT_FOUND->value => $this->addProjectError(
+                ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value,
+                "File not found. Failed to save XLIFF conversion on disk."
+            ),
             $code == ProjectCreationError::GENERIC_ERROR->value && str_contains($e->getMessage(), '<Message>Invalid copy source encoding.</Message>') => $this->addProjectError(
                 ProjectCreationError::FILE_MOVE_FAILED->value,
                 'There was a problem during the upload of your file(s). Please, ' .
                 'try to rename your file(s) avoiding non-standard characters'
             ),
-            in_array($code, [ProjectCreationError::ZIP_STORE_FAILED->value, ProjectCreationError::FILE_NOT_FOUND->value, ProjectCreationError::FILE_CACHE_ERROR->value, ProjectCreationError::FILE_MOVE_FAILED->value, ProjectCreationError::GENERIC_ERROR->value], true) => $this->addProjectError($code, $e->getMessage()),
+            in_array(
+                $code,
+                [
+                    ProjectCreationError::ZIP_STORE_FAILED->value,
+                    ProjectCreationError::FILE_NOT_FOUND->value,
+                    ProjectCreationError::FILE_CACHE_ERROR->value,
+                    ProjectCreationError::FILE_MOVE_FAILED->value,
+                    ProjectCreationError::GENERIC_ERROR->value
+                ],
+                true
+            ) => $this->addProjectError($code, $e->getMessage()),
             default => $this->addProjectError($code, 'An unexpected error occurred during file insertion: ' . $e->getMessage()),
         };
     }
@@ -910,7 +880,10 @@ class ProjectManager
             }
 
             if ($this->files_word_count > AppConfig::$MAX_SOURCE_WORDS) {
-                throw new Exception("Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!", ProjectCreationError::MAX_WORDS_EXCEEDED->value);
+                throw new Exception(
+                    "Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!",
+                    ProjectCreationError::MAX_WORDS_EXCEEDED->value
+                );
             }
 
             $this->features->run("beforeProjectCreation", $this->projectStructure, [
@@ -927,7 +900,19 @@ class ProjectManager
                 $this->storeSegments($fid);
             }
 
-            $this->createJobs($this->projectStructure);
+            $jobs = $this->createJobs();
+            $this->linkFilesAndInsertPreTranslations($jobs);
+
+            if (!empty($this->projectStructure->notes)) {
+                $this->insertSegmentNotesForFile();
+            }
+
+            if (!empty($this->projectStructure->context_group)) {
+                $this->insertContextsForFile();
+            }
+
+            $this->projectStructure->translations = [];
+
             $this->writeFastAnalysisData();
         } catch (Throwable $e) {
             $this->mapSegmentExtractionError($e, $fs, $linkFile);
@@ -943,9 +928,15 @@ class ProjectManager
         $code = $e->getCode();
 
         match ($code) {
-            ProjectCreationError::NO_TRANSLATABLE_TEXT->value => $this->addProjectError(ProjectCreationError::NO_TRANSLATABLE_TEXT->value, "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."),
+            ProjectCreationError::NO_TRANSLATABLE_TEXT->value => $this->addProjectError(
+                ProjectCreationError::NO_TRANSLATABLE_TEXT->value,
+                "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."
+            ),
             ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->addProjectError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "Xliff Import Error: {$e->getMessage()}"),
-            ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->addProjectError($code, (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage()),
+            ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->addProjectError(
+                $code,
+                (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage()
+            ),
             default => $this->addProjectError($code, $e->getMessage()),
         };
 
@@ -1049,7 +1040,7 @@ class ProjectManager
             $this->log('Deleting upload directory: ' . $this->uploadDir);
             $fs->deleteQueue($this->uploadDir);
         } catch (Exception $e) {
-            $output  = "Exception: " . $e->getMessage() . "\n";
+            $output = "Exception: " . $e->getMessage() . "\n";
             $output .= "REQUEST URI: " . ($_SERVER['REQUEST_URI'] ?? '(unavailable)') . "\n";
             $output .= "REQUEST: " . print_r($_REQUEST, true) . "\n";
             $output .= "Trace:\n" . $e->getTraceAsString() . "\n";
@@ -1209,147 +1200,72 @@ class ProjectManager
     }
 
     /**
-     * @throws NotFoundException
-     * @throws EndQueueException
-     * @throws ReQueueException
-     * @throws ReflectionException
-     * @throws ValidationError
-     * @throws AuthenticationError
      * @throws Exception
      */
-    protected function createJobs(ProjectStructure $projectStructure): void
+    /**
+     * @return list<JobStruct>
+     */
+    protected function createJobs(): array
     {
-        foreach ($projectStructure->target_language as $target) {
-            // get payable rates from mt_qe_workflow, this takes the priority over the other payable rates
-            if ($this->projectStructure->mt_qe_workflow_payable_rate) {
-                $payableRatesTemplate = null;
-                $payableRates = (string)json_encode($this->projectStructure->mt_qe_workflow_payable_rate);
-            } elseif (isset($this->projectStructure->payable_rate_model) && !empty($this->projectStructure->payable_rate_model)) {
-                // get payable rates
-                $payableRatesTemplate = new CustomPayableRateStruct();
-                $payableRatesTemplate->hydrateFromJSON((string)json_encode($this->projectStructure->payable_rate_model));
-                $payableRates = $payableRatesTemplate->getPayableRates((string)$this->projectStructure->source_language, $target);
-                $payableRates = (string)json_encode($payableRates);
-            } elseif (isset($this->projectStructure->payable_rate_model_id) && !empty($this->projectStructure->payable_rate_model_id)) {
-                // get payable rates
-                $payableRatesTemplate = CustomPayableRateDao::getById($this->projectStructure->payable_rate_model_id);
-                if ($payableRatesTemplate === null) {
-                    throw new Exception("Payable rate model not found: {$this->projectStructure->payable_rate_model_id}");
-                }
-                $payableRates = $payableRatesTemplate->getPayableRates((string)$this->projectStructure->source_language, $target);
-                $payableRates = (string)json_encode($payableRates);
-            } else {
-                $payableRatesTemplate = null;
-                $payableRates = PayableRates::getPayableRates((string)$this->projectStructure->source_language, $target);
-                $payableRates = (string)json_encode($this->features->filter("filterPayableRates", $payableRates, $this->projectStructure->source_language, $target));
-            }
+        return $this->getJobCreationService()->createJobsForTargetLanguages(
+            $this->projectStructure,
+            $this->min_max_segments_id,
+            $this->files_word_count,
+        );
+    }
 
-            $password = Utils::randomString();
+    /**
+     * For each created job, link project files and insert any pre-translations.
+     *
+     * @param list<JobStruct> $jobs
+     * @throws Exception
+     */
+    private function linkFilesAndInsertPreTranslations(array $jobs): void
+    {
+        foreach ($jobs as $job) {
+            $this->linkFilesToJob($job);
+            $this->insertPreTranslations($job);
+        }
+    }
 
-            $tm_key = [];
+    /**
+     * Link all project files to a job and create GDrive remote copies if applicable.
+     * @throws Exception
+     */
+    private function linkFilesToJob(JobStruct $job): void
+    {
+        foreach ($this->projectStructure->file_id_list as $fid) {
+            FileDao::insertFilesJob((int)$job->id, $fid);
 
-            if (!empty($this->projectStructure->private_tm_key)) {
-                foreach ($this->projectStructure->private_tm_key as $tmKeyObj) {
-                    $newTmKey = TmKeyManager::getTmKeyStructure();
-                    $newTmKey->complete_format = true;
-                    $newTmKey->tm = true;
-                    $newTmKey->glos = true;
-                    $newTmKey->owner = true;
-                    $newTmKey->penalty = $tmKeyObj['penalty'] ?? 0;
-                    $newTmKey->name = $tmKeyObj['name'];
-                    $newTmKey->key = $tmKeyObj['key'];
-                    $newTmKey->r = $tmKeyObj['r'];
-                    $newTmKey->w = $tmKeyObj['w'];
-
-                    $tm_key[] = $newTmKey;
-                }
-            }
-
-            // check for job_first_segment and job_last_segment existence
-            if (!isset($this->min_max_segments_id['job_first_segment']) || !isset($this->min_max_segments_id['job_last_segment'])) {
-                throw new Exception('Job cannot be created. No segments found!');
-            }
-
-            $this->log($this->projectStructure->private_tm_key);
-
-            $tmKeysJson = json_encode($tm_key);
-
-            // Replace {{pid}} with project ID for new keys created with an empty name
-            $tmKeysJson = str_replace("{{pid}}", (string)$this->projectStructure->id_project, $tmKeysJson);
-
-            $newJob = new JobStruct();
-            $newJob->password = $password;
-            $newJob->id_project = (int)$this->projectStructure->id_project;
-            $newJob->source = (string)$this->projectStructure->source_language;
-            $newJob->target = $target;
-            $newJob->id_tms = $this->projectStructure->tms_engine ?? 1;
-            $newJob->id_mt_engine = $this->projectStructure->target_language_mt_engine_association[$target];
-            $newJob->create_date = date("Y-m-d H:i:s");
-            $newJob->last_update = date("Y-m-d H:i:s");
-            $newJob->subject = $this->projectStructure->job_subject;
-            $newJob->owner = $this->projectStructure->owner;
-            $newJob->job_first_segment = $this->min_max_segments_id['job_first_segment'];
-            $newJob->job_last_segment = $this->min_max_segments_id['job_last_segment'];
-            $newJob->tm_keys = $tmKeysJson;
-            $newJob->payable_rates = $payableRates;
-            $newJob->total_raw_wc = $this->files_word_count;
-            $newJob->only_private_tm = $this->projectStructure->only_private;
-
-            $this->features->run('validateJobCreation', $newJob, $projectStructure);
-            $newJob = JobDao::createFromStruct($newJob);
-
-            $projectStructure->array_jobs['job_list'][] = $newJob->id;
-            $projectStructure->array_jobs['job_pass'][] = $newJob->password;
-            $projectStructure->array_jobs['job_segments'][$newJob->id . "-" . $newJob->password] = $this->min_max_segments_id;
-            $projectStructure->array_jobs['job_languages'][$newJob->id] = $newJob->id . ":" . $target;
-            $projectStructure->array_jobs['payable_rates'][$newJob->id] = $payableRates;
-
-            $this->saveJobsMetadata($newJob);
-
-            try {
-                if (isset($this->projectStructure->payable_rate_model_id) && !empty($this->projectStructure->payable_rate_model_id) && $payableRatesTemplate !== null) {
-                    CustomPayableRateDao::assocModelToJob(
-                        $this->projectStructure->payable_rate_model_id,
-                        (int)$newJob->id,
-                        $payableRatesTemplate->version,
-                        $payableRatesTemplate->name
-                    );
-                }
-
-                //prepare pre-translated segments queries
-                if (!empty($projectStructure->translations)) {
-                    $this->getSegmentStorageService()->insertPreTranslations($newJob, $projectStructure);
-                }
-            } catch (Exception $e) {
-                $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
-                Utils::sendErrMailReport($msg);
-                $this->log("Pre-translation insertion failed for job $newJob->id", $e);
-                $this->addProjectError(
-                    (int)$e->getCode(),
-                    "Pre-translations lost for job $newJob->id: " . $e->getMessage() . ". The project should be re-created."
-                );
-            }
-
-            foreach ($projectStructure->file_id_list as $fid) {
-                FileDao::insertFilesJob((int)$newJob->id, $fid);
-
-                if ($this->gdriveSession && $this->gdriveSession->hasFiles()) {
-                    $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
-                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int)$newJob->id, $client);
-                }
+            if ($this->gdriveSession && $this->gdriveSession->hasFiles()) {
+                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
+                $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int)$job->id, $client);
             }
         }
+    }
 
-        if (!empty($this->projectStructure->notes)) {
-            $this->insertSegmentNotesForFile();
+    /**
+     * Insert pre-translations for a job. Errors are logged and recorded
+     * but do not halt project creation.
+     * @throws Exception
+     */
+    private function insertPreTranslations(JobStruct $job): void
+    {
+        if (empty($this->projectStructure->translations)) {
+            return;
         }
 
-        if (!empty($this->projectStructure->context_group)) {
-            $this->insertContextsForFile();
+        try {
+            $this->getSegmentStorageService()->insertPreTranslations($job, $this->projectStructure);
+        } catch (Exception $e) {
+            $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
+            Utils::sendErrMailReport($msg);
+            $this->log("Pre-translation insertion failed for job $job->id", $e);
+            $this->addProjectError(
+                (int)$e->getCode(),
+                "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created."
+            );
         }
-
-        //Clean Translation array
-        $this->projectStructure->translations = [];
     }
 
     /**
