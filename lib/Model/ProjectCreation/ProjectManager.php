@@ -12,7 +12,6 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
-use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -23,7 +22,6 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\S3FilesStorage;
 use Model\Jobs\JobStruct;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -37,9 +35,7 @@ use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
-use Utils\Constants\EngineConstants;
 use Utils\Constants\ProjectStatus;
-use Utils\Engines\MyMemory;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -286,106 +282,22 @@ class ProjectManager
     }
 
     /**
-     *  Save custom project metadata
-     *
-     * This is where, among other things, we put project options.
-     *
-     * Project options may need to be sanitized so that we can silently ignore impossible combinations,
-     * and we can apply defaults when those are missing.
+     * Persist project-level metadata options via ProjectMetadataService.
      *
      * @throws Exception
      */
     protected function saveMetadata(): void
     {
-        $options = $this->projectStructure->metadata;
-        $dao = $this->getProjectsMetadataDao();
+        $service = $this->getProjectMetadataService();
+        $service->save($this->projectStructure, $this->features);
+    }
 
-        // "From API" flag
-        if ($this->projectStructure->from_api) {
-            $options[ProjectsMetadataDao::FROM_API] = '1';
-        }
-
-        // xliff_parameters — only persist when the model contains actual rules.
-        // Guard with instanceof: createProject() normalizes to XliffRulesModel,
-        // but saveMetadata() is protected and may be called from other paths.
-        if (
-            $this->projectStructure->xliff_parameters instanceof XliffRulesModel
-            && (
-                !empty($this->projectStructure->xliff_parameters->getRulesForVersion(1))
-                || !empty($this->projectStructure->xliff_parameters->getRulesForVersion(2))
-            )
-        ) {
-            $options[ProjectsMetadataDao::XLIFF_PARAMETERS] = json_encode($this->projectStructure->xliff_parameters);
-        }
-
-        // pretranslate_101
-        if (isset($this->projectStructure->pretranslate_101)) {
-            $options[ProjectsMetadataDao::PRETRANSLATE_101] = (string)$this->projectStructure->pretranslate_101;
-        }
-
-        // mt evaluation => ice_mt already in metadata
-        // adds JSON parameters to the project metadata as JSON string
-        if ($options[ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED] ?? false) {
-            $options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS] = json_encode($options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS]);
-        } else {
-            // When MT QE workflow is disabled, remove the raw array to prevent
-            // passing a non-string value to MetadataDao::set()
-            unset($options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS]);
-        }
-
-        /**
-         * Here we have the opportunity to add other features as dependencies of the ones
-         * which are already explicitly set.
-         */
-        $this->features->loadProjectDependenciesFromProjectMetadata($options);
-
-        if ($this->projectStructure->filters_extraction_parameters) {
-            $options[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS] = json_encode($this->projectStructure->filters_extraction_parameters);
-        }
-
-        $extraKeys = [];
-        // MT extra config parameters
-        foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
-            $extraKeys = array_merge(
-                $extraKeys,
-                (new $engineName(
-                    new EngineStruct([
-                        'type' => $engineName == MyMemory::class ? EngineConstants::TM : EngineConstants::MT,
-                    ])
-                ))->getConfigurationParameters()
-            );
-        }
-
-        foreach ($extraKeys as $extraKey) {
-            $engineValue = $this->projectStructure->$extraKey;
-            if (!empty($engineValue)) {
-                $options[$extraKey] = $engineValue;
-            }
-        }
-
-        if (!empty($options)) {
-            foreach ($options as $key => $value) {
-                $dao->set(
-                    (int)$this->projectStructure->id_project,
-                    $key,
-                    (string)$value
-                );
-            }
-        }
-
-        /** Duplicate the JobsMetadataDao::SUBFILTERING_HANDLERS in project metadata for easier retrieval.
-         * During the analysis of the project, there is no need to query the JobsMetadataDao.
-         * Configuration about handlers can be changed later in the job settings.
-         * But the analysis must everytime be performed with the current configuration.
-         * @see JobCreationService::saveJobsMetadata()
-         */
-        if (!empty($this->projectStructure->subfiltering_handlers)) {
-            $dao->set(
-                (int)$this->projectStructure->id_project,
-                JobsMetadataDao::SUBFILTERING_HANDLERS,
-                $this->projectStructure->subfiltering_handlers
-            );
-        }
+    /**
+     * Get a ProjectMetadataService instance — overridable in tests.
+     */
+    protected function getProjectMetadataService(): ProjectMetadataService
+    {
+        return new ProjectMetadataService($this->getProjectsMetadataDao());
     }
 
     /**

@@ -3,29 +3,28 @@
 namespace unit\Model\ProjectCreation;
 
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
-use Model\Files\MetadataDao;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
+use Model\ProjectCreation\ProjectMetadataService;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
-use Utils\Logger\MatecatLogger;
-use Utils\Registry\AppConfig;
 
 /**
- * Unit tests for {@see \Model\ProjectCreation\ProjectManager::saveMetadata()}.
+ * Unit tests for {@see ProjectMetadataService::save()}.
  *
- * Tests verify that metadata from `$this->projectStructure` is correctly
- * collected, transformed, and persisted via `ProjectsMetadataDao::set()`.
+ * Tests verify that metadata from ProjectStructure is correctly
+ * collected, transformed, and persisted via ProjectsMetadataDao::set().
  *
  * @see REFACTORING_PLAN.md — Step 0c
  */
 class SaveMetadataTest extends AbstractTest
 {
-    private TestableProjectManager $pm;
-    private string $originalFileStorageMethod;
+    private ProjectMetadataService $service;
+    private ProjectStructure $projectStructure;
+    private FeatureSet $features;
 
     /**
      * Collected calls to the mocked ProjectsMetadataDao::set().
@@ -42,19 +41,6 @@ class SaveMetadataTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->originalFileStorageMethod = AppConfig::$FILE_STORAGE_METHOD;
-        AppConfig::$FILE_STORAGE_METHOD = 'fs';
-
-        $featureSet = new FeatureSet();
-        /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT');
-        $filesMetadataDao = $this->createStub(MetadataDao::class);
-        $logger = $this->createStub(MatecatLogger::class);
-
-        $this->pm = new TestableProjectManager();
-        $this->pm->initForTest($filter, $featureSet, $filesMetadataDao, $logger);
-
-        // Create a stub ProjectsMetadataDao that records set() calls
         $this->daoSetCalls = [];
         $stubDao = $this->createStub(ProjectsMetadataDao::class);
         $stubDao->method('set')
@@ -63,20 +49,18 @@ class SaveMetadataTest extends AbstractTest
 
                 return true;
             });
-        $this->pm->setProjectsMetadataDao($stubDao);
 
-        // Set defaults needed by saveMetadata()
-        $this->pm->setProjectStructureValue('metadata', []);
-        $this->pm->setProjectStructureValue(
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            '[]'
-        );
-    }
+        $this->service = new ProjectMetadataService($stubDao);
 
-    public function tearDown(): void
-    {
-        AppConfig::$FILE_STORAGE_METHOD = $this->originalFileStorageMethod;
-        parent::tearDown();
+        $this->features = $this->createStub(FeatureSet::class);
+
+        $this->projectStructure = new ProjectStructure([
+            'id_project'      => 999,
+            'source_language' => 'en-US',
+            'target_language' => ['it-IT'],
+            'metadata'        => [],
+        ]);
+        $this->projectStructure->subfiltering_handlers = '[]';
     }
 
     // =========================================================================
@@ -116,12 +100,9 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testSubfilteringHandlersIsAlwaysPersisted(): void
     {
-        $this->pm->setProjectStructureValue(
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            '["handler_a"]'
-        );
+        $this->projectStructure->subfiltering_handlers = '["handler_a"]';
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $calls = $this->findDaoCallsByKey('subfiltering_handlers');
         self::assertNotEmpty($calls, 'subfiltering_handlers must always be persisted');
@@ -132,11 +113,11 @@ class SaveMetadataTest extends AbstractTest
     public function testAllDaoSetCallsUseCorrectProjectId(): void
     {
         // Set a metadata key so there is at least one option to persist
-        $this->pm->setProjectStructureValue('metadata', [
+        $this->projectStructure->metadata = [
             'some_key' => 'some_value',
-        ]);
+        ];
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         foreach ($this->daoSetCalls as $call) {
             self::assertSame(999, $call[0], 'All set() calls must use project id 999');
@@ -151,7 +132,7 @@ class SaveMetadataTest extends AbstractTest
     public function testEmptyMetadataOnlyPersistsSubfilteringHandlersAndDefaults(): void
     {
         // metadata is already empty by default in ProjectStructure
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         // pretranslate_101 always exists (DTO default = 1), plus subfiltering_handlers
         self::assertCount(2, $this->daoSetCalls);
@@ -168,9 +149,9 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testFromApiFlagIsPersistedWhenSet(): void
     {
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::FROM_API, true);
+        $this->projectStructure->from_api = true;
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         // Boolean true is coerced to '1' by PHP's string type hint on set()
         self::assertSame('1', $this->getPersistedValue('from_api'));
@@ -179,9 +160,9 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testFromApiFlagIsNotPersistedWhenFalse(): void
     {
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::FROM_API, false);
+        $this->projectStructure->from_api = false;
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $calls = $this->findDaoCallsByKey('from_api');
         self::assertEmpty($calls, 'from_api should not be persisted when false');
@@ -204,9 +185,9 @@ class SaveMetadataTest extends AbstractTest
             ],
         ]);
 
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::XLIFF_PARAMETERS, $model);
+        $this->projectStructure->xliff_parameters = $model;
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $persisted = $this->getPersistedValue('xliff_parameters');
         $decoded = json_decode($persisted, true);
@@ -225,9 +206,9 @@ class SaveMetadataTest extends AbstractTest
     {
         // When xliff_parameters is not an XliffRulesModel with rules, it should
         // not be added to options (the key won't exist in metadata)
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::XLIFF_PARAMETERS, 'not-a-struct');
+        $this->projectStructure->xliff_parameters = 'not-a-struct';
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $calls = $this->findDaoCallsByKey('xliff_parameters');
         self::assertEmpty($calls, 'xliff_parameters should not be persisted when not an XliffRulesModel with rules');
@@ -240,9 +221,9 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testPretranslate101IsPersistedWhenSet(): void
     {
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::PRETRANSLATE_101, '1');
+        $this->projectStructure->pretranslate_101 = '1';
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         self::assertSame('1', $this->getPersistedValue('pretranslate_101'));
     }
@@ -256,12 +237,12 @@ class SaveMetadataTest extends AbstractTest
     {
         $params = ['model' => 'comet', 'threshold' => 0.8];
 
-        $this->pm->setProjectStructureValue('metadata', [
-            ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED => true,
+        $this->projectStructure->metadata = [
+            ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED    => true,
             ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS => $params,
-        ]);
+        ];
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $persisted = $this->getPersistedValue('mt_qe_workflow_parameters');
         self::assertSame(json_encode($params), $persisted);
@@ -272,12 +253,12 @@ class SaveMetadataTest extends AbstractTest
     {
         $params = ['model' => 'comet', 'threshold' => 0.8];
 
-        $this->pm->setProjectStructureValue('metadata', [
-            ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED => false,
+        $this->projectStructure->metadata = [
+            ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED    => false,
             ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS => $params,
-        ]);
+        ];
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         // When workflow is disabled, raw array parameters are removed
         // to prevent passing a non-string value to MetadataDao::set()
@@ -294,12 +275,9 @@ class SaveMetadataTest extends AbstractTest
     {
         $filterParams = ['segmentation' => 'sentence', 'keep_formatting' => true];
 
-        $this->pm->setProjectStructureValue(
-            ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS,
-            $filterParams
-        );
+        $this->projectStructure->filters_extraction_parameters = $filterParams;
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $persisted = $this->getPersistedValue('filters_extraction_parameters');
         self::assertSame(json_encode($filterParams), $persisted);
@@ -308,12 +286,9 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testFiltersExtractionParametersNotPersistedWhenEmpty(): void
     {
-        $this->pm->setProjectStructureValue(
-            ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS,
-            null
-        );
+        $this->projectStructure->filters_extraction_parameters = null;
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $calls = $this->findDaoCallsByKey('filters_extraction_parameters');
         self::assertEmpty($calls);
@@ -326,11 +301,11 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testEngineExtraKeysArePersistedFromProjectStructure(): void
     {
-        $this->pm->setProjectStructureValue('mmt_glossaries', 'glossary_123');
-        $this->pm->setProjectStructureValue('deepl_formality', 'more');
-        $this->pm->setProjectStructureValue('lara_style', 'formal');
+        $this->projectStructure->mmt_glossaries = 'glossary_123';
+        $this->projectStructure->deepl_formality = 'more';
+        $this->projectStructure->lara_style = 'formal';
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         self::assertSame('glossary_123', $this->getPersistedValue('mmt_glossaries'));
         self::assertSame('more', $this->getPersistedValue('deepl_formality'));
@@ -342,7 +317,7 @@ class SaveMetadataTest extends AbstractTest
     {
         // These keys are not set in projectStructure, so they should not
         // appear in the DAO set() calls
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         $calls = $this->findDaoCallsByKey('mmt_glossaries');
         self::assertEmpty($calls, 'mmt_glossaries should not be persisted when empty');
@@ -358,13 +333,13 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testAllMetadataOptionsArePersistedViaSet(): void
     {
-        $this->pm->setProjectStructureValue('metadata', [
+        $this->projectStructure->metadata = [
             'custom_key_1' => 'value_1',
             'custom_key_2' => 'value_2',
             'custom_key_3' => 'value_3',
-        ]);
+        ];
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         // 3 custom keys + 1 pretranslate_101 (DTO default) + 1 subfiltering_handlers = 5 total calls
         self::assertCount(5, $this->daoSetCalls);
@@ -381,18 +356,15 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testCombinedMetadataScenario(): void
     {
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::FROM_API, true);
-        $this->pm->setProjectStructureValue(ProjectsMetadataDao::PRETRANSLATE_101, '0');
-        $this->pm->setProjectStructureValue('mmt_glossaries', 'gl_abc');
-        $this->pm->setProjectStructureValue(
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
-            '[{"name":"handler1"}]'
-        );
-        $this->pm->setProjectStructureValue('metadata', [
+        $this->projectStructure->from_api = true;
+        $this->projectStructure->pretranslate_101 = '0';
+        $this->projectStructure->mmt_glossaries = 'gl_abc';
+        $this->projectStructure->subfiltering_handlers = '[{"name":"handler1"}]';
+        $this->projectStructure->metadata = [
             'existing_option' => 'kept',
-        ]);
+        ];
 
-        $this->pm->callSaveMetadata();
+        $this->service->save($this->projectStructure, $this->features);
 
         // Verify all expected keys are present
         // Boolean true is coerced to '1' by DAO set() string type hint

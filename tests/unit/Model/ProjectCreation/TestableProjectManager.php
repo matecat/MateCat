@@ -150,15 +150,6 @@ class TestableProjectManager extends ProjectManager
         return $this->projectsMetadataDaoOverride ?? parent::getProjectsMetadataDao();
     }
 
-    /**
-     * Public wrapper to invoke the protected saveMetadata().
-     * @throws Exception
-     */
-    public function callSaveMetadata(): void
-    {
-        $this->saveMetadata();
-    }
-
     // ── JobCreationService override ──────────────────────────────
 
     private ?JobCreationService $jobCreationServiceOverride = null;
