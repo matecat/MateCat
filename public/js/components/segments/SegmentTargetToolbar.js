@@ -13,9 +13,11 @@ import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'
 import {Shortcuts} from '../../utils/shortcuts'
 import RemoveTagsIcon from '../../../img/icons/RemoveTagsIcon'
 import IconDown from '../icons/IconDown'
-import {LaraStyles} from './ToolbarFeatures/Lara/LaraStyles'
+import {LaraStyles} from './ToolbarFeatures/Ai/LaraStyles'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import AddTagsIcon from '../../../img/icons/AddTagsIcon'
+import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
+import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
 
 export const SegmentTargetToolbar = ({
   sid,
@@ -51,7 +53,17 @@ export const SegmentTargetToolbar = ({
       ? [
           {
             group: 0,
+            component: <AiFeedback {...{key: 'aifeedback', sid}} />,
+          },
+          {
+            group: 0,
             component: <LaraStyles {...{key: 'larastyle', sid}} />,
+          },
+          {
+            group: 0,
+            component: (
+              <AiAlternatives {...{key: 'aialternatives', sid, editArea}} />
+            ),
           },
         ]
       : []),
@@ -118,6 +130,7 @@ export const SegmentTargetToolbar = ({
                   callback={addMissingSourceTagsToTarget}
                 />
                 {getIconButton({
+                  key: 'copymissingtags',
                   title: `Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`,
                   children: <AddTagsIcon />,
                   onClick: addMissingSourceTagsToTarget,

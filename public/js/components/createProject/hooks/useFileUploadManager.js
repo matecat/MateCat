@@ -530,11 +530,15 @@ export function useFileUploadManager({
       files.some((f) => !f.uploaded || !f.converted || f.error) ||
       !files.some((f) => f.ext !== EXTENSIONS.tmx)
     CreateProjectActions.enableAnalyzeButton(!hasIncompleteFiles)
-    if (files.length >= config.maxNumberFiles) {
+    if (files.length === config.maxNumberFiles) {
       CreateProjectActions.showError(
         'No more files can be loaded (the limit of ' +
           config.maxNumberFiles +
           ' has been exceeded).',
+      )
+    } else if (files.length > config.maxNumberFiles) {
+      CreateProjectActions.showError(
+        `Maximum ${config.maxNumberFiles} files allowed. Please remove all files with errors from the list below.`,
       )
     }
   }, [files])

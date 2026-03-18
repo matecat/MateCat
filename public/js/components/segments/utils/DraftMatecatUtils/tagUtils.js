@@ -129,6 +129,26 @@ export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
   return text
 }
 
+export const excludeSomeTagsFromText = (text, excludeTags = []) => {
+  try {
+    for (let key in tagSignatures) {
+      const {placeholderRegex, regex, type} = tagSignatures[key]
+      const shouldExcludeTag = excludeTags.some((value) => value === type)
+
+      if (shouldExcludeTag) {
+        const globalRegex = placeholderRegex
+          ? new RegExp(placeholderRegex.source, placeholderRegex.flags + 'g')
+          : new RegExp(regex)
+
+        text = text.replace(globalRegex, '')
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing tag in transformTagsToHtml function')
+  }
+  return text
+}
+
 export const transformTagsToLexiqaText = (text) => {
   const tagsStruct = matchTagStructure(text).sort((a, b) =>
     a.offset > b.offset ? 1 : -1,
@@ -278,6 +298,48 @@ export const encodePlaceholdersToTags = (str) => {
         )
         .replaceAll(
           tagSignatures['nbsp'].placeholder,
+          tagSignatures['nbsp'].encodedPlaceholder,
+        )
+    : str
+}
+
+export const decodeTagsToUnicodeChar = (str) => {
+  return str
+    ? str
+        .replace(
+          tagSignatures['lineFeed'].regex,
+          tagSignatures['lineFeed'].unicodeChar,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regex,
+          tagSignatures['carriageReturn'].unicodeChar,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regex,
+          tagSignatures['carriageReturn'].unicodeChar,
+        )
+        .replace(tagSignatures['tab'].regex, tagSignatures['tab'].unicodeChar)
+        .replace(tagSignatures['nbsp'].regex, tagSignatures['nbsp'].unicodeChar)
+    : str
+}
+
+export const encodeTagsFromUnicodeChar = (str) => {
+  return str
+    ? str
+        .replace(
+          tagSignatures['lineFeed'].regexUnicodeChar,
+          tagSignatures['lineFeed'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regexUnicodeChar,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['tab'].regexUnicodeChar,
+          tagSignatures['tab'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['nbsp'].regexUnicodeChar,
           tagSignatures['nbsp'].encodedPlaceholder,
         )
     : str

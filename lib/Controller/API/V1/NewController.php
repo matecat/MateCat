@@ -11,6 +11,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;

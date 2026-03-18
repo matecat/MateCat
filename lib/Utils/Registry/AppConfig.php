@@ -102,7 +102,7 @@ class AppConfig
     public static string $TMP_DOWNLOAD;
     public static string $TEMPLATE_ROOT;
     public static string $UTILS_ROOT;
-    public static int $DEFAULT_NUM_RESULTS_FROM_TM = 3;
+    public static int $DEFAULT_NUM_RESULTS_FROM_TM = 10;
     public static string $AUTHSECRET;
     public static string $AUTHSECRET_PATH;
 
@@ -119,6 +119,11 @@ class AppConfig
     public static int $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024 // bytes
     public static int $MAX_NUM_FILES = 100;
     public static int $MAX_SOURCE_WORDS = 250000;
+
+    public static string $GEMINI_API_KEY = '';
+    public static string $GEMINI_API_MODEL = '';
+
+    public static int $GEMINI_TIMEOUT = 30; //seconds
 
     /**
      * OPENAI configuration
@@ -335,7 +340,6 @@ class AppConfig
         // Overridable defaults
         self::$ROOT = $rootPath; // Accessible by Apache/PHP
         self::$BASEURL = "/"; // Accessible by the browser
-        self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$TRACKING_CODES_VIEW_PATH = self::$ROOT . "/lib/View/templates";
 
         // Detects if the script is running via Command Line Interface (CLI) to flag the instance as a daemon/background worker

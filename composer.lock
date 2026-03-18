@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.372.3",
+            "version": "3.373.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d207d2ca972c9b10674e535dacd4a5d956a80bad"
+                "reference": "902f23313c949a8f25f0982064f318b69ae69382"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d207d2ca972c9b10674e535dacd4a5d956a80bad",
-                "reference": "d207d2ca972c9b10674e535dacd4a5d956a80bad",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/902f23313c949a8f25f0982064f318b69ae69382",
+                "reference": "902f23313c949a8f25f0982064f318b69ae69382",
                 "shasum": ""
             },
             "require": {
@@ -92,12 +92,12 @@
                 "aws/aws-php-sns-message-validator": "~1.0",
                 "behat/behat": "~3.0",
                 "composer/composer": "^2.7.8",
-                "dms/phpunit-arraysubset-asserts": "^0.4.0",
+                "dms/phpunit-arraysubset-asserts": "^v0.5.0",
                 "doctrine/cache": "~1.4",
                 "ext-dom": "*",
                 "ext-openssl": "*",
                 "ext-sockets": "*",
-                "phpunit/phpunit": "^9.6",
+                "phpunit/phpunit": "^10.0",
                 "psr/cache": "^2.0 || ^3.0",
                 "psr/simple-cache": "^2.0 || ^3.0",
                 "sebastian/comparator": "^1.2.3 || ^4.0 || ^5.0",
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.372.3"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.373.4"
             },
-            "time": "2026-03-10T18:07:21+00:00"
+            "time": "2026-03-17T18:11:35+00:00"
         },
         {
             "name": "composer/pcre",
@@ -1598,16 +1598,16 @@
         },
         {
             "name": "matecat/icu-intl",
-            "version": "1.1.20",
+            "version": "v1.1.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/icu-intl.git",
-                "reference": "5c150bf19213bc317e607e9a06dbaf6e55f2e807"
+                "reference": "70dbfebe909c758a9c1ef8fd1d550527df5ede15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/5c150bf19213bc317e607e9a06dbaf6e55f2e807",
-                "reference": "5c150bf19213bc317e607e9a06dbaf6e55f2e807",
+                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/70dbfebe909c758a9c1ef8fd1d550527df5ede15",
+                "reference": "70dbfebe909c758a9c1ef8fd1d550527df5ede15",
                 "shasum": ""
             },
             "require": {
@@ -1644,9 +1644,9 @@
             "description": "A PHP port of ICU4J's MessagePattern parser with locale utilities. Parses ICU MessageFormat patterns into an inspectable AST and provides locale data support for internationalization in PHP.",
             "support": {
                 "issues": "https://github.com/matecat/icu-intl/issues",
-                "source": "https://github.com/matecat/icu-intl/tree/1.1.20"
+                "source": "https://github.com/matecat/icu-intl/tree/v1.1.21"
             },
-            "time": "2026-03-09T12:08:33+00:00"
+            "time": "2026-03-17T10:13:38+00:00"
         },
         {
             "name": "matecat/klein",
@@ -1719,16 +1719,16 @@
         },
         {
             "name": "matecat/lara-php",
-            "version": "v2.0.0-beta.1",
+            "version": "v2.0.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/lara-php.git",
-                "reference": "a0acbc3b7eea774356547bf156d00096c2587000"
+                "reference": "08266e0592f719e24d9d486e4e05d9c65a59b1e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/lara-php/zipball/a0acbc3b7eea774356547bf156d00096c2587000",
-                "reference": "a0acbc3b7eea774356547bf156d00096c2587000",
+                "url": "https://api.github.com/repos/matecat/lara-php/zipball/08266e0592f719e24d9d486e4e05d9c65a59b1e5",
+                "reference": "08266e0592f719e24d9d486e4e05d9c65a59b1e5",
                 "shasum": ""
             },
             "require": {
@@ -1762,9 +1762,9 @@
             "homepage": "https://laratranslate.com/",
             "support": {
                 "issues": "https://github.com/matecat/lara-php/issues",
-                "source": "https://github.com/matecat/lara-php/tree/v2.0.0-beta.1"
+                "source": "https://github.com/matecat/lara-php/tree/v2.0.0-beta.2"
             },
-            "time": "2026-01-23T12:09:00+00:00"
+            "time": "2026-03-12T14:08:03+00:00"
         },
         {
             "name": "matecat/simple-s3",
@@ -1829,16 +1829,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v3.0.3",
+            "version": "v3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8"
+                "reference": "1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d9def10c51c966a9a20a0ea940b614804ff8fbd8",
-                "reference": "d9def10c51c966a9a20a0ea940b614804ff8fbd8",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7",
+                "reference": "1ce898350ca6a9aa17180c98ae78b5a8d7a4d3a7",
                 "shasum": ""
             },
             "require": {
@@ -1848,7 +1848,7 @@
                 "matecat/emoji-to-entity-converter": "^2",
                 "matecat/xml-dom-parser": "^2",
                 "php": ">=8.3",
-                "phpstan/phpstan": "^2"
+                "phpstan/phpstan": "@stable"
             },
             "require-dev": {
                 "ext-json": "*",
@@ -1885,9 +1885,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v3.0.3"
+                "source": "https://github.com/matecat/subfiltering/tree/v3.0.4"
             },
-            "time": "2026-02-19T18:20:02+00:00"
+            "time": "2026-03-18T14:43:51+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -3080,11 +3080,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.40",
+            "version": "2.1.42",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9b2c7aeb83a75d8680ea5e7c9b7fca88052b766b",
-                "reference": "9b2c7aeb83a75d8680ea5e7c9b7fca88052b766b",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1279e1ce86ba768f0780c9d889852b4e02ff40d0",
+                "reference": "1279e1ce86ba768f0780c9d889852b4e02ff40d0",
                 "shasum": ""
             },
             "require": {
@@ -3129,7 +3129,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-23T15:04:35+00:00"
+            "time": "2026-03-17T14:58:32+00:00"
         },
         {
             "name": "phptal/phptal",
@@ -6149,16 +6149,16 @@
         },
         {
             "name": "sebastian/environment",
-            "version": "8.0.3",
+            "version": "8.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/environment.git",
-                "reference": "24a711b5c916efc6d6e62aa65aa2ec98fef77f68"
+                "reference": "7b8842c2d8e85d0c3a5831236bf5869af6ab2a11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/24a711b5c916efc6d6e62aa65aa2ec98fef77f68",
-                "reference": "24a711b5c916efc6d6e62aa65aa2ec98fef77f68",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/7b8842c2d8e85d0c3a5831236bf5869af6ab2a11",
+                "reference": "7b8842c2d8e85d0c3a5831236bf5869af6ab2a11",
                 "shasum": ""
             },
             "require": {
@@ -6201,7 +6201,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/environment/issues",
                 "security": "https://github.com/sebastianbergmann/environment/security/policy",
-                "source": "https://github.com/sebastianbergmann/environment/tree/8.0.3"
+                "source": "https://github.com/sebastianbergmann/environment/tree/8.0.4"
             },
             "funding": [
                 {
@@ -6221,7 +6221,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-12T14:11:56+00:00"
+            "time": "2026-03-15T07:05:40+00:00"
         },
         {
             "name": "sebastian/exporter",

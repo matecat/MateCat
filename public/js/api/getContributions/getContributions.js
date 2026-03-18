@@ -40,7 +40,6 @@ export const getContributions = async ({
     text: target,
     translation,
     id_job: idJob,
-    num_results: NUM_CONTRIBUTION_RESULTS,
     context_before: contextBefore ? contextBefore : '',
     id_before: idBefore ? idBefore : '',
     context_after: contextAfter,

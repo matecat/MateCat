@@ -58,6 +58,10 @@ AWS_SSL_VERIFY = true
 
 MMT_DEFAULT_LICENSE = "xxxxxxxxxxxxxx"
 
+GEMINI_API_KEY = 'xxxxxxxxxxxxxxxxxxxxx';
+GEMINI_API_MODEL = 'gemini-2.5-flash-lite';
+GEMINI_TIMEOUT = 30
+
 OPENAI_API_KEY = "xxxxxxxxxxxxxxxxxxxxx"
 OPEN_AI_MODEL = "gpt-3.5-turbo"
 OPEN_AI_TIMEOUT = 30

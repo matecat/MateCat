@@ -169,20 +169,26 @@ export const SegmentFooterTabLaraStyles = ({
       id={`segment-${segment.sid}-${tab_class}`}
     >
       {translationStyles?.length ? (
-        <div className="lara-styles-content">
-          <div className="lara-styles-options">
+        <div className="ai-feature-content">
+          <div className="ai-feature-options">
             {translationStyles.map(
               ({style, translation, translationOriginal}) => (
                 <div key={style.id}>
                   <div>
                     <h4>
                       {style.name}{' '}
-                      {style.isDefault ? <span>(Original)</span> : ''}
+                      {style.isDefault ? (
+                        <span className="ai-feature-grey-label">
+                          (Original)
+                        </span>
+                      ) : (
+                        ''
+                      )}
                     </h4>
                     <p dangerouslySetInnerHTML={allowHTML(translation)}></p>
                   </div>
                   <Button
-                    className="lara-style-switch-button"
+                    className="ai-feature-button"
                     mode={BUTTON_MODE.OUTLINE}
                     onClick={() => switchStyle({style, translationOriginal})}
                   >
@@ -194,7 +200,7 @@ export const SegmentFooterTabLaraStyles = ({
           </div>
         </div>
       ) : translationStyles?.error ? (
-        <div className="lara-styles-content">
+        <div className="ai-feature-content">
           <p>{translationStyles.error}</p>
         </div>
       ) : (
