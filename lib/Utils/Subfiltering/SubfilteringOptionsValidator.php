@@ -19,7 +19,7 @@ class SubfilteringOptionsValidator
      *
      * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
      *
-     * @return ?string The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
      * @throws Exception
      */
     public static function validate(string $subfiltering_handlers): ?array
