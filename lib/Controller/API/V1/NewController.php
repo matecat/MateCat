@@ -474,16 +474,6 @@ class NewController extends KleinController
         $project_features = $this->appendFeaturesToProject((bool)$project_completion, $mt_engine);
         $target_language_mt_engine_association = $this->generateTargetEngineAssociation($target_lang, $mt_engine);
 
-        /**
-         * Subfiltering configuration (as string input):
-         *
-         * 1. String "none" or "" (empty string) string or String "null": subfiltering is disabled
-         * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
-         * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
-         *
-         * Note:
-         * - The values above are expected as strings (e.g., "[]"), not native PHP types.
-         */
         $subfiltering_handlers =  SubfilteringOptionsValidator::validate(
             $this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]')
         ); // string value or default '[]'

@@ -389,17 +389,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             'due_date' => (empty($due_date) ? null : Utils::mysqlTimestamp($due_date)),
             'file_names_list' => $arFiles,
             'public_tm_penalty' => $public_tm_penalty,
-
-            /**
-             * Subfiltering configuration (as string input):
-             *
-             * 1. String "null" or "" (empty string): subfiltering is disabled
-             * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
-             * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
-             *
-             * Note:
-             * - The values above are expected as strings (e.g., "[]"), not native PHP types.
-             */
             JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode(
                 SubfilteringOptionsValidator::validate($this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]'))
             ),

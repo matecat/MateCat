@@ -19,14 +19,14 @@ class SubfilteringOptionsValidator
      *
      * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
      *
-     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @return ?string The decoded JSON data as an associative array, or an empty array if an error occurs.
      * @throws Exception
      */
-    public static function validate(array $subfiltering_handlers): ?array
+    public static function validate(string $subfiltering_handlers): string|array|null
     {
-        if ($subfiltering_handlers == 'none') {
+        if ($subfiltering_handlers == 'none' || $subfiltering_handlers == 'null') {
             // subfiltering is disabled
-            $subfiltering_handlers = 'null';
+            return 'null';
         }
 
         // check if the string is equals to the default subfiltering handlers
@@ -34,9 +34,13 @@ class SubfilteringOptionsValidator
             array_keys(HandlersSorter::getDefaultInjectedHandlers())
         );
 
-        $areEqual = empty(array_diff($defaultHandlers, json_decode($subfiltering_handlers))) && empty(array_diff($defaultHandlers, json_decode($subfiltering_handlers)));
+        $subfiltering_handlers_array = json_decode($subfiltering_handlers);
 
-        if($areEqual){
+        if(empty($subfiltering_handlers_array)){
+            return [];
+        }
+
+        if(empty(array_diff($defaultHandlers, $subfiltering_handlers_array))){
             // subfiltering is default
             return [];
         }
