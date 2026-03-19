@@ -10,6 +10,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 
 /**
  * Unit tests for {@see \Model\ProjectCreation\ProjectManager::cleanupUploadDirectory()}.
@@ -23,9 +24,14 @@ class CleanupUploadDirectoryTest extends AbstractTest
 {
     private TestableProjectManager $pm;
 
+    private bool $oldStateEmailSendFlag;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->oldStateEmailSendFlag = AppConfig::$SEND_ERR_MAIL_REPORT;
+        AppConfig::$SEND_ERR_MAIL_REPORT = false;
 
         $this->pm = new TestableProjectManager();
         $this->pm->initForTest(
@@ -34,6 +40,12 @@ class CleanupUploadDirectoryTest extends AbstractTest
             $this->createStub(MetadataDao::class),
             $this->createStub(MatecatLogger::class),
         );
+    }
+
+    protected function tearDown(): void
+    {
+        AppConfig::$SEND_ERR_MAIL_REPORT = $this->oldStateEmailSendFlag;
+        parent::tearDown();
     }
 
     #[Test]
