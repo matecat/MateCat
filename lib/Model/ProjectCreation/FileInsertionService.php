@@ -2,15 +2,16 @@
 
 namespace Model\ProjectCreation;
 
+use Closure;
 use Exception;
 use Model\Concerns\LogsMessages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
-use Model\FilesStorage\FilesStorageFactory;
 use Psr\Log\LoggerInterface;
 use Throwable;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
@@ -31,12 +32,13 @@ class FileInsertionService
     use LogsMessages;
 
     public function __construct(
-        private ProjectManagerModel $projectManagerModel,
-        private MetadataDao         $filesMetadataDao,
-        private ?Session            $gdriveSession,
-        private \Closure            $s3FileDownloader,
-        LoggerInterface             $logger,
+        private readonly ProjectManagerModel $projectManagerModel,
+        private readonly MetadataDao $filesMetadataDao,
+        private readonly ?Session $gdriveSession,
+        private readonly Closure $s3FileDownloader,
+        LoggerInterface $logger,
     ) {
+        /** @var $logger MatecatLogger */
         $this->logger = $logger;
     }
 
@@ -57,9 +59,9 @@ class FileInsertionService
      * {@code $linkFiles['conversionHashes']} so they are indistinguishable from
      * converted files in the downstream {@see resolveAndInsertFiles()} pipeline.
      *
-     * @param AbstractFilesStorage $fs       The file storage abstraction
-     * @param ProjectStructure     $projectStructure Project data
-     * @param string               $uploadDir Absolute path to the upload directory
+     * @param AbstractFilesStorage $fs The file storage abstraction
+     * @param ProjectStructure $projectStructure Project data
+     * @param string $uploadDir Absolute path to the upload directory
      * @param array<string, mixed> &$linkFiles Modified by reference — native XLIFF
      *     hashes are appended to ['conversionHashes']['sha'] and
      *     ['conversionHashes']['fileName'].
@@ -123,8 +125,8 @@ class FileInsertionService
      * locates the corresponding cached XLIFF, validates it, and inserts file
      * records via {@see ProjectManagerModel::insertFile()}.
      *
-     * @param AbstractFilesStorage $fs       The file storage abstraction
-     * @param ProjectStructure     $projectStructure Project data (mutable — file_id_list is appended)
+     * @param AbstractFilesStorage $fs The file storage abstraction
+     * @param ProjectStructure $projectStructure Project data (mutable — file_id_list is appended)
      * @param array<string, mixed> $linkFiles Conversion and zip hashes from upload
      *
      * @return array<int, array<string, mixed>> File structures keyed by file ID (fid).
@@ -172,7 +174,7 @@ class FileInsertionService
                 $this->validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
 
                 // Insert file records using the original names and resolved XLIFF path.
-                $filesStructure = $this->insertFiles($projectStructure, $_originalFileNames, $sha1_original, (string)$cachedXliffFilePathName);
+                $filesStructure = $this->insertFiles($fs, $projectStructure, $_originalFileNames, $sha1_original, (string)$cachedXliffFilePathName);
 
                 // Treat "nothing inserted" as a hard failure.
                 if (count($filesStructure ?: []) === 0) {
@@ -275,10 +277,8 @@ class FileInsertionService
      * @return array<int, array<string, mixed>>
      * @throws Exception
      */
-    protected function insertFiles(ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
+    protected function insertFiles(AbstractFilesStorage $fs, ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
     {
-        $fs = FilesStorageFactory::create();
-
         $createDate = date_create($projectStructure->create_date);
         if ($createDate === false) {
             throw new Exception('Invalid create_date for project');

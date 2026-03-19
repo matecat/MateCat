@@ -122,6 +122,9 @@ class SettersGettersConfigTest extends AbstractTest
 
     // ── getAnalyzeURL() ────────────────────────────────────────────
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function getAnalyzeURLBuildsCorrectURLWithHttpHost(): void
     {
@@ -135,6 +138,9 @@ class SettersGettersConfigTest extends AbstractTest
         $this->assertSame('https://example.com/analyze/my-test-project/456-abc123', $url);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function getAnalyzeURLFallsBackToAppConfigWhenHttpHostIsNull(): void
     {
@@ -156,6 +162,9 @@ class SettersGettersConfigTest extends AbstractTest
         }
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function getAnalyzeURLSlugifiesProjectName(): void
     {

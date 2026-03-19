@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Model\FilesStorage\AbstractFilesStorage;
 use Model\ProjectCreation\FileInsertionService;
 use Model\ProjectCreation\ProjectStructure;
 use Throwable;
@@ -85,7 +86,7 @@ class TestableFileInsertionService extends FileInsertionService
         parent::validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
     }
 
-    protected function insertFiles(ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
+    protected function insertFiles(AbstractFilesStorage $fs, ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
     {
         $this->insertFilesCalls[] = [
             'projectStructure' => $projectStructure,
@@ -102,6 +103,6 @@ class TestableFileInsertionService extends FileInsertionService
             return array_shift($this->insertFilesReturnQueue);
         }
 
-        return parent::insertFiles($projectStructure, $_originalFileNames, $sha1_original, $cachedXliffFilePathName);
+        return parent::insertFiles($fs, $projectStructure, $_originalFileNames, $sha1_original, $cachedXliffFilePathName);
     }
 }
