@@ -9,6 +9,7 @@ use Klein\Request;
 use Klein\Response;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -117,8 +118,8 @@ class NewControllerTest extends AbstractTest
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -164,8 +165,8 @@ class NewControllerTest extends AbstractTest
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -205,8 +206,8 @@ class NewControllerTest extends AbstractTest
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -231,8 +232,8 @@ class NewControllerTest extends AbstractTest
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -261,8 +262,8 @@ class NewControllerTest extends AbstractTest
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'zz',
                 'target_lang' => 'fr,de',

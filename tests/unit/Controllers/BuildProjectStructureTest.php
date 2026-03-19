@@ -17,6 +17,7 @@ use stdClass;
 use TestHelpers\AbstractTest;
 use Utils\Constants\ProjectStatus;
 use Utils\Engines\AbstractEngine;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Utils\Registry\AppConfig;
 
@@ -109,21 +110,21 @@ class BuildProjectStructureTest extends AbstractTest
             'project_name'                          => 'Test Project',
             'subject'                               => 'general',
             'private_tm_key'                        => [],
-            'tm_prioritization'                     => null,
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value  => null,
             'source_lang'                           => 'en-US',
             'target_lang'                           => 'fr-FR,de-DE',
             'mt_engine'                             => 1,
             'tms_engine'                            => 1,
             'metadata'                              => [],
-            'public_tm_penalty'                     => null,
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => null,
             'pretranslate_100'                      => 0,
             ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value                      => null,
             'get_public_matches'                    => true,
             'due_date'                              => null,
             'target_language_mt_engine_association'  => [],
             'instructions'                          => null,
-            'character_counter_mode'                => null,
-            'character_counter_count_tags'           => null,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => null,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => null,
             ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value                 => null,
             'lara_glossaries'                       => null,
             'lara_style'                            => null,
@@ -132,7 +133,7 @@ class BuildProjectStructureTest extends AbstractTest
             'qaModel'                               => null,
             'mt_qe_workflow_payable_rate'            => null,
             'payableRateModelTemplate'              => null,
-            'dialect_strict'                        => null,
+            JobsMetadataMarshaller::DIALECT_STRICT->value      => null,
             ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value         => null,
             ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value                      => null,
             ProjectsMetadataMarshaller::MT_EVALUATION->value                         => null,
@@ -409,7 +410,7 @@ class BuildProjectStructureTest extends AbstractTest
             'lara_glossaries' => 'glossary-abc',
             'lara_style'      => 'formal',
             'mmt_glossaries'  => 'mmt-456',
-            'dialect_strict'  => 'strict',
+            JobsMetadataMarshaller::DIALECT_STRICT->value  => 'strict',
             ProjectsMetadataMarshaller::MT_EVALUATION->value   => true,
         ]);
         $filesFound = $this->makeFilesFound();
@@ -517,7 +518,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsTmPrioritization(): void
     {
         $request = $this->makeNewControllerRequest([
-            'tm_prioritization' => 'high',
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value => 'high',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -556,7 +557,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsPublicTmPenalty(): void
     {
         $request = $this->makeNewControllerRequest([
-            'public_tm_penalty' => 15,
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => 15,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -696,7 +697,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsCharacterCounterModeWhenProvided(): void
     {
         $request = $this->makeNewControllerRequest([
-            'character_counter_mode' => 'source',
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'source',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -715,7 +716,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsCharacterCounterCountTagsWhenProvided(): void
     {
         $request = $this->makeNewControllerRequest([
-            'character_counter_count_tags' => true,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => true,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1131,7 +1132,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerDialectStrictFalsyBranch(): void
     {
         $request = $this->makeNewControllerRequest([
-            'dialect_strict' => null,
+            JobsMetadataMarshaller::DIALECT_STRICT->value => null,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1163,16 +1164,16 @@ class BuildProjectStructureTest extends AbstractTest
             'job_subject'                           => 'general',
             'mt_engine'                             => 1,
             'tms_engine'                            => 1,
-            'public_tm_penalty'                     => null,
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value   => null,
             'pretranslate_100'                      => 0,
             ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value                      => 1,
-            'dialect_strict'                        => null,
+            JobsMetadataMarshaller::DIALECT_STRICT->value       => null,
             'only_private'                          => false,
             'due_date'                              => null,
             'target_language_mt_engine_association'  => [],
-            'tm_prioritization'                     => null,
-            'character_counter_mode'                => null,
-            'character_counter_count_tags'           => null,
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value    => null,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => null,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => null,
             ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value                 => null,
             ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value         => null,
             ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value                      => null,
@@ -1376,7 +1377,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsOptionalFieldsWhenPresent(): void
     {
         $data = $this->makeCreateControllerData([
-            'dialect_strict'                => 'strict',
+            JobsMetadataMarshaller::DIALECT_STRICT->value   => 'strict',
             ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value => ['some' => 'param'],
             ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value              => '{"xliff": "param"}',
         ]);
@@ -1518,7 +1519,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsPublicTmPenalty(): void
     {
         $data = $this->makeCreateControllerData([
-            'public_tm_penalty' => 20,
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => 20,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1650,7 +1651,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsTmPrioritizationWhenProvided(): void
     {
         $data = $this->makeCreateControllerData([
-            'tm_prioritization' => 'enabled',
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value => 'enabled',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1671,7 +1672,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsTmPrioritizationNullWhenEmpty(): void
     {
         $data = $this->makeCreateControllerData([
-            'tm_prioritization' => '',
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value => '',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1693,7 +1694,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsCharacterCounterModeWhenProvided(): void
     {
         $data = $this->makeCreateControllerData([
-            'character_counter_mode' => 'source',
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'source',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1714,7 +1715,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsCharacterCounterModeNullWhenEmpty(): void
     {
         $data = $this->makeCreateControllerData([
-            'character_counter_mode' => '',
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => '',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1735,7 +1736,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsCharacterCounterCountTagsWhenProvided(): void
     {
         $data = $this->makeCreateControllerData([
-            'character_counter_count_tags' => true,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => true,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1756,7 +1757,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsCharacterCounterCountTagsNullWhenEmpty(): void
     {
         $data = $this->makeCreateControllerData([
-            'character_counter_count_tags' => '',
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1948,7 +1949,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsDialectStrict(): void
     {
         $data = $this->makeCreateControllerData([
-            'dialect_strict' => 'relaxed',
+            JobsMetadataMarshaller::DIALECT_STRICT->value => 'relaxed',
         ]);
         $filesFound = $this->makeFilesFound();
 

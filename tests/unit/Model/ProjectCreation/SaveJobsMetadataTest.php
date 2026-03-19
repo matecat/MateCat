@@ -187,7 +187,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['public_tm_penalty' => '15']);
 
-        $calls = $this->findDaoCallsByKey('public_tm_penalty');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
         $this->assertCount(1, $calls);
         $this->assertSame('15', $calls[0][3]);
     }
@@ -197,7 +197,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave();
 
-        $calls = $this->findDaoCallsByKey('public_tm_penalty');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
         $this->assertCount(0, $calls);
     }
 
@@ -210,7 +210,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['character_counter_count_tags' => true]);
 
-        $calls = $this->findDaoCallsByKey('character_counter_count_tags');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value);
         $this->assertCount(1, $calls);
         $this->assertSame('1', $calls[0][3]);
     }
@@ -220,7 +220,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['character_counter_count_tags' => false]);
 
-        $calls = $this->findDaoCallsByKey('character_counter_count_tags');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value);
         $this->assertCount(1, $calls);
         $this->assertSame('0', $calls[0][3]);
     }
@@ -230,7 +230,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave();
 
-        $calls = $this->findDaoCallsByKey('character_counter_count_tags');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value);
         $this->assertCount(0, $calls);
     }
 
@@ -243,7 +243,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['character_counter_mode' => 'source']);
 
-        $calls = $this->findDaoCallsByKey('character_counter_mode');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value);
         $this->assertCount(1, $calls);
         $this->assertSame('source', $calls[0][3]);
     }
@@ -253,7 +253,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave();
 
-        $calls = $this->findDaoCallsByKey('character_counter_mode');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value);
         $this->assertCount(0, $calls);
     }
 
@@ -266,7 +266,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['tm_prioritization' => true]);
 
-        $calls = $this->findDaoCallsByKey('tm_prioritization');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::TM_PRIORITIZATION->value);
         $this->assertCount(1, $calls);
         $this->assertSame('1', $calls[0][3]);
     }
@@ -276,7 +276,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['tm_prioritization' => false]);
 
-        $calls = $this->findDaoCallsByKey('tm_prioritization');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::TM_PRIORITIZATION->value);
         $this->assertCount(1, $calls);
         $this->assertSame('0', $calls[0][3]);
     }
@@ -286,7 +286,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave();
 
-        $calls = $this->findDaoCallsByKey('tm_prioritization');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::TM_PRIORITIZATION->value);
         $this->assertCount(0, $calls);
     }
 
@@ -300,7 +300,7 @@ class SaveJobsMetadataTest extends AbstractTest
         $dialectJson = json_encode(['it-IT' => 'strict_value', 'fr-FR' => 'other_value']);
         $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
-        $calls = $this->findDaoCallsByKey('dialect_strict');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value);
         $this->assertCount(1, $calls);
         $this->assertSame('strict_value', $calls[0][3]);
     }
@@ -311,7 +311,7 @@ class SaveJobsMetadataTest extends AbstractTest
         $dialectJson = json_encode(['fr-FR' => 'french_value', 'de-DE' => 'german_value']);
         $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
-        $calls = $this->findDaoCallsByKey('dialect_strict');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value);
         $this->assertCount(0, $calls);
     }
 
@@ -324,7 +324,7 @@ class SaveJobsMetadataTest extends AbstractTest
         $this->job->target = ' it-IT ';
         $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
-        $calls = $this->findDaoCallsByKey('dialect_strict');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value);
         $this->assertCount(1, $calls);
         $this->assertSame('trimmed_value', $calls[0][3]);
     }
@@ -334,7 +334,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave();
 
-        $calls = $this->findDaoCallsByKey('dialect_strict');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value);
         $this->assertCount(0, $calls);
     }
 
@@ -348,7 +348,7 @@ class SaveJobsMetadataTest extends AbstractTest
         ]);
         $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
 
-        $calls = $this->findDaoCallsByKey('dialect_strict');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value);
         $this->assertCount(1, $calls);
         $this->assertSame('italian_value', $calls[0][3]);
     }
@@ -377,20 +377,20 @@ class SaveJobsMetadataTest extends AbstractTest
         $this->assertCount(6, $this->daoSetCalls);
 
         // Verify each key
-        $this->assertCount(1, $this->findDaoCallsByKey('public_tm_penalty'));
-        $this->assertSame('10', $this->findDaoCallsByKey('public_tm_penalty')[0][3]);
+        $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value));
+        $this->assertSame('10', $this->findDaoCallsByKey(JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value)[0][3]);
 
-        $this->assertCount(1, $this->findDaoCallsByKey('character_counter_count_tags'));
-        $this->assertSame('1', $this->findDaoCallsByKey('character_counter_count_tags')[0][3]);
+        $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value));
+        $this->assertSame('1', $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value)[0][3]);
 
-        $this->assertCount(1, $this->findDaoCallsByKey('character_counter_mode'));
-        $this->assertSame('target', $this->findDaoCallsByKey('character_counter_mode')[0][3]);
+        $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value));
+        $this->assertSame('target', $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value)[0][3]);
 
-        $this->assertCount(1, $this->findDaoCallsByKey('tm_prioritization'));
-        $this->assertSame('1', $this->findDaoCallsByKey('tm_prioritization')[0][3]);
+        $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataMarshaller::TM_PRIORITIZATION->value));
+        $this->assertSame('1', $this->findDaoCallsByKey(JobsMetadataMarshaller::TM_PRIORITIZATION->value)[0][3]);
 
-        $this->assertCount(1, $this->findDaoCallsByKey('dialect_strict'));
-        $this->assertSame('strict', $this->findDaoCallsByKey('dialect_strict')[0][3]);
+        $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value));
+        $this->assertSame('strict', $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value)[0][3]);
 
         $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value));
         $this->assertSame($handlers, $this->findDaoCallsByKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value)[0][3]);
@@ -408,7 +408,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['character_counter_count_tags' => 1]);
 
-        $calls = $this->findDaoCallsByKey('character_counter_count_tags');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value);
         $this->assertCount(1, $calls);
         $this->assertSame('1', $calls[0][3]);
     }
@@ -418,7 +418,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['character_counter_count_tags' => 0]);
 
-        $calls = $this->findDaoCallsByKey('character_counter_count_tags');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value);
         $this->assertCount(1, $calls);
         $this->assertSame('0', $calls[0][3]);
     }
@@ -428,7 +428,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['tm_prioritization' => '1']);
 
-        $calls = $this->findDaoCallsByKey('tm_prioritization');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::TM_PRIORITIZATION->value);
         $this->assertCount(1, $calls);
         $this->assertSame('1', $calls[0][3]);
     }
@@ -438,7 +438,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave(['dialect_strict' => '{}']);
 
-        $calls = $this->findDaoCallsByKey('dialect_strict');
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::DIALECT_STRICT->value);
         $this->assertCount(0, $calls);
     }
 
@@ -463,11 +463,11 @@ class SaveJobsMetadataTest extends AbstractTest
         // 6. subfiltering_handlers (always last, unconditional)
         $keys = array_map(fn(array $call) => $call[2], $this->daoSetCalls);
         $this->assertSame([
-            'public_tm_penalty',
-            'character_counter_count_tags',
-            'character_counter_mode',
-            'tm_prioritization',
-            'dialect_strict',
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value,
+            JobsMetadataMarshaller::DIALECT_STRICT->value,
             JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
         ], $keys);
     }

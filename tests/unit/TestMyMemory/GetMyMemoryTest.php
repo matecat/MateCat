@@ -10,6 +10,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
+use Model\Jobs\JobsMetadataMarshaller;
 use Utils\Registry\AppConfig;
 
 
@@ -257,7 +258,7 @@ TAB;
                     'key' => 'a6043e606ac9b5d7ff24',
                     'client_id' => 0,
                     'priority_key' => 0,
-                    'subfiltering_handlers' => 'null'
+                    JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'null'
                 ],
             CURLINFO_HEADER_OUT => true,
             CURLOPT_TIMEOUT => 120
@@ -411,7 +412,7 @@ TAB;
                     'key' => 'a6043e606ac9b5d7ff24',
                     'client_id' => 0,
                     'priority_key' => 0,
-                    'subfiltering_handlers' => 'null'
+                    JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'null'
                 ],
             CURLINFO_HEADER_OUT => true,
             CURLOPT_TIMEOUT => 120
