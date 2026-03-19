@@ -8,6 +8,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
@@ -26,6 +27,8 @@ class CleanupUploadDirectoryTest extends AbstractTest
 
     private bool $oldStateEmailSendFlag;
 
+    /**
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -48,6 +51,9 @@ class CleanupUploadDirectoryTest extends AbstractTest
         parent::tearDown();
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function callsDeleteQueueWithUploadDir(): void
     {
@@ -61,6 +67,9 @@ class CleanupUploadDirectoryTest extends AbstractTest
         $this->pm->callCleanupUploadDirectory($fs);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function doesNotThrowOnSuccess(): void
     {
@@ -73,6 +82,9 @@ class CleanupUploadDirectoryTest extends AbstractTest
         $this->assertTrue(true);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function catchesExceptionFromDeleteQueue(): void
     {
@@ -87,6 +99,9 @@ class CleanupUploadDirectoryTest extends AbstractTest
         $this->assertTrue(true);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function handlesEmptyUploadDir(): void
     {

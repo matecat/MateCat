@@ -7,6 +7,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
@@ -54,6 +55,9 @@ class InsertFileInstructionsTest extends AbstractTest
 
     // ── Tests ───────────────────────────────────────────────────────
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function insertsInstructionForMatchingFile(): void
     {
@@ -75,6 +79,9 @@ class InsertFileInstructionsTest extends AbstractTest
         $this->assertSame([200, 'Review thoroughly'], $this->insertedInstructions[1]);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function skipsFileWithNoInstructions(): void
     {
@@ -95,6 +102,9 @@ class InsertFileInstructionsTest extends AbstractTest
         $this->assertSame(100, $this->insertedInstructions[0][0]);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function skipsEmptyInstructions(): void
     {
@@ -112,6 +122,9 @@ class InsertFileInstructionsTest extends AbstractTest
         $this->assertCount(0, $this->insertedInstructions);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function noInstructionsKeyDoesNotCrash(): void
     {
@@ -127,6 +140,9 @@ class InsertFileInstructionsTest extends AbstractTest
         $this->assertCount(0, $this->insertedInstructions);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function emptyFilesStructureDoesNothing(): void
     {
@@ -138,6 +154,9 @@ class InsertFileInstructionsTest extends AbstractTest
         $this->assertCount(0, $this->insertedInstructions);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function fileNotInArrayFilesGetsNoInstructions(): void
     {
@@ -153,6 +172,9 @@ class InsertFileInstructionsTest extends AbstractTest
         $this->assertCount(0, $this->insertedInstructions);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function matchesByOriginalFilename(): void
     {

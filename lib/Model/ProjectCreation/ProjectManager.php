@@ -8,7 +8,6 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Concerns\LogsMessages;
 use Model\ConnectedServices\GDrive\Session;
-use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
@@ -94,6 +93,8 @@ class ProjectManager
     protected ?ProjectManagerModel $projectManagerModel = null;
 
     protected ?JobCreationService $jobCreationService = null;
+
+    protected ?FileInsertionService $fileInsertionService = null;
 
     /**
      * ProjectManager constructor.
@@ -235,6 +236,24 @@ class ProjectManager
         }
 
         return $this->jobCreationService;
+    }
+
+    /**
+     * Get or lazily create the FileInsertionService instance.
+     */
+    protected function getFileInsertionService(): FileInsertionService
+    {
+        if ($this->fileInsertionService === null) {
+            $this->fileInsertionService = new FileInsertionService(
+                $this->getProjectManagerModel(),
+                $this->filesMetadataDao,
+                $this->gdriveSession,
+                fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
+                $this->logger,
+            );
+        }
+
+        return $this->fileInsertionService;
     }
 
     /**
@@ -403,10 +422,19 @@ class ProjectManager
             $linkFiles = $this->resolveUploadDirAndGetHashes($fs);
             $this->pushTmxToMemory();
 
-            $this->cacheNonConvertedFiles($fs, $linkFiles);
+            $this->getFileInsertionService()->registerNativeXliffsAsConverted(
+                $fs, $this->projectStructure, $this->uploadDir, $linkFiles
+            );
             $this->handleZipFiles($linkFiles);
 
-            $totalFilesStructure = $this->resolveAndInsertFiles($fs, $linkFiles);
+            try {
+                $totalFilesStructure = $this->getFileInsertionService()->resolveAndInsertFiles(
+                    $fs, $this->projectStructure, $linkFiles
+                );
+            } catch (FileInsertionException $e) {
+                $this->clearFailedProject($e);
+                throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
+            }
             $this->extractSegmentsCreateProjectAndStoreData($fs, $totalFilesStructure, $linkFiles);
 
             $this->determineStatusAndPopulateResult();
@@ -540,55 +568,6 @@ class ProjectManager
     }
 
     /**
-     * For files that don't need conversion, create cache packages and add them to conversionHashes.
-     * Downloads from S3 if the file is missing locally.
-     *
-     * @param array<string, mixed> $linkFiles
-     *
-     * @throws Exception
-     */
-    private function cacheNonConvertedFiles(AbstractFilesStorage $fs, array &$linkFiles): void
-    {
-        foreach ($this->projectStructure->array_files as $pos => $fileName) {
-            $meta = $this->projectStructure->array_files_meta[$pos];
-
-            if ($meta['mustBeConverted']) {
-                continue;
-            }
-
-            $filePathName = "$this->uploadDir/$fileName";
-
-            if (AbstractFilesStorage::isOnS3() && false === file_exists($filePathName)) {
-                $this->getSingleS3QueueFile($fileName);
-            }
-
-            $sha1 = sha1_file($filePathName);
-            if ($sha1 === false) {
-                $this->addProjectError(ProjectCreationError::FILE_HASH_FAILED->value, "Failed to compute hash for file $fileName");
-                continue;
-            }
-
-            try {
-                $fs->makeCachePackage($sha1, (string)$this->projectStructure->source_language, null, $filePathName);
-                $this->logger->debug("File $fileName converted to cache");
-            } catch (Exception $e) {
-                $this->addProjectError(ProjectCreationError::FILE_HASH_FAILED->value, $e->getMessage());
-            }
-
-            $fs->linkSessionToCacheForAlreadyConvertedFiles(
-                $sha1,
-                (string)$this->projectStructure->uploadToken,
-                $fileName
-            );
-
-            $hashKey = $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure->source_language;
-            $linkFiles['conversionHashes']['sha'][] = $hashKey;
-            $linkFiles['conversionHashes']['fileName'][$hashKey][] = $fileName;
-            $linkFiles['conversionHashes']['sha'] = array_unique($linkFiles['conversionHashes']['sha']);
-        }
-    }
-
-    /**
      * Link zip file hashes to the project. Aborts on failure.
      *
      * @param array<string, mixed> $linkFiles
@@ -604,142 +583,6 @@ class ProjectManager
             $this->addProjectError($e->getCode(), $e->getMessage());
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
-    }
-
-    /**
-     * Resolve conversion hashes, validate cached XLIFF files, and insert file records into DB.
-     *
-     * @param array<string, mixed> $linkFiles
-     *
-     * @return array<int, array<string, mixed>> The accumulated file structures keyed by file ID.
-     *
-     * @throws EndQueueException
-     */
-    private function resolveAndInsertFiles(AbstractFilesStorage $fs, array $linkFiles): array
-    {
-        // Collect the DB/file structure created for all processed files.
-        $totalFilesStructure = [];
-
-        // Stop early if there are no converted file hashes to resolve.
-        if (!isset($linkFiles['conversionHashes']) || !isset($linkFiles['conversionHashes']['sha'])) {
-            return $totalFilesStructure;
-        }
-
-        // Process each converted-file reference produced during conversion.
-        foreach ($linkFiles['conversionHashes']['sha'] as $linkFile) {
-            // Extract the hash+lang token from the path/identifier.
-            $hashFile = AbstractFilesStorage::basename_fix($linkFile);
-            $hashFile = explode(AbstractFilesStorage::OBJECTS_SAFE_DELIMITER, $hashFile);
-
-            // The first part is the original file hash, the second is the target language.
-            $sha1_original = $hashFile[0];
-            $lang = $hashFile[1] ?? '';
-
-            // Skip malformed entries with no language suffix.
-            if (empty($lang)) {
-                continue;
-            }
-
-            // Locate the converted XLIFF in cache/storage for this hash+language.
-            $cachedXliffFilePathName = $fs->getXliffFromCache($sha1_original, $lang) ?: null;
-
-            // Get the original file names associated with this converted file.
-            $_originalFileNames = $linkFiles['conversionHashes']['fileName'][$linkFile];
-
-            try {
-                // Ensure original names exist and the cached converted file is valid.
-                $this->validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
-
-                // Insert file records using the original names and resolved XLIFF path.
-                $filesStructure = $this->insertFiles($_originalFileNames, $sha1_original, (string)$cachedXliffFilePathName);
-
-                // Treat "nothing inserted" as a hard failure.
-                if (count($filesStructure ?: []) === 0) {
-                    $this->logger->error('No files inserted in DB', [$_originalFileNames, $sha1_original, $cachedXliffFilePathName]);
-                    throw new Exception('Files could not be saved in database.', ProjectCreationError::FILE_NOT_FOUND->value);
-                }
-            } catch (Throwable $e) {
-                // Normalize the error, clean the partial project state, and rethrow as queue failure.
-                $this->mapFileInsertionError($e);
-                $this->clearFailedProject($e);
-                throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
-            }
-
-            // Merge inserted file info into the overall result.
-            // Note: += is intentional here — array_merge() would re-index the
-            // numeric keys, losing the $fid mapping that downstream consumers
-            // rely on. Key collisions cannot occur because $fid values are
-            // database auto-increment IDs, guaranteed unique across all
-            // insertFiles() calls within the same project.
-            $totalFilesStructure += $filesStructure;
-        }
-
-        // Return the combined structure for all successfully inserted files.
-        return $totalFilesStructure;
-    }
-
-    /**
-     * Validate that a cached XLIFF file exists and has a valid extension.
-     *
-     * @param list<string> $_originalFileNames
-     * @param array<string, mixed> $linkFiles
-     *
-     * @throws Exception
-     */
-    private function validateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
-    {
-        if (count($_originalFileNames ?: []) === 0) {
-            $this->logger->error('No hash files found', [$linkFiles['conversionHashes']]);
-            throw new Exception('No hash files found', ProjectCreationError::FILE_NOT_FOUND->value);
-        }
-
-        if (AbstractFilesStorage::isOnS3()) {
-            if (!$cachedXliffFilePathName) {
-                throw new Exception(sprintf('Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)), ProjectCreationError::FILE_NOT_FOUND->value);
-            }
-        } elseif ($cachedXliffFilePathName === null || !file_exists($cachedXliffFilePathName)) {
-            throw new Exception(sprintf('File %s not found on server after upload.', $cachedXliffFilePathName), ProjectCreationError::FILE_NOT_FOUND->value);
-        }
-
-        $info = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName);
-
-        if (!in_array($info['extension'] ?? '', ['xliff', 'sdlxliff', 'xlf'])) {
-            throw new Exception("Failed to find converted Xliff", ProjectCreationError::XLIFF_NOT_FOUND->value);
-        }
-    }
-
-    /**
-     * Map file-insertion error codes to user-friendly project errors.
-     */
-    private function mapFileInsertionError(Throwable $e): void
-    {
-        $code = $e->getCode();
-
-        match (true) {
-            $code == ProjectCreationError::REFERENCE_FILES_DISK_ERROR->value => $this->addProjectError($code, "Failed to store reference files on disk. Permission denied"),
-            $code == ProjectCreationError::REFERENCE_FILES_DB_ERROR->value => $this->addProjectError($code, "Failed to store reference files in database"),
-            $code == ProjectCreationError::XLIFF_NOT_FOUND->value => $this->addProjectError(
-                ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value,
-                "File not found. Failed to save XLIFF conversion on disk."
-            ),
-            $code == ProjectCreationError::GENERIC_ERROR->value && str_contains($e->getMessage(), '<Message>Invalid copy source encoding.</Message>') => $this->addProjectError(
-                ProjectCreationError::FILE_MOVE_FAILED->value,
-                'There was a problem during the upload of your file(s). Please, ' .
-                'try to rename your file(s) avoiding non-standard characters'
-            ),
-            in_array(
-                $code,
-                [
-                    ProjectCreationError::ZIP_STORE_FAILED->value,
-                    ProjectCreationError::FILE_NOT_FOUND->value,
-                    ProjectCreationError::FILE_CACHE_ERROR->value,
-                    ProjectCreationError::FILE_MOVE_FAILED->value,
-                    ProjectCreationError::GENERIC_ERROR->value
-                ],
-                true
-            ) => $this->addProjectError($code, $e->getMessage()),
-            default => $this->addProjectError($code, 'An unexpected error occurred during file insertion: ' . $e->getMessage()),
-        };
     }
 
     /**
@@ -764,26 +607,7 @@ class ProjectManager
         }
 
         try {
-            $exceptionsFound = 0;
-            foreach ($totalFilesStructure as $fid => $file_info) {
-                try {
-                    $this->extractSegments($fid, $file_info);
-                } catch (Exception $e) {
-                    $this->log($totalFilesStructure);
-                    $this->log("Count fileSt.: " . count($totalFilesStructure));
-                    $this->log("Exceptions: " . $exceptionsFound);
-                    $this->log("Failed to parse " . $file_info['original_filename'], $e);
-
-                    if ($e->getCode() == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
-                        $this->log("No text to translate in the file {$e->getMessage()}.");
-                        $exceptionsFound += 1;
-                        unset($totalFilesStructure[$fid]);
-                        continue;
-                    } else {
-                        throw $e;
-                    }
-                }
-            }
+            $this->extractSegmentsFromFiles($totalFilesStructure);
 
             if ($this->total_segments === 0) {
                 throw new Exception(
@@ -830,6 +654,40 @@ class ProjectManager
         } catch (Throwable $e) {
             $this->mapSegmentExtractionError($e, $fs, $linkFile);
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Iterate over the files structure, extracting segments from each file.
+     *
+     * Files that contain no translatable text are silently removed from the
+     * structure (by reference) as long as at least one other file remains.
+     * If the last file also fails, the exception is re-thrown so the caller
+     * can handle it as a project-level error.
+     *
+     * @throws Exception
+     */
+    private function extractSegmentsFromFiles(array &$totalFilesStructure): void
+    {
+        $exceptionsFound = 0;
+        foreach ($totalFilesStructure as $fid => $file_info) {
+            try {
+                $this->extractSegments($fid, $file_info);
+            } catch (Exception $e) {
+                $this->log($totalFilesStructure);
+                $this->log("Count fileSt.: " . count($totalFilesStructure));
+                $this->log("Exceptions: " . $exceptionsFound);
+                $this->log("Failed to parse " . $file_info['original_filename'], $e);
+
+                if ($e->getCode() == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
+                    $this->log("No text to translate in the file {$e->getMessage()}.");
+                    $exceptionsFound += 1;
+                    unset($totalFilesStructure[$fid]);
+                    continue;
+                } else {
+                    throw $e;
+                }
+            }
         }
     }
 
@@ -1162,85 +1020,6 @@ class ProjectManager
         $this->files_word_count = $extractor->getFilesWordCount();
         $this->total_segments = $extractor->getTotalSegments();
         $this->show_in_cattool_segs_counter = $extractor->getShowInCattoolSegsCounter();
-    }
-
-    /**
-     * Insert files into the database, moving them from the cache to the file directory.
-     *
-     * @param list<string> $_originalFileNames
-     * @param string $sha1_original e.g. 917f7b03c8f54350fb65387bda25fbada43ff7d8
-     * @param string $cachedXliffFilePathName e.g. 91/7f/...!!it-it/work/test_2.txt.sdlxliff
-     *
-     * @return array<int, array<string, mixed>>
-     * @throws Exception
-     */
-    protected function insertFiles(array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
-    {
-        $fs = FilesStorageFactory::create();
-
-        $createDate = date_create($this->projectStructure->create_date);
-        if ($createDate === false) {
-            throw new Exception('Invalid create_date for project');
-        }
-        $yearMonthPath = $createDate->format('Ymd');
-        $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
-
-        //return structure
-        $fileStructures = [];
-
-        foreach ($_originalFileNames as $pos => $originalFileName) {
-            // avoid blank filenames
-            if (!empty($originalFileName)) {
-                // get metadata
-                $meta = $this->projectStructure->array_files_meta[$pos] ?? null;
-                /** @var string $fileExtension */
-                $fileExtension = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
-                $fidStr = $this->getProjectManagerModel()->insertFile(
-                    (int)$this->projectStructure->id_project,
-                    (string)$this->projectStructure->source_language,
-                    $originalFileName,
-                    $fileExtension,
-                    $fileDateSha1Path
-                );
-                $fid = (int)$fidStr;
-
-                if ($this->gdriveSession) {
-                    $gdriveFileId = $this->gdriveSession->findFileIdByName($originalFileName);
-                    if ($gdriveFileId) {
-                        $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
-                        $this->gdriveSession->createRemoteFile($fid, $gdriveFileId, $client);
-                    }
-                }
-
-                $moved = $fs->moveFromCacheToFileDir(
-                    $fileDateSha1Path,
-                    (string)$this->projectStructure->source_language,
-                    $fidStr,
-                    $originalFileName
-                );
-
-                // check if the files were moved
-                if (true !== $moved) {
-                    throw new Exception('Project creation failed. Please refresh page and retry.', ProjectCreationError::FILE_MOVE_FAILED->value);
-                }
-
-                $this->projectStructure->file_id_list[] = $fid;
-
-                // pdfAnalysis
-                if (!empty($meta['pdfAnalysis'])) {
-                    $this->filesMetadataDao->insert((int)$this->projectStructure->id_project, $fid, 'pdfAnalysis', (string)json_encode($meta['pdfAnalysis']));
-                }
-
-                $fileStructures[$fid] = [
-                    'fid' => $fid,
-                    'original_filename' => $originalFileName,
-                    'path_cached_xliff' => $cachedXliffFilePathName,
-                    'mime_type' => $fileExtension
-                ];
-            }
-        }
-
-        return $fileStructures;
     }
 
     /**

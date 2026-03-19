@@ -8,6 +8,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -41,6 +42,9 @@ class HandleZipFilesTest extends AbstractTest
         $this->pm->setProjectStructureValue('result', ['errors' => new ArrayObject()]);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function doesNothingWhenZipHandlingSucceeds(): void
     {
@@ -49,6 +53,9 @@ class HandleZipFilesTest extends AbstractTest
         $this->assertCount(0, $this->pm->getTestProjectStructure()->result['errors']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function throwsEndQueueExceptionOnFailure(): void
     {
@@ -63,6 +70,9 @@ class HandleZipFilesTest extends AbstractTest
         $this->pm->callHandleZipFiles(['zipHashes' => ['hash1']]);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function recordsProjectErrorOnFailure(): void
     {
@@ -72,6 +82,7 @@ class HandleZipFilesTest extends AbstractTest
 
         try {
             $this->pm->callHandleZipFiles(['zipHashes' => []]);
+            $this->fail('Expected EndQueueException');
         } catch (EndQueueException) {
             // expected
         }
@@ -82,6 +93,9 @@ class HandleZipFilesTest extends AbstractTest
         $this->assertSame('Storage error', $errors[0]['message']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function forwardsLinkFilesToZipHandling(): void
     {
@@ -96,6 +110,9 @@ class HandleZipFilesTest extends AbstractTest
         $this->assertSame($input, $capturedLinkFiles);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function preservesExceptionCodeInEndQueueException(): void
     {
@@ -113,6 +130,9 @@ class HandleZipFilesTest extends AbstractTest
         }
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function doesNotAddErrorWhenSuccessful(): void
     {
@@ -126,6 +146,9 @@ class HandleZipFilesTest extends AbstractTest
         $this->assertCount(0, $errors);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function wrapsOriginalExceptionAsPrevious(): void
     {

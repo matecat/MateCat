@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
@@ -9,6 +10,7 @@ use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\Projects\ProjectStruct;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
@@ -25,6 +27,8 @@ class CreateProjectRecordTest extends AbstractTest
 {
     private TestableProjectManager $pm;
 
+    /**
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -37,6 +41,10 @@ class CreateProjectRecordTest extends AbstractTest
         );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     #[Test]
     public function delegatesToModelAndStoresProject(): void
     {
@@ -57,6 +65,10 @@ class CreateProjectRecordTest extends AbstractTest
         $this->assertSame($expectedProject, $this->pm->getProject());
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     #[Test]
     public function passesConfigAndMutableKeysToModel(): void
     {
@@ -107,6 +119,10 @@ class CreateProjectRecordTest extends AbstractTest
         $this->pm->getProject();
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     #[Test]
     public function overwritesPreviousProjectOnSecondCall(): void
     {

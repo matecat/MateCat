@@ -2,12 +2,16 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
+use Model\ProjectCreation\FileInsertionService;
 use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectManagerModel;
@@ -22,6 +26,8 @@ use ReflectionException;
 use Throwable;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * A testable subclass of ProjectManager that bypasses the heavy constructor
@@ -44,6 +50,11 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Initialize the testable instance with mocked/stubbed dependencies.
+     * @param MateCatFilter $filter
+     * @param FeatureSet $features
+     * @param MetadataDao $filesMetadataDao
+     * @param MatecatLogger $logger
+     * @param XliffRulesModel|null $xliffParameters
      */
     public function initForTest(
         MateCatFilter $filter,
@@ -127,7 +138,7 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Set a specific key in projectStructure for testing.
+     * Set a specific key in the projectStructure for testing.
      */
     public function setProjectStructureValue(string $key, mixed $value): void
     {
@@ -165,6 +176,20 @@ class TestableProjectManager extends ProjectManager
         return $this->jobCreationServiceOverride ?? parent::getJobCreationService();
     }
 
+    // ── FileInsertionService override ──────────────────────────────
+
+    private ?FileInsertionService $fileInsertionServiceOverride = null;
+
+    public function setFileInsertionService(FileInsertionService $service): void
+    {
+        $this->fileInsertionServiceOverride = $service;
+    }
+
+    protected function getFileInsertionService(): FileInsertionService
+    {
+        return $this->fileInsertionServiceOverride ?? parent::getFileInsertionService();
+    }
+
     // ── Step 11b: setters / getters / config methods testing support ──
 
     /**
@@ -197,6 +222,12 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the protected _insertInstructions().
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     public function callInsertInstructions(int $fid, string $value): void
     {
@@ -205,6 +236,12 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the protected __checkForProjectAssignment().
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     public function callCheckForProjectAssignment(): void
     {
@@ -230,6 +267,7 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the private sortFilesWithTmxFirst().
+     * @throws ReflectionException
      */
     public function callSortFilesWithTmxFirst(): string
     {
@@ -241,6 +279,7 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the private determineStatusAndPopulateResult().
+     * @throws ReflectionException
      */
     public function callDetermineStatusAndPopulateResult(): void
     {
@@ -258,17 +297,8 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private mapFileInsertionError().
-     */
-    public function callMapFileInsertionError(Throwable $e): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('mapFileInsertionError');
-        $method->invoke($this, $e);
-    }
-
-    /**
      * Public wrapper to invoke the private mapSegmentExtractionError().
+     * @throws ReflectionException
      */
     public function callMapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
     {
@@ -286,17 +316,8 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private validateCachedXliff().
-     */
-    public function callValidateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('validateCachedXliff');
-        $method->invoke($this, $cachedXliffFilePathName, $_originalFileNames, $linkFiles);
-    }
-
-    /**
      * Public wrapper to invoke the private validateBeforeCreation().
+     * @throws ReflectionException
      */
     public function callValidateBeforeCreation(): void
     {
@@ -307,6 +328,8 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the private insertFileInstructions().
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function callInsertFileInstructions(array $totalFilesStructure): void
     {
@@ -342,6 +365,8 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the private createProjectRecord().
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function callCreateProjectRecord(): void
     {
@@ -352,6 +377,7 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the private resolveUploadDirAndGetHashes().
+     * @throws ReflectionException
      */
     public function callResolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
     {
@@ -363,6 +389,7 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the private handleZipFiles().
+     * @throws ReflectionException
      */
     public function callHandleZipFiles(array $linkFiles): void
     {
@@ -393,6 +420,7 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the private cleanupUploadDirectory().
+     * @throws ReflectionException
      */
     public function callCleanupUploadDirectory(AbstractFilesStorage $fs): void
     {

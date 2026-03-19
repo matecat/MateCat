@@ -3,10 +3,12 @@
 namespace unit\Model\ProjectCreation;
 
 use ArrayObject;
+use DomainException;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
+use TypeError;
 
 /**
  * Audit-driven regression tests for the RecursiveArrayObject → ProjectStructure migration.
@@ -23,15 +25,6 @@ use TestHelpers\AbstractTest;
  */
 class AuditCleanupAndPluginsTest extends AbstractTest
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-    }
 
     // ──────────────────────────────────────────────────────────────
     // C23/C24: Plugin notes access — Uber.php:248 / Airbnb.php:54
@@ -122,7 +115,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     public function notesRejectsArrayObjectInput(): void
     {
         // With array type, assigning ArrayObject throws TypeError.
-        $this->expectException(\TypeError::class);
+        $this->expectException(TypeError::class);
         $notesAO = new ArrayObject([
             'unit-1' => new ArrayObject([
                 'entries' => new ArrayObject([
@@ -131,6 +124,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
             ]),
         ]);
 
+        /* @noinspection PhpExpressionResultUnusedInspection */
         new ProjectStructure([
             'notes' => $notesAO,
         ]);
@@ -198,7 +192,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
         self::assertCount(2, $ps->private_tm_key);
         self::assertSame('abc123', $ps->private_tm_key[0]['key']);
         self::assertSame('Other TM', $ps->private_tm_key[1]['name']);
-        self::assertFalse(empty($ps->private_tm_key));
+        self::assertNotEmpty($ps->private_tm_key);
 
         $keys = [];
         foreach ($ps->private_tm_key as $tmKeyObj) {
@@ -217,7 +211,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
 
         self::assertIsArray($ps->private_tm_key);
         self::assertCount(0, $ps->private_tm_key);       // No deprecation
-        self::assertTrue(empty($ps->private_tm_key));     // Correct
+        self::assertEmpty($ps->private_tm_key);     // Correct
         self::assertEmpty($ps->private_tm_key);
 
         // foreach on empty array: no iterations, no error
@@ -462,7 +456,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     {
         $ps = new ProjectStructure();
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Unknown property');
 
         $ps->file_part_id = [];
@@ -473,7 +467,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     {
         $ps = new ProjectStructure();
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Unknown property');
 
         $ps->file_metadata = [];
@@ -498,7 +492,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
 
         // Simulates the TmKeyService::setPrivateTMKeys() opening loop
         $iterations = 0;
-        foreach ($ps->private_tm_key as $tmKeyObj) {
+        foreach ($ps->private_tm_key as $ignored) {
             $iterations++;
         }
 
@@ -524,7 +518,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
 
         try {
             $iterations = 0;
-            foreach ($ps->private_tm_key as $tmKeyObj) {
+            foreach ($ps->private_tm_key as $ignored) {
                 $iterations++;
             }
         } finally {
@@ -567,7 +561,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
         ]);
 
         // This is the guard check — should evaluate to true (early return)
-        self::assertTrue(empty($ps->private_tm_key[0]['key'] ?? null));
+        self::assertEmpty($ps->private_tm_key[0]['key'] ?? null);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -702,7 +696,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     public function serializationRoundTripRejectsArrayObjectForTypedProperties(): void
     {
         // With strict array types, assigning ArrayObject throws TypeError.
-        $this->expectException(\TypeError::class);
+        $this->expectException(TypeError::class);
         new ProjectStructure([
             'segments' => new ArrayObject([
                 1 => new ArrayObject(['sid' => 1, 'source' => 'Hello']),
@@ -812,7 +806,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     {
         $ps = new ProjectStructure();
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Unknown property');
 
         $ps->completely_bogus_property = 'should fail';
@@ -821,8 +815,8 @@ class AuditCleanupAndPluginsTest extends AbstractTest
     #[Test]
     public function constructorWithUnknownKeyThrowsDomainException(): void
     {
-        $this->expectException(\DomainException::class);
-
+        $this->expectException(DomainException::class);
+        /* @noinspection PhpExpressionResultUnusedInspection */
         new ProjectStructure([
             'nonexistent_key' => 'value',
         ]);

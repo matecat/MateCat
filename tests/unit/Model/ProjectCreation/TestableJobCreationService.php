@@ -7,6 +7,7 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectStructure;
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * A testable subclass of JobCreationService that allows injecting a mock JobsMetadataDao
@@ -39,6 +40,7 @@ class TestableJobCreationService extends JobCreationService
 
     /**
      * Public wrapper to invoke the private saveJobsMetadata().
+     * @throws ReflectionException
      */
     public function callSaveJobsMetadata(JobStruct $job, ProjectStructure $projectStructure): void
     {

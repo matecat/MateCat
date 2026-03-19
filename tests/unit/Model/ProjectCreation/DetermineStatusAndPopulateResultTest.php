@@ -6,6 +6,8 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Exception;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
@@ -25,6 +27,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     private TestableProjectManager $pm;
     private bool $originalVolumeAnalysis;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -60,6 +65,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
 
     // ── Status determination ────────────────────────────────────────
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function statusIsNewWhenVolumeAnalysisEnabledAndSegmentsExist(): void
     {
@@ -72,6 +80,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame(ProjectStatus::STATUS_NEW, $ps->status);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function statusIsNotToAnalyzeWhenVolumeAnalysisDisabled(): void
     {
@@ -84,6 +95,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame(ProjectStatus::STATUS_NOT_TO_ANALYZE, $ps->status);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function statusIsEmptyWhenNoShowInCattoolSegments(): void
     {
@@ -96,6 +110,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame(ProjectStatus::STATUS_EMPTY, $ps->status);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function statusIsEmptyOverridesNotToAnalyze(): void
     {
@@ -110,6 +127,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
 
     // ── Result structure population ─────────────────────────────────
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultCodeIsSetToOne(): void
     {
@@ -120,6 +140,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame(1, $result['code']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultDataIsOK(): void
     {
@@ -130,6 +153,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame('OK', $result['data']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsProjectPassword(): void
     {
@@ -140,6 +166,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame('proj_pass', $result['ppassword']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsJobPasswords(): void
     {
@@ -151,6 +180,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertCount(1, $jobPass);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsJobIds(): void
     {
@@ -162,6 +194,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertCount(1, $jobList);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsProjectId(): void
     {
@@ -172,6 +207,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame(999, $result['id_project']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsProjectName(): void
     {
@@ -182,6 +220,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame('Test Project', $result['project_name']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsSourceLanguage(): void
     {
@@ -192,6 +233,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame('en-US', $result['source_language']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsTargetLanguage(): void
     {
@@ -202,6 +246,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertNotNull($result['target_language']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultStatusMatchesProjectStructureStatus(): void
     {
@@ -214,6 +261,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         $this->assertSame($ps->status, $ps->result['status']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function resultContainsJobSegments(): void
     {

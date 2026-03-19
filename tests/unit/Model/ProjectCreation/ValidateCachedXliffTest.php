@@ -2,17 +2,17 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Closure;
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
-use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\ProjectCreation\ProjectManagerModel;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
- * Unit tests for {@see \Model\ProjectCreation\ProjectManager::validateCachedXliff()}.
+ * Unit tests for {@see \Model\ProjectCreation\FileInsertionService::validateCachedXliff()}.
  *
  * Verifies:
  * - Exception when original file names array is empty
@@ -23,7 +23,7 @@ use Utils\Registry\AppConfig;
  */
 class ValidateCachedXliffTest extends AbstractTest
 {
-    private TestableProjectManager $pm;
+    private TestableFileInsertionService $service;
     private string $originalFileStorageMethod;
 
     protected function setUp(): void
@@ -32,11 +32,11 @@ class ValidateCachedXliffTest extends AbstractTest
         $this->originalFileStorageMethod = AppConfig::$FILE_STORAGE_METHOD;
         AppConfig::$FILE_STORAGE_METHOD = 'fs';
 
-        $this->pm = new TestableProjectManager();
-        $this->pm->initForTest(
-            $this->createStub(MateCatFilter::class),
-            $this->createStub(FeatureSet::class),
+        $this->service = new TestableFileInsertionService(
+            $this->createStub(ProjectManagerModel::class),
             $this->createStub(MetadataDao::class),
+            null, // no GDrive session
+            Closure::fromCallable(function (string $fileName): void {}),
             $this->createStub(MatecatLogger::class),
         );
     }
@@ -56,7 +56,7 @@ class ValidateCachedXliffTest extends AbstractTest
         $this->expectExceptionCode(-6);
         $this->expectExceptionMessage('No hash files found');
 
-        $this->pm->callValidateCachedXliff(
+        $this->service->callValidateCachedXliff(
             '/some/path/file.xliff',
             [],
             ['conversionHashes' => []]
@@ -69,7 +69,7 @@ class ValidateCachedXliffTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionCode(-6);
 
-        $this->pm->callValidateCachedXliff(
+        $this->service->callValidateCachedXliff(
             '/some/path/file.xliff',
             [],
             ['conversionHashes' => []]
@@ -87,7 +87,7 @@ class ValidateCachedXliffTest extends AbstractTest
         $this->expectExceptionCode(-6);
         $this->expectExceptionMessage('Key not found on S3 cache bucket');
 
-        $this->pm->callValidateCachedXliff(
+        $this->service->callValidateCachedXliff(
             null,
             ['test.docx'],
             ['conversionHashes' => []]
@@ -102,7 +102,7 @@ class ValidateCachedXliffTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionCode(-6);
 
-        $this->pm->callValidateCachedXliff(
+        $this->service->callValidateCachedXliff(
             '',
             ['test.docx'],
             ['conversionHashes' => []]
@@ -120,7 +120,7 @@ class ValidateCachedXliffTest extends AbstractTest
         $this->expectExceptionCode(-6);
         $this->expectExceptionMessage('not found on server after upload');
 
-        $this->pm->callValidateCachedXliff(
+        $this->service->callValidateCachedXliff(
             '/nonexistent/path/file.xliff',
             ['test.docx'],
             ['conversionHashes' => []]
@@ -141,7 +141,7 @@ class ValidateCachedXliffTest extends AbstractTest
             $this->expectExceptionCode(-3);
             $this->expectExceptionMessage('Failed to find converted Xliff');
 
-            $this->pm->callValidateCachedXliff(
+            $this->service->callValidateCachedXliff(
                 $tmpFile,
                 ['test.docx'],
                 ['conversionHashes' => []]
@@ -161,7 +161,7 @@ class ValidateCachedXliffTest extends AbstractTest
 
         try {
             // Should not throw
-            $this->pm->callValidateCachedXliff(
+            $this->service->callValidateCachedXliff(
                 $xliffFile,
                 ['test.docx'],
                 ['conversionHashes' => []]
@@ -181,7 +181,7 @@ class ValidateCachedXliffTest extends AbstractTest
         file_put_contents($sdlxliffFile, 'content');
 
         try {
-            $this->pm->callValidateCachedXliff(
+            $this->service->callValidateCachedXliff(
                 $sdlxliffFile,
                 ['test.docx'],
                 ['conversionHashes' => []]
@@ -201,7 +201,7 @@ class ValidateCachedXliffTest extends AbstractTest
         file_put_contents($xlfFile, 'content');
 
         try {
-            $this->pm->callValidateCachedXliff(
+            $this->service->callValidateCachedXliff(
                 $xlfFile,
                 ['test.docx'],
                 ['conversionHashes' => []]
@@ -224,7 +224,7 @@ class ValidateCachedXliffTest extends AbstractTest
             $this->expectException(Exception::class);
             $this->expectExceptionCode(-3);
 
-            $this->pm->callValidateCachedXliff(
+            $this->service->callValidateCachedXliff(
                 $docxFile,
                 ['test.docx'],
                 ['conversionHashes' => []]
@@ -240,7 +240,7 @@ class ValidateCachedXliffTest extends AbstractTest
         AppConfig::$FILE_STORAGE_METHOD = 's3';
 
         try {
-            $this->pm->callValidateCachedXliff(
+            $this->service->callValidateCachedXliff(
                 null,
                 ['my_document.docx', 'other.pdf'],
                 ['conversionHashes' => []]
