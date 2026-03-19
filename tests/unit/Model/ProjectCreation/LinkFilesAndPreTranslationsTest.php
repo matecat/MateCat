@@ -10,6 +10,7 @@ use Model\ProjectCreation\SegmentStorageService;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -21,15 +22,27 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
     private TestableJobCreationService $service;
     private MatecatLogger $logger;
 
+    private bool $oldStateEmailSendFlag;
+
     /**
      * @throws Exception
      */
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->oldStateEmailSendFlag = AppConfig::$SEND_ERR_MAIL_REPORT;
+        AppConfig::$SEND_ERR_MAIL_REPORT = false;
+
         $featureSet = $this->createStub(FeatureSet::class);
         $this->logger = $this->createStub(MatecatLogger::class);
         $this->service = new TestableJobCreationService($featureSet, $this->logger);
+    }
+
+    protected function tearDown(): void
+    {
+        AppConfig::$SEND_ERR_MAIL_REPORT = $this->oldStateEmailSendFlag;
+        parent::tearDown();
     }
 
     private function makeJob(int $id): JobStruct
