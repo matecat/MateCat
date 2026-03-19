@@ -4,11 +4,15 @@ import ContextReviewChannel from '../utils/contextReviewChannel'
 import {
   clearHighlights,
   highlightBySid,
+  setActiveHighlight,
   findSegmentSidByClick,
   tagSegments,
+  replaceTextContent,
 } from '../utils/contextReviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
-import sampleHtml from '../../../sample-context-review.html'
+import IconDown from '../components/icons/IconDown'
+const CONTEXT_REVIEW_HTML_URL =
+  'https://files.sandbox.translated.com/provetta/content/launches/2025/04/04/launch_copy_of_demo/content/we-retail/language-masters/de/equipment.html'
 
 const VIEW_MODES = {
   BOTH: 'both',
@@ -23,23 +27,102 @@ const VIEW_OPTIONS = [
 ]
 
 /**
- * Parses the sample HTML string and extracts style + body content.
+ * Resolves a potentially relative URL against a base URL string.
+ *
+ * @param {string} url
+ * @param {string} baseUrl
+ * @returns {string}
+ */
+const resolveUrl = (url, baseUrl) => {
+  if (!url || url.startsWith('data:') || url.startsWith('#')) return url
+  try {
+    return new URL(url, baseUrl).href
+  } catch {
+    return url
+  }
+}
+
+/**
+ * Resolves all relative URLs inside a parsed DOM tree so that external
+ * resources (stylesheets, scripts, images, etc.) load correctly when the
+ * HTML is rendered on a different origin.
+ *
+ * @param {Document} doc  The parsed document
+ * @param {string} baseUrl  The original document URL
+ */
+const resolveRelativeUrls = (doc, baseUrl) => {
+  // src attributes (script, img, iframe, source, video, audio, …)
+  doc.querySelectorAll('[src]').forEach((el) => {
+    el.setAttribute('src', resolveUrl(el.getAttribute('src'), baseUrl))
+  })
+  // href attributes (link, a, area, …)
+  doc.querySelectorAll('[href]').forEach((el) => {
+    el.setAttribute('href', resolveUrl(el.getAttribute('href'), baseUrl))
+  })
+  // form actions
+  doc.querySelectorAll('[action]').forEach((el) => {
+    el.setAttribute('action', resolveUrl(el.getAttribute('action'), baseUrl))
+  })
+  // inline style background-image / url() references
+  doc.querySelectorAll('[style]').forEach((el) => {
+    const style = el.getAttribute('style')
+    if (style && style.includes('url(')) {
+      el.setAttribute(
+        'style',
+        style.replace(/url\(["']?(.*?)["']?\)/g, (_match, p1) => {
+          return `url("${resolveUrl(p1, baseUrl)}")`
+        }),
+      )
+    }
+  })
+  // srcset attributes (img, source)
+  doc.querySelectorAll('[srcset]').forEach((el) => {
+    const srcset = el.getAttribute('srcset')
+    const resolved = srcset
+      .split(',')
+      .map((entry) => {
+        const parts = entry.trim().split(/\s+/)
+        parts[0] = resolveUrl(parts[0], baseUrl)
+        return parts.join(' ')
+      })
+      .join(', ')
+    el.setAttribute('srcset', resolved)
+  })
+}
+
+/**
+ * Parses the fetched HTML string and extracts head resources (stylesheets,
+ * scripts, inline styles) plus body content with all relative URLs resolved.
  *
  * @param {string} rawHtml
- * @returns {string} Combined style tags and body innerHTML
+ * @param {string} sourceUrl  The URL the HTML was fetched from
+ * @returns {string} Combined head resources and body innerHTML
  */
-const parseHtmlContent = (rawHtml) => {
+const parseHtmlContent = (rawHtml, sourceUrl) => {
   const parser = new DOMParser()
   const doc = parser.parseFromString(rawHtml, 'text/html')
 
-  const styles = doc.querySelectorAll('head style')
-  let styleHtml = ''
-  styles.forEach((style) => {
-    styleHtml += style.outerHTML
+  // Resolve all relative URLs in the document
+  resolveRelativeUrls(doc, sourceUrl)
+
+  // Collect <style> tags from head
+  let headHtml = ''
+  doc.querySelectorAll('head style').forEach((el) => {
+    headHtml += el.outerHTML
+  })
+
+  // Collect <link rel="stylesheet"> tags from head
+  doc.querySelectorAll('head link[rel="stylesheet"]').forEach((el) => {
+    headHtml += el.outerHTML
+  })
+
+  // Collect <script> tags from head (skip inline ContextHub / CMS scripts)
+  doc.querySelectorAll('head script[src]').forEach((el) => {
+    headHtml += el.outerHTML
   })
 
   const bodyHtml = doc.body ? doc.body.innerHTML : rawHtml
-  return styleHtml + bodyHtml
+  return headHtml + bodyHtml
 }
 
 const ContextReview = () => {
@@ -48,6 +131,10 @@ const ContextReview = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
+  // {sid, activeIndex, total} or null — tracks current highlight navigation
+  const [highlight, setHighlight] = useState(null)
+  // Bumped after innerHTML injection so the tagging effect knows the DOM is ready
+  const [htmlReady, setHtmlReady] = useState(0)
 
   const sourceRef = useRef(null)
   const targetRef = useRef(null)
@@ -58,42 +145,85 @@ const ContextReview = () => {
     segmentsRef.current = segments
   }, [segments])
 
-  const handleMessage = useCallback((message) => {
-    if (message.type === 'segments') {
-      const incoming = message.segments ?? []
-      setSegments((prev) => {
-        const existingSids = new Set(prev.map((s) => s.sid))
-        const newSegments = incoming.filter((s) => !existingSids.has(s.sid))
-        return newSegments.length > 0 ? [...prev, ...newSegments] : prev
-      })
-    }
+  /**
+   * Applies highlights on both panels for the given SID.
+   * Returns the total number of occurrences found (from the source panel,
+   * or the target panel when source is not mounted).
+   *
+   * @param {number|string} sid
+   * @param {number} activeIndex  Which occurrence to mark active
+   * @param {boolean} scroll      Whether to scroll to the active occurrence
+   * @returns {number} total occurrences
+   */
+  const applyHighlights = useCallback((sid, activeIndex, scroll) => {
+    let total = 0
 
-    if (message.type === 'highlight') {
-      // Highlight on both panels using data-context-sid attribute
-      if (sourceRef.current) {
-        clearHighlights(sourceRef.current)
-        const firstMatch = highlightBySid(sourceRef.current, message.sid)
-        if (firstMatch) {
-          firstMatch.scrollIntoView({behavior: 'smooth', block: 'center'})
-        }
-      }
-      if (targetRef.current) {
-        clearHighlights(targetRef.current)
-        const firstMatch = highlightBySid(targetRef.current, message.sid)
-        if (firstMatch) {
-          firstMatch.scrollIntoView({behavior: 'smooth', block: 'center'})
-        }
+    if (sourceRef.current) {
+      clearHighlights(sourceRef.current)
+      const res = highlightBySid(sourceRef.current, sid, activeIndex)
+      total = res.total
+      if (scroll && res.marks[activeIndex]) {
+        res.marks[activeIndex][0].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
       }
     }
 
-    if (message.type === 'updateTranslation') {
-      setSegments((prev) =>
-        prev.map((seg) =>
-          seg.sid === message.sid ? {...seg, target: message.target} : seg,
-        ),
-      )
+    if (targetRef.current) {
+      clearHighlights(targetRef.current)
+      const res = highlightBySid(targetRef.current, sid, activeIndex)
+      if (!total) total = res.total
+      if (scroll && res.marks[activeIndex]) {
+        res.marks[activeIndex][0].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }
     }
+
+    return total
   }, [])
+
+  const handleMessage = useCallback(
+    (message) => {
+      if (message.type === 'segments') {
+        const incoming = message.segments ?? []
+        setSegments((prev) => {
+          const existingSids = new Set(prev.map((s) => s.sid))
+          const newSegments = incoming.filter((s) => !existingSids.has(s.sid))
+          return newSegments.length > 0 ? [...prev, ...newSegments] : prev
+        })
+      }
+
+      if (message.type === 'highlight') {
+        // Highlight on both panels — scroll to the first occurrence
+        const total = applyHighlights(message.sid, 0, true)
+        setHighlight(
+          total > 0 ? {sid: message.sid, activeIndex: 0, total} : null,
+        )
+      }
+
+      if (message.type === 'updateTranslation') {
+        const {sid, target} = message
+        setSegments((prev) =>
+          prev.map((seg) => (seg.sid === sid ? {...seg, target} : seg)),
+        )
+        // Directly update the already-tagged element in the target panel so we
+        // don't need to nuke innerHTML and re-tag everything.
+        // Uses replaceTextContent to preserve child elements (e.g. <a> tags).
+        if (targetRef.current && target) {
+          const spans = targetRef.current.querySelectorAll(
+            `[data-context-sid="${sid}"]`,
+          )
+          spans.forEach((span) => {
+            replaceTextContent(span, target)
+          })
+        }
+      }
+    },
+    [applyHighlights],
+  )
 
   // Subscribe to ContextReviewChannel messages
   useEffect(() => {
@@ -105,36 +235,92 @@ const ContextReview = () => {
     ContextReviewChannel.sendMessage({type: 'requestSegments'})
   }, [])
 
-  // Parse the imported HTML string
+  // Fetch and parse the HTML document
   useEffect(() => {
-    try {
-      setLoading(true)
-      setError(null)
-      setHtmlContent(parseHtmlContent(sampleHtml))
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
+    let cancelled = false
+
+    const fetchHtml = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await fetch(CONTEXT_REVIEW_HTML_URL)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch document (${response.status})`)
+        }
+        const rawHtml = await response.text()
+        if (!cancelled) {
+          setHtmlContent(parseHtmlContent(rawHtml, CONTEXT_REVIEW_HTML_URL))
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e.message)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchHtml()
+
+    return () => {
+      cancelled = true
     }
   }, [])
 
-  // When segments change, apply text replacements to the target panel
-  // and tag source panel nodes with SID attributes
-  useEffect(() => {
-    if (!segments.length || !htmlContent) return
+  // Render the fetched HTML into panels once (or when viewMode changes,
+  // since panels are conditionally mounted).  A ref tracks whether the
+  // current HTML has already been injected so we never nuke innerHTML
+  // just because `segments` changed.
+  const htmlRenderedRef = useRef({source: '', target: ''})
 
-    // Re-render fresh HTML in target panel then apply replacements
-    if (targetRef.current) {
+  useEffect(() => {
+    if (!htmlContent) return
+
+    let injected = false
+
+    // Source panel — inject HTML only when the content or panel changed
+    if (
+      sourceRef.current &&
+      htmlRenderedRef.current.source !== htmlContent + viewMode
+    ) {
+      sourceRef.current.innerHTML = htmlContent
+      htmlRenderedRef.current.source = htmlContent + viewMode
+      injected = true
+    }
+
+    // Target panel — same logic
+    if (
+      targetRef.current &&
+      htmlRenderedRef.current.target !== htmlContent + viewMode
+    ) {
       targetRef.current.innerHTML = htmlContent
+      htmlRenderedRef.current.target = htmlContent + viewMode
+      injected = true
+    }
+
+    // Signal the tagging effect that fresh HTML is in the DOM
+    if (injected) {
+      setHtmlReady((prev) => prev + 1)
+    }
+  }, [htmlContent, viewMode])
+
+  // When segments change, apply text replacements / SID tagging
+  // incrementally — without resetting innerHTML.
+  // Depends on `htmlReady` (not `htmlContent`) so it only runs after the
+  // HTML-injection effect has finished writing to the DOM.
+  useEffect(() => {
+    if (!segments.length || !htmlReady) return
+
+    if (targetRef.current) {
       tagSegments(targetRef.current, segments, {replaceWithTarget: true})
     }
 
-    // Tag source panel nodes with SID attributes for click resolution
     if (sourceRef.current) {
-      sourceRef.current.innerHTML = htmlContent
       tagSegments(sourceRef.current, segments)
     }
-  }, [segments, htmlContent, viewMode])
+  }, [segments, htmlReady, viewMode])
 
   // Detect untagged nodes while scrolling and request more segments
   useEffect(() => {
@@ -178,9 +364,7 @@ const ContextReview = () => {
       const now = Date.now()
       const scrollTop = window.scrollY
       const scrollBottom =
-        document.documentElement.scrollHeight -
-        scrollTop -
-        window.innerHeight
+        document.documentElement.scrollHeight - scrollTop - window.innerHeight
 
       // Near top → check for untagged nodes in upper half
       if (scrollTop < 200 && now - lastRequestRef.before > THROTTLE_MS) {
@@ -219,26 +403,48 @@ const ContextReview = () => {
     if (!htmlContent) return
 
     const handleSourceClick = (event) => {
-      const sid = findSegmentSidByClick(
+      event.preventDefault()
+      const result = findSegmentSidByClick(
         event.target,
         sourceContainer,
         segmentsRef.current,
         'source',
       )
-      if (sid != null) {
-        ContextReviewChannel.sendMessage({type: 'segmentClicked', sid})
+      if (result) {
+        ContextReviewChannel.sendMessage({
+          type: 'segmentClicked',
+          sid: result.sid,
+        })
+        // Highlight at the clicked occurrence — do NOT scroll
+        const total = applyHighlights(result.sid, result.occurrenceIndex, false)
+        setHighlight(
+          total > 0
+            ? {sid: result.sid, activeIndex: result.occurrenceIndex, total}
+            : null,
+        )
       }
     }
 
     const handleTargetClick = (event) => {
-      const sid = findSegmentSidByClick(
+      event.preventDefault()
+      const result = findSegmentSidByClick(
         event.target,
         targetContainer,
         segmentsRef.current,
         'target',
       )
-      if (sid != null) {
-        ContextReviewChannel.sendMessage({type: 'segmentClicked', sid})
+      if (result) {
+        ContextReviewChannel.sendMessage({
+          type: 'segmentClicked',
+          sid: result.sid,
+        })
+        // Highlight at the clicked occurrence — do NOT scroll
+        const total = applyHighlights(result.sid, result.occurrenceIndex, false)
+        setHighlight(
+          total > 0
+            ? {sid: result.sid, activeIndex: result.occurrenceIndex, total}
+            : null,
+        )
       }
     }
 
@@ -258,6 +464,40 @@ const ContextReview = () => {
       }
     }
   }, [htmlContent, viewMode])
+
+  // --- Occurrence navigation handlers ---
+
+  const navigateHighlight = useCallback(
+    (direction) => {
+      if (!highlight || highlight.total <= 1) return
+
+      const nextIndex =
+        direction === 'next'
+          ? (highlight.activeIndex + 1) % highlight.total
+          : (highlight.activeIndex - 1 + highlight.total) % highlight.total
+
+      // Update the active mark in both panels and scroll to it
+      ;[sourceRef, targetRef].forEach((ref) => {
+        if (!ref.current) return
+        const mark = setActiveHighlight(ref.current, nextIndex)
+        if (mark) {
+          mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+        }
+      })
+
+      setHighlight((prev) => ({...prev, activeIndex: nextIndex}))
+    },
+    [highlight],
+  )
+
+  const handlePrev = useCallback(
+    () => navigateHighlight('prev'),
+    [navigateHighlight],
+  )
+  const handleNext = useCallback(
+    () => navigateHighlight('next'),
+    [navigateHighlight],
+  )
 
   if (loading) {
     return (
@@ -288,16 +528,33 @@ const ContextReview = () => {
           onChange={setViewMode}
           compact
         />
+        {highlight && highlight.total > 1 && (
+          <div className="context-review-nav">
+            <button
+              className="context-review-nav__button"
+              onClick={handlePrev}
+              aria-label="Previous occurrence"
+            >
+              <IconDown size={16} />
+            </button>
+            <span className="context-review-nav__counter">
+              {highlight.activeIndex + 1} of {highlight.total}
+            </span>
+            <button
+              className="context-review-nav__button"
+              onClick={handleNext}
+              aria-label="Next occurrence"
+            >
+              <IconDown size={16} />
+            </button>
+          </div>
+        )}
       </div>
       <div className="context-review-panels">
         {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) && (
           <div className="context-review-panel">
             <div className="context-review-panel-header">Source</div>
-            <div
-              ref={sourceRef}
-              className="context-review-content"
-              dangerouslySetInnerHTML={{__html: htmlContent}}
-            />
+            <div ref={sourceRef} className="context-review-content" />
           </div>
         )}
         {viewMode === VIEW_MODES.BOTH && (
@@ -306,11 +563,7 @@ const ContextReview = () => {
         {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.TARGET) && (
           <div className="context-review-panel">
             <div className="context-review-panel-header">Translation</div>
-            <div
-              ref={targetRef}
-              className="context-review-content"
-              dangerouslySetInnerHTML={{__html: htmlContent}}
-            />
+            <div ref={targetRef} className="context-review-content" />
           </div>
         )}
       </div>

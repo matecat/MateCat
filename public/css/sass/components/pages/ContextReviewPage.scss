@@ -3,7 +3,6 @@
 .context-review-page {
   width: 100%;
   max-width: unset;
-
 }
 .context-review-container {
   margin: 0 auto;
@@ -86,9 +85,12 @@
 
 .context-review-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   cursor: default;
   padding: 20px;
+  // Create a new containing block so that position:fixed elements from the
+  // fetched HTML stay within the panel instead of covering the viewport.
+  transform: translateZ(0);
 
   p,
   li,
@@ -150,4 +152,54 @@ mark.context-review-highlight--active {
   background-color: colors.$warning;
   outline: 2px solid colors.$warningHover;
   outline-offset: 1px;
+}
+
+// Navigation bar for cycling through multiple occurrences
+.context-review-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+  font-family: Calibri, Arial, Helvetica, sans-serif;
+}
+
+.context-review-nav__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid colors.$grey4;
+  border-radius: 4px;
+  background-color: colors.$white;
+  color: colors.$grey6;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background-color: colors.$grey5;
+    color: colors.$black;
+  }
+
+  &:active {
+    background-color: colors.$grey4;
+  }
+
+  // First button is "previous" — rotate the chevron to point up
+  &:first-child svg {
+    transform: rotate(180deg);
+  }
+}
+
+.context-review-nav__counter {
+  font-size: 13px;
+  font-weight: 600;
+  color: colors.$grey6;
+  min-width: 50px;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
 }
