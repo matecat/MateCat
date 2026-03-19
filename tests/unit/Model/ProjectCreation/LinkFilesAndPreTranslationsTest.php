@@ -10,7 +10,6 @@ use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
-require_once __DIR__ . '/TestableJobCreationService.php';
 
 /**
  * Unit tests for job-file linking and pre-translation insertion
