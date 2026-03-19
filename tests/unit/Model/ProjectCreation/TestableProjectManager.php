@@ -11,6 +11,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectManagerModel;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
@@ -73,7 +74,7 @@ class TestableProjectManager extends ProjectManager
             'notes' => [],
             'context_group' => [],
             'current_xliff_info' => [],
-            'xliff_parameters' => $xliffParameters ?? new XliffRulesModel(),
+            ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value => $xliffParameters ?? new XliffRulesModel(),
             'result' => ['errors' => []],
             // Mutable pipeline keys needed by createProjectRecord() caller
             'status' => ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,

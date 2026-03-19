@@ -37,6 +37,7 @@ use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Users\UserStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
@@ -497,8 +498,8 @@ class NewController extends KleinController
                 throw new InvalidArgumentException("MT Engine id $mt_engine is not supported for QE Workflows");
             }
 
-            $metadata[MetadataDao::MT_QE_WORKFLOW_ENABLED] = $mt_qe_workflow_enable;
-            $metadata[MetadataDao::MT_QE_WORKFLOW_PARAMETERS] = $this->validateMTQEParametersOrDefault(
+            $metadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value] = $mt_qe_workflow_enable;
+            $metadata[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] = $this->validateMTQEParametersOrDefault(
                 $mt_qe_workflow_template_id,
                 $mt_qe_workflow_template_raw_parameters
             ); // or default
@@ -518,20 +519,20 @@ class NewController extends KleinController
         }
 
         if (!empty($project_completion)) {
-            $metadata['project_completion'] = $project_completion;
+            $metadata[ProjectsMetadataMarshaller::PROJECT_COMPLETION->value] = $project_completion;
         }
 
         if (!empty($segmentation_rule)) {
             $metadata['segmentation_rule'] = $segmentation_rule;
         }
 
-        $metadata[MetadataDao::MT_QUALITY_VALUE_IN_EDITOR] = $mt_quality_value_in_editor;
+        $metadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $mt_quality_value_in_editor;
 
         if ($mt_evaluation) {
-            $metadata[MetadataDao::MT_EVALUATION] = true;
+            $metadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] = true;
         }
 
-        $metadata[MetadataDao::ICU_ENABLED] = $icu_enabled;
+        $metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;
 
         return [
             'project_info' => $project_info,
@@ -620,7 +621,7 @@ class NewController extends KleinController
         }
 
         // new raw counter model
-        $metadata[MetadataDao::WORD_COUNT_TYPE_KEY] = MetadataDao::WORD_COUNT_RAW;
+        $metadata[ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value] = ProjectsMetadataMarshaller::WORD_COUNT_RAW->value;
 
         return $metadata;
     }

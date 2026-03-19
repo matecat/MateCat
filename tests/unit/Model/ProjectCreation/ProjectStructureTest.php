@@ -5,6 +5,7 @@ namespace unit\Model\ProjectCreation;
 use DomainException;
 use JsonSerializable;
 use Model\ProjectCreation\ProjectStructure;
+use Model\Projects\ProjectsMetadataMarshaller;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
@@ -339,7 +340,7 @@ class ProjectStructureTest extends AbstractTest
         $ps = new ProjectStructure([
             'id_customer' => 'custom_user',
             'job_subject' => 'legal',
-            'pretranslate_101' => 0,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value => 0,
         ]);
 
         $this->assertSame('custom_user', $ps->id_customer);

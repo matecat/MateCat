@@ -7,6 +7,7 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\TeamStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -192,7 +193,7 @@ class SettersGettersConfigTest extends AbstractTest
             ->method('set')
             ->with(
                 100,
-                ProjectsMetadataDao::FEATURES_KEY,
+                ProjectsMetadataMarshaller::FEATURES_KEY->value,
                 'translation_versions,review_extended',
             );
 
@@ -237,7 +238,7 @@ class SettersGettersConfigTest extends AbstractTest
         $metadataDao = $this->createMock(ProjectsMetadataDao::class);
         $metadataDao->expects($this->once())
             ->method('set')
-            ->with(55, ProjectsMetadataDao::FEATURES_KEY, 'dqf');
+            ->with(55, ProjectsMetadataMarshaller::FEATURES_KEY->value, 'dqf');
 
         $this->pm->setProjectsMetadataDao($metadataDao);
         $this->pm->callSaveFeaturesInMetadata();

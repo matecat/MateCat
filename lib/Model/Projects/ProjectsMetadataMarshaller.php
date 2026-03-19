@@ -13,18 +13,27 @@ use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 
 enum ProjectsMetadataMarshaller: string
 {
-    case MT_QUALITY_VALUE_IN_EDITOR = 'mt_quality_value_in_editor';
-    case MT_EVALUATION = 'mt_evaluation';
-    case MT_QE_WORKFLOW_ENABLED = 'mt_qe_workflow_enabled';
-    case ICU_ENABLED = 'icu_enabled';
-    case ENABLE_MT_ANALYSIS = 'enable_mt_analysis';
-    case PRE_TRANSLATE_101 = 'pretranslate_101';
-    case PROJECT_COMPLETION = 'project_completion';
+    case MT_QUALITY_VALUE_IN_EDITOR    = 'mt_quality_value_in_editor';
+    case MT_EVALUATION                 = 'mt_evaluation';
+    case MT_QE_WORKFLOW_ENABLED        = 'mt_qe_workflow_enabled';
+    case ICU_ENABLED                   = 'icu_enabled';
+    case ENABLE_MT_ANALYSIS            = 'enable_mt_analysis';
+    case PRE_TRANSLATE_101             = 'pretranslate_101';
+    case PROJECT_COMPLETION            = 'project_completion';
     case MMT_ACTIVATE_CONTEXT_ANALYZER = 'mmt_activate_context_analyzer';
-    case MMT_IGNORE_GLOSSARY_CASE = 'mmt_ignore_glossary_case';
-    case FROM_API = 'from_api';
+    case MMT_IGNORE_GLOSSARY_CASE      = 'mmt_ignore_glossary_case';
+    case FROM_API                      = 'from_api';
+    case MT_QE_WORKFLOW_PARAMETERS     = 'mt_qe_workflow_parameters';
 
-    case MT_QE_WORKFLOW_PARAMETERS = 'mt_qe_workflow_parameters';
+    case FEATURES_KEY                    = 'features';
+    case WORD_COUNT_TYPE_KEY             = 'word_count_type';
+    case WORD_COUNT_RAW                  = 'raw';
+    case WORD_COUNT_EQUIVALENT           = 'equivalent';
+    case SPLIT_EQUIVALENT_WORD_TYPE      = 'eq_word_count';
+    case SPLIT_RAW_WORD_TYPE             = 'raw_word_count';
+    case SUBFILTERING_HANDLERS           = 'subfiltering_handlers';
+    case XLIFF_PARAMETERS                = 'xliff_parameters';
+    case FILTERS_EXTRACTION_PARAMETERS   = 'filters_extraction_parameters';
 
     public static function unMarshall(MetadataStruct $struct): mixed
     {

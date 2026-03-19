@@ -16,6 +16,7 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\ContextGroupDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
@@ -88,7 +89,7 @@ class GetSegmentsController extends KleinController
         $res = [];
 
         $projectMetadata = new ProjectMetadataDao();
-        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectMetadataDao::ICU_ENABLED)?->value ?? false;
+        $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectsMetadataMarshaller::ICU_ENABLED->value)?->value ?? false;
 
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];

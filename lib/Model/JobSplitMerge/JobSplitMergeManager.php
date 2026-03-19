@@ -9,6 +9,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Utils\Logger\LoggerFactory;
 
@@ -80,7 +81,7 @@ class JobSplitMergeManager
         SplitMergeProjectData $data,
         int $num_split = 2,
         array $requestedWordsPerSplit = [],
-        string $count_type = ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE
+        string $count_type = ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value
     ): ArrayObject {
         return $this->getJobSplitMergeService()->getSplitData($data, $num_split, $requestedWordsPerSplit, $count_type);
     }

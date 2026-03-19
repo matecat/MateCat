@@ -23,6 +23,7 @@ use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
@@ -484,13 +485,13 @@ class CreateProjectController extends AbstractStatefulKleinController
     private function setMetadataFromPostInput(array $data = []): void
     {
         // new raw counter model
-        $options = [MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW];
+        $options = [ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value => ProjectsMetadataMarshaller::WORD_COUNT_RAW->value];
 
         if (isset($data['mt_quality_value_in_editor'])) {
-            $options[MetadataDao::MT_QUALITY_VALUE_IN_EDITOR] = $data['mt_quality_value_in_editor'];
+            $options[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $data['mt_quality_value_in_editor'];
         }
 
-        $options[MetadataDao::ICU_ENABLED] = $data['icu_enabled'];
+        $options[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $data['icu_enabled'];
 
         $this->metadata = $options;
     }

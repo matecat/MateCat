@@ -4,6 +4,7 @@ namespace unit\Model\ProjectCreation;
 
 use ArrayObject;
 use Model\ProjectCreation\ProjectStructure;
+use Model\Projects\ProjectsMetadataMarshaller;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
@@ -602,7 +603,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
             'tms_engine'      => 1,
             'private_tm_key'  => [['key' => 'abc123', 'name' => 'Main TM']],
             'pretranslate_100' => 1,
-            'pretranslate_101' => 0,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value => 0,
             'only_private'     => 1,
             'tm_keys'          => [['key' => 'abc123', 'name' => 'Main TM', 'r' => true, 'w' => true]],
 
@@ -644,7 +645,7 @@ class AuditCleanupAndPluginsTest extends AbstractTest
             ],
 
             // Features
-            'features'         => ['quality_framework' => true],
+            ProjectsMetadataMarshaller::FEATURES_KEY->value         => ['quality_framework' => true],
             'create_2_pass_review' => true,
         ]);
 

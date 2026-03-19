@@ -14,6 +14,7 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
@@ -223,7 +224,7 @@ class JobSplitMergeService
         SplitMergeProjectData $data,
         int $num_split = 2,
         array $requestedWordsPerSplit = [],
-        string $count_type = ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE
+        string $count_type = ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value
     ): ArrayObject {
         if ($num_split < 2) {
             throw new Exception('Minimum Chunk number for split is 2.', -2);
@@ -255,7 +256,7 @@ class JobSplitMergeService
         // if the requested $count_type is empty (for example, equivalent raw count = 0),
         // switch to the other one
         if ($total_words < $num_split) {
-            $new_count_type = ($count_type === ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE) ? ProjectsMetadataDao::SPLIT_RAW_WORD_TYPE : ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
+            $new_count_type = ($count_type === ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value) ? ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value : ProjectsMetadataMarshaller::SPLIT_EQUIVALENT_WORD_TYPE->value;
             $total_words = $row_totals[$new_count_type];
             $count_type = $new_count_type;
         }

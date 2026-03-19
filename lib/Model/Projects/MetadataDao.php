@@ -13,27 +13,7 @@ use ReflectionException;
 
 class MetadataDao extends AbstractDao
 {
-    const string FEATURES_KEY = 'features';
     const string TABLE = 'project_metadata';
-
-    const string WORD_COUNT_TYPE_KEY = 'word_count_type';
-
-    const string WORD_COUNT_RAW = 'raw';
-    const string WORD_COUNT_EQUIVALENT = 'equivalent';
-
-    const string SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
-    const string SPLIT_RAW_WORD_TYPE = 'raw_word_count';
-
-    const string MT_QUALITY_VALUE_IN_EDITOR = 'mt_quality_value_in_editor';
-    const string MT_EVALUATION = 'mt_evaluation';
-    const string MT_QE_WORKFLOW_ENABLED = 'mt_qe_workflow_enabled';
-    const string MT_QE_WORKFLOW_PARAMETERS = 'mt_qe_workflow_parameters';
-    const string SUBFILTERING_HANDLERS = 'subfiltering_handlers';
-    const string ICU_ENABLED = 'icu_enabled';
-    const string FROM_API = 'from_api';
-    const string PRETRANSLATE_101 = 'pretranslate_101';
-    const string XLIFF_PARAMETERS = 'xliff_parameters';
-    const string FILTERS_EXTRACTION_PARAMETERS = 'filters_extraction_parameters';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
     protected static string $_query_get_metadata_by_key = "SELECT * FROM project_metadata WHERE id_project = :id_project AND `key` = :key ";
@@ -199,7 +179,7 @@ class MetadataDao extends AbstractDao
     public function getProjectStaticSubfilteringCustomHandlers(int $id_project): ?array
     {
         try {
-            $subfiltering = $this->setCacheTTL(86400)->get($id_project, MetadataDao::SUBFILTERING_HANDLERS);
+            $subfiltering = $this->setCacheTTL(86400)->get($id_project, ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
 
             return $subfiltering?->value ?? []; //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {

@@ -17,6 +17,7 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Users\UserDao;
@@ -92,9 +93,9 @@ class GetContributionController extends KleinController
             $this->rewriteContributionContexts($request, $Filter);
 
             $contributionRequest->mt_evaluation =
-                (bool)$projectStruct->getMetadataValue(ProjectsMetadataDao::MT_EVALUATION) ??
+                (bool)$projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value) ??
                 //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                (bool)(new MetadataDao())->get($id_job, $received_password, ProjectsMetadataDao::MT_EVALUATION, 60 * 60) ?? // for back compatibility, the mt_evaluation flag was on job metadata
+                (bool)(new MetadataDao())->get($id_job, $received_password, ProjectsMetadataMarshaller::MT_EVALUATION->value, 60 * 60) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                 false;
         }
 
@@ -126,9 +127,9 @@ class GetContributionController extends KleinController
         $contributionRequest->fromTarget = $switch_languages;
         $contributionRequest->resultNum = $num_results;
         $contributionRequest->crossLangTargets = $this->getCrossLanguages($cross_language);
-        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR) ?? 86;
-        $contributionRequest->mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED) ?? false;
-        $contributionRequest->mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS)?->toArray();
+        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 86;
+        $contributionRequest->mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value) ?? false;
+        $contributionRequest->mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value)?->toArray();
         $contributionRequest->subfiltering_handlers = $subfiltering_handlers;
 
         if ($this->isRevision()) {

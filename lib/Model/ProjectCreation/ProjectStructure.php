@@ -5,6 +5,7 @@ namespace Model\ProjectCreation;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 
 /**
@@ -157,7 +158,7 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
 
     // ── Group E: Word count metadata key ────────────────────────────
 
-    public string $word_count_type = ProjectsMetadataDao::WORD_COUNT_RAW;
+    public string $word_count_type = ProjectsMetadataMarshaller::WORD_COUNT_RAW->value;
 
     // ── Group F: Split/merge keys ───────────────────────────────────
 

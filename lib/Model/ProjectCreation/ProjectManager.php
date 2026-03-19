@@ -24,6 +24,7 @@ use Model\FilesStorage\S3FilesStorage;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
@@ -275,7 +276,7 @@ class ProjectManager
         if (!empty($featureCodes)) {
             $dao->set(
                 (int)$this->projectStructure->id_project,
-                ProjectsMetadataDao::FEATURES_KEY,
+                ProjectsMetadataMarshaller::FEATURES_KEY->value,
                 implode(',', $featureCodes)
             );
         }

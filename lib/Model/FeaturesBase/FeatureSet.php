@@ -12,6 +12,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
 use Plugins\Features\BaseFeature;
@@ -123,7 +124,7 @@ class FeatureSet implements FeatureSetInterface
      */
     public function loadForProject(ProjectStruct $project): void
     {
-        $featureStrings = $project->getMetadataValue(MetadataDao::FEATURES_KEY);
+        $featureStrings = $project->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
         $featureCodes = (!empty($featureStrings)) ? FeatureSet::splitString($featureStrings) : [];
 
         $this->clear();

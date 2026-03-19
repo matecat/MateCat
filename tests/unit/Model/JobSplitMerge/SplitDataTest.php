@@ -11,6 +11,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -249,7 +250,7 @@ class SplitDataTest extends AbstractTest
             $this->makeProjectStructure(),
             2,
             [],
-            ProjectsMetadataDao::SPLIT_RAW_WORD_TYPE
+            ProjectsMetadataMarshaller::SPLIT_RAW_WORD_TYPE->value
         );
         $chunks = $result['chunks'];
 

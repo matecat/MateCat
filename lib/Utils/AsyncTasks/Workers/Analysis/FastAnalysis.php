@@ -15,6 +15,7 @@ use Model\Jobs\MetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Monolog\Formatter\LineFormatter;
@@ -248,11 +249,11 @@ class FastAnalysis extends AbstractDaemon
                      */
                     Database::obtain()->getConnection()->beginTransaction();
                     $projectStruct = ProjectDao::findById($pid);
-                    $projectFeaturesString = $projectStruct->getMetadataValue(ProjectsMetadataDao::FEATURES_KEY);
-                    $mt_evaluation = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_EVALUATION);
-                    $mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED);
-                    $mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS);
-                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR);
+                    $projectFeaturesString = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::FEATURES_KEY->value);
+                    $mt_evaluation = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value);
+                    $mt_qe_workflow_enabled = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value);
+                    $mt_qe_workflow_parameters = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value);
+                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value);
                     $subfiltering_handlers = (new ProjectsMetadataDao)->getProjectStaticSubfilteringCustomHandlers($projectStruct->id);
                     Database::obtain()->getConnection()->commit();
 

@@ -17,6 +17,7 @@ use stdClass;
 use TestHelpers\AbstractTest;
 use Utils\Constants\ProjectStatus;
 use Utils\Engines\AbstractEngine;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Utils\Registry\AppConfig;
 
 /**
@@ -116,14 +117,14 @@ class BuildProjectStructureTest extends AbstractTest
             'metadata'                              => [],
             'public_tm_penalty'                     => null,
             'pretranslate_100'                      => 0,
-            'pretranslate_101'                      => null,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value                      => null,
             'get_public_matches'                    => true,
             'due_date'                              => null,
             'target_language_mt_engine_association'  => [],
             'instructions'                          => null,
             'character_counter_mode'                => null,
             'character_counter_count_tags'           => null,
-            'subfiltering_handlers'                 => null,
+            ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value                 => null,
             'lara_glossaries'                       => null,
             'lara_style'                            => null,
             'mmt_glossaries'                        => null,
@@ -132,9 +133,9 @@ class BuildProjectStructureTest extends AbstractTest
             'mt_qe_workflow_payable_rate'            => null,
             'payableRateModelTemplate'              => null,
             'dialect_strict'                        => null,
-            'filters_extraction_parameters'         => null,
-            'xliff_parameters'                      => null,
-            'mt_evaluation'                         => null,
+            ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value         => null,
+            ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value                      => null,
+            ProjectsMetadataMarshaller::MT_EVALUATION->value                         => null,
             'project_features'                      => [],
         ], $overrides);
     }
@@ -305,7 +306,7 @@ class BuildProjectStructureTest extends AbstractTest
     {
         // pretranslate_101 not set => defaults to 1
         $request = $this->makeNewControllerRequest([
-            'pretranslate_101' => null,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value => null,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -324,7 +325,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsPretranslate101WhenProvided(): void
     {
         $request = $this->makeNewControllerRequest([
-            'pretranslate_101' => 0,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value => 0,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -409,7 +410,7 @@ class BuildProjectStructureTest extends AbstractTest
             'lara_style'      => 'formal',
             'mmt_glossaries'  => 'mmt-456',
             'dialect_strict'  => 'strict',
-            'mt_evaluation'   => true,
+            ProjectsMetadataMarshaller::MT_EVALUATION->value   => true,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -478,7 +479,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsSubfilteringHandlers(): void
     {
         $request = $this->makeNewControllerRequest([
-            'subfiltering_handlers' => 'twig,markup',
+            ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'twig,markup',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -897,7 +898,7 @@ class BuildProjectStructureTest extends AbstractTest
         $filtersStruct->hydrateAllDto(['json' => ['extract_arrays' => true]]);
 
         $request = $this->makeNewControllerRequest([
-            'filters_extraction_parameters' => $filtersStruct,
+            ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value => $filtersStruct,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -916,7 +917,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsXliffParametersWhenTruthy(): void
     {
         $request = $this->makeNewControllerRequest([
-            'xliff_parameters' => '{"xliff":"config"}',
+            ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value => '{"xliff":"config"}',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -935,7 +936,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSetsMtEvaluationFalseWhenFalsy(): void
     {
         $request = $this->makeNewControllerRequest([
-            'mt_evaluation' => false,
+            ProjectsMetadataMarshaller::MT_EVALUATION->value => false,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1164,7 +1165,7 @@ class BuildProjectStructureTest extends AbstractTest
             'tms_engine'                            => 1,
             'public_tm_penalty'                     => null,
             'pretranslate_100'                      => 0,
-            'pretranslate_101'                      => 1,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value                      => 1,
             'dialect_strict'                        => null,
             'only_private'                          => false,
             'due_date'                              => null,
@@ -1172,9 +1173,9 @@ class BuildProjectStructureTest extends AbstractTest
             'tm_prioritization'                     => null,
             'character_counter_mode'                => null,
             'character_counter_count_tags'           => null,
-            'subfiltering_handlers'                 => null,
-            'filters_extraction_parameters'         => null,
-            'xliff_parameters'                      => null,
+            ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value                 => null,
+            ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value         => null,
+            ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value                      => null,
             'qa_model_template'                     => null,
             'payable_rate_model_template'            => null,
             'project_features'                      => [],
@@ -1376,8 +1377,8 @@ class BuildProjectStructureTest extends AbstractTest
     {
         $data = $this->makeCreateControllerData([
             'dialect_strict'                => 'strict',
-            'filters_extraction_parameters' => ['some' => 'param'],
-            'xliff_parameters'              => '{"xliff": "param"}',
+            ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value => ['some' => 'param'],
+            ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value              => '{"xliff": "param"}',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1539,7 +1540,7 @@ class BuildProjectStructureTest extends AbstractTest
     {
         $data = $this->makeCreateControllerData([
             'pretranslate_100' => 1,
-            'pretranslate_101' => 0,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value => 0,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1776,7 +1777,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsSubfilteringHandlers(): void
     {
         $data = $this->makeCreateControllerData([
-            'subfiltering_handlers' => 'twig,markup',
+            ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'twig,markup',
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1797,7 +1798,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerLeavesFiltersExtractionParametersDefaultWhenFalsy(): void
     {
         $data = $this->makeCreateControllerData([
-            'filters_extraction_parameters' => null,
+            ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value => null,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1818,7 +1819,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerLeavesXliffParametersDefaultWhenFalsy(): void
     {
         $data = $this->makeCreateControllerData([
-            'xliff_parameters' => null,
+            ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value => null,
         ]);
         $filesFound = $this->makeFilesFound();
 

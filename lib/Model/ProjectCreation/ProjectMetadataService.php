@@ -8,6 +8,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MyMemory;
@@ -35,7 +36,7 @@ class ProjectMetadataService
 
         // "From API" flag
         if ($projectStructure->from_api) {
-            $options[ProjectsMetadataDao::FROM_API] = '1';
+            $options[ProjectsMetadataMarshaller::FROM_API->value] = '1';
         }
 
         // xliff_parameters — only persist when the model contains actual rules.
@@ -48,22 +49,22 @@ class ProjectMetadataService
                 || !empty($projectStructure->xliff_parameters->getRulesForVersion(2))
             )
         ) {
-            $options[ProjectsMetadataDao::XLIFF_PARAMETERS] = json_encode($projectStructure->xliff_parameters);
+            $options[ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value] = json_encode($projectStructure->xliff_parameters);
         }
 
         // pretranslate_101
         if (isset($projectStructure->pretranslate_101)) {
-            $options[ProjectsMetadataDao::PRETRANSLATE_101] = (string)$projectStructure->pretranslate_101;
+            $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value] = (string)$projectStructure->pretranslate_101;
         }
 
         // mt evaluation => ice_mt already in metadata
         // adds JSON parameters to the project metadata as JSON string
-        if ($options[ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED] ?? false) {
-            $options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS] = json_encode($options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS]);
+        if ($options[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value] ?? false) {
+            $options[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] = json_encode($options[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value]);
         } else {
             // When MT QE workflow is disabled, remove the raw array to prevent
             // passing a non-string value to MetadataDao::set()
-            unset($options[ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS]);
+            unset($options[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value]);
         }
 
         /**
@@ -74,7 +75,7 @@ class ProjectMetadataService
 
         // Store filters extraction parameters as JSON in project metadata if present
         if ($projectStructure->filters_extraction_parameters) {
-            $options[ProjectsMetadataDao::FILTERS_EXTRACTION_PARAMETERS] = json_encode($projectStructure->filters_extraction_parameters);
+            $options[ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value] = json_encode($projectStructure->filters_extraction_parameters);
         }
 
         $extraKeys = [];
