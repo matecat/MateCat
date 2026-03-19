@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use Closure;
 use Exception;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;

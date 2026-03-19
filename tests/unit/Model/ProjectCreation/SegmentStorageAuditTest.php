@@ -2,11 +2,13 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
+use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -14,7 +16,6 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
-use Model\ProjectCreation\TranslationTuple;
 
 /**
  * Audit tests for SegmentStorageService after migrating from ArrayObject to plain arrays.
@@ -33,6 +34,9 @@ class SegmentStorageAuditTest extends AbstractTest
     private Database&MockObject $dbHandler;
     private FeatureSet&MockObject $features;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -126,6 +130,8 @@ class SegmentStorageAuditTest extends AbstractTest
 
     /**
      * Invoke a private method on the service via reflection.
+     *
+     * @throws \ReflectionException
      */
     private function invokePrivateMethod(string $methodName, array $args): mixed
     {
@@ -221,6 +227,9 @@ class SegmentStorageAuditTest extends AbstractTest
         self::assertSame(300, $ps->translations[$sanitizedId][0]->segmentId);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c16_translationLinkingSkipsWhenInternalIdNotInPlainArray(): void
     {
@@ -252,6 +261,9 @@ class SegmentStorageAuditTest extends AbstractTest
     //   isset($projectStructure->translations[$row['internal_id']][$short_var_counter])
     // ══════════════════════════════════════════════════════════════════
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c17_translationLinkingSkipsWhenMrkCounterMissingInPlainArray(): void
     {
@@ -550,6 +562,9 @@ class SegmentStorageAuditTest extends AbstractTest
     // Line 449 — After fix: isset($projectStructure->notes[$internal_id])
     // ══════════════════════════════════════════════════════════════════
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c21_setSegmentIdForNotesWorksWithPlainArrayNotes(): void
     {
@@ -573,6 +588,9 @@ class SegmentStorageAuditTest extends AbstractTest
         self::assertEmpty($ps->notes['unit-1']['json_segment_ids']);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c21_setSegmentIdForNotesAddsToJsonSegmentIdsWithPlainArray(): void
     {
@@ -595,6 +613,9 @@ class SegmentStorageAuditTest extends AbstractTest
         self::assertEmpty($ps->notes['unit-1']['segment_ids']);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c21_setSegmentIdForNotesDoesNothingWhenIdMissingFromPlainArray(): void
     {
@@ -648,6 +669,9 @@ class SegmentStorageAuditTest extends AbstractTest
     // Line 468 — After fix: isset($projectStructure->context_group[$internal_id])
     // ══════════════════════════════════════════════════════════════════
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c22_setSegmentIdForContextsWorksWithPlainArrayContextGroup(): void
     {
@@ -668,6 +692,9 @@ class SegmentStorageAuditTest extends AbstractTest
         self::assertSame([55], $ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c22_setSegmentIdForContextsAppendsMultipleIdsWithPlainArray(): void
     {
@@ -691,6 +718,9 @@ class SegmentStorageAuditTest extends AbstractTest
         self::assertSame([10, 20, 30], $ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function c22_setSegmentIdForContextsDoesNothingWhenIdMissingFromPlainArray(): void
     {

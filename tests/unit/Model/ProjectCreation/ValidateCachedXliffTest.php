@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use Closure;
 use Exception;
 use Model\Files\MetadataDao;
 use Model\ProjectCreation\ProjectManagerModel;
@@ -36,7 +35,8 @@ class ValidateCachedXliffTest extends AbstractTest
             $this->createStub(ProjectManagerModel::class),
             $this->createStub(MetadataDao::class),
             null, // no GDrive session
-            Closure::fromCallable(function (string $fileName): void {}),
+            (function (string $fileName): void {
+            })(...),
             $this->createStub(MatecatLogger::class),
         );
     }
@@ -151,6 +151,9 @@ class ValidateCachedXliffTest extends AbstractTest
         }
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function acceptsXliffExtension(): void
     {
@@ -172,6 +175,9 @@ class ValidateCachedXliffTest extends AbstractTest
         }
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function acceptsSdlxliffExtension(): void
     {
@@ -192,6 +198,9 @@ class ValidateCachedXliffTest extends AbstractTest
         }
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function acceptsXlfExtension(): void
     {

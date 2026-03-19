@@ -4,8 +4,8 @@ namespace unit\Model\ProjectCreation;
 
 use ArrayObject;
 use Model\ProjectCreation\ProjectStructure;
-use Model\Segments\SegmentMetadataStruct;
 use Model\ProjectCreation\TranslationTuple;
+use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\Test;

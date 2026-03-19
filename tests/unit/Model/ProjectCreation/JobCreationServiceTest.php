@@ -3,7 +3,6 @@
 namespace unit\Model\ProjectCreation;
 
 use Exception;
-use Model\Analysis\PayableRates;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\PayableRates\CustomPayableRateStruct;
@@ -11,6 +10,7 @@ use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
@@ -30,6 +30,8 @@ class JobCreationServiceTest extends AbstractTest
 
     /**
      * Invoke a private/protected method on JobCreationService for unit testing.
+     *
+     * @throws ReflectionException
      */
     private function invokeMethod(string $methodName, array $args): mixed
     {
@@ -54,6 +56,9 @@ class JobCreationServiceTest extends AbstractTest
     // resolvePayableRates — 4 branches
     // =========================================================================
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testResolvePayableRatesMtQeWorkflowTakesPriority(): void
     {
@@ -69,6 +74,9 @@ class JobCreationServiceTest extends AbstractTest
         $this->assertNull($template);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testResolvePayableRatesFromModelObject(): void
     {
@@ -96,6 +104,9 @@ class JobCreationServiceTest extends AbstractTest
         $this->assertInstanceOf(CustomPayableRateStruct::class, $template);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testResolvePayableRatesDefaultBranch(): void
     {
@@ -122,6 +133,9 @@ class JobCreationServiceTest extends AbstractTest
     // buildTmKeysJson
     // =========================================================================
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testBuildTmKeysJsonWithNoKeys(): void
     {
@@ -132,6 +146,9 @@ class JobCreationServiceTest extends AbstractTest
         $this->assertSame('[]', $result);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testBuildTmKeysJsonMapsKeysCorrectly(): void
     {
@@ -159,6 +176,9 @@ class JobCreationServiceTest extends AbstractTest
         $this->assertTrue($decoded[0]['owner']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testBuildTmKeysJsonReplacesPidPlaceholder(): void
     {
@@ -180,6 +200,9 @@ class JobCreationServiceTest extends AbstractTest
         $this->assertStringContainsString('42', $result);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testBuildTmKeysJsonDefaultPenaltyIsZero(): void
     {
@@ -206,6 +229,9 @@ class JobCreationServiceTest extends AbstractTest
     // buildJobStruct
     // =========================================================================
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testBuildJobStructPopulatesAllFields(): void
     {
@@ -243,6 +269,9 @@ class JobCreationServiceTest extends AbstractTest
         $this->assertNotEmpty($job->last_update);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testBuildJobStructDefaultTmsEngineIsOne(): void
     {
@@ -268,6 +297,9 @@ class JobCreationServiceTest extends AbstractTest
     // updateJobTracking
     // =========================================================================
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testUpdateJobTrackingPopulatesArrayJobs(): void
     {
@@ -300,6 +332,9 @@ class JobCreationServiceTest extends AbstractTest
     // associatePayableRateModel
     // =========================================================================
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testAssociatePayableRateModelSkipsWhenNoModelId(): void
     {
@@ -312,6 +347,9 @@ class JobCreationServiceTest extends AbstractTest
         $this->assertTrue(true); // no exception = pass
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function testAssociatePayableRateModelSkipsWhenNoTemplate(): void
     {

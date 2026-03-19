@@ -9,6 +9,8 @@ use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
+use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
@@ -126,6 +128,9 @@ class SegmentDataHelpersTest extends AbstractTest
     // setSegmentIdForNotes() — private, tested via reflection
     // ──────────────────────────────────────────────────────────────
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForNotesAddsToSegmentIdsWhenJsonIsEmpty(): void
     {
@@ -148,6 +153,9 @@ class SegmentDataHelpersTest extends AbstractTest
         self::assertEmpty($ps->notes['unit-1']['json_segment_ids']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForNotesAddsToJsonSegmentIdsWhenJsonHasEntries(): void
     {
@@ -170,6 +178,9 @@ class SegmentDataHelpersTest extends AbstractTest
         self::assertEmpty($ps->notes['unit-1']['segment_ids']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForNotesAppendsMultipleIds(): void
     {
@@ -189,6 +200,9 @@ class SegmentDataHelpersTest extends AbstractTest
         self::assertSame([10, 20, 30], $ps->notes['unit-1']['segment_ids']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForNotesDoesNothingWhenInternalIdNotFound(): void
     {
@@ -212,6 +226,9 @@ class SegmentDataHelpersTest extends AbstractTest
         self::assertEmpty($ps->notes['unit-1']['json_segment_ids']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForNotesHandlesMultipleInternalIds(): void
     {
@@ -241,6 +258,9 @@ class SegmentDataHelpersTest extends AbstractTest
     // setSegmentIdForContexts() — private, tested via reflection
     // ──────────────────────────────────────────────────────────────
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForContextsAddsIdWhenInternalIdExists(): void
     {
@@ -260,6 +280,9 @@ class SegmentDataHelpersTest extends AbstractTest
         self::assertSame([55], $ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForContextsAppendsMultipleIds(): void
     {
@@ -277,6 +300,9 @@ class SegmentDataHelpersTest extends AbstractTest
         self::assertSame([10, 20, 30], $ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForContextsDoesNothingWhenInternalIdNotFound(): void
     {
@@ -296,6 +322,9 @@ class SegmentDataHelpersTest extends AbstractTest
         self::assertEmpty($ps->context_group['unit-1']['context_json_segment_ids']);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     #[Test]
     public function setSegmentIdForContextsHandlesMultipleInternalIds(): void
     {
@@ -336,7 +365,7 @@ class SegmentDataHelpersTest extends AbstractTest
     #[Test]
     public function saveSegmentMetadataDoesNotPersistWhenNull(): void
     {
-        $this->service->callSaveSegmentMetadata(100, null);
+        $this->service->callSaveSegmentMetadata(100);
 
         self::assertEmpty($this->service->getPersistedSegmentMetadata());
     }
@@ -425,12 +454,14 @@ class SegmentDataHelpersTest extends AbstractTest
 
     /**
      * Invoke a private method on the service via reflection.
+     *
+     * @throws ReflectionException
      */
-    private function invokePrivateMethod(string $methodName, array $args): mixed
+    private function invokePrivateMethod(string $methodName, array $args): void
     {
-        $ref = new \ReflectionClass($this->service);
+        $ref = new ReflectionClass($this->service);
         $method = $ref->getMethod($methodName);
 
-        return $method->invoke($this->service, ...$args);
+        $method->invoke($this->service, ...$args);
     }
 }

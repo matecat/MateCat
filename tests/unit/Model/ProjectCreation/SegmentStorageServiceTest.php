@@ -2,11 +2,13 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
+use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
@@ -14,7 +16,6 @@ use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
-use Model\ProjectCreation\TranslationTuple;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
@@ -39,6 +40,9 @@ class SegmentStorageServiceTest extends AbstractTest
     private Database&MockObject $dbHandler;
     private FeatureSet&MockObject $features;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -532,6 +536,9 @@ class SegmentStorageServiceTest extends AbstractTest
         self::assertSame($fid, $tuple->fileId);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     #[Test]
     public function storeSegmentsSkipsTranslationWhenCounterDoesNotExist(): void
     {

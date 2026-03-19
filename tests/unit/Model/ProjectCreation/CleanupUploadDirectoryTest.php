@@ -53,6 +53,7 @@ class CleanupUploadDirectoryTest extends AbstractTest
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     #[Test]
     public function callsDeleteQueueWithUploadDir(): void
@@ -101,6 +102,7 @@ class CleanupUploadDirectoryTest extends AbstractTest
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     #[Test]
     public function handlesEmptyUploadDir(): void

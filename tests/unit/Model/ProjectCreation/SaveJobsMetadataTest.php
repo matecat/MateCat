@@ -2,9 +2,10 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
@@ -37,6 +38,9 @@ class SaveJobsMetadataTest extends AbstractTest
     private const JOB_ID       = 42;
     private const JOB_PASSWORD = 'abc123';
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();

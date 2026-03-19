@@ -2,7 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
-use Closure;
+use Exception;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\ProjectCreation\FileInsertionException;
@@ -106,6 +106,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
 
     /**
      * @throws FileInsertionException
+     * @throws Exception
      */
     #[Test]
     public function skipsMalformedEntriesWithNoLanguageSuffix(): void
@@ -134,6 +135,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
 
     /**
      * @throws FileInsertionException
+     * @throws Exception
      */
     #[Test]
     public function resolvesSingleHashAndReturnsFileStructure(): void
@@ -187,6 +189,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
 
     /**
      * @throws FileInsertionException
+     * @throws Exception
      */
     #[Test]
     public function mergesMultipleHashResultsPreservingFidKeys(): void

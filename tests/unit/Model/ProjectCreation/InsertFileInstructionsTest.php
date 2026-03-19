@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
@@ -28,6 +29,9 @@ class InsertFileInstructionsTest extends AbstractTest
     /** @var list<array{0: int, 1: string}> */
     private array $insertedInstructions = [];
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();

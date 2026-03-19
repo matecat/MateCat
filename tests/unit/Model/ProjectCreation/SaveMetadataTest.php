@@ -4,7 +4,6 @@ namespace unit\Model\ProjectCreation;
 
 use Exception;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectCreation\ProjectMetadataService;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;

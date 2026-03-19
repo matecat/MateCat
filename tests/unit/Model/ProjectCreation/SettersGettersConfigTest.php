@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -28,6 +29,9 @@ class SettersGettersConfigTest extends AbstractTest
 {
     private TestableProjectManager $pm;
 
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -173,6 +177,9 @@ class SettersGettersConfigTest extends AbstractTest
 
     // ── saveFeaturesInMetadata() ───────────────────────────────────
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function saveFeaturesInMetadataPersistsWhenCodesExist(): void
     {
@@ -201,6 +208,9 @@ class SettersGettersConfigTest extends AbstractTest
         $this->pm->callSaveFeaturesInMetadata();
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function saveFeaturesInMetadataSkipsWhenCodesEmpty(): void
     {
@@ -221,6 +231,9 @@ class SettersGettersConfigTest extends AbstractTest
         $this->pm->callSaveFeaturesInMetadata();
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function saveFeaturesInMetadataSingleCode(): void
     {

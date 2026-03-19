@@ -2,6 +2,7 @@
 
 namespace unit\Model\ProjectCreation;
 
+use Exception;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\ProjectCreation\ProjectStructure;
@@ -20,6 +21,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
     private TestableJobCreationService $service;
     private MatecatLogger $logger;
 
+    /**
+     * @throws Exception
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -50,6 +54,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
     // linkFilesToJob
     // =========================================================================
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function linkFilesToJobInsertsFileJobForEachFile(): void
     {
@@ -65,6 +72,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $this->assertSame([42, 30], $this->service->insertFilesJobCalls[2]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function linkFilesToJobHandlesEmptyFileList(): void
     {
@@ -77,6 +87,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $this->assertCount(0, $this->service->insertFilesJobCalls);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function linkFilesToJobSkipsGdriveWhenSessionIsNull(): void
     {
@@ -90,6 +103,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $this->assertCount(1, $this->service->insertFilesJobCalls);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function linkFilesToJobLinksFilesForMultipleJobs(): void
     {
@@ -111,6 +127,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
     // insertPreTranslations
     // =========================================================================
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function insertPreTranslationsSkipsWhenNoTranslations(): void
     {
@@ -124,6 +143,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function insertPreTranslationsDelegatesToSegmentStorageService(): void
     {
@@ -140,6 +162,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function insertPreTranslationsSwallowsExceptionAndRecordsError(): void
     {
@@ -150,7 +175,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
 
         $sss = $this->createStub(SegmentStorageService::class);
         $sss->method('insertPreTranslations')
-            ->willThrowException(new \Exception('DB connection lost', 500));
+            ->willThrowException(new Exception('DB connection lost', 500));
 
         $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss);
 
@@ -161,6 +186,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $this->assertStringContainsString('DB connection lost', $ps->result['errors'][0]['message']);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Test]
     public function insertPreTranslationsHandlesMultipleJobsWithMixedResults(): void
     {
@@ -176,7 +204,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
             ->willReturnCallback(function () use (&$callCount) {
                 $callCount++;
                 if ($callCount === 1) {
-                    throw new \Exception('First job failed', 100);
+                    throw new Exception('First job failed', 100);
                 }
                 // Second job succeeds
             });

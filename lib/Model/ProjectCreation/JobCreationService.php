@@ -289,6 +289,7 @@ class JobCreationService
 
     /**
      * Insert file-job association. Extracted for testability.
+     * @throws Exception
      */
     protected function insertFilesJob(int $jobId, int $fid): void
     {
@@ -299,6 +300,7 @@ class JobCreationService
      * For each created job, link project files and insert any pre-translations.
      *
      * @param list<JobStruct> $jobs
+     * @throws Exception
      */
     public function linkFilesAndInsertPreTranslations(
         array $jobs,
@@ -314,6 +316,7 @@ class JobCreationService
 
     /**
      * Link all project files to a job and create GDrive remote copies if applicable.
+     * @throws Exception
      */
     private function linkFilesToJob(JobStruct $job, ProjectStructure $projectStructure, ?Session $gdriveSession): void
     {
@@ -330,6 +333,7 @@ class JobCreationService
     /**
      * Insert pre-translations for a job. Errors are logged and recorded
      * but do not halt project creation.
+     * @throws Exception
      */
     private function insertPreTranslations(JobStruct $job, ProjectStructure $projectStructure, SegmentStorageService $segmentStorageService): void
     {
