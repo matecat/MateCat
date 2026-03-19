@@ -41,10 +41,6 @@ class SegmentStorageService
 {
     use LogsMessages;
 
-    private IDatabase $dbHandler;
-    private FeatureSet $features;
-    private MateCatFilter $filter;
-    private ProjectManagerModel $projectManagerModel;
 
     /**
      * Tracks first/last segment IDs across all files.
@@ -55,17 +51,13 @@ class SegmentStorageService
     private array $minMaxSegmentsId = [];
 
     public function __construct(
-        IDatabase $dbHandler,
-        FeatureSet $features,
+        private readonly IDatabase $dbHandler,
+        private readonly FeatureSet $features,
         MatecatLogger $logger,
-        MateCatFilter $filter,
-        ProjectManagerModel $projectManagerModel,
+        private readonly MateCatFilter $filter,
+        private readonly ProjectManagerModel $projectManagerModel,
     ) {
-        $this->dbHandler = $dbHandler;
-        $this->features = $features;
         $this->logger = $logger;
-        $this->filter = $filter;
-        $this->projectManagerModel = $projectManagerModel;
     }
 
     // ── Public API ──────────────────────────────────────────────────

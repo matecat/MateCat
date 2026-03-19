@@ -212,8 +212,9 @@ class SegmentExtractor
             $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
 
             // save `custom` meta data
-            if (isset($xliff_file['attr']['custom']) && !empty($xliff_file['attr']['custom'])) {
-                $this->filesMetadataDao->bulkInsert($this->idProject, $fid, $xliff_file['attr']['custom'], $filePartsId);
+            $customMetadata = $xliff_file['attr']['custom'] ?? null;
+            if (!empty($customMetadata)) {
+                $this->filesMetadataDao->bulkInsert($this->idProject, $fid, $customMetadata, $filePartsId);
             }
         }
 
@@ -307,25 +308,23 @@ class SegmentExtractor
 
             if (empty($wordCount)) {
                 $show_in_cattool = 0;
-            } else {
-                if (isset($xliff_trans_unit['seg-target'][$position]['raw-content'])) {
-                    $preTranslation = $this->detectPreTranslation(
-                        $seg_source['raw-content'],
-                        $xliff_trans_unit['seg-target'][$position]['raw-content'],
-                        $xliff_trans_unit,
-                        $fid,
-                        $position,
-                        $projectStructure,
-                    );
+            } elseif (isset($xliff_trans_unit['seg-target'][$position]['raw-content'])) {
+                $preTranslation = $this->detectPreTranslation(
+                    $seg_source['raw-content'],
+                    $xliff_trans_unit['seg-target'][$position]['raw-content'],
+                    $xliff_trans_unit,
+                    $fid,
+                    $position,
+                    $projectStructure,
+                );
 
-                    if ($preTranslation !== null) {
-                        if (!isset($projectStructure->translations[$trans_unit_reference])) {
-                            $projectStructure->translations[$trans_unit_reference] = [];
-                        }
-
-                        $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] =
-                            new TranslationTuple($preTranslation['target'], $xliff_trans_unit, $position);
+                if ($preTranslation !== null) {
+                    if (!isset($projectStructure->translations[$trans_unit_reference])) {
+                        $projectStructure->translations[$trans_unit_reference] = [];
                     }
+
+                    $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] =
+                        new TranslationTuple($preTranslation['target'], $xliff_trans_unit, $position);
                 }
             }
 
@@ -384,25 +383,23 @@ class SegmentExtractor
 
         if (empty($wordCount)) {
             $show_in_cattool = 0;
-        } else {
-            if (isset($xliff_trans_unit['target']['raw-content'])) {
-                $preTranslation = $this->detectPreTranslation(
-                    $xliff_trans_unit['source']['raw-content'],
-                    $xliff_trans_unit['target']['raw-content'],
-                    $xliff_trans_unit,
-                    $fid,
-                    null,
-                    $projectStructure,
-                );
+        } elseif (isset($xliff_trans_unit['target']['raw-content'])) {
+            $preTranslation = $this->detectPreTranslation(
+                $xliff_trans_unit['source']['raw-content'],
+                $xliff_trans_unit['target']['raw-content'],
+                $xliff_trans_unit,
+                $fid,
+                null,
+                $projectStructure,
+            );
 
-                if ($preTranslation !== null) {
-                    if (!isset($projectStructure->translations[$trans_unit_reference])) {
-                        $projectStructure->translations[$trans_unit_reference] = [];
-                    }
-
-                    $projectStructure->translations[$trans_unit_reference][] =
-                        new TranslationTuple($preTranslation['target'], $xliff_trans_unit);
+            if ($preTranslation !== null) {
+                if (!isset($projectStructure->translations[$trans_unit_reference])) {
+                    $projectStructure->translations[$trans_unit_reference] = [];
                 }
+
+                $projectStructure->translations[$trans_unit_reference][] =
+                    new TranslationTuple($preTranslation['target'], $xliff_trans_unit);
             }
         }
 
@@ -463,21 +460,11 @@ class SegmentExtractor
      */
     public static function getTargetStatesFromTransUnit(array $trans_unit, ?int $position = null): array
     {
-        // state handling
-        $state = null;
-        $stateQualifier = null;
+        $segTargetAttr = $trans_unit['seg-target'][$position]['attr'] ?? null;
+        $targetAttr = $trans_unit['target']['attr'] ?? null;
 
-        if (isset($trans_unit['seg-target'][$position]['attr']) && isset($trans_unit['seg-target'][$position]['attr']['state'])) {
-            $state = $trans_unit['seg-target'][$position]['attr']['state'];
-        } elseif (isset($trans_unit['target']['attr']) && isset($trans_unit['target']['attr']['state'])) {
-            $state = $trans_unit['target']['attr']['state'];
-        }
-
-        if (isset($trans_unit['seg-target'][$position]['attr']) && isset($trans_unit['seg-target'][$position]['attr']['state-qualifier'])) {
-            $stateQualifier = $trans_unit['seg-target'][$position]['attr']['state-qualifier'];
-        } elseif (isset($trans_unit['target']['attr']) && isset($trans_unit['target']['attr']['state-qualifier'])) {
-            $stateQualifier = $trans_unit['target']['attr']['state-qualifier'];
-        }
+        $state = $segTargetAttr['state'] ?? $targetAttr['state'] ?? null;
+        $stateQualifier = $segTargetAttr['state-qualifier'] ?? $targetAttr['state-qualifier'] ?? null;
 
         return ['state' => $state, 'state-qualifier' => $stateQualifier];
     }
@@ -511,11 +498,9 @@ class SegmentExtractor
     {
         $dataRefMap = [];
 
-        if (isset($xliff_trans_unit['original-data']) && !empty($xliff_trans_unit['original-data'])) {
-            foreach ($xliff_trans_unit['original-data'] as $datum) {
-                if (isset($datum['attr']['id'])) {
-                    $dataRefMap[$datum['attr']['id']] = $datum['raw-content'];
-                }
+        foreach ($xliff_trans_unit['original-data'] ?? [] as $datum) {
+            if (isset($datum['attr']['id'])) {
+                $dataRefMap[$datum['attr']['id']] = $datum['raw-content'];
             }
         }
 
