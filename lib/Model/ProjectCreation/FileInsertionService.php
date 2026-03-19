@@ -206,7 +206,7 @@ class FileInsertionService
      *
      * @throws Exception
      */
-    private function validateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
+    protected function validateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
     {
         if (count($_originalFileNames ?: []) === 0) {
             $this->logger->error('No hash files found', [$linkFiles['conversionHashes']]);
@@ -275,7 +275,7 @@ class FileInsertionService
      * @return array<int, array<string, mixed>>
      * @throws Exception
      */
-    private function insertFiles(ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
+    protected function insertFiles(ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
     {
         $fs = FilesStorageFactory::create();
 
