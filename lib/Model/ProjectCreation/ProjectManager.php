@@ -1128,54 +1128,15 @@ class ProjectManager
      * For each created job, link project files and insert any pre-translations.
      *
      * @param list<JobStruct> $jobs
-     * @throws Exception
      */
     private function linkFilesAndInsertPreTranslations(array $jobs): void
     {
-        foreach ($jobs as $job) {
-            $this->linkFilesToJob($job);
-            $this->insertPreTranslations($job);
-        }
-    }
-
-    /**
-     * Link all project files to a job and create GDrive remote copies if applicable.
-     * @throws Exception
-     */
-    private function linkFilesToJob(JobStruct $job): void
-    {
-        foreach ($this->projectStructure->file_id_list as $fid) {
-            FileDao::insertFilesJob((int)$job->id, $fid);
-
-            if ($this->gdriveSession && $this->gdriveSession->hasFiles()) {
-                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
-                $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int)$job->id, $client);
-            }
-        }
-    }
-
-    /**
-     * Insert pre-translations for a job. Errors are logged and recorded
-     * but do not halt project creation.
-     * @throws Exception
-     */
-    private function insertPreTranslations(JobStruct $job): void
-    {
-        if (empty($this->projectStructure->translations)) {
-            return;
-        }
-
-        try {
-            $this->getSegmentStorageService()->insertPreTranslations($job, $this->projectStructure);
-        } catch (Exception $e) {
-            $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
-            Utils::sendErrMailReport($msg);
-            $this->log("Pre-translation insertion failed for job $job->id", $e);
-            $this->addProjectError(
-                (int)$e->getCode(),
-                "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created."
-            );
-        }
+        $this->getJobCreationService()->linkFilesAndInsertPreTranslations(
+            $jobs,
+            $this->projectStructure,
+            $this->gdriveSession,
+            $this->getSegmentStorageService(),
+        );
     }
 
     /**
