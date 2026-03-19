@@ -4,7 +4,10 @@ namespace Model\ProjectCreation;
 
 use Exception;
 use Model\Analysis\PayableRates;
+use Model\ConnectedServices\GDrive\Session;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\FeaturesBase\FeatureSet;
+use Model\Files\FileDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
@@ -12,8 +15,10 @@ use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use ReflectionException;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\Tools\Utils;
+use View\API\Commons\Error;
 
 class JobCreationService
 {
@@ -279,5 +284,68 @@ class JobCreationService
     protected function insertJob(JobStruct $job): JobStruct
     {
         return JobDao::createFromStruct($job);
+    }
+
+    /**
+     * Insert file-job association. Extracted for testability.
+     */
+    protected function insertFilesJob(int $jobId, int $fid): void
+    {
+        FileDao::insertFilesJob($jobId, $fid);
+    }
+
+    /**
+     * For each created job, link project files and insert any pre-translations.
+     *
+     * @param list<JobStruct> $jobs
+     */
+    public function linkFilesAndInsertPreTranslations(
+        array $jobs,
+        ProjectStructure $projectStructure,
+        ?Session $gdriveSession,
+        SegmentStorageService $segmentStorageService,
+    ): void {
+        foreach ($jobs as $job) {
+            $this->linkFilesToJob($job, $projectStructure, $gdriveSession);
+            $this->insertPreTranslations($job, $projectStructure, $segmentStorageService);
+        }
+    }
+
+    /**
+     * Link all project files to a job and create GDrive remote copies if applicable.
+     */
+    private function linkFilesToJob(JobStruct $job, ProjectStructure $projectStructure, ?Session $gdriveSession): void
+    {
+        foreach ($projectStructure->file_id_list as $fid) {
+            $this->insertFilesJob((int)$job->id, $fid);
+
+            if ($gdriveSession && $gdriveSession->hasFiles()) {
+                $client = GoogleProvider::getClient(AppConfig::$HTTPHOST . '/gdrive/oauth/response');
+                $gdriveSession->createRemoteCopiesWhereToSaveTranslation($fid, (int)$job->id, $client);
+            }
+        }
+    }
+
+    /**
+     * Insert pre-translations for a job. Errors are logged and recorded
+     * but do not halt project creation.
+     */
+    private function insertPreTranslations(JobStruct $job, ProjectStructure $projectStructure, SegmentStorageService $segmentStorageService): void
+    {
+        if (empty($projectStructure->translations)) {
+            return;
+        }
+
+        try {
+            $segmentStorageService->insertPreTranslations($job, $projectStructure);
+        } catch (Exception $e) {
+            $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
+            Utils::sendErrMailReport($msg);
+            $this->logger->debug("Pre-translation insertion failed for job $job->id", (new Error($e))->render(true));
+            $projectStructure->result['errors'][] = [
+                "code"    => (int)$e->getCode(),
+                "message" => "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created.",
+            ];
+        }
     }
 }

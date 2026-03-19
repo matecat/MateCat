@@ -5,40 +5,12 @@ namespace unit\Model\ProjectCreation;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
-use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
-use ReflectionClass;
 use TestHelpers\AbstractTest;
 use Utils\Logger\MatecatLogger;
 
-/**
- * A testable subclass of JobCreationService that allows injecting a mock JobsMetadataDao.
- */
-class TestableJobCreationService extends JobCreationService
-{
-    private ?JobsMetadataDao $jobsMetadataDaoOverride = null;
-
-    public function setJobsMetadataDao(JobsMetadataDao $dao): void
-    {
-        $this->jobsMetadataDaoOverride = $dao;
-    }
-
-    protected function getJobsMetadataDao(): JobsMetadataDao
-    {
-        return $this->jobsMetadataDaoOverride ?? parent::getJobsMetadataDao();
-    }
-
-    /**
-     * Public wrapper to invoke the private saveJobsMetadata().
-     */
-    public function callSaveJobsMetadata(JobStruct $job, ProjectStructure $projectStructure): void
-    {
-        $ref = new ReflectionClass(JobCreationService::class);
-        $method = $ref->getMethod('saveJobsMetadata');
-        $method->invoke($this, $job, $projectStructure);
-    }
-}
+require_once __DIR__ . '/TestableJobCreationService.php';
 
 /**
  * Unit tests for {@see \Model\ProjectCreation\JobCreationService::saveJobsMetadata()}.
