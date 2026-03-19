@@ -987,6 +987,7 @@ class ProjectManager
      * For each created job, link project files and insert any pre-translations.
      *
      * @param list<JobStruct> $jobs
+     * @throws Exception
      */
     private function linkFilesAndInsertPreTranslations(array $jobs): void
     {

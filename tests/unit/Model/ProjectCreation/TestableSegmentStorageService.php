@@ -11,6 +11,7 @@ use Model\ProjectCreation\SegmentStorageService;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataStruct;
 use Utils\Logger\MatecatLogger;
+use Utils\LQA\QA;
 
 /**
  * A testable subclass of SegmentStorageService that overrides
@@ -29,6 +30,9 @@ class TestableSegmentStorageService extends SegmentStorageService
 
     /** @var ?array Injectable chunk results for getChunksByJobId */
     private ?array $chunksByJobIdResult = null;
+
+    /** @var ?QA Injectable QA instance for tests */
+    private ?QA $qaInstance = null;
 
     public function __construct(
         IDatabase            $dbHandler,
@@ -114,5 +118,21 @@ class TestableSegmentStorageService extends SegmentStorageService
     protected function getChunksByJobId(int $jobId): array
     {
         return $this->chunksByJobIdResult ?? parent::getChunksByJobId($jobId);
+    }
+
+    /**
+     * Inject a QA stub/mock for tests.
+     */
+    public function setQA(QA $qa): void
+    {
+        $this->qaInstance = $qa;
+    }
+
+    /**
+     * Override to return the injected QA instance instead of creating a real one.
+     */
+    protected function createQA(string $source, string $target): QA
+    {
+        return $this->qaInstance ?? parent::createQA($source, $target);
     }
 }

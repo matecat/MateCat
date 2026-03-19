@@ -324,7 +324,7 @@ class SegmentStorageService
                 $source = $this->filter->fromLayer0ToLayer1($source);
                 $target = $this->filter->fromLayer0ToLayer1($target);
 
-                $check = new QA($source, $target);
+                $check = $this->createQA($source, $target);
                 $check->setFeatureSet($this->features);
                 $check->setSourceSegLang($chunk->source);
                 $check->setTargetSegLang($chunk->target);
@@ -371,6 +371,15 @@ class SegmentStorageService
     }
 
     // ── Factory methods (overridable in tests) ──────────────────────
+
+    /**
+     * Create a new QA instance for consistency checking.
+     * Protected so test subclasses can override to avoid real QA processing.
+     */
+    protected function createQA(string $source, string $target): QA
+    {
+        return new QA($source, $target);
+    }
 
     /**
      * Create a new SegmentDao instance.
