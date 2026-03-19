@@ -50,17 +50,8 @@ class QualityReportSegmentModel
      */
     public function getSegmentsIdForQR($step, int $ref_segment, $where = "after", $options = [])
     {
-        if (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != 'all') {
-            $subCategories = (new CategoryDao())->findByIdModelAndIdParent(
-                $this->chunk->getProject()->id_qa_model,
-                $options['filter']['issue_category']
-            );
-
-            if (!empty($subCategories) > 0) {
-                $options['filter']['issue_category'] = array_map(function (CategoryStruct $subcat) {
-                    return $subcat->id;
-                }, $subCategories);
-            }
+        if (isset($options['filter']['issue_category'])) {
+            $options['filter']['issue_category'] = $this->issueCategoryIds($options['filter']['issue_category']);
         }
 
         /**
@@ -88,6 +79,39 @@ class QualityReportSegmentModel
         );
 
         return $segments_id;
+    }
+
+    /**
+     * Processes a string of issue category IDs, converting them into an array of integers,
+     * and expands the list by including IDs of subcategories if applicable.
+     *
+     * @param string $issue_category A comma-separated string of issue category IDs.
+     *                                If it contains 'all', the method returns null.
+     *
+     * @return array|null Returns an array of category IDs, including subcategory IDs, or null if 'all' is present.
+     */
+    private function issueCategoryIds(string $issue_category): ?array
+    {
+        if (str_contains($issue_category, 'all')){
+            return null;
+        }
+
+        $issue_category = array_map('intval', explode(',', $issue_category));
+
+        foreach ($issue_category as $issue_category_id) {
+            $subCategories = (new CategoryDao())->findByIdModelAndIdParent(
+                $this->chunk->getProject()->id_qa_model,
+                $issue_category_id
+            );
+
+            if (!empty($subCategories)) {
+                foreach ($subCategories as $subcat) {
+                    $issue_category[] = (int)$subcat->id;
+                }
+            }
+        }
+
+        return $issue_category;
     }
 
     /**
