@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\HandlersSorter;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;
@@ -59,6 +60,7 @@ use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
+use Utils\Subfiltering\SubfilteringOptionsValidator;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -488,7 +490,7 @@ class NewController extends KleinController
          * Note:
          * - The values above are expected as strings (e.g., "[]"), not native PHP types.
          */
-        $subfiltering_handlers = $this->validateSubfilteringOptions(
+        $subfiltering_handlers = SubfilteringOptionsValidator::validate(
             $this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]')
         ); // string value or default '[]'
 
@@ -805,36 +807,6 @@ class NewController extends KleinController
         }
 
         return $assoc;
-    }
-
-    /**
-     * Validates the provided subfiltering options by attempting to decode them as JSON.
-     *
-     * This method ensures that the input string is a valid JSON-encoded structure.
-     * If the decoding process encounters an error, it returns an empty array to enforce
-     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
-     *
-     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
-     *
-     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
-     * @throws Exception
-     */
-    private function validateSubfilteringOptions(string $subfiltering_handlers): ?array
-    {
-        if ($subfiltering_handlers == 'none') {
-            // subfiltering is disabled
-            $subfiltering_handlers = 'null';
-        }
-
-        $validatorObject = new JSONValidatorObject($subfiltering_handlers);
-        $validator = new JSONValidator('subfiltering_handlers.json', true);
-        $validator->validate($validatorObject);
-
-        if (is_null($validatorObject->getValue())) {
-            return null;
-        }
-
-        return $validatorObject->getValue();
     }
 
     /**
