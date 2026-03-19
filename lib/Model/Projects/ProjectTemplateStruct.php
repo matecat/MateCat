@@ -5,6 +5,7 @@ namespace Model\Projects;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use stdClass;
 
@@ -164,7 +165,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             'character_counter_count_tags' => $this->character_counter_count_tags,
             'character_counter_mode' => $this->character_counter_mode,
             'subject' => $this->subject,
-            MetadataDao::SUBFILTERING_HANDLERS => $this->getSubfilteringHandlers(),
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => $this->getSubfilteringHandlers(),
             'source_language' => $this->source_language,
             'target_language' => $this->getTargetLanguage(),
             'created_at' => date_create($this->created_at)->format(DATE_RFC822),

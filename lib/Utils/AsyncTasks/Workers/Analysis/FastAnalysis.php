@@ -10,6 +10,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -671,9 +672,9 @@ class FastAnalysis extends AbstractDaemon
                         $queue_element['payable_rates'] = $jobs_payable_rates[$id_job]; // assign the right payable rate for the current job
 
                         $jobsMetadataDao = new MetadataDao();
-                        $tm_prioritization = $jobsMetadataDao->get($id_job, $password, 'tm_prioritization', 10 * 60);
-                        $dialect_strict = $jobsMetadataDao->get($id_job, $password, 'dialect_strict', 10 * 60);
-                        $public_tm_penalty = $jobsMetadataDao->get($id_job, $password, 'public_tm_penalty', 10 * 60);
+                        $tm_prioritization = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60);
+                        $dialect_strict = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
+                        $public_tm_penalty = $jobsMetadataDao->get($id_job, $password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
 
                         if (!empty($public_tm_penalty)) {
                             $queue_element['public_tm_penalty'] = (int)$public_tm_penalty->value;
@@ -697,7 +698,7 @@ class FastAnalysis extends AbstractDaemon
                         }
                         $queue_element['mt_quality_value_in_editor'] = $mt_quality_value_in_editor ?? false;
 
-                        $queue_element[MetadataDao::SUBFILTERING_HANDLERS] = $subfiltering_handlers;
+                        $queue_element[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfiltering_handlers;
 
                         $element = new QueueElement();
                         $element->params = new Params($queue_element);

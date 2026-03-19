@@ -22,6 +22,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\ChunkOptionsSanitizer;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -154,7 +155,7 @@ class CattoolController extends BaseKleinViewController
 
         $model = $chunkStruct->getProject()->getLqaModel();
         $jobsMetadataDao = new MetadataDao();
-        $public_tm_penalty = $jobsMetadataDao->get($chunkStruct->id, $chunkStruct->password, 'public_tm_penalty');
+        $public_tm_penalty = $jobsMetadataDao->get($chunkStruct->id, $chunkStruct->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
 
         $this->setView("index.html", [
             'active_engine' => new PHPTalMap($this->getActiveEngine($chunkStruct->id_mt_engine)),

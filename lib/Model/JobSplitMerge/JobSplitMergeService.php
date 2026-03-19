@@ -10,6 +10,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -452,9 +453,9 @@ class JobSplitMergeService
 
             // duplicate character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata
             $metadata = [
-                MetadataDao::CHARACTER_COUNTER_COUNT_TAGS,
-                MetadataDao::CHARACTER_COUNTER_MODE,
-                MetadataDao::SUBFILTERING_HANDLERS,
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
+                JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
             ];
 
             foreach ($metadata as $key) {
@@ -571,9 +572,9 @@ class JobSplitMergeService
             if ($i > 0) {
                 // delete character_counter_count_tags, character_counter_mode, subfiltering_handlers metadata (not from the first job)
                 $metadata = [
-                    MetadataDao::CHARACTER_COUNTER_COUNT_TAGS,
-                    MetadataDao::CHARACTER_COUNTER_MODE,
-                    MetadataDao::SUBFILTERING_HANDLERS,
+                    JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
+                    JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
+                    JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
                 ];
 
                 foreach ($metadata as $key) {

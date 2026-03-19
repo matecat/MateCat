@@ -4,6 +4,7 @@ namespace unit\Model\ProjectCreation;
 
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
@@ -53,7 +54,7 @@ class SaveJobsMetadataTest extends AbstractTest
             'private_tm_key' => [],
             'result' => ['errors' => []],
             // Default subfiltering_handlers (always required)
-            JobsMetadataDao::SUBFILTERING_HANDLERS => '[]',
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => '[]',
         ]);
 
         // Create a stub JobsMetadataDao that records set() calls
@@ -128,7 +129,7 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $this->setConfigAndSave();
 
-        $calls = $this->findDaoCallsByKey(JobsMetadataDao::SUBFILTERING_HANDLERS);
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
         $this->assertCount(1, $calls);
         $this->assertSame('[]', $calls[0][3]);
     }
@@ -138,10 +139,10 @@ class SaveJobsMetadataTest extends AbstractTest
     {
         $handlers = json_encode([['handler' => 'some_handler']]);
         $this->setConfigAndSave([
-            JobsMetadataDao::SUBFILTERING_HANDLERS => $handlers,
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => $handlers,
         ]);
 
-        $calls = $this->findDaoCallsByKey(JobsMetadataDao::SUBFILTERING_HANDLERS);
+        $calls = $this->findDaoCallsByKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
         $this->assertCount(1, $calls);
         $this->assertSame($handlers, $calls[0][3]);
     }
@@ -174,7 +175,7 @@ class SaveJobsMetadataTest extends AbstractTest
         $this->setConfigAndSave();
 
         $this->assertCount(1, $this->daoSetCalls);
-        $this->assertSame(JobsMetadataDao::SUBFILTERING_HANDLERS, $this->daoSetCalls[0][2]);
+        $this->assertSame(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $this->daoSetCalls[0][2]);
     }
 
     // =========================================================================
@@ -367,7 +368,7 @@ class SaveJobsMetadataTest extends AbstractTest
             'character_counter_mode'       => 'target',
             'tm_prioritization'           => true,
             'dialect_strict'              => $dialectJson,
-            JobsMetadataDao::SUBFILTERING_HANDLERS => $handlers,
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => $handlers,
         ]);
 
         // Should have 6 DAO calls total:
@@ -391,8 +392,8 @@ class SaveJobsMetadataTest extends AbstractTest
         $this->assertCount(1, $this->findDaoCallsByKey('dialect_strict'));
         $this->assertSame('strict', $this->findDaoCallsByKey('dialect_strict')[0][3]);
 
-        $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataDao::SUBFILTERING_HANDLERS));
-        $this->assertSame($handlers, $this->findDaoCallsByKey(JobsMetadataDao::SUBFILTERING_HANDLERS)[0][3]);
+        $this->assertCount(1, $this->findDaoCallsByKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value));
+        $this->assertSame($handlers, $this->findDaoCallsByKey(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value)[0][3]);
 
         // All calls use correct credentials
         $this->assertAllCallsUseJobCredentials();
@@ -467,7 +468,7 @@ class SaveJobsMetadataTest extends AbstractTest
             'character_counter_mode',
             'tm_prioritization',
             'dialect_strict',
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
         ], $keys);
     }
 }

@@ -9,6 +9,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Model\Engines\Structs\EngineStruct;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
@@ -107,8 +108,8 @@ class MetaDataController extends KleinController
             $metadata->{$metadatum->key} = $metadatum->value;
         }
 
-        if (!property_exists($metadata, MetadataDao::SUBFILTERING_HANDLERS)) {
-            $metadata->{MetadataDao::SUBFILTERING_HANDLERS} = [];
+        if (!property_exists($metadata, JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value)) {
+            $metadata->{JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value} = [];
         }
 
         return $metadata;

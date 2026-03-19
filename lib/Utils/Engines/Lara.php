@@ -12,6 +12,7 @@ use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
@@ -417,7 +418,7 @@ class Lara extends AbstractEngine
             [],
             $_config['source'],
             $_config['target'],
-            $_config[JobsMetadataDao::SUBFILTERING_HANDLERS] ?? null
+            $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null
         );
     }
 

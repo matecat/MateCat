@@ -13,6 +13,7 @@ use Matecat\Locales\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
@@ -345,8 +346,8 @@ class CreateProjectController extends AbstractStatefulKleinController
              * Note:
              * - The values above are expected as strings (e.g., "[]"), not native PHP types.
              */
-            JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode(
-                $this->validateSubfilteringOptions($this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]'))
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode(
+                $this->validateSubfilteringOptions($this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]'))
             ),
             'icu_enabled' => $icu_enabled,
         ];
@@ -832,7 +833,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->tm_prioritization = (!empty($data['tm_prioritization'])) ? $data['tm_prioritization'] : null;
         $projectStructure->character_counter_mode = (!empty($data['character_counter_mode'])) ? $data['character_counter_mode'] : null;
         $projectStructure->character_counter_count_tags = (!empty($data['character_counter_count_tags'])) ? $data['character_counter_count_tags'] : null;
-        $projectStructure->subfiltering_handlers = $data[JobsMetadataDao::SUBFILTERING_HANDLERS];
+        $projectStructure->subfiltering_handlers = $data[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
 
         // GDrive session
         if ($gdriveSession !== null) {

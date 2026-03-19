@@ -7,6 +7,7 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Users\UserStruct;
 use Utils\Constants\EngineConstants;
@@ -253,8 +254,8 @@ class MyMemory extends AbstractEngine
         // Here we pass the subfiltering configuration to the API.
         // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
         // We use the JSON to pass a nullable value.
-        $parameters[JobsMetadataDao::SUBFILTERING_HANDLERS] = json_encode(
-            $_config[JobsMetadataDao::SUBFILTERING_HANDLERS] ?? null
+        $parameters[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = json_encode(
+            $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null
         ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
 
         $parameters = $this->featureSet->filter('filterMyMemoryGetParameters', $parameters, $_config);

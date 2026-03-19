@@ -22,6 +22,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
@@ -246,7 +247,7 @@ class NewController extends KleinController
         $projectStructure->character_counter_mode = (!empty($request['character_counter_mode'])) ? $request['character_counter_mode'] : null;
         $projectStructure->character_counter_count_tags = (!empty($request['character_counter_count_tags'])) ? $request['character_counter_count_tags'] : null;
 
-        $projectStructure->subfiltering_handlers = $request[JobsMetadataDao::SUBFILTERING_HANDLERS];
+        $projectStructure->subfiltering_handlers = $request[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value];
 
         // MT Extra params
         foreach ($engine->getConfigurationParameters() as $param) {
@@ -487,7 +488,7 @@ class NewController extends KleinController
          * - The values above are expected as strings (e.g., "[]"), not native PHP types.
          */
         $subfiltering_handlers = $this->validateSubfilteringOptions(
-            $this->request->param(JobsMetadataDao::SUBFILTERING_HANDLERS, '[]')
+            $this->request->param(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '[]')
         ); // string value or default '[]'
 
         if ($mt_qe_workflow_enable) {
@@ -586,7 +587,7 @@ class NewController extends KleinController
             'target_language_mt_engine_association' => $target_language_mt_engine_association,
             'mt_qe_workflow_payable_rate' => $mt_qe_PayableRate ?? null,
             'legacy_icu' => $legacy_icu,
-            JobsMetadataDao::SUBFILTERING_HANDLERS => json_encode($subfiltering_handlers),
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => json_encode($subfiltering_handlers),
             'icu_enabled' => $icu_enabled,
         ];
     }

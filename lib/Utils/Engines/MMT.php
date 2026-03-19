@@ -5,6 +5,7 @@ namespace Utils\Engines;
 use DomainException;
 use Exception;
 use Model\DataAccess\Database;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -171,7 +172,7 @@ class MMT extends AbstractEngine
                 [],
                 $_config['source'],
                 $_config['target'],
-                $_config[MetadataDao::SUBFILTERING_HANDLERS]
+                $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]
             );
         } catch (Exception) {
             return $this->GoogleTranslateFallback($_config);

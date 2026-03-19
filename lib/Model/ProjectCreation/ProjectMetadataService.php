@@ -5,6 +5,7 @@ namespace Model\ProjectCreation;
 use Exception;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Xliff\DTO\XliffRulesModel;
@@ -109,7 +110,7 @@ class ProjectMetadataService
                 );
             }
         }
-        /** Duplicate the JobsMetadataDao::SUBFILTERING_HANDLERS in project metadata for easier retrieval.
+        /** Duplicate the JobsMetadataMarshaller::SUBFILTERING_HANDLERS in project metadata for easier retrieval.
          * During the analysis of the project, there is no need to query the JobsMetadataDao.
          * Configuration about handlers can be changed later in the job settings.
          * But the analysis must everytime be performed with the current configuration.
@@ -118,7 +119,7 @@ class ProjectMetadataService
         if (!empty($projectStructure->subfiltering_handlers)) {
             $this->dao->set(
                 (int)$projectStructure->id_project,
-                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
                 $projectStructure->subfiltering_handlers
             );
         }

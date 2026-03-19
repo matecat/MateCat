@@ -10,6 +10,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Files\FileDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
@@ -172,16 +173,16 @@ class JobCreationService
         $dao = $this->getJobsMetadataDao();
 
         if (isset($projectStructure->public_tm_penalty)) {
-            $dao->set((int)$job->id, (string)$job->password, 'public_tm_penalty', (string)$projectStructure->public_tm_penalty);
+            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, (string)$projectStructure->public_tm_penalty);
         }
         if ($projectStructure->character_counter_count_tags !== null) {
-            $dao->set((int)$job->id, (string)$job->password, 'character_counter_count_tags', (string)($projectStructure->character_counter_count_tags ? 1 : 0));
+            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value, (string)($projectStructure->character_counter_count_tags ? 1 : 0));
         }
         if ($projectStructure->character_counter_mode !== null) {
-            $dao->set((int)$job->id, (string)$job->password, 'character_counter_mode', $projectStructure->character_counter_mode);
+            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value, $projectStructure->character_counter_mode);
         }
         if ($projectStructure->tm_prioritization !== null) {
-            $dao->set((int)$job->id, (string)$job->password, 'tm_prioritization', (string)($projectStructure->tm_prioritization ? 1 : 0));
+            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, (string)($projectStructure->tm_prioritization ? 1 : 0));
         }
 
         if ($projectStructure->dialect_strict !== null) {
@@ -189,7 +190,7 @@ class JobCreationService
 
             foreach ($dialectStrictObj as $lang => $value) {
                 if (trim($lang) === trim($job->target)) {
-                    $dao->set((int)$job->id, (string)$job->password, 'dialect_strict', (string)$value);
+                    $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::DIALECT_STRICT->value, (string)$value);
                 }
             }
         }
@@ -198,7 +199,7 @@ class JobCreationService
             $dao->set(
                 (int)$job->id,
                 (string)$job->password,
-                JobsMetadataDao::SUBFILTERING_HANDLERS,
+                JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
                 $projectStructure->subfiltering_handlers
             );
         }

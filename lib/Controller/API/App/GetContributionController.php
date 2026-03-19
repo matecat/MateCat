@@ -14,6 +14,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Segments\SegmentDao;
@@ -137,9 +138,9 @@ class GetContributionController extends KleinController
         }
 
         $jobsMetadataDao = new MetadataDao();
-        $dialect_strict = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60);
+        $dialect_strict = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::DIALECT_STRICT->value, 10 * 60);
         $mt_evaluation = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60);
-        $public_tm_penalty = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'public_tm_penalty', 10 * 60);
+        $public_tm_penalty = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, 10 * 60);
 
         if ($public_tm_penalty !== null) {
             $contributionRequest->public_tm_penalty = (int)$public_tm_penalty->value;
@@ -156,7 +157,7 @@ class GetContributionController extends KleinController
             $contributionRequest->mt_evaluation = $mt_evaluation->value == 1;
         }
 
-        $tm_prioritization = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60);
+        $tm_prioritization = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, 10 * 60);
 
         if ($tm_prioritization !== null) {
             $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;

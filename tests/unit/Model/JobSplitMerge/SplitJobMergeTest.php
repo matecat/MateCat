@@ -8,6 +8,7 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Jobs\MetadataStruct;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -701,9 +702,9 @@ class SplitJobMergeTest extends AbstractTest
         $ps = $this->makeSplitProjectStructure($chunks);
 
         $metadataKeys = [
-            JobsMetadataDao::CHARACTER_COUNTER_COUNT_TAGS,
-            JobsMetadataDao::CHARACTER_COUNTER_MODE,
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
         ];
 
         // Stub get() to return a MetadataStruct for every key on the original job
@@ -805,9 +806,9 @@ class SplitJobMergeTest extends AbstractTest
         $ps = new SplitMergeProjectData(999);
 
         $metadataKeys = [
-            JobsMetadataDao::CHARACTER_COUNTER_COUNT_TAGS,
-            JobsMetadataDao::CHARACTER_COUNTER_MODE,
-            JobsMetadataDao::SUBFILTERING_HANDLERS,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value,
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
         ];
 
         // Track delete() calls: [jobId, password, key]
