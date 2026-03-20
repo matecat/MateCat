@@ -2,6 +2,8 @@
 
 namespace Model\ProjectCreation;
 
+use Model\Xliff\DTO\XliffRuleInterface;
+
 /**
  * Represents a pre-translated segment flowing through the creation pipeline.
  *
@@ -22,6 +24,8 @@ class TranslationTuple
         public readonly string $target,
         public readonly array $transUnit,
         public readonly ?int $mrkPosition = null,
+        public readonly ?XliffRuleInterface $rule = null,
+        public readonly ?string $state = null,
     ) {
     }
 }

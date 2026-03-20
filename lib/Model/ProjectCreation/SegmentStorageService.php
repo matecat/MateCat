@@ -15,7 +15,6 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
-use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionException;
 use Utils\Constants\XliffTranslationStatus;
 use Utils\Logger\MatecatLogger;
@@ -303,17 +302,9 @@ class SegmentStorageService
                     continue;
                 }
 
-                /** @var XliffRulesModel $configModel */
-                $configModel = $projectStructure->xliff_parameters;
-                $stateValues = SegmentExtractor::getTargetStatesFromTransUnit($translationTuple->transUnit, $translationTuple->mrkPosition);
+                $rule = $translationTuple->rule;
 
-                $rule = $configModel->getMatchingRule(
-                    $projectStructure->current_xliff_info[$translationTuple->fileId]['version'],
-                    $stateValues['state'],
-                    $stateValues['state-qualifier']
-                );
-
-                if (XliffTranslationStatus::isFinalState($stateValues['state'])) {
+                if (XliffTranslationStatus::isFinalState($translationTuple->state)) {
                     $createSecondPassReview = true;
                 }
 

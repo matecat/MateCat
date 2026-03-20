@@ -21,6 +21,7 @@ use Model\FilesStorage\S3FilesStorage;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
+use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionException;
 use RuntimeException;
@@ -324,7 +325,13 @@ class SegmentExtractor
                     }
 
                     $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] =
-                        new TranslationTuple($preTranslation['target'], $xliff_trans_unit, $position);
+                        new TranslationTuple(
+                            $preTranslation['target'],
+                            $xliff_trans_unit,
+                            $position,
+                            $preTranslation['rule'],
+                            $preTranslation['state'],
+                        );
                 }
             }
 
@@ -399,7 +406,13 @@ class SegmentExtractor
                 }
 
                 $projectStructure->translations[$trans_unit_reference][] =
-                    new TranslationTuple($preTranslation['target'], $xliff_trans_unit);
+                    new TranslationTuple(
+                        $preTranslation['target'],
+                        $xliff_trans_unit,
+                        null,
+                        $preTranslation['rule'],
+                        $preTranslation['state'],
+                    );
             }
         }
 
@@ -508,20 +521,15 @@ class SegmentExtractor
     }
 
     /**
-     * Detect whether a target qualifies as a pre-translation.
-     *
-     * Applies the full pipeline: populatePreTranslations feature gate,
-     * unicode entity restoration, trim+strip, isTranslated check, and
-     * layer-0 conversion.
+     * Detect whether this segment has a valid pre-translation.
      *
      * @param string $sourceRawContent
      * @param string $targetRawContent
-     * @param array<string, mixed> $xliff_trans_unit
+     * @param array $xliff_trans_unit
      * @param int $fid
      * @param int|null $position
      * @param ProjectStructure $projectStructure
-     *
-     * @return array{target: string}|null Null if not a valid pre-translation
+     * @return array{target: string, rule: XliffRuleInterface, state: ?string}|null
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
@@ -550,12 +558,27 @@ class SegmentExtractor
         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded($sourceRawContent);
         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($targetRawContent);
 
-        if (!$this->isTranslated($src, $trg, $fid, $stateValues['state'], $stateValues['state-qualifier'], $projectStructure) || empty($trg)) {
+        if (empty($trg)) {
+            return null;
+        }
+
+        $rule = $this->resolveTranslationRule(
+            $src,
+            $trg,
+            $fid,
+            $stateValues['state'],
+            $stateValues['state-qualifier'],
+            $projectStructure
+        );
+
+        if ($rule === null) {
             return null;
         }
 
         return [
             'target' => $this->filter->fromRawXliffToLayer0($targetRawContent),
+            'rule' => $rule,
+            'state' => $stateValues['state'],
         ];
     }
 
@@ -811,8 +834,7 @@ class SegmentExtractor
     }
 
     /**
-     * Decide if a source/target pair should be considered translated,
-     * based on user-defined XLIFF rules.
+     * Resolve the XLIFF rule for this segment and check if it's translated.
      *
      * @param string|null $source
      * @param string|null $target
@@ -820,17 +842,17 @@ class SegmentExtractor
      * @param string|null $state
      * @param string|null $stateQualifier
      * @param ProjectStructure $projectStructure
-     * @return bool
+     * @return XliffRuleInterface|null The matching rule if the segment is translated, null otherwise.
      * @throws Exception
      */
-    protected function isTranslated(
+    protected function resolveTranslationRule(
         ?string $source,
         ?string $target,
         ?int $file_id,
         ?string $state,
         ?string $stateQualifier,
         ProjectStructure $projectStructure,
-    ): bool {
+    ): ?XliffRuleInterface {
         /** @var XliffRulesModel $configModel */
         $configModel = $projectStructure->xliff_parameters;
         $rule = $configModel->getMatchingRule(
@@ -839,7 +861,11 @@ class SegmentExtractor
             $stateQualifier
         );
 
-        return $rule->isTranslated($source ?? '', $target ?? '');
+        if (!$rule->isTranslated($source ?? '', $target ?? '')) {
+            return null;
+        }
+
+        return $rule;
     }
 
     /**

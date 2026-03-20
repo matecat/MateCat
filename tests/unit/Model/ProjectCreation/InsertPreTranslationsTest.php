@@ -13,7 +13,6 @@ use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use Model\Xliff\DTO\XliffRuleInterface;
-use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception as MockException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -73,7 +72,6 @@ class InsertPreTranslationsTest extends AbstractTest
             'segments_metadata'  => [],
             'create_2_pass_review' => false,
             'array_jobs'         => ['payable_rates' => [99 => ['NO_MATCH' => 100]]],
-            'current_xliff_info' => [1 => ['version' => 1]],
             'result'             => ['errors' => [], 'data' => []],
         ]);
     }
@@ -87,7 +85,6 @@ class InsertPreTranslationsTest extends AbstractTest
         ?ProjectManagerModel $pmModel = null,
         ?SegmentDao          $segmentDao = null,
         ?QA                  $qa = null,
-        ?XliffRulesModel     $xliffRulesModel = null,
     ): TestableSegmentStorageService {
         $filter = $this->createStub(MateCatFilter::class);
         $filter->method('fromLayer0ToLayer1')->willReturnArgument(0);
@@ -111,10 +108,6 @@ class InsertPreTranslationsTest extends AbstractTest
             $service->setQA($qa);
         }
 
-        if ($xliffRulesModel !== null) {
-            $this->projectStructure->xliff_parameters = $xliffRulesModel;
-        }
-
         return $service;
     }
 
@@ -122,14 +115,16 @@ class InsertPreTranslationsTest extends AbstractTest
      * Create a TranslationTuple with all mutable fields set.
      */
     private function makeTuple(
-        string $target = 'translated text',
-        int    $segmentId = 1,
-        string $segmentHash = 'hash123',
-        int    $fileId = 1,
-        ?int   $mrkPosition = null,
-        array  $transUnit = [],
+        string              $target = 'translated text',
+        int                 $segmentId = 1,
+        string              $segmentHash = 'hash123',
+        int                 $fileId = 1,
+        ?int                $mrkPosition = null,
+        array               $transUnit = [],
+        ?XliffRuleInterface $rule = null,
+        ?string             $state = null,
     ): TranslationTuple {
-        $tuple = new TranslationTuple($target, $transUnit, $mrkPosition);
+        $tuple = new TranslationTuple($target, $transUnit, $mrkPosition, $rule, $state);
         $tuple->segmentId   = $segmentId;
         $tuple->segmentHash = $segmentHash;
         $tuple->fileId      = $fileId;
@@ -139,26 +134,23 @@ class InsertPreTranslationsTest extends AbstractTest
     }
 
     /**
-     * Build a stub XliffRulesModel that returns a fixed XliffRuleInterface.
+     * Build a stub XliffRuleInterface.
      *
      * @throws MockException
      */
-    private function buildRuleStubs(
+    private function buildRuleStub(
         string $editorStatus = 'TRANSLATED',
         string $matchType = 'ICE',
         float  $eqWordCount = 0.0,
         float  $stdWordCount = 10.0,
-    ): array {
+    ): XliffRuleInterface {
         $rule = $this->createStub(XliffRuleInterface::class);
         $rule->method('asEditorStatus')->willReturn($editorStatus);
         $rule->method('asMatchType')->willReturn($matchType);
         $rule->method('asEquivalentWordCount')->willReturn($eqWordCount);
         $rule->method('asStandardWordCount')->willReturn($stdWordCount);
 
-        $rulesModel = $this->createStub(XliffRulesModel::class);
-        $rulesModel->method('getMatchingRule')->willReturn($rule);
-
-        return [$rulesModel, $rule];
+        return $rule;
     }
 
     /**
@@ -258,13 +250,13 @@ class InsertPreTranslationsTest extends AbstractTest
     #[Test]
     public function skipsSegmentNotFoundInDao(): void
     {
-        [$rulesModel] = $this->buildRuleStubs();
+        $rule = $this->buildRuleStub();
 
         $segmentDao = $this->createStub(SegmentDao::class);
         $segmentDao->method('getById')->willReturn(null);
 
         $this->projectStructure->translations = [
-            'tu-1' => [0 => $this->makeTuple()],
+            'tu-1' => [0 => $this->makeTuple(rule: $rule)],
         ];
 
         /** @var ProjectManagerModel&MockObject $pmModel */
@@ -274,7 +266,6 @@ class InsertPreTranslationsTest extends AbstractTest
         $service = $this->buildService(
             pmModel: $pmModel,
             segmentDao: $segmentDao,
-            xliffRulesModel: $rulesModel,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
@@ -291,7 +282,7 @@ class InsertPreTranslationsTest extends AbstractTest
     #[Test]
     public function happyPathSingleTranslation(): void
     {
-        [$rulesModel] = $this->buildRuleStubs();
+        $rule = $this->buildRuleStub();
 
         $qa = $this->buildQAStub(
             normalizedTarget: 'normalized translation',
@@ -299,7 +290,7 @@ class InsertPreTranslationsTest extends AbstractTest
 
         $segmentDao = $this->buildSegmentDaoStub();
 
-        $tuple = $this->makeTuple();
+        $tuple = $this->makeTuple(rule: $rule);
 
         $this->projectStructure->translations = [
             'tu-1' => [0 => $tuple],
@@ -335,7 +326,6 @@ class InsertPreTranslationsTest extends AbstractTest
             pmModel: $pmModel,
             segmentDao: $segmentDao,
             qa: $qa,
-            xliffRulesModel: $rulesModel,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
@@ -350,7 +340,7 @@ class InsertPreTranslationsTest extends AbstractTest
     #[Test]
     public function usesTargetSegWhenQAHasErrors(): void
     {
-        [$rulesModel] = $this->buildRuleStubs();
+        $rule = $this->buildRuleStub();
 
         $qa = $this->buildQAStub(
             hasErrors: true,
@@ -361,7 +351,7 @@ class InsertPreTranslationsTest extends AbstractTest
         $segmentDao = $this->buildSegmentDaoStub();
 
         $this->projectStructure->translations = [
-            'tu-1' => [0 => $this->makeTuple()],
+            'tu-1' => [0 => $this->makeTuple(rule: $rule)],
         ];
 
         /** @var ProjectManagerModel&MockObject $pmModel */
@@ -383,7 +373,6 @@ class InsertPreTranslationsTest extends AbstractTest
             pmModel: $pmModel,
             segmentDao: $segmentDao,
             qa: $qa,
-            xliffRulesModel: $rulesModel,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
@@ -398,14 +387,12 @@ class InsertPreTranslationsTest extends AbstractTest
     #[Test]
     public function setsCreateSecondPassReviewWhenStateFinal(): void
     {
-        [$rulesModel] = $this->buildRuleStubs();
+        $rule = $this->buildRuleStub();
         $qa = $this->buildQAStub();
         $segmentDao = $this->buildSegmentDaoStub();
 
-        // trans-unit with state='final'
-        $tuple = $this->makeTuple(transUnit: [
-            'target' => ['attr' => ['state' => 'final']],
-        ]);
+        // Tuple with state='final' — triggers createSecondPassReview
+        $tuple = $this->makeTuple(rule: $rule, state: 'final');
 
         $this->projectStructure->translations = [
             'tu-1' => [0 => $tuple],
@@ -414,7 +401,6 @@ class InsertPreTranslationsTest extends AbstractTest
         $service = $this->buildService(
             segmentDao: $segmentDao,
             qa: $qa,
-            xliffRulesModel: $rulesModel,
         );
 
         $this->assertFalse($this->projectStructure->create_2_pass_review);
@@ -433,14 +419,12 @@ class InsertPreTranslationsTest extends AbstractTest
     #[Test]
     public function doesNotSetCreateSecondPassReviewForNonFinalState(): void
     {
-        [$rulesModel] = $this->buildRuleStubs();
+        $rule = $this->buildRuleStub();
         $qa = $this->buildQAStub();
         $segmentDao = $this->buildSegmentDaoStub();
 
-        // trans-unit with state='translated' (not final)
-        $tuple = $this->makeTuple(transUnit: [
-            'target' => ['attr' => ['state' => 'translated']],
-        ]);
+        // Tuple with state='translated' (not final)
+        $tuple = $this->makeTuple(rule: $rule, state: 'translated');
 
         $this->projectStructure->translations = [
             'tu-1' => [0 => $tuple],
@@ -449,7 +433,6 @@ class InsertPreTranslationsTest extends AbstractTest
         $service = $this->buildService(
             segmentDao: $segmentDao,
             qa: $qa,
-            xliffRulesModel: $rulesModel,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
@@ -466,12 +449,12 @@ class InsertPreTranslationsTest extends AbstractTest
     #[Test]
     public function processesMultipleTranslationTuples(): void
     {
-        [$rulesModel] = $this->buildRuleStubs();
+        $rule = $this->buildRuleStub();
         $qa = $this->buildQAStub();
         $segmentDao = $this->buildSegmentDaoStub();
 
-        $tuple1 = $this->makeTuple(segmentHash: 'hash1');
-        $tuple2 = $this->makeTuple(segmentId: 2, segmentHash: 'hash2');
+        $tuple1 = $this->makeTuple(segmentHash: 'hash1', rule: $rule);
+        $tuple2 = $this->makeTuple(segmentId: 2, segmentHash: 'hash2', rule: $rule);
 
         $this->projectStructure->translations = [
             'tu-1' => [0 => $tuple1],
@@ -494,7 +477,6 @@ class InsertPreTranslationsTest extends AbstractTest
             pmModel: $pmModel,
             segmentDao: $segmentDao,
             qa: $qa,
-            xliffRulesModel: $rulesModel,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
@@ -529,20 +511,16 @@ class InsertPreTranslationsTest extends AbstractTest
             ->with(10, $payableRates)
             ->willReturn(10.0);
 
-        $rulesModel = $this->createStub(XliffRulesModel::class);
-        $rulesModel->method('getMatchingRule')->willReturn($rule);
-
         $qa = $this->buildQAStub();
         $segmentDao = $this->buildSegmentDaoStub();
 
         $this->projectStructure->translations = [
-            'tu-1' => [0 => $this->makeTuple()],
+            'tu-1' => [0 => $this->makeTuple(rule: $rule)],
         ];
 
         $service = $this->buildService(
             segmentDao: $segmentDao,
             qa: $qa,
-            xliffRulesModel: $rulesModel,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
@@ -557,8 +535,6 @@ class InsertPreTranslationsTest extends AbstractTest
     #[Test]
     public function doesNotCallInsertWhenAllTuplesSkipped(): void
     {
-        [$rulesModel] = $this->buildRuleStubs();
-
         // SegmentDao returns null for all lookups
         $segmentDao = $this->createStub(SegmentDao::class);
         $segmentDao->method('getById')->willReturn(null);
@@ -575,7 +551,6 @@ class InsertPreTranslationsTest extends AbstractTest
         $service = $this->buildService(
             pmModel: $pmModel,
             segmentDao: $segmentDao,
-            xliffRulesModel: $rulesModel,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);

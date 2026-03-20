@@ -134,7 +134,10 @@ class DetectPreTranslationTest extends AbstractTest
             $this->projectStructure,
         );
 
-        self::assertSame(['target' => 'filtered target'], $result);
+        self::assertNotNull($result);
+        self::assertSame('filtered target', $result['target']);
+        self::assertInstanceOf(XliffRuleInterface::class, $result['rule']);
+        self::assertNull($result['state']); // no state in trans-unit
     }
 
     /**
@@ -255,6 +258,35 @@ class DetectPreTranslationTest extends AbstractTest
         );
 
         self::assertSame('layer0 target', $result['target']);
+    }
+
+    // ── Test 9: Returns rule and state in result when state is present ──
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    #[Test]
+    public function returnsRuleAndStateInResult(): void
+    {
+        [$rulesModel, $rule] = $this->buildRuleStubs();
+
+        $extractor = $this->buildExtractor(xliffRulesModel: $rulesModel);
+
+        $transUnit = $this->makeTransUnit(state: 'translated');
+
+        $result = $extractor->callDetectPreTranslation(
+            'source text',
+            'target text',
+            $transUnit,
+            1,
+            null,
+            $this->projectStructure,
+        );
+
+        self::assertNotNull($result);
+        self::assertSame($rule, $result['rule']);
+        self::assertSame('translated', $result['state']);
     }
 
     // ── Helper methods ──────────────────────────────────────────────
