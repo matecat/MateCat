@@ -96,6 +96,8 @@ class ProjectManager
 
     protected ?FileInsertionService $fileInsertionService = null;
 
+    protected ?QAProcessor $qaProcessor = null;
+
     /**
      * ProjectManager constructor.
      *
@@ -200,7 +202,6 @@ class ProjectManager
                 $this->dbHandler,
                 $this->features,
                 $this->logger,
-                $this->filter,
                 $this->getProjectManagerModel(),
             );
         }
@@ -236,6 +237,18 @@ class ProjectManager
         }
 
         return $this->jobCreationService;
+    }
+
+    /**
+     * Get or lazily create the QAProcessor instance.
+     */
+    protected function getQAProcessor(): QAProcessor
+    {
+        if ($this->qaProcessor === null) {
+            $this->qaProcessor = new QAProcessor($this->filter, $this->features);
+        }
+
+        return $this->qaProcessor;
     }
 
     /**
@@ -665,6 +678,8 @@ class ProjectManager
      * If the last file also fails, the exception is re-thrown so the caller
      * can handle it as a project-level error.
      *
+     * @param array<int, array<string, mixed>> $totalFilesStructure
+     *
      * @throws Exception
      */
     private function extractSegmentsFromFiles(array &$totalFilesStructure): void
@@ -996,6 +1011,7 @@ class ProjectManager
             $this->projectStructure,
             $this->gdriveSession,
             $this->getSegmentStorageService(),
+            $this->getQAProcessor(),
         );
     }
 

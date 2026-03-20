@@ -47,7 +47,7 @@ class ProjectManagerModel
         $data['pretranslate_100'] = $projectStructure->pretranslate_100;
         $data['remote_ip_address'] = empty($projectStructure->user_ip) ? 'UNKNOWN' : $projectStructure->user_ip;
         $data['id_assignee'] = $idAssignee;
-        $data['instance_id'] = $projectStructure->instance_id ?? (!is_null(AppConfig::$INSTANCE_ID) ? AppConfig::$INSTANCE_ID : 0);
+        $data['instance_id'] = $projectStructure->instance_id ?? AppConfig::$INSTANCE_ID;
         $data['due_date'] = $projectStructure->due_date;
 
         $this->dbHandler->begin();
@@ -129,8 +129,8 @@ class ProjectManagerModel
      *
      * @param string $insertTemplate SQL up to and including "VALUES "
      * @param string $tupleMarks Placeholder tuple, e.g. "( ?, ?, ? )"
-     * @param list<list<mixed>> $insertValues Rows — each element is a flat tuple of column values
-     * @param int $chunkSize Max rows per INSERT statement
+     * @param list<array<int|string, mixed>> $insertValues Rows — each element is a flat tuple of column values
+     * @param positive-int $chunkSize Max rows per INSERT statement
      * @param string $label Human-readable label for logging/errors
      * @param int $errorCode Code to attach to re-thrown PDOException
      *
@@ -175,7 +175,7 @@ class ProjectManagerModel
     }
 
     /**
-     * @param array<int, array<string, mixed>> $notes
+     * @param array<int|string, array<string, mixed>> $notes
      *
      * @throws PDOException
      */
@@ -233,7 +233,7 @@ class ProjectManagerModel
     }
 
     /**
-     * @param array<int, array<string, mixed>> $notes
+     * @param array<int|string, array<string, mixed>> $notes
      *
      * @throws PDOException
      */
@@ -300,7 +300,7 @@ class ProjectManagerModel
     }
 
     /**
-     * @param array<int, array<string, mixed>> $contextGroups
+     * @param array<int|string, array<string, mixed>> $contextGroups
      *
      * @throws PDOException
      */

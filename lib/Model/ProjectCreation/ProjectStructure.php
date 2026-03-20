@@ -50,6 +50,7 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     // TM/MT configuration
     public ?int $mt_engine = null;
     public ?int $tms_engine = null;
+    /** @var array<int, array<string, mixed>> */
     public array $private_tm_key = [];
     public int $pretranslate_100 = 0;
     public int $pretranslate_101 = 1;
@@ -123,9 +124,9 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public array $segments_meta_data = [];
     /** @var array<string, array<int|string, TranslationTuple>> */
     public array $translations = [];
-    /** @var array<int|string, mixed> */
+    /** @var array<int|string, array<string, mixed>> */
     public array $notes = [];
-    /** @var array<int|string, mixed> */
+    /** @var array<int|string, array<string, mixed>> */
     public array $context_group = [];
     /** @var string[] */
     public array $array_files = [];
@@ -135,8 +136,8 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public array $file_id_list = [];
     /** @var array<int|string, int> */
     public array $file_segments_count = [];
-    /** @var array<int|string, mixed>|null */
-    public ?array $current_xliff_info = null;
+    /** @var array<int, array<string, mixed>> */
+    public array $current_xliff_info = [];
 
     // ── Group D: Output / result keys (nested structures) ───────────
 

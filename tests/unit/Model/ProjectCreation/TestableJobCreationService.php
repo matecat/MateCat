@@ -17,6 +17,9 @@ class TestableJobCreationService extends JobCreationService
 {
     private ?JobsMetadataDao $jobsMetadataDaoOverride = null;
 
+    /** @var ?array Injectable chunk results for getChunksByJobId */
+    private ?array $chunksByJobIdResult = null;
+
     /**
      * Collected calls to insertFilesJob. Each entry is [int $jobId, int $fid].
      * @var array<int, array{0: int, 1: int}>
@@ -31,6 +34,24 @@ class TestableJobCreationService extends JobCreationService
     protected function getJobsMetadataDao(): JobsMetadataDao
     {
         return $this->jobsMetadataDaoOverride ?? parent::getJobsMetadataDao();
+    }
+
+    /**
+     * Inject chunk results for getChunksByJobId.
+     *
+     * @param JobStruct[] $chunks
+     */
+    public function setChunksByJobIdResult(array $chunks): void
+    {
+        $this->chunksByJobIdResult = $chunks;
+    }
+
+    /**
+     * Override to return injected chunks instead of hitting the DB.
+     */
+    protected function getChunksByJobId(int $jobId): array
+    {
+        return $this->chunksByJobIdResult ?? parent::getChunksByJobId($jobId);
     }
 
     protected function insertFilesJob(int $jobId, int $fid): void

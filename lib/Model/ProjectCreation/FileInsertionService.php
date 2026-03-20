@@ -9,7 +9,6 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
-use Psr\Log\LoggerInterface;
 use Throwable;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
@@ -36,9 +35,8 @@ class FileInsertionService
         private readonly MetadataDao $filesMetadataDao,
         private readonly ?Session $gdriveSession,
         private readonly Closure $s3FileDownloader,
-        LoggerInterface $logger,
+        MatecatLogger $logger,
     ) {
-        /** @var $logger MatecatLogger */
         $this->logger = $logger;
     }
 

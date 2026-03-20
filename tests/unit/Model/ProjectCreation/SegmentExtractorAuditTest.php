@@ -8,6 +8,7 @@ use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
+use Model\Xliff\DTO\XliffRuleInterface;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
@@ -235,7 +236,8 @@ class SegmentExtractorAuditTest extends AbstractTest
         $this->ps->translations[$ref][$mid] = new TranslationTuple(
             'Translated target text',
             'source text',
-            1.0,
+            1,
+            $this->makeRuleStub(),
             0,
         );
 
@@ -271,7 +273,8 @@ class SegmentExtractorAuditTest extends AbstractTest
         $this->ps->translations[$ref][] = new TranslationTuple(
             'Pre-translated target',
             'source text',
-            1.0,
+            1,
+            $this->makeRuleStub(),
         );
 
         $this->assertCount(1, $this->ps->translations[$ref]);
@@ -288,12 +291,14 @@ class SegmentExtractorAuditTest extends AbstractTest
         $this->ps->translations[$ref][] = new TranslationTuple(
             'First translation',
             'source text',
-            1.0,
+            1,
+            $this->makeRuleStub(),
         );
         $this->ps->translations[$ref][] = new TranslationTuple(
             'Second translation',
             'source text',
-            1.0,
+            1,
+            $this->makeRuleStub(),
         );
 
         $this->assertCount(2, $this->ps->translations[$ref]);
@@ -769,5 +774,14 @@ class SegmentExtractorAuditTest extends AbstractTest
             'raw_word_count'   => 1,
             'show_in_cattool'  => 1,
         ]));
+    }
+
+    private function makeRuleStub(): XliffRuleInterface
+    {
+        $rule = $this->createStub(XliffRuleInterface::class);
+        $rule->method('asEquivalentWordCount')->willReturn(0.0);
+        $rule->method('asStandardWordCount')->willReturn(10.0);
+
+        return $rule;
     }
 }

@@ -3,12 +3,12 @@
 namespace unit\Model\ProjectCreation;
 
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TranslationTuple;
+use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
@@ -49,14 +49,12 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->dbHandler = $this->createMock(Database::class);
         $this->features  = $this->createMock(FeatureSet::class);
         $logger          = $this->createStub(MatecatLogger::class);
-        $filter          = $this->createStub(MateCatFilter::class);
         $pmModel         = $this->createStub(ProjectManagerModel::class);
 
         $this->service = new TestableSegmentStorageService(
             $this->dbHandler,
             $this->features,
             $logger,
-            $filter,
             $pmModel,
         );
 
@@ -66,6 +64,14 @@ class SegmentStorageServiceTest extends AbstractTest
     }
 
     // ── Helper methods ──────────────────────────────────────────────
+
+    private function makeRuleStub(): XliffRuleInterface
+    {
+        $rule = $this->createStub(XliffRuleInterface::class);
+        $rule->method('asEquivalentWordCount')->willReturn(0.0);
+        $rule->method('asStandardWordCount')->willReturn(10.0);
+        return $rule;
+    }
 
     /**
      * Create a minimal SegmentStruct for testing.
@@ -520,7 +526,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation structure: translations[internal_id][counter] = TranslationTuple
-        $translationRow = new TranslationTuple('Ciao mondo', 'Hello world', 1.0);
+        $translationRow = new TranslationTuple('Ciao mondo', 'Hello world', 1, $this->makeRuleStub());
         $ps->translations = [
             $sanitizedId => [
                 0 => $translationRow,
@@ -553,7 +559,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation exists for this internal_id but not for mrk position 5
-        $translationRow = new TranslationTuple('Target', 'Hello', 1.0);
+        $translationRow = new TranslationTuple('Target', 'Hello', 1, $this->makeRuleStub());
         $ps->translations = [
             $sanitizedId => [
                 0 => $translationRow, // position 0, not 5
@@ -626,7 +632,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation at mrk position 2
-        $translationRow = new TranslationTuple('Ciao', 'Hello', 1.0);
+        $translationRow = new TranslationTuple('Ciao', 'Hello', 1, $this->makeRuleStub());
         $ps->translations = [
             $sanitizedId => [
                 '2' => $translationRow,
@@ -655,8 +661,8 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg1, $seg2]);
         $sanitizedId = "$fid|u1";
 
-        $row0 = new TranslationTuple('Parte uno', 'Part one', 1.0);
-        $row1 = new TranslationTuple('Parte due', 'Part two', 1.0);
+        $row0 = new TranslationTuple('Parte uno', 'Part one', 1, $this->makeRuleStub());
+        $row1 = new TranslationTuple('Parte due', 'Part two', 1, $this->makeRuleStub());
 
         $ps->translations = [
             $sanitizedId => [

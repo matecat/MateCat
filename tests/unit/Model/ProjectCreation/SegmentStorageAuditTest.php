@@ -3,13 +3,13 @@
 namespace unit\Model\ProjectCreation;
 
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentDao;
+use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -43,11 +43,10 @@ class SegmentStorageAuditTest extends AbstractTest
         $this->dbHandler = $this->createMock(Database::class);
         $this->features  = $this->createMock(FeatureSet::class);
         $logger = $this->createStub(MatecatLogger::class);
-        $filter = $this->createStub(MateCatFilter::class);
         $pmModel = $this->createStub(ProjectManagerModel::class);
 
         $this->service = new TestableSegmentStorageService(
-            $this->dbHandler, $this->features, $logger, $filter, $pmModel,
+            $this->dbHandler, $this->features, $logger, $pmModel,
         );
         $segmentDaoStub = $this->createStub(SegmentDao::class);
         $this->service->setSegmentDao($segmentDaoStub);
@@ -60,6 +59,14 @@ class SegmentStorageAuditTest extends AbstractTest
 
     // ── Helpers ──────────────────────────────────────────────────────
 
+    private function makeRuleStub(): XliffRuleInterface
+    {
+        $rule = $this->createStub(XliffRuleInterface::class);
+        $rule->method('asEquivalentWordCount')->willReturn(0.0);
+        $rule->method('asStandardWordCount')->willReturn(10.0);
+        return $rule;
+    }
+
     /**
      * Create a minimal SegmentStruct for testing.
      */
@@ -67,7 +74,7 @@ class SegmentStorageAuditTest extends AbstractTest
         int    $idFile,
         string $internalId,
         string $text = 'Hello',
-        float  $rawWordCount = 1.0,
+        int    $rawWordCount = 1,
         bool   $showInCattool = true,
         ?string $xliffMrkId = null,
     ): SegmentStruct {
@@ -216,7 +223,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // Plain array translations — no ArrayObject at top level
         $ps->translations = [
             $sanitizedId => [
-                0 => new TranslationTuple('Ciao', 'Hello', 1.0),
+                0 => new TranslationTuple('Ciao', 'Hello', 1, $this->makeRuleStub()),
             ],
         ];
 
@@ -243,7 +250,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // translations has entries but NOT for this segment's internal_id
         $ps->translations = [
             'other-id' => [
-                0 => new TranslationTuple('Target', 'Hello', 1.0),
+                0 => new TranslationTuple('Target', 'Hello', 1, $this->makeRuleStub()),
             ],
         ];
 
@@ -279,7 +286,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // Translation exists for the internal_id but NOT for mrk position 5
         $ps->translations = [
             $sanitizedId => [
-                0 => new TranslationTuple('Target', 'Hello', 1.0),
+                0 => new TranslationTuple('Target', 'Hello', 1, $this->makeRuleStub()),
             ],
         ];
 
@@ -305,7 +312,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // Translation at mrk position 2
         $ps->translations = [
             $sanitizedId => [
-                '2' => new TranslationTuple('Ciao', 'Hello', 1.0),
+                '2' => new TranslationTuple('Ciao', 'Hello', 1, $this->makeRuleStub()),
             ],
         ];
 
@@ -340,7 +347,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // All 3 levels are plain arrays (no ArrayObject anywhere)
         $ps->translations = [
             $sanitizedId => [           // level 1: internal_id
-                0 => new TranslationTuple('Ciao mondo', 'Hello world', 1.0),
+                0 => new TranslationTuple('Ciao mondo', 'Hello world', 1, $this->makeRuleStub()),
             ],
         ];
 
@@ -375,8 +382,8 @@ class SegmentStorageAuditTest extends AbstractTest
         $ps = $this->makePlainArrayProjectStructure($fid, [$seg1, $seg2]);
         $ps->translations = [
             $sanitizedId => [
-                0 => new TranslationTuple('Parte uno', 'Part one', 1.0),
-                1 => new TranslationTuple('Parte due', 'Part two', 1.0),
+                0 => new TranslationTuple('Parte uno', 'Part one', 1, $this->makeRuleStub()),
+                1 => new TranslationTuple('Parte due', 'Part two', 1, $this->makeRuleStub()),
             ],
         ];
 
@@ -809,11 +816,11 @@ class SegmentStorageAuditTest extends AbstractTest
             // C16/C17/C18: plain array translations (3-level nesting)
             'translations'           => [
                 $sanitizedU1 => [
-                    0 => new TranslationTuple('Ciao', 'Hello', 1.0),
-                    1 => new TranslationTuple('Mondo', 'World', 1.0),
+                    0 => new TranslationTuple('Ciao', 'Hello', 1, $this->makeRuleStub()),
+                    1 => new TranslationTuple('Mondo', 'World', 1, $this->makeRuleStub()),
                 ],
                 $sanitizedU2 => [
-                    0 => new TranslationTuple('Pippo', 'Foo', 1.0),
+                    0 => new TranslationTuple('Pippo', 'Foo', 1, $this->makeRuleStub()),
                 ],
             ],
             // C22: plain array context_group

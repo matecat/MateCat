@@ -90,6 +90,10 @@ class TmKeyService
             }
         }
 
+        // uid is guaranteed non-null: both API entry points require authentication
+        // via LoginValidator, and UserStruct::isLogged() requires a non-empty uid.
+        assert($projectStructure->uid !== null, 'uid must be set by authenticated controller');
+
         //check if the MyMemory keys provided by the user are already associated with him.
         $userMemoryKeys = $this->getKeyringOwnerKeys($projectStructure->uid);
         $userTmKeys = [];
@@ -147,6 +151,10 @@ class TmKeyService
     public function pushTMXToMyMemory(ProjectStructure $projectStructure, string $uploadDir): void
     {
         $memoryFiles = [];
+
+        // uid is guaranteed non-null: both API entry points require authentication
+        // via LoginValidator, and UserStruct::isLogged() requires a non-empty uid.
+        assert($projectStructure->uid !== null, 'uid must be set by authenticated controller');
 
         // If there is no private TM key defined in the project structure,
         // or the nested indexes don't exist, stop and do nothing.

@@ -158,6 +158,7 @@ class SegmentExtractor
         }
 
         // use generic
+        // @phpstan-ignore equal.alwaysTrue, booleanOr.alwaysTrue (false positive: processXliffFile mutates segments via $projectStructure)
         if (count($projectStructure->segments[$fid]) == 0 || $_fileCounter_Show_In_Cattool == 0) {
             $this->log("Segment import - no segments found in {$file_info[ 'original_filename' ]}\n");
             throw new Exception($file_info['original_filename'], ProjectCreationError::NO_TRANSLATABLE_TEXT->value);
@@ -331,8 +332,8 @@ class SegmentExtractor
                             $preTranslation['target'],
                             $sourceLayer0,
                             $wordCount,
-                            $position,
                             $preTranslation['rule'],
+                            $position,
                             $preTranslation['state'],
                         );
                 }
@@ -416,9 +417,8 @@ class SegmentExtractor
                         $preTranslation['target'],
                         $sourceLayer0,
                         $wordCount,
-                        null,
                         $preTranslation['rule'],
-                        $preTranslation['state'],
+                        state: $preTranslation['state'],
                     );
             }
         }
@@ -533,7 +533,7 @@ class SegmentExtractor
      *
      * @param string $sourceRawContent
      * @param string $targetRawContent
-     * @param array $xliff_trans_unit
+     * @param array<string, mixed> $xliff_trans_unit
      * @param int $fid
      * @param int|null $position
      * @param ProjectStructure $projectStructure
@@ -598,6 +598,7 @@ class SegmentExtractor
      * @param int|null $filePartsId
      * @param array<string, mixed> $xliff_trans_unit
      * @param string $rawContent
+     * @param string $sourceLayer0
      * @param array<string, string> $dataRefMap
      * @param float $wordCount
      * @param int $showInCattool
@@ -608,7 +609,6 @@ class SegmentExtractor
      * @param string|null $xliffMrkExtSuccTags
      * @param string|null $xliffExtSuccTags
      * @return array{word_count: float, show_in_cattool: int}
-     * @throws Exception
      */
     private function buildAndAppendSegment(
         int $fid,
@@ -847,7 +847,7 @@ class SegmentExtractor
      *
      * @param string|null $source
      * @param string|null $target
-     * @param int|null $file_id
+     * @param int $file_id
      * @param string|null $state
      * @param string|null $stateQualifier
      * @param ProjectStructure $projectStructure
@@ -857,13 +857,14 @@ class SegmentExtractor
     protected function resolveTranslationRule(
         ?string $source,
         ?string $target,
-        ?int $file_id,
+        int $file_id,
         ?string $state,
         ?string $stateQualifier,
         ProjectStructure $projectStructure,
     ): ?XliffRuleInterface {
         /** @var XliffRulesModel $configModel */
         $configModel = $projectStructure->xliff_parameters;
+
         $rule = $configModel->getMatchingRule(
             $projectStructure->current_xliff_info[$file_id]['version'],
             $state,

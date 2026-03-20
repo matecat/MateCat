@@ -76,10 +76,10 @@ class QAProcessorTest extends AbstractTest
     private function makeTuple(
         string $target = 'target text',
         string $source = 'source text',
-        float  $rawWordCount = 10.0,
+        int    $rawWordCount = 10,
     ): TranslationTuple {
         $rule = $this->createStub(XliffRuleInterface::class);
-        $tuple = new TranslationTuple($target, $source, $rawWordCount, null, $rule, null);
+        $tuple = new TranslationTuple($target, $source, $rawWordCount, $rule);
         $tuple->segmentId   = 1;
         $tuple->segmentHash = 'hash123';
         $tuple->fileId      = 1;

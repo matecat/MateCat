@@ -2,7 +2,6 @@
 
 namespace unit\Model\ProjectCreation;
 
-use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectManagerModel;
@@ -33,7 +32,6 @@ class SegmentDataHelpersTest extends AbstractTest
             $this->createStub(IDatabase::class),
             $this->createStub(FeatureSet::class),
             $this->createStub(MatecatLogger::class),
-            $this->createStub(MateCatFilter::class),
             $this->createStub(ProjectManagerModel::class),
         );
     }

@@ -6,6 +6,7 @@ use Exception;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\ProjectCreation\ProjectStructure;
+use Model\ProjectCreation\QAProcessor;
 use Model\ProjectCreation\SegmentStorageService;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
@@ -37,6 +38,9 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $featureSet = $this->createStub(FeatureSet::class);
         $this->logger = $this->createStub(MatecatLogger::class);
         $this->service = new TestableJobCreationService($featureSet, $this->logger);
+        $this->service->setChunksByJobIdResult([
+            new JobStruct(['id' => 1, 'password' => 'pwd', 'source' => 'en-US', 'target' => 'it-IT']),
+        ]);
     }
 
     protected function tearDown(): void
@@ -63,6 +67,11 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         ], $overrides));
     }
 
+    private function makeQAProcessorStub(): QAProcessor
+    {
+        return $this->createStub(QAProcessor::class);
+    }
+
     // =========================================================================
     // linkFilesToJob
     // =========================================================================
@@ -77,7 +86,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $ps->file_id_list = [10, 20, 30];
         $job = $this->makeJob(42);
 
-        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $this->createStub(SegmentStorageService::class));
+        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $this->createStub(SegmentStorageService::class), $this->makeQAProcessorStub());
 
         $this->assertCount(3, $this->service->insertFilesJobCalls);
         $this->assertSame([42, 10], $this->service->insertFilesJobCalls[0]);
@@ -95,7 +104,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $ps->file_id_list = [];
         $job = $this->makeJob(42);
 
-        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $this->createStub(SegmentStorageService::class));
+        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $this->createStub(SegmentStorageService::class), $this->makeQAProcessorStub());
 
         $this->assertCount(0, $this->service->insertFilesJobCalls);
     }
@@ -111,7 +120,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $job = $this->makeJob(42);
 
         // Should not throw — GDrive path skipped when session is null
-        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $this->createStub(SegmentStorageService::class));
+        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $this->createStub(SegmentStorageService::class), $this->makeQAProcessorStub());
 
         $this->assertCount(1, $this->service->insertFilesJobCalls);
     }
@@ -127,7 +136,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $job1 = $this->makeJob(1);
         $job2 = $this->makeJob(2);
 
-        $this->service->linkFilesAndInsertPreTranslations([$job1, $job2], $ps, null, $this->createStub(SegmentStorageService::class));
+        $this->service->linkFilesAndInsertPreTranslations([$job1, $job2], $ps, null, $this->createStub(SegmentStorageService::class), $this->makeQAProcessorStub());
 
         $this->assertCount(4, $this->service->insertFilesJobCalls);
         $this->assertSame([1, 10], $this->service->insertFilesJobCalls[0]);
@@ -153,7 +162,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $sss = $this->createMock(SegmentStorageService::class);
         $sss->expects($this->never())->method('insertPreTranslations');
 
-        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss);
+        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss, $this->makeQAProcessorStub());
     }
 
     /**
@@ -172,7 +181,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
             ->method('insertPreTranslations')
             ->with($job, $ps);
 
-        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss);
+        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss, $this->makeQAProcessorStub());
     }
 
     /**
@@ -190,7 +199,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
         $sss->method('insertPreTranslations')
             ->willThrowException(new Exception('DB connection lost', 500));
 
-        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss);
+        $this->service->linkFilesAndInsertPreTranslations([$job], $ps, null, $sss, $this->makeQAProcessorStub());
 
         // Project creation should continue — no exception propagated
         $this->assertCount(1, $ps->result['errors']);
@@ -222,7 +231,7 @@ class LinkFilesAndPreTranslationsTest extends AbstractTest
                 // Second job succeeds
             });
 
-        $this->service->linkFilesAndInsertPreTranslations([$job1, $job2], $ps, null, $sss);
+        $this->service->linkFilesAndInsertPreTranslations([$job1, $job2], $ps, null, $sss, $this->makeQAProcessorStub());
 
         // Only 1 error — second job succeeded
         $this->assertCount(1, $ps->result['errors']);

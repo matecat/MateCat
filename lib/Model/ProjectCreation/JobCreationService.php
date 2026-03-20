@@ -8,6 +8,7 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\FileDao;
+use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
@@ -297,6 +298,18 @@ class JobCreationService
     }
 
     /**
+     * Look up job chunks by job ID.
+     * Protected so test subclasses can override to avoid DB access.
+     *
+     * @return JobStruct[]
+     * @throws ReflectionException
+     */
+    protected function getChunksByJobId(int $jobId): array
+    {
+        return ChunkDao::getByJobID($jobId);
+    }
+
+    /**
      * For each created job, link project files and insert any pre-translations.
      *
      * @param list<JobStruct> $jobs
@@ -307,10 +320,11 @@ class JobCreationService
         ProjectStructure $projectStructure,
         ?Session $gdriveSession,
         SegmentStorageService $segmentStorageService,
+        QAProcessor $qaProcessor,
     ): void {
         foreach ($jobs as $job) {
             $this->linkFilesToJob($job, $projectStructure, $gdriveSession);
-            $this->insertPreTranslations($job, $projectStructure, $segmentStorageService);
+            $this->insertPreTranslations($job, $projectStructure, $segmentStorageService, $qaProcessor);
         }
     }
 
@@ -335,13 +349,26 @@ class JobCreationService
      * but do not halt project creation.
      * @throws Exception
      */
-    private function insertPreTranslations(JobStruct $job, ProjectStructure $projectStructure, SegmentStorageService $segmentStorageService): void
-    {
+    private function insertPreTranslations(
+        JobStruct $job,
+        ProjectStructure $projectStructure,
+        SegmentStorageService $segmentStorageService,
+        QAProcessor $qaProcessor,
+    ): void {
         if (empty($projectStructure->translations)) {
             return;
         }
 
         try {
+            $chunks = $this->getChunksByJobId((int)$job->id);
+
+            if (empty($chunks)) {
+                throw new Exception("No Job found!!! $job->id");
+            }
+
+            $chunk = $chunks[0];
+
+            $qaProcessor->process($projectStructure, $chunk->source, $chunk->target);
             $segmentStorageService->insertPreTranslations($job, $projectStructure);
         } catch (Exception $e) {
             $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);

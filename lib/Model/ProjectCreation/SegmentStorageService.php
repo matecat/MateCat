@@ -3,22 +3,18 @@
 namespace Model\ProjectCreation;
 
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
-use ReflectionException;
 use Utils\Constants\XliffTranslationStatus;
 use Utils\Logger\MatecatLogger;
-use Utils\LQA\QA;
 
 /**
  * Encapsulates segment storage logic that was previously embedded in
@@ -53,7 +49,6 @@ class SegmentStorageService
         private readonly IDatabase $dbHandler,
         private readonly FeatureSet $features,
         MatecatLogger $logger,
-        private readonly MateCatFilter $filter,
         private readonly ProjectManagerModel $projectManagerModel,
     ) {
         $this->logger = $logger;
@@ -250,14 +245,11 @@ class SegmentStorageService
     }
 
     /**
-     * Process pre-translated segments from XLIFF and insert them as translations.
+     * Insert pre-translated segments as translations.
      *
-     * For each translation entry, this method:
-     *  - Looks up the segment from the DB
-     *  - Resolves XLIFF state/state-qualifier to determine editor status and match type
-     *  - Runs QA checks on the translation
-     *  - Builds an SQL values array for bulk insert
-     *  - Sets the create_2_pass_review flag when a final-state translation is found
+     * This method is a dumb bulk insert — it reads pre-computed QA scalars
+     * from each {@see TranslationTuple} and builds SQL values for insertion.
+     * QA consistency checks are performed upstream by {@see QAProcessor::process()}.
      *
      * @param JobStruct $job The job these translations belong to
      * @param ProjectStructure $projectStructure The mutable project structure
@@ -268,14 +260,6 @@ class SegmentStorageService
     {
         $jid = $job->id;
         $this->cleanSegmentsMetadata($projectStructure);
-
-        $chunks = $this->getChunksByJobId((int)$jid);
-
-        if (empty($chunks)) {
-            throw new Exception("No Job found!!! $jid");
-        }
-
-        $chunk = $chunks[0];
 
         $rawRates = $projectStructure->array_jobs['payable_rates'][$jid] ?? null;
         $payable_rates = is_string($rawRates) ? json_decode($rawRates, true) : $rawRates;
@@ -288,50 +272,29 @@ class SegmentStorageService
                 continue;
             }
 
-            // array of segmented translations
             foreach ($struct as $translationTuple) {
-
                 $rule = $translationTuple->rule;
 
                 if (XliffTranslationStatus::isFinalState($translationTuple->state)) {
                     $createSecondPassReview = true;
                 }
 
-                // Use QA to get a target segment
-                $source = $translationTuple->source;
-                $target = $translationTuple->target;
-
-                $source = $this->filter->fromLayer0ToLayer1($source);
-                $target = $this->filter->fromLayer0ToLayer1($target);
-
-                $check = $this->createQA($source, $target);
-                $check->setFeatureSet($this->features);
-                $check->setSourceSegLang($chunk->source);
-                $check->setTargetSegLang($chunk->target);
-                $check->performConsistencyCheck();
-
-                if (!$check->thereAreErrors()) {
-                    $translation = $check->getTrgNormalized();
-                } else {
-                    $translation = $check->getTargetSeg();
-                }
-
                 /* WARNING: do not change the order of the keys */
                 $sql_values = [
-                    'id_segment' => $translationTuple->segmentId,
-                    'id_job' => $jid,
-                    'segment_hash' => $translationTuple->segmentHash,
-                    'status' => $rule->asEditorStatus(),
-                    'translation' => $this->filter->fromLayer1ToLayer0($translation),
-                    'suggestion' => $this->filter->fromLayer1ToLayer0($translation),
-                    'locked' => 0, // not allowed to change locked status for pre-translations
-                    'match_type' => $rule->asMatchType(),
-                    'eq_word_count' => $rule->asEquivalentWordCount($translationTuple->rawWordCount, $payable_rates),
-                    'serialized_errors_list' => ($check->thereAreErrors()) ? $check->getErrorsJSON() : '',
-                    'warning' => ($check->thereAreErrors()) ? 1 : 0,
-                    'suggestion_match' => null,
-                    'standard_word_count' => $rule->asStandardWordCount($translationTuple->rawWordCount, $payable_rates),
-                    'version_number' => 0,
+                    'id_segment'             => $translationTuple->segmentId,
+                    'id_job'                 => $jid,
+                    'segment_hash'           => $translationTuple->segmentHash,
+                    'status'                 => $rule->asEditorStatus(),
+                    'translation'            => $translationTuple->translationLayer0,
+                    'suggestion'             => $translationTuple->suggestionLayer0,
+                    'locked'                 => 0,
+                    'match_type'             => $rule->asMatchType(),
+                    'eq_word_count'          => $rule->asEquivalentWordCount($translationTuple->rawWordCount, $payable_rates),
+                    'serialized_errors_list' => $translationTuple->serializedErrors,
+                    'warning'                => $translationTuple->warning,
+                    'suggestion_match'       => null,
+                    'standard_word_count'    => $rule->asStandardWordCount($translationTuple->rawWordCount, $payable_rates),
+                    'version_number'         => 0,
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -343,8 +306,6 @@ class SegmentStorageService
             $this->projectManagerModel->insertPreTranslations($query_translations_values);
         }
 
-        // We do not create Chunk reviews since this is a task for postProjectCreate
-        // Create a R2 for the job is state is 'final',
         if ($createSecondPassReview) {
             $projectStructure->create_2_pass_review = true;
         }
@@ -353,32 +314,11 @@ class SegmentStorageService
     // ── Factory methods (overridable in tests) ──────────────────────
 
     /**
-     * Create a new QA instance for consistency checking.
-     * Protected so test subclasses can override to avoid real QA processing.
-     */
-    protected function createQA(string $source, string $target): QA
-    {
-        return new QA($source, $target);
-    }
-
-    /**
      * Create a new SegmentDao instance.
      */
     protected function createSegmentDao(): SegmentDao
     {
         return new SegmentDao();
-    }
-
-    /**
-     * Look up job chunks by job ID.
-     * Protected so test subclasses can override to avoid DB access.
-     *
-     * @return JobStruct[]
-     * @throws ReflectionException
-     */
-    protected function getChunksByJobId(int $jobId): array
-    {
-        return ChunkDao::getByJobID($jobId);
     }
 
     /**

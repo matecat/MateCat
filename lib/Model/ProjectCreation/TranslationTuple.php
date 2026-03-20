@@ -8,7 +8,7 @@ use Model\Xliff\DTO\XliffRuleInterface;
  * Represents a pre-translated segment flowing through the creation pipeline.
  *
  * Created by {@see SegmentExtractor} with target, source (Layer 0), rawWordCount,
- * and optionally mrkPosition, rule, and state.
+ * rule, and optionally mrkPosition and state.
  * Completed by {@see SegmentStorageService::storeSegments()} with DB-assigned segment metadata.
  * Enriched by {@see QAProcessor::process()} with QA consistency-check results.
  * Consumed by {@see SegmentStorageService::insertPreTranslations()} to build SQL inserts.
@@ -31,9 +31,9 @@ class TranslationTuple
     public function __construct(
         public readonly string $target,
         public readonly string $source,
-        public readonly float $rawWordCount,
+        public readonly int $rawWordCount,
+        public readonly XliffRuleInterface $rule,
         public readonly ?int $mrkPosition = null,
-        public readonly ?XliffRuleInterface $rule = null,
         public readonly ?string $state = null,
     ) {
     }
