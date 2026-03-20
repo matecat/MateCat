@@ -18,6 +18,44 @@ import {BUTTON_SIZE} from '../common/Button/Button'
 import FlipBackward from '../icons/FlipBackward'
 import PropTypes from 'prop-types'
 
+const JOB_MENU_ITEM_ID = {
+  CHANGE_PASSWORD: 'change_password',
+  SPLIT: 'split',
+  MERGE: 'merge',
+  REVISE: 'revise',
+  REVISE2: 'change_password_revise_2',
+  QA_REPORT: 'qa_report',
+  DOWNLOAD: 'download',
+  ORIGINAL: 'original',
+  EXPORT_XLIFF: 'export_xliff',
+  EXPORT_TMX: 'export_tmx',
+  ARCHIVE: 'archive',
+  CANCEL: 'cancel',
+  UNARCHIVE: 'unarchive',
+  RESUME: 'resume',
+  DELETE: 'delete',
+}
+
+const JOB_CHUNKS_MENU_ITEM_ID = [
+  JOB_MENU_ITEM_ID.MERGE,
+  JOB_MENU_ITEM_ID.DOWNLOAD,
+  JOB_MENU_ITEM_ID.ORIGINAL,
+  JOB_MENU_ITEM_ID.EXPORT_XLIFF,
+  JOB_MENU_ITEM_ID.EXPORT_TMX,
+  JOB_MENU_ITEM_ID.ARCHIVE,
+  JOB_MENU_ITEM_ID.CANCEL,
+  JOB_MENU_ITEM_ID.UNARCHIVE,
+  JOB_MENU_ITEM_ID.RESUME,
+  JOB_MENU_ITEM_ID.DELETE,
+]
+
+const CHUNK_MENU_ITEM_ID = [
+  JOB_MENU_ITEM_ID.CHANGE_PASSWORD,
+  JOB_MENU_ITEM_ID.REVISE,
+  JOB_MENU_ITEM_ID.REVISE2,
+  JOB_MENU_ITEM_ID.QA_REPORT,
+]
+
 const JobMenu = ({
   job,
   project,
@@ -30,10 +68,11 @@ const JobMenu = ({
   reviseUrl,
   isChunkOutsourced,
   isChunk,
+  isJobChunks,
   changePasswordFn,
   openSplitModalFn,
   openMergeModalFn,
-  getDownloadLabel,
+  downloadLabel,
   disableDownload,
   archiveJobFn,
   cancelJobFn,
@@ -88,6 +127,7 @@ const JobMenu = ({
           job.get('revise_passwords').get(1).get('password')
         return [
           {
+            id: JOB_MENU_ITEM_ID.REVISE2,
             label: (
               <>
                 <Revise size={18} />
@@ -102,6 +142,7 @@ const JobMenu = ({
       } else {
         return [
           {
+            id: JOB_MENU_ITEM_ID.REVISE2,
             label: (
               <>
                 <Revise size={18} />
@@ -122,6 +163,7 @@ const JobMenu = ({
     ...(status === JOB_STATUS.ACTIVE
       ? [
           {
+            id: JOB_MENU_ITEM_ID.CHANGE_PASSWORD,
             label: (
               <>
                 <ChangePassword size={18} />
@@ -159,6 +201,7 @@ const JobMenu = ({
     ...(!isChunkOutsourced && config.splitEnabled && !isChunk
       ? [
           {
+            id: JOB_MENU_ITEM_ID.SPLIT,
             label: (
               <>
                 <Split size={18} />
@@ -173,6 +216,7 @@ const JobMenu = ({
       : !isChunkOutsourced && config.splitEnabled && isChunk
         ? [
             {
+              id: JOB_MENU_ITEM_ID.MERGE,
               label: (
                 <>
                   <Merge size={18} />
@@ -187,6 +231,7 @@ const JobMenu = ({
         : []),
     'separator',
     {
+      id: JOB_MENU_ITEM_ID.REVISE,
       label: (
         <>
           <Revise size={18} />
@@ -199,6 +244,7 @@ const JobMenu = ({
     },
     ...getSecondPassReviewMenuLink(),
     {
+      id: JOB_MENU_ITEM_ID.QA_REPORT,
       label: (
         <>
           <QR /> Quality report
@@ -209,18 +255,20 @@ const JobMenu = ({
       },
     },
     'separator',
-    ...(getDownloadLabel
+    ...(downloadLabel
       ? [
           {
-            label: getDownloadLabel.label,
+            id: JOB_MENU_ITEM_ID.DOWNLOAD,
+            label: downloadLabel.label,
             onClick: () => {
-              getDownloadLabel.action()
+              downloadLabel.action()
             },
             disabled: disableDownload,
           },
         ]
       : []),
     {
+      id: JOB_MENU_ITEM_ID.ORIGINAL,
       label: (
         <>
           <Download size={18} /> Original
@@ -231,6 +279,7 @@ const JobMenu = ({
       },
     },
     {
+      id: JOB_MENU_ITEM_ID.EXPORT_XLIFF,
       label: (
         <>
           <Download size={18} /> Export XLIFF
@@ -241,6 +290,7 @@ const JobMenu = ({
       },
     },
     {
+      id: JOB_MENU_ITEM_ID.EXPORT_TMX,
       label: (
         <>
           <Download size={18} /> Export job TMX
@@ -254,6 +304,7 @@ const JobMenu = ({
     ...(status === JOB_STATUS.ACTIVE
       ? [
           {
+            id: JOB_MENU_ITEM_ID.ARCHIVE,
             label: (
               <>
                 <Archive size={18} />
@@ -265,6 +316,7 @@ const JobMenu = ({
             },
           },
           {
+            id: JOB_MENU_ITEM_ID.CANCEL,
             label: (
               <>
                 <Trash size={18} />
@@ -280,6 +332,7 @@ const JobMenu = ({
     ...(status === JOB_STATUS.ARCHIVED
       ? [
           {
+            id: JOB_MENU_ITEM_ID.UNARCHIVE,
             label: (
               <>
                 <FlipBackward size={18} />
@@ -291,6 +344,7 @@ const JobMenu = ({
             },
           },
           {
+            id: JOB_MENU_ITEM_ID.CANCEL,
             label: (
               <>
                 <Trash size={18} />
@@ -306,6 +360,7 @@ const JobMenu = ({
     ...(status === JOB_STATUS.CANCELLED
       ? [
           {
+            id: JOB_MENU_ITEM_ID.RESUME,
             label: (
               <>
                 <FlipBackward size={18} />
@@ -317,6 +372,7 @@ const JobMenu = ({
             },
           },
           {
+            id: JOB_MENU_ITEM_ID.DELETE,
             label: (
               <>
                 <Trash size={18} />
@@ -330,6 +386,27 @@ const JobMenu = ({
         ]
       : []),
   ]
+    .filter(({id}) =>
+      typeof id === 'string'
+        ? !isJobChunks
+          ? isChunk
+            ? CHUNK_MENU_ITEM_ID.some((value) => value === id)
+            : true
+          : isJobChunks && isChunk
+            ? JOB_CHUNKS_MENU_ITEM_ID.some((value) => value === id)
+            : true
+        : true,
+    )
+    .reduce((acc, item) => {
+      if (item === 'separator' && acc[acc.length - 1] === 'separator') {
+        return acc
+      }
+      return [...acc, item]
+    }, [])
+    .filter((item, index, arr) => {
+      if (item !== 'separator') return true
+      return arr.slice(index + 1).some((i) => i !== 'separator')
+    })
 
   return (
     <DropdownMenu
@@ -348,7 +425,7 @@ const JobMenu = ({
 JobMenu.propTypes = {
   job: PropTypes.object.isRequired,
   project: PropTypes.object.isRequired,
-  jobId: PropTypes.string.isRequired,
+  jobId: PropTypes.number.isRequired,
   status: PropTypes.string.isRequired,
   qAReportUrl: PropTypes.string.isRequired,
   jobTMXUrl: PropTypes.string.isRequired,
@@ -357,10 +434,11 @@ JobMenu.propTypes = {
   reviseUrl: PropTypes.string.isRequired,
   isChunkOutsourced: PropTypes.bool.isRequired,
   isChunk: PropTypes.bool.isRequired,
+  isJobChunks: PropTypes.bool,
   changePasswordFn: PropTypes.func.isRequired,
   openSplitModalFn: PropTypes.func.isRequired,
   openMergeModalFn: PropTypes.func.isRequired,
-  getDownloadLabel: PropTypes.func,
+  downloadLabel: PropTypes.object,
   disableDownload: PropTypes.bool.isRequired,
   archiveJobFn: PropTypes.func.isRequired,
   cancelJobFn: PropTypes.func.isRequired,

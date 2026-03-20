@@ -322,7 +322,7 @@ const fakeProjectsData = {
     },
     props: {
       index: 0,
-      jobsLenght: 4,
+      jobsLength: 4,
       isChunk: false,
       isChunkOutsourced: false,
       activityLogUrl: '/activityLog/9/59b94d64a7ef',
@@ -492,7 +492,7 @@ const fakeProjectsData = {
     },
     props: {
       index: 1,
-      jobsLenght: 2,
+      jobsLength: 2,
       isChunk: true,
       isChunkOutsourced: false,
       activityLogUrl: '/activityLog/6/59ad778c68b1',
@@ -825,7 +825,7 @@ const fakeProjectsData = {
     },
     props: {
       index: 0,
-      jobsLenght: 4,
+      jobsLength: 4,
       isChunk: false,
       isChunkOutsourced: false,
       activityLogUrl: '/activityLog/9/59b94d64a7ef',
@@ -865,8 +865,8 @@ const getTranslateUrl = (
 ) => {
   return `/translate/${projectSlug}/${source}-${target}/${chunkId}-${password}${jobFirstSegment}`
 }
-const createTranslateUrl = (index, project, job, jobsLenght) => {
-  const usePrefix = jobsLenght > 1
+const createTranslateUrl = (index, project, job, jobsLength) => {
+  const usePrefix = jobsLength > 1
   const chunckId = `${job.get('id')}${usePrefix ? '-' + index : ''}`
   return getTranslateUrl(
     chunckId,
@@ -999,7 +999,7 @@ xtest('Check Open link', () => {
     props.index,
     project,
     job,
-    props.jobsLenght,
+    props.jobsLength,
   )
   expect(openElement).toBe(correctUrl)
 })

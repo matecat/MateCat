@@ -60,7 +60,6 @@ export const ProjectContainer = ({
 
   const idTeamProject = project.get('id_team')
 
-  const [shouldShowMoreActions, setShouldShowMoreActions] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
   const [lastAction, setLastAction] = useState()
   const [jobsActions, setJobsActions] = useState()
@@ -286,9 +285,8 @@ export const ProjectContainer = ({
         return (
           <ChunksJobContainer
             key={job.get('id')}
-            jobs={item.map((itemJS) => fromJS(itemJS))}
+            chunks={item.map((itemJS) => fromJS(itemJS))}
             project={project}
-            jobsLenght={project.get('jobs').size}
             changeStatusFn={changeStatusFn}
             downloadTranslationFn={downloadTranslationFn}
             isChunk={true}
@@ -306,7 +304,6 @@ export const ProjectContainer = ({
           key={job.get('id')}
           job={job}
           project={project}
-          jobsLenght={project.get('jobs').size}
           changeStatusFn={changeStatusFn}
           downloadTranslationFn={downloadTranslationFn}
           isChunk={false}
@@ -540,6 +537,11 @@ export const ProjectContainer = ({
     )
   }
 
+  const getFormattedDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toDateString()
+  }
+
   return (
     <div ref={projectRef} className="project-container">
       <div className="project-container-header">
@@ -567,7 +569,18 @@ export const ProjectContainer = ({
         </div>
       </div>
       {getJobContainer()}
-      <div className="project-container-footer">Footer</div>
+      <div className="project-container-footer">
+        {lastAction && (
+          <span>
+            Last action:{' '}
+            {lastAction.action +
+              ' on ' +
+              getFormattedDate(lastAction.event_date)}
+            <span> by {lastAction.first_name}</span>
+          </span>
+        )}
+        <span>Created: {getFormattedDate(project.get('create_date'))}</span>
+      </div>
     </div>
   )
 }

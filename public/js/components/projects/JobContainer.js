@@ -52,7 +52,7 @@ class JobContainer extends React.Component {
   }
 
   getTranslateUrl() {
-    let use_prefix = this.props.jobsLenght > 1
+    let use_prefix = this.props.jobsLength > 1
     let chunk_id =
       this.props.job.get('id') + (use_prefix ? '-' + this.props.index : '')
     return (
@@ -71,7 +71,7 @@ class JobContainer extends React.Component {
   }
 
   getReviseUrl() {
-    let use_prefix = this.props.jobsLenght > 1
+    let use_prefix = this.props.jobsLength > 1
     let chunk_id =
       this.props.job.get('id') + (use_prefix ? '-' + this.props.index : '')
     let possibly_different_review_password = this.props.job.has(

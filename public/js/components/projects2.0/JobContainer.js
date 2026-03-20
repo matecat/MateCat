@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import JobMenu from '../projects/JobMenu'
 import Download from '../../../img/icons/Download'
@@ -17,9 +17,10 @@ import Tooltip from '../common/Tooltip'
 import QR from '../../../img/icons/QR'
 import AlertIcon from '../../../img/icons/AlertIcon'
 import CommentsIcon from '../../../img/icons/CommentsIcon'
+import ProjectsStore from '../../stores/ProjectsStore'
+import ManageConstants from '../../constants/ManageConstants'
 
 export const JobContainer = ({
-  jobsLength,
   job,
   project,
   isChunk,
@@ -34,11 +35,46 @@ export const JobContainer = ({
   const qrIconRef = useRef()
   const warningsIconRef = useRef()
   const commentsIconRef = useRef()
+  const sourceTargetTextRef = useRef()
+
+  useEffect(() => {
+    const disableDownloadMenu = (idJob) => {
+      if (job.get('id') === idJob) {
+        setShowDownloadProgress(true)
+      }
+    }
+
+    const enableDownloadMenu = (idJob) => {
+      if (job.get('id') === idJob) {
+        setShowDownloadProgress(false)
+      }
+    }
+
+    ProjectsStore.addListener(
+      ManageConstants.ENABLE_DOWNLOAD_BUTTON,
+      enableDownloadMenu,
+    )
+    ProjectsStore.addListener(
+      ManageConstants.DISABLE_DOWNLOAD_BUTTON,
+      disableDownloadMenu,
+    )
+
+    return () => {
+      ProjectsStore.removeListener(
+        ManageConstants.ENABLE_DOWNLOAD_BUTTON,
+        enableDownloadMenu,
+      )
+      ProjectsStore.removeListener(
+        ManageConstants.DISABLE_DOWNLOAD_BUTTON,
+        disableDownloadMenu,
+      )
+    }
+  }, [job])
 
   const idJobLabel = !isChunk ? job.get('id') : job.get('id') + '-' + index
 
   const getReviseUrl = () => {
-    const use_prefix = jobsLength > 1
+    const use_prefix = project.get('jobs').size > 1 && isChunk
     const chunk_id = job.get('id') + (use_prefix ? '-' + index : '')
     const possibly_different_review_password = job.has('revise_passwords')
       ? job.get('revise_passwords').get(0).get('password')
@@ -283,7 +319,7 @@ export const JobContainer = ({
   }
 
   const getTranslateUrl = () => {
-    const use_prefix = jobsLength > 1
+    const use_prefix = project.get('jobs').size > 1 && isChunk
     const chunk_id = job.get('id') + (use_prefix ? '-' + index : '')
     return (
       '/translate/' +
@@ -309,18 +345,6 @@ export const JobContainer = ({
       '-' +
       project.get('password')
     )
-  }
-
-  const disableDownloadMenu = (idJob) => {
-    if (job.get('id') === idJob) {
-      setShowDownloadProgress(true)
-    }
-  }
-
-  const enableDownloadMenu = (idJob) => {
-    if (job.get('id') === idJob) {
-      setShowDownloadProgress(false)
-    }
   }
 
   const getJobMenu = () => {
@@ -351,7 +375,7 @@ export const JobContainer = ({
         jobTMXUrl={jobTMXUrl}
         exportXliffUrl={exportXliffUrl}
         originalUrl={originalUrl}
-        getDownloadLabel={getDownloadLabel()}
+        downloadLabel={getDownloadLabel()}
         openSplitModalFn={openSplitModal}
         openMergeModalFn={openMergeModal}
         changePasswordFn={changePassword}
@@ -495,10 +519,10 @@ export const JobContainer = ({
     } else {
       outsourceJobElement = (
         <Button
-          className="job-container-words-button"
+          className="job-container-button-weight-normal"
           onClick={openOutsourceModal.bind(this, true, false)}
         >
-          Assign job to translator
+          Assign
         </Button>
       )
     }
@@ -517,13 +541,17 @@ export const JobContainer = ({
       )}
 
       <div>
-        <div className="job-container-id" title="Job Id">
+        <div className="job-container-id">
           {!isChunk && (
-            <span className="job-languages-codes">
-              {job.get('source')}
-              <IconDown size={16} />
-              {job.get('target')}
-            </span>
+            <Tooltip
+              content={`${job.get('sourceTxt')} - ${job.get('targetTxt')}`}
+            >
+              <span ref={sourceTargetTextRef} className="job-languages-code">
+                {job.get('source')}
+                <IconDown size={16} />
+                {job.get('target')}
+              </span>
+            </Tooltip>
           )}
           ID: {idJobLabel}
         </div>
@@ -533,7 +561,8 @@ export const JobContainer = ({
       </div>
       <div>
         <Button
-          className="job-container-words-button"
+          tooltip={`Total: ${Math.round(stats.equivalent.total)} / Weighted: ${Math.round(stats.equivalent.total)}`}
+          className="job-container-button-weight-normal job-container-words-button"
           onClick={() => window.open(getProjectAnalyzeUrl(), '_blank')}
         >
           Words: {Math.round(stats.raw.total)}{' '}
@@ -544,7 +573,7 @@ export const JobContainer = ({
       <div className="job-container-outsource">{getOutsourceJobSent()}</div>
       <div>
         <Button
-          className="job-container-translation-button"
+          className="job-container-button-weight-normal"
           id="open-quote-request"
           onClick={openOutsourceModal.bind(this, false, true)}
           data-testid="buy-translation-button"
@@ -568,11 +597,10 @@ export const JobContainer = ({
 }
 
 JobContainer.propTypes = {
-  jobsLength: PropTypes.number.isRequired,
   job: PropTypes.object.isRequired,
   project: PropTypes.object.isRequired,
   isChunk: PropTypes.bool.isRequired,
   isChecked: PropTypes.bool.isRequired,
   onCheckedJob: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired,
+  index: PropTypes.number,
 }

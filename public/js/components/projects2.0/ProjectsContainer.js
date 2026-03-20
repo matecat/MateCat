@@ -1,6 +1,6 @@
 import {fromJS} from 'immutable'
 import PropTypes from 'prop-types'
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import {ProjectsBulkActions} from '../projects/ProjectsBulkActions'
@@ -15,13 +15,21 @@ export const ProjectsContainer = ({
   selectedUser,
   fetchingProjects,
 }) => {
-  const [projects, setProjects] = React.useState(fromJS([]))
-  const [teamState, setTeamState] = React.useState(team)
-  const [teamsState, setTeamsState] = React.useState(teams)
+  const [projects, setProjects] = useState(fromJS([]))
+  const [teamState, setTeamState] = useState(team)
+  const [teamsState, setTeamsState] = useState(teams)
+  const [moreProjects, setMoreProjects] = useState(false)
+  const [reloadingProjects, setReloadingProjects] = useState(false)
 
   useEffect(() => {
     const renderProjects = (projects, team, teams, hideSpinner, filtering) => {
+      // let filteringState = filtering ? filtering : this.state.filtering
+
       setProjects(projects)
+      setTeamState((prevState) => (team ? team : prevState))
+      setTeamsState((prevState) => (teams ? teams : prevState))
+      setMoreProjects((prevState) => (hideSpinner ? prevState : true))
+      setReloadingProjects(false)
     }
     const updateProjects = (projects) => setProjects(projects)
     const updateTeams = (teams) => setTeamsState(teams)
@@ -30,8 +38,8 @@ export const ProjectsContainer = ({
         setTeamState(team)
       }
     }
-    const hideSpinner = () => {}
-    const showProjectsReloadSpinner = () => {}
+    const hideSpinner = () => setMoreProjects(false)
+    const showProjectsReloadSpinner = () => setReloadingProjects(true)
 
     ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, renderProjects)
     ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, updateProjects)
