@@ -10,6 +10,7 @@ use Model\Xliff\DTO\XliffRuleInterface;
  * Created by {@see SegmentExtractor} with target, source (Layer 0), rawWordCount,
  * and optionally mrkPosition, rule, and state.
  * Completed by {@see SegmentStorageService::storeSegments()} with DB-assigned segment metadata.
+ * Enriched by {@see QAProcessor::process()} with QA consistency-check results.
  * Consumed by {@see SegmentStorageService::insertPreTranslations()} to build SQL inserts.
  */
 class TranslationTuple
@@ -20,6 +21,12 @@ class TranslationTuple
     public string $internalId;
     public string $segmentHash;
     public int $fileId;
+
+    // Set by QAProcessor::process()
+    public string $translationLayer0;
+    public string $suggestionLayer0;
+    public string $serializedErrors = '';
+    public int $warning = 0;
 
     public function __construct(
         public readonly string $target,
