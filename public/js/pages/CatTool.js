@@ -137,7 +137,7 @@ function CatTool() {
             segmentsList.push({
               sid: seg.sid,
               source: seg.segment,
-              target: seg.gettranslation,
+              target: seg.translation,
             })
           }
           ContextReviewChannel.sendMessage({

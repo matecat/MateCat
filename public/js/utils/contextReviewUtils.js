@@ -348,9 +348,6 @@ export const tagSegments = (
     const candidates = container.querySelectorAll(MEANINGFUL_SELECTOR)
 
     for (const el of candidates) {
-      // Skip elements already tagged (or inside a tagged ancestor)
-      if (el.closest(`[${SEGMENT_SID_ATTR}]`)) continue
-
       const fullText = el.textContent
       flexRegex.lastIndex = 0
       if (!flexRegex.test(fullText)) continue
