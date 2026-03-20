@@ -529,7 +529,7 @@ class SegmentExtractor
      * @throws ValidationError
      * @throws Exception
      */
-    private function detectPreTranslation(
+    protected function detectPreTranslation(
         string $sourceRawContent,
         string $targetRawContent,
         array $xliff_trans_unit,
@@ -823,7 +823,7 @@ class SegmentExtractor
      * @return bool
      * @throws Exception
      */
-    private function isTranslated(
+    protected function isTranslated(
         ?string $source,
         ?string $target,
         ?int $file_id,
