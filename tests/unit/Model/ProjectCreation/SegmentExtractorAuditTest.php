@@ -234,7 +234,8 @@ class SegmentExtractorAuditTest extends AbstractTest
         // Option B replacement for: $ps->translations[$ref]->offsetSet($mid, new ArrayObject([...]))
         $this->ps->translations[$ref][$mid] = new TranslationTuple(
             'Translated target text',
-            ['attr' => ['id' => 'tu1']],
+            'source text',
+            1.0,
             0,
         );
 
@@ -269,7 +270,8 @@ class SegmentExtractorAuditTest extends AbstractTest
         // Option B replacement for: $ps->translations[$ref]->append(new ArrayObject([...]))
         $this->ps->translations[$ref][] = new TranslationTuple(
             'Pre-translated target',
-            ['attr' => ['id' => 'tu2']],
+            'source text',
+            1.0,
         );
 
         $this->assertCount(1, $this->ps->translations[$ref]);
@@ -285,11 +287,13 @@ class SegmentExtractorAuditTest extends AbstractTest
         // Multiple trans-units with the same reference should accumulate
         $this->ps->translations[$ref][] = new TranslationTuple(
             'First translation',
-            ['attr' => ['id' => 'tu3']],
+            'source text',
+            1.0,
         );
         $this->ps->translations[$ref][] = new TranslationTuple(
             'Second translation',
-            ['attr' => ['id' => 'tu3']],
+            'source text',
+            1.0,
         );
 
         $this->assertCount(2, $this->ps->translations[$ref]);

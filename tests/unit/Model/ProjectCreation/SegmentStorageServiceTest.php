@@ -520,7 +520,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation structure: translations[internal_id][counter] = TranslationTuple
-        $translationRow = new TranslationTuple('Ciao mondo', ['<trans-unit/>']);
+        $translationRow = new TranslationTuple('Ciao mondo', 'Hello world', 1.0);
         $ps->translations = [
             $sanitizedId => [
                 0 => $translationRow,
@@ -553,7 +553,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation exists for this internal_id but not for mrk position 5
-        $translationRow = new TranslationTuple('Target', ['<tu/>']);
+        $translationRow = new TranslationTuple('Target', 'Hello', 1.0);
         $ps->translations = [
             $sanitizedId => [
                 0 => $translationRow, // position 0, not 5
@@ -626,7 +626,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $sanitizedId = "$fid|u1";
 
         // Translation at mrk position 2
-        $translationRow = new TranslationTuple('Ciao', ['<tu/>']);
+        $translationRow = new TranslationTuple('Ciao', 'Hello', 1.0);
         $ps->translations = [
             $sanitizedId => [
                 '2' => $translationRow,
@@ -655,8 +655,8 @@ class SegmentStorageServiceTest extends AbstractTest
         $ps = $this->makeProjectStructure($fid, [$seg1, $seg2]);
         $sanitizedId = "$fid|u1";
 
-        $row0 = new TranslationTuple('Parte uno', ['<tu/>']);
-        $row1 = new TranslationTuple('Parte due', ['<tu/>']);
+        $row0 = new TranslationTuple('Parte uno', 'Part one', 1.0);
+        $row1 = new TranslationTuple('Parte due', 'Part two', 1.0);
 
         $ps->translations = [
             $sanitizedId => [

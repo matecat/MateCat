@@ -216,7 +216,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // Plain array translations — no ArrayObject at top level
         $ps->translations = [
             $sanitizedId => [
-                0 => new TranslationTuple('Ciao', ['<trans-unit/>']),
+                0 => new TranslationTuple('Ciao', 'Hello', 1.0),
             ],
         ];
 
@@ -243,7 +243,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // translations has entries but NOT for this segment's internal_id
         $ps->translations = [
             'other-id' => [
-                0 => new TranslationTuple('Target', ['<tu/>']),
+                0 => new TranslationTuple('Target', 'Hello', 1.0),
             ],
         ];
 
@@ -279,7 +279,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // Translation exists for the internal_id but NOT for mrk position 5
         $ps->translations = [
             $sanitizedId => [
-                0 => new TranslationTuple('Target', ['<tu/>']),
+                0 => new TranslationTuple('Target', 'Hello', 1.0),
             ],
         ];
 
@@ -305,7 +305,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // Translation at mrk position 2
         $ps->translations = [
             $sanitizedId => [
-                '2' => new TranslationTuple('Ciao', ['<tu/>']),
+                '2' => new TranslationTuple('Ciao', 'Hello', 1.0),
             ],
         ];
 
@@ -340,7 +340,7 @@ class SegmentStorageAuditTest extends AbstractTest
         // All 3 levels are plain arrays (no ArrayObject anywhere)
         $ps->translations = [
             $sanitizedId => [           // level 1: internal_id
-                0 => new TranslationTuple('Ciao mondo', ['<trans-unit/>']),
+                0 => new TranslationTuple('Ciao mondo', 'Hello world', 1.0),
             ],
         ];
 
@@ -356,7 +356,7 @@ class SegmentStorageAuditTest extends AbstractTest
 
         // Verify untouched properties are preserved
         self::assertSame('Ciao mondo', $translationRow->target, 'target unchanged');
-        self::assertSame(['<trans-unit/>'], $translationRow->transUnit, 'transUnit unchanged');
+        self::assertSame('Hello world', $translationRow->source, 'source unchanged');
     }
 
     #[Test]
@@ -375,8 +375,8 @@ class SegmentStorageAuditTest extends AbstractTest
         $ps = $this->makePlainArrayProjectStructure($fid, [$seg1, $seg2]);
         $ps->translations = [
             $sanitizedId => [
-                0 => new TranslationTuple('Parte uno', ['<tu/>']),
-                1 => new TranslationTuple('Parte due', ['<tu/>']),
+                0 => new TranslationTuple('Parte uno', 'Part one', 1.0),
+                1 => new TranslationTuple('Parte due', 'Part two', 1.0),
             ],
         ];
 
@@ -809,11 +809,11 @@ class SegmentStorageAuditTest extends AbstractTest
             // C16/C17/C18: plain array translations (3-level nesting)
             'translations'           => [
                 $sanitizedU1 => [
-                    0 => new TranslationTuple('Ciao', ['<tu/>']),
-                    1 => new TranslationTuple('Mondo', ['<tu/>']),
+                    0 => new TranslationTuple('Ciao', 'Hello', 1.0),
+                    1 => new TranslationTuple('Mondo', 'World', 1.0),
                 ],
                 $sanitizedU2 => [
-                    0 => new TranslationTuple('Pippo', ['<tu/>']),
+                    0 => new TranslationTuple('Pippo', 'Foo', 1.0),
                 ],
             ],
             // C22: plain array context_group

@@ -26,14 +26,12 @@ use Utils\LQA\QA;
  * Verifies:
  * - Exception thrown when no chunks found
  * - Empty translation structs are skipped
- * - Segments not found in DAO are skipped
  * - Happy path: builds correct SQL values and calls insertPreTranslations
  * - QA errors: uses getTargetSeg(), sets warning flag
  * - Final state sets create_2_pass_review
  * - Non-final state does not set create_2_pass_review
  * - Multiple translation tuples are all processed
  * - JSON-encoded payable rates are decoded
- * - No insert call when all tuples are skipped
  */
 class InsertPreTranslationsTest extends AbstractTest
 {
@@ -83,12 +81,22 @@ class InsertPreTranslationsTest extends AbstractTest
      */
     private function buildService(
         ?ProjectManagerModel $pmModel = null,
-        ?SegmentDao          $segmentDao = null,
         ?QA                  $qa = null,
     ): TestableSegmentStorageService {
         $filter = $this->createStub(MateCatFilter::class);
         $filter->method('fromLayer0ToLayer1')->willReturnArgument(0);
         $filter->method('fromLayer1ToLayer0')->willReturnArgument(0);
+
+        $segmentStub = new SegmentStruct([
+            'id'             => 1,
+            'id_file'        => 1,
+            'internal_id'    => 'tu-1',
+            'segment'        => 'source text',
+            'segment_hash'   => 'hash123',
+            'raw_word_count' => 10,
+        ]);
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getById')->willReturn($segmentStub);
 
         $service = new TestableSegmentStorageService(
             $this->createStub(IDatabase::class),
@@ -99,10 +107,7 @@ class InsertPreTranslationsTest extends AbstractTest
         );
 
         $service->setChunksByJobIdResult([$this->chunk]);
-
-        if ($segmentDao !== null) {
-            $service->setSegmentDao($segmentDao);
-        }
+        $service->setSegmentDao($segmentDao);
 
         if ($qa !== null) {
             $service->setQA($qa);
@@ -116,15 +121,16 @@ class InsertPreTranslationsTest extends AbstractTest
      */
     private function makeTuple(
         string              $target = 'translated text',
+        string              $source = 'source text',
+        float               $rawWordCount = 10.0,
         int                 $segmentId = 1,
         string              $segmentHash = 'hash123',
         int                 $fileId = 1,
         ?int                $mrkPosition = null,
-        array               $transUnit = [],
         ?XliffRuleInterface $rule = null,
         ?string             $state = null,
     ): TranslationTuple {
-        $tuple = new TranslationTuple($target, $transUnit, $mrkPosition, $rule, $state);
+        $tuple = new TranslationTuple($target, $source, $rawWordCount, $mrkPosition, $rule, $state);
         $tuple->segmentId   = $segmentId;
         $tuple->segmentHash = $segmentHash;
         $tuple->fileId      = $fileId;
@@ -174,30 +180,6 @@ class InsertPreTranslationsTest extends AbstractTest
         return $qa;
     }
 
-    /**
-     * Build a SegmentDao stub that returns a SegmentStruct for getById.
-     *
-     * @throws MockException
-     */
-    private function buildSegmentDaoStub(
-        string $segmentContent = 'source text',
-        int    $rawWordCount = 10,
-    ): SegmentDao {
-        $segment = new SegmentStruct([
-            'id'             => 1,
-            'id_file'        => 1,
-            'internal_id'    => 'tu-1',
-            'segment'        => $segmentContent,
-            'segment_hash'   => 'hash123',
-            'raw_word_count' => $rawWordCount,
-        ]);
-
-        $dao = $this->createStub(SegmentDao::class);
-        $dao->method('getById')->willReturn($segment);
-
-        return $dao;
-    }
-
     // ── Test 1: No chunks found ─────────────────────────────────────
 
     /**
@@ -241,39 +223,7 @@ class InsertPreTranslationsTest extends AbstractTest
         $this->assertFalse($this->projectStructure->create_2_pass_review);
     }
 
-    // ── Test 3: Segment not found in DAO ────────────────────────────
-
-    /**
-     * @throws MockException
-     * @throws Exception
-     */
-    #[Test]
-    public function skipsSegmentNotFoundInDao(): void
-    {
-        $rule = $this->buildRuleStub();
-
-        $segmentDao = $this->createStub(SegmentDao::class);
-        $segmentDao->method('getById')->willReturn(null);
-
-        $this->projectStructure->translations = [
-            'tu-1' => [0 => $this->makeTuple(rule: $rule)],
-        ];
-
-        /** @var ProjectManagerModel&MockObject $pmModel */
-        $pmModel = $this->createMock(ProjectManagerModel::class);
-        $pmModel->expects($this->never())->method('insertPreTranslations');
-
-        $service = $this->buildService(
-            pmModel: $pmModel,
-            segmentDao: $segmentDao,
-        );
-
-        $service->insertPreTranslations($this->job, $this->projectStructure);
-
-        $this->assertFalse($this->projectStructure->create_2_pass_review);
-    }
-
-    // ── Test 4: Happy path — single translation ─────────────────────
+    // ── Test 3: Happy path — single translation ─────────────────────
 
     /**
      * @throws MockException
@@ -287,8 +237,6 @@ class InsertPreTranslationsTest extends AbstractTest
         $qa = $this->buildQAStub(
             normalizedTarget: 'normalized translation',
         );
-
-        $segmentDao = $this->buildSegmentDaoStub();
 
         $tuple = $this->makeTuple(rule: $rule);
 
@@ -324,7 +272,6 @@ class InsertPreTranslationsTest extends AbstractTest
 
         $service = $this->buildService(
             pmModel: $pmModel,
-            segmentDao: $segmentDao,
             qa: $qa,
         );
 
@@ -348,8 +295,6 @@ class InsertPreTranslationsTest extends AbstractTest
             errorsJson: '{"errors":["tag mismatch"]}',
         );
 
-        $segmentDao = $this->buildSegmentDaoStub();
-
         $this->projectStructure->translations = [
             'tu-1' => [0 => $this->makeTuple(rule: $rule)],
         ];
@@ -371,7 +316,6 @@ class InsertPreTranslationsTest extends AbstractTest
 
         $service = $this->buildService(
             pmModel: $pmModel,
-            segmentDao: $segmentDao,
             qa: $qa,
         );
 
@@ -389,7 +333,6 @@ class InsertPreTranslationsTest extends AbstractTest
     {
         $rule = $this->buildRuleStub();
         $qa = $this->buildQAStub();
-        $segmentDao = $this->buildSegmentDaoStub();
 
         // Tuple with state='final' — triggers createSecondPassReview
         $tuple = $this->makeTuple(rule: $rule, state: 'final');
@@ -399,7 +342,6 @@ class InsertPreTranslationsTest extends AbstractTest
         ];
 
         $service = $this->buildService(
-            segmentDao: $segmentDao,
             qa: $qa,
         );
 
@@ -421,7 +363,6 @@ class InsertPreTranslationsTest extends AbstractTest
     {
         $rule = $this->buildRuleStub();
         $qa = $this->buildQAStub();
-        $segmentDao = $this->buildSegmentDaoStub();
 
         // Tuple with state='translated' (not final)
         $tuple = $this->makeTuple(rule: $rule, state: 'translated');
@@ -431,7 +372,6 @@ class InsertPreTranslationsTest extends AbstractTest
         ];
 
         $service = $this->buildService(
-            segmentDao: $segmentDao,
             qa: $qa,
         );
 
@@ -451,7 +391,6 @@ class InsertPreTranslationsTest extends AbstractTest
     {
         $rule = $this->buildRuleStub();
         $qa = $this->buildQAStub();
-        $segmentDao = $this->buildSegmentDaoStub();
 
         $tuple1 = $this->makeTuple(segmentHash: 'hash1', rule: $rule);
         $tuple2 = $this->makeTuple(segmentId: 2, segmentHash: 'hash2', rule: $rule);
@@ -475,7 +414,6 @@ class InsertPreTranslationsTest extends AbstractTest
 
         $service = $this->buildService(
             pmModel: $pmModel,
-            segmentDao: $segmentDao,
             qa: $qa,
         );
 
@@ -512,45 +450,13 @@ class InsertPreTranslationsTest extends AbstractTest
             ->willReturn(10.0);
 
         $qa = $this->buildQAStub();
-        $segmentDao = $this->buildSegmentDaoStub();
 
         $this->projectStructure->translations = [
             'tu-1' => [0 => $this->makeTuple(rule: $rule)],
         ];
 
         $service = $this->buildService(
-            segmentDao: $segmentDao,
             qa: $qa,
-        );
-
-        $service->insertPreTranslations($this->job, $this->projectStructure);
-    }
-
-    // ── Test 10: No insert when all tuples skipped ───────────────────
-
-    /**
-     * @throws MockException
-     * @throws Exception
-     */
-    #[Test]
-    public function doesNotCallInsertWhenAllTuplesSkipped(): void
-    {
-        // SegmentDao returns null for all lookups
-        $segmentDao = $this->createStub(SegmentDao::class);
-        $segmentDao->method('getById')->willReturn(null);
-
-        $this->projectStructure->translations = [
-            'tu-1' => [0 => $this->makeTuple()],
-            'tu-2' => [0 => $this->makeTuple(segmentId: 2)],
-        ];
-
-        /** @var ProjectManagerModel&MockObject $pmModel */
-        $pmModel = $this->createMock(ProjectManagerModel::class);
-        $pmModel->expects($this->never())->method('insertPreTranslations');
-
-        $service = $this->buildService(
-            pmModel: $pmModel,
-            segmentDao: $segmentDao,
         );
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
