@@ -303,6 +303,8 @@ class SegmentExtractor
             $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
             $wordCount = $this->features->filter('wordCount', $wordCount);
 
+            $sourceLayer0 = $this->filter->fromRawXliffToLayer0($seg_source['raw-content']);
+
             // init tags
             $seg_source['mrk-ext-prec-tags'] = '';
             $seg_source['mrk-ext-succ-tags'] = '';
@@ -327,7 +329,8 @@ class SegmentExtractor
                     $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] =
                         new TranslationTuple(
                             $preTranslation['target'],
-                            $xliff_trans_unit,
+                            $sourceLayer0,
+                            $wordCount,
                             $position,
                             $preTranslation['rule'],
                             $preTranslation['state'],
@@ -340,6 +343,7 @@ class SegmentExtractor
                 filePartsId: $filePartsId,
                 xliff_trans_unit: $xliff_trans_unit,
                 rawContent: $seg_source['raw-content'],
+                sourceLayer0: $sourceLayer0,
                 dataRefMap: $dataRefMap,
                 wordCount: $wordCount,
                 showInCattool: $show_in_cattool,
@@ -388,6 +392,8 @@ class SegmentExtractor
 
         $wordCount = CatUtils::segment_raw_word_count($xliff_trans_unit['source']['raw-content'], $this->sourceLanguage, $this->filter);
 
+        $sourceLayer0 = $this->filter->fromRawXliffToLayer0($xliff_trans_unit['source']['raw-content']);
+
         if (empty($wordCount)) {
             $show_in_cattool = 0;
         } elseif (isset($xliff_trans_unit['target']['raw-content'])) {
@@ -408,7 +414,8 @@ class SegmentExtractor
                 $projectStructure->translations[$trans_unit_reference][] =
                     new TranslationTuple(
                         $preTranslation['target'],
-                        $xliff_trans_unit,
+                        $sourceLayer0,
+                        $wordCount,
                         null,
                         $preTranslation['rule'],
                         $preTranslation['state'],
@@ -423,6 +430,7 @@ class SegmentExtractor
             filePartsId: $filePartsId,
             xliff_trans_unit: $xliff_trans_unit,
             rawContent: $xliff_trans_unit['source']['raw-content'],
+            sourceLayer0: $sourceLayer0,
             dataRefMap: $dataRefMap,
             wordCount: $wordCount,
             showInCattool: $show_in_cattool,
@@ -607,6 +615,7 @@ class SegmentExtractor
         ?int $filePartsId,
         array $xliff_trans_unit,
         string $rawContent,
+        string $sourceLayer0,
         array $dataRefMap,
         float $wordCount,
         int $showInCattool,
@@ -642,7 +651,7 @@ class SegmentExtractor
             'xliff_mrk_id' => $xliffMrkId,
             'xliff_ext_prec_tags' => $xliffExtPrecTags,
             'xliff_mrk_ext_prec_tags' => $xliffMrkExtPrecTags,
-            'segment' => $this->filter->fromRawXliffToLayer0($rawContent),
+            'segment' => $sourceLayer0,
             'segment_hash' => $segmentHash,
             'xliff_mrk_ext_succ_tags' => $xliffMrkExtSuccTags,
             'xliff_ext_succ_tags' => $xliffExtSuccTags,
