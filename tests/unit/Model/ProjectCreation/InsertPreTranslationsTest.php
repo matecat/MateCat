@@ -10,8 +10,6 @@ use Model\Jobs\JobStruct;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TranslationTuple;
-use Model\Segments\SegmentDao;
-use Model\Segments\SegmentStruct;
 use Model\Xliff\DTO\XliffRuleInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception as MockException;
@@ -87,17 +85,6 @@ class InsertPreTranslationsTest extends AbstractTest
         $filter->method('fromLayer0ToLayer1')->willReturnArgument(0);
         $filter->method('fromLayer1ToLayer0')->willReturnArgument(0);
 
-        $segmentStub = new SegmentStruct([
-            'id'             => 1,
-            'id_file'        => 1,
-            'internal_id'    => 'tu-1',
-            'segment'        => 'source text',
-            'segment_hash'   => 'hash123',
-            'raw_word_count' => 10,
-        ]);
-        $segmentDao = $this->createStub(SegmentDao::class);
-        $segmentDao->method('getById')->willReturn($segmentStub);
-
         $service = new TestableSegmentStorageService(
             $this->createStub(IDatabase::class),
             $this->createStub(FeatureSet::class),
@@ -107,7 +94,6 @@ class InsertPreTranslationsTest extends AbstractTest
         );
 
         $service->setChunksByJobIdResult([$this->chunk]);
-        $service->setSegmentDao($segmentDao);
 
         if ($qa !== null) {
             $service->setQA($qa);

@@ -4,7 +4,6 @@ namespace Model\ProjectCreation;
 
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
-use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 

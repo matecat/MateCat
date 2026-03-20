@@ -269,9 +269,6 @@ class SegmentStorageService
         $jid = $job->id;
         $this->cleanSegmentsMetadata($projectStructure);
 
-        // Hoist invariant lookups outside the loop to avoid N+1 queries
-        $segmentDao = $this->createSegmentDao();
-
         $chunks = $this->getChunksByJobId((int)$jid);
 
         if (empty($chunks)) {
@@ -293,14 +290,6 @@ class SegmentStorageService
 
             // array of segmented translations
             foreach ($struct as $translationTuple) {
-                $segment = $segmentDao->getById($translationTuple->segmentId);
-
-                // This condition is meant to debug an issue with the segment id that returns false from dao.
-                // SegmentDao::getById returns false if the id is not found in the database
-                // Skip the segment and lose the translation if the segment id is not found in the database
-                if (!$segment) {
-                    continue;
-                }
 
                 $rule = $translationTuple->rule;
 
@@ -309,7 +298,7 @@ class SegmentStorageService
                 }
 
                 // Use QA to get a target segment
-                $source = $segment->segment;
+                $source = $translationTuple->source;
                 $target = $translationTuple->target;
 
                 $source = $this->filter->fromLayer0ToLayer1($source);
@@ -337,11 +326,11 @@ class SegmentStorageService
                     'suggestion' => $this->filter->fromLayer1ToLayer0($translation),
                     'locked' => 0, // not allowed to change locked status for pre-translations
                     'match_type' => $rule->asMatchType(),
-                    'eq_word_count' => $rule->asEquivalentWordCount($segment->raw_word_count, $payable_rates),
+                    'eq_word_count' => $rule->asEquivalentWordCount($translationTuple->rawWordCount, $payable_rates),
                     'serialized_errors_list' => ($check->thereAreErrors()) ? $check->getErrorsJSON() : '',
                     'warning' => ($check->thereAreErrors()) ? 1 : 0,
                     'suggestion_match' => null,
-                    'standard_word_count' => $rule->asStandardWordCount($segment->raw_word_count, $payable_rates),
+                    'standard_word_count' => $rule->asStandardWordCount($translationTuple->rawWordCount, $payable_rates),
                     'version_number' => 0,
                 ];
 
