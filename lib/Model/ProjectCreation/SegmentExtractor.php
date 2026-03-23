@@ -312,30 +312,18 @@ class SegmentExtractor
             if (empty($wordCount)) {
                 $show_in_cattool = 0;
             } elseif (isset($xliff_trans_unit['seg-target'][$position]['raw-content'])) {
-                $preTranslation = $this->detectPreTranslation(
+                $this->resolveAndStorePreTranslation(
                     $seg_source['raw-content'],
                     $xliff_trans_unit['seg-target'][$position]['raw-content'],
+                    $sourceLayer0,
+                    $wordCount,
                     $xliff_trans_unit,
                     $fid,
                     $position,
+                    $trans_unit_reference,
+                    $seg_source['mid'],
                     $projectStructure,
                 );
-
-                if ($preTranslation !== null) {
-                    if (!isset($projectStructure->translations[$trans_unit_reference])) {
-                        $projectStructure->translations[$trans_unit_reference] = [];
-                    }
-
-                    $projectStructure->translations[$trans_unit_reference][$seg_source['mid']] =
-                        new TranslationTuple(
-                            $preTranslation['target'],
-                            $sourceLayer0,
-                            $wordCount,
-                            $preTranslation['rule'],
-                            $position,
-                            $preTranslation['state'],
-                        );
-                }
             }
 
             $counters = $this->buildAndAppendSegment(
@@ -397,29 +385,18 @@ class SegmentExtractor
         if (empty($wordCount)) {
             $show_in_cattool = 0;
         } elseif (isset($xliff_trans_unit['target']['raw-content'])) {
-            $preTranslation = $this->detectPreTranslation(
+            $this->resolveAndStorePreTranslation(
                 $xliff_trans_unit['source']['raw-content'],
                 $xliff_trans_unit['target']['raw-content'],
+                $sourceLayer0,
+                $wordCount,
                 $xliff_trans_unit,
                 $fid,
                 null,
+                $trans_unit_reference,
+                null,
                 $projectStructure,
             );
-
-            if ($preTranslation !== null) {
-                if (!isset($projectStructure->translations[$trans_unit_reference])) {
-                    $projectStructure->translations[$trans_unit_reference] = [];
-                }
-
-                $projectStructure->translations[$trans_unit_reference][] =
-                    new TranslationTuple(
-                        $preTranslation['target'],
-                        $sourceLayer0,
-                        $wordCount,
-                        $preTranslation['rule'],
-                        state: $preTranslation['state'],
-                    );
-            }
         }
 
         $this->extractNotesAndContexts($xliff_trans_unit, $fid, $projectStructure);
@@ -587,6 +564,71 @@ class SegmentExtractor
             'rule' => $rule,
             'state' => $stateValues['state'],
         ];
+    }
+
+    /**
+     * Detect and store a pre-translation for a single segment.
+     *
+     * Shared logic extracted from processSegSourceTransUnit() and
+     * processNonSegSourceTransUnit() to eliminate duplication of the
+     * detectPreTranslation → TranslationTuple → translations[] flow.
+     *
+     * @param string $rawSourceContent  Raw source content from the XLIFF
+     * @param string $rawTargetContent  Raw target content from the XLIFF
+     * @param string $sourceLayer0      Source filtered to Layer 0
+     * @param int    $wordCount         Pre-computed word count for this segment
+     * @param array<string, mixed> $xliff_trans_unit  The parsed trans-unit
+     * @param int    $fid               File ID
+     * @param int|null $position        mrk position (for seg-source), null for non-segmented
+     * @param string $trans_unit_reference  Sanitized unit reference key
+     * @param string|null $mrkId        mrk mid attribute (for seg-source), null for non-segmented
+     * @param ProjectStructure $projectStructure
+     *
+     * @throws Exception
+     */
+    private function resolveAndStorePreTranslation(
+        string $rawSourceContent,
+        string $rawTargetContent,
+        string $sourceLayer0,
+        int $wordCount,
+        array $xliff_trans_unit,
+        int $fid,
+        ?int $position,
+        string $trans_unit_reference,
+        ?string $mrkId,
+        ProjectStructure $projectStructure,
+    ): void {
+        $preTranslation = $this->detectPreTranslation(
+            $rawSourceContent,
+            $rawTargetContent,
+            $xliff_trans_unit,
+            $fid,
+            $position,
+            $projectStructure,
+        );
+
+        if ($preTranslation === null) {
+            return;
+        }
+
+        if (!isset($projectStructure->translations[$trans_unit_reference])) {
+            $projectStructure->translations[$trans_unit_reference] = [];
+        }
+
+        $tuple = new TranslationTuple(
+            $preTranslation['target'],
+            $sourceLayer0,
+            $wordCount,
+            $preTranslation['rule'],
+            $position,
+            $preTranslation['state'],
+        );
+
+        if ($mrkId !== null) {
+            $projectStructure->translations[$trans_unit_reference][$mrkId] = $tuple;
+        } else {
+            $projectStructure->translations[$trans_unit_reference][] = $tuple;
+        }
     }
 
     /**

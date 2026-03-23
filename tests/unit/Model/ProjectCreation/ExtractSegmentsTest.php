@@ -6,6 +6,7 @@ use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
@@ -309,6 +310,62 @@ class ExtractSegmentsTest extends AbstractTest
         $this->assertNotEquals($hashWithout, $hashWith);
     }
 
+    /**
+     * Verify that seg-source translations are keyed by mrk ID (not numeric).
+     * This locks behavior before extracting resolveAndStorePreTranslation().
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testSegSourceTranslationsKeyedByMrkId(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // The reference key is "{fid}|{tu_id}"
+        $unitRef = $fid . '|tu1';
+        $this->assertArrayHasKey($unitRef, $ps->translations);
+
+        $tuplesByMrk = $ps->translations[$unitRef];
+
+        // mrk mid="0" and mid="1" should be used as keys
+        $this->assertArrayHasKey('0', $tuplesByMrk, 'mrk mid=0 should be a key');
+        $this->assertArrayHasKey('1', $tuplesByMrk, 'mrk mid=1 should be a key');
+        $this->assertCount(2, $tuplesByMrk);
+    }
+
+    /**
+     * Verify that seg-source TranslationTuples have mrkPosition set.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testSegSourceTranslationTupleHasMrkPosition(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'seg-source-simple.xliff',
+            'original_filename' => 'seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $unitRef = $fid . '|tu1';
+        $tuplesByMrk = $ps->translations[$unitRef];
+
+        /** @var TranslationTuple $tuple0 */
+        $tuple0 = $tuplesByMrk['0'];
+        /** @var TranslationTuple $tuple1 */
+        $tuple1 = $tuplesByMrk['1'];
+
+        $this->assertSame(0, $tuple0->mrkPosition);
+        $this->assertSame(1, $tuple1->mrkPosition);
+    }
+
     // =========================================================================
     // 0b. Non-seg-source path tests
     // =========================================================================
@@ -330,6 +387,58 @@ class ExtractSegmentsTest extends AbstractTest
 
         // 2 trans-units, each without seg-source → 2 segments
         $this->assertCount(2, $segments);
+    }
+
+    /**
+     * Verify that non-seg-source translations are appended (numeric key).
+     * This locks behavior before extracting resolveAndStorePreTranslation().
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testNoSegSourceTranslationsAppendedWithNumericKey(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+
+        // tu1 has target (state="translated"), tu2 has no target
+        $unitRef = $fid . '|tu1';
+        $this->assertArrayHasKey($unitRef, $ps->translations);
+
+        $tuples = $ps->translations[$unitRef];
+
+        // Appended with [], so key should be numeric 0
+        $this->assertArrayHasKey(0, $tuples);
+        $this->assertCount(1, $tuples);
+    }
+
+    /**
+     * Verify that non-seg-source TranslationTuple has null mrkPosition.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testNoSegSourceTranslationTupleHasNullMrkPosition(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'no-seg-source-simple.xliff',
+            'original_filename' => 'no-seg-source-simple.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $unitRef = $fid . '|tu1';
+        $tuples = $ps->translations[$unitRef];
+
+        /** @var TranslationTuple $tuple */
+        $tuple = $tuples[0];
+
+        $this->assertNull($tuple->mrkPosition);
     }
 
     /**
