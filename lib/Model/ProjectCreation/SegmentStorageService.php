@@ -2,10 +2,13 @@
 
 namespace Model\ProjectCreation;
 
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDao;
@@ -15,6 +18,8 @@ use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
 use Utils\Constants\XliffTranslationStatus;
 use Utils\Logger\MatecatLogger;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Encapsulates segment storage logic that was previously embedded in
@@ -95,60 +100,7 @@ class SegmentStorageService
 
         $segments_metadata = [];
         foreach ($sequenceIds as $position => $id_segment) {
-            // $projectStructure->segments[$fid][$position] is a \Model\Segments\SegmentStruct
-            $projectStructure->segments[$fid][$position]->id = $id_segment;
-
-            /** @var SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = $projectStructure->segments_original_data[$fid][$position] ?? new SegmentOriginalDataStruct(
-            ); // If not set, create an empty struct to be safe. Avoid 'Call to a member function getMap() on null'
-
-            $originalDataMap = $segmentOriginalDataStruct->getMap();
-            if (!empty($originalDataMap)) {
-                // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
-                // to allow the correct tag handling by the plugins
-                $map = $this->features->filter('sanitizeOriginalDataMap', $originalDataMap);
-
-                // persist an original data map if present
-                $this->insertOriginalDataRecord($id_segment, $map);
-
-                $projectStructure->segments[$fid][$position]->segment = $this->features->filter(
-                    'correctTagErrors',
-                    $projectStructure->segments[$fid][$position]->segment,
-                    $map
-                );
-            }
-
-            /** @var ?SegmentMetadataStruct $segmentMetadataStruct */
-            $segmentMetadataStruct = $projectStructure->segments_meta_data[$fid][$position] ?? null;
-
-            if ($segmentMetadataStruct !== null) {
-                $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
-            }
-
-            if (!isset($projectStructure->file_segments_count[$fid])) {
-                $projectStructure->file_segments_count[$fid] = 0;
-            }
-            $projectStructure->file_segments_count[$fid]++;
-
-            $_metadata = [
-                'id' => $id_segment,
-                'internal_id' => SegmentExtractor::sanitizedUnitId($projectStructure->segments[$fid][$position]->internal_id, (int)$fid),
-                'segment' => $projectStructure->segments[$fid][$position]->segment,
-                'segment_hash' => $projectStructure->segments[$fid][$position]->segment_hash,
-                'raw_word_count' => $projectStructure->segments[$fid][$position]->raw_word_count,
-                'xliff_mrk_id' => $projectStructure->segments[$fid][$position]->xliff_mrk_id,
-                'show_in_cattool' => $projectStructure->segments[$fid][$position]->show_in_cattool,
-                'additional_params' => null,
-                'file_id' => $fid,
-            ];
-
-            /*
-             * This hook allows plugins to manipulate data analysis content, should be not allowed to change existing data
-             * but only to eventually add new fields
-             */
-            $_metadata = $this->features->filter('appendFieldToAnalysisObject', $_metadata, $projectStructure);
-
-            $segments_metadata[] = $_metadata;
+            $segments_metadata[] = $this->prepareAndPersistSegment($position, $id_segment, $fid, $projectStructure);
         }
 
         $segmentsDao = $this->createSegmentDao();
@@ -167,6 +119,81 @@ class SegmentStorageService
             $projectStructure->segments_metadata,
             $segments_metadata
         );
+    }
+
+    /**
+     * Assign the reserved ID to the segment, persist original data and metadata,
+     * increment the file segment counter, and build the analysis metadata array.
+     *
+     * @param int $position Index within the file's segment list
+     * @param int|string $id_segment Reserved sequence ID
+     * @param int|string $fid File ID
+     * @param ProjectStructure $projectStructure
+     *
+     * @return array<string, mixed> The segment analysis metadata row
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
+     */
+    private function prepareAndPersistSegment(
+        int $position,
+        int|string $id_segment,
+        int|string $fid,
+        ProjectStructure $projectStructure,
+    ): array {
+        $projectStructure->segments[$fid][$position]->id = $id_segment;
+
+        /** @var SegmentOriginalDataStruct $segmentOriginalDataStruct */
+        $segmentOriginalDataStruct = $projectStructure->segments_original_data[$fid][$position] ?? new SegmentOriginalDataStruct(
+        ); // If not set, create an empty struct to be safe. Avoid 'Call to a member function getMap() on null'
+
+        $originalDataMap = $segmentOriginalDataStruct->getMap();
+        if (!empty($originalDataMap)) {
+            // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
+            // to allow the correct tag handling by the plugins
+            $map = $this->features->filter('sanitizeOriginalDataMap', $originalDataMap);
+
+            // persist an original data map if present
+            $this->insertOriginalDataRecord($id_segment, $map);
+
+            $projectStructure->segments[$fid][$position]->segment = $this->features->filter(
+                'correctTagErrors',
+                $projectStructure->segments[$fid][$position]->segment,
+                $map
+            );
+        }
+
+        /** @var ?SegmentMetadataStruct $segmentMetadataStruct */
+        $segmentMetadataStruct = $projectStructure->segments_meta_data[$fid][$position] ?? null;
+
+        if ($segmentMetadataStruct !== null) {
+            $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
+        }
+
+        if (!isset($projectStructure->file_segments_count[$fid])) {
+            $projectStructure->file_segments_count[$fid] = 0;
+        }
+        $projectStructure->file_segments_count[$fid]++;
+
+        $metadata = [
+            'id' => $id_segment,
+            'internal_id' => SegmentExtractor::sanitizedUnitId($projectStructure->segments[$fid][$position]->internal_id, (int)$fid),
+            'segment' => $projectStructure->segments[$fid][$position]->segment,
+            'segment_hash' => $projectStructure->segments[$fid][$position]->segment_hash,
+            'raw_word_count' => $projectStructure->segments[$fid][$position]->raw_word_count,
+            'xliff_mrk_id' => $projectStructure->segments[$fid][$position]->xliff_mrk_id,
+            'show_in_cattool' => $projectStructure->segments[$fid][$position]->show_in_cattool,
+            'additional_params' => null,
+            'file_id' => $fid,
+        ];
+
+        /*
+         * This hook allows plugins to manipulate data analysis content, should be not allowed to change existing data
+         * but only to eventually add new fields
+         */
+        return $this->features->filter('appendFieldToAnalysisObject', $metadata, $projectStructure);
     }
 
     /**
