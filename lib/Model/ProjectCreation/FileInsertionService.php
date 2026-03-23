@@ -288,7 +288,7 @@ class FileInsertionService
             // avoid blank filenames
             if (!empty($originalFileName)) {
                 // get metadata
-                $meta = $projectStructure->array_files_meta[$pos] ?? null;
+                $meta = $projectStructure->array_files_meta[$pos];
                 /** @var string $fileExtension */
                 $fileExtension = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
                 $fidStr = $this->projectManagerModel->insertFile(
