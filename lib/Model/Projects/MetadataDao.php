@@ -28,9 +28,7 @@ class MetadataDao extends AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(self::$_query_get_metadata);
 
-        /**
-         * @var $list MetadataStruct[]
-         */
+        /** @var MetadataStruct[] $list */
         $list = $this->_fetchObjectMap($stmt, MetadataStruct::class, ['id_project' => $id]);
         foreach ($list as $metaStruct) {
             $metaStruct->value = ProjectsMetadataMarshaller::unMarshall($metaStruct);
@@ -74,9 +72,7 @@ class MetadataDao extends AbstractDao
     {
         $stmt = $this->_getStatementForQuery(self::$_query_get_metadata_by_key);
 
-        /**
-         * @var $result MetadataStruct
-         */
+        /** @var MetadataStruct|null $result */
         $result = $this->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_project' => $id_project,
             'key' => $key
@@ -117,6 +113,46 @@ class MetadataDao extends AbstractDao
         $this->destroyMetadataCache($id_project, $key);
 
         return $conn->lastInsertId();
+    }
+
+    /**
+     * Bulk insert/update multiple metadata key-value pairs in a single query.
+     *
+     * @param int $id_project
+     * @param array<string, string> $metadata key => value pairs to upsert
+     *
+     * @throws ReflectionException
+     */
+    public function bulkSet(int $id_project, array $metadata): void
+    {
+        if (empty($metadata)) {
+            return;
+        }
+
+        $placeholders = [];
+        $params = [];
+        $i = 0;
+
+        foreach ($metadata as $key => $value) {
+            $placeholders[] = "(:id_project_{$i}, :key_{$i}, :value_{$i})";
+            $params["id_project_{$i}"] = $id_project;
+            $params["key_{$i}"] = $key;
+            $params["value_{$i}"] = $value;
+            $i++;
+        }
+
+        $sql = "INSERT INTO project_metadata (id_project, `key`, value) VALUES "
+            . implode(', ', $placeholders)
+            . " ON DUPLICATE KEY UPDATE value = VALUES(value)";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+
+        $this->destroyMetadataCache($id_project);
+        foreach ($metadata as $key => $value) {
+            $this->destroyMetadataCache($id_project, $key);
+        }
     }
 
 
