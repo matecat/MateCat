@@ -97,7 +97,6 @@ class InsertPreTranslationsTest extends AbstractTest
         $tuple->segmentId        = $segmentId;
         $tuple->segmentHash      = $segmentHash;
         $tuple->fileId           = $fileId;
-        $tuple->internalId       = 'tu-1';
         $tuple->translationLayer0 = $translationLayer0;
         $tuple->suggestionLayer0  = $suggestionLayer0;
         $tuple->serializedErrors  = $serializedErrors;

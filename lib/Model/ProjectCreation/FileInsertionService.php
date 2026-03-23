@@ -73,9 +73,9 @@ class FileInsertionService
         array &$linkFiles,
     ): void {
         foreach ($projectStructure->array_files as $pos => $fileName) {
-            $meta = $projectStructure->array_files_meta[$pos];
+            $meta = $projectStructure->array_files_meta[$pos] ?? null;
 
-            if ($meta['mustBeConverted']) {
+            if (!empty($meta['mustBeConverted'])) {
                 continue;
             }
 
@@ -288,7 +288,7 @@ class FileInsertionService
             // avoid blank filenames
             if (!empty($originalFileName)) {
                 // get metadata
-                $meta = $projectStructure->array_files_meta[$pos];
+                $meta = $projectStructure->array_files_meta[$pos] ?? null;
                 /** @var string $fileExtension */
                 $fileExtension = AbstractFilesStorage::pathinfo_fix($originalFileName, PATHINFO_EXTENSION);
                 $fidStr = $this->projectManagerModel->insertFile(

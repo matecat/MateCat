@@ -537,7 +537,6 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $tuple = $ps->translations[$sanitizedId][0];
         self::assertSame(1400, $tuple->segmentId);
-        self::assertSame($sanitizedId, $tuple->internalId);
         self::assertSame(md5('Hello world'), $tuple->segmentHash);
         self::assertSame($fid, $tuple->fileId);
     }
@@ -643,7 +642,6 @@ class SegmentStorageServiceTest extends AbstractTest
 
         $tuple = $ps->translations[$sanitizedId]['2'];
         self::assertSame(1600, $tuple->segmentId);
-        self::assertSame($sanitizedId, $tuple->internalId);
     }
 
     // ── Multiple segments same internal_id with positional counter ──

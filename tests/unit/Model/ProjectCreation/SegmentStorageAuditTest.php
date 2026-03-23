@@ -355,9 +355,8 @@ class SegmentStorageAuditTest extends AbstractTest
 
         $translationRow = $ps->translations[$sanitizedId][0];
 
-        // Verify all 4 properties were set correctly
+        // Verify all 3 properties were set correctly
         self::assertSame(500, $translationRow->segmentId, 'segmentId');
-        self::assertSame($sanitizedId, $translationRow->internalId, 'internalId');
         self::assertSame(md5('Hello world'), $translationRow->segmentHash, 'segmentHash');
         self::assertSame($fid, $translationRow->fileId, 'fileId');
 
@@ -391,13 +390,11 @@ class SegmentStorageAuditTest extends AbstractTest
 
         // First segment (counter=0)
         self::assertSame(600, $ps->translations[$sanitizedId][0]->segmentId);
-        self::assertSame($sanitizedId, $ps->translations[$sanitizedId][0]->internalId);
         self::assertSame(md5('Part one'), $ps->translations[$sanitizedId][0]->segmentHash);
         self::assertSame($fid, $ps->translations[$sanitizedId][0]->fileId);
 
         // Second segment (counter=1)
         self::assertSame(601, $ps->translations[$sanitizedId][1]->segmentId);
-        self::assertSame($sanitizedId, $ps->translations[$sanitizedId][1]->internalId);
         self::assertSame(md5('Part two'), $ps->translations[$sanitizedId][1]->segmentHash);
         self::assertSame($fid, $ps->translations[$sanitizedId][1]->fileId);
     }
@@ -845,19 +842,16 @@ class SegmentStorageAuditTest extends AbstractTest
         // C16/C17/C18: translation properties set correctly
         // u1, counter 0 → seg 900
         self::assertSame(900, $ps->translations[$sanitizedU1][0]->segmentId);
-        self::assertSame($sanitizedU1, $ps->translations[$sanitizedU1][0]->internalId);
         self::assertSame(md5('Hello'), $ps->translations[$sanitizedU1][0]->segmentHash);
         self::assertSame($fid, $ps->translations[$sanitizedU1][0]->fileId);
 
         // u1, counter 1 → seg 901
         self::assertSame(901, $ps->translations[$sanitizedU1][1]->segmentId);
-        self::assertSame($sanitizedU1, $ps->translations[$sanitizedU1][1]->internalId);
         self::assertSame(md5('World'), $ps->translations[$sanitizedU1][1]->segmentHash);
         self::assertSame($fid, $ps->translations[$sanitizedU1][1]->fileId);
 
         // u2, counter 0 → seg 902
         self::assertSame(902, $ps->translations[$sanitizedU2][0]->segmentId);
-        self::assertSame($sanitizedU2, $ps->translations[$sanitizedU2][0]->internalId);
         self::assertSame(md5('Foo'), $ps->translations[$sanitizedU2][0]->segmentHash);
         self::assertSame($fid, $ps->translations[$sanitizedU2][0]->fileId);
 

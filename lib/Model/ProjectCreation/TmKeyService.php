@@ -166,9 +166,9 @@ class TmKeyService
         if (!empty($projectStructure->array_files)) {
             foreach ($projectStructure->array_files as $pos => $fileName) {
                 // get corresponding meta
-                $meta = $projectStructure->array_files_meta[$pos];
+                $meta = $projectStructure->array_files_meta[$pos] ?? null;
 
-                $ext = $meta['extension'];
+                $ext = $meta['extension'] ?? null;
 
                 try {
                     if ('tmx' == $ext) {

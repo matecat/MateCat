@@ -17,8 +17,6 @@ class TranslationTuple
 {
     // Set by SegmentStorageService::storeSegments()
     public int $segmentId;
-    // This is not used, but the information is kept for completeness of information
-    public string $internalId;
     public string $segmentHash;
     public int $fileId;
 

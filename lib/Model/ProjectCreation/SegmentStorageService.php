@@ -348,7 +348,6 @@ class SegmentStorageService
 
             $tuple = $projectStructure->translations[$row['internal_id']][$short_var_counter];
             $tuple->segmentId = (int)$row['id'];
-            $tuple->internalId = $row['internal_id'];
             $tuple->segmentHash = $row['segment_hash'];
             $tuple->fileId = (int)$row['file_id'];
         }

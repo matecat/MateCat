@@ -83,7 +83,6 @@ class QAProcessorTest extends AbstractTest
         $tuple->segmentId   = 1;
         $tuple->segmentHash = 'hash123';
         $tuple->fileId      = 1;
-        $tuple->internalId  = 'tu-1';
 
         return $tuple;
     }

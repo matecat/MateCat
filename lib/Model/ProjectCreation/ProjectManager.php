@@ -160,17 +160,13 @@ class ProjectManager
      */
     protected function getSegmentExtractor(): SegmentExtractor
     {
-        if ($this->segmentExtractor === null) {
-            $this->segmentExtractor = new SegmentExtractor(
-                $this->projectStructure,
-                $this->filter,
-                $this->features,
-                $this->filesMetadataDao,
-                $this->logger,
-            );
-        }
-
-        return $this->segmentExtractor;
+        return $this->segmentExtractor ??= new SegmentExtractor(
+            $this->projectStructure,
+            $this->filter,
+            $this->features,
+            $this->filesMetadataDao,
+            $this->logger,
+        );
     }
 
     /**
@@ -178,16 +174,12 @@ class ProjectManager
      */
     protected function getTmKeyService(): TmKeyService
     {
-        if ($this->tmKeyService === null) {
-            $this->tmKeyService = new TmKeyService(
-                $this->tmxServiceWrapper,
-                $this->dbHandler,
-                $this->logger,
-                fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
-            );
-        }
-
-        return $this->tmKeyService;
+        return $this->tmKeyService ??= new TmKeyService(
+            $this->tmxServiceWrapper,
+            $this->dbHandler,
+            $this->logger,
+            fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
+        );
     }
 
 
@@ -197,16 +189,12 @@ class ProjectManager
      */
     protected function getSegmentStorageService(): SegmentStorageService
     {
-        if ($this->segmentStorageService === null) {
-            $this->segmentStorageService = new SegmentStorageService(
-                $this->dbHandler,
-                $this->features,
-                $this->logger,
-                $this->getProjectManagerModel(),
-            );
-        }
-
-        return $this->segmentStorageService;
+        return $this->segmentStorageService ??= new SegmentStorageService(
+            $this->dbHandler,
+            $this->features,
+            $this->logger,
+            $this->getProjectManagerModel(),
+        );
     }
 
     /**
@@ -214,14 +202,10 @@ class ProjectManager
      */
     protected function getProjectManagerModel(): ProjectManagerModel
     {
-        if ($this->projectManagerModel === null) {
-            $this->projectManagerModel = new ProjectManagerModel(
-                $this->dbHandler,
-                $this->logger,
-            );
-        }
-
-        return $this->projectManagerModel;
+        return $this->projectManagerModel ??= new ProjectManagerModel(
+            $this->dbHandler,
+            $this->logger,
+        );
     }
 
     /**
@@ -229,14 +213,10 @@ class ProjectManager
      */
     protected function getJobCreationService(): JobCreationService
     {
-        if ($this->jobCreationService === null) {
-            $this->jobCreationService = new JobCreationService(
-                $this->features,
-                $this->logger,
-            );
-        }
-
-        return $this->jobCreationService;
+        return $this->jobCreationService ??= new JobCreationService(
+            $this->features,
+            $this->logger,
+        );
     }
 
     /**
@@ -244,11 +224,7 @@ class ProjectManager
      */
     protected function getQAProcessor(): QAProcessor
     {
-        if ($this->qaProcessor === null) {
-            $this->qaProcessor = new QAProcessor($this->filter, $this->features);
-        }
-
-        return $this->qaProcessor;
+        return $this->qaProcessor ??= new QAProcessor($this->filter, $this->features);
     }
 
     /**
@@ -256,17 +232,13 @@ class ProjectManager
      */
     protected function getFileInsertionService(): FileInsertionService
     {
-        if ($this->fileInsertionService === null) {
-            $this->fileInsertionService = new FileInsertionService(
-                $this->getProjectManagerModel(),
-                $this->filesMetadataDao,
-                $this->gdriveSession,
-                fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
-                $this->logger,
-            );
-        }
-
-        return $this->fileInsertionService;
+        return $this->fileInsertionService ??= new FileInsertionService(
+            $this->getProjectManagerModel(),
+            $this->filesMetadataDao,
+            $this->gdriveSession,
+            fn(string $fileName) => $this->getSingleS3QueueFile($fileName),
+            $this->logger,
+        );
     }
 
     /**
@@ -276,13 +248,11 @@ class ProjectManager
     {
         $features = [];
         $projectFeatures = $this->projectStructure->project_features;
-        if (count($projectFeatures) != 0) {
-            foreach ($projectFeatures as $feature) {
-                if ($feature instanceof BasicFeatureStruct) {
-                    $features[] = $feature;
-                } else {
-                    $features[] = new BasicFeatureStruct((array)$feature);
-                }
+        foreach ($projectFeatures as $feature) {
+            if ($feature instanceof BasicFeatureStruct) {
+                $features[] = $feature;
+            } else {
+                $features[] = new BasicFeatureStruct((array)$feature);
             }
         }
 
@@ -499,10 +469,10 @@ class ProjectManager
         $firstTMXFileName = "";
 
         foreach ($this->projectStructure->array_files as $pos => $fileName) {
-            $meta = $this->projectStructure->array_files_meta[$pos];
+            $meta = $this->projectStructure->array_files_meta[$pos] ?? [];
 
-            if ($meta['getMemoryType']) {
-                if ($meta['isTMX']) {
+            if (!empty($meta['getMemoryType'])) {
+                if (!empty($meta['isTMX'])) {
                     $firstTMXFileName = (empty($firstTMXFileName) ? $fileName : null);
                 }
 
