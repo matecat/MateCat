@@ -171,19 +171,19 @@ class JobCreationService
      */
     private function saveJobsMetadata(JobStruct $job, ProjectStructure $projectStructure): void
     {
-        $dao = $this->getJobsMetadataDao();
+        $metadata = [];
 
         if (isset($projectStructure->public_tm_penalty)) {
-            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, (string)$projectStructure->public_tm_penalty);
+            $metadata[JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value] = (string)$projectStructure->public_tm_penalty;
         }
         if ($projectStructure->character_counter_count_tags !== null) {
-            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value, (string)($projectStructure->character_counter_count_tags ? 1 : 0));
+            $metadata[JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value] = (string)($projectStructure->character_counter_count_tags ? 1 : 0);
         }
         if ($projectStructure->character_counter_mode !== null) {
-            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value, $projectStructure->character_counter_mode);
+            $metadata[JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value] = $projectStructure->character_counter_mode;
         }
         if ($projectStructure->tm_prioritization !== null) {
-            $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::TM_PRIORITIZATION->value, (string)($projectStructure->tm_prioritization ? 1 : 0));
+            $metadata[JobsMetadataMarshaller::TM_PRIORITIZATION->value] = (string)($projectStructure->tm_prioritization ? 1 : 0);
         }
 
         if ($projectStructure->dialect_strict !== null) {
@@ -191,19 +191,16 @@ class JobCreationService
 
             foreach ($dialectStrictObj as $lang => $value) {
                 if (trim($lang) === trim($job->target)) {
-                    $dao->set((int)$job->id, (string)$job->password, JobsMetadataMarshaller::DIALECT_STRICT->value, (string)$value);
+                    $metadata[JobsMetadataMarshaller::DIALECT_STRICT->value] = (string)$value;
                 }
             }
         }
 
         if (!empty($projectStructure->subfiltering_handlers)) {
-            $dao->set(
-                (int)$job->id,
-                (string)$job->password,
-                JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-                $projectStructure->subfiltering_handlers
-            );
+            $metadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
         }
+
+        $this->getJobsMetadataDao()->bulkSet((int)$job->id, (string)$job->password, $metadata);
     }
 
     /**
