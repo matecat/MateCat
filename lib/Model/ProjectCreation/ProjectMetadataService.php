@@ -62,7 +62,7 @@ class ProjectMetadataService
             $options[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value] = json_encode($options[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value]);
         } else {
             // When MT QE workflow is disabled, remove the raw array to prevent
-            // passing a non-string value to MetadataDao::set()
+            // passing a non-string value to MetadataDao::bulkSet()
             unset($options[ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value]);
         }
 
@@ -100,16 +100,6 @@ class ProjectMetadataService
             }
         }
 
-        // Persist all collected metadata options to the project_metadata table
-        if (!empty($options)) {
-            foreach ($options as $key => $value) {
-                $this->dao->set(
-                    (int)$projectStructure->id_project,
-                    $key,
-                    (string)$value
-                );
-            }
-        }
         /** Duplicate the JobsMetadataMarshaller::SUBFILTERING_HANDLERS in project metadata for easier retrieval.
          * During the analysis of the project, there is no need to query the JobsMetadataDao.
          * Configuration about handlers can be changed later in the job settings.
@@ -117,10 +107,14 @@ class ProjectMetadataService
          * @see JobCreationService::saveJobsMetadata()
          */
         if (!empty($projectStructure->subfiltering_handlers)) {
-            $this->dao->set(
+            $options[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
+        }
+
+        if (!empty($options)) {
+            $stringOptions = array_map(static fn($value) => (string)$value, $options);
+            $this->dao->bulkSet(
                 (int)$projectStructure->id_project,
-                JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
-                $projectStructure->subfiltering_handlers
+                $stringOptions
             );
         }
     }

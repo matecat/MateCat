@@ -16,7 +16,7 @@ use TestHelpers\AbstractTest;
  * Unit tests for {@see ProjectMetadataService::save()}.
  *
  * Tests verify that metadata from ProjectStructure is correctly
- * collected, transformed, and persisted via ProjectsMetadataDao::set().
+ * collected, transformed, and persisted via ProjectsMetadataDao::bulkSet().
  *
  * @see REFACTORING_PLAN.md — Step 0c
  */
@@ -27,12 +27,11 @@ class SaveMetadataTest extends AbstractTest
     private FeatureSet $features;
 
     /**
-     * Collected calls to the mocked ProjectsMetadataDao::set().
-     * Each entry is [int $id_project, string $key, mixed $value].
+     * Collected calls to the mocked ProjectsMetadataDao::bulkSet().
      *
-     * @var array<int, array{0: int, 1: string, 2: mixed}>
+     * @var array<int, array{id_project: int, metadata: array<string, string>}>
      */
-    private array $daoSetCalls = [];
+    private array $bulkSetCalls = [];
 
     /**
      * @throws Exception
@@ -41,13 +40,14 @@ class SaveMetadataTest extends AbstractTest
     {
         parent::setUp();
 
-        $this->daoSetCalls = [];
+        $this->bulkSetCalls = [];
         $stubDao = $this->createStub(ProjectsMetadataDao::class);
-        $stubDao->method('set')
-            ->willReturnCallback(function (int $idProject, string $key, mixed $value): bool {
-                $this->daoSetCalls[] = [$idProject, $key, $value];
-
-                return true;
+        $stubDao->method('bulkSet')
+            ->willReturnCallback(function (int $idProject, array $metadata): void {
+                $this->bulkSetCalls[] = [
+                    'id_project' => $idProject,
+                    'metadata'   => $metadata,
+                ];
             });
 
         $this->service = new ProjectMetadataService($stubDao);
@@ -67,17 +67,12 @@ class SaveMetadataTest extends AbstractTest
     // Helper methods
     // =========================================================================
 
-    /**
-     * Find all DAO set() calls for a given key.
-     *
-     * @return array<int, array{0: int, 1: string, 2: mixed}>
-     */
     private function findDaoCallsByKey(string $key): array
     {
         return array_values(
             array_filter(
-                $this->daoSetCalls,
-                static fn(array $call) => $call[1] === $key
+                $this->bulkSetCalls,
+                static fn(array $call) => array_key_exists($key, $call['metadata'])
             )
         );
     }
@@ -88,9 +83,16 @@ class SaveMetadataTest extends AbstractTest
     private function getPersistedValue(string $key): mixed
     {
         $calls = $this->findDaoCallsByKey($key);
-        self::assertNotEmpty($calls, "Expected at least one set() call for key '$key'");
+        self::assertNotEmpty($calls, "Expected at least one bulkSet() metadata map containing key '$key'");
 
-        return $calls[0][2];
+        return $calls[0]['metadata'][$key];
+    }
+
+    private function getSinglePersistedMetadataMap(): array
+    {
+        self::assertCount(1, $this->bulkSetCalls, 'save() must invoke bulkSet() exactly once when metadata exists');
+
+        return $this->bulkSetCalls[0]['metadata'];
     }
 
     // =========================================================================
@@ -106,7 +108,7 @@ class SaveMetadataTest extends AbstractTest
 
         $calls = $this->findDaoCallsByKey(ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value);
         self::assertNotEmpty($calls, 'subfiltering_handlers must always be persisted');
-        self::assertSame('["handler_a"]', $calls[0][2]);
+        self::assertSame('["handler_a"]', $calls[0]['metadata'][ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value]);
     }
 
     #[Test]
@@ -119,8 +121,10 @@ class SaveMetadataTest extends AbstractTest
 
         $this->service->save($this->projectStructure, $this->features);
 
-        foreach ($this->daoSetCalls as $call) {
-            self::assertSame(999, $call[0], 'All set() calls must use project id 999');
+        self::assertCount(1, $this->bulkSetCalls, 'save() must call bulkSet() once when metadata exists');
+
+        foreach ($this->bulkSetCalls as $call) {
+            self::assertSame(999, $call['id_project'], 'bulkSet() calls must use project id 999');
         }
     }
 
@@ -135,9 +139,10 @@ class SaveMetadataTest extends AbstractTest
         $this->service->save($this->projectStructure, $this->features);
 
         // pretranslate_101 always exists (DTO default = 1), plus subfiltering_handlers
-        self::assertCount(2, $this->daoSetCalls);
+        $metadata = $this->getSinglePersistedMetadataMap();
+        self::assertCount(2, $metadata);
 
-        $keys = array_map(fn(array $call) => $call[1], $this->daoSetCalls);
+        $keys = array_keys($metadata);
         self::assertContains(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value, $keys);
         self::assertContains(ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value, $keys);
     }
@@ -316,7 +321,7 @@ class SaveMetadataTest extends AbstractTest
     public function testEngineExtraKeysAreNotPersistedWhenEmpty(): void
     {
         // These keys are not set in projectStructure, so they should not
-        // appear in the DAO set() calls
+        // appear in the DAO bulkSet() calls
         $this->service->save($this->projectStructure, $this->features);
 
         $calls = $this->findDaoCallsByKey('mmt_glossaries');
@@ -327,11 +332,11 @@ class SaveMetadataTest extends AbstractTest
     }
 
     // =========================================================================
-    // Metadata from options are all persisted via set()
+    // =========================================================================
     // =========================================================================
 
     #[Test]
-    public function testAllMetadataOptionsArePersistedViaSet(): void
+    public function testAllMetadataOptionsArePersistedViaBulkSet(): void
     {
         $this->projectStructure->metadata = [
             'custom_key_1' => 'value_1',
@@ -342,11 +347,16 @@ class SaveMetadataTest extends AbstractTest
         $this->service->save($this->projectStructure, $this->features);
 
         // 3 custom keys + 1 pretranslate_101 (DTO default) + 1 subfiltering_handlers = 5 total calls
-        self::assertCount(5, $this->daoSetCalls);
+        $metadata = $this->getSinglePersistedMetadataMap();
+        self::assertCount(5, $metadata);
 
         self::assertSame('value_1', $this->getPersistedValue('custom_key_1'));
         self::assertSame('value_2', $this->getPersistedValue('custom_key_2'));
         self::assertSame('value_3', $this->getPersistedValue('custom_key_3'));
+
+        foreach ($metadata as $value) {
+            self::assertIsString($value, 'All bulkSet() metadata values must be strings');
+        }
     }
 
     // =========================================================================
