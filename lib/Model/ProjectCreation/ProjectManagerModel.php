@@ -175,6 +175,80 @@ class ProjectManagerModel
     }
 
     /**
+     * Single-pass classification and bulk insert of segment notes and metadata.
+     *
+     * Iterates through $notes once, classifying each entry as either a segment
+     * note (INSERT INTO segment_notes) or segment metadata (INSERT INTO
+     * segment_metadata) based on the attribute key.
+     *
+     * @param array<int|string, array<string, mixed>> $notes
+     *
+     * @throws PDOException
+     */
+    public function bulkInsertSegmentNotesAndMetadata(array $notes): void
+    {
+        $noteTemplate = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES ";
+        $noteTupleMarks = "( ?, ?, ?, ? )";
+
+        $metaTemplate = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
+        $metaTupleMarks = "( ?, ?, ? )";
+
+        $noteValues = [];
+        $metaValues = [];
+
+        foreach ($notes as $internalId => $v) {
+            $attributes = $v['from'];
+            $entries = $v['entries'];
+            $segments = $v['segment_ids'];
+            $jsonEntries = $v['json'];
+            $jsonSegmentIds = $v['json_segment_ids'];
+
+            // Text entries
+            foreach ($segments as $idSegment) {
+                foreach ($entries as $index => $note) {
+                    if (isset($attributes['entries'][$index])) {
+                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes['entries'][$index]));
+
+                        if (self::isAMetadata($metaKey)) {
+                            $metaValue = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
+                            $metaValues[] = [$idSegment, $metaKey, $metaValue];
+                        } else {
+                            $noteValues[] = [$idSegment, $internalId, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null];
+                        }
+                    } else {
+                        $noteValues[] = [$idSegment, $internalId, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null];
+                    }
+                }
+            }
+
+            // JSON entries
+            foreach ($jsonSegmentIds as $idSegment) {
+                foreach ($jsonEntries as $index => $json) {
+                    if (isset($attributes['json'][$index])) {
+                        $metaKey = $attributes['json'][$index];
+
+                        if (self::isAMetadata($metaKey)) {
+                            $metaValues[] = [$idSegment, $metaKey, $json];
+                        } else {
+                            $noteValues[] = [$idSegment, $internalId, null, $json];
+                        }
+                    } else {
+                        $noteValues[] = [$idSegment, $internalId, null, $json];
+                    }
+                }
+            }
+        }
+
+        if ($noteValues !== []) {
+            $this->executeBulkInsert($noteTemplate, $noteTupleMarks, $noteValues, 30, 'Notes', ProjectCreationError::BULK_INSERT_NOTES->value);
+        }
+
+        if ($metaValues !== []) {
+            $this->executeBulkInsert($metaTemplate, $metaTupleMarks, $metaValues, 30, 'Segment Metadata', ProjectCreationError::BULK_INSERT_SEGMENT_METADATA->value);
+        }
+    }
+
+    /**
      * @param array<int|string, array<string, mixed>> $notes
      *
      * @throws PDOException
