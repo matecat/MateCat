@@ -403,10 +403,8 @@ class NewController extends KleinController
                 'flags' => FILTER_REQUIRE_ARRAY,
                 'options' => function ($value) {
                     $value = Utils::stripTagsPreservingHrefs($value);
-                    /**
-                     * Uber plugin callback
-                     */
-                    return $this->featureSet->filter('encodeInstructions', $value);
+
+                    return htmlentities($value);
                 }
             ]
         );
