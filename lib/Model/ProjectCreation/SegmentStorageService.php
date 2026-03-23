@@ -158,66 +158,9 @@ class SegmentStorageService
         // free memory
         $projectStructure->segments[$fid] = [];
 
-        // Here we make a query for the last inserted segments. This is the point where we
-        // can read the id of the segments table to reference it in other inserts in other tables.
-        if (!(
-            empty($projectStructure->notes) &&
-            empty($projectStructure->translations) &&
-            empty($projectStructure->context_group)
-        )) {
-            // internal counter for the segmented translations ( mrk in target )
-            $array_internal_segmentation_counter = [];
-
-            foreach ($segments_metadata as $row) {
-                // The following call is to save `id_segment` for notes,
-                // to be used later to insert the record in the notes table.
-                $this->setSegmentIdForNotes($row, $projectStructure);
-                $this->setSegmentIdForContexts($row, $projectStructure);
-
-                // The following block of code is for translations
-                if (isset($projectStructure->translations[$row['internal_id']])) {
-                    if (!array_key_exists($row['internal_id'], $array_internal_segmentation_counter)) {
-                        // if we don't have segmentation, we have no mrk ID,
-                        // so work with positional indexes ( should be only one row )
-                        if (empty($row['xliff_mrk_id'])) {
-                            $array_internal_segmentation_counter[$row['internal_id']] = 0;
-                        } else {
-                            // we have the mark id use them
-                            $array_internal_segmentation_counter[$row['internal_id']] = $row['xliff_mrk_id'];
-                        }
-                    } elseif (empty($row['xliff_mrk_id'])) {
-                        // if we don't have segmentation, we have no mrk ID,
-                        // so work with positional indexes
-                        // (should be only one row but if we are here, let's increment it)
-                        $array_internal_segmentation_counter[$row['internal_id']]++;
-                    } else {
-                        // we have the mark id use them
-                        $array_internal_segmentation_counter[$row['internal_id']] = $row['xliff_mrk_id'];
-                    }
-
-                    // set this var only for easy reading
-                    $short_var_counter = $array_internal_segmentation_counter[$row['internal_id']];
-
-                    if (!isset($projectStructure->translations[$row['internal_id']][$short_var_counter])) {
-                        continue;
-                    }
-
-                    $tuple = $projectStructure->translations[$row['internal_id']][$short_var_counter];
-                    $tuple->segmentId = (int)$row['id'];
-                    $tuple->internalId = $row['internal_id'];
-                    $tuple->segmentHash = $row['segment_hash'];
-                    $tuple->fileId = (int)$row['file_id'];
-
-                    // Remove an existent translation, we won't send these segments to the analysis because it is marked as locked
-                    /*
-                     * Commented because of
-                     *
-                     * https://app.asana.com/0/1134617950425092/1202822242420298
-                     */
-                    // unset( $segments_metadata[ $k ] );
-                }
-            }
-        }
+        // Link segment IDs to notes, contexts, and translations
+        // so downstream code can insert related records.
+        $this->linkSegmentIdsToRelatedData($segments_metadata, $projectStructure);
 
         // merge segments_metadata for every file in the project
         $projectStructure->segments_metadata = array_merge(
@@ -343,6 +286,73 @@ class SegmentStorageService
     }
 
     // ── Private helpers ─────────────────────────────────────────────
+
+    /**
+     * Link segment IDs to notes, contexts, and translation entries.
+     *
+     * After bulk-inserting segment rows we know their database IDs.
+     * This method walks the metadata array and stamps those IDs into
+     * the corresponding notes, context-group, and translation structures
+     * so downstream code can insert the related records.
+     *
+     * @param array<int, array<string, mixed>> $segmentsMetadata
+     * @param ProjectStructure $projectStructure
+     */
+    private function linkSegmentIdsToRelatedData(array $segmentsMetadata, ProjectStructure $projectStructure): void
+    {
+        if (
+            empty($projectStructure->notes) &&
+            empty($projectStructure->translations) &&
+            empty($projectStructure->context_group)
+        ) {
+            return;
+        }
+
+        // internal counter for the segmented translations ( mrk in target )
+        $array_internal_segmentation_counter = [];
+
+        foreach ($segmentsMetadata as $row) {
+            $this->setSegmentIdForNotes($row, $projectStructure);
+            $this->setSegmentIdForContexts($row, $projectStructure);
+
+            // Link translation entries
+            if (!isset($projectStructure->translations[$row['internal_id']])) {
+                continue;
+            }
+
+            if (!array_key_exists($row['internal_id'], $array_internal_segmentation_counter)) {
+                // if we don't have segmentation, we have no mrk ID,
+                // so work with positional indexes ( should be only one row )
+                if (empty($row['xliff_mrk_id'])) {
+                    $array_internal_segmentation_counter[$row['internal_id']] = 0;
+                } else {
+                    // we have the mark id use them
+                    $array_internal_segmentation_counter[$row['internal_id']] = $row['xliff_mrk_id'];
+                }
+            } elseif (empty($row['xliff_mrk_id'])) {
+                // if we don't have segmentation, we have no mrk ID,
+                // so work with positional indexes
+                // (should be only one row but if we are here, let's increment it)
+                $array_internal_segmentation_counter[$row['internal_id']]++;
+            } else {
+                // we have the mark id use them
+                $array_internal_segmentation_counter[$row['internal_id']] = $row['xliff_mrk_id'];
+            }
+
+            // set this var only for easy reading
+            $short_var_counter = $array_internal_segmentation_counter[$row['internal_id']];
+
+            if (!isset($projectStructure->translations[$row['internal_id']][$short_var_counter])) {
+                continue;
+            }
+
+            $tuple = $projectStructure->translations[$row['internal_id']][$short_var_counter];
+            $tuple->segmentId = (int)$row['id'];
+            $tuple->internalId = $row['internal_id'];
+            $tuple->segmentHash = $row['segment_hash'];
+            $tuple->fileId = (int)$row['file_id'];
+        }
+    }
 
     /**
      * Validate and persist segment metadata if the struct has valid key/value.
