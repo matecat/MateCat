@@ -164,6 +164,11 @@ class TmKeyService
 
         //TMX Management
         if (!empty($projectStructure->array_files)) {
+            $userStruct = $this->getUserByUid($projectStructure->uid);
+            if ($userStruct === null) {
+                throw new Exception("User not found for uid: " . $projectStructure->uid);
+            }
+
             foreach ($projectStructure->array_files as $pos => $fileName) {
                 // get corresponding meta
                 $meta = $projectStructure->array_files_meta[$pos] ?? null;
@@ -185,10 +190,6 @@ class TmKeyService
                             ($this->s3QueueFileDownloader)($fileName);
                         }
 
-                        $userStruct = $this->getUserByUid($projectStructure->uid);
-                        if ($userStruct === null) {
-                            throw new Exception("User not found for uid: " . $projectStructure->uid);
-                        }
                         $this->tmxServiceWrapper->addTmxInMyMemory($file, $userStruct);
                     } else {
                         //don't call the postPushTMX for normal files
