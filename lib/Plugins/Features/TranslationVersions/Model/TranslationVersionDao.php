@@ -265,21 +265,23 @@ class TranslationVersionDao extends AbstractDao
             SELECT
                 stv.id_segment,
                 stv.translation,
+                stv.creation_date as stv_creation_date,
                 ste.version_number,
-                ste.source_page
+                ste.source_page,
+                ste.create_date as ste_creation_date
             FROM (
-                 SELECT id_segment, translation, version_number, id_job
+                 SELECT creation_date, id_segment, translation, version_number, id_job
                  FROM segment_translation_versions
                  WHERE id_segment IN ( $prepare_str_segments_id )
                    AND id_job = ?
                  UNION
-                 SELECT id_segment, translation, version_number, id_job
+                 SELECT null as creation_date, id_segment, translation, version_number, id_job
                  FROM segment_translations
                  WHERE id_segment IN ( $prepare_str_segments_id )
                    AND id_job = ?
             ) AS stv
             JOIN (
-                   SELECT MAX(version_number) AS version_number, ste.id_segment, ste.source_page
+                   SELECT MAX(version_number) AS version_number, ste.id, ste.id_segment, ste.source_page, ste.create_date
                    FROM segment_translation_events ste
                    WHERE id_segment IN ( $prepare_str_segments_id )
                      AND ste.id_job = ?

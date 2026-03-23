@@ -204,8 +204,6 @@ class QualityReportSegmentModel
         $commentsDao = new CommentDao;
         $comments = $commentsDao->getThreadsBySegments($segment_ids, $this->chunk->id);
 
-        $all_events = [];
-
         $translationVersionDao = new TranslationVersionDao;
         $all_events = $translationVersionDao->getAllRelevantEvents($segment_ids, $this->chunk->id);
 
@@ -229,7 +227,8 @@ class QualityReportSegmentModel
             $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI);
             $this->_assignIssues($seg, $issues ?? [], $issue_comments);
             $this->_assignComments($seg, $comments);
-            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events, $isForUI);
+            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events,  $isForUI);
+            $this->_populateHistory($seg, $Filter, $all_events,$issues ?? [], $isForUI);
 
             $seg->pee_translation_revise = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
@@ -238,6 +237,39 @@ class QualityReportSegmentModel
         }
 
         return $segments;
+    }
+
+    protected function _populateHistory(
+        QualityReportSegmentStruct $seg,
+        MateCatFilter $Filter,
+        array $events = [],
+        array $issues = [],
+        bool $isForUI = false
+    )
+    {
+        $elements = [];
+
+        $eventsForThisSegment = array_filter($events, function (SegmentEventsStruct $event) use ($seg) {
+            return $event->id_segment == $seg->sid;
+        });
+
+        foreach ($eventsForThisSegment as $event) {
+            $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($event->translation) : $event->translation;
+
+            $elements[] = [
+                'type' => $event->stv_creation_date !== null ? 'version' : 'event',
+                'date' => $event->stv_creation_date ?? $event->ste_creation_date,
+                'revision_number' => ReviewUtils::sourcePageToRevisionNumber($event->source_page),
+                'source_page' => $event->source_page,
+                'version_number' => $event->version_number,
+                'translation' => $translation,
+                'issues' => array_filter($issues, function ($issue) use ($event) {
+                    return $event->id_segment == $issue->segment_id && $event->version_number == $issue->translation_version;
+                })
+            ];
+        }
+
+        $seg->history = $elements;
     }
 
     /**

@@ -95,6 +95,8 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     protected string $tm_analysis_status;
 
+    public array $history = [];
+
     /**
      * @return string
      */
