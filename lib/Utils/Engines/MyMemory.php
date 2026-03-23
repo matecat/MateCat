@@ -278,27 +278,7 @@ class MyMemory extends AbstractEngine
      */
     public function set($_config): ?SetContributionResponse
     {
-        $parameters = [];
-        $parameters['seg'] = $_config['segment'] ?? '';
-        $parameters['tra'] = $_config['translation'] ?? '';
-        $parameters['tnote'] = $_config['tnote'];
-        $parameters['langpair'] = $_config['source'] . "|" . $_config['target'];
-        $parameters['de'] = $_config['email'];
-        $parameters['mt'] = $_config['set_mt'] ?? true;
-        $parameters['client_id'] = $_config['uid'] ?? 0;
-        $parameters['prop'] = $_config['prop'];
-
-        if (isset($_config['context_after']) || isset($_config['context_before'])) {
-            $parameters['context_after'] = $_config['context_after'] ?? '';
-            $parameters['context_before'] = $_config['context_before'] ?? '';
-        }
-
-        if (!empty($_config['id_user'])) {
-            if (!is_array($_config['id_user'])) {
-                $_config['id_user'] = [$_config['id_user']];
-            }
-            $parameters['key'] = implode(",", $_config['id_user']);
-        }
+        $parameters = $this->buildContributeParameters($_config);
 
         $this->call('contribute_relative_url', $parameters, true);
 
@@ -332,27 +312,7 @@ class MyMemory extends AbstractEngine
             $mh->verbose = true;
 
             foreach ($batch as $config) {
-                $parameters = [];
-                $parameters['seg'] = $config['segment'] ?? '';
-                $parameters['tra'] = $config['translation'] ?? '';
-                $parameters['tnote'] = $config['tnote'];
-                $parameters['langpair'] = $config['source'] . "|" . $config['target'];
-                $parameters['de'] = $config['email'];
-                $parameters['mt'] = $config['set_mt'] ?? true;
-                $parameters['client_id'] = $config['uid'] ?? 0;
-                $parameters['prop'] = $config['prop'];
-
-                if (isset($config['context_after']) || isset($config['context_before'])) {
-                    $parameters['context_after'] = $config['context_after'] ?? '';
-                    $parameters['context_before'] = $config['context_before'] ?? '';
-                }
-
-                if (!empty($config['id_user'])) {
-                    if (!is_array($config['id_user'])) {
-                        $config['id_user'] = [$config['id_user']];
-                    }
-                    $parameters['key'] = implode(",", $config['id_user']);
-                }
+                $parameters = $this->buildContributeParameters($config);
 
                 $curlOpt = $this->curl_additional_params + [
                         CURLOPT_POSTFIELDS  => $parameters,
@@ -365,6 +325,40 @@ class MyMemory extends AbstractEngine
 
             $mh->multiExec();
         }
+    }
+
+    /**
+     * Build POST parameters for a TM contribution request.
+     *
+     * @param array<string, mixed> $config
+     *
+     * @return array<string, mixed>
+     */
+    private function buildContributeParameters(array $config): array
+    {
+        $parameters = [];
+        $parameters['seg'] = $config['segment'] ?? '';
+        $parameters['tra'] = $config['translation'] ?? '';
+        $parameters['tnote'] = $config['tnote'];
+        $parameters['langpair'] = $config['source'] . "|" . $config['target'];
+        $parameters['de'] = $config['email'];
+        $parameters['mt'] = $config['set_mt'] ?? true;
+        $parameters['client_id'] = $config['uid'] ?? 0;
+        $parameters['prop'] = $config['prop'];
+
+        if (isset($config['context_after']) || isset($config['context_before'])) {
+            $parameters['context_after'] = $config['context_after'] ?? '';
+            $parameters['context_before'] = $config['context_before'] ?? '';
+        }
+
+        if (!empty($config['id_user'])) {
+            if (!is_array($config['id_user'])) {
+                $config['id_user'] = [$config['id_user']];
+            }
+            $parameters['key'] = implode(",", $config['id_user']);
+        }
+
+        return $parameters;
     }
 
     /**
