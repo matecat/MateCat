@@ -1059,8 +1059,7 @@ class ProjectManager
     private function insertSegmentNotesForFile(): void
     {
         $this->projectStructure = $this->features->filter('handleJsonNotesBeforeInsert', $this->projectStructure);
-        $this->getProjectManagerModel()->bulkInsertSegmentNotes($this->projectStructure->notes);
-        $this->getProjectManagerModel()->bulkInsertSegmentMetaDataFromAttributes($this->projectStructure->notes);
+        $this->getProjectManagerModel()->bulkInsertSegmentNotesAndMetadata($this->projectStructure->notes);
     }
 
     /**
