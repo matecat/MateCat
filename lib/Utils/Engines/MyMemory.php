@@ -8,7 +8,6 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Users\UserStruct;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
@@ -30,6 +29,7 @@ use Utils\Engines\Results\MyMemory\TagProjectionResponse;
 use Utils\Engines\Results\MyMemory\UpdateContributionResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -187,6 +187,10 @@ class MyMemory extends AbstractEngine
         if (!empty($this->result->matches)) {
             /** @var $match Matches */
             foreach ($this->result->matches as $match) {
+                if (!$match instanceof Matches) {
+                    continue;
+                }
+
                 if (stripos($match->created_by, InternalMatchesConstants::MT) !== false) {
                     $match->match = $this->getStandardMtPenaltyString();
                 }
@@ -270,7 +274,7 @@ class MyMemory extends AbstractEngine
     /**
      * @param $_config
      *
-     * @return int
+     * @return SetContributionResponse|null
      */
     public function set($_config): ?SetContributionResponse
     {
@@ -301,6 +305,71 @@ class MyMemory extends AbstractEngine
         return $this->result;
     }
 
+    /**
+     * Send multiple TM contributions in parallel via MultiCurlHandler.
+     *
+     * Fire-and-forget: individual request failures are silently ignored.
+     * Configs are chunked into batches of $batchSize parallel requests.
+     *
+     * @param array<int, array<string, mixed>> $configsList
+     * @param int $batchSize
+     * @throws Exception
+     */
+    public function setMulti(array $configsList, int $batchSize = 20): void
+    {
+        if (empty($configsList)) {
+            return;
+        }
+
+        if ($batchSize < 1) {
+            $batchSize = 1;
+        }
+
+        $url = "{$this->engineRecord['base_url']}/" . $this->contribute_relative_url;
+
+        foreach (array_chunk($configsList, $batchSize) as $batch) {
+            $mh = new MultiCurlHandler($this->logger);
+            $mh->verbose = true;
+
+            foreach ($batch as $config) {
+                $parameters = [];
+                $parameters['seg'] = $config['segment'] ?? '';
+                $parameters['tra'] = $config['translation'] ?? '';
+                $parameters['tnote'] = $config['tnote'];
+                $parameters['langpair'] = $config['source'] . "|" . $config['target'];
+                $parameters['de'] = $config['email'];
+                $parameters['mt'] = $config['set_mt'] ?? true;
+                $parameters['client_id'] = $config['uid'] ?? 0;
+                $parameters['prop'] = $config['prop'];
+
+                if (isset($config['context_after']) || isset($config['context_before'])) {
+                    $parameters['context_after'] = $config['context_after'] ?? '';
+                    $parameters['context_before'] = $config['context_before'] ?? '';
+                }
+
+                if (!empty($config['id_user'])) {
+                    if (!is_array($config['id_user'])) {
+                        $config['id_user'] = [$config['id_user']];
+                    }
+                    $parameters['key'] = implode(",", $config['id_user']);
+                }
+
+                $curlOpt = $this->curl_additional_params + [
+                        CURLOPT_POSTFIELDS  => $parameters,
+                        CURLINFO_HEADER_OUT => true,
+                        CURLOPT_TIMEOUT     => 10,
+                    ];
+
+                $mh->createResource($url, $curlOpt);
+            }
+
+            $mh->multiExec();
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
     public function update($_config): UpdateContributionResponse
     {
         $parameters = [];
@@ -627,7 +696,7 @@ class MyMemory extends AbstractEngine
      * @param string $memoryKey
      * @param UserStruct $user * Not used
      *
-     * @return array|mixed
+     * @return FileImportAndStatusResponse
      */
     public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
     {

@@ -40,7 +40,7 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @var mixed
      */
-    protected $result = []; // this cannot be forced to be an array, engines may use different types
+    protected mixed $result = []; // this cannot be forced to be an array, engines may use different types
     protected array $error = [];
 
     protected array $curl_additional_params = [];
