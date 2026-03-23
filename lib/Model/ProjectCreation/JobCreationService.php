@@ -371,10 +371,10 @@ class JobCreationService
             $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export($e->getMessage(), true);
             Utils::sendErrMailReport($msg);
             $this->logger->debug("Pre-translation insertion failed for job $job->id", (new Error($e))->render(true));
-            $projectStructure->result['errors'][] = [
-                "code"    => (int)$e->getCode(),
-                "message" => "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created.",
-            ];
+            $projectStructure->addError(
+                (int)$e->getCode(),
+                "Pre-translations lost for job $job->id: " . $e->getMessage() . ". The project should be re-created."
+            );
         }
     }
 }

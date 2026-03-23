@@ -84,7 +84,7 @@ class TmKeyService
                     throw new Exception("TM key is not valid: " . $_tmKey['key'], ProjectCreationError::TM_KEY_INVALID->value);
                 }
             } catch (Exception $e) {
-                $this->addProjectError($projectStructure, $e->getCode(), $e->getMessage());
+                $projectStructure->addError($e->getCode(), $e->getMessage());
 
                 return;
             }
@@ -195,7 +195,7 @@ class TmKeyService
                         continue;
                     }
                 } catch (Exception $e) {
-                    $this->addProjectError($projectStructure, $e->getCode(), $e->getMessage());
+                    $projectStructure->addError($e->getCode(), $e->getMessage());
 
                     throw $e;
                 }
@@ -247,8 +247,7 @@ class TmKeyService
                     }
 
                     if (time() > $deadline) {
-                        $this->addProjectError(
-                            $projectStructure,
+                        $projectStructure->addError(
                             ProjectCreationError::TMX_IMPORT_TIMEOUT->value,
                             "TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName()
                         );
@@ -262,7 +261,7 @@ class TmKeyService
                     sleep($pollInterval);
                     $pollInterval = min($pollInterval * 2, self::TMX_POLL_MAX_INTERVAL);
                 } catch (Exception $e) {
-                    $this->addProjectError($projectStructure, $e->getCode(), $e->getMessage());
+                    $projectStructure->addError($e->getCode(), $e->getMessage());
 
                     $this->log($e->getMessage(), $e);
 
@@ -308,18 +307,5 @@ class TmKeyService
     protected function getUserByUid(int $uid): ?UserStruct
     {
         return (new UserDao())->setCacheTTL(60 * 60)->getByUid($uid);
-    }
-
-    /**
-     * @param ProjectStructure $projectStructure
-     * @param int $code
-     * @param string $message
-     */
-    private function addProjectError(ProjectStructure $projectStructure, int $code, string $message): void
-    {
-        $projectStructure->result['errors'][] = [
-            "code" => $code,
-            "message" => $message,
-        ];
     }
 }

@@ -87,8 +87,7 @@ class FileInsertionService
 
             $sha1 = sha1_file($filePathName);
             if ($sha1 === false) {
-                $this->addProjectError(
-                    $projectStructure,
+                $projectStructure->addError(
                     ProjectCreationError::FILE_HASH_FAILED->value,
                     "Failed to compute hash for file $fileName"
                 );
@@ -99,7 +98,7 @@ class FileInsertionService
                 $fs->makeCachePackage($sha1, (string)$projectStructure->source_language, null, $filePathName);
                 $this->logger->debug("File $fileName converted to cache");
             } catch (Exception $e) {
-                $this->addProjectError($projectStructure, ProjectCreationError::FILE_HASH_FAILED->value, $e->getMessage());
+                $projectStructure->addError(ProjectCreationError::FILE_HASH_FAILED->value, $e->getMessage());
             }
 
             $fs->linkSessionToCacheForAlreadyConvertedFiles(
@@ -236,15 +235,13 @@ class FileInsertionService
         $code = $e->getCode();
 
         match (true) {
-            $code == ProjectCreationError::REFERENCE_FILES_DISK_ERROR->value => $this->addProjectError($projectStructure, $code, "Failed to store reference files on disk. Permission denied"),
-            $code == ProjectCreationError::REFERENCE_FILES_DB_ERROR->value => $this->addProjectError($projectStructure, $code, "Failed to store reference files in database"),
-            $code == ProjectCreationError::XLIFF_NOT_FOUND->value => $this->addProjectError(
-                $projectStructure,
+            $code == ProjectCreationError::REFERENCE_FILES_DISK_ERROR->value => $projectStructure->addError($code, "Failed to store reference files on disk. Permission denied"),
+            $code == ProjectCreationError::REFERENCE_FILES_DB_ERROR->value => $projectStructure->addError($code, "Failed to store reference files in database"),
+            $code == ProjectCreationError::XLIFF_NOT_FOUND->value => $projectStructure->addError(
                 ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value,
                 "File not found. Failed to save XLIFF conversion on disk."
             ),
-            $code == ProjectCreationError::GENERIC_ERROR->value && str_contains($e->getMessage(), '<Message>Invalid copy source encoding.</Message>') => $this->addProjectError(
-                $projectStructure,
+            $code == ProjectCreationError::GENERIC_ERROR->value && str_contains($e->getMessage(), '<Message>Invalid copy source encoding.</Message>') => $projectStructure->addError(
                 ProjectCreationError::FILE_MOVE_FAILED->value,
                 'There was a problem during the upload of your file(s). Please, ' .
                 'try to rename your file(s) avoiding non-standard characters'
@@ -259,8 +256,8 @@ class FileInsertionService
                     ProjectCreationError::GENERIC_ERROR->value
                 ],
                 true
-            ) => $this->addProjectError($projectStructure, $code, $e->getMessage()),
-            default => $this->addProjectError($projectStructure, $code, 'An unexpected error occurred during file insertion: ' . $e->getMessage()),
+            ) => $projectStructure->addError($code, $e->getMessage()),
+            default => $projectStructure->addError($code, 'An unexpected error occurred during file insertion: ' . $e->getMessage()),
         };
     }
 
@@ -340,16 +337,5 @@ class FileInsertionService
         }
 
         return $fileStructures;
-    }
-
-    /**
-     * Append an error entry to projectStructure->result['errors'].
-     */
-    private function addProjectError(ProjectStructure $projectStructure, int $code, string $message): void
-    {
-        $projectStructure->result['errors'][] = [
-            "code" => $code,
-            "message" => $message,
-        ];
     }
 }

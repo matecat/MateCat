@@ -130,14 +130,6 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the protected addProjectError().
-     */
-    public function callAddProjectError(int $code, string $message): void
-    {
-        $this->addProjectError($code, $message);
-    }
-
-    /**
      * Set a specific key in the projectStructure for testing.
      */
     public function setProjectStructureValue(string $key, mixed $value): void

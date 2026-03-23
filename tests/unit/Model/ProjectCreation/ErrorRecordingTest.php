@@ -2,85 +2,44 @@
 
 namespace unit\Model\ProjectCreation;
 
-use Exception;
-use Matecat\SubFiltering\MateCatFilter;
-use Model\FeaturesBase\FeatureSet;
-use Model\Files\MetadataDao;
+use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
-use TestHelpers\AbstractTest;
-use Utils\Logger\MatecatLogger;
-use Utils\Registry\AppConfig;
+use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for the error recording pattern in {@see \Model\ProjectCreation\ProjectManager}.
+ * Unit tests for the error recording pattern via {@see ProjectStructure::addError()}.
  *
- * Tests cover:
- * - `addProjectError()` — appends structured error entries to projectStructure->result['errors']
- * - General error array structure (code + message keys)
+ * These tests verify the integration-level contract: errors appended via addError()
+ * are visible to callers reading the result['errors'] array.
  *
- * Note: `sanitizeProjectStructure()`, `validateUploadToken()`, and `validateXliffParameters()`
- * were removed as part of the controller-layer validation refactoring.
- * Upload token validation now lives in the controllers (NewController, CreateProjectController).
- * XliffRulesModel normalization is done inline at the top of `createProject()`.
- *
- * @see REFACTORING_PLAN.md — Step 0e
+ * @see ProjectStructureTest for lower-level addError() unit tests
  */
-class ErrorRecordingTest extends AbstractTest
+class ErrorRecordingTest extends TestCase
 {
-    private TestableProjectManager $pm;
-    private string $originalFileStorageMethod;
-
-    /**
-     * @throws Exception
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $this->originalFileStorageMethod = AppConfig::$FILE_STORAGE_METHOD;
-        AppConfig::$FILE_STORAGE_METHOD = 'fs';
-
-        $featureSet = new FeatureSet();
-        /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance($featureSet, 'en-US', 'it-IT');
-        $metadataDao = $this->createStub(MetadataDao::class);
-        $logger = $this->createStub(MatecatLogger::class);
-
-        $this->pm = new TestableProjectManager();
-        $this->pm->initForTest($filter, $featureSet, $metadataDao, $logger);
-    }
-
-    public function tearDown(): void
-    {
-        AppConfig::$FILE_STORAGE_METHOD = $this->originalFileStorageMethod;
-        parent::tearDown();
-    }
-
     // =========================================================================
-    // addProjectError() — error recording
+    // addError() — error recording
     // =========================================================================
 
     #[Test]
-    public function testAddProjectErrorAppendsToResultErrors(): void
+    public function testAddErrorAppendsToResultErrors(): void
     {
-        $this->pm->callAddProjectError(-19, 'Invalid Upload Token.');
+        $ps = new ProjectStructure();
+        $ps->addError(-19, 'Invalid Upload Token.');
 
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
+        $errors = $ps->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertEquals(-19, $errors[0]['code']);
         $this->assertEquals('Invalid Upload Token.', $errors[0]['message']);
     }
 
     #[Test]
-    public function testAddProjectErrorDoesNotResetExistingErrors(): void
+    public function testAddErrorDoesNotResetExistingErrors(): void
     {
-        // Pre-populate with an error
-        $this->pm->callAddProjectError(-999, 'First error');
+        $ps = new ProjectStructure();
+        $ps->addError(-999, 'First error');
+        $ps->addError(400, 'Second error');
 
-        // Add another error — should NOT reset the first one
-        $this->pm->callAddProjectError(400, 'Second error');
-
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
+        $errors = $ps->result['errors'];
         $this->assertCount(2, $errors);
         $this->assertEquals(-999, $errors[0]['code']);
         $this->assertEquals(400, $errors[1]['code']);
@@ -93,10 +52,10 @@ class ErrorRecordingTest extends AbstractTest
     #[Test]
     public function testErrorEntryHasCodeAndMessageKeys(): void
     {
-        $this->pm->callAddProjectError(-19, 'Invalid Upload Token.');
+        $ps = new ProjectStructure();
+        $ps->addError(-19, 'Invalid Upload Token.');
 
-        $errors = $this->pm->getTestProjectStructure()->result['errors'];
-        $error = $errors[0];
+        $error = $ps->result['errors'][0];
 
         $this->assertArrayHasKey('code', $error);
         $this->assertArrayHasKey('message', $error);
@@ -107,11 +66,12 @@ class ErrorRecordingTest extends AbstractTest
     #[Test]
     public function testMultipleErrorsAreAppended(): void
     {
-        // First error
-        $this->pm->callAddProjectError(-19, 'Invalid Upload Token.');
+        $ps = new ProjectStructure();
 
-        // Second error appended manually
-        $ps = $this->pm->getTestProjectStructure();
+        // First error via addError()
+        $ps->addError(-19, 'Invalid Upload Token.');
+
+        // Second error appended manually (legacy callers may still do this)
         $ps->result['errors'][] = ['code' => -999, 'message' => 'Second error'];
 
         $errors = $ps->result['errors'];

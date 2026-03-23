@@ -342,19 +342,6 @@ class ProjectManager
     }
 
     /**
-     * Append an error entry to projectStructure->result['errors'].
-     *
-     * Centralizes the ~19 occurrences of the duplicated appended pattern.
-     */
-    protected function addProjectError(int $code, string $message): void
-    {
-        $this->projectStructure->result['errors'][] = [
-            "code" => $code,
-            "message" => $message,
-        ];
-    }
-
-    /**
      * Creates a record in the projects table and instantiates the project struct
      * internally.
      *
@@ -593,7 +580,7 @@ class ProjectManager
             $this->zipFileHandling($linkFiles);
         } catch (Exception $e) {
             $this->log($e->getMessage(), $e);
-            $this->addProjectError($e->getCode(), $e->getMessage());
+            $this->projectStructure->addError($e->getCode(), $e->getMessage());
             throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
     }
@@ -714,16 +701,16 @@ class ProjectManager
         $code = $e->getCode();
 
         match ($code) {
-            ProjectCreationError::NO_TRANSLATABLE_TEXT->value => $this->addProjectError(
+            ProjectCreationError::NO_TRANSLATABLE_TEXT->value => $this->projectStructure->addError(
                 ProjectCreationError::NO_TRANSLATABLE_TEXT->value,
                 "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."
             ),
-            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->addProjectError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "Xliff Import Error: {$e->getMessage()}"),
-            ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->addProjectError(
+            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->projectStructure->addError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "Xliff Import Error: {$e->getMessage()}"),
+            ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->projectStructure->addError(
                 $code,
                 (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage()
             ),
-            default => $this->addProjectError($code, $e->getMessage()),
+            default => $this->projectStructure->addError($code, $e->getMessage()),
         };
 
         if ($code == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && AppConfig::$FILE_STORAGE_METHOD != 's3') {
