@@ -183,40 +183,10 @@ class SegmentExtractor
      */
     private function processXliffFile(array $xliff_file, int $fid, ProjectStructure $projectStructure): int
     {
-        // save external-file attribute
-        if (isset($xliff_file['attr']['external-file'])) {
-            $externalFile = $xliff_file['attr']['external-file'];
-            $this->filesMetadataDao->insert($this->idProject, $fid, 'mtc:references', $externalFile);
-        }
-
-        // save x-jsont* datatype
-        if (isset($xliff_file['attr']['data-type'])) {
-            $dataType = $xliff_file['attr']['data-type'];
-
-            if (str_contains($dataType, 'x-jsont')) {
-                $this->filesMetadataDao->insert($this->idProject, $fid, 'data-type', $dataType);
-            }
-        }
+        $filePartsId = $this->persistXliffFileAttributes($xliff_file, $fid);
 
         if (!array_key_exists('trans-units', $xliff_file)) {
             return 0;
-        }
-
-        // files-part
-        $filePartsId = null;
-        if (isset($xliff_file['attr']['original'])) {
-            $filesPartsStruct = new FilesPartsStruct();
-            $filesPartsStruct->id_file = $fid;
-            $filesPartsStruct->tag_key = 'original';
-            $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
-
-            $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
-
-            // save `custom` meta data
-            $customMetadata = $xliff_file['attr']['custom'] ?? null;
-            if (!empty($customMetadata)) {
-                $this->filesMetadataDao->bulkInsert($this->idProject, $fid, $customMetadata, $filePartsId);
-            }
         }
 
         $fileCounterShowInCattool = 0;
@@ -262,6 +232,53 @@ class SegmentExtractor
         $this->totalSegments += count($xliff_file['trans-units']);
 
         return $fileCounterShowInCattool;
+    }
+
+    /**
+     * Persist XLIFF <file>-level attributes (external-file, data-type, original, custom metadata)
+     * and create the file-parts record if an 'original' attribute is present.
+     *
+     * @param array<string, mixed> $xliff_file
+     * @param int $fid
+     *
+     * @return int|null The file-parts ID if an 'original' attribute was found, null otherwise
+     * @throws ReflectionException
+     */
+    private function persistXliffFileAttributes(array $xliff_file, int $fid): ?int
+    {
+        // save external-file attribute
+        if (isset($xliff_file['attr']['external-file'])) {
+            $externalFile = $xliff_file['attr']['external-file'];
+            $this->filesMetadataDao->insert($this->idProject, $fid, 'mtc:references', $externalFile);
+        }
+
+        // save x-jsont* datatype
+        if (isset($xliff_file['attr']['data-type'])) {
+            $dataType = $xliff_file['attr']['data-type'];
+
+            if (str_contains($dataType, 'x-jsont')) {
+                $this->filesMetadataDao->insert($this->idProject, $fid, 'data-type', $dataType);
+            }
+        }
+
+        // files-part
+        $filePartsId = null;
+        if (isset($xliff_file['attr']['original'])) {
+            $filesPartsStruct = new FilesPartsStruct();
+            $filesPartsStruct->id_file = $fid;
+            $filesPartsStruct->tag_key = 'original';
+            $filesPartsStruct->tag_value = $xliff_file['attr']['original'];
+
+            $filePartsId = (new FilesPartsDao())->insert($filesPartsStruct);
+
+            // save `custom` meta data
+            $customMetadata = $xliff_file['attr']['custom'] ?? null;
+            if (!empty($customMetadata)) {
+                $this->filesMetadataDao->bulkInsert($this->idProject, $fid, $customMetadata, $filePartsId);
+            }
+        }
+
+        return $filePartsId;
     }
 
     /**
