@@ -889,6 +889,8 @@ class SegmentExtractor
         $config['target'] = $xliff_file_attributes['target-language'];
         $config['email'] = AppConfig::$MYMEMORY_API_KEY;
 
+        $configsList = [];
+
         foreach ($xliff_trans_unit['alt-trans'] as $altTrans) {
             if (!empty($altTrans['attr']['match-quality']) && (float)$altTrans['attr']['match-quality'] < 50) {
                 continue;
@@ -897,7 +899,7 @@ class SegmentExtractor
             $sourceRaw = null;
 
             // Wrong alt-trans tag
-            if ((empty($xliff_trans_unit['source'] /* theoretically impossible empty source */) && empty($altTrans['source'])) || empty($altTrans['target'])) {
+            if ((empty($xliff_trans_unit['source']) && empty($altTrans['source'])) || empty($altTrans['target'])) {
                 continue;
             }
 
@@ -917,27 +919,33 @@ class SegmentExtractor
                 continue;
             }
 
-            $config['segment'] = $sourceRaw !== null
+            $segment = $sourceRaw !== null
                 ? $this->filter->fromRawXliffToLayer0($sourceRaw)
                 : '';
 
             // skip TM submission when source is empty after filtering
-            if ($config['segment'] === '') {
+            if ($segment === '') {
                 continue;
             }
 
-            $config['translation'] = $this->filter->fromRawXliffToLayer0($targetRaw);
-            $config['context_after'] = null;
-            $config['context_before'] = null;
+            $contribution = $config;
+            $contribution['segment'] = $segment;
+            $contribution['translation'] = $this->filter->fromRawXliffToLayer0($targetRaw);
+            $contribution['context_after'] = null;
+            $contribution['context_before'] = null;
 
             if (!empty($altTrans['attr']['match-quality'])) {
                 // get the Props
-                $config['prop'] = json_encode([
+                $contribution['prop'] = json_encode([
                     "match-quality" => $altTrans['attr']['match-quality']
                 ]);
             }
 
-            $engine->set($config);
+            $configsList[] = $contribution;
+        }
+
+        if (!empty($configsList)) {
+            $engine->setMulti($configsList);
         }
     }
 }
