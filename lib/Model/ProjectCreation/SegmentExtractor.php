@@ -4,7 +4,6 @@ namespace Model\ProjectCreation;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
@@ -752,7 +751,7 @@ class SegmentExtractor
             }
 
             foreach ($trans_unit['notes'] as $note) {
-                $this->initNestedArray('notes', $internal_id, $projectStructure);
+                $projectStructure->notes[$internal_id] ??= [];
 
                 $noteKey = null;
                 $noteContent = null;
@@ -806,39 +805,12 @@ class SegmentExtractor
     {
         $internal_id = self::sanitizedUnitId($trans_unit['attr']['id'], $fid);
         if (isset($trans_unit['context-group'])) {
-            $this->initNestedArray('context_group', $internal_id, $projectStructure);
+            $projectStructure->context_group[$internal_id] ??= [];
 
             if (!isset($projectStructure->context_group[$internal_id]['context_json'])) {
                 $projectStructure->context_group[$internal_id]['context_json'] = $trans_unit['context-group'];
                 $projectStructure->context_group[$internal_id]['context_json_segment_ids'] = []; // because of mrk tags, the same context can be owned by different segments
             }
-        }
-    }
-
-    /**
-     * Initialize a nested array entry in projectStructure if it does not already exist.
-     *
-     * @param string $key
-     * @param string $id
-     * @param ProjectStructure $projectStructure
-     */
-    private function initNestedArray(string $key, string $id, ProjectStructure $projectStructure): void
-    {
-        switch ($key) {
-            case 'notes':
-                if (!array_key_exists($id, $projectStructure->notes)) {
-                    $projectStructure->notes[$id] = [];
-                }
-                return;
-
-            case 'context_group':
-                if (!array_key_exists($id, $projectStructure->context_group)) {
-                    $projectStructure->context_group[$id] = [];
-                }
-                return;
-
-            default:
-                throw new InvalidArgumentException('Invalid nested array key.');
         }
     }
 
