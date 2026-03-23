@@ -173,6 +173,19 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public array $features = [];
     public bool $create_2_pass_review = false;
 
+    // ── Error recording ────────────────────────────────────────────
+
+    /**
+     * Append a structured error entry to {@see $result}['errors'].
+     */
+    public function addError(int $code, string $message): void
+    {
+        $this->result['errors'][] = [
+            'code'    => $code,
+            'message' => $message,
+        ];
+    }
+
     // ── Serialization ───────────────────────────────────────────────
 
     /**

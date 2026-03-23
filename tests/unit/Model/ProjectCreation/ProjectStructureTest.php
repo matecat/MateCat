@@ -323,6 +323,48 @@ class ProjectStructureTest extends AbstractTest
         $this->assertSame($ps->toArray(), $ps->getArrayCopy());
     }
 
+    // ── addError() — error recording ────────────────────────────
+
+    #[Test]
+    public function testAddErrorAppendsSingleEntry(): void
+    {
+        $ps = new ProjectStructure();
+
+        $ps->addError(-19, 'Invalid Upload Token.');
+
+        $errors = $ps->result['errors'];
+        $this->assertCount(1, $errors);
+        $this->assertSame(-19, $errors[0]['code']);
+        $this->assertSame('Invalid Upload Token.', $errors[0]['message']);
+    }
+
+    #[Test]
+    public function testAddErrorPreservesExistingErrors(): void
+    {
+        $ps = new ProjectStructure();
+
+        $ps->addError(-999, 'First error');
+        $ps->addError(400, 'Second error');
+
+        $errors = $ps->result['errors'];
+        $this->assertCount(2, $errors);
+        $this->assertSame(-999, $errors[0]['code']);
+        $this->assertSame(400, $errors[1]['code']);
+    }
+
+    #[Test]
+    public function testAddErrorEntryHasExactlyCodeAndMessageKeys(): void
+    {
+        $ps = new ProjectStructure();
+
+        $ps->addError(100, 'Some error');
+
+        $error = $ps->result['errors'][0];
+        $this->assertArrayHasKey('code', $error);
+        $this->assertArrayHasKey('message', $error);
+        $this->assertCount(2, $error);
+    }
+
     // ── Edge cases ───────────────────────────────────────────────
 
     #[Test]
