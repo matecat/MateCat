@@ -3,14 +3,12 @@
 namespace Model\ProjectCreation;
 
 use Exception;
-use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 use Utils\Constants\EngineConstants;
-use Utils\Engines\MyMemory;
 
 class ProjectMetadataService
 {
@@ -80,15 +78,7 @@ class ProjectMetadataService
         $extraKeys = [];
         // Collect all configuration parameter keys from every registered MT/TM engine
         foreach (EngineConstants::getAvailableEnginesList() as $engineName) {
-            $extraKeys = array_merge(
-                $extraKeys,
-                (new $engineName(
-                    new EngineStruct([
-                        // MyMemory is a TM engine; all others are MT engines
-                        'type' => $engineName == MyMemory::class ? EngineConstants::TM : EngineConstants::MT,
-                    ])
-                ))->getConfigurationParameters()
-            );
+            $extraKeys = array_merge($extraKeys, $engineName::getConfigurationParameters());
         }
 
         // Copy any engine-specific config values (e.g., deepl_formality, mmt_glossaries)

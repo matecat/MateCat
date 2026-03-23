@@ -17,6 +17,7 @@ use stdClass;
 use TestHelpers\AbstractTest;
 use Utils\Constants\ProjectStatus;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\NONE;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Utils\Registry\AppConfig;
@@ -52,6 +53,28 @@ class TestableCreateProjectController extends CreateProjectController
         ?array $gdriveSession,
     ): ProjectStructure {
         return parent::buildProjectStructure($data, $metadata, $filesFound, $uploadToken, $user, $engine, $gdriveSession);
+    }
+}
+
+/**
+ * Concrete engine stub that avoids PHPUnit mock limitations with static methods.
+ *
+ * PHPUnit mocks reject static method calls via instance syntax ($mock->staticMethod()),
+ * so we use a real object with a configurable static property instead.
+ */
+class StubEngine extends NONE
+{
+    /** @var string[] */
+    public static array $configParams = [];
+
+    public function __construct()
+    {
+        // Skip AbstractEngine constructor — no EngineStruct needed for tests.
+    }
+
+    public static function getConfigurationParameters(): array
+    {
+        return static::$configParams;
     }
 }
 
@@ -92,9 +115,11 @@ class BuildProjectStructureTest extends AbstractTest
         $this->user->method('getUid')->willReturn(42);
         $this->user->method('getEmail')->willReturn('test@example.com');
 
-        // Stub AbstractEngine — returns no extra configuration parameters by default
-        $this->engine = $this->createStub(AbstractEngine::class);
-        $this->engine->method('getConfigurationParameters')->willReturn([]);
+        // Stub engine — returns no extra configuration parameters by default.
+        // Uses a concrete class instead of createStub() because PHPUnit mocks
+        // reject static method calls via instance syntax.
+        StubEngine::$configParams = [];
+        $this->engine = new StubEngine();
     }
 
     // ──────────────────────────────────────────────────────────────────
@@ -345,11 +370,11 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerPassesEngineConfigurationParameters(): void
     {
         // Engine declares two config parameters; request has values for both
-        $engine = $this->createStub(AbstractEngine::class);
-        $engine->method('getConfigurationParameters')->willReturn([
+        StubEngine::$configParams = [
             'mmt_glossaries',
             'deepl_formality',
-        ]);
+        ];
+        $engine = new StubEngine();
 
         $request = $this->makeNewControllerRequest([
             'mmt_glossaries'  => 'glossary-123',
@@ -372,10 +397,10 @@ class BuildProjectStructureTest extends AbstractTest
     #[Test]
     public function newControllerSkipsNullEngineConfigParameters(): void
     {
-        $engine = $this->createStub(AbstractEngine::class);
-        $engine->method('getConfigurationParameters')->willReturn([
+        StubEngine::$configParams = [
             'mmt_glossaries',
-        ]);
+        ];
+        $engine = new StubEngine();
 
         $request = $this->makeNewControllerRequest([
             'mmt_glossaries' => null,
@@ -399,12 +424,12 @@ class BuildProjectStructureTest extends AbstractTest
     {
         // Engine must declare lara_glossaries, lara_style, mmt_glossaries
         // as configuration parameters so the generic loop picks them up.
-        $engine = $this->createStub(AbstractEngine::class);
-        $engine->method('getConfigurationParameters')->willReturn([
+        StubEngine::$configParams = [
             'lara_glossaries',
             'lara_style',
             'mmt_glossaries',
-        ]);
+        ];
+        $engine = new StubEngine();
 
         $request = $this->makeNewControllerRequest([
             'lara_glossaries' => 'glossary-abc',
@@ -1321,11 +1346,11 @@ class BuildProjectStructureTest extends AbstractTest
     #[Test]
     public function createControllerPassesEngineConfigurationParameters(): void
     {
-        $engine = $this->createStub(AbstractEngine::class);
-        $engine->method('getConfigurationParameters')->willReturn([
+        StubEngine::$configParams = [
             'deepl_formality',
             'deepl_id_glossary',
-        ]);
+        ];
+        $engine = new StubEngine();
 
         $data = $this->makeCreateControllerData([
             'deepl_formality'   => 'less',
@@ -1350,10 +1375,10 @@ class BuildProjectStructureTest extends AbstractTest
     #[Test]
     public function createControllerSkipsNullEngineConfigParameters(): void
     {
-        $engine = $this->createStub(AbstractEngine::class);
-        $engine->method('getConfigurationParameters')->willReturn([
+        StubEngine::$configParams = [
             'deepl_formality',
-        ]);
+        ];
+        $engine = new StubEngine();
 
         $data = $this->makeCreateControllerData([
             'deepl_formality' => null,

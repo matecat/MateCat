@@ -191,7 +191,7 @@ abstract class AbstractEngine implements EngineInterface
     /**
      * @return array
      */
-    abstract public function getConfigurationParameters(): array;
+    abstract public static function getConfigurationParameters(): array;
 
     /**
      * @param mixed $rawValue
