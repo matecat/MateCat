@@ -101,12 +101,9 @@ class ProjectManager
     /**
      * ProjectManager constructor.
      *
+     * @param ProjectStructure $projectStructure
+     * @throws ReflectionException
      * @throws Exception
-     * @throws NotFoundException
-     * @throws AuthenticationError
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
      */
     public function __construct(ProjectStructure $projectStructure)
     {
@@ -135,16 +132,10 @@ class ProjectManager
         );
         $this->filter = $filter;
 
-        $this->projectStructure->array_files = $this->features->filter(
-            'filter_project_manager_array_files',
-            $this->projectStructure->array_files,
-            $this->projectStructure
-        );
-
         // sync array_files_meta
         $array_files_meta = [];
         foreach ($this->projectStructure->array_files_meta as $fileMeta) {
-            if (in_array($fileMeta['basename'], (array)$this->projectStructure->array_files)) {
+            if (in_array($fileMeta['basename'], $this->projectStructure->array_files)) {
                 $array_files_meta[] = $fileMeta;
             }
         }
