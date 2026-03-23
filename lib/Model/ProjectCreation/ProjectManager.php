@@ -891,6 +891,7 @@ class ProjectManager
             $segmentElement['payable_rates'] = $this->projectStructure->array_jobs['payable_rates'];
             $segmentElement['segment'] = $this->filter->fromLayer0ToLayer1($segmentElement['segment']);
         }
+        unset($segmentElement); // break the reference to the last array element to avoid accidental overwrites
 
         $fs = FilesStorageFactory::create();
         $fs::storeFastAnalysisFile((string)$this->project->id, $this->projectStructure->segments_metadata);
