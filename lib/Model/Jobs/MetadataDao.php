@@ -170,11 +170,11 @@ class MetadataDao extends AbstractDao
         $i = 0;
 
         foreach ($metadata as $key => $value) {
-            $placeholders[] = "(:id_job_{$i}, :password_{$i}, :key_{$i}, :value_{$i})";
-            $params["id_job_{$i}"] = $id_job;
-            $params["password_{$i}"] = $password;
-            $params["key_{$i}"] = $key;
-            $params["value_{$i}"] = $value;
+            $placeholders[] = "(:id_job_$i, :password_$i, :key_$i, :value_$i)";
+            $params["id_job_$i"] = $id_job;
+            $params["password_$i"] = $password;
+            $params["key_$i"] = $key;
+            $params["value_$i"] = $value;
             $i++;
         }
 
