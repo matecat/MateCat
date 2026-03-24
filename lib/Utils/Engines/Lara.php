@@ -15,6 +15,7 @@ use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
@@ -263,11 +264,9 @@ class Lara extends AbstractEngine
                 $laraGlossariesArray = [];
 
                 if (!empty($_config['id_project'])) {
-                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], 'lara_glossaries');
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], ProjectsMetadataMarshaller::LARA_GLOSSARIES->value);
 
                     if ($laraGlossaries !== null) {
-                        $laraGlossaries = html_entity_decode($laraGlossaries->value);
-                        $laraGlossariesArray = json_decode($laraGlossaries, true);
                         $translateOptions->setGlossaries($laraGlossariesArray);
                     }
                 }
