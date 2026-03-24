@@ -58,6 +58,7 @@ use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\LaraGlossaryValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
 use Utils\Subfiltering\SubfilteringOptionsValidator;
@@ -466,6 +467,8 @@ class NewController extends KleinController
         if ($engineStruct instanceof Lara) {
             $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
         }
+
+        $lara_glossaries = $this->validateLaraGlossaries($lara_glossaries);
 
         $dialect_strict = $this->validateDialectStrictParam($lang_handler, $dialect_strict);
         $filters_extraction_parameters = $this->validateFiltersExtractionParameters(
@@ -1102,6 +1105,32 @@ class NewController extends KleinController
                 );
 
                 return $mmtGlossaries;
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), -6);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param null $lara_glossaries
+     *
+     * @return string|null
+     */
+    private function validateLaraGlossaries($lara_glossaries = null): ?string
+    {
+        if (!empty($lara_glossaries)) {
+            try {
+                $laraGlossaries = html_entity_decode($lara_glossaries);
+
+                (new LaraGlossaryValidator)->validate(
+                    EngineValidatorObject::fromArray([
+                        'glossaryString' => $laraGlossaries,
+                    ])
+                );
+
+                return $laraGlossaries;
             } catch (Exception $exception) {
                 throw new InvalidArgumentException($exception->getMessage(), -6);
             }

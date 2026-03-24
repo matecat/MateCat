@@ -40,6 +40,7 @@ use Utils\Engines\Lara;
 use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
+use Utils\Engines\Validators\LaraGlossaryValidator;
 use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
 use Utils\Subfiltering\SubfilteringOptionsValidator;
@@ -287,6 +288,8 @@ class CreateProjectController extends AbstractStatefulKleinController
         if ($engineStruct instanceof Lara) {
             $lara_style = (!empty($lara_style)) ? Lara::validateLaraStyle($lara_style) : Lara::DEFAULT_STYLE;
         }
+
+        $lara_glossaries = $this->validateLaraGlossaries($lara_glossaries);
 
         /**
          * Represents a generic data variable that can hold a variety of information.
@@ -546,6 +549,34 @@ class CreateProjectController extends AbstractStatefulKleinController
                 );
 
                 return $mmtGlossaries;
+            } catch (Exception $exception) {
+                throw new InvalidArgumentException($exception->getMessage(), -6);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate `lara_glossaries` string
+     *
+     * @param null $lara_glossaries
+     *
+     * @return string|null
+     */
+    private function validateLaraGlossaries($lara_glossaries = null): ?string
+    {
+        if (!empty($lara_glossaries)) {
+            try {
+                $laraGlossaries = html_entity_decode($lara_glossaries);
+
+                (new LaraGlossaryValidator)->validate(
+                    EngineValidatorObject::fromArray([
+                        'glossaryString' => $laraGlossaries,
+                    ])
+                );
+
+                return $laraGlossaries;
             } catch (Exception $exception) {
                 throw new InvalidArgumentException($exception->getMessage(), -6);
             }
