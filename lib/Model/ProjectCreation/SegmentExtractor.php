@@ -65,7 +65,7 @@ class SegmentExtractor
     private int $filesWordCount = 0;
 
     /**
-     * Total number of trans-units processed (including non-translatable ones).
+     * Total number of translatable trans-units processed (excludes translate="no" units).
      */
     private int $totalSegments = 0;
 
@@ -190,6 +190,7 @@ class SegmentExtractor
         }
 
         $fileCounterShowInCattool = 0;
+        $translatableUnitCount = 0;
 
         foreach ($xliff_file['trans-units'] as $xliff_trans_unit) {
             if (!isset($xliff_trans_unit['attr']['translate'])) {
@@ -200,6 +201,8 @@ class SegmentExtractor
                 // No segments to translate — skip this trans-unit entirely
                 continue;
             }
+
+            $translatableUnitCount++;
 
             $this->manageAlternativeTranslations($xliff_trans_unit, $xliff_file['attr']);
 
@@ -229,7 +232,7 @@ class SegmentExtractor
             }
         }
 
-        $this->totalSegments += count($xliff_file['trans-units']);
+        $this->totalSegments += $translatableUnitCount;
 
         return $fileCounterShowInCattool;
     }

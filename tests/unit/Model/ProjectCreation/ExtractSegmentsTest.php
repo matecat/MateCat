@@ -850,5 +850,59 @@ class ExtractSegmentsTest extends AbstractTest
         $notes = $ps->notes;
         $this->assertGreaterThan(0, count($notes));
     }
+
+    // =========================================================================
+    // translate="no" handling
+    // =========================================================================
+
+    /**
+     * totalSegments must count only translatable trans-units.
+     * The fixture has 4 trans-units: 2 with translate="yes" (default), 2 with translate="no".
+     * Only 2 should be counted.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testTotalSegmentsExcludesTranslateNoUnits(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'with-translate-no.xliff',
+            'original_filename' => 'with-translate-no.xliff',
+        ]);
+
+        // 4 trans-units total, but 2 have translate="no" — only 2 should be counted
+        $this->assertEquals(2, $this->pm->getTotalSegments());
+    }
+
+    /**
+     * Segments array should only contain translatable trans-units.
+     * translate="no" units must be skipped entirely — no segment structs created.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testTranslateNoUnitsAreNotExtractedAsSegments(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'with-translate-no.xliff',
+            'original_filename' => 'with-translate-no.xliff',
+        ]);
+
+        $ps = $this->pm->getTestProjectStructure();
+        $segments = $ps->segments[$fid];
+
+        // Only tu1 ("Hello world") and tu3 ("Goodbye world") should produce segments
+        $this->assertCount(2, $segments);
+
+        /** @var SegmentStruct $seg0 */
+        $seg0 = $segments[0];
+        $this->assertEquals('tu1', $seg0->internal_id);
+
+        /** @var SegmentStruct $seg1 */
+        $seg1 = $segments[1];
+        $this->assertEquals('tu3', $seg1->internal_id);
+    }
 }
 
