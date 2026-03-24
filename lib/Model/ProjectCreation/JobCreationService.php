@@ -187,11 +187,9 @@ class JobCreationService
         }
 
         if ($projectStructure->dialect_strict !== null) {
-            $dialectStrictObj = json_decode($projectStructure->dialect_strict, true) ?? [];
-
-            foreach ($dialectStrictObj as $lang => $value) {
+            foreach ($projectStructure->dialect_strict as $lang => $value) {
                 if (trim($lang) === trim($job->target)) {
-                    $metadata[JobsMetadataMarshaller::DIALECT_STRICT->value] = (string)$value;
+                    $metadata[JobsMetadataMarshaller::DIALECT_STRICT->value] = (string)(int)$value;
                 }
             }
         }

@@ -1,3 +1,5 @@
+.*
+!/.gitignore
 # IDE stuffs
 .settings
 .idea
@@ -8,7 +10,6 @@ webgrind/
 _dic_cache
 .phpunit.result.cache
 /docs
-
 
 # Configuration files
 .num_processes

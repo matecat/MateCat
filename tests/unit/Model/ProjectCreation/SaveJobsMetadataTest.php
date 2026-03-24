@@ -257,18 +257,16 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testDialectStrictPersistsMatchingLanguageValue(): void
     {
-        $dialectJson = json_encode(['it-IT' => 'strict_value', 'fr-FR' => 'other_value']);
-        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
+        $this->setConfigAndSave(['dialect_strict' => ['it-IT' => true, 'fr-FR' => false]]);
 
         $this->assertArrayHasKey(JobsMetadataMarshaller::DIALECT_STRICT->value, $this->capturedMetadata);
-        $this->assertSame('strict_value', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
+        $this->assertSame('1', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
     }
 
     #[Test]
     public function testDialectStrictDoesNotPersistNonMatchingLanguage(): void
     {
-        $dialectJson = json_encode(['fr-FR' => 'french_value', 'de-DE' => 'german_value']);
-        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
+        $this->setConfigAndSave(['dialect_strict' => ['fr-FR' => true, 'de-DE' => true]]);
 
         $this->assertArrayNotHasKey(JobsMetadataMarshaller::DIALECT_STRICT->value, $this->capturedMetadata);
     }
@@ -276,13 +274,11 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testDialectStrictTrimsWhitespaceForMatching(): void
     {
-        $dialectJson = json_encode([' it-IT ' => 'trimmed_value']);
-
         $this->job->target = ' it-IT ';
-        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
+        $this->setConfigAndSave(['dialect_strict' => [' it-IT ' => true]]);
 
         $this->assertArrayHasKey(JobsMetadataMarshaller::DIALECT_STRICT->value, $this->capturedMetadata);
-        $this->assertSame('trimmed_value', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
+        $this->assertSame('1', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
     }
 
     #[Test]
@@ -296,15 +292,14 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testDialectStrictWithMultipleLanguagesOnlyPersistsMatch(): void
     {
-        $dialectJson = json_encode([
-            'en-US' => 'english_value',
-            'it-IT' => 'italian_value',
-            'fr-FR' => 'french_value',
-        ]);
-        $this->setConfigAndSave(['dialect_strict' => $dialectJson]);
+        $this->setConfigAndSave(['dialect_strict' => [
+            'en-US' => true,
+            'it-IT' => true,
+            'fr-FR' => false,
+        ]]);
 
         $this->assertArrayHasKey(JobsMetadataMarshaller::DIALECT_STRICT->value, $this->capturedMetadata);
-        $this->assertSame('italian_value', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
+        $this->assertSame('1', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
     }
 
     // =========================================================================
@@ -314,14 +309,13 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testCombinedScenarioWithAllOptions(): void
     {
-        $dialectJson = json_encode(['it-IT' => 'strict']);
         $handlers = json_encode([['handler' => 'xliff']]);
         $this->setConfigAndSave([
             'public_tm_penalty'           => '10',
             'character_counter_count_tags' => true,
             'character_counter_mode'       => 'target',
             'tm_prioritization'           => true,
-            'dialect_strict'              => $dialectJson,
+            'dialect_strict'              => ['it-IT' => true],
             JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => $handlers,
         ]);
 
@@ -331,7 +325,7 @@ class SaveJobsMetadataTest extends AbstractTest
         $this->assertSame('1', $this->capturedMetadata[JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value]);
         $this->assertSame('target', $this->capturedMetadata[JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value]);
         $this->assertSame('1', $this->capturedMetadata[JobsMetadataMarshaller::TM_PRIORITIZATION->value]);
-        $this->assertSame('strict', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
+        $this->assertSame('1', $this->capturedMetadata[JobsMetadataMarshaller::DIALECT_STRICT->value]);
         $this->assertSame($handlers, $this->capturedMetadata[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]);
 
         $this->assertSame(self::JOB_ID, $this->capturedIdJob);
@@ -369,7 +363,7 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testDialectStrictWithEmptyJsonObjectPersistsNothing(): void
     {
-        $this->setConfigAndSave(['dialect_strict' => '{}']);
+        $this->setConfigAndSave(['dialect_strict' => []]);
 
         $this->assertArrayNotHasKey(JobsMetadataMarshaller::DIALECT_STRICT->value, $this->capturedMetadata);
     }
@@ -377,13 +371,12 @@ class SaveJobsMetadataTest extends AbstractTest
     #[Test]
     public function testMetadataKeyOrderMatchesCodeOrder(): void
     {
-        $dialectJson = json_encode(['it-IT' => 'yes']);
         $this->setConfigAndSave([
             'public_tm_penalty'           => '5',
             'character_counter_count_tags' => true,
             'character_counter_mode'       => 'source',
             'tm_prioritization'           => true,
-            'dialect_strict'              => $dialectJson,
+            'dialect_strict'              => ['it-IT' => true],
         ]);
 
         $this->assertSame([

@@ -67,7 +67,8 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
 
     // Options / flags
     public ?bool $from_api = null;
-    public ?string $dialect_strict = null;
+    /** @var array<string, bool>|null */
+    public ?array $dialect_strict = null;
     public ?string $character_counter_mode = null;
     public ?bool $character_counter_count_tags = null;
 

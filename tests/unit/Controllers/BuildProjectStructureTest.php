@@ -4,8 +4,6 @@ namespace unit\Controllers;
 
 use Controller\API\App\CreateProjectController;
 use Controller\API\V1\NewController;
-use Klein\Request;
-use Klein\Response;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\LQA\QAModelInterface;
 use Model\ProjectCreation\ProjectStructure;
@@ -109,11 +107,20 @@ class BuildProjectStructureTest extends AbstractTest
         $this->createProjectController = $refCreate->newInstanceWithoutConstructor();
 
         // Stub UserStruct
-        $this->user = $this->createStub(UserStruct::class);
-        $this->user->uid = 42;
-        $this->user->email = 'test@example.com';
-        $this->user->method('getUid')->willReturn(42);
-        $this->user->method('getEmail')->willReturn('test@example.com');
+        $user = new class extends UserStruct {
+            public function getUid(): int
+            {
+                return 42;
+            }
+
+            public function getEmail(): string
+            {
+                return 'test@example.com';
+            }
+        };
+        $user->uid = 42;
+        $user->email = 'test@example.com';
+        $this->user = $user;
 
         // Stub engine — returns no extra configuration parameters by default.
         // Uses a concrete class instead of createStub() because PHPUnit mocks
@@ -435,7 +442,7 @@ class BuildProjectStructureTest extends AbstractTest
             'lara_glossaries' => 'glossary-abc',
             'lara_style'      => 'formal',
             'mmt_glossaries'  => 'mmt-456',
-            JobsMetadataMarshaller::DIALECT_STRICT->value  => 'strict',
+            JobsMetadataMarshaller::DIALECT_STRICT->value  => ['it-IT' => true],
             ProjectsMetadataMarshaller::MT_EVALUATION->value   => true,
         ]);
         $filesFound = $this->makeFilesFound();
@@ -451,7 +458,7 @@ class BuildProjectStructureTest extends AbstractTest
         $this->assertSame('glossary-abc', $ps->lara_glossaries);
         $this->assertSame('formal', $ps->lara_style);
         $this->assertSame('mmt-456', $ps->mmt_glossaries);
-        $this->assertSame('strict', $ps->dialect_strict);
+        $this->assertSame(['it-IT' => true], $ps->dialect_strict);
         $this->assertTrue($ps->mt_evaluation);
     }
 
@@ -1402,7 +1409,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsOptionalFieldsWhenPresent(): void
     {
         $data = $this->makeCreateControllerData([
-            JobsMetadataMarshaller::DIALECT_STRICT->value   => 'strict',
+            JobsMetadataMarshaller::DIALECT_STRICT->value   => ['it-IT' => true],
             ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS->value => ['some' => 'param'],
             ProjectsMetadataMarshaller::XLIFF_PARAMETERS->value              => '{"xliff": "param"}',
         ]);
@@ -1418,7 +1425,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('strict', $ps->dialect_strict);
+        $this->assertSame(['it-IT' => true], $ps->dialect_strict);
         $this->assertSame(['some' => 'param'], $ps->filters_extraction_parameters);
         $this->assertSame('{"xliff": "param"}', $ps->xliff_parameters);
     }
@@ -1974,7 +1981,7 @@ class BuildProjectStructureTest extends AbstractTest
     public function createControllerSetsDialectStrict(): void
     {
         $data = $this->makeCreateControllerData([
-            JobsMetadataMarshaller::DIALECT_STRICT->value => 'relaxed',
+            JobsMetadataMarshaller::DIALECT_STRICT->value => ['fr-FR' => false],
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -1988,7 +1995,7 @@ class BuildProjectStructureTest extends AbstractTest
             null,
         );
 
-        $this->assertSame('relaxed', $ps->dialect_strict);
+        $this->assertSame(['fr-FR' => false], $ps->dialect_strict);
     }
 
     // ──────────────────────────────────────────────────────────────────
