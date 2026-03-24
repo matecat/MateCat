@@ -14,6 +14,8 @@ import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconDown from '../components/icons/IconDown'
 const CONTEXT_REVIEW_HTML_URL =
   'https://files.sandbox.translated.com/provetta/content/launches/2025/04/04/launch_copy_of_demo/content/we-retail/language-masters/de/equipment.html'
+// const CONTEXT_REVIEW_HTML_URL =
+//   'https://files.sandbox.translated.com/provola/hidden-components/content/wknd/language-masters/en/faqs.html'
 
 const VIEW_MODES = {
   BOTH: 'both',
