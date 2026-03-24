@@ -13,7 +13,6 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -235,11 +234,6 @@ class Lara extends AbstractEngine
         $metadataDao = new MetadataDao();
         $laraStyle = $_config['lara_style'] ?? null;
 
-        if($laraStyle === null && !empty($_config['project_id'])){
-            $laraStyleVal = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_style');
-            $laraStyle = !empty($laraStyleVal) ? $laraStyleVal->value : null;
-        }
-
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
             $reasoning = false;
@@ -268,8 +262,8 @@ class Lara extends AbstractEngine
                 $translateOptions->setHeaders($headers->getArrayCopy());
                 $laraGlossariesArray = [];
 
-                if (!empty($_config['project_id'])) {
-                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['project_id'], 'lara_glossaries');
+                if (!empty($_config['id_project'])) {
+                    $laraGlossaries = $metadataDao->setCacheTTL(86400)->get($_config['id_project'], 'lara_glossaries');
 
                     if ($laraGlossaries !== null) {
                         $laraGlossaries = html_entity_decode($laraGlossaries->value);
@@ -728,7 +722,7 @@ class Lara extends AbstractEngine
      */
     public static function validateLaraStyle(string $lara_style): string
     {
-        if(!in_array($lara_style, self::ALLOWED_STYLES)) {
+        if (!in_array($lara_style, self::ALLOWED_STYLES)) {
             throw new InvalidArgumentException("Invalid lara style.", -1);
         }
 

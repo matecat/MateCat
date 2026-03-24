@@ -58,7 +58,8 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value,
             ProjectsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value,
             ProjectsMetadataMarshaller::FROM_API->value,
-            ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value => fn() => (bool)$struct->value,
+            ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value,
+            ProjectsMetadataMarshaller::WPML->value => fn() => (bool)$struct->value,
             ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => fn() => (int)$struct->value,
             ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value => fn() => new MTQEWorkflowParams(json_decode((string)$struct->value, true)),
             ProjectsMetadataMarshaller::MMT_GLOSSARIES->value,
@@ -70,7 +71,6 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::DEEPL_FORMALITY->value,
             ProjectsMetadataMarshaller::DEEPL_ID_GLOSSARY->value,
             ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value => fn() => (string)$struct->value,
-            ProjectsMetadataMarshaller::WPML->value => fn() => (bool)$struct->value,
             default => fn() => json_validate((string)$struct->value) ? json_decode((string)$struct->value, true) : (string)$struct->value,
         })();
     }

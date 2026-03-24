@@ -16,7 +16,6 @@ use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
-use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
@@ -67,7 +66,10 @@ class GetContributionController extends KleinController
         $cross_language = $request['cross_language'];
         $reasoning = $request['reasoning'];
 
-        $lara_style = $request['lara_style'] ?: $projectStruct->getMetadataValue('lara_style');
+        // try to get from metadata if Lara style is empty of fallback to the default
+        if (empty($request['lara_style'])) {
+            $lara_style = $projectStruct->getMetadataValue('lara_style') ?? Lara::DEFAULT_STYLE;
+        }
 
         if (empty($num_results)) {
             $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
@@ -95,7 +97,12 @@ class GetContributionController extends KleinController
             $contributionRequest->mt_evaluation =
                 (bool)$projectStruct->getMetadataValue(ProjectsMetadataMarshaller::MT_EVALUATION->value) ??
                 //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                (bool)(new MetadataDao())->get($id_job, $received_password, ProjectsMetadataMarshaller::MT_EVALUATION->value, 60 * 60) ?? // for back compatibility, the mt_evaluation flag was on job metadata
+                (bool)(new MetadataDao())->get(
+                    $id_job,
+                    $received_password,
+                    ProjectsMetadataMarshaller::MT_EVALUATION->value,
+                    60 * 60
+                ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                 false;
         }
 
@@ -263,7 +270,7 @@ class GetContributionController extends KleinController
         }
 
         // validate Lara style
-        if(!empty($lara_style)){
+        if (!empty($lara_style)) {
             $lara_style = Lara::validateLaraStyle($lara_style);
         }
 
