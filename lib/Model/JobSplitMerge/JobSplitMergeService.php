@@ -517,9 +517,6 @@ class JobSplitMergeService
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {
-        $metadata_dao = $this->createProjectsMetadataDao();
-        $metadata_dao->cleanupChunksOptions($jobStructs);
-
         $jobsMetadataDao = $this->createJobMetadataDao();
 
         //get the min and

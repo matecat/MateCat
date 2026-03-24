@@ -291,7 +291,7 @@ class ProjectManager
      */
     protected function getProjectMetadataService(): ProjectMetadataService
     {
-        return new ProjectMetadataService($this->getProjectsMetadataDao());
+        return new ProjectMetadataService($this->getProjectsMetadataDao(), $this->logger);
     }
 
     /**

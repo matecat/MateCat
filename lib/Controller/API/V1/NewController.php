@@ -348,7 +348,6 @@ class NewController extends KleinController
         $mt_qe_workflow_payable_rate_template_id = filter_var($this->request->param('mt_qe_workflow_payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
         $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $payable_rate_template_name = filter_var($this->request->param('payable_rate_template_name'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $project_info = filter_var($this->request->param('project_info'), FILTER_SANITIZE_SPECIAL_CHARS);
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);
@@ -358,7 +357,6 @@ class NewController extends KleinController
         $qa_model_template_id = filter_var($this->request->param('qa_model_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $speech2text = filter_var($this->request->param('speech2text'), FILTER_VALIDATE_BOOLEAN);
         $subject = filter_var($this->request->param('subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $tms_engine = filter_var(
@@ -512,20 +510,12 @@ class NewController extends KleinController
             $mt_evaluation = true; // force mt_evaluation because it is the default for mt_qe_workflows
         }
 
-        if (!empty($project_info)) {
-            $metadata['project_info'] = $project_info;
-        }
-
-        if (!empty($speech2text)) {
-            $metadata['speech2text'] = $speech2text;
-        }
-
         if (!empty($project_completion)) {
             $metadata[ProjectsMetadataMarshaller::PROJECT_COMPLETION->value] = $project_completion;
         }
 
         if (!empty($segmentation_rule)) {
-            $metadata['segmentation_rule'] = $segmentation_rule;
+            $metadata[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value] = $segmentation_rule;
         }
 
         $metadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $mt_quality_value_in_editor;
@@ -537,7 +527,6 @@ class NewController extends KleinController
         $metadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $icu_enabled;
 
         return [
-            'project_info' => $project_info,
             'project_name' => $project_name,
             'source_lang' => $source_lang,
             'target_lang' => $target_lang,
@@ -582,7 +571,6 @@ class NewController extends KleinController
             'qaModelTemplate' => $qaModelTemplate,
             'payableRateModelTemplate' => $payableRateModelTemplate,
             'instructions' => $instructions,
-            'speech2text' => $speech2text,
             'project_features' => $project_features,
             'mt_evaluation' => $mt_evaluation,
             'character_counter_count_tags' => $character_counter_count_tags,
@@ -611,8 +599,12 @@ class NewController extends KleinController
                 throw new InvalidArgumentException('metadata string is too long');
             }
 
-            $depth = 2; // only converts key value structures
             $metadata = html_entity_decode($metadata);
+            $validatorObject = new JSONValidatorObject($metadata);
+            $validator = new JSONValidator('project_metadata.json', true);
+            $validator->validate($validatorObject);
+
+            $depth = 2;
             $parsedMetadata = json_decode($metadata, true, $depth);
 
             if (is_array($parsedMetadata)) {

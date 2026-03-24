@@ -5,9 +5,6 @@ namespace Model\Projects;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
-use Model\Exceptions\NotFoundException;
-use Model\Jobs\ChunkDao;
-use Model\Jobs\ChunkOptionsModel;
 use Model\Jobs\JobStruct;
 use ReflectionException;
 
@@ -179,28 +176,6 @@ class MetadataDao extends AbstractDao
     public static function buildChunkKey(string $key, JobStruct $chunk): string
     {
         return "{$key}_chunk_{$chunk->id}_$chunk->password";
-    }
-
-    /**
-     * Clean up the chunks options before the job merging
-     *
-     * @param $jobs array Associative array with the Jobs
-     *
-     * @throws ReflectionException
-     * @throws NotFoundException
-     */
-    public function cleanupChunksOptions(array $jobs): void
-    {
-        foreach ($jobs as $job) {
-            $chunk = ChunkDao::getByIdAndPassword($job['id'], $job['password']);
-
-            foreach (ChunkOptionsModel::$valid_keys as $key) {
-                $this->delete(
-                    $chunk->id_project,
-                    self::buildChunkKey($key, $chunk)
-                );
-            }
-        }
     }
 
     protected function _buildResult(array $array_result)

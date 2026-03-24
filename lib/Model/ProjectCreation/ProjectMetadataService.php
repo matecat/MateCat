@@ -9,11 +9,14 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 use Utils\Constants\EngineConstants;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 
-class ProjectMetadataService
+readonly class ProjectMetadataService
 {
     public function __construct(
-        private ProjectsMetadataDao $dao
+        private ProjectsMetadataDao $dao,
+        private ?MatecatLogger $logger = null
     ) {
     }
 
@@ -98,6 +101,31 @@ class ProjectMetadataService
          */
         if (!empty($projectStructure->subfiltering_handlers)) {
             $options[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $projectStructure->subfiltering_handlers;
+        }
+
+        /**
+         * Storage-layer key guard (defense-in-depth).
+         *
+         * Even though the JSON Schema gate at the controller level already restricts which keys
+         * can enter via the metadata blob, this second line of defense strips any key that is not
+         * explicitly known before the data reaches bulkSet(). This prevents metadata pollution
+         * caused by future code paths that bypass the schema validation layer.
+         *
+         * Allowed keys are:
+         *  - Every case value from ProjectsMetadataMarshaller (the canonical project-metadata enum)
+         *  - All engine-specific configuration parameter keys ($extraKeys, already computed above)
+         *  - The subfiltering-handlers key mirrored from JobsMetadataMarshaller
+         */
+        $allowedKeys = array_unique(array_merge(
+            array_map(fn(ProjectsMetadataMarshaller $case) => $case->value, ProjectsMetadataMarshaller::cases()),
+            $extraKeys,
+            [JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value]
+        ));
+
+        $unknownKeys = array_diff(array_keys($options), $allowedKeys);
+        if (!empty($unknownKeys)) {
+            $this->logger?->debug("ProjectMetadataService: Unknown metadata keys stripped: " . implode(', ', $unknownKeys));
+            $options = array_intersect_key($options, array_flip($allowedKeys));
         }
 
         if (!empty($options)) {

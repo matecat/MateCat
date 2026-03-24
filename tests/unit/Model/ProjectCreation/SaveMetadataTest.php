@@ -11,6 +11,7 @@ use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
+use Utils\Logger\MatecatLogger;
 
 /**
  * Unit tests for {@see ProjectMetadataService::save()}.
@@ -50,7 +51,7 @@ class SaveMetadataTest extends AbstractTest
                 ];
             });
 
-        $this->service = new ProjectMetadataService($stubDao);
+        $this->service = new ProjectMetadataService($stubDao, $this->createStub(MatecatLogger::class));
 
         $this->features = $this->createStub(FeatureSet::class);
 

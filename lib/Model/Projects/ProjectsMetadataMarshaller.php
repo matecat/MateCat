@@ -25,15 +25,27 @@ enum ProjectsMetadataMarshaller: string
     case FROM_API                      = 'from_api';
     case MT_QE_WORKFLOW_PARAMETERS     = 'mt_qe_workflow_parameters';
 
-    case FEATURES_KEY                    = 'features';
-    case WORD_COUNT_TYPE_KEY             = 'word_count_type';
-    case WORD_COUNT_RAW                  = 'raw';
-    case WORD_COUNT_EQUIVALENT           = 'equivalent';
-    case SPLIT_EQUIVALENT_WORD_TYPE      = 'eq_word_count';
-    case SPLIT_RAW_WORD_TYPE             = 'raw_word_count';
-    case SUBFILTERING_HANDLERS           = 'subfiltering_handlers';
-    case XLIFF_PARAMETERS                = 'xliff_parameters';
-    case FILTERS_EXTRACTION_PARAMETERS   = 'filters_extraction_parameters';
+    case FEATURES_KEY                  = 'features';
+    case WORD_COUNT_TYPE_KEY           = 'word_count_type';
+    case WORD_COUNT_RAW                = 'raw';
+    case WORD_COUNT_EQUIVALENT         = 'equivalent';
+    case SPLIT_EQUIVALENT_WORD_TYPE    = 'eq_word_count';
+    case SPLIT_RAW_WORD_TYPE           = 'raw_word_count';
+    case SUBFILTERING_HANDLERS         = 'subfiltering_handlers';
+    case XLIFF_PARAMETERS              = 'xliff_parameters';
+    case FILTERS_EXTRACTION_PARAMETERS = 'filters_extraction_parameters';
+
+    case MMT_GLOSSARIES    = 'mmt_glossaries';
+    case LARA_GLOSSARIES   = 'lara_glossaries';
+    case LARA_STYLE        = 'lara_style';
+    case INTENTO_ROUTING   = 'intento_routing';
+    case INTENTO_PROVIDER  = 'intento_provider';
+    case DEEPL_FORMALITY   = 'deepl_formality';
+    case DEEPL_ID_GLOSSARY = 'deepl_id_glossary';
+    case DEEPL_ENGINE_TYPE = 'deepl_engine_type';
+
+    case SEGMENTATION_RULE = 'segmentation_rule';
+    case WPML              = 'WPML';
 
     public static function unMarshall(MetadataStruct $struct): mixed
     {
@@ -49,6 +61,16 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::MT_QE_WORKFLOW_ENABLED->value => fn() => (bool)$struct->value,
             ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => fn() => (int)$struct->value,
             ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value => fn() => new MTQEWorkflowParams(json_decode((string)$struct->value, true)),
+            ProjectsMetadataMarshaller::MMT_GLOSSARIES->value,
+            ProjectsMetadataMarshaller::SEGMENTATION_RULE->value,
+            ProjectsMetadataMarshaller::LARA_GLOSSARIES->value,
+            ProjectsMetadataMarshaller::LARA_STYLE->value,
+            ProjectsMetadataMarshaller::INTENTO_ROUTING->value,
+            ProjectsMetadataMarshaller::INTENTO_PROVIDER->value,
+            ProjectsMetadataMarshaller::DEEPL_FORMALITY->value,
+            ProjectsMetadataMarshaller::DEEPL_ID_GLOSSARY->value,
+            ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value => fn() => (string)$struct->value,
+            ProjectsMetadataMarshaller::WPML->value => fn() => (bool)$struct->value,
             default => fn() => json_validate((string)$struct->value) ? json_decode((string)$struct->value, true) : (string)$struct->value,
         })();
     }
