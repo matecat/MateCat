@@ -139,7 +139,7 @@ class LaraAuthController extends AbstractStatefulKleinController
             );
 
             // Send the selected memory IDs to Lara via a custom request header.
-            $laraClient->setExtraHeader('x-memory-ids', $tm_keys);
+            $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, $tm_keys);
 
             // Authenticate the client (likely producing an auth token for later requests).
             $token = $laraClient->authenticate();
@@ -148,7 +148,7 @@ class LaraAuthController extends AbstractStatefulKleinController
                 'LARA AUTH REQUEST' => 'from browser',
                 'headers' => [
                     Headers::LARA_PRE_SHARED_KEY_HEADER => substr(AppConfig::$LARA_PRE_SHARED_KEY_HEADER, 0, 16) . "...",
-                    'x-memory-ids' => $tm_keys
+                    Headers::LARA_MEMORIES_IDS => $tm_keys
                 ],
                 'token' => $token
             ]);
