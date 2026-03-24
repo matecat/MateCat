@@ -8,6 +8,7 @@ import {
   findSegmentSidByClick,
   tagSegments,
   replaceTextContent,
+  stripSegmentTags,
 } from '../utils/contextReviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconDown from '../components/icons/IconDown'
@@ -213,11 +214,12 @@ const ContextReview = () => {
         // don't need to nuke innerHTML and re-tag everything.
         // Uses replaceTextContent to preserve child elements (e.g. <a> tags).
         if (targetRef.current && target) {
+          const cleanTarget = stripSegmentTags(target)
           const spans = targetRef.current.querySelectorAll(
             `[data-context-sid="${sid}"]`,
           )
           spans.forEach((span) => {
-            replaceTextContent(span, target)
+            replaceTextContent(span, cleanTarget)
           })
         }
       }

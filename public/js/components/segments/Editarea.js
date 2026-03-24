@@ -365,7 +365,7 @@ class Editarea extends React.Component {
       ContextReviewChannel.sendMessage({
         type: 'updateTranslation',
         sid: segment.sid,
-        target: plainText,
+        target: decodedSegment,
       })
       this.props.updateCounter(
         DraftMatecatUtils.getCharactersCounter(

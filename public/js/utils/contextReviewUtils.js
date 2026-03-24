@@ -1,3 +1,8 @@
+import {
+  excludeSomeTagsTransformToText,
+  removeTagsFromText,
+} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+
 const HIGHLIGHT_CLASS = 'context-review-highlight'
 const HIGHLIGHT_ACTIVE_CLASS = 'context-review-highlight--active'
 const SEGMENT_SID_ATTR = 'data-context-sid'
@@ -192,27 +197,29 @@ export const setActiveHighlight = (container, activeIndex) => {
 }
 
 /**
- * Selector for elements that represent meaningful content blocks.
- * Used both for click resolution and for parent-level segment matching.
+ * Selector for block-level elements that correspond to XLIFF trans-units.
+ * Okapi treats these as segment boundaries; inline elements (a, span,
+ * strong, etc.) become <g> tags *inside* a trans-unit and must NOT appear
+ * here.
+ *
+ * `div` is included because Okapi extracts text from <div> elements that
+ * contain only inline content (e.g. `<div><a>Surfing</a></div>`).
+ * Outer wrapper <div> elements are not a problem because we skip elements
+ * that already contain tagged descendants (longest-first processing).
  */
-const MEANINGFUL_SELECTOR = 'p, li, td, th, h1, h2, h3, h4, a, span, label'
+const BLOCK_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li, td, th, div, title'
+
+/**
+ * Selector kept for click-resolution only — includes block elements that
+ * may appear in the page but are not always direct Okapi segment boundaries.
+ */
+const MEANINGFUL_SELECTOR = 'p, li, td, th, h1, h2, h3, h4, div'
 
 /**
  * Tags for elements that represent meaningful content blocks in the document.
  * Used to resolve clicks to segment-level granularity.
  */
-const MEANINGFUL_TAGS = [
-  'P',
-  'LI',
-  'TD',
-  'TH',
-  'H1',
-  'H2',
-  'H3',
-  'H4',
-  'DIV',
-  'A',
-]
+const MEANINGFUL_TAGS = ['P', 'LI', 'TD', 'TH', 'H1', 'H2', 'H3', 'H4', 'DIV']
 
 /**
  * Finds the closest meaningful parent element for a clicked node.
@@ -304,25 +311,56 @@ export const findSegmentSidByClick = (
 }
 
 /**
- * Walks all meaningful elements in a container and tags those whose full
+ * Strips XLIFF inline tags (`<g>`, `<x/>`, `<ph>`, etc.) and MateCat
+ * whitespace placeholders (`##$_0A$##`, `##$_A0$##`, …) from a segment
+ * string, then collapses whitespace.
+ *
+ * The result is the "visible text" that should appear in the rendered HTML.
+ *
+ * @param {string} text  Raw segment source or target from MateCat
+ * @returns {string}
+ */
+export const stripSegmentTags = (text) => {
+  if (!text) return ''
+  return decodeHtmlEntities(
+    removeTagsFromText(
+      excludeSomeTagsTransformToText(text, ['g', 'gCl', 'gSc', 'bx', 'ex', 'x'])
+        .replace(/##\$_[^$]+\$##/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim(),
+    ),
+  )
+}
+
+/**
+ * Walks all block-level elements in a container and tags those whose
  * `textContent` matches a segment source.
  *
- * The key difference from the previous approach: instead of matching
- * individual text nodes in isolation, we match against the **parent element's
- * combined text**.  This ensures only elements whose full text contains
- * the entire segment get tagged.
+ * Matching logic follows Okapi's HTML segmentation rules:
+ * - Block-level elements (`<p>`, `<h1>`–`<h6>`, `<li>`, `<td>`, `<th>`,
+ *   `<title>`) correspond to XLIFF trans-units — each one IS a segment.
+ * - Inline elements (`<a>`, `<strong>`, `<span>`, etc.) are encoded as
+ *   `<g>` tags *inside* a trans-unit and do NOT create new segments.
  *
- * When the segment text is found inside a single text node within the
- * matched parent, that text node is split and the match is wrapped in a
- * `<span data-context-sid>`.  When the segment spans the parent's entire
- * text (possibly across multiple child nodes), the `data-context-sid`
- * attribute is set directly on the parent element.
+ * Before comparison the segment source is normalised: XLIFF inline tags
+ * and MateCat whitespace placeholders are stripped, then whitespace is
+ * collapsed.  The block element's `textContent` is normalised the same
+ * way.  Matching is case-insensitive.
  *
- * When `replaceWithTarget` is true the matched text is swapped with
- * `seg.target` (falling back to the original text when target is empty).
+ * Both the DOM elements (returned by `querySelectorAll` in document order)
+ * and the segments (sorted by SID) follow the same top-to-bottom order
+ * that Okapi uses when extracting trans-units from HTML.  The algorithm
+ * exploits this: it walks elements in document order and, for each one,
+ * consumes the first not-yet-used segment whose normalised source matches.
+ * This correctly handles duplicate source text (e.g. "Equipment" appearing
+ * in both `<title>` and `<strong>`) by assigning each occurrence to the
+ * right segment based on position.
  *
- * Segments are processed longest-first to avoid partial replacements.
- * Already-tagged nodes are skipped to prevent double-wrapping.
+ * When `replaceWithTarget` is true the matched element's visible text is
+ * replaced with the normalised `seg.target`.
+ *
+ * Already-tagged elements are skipped to prevent double-tagging on
+ * incremental updates.
  *
  * @param {HTMLElement} container - The DOM container to process (modified in place)
  * @param {Array<{sid: number, source: string, target: string}>} segments
@@ -336,98 +374,61 @@ export const tagSegments = (
 ) => {
   if (!container || !segments || !segments.length) return
 
-  const sorted = [...segments]
-    .filter((s) => s.source)
-    .sort((a, b) => b.source.length - a.source.length)
+  // Pre-compute normalised source for each segment, sorted by SID so
+  // their order matches the document order of the HTML elements.
+  const prepared = segments
+    .map((seg) => ({
+      ...seg,
+      normSource: stripSegmentTags(seg.source),
+      normTarget: stripSegmentTags(seg.target),
+    }))
+    .filter((seg) => seg.normSource)
+    .sort((a, b) => a.sid - b.sid)
+  if (!prepared.length) return
 
-  sorted.forEach((seg) => {
-    const flexRegex = buildFlexibleRegex(seg.source)
-    const decodedSource = decodeHtmlEntities(seg.source).trim()
+  // Collect SIDs that are already tagged in the DOM from previous calls
+  // (segments arrive incrementally as the user scrolls).  These segments
+  // must be marked as consumed so they are not re-assigned to a different
+  // DOM element with the same text.
+  const alreadyTagged = new Set()
+  container
+    .querySelectorAll(`[${SEGMENT_SID_ATTR}]`)
+    .forEach((el) => alreadyTagged.add(el.getAttribute(SEGMENT_SID_ATTR)))
 
-    // Collect candidate parent elements whose full textContent matches
-    const candidates = container.querySelectorAll(MEANINGFUL_SELECTOR)
-
-    for (const el of candidates) {
-      const fullText = el.textContent
-      flexRegex.lastIndex = 0
-      if (!flexRegex.test(fullText)) continue
-
-      // Check whether the full textContent of this element is (approximately)
-      // equal to the segment source — i.e. the element IS the segment.
-      const normalizedFull = fullText.replace(/\s+/g, ' ').trim()
-      const normalizedSource = decodedSource.replace(/\s+/g, ' ').trim()
-      const isExactParent =
-        normalizedFull.toLowerCase() === normalizedSource.toLowerCase()
-
-      if (isExactParent) {
-        // The element's entire text matches the segment — tag the element
-        // itself instead of wrapping individual text nodes.
-        el.setAttribute(SEGMENT_SID_ATTR, seg.sid)
-        if (replaceWithTarget && seg.target) {
-          replaceTextContent(el, decodeHtmlEntities(seg.target))
-        }
-        continue
-      }
-
-      // The segment is a substring of this element's text.  Walk its text
-      // nodes and wrap the matching portion.  We must verify each text node
-      // individually contains the full segment to avoid partial matches.
-      const treeWalker = document.createTreeWalker(
-        el,
-        NodeFilter.SHOW_TEXT,
-        null,
-      )
-
-      const matchingNodes = []
-      while (treeWalker.nextNode()) {
-        const textNode = treeWalker.currentNode
-        if (textNode.parentNode.closest(`[${SEGMENT_SID_ATTR}]`)) continue
-        const nodeRegex = buildFlexibleRegex(seg.source)
-        nodeRegex.lastIndex = 0
-        if (nodeRegex.test(textNode.nodeValue)) {
-          matchingNodes.push(textNode)
-        }
-      }
-
-      matchingNodes.forEach((textNode) => {
-        const text = textNode.nodeValue
-        const parent = textNode.parentNode
-        const fragment = document.createDocumentFragment()
-
-        const regex = buildFlexibleRegex(seg.source)
-        let lastIndex = 0
-        let match
-
-        while ((match = regex.exec(text)) !== null) {
-          const matchStart = match.index
-          const matchEnd = matchStart + match[0].length
-
-          if (matchStart > lastIndex) {
-            fragment.appendChild(
-              document.createTextNode(text.slice(lastIndex, matchStart)),
-            )
-          }
-
-          const originalText = text.slice(matchStart, matchEnd)
-          const span = document.createElement('span')
-          span.setAttribute(SEGMENT_SID_ATTR, seg.sid)
-          span.textContent =
-            replaceWithTarget && seg.target
-              ? decodeHtmlEntities(seg.target)
-              : originalText
-          fragment.appendChild(span)
-
-          lastIndex = matchEnd
-        }
-
-        if (lastIndex < text.length) {
-          fragment.appendChild(document.createTextNode(text.slice(lastIndex)))
-        }
-
-        if (lastIndex > 0) {
-          parent.replaceChild(fragment, textNode)
-        }
-      })
+  // Track which segments have been consumed (by index in `prepared`).
+  // Pre-mark segments whose SID is already in the DOM.
+  const used = new Set()
+  for (let i = 0; i < prepared.length; i++) {
+    if (alreadyTagged.has(String(prepared[i].sid))) {
+      used.add(i)
     }
-  })
+  }
+
+  const candidates = container.querySelectorAll(BLOCK_SELECTOR)
+
+  for (const el of candidates) {
+    // Skip already-tagged elements
+    if (el.hasAttribute(SEGMENT_SID_ATTR)) continue
+    // Skip elements that contain an already-tagged descendant — the
+    // descendant is the more specific match.
+    if (el.querySelector(`[${SEGMENT_SID_ATTR}]`)) continue
+
+    const elText = el.textContent.replace(/\s+/g, ' ').trim()
+    if (!elText) continue
+
+    const elTextLower = elText.toLowerCase()
+
+    // Find the first unused segment whose normalised source matches
+    for (let i = 0; i < prepared.length; i++) {
+      if (used.has(i)) continue
+      if (elTextLower === prepared[i].normSource.toLowerCase()) {
+        el.setAttribute(SEGMENT_SID_ATTR, prepared[i].sid)
+        if (replaceWithTarget && prepared[i].target) {
+          replaceTextContent(el, stripSegmentTags(prepared[i].target))
+        }
+        used.add(i)
+        break // one segment per element
+      }
+    }
+  }
 }
