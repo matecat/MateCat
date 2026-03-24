@@ -24,9 +24,9 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     // =========================================================================
 
     #[Test]
-    public function enumHasExactlyTwentyCases(): void
+    public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(20, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(30, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -59,6 +59,16 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'SUBFILTERING_HANDLERS'         => [ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS, 'subfiltering_handlers'],
             'XLIFF_PARAMETERS'              => [ProjectsMetadataMarshaller::XLIFF_PARAMETERS, 'xliff_parameters'],
             'FILTERS_EXTRACTION_PARAMETERS' => [ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS, 'filters_extraction_parameters'],
+            'MMT_GLOSSARIES'                => [ProjectsMetadataMarshaller::MMT_GLOSSARIES, 'mmt_glossaries'],
+            'LARA_GLOSSARIES'               => [ProjectsMetadataMarshaller::LARA_GLOSSARIES, 'lara_glossaries'],
+            'LARA_STYLE'                    => [ProjectsMetadataMarshaller::LARA_STYLE, 'lara_style'],
+            'INTENTO_ROUTING'               => [ProjectsMetadataMarshaller::INTENTO_ROUTING, 'intento_routing'],
+            'INTENTO_PROVIDER'              => [ProjectsMetadataMarshaller::INTENTO_PROVIDER, 'intento_provider'],
+            'DEEPL_FORMALITY'               => [ProjectsMetadataMarshaller::DEEPL_FORMALITY, 'deepl_formality'],
+            'DEEPL_ID_GLOSSARY'             => [ProjectsMetadataMarshaller::DEEPL_ID_GLOSSARY, 'deepl_id_glossary'],
+            'DEEPL_ENGINE_TYPE'             => [ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE, 'deepl_engine_type'],
+            'SEGMENTATION_RULE'             => [ProjectsMetadataMarshaller::SEGMENTATION_RULE, 'segmentation_rule'],
+            'WPML'                          => [ProjectsMetadataMarshaller::WPML, 'WPML'],
         ];
     }
 
@@ -343,6 +353,119 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     {
         $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct('some_unknown_key', 'plain text'));
         $this->assertSame('plain text', $result);
+    }
+
+    // =========================================================================
+    // unMarshall -- string-cast branch (9 keys)
+    // =========================================================================
+
+    #[Test]
+    #[DataProvider('stringCastKeyStringValueProvider')]
+    public function unMarshallStringCastKeyWithStringValueReturnsSameString(string $key, string $rawValue): void
+    {
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct($key, $rawValue));
+        $this->assertSame($rawValue, $result);
+    }
+
+    public static function stringCastKeyStringValueProvider(): array
+    {
+        $keys = self::stringCastKeyProvider();
+
+        $cases = [];
+        foreach ($keys as $keyLabel => [$key]) {
+            $cases["$keyLabel / string value"] = [$key, 'some-string-value'];
+        }
+
+        return $cases;
+    }
+
+    #[Test]
+    #[DataProvider('stringCastKeyIntegerValueProvider')]
+    public function unMarshallStringCastKeyWithIntegerValueReturnsStringCast(string $key, int $rawValue, string $expected): void
+    {
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct($key, $rawValue));
+        $this->assertSame($expected, $result);
+    }
+
+    public static function stringCastKeyIntegerValueProvider(): array
+    {
+        $keys = self::stringCastKeyProvider();
+
+        $cases = [];
+        foreach ($keys as $keyLabel => [$key]) {
+            $cases["$keyLabel / int 42"] = [$key, 42, '42'];
+        }
+
+        return $cases;
+    }
+
+    #[Test]
+    #[DataProvider('stringCastKeyNullValueProvider')]
+    public function unMarshallStringCastKeyWithNullValueReturnsEmptyString(string $key): void
+    {
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct($key, null));
+        $this->assertSame('', $result);
+    }
+
+    public static function stringCastKeyNullValueProvider(): array
+    {
+        return self::stringCastKeyProvider();
+    }
+
+    public static function stringCastKeyProvider(): array
+    {
+        return [
+            'mmt_glossaries'    => ['mmt_glossaries'],
+            'lara_glossaries'   => ['lara_glossaries'],
+            'lara_style'        => ['lara_style'],
+            'intento_routing'   => ['intento_routing'],
+            'intento_provider'  => ['intento_provider'],
+            'deepl_formality'   => ['deepl_formality'],
+            'deepl_id_glossary' => ['deepl_id_glossary'],
+            'deepl_engine_type' => ['deepl_engine_type'],
+            'segmentation_rule' => ['segmentation_rule'],
+        ];
+    }
+
+    // =========================================================================
+    // unMarshall -- WPML boolean branch
+    // =========================================================================
+
+    #[Test]
+    #[DataProvider('wpmlTruthyProvider')]
+    public function unMarshallWpmlWithTruthyValueReturnsTrue(mixed $rawValue): void
+    {
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct('WPML', $rawValue));
+        $this->assertTrue($result);
+    }
+
+    public static function wpmlTruthyProvider(): array
+    {
+        return [
+            'string 1'   => ['1'],
+            'int 1'      => [1],
+            'string yes' => ['yes'],
+            'true'       => [true],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('wpmlFalsyProvider')]
+    public function unMarshallWpmlWithFalsyValueReturnsFalse(mixed $rawValue): void
+    {
+        $result = ProjectsMetadataMarshaller::unMarshall($this->makeStruct('WPML', $rawValue));
+        $this->assertFalse($result);
+    }
+
+    public static function wpmlFalsyProvider(): array
+    {
+        return [
+            'string 0'     => ['0'],
+            'int 0'        => [0],
+            'empty string' => [''],
+            'null'         => [null],
+            'false'        => [false],
+        ];
     }
 
     // =========================================================================

@@ -658,31 +658,6 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertEquals('[{"key":"abc123","r":true,"w":true}]', $chunks[0]['tm_keys']);
     }
 
-    /**
-     * @return void
-     * @throws Exception
-     */
-    #[Test]
-    public function mergeALLCleansUpChunksOptionsMetadata(): void
-    {
-        // ProjectStruct for cache invalidation
-        $projectStruct = new ProjectStruct();
-        $projectStruct->id = 999;
-        $projectStruct->password = 'projpass';
-        $this->service->setProjectForCacheInvalidation($projectStruct);
-
-        $this->service->setOwnerKeysResult([]);
-
-        $metadataDao = $this->createMock(MetadataDao::class);
-        $metadataDao->expects($this->once())->method('cleanupChunksOptions');
-        $this->service->setProjectsMetadataDao($metadataDao);
-
-        $chunks = $this->makeJobChunksForMerge();
-        $ps = new SplitMergeProjectData(999);
-
-        $this->service->mergeALL($ps, $chunks);
-    }
-
     // ────────────────────────────────────────────────────────────────
     // Metadata duplication / deletion tests
     // ────────────────────────────────────────────────────────────────

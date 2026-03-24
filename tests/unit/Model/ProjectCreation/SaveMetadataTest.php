@@ -7,6 +7,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\ProjectCreation\ProjectMetadataService;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\Test;
@@ -117,7 +118,7 @@ class SaveMetadataTest extends AbstractTest
     {
         // Set a metadata key so there is at least one option to persist
         $this->projectStructure->metadata = [
-            'some_key' => 'some_value',
+            ProjectsMetadataMarshaller::ICU_ENABLED->value => '1',
         ];
 
         $this->service->save($this->projectStructure, $this->features);
@@ -340,20 +341,20 @@ class SaveMetadataTest extends AbstractTest
     public function testAllMetadataOptionsArePersistedViaBulkSet(): void
     {
         $this->projectStructure->metadata = [
-            'custom_key_1' => 'value_1',
-            'custom_key_2' => 'value_2',
-            'custom_key_3' => 'value_3',
+            ProjectsMetadataMarshaller::ICU_ENABLED->value                   => '1',
+            ProjectsMetadataMarshaller::MT_EVALUATION->value                 => '0',
+            ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value => '1',
         ];
 
         $this->service->save($this->projectStructure, $this->features);
 
-        // 3 custom keys + 1 pretranslate_101 (DTO default) + 1 subfiltering_handlers = 5 total calls
+        // 3 metadata keys + 1 pretranslate_101 (DTO default) + 1 subfiltering_handlers = 5 total
         $metadata = $this->getSinglePersistedMetadataMap();
         self::assertCount(5, $metadata);
 
-        self::assertSame('value_1', $this->getPersistedValue('custom_key_1'));
-        self::assertSame('value_2', $this->getPersistedValue('custom_key_2'));
-        self::assertSame('value_3', $this->getPersistedValue('custom_key_3'));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
+        self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::MT_EVALUATION->value));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value));
 
         foreach ($metadata as $value) {
             self::assertIsString($value, 'All bulkSet() metadata values must be strings');
@@ -372,7 +373,7 @@ class SaveMetadataTest extends AbstractTest
         $this->projectStructure->mmt_glossaries = 'gl_abc';
         $this->projectStructure->subfiltering_handlers = '[{"name":"handler1"}]';
         $this->projectStructure->metadata = [
-            'existing_option' => 'kept',
+            ProjectsMetadataMarshaller::ICU_ENABLED->value => '1',
         ];
 
         $this->service->save($this->projectStructure, $this->features);
@@ -383,6 +384,157 @@ class SaveMetadataTest extends AbstractTest
         self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value));
         self::assertSame('gl_abc', $this->getPersistedValue('mmt_glossaries'));
         self::assertSame('[{"name":"handler1"}]', $this->getPersistedValue(ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value));
-        self::assertSame('kept', $this->getPersistedValue('existing_option'));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
+    }
+
+    // =========================================================================
+    // Storage-layer key guard
+    // =========================================================================
+
+    #[Test]
+    public function testUnknownMetadataKeysAreStrippedBeforeBulkSet(): void
+    {
+        // Inject obviously unknown keys alongside a valid key
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::ICU_ENABLED->value => '1',
+            'injected_evil_key'                            => 'evil_value',
+            'metadata_pollution'                           => 'polluted_value',
+        ];
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        // Unknown keys must not reach the DAO
+        self::assertEmpty(
+            $this->findDaoCallsByKey('injected_evil_key'),
+            "'injected_evil_key' must not reach bulkSet()"
+        );
+        self::assertEmpty(
+            $this->findDaoCallsByKey('metadata_pollution'),
+            "'metadata_pollution' must not reach bulkSet()"
+        );
+
+        // The valid key must still be persisted
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
+    }
+
+    #[Test]
+    public function testValidProjectsMetadataMarshallerKeysPassThroughGuard(): void
+    {
+        // Use several canonical ProjectsMetadataMarshaller enum values
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::ICU_ENABLED->value  => '1',
+            ProjectsMetadataMarshaller::MT_EVALUATION->value => '0',
+            ProjectsMetadataMarshaller::FROM_API->value      => '1',
+        ];
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        // All three must survive the guard and reach bulkSet()
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
+        self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::MT_EVALUATION->value));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::FROM_API->value));
+    }
+
+    #[Test]
+    public function testEngineExtraKeysPassThroughGuard(): void
+    {
+        // mmt_glossaries and deepl_formality are engine configuration parameter keys
+        // and must be allowed through the guard
+        $this->projectStructure->mmt_glossaries  = 'glossary_abc';
+        $this->projectStructure->deepl_formality = 'more';
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame('glossary_abc', $this->getPersistedValue('mmt_glossaries'));
+        self::assertSame('more', $this->getPersistedValue('deepl_formality'));
+    }
+
+    #[Test]
+    public function testSubfilteringHandlersKeyPassesThroughGuard(): void
+    {
+        // subfiltering_handlers is from JobsMetadataMarshaller and must be
+        // explicitly allowed by the guard
+        $this->projectStructure->subfiltering_handlers = '[{"name":"filter_a"}]';
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame(
+            '[{"name":"filter_a"}]',
+            $this->getPersistedValue(JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value)
+        );
+    }
+
+    #[Test]
+    public function testLoggerDebugIsCalledWhenUnknownKeysAreStripped(): void
+    {
+        // Build a fresh service with a MOCK logger (not a stub) so we can assert on it
+        $stubDao = $this->createStub(ProjectsMetadataDao::class);
+        $stubDao->method('bulkSet')->willReturnCallback(function (int $idProject, array $metadata): void {
+            $this->bulkSetCalls[] = ['id_project' => $idProject, 'metadata' => $metadata];
+        });
+
+        $loggerMock = $this->createMock(MatecatLogger::class);
+        $loggerMock->expects(self::once())
+            ->method('debug')
+            ->with(self::stringContains('injected_evil_key'));
+
+        $service = new ProjectMetadataService($stubDao, $loggerMock);
+
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::ICU_ENABLED->value => '1',
+            'injected_evil_key'                            => 'evil_value',
+        ];
+
+        $service->save($this->projectStructure, $this->features);
+    }
+
+    #[Test]
+    public function testLoggerIsNotCalledWhenAllKeysAreValid(): void
+    {
+        // Build a fresh service with a MOCK logger to assert debug() is never called
+        $stubDao = $this->createStub(ProjectsMetadataDao::class);
+        $stubDao->method('bulkSet')->willReturnCallback(function (int $idProject, array $metadata): void {
+            $this->bulkSetCalls[] = ['id_project' => $idProject, 'metadata' => $metadata];
+        });
+
+        $loggerMock = $this->createMock(MatecatLogger::class);
+        $loggerMock->expects(self::never())->method('debug');
+
+        $service = new ProjectMetadataService($stubDao, $loggerMock);
+
+        // Only valid keys — no unknown keys should trigger the guard
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::ICU_ENABLED->value  => '1',
+            ProjectsMetadataMarshaller::MT_EVALUATION->value => '0',
+        ];
+
+        $service->save($this->projectStructure, $this->features);
+    }
+
+    #[Test]
+    public function testMixedValidAndUnknownKeysOnlyValidSurvive(): void
+    {
+        $this->projectStructure->metadata = [
+            ProjectsMetadataMarshaller::ICU_ENABLED->value          => '1',
+            ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value => '1',
+            'injected_evil_key'                                      => 'evil_value',
+            'metadata_pollution'                                     => 'polluted_value',
+        ];
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        // Valid keys must survive
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value));
+
+        // Unknown keys must be absent
+        self::assertEmpty(
+            $this->findDaoCallsByKey('injected_evil_key'),
+            "'injected_evil_key' must not reach bulkSet()"
+        );
+        self::assertEmpty(
+            $this->findDaoCallsByKey('metadata_pollution'),
+            "'metadata_pollution' must not reach bulkSet()"
+        );
     }
 }
