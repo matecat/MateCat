@@ -7,6 +7,7 @@ use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentMetadataMarshaller;
 use PDOException;
 use PDOStatement;
 use RecursiveArrayIterator;
@@ -254,15 +255,7 @@ class ProjectManagerModel
      */
     private static function isAMetadata(string $metaKey): bool
     {
-        $metaDataKeys = [
-            'id_request',
-            'id_content',
-            'id_order',
-            'id_order_group',
-            'screenshot'
-        ];
-
-        return in_array($metaKey, $metaDataKeys);
+        return SegmentMetadataMarshaller::isAllowed($metaKey);
     }
 
     /**

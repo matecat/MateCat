@@ -269,10 +269,12 @@ class ExtractSegmentsTest extends AbstractTest
 
         // Both mrk segments should have sizeRestriction metadata
         $foundSizeRestriction = false;
-        foreach ($metaData as $meta) {
-            if (isset($meta->meta_key) && $meta->meta_key === 'sizeRestriction') {
-                $foundSizeRestriction = true;
-                $this->assertEquals('80', $meta->meta_value);
+        foreach ($metaData as $position => $structs) {
+            foreach ($structs as $meta) {
+                if (isset($meta->meta_key) && $meta->meta_key === 'sizeRestriction') {
+                    $foundSizeRestriction = true;
+                    $this->assertEquals('80', $meta->meta_value);
+                }
             }
         }
 
@@ -547,10 +549,12 @@ class ExtractSegmentsTest extends AbstractTest
         $metaData = $ps->segments_meta_data[$fid];
 
         $foundSizeRestriction = false;
-        foreach ($metaData as $meta) {
-            if (isset($meta->meta_key) && $meta->meta_key === 'sizeRestriction') {
-                $foundSizeRestriction = true;
-                $this->assertEquals('100', $meta->meta_value);
+        foreach ($metaData as $position => $structs) {
+            foreach ($structs as $meta) {
+                if (isset($meta->meta_key) && $meta->meta_key === 'sizeRestriction') {
+                    $foundSizeRestriction = true;
+                    $this->assertEquals('100', $meta->meta_value);
+                }
             }
         }
 

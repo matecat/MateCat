@@ -28,6 +28,7 @@ use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationDao;
@@ -664,7 +665,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
             $check->setCharactersCount(
                 $this->data['characters_counter'],
-                SegmentMetadataDao::get($this->data['id_segment'], QA::SIZE_RESTRICTION)[0] ?? null
+                SegmentMetadataDao::get($this->data['id_segment'], SegmentMetadataMarshaller::SIZE_RESTRICTION->value)[0] ?? null
             );
         }
 
