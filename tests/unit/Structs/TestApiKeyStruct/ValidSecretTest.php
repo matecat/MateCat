@@ -1,6 +1,7 @@
 <?php
 
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -23,11 +24,13 @@ class ValidSecretTest extends AbstractTest
     }
 
 
+    #[Test]
     public function test_validSecret_success()
     {
         $this->assertTrue($this->test_data->api_key->validSecret($this->test_data->api_key->api_secret));
     }
 
+    #[Test]
     public function test_validSecret_failure()
     {
         $this->assertFalse($this->test_data->api_key->validSecret($this->test_data->api_key->api_secret . "made_invalid"));

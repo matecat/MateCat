@@ -123,11 +123,12 @@ var spec = {
           {
             name: 'private_tm_key_json',
             in: 'formData',
-            description: 'Private key(s) for MyMemory in a JSON format. `tm_prioritization` must be specified.',
+            description:
+              'Private key(s) for MyMemory in a JSON format. `tm_prioritization` must be specified.',
             required: false,
             type: 'string',
             example:
-                '{"tm_prioritization":true, "keys":[{"key": "123456","read": true, "write": true, "penalty": 97},{"key": "xdfr3r","read": true, "write": true, "penalty": 95}]}',
+              '{"tm_prioritization":true, "keys":[{"key": "123456","read": true, "write": true, "penalty": 97},{"key": "xdfr3r","read": true, "write": true, "penalty": 95}]}',
           },
           {
             name: 'subject',
@@ -275,7 +276,7 @@ var spec = {
             description: 'Select the DeepL engine type',
             required: false,
             type: 'string',
-            enum: ['prefer_quality_optimized','latency_optimized']
+            enum: ['prefer_quality_optimized', 'latency_optimized'],
           },
           {
             name: 'filters_extraction_parameters',
@@ -331,14 +332,7 @@ var spec = {
             type: 'string',
             example: '3213',
           },
-          {
-            name: 'metadata',
-            in: 'formData',
-            description:
-              'Metadata for the project must be sent in JSON format Key:Value es: {"key1":"value1", "key2":"value2"}',
-            required: false,
-            type: 'string',
-          },
+
           {
             name: 'character_counter_count_tags',
             in: 'formData',
@@ -369,7 +363,7 @@ var spec = {
             type: 'integer',
             default: 86,
             minimum: 76,
-            maximum: 102
+            maximum: 102,
           },
           {
             name: 'legacy_icu',
@@ -379,21 +373,15 @@ var spec = {
             type: 'boolean',
           },
           {
-            name: 'project_info',
-            in: 'formData',
-            description: 'Additional project information',
-            required: false,
-            type: 'string'
-          },
-          {
             name: 'public_tm_penalty',
             in: 'formData',
-            description: 'The penalty value (between 0 and 100) to be applied to the public TM matches',
+            description:
+              'The penalty value (between 0 and 100) to be applied to the public TM matches',
             required: false,
             type: 'integer',
             default: 0,
             minimum: 0,
-            maximum: 100
+            maximum: 100,
           },
           {
             name: 'project_completion',
@@ -405,16 +393,10 @@ var spec = {
           {
             name: 'qa_model_template_id',
             in: 'formData',
-            description: 'The id of the QA model you want to use in the project you are creating (if you want to use a custom QA model in a project, both relevant parameters must be included in the API call)',
+            description:
+              'The id of the QA model you want to use in the project you are creating (if you want to use a custom QA model in a project, both relevant parameters must be included in the API call)',
             required: false,
-            type: 'integer'
-          },
-          {
-            name: 'speech2text',
-            in: 'formData',
-            description: 'Enable speech to text for this project',
-            required: false,
-            type: 'boolean',
+            type: 'integer',
           },
           {
             name: 'enable_mt_analysis',
@@ -427,14 +409,16 @@ var spec = {
           {
             name: 'intento_routing',
             in: 'formData',
-            description: 'Select the Intento routing (this parameter is only applied if Intento is enabled for the project)',
+            description:
+              'Select the Intento routing (this parameter is only applied if Intento is enabled for the project)',
             required: false,
             type: 'string',
           },
           {
             name: 'intento_provider',
             in: 'formData',
-            description: 'Select the Intento provider (this parameter is only applied if Intento is enabled for the project)',
+            description:
+              'Select the Intento provider (this parameter is only applied if Intento is enabled for the project)',
             required: false,
             type: 'string',
           },
@@ -448,12 +432,13 @@ var spec = {
           {
             name: 'subfiltering_handlers',
             in: 'formData',
-            description: 'An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: "markup", "percent_double_curly", "twig", "ruby_on_rails", "double_snail", "double_square", "dollar_curly", "single_curly", "objective_c_ns", "double_percent", "square_sprintf", "sprintf"',
+            description:
+              'An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: "markup", "percent_double_curly", "twig", "ruby_on_rails", "double_snail", "double_square", "dollar_curly", "single_curly", "objective_c_ns", "double_percent", "square_sprintf", "sprintf"',
             required: false,
             type: 'string',
             default: '[]',
-            example: '["markup","percent_double_curly","twig"]'
-          }
+            example: '["markup","percent_double_curly","twig"]',
+          },
         ],
         responses: {
           200: {

@@ -3,6 +3,8 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
@@ -83,8 +85,13 @@ class SetMyMemoryTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::set
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_set_segment_1_general_check()
     {
         $params = [
@@ -127,6 +134,7 @@ class SetMyMemoryTest extends AbstractTest
      * @group  regression
      * @covers MyMemory::set
      */
+    #[Test]
     public function test_set_segment_1_with_mock()
     {
         $params = [
@@ -199,8 +207,13 @@ TAB;
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::set
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_set_segment_2_general_check_with_id_user_not_in_array_coverage_purpose()
     {
         $params = [
@@ -239,6 +252,7 @@ TAB;
         $this->assertTrue(property_exists($result_object, '_rawResponse'));
     }
 
+    #[Test]
     public function test_set_segment_2_with_mock()
     {
         $params = [
@@ -318,6 +332,7 @@ TAB;
      * @group  regression
      * @covers MyMemory::set
      */
+    #[Test]
     public function test_set_with_error_from_mocked__call()
     {
         $params = [

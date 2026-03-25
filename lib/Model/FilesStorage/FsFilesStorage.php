@@ -403,7 +403,7 @@ class FsFilesStorage extends AbstractFilesStorage
                     // Example: aad03b600_3dc4bf3a2d|it-IT → abc12de006__it-IT - where abc12de006 == sha1(aad03b600_3dc4bf3a2d|it-IT)
                     $short_hash = sha1($subPathName);
 
-                    //XXX check this separator: could be the same for S3 and FS ?
+                    //TODO check this separator: could be the same for S3 and FS ?
                     $pathParts = explode("|", $iterator->getSubPathName());
                     $lang = array_pop($pathParts);
                     $subPathName = $short_hash . self::OBJECTS_SAFE_DELIMITER . $lang;
@@ -414,6 +414,17 @@ class FsFilesStorage extends AbstractFilesStorage
         }
 
         Utils::deleteDir(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deleteQueue(string $uploadDir): void
+    {
+        Utils::deleteDir($uploadDir);
+        if (is_dir($uploadDir . '_converted')) {
+            Utils::deleteDir($uploadDir . '_converted');
+        }
     }
 
     /**

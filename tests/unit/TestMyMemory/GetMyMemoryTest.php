@@ -3,11 +3,14 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
+use Model\Jobs\JobsMetadataMarshaller;
 use Utils\Registry\AppConfig;
 
 
@@ -75,8 +78,13 @@ class GetMyMemoryTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::get
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_get_segment_dutch()
     {
         $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
@@ -100,8 +108,13 @@ class GetMyMemoryTest extends AbstractTest
      * Test that verified the behaviour of a get request for the translation
      * of a segment given personal tm with respective id_user.
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::get
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_get_segment_italian_with_id_user_initialized()
     {
         $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
@@ -128,8 +141,13 @@ class GetMyMemoryTest extends AbstractTest
      * Test that verified the behaviour of a get request for the translation of a
      * segment with wrong source language.
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::get
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_get_segment_italian_with_wrong_source_language_and_id_user_not_in_array_coverage_purpose()
     {
         $this->engine_MyMemory = new MyMemory($this->engine_struct_param);
@@ -160,6 +178,7 @@ class GetMyMemoryTest extends AbstractTest
      * @group  regression
      * @covers MyMemory::get
      */
+    #[Test]
     public function test_get_segment_with_mock_for__call0()
     {
         $this->config_param_of_get['segment'] = "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
@@ -224,6 +243,7 @@ TAB;
      * @group  regression
      * @covers MyMemory::get
      */
+    #[Test]
     public function test_get_segment_with_mock_for__call_and_at_least_one_match_found_in_TM()
     {
         $this->config_param_of_get['segment'] = "Ciascuna copia è dotata di un numero di serie univoco.";
@@ -238,7 +258,7 @@ TAB;
                     'key' => 'a6043e606ac9b5d7ff24',
                     'client_id' => 0,
                     'priority_key' => 0,
-                    'subfiltering_handlers' => 'null'
+                    JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'null'
                 ],
             CURLINFO_HEADER_OUT => true,
             CURLOPT_TIMEOUT => 120
@@ -377,6 +397,7 @@ TAB;
      * @group  regression
      * @covers MyMemory::get
      */
+    #[Test]
     public function test_get_segment_with_mock_for__call_and_MT_penalty_management()
     {
         $this->config_param_of_get['segment'] = "Ciascuna copia è dotata di un numero di serie univoco.";
@@ -391,7 +412,7 @@ TAB;
                     'key' => 'a6043e606ac9b5d7ff24',
                     'client_id' => 0,
                     'priority_key' => 0,
-                    'subfiltering_handlers' => 'null'
+                    JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'null'
                 ],
             CURLINFO_HEADER_OUT => true,
             CURLOPT_TIMEOUT => 120
@@ -525,6 +546,7 @@ TAB;
      * @group  regression
      * @covers MyMemory::get
      */
+    #[Test]
     public function test_get_with_error_from_mocked__call_for_coverage_purpose()
     {
         $this->config_param_of_get['segment'] = "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";

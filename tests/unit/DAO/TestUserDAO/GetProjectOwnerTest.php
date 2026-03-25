@@ -5,6 +5,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
@@ -138,6 +139,7 @@ class GetProjectOwnerTest extends AbstractTest
         parent::tearDown();
     }
 
+    #[Test]
     public function test_getProjectOwner()
     {
         /** @var UserStruct $user */
@@ -153,6 +155,7 @@ class GetProjectOwnerTest extends AbstractTest
         $this->assertNull($user->oauth_access_token);
     }
 
+    #[Test]
     public function test_getProjectOwner_mocked()
     {
         /**

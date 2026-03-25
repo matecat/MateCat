@@ -293,7 +293,6 @@ class QualityReportModel
             'id' => $record['segment_id'],
             'source' => $record['segment_source'],
             'status' => $record['translation_status'],
-            // TODO: the following `round` is wrong, this should be done later in a presentation layer...
             'edit_distance' => round($record['edit_distance'] / 1000, 2),
             'time_to_edit' => round($record['time_to_edit'] / 1000, 2),
             'issues' => [],

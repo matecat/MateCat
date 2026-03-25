@@ -20,12 +20,13 @@ use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
-use Model\ProjectManager\ProjectOptionsSanitizer;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
@@ -154,7 +155,7 @@ class CattoolController extends BaseKleinViewController
 
         $model = $chunkStruct->getProject()->getLqaModel();
         $jobsMetadataDao = new MetadataDao();
-        $public_tm_penalty = $jobsMetadataDao->get($chunkStruct->id, $chunkStruct->password, 'public_tm_penalty');
+        $public_tm_penalty = $jobsMetadataDao->get($chunkStruct->id, $chunkStruct->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value);
 
         $this->setView("index.html", [
             'active_engine' => new PHPTalMap($this->getActiveEngine($chunkStruct->id_mt_engine)),
@@ -220,7 +221,7 @@ class CattoolController extends BaseKleinViewController
                     TranslationStatus::STATUS_APPROVED2 => 'Revised'
                 ]
             ),
-            'tag_projection_languages' => new PHPTalMap(ProjectOptionsSanitizer::$tag_projection_allowed_languages),
+            'tag_projection_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$tagProjectionAllowedLanguages),
             'targetIsCJK' => new PHPTalBoolean(CatUtils::isCJK($chunkStruct->target)),
             'target_code' => $chunkStruct->target,
             'team_name' => $jobOwnership['team']->name,
@@ -257,7 +258,7 @@ class CattoolController extends BaseKleinViewController
             $this->addParamsToView([
                     'lxq_license' => AppConfig::$LXQ_LICENSE,
                     'lxq_partnerid' => AppConfig::$LXQ_PARTNERID,
-                    'lexiqa_languages' => new PHPTalMap(ProjectOptionsSanitizer::$lexiQA_allowed_languages),
+                    'lexiqa_languages' => new PHPTalMap(LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages),
                     'lexiqaServer' => AppConfig::$LXQ_SERVER,
                 ]
             );

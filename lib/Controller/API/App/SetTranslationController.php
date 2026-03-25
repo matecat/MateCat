@@ -24,6 +24,7 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
@@ -204,7 +205,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                      */
                     $project = $this->data['project'];
                     // case 1. is MT
-                    $new_translation->suggestion_match = $project->getMetadataValue(MetadataDao::MT_QUALITY_VALUE_IN_EDITOR) ?? 85;
+                    $new_translation->suggestion_match = $project->getMetadataValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85;
                     $new_translation->suggestion_source = EngineConstants::MT;
                 } elseif ($client_chosen_suggestion->match == InternalMatchesConstants::NO_MATCH) {
                     // case 2. no match
@@ -386,8 +387,8 @@ class SetTranslationController extends AbstractStatefulKleinController
             if (
                 (
                     (
-                        $job_stats[MetadataDao::WORD_COUNT_RAW]['draft'] +
-                        $job_stats[MetadataDao::WORD_COUNT_RAW]['new'] == 0
+                        $job_stats[ProjectsMetadataMarshaller::WORD_COUNT_RAW->value]['draft'] +
+                        $job_stats[ProjectsMetadataMarshaller::WORD_COUNT_RAW->value]['new'] == 0
                     )
                     and empty($job_status)
                 )

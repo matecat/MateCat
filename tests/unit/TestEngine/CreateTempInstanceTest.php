@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\DeepL;
@@ -28,6 +29,7 @@ class CreateTempInstanceTest extends AbstractTest
      * @group  regression
      * @covers EnginesFactory::createTempInstance
      */
+    #[Test]
     public function test_createTempInstance_of_constructed_engine()
     {
         $this->engine_struct_param = new EngineStruct();

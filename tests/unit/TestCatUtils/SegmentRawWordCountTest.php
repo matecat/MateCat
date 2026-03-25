@@ -3,6 +3,21 @@
 namespace unit\TestCatUtils;
 
 use Exception;
+use PHPUnit\Framework\Attributes\Test;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+use Matecat\SubFiltering\Filters\DollarCurlyBrackets;
+use Matecat\SubFiltering\Filters\DoublePercentages;
+use Matecat\SubFiltering\Filters\DoubleSquareBrackets;
+use Matecat\SubFiltering\Filters\MarkupToPh;
+use Matecat\SubFiltering\Filters\ObjectiveCNSString;
+use Matecat\SubFiltering\Filters\PercentDoubleCurlyBrackets;
+use Matecat\SubFiltering\Filters\RubyOnRailsI18n;
+use Matecat\SubFiltering\Filters\Snails;
+use Matecat\SubFiltering\Filters\SprintfToPH;
+use Matecat\SubFiltering\Filters\SquareSprintf;
+use Matecat\SubFiltering\Filters\TwigToPh;
+use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
 use TestHelpers\AbstractTest;
 use Utils\Tools\CatUtils;
 
@@ -11,6 +26,7 @@ class SegmentRawWordCountTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testSegmentRawWordCount()
     {
         $links = <<<H
@@ -116,7 +132,25 @@ H;
 
         foreach ($data as $language => $phrases) {
             foreach ($phrases as $phrase => $count) {
-                $this->assertEquals($count, CatUtils::segment_raw_word_count($phrase, $language), $phrase . ': test failed');
+
+                $defaultHandlers = InjectableFiltersTags::tagNamesForArrayClasses([
+                    MarkupToPh::class,
+                    PercentDoubleCurlyBrackets::class,
+                    TwigToPh::class,
+                    RubyOnRailsI18n::class,
+                    Snails::class,
+                    DoubleSquareBrackets::class,
+                    DollarCurlyBrackets::class,
+                    ObjectiveCNSString::class,
+                    DoublePercentages::class,
+                    SquareSprintf::class,
+                    SprintfToPH::class,
+                ]);
+
+                /** @var MateCatFilter $filter */
+                $filter = MateCatFilter::getInstance(new FeatureSet(), "en-US", $language, [], $defaultHandlers);
+
+                $this->assertEquals($count, CatUtils::segment_raw_word_count($phrase, $language, $filter), $phrase . ': test failed');
             }
         }
     }

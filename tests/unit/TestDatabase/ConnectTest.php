@@ -2,6 +2,7 @@
 
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -15,13 +16,13 @@ use Utils\Registry\AppConfig;
  */
 class ConnectTest extends AbstractTest
 {
-    protected $reflector;
-    protected $property;
+    protected ReflectionClass $reflector;
+    protected ReflectionProperty $property;
 
     /**
-     * @var \Model\DataAccess\Database|IDatabase
+     * @var IDatabase
      */
-    protected $databaseInstance;
+    protected IDatabase $databaseInstance;
 
     /**
      * @throws ReflectionException
@@ -65,6 +66,7 @@ class ConnectTest extends AbstractTest
      * @covers Database::connect
      * @throws ReflectionException
      */
+    #[Test]
     public function test_connect_connected()
     {
         // verify that the setup method has reset the connection
@@ -88,6 +90,7 @@ class ConnectTest extends AbstractTest
      * @covers Database::connect
      * @throws ReflectionException
      */
+    #[Test]
     public function test_connect_not_connected_without_explicit_call_to_connect()
     {
         // verify that the setup method has reset the connection
@@ -107,6 +110,7 @@ class ConnectTest extends AbstractTest
      * @covers \Model\DataAccess\Database::connect
      * @throws ReflectionException
      */
+    #[Test]
     public function test_connect_different_hash_between_two_PDO_objects()
     {
         // verify that the setup method has reset the connection

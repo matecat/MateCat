@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -13,26 +14,26 @@ use TestHelpers\AbstractTest;
  */
 class GetStructTest extends AbstractTest
 {
-    protected $array_param;
-    protected $reflector;
-    protected $method;
+    protected ReflectionMethod $method;
+    protected EngineStruct $engineStruct;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->databaseInstance = new EngineStruct;
-        $this->reflector = new ReflectionClass($this->databaseInstance);
-        $this->method = $this->reflector->getMethod("getStruct");
+        $this->engineStruct = new EngineStruct;
+        $reflector = new ReflectionClass($this->engineStruct);
+        $this->method = $reflector->getMethod("getStruct");
     }
 
     /**
-     * @return EngineStruct
-     * It returns a EngineStruct
+     * It returns an EngineStruct
      * @group  regression
      * @covers EngineStruct::getStruct
+     * @throws ReflectionException
      */
+    #[Test]
     public function test_getStruct_simple()
     {
-        $this->assertTrue($this->method->invoke($this->databaseInstance, null) instanceof EngineStruct);
+        $this->assertTrue($this->method->invoke($this->engineStruct, null) instanceof EngineStruct);
     }
 }

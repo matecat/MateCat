@@ -8,7 +8,6 @@
 
 namespace Model\ConnectedServices\GDrive;
 
-use ArrayObject;
 use DirectoryIterator;
 use Exception;
 use FilesystemIterator;
@@ -44,7 +43,7 @@ use Utils\Tools\Utils;
  */
 class Session
 {
-
+    const string SESSION_KEY = 'gdrive_session';
     const string FILE_LIST = 'gdriveFileList';
     const string FILE_NAME = 'fileName';
     const string FILE_HASH = 'fileHash';
@@ -55,6 +54,7 @@ class Session
     protected string $target_lang;
     protected ?string $seg_rule = null;
     protected array $session = [];
+    protected array $gDriveSession = [];
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
     protected ?Google_Service_Drive $service = null;
     protected ?array $token = null;
@@ -87,27 +87,22 @@ class Session
         }
 
         $this->session = &$_SESSION;
+        if (!isset($_SESSION[self::SESSION_KEY]) || !is_array($_SESSION[self::SESSION_KEY])) {
+            $_SESSION[self::SESSION_KEY] = [];
+        }
+        $this->gDriveSession = &$_SESSION[self::SESSION_KEY];
 
         $this->files_storage = FilesStorageFactory::create();
     }
 
     /**
-     * @return array
-     */
-    public function getSession(): array
-    {
-        return $this->session;
-    }
-
-    /**
      * Creates a new instance of the Session class for CLI usage.
      *
-     * @param $session
+     * @param array $session
      *
      * @return Session
-     * @throws Exception
      */
-    public static function getInstanceForCLI($session): Session
+    public static function getInstanceForCLI(array $session): Session
     {
         if (PHP_SAPI != 'cli') {
             throw new RuntimeException("This method MUST be called by CLI.");
@@ -128,7 +123,7 @@ class Session
     {
         $this->setConversionParams($this->session["upload_token"], $newSourceLang, 'en-US', $newSegmentationRule, $filtersExtractionParameters);
 
-        $fileList = $this->session[self::FILE_LIST];
+        $fileList = $this->gDriveSession[self::FILE_LIST];
 
         foreach ($fileList as $fileId => $file) {
             try {
@@ -138,7 +133,7 @@ class Session
                     throw new Exception('Error when converting file.');
                 }
 
-                $this->session[self::FILE_LIST][$fileId][self::FILE_HASH] = $generatedSha;
+                $this->gDriveSession[self::FILE_LIST][$fileId][self::FILE_HASH] = $generatedSha;
             } catch (Exception) {
                 return false;
             }
@@ -155,11 +150,11 @@ class Session
     {
         $response = [];
 
-        if (empty($this->session[self::FILE_LIST])) {
+        if (empty($this->gDriveSession[self::FILE_LIST])) {
             return $response;
         }
 
-        foreach ($this->session[self::FILE_LIST] as $fileId => $file) {
+        foreach ($this->gDriveSession[self::FILE_LIST] as $fileId => $file) {
             $fileName = $file[self::FILE_NAME];
 
             if (AbstractFilesStorage::isOnS3()) {
@@ -191,7 +186,7 @@ class Session
                         'fileExtension' => $fileExtension
                     ];
                 } else {
-                    unset($this->session[self::FILE_LIST][$fileId]);
+                    unset($this->gDriveSession[self::FILE_LIST][$fileId]);
                 }
             }
         }
@@ -200,14 +195,19 @@ class Session
     }
 
     /**
-     * MUST NOT TO BE CALLED FROM THE cli
+     * Clears the current session by removing specific file list data.
+     *
+     * @return void
+     * @throws RuntimeException If the method is called from a daemon instance (CLI context).
+     *
      */
-    public function cleanupSessionFiles(): void
+    public function clearSession(): void
     {
-        if ($this->sessionHasFiles()) {
-            unset($this->session[self::FILE_LIST]);
-            unset($_SESSION[self::FILE_LIST]);
+        if (AppConfig::$IS_DAEMON_INSTANCE) {
+            throw new RuntimeException("This method MUST NOT be called from the CLI.");
         }
+        unset($this->gDriveSession[self::FILE_LIST]);
+        unset($_SESSION[self::SESSION_KEY][self::FILE_LIST]);
     }
 
     /**
@@ -218,9 +218,6 @@ class Session
     {
         if (is_null($this->token)) {
             if ($this->session['user'] !== null) {
-                if ($this->session['user'] instanceof ArrayObject) { // comes from CLI (ProjectManager)
-                    $this->session['user'] = new UserStruct($this->session['user']->getArrayCopy());
-                }
                 $this->token = $this->getTokenByUser($this->session['user']);
             }
         }
@@ -251,12 +248,12 @@ class Session
      */
     public function addFiles(string $fileId, string $fileName, array $fileHash): void
     {
-        if (!isset($this->session[self::FILE_LIST])
-            || !is_array($this->session[self::FILE_LIST])) {
-            $this->session[self::FILE_LIST] = [];
+        if (!isset($this->gDriveSession[self::FILE_LIST])
+            || !is_array($this->gDriveSession[self::FILE_LIST])) {
+            $this->gDriveSession[self::FILE_LIST] = [];
         }
 
-        $this->session[self::FILE_LIST][$fileId] = [
+        $this->gDriveSession[self::FILE_LIST][$fileId] = [
             self::FILE_NAME => $fileName,
             self::FILE_HASH => $fileHash,
             self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
@@ -268,7 +265,7 @@ class Session
      */
     public function hasFiles(): bool
     {
-        return (isset($this->session[self::FILE_LIST]) and count($this->session[self::FILE_LIST]) > 0);
+        return (isset($this->gDriveSession[self::FILE_LIST]) and count($this->gDriveSession[self::FILE_LIST]) > 0);
     }
 
     /**
@@ -276,8 +273,8 @@ class Session
      */
     public function sessionHasFiles(): bool
     {
-        if (isset($this->session[self::FILE_LIST])
-            && !empty($this->session[self::FILE_LIST])) {
+        if (isset($this->gDriveSession[self::FILE_LIST])
+            && !empty($this->gDriveSession[self::FILE_LIST])) {
             return true;
         }
 
@@ -292,7 +289,7 @@ class Session
     public function findFileIdByName(string $fileName): ?string
     {
         if ($this->hasFiles()) {
-            foreach ($this->session[self::FILE_LIST] as $singleFileId => $file) {
+            foreach ($this->gDriveSession[self::FILE_LIST] as $singleFileId => $file) {
                 if ($file[self::FILE_NAME] === $fileName) {
                     return $singleFileId;
                 }
@@ -347,7 +344,7 @@ class Session
 
     public function clearFileListFromSession(): void
     {
-        unset($this->session[self::FILE_LIST]);
+        unset($this->gDriveSession[self::FILE_LIST]);
     }
 
     /**
@@ -363,8 +360,8 @@ class Session
     {
         $success = false;
 
-        if (isset($this->session[self::FILE_LIST][$fileId])) {
-            $file = $this->session[self::FILE_LIST][$fileId];
+        if (isset($this->gDriveSession[self::FILE_LIST][$fileId])) {
+            $file = $this->gDriveSession[self::FILE_LIST][$fileId];
             $pathCache = $this->getCacheFileDir($file);
 
             if (S3FilesStorage::isOnS3()) {
@@ -396,7 +393,7 @@ class Session
                 }
             }
 
-            unset($this->session[self::FILE_LIST] [$fileId]);
+            unset($this->gDriveSession[self::FILE_LIST] [$fileId]);
 
             $success = true;
         }
@@ -413,11 +410,11 @@ class Session
      */
     public function removeAllFiles(string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): void
     {
-        foreach ($this->session[self::FILE_LIST] as $singleFileId => $file) {
+        foreach ($this->gDriveSession[self::FILE_LIST] as $singleFileId => $file) {
             $this->removeFile($singleFileId, $source, $segmentationRule, $filtersTemplate);
         }
 
-        unset($this->session[self::FILE_LIST]);
+        unset($this->gDriveSession[self::FILE_LIST]);
     }
 
     /**

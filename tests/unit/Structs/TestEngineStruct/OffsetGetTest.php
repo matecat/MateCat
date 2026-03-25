@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -45,6 +46,7 @@ class OffsetGetTest extends AbstractTest
      * @group  regression
      * @covers EngineStruct::offsetGet
      */
+    #[Test]
     public function test_offsetGet_id_field()
     {
         $this->assertEquals(999, $this->engine_struct_param->offsetGet("id"));

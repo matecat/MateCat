@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -113,6 +114,7 @@ class DestroyCacheJobTest extends AbstractTest
      * @group  regression
      * @covers JobDao::destroyCache
      */
+    #[Test]
     public function test_DestroyCache_with_ID_and_Password()
     {
         $cache_key = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`jobs` WHERE id ='" . $this->id . "' AND password = '" . $this->str_password . " '";
@@ -134,6 +136,7 @@ class DestroyCacheJobTest extends AbstractTest
      * @covers JobDao::destroyCache
      * @throws Exception
      */
+    #[Test]
     public function test_DestroyCache_with_ID_Project()
     {
         $cache_key = "SELECT * FROM ( SELECT * FROM  " . AppConfig::$DB_DATABASE . ".`jobs` WHERE id ='" . $this->str_id_project . "' ORDER BY id DESC) t GROUP BY id ; ";

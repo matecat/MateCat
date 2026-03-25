@@ -37,7 +37,7 @@ trait RecursiveArrayCopy
         foreach ($reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
             $propertyName = $property->getName();
 
-            // Skip properties not included in the mask, if a mask is provided.
+            // Skip properties that aren't included in the mask if a mask is provided.
             if ($mask && !in_array($propertyName, $mask)) {
                 continue;
             }

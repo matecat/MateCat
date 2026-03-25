@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use TestHelpers\AbstractTest;
 use Utils\Engines\NONE;
@@ -71,6 +72,7 @@ class ReadEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::read
      */
+    #[Test]
     public function test_read_simple_engine_already_present_in_database()
     {
         $this->engine_struct_simple = new EngineStruct();
@@ -101,6 +103,7 @@ class ReadEngineTest extends AbstractTest
      * @group  regression
      * @covers EngineDAO::read
      */
+    #[Test]
     public function test_read_engine_just_created_in_database()
     {
         $this->engine_Dao = new EngineDAO(Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));

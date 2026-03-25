@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -117,6 +118,7 @@ class GetByIdAndPasswordTest extends AbstractTest
         parent::tearDown();
     }
 
+    #[Test]
     public function test_GetByIdAndPassword()
     {
         $actual_result = $this->job_Dao->getByIdAndPassword($this->id, $this->str_password);

@@ -2,6 +2,8 @@
 //TODO:estendere
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use TestHelpers\AbstractTest;
@@ -86,6 +88,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::call
      */
+    #[Test]
     public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_1()
     {
         $params = [
@@ -138,6 +141,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::call
      */
+    #[Test]
     public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_stubbed__call_with_mock_1()
     {
         $params = [
@@ -196,6 +200,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
      * @covers  AbstractEngine::call
      * @throws Exception
      */
+    #[Test]
     public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_2()
     {
         $params = [
@@ -253,6 +258,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::call
      */
+    #[Test]
     public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_general_check()
     {
         $params = [
@@ -286,6 +292,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::call
      */
+    #[Test]
     public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_stubbed__call_with_mock()
     {
         $params = [
@@ -344,6 +351,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
      * @group   regression
      * @covers  AbstractEngine::call
      */
+    #[Test]
     public function test_call_with_wrong_function_name_for_code_coverage_purpose()
     {
         $function_param = "bar_and_foo_invalid";
@@ -364,9 +372,14 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
     /**
      * @group   regression
+     * @group   ExternalServices
+     * @group   MyMemory
      * @covers  AbstractEngine::call
      * @throws Exception
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_real_get()
     {
         $params = [

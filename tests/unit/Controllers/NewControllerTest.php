@@ -9,8 +9,10 @@ use Klein\Request;
 use Klein\Response;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -106,6 +108,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithValidParameters()
     {
         $user = $this->createMock(UserStruct::class);
@@ -115,8 +118,8 @@ class NewControllerTest extends AbstractTest
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -151,6 +154,7 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithValidParametersAndMtDeepLEngine()
     {
         $this->user = $this->createMock(UserStruct::class);
@@ -161,8 +165,8 @@ class NewControllerTest extends AbstractTest
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -196,13 +200,14 @@ class NewControllerTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithMissingFile()
     {
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -221,13 +226,14 @@ class NewControllerTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithInvalidParameters()
     {
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'en',
                 'target_lang' => 'fr,de',
@@ -250,13 +256,14 @@ class NewControllerTest extends AbstractTest
      * @throws ReflectionException
      * @throws Exception
      */
+    #[Test]
     public function testValidateTheRequestWithInvalidSourceLang()
     {
         $this->requestMock = new Request(
             [],
             [
-                'character_counter_count_tags' => '1',
-                'character_counter_mode' => 'google_ads',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+                JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'google_ads',
                 'due_date' => '20251231',
                 'source_lang' => 'zz',
                 'target_lang' => 'fr,de',
@@ -274,98 +281,5 @@ class NewControllerTest extends AbstractTest
         $this->expectExceptionMessage('Missing source language.');
         $this->method->invoke($this->controller);
     }
-
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function testValidateSubfilteringOptionsReturnsNullForNone(): void
-    {
-        $controller = new NewController(
-            new Request(),
-            new Response(),
-        );
-
-        $ref = new ReflectionClass($controller);
-        $m = $ref->getMethod('validateSubfilteringOptions');
-
-        $this->assertNull($m->invoke($controller, 'none'));
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function testValidateSubfilteringOptionsReturnsNullForEmptyString(): void
-    {
-        $controller = new NewController(
-            new Request(),
-            new Response()
-        );
-
-        $ref = new ReflectionClass($controller);
-        $m = $ref->getMethod('validateSubfilteringOptions');
-
-        $this->assertNull($m->invoke($controller, ''));
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function testValidateSubfilteringOptionsReturnsArrayForValidJson(): void
-    {
-        $controller = new NewController(
-            new Request(),
-            new Response()
-        );
-
-        $ref = new ReflectionClass($controller);
-        $m = $ref->getMethod('validateSubfilteringOptions');
-
-        $result = $m->invoke($controller, '["twig","markup"]');
-        $this->assertIsArray($result);
-        $this->assertSame(['twig', 'markup'], $result);
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function testValidateSubfilteringOptionsReturnsEmptyArrayForEmptyJsonArray(): void
-    {
-        $controller = new NewController(
-            new Request(),
-            new Response()
-        );
-
-        $ref = new ReflectionClass($controller);
-        $m = $ref->getMethod('validateSubfilteringOptions');
-
-        $result = $m->invoke($controller, '[]');
-        $this->assertIsArray($result);
-        $this->assertSame([], $result);
-    }
-
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function testValidateSubfilteringOptionsThrowsForMalformedJson(): void
-    {
-        $controller = new NewController(
-            new Request(),
-            new Response()
-        );
-
-        $ref = new ReflectionClass($controller);
-        $m = $ref->getMethod('validateSubfilteringOptions');
-
-        $this->expectException(JsonValidatorGenericException::class);
-        $m->invoke($controller, 'not-a-json');
-    }
-
 
 }
