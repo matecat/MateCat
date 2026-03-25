@@ -22,17 +22,13 @@ import SegmentActions from '../../actions/SegmentActions'
 import {TagEntityLite} from './TagEntity/TagEntityLite'
 
 export const EditorLite = forwardRef(({content, highlightSnippet}, ref) => {
-  console.log('EditorLite ->', content)
-
   const fragmentHighlightRef = useRef()
 
   const applyStyleToSnippet = useCallback(
     (editorState) => {
       if (!highlightSnippet.text) return editorState
-      console.log('Applying style to snippet:', highlightSnippet.text)
 
       let contentState = editorState.getCurrentContent()
-
       let {editorState: editorStateTarget} = DraftMatecatUtils.encodeContent(
         EditorState.createEmpty(),
         highlightSnippet.text,
