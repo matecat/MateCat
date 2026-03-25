@@ -1,6 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react'
-import Tooltip from '../../common/Tooltip'
-import {getTooltipTag, tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
+import React, {useRef} from 'react'
+import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
 
 export const TagEntityLite = ({
   entityKey,
