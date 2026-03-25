@@ -416,7 +416,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     {
         return [
             'mmt_glossaries'    => ['mmt_glossaries'],
-            'lara_glossaries'   => ['lara_glossaries'],
             'lara_style'        => ['lara_style'],
             'intento_routing'   => ['intento_routing'],
             'intento_provider'  => ['intento_provider'],
