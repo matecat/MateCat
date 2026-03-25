@@ -3,6 +3,7 @@
 use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -52,6 +53,7 @@ class UpdateFieldProjectTest extends AbstractTest
     }
 
 
+    #[Test]
     public function test_updateField()
     {
         /**

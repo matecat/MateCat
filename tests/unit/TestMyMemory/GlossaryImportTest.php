@@ -18,6 +18,8 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
@@ -68,8 +70,13 @@ class GlossaryImportTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::glossaryImport
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_glossaryImport_correct_behaviour()
     {
         $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-Glossary.csv';
@@ -99,8 +106,13 @@ class GlossaryImportTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::glossaryImport
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_glossaryImport_wrong_target_lang()
     {
         $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-InvalidTargetLang.csv';
@@ -121,8 +133,13 @@ class GlossaryImportTest extends AbstractTest
 
     /**
      * @group  regression
+     * @group  ExternalServices
+     * @group  MyMemory
      * @covers MyMemory::glossaryImport
      */
+    #[Group('ExternalServices')]
+    #[Group('MyMemory')]
+    #[Test]
     public function test_glossaryImport_invalid_header()
     {
         $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeader.csv';
@@ -145,6 +162,7 @@ class GlossaryImportTest extends AbstractTest
      * @group  regression
      * @covers MyMemory::glossaryImport
      */
+    #[Test]
     public function test_glossaryImport_with_error_from_mocked__call_for_coverage_purpose()
     {
         $rawValue_error = json_encode([

@@ -2,10 +2,17 @@
 
 use Matecat\SimpleS3\Client;
 use Model\FilesStorage\S3FilesStorage;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
+/**
+ * @group ExternalServices
+ * @group S3
+ */
+#[Group('ExternalServices')]
+#[Group('S3')]
 class S3FilesStorageTest extends AbstractTest
 {
 

@@ -9,6 +9,7 @@
 
 use Matecat\SubFiltering\Filters\LtGtDoubleDecode;
 use Matecat\SubFiltering\MateCatFilter;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -31,6 +32,7 @@ class ParseSplittedSegmentTest extends AbstractTest
     /**
      * Test for MarkAllSegmentStatusController/BulkSegmentStatusChangeWorker
      */
+    #[Test]
     public function testInputSplitted()
     {
         $request = ["123-1", "123-2", "234", "ciao", "567", "536", "244"];

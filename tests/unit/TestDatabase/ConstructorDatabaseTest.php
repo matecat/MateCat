@@ -1,6 +1,7 @@
 <?php
 
 use Model\DataAccess\Database;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Registry\AppConfig;
 
@@ -37,6 +38,7 @@ class ConstructorDatabaseTest extends AbstractTest
      * @covers Database::__construct
      * @throws ReflectionException
      */
+    #[Test]
     public function test___construct_without_parameters()
     {
         // get the singleton static instance reference

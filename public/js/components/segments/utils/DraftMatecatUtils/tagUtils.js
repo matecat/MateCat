@@ -303,6 +303,48 @@ export const encodePlaceholdersToTags = (str) => {
     : str
 }
 
+export const decodeTagsToUnicodeChar = (str) => {
+  return str
+    ? str
+        .replace(
+          tagSignatures['lineFeed'].regex,
+          tagSignatures['lineFeed'].unicodeChar,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regex,
+          tagSignatures['carriageReturn'].unicodeChar,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regex,
+          tagSignatures['carriageReturn'].unicodeChar,
+        )
+        .replace(tagSignatures['tab'].regex, tagSignatures['tab'].unicodeChar)
+        .replace(tagSignatures['nbsp'].regex, tagSignatures['nbsp'].unicodeChar)
+    : str
+}
+
+export const encodeTagsFromUnicodeChar = (str) => {
+  return str
+    ? str
+        .replace(
+          tagSignatures['lineFeed'].regexUnicodeChar,
+          tagSignatures['lineFeed'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['carriageReturn'].regexUnicodeChar,
+          tagSignatures['carriageReturn'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['tab'].regexUnicodeChar,
+          tagSignatures['tab'].encodedPlaceholder,
+        )
+        .replace(
+          tagSignatures['nbsp'].regexUnicodeChar,
+          tagSignatures['nbsp'].encodedPlaceholder,
+        )
+    : str
+}
+
 export const removePlaceholdersForGlossary = (str) => {
   return str.replace(tagSignatures['nbsp'].regex, ' ')
 }

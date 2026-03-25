@@ -1,6 +1,7 @@
 <?php
 
 use Matecat\SubFiltering\Filters\PlaceHoldXliffTags;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -22,6 +23,7 @@ class PlaceholdxlifftagsTest extends AbstractTest
      * @group  regression
      * @covers PlaceHoldXliffTags::transform
      */
+    #[Test]
     public function testplaceholdxlifftags_japanese_short()
     {
         $this->source_segment = <<<'LAB'
@@ -37,6 +39,7 @@ LAB;
      * @group  regression
      * @covers PlaceHoldXliffTags::transform
      */
+    #[Test]
     public function testplaceholdxlifftags_japanese_long()
     {
         $this->source_segment = <<<'LAB'
@@ -56,6 +59,7 @@ LAB;
      * @group  regression
      * @covers PlaceHoldXliffTags::transform
      */
+    #[Test]
     public function testplaceholdxlifftags_english_short()
     {
         $this->source_segment = <<<'LAB'
@@ -71,6 +75,7 @@ LAB;
      * @group  regression
      * @covers PlaceHoldXliffTags::transform
      */
+    #[Test]
     public function testplaceholdxlifftags_deustsch()
     {
         $this->source_segment = <<<'LAB'
@@ -86,6 +91,7 @@ LAB;
      * @group  regression
      * @covers PlaceHoldXliffTags::transform
      */
+    #[Test]
     public function testplaceholdxlifftags_very_long()
     {
         $this->source_segment = <<<'LAB'

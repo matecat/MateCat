@@ -38,7 +38,7 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     /**
      * @return array
      */
-    protected function getBreakdownsArray(): array
+    public function getBreakdownsArray(): array
     {
         $this->breakdowns = (is_string($this->breakdowns) ? json_decode($this->breakdowns, true) : $this->breakdowns);
 
@@ -104,11 +104,11 @@ class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStr
     }
 
     /**
-     * @param $breakdowns
+     * @param array $breakdowns
      *
      * @throws Exception
      */
-    private function validateBreakdowns($breakdowns): void
+    private function validateBreakdowns(array $breakdowns): void
     {
         $size = mb_strlen(json_encode($breakdowns, JSON_NUMERIC_CHECK), '8bit');
 

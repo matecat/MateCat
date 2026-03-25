@@ -1,10 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Tools\Utils;
 
 class StripTagsPreservingHrefsTest extends AbstractTest
 {
+    #[Test]
     public function testCanStripTagsFromMdaString()
     {
         $string = 'mda:key|¶|172f7f84-0245-485c-b2c6-aaef19bcf0f9';
@@ -14,6 +16,7 @@ class StripTagsPreservingHrefsTest extends AbstractTest
         $this->assertEquals($expected, $stripTags);
     }
 
+    #[Test]
     public function testCanStripTagsFromString()
     {
         $string = 'This is a simple test.';
@@ -23,6 +26,7 @@ class StripTagsPreservingHrefsTest extends AbstractTest
         $this->assertEquals($expected, $stripTags);
     }
 
+    #[Test]
     public function testCanStripTagsFromHtml()
     {
         $html = '<p>This is a simple test. <span>This is nested <a href="http://test.com" onclick"XSS_INJECTION">link</a></span></p>';
@@ -32,6 +36,7 @@ class StripTagsPreservingHrefsTest extends AbstractTest
         $this->assertEquals($expected, $stripTags);
     }
 
+    #[Test]
     public function testCanStripTagsFromJson()
     {
         $json = '{"AdditionalInfo":"{}","MobileUsages":"[]","ReferenceLinks":"[]","Component":"[]","DynamicValueExample":"<span>Example</span>","KeyName":"<a href=\"https://text.com\" target=\"_blank\">Test</a><br>","Repo":"<a href =\"https://test2.com\" target=\"_blank\">test2</a>"}';
@@ -41,6 +46,7 @@ class StripTagsPreservingHrefsTest extends AbstractTest
         $this->assertEquals($expected, $stripTags);
     }
 
+    #[Test]
     public function testCanPreserveImgSrc()
     {
         $html = '<p>This is a simple test. <img src="https://placehold.co/600x400" alt="Test"/></p>';
@@ -50,6 +56,7 @@ class StripTagsPreservingHrefsTest extends AbstractTest
         $this->assertEquals($expected, $stripTags);
     }
 
+    #[Test]
     public function testCanPreserveMultipleImgSrc()
     {
         $html = 'tags: Shift_completed_EWA, plugin.figma.2025-03-11.17-19-52
@@ -64,6 +71,7 @@ class StripTagsPreservingHrefsTest extends AbstractTest
         $this->assertEquals($expected, $stripTags);
     }
 
+    #[Test]
     public function testWithMoreImages()
     {
         $html = '<img src="https://placehold.co/600x400" alt="Test"/> test <img src="https://placehold.co/600x400" alt="Test"/> test <img src="https://placehold.co/600x400" alt="Test"/>';

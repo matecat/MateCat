@@ -3,6 +3,7 @@
 
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 /**
@@ -41,6 +42,7 @@ class SumDifferentialsTest extends AbstractTest
      * @group  regression
      *
      */
+    #[Test]
     public function test_sumDifferentials_with_rejection()
     {
         $this->word_count_struct->setNewWords(0);
@@ -89,6 +91,7 @@ class SumDifferentialsTest extends AbstractTest
      * @group  regression
      *
      */
+    #[Test]
     public function test_sumDifferentials_with_chunks_of_split_from_NEW_to_APPROVED()
     {
         $this->word_count_struct->setNewWords(23);

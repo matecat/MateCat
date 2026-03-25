@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\Structs\EngineStruct;
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 
 
@@ -32,6 +33,7 @@ class OffsetSet extends AbstractTest
      * @group  regression
      * @covers EngineStruct::offsetSet
      */
+    #[Test]
     public function test_offsetSet_id_field()
     {
         $this->engine_struct_param->offsetSet("id", 000);

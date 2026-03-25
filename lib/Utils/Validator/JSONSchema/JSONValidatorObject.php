@@ -124,7 +124,7 @@ class JSONValidatorObject extends ValidatorObject
 
             if ($isStructured) {
                 // Recursively convert structured values into arrays.
-                $collector[$key] = $this->toArray((object)$value); // Force cast to object to respect the function signature.
+                $collector[$key] = $this->toArray((object)$value); // Force cast to an object to respect the function signature.
             } else {
                 // Add scalar values directly to the resulting array.
                 $collector[$key] = $value;

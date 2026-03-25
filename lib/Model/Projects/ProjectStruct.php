@@ -207,10 +207,10 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     {
         //this method is already cached internally by the MetadataDao.
         // we can avoid using the cachable method here
-        $type = $this->getMetadataValue(MetadataDao::WORD_COUNT_TYPE_KEY);
+        $type = $this->getMetadataValue(ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value);
 
         if ($type == null) {
-            return MetadataDao::WORD_COUNT_EQUIVALENT;
+            return ProjectsMetadataMarshaller::WORD_COUNT_EQUIVALENT->value;
         } else {
             return $type;
         }

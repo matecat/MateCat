@@ -19,7 +19,6 @@ class MetadataDao extends AbstractDao
     const string _query_metadata_by_job_id_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
     const string _query_metadata_by_job_password = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
     const string _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
-    const string SUBFILTERING_HANDLERS = 'subfiltering_handlers';
 
     /**
      * @param int $id_job
@@ -154,6 +153,48 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * @param int $id_job
+     * @param string $password
+     * @param array<string, string> $metadata
+     *
+     * @throws ReflectionException
+     */
+    public function bulkSet(int $id_job, string $password, array $metadata): void
+    {
+        if (empty($metadata)) {
+            return;
+        }
+
+        $placeholders = [];
+        $params = [];
+        $i = 0;
+
+        foreach ($metadata as $key => $value) {
+            $placeholders[] = "(:id_job_$i, :password_$i, :key_$i, :value_$i)";
+            $params["id_job_$i"] = $id_job;
+            $params["password_$i"] = $password;
+            $params["key_$i"] = $key;
+            $params["value_$i"] = $value;
+            $i++;
+        }
+
+        $sql = "INSERT INTO job_metadata (`id_job`, `password`, `key`, `value`) VALUES "
+            . implode(', ', $placeholders)
+            . " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+
+        $this->openTransaction();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+
+        $this->destroyCacheByJobAndPassword($id_job, $password);
+        foreach ($metadata as $key => $value) {
+            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $key);
+        }
+        $this->commitTransaction();
+    }
+
+    /**
      * @throws ReflectionException
      */
     public function delete($id_job, $password, $key): void
@@ -188,7 +229,7 @@ class MetadataDao extends AbstractDao
     public function getSubfilteringCustomHandlers(int $id_job, string $password): ?array
     {
         try {
-            $subfiltering = $this->get($id_job, $password, self::SUBFILTERING_HANDLERS, 86400);
+            $subfiltering = $this->get($id_job, $password, JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, 86400);
 
             return json_decode($subfiltering?->value ?? '[]'); //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch (Exception) {

@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\GlossaryCSVValidator;
@@ -10,6 +11,7 @@ class GlossaryCSVValidatorTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testFiles()
     {
         $invalids = [

@@ -2,7 +2,6 @@
 
 namespace Plugins\Features;
 
-use ArrayObject;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
@@ -14,9 +13,11 @@ use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelDao;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
@@ -25,7 +26,6 @@ use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use ReflectionException;
-use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
@@ -138,11 +138,11 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * If so, then try to assign the defined qa_model.
      * If not, then try to find the qa_model from the project structure.
      *
-     * @param RecursiveArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @throws ReflectionException
      */
-    public function postProjectCreate(RecursiveArrayObject $projectStructure): void
+    public function postProjectCreate(ProjectStructure $projectStructure): void
     {
         if ($this instanceof ReviewExtended) {
             return;
@@ -189,20 +189,20 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
-     * @param ArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function createChunkReviewRecords(ArrayObject $projectStructure): void
+    protected function createChunkReviewRecords(ProjectStructure $projectStructure): void
     {
-        $project = ProjectDao::findById($projectStructure['id_project']);
-        foreach ($projectStructure['array_jobs']['job_list'] as $id_job) {
+        $project = ProjectDao::findById($projectStructure->id_project);
+        foreach ($projectStructure->array_jobs['job_list'] as $id_job) {
             $chunkStruct = JobDao::getById($id_job);
 
             $iMax = 3;
 
-            if (isset($projectStructure['create_2_pass_review']) && $projectStructure['create_2_pass_review']) {
+            if (isset($projectStructure->create_2_pass_review) && $projectStructure->create_2_pass_review) {
                 $iMax = 4;
             }
 
@@ -217,12 +217,12 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      *
-     * @param ArrayObject $projectStructure
+     * @param SplitMergeProjectData $projectStructure
      *
      * @throws Exception
      *
      */
-    public function postJobSplitted(ArrayObject $projectStructure): void
+    public function postJobSplitted(SplitMergeProjectData $projectStructure): void
     {
         /**
          * By definition, when running postJobSplitted callback, the job is not split.
@@ -231,9 +231,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
          *
          */
 
-        $id_job = $projectStructure['job_to_split'];
+        $id_job = $projectStructure->jobToSplit;
         $previousRevisionRecords = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure['id_project'], 86400);
+        $project = ProjectDao::findById($projectStructure->idProject, 86400);
 
         ChunkReviewDao::deleteByJobId($id_job);
 
@@ -270,16 +270,16 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      *
-     * @param ArrayObject $projectStructure
+     * @param SplitMergeProjectData $projectStructure
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    public function postJobMerged(ArrayObject $projectStructure): void
+    public function postJobMerged(SplitMergeProjectData $projectStructure): void
     {
-        $id_job = $projectStructure['job_to_merge'];
+        $id_job = $projectStructure->jobToMerge;
         $old_reviews = ChunkReviewDao::findByIdJob($id_job);
-        $project = ProjectDao::findById($projectStructure['id_project'], 86400);
+        $project = ProjectDao::findById($projectStructure->idProject, 86400);
 
         $reviewGroupedData = [];
 
@@ -419,20 +419,20 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *  Sets the QA model fom the uploaded file which was previously validated
      *  and added to the project structure.
      *
-     * @param RecursiveArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      *
      * @return void
      * @throws ReflectionException
      */
-    private function setQaModelFromJsonFile(RecursiveArrayObject $projectStructure): void
+    private function setQaModelFromJsonFile(ProjectStructure $projectStructure): void
     {
-        /** @var RecursiveArrayObject $model_json */
-        $model_json = $projectStructure['features']['quality_framework'];
+        /** @var array<string, mixed> $model_json */
+        $model_json = $projectStructure->features['quality_framework'];
 
-        $model_record = ModelDao::createModelFromJsonDefinition($model_json->toArray());
+        $model_record = ModelDao::createModelFromJsonDefinition($model_json);
 
         $project = ProjectDao::findById(
-            $projectStructure['id_project']
+            $projectStructure->id_project
         );
 
         $dao = new ProjectDao(Database::obtain());
@@ -446,18 +446,18 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * If validation fails, add errors to the projectStructure.
      *
-     * @param ArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      * @param string|null $jsonPath
      *
      */
-    public static function loadAndValidateQualityFramework(ArrayObject &$projectStructure, ?string $jsonPath = null): void
+    public static function loadAndValidateQualityFramework(ProjectStructure &$projectStructure, ?string $jsonPath = null): void
     {
         if (get_called_class() instanceof ReviewExtended || get_called_class() == ReviewExtended::class) {
             return;
         }
 
         // Use Null Coalescing Operator to simplify checks for template or model
-        $decoded_model = $projectStructure['qa_model_template'] ?? $projectStructure['qa_model'];
+        $decoded_model = $projectStructure->qa_model_template ?? $projectStructure->qa_model;
 
         // Still empty?
         if (empty($decoded_model)) {
@@ -466,40 +466,40 @@ abstract class AbstractRevisionFeature extends BaseFeature
 
         // If decoding the model failed, register the error
         if (empty($decoded_model)) {
-            $projectStructure['result']['errors'][] = [
+            $projectStructure->result['errors'][] = [
                 'code' => '-900',
                 'message' => 'QA model failed to decode'
             ];
         }
 
         // Initialize features if not already set
-        if (!isset($projectStructure['features'])) {
-            $projectStructure['features'] = [];
+        if (!isset($projectStructure->features)) {
+            $projectStructure->features = [];
         }
 
         // Append the QA model to the project structure
-        $projectStructure['features']['quality_framework'] = $decoded_model;
+        $features = $projectStructure->features;
+        $features['quality_framework'] = $decoded_model;
+        $projectStructure->features = $features;
     }
 
     /**
      * Get a model from path or default
      *
-     * @param ArrayObject $projectStructure
+     * @param ProjectStructure $projectStructure
      * @param string|null $jsonPath
      *
-     * @return RecursiveArrayObject
+     * @return array<string, mixed>
      */
-    private static function loadModelFromPathOrDefault(ArrayObject $projectStructure, ?string $jsonPath): RecursiveArrayObject
+    private static function loadModelFromPathOrDefault(ProjectStructure $projectStructure, ?string $jsonPath): array
     {
-        if (empty($qa_model)) {
-            // Use null coalescing to simplify fallback logic
-            $path = $jsonPath ?? AppConfig::$ROOT . '/inc/qa_model.json';
-            $qa_model = file_get_contents($path);
-        }
+        // Use null coalescing to simplify fallback logic
+        $path = $jsonPath ?? AppConfig::$ROOT . '/inc/qa_model.json';
+        $qa_model = file_get_contents($path);
 
-        $decoded_model = new RecursiveArrayObject(json_decode($qa_model, true));
+        $decoded_model = json_decode($qa_model, true);
         // Set the user ID to allow ownership in the QA models table
-        $decoded_model['model']['uid'] = $projectStructure['uid'];
+        $decoded_model['model']['uid'] = $projectStructure->uid;
 
         return $decoded_model;
     }

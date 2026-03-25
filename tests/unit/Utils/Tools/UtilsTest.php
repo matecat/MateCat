@@ -483,6 +483,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testApiTimestampReturnsIso8601Format(): void
     {
         $result = Utils::api_timestamp('2023-06-15 14:30:00');
@@ -665,6 +666,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('172.16.0.1', $result);
     }
 
+    #[Test]
     public function testGetRealIpAddrHandlesIpv6(): void
     {
         $_SERVER['REMOTE_ADDR'] = '2001:0db8:85a3:0000:0000:8a2e:0370:7334';
@@ -695,6 +697,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testUuid4ReturnsValidFormat(): void
     {
         $result = Utils::uuid4();
@@ -704,6 +707,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testUuid4Returns36Characters(): void
     {
         $result = Utils::uuid4();
@@ -713,6 +717,7 @@ class UtilsTest extends AbstractTest
     /**
      * @throws Exception
      */
+    #[Test]
     public function testUuid4GeneratesUniqueValues(): void
     {
         $uuids = [];
@@ -944,6 +949,7 @@ class UtilsTest extends AbstractTest
         $this->assertFalse(Utils::isValidFileName($longName));
     }
 
+    #[Test]
     public function testIsValidFileNameWith255CharName(): void
     {
         $maxName = str_repeat('a', 251) . '.txt';
@@ -1067,18 +1073,21 @@ class UtilsTest extends AbstractTest
     // The attack only worked on old IIS/Tomcat with broken UTF-8 decoders
     // (CVE-2008-2938). Still, partial sequences starting with '..' are blocked.
 
+    #[Test]
     public function testTraversalOverlongUtf8PartialDotDotSlash(): void
     {
         // ..%c0%af — starts with literal '..' so the traversal regex catches it
         $this->assertFalse(Utils::isValidFileName('..%c0%af'));
     }
 
+    #[Test]
     public function testTraversalOverlongUtf8PartialDotDotBackslash(): void
     {
         // ..%c1%9c — starts with literal '..' so the traversal regex catches it
         $this->assertFalse(Utils::isValidFileName('..%c1%9c'));
     }
 
+    #[Test]
     public function testTraversalOverlongUtf8FullSequenceIsNotExploitable(): void
     {
         // %c0%ae%c0%ae%c0%af — fully overlong-encoded '../'
@@ -1143,11 +1152,13 @@ class UtilsTest extends AbstractTest
         $this->assertFalse(Utils::isValidFileName('NUL'));
     }
 
+    #[Test]
     public function testTraversalReservedCOM1(): void
     {
         $this->assertFalse(Utils::isValidFileName('COM1'));
     }
 
+    #[Test]
     public function testTraversalReservedLPT1(): void
     {
         $this->assertFalse(Utils::isValidFileName('LPT1'));
@@ -1256,6 +1267,7 @@ class UtilsTest extends AbstractTest
     // Tests for stripFileBOM()
     // =========================================================================
 
+    #[Test]
     public function testStripFileBOMRemovesUtf8Bom(): void
     {
         $stringWithBom = "\xEF\xBB\xBFHello";
@@ -1263,6 +1275,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Hello', $result);
     }
 
+    #[Test]
     public function testStripFileBOMRemovesUtf16Bom(): void
     {
         $stringWithBom = "\xFF\xFEHello";
@@ -1270,6 +1283,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Hello', $result);
     }
 
+    #[Test]
     public function testStripFileBOMRemovesUtf32Bom(): void
     {
         $stringWithBom = "\x00\x00\xFE\xFFHello";
@@ -1277,6 +1291,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals('Hello', $result);
     }
 
+    #[Test]
     public function testStripFileBOMDefaultsToUtf8(): void
     {
         $stringWithBom = "\xEF\xBB\xBFHello";
@@ -1288,6 +1303,7 @@ class UtilsTest extends AbstractTest
     // Tests for stripBOM()
     // =========================================================================
 
+    #[Test]
     public function testStripBOMRemovesUtf8Bom(): void
     {
         $stringWithBom = "\xEF\xBB\xBFHello World";
@@ -1336,6 +1352,7 @@ class UtilsTest extends AbstractTest
     // Tests for htmlentitiesToUft8WithoutDoubleEncoding()
     // =========================================================================
 
+    #[Test]
     public function testHtmlentitiesToUft8WithoutDoubleEncodingConvertsSpecialChars(): void
     {
         $result = Utils::htmlentitiesToUft8WithoutDoubleEncoding('<script>alert("xss")</script>');
@@ -1343,6 +1360,7 @@ class UtilsTest extends AbstractTest
         $this->assertStringContainsString('&gt;', $result);
     }
 
+    #[Test]
     public function testHtmlentitiesToUft8WithoutDoubleEncodingDoesNotDoubleEncode(): void
     {
         $alreadyEncoded = '&lt;script&gt;';
@@ -1350,6 +1368,7 @@ class UtilsTest extends AbstractTest
         $this->assertStringNotContainsString('&amp;lt;', $result);
     }
 
+    #[Test]
     public function testHtmlentitiesToUft8WithoutDoubleEncodingHandlesQuotes(): void
     {
         $result = Utils::htmlentitiesToUft8WithoutDoubleEncoding('"test"');
@@ -1569,6 +1588,7 @@ class UtilsTest extends AbstractTest
         $this->assertEquals(2, $result);
     }
 
+    #[Test]
     public function testGetSourcePageForRevise2Path(): void
     {
         $_SERVER['REQUEST_URI'] = '/revise2/project/1-2/en-US-it-IT';
@@ -1643,12 +1663,14 @@ class UtilsTest extends AbstractTest
         $this->assertTrue(Utils::isValidFileName('CON.txt'));
     }
 
+    #[Test]
     public function testIsValidFileNameWithCOM9(): void
     {
         // COM9 is in the reserved list
         $this->assertFalse(Utils::isValidFileName('COM9'));
     }
 
+    #[Test]
     public function testIsValidFileNameWithLPT9(): void
     {
         $this->assertFalse(Utils::isValidFileName('LPT9'));
