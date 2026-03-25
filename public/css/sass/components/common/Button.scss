@@ -246,6 +246,24 @@ a.button-component-container {
   --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
   --btnBgColorOutline: #{rgba(colors.$white, 0.5)};
 }
+.neutral {
+  --btnTextColor: #{colors.$black};
+  --btnTextColorDisabled: #{colors.$grey200};
+  --btnAltTextColor: #{colors.$black};
+  --btnAltTextColorHover: #{colors.$grey600};
+  --btnAltTextColorDisabled: #{rgba(colors.$grey700, 0.12)};
+
+  --btnBorderColor: #{colors.$grey200};
+  --btnBorderColorHover: #{colors.$grey700};
+  --btnBorderColorActive: #{colors.$grey700};
+  --btnBorderColorDisabled: #{rgba(colors.$grey700, 0.12)};
+
+  --btnBgColor: #{colors.$white};
+  --btnBgColorAlt: #{colors.$grey75};
+  --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
+  --btnBgColorOutline: #{rgba(colors.$white, 0.5)};
+}
 .primary {
   --btnTextColor: #{colors.$white};
   --btnTextColorDisabled: #{colors.$white};

@@ -1,4 +1,11 @@
-import React, {useState, useMemo, useRef, useEffect, useCallback} from 'react'
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+  createRef,
+} from 'react'
 import classnames from 'classnames'
 
 import TextUtils from '../../utils/textUtils'
@@ -12,7 +19,12 @@ import DraftMatecatUtils from '../segments/utils/DraftMatecatUtils'
 import SegmentQA from '../../../img/icons/SegmentQA'
 import AlertIcon from '../../../img/icons/AlertIcon'
 import InfoIcon from '../../../img/icons/InfoIcon'
-import {Badge, BADGE_TYPE} from '../common/Badge'
+import {Badge, BADGE_MODE, BADGE_TYPE} from '../common/Badge'
+import Tooltip from '../common/Tooltip'
+import ReviseIssuesIcon from '../../../img/icons/ReviseIssuesIcon'
+import {Button} from '../common/Button/Button'
+import ChevronDown from '../../../img/icons/ChevronDown'
+import ChevronUp from '../../../img/icons/ChevronUp'
 
 const QA_TYPES = ['ERROR', 'WARNING', 'INFO']
 
@@ -117,6 +129,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
   )
   const [r1QaOpen, setR1QaOpen] = useState(revisionToShow === '1')
   const [r2QaOpen, setR2QaOpen] = useState(revisionToShow === '2')
+  const [showHistory, setShowHistory] = useState(false)
 
   const issuesContainer = useRef(null)
 
@@ -260,6 +273,75 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
     },
     [urls, segment],
   )
+
+  const renderSegmentHistory = () => {
+    const history = segment
+      .get('history')
+      .toJS()
+      .filter((elem) => elem.status)
+    return history.map((elem, index) => {
+      return (
+        <div key={elem.date} className="qr-history-item">
+          <div
+            className={`qr-history-status qr-history-status_${elem.status.toLowerCase()}`}
+          >
+            <div className="qr-history-status_point"></div>
+            {index < history.length - 1 && (
+              <div className="qr-history-status_separator"></div>
+            )}
+            {elem.status === SEGMENTS_STATUS.APPROVED2
+              ? '2nd Revision'
+              : elem.status.charAt(0).toUpperCase() +
+                elem.status.toLowerCase().slice(1)}
+          </div>
+          <div className="qr-history-date">
+            {elem.date.replaceAll('-', '/')}
+          </div>
+          <div
+            className="qr-history-version"
+            dangerouslySetInnerHTML={{
+              __html: decodeTextAndTransformTags(
+                index === 0
+                  ? elem.translation
+                  : TextUtils.getDiffHtml(
+                      history[index - 1].translation,
+                      elem.translation,
+                    ),
+                config.isTargetRTL,
+              ),
+            }}
+          />
+          {elem.issues.length > 0 && (
+            <Tooltip
+              content={
+                <div>
+                  {elem.issues.map((issue) => (
+                    <div
+                      key={issue.issue_id}
+                      className="qr-history-issue"
+                      style={{fontWeight: '700'}}
+                    >
+                      {issue.issue_category}:{' '}
+                      <span style={{fontWeight: '400'}}>
+                        {issue.issue_severity}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              }
+            >
+              <div ref={createRef()}>
+                <Badge type={BADGE_TYPE.RED}>
+                  <ReviseIssuesIcon size={16} />
+                  Issues
+                </Badge>
+              </div>
+            </Tooltip>
+          )}
+        </div>
+      )
+    })
+  }
 
   // Render logic
   const renderedSource = decodeTextAndTransformTags(source, config.isSourceRTL)
@@ -485,7 +567,23 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 </div>
               )}
             </div>
+            {segment.get('history').size > 0 ? (
+              !showHistory ? (
+                <Button onClick={() => setShowHistory(true)}>
+                  Open history
+                  <ChevronDown size={16} />
+                </Button>
+              ) : (
+                <Button onClick={() => setShowHistory(false)}>
+                  Close history
+                  <ChevronUp size={16} />
+                </Button>
+              )
+            ) : null}
           </div>
+        )}
+        {segment.get('history').size > 0 && showHistory && (
+          <div className="qr-history">{renderSegmentHistory()}</div>
         )}
       </div>
     </div>

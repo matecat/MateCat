@@ -81,7 +81,7 @@ function SegmentsDetails(props) {
     <div className="qr-segment-details-container">
       <div className="qr-segments-summary">
         <div className="qr-filter-container">
-          <h3>Segment details</h3>
+          <h6>Segment details</h6>
           <Filters
             applyFilter={filterSegments}
             categories={props.categories}
