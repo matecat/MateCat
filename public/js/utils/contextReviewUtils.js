@@ -210,12 +210,6 @@ export const setActiveHighlight = (container, activeIndex) => {
 const BLOCK_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li, td, th, div, title'
 
 /**
- * Selector kept for click-resolution only — includes block elements that
- * may appear in the page but are not always direct Okapi segment boundaries.
- */
-const MEANINGFUL_SELECTOR = 'p, li, td, th, h1, h2, h3, h4, div'
-
-/**
  * Tags for elements that represent meaningful content blocks in the document.
  * Used to resolve clicks to segment-level granularity.
  */
