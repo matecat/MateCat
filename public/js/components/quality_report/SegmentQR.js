@@ -22,7 +22,7 @@ import InfoIcon from '../../../img/icons/InfoIcon'
 import {Badge, BADGE_MODE, BADGE_TYPE} from '../common/Badge'
 import Tooltip from '../common/Tooltip'
 import ReviseIssuesIcon from '../../../img/icons/ReviseIssuesIcon'
-import {Button} from '../common/Button/Button'
+import {Button, BUTTON_SIZE} from '../common/Button/Button'
 import ChevronDown from '../../../img/icons/ChevronDown'
 import ChevronUp from '../../../img/icons/ChevronUp'
 
@@ -567,14 +567,20 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
                 </div>
               )}
             </div>
-            {segment.get('history').size > 0 ? (
+            {(segment.get('history')?.size ?? 0) > 0 ? (
               !showHistory ? (
-                <Button onClick={() => setShowHistory(true)}>
+                <Button
+                  onClick={() => setShowHistory(true)}
+                  size={BUTTON_SIZE.SMALL}
+                >
                   Open history
                   <ChevronDown size={16} />
                 </Button>
               ) : (
-                <Button onClick={() => setShowHistory(false)}>
+                <Button
+                  onClick={() => setShowHistory(false)}
+                  size={BUTTON_SIZE.SMALL}
+                >
                   Close history
                   <ChevronUp size={16} />
                 </Button>
@@ -582,7 +588,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             ) : null}
           </div>
         )}
-        {segment.get('history').size > 0 && showHistory && (
+        {(segment.get('history')?.size ?? 0) > 0 && showHistory && (
           <div className="qr-history">{renderSegmentHistory()}</div>
         )}
       </div>

@@ -28,7 +28,7 @@ const JobProgressBar = ({stats = {}}) => {
     : true
 
   return (
-    <div className="job-progress-container">
+    <div className="job-progress-container" data-testid="progress-bar">
       <div className="job-progress-bar">
         {(stats || !analysisComplete) && (
           <>
@@ -58,7 +58,9 @@ const JobProgressBar = ({stats = {}}) => {
           </>
         )}
       </div>
-      {!isNaN(totalPerc) && isFinite(totalPerc) && `${totalPerc}%`}
+      <span data-testid="progress-bar-amount">
+        {!isNaN(totalPerc) && isFinite(totalPerc) ? `${totalPerc}%` : '-'}
+      </span>
     </div>
   )
 }

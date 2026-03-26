@@ -29,7 +29,7 @@ jest.mock('../../actions/CreateProjectActions', () => ({
 }))
 
 jest.mock('../../utils/commonUtils', () => ({
-  getFileIcon: jest.fn(() => 'extdoc'),
+  getFileIcon: jest.fn(() => null),
   dispatchCustomEvent: jest.fn(),
 }))
 
