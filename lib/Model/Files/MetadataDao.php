@@ -30,10 +30,18 @@ class MetadataDao extends AbstractDao
     {
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_project_id_file);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
+        $list = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
             'id_project' => $id_project,
             'id_file' => $id_file,
         ]);
+
+        if ($list) {
+            foreach ($list as $metaStruct) {
+                $metaStruct->value = FilesMetadataMarshaller::unMarshall($metaStruct);
+            }
+        }
+
+        return $list;
     }
 
     /**
@@ -76,7 +84,13 @@ class MetadataDao extends AbstractDao
 
         $stmt = $this->_getStatementForQuery($query);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, $params)[0] ?? null;
+        $result = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, $params)[0] ?? null;
+
+        if ($result) {
+            $result->value = FilesMetadataMarshaller::unMarshall($result);
+        }
+
+        return $result;
     }
 
     /**

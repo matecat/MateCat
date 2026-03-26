@@ -61,8 +61,8 @@ SegmentMetadataDao::get()    → ?SegmentMetadataStruct      (single key lookup)
 |---|---|
 | `SegmentMetadataStruct::meta_value` stays `string` | DB-honest — the database column is VARCHAR. No lying about what the DB returns. |
 | `Collection::find()` returns `?string` (raw) | Write path — `SegmentExtractor::createSegmentHash(?string $sizeRestriction)` needs raw string. |
-| `Collection::findTyped()` returns `mixed` (typed) | Read path — calls `unmarshall()` internally for typed access. |
-| `SegmentMetadataMarshaller::unmarshall()` is static | Follows `ProjectsMetadataMarshaller::unMarshall(MetadataStruct)` pattern. Accepts struct, not string. |
+| `Collection::findTyped()` returns `mixed` (typed) | Read path — calls `unMarshall()` internally for typed access. |
+| `SegmentMetadataMarshaller::unMarshall()` is static | Follows `ProjectsMetadataMarshaller::unMarshall(MetadataStruct)` pattern. Accepts struct, not string. |
 | `jsonSerialize()` serves typed values | API sends `sizeRestriction` as `int 42`, not `"42"`. Frontend confirmed safe (JS coercion). |
 | No project-level flag | Per requirement: "a project is created without a flag declaring that an in-context review type is enabled." |
 | `ProjectManagerModel::isAMetadata()` delegates to marshaller | Single source of truth for allowed keys. |
@@ -190,7 +190,7 @@ enum SegmentMetadataMarshaller: string
 
     public static function isAllowed(string $key): bool;
     public function marshall(mixed $value): ?string;
-    public static function unmarshall(SegmentMetadataStruct $struct): mixed;
+    public static function unMarshall(SegmentMetadataStruct $struct): mixed;
 }
 ```
 
@@ -280,7 +280,9 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 
 ### 7.2 Context URL Pipeline (next)
 
-- [ ] **FilesMetadataMarshaller** — Create Pattern B enum (`isAllowed` + `marshall` + `unmarshall`); cases: `INSTRUCTIONS`, `PDF_ANALYSIS`, `CONTEXT_URL`; wire `unmarshall` into `Files\MetadataDao` retrieval methods
+- [ ] **7.2.1a — PSR-1 rename `unmarshall` → `unMarshall`** in `SegmentMetadataMarshaller`, `SegmentMetadataCollection`, and tests (3 files). Uniform with `ProjectsMetadataMarshaller::unMarshall()` / `JobsMetadataMarshaller::unMarshall()`.
+- [ ] **7.2.1b — Create `FilesMetadataMarshaller`** — Pattern B enum (`isAllowed` + `marshall` + `unMarshall`); cases: `INSTRUCTIONS`, `PDF_ANALYSIS`, `CONTEXT_URL`. TDD.
+- [ ] **7.2.1c — Wire `FilesMetadataMarshaller` into `Files\MetadataDao`** — Change `MetadataStruct::$value` from `string` to `mixed`; add `unMarshall()` calls in `get()`, `getByJobIdProjectAndIdFile()`, and `insert()`/`update()` return paths.
 - [ ] **Add `CONTEXT_URL = 'context-url'`** to `SegmentMetadataMarshaller` (already has full pipeline) and `ProjectsMetadataMarshaller` (`unMarshall` only)
 - [ ] **Context URL fallback resolver** — service: segment → file → project read-time resolution
 - [ ] **API 3**: POST context-url at project level (`context_url`, `project_id`)
@@ -328,6 +330,7 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 11. "MANDATORY: ALWAYS use conventional-commit"
 12. "Wait my command before start implementing."
 13. ALWAYS use `english-checker` skill
+14. "use unMarshall, uniform SegmentMetadataMarshaller, stay compliant with PHP PSR-1 Basic Coding Standard" — all marshallers use `unMarshall()` (camelCase)
 
 ---
 
@@ -540,7 +543,59 @@ Resolution happens at **read time**, not write time. No data duplication. If the
 | **API 2** (file) | `context_url`, `file_id`, `project_id` (optional) | `file_metadata` | Applies to all segments in file |
 | **API 3** (project) | `context_url`, `project_id` | `project_metadata` | Broadest — all segments in project |
 
-### 11.7 GetSegmentsController Change
+### 11.7 Deep Analysis — Files\MetadataDao Consumer Impact
+
+> Based on deep analysis of all `Files\MetadataDao` consumers and `pdfAnalysis` data flow (2 parallel explore agents).
+
+#### Read Path Consumers
+
+| Consumer | Method | Usage | Impact |
+|---|---|---|---|
+| `FilesInfoUtility:56-64` | `getByJobIdProjectAndIdFile` | `$metadata[$key] = $value` | ✅ Safe — direct assignment works with both string and array |
+| `AbstractStatus:223` | `getByJobIdProjectAndIdFile` | Passes to `AnalysisFile` constructor | ✅ Safe — wraps key/value pairs |
+| `MetaDataController:122` | `getByJobIdProjectAndIdFile` | `$stdClass->$key = $value` | ✅ Safe — direct property assignment |
+| `FilesInfoUtility:114-124` | `get` | Returns instructions `.value` | ✅ Safe — instructions stay string |
+| `FilesInfoUtility:141-144` | `get` + `insert`/`update` | Instructions CRUD | ✅ Safe — instructions stay string |
+
+#### Write Path (not affected by unmarshalling)
+
+| Consumer | Method | Key | Value Format |
+|---|---|---|---|
+| `SegmentExtractor:257` | `insert` | `mtc:references` | Raw string |
+| `SegmentExtractor:265` | `insert` | `data-type` | Raw string |
+| `FileInsertionService:327` | `insert` | `pdfAnalysis` | `json_encode($array)` → JSON string |
+| `ProjectManager:1007` | `insert` | `instructions` | Raw string |
+| `FilesInfoUtility:144` | `insert` | `instructions` | Raw string |
+| `SegmentExtractor:282` | `bulkInsert` | XLIFF custom attributes | Raw strings |
+
+#### pdfAnalysis Data Flow
+
+```
+ConversionHandler → array → ConvertedFileModel → Redis (serialized)
+    → FileInsertionService → json_encode($array) → DB (JSON string)
+    → MetadataDao::get() → MetadataStruct (raw JSON string)
+    → FilesInfoUtility / MetaDataController → API response (string in JSON body)
+```
+
+**After unmarshalling**: `MetadataDao::get()` returns decoded array. All consumers do direct assignment (`$metadata[$key] = $value`), so `response->json()` handles arrays correctly. **Zero frontend JS references to `pdfAnalysis`** — safe to change.
+
+#### Conclusion
+
+**No breaking changes.** All read-path consumers use direct assignment, which works with both string and mixed types. No PHP code calls `json_decode()` on Files metadata values (unlike Projects `MMT.php:129` which is a different DAO). The change is fully backward-compatible.
+
+### 11.8 PSR-1 Method Naming Normalization
+
+`SegmentMetadataMarshaller::unmarshall()` violates PSR-1 §4.3 ("Method names MUST be declared in camelCase"). Must rename to `unMarshall()` to match `ProjectsMetadataMarshaller::unMarshall()` and `JobsMetadataMarshaller::unMarshall()`.
+
+**Files affected:**
+
+| File | Change |
+|---|---|
+| `lib/Model/Segments/SegmentMetadataMarshaller.php` | Method definition: `unmarshall` → `unMarshall` |
+| `lib/Model/Segments/SegmentMetadataCollection.php` | 2 call sites: `findTyped()` + `jsonSerialize()` |
+| `tests/unit/Model/Segments/SegmentMetadataMarshallerTest.php` | 5 test calls + 1 comment |
+
+### 11.9 GetSegmentsController Change
 
 Current (line 158):
 ```php
