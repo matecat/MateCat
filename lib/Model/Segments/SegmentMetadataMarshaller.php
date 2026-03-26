@@ -27,7 +27,7 @@ enum SegmentMetadataMarshaller: string
         };
     }
 
-    public static function unmarshall(SegmentMetadataStruct $struct): mixed
+    public static function unMarshall(SegmentMetadataStruct $struct): mixed
     {
         return match ($struct->meta_key) {
             self::SIZE_RESTRICTION->value => (int)$struct->meta_value,

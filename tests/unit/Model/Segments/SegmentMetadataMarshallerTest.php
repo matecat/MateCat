@@ -121,7 +121,7 @@ class SegmentMetadataMarshallerTest extends TestCase
         self::assertSame($expected, $actual);
     }
 
-    // ── unmarshall ──
+    // ── unMarshall ──
 
     #[Test]
     public function testUnmarshallSizeRestrictionReturnsInt(): void
@@ -130,7 +130,7 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_key = SegmentMetadataMarshaller::SIZE_RESTRICTION->value;
         $struct->meta_value = '42';
 
-        self::assertSame(42, SegmentMetadataMarshaller::unmarshall($struct));
+        self::assertSame(42, SegmentMetadataMarshaller::unMarshall($struct));
     }
 
     #[Test]
@@ -140,7 +140,7 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_key = SegmentMetadataMarshaller::ID_REQUEST->value;
         $struct->meta_value = 'REQ-123';
 
-        self::assertSame('REQ-123', SegmentMetadataMarshaller::unmarshall($struct));
+        self::assertSame('REQ-123', SegmentMetadataMarshaller::unMarshall($struct));
     }
 
     #[Test]
@@ -150,7 +150,7 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_key = SegmentMetadataMarshaller::ID_ORDER->value;
         $struct->meta_value = '5';
 
-        self::assertSame('5', SegmentMetadataMarshaller::unmarshall($struct));
+        self::assertSame('5', SegmentMetadataMarshaller::unMarshall($struct));
     }
 
     // ── resname ──
@@ -171,7 +171,7 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_key = SegmentMetadataMarshaller::RESNAME->value;
         $struct->meta_value = 'product-title';
 
-        self::assertSame('product-title', SegmentMetadataMarshaller::unmarshall($struct));
+        self::assertSame('product-title', SegmentMetadataMarshaller::unMarshall($struct));
     }
 
     // ── restype ──
@@ -218,6 +218,6 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_key = SegmentMetadataMarshaller::RESTYPE->value;
         $struct->meta_value = 'x-path';
 
-        self::assertSame('x-path', SegmentMetadataMarshaller::unmarshall($struct));
+        self::assertSame('x-path', SegmentMetadataMarshaller::unMarshall($struct));
     }
 }

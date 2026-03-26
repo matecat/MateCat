@@ -47,9 +47,9 @@ class SegmentMetadataCollection implements IteratorAggregate, Countable, JsonSer
     public function findTyped(SegmentMetadataMarshaller $key): mixed
     {
         foreach ($this->structs as $struct) {
-            if ($struct->meta_key === $key->value) {
-                return SegmentMetadataMarshaller::unmarshall($struct);
-            }
+             if ($struct->meta_key === $key->value) {
+                 return SegmentMetadataMarshaller::unMarshall($struct);
+             }
         }
 
         return null;
@@ -76,7 +76,7 @@ class SegmentMetadataCollection implements IteratorAggregate, Countable, JsonSer
         return array_map(fn(SegmentMetadataStruct $s) => [
             'id_segment' => $s->id_segment,
             'meta_key'   => $s->meta_key,
-            'meta_value' => SegmentMetadataMarshaller::unmarshall($s),
+            'meta_value' => SegmentMetadataMarshaller::unMarshall($s),
         ], $this->structs);
     }
 }
