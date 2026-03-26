@@ -278,10 +278,20 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 - [x] **Implement ContextResType enum** (TDD) — `lib/Model/Segments/ContextResType.php` with 5 cases. 15 tests.
 - [x] **Add RESNAME + RESTYPE to marshaller** (TDD) — Two new cases in `SegmentMetadataMarshaller`. `RESTYPE.marshall()` validates via `ContextResType::tryFrom()`, returns `null` for invalid values. `RESNAME.marshall()` default string behavior. 14 tests added.
 
-### 7.2 Future Work (no plan yet)
+### 7.2 Context URL Pipeline (next)
+
+- [ ] **FilesMetadataMarshaller** — Create Pattern B enum (`isAllowed` + `marshall` + `unmarshall`); cases: `INSTRUCTIONS`, `PDF_ANALYSIS`, `CONTEXT_URL`; wire `unmarshall` into `Files\MetadataDao` retrieval methods
+- [ ] **Add `CONTEXT_URL = 'context-url'`** to `SegmentMetadataMarshaller` (already has full pipeline) and `ProjectsMetadataMarshaller` (`unMarshall` only)
+- [ ] **Context URL fallback resolver** — service: segment → file → project read-time resolution
+- [ ] **API 3**: POST context-url at project level (`context_url`, `project_id`)
+- [ ] **API 2**: POST context-url at file level (`context_url`, `file_id`, optional `project_id`)
+- [ ] **API 1**: POST context-url at segment level (`context_url`, `segment_id`, optional `file_id`/`project_id`)
+- [ ] **GetSegmentsController**: return resolved `context-url` per segment via the fallback resolver
+
+### 7.3 Future Work (no plan yet)
 
 - [ ] **Integration: Connect metadata to context review page** — The backend stores `id_content`, `id_order`, `id_order_group`, `screenshot` but the frontend context review page doesn't consume them yet.
-- [ ] **Frontend: Extend segment message protocol** — Currently sends `{sid, source, target}`. Needs `resname` + `restype` metadata for lookup strategies.
+- [ ] **Frontend: Extend segment message protocol** — Currently sends `{sid, source, target}`. Needs `resname`, `restype`, and `context-url` metadata for lookup strategies.
 - [ ] **Frontend: Implement 5 lookup strategies** — XPath, ID, CSS class, custom path, attribute pair. Currently only text-matching is implemented.
 - [ ] **Frontend: Fallback chain** — `restype` lookup → text matching (graceful degradation).
 - [ ] **Screenshot handling** — The `screenshot` metadata key is stored but there's no upload/retrieval/display flow.
@@ -302,6 +312,9 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 4. "serve typed" — API returns typed values, not all strings
 5. "SegmentMetadataStruct::meta_value MUST stay `string` — DB-honest, typed access only through `Collection::findTyped()`"
 6. "Do NOT perform cross-validation between `resname` and `restype` at storage time" — stored independently, frontend responsible
+7. `context-url` is the field name at all three levels — hyphenated to align with XLIFF attribute conventions
+8. `context-url` has dual ingestion: XLIFF trans-unit attributes AND API. `FilesMetadataMarshaller` uses Pattern B (full pipeline) — ready for future XLIFF `<file>` attribute extraction
+9. Fallback resolution order: segment → file → project (read-time, no data duplication)
 
 ### Implementation Guardrails
 
@@ -447,3 +460,97 @@ No cross-validation between `resname` and `restype` at storage time. If `restype
 | Custom path lookup | Not implemented |
 | Attribute pair lookup | Not implemented |
 | Fallback chain | Not implemented (text-matching is the ONLY strategy) |
+
+---
+
+## 11. Context URL — Architecture & Design
+
+### 11.1 Problem Statement
+
+When a user wants in-context review, the system needs a URL to fetch the context HTML file. Three real-world scenarios exist:
+
+| Scenario | Granularity | Example |
+|---|---|---|
+| Different segments refer to different HTML pages | Per-segment | An XLIFF where each trans-unit has its own `context-url` attribute |
+| Each XLIFF file refers to a different HTML page | Per-file | Two XLIFF files, each translating a different web page |
+| All segments in a project share the same context | Per-project | One XLIFF, one HTML context page |
+
+### 11.2 Storage: Three-Level Metadata
+
+The `context-url` key is stored at all three metadata levels:
+
+| Level | Table | DAO | Key |
+|---|---|---|---|
+| **Segment** | `segment_metadata` | `SegmentMetadataDao` | `context-url` |
+| **File** | `file_metadata` | `Files\MetadataDao` | `context-url` |
+| **Project** | `project_metadata` | `Projects\MetadataDao` | `context-url` |
+
+> **Naming convention**: hyphenated (`context-url`) to align with XLIFF attribute conventions (`x-path`, `x-tag-id`, `x-css_class`).
+
+### 11.3 Dual Ingestion Paths
+
+`context-url` can enter the system from two directions:
+
+| Source | Segment level | File level | Project level |
+|---|---|---|---|
+| **XLIFF trans-unit attribute** | ✅ Extracted via `SegmentMetadataMarshaller` pipeline | ⚠️ Future — XLIFF parser does not yet extract `<file>` attributes, but `FilesMetadataMarshaller` is designed ready for it | ❌ No XLIFF source |
+| **API (user-submitted)** | ✅ API 1 | ✅ API 2 | ✅ API 3 |
+
+### 11.4 Fallback Resolution (read-time)
+
+When the GetSegments API returns segment data, `context-url` is resolved with this priority:
+
+```
+1. segment_metadata  (most specific — per-segment context)
+2. file_metadata     (mid-level — per-file context)
+3. project_metadata  (broadest — project-wide context)
+```
+
+Resolution happens at **read time**, not write time. No data duplication. If the project-level URL changes via API, all segments without their own context-url immediately inherit the new value.
+
+**Performance**: project-level and file-level context-urls are fetched **once** before the segment loop. Per-segment check is a `Collection::find()` on the already-loaded collection — no extra query.
+
+### 11.5 FilesMetadataMarshaller — Design Decision
+
+**Current state**: `Files\MetadataDao` has NO marshaller. Values stored/retrieved as raw strings. Existing keys: `instructions`, `mtc:instructions` (legacy), `pdfAnalysis` (JSON).
+
+**Decision**: Create `FilesMetadataMarshaller` using **Pattern B** (full pipeline, same as `SegmentMetadataMarshaller`):
+
+| Method | Purpose |
+|---|---|
+| `isAllowed(string $key): bool` | Whitelist gate — ready for future XLIFF `<file>` attribute extraction |
+| `marshall(mixed $value): ?string` | Write validation — returns `null` to reject invalid values |
+| `unmarshall(MetadataStruct $struct): mixed` | Read-time type restoration |
+
+**Rationale**: Although the XLIFF parser does not yet extract `<file>`-element attributes, future versions will. Designing with full pipeline now avoids retrofitting later. Consistent interface across all three marshallers.
+
+**Initial cases**:
+
+| Enum Case | DB Value (`key`) | Marshall | Unmarshall |
+|---|---|---|---|
+| `INSTRUCTIONS` | `instructions` | `string → string` | `string → string` |
+| `PDF_ANALYSIS` | `pdfAnalysis` | `string → string` (JSON) | `string → array` (json_decode) |
+| `CONTEXT_URL` | `context-url` | `string → string` (URL) | `string → string` |
+
+### 11.6 Three APIs
+
+| API | Input | Stores in | Notes |
+|---|---|---|---|
+| **API 1** (segment) | `context_url`, `segment_id`, `file_id` (optional), `project_id` (optional) | `segment_metadata` | Most specific override |
+| **API 2** (file) | `context_url`, `file_id`, `project_id` (optional) | `file_metadata` | Applies to all segments in file |
+| **API 3** (project) | `context_url`, `project_id` | `project_metadata` | Broadest — all segments in project |
+
+### 11.7 GetSegmentsController Change
+
+Current (line 158):
+```php
+$seg['metadata'] = SegmentMetadataDao::getAll($seg['sid'])->jsonSerialize();
+```
+
+After:
+```php
+$seg['metadata'] = SegmentMetadataDao::getAll($seg['sid'])->jsonSerialize();
+$seg['context_url'] = $contextUrlResolver->resolve($seg['sid'], $id_file, $id_project);
+```
+
+The resolved `context-url` is returned as a **top-level field** per segment (not nested in metadata), since it may come from file or project level rather than segment metadata.
