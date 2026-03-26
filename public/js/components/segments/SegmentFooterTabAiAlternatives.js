@@ -225,7 +225,6 @@ export const SegmentFooterTabAiAlternatives = ({
     }
 
     const receiveAlternatives = ({data}) => {
-      console.log('Received alternatives:', data)
       if (!data.has_error && Array.isArray(data.message)) {
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
