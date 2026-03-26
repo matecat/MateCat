@@ -155,7 +155,7 @@ class GetSegmentsController extends KleinController
             $seg['translation'] = $Filter->fromLayer1ToLayer2($Filter->realignIDInLayer1($seg['segment'], $seg['translation']));
             $seg['segment'] = $Filter->fromLayer1ToLayer2($seg['segment']);
 
-            $seg['metadata'] = SegmentMetadataDao::getAll($seg['sid']);
+            $seg['metadata'] = SegmentMetadataDao::getAll($seg['sid'])->jsonSerialize();
 
             $this->attachNotes($seg, $segment_notes);
             $this->attachContexts($seg, $contexts);
