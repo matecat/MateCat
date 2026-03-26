@@ -131,4 +131,86 @@ class SegmentMetadataCollectionTest extends TestCase
         self::assertSame('http://example.com/shot.png', $collection->find(SegmentMetadataMarshaller::SCREENSHOT));
         self::assertSame('120', $collection->find(SegmentMetadataMarshaller::SIZE_RESTRICTION));
     }
+
+    #[Test]
+    public function testFindTypedReturnsCastedValueForSizeRestriction(): void
+    {
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::SIZE_RESTRICTION->value;
+        $struct->meta_value = '80';
+
+        $collection = new SegmentMetadataCollection([$struct]);
+
+        self::assertSame(80, $collection->findTyped(SegmentMetadataMarshaller::SIZE_RESTRICTION));
+    }
+
+    #[Test]
+    public function testFindTypedReturnsStringForRegularKey(): void
+    {
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::ID_REQUEST->value;
+        $struct->meta_value = 'REQ-123';
+
+        $collection = new SegmentMetadataCollection([$struct]);
+
+        self::assertSame('REQ-123', $collection->findTyped(SegmentMetadataMarshaller::ID_REQUEST));
+    }
+
+    #[Test]
+    public function testFindTypedReturnsNullWhenKeyNotFound(): void
+    {
+        $collection = new SegmentMetadataCollection([]);
+        self::assertNull($collection->findTyped(SegmentMetadataMarshaller::SIZE_RESTRICTION));
+    }
+
+    #[Test]
+    public function testFindReturnsRawStringWhileFindTypedReturnsCasted(): void
+    {
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::SIZE_RESTRICTION->value;
+        $struct->meta_value = '42';
+
+        $collection = new SegmentMetadataCollection([$struct]);
+
+        self::assertSame('42', $collection->find(SegmentMetadataMarshaller::SIZE_RESTRICTION));
+        self::assertSame(42, $collection->findTyped(SegmentMetadataMarshaller::SIZE_RESTRICTION));
+    }
+
+    #[Test]
+    public function testJsonSerializeReturnsTypedValues(): void
+    {
+        $s1 = new SegmentMetadataStruct();
+        $s1->id_segment = '456';
+        $s1->meta_key = SegmentMetadataMarshaller::ID_REQUEST->value;
+        $s1->meta_value = 'REQ-1';
+
+        $s2 = new SegmentMetadataStruct();
+        $s2->id_segment = '456';
+        $s2->meta_key = SegmentMetadataMarshaller::SIZE_RESTRICTION->value;
+        $s2->meta_value = '120';
+
+        $collection = new SegmentMetadataCollection([$s1, $s2]);
+
+        $json = json_encode($collection);
+        $decoded = json_decode($json, true);
+
+        self::assertCount(2, $decoded);
+
+        self::assertSame('id_request', $decoded[0]['meta_key']);
+        self::assertSame('REQ-1', $decoded[0]['meta_value']);
+
+        self::assertSame('sizeRestriction', $decoded[1]['meta_key']);
+        self::assertSame(120, $decoded[1]['meta_value']);
+    }
+
+    #[Test]
+    public function testJsonSerializeEmptyCollection(): void
+    {
+        $collection = new SegmentMetadataCollection([]);
+
+        $json = json_encode($collection);
+        $decoded = json_decode($json, true);
+
+        self::assertSame([], $decoded);
+    }
 }

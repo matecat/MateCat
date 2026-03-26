@@ -7,7 +7,6 @@ use Gemini\Data\GenerationConfig;
 use Gemini\Data\Schema;
 use Gemini\Enums\DataType;
 use Gemini\Enums\ResponseMimeType;
-use Utils\Registry\AppConfig;
 
 class GeminiClient implements AIClientInterface
 {

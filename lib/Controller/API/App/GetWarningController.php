@@ -158,7 +158,7 @@ class GetWarningController extends KleinController
         $QA->setTargetSegLang($chunk->target);
 
         if (!$this->sourceContainsIcu && isset($characters_counter)) {
-            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value)[0] ?? null);
+            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value));
         }
 
         $QA->performConsistencyCheck();

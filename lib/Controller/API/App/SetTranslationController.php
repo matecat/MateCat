@@ -665,7 +665,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         if (isset($this->data['characters_counter']) and is_numeric($this->data['characters_counter'])) {
             $check->setCharactersCount(
                 $this->data['characters_counter'],
-                SegmentMetadataDao::get($this->data['id_segment'], SegmentMetadataMarshaller::SIZE_RESTRICTION->value)[0] ?? null
+                SegmentMetadataDao::get($this->data['id_segment'], SegmentMetadataMarshaller::SIZE_RESTRICTION->value)
             );
         }
 

@@ -24,16 +24,11 @@ enum SegmentMetadataMarshaller: string
         };
     }
 
-    /**
-     * Convert a stored string value back to its typed PHP representation.
-     *
-     * This is the reverse of {@see marshall()}.
-     */
-    public function unmarshall(string $storedValue): mixed
+    public static function unmarshall(SegmentMetadataStruct $struct): mixed
     {
-        return match ($this) {
-            self::SIZE_RESTRICTION => (int)$storedValue,
-            default => $storedValue,
+        return match ($struct->meta_key) {
+            self::SIZE_RESTRICTION->value => (int)$struct->meta_value,
+            default => $struct->meta_value,
         };
     }
 }

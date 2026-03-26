@@ -10,27 +10,27 @@ class SegmentMetadataDao extends AbstractDao
 {
 
     /**
-     * get all meta
+     * Get all metadata for a segment.
      *
      * @param int $id_segment
-     * @param int $ttl
+     * @param int $ttl Cache TTL in seconds (default: 1 week)
      *
-     * NOTE: 604,800 sec = 1 week
-     *
-     * @return SegmentMetadataStruct[]
+     * @return SegmentMetadataCollection
      * @throws ReflectionException
      */
-    public static function getAll(int $id_segment, int $ttl = 604800): array
+    public static function getAll(int $id_segment, int $ttl = 604800): SegmentMetadataCollection
     {
         $thisDao = new self();
         $conn = $thisDao->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment = ? ");
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+        $results = $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentMetadataStruct::class,
             [$id_segment]
         );
+
+        return new SegmentMetadataCollection($results);
     }
 
     /**
@@ -55,28 +55,28 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * get key
+     * Get a single metadata entry by segment ID and key.
      *
      * @param int $id_segment
      * @param string $key
-     * @param int $ttl
+     * @param int $ttl Cache TTL in seconds (default: 1 week)
      *
-     * NOTE: 604,800 sec = 1 week
-     *
-     * @return array
+     * @return SegmentMetadataStruct|null
      * @throws ReflectionException
      */
-    public static function get(int $id_segment, string $key, int $ttl = 604800): array
+    public static function get(int $id_segment, string $key, int $ttl = 604800): ?SegmentMetadataStruct
     {
         $thisDao = new self();
         $conn = $thisDao->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment = ? and meta_key = ? ");
 
-        return $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
+        $results = $thisDao->setCacheTTL($ttl)->_fetchObjectMap(
             $stmt,
             SegmentMetadataStruct::class,
             [$id_segment, $key]
         );
+
+        return $results[0] ?? null;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace unit\Model\Segments;
 
 use Model\Segments\SegmentMetadataMarshaller;
+use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -121,18 +122,30 @@ class SegmentMetadataMarshallerTest extends TestCase
     #[Test]
     public function testUnmarshallSizeRestrictionReturnsInt(): void
     {
-        self::assertSame(42, SegmentMetadataMarshaller::SIZE_RESTRICTION->unmarshall('42'));
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::SIZE_RESTRICTION->value;
+        $struct->meta_value = '42';
+
+        self::assertSame(42, SegmentMetadataMarshaller::unmarshall($struct));
     }
 
     #[Test]
     public function testUnmarshallRegularKeyReturnsString(): void
     {
-        self::assertSame('REQ-123', SegmentMetadataMarshaller::ID_REQUEST->unmarshall('REQ-123'));
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::ID_REQUEST->value;
+        $struct->meta_value = 'REQ-123';
+
+        self::assertSame('REQ-123', SegmentMetadataMarshaller::unmarshall($struct));
     }
 
     #[Test]
     public function testUnmarshallIdOrderReturnsString(): void
     {
-        self::assertSame('5', SegmentMetadataMarshaller::ID_ORDER->unmarshall('5'));
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::ID_ORDER->value;
+        $struct->meta_value = '5';
+
+        self::assertSame('5', SegmentMetadataMarshaller::unmarshall($struct));
     }
 }
