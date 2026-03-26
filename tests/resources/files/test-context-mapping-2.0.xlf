@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en-US" trgLang="it-IT">
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" xmlns:matecat="https://www.matecat.com" version="2.0" srcLang="en-US" trgLang="it-IT">
     <!--
     XLIFF 2.0 file demonstrating all resource types defined in the
     "Technical Specification: Mapping Between Contextual Markup and Translatable Strings".
 
-    Each unit uses 'name' to carry the nodePath and a custom 'x-restype' attribute
+    Each unit uses 'matecat:resname' to carry the nodePath and a custom 'matecat:restype' attribute
     to declare the identification method.  The corresponding context HTML is provided
     as a reference in the <notes> elements and matches the example in the spec.
 
@@ -40,17 +40,17 @@
             <note>
                 This file demonstrates the mapping between contextual markup and
                 translatable strings as defined in the Technical Specification.
-                All x-restype values are prefixed with 'x-' per the original XLIFF 2.0
+                All matecat:restype values are prefixed with 'x-' per the original XLIFF 2.0
                 convention (values not in the standard enumeration must use the 'x-' prefix).
             </note>
         </notes>
 
         <!-- ============================================================ -->
-        <!-- 1. x-restype="x-path" — XPath to a leaf node                 -->
+        <!-- 1. matecat:restype="x-path" — XPath to a leaf node                 -->
         <!-- ============================================================ -->
 
         <!-- Points to: <h1>Title</h1> -->
-        <unit id="t1" name="/html/body/h1" x-restype="x-path">
+        <unit id="t1" matecat:resname="/html/body/h1" matecat:restype="x-path">
             <notes>
                 <note>XPath to the &lt;h1&gt; element (leaf node with text content).</note>
             </notes>
@@ -61,7 +61,7 @@
         </unit>
 
         <!-- Points to: <div class="info"><p>Informational text.</p></div> -->
-        <unit id="t2" name="/html/body/div[1]/p[1]" x-restype="x-path">
+        <unit id="t2" matecat:resname="/html/body/div[1]/p[1]" matecat:restype="x-path">
             <notes>
                 <note>XPath to the first paragraph inside the first div (div.info).</note>
             </notes>
@@ -72,7 +72,7 @@
         </unit>
 
         <!-- Points to: <div><p>Paragraph in the first div.</p></div> -->
-        <unit id="t3" name="/html/body/div[2]/p[1]" x-restype="x-path">
+        <unit id="t3" matecat:resname="/html/body/div[2]/p[1]" matecat:restype="x-path">
             <notes>
                 <note>XPath to the paragraph inside the second div.</note>
             </notes>
@@ -83,7 +83,7 @@
         </unit>
 
         <!-- Points to: <p>Text in the second div, first paragraph.</p> -->
-        <unit id="t4" name="/html/body/div[3]/p[1]" x-restype="x-path">
+        <unit id="t4" matecat:resname="/html/body/div[3]/p[1]" matecat:restype="x-path">
             <notes>
                 <note>XPath to the first paragraph inside the third div.</note>
             </notes>
@@ -94,11 +94,11 @@
         </unit>
 
         <!-- ============================================================ -->
-        <!-- 2. x-restype="x-client_nodepath" — Custom path algorithm      -->
+        <!-- 2. matecat:restype="x-client_nodepath" — Custom path algorithm      -->
         <!-- ============================================================ -->
 
         <!-- Same node as t4, but using a custom dot-notation path -->
-        <unit id="t5" name="html.body.div_3.p_1" x-restype="x-client_nodepath">
+        <unit id="t5" matecat:resname="html.body.div_3.p_1" matecat:restype="x-client_nodepath">
             <notes>
                 <note>
                     Custom path algorithm (dot-notation with underscored indices).
@@ -113,7 +113,7 @@
         </unit>
 
         <!-- Another custom path example -->
-        <unit id="t6" name="html.body.div_1.p_1" x-restype="x-client_nodepath">
+        <unit id="t6" matecat:resname="html.body.div_1.p_1" matecat:restype="x-client_nodepath">
             <notes>
                 <note>
                     Custom path 'html.body.div_1.p_1' maps to /html/body/div[1]/p[1].
@@ -126,11 +126,11 @@
         </unit>
 
         <!-- ============================================================ -->
-        <!-- 3. x-restype="x-tag-id" — HTML element id attribute           -->
+        <!-- 3. matecat:restype="x-tag-id" — HTML element id attribute           -->
         <!-- ============================================================ -->
 
         <!-- Points to: <span id="node_id">Text identified by an ID.</span> -->
-        <unit id="t7" name="node_id" x-restype="x-tag-id">
+        <unit id="t7" matecat:resname="node_id" matecat:restype="x-tag-id">
             <notes>
                 <note>
                     Identifies the element via its 'id' attribute.
@@ -144,11 +144,11 @@
         </unit>
 
         <!-- ============================================================ -->
-        <!-- 4. x-restype="x-css_class" — Unique CSS class                 -->
+        <!-- 4. matecat:restype="x-css_class" — Unique CSS class                 -->
         <!-- ============================================================ -->
 
         <!-- Points to: <p class="unique-class">This paragraph is identified by a unique CSS class.</p> -->
-        <unit id="t8" name="unique-class" x-restype="x-css_class">
+        <unit id="t8" matecat:resname="unique-class" matecat:restype="x-css_class">
             <notes>
                 <note>
                     Identifies the element via its CSS class.
@@ -163,14 +163,14 @@
         </unit>
 
         <!-- ============================================================ -->
-        <!-- 5. x-restype="x-attribute_name_value" — Custom attribute pair -->
+        <!-- 5. matecat:restype="x-attribute_matecat:resname_value" — Custom attribute pair -->
         <!-- ============================================================ -->
 
         <!-- Points to: <div data-custom-id="xyz-123">Content identified by a custom attribute.</div> -->
-        <unit id="t9" name="data-custom-id=xyz-123" x-restype="x-attribute_name_value">
+        <unit id="t9" matecat:resname="data-custom-id=xyz-123" matecat:restype="x-attribute_matecat:resname_value">
             <notes>
                 <note>
-                    Identifies the element via a name=value attribute pair.
+                    Identifies the element via a matecat:resname=value attribute pair.
                     Corresponds to &lt;div data-custom-id="xyz-123"&gt; in the HTML.
                     Useful for data-* attributes that guarantee uniqueness.
                 </note>
@@ -183,11 +183,11 @@
 
         <!-- ============================================================ -->
         <!-- 6. XPath pointing to element ATTRIBUTES (alt, title, etc.)    -->
-        <!--    Still x-restype="x-path", but the XPath targets an attribute -->
+        <!--    Still matecat:restype="x-path", but the XPath targets an attribute -->
         <!-- ============================================================ -->
 
         <!-- Points to: <img id="logo" alt="Company Logo" .../>/@alt -->
-        <unit id="t10" name="//img[@id='logo']/@alt" x-restype="x-path">
+        <unit id="t10" matecat:resname="//img[@id='logo']/@alt" matecat:restype="x-path">
             <notes>
                 <note>
                     XPath selecting the 'alt' attribute of the img element with id='logo'.
@@ -201,7 +201,7 @@
         </unit>
 
         <!-- Points to: <img id="logo" title="Go to Homepage" .../>/@title -->
-        <unit id="t11" name="//img[@id='logo']/@title" x-restype="x-path">
+        <unit id="t11" matecat:resname="//img[@id='logo']/@title" matecat:restype="x-path">
             <notes>
                 <note>
                     XPath selecting the 'title' attribute of the img element with id='logo'.
@@ -214,7 +214,7 @@
         </unit>
 
         <!-- Points to: <input type="text" placeholder="Search the site..."/>/@placeholder -->
-        <unit id="t12" name="//input/@placeholder" x-restype="x-path">
+        <unit id="t12" matecat:resname="//input/@placeholder" matecat:restype="x-path">
             <notes>
                 <note>
                     XPath selecting the 'placeholder' attribute of the input element.

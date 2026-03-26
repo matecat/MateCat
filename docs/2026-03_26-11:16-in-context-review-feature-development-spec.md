@@ -292,24 +292,29 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 
 ---
 
-## 8. Constraints (verbatim from requirements)
+## 8. Constraints (active)
 
-- "a project is created without a flag declaring that an in-context review type is enabled like any other normal project"
-- "the backend must get a list of defined attributes from the xliff trans-unit and store the in segments_metadata"
-- "for now we will use only the parameters defined in ProjectMetadataModel::isAMetadata"
-- "exclude group ExternalServices, you do not have the needed AWS and MyMemory keys"
-- "Before closing a task and decide to commit, YOU MUST RUN ALL the tests"
-- "do not use class constant SizeRestrictionChecker::SIZE_RESTRICTION, remove this class constant from all the codebase and use the enum"
-- "it should not know about segment metadata structs" (TransUnitAttributeFilter scope)
-- "I DON'T WANT segmentextractor call any method to unmarshall in SegmentExtractor"
-- "SegmentMetadataMapper::fromTransUnitAttributes is the one who creates the SegmentMetadataStruct, it must create the definitive segmentstruct"
-- "segmentMetadataMarshaller must accept a Struct, not a string"
-- "serve typed" (API returns typed values, not all strings)
-- "i want point 5 implementation, dedicated ContextResType enum" (enum over `in_array` for restype validation)
-- "both 1.2 and 2.0 now get restype and resname as field names" (XLIFF versions normalized)
-- "we will ignore Equipment.html.xlf Equipment.html files" (not lookup strategies)
-- Do NOT modify files in `mm_bkp/` directory
-- Do NOT touch `ERR_SIZE_RESTRICTION` (int constant, error code 3000)
+### Architecture & Design
+
+1. "a project is created without a flag declaring that an in-context review type is enabled like any other normal project"
+2. "I DON'T WANT segmentextractor call any method to unmarshall in SegmentExtractor"
+3. "SegmentMetadataMapper::fromTransUnitAttributes is the one who creates the SegmentMetadataStruct, it must create the definitive segmentstruct"
+4. "serve typed" — API returns typed values, not all strings
+5. "SegmentMetadataStruct::meta_value MUST stay `string` — DB-honest, typed access only through `Collection::findTyped()`"
+6. "Do NOT perform cross-validation between `resname` and `restype` at storage time" — stored independently, frontend responsible
+
+### Implementation Guardrails
+
+7. "we will ignore Equipment.html.xlf Equipment.html files" (not lookup strategies)
+8. Do NOT modify files in `mm_bkp/` directory
+
+### Workflow
+
+9. "exclude group ExternalServices, you do not have the needed AWS and MyMemory keys"
+10. "Before closing a task and decide to commit, YOU MUST RUN ALL the tests"
+11. "MANDATORY: ALWAYS use conventional-commit"
+12. "Wait my command before start implementing."
+13. ALWAYS use `english-checker` skill
 
 ---
 
