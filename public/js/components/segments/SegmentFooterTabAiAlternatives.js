@@ -321,13 +321,11 @@ export const SegmentFooterTabAiAlternatives = ({
               return (
                 <div key={index}>
                   <div>
-                    <p>
-                      <EditorLite
-                        ref={ref}
-                        highlightSnippet={{text: changed, style: 'BOLD'}}
-                        content={`${before}${changed}${after}`}
-                      />
-                    </p>
+                    <EditorLite
+                      ref={ref}
+                      highlightSnippet={{text: changed, style: 'BOLD'}}
+                      content={`${before}${changed}${after}`}
+                    />
                     <p className="ai-feature-option-alternative-description">
                       {context}{' '}
                     </p>
