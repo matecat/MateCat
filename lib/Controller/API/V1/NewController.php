@@ -404,7 +404,7 @@ class NewController extends KleinController
                     return $this->featureSet->filter('encodeInstructions', $value);
                 }
             ]
-        );
+        ) ?: null;
 
         if ($this->request->files()->isEmpty()) {
             throw new InvalidArgumentException("Missing file. Not Sent.");
