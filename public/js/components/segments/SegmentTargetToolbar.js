@@ -21,6 +21,7 @@ import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
 
 export const SegmentTargetToolbar = ({
   sid,
+  segment,
   editArea,
   lockEditArea,
   qrLink,
@@ -53,16 +54,18 @@ export const SegmentTargetToolbar = ({
       ? [
           {
             group: 0,
-            component: <AiFeedback {...{key: 'aifeedback', sid}} />,
+            component: <LaraStyles {...{key: 'larastyle', sid, segment}} />,
           },
           {
             group: 0,
-            component: <LaraStyles {...{key: 'larastyle', sid}} />,
+            component: <AiFeedback {...{key: 'aifeedback', sid, segment}} />,
           },
           {
             group: 0,
             component: (
-              <AiAlternatives {...{key: 'aialternatives', sid, editArea}} />
+              <AiAlternatives
+                {...{key: 'aialternatives', sid, segment, editArea}}
+              />
             ),
           },
         ]
@@ -239,6 +242,7 @@ export const SegmentTargetToolbar = ({
 
 SegmentTargetToolbar.propTypes = {
   sid: PropTypes.string.isRequired,
+  segment: PropTypes.object.isRequired,
   editArea: PropTypes.object,
   lockEditArea: PropTypes.func,
   qrLink: PropTypes.string,
