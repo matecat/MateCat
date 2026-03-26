@@ -28,6 +28,8 @@ class SegmentMetadataMarshallerTest extends TestCase
             'id_order_group'  => ['id_order_group'],
             'screenshot'      => ['screenshot'],
             'sizeRestriction' => ['sizeRestriction'],
+            'resname'         => ['resname'],
+            'restype'         => ['restype'],
         ];
     }
 
@@ -110,6 +112,8 @@ class SegmentMetadataMarshallerTest extends TestCase
             'id_order_group',
             'screenshot',
             'sizeRestriction',
+            'resname',
+            'restype',
         ];
 
         $actual = array_map(fn(SegmentMetadataMarshaller $case) => $case->value, SegmentMetadataMarshaller::cases());
@@ -147,5 +151,73 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_value = '5';
 
         self::assertSame('5', SegmentMetadataMarshaller::unmarshall($struct));
+    }
+
+    // ── resname ──
+
+    #[Test]
+    public function testMarshallResnameReturnsString(): void
+    {
+        self::assertSame(
+            '//html/body/div[2]/p[1]',
+            SegmentMetadataMarshaller::RESNAME->marshall('//html/body/div[2]/p[1]')
+        );
+    }
+
+    #[Test]
+    public function testUnmarshallResnameReturnsString(): void
+    {
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::RESNAME->value;
+        $struct->meta_value = 'product-title';
+
+        self::assertSame('product-title', SegmentMetadataMarshaller::unmarshall($struct));
+    }
+
+    // ── restype ──
+
+    #[Test]
+    #[DataProvider('validRestypeProvider')]
+    public function testMarshallRestypeReturnsStringForValidContextResType(string $value): void
+    {
+        self::assertSame($value, SegmentMetadataMarshaller::RESTYPE->marshall($value));
+    }
+
+    public static function validRestypeProvider(): array
+    {
+        return [
+            'x-path'                 => ['x-path'],
+            'x-client_nodepath'      => ['x-client_nodepath'],
+            'x-tag-id'               => ['x-tag-id'],
+            'x-css_class'            => ['x-css_class'],
+            'x-attribute_name_value' => ['x-attribute_name_value'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('invalidRestypeProvider')]
+    public function testMarshallRestypeReturnsNullForInvalidContextResType(string $value): void
+    {
+        self::assertNull(SegmentMetadataMarshaller::RESTYPE->marshall($value));
+    }
+
+    public static function invalidRestypeProvider(): array
+    {
+        return [
+            'x-title' => ['x-title'],
+            'x-li'    => ['x-li'],
+            'dialog'  => ['dialog'],
+            'empty'   => [''],
+        ];
+    }
+
+    #[Test]
+    public function testUnmarshallRestypeReturnsString(): void
+    {
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::RESTYPE->value;
+        $struct->meta_value = 'x-path';
+
+        self::assertSame('x-path', SegmentMetadataMarshaller::unmarshall($struct));
     }
 }

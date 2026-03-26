@@ -10,6 +10,8 @@ enum SegmentMetadataMarshaller: string
     case ID_ORDER_GROUP = 'id_order_group';
     case SCREENSHOT     = 'screenshot';
     case SIZE_RESTRICTION = 'sizeRestriction';
+    case RESNAME        = 'resname';
+    case RESTYPE        = 'restype';
 
     public static function isAllowed(string $key): bool
     {
@@ -20,6 +22,7 @@ enum SegmentMetadataMarshaller: string
     {
         return match ($this) {
             self::SIZE_RESTRICTION => ((int)$value > 0) ? (string)(int)$value : null,
+            self::RESTYPE          => ContextResType::tryFrom($value) !== null ? (string)$value : null,
             default => (string)$value,
         };
     }
