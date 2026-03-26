@@ -43,7 +43,11 @@ export const AiAlternatives = ({sid, editArea}) => {
         className="segment-target-toolbar-icon"
         size={BUTTON_SIZE.ICON_SMALL}
         mode={BUTTON_MODE.OUTLINE}
-        title="Ai alternatives"
+        title={
+          isDisabled
+            ? 'Alternative translations by Lara - Highlight parts of the target text to enable'
+            : 'Alternative translations by Lara'
+        }
         onClick={openTab}
         disabled={isDisabled}
       >
