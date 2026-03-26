@@ -455,6 +455,14 @@ header {
             border-radius: variables.$border-radius-default;
             border: 1px solid colors.$grey150;
             .qr-segments-summary {
+              .document-name {
+                display: flex;
+                align-items: center;
+                font-size: 14px;
+                margin-top: 8px;
+                line-height: 16px;
+                gap: 8px;
+              }
               h3 {
                 margin-bottom: 0;
               }
