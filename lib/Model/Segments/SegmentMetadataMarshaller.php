@@ -12,6 +12,7 @@ enum SegmentMetadataMarshaller: string
     case SIZE_RESTRICTION = 'sizeRestriction';
     case RESNAME        = 'resname';
     case RESTYPE        = 'restype';
+    case CONTEXT_URL    = 'context-url';
 
     public static function isAllowed(string $key): bool
     {

@@ -30,6 +30,7 @@ class SegmentMetadataMarshallerTest extends TestCase
             'sizeRestriction' => ['sizeRestriction'],
             'resname'         => ['resname'],
             'restype'         => ['restype'],
+            'context-url'     => ['context-url'],
         ];
     }
 
@@ -114,6 +115,7 @@ class SegmentMetadataMarshallerTest extends TestCase
             'sizeRestriction',
             'resname',
             'restype',
+            'context-url',
         ];
 
         $actual = array_map(fn(SegmentMetadataMarshaller $case) => $case->value, SegmentMetadataMarshaller::cases());
@@ -219,5 +221,32 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_value = 'x-path';
 
         self::assertSame('x-path', SegmentMetadataMarshaller::unMarshall($struct));
+    }
+
+    // ── context-url ──
+
+    #[Test]
+    public function testMarshallContextUrlReturnsUrlString(): void
+    {
+        self::assertSame(
+            'https://example.com/page/1',
+            SegmentMetadataMarshaller::CONTEXT_URL->marshall('https://example.com/page/1')
+        );
+    }
+
+    #[Test]
+    public function testMarshallContextUrlReturnsEmptyStringAsIs(): void
+    {
+        self::assertSame('', SegmentMetadataMarshaller::CONTEXT_URL->marshall(''));
+    }
+
+    #[Test]
+    public function testUnmarshallContextUrlReturnsString(): void
+    {
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::CONTEXT_URL->value;
+        $struct->meta_value = 'https://example.com/review';
+
+        self::assertSame('https://example.com/review', SegmentMetadataMarshaller::unMarshall($struct));
     }
 }

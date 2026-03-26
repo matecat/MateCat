@@ -280,10 +280,10 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 
 ### 7.2 Context URL Pipeline (next)
 
-- [ ] **7.2.1a — PSR-1 rename `unmarshall` → `unMarshall`** in `SegmentMetadataMarshaller`, `SegmentMetadataCollection`, and tests (3 files). Uniform with `ProjectsMetadataMarshaller::unMarshall()` / `JobsMetadataMarshaller::unMarshall()`.
-- [ ] **7.2.1b — Create `FilesMetadataMarshaller`** — Pattern B enum (`isAllowed` + `marshall` + `unMarshall`); cases: `INSTRUCTIONS`, `PDF_ANALYSIS`, `CONTEXT_URL`. TDD.
-- [ ] **7.2.1c — Wire `FilesMetadataMarshaller` into `Files\MetadataDao`** — Change `MetadataStruct::$value` from `string` to `mixed`; add `unMarshall()` calls in `get()`, `getByJobIdProjectAndIdFile()`, and `insert()`/`update()` return paths.
-- [ ] **Add `CONTEXT_URL = 'context-url'`** to `SegmentMetadataMarshaller` (already has full pipeline) and `ProjectsMetadataMarshaller` (`unMarshall` only)
+- [x] **7.2.1a — PSR-1 rename `unmarshall` → `unMarshall`** in `SegmentMetadataMarshaller`, `SegmentMetadataCollection`, and tests (3 files). Uniform with `ProjectsMetadataMarshaller::unMarshall()` / `JobsMetadataMarshaller::unMarshall()`.
+- [x] **7.2.1b — Create `FilesMetadataMarshaller`** — Pattern B enum (`isAllowed` + `marshall` + `unMarshall`); cases: `INSTRUCTIONS`, `PDF_ANALYSIS`, `CONTEXT_URL`. TDD (16 tests).
+- [x] **7.2.1c — Wire `FilesMetadataMarshaller` into `Files\MetadataDao`** — Changed `MetadataStruct::$value` from `string` to `mixed`; added `unMarshall()` calls in `get()`, `getByJobIdProjectAndIdFile()`, and `insert()`/`update()` return paths.
+- [x] **7.2.2 — Add `CONTEXT_URL = 'context-url'`** to `SegmentMetadataMarshaller` (9th case, Pattern B — falls through to default string handling) and `ProjectsMetadataMarshaller` (31st case, wired into string-cast branch of `unMarshall()`). TDD: +8 tests.
 - [ ] **Context URL fallback resolver** — service: segment → file → project read-time resolution
 - [ ] **API 3**: POST context-url at project level (`context_url`, `project_id`)
 - [ ] **API 2**: POST context-url at file level (`context_url`, `file_id`, optional `project_id`)
