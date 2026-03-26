@@ -90,9 +90,10 @@ class AIAssistantWorker extends AbstractWorker
         $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
         try {
+            $openAi = new AIAssistantClient($this->openAi);
             $buffer = '';
 
-            (new AIAssistantClient($this->openAi))->findContextForAWord(
+            $openAi->findContextForAWord(
                 $payload['word'],
                 $phrase,
                 $payload['localized_target'],
@@ -182,29 +183,30 @@ class AIAssistantWorker extends AbstractWorker
                         }
                     }
 
-                    // ✅ Continua lo stream
+                    // Continue the stream
                     return strlen($data);
                 }
             );
-
 
         } catch (Exception) {
         }
     }
 
     /**
+     * @param string $type
      * @param string $message
      * @param array $payload
      *
      * @throws Exception
      */
-    private function emitErrorMessage(string $message, array $payload): void
+    private function emitErrorMessage(string $type, string $message, array $payload): void
     {
         $this->_doLog($message);
-        $this->emitMessage($payload['id_client'], $payload['id_segment'], $message, true);
+        $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true);
     }
 
     /**
+     * @param string $type
      * @param string $idClient
      * @param string $idSegment
      * @param string $message
@@ -213,17 +215,21 @@ class AIAssistantWorker extends AbstractWorker
      *
      * @throws Exception
      */
-    private function emitMessage(string $idClient, string $idSegment, string $message, bool $hasError = false, bool $completed = false): void
+    private function emitMessage(string $type, string $idClient, string $idSegment, null|array|string $message, bool $hasError = false, bool $completed = false): void
     {
+        if($message === null){
+            $hasError = true;
+        }
+
         $this->publishToNodeJsClients([
-            '_type' => 'ai_assistant_explain_meaning',
+            '_type' => $type,
             'data' => [
                 'id_client' => $idClient,
                 'payload' => [
                     'id_segment' => $idSegment,
                     'has_error' => $hasError,
                     'completed' => $completed,
-                    'message' => trim($message)
+                    'message' => is_string($message) ? trim($message) : $message
                 ],
             ]
         ]);
