@@ -154,14 +154,32 @@ trait DaoCacheTrait
 
         $this->_cacheSetConnection();
 
-        $value = null;
-        if (isset(self::$cache_con) && !empty(self::$cache_con)) {
-            $key = md5($query);
-            $value = unserialize(self::$cache_con->hget($keyMap, $key) ?? '');
-            $this->_logCache("GETMAP: " . $keyMap, $key, $value, $query);
+        $key = md5($query);
+        $raw = self::$cache_con->hget($keyMap, $key);
+
+        if ($raw === null) {
+            $this->_logCache("GETMAP_MISS: " . $keyMap, $key, null, $query);
+            return null;
         }
 
-        return !is_bool($value) ? $value : null;
+        $unserialized = unserialize($raw);
+
+        if ($unserialized instanceof XFetchEnvelope) {
+            if (
+                $this->xfetchEnabled
+                && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD
+                && $this->_shouldRecompute($unserialized->storedAt, $unserialized->delta, $this->cacheTTL)
+            ) {
+                $this->_logCache("GETMAP_XFETCH_RECOMPUTE: " . $keyMap, $key, null, $query);
+                return null;
+            }
+
+            $unserialized = $unserialized->value;
+        }
+
+        $this->_logCache("GETMAP: " . $keyMap, $key, $unserialized, $query);
+
+        return is_array($unserialized) ? $unserialized : null;
     }
 
     /**
