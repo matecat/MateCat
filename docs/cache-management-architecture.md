@@ -2,6 +2,8 @@
 
 MateCat's cache layer sits between DAOs and Redis, transparently caching SQL query results using a hashset-based model with reverse pointers for O(1) invalidation. This document covers how the system works — from the trait primitives up through the three consumer patterns.
 
+**Pattern name**: Read-through with XFetch early recomputation — read-through on the read path (transparent cache population on miss via `_fetchObjectMap`), cache-aside invalidation on the write path (explicit evict via `_destroyObjectCache` / `_deleteCacheByKey`), with probabilistic early expiration to prevent cache stampede (planned — see §7).
+
 ---
 
 ## Table of Contents
@@ -12,6 +14,7 @@ MateCat's cache layer sits between DAOs and Redis, transparently caching SQL que
 4. [The Three Invalidation Strategies](#4-the-three-invalidation-strategies)
 5. [Pager & getAllPaginated Pattern](#5-pager--getallpaginated-pattern)
 6. [SessionTokenStoreHandler — Non-DAO Consumer](#6-sessiontokenstorehandler--non-dao-consumer)
+7. [Planned: Probabilistic Early Expiration (XFetch)](#7-planned-probabilistic-early-expiration-xfetch)
 
 ---
 
@@ -720,3 +723,39 @@ public function removeLoginCookieFromStore(int $userId, string $loginCookieValue
 A user may have multiple active sessions across different devices. If logout on one device used `_deleteCacheByKey($keyMap, false)` (nuclear), all other sessions would be invalidated. `_removeObjectCacheMapElement` removes exactly one token, leaving the user's other active sessions intact.
 
 This is the **only place** in the codebase that calls `_removeObjectCacheMapElement`.
+
+---
+
+## 7. Planned: Probabilistic Early Expiration (XFetch)
+
+> **Status**: Not yet implemented. This section documents the intended design for future work.
+
+### Problem — Cache Stampede
+
+When a popular cache entry expires, many concurrent requests simultaneously miss the cache and hit the database with the same query. This thundering herd can spike DB load and degrade response times.
+
+### Solution — XFetch Algorithm
+
+Instead of all requests waiting until TTL expiry, each request probabilistically decides whether to recompute the entry *before* it expires. The probability increases as the entry approaches its TTL, spreading recomputation across time so that (statistically) only one request refreshes the entry before expiration.
+
+The decision formula (from Vattani, Chierichetti & Lowenstein):
+
+```
+shouldRecompute = (currentTime - (expiry - ttl * β * log(rand()))) > 0
+```
+
+Where:
+- `expiry` — absolute timestamp when the entry expires
+- `ttl` — the original TTL in seconds
+- `β` — tuning parameter (higher = earlier recomputation, default ~1.0)
+- `rand()` — uniform random in (0, 1]
+- `log(rand())` — always negative, so `β * log(rand())` reduces the effective TTL
+
+### Integration Point
+
+The algorithm would be applied inside `_getFromCacheMap`: on a cache hit, check whether early recomputation should trigger. If yes, return `null` (forcing the caller through the miss path to refresh the entry) while the existing cached value is still valid for other concurrent requests.
+
+### References
+
+- Vattani, A., Chierichetti, F., Lowenstein, K. — *"Optimal Probabilistic Cache Stampede Prevention"* (2015)
+- Redis documentation on cache stampede mitigation
