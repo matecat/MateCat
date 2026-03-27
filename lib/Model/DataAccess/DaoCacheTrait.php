@@ -185,7 +185,17 @@ trait DaoCacheTrait
 
         if (isset(self::$cache_con) && !empty(self::$cache_con)) {
             $key = md5($query);
-            self::$cache_con->hset($keyMap, $key, serialize($value));
+
+            if ($this->xfetchEnabled && $this->cacheTTL >= static::XFETCH_MIN_TTL_THRESHOLD) {
+                $delta = $this->lastComputeDelta > 0.0 ? $this->lastComputeDelta : static::XFETCH_FALLBACK_DELTA;
+                $this->lastComputeDelta = 0.0;
+                $storable = serialize(new XFetchEnvelope($value, microtime(true), $delta));
+            } else {
+                $this->lastComputeDelta = 0.0;
+                $storable = serialize($value);
+            }
+
+            self::$cache_con->hset($keyMap, $key, $storable);
             self::$cache_con->expire($keyMap, $this->cacheTTL);
             self::$cache_con->setex($key, $this->cacheTTL, $keyMap);
             $this->_logCache("SETMAP: " . $keyMap, $key, $value, $query);
