@@ -30,36 +30,49 @@ const JobProgressBar = ({stats = {}}) => {
     <div className="job-progress-container">
       <Tooltip
         content={
-          <div className="job-progress-bar-tooltip">
-            <div>
-              <span>
-                <span className="job-progress-bar-unconfirmed-quad" />
-                Unconfirmed
-              </span>
-              <span>{unconfirmedPerc.toFixed(1)}%</span>
+          (unconfirmedPerc > 0 ||
+            translatedPerc > 0 ||
+            approvedPerc > 0 ||
+            approved2Perc > 0) && (
+            <div className="job-progress-bar-tooltip">
+              {unconfirmedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-unconfirmed-quad" />
+                    Unconfirmed
+                  </span>
+                  <span>{unconfirmedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {translatedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-translated-quad" />
+                    Translated
+                  </span>
+                  <span>{translatedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {approvedPerc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-approved-quad" />
+                    Revise
+                  </span>
+                  <span>{approvedPerc.toFixed(1)}%</span>
+                </div>
+              )}
+              {approved2Perc > 0 && (
+                <div>
+                  <span>
+                    <span className="job-progress-bar-approved2-quad" />
+                    Revise 2
+                  </span>
+                  <span>{approved2Perc.toFixed(1)}%</span>
+                </div>
+              )}
             </div>
-            <div>
-              <span>
-                <span className="job-progress-bar-translated-quad" />
-                Translated
-              </span>
-              <span>{translatedPerc.toFixed(1)}%</span>
-            </div>
-            <div>
-              <span>
-                <span className="job-progress-bar-approved-quad" />
-                Revise
-              </span>
-              <span>{approvedPerc.toFixed(1)}%</span>
-            </div>
-            <div>
-              <span>
-                <span className="job-progress-bar-approved2-quad" />
-                Revise 2
-              </span>
-              <span>{approved2Perc.toFixed(1)}%</span>
-            </div>
-          </div>
+          )
         }
       >
         <div className="job-progress-bar" ref={progressTooltipRef}>
