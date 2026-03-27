@@ -1,8 +1,15 @@
-# Cache Management Architecture
+# Read-Through with XFetch Early Recomputation
 
-MateCat's cache layer sits between DAOs and Redis, transparently caching SQL query results using a hashset-based model with reverse pointers for O(1) invalidation. This document covers how the system works — from the trait primitives up through the three consumer patterns.
+> Hashset-based read-through cache with reverse-pointer O(1) invalidation and XFetch probabilistic early expiration to prevent cache stampede.
 
-**Pattern name**: Read-through with XFetch early recomputation — read-through on the read path (transparent cache population on miss via `_fetchObjectMap`), cache-aside invalidation on the write path (explicit evict via `_destroyObjectCache` / `_deleteCacheByKey`), with probabilistic early expiration to prevent cache stampede (planned — see §7).
+| Property | Value |
+|----------|-------|
+| **Cache model** | Redis hashset per DAO method + parameter scope |
+| **Read path** | Read-through — transparent population on miss via `_fetchObjectMap` |
+| **Write path** | Cache-aside — explicit eviction via `_destroyObjectCache` / `_deleteCacheByKey` |
+| **Invalidation** | O(1) via reverse pointer (`md5 → keyMap → DEL`) |
+| **Stampede prevention** | XFetch probabilistic early expiration (Vattani et al., 2015) |
+| **Consumers** | 47 DAO subclasses, Pager, SessionTokenStoreHandler |
 
 ---
 
@@ -14,7 +21,8 @@ MateCat's cache layer sits between DAOs and Redis, transparently caching SQL que
 4. [The Three Invalidation Strategies](#4-the-three-invalidation-strategies)
 5. [Pager & getAllPaginated Pattern](#5-pager--getallpaginated-pattern)
 6. [SessionTokenStoreHandler — Non-DAO Consumer](#6-sessiontokenstorehandler--non-dao-consumer)
-7. [Planned: Probabilistic Early Expiration (XFetch)](#7-planned-probabilistic-early-expiration-xfetch)
+7. [XFetch — Probabilistic Early Expiration](#7-xfetch--probabilistic-early-expiration)
+8. [XFetch in Practice](#8-xfetch-in-practice)
 
 ---
 
@@ -40,11 +48,18 @@ Controller / Service
    └── calls DaoCacheTrait methods
               │
               ├── _getFromCacheMap(keyMap, fingerprint) ──► Redis HGET
-              │        (cache hit → return unserialized result)
+              │        │
+              │        ├── XFetchEnvelope? ─► _shouldRecompute()
+              │        │       ├── YES → treat as miss (early recompute)
+              │        │       └── NO  → return envelope.value
+              │        │
+              │        └── raw array? → return as-is (backward compat)
               │
-              └── on miss: execute PDO, fetch rows
+              └── on miss: execute PDO, fetch rows  [measures δ]
                        │
-                       └── _setInCacheMap(keyMap, fingerprint, result) ──► Redis HSET + EXPIRE + SETEX
+                       └── _setInCacheMap(keyMap, fingerprint, result)
+                                ├── XFetch active? → wrap in XFetchEnvelope(value, now, δ)
+                                └── Redis HSET + EXPIRE + SETEX
 ```
 
 ```
@@ -73,6 +88,7 @@ Invalidation path:
 - **Reverse pointer**: Every stored entry creates a second Redis key (`md5` → `keyMap`), enabling surgical invalidation without knowing the keyMap name.
 - **Auto-generated keyMaps**: `AbstractDao` uses `debug_backtrace()` to derive the keyMap name from the calling class and method. This eliminates manual keyMap management for the ~47 DAO subclasses.
 - **Opt-in TTL**: Cache is disabled by default (`$cacheTTL = 0`). DAOs explicitly opt in via `setCacheTTL($seconds)` chained before read calls.
+- **Probabilistic early expiration**: Each cache hit runs the XFetch algorithm to determine if the entry should be refreshed before its TTL expires, preventing cache stampede without coordination or distributed locks.
 
 ---
 
@@ -726,9 +742,7 @@ This is the **only place** in the codebase that calls `_removeObjectCacheMapElem
 
 ---
 
-## 7. Planned: Probabilistic Early Expiration (XFetch)
-
-> **Status**: Not yet implemented. This section documents the intended design for future work.
+## 7. XFetch — Probabilistic Early Expiration
 
 ### Problem — Cache Stampede
 
@@ -738,24 +752,140 @@ When a popular cache entry expires, many concurrent requests simultaneously miss
 
 Instead of all requests waiting until TTL expiry, each request probabilistically decides whether to recompute the entry *before* it expires. The probability increases as the entry approaches its TTL, spreading recomputation across time so that (statistically) only one request refreshes the entry before expiration.
 
-The decision formula (from Vattani, Chierichetti & Lowenstein):
+### Formula
 
 ```
-shouldRecompute = (currentTime - (expiry - ttl * β * log(rand()))) > 0
+shouldRecompute = now ≥ storedAt + TTL − δ · β · |log(rand())|
 ```
 
 Where:
-- `expiry` — absolute timestamp when the entry expires
-- `ttl` — the original TTL in seconds
-- `β` — tuning parameter (higher = earlier recomputation, default ~1.0)
+- `storedAt` — timestamp when the entry was cached
+- `TTL` — cache time-to-live in seconds
+- `δ` (delta) — measured recomputation time (seconds the DB query took)
+- `β` (beta) — tuning parameter (default `1.0`, optimal per Vattani et al.)
 - `rand()` — uniform random in (0, 1]
-- `log(rand())` — always negative, so `β * log(rand())` reduces the effective TTL
+- `|log(rand())|` — always positive, creates an exponentially distributed gap
 
-### Integration Point
+The **early recomputation window** is proportional to δ, not TTL. For a typical δ of 0.05s, the window is ~0.05–0.25s before expiry regardless of whether TTL is 60s or 86400s.
 
-The algorithm would be applied inside `_getFromCacheMap`: on a cache hit, check whether early recomputation should trigger. If yes, return `null` (forcing the caller through the miss path to refresh the entry) while the existing cached value is still valid for other concurrent requests.
+### Constants
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| `XFETCH_BETA` | `1.0` | Tuning parameter — theoretically optimal |
+| `XFETCH_MIN_TTL_THRESHOLD` | `10` | Auto-disable XFetch below this TTL (seconds) |
+| `XFETCH_FALLBACK_DELTA` | `0.05` | Default δ when no measurement available |
+
+### Cache Envelope Format
+
+When XFetch is active (TTL ≥ 10s, `$xfetchEnabled = true`), `_setInCacheMap` wraps the value in an `XFetchEnvelope` object:
+
+```php
+// lib/Model/DataAccess/XFetchEnvelope.php
+final readonly class XFetchEnvelope
+{
+    public function __construct(
+        public array $value,    // The actual cached data (array of IDaoStruct objects)
+        public float $storedAt, // microtime(true) when stored
+        public float $delta,    // Measured recomputation time in seconds
+    ) {}
+}
+
+// Stored in Redis as:
+serialize(new XFetchEnvelope($value, microtime(true), $delta))
+```
+
+On read, `_getFromCacheMap` detects the envelope via `instanceof XFetchEnvelope` — no fragile key-checking needed.
+
+When XFetch is inactive (TTL < 10s or `$xfetchEnabled = false`), the value is stored as a raw serialized array, preserving backward compatibility.
+
+### δ (Delta) Measurement
+
+`AbstractDao::_fetchObjectMap()` wraps `microtime(true)` around `$stmt->execute()` + `$stmt->fetchAll()` and calls `_setLastComputeDelta()` to pass the measurement to the trait. The private property `$lastComputeDelta` is consumed-and-reset by `_setInCacheMap()` when building the envelope.
+
+Callers that bypass `_fetchObjectMap()` (e.g., `Pager::getPagination()`) get the fallback δ of 0.05s.
+
+### Backward Compatibility
+
+`_getFromCacheMap()` detects the envelope via `$unserialized instanceof XFetchEnvelope`. Old entries (stored as plain serialized arrays) fail this check and are returned as-is — no XFetch logic applied. They naturally refresh on expiry and get the new envelope format on the next write.
+
+### Exclusions
+
+- **`SessionTokenStoreHandler`** — sets `$xfetchEnabled = false` in its constructor. Session tokens are written/read explicitly (not computed from queries), so probabilistic early expiration has no semantic meaning.
+- **TTL < 10s** — XFetch auto-disables. The early recomputation window could exceed the remaining TTL, causing perpetual recomputation.
+- **`AppConfig::$SKIP_SQL_CACHE = true`** — All caching (including XFetch) is bypassed.
 
 ### References
 
 - Vattani, A., Chierichetti, F., Lowenstein, K. — *"Optimal Probabilistic Cache Stampede Prevention"* (2015)
 - Redis documentation on cache stampede mitigation
+
+---
+
+## 8. XFetch in Practice
+
+### The `|log(rand)|` Curve
+
+The XFetch multiplier `|log(rand)|` for uniform random `rand ∈ (0, 1]` determines how far before expiry a request might trigger early recomputation:
+
+![XFetch |log(x)| curve](xfetch-log-curve.png)
+
+> **Figure 1** — The `|log(x)|` curve for uniform random `x ∈ (0, 1]`. Most draws produce values below 1 (right side), making `δ · |log(rand)|` smaller than δ itself. Only rare draws near zero (left tail) produce large multipliers — which is why early recomputation triggers only in the final fractions of a second before expiry.
+
+### Probability Table
+
+Given `δ = 0.05s` (fallback), `β = 1.0`, `TTL = 86,400s` (1 day):
+
+| Time before expiry | P(recompute) | Why |
+|--------------------|--------------|-----|
+| 5 seconds          | ≈ 0%         | 5s is ~100× δ — `\|log(rand)\|` almost never reaches 100 |
+| 1 second           | ≈ 2%         | 1s is ~20× δ — requires a rare left-tail draw |
+| 0.25 seconds       | ≈ 18%        | 0.25s is ~5× δ — starting to enter reachable range |
+| 0.1 seconds        | ≈ 39%        | 0.1s is ~2× δ — roughly a coin flip |
+| 0.05 seconds       | ≈ 63%        | 0.05s equals δ — majority of draws clear this gap |
+
+The early recomputation window scales with δ, not TTL. A query that takes 50ms to execute will start triggering recomputes ~0.05–0.25s before expiry, regardless of whether TTL is 60s or 86,400s.
+
+### Timeline: How XFetch Prevents a Stampede
+
+```
+Given: TTL = 86,400s (1 day), δ = 38ms (measured query time), β = 1.0
+
+t = 0s
+  Cache populated. Envelope stored: value + storedAt + δ.
+
+t = 43,200s (12 hours in)
+  Request hits cache. Time remaining: 43,200s.
+  P(recompute) ≈ 0%. Served from cache.
+
+t = 86,399.7s (0.3s before expiry)
+  Request hits cache. XFetch multiplies δ (38ms) by |log(rand)|, where
+  rand ∈ (0, 1]. Most values of |log(rand)| are small (near zero), so
+  38ms × |log(rand)| rarely exceeds 0.3s — only 8% probability.
+   This math calculation probably doesn't trigger a recompute; the result is served from cache.
+
+t = 86,399.92s (0.08s before expiry)
+  Same draw, but only 0.08s to cover. 38ms × |log(rand)| clears that
+   about 45% of the time. This math calculation likely triggers a recomputation.
+  Query re-executed (δ = 41ms). Fresh envelope stored. TTL resets to 86,400s.
+
+t = 86,399.95s
+  Three more requests hit cache. Fresh entry — 86,400s remaining.
+  P(recompute) ≈ 0% for all three. Served from cache.
+
+t = 86,400s
+  Original TTL would have expired here.
+  Entry already refreshed 0.08s ago. No stampede. No thundering herd.
+```
+
+### Pattern Comparison
+
+| Pattern | Read miss | Write | Stampede prevention | MateCat |
+|---------|-----------|-------|---------------------|---------|
+| Cache-aside | App fetches DB, stores in cache | App evicts cache | None | Write path ✓ |
+| Read-through | Cache layer fetches on miss | — | None | Read path ✓ |
+| Write-through | — | Cache writes to DB + cache | N/A | ✗ |
+| Refresh-ahead | Background timer refreshes | — | Full (timer-based) | ✗ |
+| **XFetch hybrid** | Cache layer fetches on miss | App evicts cache | Probabilistic (per-request) | **Full system** |
+
+MateCat's pattern is a deliberate hybrid: read-through on the read path, cache-aside on the write path, with XFetch probabilistic early expiration layered on top. It requires no background processes, no distributed locks, and no coordination between requests.
