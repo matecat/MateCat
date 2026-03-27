@@ -42,6 +42,8 @@ class GeminiClient implements AIClientInterface
         string $styleInstructions
     ): array {
         $prompt = <<<PROMPT
+Look at this prompt:
+
 You are an expert $sourceLanguage to $targetLanguage translator.
 
   Given:
@@ -80,6 +82,15 @@ You are an expert $sourceLanguage to $targetLanguage translator.
    - Every XML/HTML/XLIFF tag is a mandatory placeholder. 
    - If the original target sentence is "Hello <ex/> world" and the excerpt is "world", the alternative MUST contain "<ex/>".
    - Do not "fix" the spacing around tags; keep the original tag syntax (e.g., `<ex />` vs `<ex/>`) exactly as provided.
+   - **Verbatim Requirement**: Treat every tag (e.g., <bx id="123"/>, <ph id="1" />) as an **atomic, non-translatable string**.
+   - **No Conversion**: Do not convert self-closing tags (e.g., <ph />) into open/close pairs (e.g., <ph></ph>).
+   - **No Truncation**: Every character within the brackets < >, including internal attributes and the trailing slash, must be copied exactly as it appears in the source.
+
+   **Example of Tag Preservation**:
+     - Target Sentence: "Click to start <ph id="1" />."
+     - Excerpt: "to start"
+     - Alternative: "to begin"
+     - Correct Proposal: "Click to begin <ph id="1" />." (Notice the tag remains identical).
    
  *Instructions to generate alternative translations*
    - Always ensure that only the specified excerpt is altered, and all other parts of the sentence remain unchanged unless absolutely necessary for grammatical correctness with the new excerpt.
