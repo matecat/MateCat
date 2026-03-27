@@ -278,17 +278,16 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 - [x] **Implement ContextResType enum** (TDD) — `lib/Model/Segments/ContextResType.php` with 5 cases. 15 tests.
 - [x] **Add RESNAME + RESTYPE to marshaller** (TDD) — Two new cases in `SegmentMetadataMarshaller`. `RESTYPE.marshall()` validates via `ContextResType::tryFrom()`, returns `null` for invalid values. `RESNAME.marshall()` default string behavior. 14 tests added.
 
-### 7.2 Context URL Pipeline (next)
+### 7.2 Context URL Pipeline — Done
 
 - [x] **7.2.1a — PSR-1 rename `unmarshall` → `unMarshall`** in `SegmentMetadataMarshaller`, `SegmentMetadataCollection`, and tests (3 files). Uniform with `ProjectsMetadataMarshaller::unMarshall()` / `JobsMetadataMarshaller::unMarshall()`.
 - [x] **7.2.1b — Create `FilesMetadataMarshaller`** — Pattern B enum (`isAllowed` + `marshall` + `unMarshall`); cases: `INSTRUCTIONS`, `PDF_ANALYSIS`, `CONTEXT_URL`. TDD (16 tests).
 - [x] **7.2.1c — Wire `FilesMetadataMarshaller` into `Files\MetadataDao`** — Changed `MetadataStruct::$value` from `string` to `mixed`; added `unMarshall()` calls in `get()`, `getByJobIdProjectAndIdFile()`, and `insert()`/`update()` return paths.
 - [x] **7.2.2 — Add `CONTEXT_URL = 'context-url'`** to `SegmentMetadataMarshaller` (9th case, Pattern B — falls through to default string handling) and `ProjectsMetadataMarshaller` (31st case, wired into string-cast branch of `unMarshall()`). TDD: +8 tests.
-- [ ] **Context URL fallback resolver** — service: segment → file → project read-time resolution
-- [ ] **API 3**: POST context-url at project level (`context_url`, `project_id`)
-- [ ] **API 2**: POST context-url at file level (`context_url`, `file_id`, optional `project_id`)
-- [ ] **API 1**: POST context-url at segment level (`context_url`, `segment_id`, optional `file_id`/`project_id`)
-- [ ] **GetSegmentsController**: return resolved `context-url` per segment via the fallback resolver
+- [x] **7.2.3a — ContextUrlResolver** — Stateless static resolver with three-level fallback (segment → file → project). TDD: 7 tests.
+- [x] **7.2.3b — GetSegmentsController integration** — Pre-fetches project/file context-urls before segment loop; resolves per-segment via `ContextUrlResolver::resolve()`. Returns `context_url` as top-level field on each segment.
+- [x] **7.2.3c — Schema migration + `SegmentMetadataDao::upsert()`** — Added `UNIQUE KEY` constraint to `segment_metadata(id_segment, meta_key)` in 3 SQL files. Added `upsert()` (INSERT ... ON DUPLICATE KEY UPDATE) and `destroyGetAllCache()` methods. Runtime migration: `migrations/20260326190000_alter_table_segment_metadata_add_unique_index.php`.
+- [x] **7.2.3d — ContextUrlController (3 APIs)** — Single controller with `setForProject()`, `setForFile()`, `setForSegment()` actions. Routes: `POST /api/app/context-url/{project,file,segment}`. Cache invalidation at all three levels.
 
 ### 7.3 Future Work (no plan yet)
 
@@ -331,6 +330,7 @@ Typed API response (`sizeRestriction` as `int` instead of `"string"`) — confir
 12. "Wait my command before start implementing."
 13. ALWAYS use `english-checker` skill
 14. "use unMarshall, uniform SegmentMetadataMarshaller, stay compliant with PHP PSR-1 Basic Coding Standard" — all marshallers use `unMarshall()` (camelCase)
+15. "ALWAYS follow this pattern: update the document, show me the commit message, WAIT for my authorization, commit"
 
 ---
 
@@ -595,17 +595,56 @@ ConversionHandler → array → ConvertedFileModel → Redis (serialized)
 | `lib/Model/Segments/SegmentMetadataCollection.php` | 2 call sites: `findTyped()` + `jsonSerialize()` |
 | `tests/unit/Model/Segments/SegmentMetadataMarshallerTest.php` | 5 test calls + 1 comment |
 
-### 11.9 GetSegmentsController Change
+### 11.9 GetSegmentsController Change (implemented)
 
-Current (line 158):
+**Pre-fetch (before segment loop):**
 ```php
-$seg['metadata'] = SegmentMetadataDao::getAll($seg['sid'])->jsonSerialize();
+$projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->get(
+    $project->id, ProjectsMetadataMarshaller::CONTEXT_URL->value
+)?->value;
+$filesMetadataDao = new FilesMetadataDao();
+$fileContextUrls = [];
 ```
 
-After:
+**Per-file lookup (inside `!isset($res[$id_file])` block):**
 ```php
-$seg['metadata'] = SegmentMetadataDao::getAll($seg['sid'])->jsonSerialize();
-$seg['context_url'] = $contextUrlResolver->resolve($seg['sid'], $id_file, $id_project);
+$fileContextUrls[$id_file] = $filesMetadataDao->setCacheTTL(60 * 60 * 24)->get(
+    $project->id, $id_file, FilesMetadataMarshaller::CONTEXT_URL->value
+)?->value;
+```
+
+**Per-segment resolution (replaced old line 158):**
+```php
+$segmentMetadata = SegmentMetadataDao::getAll($seg['sid']);
+$seg['metadata'] = $segmentMetadata->jsonSerialize();
+$seg['context_url'] = ContextUrlResolver::resolve(
+    $segmentMetadata, $fileContextUrls[$id_file] ?? null, $projectContextUrl
+);
 ```
 
 The resolved `context-url` is returned as a **top-level field** per segment (not nested in metadata), since it may come from file or project level rather than segment metadata.
+
+### 11.10 ContextUrlController (implemented)
+
+Three POST endpoints under `/api/app/context-url/`:
+
+| Route | Action | DAO Method | Cache Invalidation |
+|---|---|---|---|
+| `POST /project` | `setForProject()` | `ProjectsMetadataDao::set()` | Internal (DAO handles it) |
+| `POST /file` | `setForFile()` | `FilesMetadataDao::get/insert/update` | `destroyCacheByJobIdProjectAndIdFile()` |
+| `POST /segment` | `setForSegment()` | `SegmentMetadataDao::upsert()` | `destroyGetAllCache()` |
+
+All endpoints require `LoginValidator` authentication. Segment-level validates through `SegmentMetadataMarshaller::CONTEXT_URL->marshall()`. Project/file levels store raw strings (Pattern A marshallers — no `marshall()` method).
+
+### 11.11 Schema Migration (implemented)
+
+`segment_metadata` table index `idx_id_segment_meta_key(id_segment, meta_key)` upgraded from `KEY` to `UNIQUE KEY` in:
+- `lib/Model/matecat.sql`
+- `INSTALL/matecat.sql`
+- `tests/inc/unittest_matecat_local.sql`
+
+Runtime migration: `migrations/20260326190000_alter_table_segment_metadata_add_unique_index.php` (user-created).
+
+### 11.12 Cache Management Architecture Document (added 2026-03-27)
+
+`docs/cache-management-architecture.md` — standalone technical reference covering `DaoCacheTrait` (all 8 methods), `AbstractDao` cache integration (`_fetchObjectMap`, `_destroyObjectCache`), the three invalidation strategies (surgical reverse-lookup, nuclear direct delete, surgical field removal), the `Pager`/`getAllPaginated` pagination pattern with `PaginationParameters`, and `SessionTokenStoreHandler` as the sole non-DAO consumer of the trait.
