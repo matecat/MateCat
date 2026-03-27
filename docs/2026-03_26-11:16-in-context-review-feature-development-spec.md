@@ -626,7 +626,7 @@ The resolved `context-url` is returned as a **top-level field** per segment (not
 
 ### 11.10 ContextUrlController (implemented)
 
-Three POST endpoints under `/api/app/context-url/`:
+Three POST endpoints under `/api/v3/context-url/`:
 
 | Route | Action | DAO Method | Cache Invalidation |
 |---|---|---|---|
