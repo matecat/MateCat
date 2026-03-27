@@ -35,6 +35,9 @@ class SessionTokenStoreHandler
     public function __construct()
     {
         $this->cacheTTL = 60 * 60 * 24 * 7; // 7 days
+        // Session tokens are written explicitly (not computed from queries),
+        // so probabilistic early expiration has no semantic meaning here.
+        $this->xfetchEnabled = false;
     }
 
     /**

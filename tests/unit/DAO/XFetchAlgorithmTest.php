@@ -210,4 +210,15 @@ class XFetchAlgorithmTest extends TestCase
         }
         $this->assertSame(0, $triggerCount, "Zero δ should never trigger early recomputation");
     }
+
+    // --- SessionTokenStoreHandler exclusion ---
+
+    #[Test]
+    public function test_sessionTokenStoreHandler_hasXfetchDisabled(): void
+    {
+        $handler = new \Controller\Abstracts\Authentication\SessionTokenStoreHandler();
+        $reflector = new ReflectionClass($handler);
+        $prop = $reflector->getProperty('xfetchEnabled');
+        $this->assertFalse($prop->getValue($handler), 'SessionTokenStoreHandler must have xfetchEnabled = false');
+    }
 }
