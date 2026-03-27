@@ -11,6 +11,7 @@ namespace Model\DataAccess;
 
 use Exception;
 use Predis\Client;
+use Random\RandomException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
@@ -111,14 +112,15 @@ trait DaoCacheTrait
      * XFetch probabilistic early expiration check.
      *
      * Returns true if the cache entry should be recomputed early to prevent stampede.
-     * Formula: now > storedAt + TTL - δ · β · |log(rand)|
+     * Formula: now - δ · β · log(rand) ≥ storedAt + TTL
      *
      * @param float $storedAt Timestamp when the entry was cached
-     * @param float $delta    Recomputation time (δ) in seconds
-     * @param int   $ttl      Cache TTL in seconds
+     * @param float $delta Recomputation time (δ) in seconds
+     * @param int $ttl Cache TTL in seconds
      *
      * @return bool True if early recomputation should happen
      *
+     * @throws RandomException
      * @see https://en.wikipedia.org/wiki/Cache_stampede#Optimal_probabilistic_early_expiration
      */
     protected function _shouldRecompute(float $storedAt, float $delta, int $ttl): bool
@@ -127,14 +129,9 @@ trait DaoCacheTrait
             return false;
         }
 
-        $expiry = $storedAt + $ttl;
-        $now = microtime(true);
-
-        // XFetch formula: recompute when now > expiry - δ · β · |log(rand())|
-        // log(rand()) is always ≤ 0 for rand() in (0, 1], so we use -log(rand()) to get a positive value
-        $gap = $delta * static::XFETCH_BETA * (-log(random_int(1, PHP_INT_MAX) / PHP_INT_MAX));
-
-        return $now >= ($expiry - $gap);
+        // XFetch formula: recompute when now - δ · β · log(rand()) ≥ expiry
+        // log(rand()) is always ≤ 0 for rand() in (0, 1], so subtracting it adds a positive jitter window.
+        return (microtime(true) - $delta * static::XFETCH_BETA * log(random_int(1, PHP_INT_MAX) / PHP_INT_MAX)) >= ($storedAt + $ttl);
     }
 
     /**
