@@ -108,6 +108,36 @@ trait DaoCacheTrait
     }
 
     /**
+     * XFetch probabilistic early expiration check.
+     *
+     * Returns true if the cache entry should be recomputed early to prevent stampede.
+     * Formula: now > storedAt + TTL - δ · β · |log(rand)|
+     *
+     * @param float $storedAt Timestamp when the entry was cached
+     * @param float $delta    Recomputation time (δ) in seconds
+     * @param int   $ttl      Cache TTL in seconds
+     *
+     * @return bool True if early recomputation should happen
+     *
+     * @see https://en.wikipedia.org/wiki/Cache_stampede#Optimal_probabilistic_early_expiration
+     */
+    protected function _shouldRecompute(float $storedAt, float $delta, int $ttl): bool
+    {
+        if ($delta <= 0.0) {
+            return false;
+        }
+
+        $expiry = $storedAt + $ttl;
+        $now = microtime(true);
+
+        // XFetch formula: recompute when now > expiry - δ · β · |log(rand())|
+        // log(rand()) is always ≤ 0 for rand() in (0, 1], so we use -log(rand()) to get a positive value
+        $gap = $delta * static::XFETCH_BETA * (-log(random_int(1, PHP_INT_MAX) / PHP_INT_MAX));
+
+        return $now >= ($expiry - $gap);
+    }
+
+    /**
      * @template T of IDaoStruct
      * @param string $keyMap
      * @param string $query A query

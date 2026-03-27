@@ -159,4 +159,55 @@ class XFetchAlgorithmTest extends TestCase
         $this->traitUser->publicSetLastComputeDelta(0.0);
         $this->assertSame(0.0, $this->traitUser->getLastComputeDelta());
     }
+
+    // --- _shouldRecompute tests ---
+
+    #[Test]
+    public function test_shouldRecompute_returnsFalseWhenFarFromExpiry(): void
+    {
+        // Entry stored 10 seconds ago, TTL = 3600s, δ = 0.05s
+        // Expiry is 3590 seconds away — XFetch window is ~0.05-0.25s
+        $storedAt = time() - 10;
+        $result = $this->traitUser->publicShouldRecompute($storedAt, 0.05, 3600);
+        $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function test_shouldRecompute_returnsTrueWhenPastExpiry(): void
+    {
+        // Entry stored 3601 seconds ago with TTL = 3600s → already expired
+        $storedAt = time() - 3601;
+        $result = $this->traitUser->publicShouldRecompute($storedAt, 0.05, 3600);
+        $this->assertTrue($result);
+    }
+
+    #[Test]
+    public function test_shouldRecompute_probabilisticNearExpiry(): void
+    {
+        // At 0.01s before expiry with δ=1.0, probability should be very high.
+        // Run 100 times; expect at least 80 triggers.
+        $ttl = 3600;
+        $storedAt = time() - ($ttl - 0.01);
+        $triggerCount = 0;
+        for ($i = 0; $i < 100; $i++) {
+            if ($this->traitUser->publicShouldRecompute($storedAt, 1.0, $ttl)) {
+                $triggerCount++;
+            }
+        }
+        $this->assertGreaterThan(80, $triggerCount, "Near expiry with δ=1.0, should trigger >80% of the time");
+    }
+
+    #[Test]
+    public function test_shouldRecompute_neverTriggersWithZeroDelta(): void
+    {
+        // δ = 0 means the window is always 0 — never triggers early
+        $storedAt = time() - 3599;
+        $triggerCount = 0;
+        for ($i = 0; $i < 100; $i++) {
+            if ($this->traitUser->publicShouldRecompute($storedAt, 0.0, 3600)) {
+                $triggerCount++;
+            }
+        }
+        $this->assertSame(0, $triggerCount, "Zero δ should never trigger early recomputation");
+    }
 }
