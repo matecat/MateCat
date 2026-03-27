@@ -101,6 +101,7 @@ trait DaoCacheTrait
      * @param        $value T[]
      *
      * @return void|null
+     * @throws Exception
      */
     protected function _setInCacheMap(string $keyMap, string $query, array $value)
     {

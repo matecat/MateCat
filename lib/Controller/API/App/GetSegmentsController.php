@@ -13,11 +13,14 @@ use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
+use Model\Files\FilesMetadataMarshaller;
+use Model\Files\MetadataDao as FilesMetadataDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\ContextGroupDao;
+use Model\Segments\ContextUrlResolver;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
@@ -91,6 +94,14 @@ class GetSegmentsController extends KleinController
         $projectMetadata = new ProjectMetadataDao();
         $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectsMetadataMarshaller::ICU_ENABLED->value)?->value ?? false;
 
+        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->get(
+            $project->id,
+            ProjectsMetadataMarshaller::CONTEXT_URL->value
+        )?->value;
+
+        $filesMetadataDao = new FilesMetadataDao();
+        $fileContextUrls = [];
+
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];
 
@@ -102,6 +113,12 @@ class GetSegmentsController extends KleinController
                 $res[$id_file]['source_code'] = $job->source;
                 $res[$id_file]['target_code'] = $job->target;
                 $res[$id_file]['segments'] = [];
+
+                $fileContextUrls[$id_file] = $filesMetadataDao->setCacheTTL(60 * 60 * 24)->get(
+                    $project->id,
+                    $id_file,
+                    FilesMetadataMarshaller::CONTEXT_URL->value
+                )?->value;
             }
 
             if (isset($seg['edit_distance'])) {
@@ -155,7 +172,13 @@ class GetSegmentsController extends KleinController
             $seg['translation'] = $Filter->fromLayer1ToLayer2($Filter->realignIDInLayer1($seg['segment'], $seg['translation']));
             $seg['segment'] = $Filter->fromLayer1ToLayer2($seg['segment']);
 
-            $seg['metadata'] = SegmentMetadataDao::getAll($seg['sid'])->jsonSerialize();
+            $segmentMetadata = SegmentMetadataDao::getAll($seg['sid']);
+            $seg['metadata'] = $segmentMetadata->jsonSerialize();
+            $seg['context_url'] = ContextUrlResolver::resolve(
+                $segmentMetadata,
+                $fileContextUrls[$id_file] ?? null,
+                $projectContextUrl
+            );
 
             $this->attachNotes($seg, $segment_notes);
             $this->attachContexts($seg, $contexts);

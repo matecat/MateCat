@@ -9,5 +9,20 @@
  */
 class AlterTableSegmentMetadataAddUniqueIndex
 {
+    public array $sql_up = [
+        '
+        ALTER TABLE `segment_metadata`
+            DROP INDEX `idx_id_segment_meta_key`,
+            ADD UNIQUE INDEX `idx_id_segment_meta_key` (`id_segment`, `meta_key`);
+    '
+    ];
 
+    public array $sql_down = [
+        '
+        ALTER TABLE `segment_metadata` REMOVE PARTITIONING;
+        ALTER TABLE `segment_metadata`
+            DROP INDEX `idx_id_segment_meta_key`,
+            ADD INDEX `idx_id_segment_meta_key` (`id_segment`, `meta_key`);
+    '
+    ];
 }
