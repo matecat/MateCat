@@ -16,18 +16,10 @@ import {
   textHasTags,
 } from './utils/DraftMatecatUtils/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
-import RemoveTagsIcon from '../../../img/icons/RemoveTagsIcon'
-import AddTagsIcon from '../../../img/icons/AddTagsIcon'
-import UpperCaseIcon from '../../../img/icons/UpperCaseIcon'
-import LowerCaseIcon from '../../../img/icons/LowerCaseIcon'
-import CapitalizeIcon from '../../../img/icons/CapitalizeIcon'
-import QualityReportIcon from '../../../img/icons/QualityReportIcon'
 import ReviseLockIcon from '../../../img/icons/ReviseLockIcon'
 import OfflineUtils from '../../utils/offlineUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
-import {Shortcuts} from '../../utils/shortcuts'
-import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import {SegmentTargetToolbar} from './SegmentTargetToolbar'
 
 class SegmentTarget extends React.Component {
