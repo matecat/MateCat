@@ -27,7 +27,7 @@ const JobProgressBar = ({stats = {}}) => {
     : true
 
   return (
-    <div className="job-progress-container">
+    <div className="job-progress-container" data-testid="progress-bar">
       <Tooltip
         content={
           (unconfirmedPerc > 0 ||
@@ -97,7 +97,9 @@ const JobProgressBar = ({stats = {}}) => {
         </div>
       </Tooltip>
 
-      {!isNaN(totalPerc) && isFinite(totalPerc) && `${totalPerc}%`}
+      <span data-testid="progress-bar-amount">
+        {!isNaN(totalPerc) && isFinite(totalPerc) ? `${totalPerc}%` : '-'}
+      </span>
     </div>
   )
 }
