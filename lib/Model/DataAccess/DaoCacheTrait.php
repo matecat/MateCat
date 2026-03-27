@@ -31,6 +31,50 @@ trait DaoCacheTrait
     protected int $cacheTTL = 0;
 
     /**
+     * XFetch β (beta) tuning parameter.
+     * Controls how aggressively early recomputation triggers.
+     * 1.0 is the theoretically optimal value per Vattani et al. (2015).
+     */
+    protected const float XFETCH_BETA = 1.0;
+
+    /**
+     * Minimum TTL (seconds) for XFetch to activate.
+     * Below this threshold, XFetch auto-disables because the early
+     * recomputation window could exceed the remaining TTL.
+     */
+    protected const int XFETCH_MIN_TTL_THRESHOLD = 10;
+
+    /**
+     * Fallback δ (seconds) when no measured recomputation time is available.
+     * Used by callers that bypass _fetchObjectMap (e.g., Pager).
+     */
+    protected const float XFETCH_FALLBACK_DELTA = 0.05;
+
+    /**
+     * Whether XFetch probabilistic early expiration is active for this class.
+     * Override to false in classes that use DaoCacheTrait for non-query storage
+     * (e.g., SessionTokenStoreHandler).
+     */
+    protected bool $xfetchEnabled = true;
+
+    /**
+     * Last measured recomputation time (δ) in seconds.
+     * Set via _setLastComputeDelta() from AbstractDao::_fetchObjectMap().
+     * Consumed-and-reset internally by _setInCacheMap() when building the envelope.
+     */
+    private float $lastComputeDelta = 0.0;
+
+    /**
+     * Set the last measured recomputation time (δ).
+     *
+     * @param float $delta Recomputation time in seconds
+     */
+    protected function _setLastComputeDelta(float $delta): void
+    {
+        $this->lastComputeDelta = $delta;
+    }
+
+    /**
      * Cache Initialization
      *
      * @return void
