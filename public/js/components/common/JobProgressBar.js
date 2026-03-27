@@ -2,8 +2,9 @@ import React, {useRef} from 'react'
 import Tooltip from './Tooltip'
 import {isUndefined} from 'lodash'
 
-const JobProgressBar = ({stats = {}}) => {
+const JobProgressBar = ({stats = {}, showPercent = true}) => {
   const progressTooltipRef = useRef()
+
 
   const {raw} = stats
 
@@ -97,9 +98,11 @@ const JobProgressBar = ({stats = {}}) => {
         </div>
       </Tooltip>
 
-      <span data-testid="progress-bar-amount">
-        {!isNaN(totalPerc) && isFinite(totalPerc) ? `${totalPerc}%` : '-'}
-      </span>
+      {showPercent && (
+        <span data-testid="progress-bar-amount">
+          {!isNaN(totalPerc) && isFinite(totalPerc) ? `${totalPerc}%` : '-'}
+        </span>
+      )}
     </div>
   )
 }
