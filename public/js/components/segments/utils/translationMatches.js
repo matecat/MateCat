@@ -42,7 +42,10 @@ let TranslationMatches = {
         segment: segment,
       })
 
-      SegmentActions.modifiedTranslation(segment.sid, true)
+      SegmentActions.modifiedTranslation(
+        segment.sid,
+        segment.translation !== '',
+      )
     }
   },
 
