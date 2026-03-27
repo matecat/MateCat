@@ -5,14 +5,12 @@ import Palette from '../../../icons/Palette'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CatToolStore from '../../../../stores/CatToolStore'
-import SegmentStore from '../../../../stores/SegmentStore'
 import CommonUtils from '../../../../utils/commonUtils'
 import PropTypes from 'prop-types'
 
-export const LaraStyles = ({sid, isIconsBundled}) => {
+export const LaraStyles = ({sid, segment, isIconsBundled}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
-  const segment = SegmentStore.getSegmentByIdToJS(sid)
   const contributions = segment?.contributions
 
   const openTab = () => {

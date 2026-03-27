@@ -23,6 +23,7 @@ import useResizeObserver from '../../hooks/useResizeObserver'
 
 export const SegmentTargetToolbar = ({
   sid,
+  segment,
   editArea,
   lockEditArea,
   qrLink,
@@ -62,32 +63,40 @@ export const SegmentTargetToolbar = ({
       ? [
           {
             group: 0,
-            component: <AiFeedback {...{key: 'aifeedback', sid}} />,
-          },
-          {
-            group: 0,
             component: (
-              <AiFeedback {...{key: 'aifeedback', sid, isIconsBundled}} />
-            ),
-          },
-          {
-            group: 0,
-            component: (
-              <LaraStyles {...{key: 'larastyle', sid, isIconsBundled}} />
-            ),
-          },
-          {
-            group: 0,
-            component: (
-              <AiAlternatives
-                {...{key: 'aialternatives', sid, editArea, isIconsBundled}}
+              <LaraStyles
+                {...{key: 'larastyle', sid, segment, isIconsBundled}}
               />
             ),
           },
           {
             group: 0,
             component: (
-              <AiAlternatives {...{key: 'aialternatives', sid, editArea}} />
+              <AiFeedback
+                {...{key: 'aifeedback', sid, segment, isIconsBundled}}
+              />
+            ),
+          },
+          {
+            group: 0,
+            component: (
+              <AiAlternatives
+                {...{
+                  key: 'aialternatives',
+                  sid,
+                  segment,
+                  editArea,
+                  isIconsBundled,
+                }}
+              />
+            ),
+          },
+          {
+            group: 0,
+            component: (
+              <AiAlternatives
+                {...{key: 'aialternatives', sid, segment, editArea}}
+              />
             ),
           },
         ]
@@ -272,6 +281,7 @@ export const SegmentTargetToolbar = ({
 
 SegmentTargetToolbar.propTypes = {
   sid: PropTypes.string.isRequired,
+  segment: PropTypes.object.isRequired,
   editArea: PropTypes.object,
   lockEditArea: PropTypes.func,
   qrLink: PropTypes.string,
