@@ -22,7 +22,7 @@ class SegmentMetadataDao extends AbstractDao
      * @return SegmentMetadataCollection
      * @throws ReflectionException
      */
-    public static function getAll(int $id_segment, int $ttl = 604800): SegmentMetadataCollection
+    public static function getAll(int $id_segment, int $ttl = 86400): SegmentMetadataCollection
     {
         $thisDao = new self();
         $conn = $thisDao->getDatabaseHandler();
@@ -45,7 +45,7 @@ class SegmentMetadataDao extends AbstractDao
      * @return SegmentMetadataStruct[]
      * @throws ReflectionException
      */
-    public static function getBySegmentIds(array $ids, string $key, int $ttl = 604800): array
+    public static function getBySegmentIds(array $ids, string $key, int $ttl = 86400): array
     {
         $thisDao = new self();
         $conn = $thisDao->getDatabaseHandler();
