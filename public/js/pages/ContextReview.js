@@ -9,6 +9,7 @@ import {
   tagSegments,
   replaceTextContent,
   stripSegmentTags,
+  getSegmentNodeMap,
 } from '../utils/contextReviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconDown from '../components/icons/IconDown'
@@ -134,7 +135,17 @@ const ContextReview = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
-  // {sid, activeIndex, total} or null — tracks current highlight navigation
+  /**
+   * Highlight navigation state — two modes:
+   *
+   * mode: 'segment' — came from CatTool (segment click / scroll-to-segment)
+   *   {mode: 'segment', sid: number, activeIndex: number, total: number}
+   *
+   * mode: 'node' — came from HTML panel click
+   *   {mode: 'node', nodeIndex: number, sids: number[], activeSegIdx: number}
+   *
+   * null — no highlight
+   */
   const [highlight, setHighlight] = useState(null)
   // Bumped after innerHTML injection so the tagging effect knows the DOM is ready
   const [htmlReady, setHtmlReady] = useState(0)
@@ -158,7 +169,7 @@ const ContextReview = () => {
    * @param {boolean} scroll      Whether to scroll to the active occurrence
    * @returns {number} total occurrences
    */
-  const applyHighlights = useCallback((sid, activeIndex, scroll) => {
+  const applyHighlightsForSegment = useCallback((sid, activeIndex, scroll) => {
     let total = 0
 
     if (sourceRef.current) {
@@ -188,6 +199,26 @@ const ContextReview = () => {
     return total
   }, [])
 
+  const applyHighlightsForNode = useCallback(
+    (nodeIndex, activeSegIdx, scroll) => {
+      ;[sourceRef, targetRef].forEach((ref) => {
+        if (!ref.current) return
+        const map = getSegmentNodeMap(ref.current)
+        if (!map) return
+        const sids = map.nodeIndexToSids.get(nodeIndex) ?? []
+        const activeSid = sids[activeSegIdx] ?? sids[0]
+        if (activeSid == null) return
+        clearHighlights(ref.current)
+        // highlightBySid marks ALL nodes tagged with activeSid; occurrence 0 is active
+        const res = highlightBySid(ref.current, activeSid, 0)
+        if (scroll && res.marks[0]?.[0]) {
+          res.marks[0][0].scrollIntoView({behavior: 'smooth', block: 'center'})
+        }
+      })
+    },
+    [],
+  )
+
   const handleMessage = useCallback(
     (message) => {
       if (message.type === 'segments') {
@@ -200,11 +231,14 @@ const ContextReview = () => {
       }
 
       if (message.type === 'highlight') {
-        // Highlight on both panels — scroll to the first occurrence
-        const total = applyHighlights(message.sid, 0, true)
-        setHighlight(
-          total > 0 ? {sid: message.sid, activeIndex: 0, total} : null,
-        )
+        setHighlight((prev) => {
+          if (prev?.mode === 'node' && prev.sids.includes(message.sid))
+            return prev
+          const total = applyHighlightsForSegment(message.sid, 0, true)
+          return total > 0
+            ? {mode: 'segment', sid: message.sid, activeIndex: 0, total}
+            : null
+        })
       }
 
       if (message.type === 'updateTranslation') {
@@ -226,7 +260,7 @@ const ContextReview = () => {
         }
       }
     },
-    [applyHighlights],
+    [applyHighlightsForSegment],
   )
 
   // Subscribe to ContextReviewChannel messages
@@ -420,10 +454,19 @@ const ContextReview = () => {
           sid: result.sid,
         })
         // Highlight at the clicked occurrence — do NOT scroll
-        const total = applyHighlights(result.sid, result.occurrenceIndex, false)
+        const total = applyHighlightsForSegment(
+          result.sid,
+          result.occurrenceIndex,
+          false,
+        )
         setHighlight(
           total > 0
-            ? {sid: result.sid, activeIndex: result.occurrenceIndex, total}
+            ? {
+                mode: 'segment',
+                sid: result.sid,
+                activeIndex: result.occurrenceIndex,
+                total,
+              }
             : null,
         )
       }
@@ -443,10 +486,19 @@ const ContextReview = () => {
           sid: result.sid,
         })
         // Highlight at the clicked occurrence — do NOT scroll
-        const total = applyHighlights(result.sid, result.occurrenceIndex, false)
+        const total = applyHighlightsForSegment(
+          result.sid,
+          result.occurrenceIndex,
+          false,
+        )
         setHighlight(
           total > 0
-            ? {sid: result.sid, activeIndex: result.occurrenceIndex, total}
+            ? {
+                mode: 'segment',
+                sid: result.sid,
+                activeIndex: result.occurrenceIndex,
+                total,
+              }
             : null,
         )
       }
