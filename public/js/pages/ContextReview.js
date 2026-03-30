@@ -7,9 +7,8 @@ import {
   setActiveHighlight,
   findSegmentSidsByClick,
   tagSegments,
-  replaceTextContent,
-  stripSegmentTags,
   getSegmentNodeMap,
+  updateNodeTranslation,
 } from '../utils/contextReviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconDown from '../components/icons/IconDown'
@@ -155,6 +154,11 @@ const ContextReview = () => {
   const segmentsRef = useRef([])
   const highlightRef = useRef(null)
 
+  const showNodeWarning = (el) =>
+    el.classList.add('context-review-node--mismatch')
+  const clearNodeWarning = (el) =>
+    el.classList.remove('context-review-node--mismatch')
+
   // Keep segmentsRef in sync so callbacks always see the latest value
   useEffect(() => {
     segmentsRef.current = segments
@@ -252,21 +256,23 @@ const ContextReview = () => {
 
       if (message.type === 'updateTranslation') {
         const {sid, target} = message
-        setSegments((prev) =>
-          prev.map((seg) => (seg.sid === sid ? {...seg, target} : seg)),
-        )
-        // Directly update the already-tagged element in the target panel so we
-        // don't need to nuke innerHTML and re-tag everything.
-        // Uses replaceTextContent to preserve child elements (e.g. <a> tags).
-        if (targetRef.current && target) {
-          const cleanTarget = stripSegmentTags(target)
-          const spans = targetRef.current.querySelectorAll(
-            `[data-context-sid="${sid}"]`,
+        setSegments((prev) => {
+          const updated = prev.map((seg) =>
+            seg.sid === sid ? {...seg, target} : seg,
           )
-          spans.forEach((span) => {
-            replaceTextContent(span, cleanTarget)
-          })
-        }
+          if (targetRef.current) {
+            const map = getSegmentNodeMap(targetRef.current)
+            const nodeIndices = map?.sidToNodeIndices.get(sid) ?? []
+            nodeIndices.forEach((nodeIndex) => {
+              const el = map.nodes[nodeIndex]
+              if (!el) return
+              const result = updateNodeTranslation(el, updated)
+              if (result === 'mismatch') showNodeWarning(el)
+              else clearNodeWarning(el)
+            })
+          }
+          return updated
+        })
       }
     },
     [applyHighlightsForSegment],

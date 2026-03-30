@@ -203,3 +203,19 @@ mark.context-review-highlight--active {
   white-space: nowrap;
   user-select: none;
 }
+
+[data-context-sids].context-review-node--mismatch {
+  outline: 2px solid #e05c00;
+  outline-offset: 2px;
+  position: relative;
+
+  &::after {
+    content: '⚠';
+    position: absolute;
+    top: -0.6em;
+    right: -0.3em;
+    font-size: 0.75em;
+    color: #e05c00;
+    pointer-events: none;
+  }
+}
