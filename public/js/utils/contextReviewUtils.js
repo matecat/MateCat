@@ -81,6 +81,37 @@ export const replaceTextContent = (el, newText) => {
 }
 
 /**
+ * Attempts to replace the visible text of a node with its translated content.
+ *
+ * Only performs the replacement when every segment linked to the node has a
+ * non-empty target AND all targets are identical (after stripping XLIFF tags).
+ *
+ * @param {HTMLElement} el
+ * @param {Array<{sid: number, source: string, target: string}>} segments
+ * @returns {'ok'|'mismatch'|'no-target'}
+ */
+export const updateNodeTranslation = (el, segments) => {
+  const sids = getSidsFromElement(el)
+  if (!sids.length) return 'no-target'
+
+  const sidSet = new Set(sids)
+  const relevant = segments.filter((s) => sidSet.has(s.sid))
+  if (!relevant.length) return 'no-target'
+
+  const targets = relevant
+    .map((s) => (s.target ? stripSegmentTags(s.target).trim() : null))
+    .filter(Boolean)
+
+  if (targets.length < relevant.length) return 'no-target'
+
+  const allSame = targets.every((t) => t === targets[0])
+  if (!allSame) return 'mismatch'
+
+  replaceTextContent(el, targets[0])
+  return 'ok'
+}
+
+/**
  * Clears all existing highlights from the container by unwrapping
  * <mark> elements back to their original text nodes.
  *

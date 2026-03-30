@@ -5,6 +5,7 @@ import {
   getSegmentNodeMap,
   findSegmentSidsByClick,
   findSegmentSidByClick,
+  updateNodeTranslation,
 } from './contextReviewUtils'
 
 describe('getSidsFromElement', () => {
@@ -425,5 +426,63 @@ describe('findSegmentSidByClick — backward compat wrapper', () => {
       'source',
     )
     expect(result).toBeNull()
+  })
+})
+
+describe('updateNodeTranslation', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('replaces text when a single segment has a target', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    expect(result).toBe('ok')
+    expect(p.textContent.trim()).toBe('Hallo Welt')
+  })
+
+  it('replaces text when all segment targets are identical', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+      {sid: 2, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+      {sid: 2, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    expect(result).toBe('ok')
+    expect(p.textContent.trim()).toBe('Hallo Welt')
+  })
+
+  it('returns "mismatch" when targets differ', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+      {sid: 2, source: 'Hello world', target: 'Ciao mondo'},
+    ])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+      {sid: 2, source: 'Hello world', target: 'Ciao mondo'},
+    ])
+    expect(result).toBe('mismatch')
+  })
+
+  it('returns "no-target" when a segment has no translation yet', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [{sid: 1, source: 'Hello world', target: ''}])
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: ''},
+    ])
+    expect(result).toBe('no-target')
   })
 })
