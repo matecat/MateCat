@@ -398,25 +398,44 @@ export const tagSegments = (
   // DOM element with the same text.
   const alreadyTagged = new Set()
   container.querySelectorAll(`[${SEGMENT_SIDS_ATTR}]`).forEach((el) => {
-    getSidsFromElement(el).forEach((sid) => alreadyTagged.add(String(sid)))
+    getSidsFromElement(el).forEach((sid) => alreadyTagged.add(sid))
   })
 
   // Track which segments have been consumed (by index in `prepared`).
   // Pre-mark segments whose SID is already in the DOM.
   const used = new Set()
   for (let i = 0; i < prepared.length; i++) {
-    if (alreadyTagged.has(String(prepared[i].sid))) {
+    if (alreadyTagged.has(prepared[i].sid)) {
       used.add(i)
     }
   }
 
   const candidates = container.querySelectorAll(BLOCK_SELECTOR)
 
+  // Cache parsed SIDs per element to avoid repeated getAttribute + split
+  // calls inside the inner loops.
+  const elSidsCache = new Map()
+  const getCachedSids = (el) => {
+    if (!elSidsCache.has(el)) elSidsCache.set(el, getSidsFromElement(el))
+    return elSidsCache.get(el)
+  }
+  const appendSid = (el, sid) => {
+    const existing = getCachedSids(el)
+    const updated = [...existing, sid]
+    el.setAttribute(SEGMENT_SIDS_ATTR, updated.join(','))
+    el.setAttribute(SEGMENT_SID_ATTR, String(updated[0]))
+    elSidsCache.set(el, updated)
+  }
+
   // Pass 1 — positional: each untagged element consumes the first unused
   // segment whose normalised source is an exact match.  This preserves
   // positional pairing when duplicate source texts appear in multiple
   // elements (e.g. two <p>Equipment</p> nodes).
   for (const el of candidates) {
+    // Skip elements that contain an already-tagged descendant — the
+    // descendant is the more specific match.
+    if (el.querySelector(`[${SEGMENT_SIDS_ATTR}]`)) continue
+
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
 
@@ -424,12 +443,9 @@ export const tagSegments = (
 
     for (let i = 0; i < prepared.length; i++) {
       if (used.has(i)) continue
-      if (getSidsFromElement(el).includes(prepared[i].sid)) continue
+      if (getCachedSids(el).includes(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
-        const existingSids = getSidsFromElement(el)
-        const newSids = [...existingSids, prepared[i].sid]
-        el.setAttribute(SEGMENT_SIDS_ATTR, newSids.join(','))
-        el.setAttribute(SEGMENT_SID_ATTR, String(newSids[0]))
+        appendSid(el, prepared[i].sid)
         if (replaceWithTarget && prepared[i].target) {
           replaceTextContent(el, stripSegmentTags(prepared[i].target))
         }
@@ -442,7 +458,12 @@ export const tagSegments = (
   // Pass 2 — N:N append: remaining unused segments are checked against
   // already-tagged elements.  If the segment's normalised source matches
   // the element's text and that SID is not yet on the element, append it.
+  // Note: replaceWithTarget is NOT applied here — the element's text was
+  // already replaced by the primary segment in Pass 1. Pass 2 only adds
+  // additional SID associations for N:N tracking.
   for (const el of candidates) {
+    if (!el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
+
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
 
@@ -450,12 +471,9 @@ export const tagSegments = (
 
     for (let i = 0; i < prepared.length; i++) {
       if (used.has(i)) continue
-      if (getSidsFromElement(el).includes(prepared[i].sid)) continue
+      if (getCachedSids(el).includes(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
-        const existingSids = getSidsFromElement(el)
-        const newSids = [...existingSids, prepared[i].sid]
-        el.setAttribute(SEGMENT_SIDS_ATTR, newSids.join(','))
-        el.setAttribute(SEGMENT_SID_ATTR, String(newSids[0]))
+        appendSid(el, prepared[i].sid)
         used.add(i)
       }
     }
