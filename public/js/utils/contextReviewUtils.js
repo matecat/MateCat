@@ -470,7 +470,6 @@ export const tagSegments = (
     .map((seg) => ({
       ...seg,
       normSource: stripSegmentTags(seg.source),
-      normTarget: stripSegmentTags(seg.target),
     }))
     .filter((seg) => seg.normSource)
     .sort((a, b) => a.sid - b.sid)
