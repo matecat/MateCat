@@ -1,4 +1,9 @@
-import {getSidsFromElement, tagSegments} from './contextReviewUtils'
+import {
+  getSidsFromElement,
+  tagSegments,
+  buildSegmentNodeMap,
+  getSegmentNodeMap,
+} from './contextReviewUtils'
 
 describe('getSidsFromElement', () => {
   it('returns [] for an element with no attribute', () => {
@@ -118,5 +123,60 @@ describe('tagSegments — multi-SID attribute', () => {
     expect(p.textContent.trim()).toBe('Hello world')
     expect(getSidsFromElement(p)).toContain(1)
     expect(getSidsFromElement(p)).toContain(2)
+  })
+})
+
+describe('buildSegmentNodeMap', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('maps a single segment to a single node', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    tagSegments(document.body, [{sid: 1, source: 'Hello world', target: ''}])
+    const map = buildSegmentNodeMap(document.body)
+    expect(map.sidToNodeIndices.get(1)).toEqual([0])
+    expect(map.nodeIndexToSids.get(0)).toEqual([1])
+    expect(map.nodes).toHaveLength(1)
+  })
+
+  it('maps multiple segments to the same node', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: ''},
+      {sid: 2, source: 'Hello world', target: ''},
+    ])
+    const map = buildSegmentNodeMap(document.body)
+    expect(map.nodeIndexToSids.get(0)).toContain(1)
+    expect(map.nodeIndexToSids.get(0)).toContain(2)
+    expect(map.sidToNodeIndices.get(1)).toContain(0)
+    expect(map.sidToNodeIndices.get(2)).toContain(0)
+  })
+
+  it('maps one segment to multiple nodes when duplicate source text exists', () => {
+    document.body.innerHTML = '<p>Equipment</p><p>Equipment</p>'
+    tagSegments(document.body, [
+      {sid: 1, source: 'Equipment', target: ''},
+      {sid: 2, source: 'Equipment', target: ''},
+    ])
+    const map = buildSegmentNodeMap(document.body)
+    expect(map.sidToNodeIndices.get(1)).toHaveLength(1)
+    expect(map.sidToNodeIndices.get(2)).toHaveLength(1)
+    expect(map.sidToNodeIndices.get(1)[0]).not.toBe(
+      map.sidToNodeIndices.get(2)[0],
+    )
+  })
+
+  it('getSegmentNodeMap returns the cached result', () => {
+    document.body.innerHTML = '<p>Hello</p>'
+    tagSegments(document.body, [{sid: 1, source: 'Hello', target: ''}])
+    const map1 = buildSegmentNodeMap(document.body)
+    const map2 = getSegmentNodeMap(document.body)
+    expect(map1).toBe(map2)
+  })
+
+  it('getSegmentNodeMap returns null for an untagged container', () => {
+    const div = document.createElement('div')
+    expect(getSegmentNodeMap(div)).toBeNull()
   })
 })

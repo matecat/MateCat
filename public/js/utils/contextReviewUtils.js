@@ -3,6 +3,8 @@ import {
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
 
+const containerMaps = new WeakMap()
+
 const HIGHLIGHT_CLASS = 'context-review-highlight'
 const HIGHLIGHT_ACTIVE_CLASS = 'context-review-highlight--active'
 const SEGMENT_SID_ATTR = 'data-context-sid'
@@ -339,6 +341,40 @@ export const stripSegmentTags = (text) => {
 }
 
 /**
+ * Builds and caches the two-way segment↔node lookup maps for a container.
+ * Must be called after tagSegments has finished tagging the container.
+ *
+ * @param {HTMLElement} container
+ * @returns {{ sidToNodeIndices: Map<number, number[]>, nodeIndexToSids: Map<number, number[]>, nodes: HTMLElement[] }}
+ */
+export const buildSegmentNodeMap = (container) => {
+  const nodes = Array.from(container.querySelectorAll(`[${SEGMENT_SIDS_ATTR}]`))
+  const sidToNodeIndices = new Map()
+  const nodeIndexToSids = new Map()
+
+  nodes.forEach((el, nodeIndex) => {
+    const sids = getSidsFromElement(el)
+    nodeIndexToSids.set(nodeIndex, sids)
+    sids.forEach((sid) => {
+      if (!sidToNodeIndices.has(sid)) sidToNodeIndices.set(sid, [])
+      sidToNodeIndices.get(sid).push(nodeIndex)
+    })
+  })
+
+  const map = {sidToNodeIndices, nodeIndexToSids, nodes}
+  containerMaps.set(container, map)
+  return map
+}
+
+/**
+ * Returns the cached map for a container, or null if not yet built.
+ * @param {HTMLElement} container
+ * @returns {{ sidToNodeIndices: Map, nodeIndexToSids: Map, nodes: HTMLElement[] }|null}
+ */
+export const getSegmentNodeMap = (container) =>
+  containerMaps.get(container) ?? null
+
+/**
  * Walks all block-level elements in a container and tags those whose
  * `textContent` matches a segment source.
  *
@@ -478,4 +514,6 @@ export const tagSegments = (
       }
     }
   }
+
+  buildSegmentNodeMap(container)
 }
