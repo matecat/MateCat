@@ -265,7 +265,9 @@ const findMeaningfulParent = (clickedElement, container) => {
  * @param {HTMLElement} container - The panel container element
  * @param {Array<{sid: number, source: string, target: string}>} segments - The segments mapping
  * @param {'source'|'target'} field - Which field to match against
- * @returns {{sids: number[], nodeIndex: number}|null}
+ * @returns {{sids: number[], nodeIndex: number}|null} nodeIndex is the element's
+ *   position in the container's segment node map (`nodes` array). Falls back to 0
+ *   when the node map is unavailable or the element is not found in it.
  */
 export const findSegmentSidsByClick = (
   clickedElement,
@@ -291,12 +293,17 @@ export const findSegmentSidsByClick = (
   if (!clickedText) return null
 
   const matchingSids = []
+  const seenSids = new Set()
   for (const seg of segments) {
     const segText = seg[field]
     if (!segText) continue
+    if (seenSids.has(seg.sid)) continue
     const regex = buildFlexibleRegex(segText)
     regex.lastIndex = 0
-    if (regex.test(clickedText)) matchingSids.push(seg.sid)
+    if (regex.test(clickedText)) {
+      matchingSids.push(seg.sid)
+      seenSids.add(seg.sid)
+    }
   }
 
   return matchingSids.length > 0 ? {sids: matchingSids, nodeIndex: 0} : null

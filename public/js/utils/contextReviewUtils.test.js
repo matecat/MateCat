@@ -345,6 +345,20 @@ describe('findSegmentSidsByClick', () => {
       expect(result.sids).toContain(2)
       expect(result.nodeIndex).toBe(0)
     })
+
+    it('matches via fuzzy regex using the target field', () => {
+      const segments = [{sid: 1, source: 'Hello world', target: 'Hallo Welt'}]
+      document.body.innerHTML = '<p>Hallo Welt</p>'
+      const p = document.body.querySelector('p')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        segments,
+        'target',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toEqual([1])
+    })
   })
 
   describe('edge cases', () => {
@@ -360,6 +374,22 @@ describe('findSegmentSidsByClick', () => {
       document.body.innerHTML = '<p>Text</p>'
       const p = document.body.querySelector('p')
       expect(findSegmentSidsByClick(p, document.body, [], 'source')).toBeNull()
+    })
+
+    it('defaults nodeIndex to 0 when the node map is not built', () => {
+      // Manually set the attribute without calling tagSegments/buildSegmentNodeMap
+      document.body.innerHTML = '<p>Hello</p>'
+      const p = document.body.querySelector('p')
+      p.setAttribute('data-context-sids', '99')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        [{sid: 99, source: 'Hello', target: ''}],
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toEqual([99])
+      expect(result.nodeIndex).toBe(0)
     })
   })
 })
@@ -382,7 +412,7 @@ describe('findSegmentSidByClick — backward compat wrapper', () => {
     const result = findSegmentSidByClick(p, document.body, segments, 'source')
     expect(result).not.toBeNull()
     expect(result.sid).toBe(1)
-    expect(typeof result.occurrenceIndex).toBe('number')
+    expect(result.occurrenceIndex).toBe(0)
   })
 
   it('returns null when findSegmentSidsByClick returns null', () => {
