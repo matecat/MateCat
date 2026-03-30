@@ -5,7 +5,7 @@ import {
   clearHighlights,
   highlightBySid,
   setActiveHighlight,
-  findSegmentSidByClick,
+  findSegmentSidsByClick,
   tagSegments,
   replaceTextContent,
   stripSegmentTags,
@@ -451,66 +451,32 @@ const ContextReview = () => {
 
     const handleSourceClick = (event) => {
       event.preventDefault()
-      const result = findSegmentSidByClick(
+      const result = findSegmentSidsByClick(
         event.target,
         sourceContainer,
         segmentsRef.current,
         'source',
       )
-      if (result) {
-        ContextReviewChannel.sendMessage({
-          type: 'segmentClicked',
-          sid: result.sid,
-        })
-        // Highlight at the clicked occurrence — do NOT scroll
-        const total = applyHighlightsForSegment(
-          result.sid,
-          result.occurrenceIndex,
-          false,
-        )
-        setHighlight(
-          total > 0
-            ? {
-                mode: 'segment',
-                sid: result.sid,
-                activeIndex: result.occurrenceIndex,
-                total,
-              }
-            : null,
-        )
-      }
+      if (!result) return
+      const {sids, nodeIndex} = result
+      ContextReviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
+      applyHighlightsForNode(nodeIndex, 0, false)
+      setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
     }
 
     const handleTargetClick = (event) => {
       event.preventDefault()
-      const result = findSegmentSidByClick(
+      const result = findSegmentSidsByClick(
         event.target,
         targetContainer,
         segmentsRef.current,
         'target',
       )
-      if (result) {
-        ContextReviewChannel.sendMessage({
-          type: 'segmentClicked',
-          sid: result.sid,
-        })
-        // Highlight at the clicked occurrence — do NOT scroll
-        const total = applyHighlightsForSegment(
-          result.sid,
-          result.occurrenceIndex,
-          false,
-        )
-        setHighlight(
-          total > 0
-            ? {
-                mode: 'segment',
-                sid: result.sid,
-                activeIndex: result.occurrenceIndex,
-                total,
-              }
-            : null,
-        )
-      }
+      if (!result) return
+      const {sids, nodeIndex} = result
+      ContextReviewChannel.sendMessage({type: 'segmentClicked', sid: sids[0]})
+      applyHighlightsForNode(nodeIndex, 0, false)
+      setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
     }
 
     if (sourceContainer) {
@@ -534,25 +500,40 @@ const ContextReview = () => {
 
   const navigateHighlight = useCallback(
     (direction) => {
-      if (!highlight || highlight.total <= 1) return
+      if (!highlight) return
 
-      const nextIndex =
-        direction === 'next'
-          ? (highlight.activeIndex + 1) % highlight.total
-          : (highlight.activeIndex - 1 + highlight.total) % highlight.total
+      if (highlight.mode === 'segment') {
+        const nextIndex =
+          direction === 'next'
+            ? (highlight.activeIndex + 1) % highlight.total
+            : (highlight.activeIndex - 1 + highlight.total) % highlight.total
+        ;[sourceRef, targetRef].forEach((ref) => {
+          if (!ref.current) return
+          const mark = setActiveHighlight(ref.current, nextIndex)
+          if (mark) mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+        })
+        setHighlight((prev) => ({...prev, activeIndex: nextIndex}))
+        return
+      }
 
-      // Update the active mark in both panels and scroll to it
-      ;[sourceRef, targetRef].forEach((ref) => {
-        if (!ref.current) return
-        const mark = setActiveHighlight(ref.current, nextIndex)
-        if (mark) {
-          mark.scrollIntoView({behavior: 'smooth', block: 'center'})
-        }
-      })
-
-      setHighlight((prev) => ({...prev, activeIndex: nextIndex}))
+      if (highlight.mode === 'node') {
+        const {sids, activeSegIdx, nodeIndex} = highlight
+        const nextSegIdx =
+          direction === 'next'
+            ? (activeSegIdx + 1) % sids.length
+            : (activeSegIdx - 1 + sids.length) % sids.length
+        // Send segmentClicked for CatTool scroll-sync only.
+        // The CatTool will send a 'highlight' message back; guard against it
+        // flipping the mode from 'node' back to 'segment' (see handleMessage).
+        ContextReviewChannel.sendMessage({
+          type: 'segmentClicked',
+          sid: sids[nextSegIdx],
+        })
+        applyHighlightsForNode(nodeIndex, nextSegIdx, false)
+        setHighlight((prev) => ({...prev, activeSegIdx: nextSegIdx}))
+      }
     },
-    [highlight],
+    [highlight, applyHighlightsForNode],
   )
 
   const handlePrev = useCallback(
@@ -593,27 +574,31 @@ const ContextReview = () => {
           onChange={setViewMode}
           compact
         />
-        {highlight && highlight.total > 1 && (
-          <div className="context-review-nav">
-            <button
-              className="context-review-nav__button"
-              onClick={handlePrev}
-              aria-label="Previous occurrence"
-            >
-              <IconDown size={16} />
-            </button>
-            <span className="context-review-nav__counter">
-              {highlight.activeIndex + 1} of {highlight.total}
-            </span>
-            <button
-              className="context-review-nav__button"
-              onClick={handleNext}
-              aria-label="Next occurrence"
-            >
-              <IconDown size={16} />
-            </button>
-          </div>
-        )}
+        {highlight &&
+          ((highlight.mode === 'segment' && highlight.total > 1) ||
+            (highlight.mode === 'node' && highlight.sids.length > 1)) && (
+            <div className="context-review-nav">
+              <button
+                className="context-review-nav__button"
+                onClick={handlePrev}
+                aria-label="Previous"
+              >
+                <IconDown size={16} />
+              </button>
+              <span className="context-review-nav__counter">
+                {highlight.mode === 'segment'
+                  ? `${highlight.activeIndex + 1} of ${highlight.total}`
+                  : `Segment ${highlight.activeSegIdx + 1} of ${highlight.sids.length}`}
+              </span>
+              <button
+                className="context-review-nav__button"
+                onClick={handleNext}
+                aria-label="Next"
+              >
+                <IconDown size={16} />
+              </button>
+            </div>
+          )}
       </div>
       <div className="context-review-panels">
         {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) && (
