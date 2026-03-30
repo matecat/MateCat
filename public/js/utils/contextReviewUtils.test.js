@@ -474,6 +474,7 @@ describe('updateNodeTranslation', () => {
       {sid: 2, source: 'Hello world', target: 'Ciao mondo'},
     ])
     expect(result).toBe('mismatch')
+    expect(p.textContent.trim()).toBe('Hello world')
   })
 
   it('returns "no-target" when a segment has no translation yet', () => {
@@ -484,5 +485,31 @@ describe('updateNodeTranslation', () => {
       {sid: 1, source: 'Hello world', target: ''},
     ])
     expect(result).toBe('no-target')
+    expect(p.textContent.trim()).toBe('Hello world')
+  })
+
+  it('returns "no-target" for an untagged element', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    expect(result).toBe('no-target')
+    expect(p.textContent.trim()).toBe('Hello world')
+  })
+
+  it('returns "no-target" when segments array does not cover all SIDs on the element', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+      {sid: 2, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    // Only pass one of the two segments — partial coverage
+    const result = updateNodeTranslation(p, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    expect(result).toBe('no-target')
+    expect(p.textContent.trim()).toBe('Hello world')
   })
 })

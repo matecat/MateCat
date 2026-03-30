@@ -96,7 +96,7 @@ export const updateNodeTranslation = (el, segments) => {
 
   const sidSet = new Set(sids)
   const relevant = segments.filter((s) => sidSet.has(s.sid))
-  if (!relevant.length) return 'no-target'
+  if (!relevant.length || relevant.length < sids.length) return 'no-target'
 
   const targets = relevant
     .map((s) => (s.target ? stripSegmentTags(s.target).trim() : null))
