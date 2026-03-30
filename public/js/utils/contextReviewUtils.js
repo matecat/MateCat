@@ -530,9 +530,6 @@ export const tagSegments = (
       if (getCachedSids(el).includes(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
         appendSid(el, prepared[i].sid)
-        if (replaceWithTarget && prepared[i].target) {
-          replaceTextContent(el, stripSegmentTags(prepared[i].target))
-        }
         used.add(i)
         break // one new segment per element per pass (positional pairing)
       }
@@ -542,9 +539,8 @@ export const tagSegments = (
   // Pass 2 — N:N append: remaining unused segments are checked against
   // already-tagged elements.  If the segment's normalised source matches
   // the element's text and that SID is not yet on the element, append it.
-  // Note: replaceWithTarget is NOT applied here — the element's text was
-  // already replaced by the primary segment in Pass 1. Pass 2 only adds
-  // additional SID associations for N:N tracking.
+  // Text replacement (when replaceWithTarget is true) happens after both
+  // passes, via updateNodeTranslation.
   for (const el of candidates) {
     if (!el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
 
@@ -564,4 +560,14 @@ export const tagSegments = (
   }
 
   buildSegmentNodeMap(container)
+
+  if (replaceWithTarget) {
+    const map = getSegmentNodeMap(container)
+    if (map) {
+      map.nodes.forEach((el) => {
+        updateNodeTranslation(el, segments)
+        // mismatch silently ignored here — shown via the updateTranslation message handler
+      })
+    }
+  }
 }

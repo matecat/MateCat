@@ -96,7 +96,7 @@ describe('tagSegments — multi-SID attribute', () => {
     expect(getSidsFromElement(p)).toEqual([1])
   })
 
-  it('does not append second SID in N:N when replaceWithTarget changed the text', () => {
+  it('appends second SID in N:N even with replaceWithTarget (text replaced after tagging)', () => {
     document.body.innerHTML = '<p>Hello world</p>'
     const p = document.body.querySelector('p')
     tagSegments(
@@ -107,11 +107,12 @@ describe('tagSegments — multi-SID attribute', () => {
       ],
       {replaceWithTarget: true},
     )
-    // Pass 1 replaces text with first segment's target ("Hallo Welt").
-    // Pass 2 cannot match SID 2 because the element text is now
-    // "Hallo Welt", not "Hello world".
-    expect(p.textContent.trim()).toBe('Hallo Welt')
-    expect(getSidsFromElement(p)).toEqual([1])
+    // Text replacement is deferred until after both passes, so Pass 2
+    // can still match "Hello world" and append SID 2. Since the targets
+    // differ, updateNodeTranslation returns 'mismatch' and text stays.
+    expect(p.textContent.trim()).toBe('Hello world')
+    expect(getSidsFromElement(p)).toContain(1)
+    expect(getSidsFromElement(p)).toContain(2)
   })
 
   it('appends second SID in N:N without replaceWithTarget', () => {
@@ -510,6 +511,40 @@ describe('updateNodeTranslation', () => {
       {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
     ])
     expect(result).toBe('no-target')
+    expect(p.textContent.trim()).toBe('Hello world')
+  })
+})
+
+describe('tagSegments with replaceWithTarget', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('replaces text when all targets agree', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+        {sid: 2, source: 'Hello world', target: 'Hallo Welt'},
+      ],
+      {replaceWithTarget: true},
+    )
+    expect(p.textContent.trim()).toBe('Hallo Welt')
+  })
+
+  it('does NOT replace text when targets differ', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+        {sid: 2, source: 'Hello world', target: 'Ciao mondo'},
+      ],
+      {replaceWithTarget: true},
+    )
     expect(p.textContent.trim()).toBe('Hello world')
   })
 })
