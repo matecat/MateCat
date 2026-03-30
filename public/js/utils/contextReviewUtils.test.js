@@ -153,7 +153,7 @@ describe('buildSegmentNodeMap', () => {
     expect(map.sidToNodeIndices.get(2)).toContain(0)
   })
 
-  it('maps one segment to multiple nodes when duplicate source text exists', () => {
+  it('positional pairing assigns each segment to a distinct node', () => {
     document.body.innerHTML = '<p>Equipment</p><p>Equipment</p>'
     tagSegments(document.body, [
       {sid: 1, source: 'Equipment', target: ''},
@@ -167,7 +167,21 @@ describe('buildSegmentNodeMap', () => {
     )
   })
 
-  it('getSegmentNodeMap returns the cached result', () => {
+  it('returns empty maps for a container with no tagged nodes', () => {
+    document.body.innerHTML = '<p>Untagged</p>'
+    const map = buildSegmentNodeMap(document.body)
+    expect(map.nodes).toHaveLength(0)
+    expect(map.sidToNodeIndices.size).toBe(0)
+    expect(map.nodeIndexToSids.size).toBe(0)
+  })
+})
+
+describe('getSegmentNodeMap', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('returns the map cached by buildSegmentNodeMap', () => {
     document.body.innerHTML = '<p>Hello</p>'
     tagSegments(document.body, [{sid: 1, source: 'Hello', target: ''}])
     const map1 = buildSegmentNodeMap(document.body)
@@ -175,7 +189,16 @@ describe('buildSegmentNodeMap', () => {
     expect(map1).toBe(map2)
   })
 
-  it('getSegmentNodeMap returns null for an untagged container', () => {
+  it('returns a non-null map after tagSegments (auto-populated cache)', () => {
+    document.body.innerHTML = '<p>Hello</p>'
+    tagSegments(document.body, [{sid: 1, source: 'Hello', target: ''}])
+    const map = getSegmentNodeMap(document.body)
+    expect(map).not.toBeNull()
+    expect(map.sidToNodeIndices.get(1)).toEqual([0])
+    expect(map.nodes).toHaveLength(1)
+  })
+
+  it('returns null for an untagged container', () => {
     const div = document.createElement('div')
     expect(getSegmentNodeMap(div)).toBeNull()
   })

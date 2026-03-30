@@ -369,7 +369,7 @@ export const buildSegmentNodeMap = (container) => {
 /**
  * Returns the cached map for a container, or null if not yet built.
  * @param {HTMLElement} container
- * @returns {{ sidToNodeIndices: Map, nodeIndexToSids: Map, nodes: HTMLElement[] }|null}
+ * @returns {{ sidToNodeIndices: Map<number, number[]>, nodeIndexToSids: Map<number, number[]>, nodes: HTMLElement[] }|null}
  */
 export const getSegmentNodeMap = (container) =>
   containerMaps.get(container) ?? null
