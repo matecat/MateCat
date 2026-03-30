@@ -153,11 +153,17 @@ const ContextReview = () => {
   const sourceRef = useRef(null)
   const targetRef = useRef(null)
   const segmentsRef = useRef([])
+  const highlightRef = useRef(null)
 
   // Keep segmentsRef in sync so callbacks always see the latest value
   useEffect(() => {
     segmentsRef.current = segments
   }, [segments])
+
+  // Keep highlightRef in sync so callbacks always see the latest value
+  useEffect(() => {
+    highlightRef.current = highlight
+  }, [highlight])
 
   /**
    * Applies highlights on both panels for the given SID.
@@ -231,14 +237,17 @@ const ContextReview = () => {
       }
 
       if (message.type === 'highlight') {
-        setHighlight((prev) => {
-          if (prev?.mode === 'node' && prev.sids.includes(message.sid))
-            return prev
-          const total = applyHighlightsForSegment(message.sid, 0, true)
-          return total > 0
+        // Guard: don't flip away from node mode for a SID that belongs to
+        // the current node — the highlight is already managed by
+        // applyHighlightsForNode.
+        const cur = highlightRef.current
+        if (cur?.mode === 'node' && cur.sids.includes(message.sid)) return
+        const total = applyHighlightsForSegment(message.sid, 0, true)
+        setHighlight(
+          total > 0
             ? {mode: 'segment', sid: message.sid, activeIndex: 0, total}
-            : null
-        })
+            : null,
+        )
       }
 
       if (message.type === 'updateTranslation') {
