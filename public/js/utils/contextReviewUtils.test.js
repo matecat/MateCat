@@ -3,6 +3,8 @@ import {
   tagSegments,
   buildSegmentNodeMap,
   getSegmentNodeMap,
+  findSegmentSidsByClick,
+  findSegmentSidByClick,
 } from './contextReviewUtils'
 
 describe('getSidsFromElement', () => {
@@ -201,5 +203,197 @@ describe('getSegmentNodeMap', () => {
   it('returns null for an untagged container', () => {
     const div = document.createElement('div')
     expect(getSegmentNodeMap(div)).toBeNull()
+  })
+})
+
+describe('findSegmentSidsByClick', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  describe('Strategy 1: data-context-sids attribute', () => {
+    it('returns all SIDs when clicking a multi-SID node', () => {
+      const segments = [
+        {sid: 1, source: 'Hello world', target: ''},
+        {sid: 2, source: 'Hello world', target: ''},
+      ]
+      document.body.innerHTML = '<p>Hello world</p>'
+      tagSegments(document.body, segments)
+      buildSegmentNodeMap(document.body)
+
+      const p = document.body.querySelector('p')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toContain(1)
+      expect(result.sids).toContain(2)
+      expect(typeof result.nodeIndex).toBe('number')
+    })
+
+    it('returns a single SID when clicking a single-SID node', () => {
+      const segments = [{sid: 5, source: 'Only one', target: ''}]
+      document.body.innerHTML = '<p>Only one</p>'
+      tagSegments(document.body, segments)
+      buildSegmentNodeMap(document.body)
+
+      const p = document.body.querySelector('p')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toEqual([5])
+      expect(result.nodeIndex).toBe(0)
+    })
+
+    it('returns the correct nodeIndex for the second tagged element', () => {
+      const segments = [
+        {sid: 1, source: 'First', target: ''},
+        {sid: 2, source: 'Second', target: ''},
+      ]
+      document.body.innerHTML = '<p>First</p><p>Second</p>'
+      tagSegments(document.body, segments)
+      buildSegmentNodeMap(document.body)
+
+      const ps = document.body.querySelectorAll('p')
+      const result = findSegmentSidsByClick(
+        ps[1],
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toEqual([2])
+      expect(result.nodeIndex).toBe(1)
+    })
+
+    it('reads SIDs from an ancestor with data-context-sids when clicking an inline child', () => {
+      const segments = [{sid: 3, source: 'Click me', target: ''}]
+      document.body.innerHTML = '<p>Click me</p>'
+      tagSegments(document.body, segments)
+      buildSegmentNodeMap(document.body)
+
+      // Simulate clicking the text node's parent — the <p> itself is tagged.
+      // Create an inline child to click on.
+      const p = document.body.querySelector('p')
+      p.innerHTML = '<span>Click me</span>'
+      const span = p.querySelector('span')
+
+      const result = findSegmentSidsByClick(
+        span,
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toEqual([3])
+    })
+  })
+
+  describe('Strategy 2: fuzzy text match fallback', () => {
+    it('returns null when clicking an element with no matching segment', () => {
+      const segments = [{sid: 1, source: 'Hello world', target: ''}]
+      document.body.innerHTML = '<p>Unrelated content</p>'
+      const p = document.body.querySelector('p')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).toBeNull()
+    })
+
+    it('matches via fuzzy regex when element has no data-context-sids attribute', () => {
+      const segments = [{sid: 10, source: 'Fuzzy match', target: ''}]
+      // Do NOT tag segments — no attribute on DOM
+      document.body.innerHTML = '<p>Fuzzy match</p>'
+      const p = document.body.querySelector('p')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toEqual([10])
+      expect(result.nodeIndex).toBe(0)
+    })
+
+    it('collects multiple SIDs via fuzzy match when several segments match', () => {
+      const segments = [
+        {sid: 1, source: 'Hello world', target: ''},
+        {sid: 2, source: 'Hello', target: ''},
+      ]
+      // No tagging — both segment regexes match "Hello world"
+      document.body.innerHTML = '<p>Hello world</p>'
+      const p = document.body.querySelector('p')
+      const result = findSegmentSidsByClick(
+        p,
+        document.body,
+        segments,
+        'source',
+      )
+      expect(result).not.toBeNull()
+      expect(result.sids).toContain(1)
+      expect(result.sids).toContain(2)
+      expect(result.nodeIndex).toBe(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('returns null when segments is null', () => {
+      document.body.innerHTML = '<p>Text</p>'
+      const p = document.body.querySelector('p')
+      expect(
+        findSegmentSidsByClick(p, document.body, null, 'source'),
+      ).toBeNull()
+    })
+
+    it('returns null when segments is empty', () => {
+      document.body.innerHTML = '<p>Text</p>'
+      const p = document.body.querySelector('p')
+      expect(findSegmentSidsByClick(p, document.body, [], 'source')).toBeNull()
+    })
+  })
+})
+
+describe('findSegmentSidByClick — backward compat wrapper', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('returns {sid, occurrenceIndex} wrapping the first SID and nodeIndex', () => {
+    const segments = [
+      {sid: 1, source: 'Hello world', target: ''},
+      {sid: 2, source: 'Hello world', target: ''},
+    ]
+    document.body.innerHTML = '<p>Hello world</p>'
+    tagSegments(document.body, segments)
+    buildSegmentNodeMap(document.body)
+
+    const p = document.body.querySelector('p')
+    const result = findSegmentSidByClick(p, document.body, segments, 'source')
+    expect(result).not.toBeNull()
+    expect(result.sid).toBe(1)
+    expect(typeof result.occurrenceIndex).toBe('number')
+  })
+
+  it('returns null when findSegmentSidsByClick returns null', () => {
+    document.body.innerHTML = '<p>Unrelated</p>'
+    const p = document.body.querySelector('p')
+    const result = findSegmentSidByClick(
+      p,
+      document.body,
+      [{sid: 1, source: 'Something else', target: ''}],
+      'source',
+    )
+    expect(result).toBeNull()
   })
 })

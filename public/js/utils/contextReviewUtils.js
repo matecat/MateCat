@@ -252,13 +252,59 @@ const findMeaningfulParent = (clickedElement, container) => {
 }
 
 /**
- * Finds the segment SID that matches the text content of a clicked element,
- * plus the occurrence index of the clicked element among all elements with
- * the same SID in the container.
+ * Finds all segment SIDs that match the text content of a clicked element,
+ * plus the index of the clicked node in the container's node map.
  *
- * First checks for a `data-context-sid` attribute on the element or its
- * ancestors, then falls back to fuzzy-matching the text against the
- * segments list.
+ * Strategy 1: Check for a `data-context-sids` attribute on the element or
+ * an ancestor, then read all SIDs from that attribute.
+ *
+ * Strategy 2 (fallback): Fuzzy-match the clicked text against all segments
+ * and collect every SID whose source/target matches.
+ *
+ * @param {HTMLElement} clickedElement - The element that was clicked
+ * @param {HTMLElement} container - The panel container element
+ * @param {Array<{sid: number, source: string, target: string}>} segments - The segments mapping
+ * @param {'source'|'target'} field - Which field to match against
+ * @returns {{sids: number[], nodeIndex: number}|null}
+ */
+export const findSegmentSidsByClick = (
+  clickedElement,
+  container,
+  segments,
+  field,
+) => {
+  if (!segments || !segments.length) return null
+
+  // Strategy 1: data-context-sids attribute on clicked element or ancestor
+  const sidEl = clickedElement.closest(`[${SEGMENT_SIDS_ATTR}]`)
+  if (sidEl) {
+    const sids = getSidsFromElement(sidEl)
+    const map = getSegmentNodeMap(container)
+    let nodeIndex = map ? map.nodes.indexOf(sidEl) : 0
+    if (nodeIndex === -1) nodeIndex = 0
+    return {sids, nodeIndex}
+  }
+
+  // Strategy 2: fuzzy text match (fallback for untagged elements)
+  const targetEl = findMeaningfulParent(clickedElement, container)
+  const clickedText = targetEl.textContent.replace(/\s+/g, ' ').trim()
+  if (!clickedText) return null
+
+  const matchingSids = []
+  for (const seg of segments) {
+    const segText = seg[field]
+    if (!segText) continue
+    const regex = buildFlexibleRegex(segText)
+    regex.lastIndex = 0
+    if (regex.test(clickedText)) matchingSids.push(seg.sid)
+  }
+
+  return matchingSids.length > 0 ? {sids: matchingSids, nodeIndex: 0} : null
+}
+
+/**
+ * Backward-compatible wrapper around findSegmentSidsByClick.
+ * Returns the first SID and the node index as occurrenceIndex.
  *
  * @param {HTMLElement} clickedElement - The element that was clicked
  * @param {HTMLElement} container - The panel container element
@@ -272,50 +318,14 @@ export const findSegmentSidByClick = (
   segments,
   field,
 ) => {
-  if (!segments || !segments.length) return null
-
-  // 1. Check for data-context-sid on the clicked element or any ancestor
-  const sidEl = clickedElement.closest(`[${SEGMENT_SID_ATTR}]`)
-  if (sidEl) {
-    const sid = parseInt(sidEl.getAttribute(SEGMENT_SID_ATTR), 10)
-    // Determine occurrence index: find all elements with same SID and see
-    // which one is (or contains) the clicked element.
-    const allWithSid = container.querySelectorAll(
-      `[${SEGMENT_SID_ATTR}="${sid}"]`,
-    )
-    let occurrenceIndex = 0
-    for (let i = 0; i < allWithSid.length; i++) {
-      if (allWithSid[i] === sidEl || allWithSid[i].contains(sidEl)) {
-        occurrenceIndex = i
-        break
-      }
-    }
-    return {sid, occurrenceIndex}
-  }
-
-  // 2. Fallback: fuzzy-match the clicked text against segments.
-  //    When multiple segments match, pick the longest one so that e.g.
-  //    "Welcome to our finest equipment" wins over "Equipment" when the
-  //    user clicks on the <h2> that contains both.
-  const targetEl = findMeaningfulParent(clickedElement, container)
-  const clickedText = targetEl.textContent.replace(/\s+/g, ' ').trim()
-  if (!clickedText) return null
-
-  let bestMatch = null
-
-  for (const seg of segments) {
-    const segText = seg[field]
-    if (!segText) continue
-    const regex = buildFlexibleRegex(segText)
-    regex.lastIndex = 0
-    if (regex.test(clickedText)) {
-      if (!bestMatch || segText.length > bestMatch.source.length) {
-        bestMatch = {sid: seg.sid, source: segText}
-      }
-    }
-  }
-
-  return bestMatch ? {sid: bestMatch.sid, occurrenceIndex: 0} : null
+  const result = findSegmentSidsByClick(
+    clickedElement,
+    container,
+    segments,
+    field,
+  )
+  if (!result) return null
+  return {sid: result.sids[0], occurrenceIndex: result.nodeIndex}
 }
 
 /**
