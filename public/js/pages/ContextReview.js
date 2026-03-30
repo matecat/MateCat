@@ -494,7 +494,7 @@ const ContextReview = () => {
         targetContainer.removeEventListener('click', handleTargetClick)
       }
     }
-  }, [htmlContent, viewMode])
+  }, [htmlContent, viewMode, applyHighlightsForNode])
 
   // --- Occurrence navigation handlers ---
 
