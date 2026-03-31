@@ -504,6 +504,8 @@ export const tagSegments = (
   }
   const appendSid = (el, sid) => {
     const existing = getCachedSids(el)
+    // Defense-in-depth: never append a SID that is already on the element.
+    if (existing.includes(sid)) return
     const updated = [...existing, sid]
     el.setAttribute(SEGMENT_SIDS_ATTR, updated.join(','))
     el.setAttribute(SEGMENT_SID_ATTR, String(updated[0]))
@@ -515,6 +517,10 @@ export const tagSegments = (
   // positional pairing when duplicate source texts appear in multiple
   // elements (e.g. two <p>Equipment</p> nodes).
   for (const el of candidates) {
+    // Skip elements already tagged (from a previous incremental call) —
+    // Pass 1 is strictly for fresh, untagged elements.
+    if (el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
+
     // Skip elements that contain an already-tagged descendant — the
     // descendant is the more specific match.
     if (el.querySelector(`[${SEGMENT_SIDS_ATTR}]`)) continue

@@ -62,6 +62,86 @@ describe('tagSegments — multi-SID attribute', () => {
     expect(getSidsFromElement(p)).toEqual([1])
   })
 
+  it('does not duplicate SIDs on incremental segment loading (superset call)', () => {
+    document.body.innerHTML =
+      '<p>Hello world</p><p>Goodbye world</p><p>Hello world</p>'
+    const ps = document.body.querySelectorAll('p')
+    // First call — only first batch of segments
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: ''},
+      {sid: 2, source: 'Goodbye world', target: ''},
+    ])
+    expect(getSidsFromElement(ps[0])).toEqual([1])
+    expect(getSidsFromElement(ps[1])).toEqual([2])
+    expect(getSidsFromElement(ps[2])).toEqual([])
+
+    // Second call — superset with new segment added
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: ''},
+      {sid: 2, source: 'Goodbye world', target: ''},
+      {sid: 3, source: 'Hello world', target: ''},
+    ])
+    expect(getSidsFromElement(ps[0])).toEqual([1])
+    expect(getSidsFromElement(ps[1])).toEqual([2])
+    // SID 3 has same source as SID 1 — positional pairing assigns it to ps[2]
+    expect(getSidsFromElement(ps[2])).toEqual([3])
+  })
+
+  it('does not duplicate SIDs when N:N segments arrive incrementally', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    // First call — single segment
+    tagSegments(document.body, [{sid: 1, source: 'Hello world', target: ''}])
+    expect(getSidsFromElement(p)).toEqual([1])
+
+    // Second call — superset with second segment matching same text
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: ''},
+      {sid: 2, source: 'Hello world', target: ''},
+    ])
+    // SID 2 should be appended via N:N, but SID 1 must not be duplicated
+    const sids = getSidsFromElement(p)
+    expect(sids).toEqual([1, 2])
+  })
+
+  it('does not duplicate SIDs after three incremental calls', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [{sid: 1, source: 'Hello world', target: ''}])
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: ''},
+      {sid: 2, source: 'Hello world', target: ''},
+    ])
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: ''},
+      {sid: 2, source: 'Hello world', target: ''},
+      {sid: 3, source: 'Hello world', target: ''},
+    ])
+    expect(getSidsFromElement(p)).toEqual([1, 2, 3])
+  })
+
+  it('does not duplicate SIDs with replaceWithTarget on incremental calls', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    // First call with replaceWithTarget — text becomes target
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Hello world', target: 'Hallo Welt'}],
+      {replaceWithTarget: true},
+    )
+    expect(getSidsFromElement(p)).toEqual([1])
+    expect(p.textContent.trim()).toBe('Hallo Welt')
+
+    // Second call — same segments, text is now "Hallo Welt" not "Hello world"
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Hello world', target: 'Hallo Welt'}],
+      {replaceWithTarget: true},
+    )
+    // SID 1 should NOT be duplicated
+    expect(getSidsFromElement(p)).toEqual([1])
+  })
+
   it('assigns different SIDs to different elements with the same text (positional pairing)', () => {
     document.body.innerHTML = '<p>Equipment</p><p>Equipment</p>'
     const ps = document.body.querySelectorAll('p')
