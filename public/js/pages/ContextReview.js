@@ -1,21 +1,12 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react'
+import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
 import {mountPage} from './mountPage'
 import ContextReviewChannel from '../utils/contextReviewChannel'
-import {
-  clearHighlights,
-  highlightBySid,
-  setActiveHighlight,
-  findSegmentSidsByClick,
-  tagSegments,
-  getSegmentNodeMap,
-  updateNodeTranslation,
-} from '../utils/contextReviewUtils'
+import {findSegmentSidsByClick, tagSegments} from '../utils/contextReviewUtils'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import IconDown from '../components/icons/IconDown'
-const CONTEXT_REVIEW_HTML_URL =
-  'https://files.sandbox.translated.com/provetta/content/launches/2025/04/04/launch_copy_of_demo/content/we-retail/language-masters/de/equipment.html'
-// const CONTEXT_REVIEW_HTML_URL =
-//   'https://files.sandbox.translated.com/provola/hidden-components/content/wknd/language-masters/en/faqs.html'
+import useContextDocument from '../hooks/useContextDocument'
+import useContextHighlight from '../hooks/useContextHighlight'
+import useContextReviewMessages from '../hooks/useContextReviewMessages'
 
 const VIEW_MODES = {
   BOTH: 'both',
@@ -29,322 +20,94 @@ const VIEW_OPTIONS = [
   {id: VIEW_MODES.BOTH, name: 'Source&Target'},
 ]
 
-/**
- * Resolves a potentially relative URL against a base URL string.
- *
- * @param {string} url
- * @param {string} baseUrl
- * @returns {string}
- */
-const resolveUrl = (url, baseUrl) => {
-  if (!url || url.startsWith('data:') || url.startsWith('#')) return url
-  try {
-    return new URL(url, baseUrl).href
-  } catch {
-    return url
-  }
-}
-
-/**
- * Resolves all relative URLs inside a parsed DOM tree so that external
- * resources (stylesheets, scripts, images, etc.) load correctly when the
- * HTML is rendered on a different origin.
- *
- * @param {Document} doc  The parsed document
- * @param {string} baseUrl  The original document URL
- */
-const resolveRelativeUrls = (doc, baseUrl) => {
-  // src attributes (script, img, iframe, source, video, audio, …)
-  doc.querySelectorAll('[src]').forEach((el) => {
-    el.setAttribute('src', resolveUrl(el.getAttribute('src'), baseUrl))
-  })
-  // href attributes (link, a, area, …)
-  doc.querySelectorAll('[href]').forEach((el) => {
-    el.setAttribute('href', resolveUrl(el.getAttribute('href'), baseUrl))
-  })
-  // form actions
-  doc.querySelectorAll('[action]').forEach((el) => {
-    el.setAttribute('action', resolveUrl(el.getAttribute('action'), baseUrl))
-  })
-  // inline style background-image / url() references
-  doc.querySelectorAll('[style]').forEach((el) => {
-    const style = el.getAttribute('style')
-    if (style && style.includes('url(')) {
-      el.setAttribute(
-        'style',
-        style.replace(/url\(["']?(.*?)["']?\)/g, (_match, p1) => {
-          return `url("${resolveUrl(p1, baseUrl)}")`
-        }),
-      )
-    }
-  })
-  // srcset attributes (img, source)
-  doc.querySelectorAll('[srcset]').forEach((el) => {
-    const srcset = el.getAttribute('srcset')
-    const resolved = srcset
-      .split(',')
-      .map((entry) => {
-        const parts = entry.trim().split(/\s+/)
-        parts[0] = resolveUrl(parts[0], baseUrl)
-        return parts.join(' ')
-      })
-      .join(', ')
-    el.setAttribute('srcset', resolved)
-  })
-}
-
-/**
- * Parses the fetched HTML string and extracts head resources (stylesheets,
- * scripts, inline styles) plus body content with all relative URLs resolved.
- *
- * @param {string} rawHtml
- * @param {string} sourceUrl  The URL the HTML was fetched from
- * @returns {string} Combined head resources and body innerHTML
- */
-const parseHtmlContent = (rawHtml, sourceUrl) => {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(rawHtml, 'text/html')
-
-  // Resolve all relative URLs in the document
-  resolveRelativeUrls(doc, sourceUrl)
-
-  // Collect <style> tags from head
-  let headHtml = ''
-  doc.querySelectorAll('head style').forEach((el) => {
-    headHtml += el.outerHTML
-  })
-
-  // Collect <link rel="stylesheet"> tags from head
-  doc.querySelectorAll('head link[rel="stylesheet"]').forEach((el) => {
-    headHtml += el.outerHTML
-  })
-
-  // Collect <script> tags from head (skip inline ContextHub / CMS scripts)
-  doc.querySelectorAll('head script[src]').forEach((el) => {
-    headHtml += el.outerHTML
-  })
-
-  const bodyHtml = doc.body ? doc.body.innerHTML : rawHtml
-  return headHtml + bodyHtml
-}
-
 const ContextReview = () => {
-  const [htmlContent, setHtmlContent] = useState('')
-  const [segments, setSegments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
-  /**
-   * Highlight navigation state — two modes:
-   *
-   * mode: 'segment' — came from CatTool (segment click / scroll-to-segment)
-   *   {mode: 'segment', sid: number, activeIndex: number, total: number}
-   *
-   * mode: 'node' — came from HTML panel click
-   *   {mode: 'node', nodeIndex: number, sids: number[], activeSegIdx: number}
-   *
-   * null — no highlight
-   */
-  const [highlight, setHighlightState] = useState(null)
-  // Bumped after innerHTML injection so the tagging effect knows the DOM is ready
   const [htmlReady, setHtmlReady] = useState(0)
 
   const sourceRef = useRef(null)
   const targetRef = useRef(null)
-  const segmentsRef = useRef([])
-  const highlightRef = useRef(null)
 
-  // Synchronously update highlightRef alongside React state so that
-  // BroadcastChannel callbacks (which can fire before useEffect) always
-  // see the latest value.
-  const setHighlight = useCallback((valueOrUpdater) => {
-    setHighlightState((prev) => {
-      const next =
-        typeof valueOrUpdater === 'function'
-          ? valueOrUpdater(prev)
-          : valueOrUpdater
-      highlightRef.current = next
-      return next
-    })
+  const showNodeWarning = useCallback(
+    (el) => el.classList.add('context-review-node--mismatch'),
+    [],
+  )
+  const clearNodeWarning = useCallback(
+    (el) => el.classList.remove('context-review-node--mismatch'),
+    [],
+  )
+
+  const {
+    highlight,
+    setHighlight,
+    highlightRef,
+    applyHighlightsForSegment,
+    applyHighlightsForNode,
+    handlePrev,
+    handleNext,
+  } = useContextHighlight({sourceRef, targetRef})
+
+  const onHighlight = useCallback(
+    (numericSid) => {
+      const total = applyHighlightsForSegment(numericSid, 0, true)
+      setHighlight(
+        total > 0
+          ? {mode: 'segment', sid: numericSid, activeIndex: 0, total}
+          : null,
+      )
+    },
+    [applyHighlightsForSegment, setHighlight],
+  )
+
+  const onTranslationUpdate = useCallback(() => {
+    // no additional action needed here; useContextReviewMessages updates segments state
   }, [])
 
-  const showNodeWarning = (el) =>
-    el.classList.add('context-review-node--mismatch')
-  const clearNodeWarning = (el) =>
-    el.classList.remove('context-review-node--mismatch')
+  const {segments, currentContextUrl} = useContextReviewMessages({
+    onHighlight,
+    onTranslationUpdate,
+    highlightRef,
+    targetRef,
+    showNodeWarning,
+    clearNodeWarning,
+  })
 
-  // Keep segmentsRef in sync so callbacks always see the latest value
+  // Derive the URL to pass to useContextDocument:
+  // - If highlight messages have arrived and carried a context_url → use it.
+  // - Otherwise → use the first segment's context_url (if any).
+  // - Passing null → hook falls back to the hardcoded constant.
+  const firstSegmentContextUrl = useMemo(
+    () => segments.find((s) => s.context_url)?.context_url ?? null,
+    [segments],
+  )
+  const documentUrl = currentContextUrl ?? firstSegmentContextUrl
+
+  const {htmlContent, loading, error} = useContextDocument(documentUrl)
+
+  // Build metadataMap for tagSegments strategy pass
+  const metadataMap = useMemo(
+    () =>
+      Object.fromEntries(
+        segments
+          .filter((s) => s.resname && s.restype)
+          .map((s) => [
+            Number(s.sid),
+            {resname: s.resname, restype: s.restype},
+          ]),
+      ),
+    [segments],
+  )
+
+  const segmentsRef = useRef([])
   useEffect(() => {
     segmentsRef.current = segments
   }, [segments])
 
-  /**
-   * Applies highlights on both panels for the given SID.
-   * Returns the total number of occurrences found (from the source panel,
-   * or the target panel when source is not mounted).
-   *
-   * @param {number|string} sid
-   * @param {number} activeIndex  Which occurrence to mark active
-   * @param {boolean} scroll      Whether to scroll to the active occurrence
-   * @returns {number} total occurrences
-   */
-  const applyHighlightsForSegment = useCallback((sid, activeIndex, scroll) => {
-    let total = 0
-
-    if (sourceRef.current) {
-      clearHighlights(sourceRef.current)
-      const res = highlightBySid(sourceRef.current, sid, activeIndex)
-      total = res.total
-      if (scroll && res.marks[activeIndex]) {
-        res.marks[activeIndex][0].scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        })
-      }
-    }
-
-    if (targetRef.current) {
-      clearHighlights(targetRef.current)
-      const res = highlightBySid(targetRef.current, sid, activeIndex)
-      if (!total) total = res.total
-      if (scroll && res.marks[activeIndex]) {
-        res.marks[activeIndex][0].scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        })
-      }
-    }
-
-    return total
-  }, [])
-
-  const applyHighlightsForNode = useCallback(
-    (nodeIndex, activeSegIdx, scroll) => {
-      ;[sourceRef, targetRef].forEach((ref) => {
-        if (!ref.current) return
-        const map = getSegmentNodeMap(ref.current)
-        if (!map) return
-        const sids = map.nodeIndexToSids.get(nodeIndex) ?? []
-        const activeSid = sids[activeSegIdx] ?? sids[0]
-        if (activeSid == null) return
-        clearHighlights(ref.current)
-        // highlightBySid marks ALL nodes tagged with activeSid; occurrence 0 is active
-        const res = highlightBySid(ref.current, activeSid, 0)
-        if (scroll && res.marks[0]?.[0]) {
-          res.marks[0][0].scrollIntoView({behavior: 'smooth', block: 'center'})
-        }
-      })
-    },
-    [],
-  )
-
-  const handleMessage = useCallback(
-    (message) => {
-      if (message.type === 'segments') {
-        const incoming = message.segments ?? []
-        setSegments((prev) => {
-          const existingSids = new Set(prev.map((s) => s.sid))
-          const newSegments = incoming.filter((s) => !existingSids.has(s.sid))
-          return newSegments.length > 0 ? [...prev, ...newSegments] : prev
-        })
-      }
-
-      if (message.type === 'highlight') {
-        // Guard: don't flip away from node mode for a SID that belongs to
-        // the current node — the highlight is already managed by
-        // applyHighlightsForNode.
-        const cur = highlightRef.current
-        const numericSid = Number(message.sid)
-        if (cur?.mode === 'node' && cur.sids.includes(numericSid)) return
-        const total = applyHighlightsForSegment(numericSid, 0, true)
-        setHighlight(
-          total > 0
-            ? {mode: 'segment', sid: numericSid, activeIndex: 0, total}
-            : null,
-        )
-      }
-
-      if (message.type === 'updateTranslation') {
-        const {sid, target} = message
-        const numericSid = Number(sid)
-        setSegments((prev) => {
-          const updated = prev.map((seg) =>
-            Number(seg.sid) === numericSid ? {...seg, target} : seg,
-          )
-          if (targetRef.current) {
-            const map = getSegmentNodeMap(targetRef.current)
-            const nodeIndices = map?.sidToNodeIndices.get(numericSid) ?? []
-            nodeIndices.forEach((nodeIndex) => {
-              const el = map.nodes[nodeIndex]
-              if (!el) return
-              const result = updateNodeTranslation(el, updated)
-              if (result === 'mismatch') showNodeWarning(el)
-              else clearNodeWarning(el)
-            })
-          }
-          return updated
-        })
-      }
-    },
-    [applyHighlightsForSegment],
-  )
-
-  // Subscribe to ContextReviewChannel messages
-  useEffect(() => {
-    return ContextReviewChannel.onMessage(handleMessage)
-  }, [handleMessage])
-
-  // Request segments from CatTool on mount (covers case where ContextReview loads after CatTool)
-  useEffect(() => {
-    ContextReviewChannel.sendMessage({type: 'requestSegments'})
-  }, [])
-
-  // Fetch and parse the HTML document
-  useEffect(() => {
-    let cancelled = false
-
-    const fetchHtml = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await fetch(CONTEXT_REVIEW_HTML_URL)
-        if (!response.ok) {
-          throw new Error(`Failed to fetch document (${response.status})`)
-        }
-        const rawHtml = await response.text()
-        if (!cancelled) {
-          setHtmlContent(parseHtmlContent(rawHtml, CONTEXT_REVIEW_HTML_URL))
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e.message)
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    }
-
-    fetchHtml()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  // Render the fetched HTML into panels once (or when viewMode changes,
-  // since panels are conditionally mounted).  A ref tracks whether the
-  // current HTML has already been injected so we never nuke innerHTML
-  // just because `segments` changed.
+  // Render the fetched HTML into panels once (or when viewMode changes)
   const htmlRenderedRef = useRef({source: '', target: ''})
 
   useEffect(() => {
     if (!htmlContent) return
-
     let injected = false
-
-    // Source panel — inject HTML only when the content or panel changed
     if (
       sourceRef.current &&
       htmlRenderedRef.current.source !== htmlContent + viewMode
@@ -353,8 +116,6 @@ const ContextReview = () => {
       htmlRenderedRef.current.source = htmlContent + viewMode
       injected = true
     }
-
-    // Target panel — same logic
     if (
       targetRef.current &&
       htmlRenderedRef.current.target !== htmlContent + viewMode
@@ -363,30 +124,24 @@ const ContextReview = () => {
       htmlRenderedRef.current.target = htmlContent + viewMode
       injected = true
     }
-
-    // Signal the tagging effect that fresh HTML is in the DOM
-    if (injected) {
-      setHtmlReady((prev) => prev + 1)
-    }
+    if (injected) setHtmlReady((prev) => prev + 1)
   }, [htmlContent, viewMode])
 
-  // When segments change, apply text replacements / SID tagging
-  // incrementally — without resetting innerHTML.
-  // Depends on `htmlReady` (not `htmlContent`) so it only runs after the
-  // HTML-injection effect has finished writing to the DOM.
+  // Tag segments in panels when segments or HTML changes
   useEffect(() => {
     if (!segments.length || !htmlReady) return
-
     if (targetRef.current) {
-      tagSegments(targetRef.current, segments, {replaceWithTarget: true})
+      tagSegments(targetRef.current, segments, {
+        replaceWithTarget: true,
+        metadataMap,
+      })
     }
-
     if (sourceRef.current) {
-      tagSegments(sourceRef.current, segments)
+      tagSegments(sourceRef.current, segments, {metadataMap})
     }
-  }, [segments, htmlReady, viewMode])
+  }, [segments, htmlReady, viewMode, metadataMap])
 
-  // Detect untagged nodes while scrolling and request more segments
+  // Scroll listener — detect untagged nodes and request more segments
   useEffect(() => {
     const panel = sourceRef.current || targetRef.current
     if (!panel || !segments.length) return
@@ -397,23 +152,16 @@ const ContextReview = () => {
     const hasUntaggedNodesInViewport = (region) => {
       const container = sourceRef.current || targetRef.current
       if (!container) return false
-
       const meaningfulEls = container.querySelectorAll(
         'p, li, td, th, h1, h2, h3, h4',
       )
       const viewportMidY = window.innerHeight / 2
-
       for (const el of meaningfulEls) {
         const elRect = el.getBoundingClientRect()
-        // Check if element is visible in the window viewport
         if (elRect.bottom < 0 || elRect.top > window.innerHeight) continue
-
-        // Element is visible — check if it's in the requested region
         const midY = (elRect.top + elRect.bottom) / 2
         if (region === 'before' && midY > viewportMidY) continue
         if (region === 'after' && midY < viewportMidY) continue
-
-        // Check if this element has tagged content (attribute on self or descendants)
         if (
           !el.hasAttribute('data-context-sids') &&
           !el.querySelector('[data-context-sids]')
@@ -429,8 +177,6 @@ const ContextReview = () => {
       const scrollTop = window.scrollY
       const scrollBottom =
         document.documentElement.scrollHeight - scrollTop - window.innerHeight
-
-      // Near top → check for untagged nodes in upper half
       if (scrollTop < 200 && now - lastRequestRef.before > THROTTLE_MS) {
         if (hasUntaggedNodesInViewport('before')) {
           lastRequestRef.before = now
@@ -440,8 +186,6 @@ const ContextReview = () => {
           })
         }
       }
-
-      // Near bottom → check for untagged nodes in lower half
       if (scrollBottom < 200 && now - lastRequestRef.after > THROTTLE_MS) {
         if (hasUntaggedNodesInViewport('after')) {
           lastRequestRef.after = now
@@ -454,13 +198,10 @@ const ContextReview = () => {
     }
 
     window.addEventListener('scroll', handleScroll)
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [segments, viewMode])
 
-  // Attach click listeners to both panels
+  // Click listeners on both panels
   useEffect(() => {
     const sourceContainer = sourceRef.current
     const targetContainer = targetRef.current
@@ -496,71 +237,18 @@ const ContextReview = () => {
       setHighlight({mode: 'node', nodeIndex, sids, activeSegIdx: 0})
     }
 
-    if (sourceContainer) {
+    if (sourceContainer)
       sourceContainer.addEventListener('click', handleSourceClick)
-    }
-    if (targetContainer) {
+    if (targetContainer)
       targetContainer.addEventListener('click', handleTargetClick)
-    }
 
     return () => {
-      if (sourceContainer) {
+      if (sourceContainer)
         sourceContainer.removeEventListener('click', handleSourceClick)
-      }
-      if (targetContainer) {
+      if (targetContainer)
         targetContainer.removeEventListener('click', handleTargetClick)
-      }
     }
-  }, [htmlContent, viewMode, applyHighlightsForNode])
-
-  // --- Occurrence navigation handlers ---
-
-  const navigateHighlight = useCallback(
-    (direction) => {
-      if (!highlight) return
-
-      if (highlight.mode === 'segment') {
-        const nextIndex =
-          direction === 'next'
-            ? (highlight.activeIndex + 1) % highlight.total
-            : (highlight.activeIndex - 1 + highlight.total) % highlight.total
-        ;[sourceRef, targetRef].forEach((ref) => {
-          if (!ref.current) return
-          const mark = setActiveHighlight(ref.current, nextIndex)
-          if (mark) mark.scrollIntoView({behavior: 'smooth', block: 'center'})
-        })
-        setHighlight((prev) => ({...prev, activeIndex: nextIndex}))
-        return
-      }
-
-      if (highlight.mode === 'node') {
-        const {sids, activeSegIdx, nodeIndex} = highlight
-        const nextSegIdx =
-          direction === 'next'
-            ? (activeSegIdx + 1) % sids.length
-            : (activeSegIdx - 1 + sids.length) % sids.length
-        // Send segmentClicked for CatTool scroll-sync only.
-        // The CatTool will send a 'highlight' message back; guard against it
-        // flipping the mode from 'node' back to 'segment' (see handleMessage).
-        ContextReviewChannel.sendMessage({
-          type: 'segmentClicked',
-          sid: sids[nextSegIdx],
-        })
-        applyHighlightsForNode(nodeIndex, nextSegIdx, false)
-        setHighlight((prev) => ({...prev, activeSegIdx: nextSegIdx}))
-      }
-    },
-    [highlight, applyHighlightsForNode],
-  )
-
-  const handlePrev = useCallback(
-    () => navigateHighlight('prev'),
-    [navigateHighlight],
-  )
-  const handleNext = useCallback(
-    () => navigateHighlight('next'),
-    [navigateHighlight],
-  )
+  }, [htmlContent, viewMode, applyHighlightsForNode, setHighlight])
 
   if (loading) {
     return (
