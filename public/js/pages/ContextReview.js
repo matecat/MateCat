@@ -254,24 +254,26 @@ const ContextReview = () => {
         // the current node — the highlight is already managed by
         // applyHighlightsForNode.
         const cur = highlightRef.current
-        if (cur?.mode === 'node' && cur.sids.includes(message.sid)) return
-        const total = applyHighlightsForSegment(message.sid, 0, true)
+        const numericSid = Number(message.sid)
+        if (cur?.mode === 'node' && cur.sids.includes(numericSid)) return
+        const total = applyHighlightsForSegment(numericSid, 0, true)
         setHighlight(
           total > 0
-            ? {mode: 'segment', sid: message.sid, activeIndex: 0, total}
+            ? {mode: 'segment', sid: numericSid, activeIndex: 0, total}
             : null,
         )
       }
 
       if (message.type === 'updateTranslation') {
         const {sid, target} = message
+        const numericSid = Number(sid)
         setSegments((prev) => {
           const updated = prev.map((seg) =>
-            seg.sid === sid ? {...seg, target} : seg,
+            Number(seg.sid) === numericSid ? {...seg, target} : seg,
           )
           if (targetRef.current) {
             const map = getSegmentNodeMap(targetRef.current)
-            const nodeIndices = map?.sidToNodeIndices.get(sid) ?? []
+            const nodeIndices = map?.sidToNodeIndices.get(numericSid) ?? []
             nodeIndices.forEach((nodeIndex) => {
               const el = map.nodes[nodeIndex]
               if (!el) return
