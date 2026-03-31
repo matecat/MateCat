@@ -11,11 +11,15 @@ use Lara\LaraApiException;
 use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
+use Matecat\SubFiltering\MateCatFilter;
 use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectsMetadataMarshaller;
+use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentOriginalDataDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
@@ -493,6 +497,24 @@ class Lara extends AbstractEngine
         $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, implode(',', $_keys));
 
         try {
+            /** @var $projectStruct ProjectStruct */
+            $projectStruct = $_config['project'];
+            $featureSet = $this->featureSet;
+            $featureSet->loadForProject($projectStruct);
+
+            /** @var MateCatFilter $filter */
+            $metadata = new JobsMetadataDao();
+            $filter = MateCatFilter::getInstance(
+                $featureSet,
+                $_config['source'],
+                $_config['target'],
+                SegmentOriginalDataDao::getSegmentDataRefMap((int)$_config['id_segment']),
+                $metadata->getSubfilteringCustomHandlers($_config['id_job'], $_config['job_password'])
+            );
+
+            // Lara expects the translation in layer 0
+            $_config['translation'] = $filter->fromLayer0ToLayer1($_config['translation']);
+
             $time_start = microtime(true);
             $headers = new Headers($_config['tuid'], $_config['translation_origin']);
             // call lara
