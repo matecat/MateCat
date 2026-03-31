@@ -8,12 +8,20 @@ const CHANNEL_NAME = 'matecat-context-review'
  * Flux actions, or plain utility code.
  *
  * Message protocol:
- * - CatTool -> ContextReview: {type: 'segments', segments: [{sid, source, target}, ...]}
+ * - CatTool -> ContextReview: {type: 'segments', segments: [{
+ *       sid, source, target,
+ *       context_url,   // string|null — resolved URL for the context HTML document
+ *       resname,       // string|null — node selector/path value from XLIFF resname
+ *       restype,       // string|null — one of: x-path | x-tag-id | x-css_class |
+ *                      //               x-client_nodepath | x-attribute_name_value
+ *   }]}
  *     Sends the full segment mapping so ContextReview can build the target panel.
- * - CatTool -> ContextReview: {type: 'highlight', sid: number, source: string, target: string}
+ * - CatTool -> ContextReview: {type: 'highlight', sid: number, source: string, target: string,
+ *       context_url: string|null, resname: string|null, restype: string|null}
  *     Highlights a single segment on both source and target panels.
  * - CatTool -> ContextReview: {type: 'updateTranslation', sid: number, target: string}
  *     Updates the translation for a single segment in the target panel.
+ *     (Does not carry metadata — only updates text.)
  * - ContextReview -> CatTool: {type: 'segmentClicked', sid: number}
  *     Reports which segment was clicked in either panel.
  * - ContextReview -> CatTool: {type: 'requestSegments'}
