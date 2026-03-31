@@ -346,32 +346,6 @@ export const findSegmentSidsByClick = (
 }
 
 /**
- * Backward-compatible wrapper around findSegmentSidsByClick.
- * Returns the first SID and the node index as occurrenceIndex.
- *
- * @param {HTMLElement} clickedElement - The element that was clicked
- * @param {HTMLElement} container - The panel container element
- * @param {Array<{sid: number, source: string, target: string}>} segments - The segments mapping
- * @param {'source'|'target'} field - Which field to match against
- * @returns {{sid: number, occurrenceIndex: number}|null}
- */
-export const findSegmentSidByClick = (
-  clickedElement,
-  container,
-  segments,
-  field,
-) => {
-  const result = findSegmentSidsByClick(
-    clickedElement,
-    container,
-    segments,
-    field,
-  )
-  if (!result) return null
-  return {sid: result.sids[0], occurrenceIndex: result.nodeIndex}
-}
-
-/**
  * Strips XLIFF inline tags (`<g>`, `<x/>`, `<ph>`, etc.) and MateCat
  * whitespace placeholders (`##$_0A$##`, `##$_A0$##`, …) from a segment
  * string, then collapses whitespace.

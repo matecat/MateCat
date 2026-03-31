@@ -4,7 +4,6 @@ import {
   buildSegmentNodeMap,
   getSegmentNodeMap,
   findSegmentSidsByClick,
-  findSegmentSidByClick,
   updateNodeTranslation,
 } from './contextReviewUtils'
 
@@ -486,40 +485,6 @@ describe('findSegmentSidsByClick', () => {
       expect(result.sids).toEqual([99])
       expect(result.nodeIndex).toBe(0)
     })
-  })
-})
-
-describe('findSegmentSidByClick — backward compat wrapper', () => {
-  beforeEach(() => {
-    document.body.innerHTML = ''
-  })
-
-  it('returns {sid, occurrenceIndex} wrapping the first SID and nodeIndex', () => {
-    const segments = [
-      {sid: 1, source: 'Hello world', target: ''},
-      {sid: 2, source: 'Hello world', target: ''},
-    ]
-    document.body.innerHTML = '<p>Hello world</p>'
-    tagSegments(document.body, segments)
-    buildSegmentNodeMap(document.body)
-
-    const p = document.body.querySelector('p')
-    const result = findSegmentSidByClick(p, document.body, segments, 'source')
-    expect(result).not.toBeNull()
-    expect(result.sid).toBe(1)
-    expect(result.occurrenceIndex).toBe(0)
-  })
-
-  it('returns null when findSegmentSidsByClick returns null', () => {
-    document.body.innerHTML = '<p>Unrelated</p>'
-    const p = document.body.querySelector('p')
-    const result = findSegmentSidByClick(
-      p,
-      document.body,
-      [{sid: 1, source: 'Something else', target: ''}],
-      'source',
-    )
-    expect(result).toBeNull()
   })
 })
 
