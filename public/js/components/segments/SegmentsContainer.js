@@ -488,11 +488,22 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       setScrollToSid(sid)
       setScrollToSelected(false)
       const segment = SegmentStore.getSegmentById(sid)
+      const rawMetadata = segment.get('metadata')
+      const metadataArr = rawMetadata
+        ? typeof rawMetadata.toJS === 'function'
+          ? rawMetadata.toJS()
+          : rawMetadata
+        : []
+      const findMeta = (key) =>
+        metadataArr.find((m) => m.meta_key === key)?.meta_value ?? null
       ContextReviewChannel.sendMessage({
         type: 'highlight',
         sid,
         source: segment.get('segment'),
         target: segment.get('translation'),
+        context_url: segment.get('context_url') ?? null,
+        resname: findMeta('resname'),
+        restype: findMeta('restype'),
       })
     }
     const scrollToSelectedSegment = (sid) => {
