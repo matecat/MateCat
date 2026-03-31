@@ -495,8 +495,12 @@ class Lara extends AbstractEngine
 
         try {
             // Lara expects the translation in layer 0
-            if(isset($_config['filter']) && $_config['filter'] instanceof MateCatFilter){
-                $_config['translation'] = $_config['filter']->fromLayer0ToLayer1($_config['translation']);
+            if(isset($_config['filter'])){
+                $_config['filter'] = unserialize($_config['filter']);
+
+                if($_config['filter'] instanceof MateCatFilter){
+                    $_config['translation'] = $_config['filter']->fromLayer1ToLayer0($_config['translation']);
+                }
             }
 
             $time_start = microtime(true);

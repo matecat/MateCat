@@ -25,7 +25,7 @@ use Utils\TaskRunner\Commons\Params;
 class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStruct, Stringable
 {
 
-    public ?MateCatFilter $filter = null;
+    public ?string $filter = null;
 
     protected array $cached_results = [];
 
