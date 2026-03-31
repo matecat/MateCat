@@ -1,6 +1,11 @@
 @use '../../commons/colors';
 
 .job-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.job-container-grid {
   display: grid;
   grid-template-columns:
     20px 180px minmax(auto, 240px)
@@ -51,7 +56,7 @@
   padding: 16px 0px 16px 24px;
 }
 
-.job-container,
+.job-container-grid,
 .chunks-job-container {
   .job-languages-code {
     display: flex;
@@ -126,4 +131,8 @@
   span {
     color: colors.$grey400;
   }
+}
+
+.job-container-outsource-container {
+  display: flex;
 }

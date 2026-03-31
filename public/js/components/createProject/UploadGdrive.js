@@ -9,6 +9,7 @@ import {CreateProjectContext} from './CreateProjectContext'
 import DriveIcon from '../../../img/icons/DriveIcon'
 import {useGDrivePicker} from './hooks/useGDrivePicker'
 import {useGDriveFiles} from './hooks/useGDriveFiles'
+import {SpinnerLoader} from '../common/SpinnerLoader'
 
 export const UploadGdrive = () => {
   const {
@@ -96,9 +97,7 @@ export const UploadGdrive = () => {
 function LoadingOverlay() {
   return (
     <div className="modal-gdrive">
-      <div className="ui active inverted dimmer">
-        <div className="ui massive text loader">Uploading Files</div>
-      </div>
+      <SpinnerLoader label="Uploading Files" />
     </div>
   )
 }

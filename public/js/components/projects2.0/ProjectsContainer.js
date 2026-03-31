@@ -7,47 +7,34 @@ import {ProjectsBulkActions} from '../projects/ProjectsBulkActions'
 import {ProjectContainer} from './ProjectContainer'
 import UserConstants from '../../constants/UserConstants'
 import UserStore from '../../stores/UserStore'
+import {DASHBOARD_REQUEST_PROJECTS_STATUS} from '../../constants/Constants'
 
 export const ProjectsContainer = ({
   team,
   teams,
   downloadTranslationFn,
   selectedUser,
-  fetchingProjects,
+  requestProjectsStatus,
 }) => {
   const [projects, setProjects] = useState(fromJS([]))
   const [teamState, setTeamState] = useState(team)
   const [teamsState, setTeamsState] = useState(teams)
-  const [moreProjects, setMoreProjects] = useState(false)
-  const [reloadingProjects, setReloadingProjects] = useState(false)
 
   useEffect(() => {
-    const renderProjects = (projects, team, teams, hideSpinner, filtering) => {
-      // let filteringState = filtering ? filtering : this.state.filtering
-
+    const renderProjects = (projects, team, teams) => {
       setProjects(projects)
       setTeamState((prevState) => (team ? team : prevState))
       setTeamsState((prevState) => (teams ? teams : prevState))
-      setMoreProjects((prevState) => (hideSpinner ? prevState : true))
-      setReloadingProjects(false)
     }
     const updateProjects = (projects) => setProjects(projects)
     const updateTeams = (teams) => setTeamsState(teams)
-    const updateTeam = (team) => {
-      if (team.get('id') === teamState.get('id')) {
-        setTeamState(team)
-      }
-    }
-    const hideSpinner = () => setMoreProjects(false)
-    const showProjectsReloadSpinner = () => setReloadingProjects(true)
+    const updateTeam = (team) =>
+      setTeamState((prevState) =>
+        team.get('id') === prevState.get('id') ? team : prevState,
+      )
 
     ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, renderProjects)
     ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, updateProjects)
-    ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, hideSpinner)
-    ProjectsStore.addListener(
-      ManageConstants.SHOW_RELOAD_SPINNER,
-      showProjectsReloadSpinner,
-    )
     UserStore.addListener(UserConstants.UPDATE_TEAM, updateTeam)
     UserStore.addListener(UserConstants.UPDATE_TEAMS, updateTeams)
     UserStore.addListener(UserConstants.RENDER_TEAMS, updateTeams)
@@ -61,14 +48,6 @@ export const ProjectsContainer = ({
         ManageConstants.UPDATE_PROJECTS,
         updateProjects,
       )
-      ProjectsStore.removeListener(
-        ManageConstants.NO_MORE_PROJECTS,
-        hideSpinner,
-      )
-      ProjectsStore.removeListener(
-        ManageConstants.SHOW_RELOAD_SPINNER,
-        showProjectsReloadSpinner,
-      )
       UserStore.removeListener(UserConstants.UPDATE_TEAM, updateTeam)
       UserStore.removeListener(UserConstants.UPDATE_TEAMS, updateTeams)
       UserStore.removeListener(UserConstants.RENDER_TEAMS, updateTeams)
@@ -76,7 +55,31 @@ export const ProjectsContainer = ({
   }, [])
 
   return (
-    <div className="layout__container">
+    <div
+      className={`layout__container projects-container ${requestProjectsStatus === DASHBOARD_REQUEST_PROJECTS_STATUS.RELOAD_IN_PROGRESS ? 'projects-container--loading' : ''}`}
+    >
+      <div className="projects-container-title">
+        <h4>Projects</h4>
+        <div>
+          <span>Legend:</span>
+          <span>
+            <span className="projects-container-legend-unconfirmed-quad" />
+            Unconfirmed
+          </span>
+          <span>
+            <span className="projects-container-legend-translated-quad" />
+            Translated
+          </span>
+          <span>
+            <span className="projects-container-legend-approved-quad" />
+            Revise
+          </span>
+          <span>
+            <span className="projects-container-legend-approved2-quad" />
+            Revise 2
+          </span>
+        </div>
+      </div>
       <ProjectsBulkActions
         projects={projects.toJS()}
         teams={teamsState.toJS()}
@@ -104,5 +107,7 @@ ProjectsContainer.propTypes = {
   teams: PropTypes.object,
   downloadTranslationFn: PropTypes.func,
   selectedUser: PropTypes.string,
-  fetchingProjects: PropTypes.bool,
+  requestProjectsStatus: PropTypes.oneOf(
+    Object.values(DASHBOARD_REQUEST_PROJECTS_STATUS),
+  ),
 }

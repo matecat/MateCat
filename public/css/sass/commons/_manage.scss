@@ -956,6 +956,53 @@ ul {
   opacity: 0;
 }
 
+.projects-container {
+  .projects-container-title {
+    display: flex;
+    justify-content: space-between;
+    margin: 40px 0 16px;
+
+    > :last-child {
+      display: flex;
+      gap: 16px;
+      color: colors.$grey700;
+
+      > span {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+    }
+
+    .projects-container-legend-unconfirmed-quad,
+    .projects-container-legend-translated-quad,
+    .projects-container-legend-approved-quad,
+    .projects-container-legend-approved2-quad {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+    }
+
+    .projects-container-legend-unconfirmed-quad {
+      background-color: colors.$black100;
+      border: 1px solid colors.$grey200;
+    }
+    .projects-container-legend-translated-quad {
+      background-color: colors.$blue500;
+    }
+    .projects-container-legend-approved-quad {
+      background-color: colors.$green800;
+    }
+    .projects-container-legend-approved2-quad {
+      background-color: colors.$purple500;
+    }
+  }
+
+  &.projects-container--loading {
+    opacity: 0.5;
+  }
+}
+
 .projects-list {
   display: flex;
   flex-direction: column;

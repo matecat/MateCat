@@ -19,6 +19,7 @@ import AlertIcon from '../../../img/icons/AlertIcon'
 import CommentsIcon from '../../../img/icons/CommentsIcon'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
+import OutsourceContainer from '../outsource/OutsourceContainer'
 
 export const JobContainer = ({
   job,
@@ -31,6 +32,7 @@ export const JobContainer = ({
   index,
 }) => {
   const [showDownloadProgress, setShowDownloadProgress] = useState(false)
+  const [showingOutsource, setShowingOutsource] = useState()
 
   const qrIconRef = useRef()
   const warningsIconRef = useRef()
@@ -389,27 +391,26 @@ export const JobContainer = ({
   }
 
   const openOutsourceModal = (showTranslatorBox, extendedView) => {
-    //   if (showTranslatorBox && !job.get('outsource_available')) {
-    //     setState({
-    //       showTranslatorBox: showTranslatorBox,
-    //       extendedView: false,
-    //     })
-    //   } else if (job.get('outsource_available')) {
-    //     if (!state.openOutsource) {
-    //       const data = {
-    //         event: 'outsource_request',
-    //       }
-    //       CommonUtils.dispatchAnalyticsEvents(data)
-    //     }
-    //     setState({
-    //       openOutsource: true,
-    //       showTranslatorBox: showTranslatorBox,
-    //       extendedView: extendedView,
-    //     })
-    //   } else {
-    //     window.open('https://translated.com/contact-us', '_blank')
-    //   }
+    if (
+      (showTranslatorBox && !job.get('outsource_available')) ||
+      job.get('outsource_available')
+    ) {
+      if (
+        job.get('outsource_available') &&
+        typeof showingOutsource !== 'undefined'
+      ) {
+        const data = {
+          event: 'outsource_request',
+        }
+        CommonUtils.dispatchAnalyticsEvents(data)
+      }
+      setShowingOutsource({showTranslatorBox, extendedView})
+    } else {
+      window.open('https://translated.com/contact-us', '_blank')
+    }
   }
+
+  const closeOutsourceModal = () => setShowingOutsource()
 
   const getQRIcon = () => {
     const quality = job.get('quality_summary').get('quality_overall')
@@ -532,66 +533,90 @@ export const JobContainer = ({
   const stats = job.get('stats').toJS()
 
   return (
-    <div className={`job-container ${isChunk ? 'chunk-job-container' : ''}`}>
-      {!isChunk && (
-        <Checkbox
-          onChange={() => onCheckedJob(job.get('id'))}
-          value={isChecked ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
-        />
-      )}
+    <div className="job-container">
+      <div
+        className={`job-container-grid ${isChunk ? 'chunk-job-container' : ''}`}
+      >
+        {!isChunk && (
+          <Checkbox
+            onChange={() => onCheckedJob(job.get('id'))}
+            value={
+              isChecked ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED
+            }
+          />
+        )}
 
-      <div>
-        <div className="job-container-id">
-          {!isChunk && (
-            <Tooltip
-              content={`${job.get('sourceTxt')} - ${job.get('targetTxt')}`}
-            >
-              <span ref={sourceTargetTextRef} className="job-languages-code">
-                {job.get('source')}
-                <IconDown size={16} />
-                {job.get('target')}
-              </span>
-            </Tooltip>
-          )}
-          ID: {idJobLabel}
+        <div>
+          <div className="job-container-id">
+            {!isChunk && (
+              <Tooltip
+                content={`${job.get('sourceTxt')} - ${job.get('targetTxt')}`}
+              >
+                <span ref={sourceTargetTextRef} className="job-languages-code">
+                  {job.get('source')}
+                  <IconDown size={16} />
+                  {job.get('target')}
+                </span>
+              </Tooltip>
+            )}
+            ID: {idJobLabel}
+          </div>
         </div>
+        <div>
+          <JobProgressBar stats={stats} />
+        </div>
+        <div>
+          <Button
+            tooltip={`Total: ${Math.round(stats.equivalent.total)} / Weighted: ${Math.round(stats.equivalent.total)}`}
+            className="job-container-button-weight-normal job-container-words-button"
+            onClick={() => window.open(getProjectAnalyzeUrl(), '_blank')}
+          >
+            Words: {Math.round(stats.raw.total)}{' '}
+            <span>({Math.round(stats.equivalent.total)})</span>
+          </Button>
+        </div>
+        <div>{getWarningsGroup()}</div>
+        <div className="job-container-outsource">{getOutsourceJobSent()}</div>
+        <div>
+          <Button
+            className="job-container-button-weight-normal"
+            id="open-quote-request"
+            onClick={openOutsourceModal.bind(this, false, true)}
+            data-testid="buy-translation-button"
+            disabled={
+              !job.get('outsource_available') &&
+              job.get('outsource_info')?.toJS()?.custom_payable_rate
+            }
+          >
+            <TranslatedIconSmall size={20} />
+            Buy Translation from
+          </Button>
+        </div>
+        <div>
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
+            onClick={() => window.open(getTranslateUrl(), '_blank')}
+          >
+            Open
+          </Button>
+        </div>
+        <div>{getJobMenu()}</div>
       </div>
-      <div>
-        <JobProgressBar stats={stats} />
-      </div>
-      <div>
-        <Button
-          tooltip={`Total: ${Math.round(stats.equivalent.total)} / Weighted: ${Math.round(stats.equivalent.total)}`}
-          className="job-container-button-weight-normal job-container-words-button"
-          onClick={() => window.open(getProjectAnalyzeUrl(), '_blank')}
-        >
-          Words: {Math.round(stats.raw.total)}{' '}
-          <span>({Math.round(stats.equivalent.total)})</span>
-        </Button>
-      </div>
-      <div>{getWarningsGroup()}</div>
-      <div className="job-container-outsource">{getOutsourceJobSent()}</div>
-      <div>
-        <Button
-          className="job-container-button-weight-normal"
-          id="open-quote-request"
-          onClick={openOutsourceModal.bind(this, false, true)}
-          data-testid="buy-translation-button"
-        >
-          <TranslatedIconSmall size={20} />
-          Buy Translation from
-        </Button>
-      </div>
-      <div>
-        <Button
-          type={BUTTON_TYPE.PRIMARY}
-          size={BUTTON_SIZE.SMALL}
-          onClick={() => window.open(getTranslateUrl(), '_blank')}
-        >
-          Open
-        </Button>
-      </div>
-      <div>{getJobMenu()}</div>
+      {typeof showingOutsource !== 'undefined' && (
+        <div className="job-container-outsource-container">
+          <OutsourceContainer
+            project={project}
+            job={job}
+            standardWC={Math.round(parseFloat(stats.equivalent.total))}
+            showTranslatorBox={showingOutsource.showTranslatorBox}
+            extendedView={showingOutsource.extendedView}
+            onClickOutside={closeOutsourceModal}
+            openOutsource={showingOutsource}
+            idJobLabel={job.id}
+          />
+        </div>
+      )}
     </div>
   )
 }
