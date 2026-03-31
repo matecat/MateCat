@@ -5,6 +5,7 @@ import {
   getSegmentNodeMap,
   findSegmentSidsByClick,
   updateNodeTranslation,
+  extractSegmentContextFields,
 } from './contextReviewUtils'
 
 describe('getSidsFromElement', () => {
@@ -652,5 +653,50 @@ describe('string SID type coercion', () => {
     expect(result).not.toBeNull()
     expect(result.sids).toEqual([10])
     expect(typeof result.sids[0]).toBe('number')
+  })
+})
+
+describe('extractSegmentContextFields', () => {
+  it('extracts context_url, resname, restype from a plain JS segment', () => {
+    const seg = {
+      context_url: 'https://example.com/page.html',
+      metadata: [
+        {meta_key: 'resname', meta_value: 'hero-title'},
+        {meta_key: 'restype', meta_value: 'x-tag-id'},
+      ],
+    }
+    expect(extractSegmentContextFields(seg)).toEqual({
+      context_url: 'https://example.com/page.html',
+      resname: 'hero-title',
+      restype: 'x-tag-id',
+    })
+  })
+
+  it('returns nulls when metadata array is missing', () => {
+    const seg = {context_url: null}
+    expect(extractSegmentContextFields(seg)).toEqual({
+      context_url: null,
+      resname: null,
+      restype: null,
+    })
+  })
+
+  it('returns nulls when metadata array is empty', () => {
+    const seg = {metadata: [], context_url: null}
+    expect(extractSegmentContextFields(seg)).toEqual({
+      context_url: null,
+      resname: null,
+      restype: null,
+    })
+  })
+
+  it('returns null for a missing meta_key', () => {
+    const seg = {
+      context_url: null,
+      metadata: [{meta_key: 'resname', meta_value: 'my-id'}],
+    }
+    const result = extractSegmentContextFields(seg)
+    expect(result.resname).toBe('my-id')
+    expect(result.restype).toBeNull()
   })
 })
