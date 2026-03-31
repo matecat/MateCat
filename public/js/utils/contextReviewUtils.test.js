@@ -700,3 +700,77 @@ describe('extractSegmentContextFields', () => {
     expect(result.restype).toBeNull()
   })
 })
+
+describe('tagSegments — strategy pass (metadataMap)', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('tags an element by id when metadataMap has x-tag-id for that segment', () => {
+    document.body.innerHTML = '<p id="hero">Some text</p><p>Other text</p>'
+    const heroEl = document.body.querySelector('#hero')
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Some text', target: ''},
+        {sid: 2, source: 'Other text', target: ''},
+      ],
+      {metadataMap: {1: {resname: 'hero', restype: 'x-tag-id'}}},
+    )
+    // Strategy resolved SID 1 to #hero
+    expect(getSidsFromElement(heroEl)).toContain(1)
+  })
+
+  it('tags by id even when element text does not match segment source', () => {
+    // Text-match alone would never tag #hero because "Different content" !== "segment source"
+    document.body.innerHTML = '<p id="hero">Different content</p>'
+    const heroEl = document.body.querySelector('#hero')
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'segment source', target: ''}],
+      {metadataMap: {1: {resname: 'hero', restype: 'x-tag-id'}}},
+    )
+    expect(getSidsFromElement(heroEl)).toContain(1)
+  })
+
+  it('strategy-resolved node is not re-assigned by text-match to a different SID exclusively', () => {
+    // SID 1 is strategy-resolved to #hero.
+    // SID 2 has matching text but no strategy — it goes through text-match.
+    document.body.innerHTML = '<p id="hero">Same text</p><p>Same text</p>'
+    const heroEl = document.body.querySelector('#hero')
+    const otherEl = document.body.querySelectorAll('p')[1]
+    tagSegments(
+      document.body,
+      [
+        {sid: 1, source: 'Same text', target: ''},
+        {sid: 2, source: 'Same text', target: ''},
+      ],
+      {metadataMap: {1: {resname: 'hero', restype: 'x-tag-id'}}},
+    )
+    // Both nodes should have SID 1 (strategy + N:N); otherEl should also have SID 2
+    expect(getSidsFromElement(heroEl)).toContain(1)
+    expect(getSidsFromElement(otherEl)).toContain(2)
+  })
+
+  it('falls through to text-match when strategy lookup returns null (fallback queue)', () => {
+    document.body.innerHTML = '<p>Fallback text</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(
+      document.body,
+      [{sid: 1, source: 'Fallback text', target: ''}],
+      {metadataMap: {1: {resname: 'nonexistent-id', restype: 'x-tag-id'}}},
+    )
+    // Strategy missed; text-match should have tagged it
+    expect(getSidsFromElement(p)).toContain(1)
+  })
+
+  it('ignores metadataMap entries where resname or restype is missing', () => {
+    document.body.innerHTML = '<p id="hero">Hello</p>'
+    tagSegments(document.body, [{sid: 1, source: 'Hello', target: ''}], {
+      metadataMap: {1: {resname: null, restype: 'x-tag-id'}},
+    })
+    // Should fall through to text-match, still tag the node
+    const heroEl = document.body.querySelector('#hero')
+    expect(getSidsFromElement(heroEl)).toContain(1)
+  })
+})

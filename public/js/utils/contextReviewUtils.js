@@ -2,6 +2,7 @@ import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {findElementByMetadata} from './contextReviewLookup'
 
 const containerMaps = new WeakMap()
 
@@ -439,7 +440,7 @@ export const getSegmentNodeMap = (container) =>
 export const tagSegments = (
   container,
   segments,
-  {replaceWithTarget = false} = {},
+  {replaceWithTarget = false, metadataMap = {}} = {},
 ) => {
   if (!container || !segments || !segments.length) return
 
@@ -475,8 +476,6 @@ export const tagSegments = (
     }
   }
 
-  const candidates = container.querySelectorAll(BLOCK_SELECTOR)
-
   // Cache parsed SIDs per element to avoid repeated getAttribute + split
   // calls inside the inner loops.
   const elSidsCache = new Map()
@@ -492,6 +491,34 @@ export const tagSegments = (
     el.setAttribute(SEGMENT_SIDS_ATTR, updated.join(','))
     elSidsCache.set(el, updated)
   }
+
+  // Strategy pass — runs first, highest priority.
+  // Segments with resname + restype are resolved via DOM-attribute lookups
+  // before any text-match runs. Misses join fallbackQueue and compete in
+  // text-match exactly as segments with no metadata.
+  const strategyResolved = new Set()
+  const fallbackQueue = new Set()
+
+  for (const [sidStr, {resname, restype}] of Object.entries(metadataMap)) {
+    const sid = Number(sidStr)
+    if (!resname || !restype) continue
+    if (alreadyTagged.has(sid)) {
+      strategyResolved.add(sid)
+      continue
+    }
+    const el = findElementByMetadata(container, resname, restype)
+    if (el) {
+      appendSid(el, sid)
+      strategyResolved.add(sid)
+      // Mark the corresponding prepared entry as used so Pass 1 skips it
+      const idx = prepared.findIndex((p) => p.sid === sid)
+      if (idx !== -1) used.add(idx)
+    } else {
+      fallbackQueue.add(sid)
+    }
+  }
+
+  const candidates = container.querySelectorAll(BLOCK_SELECTOR)
 
   // Pass 1 — positional: each untagged element consumes the first unused
   // segment whose normalised source is an exact match.  This preserves
@@ -513,6 +540,7 @@ export const tagSegments = (
 
     for (let i = 0; i < prepared.length; i++) {
       if (used.has(i)) continue
+      if (strategyResolved.has(prepared[i].sid)) continue
       if (getCachedSids(el).includes(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
         appendSid(el, prepared[i].sid)
