@@ -7,7 +7,6 @@ const containerMaps = new WeakMap()
 
 const HIGHLIGHT_CLASS = 'context-review-highlight'
 const HIGHLIGHT_ACTIVE_CLASS = 'context-review-highlight--active'
-const SEGMENT_SID_ATTR = 'data-context-sid'
 const SEGMENT_SIDS_ATTR = 'data-context-sids'
 
 /**
@@ -95,7 +94,7 @@ export const updateNodeTranslation = (el, segments) => {
   if (!sids.length) return 'no-target'
 
   const sidSet = new Set(sids)
-  const relevant = segments.filter((s) => sidSet.has(s.sid))
+  const relevant = segments.filter((s) => sidSet.has(Number(s.sid)))
   if (!relevant.length || relevant.length < sids.length) return 'no-target'
 
   const targets = relevant
@@ -149,10 +148,11 @@ export const buildFlexibleRegex = (searchText) => {
 }
 
 /**
- * Highlights all elements in a container that have a matching
- * `data-context-sid` attribute. Wraps their text content in <mark> elements.
+ * Highlights all elements in a container whose `data-context-sids`
+ * attribute includes the given SID. Wraps their text content in
+ * <mark> elements.
  *
- * Each matched `[data-context-sid]` element is one "occurrence".
+ * Each matched element is one "occurrence".
  * The `activeIndex` parameter controls which occurrence gets the
  * `--active` class (defaults to 0 — the first one).
  *
@@ -169,7 +169,11 @@ export const highlightBySid = (container, sid, activeIndex = 0) => {
   const result = {total: 0, marks: []}
   if (!container || sid == null) return result
 
-  const elements = container.querySelectorAll(`[${SEGMENT_SID_ATTR}="${sid}"]`)
+  const numSid = Number(sid)
+  const all = container.querySelectorAll(`[${SEGMENT_SIDS_ATTR}]`)
+  const elements = Array.from(all).filter((el) =>
+    getSidsFromElement(el).includes(numSid),
+  )
   if (!elements.length) return result
 
   elements.forEach((el, elIndex) => {
@@ -218,12 +222,12 @@ export const setActiveHighlight = (container, activeIndex) => {
   const allMarks = container.querySelectorAll(`mark.${HIGHLIGHT_CLASS}`)
   allMarks.forEach((m) => m.classList.remove(HIGHLIGHT_ACTIVE_CLASS))
 
-  // Group marks by their closest [data-context-sid] ancestor to determine
+  // Group marks by their closest [data-context-sids] ancestor to determine
   // which occurrence each mark belongs to.
   const occurrences = []
   const seen = new Set()
   allMarks.forEach((m) => {
-    const ancestor = m.closest(`[${SEGMENT_SID_ATTR}]`)
+    const ancestor = m.closest(`[${SEGMENT_SIDS_ATTR}]`)
     if (!ancestor) return
     if (!seen.has(ancestor)) {
       seen.add(ancestor)
@@ -328,12 +332,13 @@ export const findSegmentSidsByClick = (
   for (const seg of segments) {
     const segText = seg[field]
     if (!segText) continue
-    if (seenSids.has(seg.sid)) continue
+    const numSid = Number(seg.sid)
+    if (seenSids.has(numSid)) continue
     const regex = buildFlexibleRegex(segText)
     regex.lastIndex = 0
     if (regex.test(clickedText)) {
-      matchingSids.push(seg.sid)
-      seenSids.add(seg.sid)
+      matchingSids.push(numSid)
+      seenSids.add(numSid)
     }
   }
 
@@ -466,9 +471,12 @@ export const tagSegments = (
 
   // Pre-compute normalised source for each segment, sorted by SID so
   // their order matches the document order of the HTML elements.
+  // Coerce `sid` to Number so comparisons against getSidsFromElement()
+  // (which returns number[]) use strict equality consistently.
   const prepared = segments
     .map((seg) => ({
       ...seg,
+      sid: Number(seg.sid),
       normSource: stripSegmentTags(seg.source),
     }))
     .filter((seg) => seg.normSource)
@@ -506,9 +514,8 @@ export const tagSegments = (
     const existing = getCachedSids(el)
     // Defense-in-depth: never append a SID that is already on the element.
     if (existing.includes(sid)) return
-    const updated = [...existing, sid]
+    const updated = [...existing, sid].sort((a, b) => a - b)
     el.setAttribute(SEGMENT_SIDS_ATTR, updated.join(','))
-    el.setAttribute(SEGMENT_SID_ATTR, String(updated[0]))
     elSidsCache.set(el, updated)
   }
 
@@ -541,25 +548,23 @@ export const tagSegments = (
     }
   }
 
-  // Pass 2 — N:N append: remaining unused segments are checked against
-  // already-tagged elements.  If the segment's normalised source matches
-  // the element's text and that SID is not yet on the element, append it.
+  // Pass 2 — N:N broadcast: every segment is checked against every
+  // candidate element regardless of the `used` set.  If the segment's
+  // normalised source matches the element's text and that SID is not yet
+  // on the element, append it.  This ensures that one segment can map to
+  // many nodes AND one node can accumulate many segments.
   // Text replacement (when replaceWithTarget is true) happens after both
   // passes, via updateNodeTranslation.
   for (const el of candidates) {
-    if (!el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
-
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
 
     const elTextLower = elText.toLowerCase()
 
     for (let i = 0; i < prepared.length; i++) {
-      if (used.has(i)) continue
       if (getCachedSids(el).includes(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
         appendSid(el, prepared[i].sid)
-        used.add(i)
       }
     }
   }

@@ -145,7 +145,7 @@ const ContextReview = () => {
    *
    * null — no highlight
    */
-  const [highlight, setHighlight] = useState(null)
+  const [highlight, setHighlightState] = useState(null)
   // Bumped after innerHTML injection so the tagging effect knows the DOM is ready
   const [htmlReady, setHtmlReady] = useState(0)
 
@@ -153,6 +153,20 @@ const ContextReview = () => {
   const targetRef = useRef(null)
   const segmentsRef = useRef([])
   const highlightRef = useRef(null)
+
+  // Synchronously update highlightRef alongside React state so that
+  // BroadcastChannel callbacks (which can fire before useEffect) always
+  // see the latest value.
+  const setHighlight = useCallback((valueOrUpdater) => {
+    setHighlightState((prev) => {
+      const next =
+        typeof valueOrUpdater === 'function'
+          ? valueOrUpdater(prev)
+          : valueOrUpdater
+      highlightRef.current = next
+      return next
+    })
+  }, [])
 
   const showNodeWarning = (el) =>
     el.classList.add('context-review-node--mismatch')
@@ -163,11 +177,6 @@ const ContextReview = () => {
   useEffect(() => {
     segmentsRef.current = segments
   }, [segments])
-
-  // Keep highlightRef in sync so callbacks always see the latest value
-  useEffect(() => {
-    highlightRef.current = highlight
-  }, [highlight])
 
   /**
    * Applies highlights on both panels for the given SID.
@@ -404,8 +413,8 @@ const ContextReview = () => {
 
         // Check if this element has tagged content (attribute on self or descendants)
         if (
-          !el.hasAttribute('data-context-sid') &&
-          !el.querySelector('[data-context-sid]')
+          !el.hasAttribute('data-context-sids') &&
+          !el.querySelector('[data-context-sids]')
         ) {
           return true
         }

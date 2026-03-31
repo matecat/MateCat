@@ -37,7 +37,6 @@ describe('tagSegments — multi-SID attribute', () => {
     const p = document.body.querySelector('p')
     tagSegments(document.body, [{sid: 1, source: 'Hello world', target: ''}])
     expect(getSidsFromElement(p)).toEqual([1])
-    expect(p.getAttribute('data-context-sid')).toBe('1')
   })
 
   it('appends a second SID when two segments have the same normalised source matching the same element', () => {
@@ -50,7 +49,6 @@ describe('tagSegments — multi-SID attribute', () => {
     const sids = getSidsFromElement(p)
     expect(sids).toContain(1)
     expect(sids).toContain(2)
-    expect(p.getAttribute('data-context-sid')).toBe(String(sids[0]))
   })
 
   it('does not duplicate a SID when tagSegments is called twice', () => {
@@ -71,9 +69,10 @@ describe('tagSegments — multi-SID attribute', () => {
       {sid: 1, source: 'Hello world', target: ''},
       {sid: 2, source: 'Goodbye world', target: ''},
     ])
+    // N:N: SID 1 maps to ALL "Hello world" nodes (ps[0] and ps[2])
     expect(getSidsFromElement(ps[0])).toEqual([1])
     expect(getSidsFromElement(ps[1])).toEqual([2])
-    expect(getSidsFromElement(ps[2])).toEqual([])
+    expect(getSidsFromElement(ps[2])).toEqual([1])
 
     // Second call — superset with new segment added
     tagSegments(document.body, [
@@ -81,10 +80,10 @@ describe('tagSegments — multi-SID attribute', () => {
       {sid: 2, source: 'Goodbye world', target: ''},
       {sid: 3, source: 'Hello world', target: ''},
     ])
-    expect(getSidsFromElement(ps[0])).toEqual([1])
+    // SID 3 is new and also matches both "Hello world" nodes
+    expect(getSidsFromElement(ps[0])).toEqual([1, 3])
     expect(getSidsFromElement(ps[1])).toEqual([2])
-    // SID 3 has same source as SID 1 — positional pairing assigns it to ps[2]
-    expect(getSidsFromElement(ps[2])).toEqual([3])
+    expect(getSidsFromElement(ps[2])).toEqual([1, 3])
   })
 
   it('does not duplicate SIDs when N:N segments arrive incrementally', () => {
@@ -149,19 +148,32 @@ describe('tagSegments — multi-SID attribute', () => {
       {sid: 1, source: 'Equipment', target: ''},
       {sid: 2, source: 'Equipment', target: ''},
     ])
-    expect(getSidsFromElement(ps[0])).toEqual([1])
-    expect(getSidsFromElement(ps[1])).toEqual([2])
+    // Both segments match both nodes — N:N gives every node every matching SID.
+    // SIDs are always sorted numerically regardless of positional pairing order.
+    expect(getSidsFromElement(ps[0])).toEqual([1, 2])
+    expect(getSidsFromElement(ps[1])).toEqual([1, 2])
   })
 
-  it('tags the outer block when nested blocks have the same text (document order)', () => {
+  it('maps a single segment to multiple non-nested nodes with the same text', () => {
+    document.body.innerHTML =
+      '<h1>Equipment</h1><p>Equipment</p><p>Equipment</p>'
+    const h1 = document.body.querySelector('h1')
+    const ps = document.body.querySelectorAll('p')
+    tagSegments(document.body, [{sid: 1, source: 'Equipment', target: ''}])
+    // The single segment should appear on ALL nodes whose text matches
+    expect(getSidsFromElement(h1)).toEqual([1])
+    expect(getSidsFromElement(ps[0])).toEqual([1])
+    expect(getSidsFromElement(ps[1])).toEqual([1])
+  })
+
+  it('tags both outer and inner block when nested blocks have the same text (N:N)', () => {
     document.body.innerHTML = '<div><p>Equipment</p></div>'
     const div = document.body.querySelector('div')
     const p = document.body.querySelector('p')
     tagSegments(document.body, [{sid: 1, source: 'Equipment', target: ''}])
-    // In document order, <div> is encountered first and matches —
-    // the <p> cannot match because the segment is already consumed.
+    // N:N: the segment maps to every matching node, including nested ones
     expect(getSidsFromElement(div)).toEqual([1])
-    expect(getSidsFromElement(p)).toEqual([])
+    expect(getSidsFromElement(p)).toEqual([1])
   })
 
   it('replaces text when replaceWithTarget is true (single segment)', () => {
@@ -237,18 +249,19 @@ describe('buildSegmentNodeMap', () => {
     expect(map.sidToNodeIndices.get(2)).toContain(0)
   })
 
-  it('positional pairing assigns each segment to a distinct node', () => {
+  it('positional pairing assigns each segment to both nodes when source matches', () => {
     document.body.innerHTML = '<p>Equipment</p><p>Equipment</p>'
     tagSegments(document.body, [
       {sid: 1, source: 'Equipment', target: ''},
       {sid: 2, source: 'Equipment', target: ''},
     ])
     const map = buildSegmentNodeMap(document.body)
-    expect(map.sidToNodeIndices.get(1)).toHaveLength(1)
-    expect(map.sidToNodeIndices.get(2)).toHaveLength(1)
-    expect(map.sidToNodeIndices.get(1)[0]).not.toBe(
-      map.sidToNodeIndices.get(2)[0],
-    )
+    // N:N: both SIDs map to both nodes
+    expect(map.sidToNodeIndices.get(1)).toEqual([0, 1])
+    expect(map.sidToNodeIndices.get(2)).toEqual([0, 1])
+    // SIDs are sorted numerically on every node
+    expect(map.nodeIndexToSids.get(0)).toEqual([1, 2])
+    expect(map.nodeIndexToSids.get(1)).toEqual([1, 2])
   })
 
   it('returns empty maps for a container with no tagged nodes', () => {
@@ -626,5 +639,53 @@ describe('tagSegments with replaceWithTarget', () => {
       {replaceWithTarget: true},
     )
     expect(p.textContent.trim()).toBe('Hello world')
+  })
+})
+
+describe('string SID type coercion', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('tagSegments handles string SIDs from BroadcastChannel without duplicates', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    // SIDs arrive as strings from BroadcastChannel / Flux store
+    tagSegments(document.body, [{sid: '1', source: 'Hello world', target: ''}])
+    tagSegments(document.body, [
+      {sid: '1', source: 'Hello world', target: ''},
+      {sid: '2', source: 'Hello world', target: ''},
+    ])
+    // Must not duplicate — coercion ensures '1' matches 1 in the DOM
+    expect(getSidsFromElement(p)).toEqual([1, 2])
+  })
+
+  it('updateNodeTranslation matches string SIDs against numeric DOM SIDs', () => {
+    document.body.innerHTML = '<p>Hello world</p>'
+    const p = document.body.querySelector('p')
+    tagSegments(document.body, [
+      {sid: 1, source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    // Segments with string SIDs (as they arrive from BroadcastChannel)
+    const result = updateNodeTranslation(p, [
+      {sid: '1', source: 'Hello world', target: 'Hallo Welt'},
+    ])
+    expect(result).toBe('ok')
+    expect(p.textContent.trim()).toBe('Hallo Welt')
+  })
+
+  it('findSegmentSidsByClick Strategy 2 returns number SIDs even when segments have string SIDs', () => {
+    document.body.innerHTML = '<p>Fuzzy match</p>'
+    const p = document.body.querySelector('p')
+    // No tagging — triggers Strategy 2 (fuzzy match)
+    const result = findSegmentSidsByClick(
+      p,
+      document.body,
+      [{sid: '10', source: 'Fuzzy match', target: ''}],
+      'source',
+    )
+    expect(result).not.toBeNull()
+    expect(result.sids).toEqual([10])
+    expect(typeof result.sids[0]).toBe('number')
   })
 })
