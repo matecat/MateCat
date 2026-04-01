@@ -332,6 +332,7 @@ export const SegmentFooterTabAiAlternatives = ({
                   <Button
                     className="ai-feature-button"
                     mode={BUTTON_MODE.OUTLINE}
+                    tooltip="Copy edited part"
                     onClick={() => ref.current.copyToClipboardHighlight()}
                   >
                     <Copy size={16} />
