@@ -270,6 +270,10 @@ const Dashboard = () => {
       setRequestProjectsStatus(DASHBOARD_REQUEST_PROJECTS_STATUS.COMPLETED)
     }
 
+    const debounceHideProjectsReloadSpinner = debounce(() => {
+      hideProjectsReloadSpinner()
+    }, 500)
+
     const openCreateTeamModal = () => {
       ModalsActions.openCreateTeamModal()
     }
@@ -378,7 +382,7 @@ const Dashboard = () => {
     )
     ProjectsStore.addListener(
       ManageConstants.RENDER_PROJECTS,
-      hideProjectsReloadSpinner,
+      debounceHideProjectsReloadSpinner,
     )
 
     return () => {
@@ -425,7 +429,7 @@ const Dashboard = () => {
       )
       ProjectsStore.removeListener(
         ManageConstants.RENDER_PROJECTS,
-        hideProjectsReloadSpinner,
+        debounceHideProjectsReloadSpinner,
       )
     }
   }, [isUserLogged])
