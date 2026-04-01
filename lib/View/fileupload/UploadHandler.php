@@ -170,7 +170,7 @@ class UploadHandler
         }
 
         if (is_int($this->options['max_number_of_files']) && (
-                count($this->get_file_objects()) >= $this->options['max_number_of_files'])
+                $this->getRealFilesCount() >= $this->options['max_number_of_files'])
         ) {
             $file->error = 'Too many files uploaded. Please remove this file to continue.';
 
@@ -203,6 +203,38 @@ class UploadHandler
         }
 
         return true;
+    }
+
+    /**
+     * Counts the number of real files excluding those with specific patterns in their names.
+     *
+     * @return int The number of real files that do not match the predefined exclusion pattern.
+     */
+    private function getRealFilesCount(): int
+    {
+        $files = $this->get_file_objects();
+
+        if (empty($files)) {
+            return 0;
+        }
+
+        $count = 0;
+
+        // remove sha1
+        foreach ($files as $file) {
+
+            // Exclude files with sha1 in the name.
+            // Ex. 70a1af62ebce284ccaa4ab0dc8a37afb5b4cd296_da39a3ee5e6b4b0d3255bfef95601890afd80709|en-US
+            $pattern = '/^([a-f0-9]{40}(?:_[a-f0-9]{40})?)\|([a-z]{2}(?:-[A-Z]{2})?)$/';
+
+            if (preg_match($pattern, $file->name, $matches)) {
+                continue;
+            }
+
+            $count++;
+        }
+
+        return $count;
     }
 
     protected function up_count_name_callback($matches): string
