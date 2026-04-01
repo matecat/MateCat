@@ -7,6 +7,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
+import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
 
 export const SegmentFooterTabAiFeedback = ({
   code,
@@ -21,20 +22,16 @@ export const SegmentFooterTabAiFeedback = ({
       setFeedback()
 
       const decodedSource = DraftMatecatUtils.transformTagsToText(
-        DraftMatecatUtils.excludeSomeTagsFromText(segment.segment, [
-          'g',
-          'bx',
-          'ex',
-          'x',
-        ]),
+        DraftMatecatUtils.excludeSomeTagsFromText(
+          decodeTagsToUnicodeChar(segment.segment),
+          ['g', 'bx', 'ex', 'x'],
+        ),
       ).replace(/·/g, ' ')
       const decodedTarget = DraftMatecatUtils.transformTagsToText(
-        DraftMatecatUtils.excludeSomeTagsFromText(segment.translation, [
-          'g',
-          'bx',
-          'ex',
-          'x',
-        ]),
+        DraftMatecatUtils.excludeSomeTagsFromText(
+          decodeTagsToUnicodeChar(segment.translation),
+          ['g', 'bx', 'ex', 'x'],
+        ),
       ).replace(/·/g, ' ')
 
       aiFeedback({
