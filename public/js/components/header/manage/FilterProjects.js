@@ -1,93 +1,73 @@
-import React from 'react'
-import {isUndefined} from 'lodash'
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from 'react'
 import FilterProjectsStatus from './FilterProjectsStatus'
 import SearchInput from './SearchInput'
 import ManageActions from '../../../actions/ManageActions'
 import ManageConstants from '../../../constants/ManageConstants'
-import MembersFilter from './MembersFilter'
 
-class FilterProjects extends React.Component {
-  constructor(props) {
-    super(props)
+const FilterProjects = forwardRef((props, ref) => {
+  const [currentStatus, setCurrentStatus] = useState('active')
+  const [currentUser, setCurrentUser] = useState(
+    ManageConstants.ALL_MEMBERS_FILTER,
+  )
+  const currentText = useRef()
 
-    this.state = {
-      currentStatus: 'active',
-      currentUser: ManageConstants.ALL_MEMBERS_FILTER,
-    }
-  }
+  const handleSetCurrentUser = useCallback(
+    (value) => {
+      setCurrentUser(value)
 
-  setCurrentUser = (value) => {
-    this.setState({currentUser: value})
+      ManageActions.filterProjects(
+        typeof value === 'object' ? value.user.uid : value,
+        currentText.current,
+        currentStatus,
+      )
+    },
+    [currentStatus],
+  )
 
-    ManageActions.filterProjects(
-      typeof value === 'object' ? value.user.uid : value,
-      this.currentText,
-      this.state.currentStatus,
-    )
-  }
+  const onChangeSearchInput = useCallback(
+    (value) => {
+      currentText.current = value
+      ManageActions.filterProjects(
+        typeof currentUser === 'object' ? currentUser.user.uid : currentUser,
+        value,
+        currentStatus,
+      )
+    },
+    [currentStatus, currentUser],
+  )
 
-  onChangeSearchInput(value) {
-    this.currentText = value
-    const {currentStatus, currentUser} = this.state
+  const filterByStatus = useCallback(
+    (status) => {
+      setCurrentStatus(status)
 
-    ManageActions.filterProjects(
-      typeof currentUser === 'object' ? currentUser.user.uid : currentUser,
-      value,
-      currentStatus,
-    )
-  }
+      ManageActions.filterProjects(
+        typeof currentUser === 'object' ? currentUser.user.uid : currentUser,
+        currentText.current,
+        status,
+      )
+    },
+    [currentUser],
+  )
 
-  filterByStatus(status) {
-    this.setState({currentStatus: status})
-    const {currentUser} = this.state
+  useImperativeHandle(ref, () => ({
+    currentUser,
+    handleSetCurrentUser,
+  }))
 
-    ManageActions.filterProjects(
-      typeof currentUser === 'object' ? currentUser.user.uid : currentUser,
-      this.currentText,
-      status,
-    )
-  }
+  return (
+    <div className="filter-projects-container">
+      <SearchInput onChange={onChangeSearchInput} />
+      <FilterProjectsStatus filterFunction={filterByStatus} />
+    </div>
+  )
+})
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      isUndefined(this.props.selectedTeam) ||
-      (!isUndefined(nextProps.selectedTeam) &&
-        !nextProps.selectedTeam.equals(this.props.selectedTeam)) ||
-      nextState.currentUser !== this.state.currentUser
-    )
-  }
-
-  render() {
-    const canRenderMemebersFilter =
-      this.props.selectedTeam &&
-      this.props.selectedTeam.get('type') === 'general' &&
-      this.props.selectedTeam.get('members') &&
-      this.props.selectedTeam.get('members').size > 1
-
-    return (
-      <section className="row sub-head">
-        <div className="ui grid">
-          <div className="twelve wide column">
-            <div className="ui right labeled fluid input search-state-filters">
-              <SearchInput onChange={this.onChangeSearchInput.bind(this)} />
-              <FilterProjectsStatus
-                filterFunction={this.filterByStatus.bind(this)}
-              />
-            </div>
-          </div>
-          <div className="four wide column pad-right-0">
-            {canRenderMemebersFilter && (
-              <MembersFilter
-                selectedTeam={this.props.selectedTeam}
-                currentUser={this.state.currentUser}
-                setCurrentUser={this.setCurrentUser}
-              />
-            )}
-          </div>
-        </div>
-      </section>
-    )
-  }
-}
+FilterProjects.displayName = 'FilterProjects'
 
 export default FilterProjects

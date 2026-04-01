@@ -69,11 +69,14 @@
 .project-container-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 10px 24px;
   color: colors.$grey700;
   font-size: 12px;
   font-style: italic;
+
+  > :last-child {
+    margin-left: auto;
+  }
 }
 
 .project-team-dropdown,

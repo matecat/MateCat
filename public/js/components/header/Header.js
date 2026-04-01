@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import QualityReportStore from '../../stores/QualityReportStore'
@@ -9,6 +9,7 @@ import {UserMenu} from './UserMenu'
 import {ComponentExtendInterface} from '../../utils/ComponentExtendInterface'
 import {fromJS} from 'immutable'
 import {TeamDropdown} from './TeamDropdown'
+import MembersFilter from './manage/MembersFilter'
 
 export class HeaderInterface extends ComponentExtendInterface {
   getMoreLinks() {}
@@ -27,6 +28,8 @@ const Header = ({
   const {userInfo} = useContext(ApplicationWrapperContext)
 
   const [jobUrls, setJobUrls] = useState()
+
+  const filterProjectsRef = useRef()
 
   useEffect(() => {
     const storeJobUrls = (jobInfo) => setJobUrls(jobInfo.get('urls'))
@@ -48,6 +51,12 @@ const Header = ({
   const {teams = []} = userInfo ?? {}
   const selectedTeam = teams.find(({isSelected}) => isSelected)
 
+  const canRenderMembersFilter =
+    selectedTeam &&
+    selectedTeam.type === 'general' &&
+    selectedTeam.members &&
+    selectedTeam.members.length > 1
+
   return (
     <section className="nav-bar ui grid">
       <nav className="sixteen wide column navigation">
@@ -57,7 +66,7 @@ const Header = ({
           </div>
           {showFilterProjects && (
             <div className="nine wide column">
-              <FilterProjects selectedTeam={fromJS(selectedTeam)} />
+              <FilterProjects ref={filterProjectsRef} />
             </div>
           )}
 
@@ -86,6 +95,14 @@ const Header = ({
               </div>
             ) : (
               ''
+            )}
+
+            {canRenderMembersFilter && (
+              <MembersFilter
+                selectedTeam={fromJS(selectedTeam)}
+                currentUser={filterProjectsRef.current.currentUser}
+                setCurrentUser={filterProjectsRef.current.handleSetCurrentUser}
+              />
             )}
 
             {!!showFilterProjects && (

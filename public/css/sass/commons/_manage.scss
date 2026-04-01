@@ -1008,3 +1008,29 @@ ul {
   flex-direction: column;
   gap: 16px;
 }
+
+.filter-projects-container {
+  display: flex;
+  width: 60%;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+
+  > :first-child {
+    flex-grow: 1;
+
+    > :first-child {
+      border-right: 1px solid colors.$grey150;
+    }
+
+    input {
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+
+      &:active,
+      &:focus {
+        box-shadow: inset 0 0 0 1px colors.$blue600;
+      }
+    }
+  }
+}
