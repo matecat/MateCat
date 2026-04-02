@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 class AlertModal extends React.Component {
   allowHTML(string) {
@@ -25,12 +26,12 @@ class AlertModal extends React.Component {
               )}
             </div>
             <div className="column right aligned">
-              <div
-                className="ui primary button right floated"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
                 onClick={() => this.closeModal()}
               >
                 {this.props.buttonText ? this.props.buttonText : 'Ok'}
-              </div>
+              </Button>
             </div>
           </div>
         </div>

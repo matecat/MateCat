@@ -101,7 +101,6 @@ export const AltLang = ({
             <Button
               type={BUTTON_TYPE.PRIMARY}
               mode={BUTTON_MODE.BASIC}
-              size={BUTTON_SIZE.MEDIUM}
               disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >

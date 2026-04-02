@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 .translation-memory-glossary-tab {
   display: flex;
@@ -32,8 +33,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-radius: 4px;
-  border: 1px dashed colors.$grey8;
+  border-radius: variables.$border-radius-default;
+  border: 1px dashed colors.$grey200;
   padding: 10px;
   margin-bottom: 20px;
   background: colors.$white;
@@ -61,7 +62,7 @@
 
 .translation-memory-glossary-tab-input-text {
   border-radius: 2px;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   padding: 6px;
   width: 350px;
 }
@@ -119,7 +120,7 @@
 
   .settings-panel-row-active {
     padding: 10px;
-    background-color: colors.$transparentBlue;
+    background-color: colors.$blue50;
   }
 
   .settings-panel-table-rowHeading-column {
@@ -170,10 +171,10 @@
 
 .tm-key-row-name {
   width: 100%;
-  padding: 4px;
+  padding: 4px 8px;
   background-color: unset;
-  border: 1px solid colors.$grey8;
-  border-radius: 3px;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
 
   &:focus,
   &:hover {
@@ -194,7 +195,7 @@
 }
 
 .tm-key-row-button-item {
-  color: colors.$grey6;
+  color: colors.$grey700;
 
   > :first-child {
     display: flex;
@@ -204,8 +205,27 @@
 }
 
 .tm-key-row-menu-button {
+  justify-content: unset;
+
   .menu-button-wrapper {
-    > :first-child {
+    button {
+      color: colors.$black !important;
+      background: colors.$grey100 !important;
+      text-align: center;
+      border: 1px solid colors.$grey300 !important;
+      height: 32px !important;
+      font-size: 14px !important;
+
+      &:hover {
+        background-color: colors.$grey50 !important;
+      }
+    }
+
+    > :last-child {
+      padding: 4px 8px;
+    }
+
+    /* > :first-child {
       min-width: 140px;
       border-radius: 2px;
       height: 28px;
@@ -214,35 +234,36 @@
     > :last-child {
       border: none;
       background-color: unset;
-      color: colors.$grey6;
-    }
+      color: colors.$grey700;
+    } */
   }
 
   .just-button-import-tmx {
     min-width: 140px;
     border-radius: 2px;
     font-size: 16px;
-    color: #000;
-    background: colors.$grey4;
+    color: colors.$black;
+    background: colors.$grey100;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid colors.$grey7;
+    border: 1px solid colors.$grey400;
 
     &:hover {
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
     }
   }
 }
 
-.tm-key-row-menu-button-dropdown {
-  margin-left: -10px;
+.tm-key-row-options-menu-container {
+  display: flex;
+  gap: 8px;
 }
 
 .tm-key-row-icons {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: colors.$grey;
+  color: colors.$grey600;
 }
 
 .translation-memory-glossary-tab-buttons-group {
@@ -255,10 +276,10 @@
   width: 100%;
   padding: 4px;
   border-radius: 3px;
-  border: solid 1px colors.$grey3;
+  border: solid 1px colors.$grey150;
 
   &.error {
-    border: solid 1px colors.$redDefault;
+    border: solid 1px colors.$red500;
   }
 }
 
@@ -267,7 +288,7 @@
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 10px 35px 10px 10px;
   min-height: 50px;
 
   .action-form {
@@ -276,7 +297,7 @@
     align-items: center;
     width: 100%;
     .translation-memory-glossary-tab-label {
-      gap: 220px !important;
+      gap: 200px !important;
     }
     > :first-child {
       display: flex;
@@ -301,7 +322,7 @@
   }
   .action-form-error {
     input {
-      color: colors.$redDefault;
+      color: colors.$red500;
     }
   }
 
@@ -328,12 +349,12 @@
         }
 
         .filename-error {
-          color: colors.$redDefault;
+          color: colors.$red500;
         }
       }
 
       > li:nth-child(even) {
-        background-color: colors.$grey4;
+        background-color: colors.$grey100;
       }
     }
 
@@ -341,24 +362,24 @@
       width: 260px;
       height: 6px;
       border-radius: 4px;
-      background-color: colors.$grey8;
+      background-color: colors.$grey200;
 
       > :first-child {
-        background-color: colors.$approvedGreen;
+        background-color: colors.$green800;
         height: 100%;
         border-radius: 4px;
       }
     }
 
     .import-completed {
-      color: colors.$approvedGreenHover;
+      color: colors.$green600;
     }
 
     .message-error {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: colors.$redDefault;
+      color: colors.$red500;
 
       > button {
         padding: 4px;
@@ -373,7 +394,7 @@
     margin-top: 6px;
 
     > :last-child {
-      color: colors.$approvedGreenHover;
+      color: colors.$green600;
     }
   }
 }
@@ -385,8 +406,8 @@
 }
 
 .translation-memory-glossary-tab-delete {
-  border-top: 3px solid #ffcc01;
-  background-color: colors.$orangeDefaultTransparent2;
+  border-top: 3px solid colors.$orange200;
+  background-color: colors.$orange50;
 }
 
 .translation-memory-glossary-tab-active-table {
@@ -406,8 +427,8 @@
         .settings-panel-row-dragover-half-bottom
       ) {
       .settings-panel-row-active {
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: variables.$border-radius-default;
+        border-bottom-right-radius: variables.$border-radius-default;
       }
     }
   }
@@ -418,9 +439,9 @@
     justify-content: space-between;
     height: 56px;
     padding: 20px;
-    background-color: colors.$grey3;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    background-color: colors.$grey150;
+    border-top-left-radius: variables.$border-radius-default;
+    border-top-right-radius: variables.$border-radius-default;
   }
 
   .tm-prioritization-text-content {
@@ -434,32 +455,17 @@
     }
 
     span {
-      color: colors.$grey6;
+      color: colors.$grey700;
     }
   }
 
   .switch-container-outer {
-    width: 155px;
+    width: 150px;
   }
 }
 
+.tm-key-row-menu-button,
 .tm-row-penalty {
-  .tm-row-penalty-button,
-  .penalty-numeric-stepper-close-button {
-    border-radius: 2px;
-    font-size: 16px;
-    color: #000 !important;
-    background: colors.$grey4 !important;
-    padding: 4px 8px;
-    text-align: center;
-    border: 1px solid colors.$grey7 !important;
-    font-size: 16px !important;
-
-    &:hover {
-      background-color: colors.$grey5 !important;
-    }
-  }
-
   .tm-row-penalty-numeric-stepper {
     display: flex;
     gap: 5px;
@@ -468,7 +474,7 @@
   .penalty-numeric-stepper-close-button {
     width: 28px !important;
     height: 28px !important;
-    color: colors.$grey6 !important;
+    color: colors.$grey700 !important;
   }
 }
 

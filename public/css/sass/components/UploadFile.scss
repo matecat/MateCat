@@ -1,6 +1,6 @@
 @use '../commons/colors';
-.upload-files-container {
-  border: 1px dashed #ccc;
+.upload-files-container, .upload-box-not-logged, .upload-waiting-logged {
+  border: 1px dashed colors.$grey200;
   min-height: 200px;
   border-radius: 4px;
   padding: 24px;
@@ -16,7 +16,7 @@
     align-items: flex-start;
   }
   &.isDragging {
-    background-color: colors.$grey7;
+    background-color: colors.$grey400;
   }
   .upload-files-start {
     display: flex;
@@ -32,7 +32,7 @@
     }
     span {
       font-size: 24px;
-      color: colors.$grey1
+      color: colors.$grey500
     }
   }
   .upload-files-list {
@@ -44,7 +44,7 @@
       grid-template-columns: 2fr 1fr 24px;
       align-items: center;
       padding: 8px;
-      border-bottom: 1px dashed #ccc;
+      border-bottom: 1px dashed colors.$grey200;
       &.zip-folder {
         padding-left: 40px;
       }
@@ -57,21 +57,14 @@
         font-size: 16px;
         max-width: 80%;
       }
-      .file-icon {
-        height: 30px;
-        min-width: 30px;
-        display: block;
-        background-size: 25px !important;
-        margin-bottom: 4px;
-      }
       .file-item-error {
-        color: colors.$redDefault;
+        color: colors.$red500;
       }
       .file-item-warning {
-        color: colors.$orangeDefault;
+        color: colors.$orange200;
       }
       .file-item-success {
-        color: colors.$greenDefault;
+        color: colors.$green500;
       }
       .file-item-info {
         display:flex;
@@ -83,10 +76,10 @@
     }
     .importing-progress {
       .progress {
-        background-color: colors.$approvedGreen;
+        background-color: colors.$green800;
       }
       .progress-wrapper {
-        background-color: rgba(colors.$approvedGreen, 0.24);
+        background-color: rgba(colors.$green800, 0.24);
       }
     }
   }

@@ -118,13 +118,12 @@ export const SeveritiyRow = ({severity}) => {
           onFocus={selectAll}
           onBlur={onBlur}
         />
-        <Tooltip
-          stylePointerElement={{position: 'absolute'}}
-          content="Remove severity"
-        >
+        <Tooltip content="Remove severity">
           <Button
             ref={removeSeverityRef}
-            size={BUTTON_SIZE.ICON_SMALL}
+            l
+            className="quaity-framework-remove-severity-button"
+            size={BUTTON_SIZE.ICON_XSMALL}
             onClick={removeSeverity}
           >
             <IconClose size={9} />

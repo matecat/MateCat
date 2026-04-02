@@ -1,4 +1,5 @@
 @use 'colors';
+@use 'variables';
 
 // rewrite semantic CSS
 html,
@@ -8,7 +9,7 @@ body {
 body.manage {
   min-width: 1200px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: colors.$grey5;
+  background-color: colors.$grey100;
   overflow-y: hidden;
   overflow-x: auto;
   font-size: 14px;
@@ -84,13 +85,13 @@ div#manage-container {
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
     }
   }
 
   .project {
     margin-bottom: 30px !important;
-    //border: 1px solid $grey2;
+    border-radius: variables.$border-radius-default;
     .project-title {
       display: flex !important;
       gap: 10px;
@@ -108,17 +109,18 @@ div#manage-container {
       left: -33px;
       max-width: 540px;
       min-width: 0px;
-      line-height: 16px;
-      background-color: colors.$grey2;
+      line-height: 24px;
+      background-color: colors.$grey300;
       color: colors.$black;
-      height: 30px;
+      height: 38px;
       border-radius: 0 2px 2px 0;
-      display: inline-block;
+      display: flex;
+      align-items: center;
       margin-right: -33px;
       padding-left: 10px !important;
     }
     .project-header {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
       padding-bottom: 10px !important;
       //border-bottom: 1px solid #ccc;
       margin-bottom: -25px;
@@ -141,7 +143,7 @@ div#manage-container {
         display: inline-block;
         vertical-align: text-bottom;
         min-width: 72px;
-        color: #5a5a5a;
+        color: colors.$grey700;
       }
       .ui.form .field :disabled {
         opacity: 1 !important;
@@ -174,7 +176,7 @@ div#manage-container {
           .ui.icon.input input {
             font-family: Calibri, Arial, Helvetica, sans-serif;
             padding-right: 2.67142857em !important;
-            box-shadow: inset 0 1px 3px #ddd;
+            box-shadow: inset 0 1px 3px colors.$grey200;
           }
           &.project-menu.ui.button {
             box-shadow: none;
@@ -183,7 +185,7 @@ div#manage-container {
             margin-right: 8px;
             background-color: colors.$white;
             vertical-align: top;
-            border: 1px solid #bdbdbd;
+            border: 1px solid colors.$grey200;
             cursor: default;
             .text {
               border-radius: 15px;
@@ -191,8 +193,8 @@ div#manage-container {
               color: black;
               transition: 0.3s ease;
               .ui.circular.label {
-                background-color: #cecece;
-                color: #888888;
+                background-color: colors.$grey200;
+                color: colors.$grey400;
               }
             }
           }
@@ -231,16 +233,16 @@ div#manage-container {
                 cursor: pointer;
 
                 &:hover {
-                  background-color: colors.$grey3;
+                  background-color: colors.$grey150;
                 }
               }
             }
             &:hover .text {
-              background-color: colors.$grey5 !important;
+              background-color: colors.$grey50 !important;
             }
           }
           &.project-assignee {
-            background-color: #ffffff !important;
+            background-color: colors.$white !important;
             vertical-align: top;
             /*height: 30px !important;*/
             .text {
@@ -249,7 +251,7 @@ div#manage-container {
               min-width: 30px;
               border-radius: 15px;
               padding: 3px 15px 3px 3px;
-              color: #000000;
+              color: colors.$black;
               transition: 0.3s ease;
               height: 30px;
               img {
@@ -276,15 +278,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 &:hover {
-                  background-color: colors.$grey3;
+                  background-color: colors.$grey150;
                 }
               }
               .scrolling {
@@ -302,22 +304,22 @@ div#manage-container {
               display: none;
             }
             &:hover .text {
-              background-color: #ffffff !important;
+              background-color: colors.$white !important;
               padding-right: 5px;
               padding-right: 30px;
             }
             &.disabled {
-              background-color: #f4f4f4 !important;
-              box-shadow: 0px 0px 1px #666 !important;
+              background-color: colors.$grey75 !important;
+              box-shadow: 0px 0px 1px colors.$grey700 !important;
               opacity: 1;
               &.text {
-                color: #666 !important;
+                color: colors.$grey700 !important;
               }
             }
           }
 
           &.project-not-assigned {
-            border: 1px solid #868686;
+            border: 1px solid colors.$grey600;
             padding: 0px 15px 0px 3px;
             trans\ition: 0.3s ease;
             color: rgba(0, 0, 0, 0.6);
@@ -327,10 +329,10 @@ div#manage-container {
               transition: 0.3s ease;
             }
             &:hover {
-              border: 1px solid colors.$translatedBlue;
-              color: colors.$translatedBlue;
+              border: 1px solid colors.$blue500;
+              color: colors.$blue500;
               .icon-user22 {
-                color: colors.$translatedBlue;
+                color: colors.$blue500;
               }
             }
             .not-assigned {
@@ -346,15 +348,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: colors.$translatedBlue;
+                  color: colors.$blue500;
                 }
                 &:hover {
-                  background-color: colors.$grey3;
+                  background-color: colors.$grey150;
                 }
               }
             }
@@ -365,7 +367,7 @@ div#manage-container {
           &.project-assignee {
             .ui.cancel.label {
               padding: 4px;
-              background-color: #d6d6d6;
+              background-color: colors.$grey200;
               margin: 0px;
               border-radius: 15px;
               position: absolute;
@@ -375,10 +377,10 @@ div#manage-container {
               visibility: hidden;
               i {
                 font-size: 15px;
-                color: #ffffff;
+                color: colors.$white;
               }
               &:hover {
-                background-color: #cccccc !important;
+                background-color: colors.$grey200 !important;
               }
             }
 
@@ -396,7 +398,7 @@ div#manage-container {
     }
 
     .project-body {
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
 
       .jobs {
         margin-top: 0px;
@@ -405,7 +407,7 @@ div#manage-container {
         padding: 0 15px;
         margin-bottom: 15px;
         .job-header {
-          background-color: #ffffff !important;
+          background-color: colors.$white !important;
           padding: 0 0 !important;
 
           .split-merge {
@@ -413,7 +415,7 @@ div#manage-container {
             .merge {
               font-family: Calibri, Arial, Helvetica, sans-serif;
               padding: 5px 17px;
-              border: 1px solid #797979;
+              border: 1px solid colors.$grey600;
               font-size: 16px;
               transition: 0.3s ease !important;
             }
@@ -421,16 +423,15 @@ div#manage-container {
         }
         .job-body {
           .chunks {
+            border-radius: variables.$border-radius-default;
+            overflow: hidden;
             .chunk {
               display: grid;
-              grid-template-columns:
-                auto
-                70px
-                150px 120px 106px auto auto 1fr auto auto auto;
+              grid-template-columns: 20px 100px 150px 120px 106px 100px auto 180px 65px 40px;
               align-items: center;
               gap: 6px;
               transition: 0.3s ease;
-              background-color: #ffffff;
+              background-color: colors.$white;
               padding: 8px 10px !important;
 
               @media only screen and (max-width: 1200px) {
@@ -438,16 +439,18 @@ div#manage-container {
               }
 
               .job-id {
-                color: #969696;
+                color: colors.$grey400;
                 font-size: 12px;
                 position: relative;
               }
               .source-target {
                 font-weight: bold;
                 position: relative;
+                display: flex;
+                gap: 2px;
                 .source-box {
                   float: left;
-                  max-width: 60px;
+                  max-width: 120px;
                   min-width: 60px;
                   white-space: nowrap;
                   overflow: hidden;
@@ -457,7 +460,7 @@ div#manage-container {
                 .in-to {
                   float: left;
                   top: 4px;
-                  color: #5a5a5a;
+                  color: colors.$grey700;
                   line-height: 26px;
                   position: relative;
                   font-size: 12px;
@@ -467,7 +470,7 @@ div#manage-container {
                 }
                 .target-box {
                   float: left;
-                  width: 60px;
+                  max-width: 120px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
@@ -480,55 +483,6 @@ div#manage-container {
                 padding: unset !important;
                 margin: unset !important;
                 min-width: unset !important;
-              }
-              .tm-job,
-              .activity-icon-single {
-                width: 30px;
-                height: 30px;
-              }
-              .job-activity-icons {
-                display: flex;
-                justify-content: center;
-                min-width: 110px;
-                gap: 5px;
-
-                button.group-activity-icon {
-                  height: 30px;
-                  width: 30px;
-                  i {
-                    width: 30px;
-                  }
-                }
-                .comments {
-                }
-                .group-activity-icons {
-                  .item {
-                    margin: 0;
-                    padding: 1px !important;
-                    a {
-                      padding: 0;
-                      width: 100%;
-                      border-radius: 0px;
-                      font-size: 15px;
-                      font-weight: normal;
-                      font-family: Calibri, Arial, Helvetica, sans-serif;
-                      text-align: left;
-                      margin: 0 15px 0 10px;
-                      background: transparent !important;
-                      box-shadow: none !important;
-                      i {
-                        margin-right: 10px !important;
-                      }
-                    }
-                  }
-                }
-              }
-              .tm-job.job-activity-icons {
-                a {
-                  i {
-                    vertical-align: inherit;
-                  }
-                }
               }
               .outsource-job {
                 display: inline-block;
@@ -554,27 +508,11 @@ div#manage-container {
                   }
                 }
                 .job-to-translator {
-                  display: inline-block;
-                  vertical-align: text-bottom;
-                  color: #969696;
-                  max-width: 150px;
-                  transition: 0.3s ease;
-                  min-width: 0px;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-
-                  @media only screen and (max-width: 1199px) and (min-width: 992px) {
-                    width: fit-content;
-                    &:hover {
-                    }
-                  }
+                  width: 100%;
+                  text-align: center;
                   a {
                     text-decoration: underline;
                     font-weight: 700;
-                  }
-                  &.not-assigned {
-                    width: fit-content;
                   }
                 }
                 &:hover .job-to-translator {
@@ -601,7 +539,7 @@ div#manage-container {
                     font-weight: 700;
                   }
                   .outsource-gmt-text {
-                    color: #969696;
+                    color: colors.$grey400;
                     display: inherit;
                     margin-left: 5px;
                     font-size: 13px;
@@ -620,15 +558,17 @@ div#manage-container {
                 &:hover .translator .job-delivery {
                   display: none;
                 }
-                .outsource-delivery-container {
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                }
                 .job-delivery-date {
                   margin-left: 5px;
-                  color: colors.$grey7;
-
+                  color: colors.$grey400;
+                  display: flex;
+                  gap: 4px;
+                  .job-delivery-email {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 200px;
+                  }
                   > :nth-child(2) {
                     font-weight: bold;
                     color: black;
@@ -644,17 +584,17 @@ div#manage-container {
                   }
                   .ui.cancel {
                     padding: 4px;
-                    background-color: #d6d6d6;
+                    background-color: colors.$grey200;
                     margin-top: 3px;
                     margin-bottom: 2px;
                     position: relative;
                     line-height: 0;
                     right: 3px;
                     font-size: 15px;
-                    color: #ffffff;
+                    color: colors.$white;
                   }
                   &:hover .ui.cancel {
-                    background-color: #cccccc !important;
+                    background-color: colors.$grey200 !important;
                   }
                 }
                 &:hover .item {
@@ -680,15 +620,6 @@ div#manage-container {
                   text-decoration: none;
                 }
               }
-              .open-translate {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                padding: 6px 15px;
-                vertical-align: top;
-                font-size: 16px;
-                //border: 1px solid #797979;
-                border-radius: 2px;
-                float: right;
-              }
               .open-vendor {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 font-size: 16px;
@@ -696,10 +627,10 @@ div#manage-container {
                 border-radius: 2px;
                 font-weight: bold;
                 box-shadow: none !important;
-                color: #7eaf3e !important;
+                color: colors.$green300 !important;
                 &:hover {
                   box-shadow:
-                    0 0 0 #e0e0e0,
+                    0 0 0 colors.$grey200,
                     0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
@@ -726,7 +657,7 @@ div#manage-container {
                   display: flex;
                   justify-content: end;
                   align-items: center;
-                  background: #fff;
+                  background: colors.$white;
                   color: colors.$black;
                   font-weight: normal;
                   border: none; // border: 1px solid #979797;
@@ -746,11 +677,11 @@ div#manage-container {
 
                     span {
                       text-decoration: none;
-                      color: colors.$grey;
+                      color: colors.$grey600;
                     }
                   }
                   span {
-                    color: #000;
+                    color: colors.$black;
                     margin-left: 4px;
                     line-height: 1.6;
                   }
@@ -769,7 +700,7 @@ div#manage-container {
                 float: right;
                 &:hover {
                   box-shadow:
-                    0 0 0 #e0e0e0,
+                    0 0 0 colors.$grey200,
                     0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
@@ -781,16 +712,14 @@ div#manage-container {
                 }
               }
               .job-menu {
-                width: 28px !important;
-                height: 28px !important;
                 &:hover {
-                  background-color: rgba(colors.$grey8, 0.5) !important;
+                  background-color: rgba(colors.$grey200, 0.5) !important;
                 }
               }
 
               .chunk-download-progress {
                 height: 2px;
-                background-color: #ffffff;
+                background-color: colors.$white;
                 position: absolute;
                 bottom: 0px;
                 width: 100%;
@@ -803,31 +732,36 @@ div#manage-container {
                   left: 0;
                   right: 0;
                   bottom: 0;
-                  background: #000000;
+                  background: colors.$black;
                   border-radius: 0.28571429rem;
                   -webkit-animation: progress-active 1s ease infinite;
                   animation: progress-active 1s ease infinite;
                 }
               }
               &.updated-job {
-                background-color: #f9ffb5;
+                background-color: colors.$orange50;
               }
             }
           }
         }
       }
     }
+    .chunk-container {
+      border-radius: variables.$border-radius-default;
+    }
 
     .project-footer {
       padding: 0 30px 5px !important;
       text-align: right;
-      background-color: colors.$grey4;
+      background-color: colors.$grey100;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;
         a {
           text-decoration: underline;
-          color: colors.$grey1;
+          color: colors.$grey500;
           font-size: 13px;
           &:hover {
             text-decoration: none;
@@ -837,7 +771,7 @@ div#manage-container {
       .project-due-date {
         margin-top: -10px;
         margin-left: -15px;
-        color: colors.$grey1;
+        color: colors.$grey500;
         font-size: 13px;
       }
     }
@@ -885,7 +819,7 @@ div#manage-container {
         padding: 16px 25px;
         vertical-align: top;
         font-size: 20px;
-        border: 1px solid #797979;
+        border: 1px solid colors.$grey600;
         border-radius: 2px;
         margin: 10px;
       }
@@ -910,12 +844,12 @@ div#manage-container {
     margin-right: auto !important;
     transition: 0.3s ease;
   }
-  .outsource-delivery-container {
-    max-width: 210px;
+  .job-delivery-email {
+    display: none;
   }
 }
 
-@media only screen and (min-width: 1500px) {
+@media only screen and (min-width: 1501px) {
   .ui.container {
     width: 1280px !important;
     margin-left: auto !important;
@@ -923,8 +857,9 @@ div#manage-container {
     transition: 0.3s ease;
   }
 
-  .outsource-delivery-container {
-    max-width: unset;
+  .job-delivery-email {
+    max-width: 130px;
+    display: block;
   }
 }
 
@@ -978,10 +913,10 @@ div#manage-container {
   gap: 10px;
   .status-filter {
     display: inline-block;
-    background: #d8d8d8;
+    background: colors.$grey200;
     padding: 4px 5px 4px;
     border-radius: 2px;
-    color: #5d5d5d;
+    color: colors.$grey700;
     font-weight: 100;
     font-size: 12px;
   }
@@ -995,67 +930,11 @@ div#manage-container {
   border-top: none;
 }
 
-.project-team-dropdown,
-.user-project-dropdown {
-  line-height: 1;
-  border-radius: 15px !important;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-}
-
-.project-menu-dropdown {
-  border-radius: 50% !important;
-  width: 28px !important;
-  height: 28px !important;
-  background-color: rgba(colors.$grey8, 0.5) !important;
-
-  &:hover {
-    background-color: rgba(colors.$grey8, 1) !important;
-  }
-}
-
 .project-activity-icon button.project-team-dropdown {
-  height: 30px;
   font-size: 14px;
-  color: #000;
+  color: colors.$black;
   padding: 5px 15px;
-  background-color: #fff;
-}
-
-.user-project-dropdown-container button.user-project-dropdown {
-  height: 30px !important;
-  color: #000 !important;
-  font-size: 14px;
-}
-
-.project-container-button-edit-name {
-  width: 30px !important;
-  height: 30px !important;
-  line-height: 30px !important;
-}
-
-.project-container-form-edit-name {
-  display: inline-block;
-
-  fieldset {
-    border: unset;
-    margin: 0;
-    padding: 0;
-  }
-
-  input[type='text'] {
-    height: 28px;
-    min-width: 250px;
-    max-width: 400px;
-
-    &:active,
-    &:focus {
-      box-shadow: unset;
-      border: 1px solid colors.$grey1;
-    }
-  }
+  background-color: colors.$white;
 }
 
 .project-title-editing-name-mode {
@@ -1075,4 +954,109 @@ ul {
 
 .project-container-checkbox-hidden {
   opacity: 0;
+}
+
+.projects-container {
+  .projects-container-title {
+    display: flex;
+    justify-content: space-between;
+    margin: 40px 0 16px;
+
+    > :last-child {
+      display: flex;
+      gap: 16px;
+      color: colors.$grey700;
+
+      > span {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+    }
+
+    .projects-container-legend-unconfirmed-quad,
+    .projects-container-legend-translated-quad,
+    .projects-container-legend-approved-quad,
+    .projects-container-legend-approved2-quad {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+    }
+
+    .projects-container-legend-unconfirmed-quad {
+      background-color: colors.$black100;
+      border: 1px solid colors.$grey200;
+    }
+    .projects-container-legend-translated-quad {
+      background-color: colors.$blue500;
+    }
+    .projects-container-legend-approved-quad {
+      background-color: colors.$green800;
+    }
+    .projects-container-legend-approved2-quad {
+      background-color: colors.$purple500;
+    }
+  }
+
+  &.projects-container--loading {
+    opacity: 0.5;
+  }
+
+  .spinner-loader-more-projects {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.1s;
+    height: 120px;
+
+    > h5 {
+      font-weight: normal;
+    }
+
+    .spinner-loader-more-projects__loader-component {
+      position: absolute;
+
+      > span {
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .spinner-loader-more-projects--visible {
+    opacity: 1;
+  }
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filter-projects-container {
+  display: flex;
+  width: 60%;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+
+  > :first-child {
+    flex-grow: 1;
+
+    > :first-child {
+      border-right: 1px solid colors.$grey150;
+    }
+
+    input {
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+
+      &:active,
+      &:focus {
+        box-shadow: inset 0 0 0 1px colors.$blue600;
+      }
+    }
+  }
 }

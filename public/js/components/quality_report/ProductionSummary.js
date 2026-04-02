@@ -3,9 +3,13 @@ import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
 import HelpCircle from '../../../img/icons/HelpCircle'
 
-class ProductionSummary extends React.Component {
-  getTimeToEdit = () => {
-    let time = parseInt(this.props.jobInfo.get('total_time_to_edit') / 1000)
+export const ProductionSummary = ({
+  qualitySummary,
+  jobInfo,
+  secondPassReviewEnabled,
+}) => {
+  const getTimeToEdit = (type) => {
+    let time = parseInt(jobInfo.get('time_to_edit').get(type) / 1000)
     let hours = Math.floor(time / 3600)
     let minutes = Math.floor((time % 3600) / 60)
     let seconds = Math.floor((time % 3600) % 60)
@@ -15,56 +19,54 @@ class ProductionSummary extends React.Component {
       .join(':')
   }
 
-  render() {
-    const {qualitySummary, jobInfo} = this.props
+  const tooltipText = (
+    <div style={{color: 'gray'}}>
+      Matecat calculates the score as follows: <br />
+      <br />
+      <code>(Tot. error points * 1000) / reviewed words</code>
+      <br />
+      Reviewed words = raw words - unmodified 101% matches
+      <br />
+      <br />
+      The score is compared to a max. amount of tolerated error points.
+      <a
+        style={{textDecoration: 'underline'}}
+        href="https://guides.matecat.com/quality-report-in-matecat"
+        target="_blank"
+      >
+        Learn more
+      </a>
+    </div>
+  )
+  const score = parseFloat(qualitySummary.get('score'))
+  const limit = qualitySummary.get('passfail')
+    ? parseInt(qualitySummary.getIn(['passfail', 'options', 'limit']))
+    : 0
+  const qualityOverall = qualitySummary.get('quality_overall')
+  const reviewedWordsCount = qualitySummary.get('total_reviewed_words_count')
+  const jobPassed =
+    qualityOverall !== null
+      ? qualityOverall !== 'fail' && reviewedWordsCount > 0
+      : null
+  const jobPassedClass =
+    jobPassed === null || reviewedWordsCount === 0
+      ? 'qr-norevision'
+      : jobPassed
+        ? 'qr-pass'
+        : 'qr-fail'
+  const translator = jobInfo.get('translator')
+    ? jobInfo.get('translator').get('email')
+    : 'Not assigned'
+  const stats = jobInfo.get('stats').toJS()
 
-    const tooltipText = (
-      <div style={{color: 'gray'}}>
-        Matecat calculates the score as follows: <br />
-        <br />
-        <code>(Tot. error points * 1000) / reviewed words</code>
-        <br />
-        Reviewed words = raw words - unmodified 101% matches
-        <br />
-        <br />
-        The score is compared to a max. amount of tolerated error points.
-        <a
-          style={{textDecoration: 'underline'}}
-          href="https://guides.matecat.com/quality-report-in-matecat"
-          target="_blank"
-        >
-          Learn more
-        </a>
-      </div>
-    )
-    const score = parseFloat(qualitySummary.get('score'))
-    const limit = qualitySummary.get('passfail')
-      ? parseInt(qualitySummary.getIn(['passfail', 'options', 'limit']))
-      : 0
-    const qualityOverall = qualitySummary.get('quality_overall')
-    const reviewedWordsCount = qualitySummary.get('total_reviewed_words_count')
-    const jobPassed =
-      qualityOverall !== null
-        ? qualityOverall !== 'fail' && reviewedWordsCount > 0
-        : null
-    const jobPassedClass =
-      jobPassed === null || reviewedWordsCount === 0
-        ? 'qr-norevision'
-        : jobPassed
-          ? 'qr-pass'
-          : 'qr-fail'
-    const translator = jobInfo.get('translator')
-      ? jobInfo.get('translator').get('email')
-      : 'Not assigned'
-    const stats = jobInfo.get('stats').toJS()
-
-    return (
-      <div className="qr-production shadow-2">
+  return (
+    <div className="qr-production-container">
+      <div className="qr-production ">
         <div className="qr-effort job-id">ID: {jobInfo.get('id')}</div>
 
         <div className="qr-effort source-to-target">
           <div className="qr-source">
-            <b>{jobInfo.get('sourceTxt')}</b>
+            <b>{jobInfo.get('source')}</b>
           </div>
 
           <div className="qr-to">
@@ -72,14 +74,11 @@ class ProductionSummary extends React.Component {
           </div>
 
           <div className="qr-target">
-            <b>{jobInfo.get('targetTxt')}</b>
+            <b>{jobInfo.get('target')}</b>
           </div>
         </div>
 
-        <div
-          className="qr-effort progress-percent"
-          ref={(bar) => (this.progressBar = bar)}
-        >
+        <div className="qr-effort progress-percent">
           <JobProgressBar stats={stats} showPercent={false} />
           <div className="percent">
             {Math.round(
@@ -92,65 +91,55 @@ class ProductionSummary extends React.Component {
             %
           </div>
         </div>
-
-        <div className="qr-effort">
-          <div className="qr-label">Reviewed Words</div>
-          <div className="qr-info">
-            <b>{reviewedWordsCount}</b>
-          </div>
-        </div>
-
-        <div className="qr-effort translator">
-          <div className="qr-label">Translator</div>
-          <div className="qr-info" title={translator}>
-            <b>{translator}</b>
-          </div>
-        </div>
-
-        <div className="qr-effort time-edit">
-          <div className="qr-label">Time to edit</div>
-          <div className="qr-info">
-            <b>{this.getTimeToEdit()}</b>{' '}
-          </div>
-        </div>
-
-        <div className="qr-effort pee">
-          <div className="qr-label">PEE</div>
-          <div className="qr-info">
-            <b>
-              {jobInfo.get('pee') ? Math.round(jobInfo.get('pee')) : 0}%
-            </b>{' '}
-          </div>
-        </div>
-
-        {config.project_type !== 'old' ? (
-          <div className={'qr-effort qr-score ' + jobPassedClass}>
+        <div className="qr-effort-container">
+          <div className="qr-effort">
+            <div className="qr-label">Reviewed Words</div>
             <div className="qr-info">
-              <div className="qr-tolerated-score">
-                <b>{score}</b>
-              </div>
-
-              {jobPassed === null || reviewedWordsCount === 0 ? (
-                <div>
-                  <div className="qr-label">Quality score</div>
-                  <div className="qr-pass-score">No revision</div>
-                </div>
-              ) : jobPassed ? (
-                <div>
-                  <div className="qr-label">Quality score</div>
-                  <div className="qr-pass-score">
-                    <b>Pass</b>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="qr-label">Quality score</div>
-                  <div className="qr-pass-score">
-                    <b>Fail</b>
-                  </div>
-                </div>
-              )}
+              <b>{reviewedWordsCount}</b>
             </div>
+          </div>
+
+          <div className="qr-effort translator">
+            <div className="qr-label">Translator</div>
+            <div className="qr-info" title={translator}>
+              <b>{translator}</b>
+            </div>
+          </div>
+
+          <div className="qr-effort time-edit">
+            <div className="qr-label">TTE Translate</div>
+            <div className="qr-info">
+              <b>{getTimeToEdit('t')}</b>{' '}
+            </div>
+          </div>
+
+          <div className="qr-effort time-edit">
+            <div className="qr-label">TTE revise</div>
+            <div className="qr-info">
+              <b>{getTimeToEdit('r1')}</b>{' '}
+            </div>
+          </div>
+          {secondPassReviewEnabled && (
+            <div className="qr-effort time-edit">
+              <div className="qr-label">TTE revise 2</div>
+              <div className="qr-info">
+                <b>{getTimeToEdit('r2')}</b>{' '}
+              </div>
+            </div>
+          )}
+          <div className="qr-effort pee">
+            <div className="qr-label">PEE</div>
+            <div className="qr-info">
+              <b>
+                {jobInfo.get('pee') ? Math.round(jobInfo.get('pee')) : 0}%
+              </b>{' '}
+            </div>
+          </div>
+        </div>
+      </div>
+      {config.project_type !== 'old' ? (
+        <div className={'qr-effort qr-score ' + jobPassedClass}>
+          <div>
             <Popup
               content={tooltipText}
               position="bottom right"
@@ -158,16 +147,33 @@ class ProductionSummary extends React.Component {
               hoverable
               wide="very"
               trigger={
-                <div className="qr-label">
-                  Threshold {limit} <HelpCircle />
+                <div className="qr-ept-info">
+                  EPT score <HelpCircle size={12} />
                 </div>
               }
             />
+            <div className="qr-tolerated-score">{score}</div>
           </div>
-        ) : null}
-      </div>
-    )
-  }
+          <div>
+            {jobPassed === null || reviewedWordsCount === 0 ? (
+              <div>
+                <div className="qr-pass-score">No revision</div>
+              </div>
+            ) : jobPassed ? (
+              <div>
+                <div className="qr-pass-score">Pass</div>
+              </div>
+            ) : (
+              <div>
+                <div className="qr-pass-score">Fail</div>
+              </div>
+            )}
+            <div className="qr-threshold">Threshold {limit}</div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 export default ProductionSummary

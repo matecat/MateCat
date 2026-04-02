@@ -11,14 +11,35 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import SocketListener from '../sse/SocketListener'
-import {DropdownMenu} from '../components/common/DropdownMenu/DropdownMenu'
-import {BUTTON_SIZE} from '../components/common/Button/Button'
+import {SegmentedControl} from '../components/common/SegmentedControl'
+import {SpinnerLoader} from '../components/common/SpinnerLoader'
 
 const getReviseUrlParameter = () => {
   const url = new URL(window.location.href)
   const revType = url.searchParams.get('revision_type')
   return revType ? revType : '1'
 }
+
+const SEGMENTED_CONTROL_OPTIONS = [
+  {
+    id: '1',
+    name: (
+      <>
+        <div className={'ui revision-color empty circular label'} />
+        Revise
+      </>
+    ),
+  },
+  {
+    id: '2',
+    name: (
+      <>
+        <div className={'ui second-revision-color empty circular label'} />
+        Revise 2
+      </>
+    ),
+  },
+]
 
 export const QualityReport = () => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -148,130 +169,21 @@ export const QualityReport = () => {
             <div className="qr-bg-head" />
 
             {jobInfo ? (
-              <div className="qr-job-summary">
+              <div className="layout__container">
                 <div className="qr-header">
-                  <h3>QR Job summary</h3>
+                  <h3>Quality report</h3>
 
                   {secondPassReviewEnabled ? (
                     <div className="qr-filter-list">
                       <div className="filter-dropdown right-10">
                         <div className={'filter-reviewType active'}>
-                          <DropdownMenu
-                            dropdownClassName={'qr-reviewType-dropdown'}
-                            toggleButtonProps={{
-                              children: (
-                                <div
-                                  className="ui top left pointing dropdown basic tiny button right-0"
-                                  style={{marginBottom: '12px'}}
-                                >
-                                  {revisionToShow === '1' ? (
-                                    <div className="text">
-                                      <div
-                                        className={
-                                          'ui revision-color empty circular label'
-                                        }
-                                      />
-                                      Revision
-                                    </div>
-                                  ) : (
-                                    <div className="text">
-                                      <div
-                                        className={
-                                          'ui second-revision-color empty circular label'
-                                        }
-                                      />
-                                      2nd Revision
-                                    </div>
-                                  )}
-                                </div>
-                              ),
-                              size: BUTTON_SIZE.ICON_STANDARD,
-                            }}
-                            items={[
-                              {
-                                label: (
-                                  <>
-                                    <div
-                                      className={
-                                        'ui revision-color empty circular label'
-                                      }
-                                    />
-                                    Revision
-                                  </>
-                                ),
-                                onClick: () => {
-                                  setRevisionToShow('1')
-                                },
-                              },
-                              {
-                                label: (
-                                  <>
-                                    <div
-                                      className={
-                                        'ui second-revision-color empty circular label'
-                                      }
-                                    />
-                                    2nd Revision
-                                  </>
-                                ),
-                                onClick: () => {
-                                  setRevisionToShow('2')
-                                },
-                              },
-                            ]}
+                          <SegmentedControl
+                            name={'reviewType'}
+                            className="qr-reviewType-control"
+                            options={SEGMENTED_CONTROL_OPTIONS}
+                            selectedId={revisionToShow}
+                            onChange={(v) => setRevisionToShow(v)}
                           />
-                          {/*<div
-                            className="ui top left pointing dropdown basic tiny button right-0"
-                            style={{marginBottom: '12px'}}
-                            ref={reviewDropdownRef}
-                          >
-                            {revisionToShow === '1' ? (
-                              <div className="text">
-                                <div
-                                  className={
-                                    'ui revision-color empty circular label'
-                                  }
-                                />
-                                Revision
-                              </div>
-                            ) : (
-                              <div className="text">
-                                <div
-                                  className={
-                                    'ui second-revision-color empty circular label'
-                                  }
-                                />
-                                2nd Revision
-                              </div>
-                            )}
-
-                            <div className="menu">
-                              <div
-                                className="item"
-                                data-value="1"
-                                key={'option-revision'}
-                              >
-                                <div
-                                  className={
-                                    'ui revision-color empty circular label'
-                                  }
-                                />
-                                Revision
-                              </div>
-                              <div
-                                className="item"
-                                data-value="2"
-                                key={'option-revision-2'}
-                              >
-                                <div
-                                  className={
-                                    'ui second-revision-color empty circular label'
-                                  }
-                                />
-                                2nd Revision
-                              </div>
-                            </div>
-                          </div>*/}
                         </div>
                       </div>
                     </div>
@@ -299,9 +211,7 @@ export const QualityReport = () => {
               </div>
             ) : (
               <div style={spinnerContainer}>
-                <div className="ui active inverted dimmer">
-                  <div className="ui massive text loader">Loading</div>
-                </div>
+                <SpinnerLoader />
               </div>
             )}
           </div>

@@ -185,6 +185,7 @@ SQL;
 
         $sql = "SELECT
 
+  issues.translation_version as translation_version,
   issues.id_segment as segment_id,
   issues.id as issue_id,
   issues.create_date as issue_create_date,

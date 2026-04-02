@@ -34,7 +34,6 @@ export const SubTemplates = ({
   updateApi,
   deleteApi,
   saveErrorCallback,
-  portalTarget,
 }) => {
   const [templateModifier, setTemplateModifier] = useState()
   const [templateName, setTemplateName] = useState('')
@@ -288,9 +287,7 @@ export const SubTemplates = ({
                   Save as new
                 </Button>
               )}
-              {!isStandardTemplateBool && (
-                <SubTemplateMoreMenu {...{portalTarget}} />
-              )}
+              {!isStandardTemplateBool && <SubTemplateMoreMenu />}
             </>
           ) : (
             <SubTemplateCreateUpdateControl />

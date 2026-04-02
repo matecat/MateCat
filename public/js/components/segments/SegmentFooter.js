@@ -113,6 +113,13 @@ const TAB_ITEMS = {
     tabClass: 'icu-validator',
     isLoading: false,
   },
+  [TAB.AI_ALTERNATIVES]: {
+    label: 'Ai alternatives',
+    code: 'aialternatives',
+    tabClass: 'ai-alternatives',
+    isLoading: false,
+    isEnableCloseButton: true,
+  },
 }
 const DELAY_MESSAGE = 7000
 

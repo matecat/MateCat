@@ -1,0 +1,138 @@
+@use '../../commons/colors';
+
+.job-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.job-container-grid {
+  display: grid;
+  grid-template-columns:
+    20px 180px minmax(auto, 240px)
+    140px 100px 1fr auto auto auto;
+  align-items: center;
+  padding: 16px 24px;
+  gap: 16px;
+  border-bottom: 1px solid colors.$grey100;
+
+  .chunks-job-container & {
+    border-bottom: unset;
+  }
+
+  .job-container-id {
+    display: flex;
+    flex-direction: column;
+    color: colors.$grey700;
+  }
+}
+
+.chunks-job-container {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  gap: 16px;
+  border-bottom: 1px solid colors.$grey100;
+
+  .chunks-job-container-line {
+    display: flex;
+    justify-content: space-between;
+
+    .chunks-job-container-line-sx,
+    .chunks-job-container-line-dx {
+      display: flex;
+      gap: 16px;
+    }
+  }
+
+  .chunks-job-container-list {
+    padding-left: 8px;
+  }
+}
+
+.chunk-job-container {
+  grid-template-columns:
+    180px minmax(auto, 240px)
+    140px 100px 1fr auto auto auto;
+  padding: 16px 0px 16px 24px;
+}
+
+.job-container-grid,
+.chunks-job-container {
+  .job-languages-code {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: colors.$black;
+
+    svg {
+      color: colors.$grey400;
+      transform: rotate(270deg);
+    }
+  }
+}
+
+.job-container-outsource {
+  display: flex;
+  justify-content: end;
+}
+
+.job-progress-bar-tooltip {
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+
+    > :first-child {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+  }
+
+  .job-progress-bar-unconfirmed-quad,
+  .job-progress-bar-translated-quad,
+  .job-progress-bar-approved-quad,
+  .job-progress-bar-approved2-quad {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+  }
+
+  .job-progress-bar-unconfirmed-quad {
+    background-color: colors.$black100;
+    border: 1px solid colors.$grey200;
+  }
+  .job-progress-bar-translated-quad {
+    background-color: colors.$blue500;
+  }
+  .job-progress-bar-approved-quad {
+    background-color: colors.$green800;
+  }
+  .job-progress-bar-approved2-quad {
+    background-color: colors.$purple500;
+  }
+}
+
+.job-activity-icons {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+.job-container-button-weight-normal {
+  font-weight: normal !important;
+}
+
+.job-container-words-button {
+  span {
+    color: colors.$grey400;
+  }
+}
+
+.job-container-outsource-container {
+  display: flex;
+}

@@ -9,6 +9,7 @@ import UserStore from '../../stores/UserStore'
 import ManageActions from '../../actions/ManageActions'
 import {fromJS} from 'immutable'
 import {ProjectsBulkActions} from './ProjectsBulkActions'
+import {Button, BUTTON_TYPE} from '../common/Button/Button'
 
 class ProjectsContainer extends React.Component {
   constructor(props) {
@@ -110,23 +111,22 @@ class ProjectsContainer extends React.Component {
             <div className="message-nofound">Welcome to your Personal area</div>
             <div className="welcome-to-matecat"></div>
             <div className="message-create">
-              {/*Lorem ipsum dolor sit amet*/}
               <p>
-                <a
-                  className="ui primary button"
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
                   onClick={this.createNewProject.bind(this)}
                 >
                   Create Project
-                </a>
+                </Button>
               </p>
               {!thereAreMembers ? (
                 <p>
-                  <a
-                    className="ui primary button"
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
                     onClick={this.openAddMember.bind(this)}
                   >
                     Add member
-                  </a>
+                  </Button>
                 </p>
               ) : (
                 ''
@@ -142,19 +142,19 @@ class ProjectsContainer extends React.Component {
             <div className="message-create">
               {/*Lorem ipsum dolor sit amet*/}
               <p>
-                <a
-                  className="ui primary button"
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
                   onClick={this.createNewProject.bind(this)}
                 >
                   Create Project
-                </a>
+                </Button>
                 {!thereAreMembers ? (
-                  <a
-                    className="ui primary button"
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
                     onClick={this.openAddMember.bind(this)}
                   >
                     Add member
-                  </a>
+                  </Button>
                 ) : (
                   ''
                 )}
@@ -296,7 +296,7 @@ class ProjectsContainer extends React.Component {
 
     return (
       <div className="project-list">
-        <div className="ui container">
+        <div className="layout__container">
           <ProjectsBulkActions
             projects={this.state.projects.toJS()}
             teams={this.state.teams.toJS()}

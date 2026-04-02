@@ -14,12 +14,12 @@ section.readonly .issues-container {
       display: inline-block !important;
       width: 100%;
       main-bottom: 0px;
-      border-bottom: 1px solid #ffffff;
+      border-bottom: 1px solid colors.$white;
       position: relative;
       z-index: 3;
       top: 0px;
-      border-top: 1px solid #ccc;
-      background: #ffffff !important;
+      border-top: 1px solid colors.$grey200;
+      background: colors.$white !important;
       .border-box-issue {
         width: 50%;
         display: inline-block;
@@ -32,10 +32,10 @@ section.readonly .issues-container {
             display: inline-block;
             width: 50%;
             .ui.dropdown {
-              border: 1px solid #888;
+              border: 1px solid colors.$grey400;
               border-radius: 2px !important;
               &:hover {
-                border: 1px solid #96c8da;
+                border: 1px solid colors.$grey300;
               }
               .text {
                 background: none;
@@ -72,7 +72,7 @@ section.readonly .issues-container {
                 border-top: 0 !important;
                 border-radius: 0 0 2px 2px;
                 &.visible {
-                  border: 1px solid #96c8da;
+                  border: 1px solid colors.$grey300;
                   box-shadow: 0px 2px 3px 0px rgba(34, 36, 38, 0.15);
                 }
                 .item {
@@ -104,9 +104,9 @@ section.readonly .issues-container {
             vertical-align: top;
             transition: 0.3s ease;
             .issue {
-              background: #ffffff;
+              background: colors.$white;
               padding: 5px 5px 5px 10px;
-              box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+              box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
               .issue-head,
               .issue-activity-icon {
@@ -146,26 +146,20 @@ section.readonly .issues-container {
                   text-align: center;
                   margin-right: 5px;
                   background: transparent;
-                  box-shadow: 0 0 0 1px #bcbcbc inset;
+                  box-shadow: 0 0 0 1px colors.$grey300 inset;
                   border: none;
                   outline: none;
-                  &.re-active {
-                    background: #e9e9e9;
-                    i {
-                      color: #333333;
-                    }
-                  }
                   &:hover {
                     box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.35) inset;
                     i {
-                      color: #333333;
+                      color: colors.$grey1300;
                     }
                   }
                   &:active {
-                    background: #e3e3e3;
+                    background: colors.$grey100;
                   }
                   &:focus {
-                    box-shadow: 0 0 0 1px #96c8da inset;
+                    box-shadow: 0 0 0 1px colors.$grey300 inset;
                   }
                   &:last-child {
                     margin-right: 0;
@@ -176,16 +170,6 @@ section.readonly .issues-container {
                     position: relative;
                     top: 1px;
                   }
-                  &.re-message {
-                    i {
-                      color: colors.$approvedGreen;
-                    }
-                    &:hover {
-                      i {
-                        color: #65a060;
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -194,9 +178,9 @@ section.readonly .issues-container {
               .re-comment-list {
                 padding: 5px 10px;
                 font-size: 18px;
-                background: #f0f2f5;
-                color: #787878;
-                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                background: colors.$grey75;
+                color: colors.$grey600;
+                box-shadow: 0 0 0 colors.$grey200, 0 0 2px rgba(0, 0, 0, 0.12),
                   0 2px 4px rgba(0, 0, 0, 0.24) !important;
               }
               .re-add-comment {
@@ -208,20 +192,20 @@ section.readonly .issues-container {
               }
               .re-comment-list {
                 font-size: 14px;
-                background: #ffffff;
+                background: colors.$white;
                 .re-comment {
                   margin-bottom: 0;
                   .re-revisor {
-                    color: colors.$approvedGreen;
+                    color: colors.$green800;
                   }
                   .re-revisor2 {
-                    color: colors.$approved2Green;
+                    color: colors.$purple500;
                   }
                   .re-translator {
-                    color: colors.$translatedBlue;
+                    color: colors.$blue500;
                   }
                   .re-selected-text {
-                    color: #000;
+                    color: colors.$black;
                   }
                   .re-comment-date {
                     font-size: 13px;
@@ -243,8 +227,8 @@ section.readonly .issues-container {
       &.add-issue-segment {
         .category,
         .category-selected .severity {
-          border: 1px solid colors.$approvedGreen !important;
-          box-shadow: inset 0 0 3px colors.$approvedGreen;
+          border: 1px solid colors.$green800 !important;
+          box-shadow: inset 0 0 3px colors.$green800;
         }
       }
     }
