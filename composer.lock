@@ -1678,16 +1678,16 @@
         },
         {
             "name": "matecat/icu-intl",
-            "version": "v1.1.22",
+            "version": "v1.1.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/icu-intl.git",
-                "reference": "39fa13981127223e4a5434fc665f0070c0f89a15"
+                "reference": "f927d3a0e13e46888448799d54a473a29ddf7070"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/39fa13981127223e4a5434fc665f0070c0f89a15",
-                "reference": "39fa13981127223e4a5434fc665f0070c0f89a15",
+                "url": "https://api.github.com/repos/matecat/icu-intl/zipball/f927d3a0e13e46888448799d54a473a29ddf7070",
+                "reference": "f927d3a0e13e46888448799d54a473a29ddf7070",
                 "shasum": ""
             },
             "require": {
@@ -1724,9 +1724,9 @@
             "description": "A PHP port of ICU4J's MessagePattern parser with locale utilities. Parses ICU MessageFormat patterns into an inspectable AST and provides locale data support for internationalization in PHP.",
             "support": {
                 "issues": "https://github.com/matecat/icu-intl/issues",
-                "source": "https://github.com/matecat/icu-intl/tree/v1.1.22"
+                "source": "https://github.com/matecat/icu-intl/tree/v1.1.23"
             },
-            "time": "2026-03-23T18:27:54+00:00"
+            "time": "2026-04-02T13:18:00+00:00"
         },
         {
             "name": "matecat/klein",
