@@ -225,7 +225,7 @@ class UploadHandler
 
             // Exclude files with sha1 in the name.
             // Ex. 70a1af62ebce284ccaa4ab0dc8a37afb5b4cd296_da39a3ee5e6b4b0d3255bfef95601890afd80709|en-US
-            $pattern = '/^([a-f0-9]{40}(?:_[a-f0-9]{40})?)\|([a-z]{2}(?:-[A-Z]{2})?)$/';
+            $pattern = '/^[a-f0-9]{40}_[a-f0-9]{40}\|[a-zA-Z]{2,3}(?:-[a-zA-Z]{4})?(?:-(?:[a-zA-Z]{2}|[0-9]{3}))?(?:-[a-zA-Z0-9]+)*$/';
 
             if (preg_match($pattern, $file->name, $matches)) {
                 continue;
