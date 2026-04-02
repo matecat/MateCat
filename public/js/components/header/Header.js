@@ -58,67 +58,54 @@ const Header = ({
     selectedTeam.members.length > 1
 
   return (
-    <section className="nav-bar ui grid">
-      <nav className="sixteen wide column navigation">
-        <div className="ui grid">
-          <div className="three wide column" data-testid="logo">
-            <a href="/" className="logo" />
-          </div>
-          {showFilterProjects && (
-            <div className="nine wide column">
-              <FilterProjects ref={filterProjectsRef} />
+    <section className="header-container">
+      <a href="/" className="logo" />
+      <div className="header-elements">
+        {showFilterProjects && <FilterProjects ref={filterProjectsRef} />}
+        <div>
+          {showLinks ? (
+            <div>
+              <ul id="menu-site">
+                <li>
+                  <a href="https://site.matecat.com">About</a>
+                </li>
+                <li>
+                  <a href="https://site.matecat.com/benefits/">Benefits</a>
+                </li>
+                <li>
+                  <a href="https://site.matecat.com/outsourcing/">Outsource</a>
+                </li>
+                <li>
+                  <a href="https://guides.matecat.com/">User Guide</a>
+                </li>
+                {headerInterface.getMoreLinks()}
+              </ul>
             </div>
+          ) : (
+            ''
           )}
-
-          <div
-            className={`${showLinks ? 'user-teams thirteen' : 'user-teams four'} wide column right floated`}
-          >
-            {showLinks ? (
-              <div>
-                <ul id="menu-site">
-                  <li>
-                    <a href="https://site.matecat.com">About</a>
-                  </li>
-                  <li>
-                    <a href="https://site.matecat.com/benefits/">Benefits</a>
-                  </li>
-                  <li>
-                    <a href="https://site.matecat.com/outsourcing/">
-                      Outsource
-                    </a>
-                  </li>
-                  <li>
-                    <a href="https://guides.matecat.com/">User Guide</a>
-                  </li>
-                  {headerInterface.getMoreLinks()}
-                </ul>
-              </div>
-            ) : (
-              ''
-            )}
-
-            {canRenderMembersFilter && (
-              <MembersFilter
-                selectedTeam={fromJS(selectedTeam)}
-                currentUser={filterProjectsRef.current.currentUser}
-                setCurrentUser={filterProjectsRef.current.handleSetCurrentUser}
-              />
-            )}
-
-            {!!showFilterProjects && (
-              <TeamDropdown
-                isManage={showFilterProjects}
-                showModals={showModals}
-                changeTeam={changeTeam}
-              />
-            )}
-            {!!isQualityReport && jobUrls && (
-              <ActionMenu jobUrls={jobUrls.toJS()} />
-            )}
-            {showUserMenu && <UserMenu />}
-          </div>
         </div>
-      </nav>
+
+        {canRenderMembersFilter && (
+          <MembersFilter
+            selectedTeam={fromJS(selectedTeam)}
+            currentUser={filterProjectsRef.current.currentUser}
+            setCurrentUser={filterProjectsRef.current.handleSetCurrentUser}
+          />
+        )}
+
+        {!!showFilterProjects && (
+          <TeamDropdown
+            isManage={showFilterProjects}
+            showModals={showModals}
+            changeTeam={changeTeam}
+          />
+        )}
+        {!!isQualityReport && jobUrls && (
+          <ActionMenu jobUrls={jobUrls.toJS()} />
+        )}
+        {showUserMenu && <UserMenu />}
+      </div>
     </section>
   )
 }

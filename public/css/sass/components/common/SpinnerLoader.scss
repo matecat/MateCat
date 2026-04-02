@@ -5,6 +5,7 @@
   left: 50%;
   top: 50%;
   color: rgba(0, 0, 0, 0.87);
+  transform: translate(-50%, -50%);
 
   > span {
     display: block;
@@ -36,8 +37,6 @@
 }
 
 .spinner-loader-size-small {
-  transform: translate(-12px, -12px);
-
   > span {
     margin-top: 25px;
     font-size: 12px;
@@ -51,8 +50,6 @@
   }
 }
 .spinner-loader-size-medium {
-  transform: translate(-21px, -21px);
-
   > span {
     margin-top: 50px;
     font-size: 16px;
@@ -66,8 +63,6 @@
   }
 }
 .spinner-loader-size-large {
-  transform: translate(-37px, -37px);
-
   > span {
     margin-top: 85px;
     font-size: 24px;

@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import ManageConstants from '../../../constants/ManageConstants'
-import {Button, BUTTON_TYPE} from '../../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../common/Button/Button'
 import TEXT_UTILS from '../../../utils/textUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import {Input, INPUT_SIZE} from '../../common/Input/Input'
@@ -49,6 +49,7 @@ const MembersFilter = ({selectedTeam, currentUser, setCurrentUser}) => {
         <Button
           className={`members-filter-trigger-button user-project-dropdown${open ? ' members-filter-open' : ''}`}
           type={BUTTON_TYPE.BASIC}
+          size={BUTTON_SIZE.SMALL}
         >
           {currentUser === ManageConstants.ALL_MEMBERS_FILTER ? (
             <div className="members-filter-item-filter members-filter-all members-filter-user-full-name">

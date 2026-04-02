@@ -7,9 +7,15 @@ export const SPINNER_LOADER_SIZE = {
   LARGE: 'large',
 }
 
-export const SpinnerLoader = ({label, size = SPINNER_LOADER_SIZE.LARGE}) => {
+export const SpinnerLoader = ({
+  label,
+  size = SPINNER_LOADER_SIZE.LARGE,
+  className,
+}) => {
   return (
-    <div className={`spinner-loader spinner-loader-size-${size}`}>
+    <div
+      className={`spinner-loader spinner-loader-size-${size} ${className ? className : ''}`}
+    >
       <span>{label ?? 'Loading'}</span>
     </div>
   )
@@ -18,4 +24,5 @@ export const SpinnerLoader = ({label, size = SPINNER_LOADER_SIZE.LARGE}) => {
 SpinnerLoader.propTypes = {
   label: PropTypes.string,
   size: PropTypes.oneOf(Object.values(SPINNER_LOADER_SIZE)),
+  className: PropTypes.string,
 }

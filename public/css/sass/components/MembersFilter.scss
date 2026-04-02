@@ -10,16 +10,14 @@
   padding-right: 5px !important;
   font-size: 14px !important;
   color: black !important;
-  margin-right: 15px;
 
   &:disabled {
     box-shadow: unset !important;
     border: 1px solid colors.$grey200;
-    //color: $grey700 !important;
   }
 
   > :first-child {
-    margin-left: 3px !important;
+    margin-left: 0 !important;
     padding-left: 0 !important;
   }
 

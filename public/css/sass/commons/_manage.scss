@@ -1001,6 +1001,32 @@ ul {
   &.projects-container--loading {
     opacity: 0.5;
   }
+
+  .spinner-loader-more-projects {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.1s;
+    height: 120px;
+
+    > h5 {
+      font-weight: normal;
+    }
+
+    .spinner-loader-more-projects__loader-component {
+      position: absolute;
+
+      > span {
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .spinner-loader-more-projects--visible {
+    opacity: 1;
+  }
 }
 
 .projects-list {
