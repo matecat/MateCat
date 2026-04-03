@@ -759,3 +759,31 @@ All in-context review test files are organized under `tests/resources/files/in-c
 - **File-level `context-url`** — prepares for future `<file>` attribute extraction (§11.3)
 - **`screenshot` attribute** on t18 — segment-level metadata the backend stores but frontend does not consume yet
 - **`x-path`**, **`x-tag-id`**, **`x-css_class`** strategies against a product page DOM
+
+### 11.14 Integration Tests — In-Context Review (added 2026-04-03)
+
+Two test classes in `tests/unit/Model/Segments/InContextReview/`:
+
+| Class                            | What it verifies                                                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `XliffToMetadataIntegrationTest` | Full pipeline: XLIFF bytes → `XliffParser` → `SegmentMetadataMapper` → `SegmentMetadataCollection` |
+| `XPathResolutionContractTest`    | Every `restype="x-path"` trans-unit resolves against its context HTML and matches the XLIFF source |
+
+**XliffToMetadataIntegrationTest** (14 tests):
+
+- XLIFF 1.2 and 2.0 produce identical metadata after namespace stripping
+- Multi-file XLIFF parsed correctly (12 + 6 trans-units)
+- Every trans-unit has `resname` and `restype`
+- All 5 restype strategies pass through the marshaller
+- `x-client-name` extracted alongside `x-client_nodepath`
+- `screenshot` attribute extracted on t18
+- Non-metadata attributes (`id`, `xml:lang`, `approved`) filtered out
+
+**XPathResolutionContractTest** (11 tests):
+
+- Data provider dynamically extracts all `x-path` trans-units from the XLIFF 1.2 fixture
+- Each XPath is evaluated via `DOMXPath` against the corresponding context HTML file
+- Attribute-targeting XPaths (`/@alt`, `/@title`, `/@placeholder`) resolve `DOMAttr::nodeValue`
+- Element-targeting XPaths resolve `DOMElement::textContent`
+- XML entity normalization (`&#x00A9;` → `©`) via `html_entity_decode` for semantic comparison
+- Coverage guard: asserts the provider covers every `x-path` trans-unit in the fixture

@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    XLIFF 1.2 file demonstrating all resource types defined in the
-    "Technical Specification: Mapping Between Contextual Markup and Translatable Strings".
-
-    Each trans-unit uses 'resname' to carry the nodePath and 'restype' to declare
-    the identification method.  The corresponding context HTML is provided as a
-    reference in the <note> elements and matches the example in the spec.
-
-    Context HTML (the DOM against which all nodePath values were calculated):
-
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Sample Document</title>
-    </head>
-    <body>
-        <h1>Title</h1>
-        <div class="info">
-            <p>Informational text.</p>
-        </div>
-        <div>
-            <p>Paragraph in the first div.</p>
-        </div>
-        <div>
-            <p>Text in the second div, first paragraph.</p>
-            <span id="node_id">Text identified by an ID.</span>
-            <p class="unique-class">This paragraph is identified by a unique CSS class.</p>
-            <div data-custom-id="xyz-123">Content identified by a custom attribute.</div>
-        </div>
-        <img src="logo.png" id="logo" alt="Company Logo" title="Go to Homepage"/>
-        <input type="text" placeholder="Search the site..."/>
-    </body>
-    </html>
--->
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <!--
+        XLIFF 1.2 file demonstrating all resource types defined in the
+        "Technical Specification: Mapping Between Contextual Markup and Translatable Strings".
+
+        Each trans-unit uses 'resname' to carry the nodePath and 'restype' to declare
+        the identification method.  The corresponding context HTML is provided as a
+        reference in the <note> elements and matches the example in the spec.
+
+        Context HTML (the DOM against which all nodePath values were calculated):
+
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Sample Document</title>
+        </head>
+        <body>
+            <h1>Title</h1>
+            <div class="info">
+                <p>Informational text.</p>
+            </div>
+            <div>
+                <p>Paragraph in the first div.</p>
+            </div>
+            <div>
+                <p>Text in the second div, first paragraph.</p>
+                <span id="node_id">Text identified by an ID.</span>
+                <p class="unique-class">This paragraph is identified by a unique CSS class.</p>
+                <div data-custom-id="xyz-123">Content identified by a custom attribute.</div>
+            </div>
+            <img src="logo.png" id="logo" alt="Company Logo" title="Go to Homepage"/>
+            <input type="text" placeholder="Search the site..."/>
+        </body>
+        </html>
+    -->
     <file original="sample-document.html"
           source-language="en"
           target-language="it"
