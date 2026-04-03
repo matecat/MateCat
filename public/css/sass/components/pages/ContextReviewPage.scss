@@ -1,0 +1,221 @@
+@use '../common/SegmentedControl';
+@use '../../commons/colors';
+.context-review-page {
+  width: 100%;
+  max-width: unset;
+}
+.context-review-container {
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.context-review-toolbar {
+  font-family: Calibri, Arial, Helvetica, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid colors.$grey4;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: colors.$white;
+  .segmented-control__wrapper {
+    width: 430px;
+  }
+  .custom-segmented-control {
+    .segmented-control {
+      background-color: colors.$grey8;
+    }
+    .segmented-control__label {
+      line-height: 28px;
+    }
+    .segmented-control__cursor {
+      padding: 2px;
+    }
+    .segmented-control__cursor:before {
+      background-color: colors.$white;
+    }
+    .segmented-control input:checked + .segmented-control__label {
+      color: colors.$black;
+    }
+  }
+
+  .container-segmented-control {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.context-review-panels {
+  display: flex;
+  flex: 1;
+  gap: 0;
+  overflow: hidden;
+}
+
+.context-review-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.context-review-panel-header {
+  font-family: Calibri, Arial, Helvetica, sans-serif;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.context-review-divider {
+  width: 1px;
+  background-color: colors.$grey4;
+  flex-shrink: 0;
+}
+
+.context-review-content {
+  flex: 1;
+  overflow: auto;
+  cursor: default;
+  padding: 20px;
+  // Create a new containing block so that position:fixed elements from the
+  // fetched HTML stay within the panel instead of covering the viewport.
+  transform: translateZ(0);
+
+  p,
+  li,
+  td,
+  th,
+  h1,
+  h2,
+  h3,
+  h4 {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: rgba(colors.$blue800, 0.08);
+      border-radius: 2px;
+    }
+  }
+}
+
+.context-review-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  font-size: 16px;
+  color: colors.$grey1;
+}
+
+.context-review-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+
+  h2 {
+    color: colors.$red800;
+    margin-bottom: 12px;
+    font-size: 20px;
+  }
+
+  p {
+    color: colors.$grey1;
+    font-size: 14px;
+  }
+}
+
+// Highlight styles for matched text
+mark.context-review-highlight {
+  background-color: colors.$orangeDefaultTransparent;
+  color: inherit;
+  padding: 1px 2px;
+  border-radius: 2px;
+  box-decoration-break: clone;
+}
+
+mark.context-review-highlight--active {
+  background-color: colors.$warning;
+  outline: 2px solid colors.$warningHover;
+  outline-offset: 1px;
+}
+
+// Navigation bar for cycling through multiple occurrences
+.context-review-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+  font-family: Calibri, Arial, Helvetica, sans-serif;
+}
+
+.context-review-nav__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid colors.$grey4;
+  border-radius: 4px;
+  background-color: colors.$white;
+  color: colors.$grey6;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background-color: colors.$grey5;
+    color: colors.$black;
+  }
+
+  &:active {
+    background-color: colors.$grey4;
+  }
+
+  // First button is "previous" — rotate the chevron to point up
+  &:first-child svg {
+    transform: rotate(180deg);
+  }
+}
+
+.context-review-nav__counter {
+  font-size: 13px;
+  font-weight: 600;
+  color: colors.$grey6;
+  min-width: 50px;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+}
+
+[data-context-sids].context-review-node--mismatch {
+  outline: 2px solid #e05c00;
+  outline-offset: 2px;
+  position: relative;
+
+  &::after {
+    content: '⚠';
+    position: absolute;
+    top: -0.6em;
+    right: -0.3em;
+    font-size: 0.75em;
+    color: #e05c00;
+    pointer-events: none;
+  }
+}

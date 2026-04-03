@@ -11,8 +11,6 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
-use Matecat\SubFiltering\Enum\InjectableFiltersTags;
-use Matecat\SubFiltering\HandlersSorter;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;
@@ -24,7 +22,6 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -37,13 +34,12 @@ use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
-use Model\Users\UserStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
@@ -199,11 +195,11 @@ class NewController extends KleinController
      * submission, project sanitization) are intentionally left in
      * {@see create()}.
      *
-     * @param array          $request     Validated request data from validateTheRequest()
-     * @param array          $filesFound  Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
-     * @param string         $uploadToken Upload directory token
-     * @param UserStruct     $user        Authenticated user
-     * @param AbstractEngine $engine      MT engine instance (for getConfigurationParameters())
+     * @param array $request Validated request data from validateTheRequest()
+     * @param array $filesFound Output of getFilesList() with 'arrayFiles' and 'arrayFilesMeta'
+     * @param string $uploadToken Upload directory token
+     * @param UserStruct $user Authenticated user
+     * @param AbstractEngine $engine MT engine instance (for getConfigurationParameters())
      *
      * @return ProjectStructure
      */
@@ -604,8 +600,22 @@ class NewController extends KleinController
 
             $metadata = html_entity_decode($metadata);
             $validatorObject = new JSONValidatorObject($metadata);
-            $validator = new JSONValidator('project_metadata.json', true);
+            $validator = new JSONValidator('project_metadata.json');
             $validator->validate($validatorObject);
+
+            if (!$validator->isValid()) {
+                throw new InvalidArgumentException(
+                    'Invalid Metadata. ' . implode(
+                        "",
+                        array_map(
+                            function ($exception) {
+                                return $exception->getMessage();
+                            },
+                            $validator->getExceptions()
+                        )
+                    )
+                );
+            }
 
             $depth = 2;
             $parsedMetadata = json_decode($metadata, true, $depth);

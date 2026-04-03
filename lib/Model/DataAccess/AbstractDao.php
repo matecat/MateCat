@@ -231,8 +231,11 @@ abstract class AbstractDao
         }
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, $fetchClass);
+
+        $t0 = microtime(true);
         $stmt->execute($bindParams);
         $result = $stmt->fetchAll();
+        $this->_setLastComputeDelta(microtime(true) - $t0);
 
         $this->_setInCacheMap($keyMap, $stmt->queryString . $this->_serializeForCacheKey($bindParams) . $fetchClass, $result);
 

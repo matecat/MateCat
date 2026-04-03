@@ -49,6 +49,13 @@ import {CatToolInterface} from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import ContextReviewChannel from '../utils/contextReviewChannel'
+import {extractSegmentContextFields} from '../utils/contextReviewUtils'
+import useResizable from '../hooks/useResizable'
+import IconRedirect from '../components/icons/IconRedirect'
+import IconDown from '../components/icons/IconDown'
+import EyeIcon from '../../img/icons/EyeIcon'
+import {Button} from '../components/common/Button/Button'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -79,7 +86,82 @@ function CatTool() {
 
   const startSegmentIdRef = useRef()
   const callbackAfterSegmentsResponseRef = useRef()
+  const {
+    height: contextReviewHeight,
+    isDragging: isResizing,
+    handleMouseDown: onResizeMouseDown,
+  } = useResizable({initialHeight: 500, minHeight: 100})
 
+  const [isPreviewOpen, setIsPreviewOpen] = useState(true)
+  const contextReviewUrl = `${window.origin}/context-review/${config.id_job}/${config.password}`
+  const popupWindowRef = useRef(null)
+
+  const togglePreview = useCallback(() => {
+    setIsPreviewOpen((prev) => {
+      if (!prev && popupWindowRef.current && !popupWindowRef.current.closed) {
+        popupWindowRef.current.close()
+        popupWindowRef.current = null
+      }
+      return !prev
+    })
+  }, [])
+
+  const openPreviewInNewWindow = useCallback(() => {
+    if (popupWindowRef.current && !popupWindowRef.current.closed) {
+      popupWindowRef.current.focus()
+    } else {
+      const width = Math.round(window.screen.width * 0.8)
+      const height = Math.round(window.screen.height * 0.8)
+      const left = Math.round((window.screen.width - width) / 2)
+      const top = Math.round((window.screen.height - height) / 2)
+      popupWindowRef.current = window.open(
+        contextReviewUrl,
+        'contextReviewWindow',
+        `width=${width},height=${height},left=${left},top=${top}`,
+      )
+    }
+    setIsPreviewOpen(false)
+  }, [contextReviewUrl])
+
+  useEffect(() => {
+    return ContextReviewChannel.onMessage((message) => {
+      if (message.type === 'segmentClicked' && message.sid) {
+        SegmentActions.openSegment(message.sid)
+      }
+
+      if (message.type === 'requestSegments') {
+        const segments = SegmentStore.getAllSegments()
+        if (segments && segments.length) {
+          const segmentsList = []
+          for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i]
+            segmentsList.push({
+              sid: seg.sid,
+              source: seg.segment,
+              target: seg.translation,
+              ...extractSegmentContextFields(seg),
+            })
+          }
+          ContextReviewChannel.sendMessage({
+            type: 'segments',
+            segments: segmentsList,
+          })
+        }
+      }
+
+      if (message.type === 'loadMoreSegments' && message.where) {
+        const segmentId =
+          message.where === 'after'
+            ? SegmentStore.getLastSegmentId()
+            : SegmentStore.getFirstSegmentId()
+        setOptions((prevState) => ({
+          ...prevState,
+          segmentId,
+          where: message.where,
+        }))
+      }
+    })
+  }, [])
   const {isLoading: isLoadingSegments, result: segmentsResult} =
     useSegmentsLoader({
       segmentId: options?.segmentId
@@ -334,10 +416,6 @@ function CatTool() {
 
     const {segmentId, data} = segmentsResult
     if (where === 'center') {
-      // Init segments
-      // TODO: da verificare se serve: $(document).trigger('segments:load', data)
-      $(document).trigger('segments:load', data)
-
       if (
         !Object.entries(data.files)
           .map(([, value]) => value.segments)
@@ -381,6 +459,20 @@ function CatTool() {
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       CommonUtils.dispatchCustomEvent('segmentsAdded', {resp: data.files})
     }
+    const segmentsFlat = Object.entries(data.files)
+      .map(([, value]) => value.segments)
+      .flat()
+    const segmentsList = []
+    for (let i = 0; i < segmentsFlat.length; i++) {
+      const seg = segmentsFlat[i]
+      segmentsList.push({
+        sid: seg.sid,
+        source: seg.segment,
+        target: seg.translation,
+        ...extractSegmentContextFields(seg),
+      })
+    }
+    ContextReviewChannel.sendMessage({type: 'segments', segments: segmentsList})
     if (config.isReview) {
       SegmentActions.addPreloadedIssuesToSegment()
     }
@@ -536,6 +628,52 @@ function CatTool() {
         </div>
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
+      </div>
+      <div id="context-review-wrapper">
+        {isPreviewOpen && (
+          <div
+            className="context-review__resize-handle"
+            onMouseDown={onResizeMouseDown}
+          />
+        )}
+        <div className="context-review__header">
+          <span className="context-review__header-title">
+            <EyeIcon size={16} />
+            Preview
+          </span>
+          <div className="context-review__header-actions">
+            <Button
+              className="context-review__header-btn"
+              onClick={openPreviewInNewWindow}
+              title="Open in new window"
+            >
+              <IconRedirect size={16} />
+            </Button>
+
+            <Button
+              className="context-review__header-btn"
+              onClick={togglePreview}
+              title={isPreviewOpen ? 'Close preview' : 'Open preview'}
+            >
+              <span className="context-review__header-close-label">
+                {isPreviewOpen ? 'Close' : 'Open'}
+              </span>
+              <IconDown size={16} />
+            </Button>
+          </div>
+        </div>
+        {isPreviewOpen && (
+          <div
+            className="context-review__container"
+            id="context-review"
+            style={{
+              height: contextReviewHeight,
+              pointerEvents: isResizing ? 'none' : undefined,
+            }}
+          >
+            <iframe src={contextReviewUrl} />
+          </div>
+        )}
       </div>
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (

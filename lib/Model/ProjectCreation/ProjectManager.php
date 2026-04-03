@@ -28,6 +28,7 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use Model\Segments\SegmentMetadataMapper;
 use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
@@ -156,6 +157,7 @@ class ProjectManager
             $this->filter,
             $this->features,
             $this->filesMetadataDao,
+            new SegmentMetadataMapper(),
             $this->logger,
         );
     }

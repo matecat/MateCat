@@ -4,6 +4,7 @@ namespace unit\LQA;
 
 use LogicException;
 use Matecat\ICU\MessagePatternComparator;
+use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentMetadataStruct;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
@@ -625,7 +626,7 @@ class QATest extends AbstractTest
     public function setCharactersCountConfiguresSizeRestrictionChecker(): void
     {
         $qa = new QA('Source', 'Target');
-        $qa->setCharactersCount(99, new SegmentMetadataStruct(['meta_value' => 100, 'meta_key' => QA::SIZE_RESTRICTION]));
+        $qa->setCharactersCount(99, new SegmentMetadataStruct(['meta_value' => 100, 'meta_key' => SegmentMetadataMarshaller::SIZE_RESTRICTION->value]));
         $qa->performConsistencyCheck();
 
         // Should not throw exception
@@ -636,7 +637,7 @@ class QATest extends AbstractTest
     public function setCharactersCountConfiguresSizeRestrictionCheckerFail(): void
     {
         $qa = new QA('Source', 'Target');
-        $qa->setCharactersCount(100, new SegmentMetadataStruct(['meta_value' => 99, 'meta_key' => QA::SIZE_RESTRICTION]));
+        $qa->setCharactersCount(100, new SegmentMetadataStruct(['meta_value' => 99, 'meta_key' => SegmentMetadataMarshaller::SIZE_RESTRICTION->value]));
         $qa->performConsistencyCheck();
 
         // Should not throw exception

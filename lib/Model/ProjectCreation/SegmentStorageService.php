@@ -12,6 +12,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
@@ -165,10 +166,10 @@ class SegmentStorageService
             );
         }
 
-        /** @var ?SegmentMetadataStruct $segmentMetadataStruct */
-        $segmentMetadataStruct = $projectStructure->segments_meta_data[$fid][$position] ?? null;
+        /** @var SegmentMetadataCollection $metadataCollection */
+        $metadataCollection = $projectStructure->segments_meta_data[$fid][$position] ?? new SegmentMetadataCollection();
 
-        if ($segmentMetadataStruct !== null) {
+        foreach ($metadataCollection as $segmentMetadataStruct) {
             $this->saveSegmentMetadata($id_segment, $segmentMetadataStruct);
         }
 

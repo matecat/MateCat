@@ -10,6 +10,7 @@ use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TranslationTuple;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataCollection;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
@@ -313,7 +314,7 @@ class SegmentStorageServiceTest extends AbstractTest
         $this->stubSequence(1, 500);
         $this->stubFeaturesPassThrough();
 
-        $ps = $this->makeProjectStructure($fid, [$seg], [], [$fid => [0 => $meta]]);
+        $ps = $this->makeProjectStructure($fid, [$seg], [], [$fid => [0 => new SegmentMetadataCollection([$meta])]]);
         $this->service->storeSegments($fid, $ps);
 
         $persisted = $this->service->getPersistedSegmentMetadata();

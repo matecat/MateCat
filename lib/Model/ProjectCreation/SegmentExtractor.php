@@ -17,9 +17,10 @@ use Model\Files\FilesPartsStruct;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\S3FilesStorage;
-use Model\Segments\SegmentMetadataStruct;
+use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
+use Model\Segments\SegmentMetadataMapper;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionException;
@@ -79,6 +80,7 @@ class SegmentExtractor
         private readonly MateCatFilter $filter,
         private readonly FeatureSet $features,
         private readonly MetadataDao $filesMetadataDao,
+        private readonly SegmentMetadataMapper $segmentMetadataMapper,
         MatecatLogger $logger,
     ) {
         $this->logger = $logger;
@@ -489,22 +491,6 @@ class SegmentExtractor
     // ── Private helpers ─────────────────────────────────────────────
 
     /**
-     * Extract the sizeRestriction value from a trans-unit's attributes.
-     *
-     * Returns the value as an int if present and > 0, null otherwise.
-     *
-     * @param array<string, mixed> $xliff_trans_unit
-     */
-    private function getSizeRestrictionValue(array $xliff_trans_unit): ?int
-    {
-        if (isset($xliff_trans_unit['attr']['sizeRestriction']) && $xliff_trans_unit['attr']['sizeRestriction'] > 0) {
-            return (int)$xliff_trans_unit['attr']['sizeRestriction'];
-        }
-
-        return null;
-    }
-
-    /**
      * Build a dataRef map from the trans-unit's original-data entries.
      *
      * @param array<string, mixed> $xliff_trans_unit
@@ -687,14 +673,12 @@ class SegmentExtractor
         ?string $xliffMrkExtSuccTags = null,
         ?string $xliffExtSuccTags = null,
     ): array {
-        // --- Segment metadata (sizeRestriction) ---
-        $metadataStruct = new SegmentMetadataStruct();
-        $sizeRestriction = $this->getSizeRestrictionValue($xliff_trans_unit);
-        if ($sizeRestriction !== null) {
-            $metadataStruct->meta_key = 'sizeRestriction';
-            $metadataStruct->meta_value = (string)$sizeRestriction;
-        }
-        $projectStructure->segments_meta_data[$fid][] = $metadataStruct;
+        // --- Segment metadata (mapped from trans-unit attributes) ---
+        $metadataCollection = $this->segmentMetadataMapper->fromTransUnitAttributes($xliff_trans_unit['attr'] ?? []);
+        $projectStructure->segments_meta_data[$fid][] = $metadataCollection;
+
+        // Extract sizeRestriction meta_value for hash computation
+        $sizeRestriction = $metadataCollection->find(SegmentMetadataMarshaller::SIZE_RESTRICTION);
 
         // --- Segment original data ---
         $segmentOriginalDataStruct = (new SegmentOriginalDataStruct())->setMap($dataRefMap);
@@ -734,7 +718,7 @@ class SegmentExtractor
      *
      * @param array<string, string>|null $dataRefMap
      */
-    private function createSegmentHash(string $rawContent, ?array $dataRefMap = null, ?int $sizeRestriction = null): string
+    private function createSegmentHash(string $rawContent, ?array $dataRefMap = null, ?string $sizeRestriction = null): string
     {
         $segmentToBeHashed = $rawContent;
 

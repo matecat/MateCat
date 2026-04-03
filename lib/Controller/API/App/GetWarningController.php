@@ -18,6 +18,7 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Translations\WarningDao;
 use Utils\LQA\ICUSourceSegmentChecker;
@@ -157,7 +158,7 @@ class GetWarningController extends KleinController
         $QA->setTargetSegLang($chunk->target);
 
         if (!$this->sourceContainsIcu && isset($characters_counter)) {
-            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, QA::SIZE_RESTRICTION)[0] ?? null);
+            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value));
         }
 
         $QA->performConsistencyCheck();
