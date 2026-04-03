@@ -1,0 +1,148 @@
+import {useState, useRef, useCallback} from 'react'
+import {
+  clearHighlights,
+  highlightBySid,
+  setActiveHighlight,
+  getSegmentNodeMap,
+} from '../utils/contextReviewUtils'
+import ContextReviewChannel from '../utils/contextReviewChannel'
+
+/**
+ * Manages highlight state and occurrence navigation for the ContextReview panels.
+ *
+ * @param {{sourceRef: React.RefObject, targetRef: React.RefObject}} params
+ * @returns {{
+ *   highlight: object|null,
+ *   setHighlight: Function,
+ *   highlightRef: React.RefObject,
+ *   applyHighlightsForSegment: Function,
+ *   applyHighlightsForNode: Function,
+ *   navigateHighlight: Function,
+ *   handlePrev: Function,
+ *   handleNext: Function,
+ * }}
+ */
+const useContextHighlight = ({sourceRef, targetRef}) => {
+  const [highlight, setHighlightState] = useState(null)
+  const highlightRef = useRef(null)
+
+  const setHighlight = useCallback((valueOrUpdater) => {
+    setHighlightState((prev) => {
+      const next =
+        typeof valueOrUpdater === 'function'
+          ? valueOrUpdater(prev)
+          : valueOrUpdater
+      highlightRef.current = next
+      return next
+    })
+  }, [])
+
+  const applyHighlightsForSegment = useCallback(
+    (sid, activeIndex, scroll) => {
+      let total = 0
+      if (sourceRef.current) {
+        clearHighlights(sourceRef.current)
+        const res = highlightBySid(sourceRef.current, sid, activeIndex)
+        total = res.total
+        if (scroll && res.marks[activeIndex]) {
+          res.marks[activeIndex][0].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        }
+      }
+      if (targetRef.current) {
+        clearHighlights(targetRef.current)
+        const res = highlightBySid(targetRef.current, sid, activeIndex)
+        if (!total) total = res.total
+        if (scroll && res.marks[activeIndex]) {
+          res.marks[activeIndex][0].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        }
+      }
+      return total
+    },
+    [sourceRef, targetRef],
+  )
+
+  const applyHighlightsForNode = useCallback(
+    (nodeIndex, activeSegIdx, scroll) => {
+      ;[sourceRef, targetRef].forEach((ref) => {
+        if (!ref.current) return
+        const map = getSegmentNodeMap(ref.current)
+        if (!map) return
+        const sids = map.nodeIndexToSids.get(nodeIndex) ?? []
+        const activeSid = sids[activeSegIdx] ?? sids[0]
+        if (activeSid == null) return
+        clearHighlights(ref.current)
+        const res = highlightBySid(ref.current, activeSid, 0)
+        if (scroll && res.marks[0]?.[0]) {
+          res.marks[0][0].scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        }
+      })
+    },
+    [sourceRef, targetRef],
+  )
+
+  const navigateHighlight = useCallback(
+    (direction) => {
+      if (!highlight) return
+
+      if (highlight.mode === 'segment') {
+        const nextIndex =
+          direction === 'next'
+            ? (highlight.activeIndex + 1) % highlight.total
+            : (highlight.activeIndex - 1 + highlight.total) % highlight.total
+        ;[sourceRef, targetRef].forEach((ref) => {
+          if (!ref.current) return
+          const mark = setActiveHighlight(ref.current, nextIndex)
+          if (mark) mark.scrollIntoView({behavior: 'smooth', block: 'center'})
+        })
+        setHighlight((prev) => ({...prev, activeIndex: nextIndex}))
+        return
+      }
+
+      if (highlight.mode === 'node') {
+        const {sids, activeSegIdx, nodeIndex} = highlight
+        const nextSegIdx =
+          direction === 'next'
+            ? (activeSegIdx + 1) % sids.length
+            : (activeSegIdx - 1 + sids.length) % sids.length
+        ContextReviewChannel.sendMessage({
+          type: 'segmentClicked',
+          sid: sids[nextSegIdx],
+        })
+        applyHighlightsForNode(nodeIndex, nextSegIdx, false)
+        setHighlight((prev) => ({...prev, activeSegIdx: nextSegIdx}))
+      }
+    },
+    [highlight, sourceRef, targetRef, applyHighlightsForNode, setHighlight],
+  )
+
+  const handlePrev = useCallback(
+    () => navigateHighlight('prev'),
+    [navigateHighlight],
+  )
+  const handleNext = useCallback(
+    () => navigateHighlight('next'),
+    [navigateHighlight],
+  )
+
+  return {
+    highlight,
+    setHighlight,
+    highlightRef,
+    applyHighlightsForSegment,
+    applyHighlightsForNode,
+    navigateHighlight,
+    handlePrev,
+    handleNext,
+  }
+}
+
+export default useContextHighlight

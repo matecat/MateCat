@@ -5,7 +5,7 @@ import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/Appl
 import CommonUtils from '../../../../utils/commonUtils'
 import Feedback from '../../../icons/Feedback'
 
-export const AiFeedback = ({sid}) => {
+export const AiFeedback = ({sid, segment}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
   const openTab = () => {
@@ -22,14 +22,23 @@ export const AiFeedback = ({sid}) => {
     CommonUtils.dispatchTrackingEvents('AiFeedback', message)
   }
 
+  const isDisabled =
+    !segment.modified &&
+    (segment.status === 'NEW' || segment.status === 'DRAFT')
+
   return (
     !config.isReview && (
       <Button
         className="segment-target-toolbar-icon"
         size={BUTTON_SIZE.ICON_SMALL}
         mode={BUTTON_MODE.OUTLINE}
-        title="Ai feedback"
+        title={
+          isDisabled
+            ? 'Lara feedback - edit translation to enable'
+            : 'Lara feedback'
+        }
         onClick={openTab}
+        disabled={isDisabled}
       >
         <Feedback size={16} />
       </Button>

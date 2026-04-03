@@ -2,10 +2,24 @@ import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {findElementByMetadata} from './contextReviewLookup'
+
+const containerMaps = new WeakMap()
 
 const HIGHLIGHT_CLASS = 'context-review-highlight'
 const HIGHLIGHT_ACTIVE_CLASS = 'context-review-highlight--active'
-const SEGMENT_SID_ATTR = 'data-context-sid'
+const SEGMENT_SIDS_ATTR = 'data-context-sids'
+
+/**
+ * Returns the list of SIDs associated with an element, or [] if none.
+ * @param {HTMLElement} el
+ * @returns {number[]}
+ */
+export const getSidsFromElement = (el) => {
+  const raw = el.getAttribute(SEGMENT_SIDS_ATTR)
+  if (!raw) return []
+  return raw.split(',').map(Number).filter(Boolean)
+}
 
 /**
  * Decodes HTML entities in a string (e.g. `&amp;` → `&`, `&lt;` → `<`).
@@ -67,6 +81,37 @@ export const replaceTextContent = (el, newText) => {
 }
 
 /**
+ * Attempts to replace the visible text of a node with its translated content.
+ *
+ * Only performs the replacement when every segment linked to the node has a
+ * non-empty target AND all targets are identical (after stripping XLIFF tags).
+ *
+ * @param {HTMLElement} el
+ * @param {Array<{sid: number, source: string, target: string}>} segments
+ * @returns {'ok'|'mismatch'|'no-target'}
+ */
+export const updateNodeTranslation = (el, segments) => {
+  const sids = getSidsFromElement(el)
+  if (!sids.length) return 'no-target'
+
+  const sidSet = new Set(sids)
+  const relevant = segments.filter((s) => sidSet.has(Number(s.sid)))
+  if (!relevant.length || relevant.length < sids.length) return 'no-target'
+
+  const targets = relevant
+    .map((s) => (s.target ? stripSegmentTags(s.target).trim() : null))
+    .filter(Boolean)
+
+  if (targets.length < relevant.length) return 'no-target'
+
+  const allSame = targets.every((t) => t === targets[0])
+  if (!allSame) return 'mismatch'
+
+  replaceTextContent(el, targets[0])
+  return 'ok'
+}
+
+/**
  * Clears all existing highlights from the container by unwrapping
  * <mark> elements back to their original text nodes.
  *
@@ -104,10 +149,11 @@ export const buildFlexibleRegex = (searchText) => {
 }
 
 /**
- * Highlights all elements in a container that have a matching
- * `data-context-sid` attribute. Wraps their text content in <mark> elements.
+ * Highlights all elements in a container whose `data-context-sids`
+ * attribute includes the given SID. Wraps their text content in
+ * <mark> elements.
  *
- * Each matched `[data-context-sid]` element is one "occurrence".
+ * Each matched element is one "occurrence".
  * The `activeIndex` parameter controls which occurrence gets the
  * `--active` class (defaults to 0 — the first one).
  *
@@ -124,7 +170,11 @@ export const highlightBySid = (container, sid, activeIndex = 0) => {
   const result = {total: 0, marks: []}
   if (!container || sid == null) return result
 
-  const elements = container.querySelectorAll(`[${SEGMENT_SID_ATTR}="${sid}"]`)
+  const numSid = Number(sid)
+  const all = container.querySelectorAll(`[${SEGMENT_SIDS_ATTR}]`)
+  const elements = Array.from(all).filter((el) =>
+    getSidsFromElement(el).includes(numSid),
+  )
   if (!elements.length) return result
 
   elements.forEach((el, elIndex) => {
@@ -173,12 +223,12 @@ export const setActiveHighlight = (container, activeIndex) => {
   const allMarks = container.querySelectorAll(`mark.${HIGHLIGHT_CLASS}`)
   allMarks.forEach((m) => m.classList.remove(HIGHLIGHT_ACTIVE_CLASS))
 
-  // Group marks by their closest [data-context-sid] ancestor to determine
+  // Group marks by their closest [data-context-sids] ancestor to determine
   // which occurrence each mark belongs to.
   const occurrences = []
   const seen = new Set()
   allMarks.forEach((m) => {
-    const ancestor = m.closest(`[${SEGMENT_SID_ATTR}]`)
+    const ancestor = m.closest(`[${SEGMENT_SIDS_ATTR}]`)
     if (!ancestor) return
     if (!seen.has(ancestor)) {
       seen.add(ancestor)
@@ -238,21 +288,24 @@ const findMeaningfulParent = (clickedElement, container) => {
 }
 
 /**
- * Finds the segment SID that matches the text content of a clicked element,
- * plus the occurrence index of the clicked element among all elements with
- * the same SID in the container.
+ * Finds all segment SIDs that match the text content of a clicked element,
+ * plus the index of the clicked node in the container's node map.
  *
- * First checks for a `data-context-sid` attribute on the element or its
- * ancestors, then falls back to fuzzy-matching the text against the
- * segments list.
+ * Strategy 1: Check for a `data-context-sids` attribute on the element or
+ * an ancestor, then read all SIDs from that attribute.
+ *
+ * Strategy 2 (fallback): Fuzzy-match the clicked text against all segments
+ * and collect every SID whose source/target matches.
  *
  * @param {HTMLElement} clickedElement - The element that was clicked
  * @param {HTMLElement} container - The panel container element
  * @param {Array<{sid: number, source: string, target: string}>} segments - The segments mapping
  * @param {'source'|'target'} field - Which field to match against
- * @returns {{sid: number, occurrenceIndex: number}|null}
+ * @returns {{sids: number[], nodeIndex: number}|null} nodeIndex is the element's
+ *   position in the container's segment node map (`nodes` array). Falls back to 0
+ *   when the node map is unavailable or the element is not found in it.
  */
-export const findSegmentSidByClick = (
+export const findSegmentSidsByClick = (
   clickedElement,
   container,
   segments,
@@ -260,48 +313,37 @@ export const findSegmentSidByClick = (
 ) => {
   if (!segments || !segments.length) return null
 
-  // 1. Check for data-context-sid on the clicked element or any ancestor
-  const sidEl = clickedElement.closest(`[${SEGMENT_SID_ATTR}]`)
+  // Strategy 1: data-context-sids attribute on clicked element or ancestor
+  const sidEl = clickedElement.closest(`[${SEGMENT_SIDS_ATTR}]`)
   if (sidEl) {
-    const sid = parseInt(sidEl.getAttribute(SEGMENT_SID_ATTR), 10)
-    // Determine occurrence index: find all elements with same SID and see
-    // which one is (or contains) the clicked element.
-    const allWithSid = container.querySelectorAll(
-      `[${SEGMENT_SID_ATTR}="${sid}"]`,
-    )
-    let occurrenceIndex = 0
-    for (let i = 0; i < allWithSid.length; i++) {
-      if (allWithSid[i] === sidEl || allWithSid[i].contains(sidEl)) {
-        occurrenceIndex = i
-        break
-      }
-    }
-    return {sid, occurrenceIndex}
+    const sids = getSidsFromElement(sidEl)
+    const map = getSegmentNodeMap(container)
+    let nodeIndex = map ? map.nodes.indexOf(sidEl) : 0
+    if (nodeIndex === -1) nodeIndex = 0
+    return {sids, nodeIndex}
   }
 
-  // 2. Fallback: fuzzy-match the clicked text against segments.
-  //    When multiple segments match, pick the longest one so that e.g.
-  //    "Welcome to our finest equipment" wins over "Equipment" when the
-  //    user clicks on the <h2> that contains both.
+  // Strategy 2: fuzzy text match (fallback for untagged elements)
   const targetEl = findMeaningfulParent(clickedElement, container)
   const clickedText = targetEl.textContent.replace(/\s+/g, ' ').trim()
   if (!clickedText) return null
 
-  let bestMatch = null
-
+  const matchingSids = []
+  const seenSids = new Set()
   for (const seg of segments) {
     const segText = seg[field]
     if (!segText) continue
+    const numSid = Number(seg.sid)
+    if (seenSids.has(numSid)) continue
     const regex = buildFlexibleRegex(segText)
     regex.lastIndex = 0
     if (regex.test(clickedText)) {
-      if (!bestMatch || segText.length > bestMatch.source.length) {
-        bestMatch = {sid: seg.sid, source: segText}
-      }
+      matchingSids.push(numSid)
+      seenSids.add(numSid)
     }
   }
 
-  return bestMatch ? {sid: bestMatch.sid, occurrenceIndex: 0} : null
+  return matchingSids.length > 0 ? {sids: matchingSids, nodeIndex: 0} : null
 }
 
 /**
@@ -325,6 +367,40 @@ export const stripSegmentTags = (text) => {
     ),
   )
 }
+
+/**
+ * Builds and caches the two-way segment↔node lookup maps for a container.
+ * Must be called after tagSegments has finished tagging the container.
+ *
+ * @param {HTMLElement} container
+ * @returns {{ sidToNodeIndices: Map<number, number[]>, nodeIndexToSids: Map<number, number[]>, nodes: HTMLElement[] }}
+ */
+export const buildSegmentNodeMap = (container) => {
+  const nodes = Array.from(container.querySelectorAll(`[${SEGMENT_SIDS_ATTR}]`))
+  const sidToNodeIndices = new Map()
+  const nodeIndexToSids = new Map()
+
+  nodes.forEach((el, nodeIndex) => {
+    const sids = getSidsFromElement(el)
+    nodeIndexToSids.set(nodeIndex, sids)
+    sids.forEach((sid) => {
+      if (!sidToNodeIndices.has(sid)) sidToNodeIndices.set(sid, [])
+      sidToNodeIndices.get(sid).push(nodeIndex)
+    })
+  })
+
+  const map = {sidToNodeIndices, nodeIndexToSids, nodes}
+  containerMaps.set(container, map)
+  return map
+}
+
+/**
+ * Returns the cached map for a container, or null if not yet built.
+ * @param {HTMLElement} container
+ * @returns {{ sidToNodeIndices: Map<number, number[]>, nodeIndexToSids: Map<number, number[]>, nodes: HTMLElement[] }|null}
+ */
+export const getSegmentNodeMap = (container) =>
+  containerMaps.get(container) ?? null
 
 /**
  * Walks all block-level elements in a container and tags those whose
@@ -364,17 +440,19 @@ export const stripSegmentTags = (text) => {
 export const tagSegments = (
   container,
   segments,
-  {replaceWithTarget = false} = {},
+  {replaceWithTarget = false, metadataMap = {}} = {},
 ) => {
   if (!container || !segments || !segments.length) return
 
   // Pre-compute normalised source for each segment, sorted by SID so
   // their order matches the document order of the HTML elements.
+  // Coerce `sid` to Number so comparisons against getSidsFromElement()
+  // (which returns number[]) use strict equality consistently.
   const prepared = segments
     .map((seg) => ({
       ...seg,
+      sid: Number(seg.sid),
       normSource: stripSegmentTags(seg.source),
-      normTarget: stripSegmentTags(seg.target),
     }))
     .filter((seg) => seg.normSource)
     .sort((a, b) => a.sid - b.sid)
@@ -385,44 +463,142 @@ export const tagSegments = (
   // must be marked as consumed so they are not re-assigned to a different
   // DOM element with the same text.
   const alreadyTagged = new Set()
-  container
-    .querySelectorAll(`[${SEGMENT_SID_ATTR}]`)
-    .forEach((el) => alreadyTagged.add(el.getAttribute(SEGMENT_SID_ATTR)))
+  container.querySelectorAll(`[${SEGMENT_SIDS_ATTR}]`).forEach((el) => {
+    getSidsFromElement(el).forEach((sid) => alreadyTagged.add(sid))
+  })
 
   // Track which segments have been consumed (by index in `prepared`).
   // Pre-mark segments whose SID is already in the DOM.
   const used = new Set()
   for (let i = 0; i < prepared.length; i++) {
-    if (alreadyTagged.has(String(prepared[i].sid))) {
+    if (alreadyTagged.has(prepared[i].sid)) {
       used.add(i)
+    }
+  }
+
+  // Cache parsed SIDs per element to avoid repeated getAttribute + split
+  // calls inside the inner loops.
+  const elSidsCache = new Map()
+  const getCachedSids = (el) => {
+    if (!elSidsCache.has(el)) elSidsCache.set(el, getSidsFromElement(el))
+    return elSidsCache.get(el)
+  }
+  const appendSid = (el, sid) => {
+    const existing = getCachedSids(el)
+    // Defense-in-depth: never append a SID that is already on the element.
+    if (existing.includes(sid)) return
+    const updated = [...existing, sid].sort((a, b) => a - b)
+    el.setAttribute(SEGMENT_SIDS_ATTR, updated.join(','))
+    elSidsCache.set(el, updated)
+  }
+
+  // Strategy pass — runs first, highest priority.
+  // Segments with resname + restype are resolved via DOM-attribute lookups
+  // before any text-match runs. Misses join fallbackQueue and compete in
+  // text-match exactly as segments with no metadata.
+  const strategyResolved = new Set()
+  const fallbackQueue = new Set()
+
+  for (const [sidStr, {resname, restype}] of Object.entries(metadataMap)) {
+    const sid = Number(sidStr)
+    if (!resname || !restype) continue
+    if (alreadyTagged.has(sid)) {
+      strategyResolved.add(sid)
+      continue
+    }
+    const el = findElementByMetadata(container, resname, restype)
+    if (el) {
+      appendSid(el, sid)
+      strategyResolved.add(sid)
+      // Mark the corresponding prepared entry as used so Pass 1 skips it
+      const idx = prepared.findIndex((p) => p.sid === sid)
+      if (idx !== -1) used.add(idx)
+    } else {
+      fallbackQueue.add(sid)
     }
   }
 
   const candidates = container.querySelectorAll(BLOCK_SELECTOR)
 
+  // Pass 1 — positional: each untagged element consumes the first unused
+  // segment whose normalised source is an exact match.  This preserves
+  // positional pairing when duplicate source texts appear in multiple
+  // elements (e.g. two <p>Equipment</p> nodes).
   for (const el of candidates) {
-    // Skip already-tagged elements
-    if (el.hasAttribute(SEGMENT_SID_ATTR)) continue
+    // Skip elements already tagged (from a previous incremental call) —
+    // Pass 1 is strictly for fresh, untagged elements.
+    if (el.hasAttribute(SEGMENT_SIDS_ATTR)) continue
+
     // Skip elements that contain an already-tagged descendant — the
     // descendant is the more specific match.
-    if (el.querySelector(`[${SEGMENT_SID_ATTR}]`)) continue
+    if (el.querySelector(`[${SEGMENT_SIDS_ATTR}]`)) continue
 
     const elText = el.textContent.replace(/\s+/g, ' ').trim()
     if (!elText) continue
 
     const elTextLower = elText.toLowerCase()
 
-    // Find the first unused segment whose normalised source matches
     for (let i = 0; i < prepared.length; i++) {
       if (used.has(i)) continue
+      if (strategyResolved.has(prepared[i].sid)) continue
+      if (getCachedSids(el).includes(prepared[i].sid)) continue
       if (elTextLower === prepared[i].normSource.toLowerCase()) {
-        el.setAttribute(SEGMENT_SID_ATTR, prepared[i].sid)
-        if (replaceWithTarget && prepared[i].target) {
-          replaceTextContent(el, stripSegmentTags(prepared[i].target))
-        }
+        appendSid(el, prepared[i].sid)
         used.add(i)
-        break // one segment per element
+        break // one new segment per element per pass (positional pairing)
       }
     }
+  }
+
+  // Pass 2 — N:N broadcast: every segment is checked against every
+  // candidate element regardless of the `used` set.  If the segment's
+  // normalised source matches the element's text and that SID is not yet
+  // on the element, append it.  This ensures that one segment can map to
+  // many nodes AND one node can accumulate many segments.
+  // Text replacement (when replaceWithTarget is true) happens after both
+  // passes, via updateNodeTranslation.
+  for (const el of candidates) {
+    const elText = el.textContent.replace(/\s+/g, ' ').trim()
+    if (!elText) continue
+
+    const elTextLower = elText.toLowerCase()
+
+    for (let i = 0; i < prepared.length; i++) {
+      if (getCachedSids(el).includes(prepared[i].sid)) continue
+      if (elTextLower === prepared[i].normSource.toLowerCase()) {
+        appendSid(el, prepared[i].sid)
+      }
+    }
+  }
+
+  buildSegmentNodeMap(container)
+
+  if (replaceWithTarget) {
+    const map = getSegmentNodeMap(container)
+    if (map) {
+      map.nodes.forEach((el) => {
+        updateNodeTranslation(el, segments)
+        // mismatch silently ignored here — shown via the updateTranslation message handler
+      })
+    }
+  }
+}
+
+/**
+ * Extracts the four new BroadcastChannel payload fields from a raw segment object.
+ *
+ * Works with both plain JS objects (dot notation) and any shape where
+ * `metadata` is an Array<{meta_key: string, meta_value: string}>.
+ *
+ * @param {{metadata?: Array<{meta_key: string, meta_value: string}>, context_url?: string|null}} segment
+ * @returns {{context_url: string|null, resname: string|null, restype: string|null}}
+ */
+export const extractSegmentContextFields = (segment) => {
+  const meta = segment.metadata ?? []
+  const find = (key) => meta.find((m) => m.meta_key === key)?.meta_value ?? null
+  return {
+    context_url: segment.context_url ?? null,
+    resname: find('resname'),
+    restype: find('restype'),
   }
 }

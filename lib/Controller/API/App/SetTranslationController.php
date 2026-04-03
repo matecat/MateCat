@@ -925,6 +925,7 @@ class SetTranslationController extends AbstractStatefulKleinController
          * Set the new contribution in the queue
          */
         $contributionStruct = new SetContributionRequest();
+        $contributionStruct->filter = serialize($this->filter);
         $contributionStruct->jobStruct = $this->chunk;
         $contributionStruct->fromRevision = $this->isRevision();
         $contributionStruct->id_file = $filesParts->id_file ?? null;

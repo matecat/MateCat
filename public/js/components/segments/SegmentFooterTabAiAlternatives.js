@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {createRef, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -8,6 +8,7 @@ import Copy from '../icons/Copy'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
+import {EditorLite} from './EditorLite'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
@@ -179,6 +180,15 @@ export const SegmentFooterTabAiAlternatives = ({
 }) => {
   const [alternatives, setAlternatives] = useState()
 
+  const editorLiteRefs = []
+
+  const getEditorLiteRef = (index) => {
+    if (!editorLiteRefs[index]) {
+      editorLiteRefs[index] = createRef()
+    }
+    return editorLiteRefs[index]
+  }
+
   useEffect(() => {
     let selectedText = ''
 
@@ -240,24 +250,16 @@ export const SegmentFooterTabAiAlternatives = ({
               ),
             }),
             alternative: data.message[index].alternative,
-            before: DraftMatecatUtils.transformTagsToHtml(
+            before:
               highlighted.before.length > 0
                 ? `${highlighted.before} `
                 : highlighted.before,
-              config.isTargetRTL,
-            ),
-            after: DraftMatecatUtils.transformTagsToHtml(
+            after:
               highlighted.after.length > 0
                 ? ` ${highlighted.after}`
                 : highlighted.after,
-              config.isTargetRTL,
-            ),
 
-            changed: DraftMatecatUtils.transformTagsToHtml(
-              highlighted.changed,
-              config.isTargetRTL,
-            ),
-            copyToClipboard: highlighted.changed,
+            changed: highlighted.changed,
             context,
           })),
         )
@@ -293,10 +295,6 @@ export const SegmentFooterTabAiAlternatives = ({
     }
   }, [segment])
 
-  const copyAlternative = (alternative) => {
-    navigator.clipboard.writeText(alternative)
-  }
-
   const allowHTML = (string) => {
     return {__html: string}
   }
@@ -316,18 +314,17 @@ export const SegmentFooterTabAiAlternatives = ({
             ></p>
           </div>
           <div className="ai-alternative-options">
-            {alternatives.map(
-              ({before, after, changed, copyToClipboard, context}, index) => (
+            {alternatives.map(({before, after, changed, context}, index) => {
+              const ref = getEditorLiteRef(index)
+
+              return (
                 <div key={index}>
                   <div>
-                    <p>
-                      <span dangerouslySetInnerHTML={allowHTML(before)}></span>
-                      <span
-                        className="ai-feature-option-alternative-highlight"
-                        dangerouslySetInnerHTML={allowHTML(changed)}
-                      ></span>
-                      <span dangerouslySetInnerHTML={allowHTML(after)}></span>
-                    </p>
+                    <EditorLite
+                      ref={ref}
+                      highlightSnippet={{text: changed, style: 'BOLD'}}
+                      content={`${before}${changed}${after}`}
+                    />
                     <p className="ai-feature-option-alternative-description">
                       {context}{' '}
                     </p>
@@ -335,13 +332,13 @@ export const SegmentFooterTabAiAlternatives = ({
                   <Button
                     className="ai-feature-button"
                     mode={BUTTON_MODE.OUTLINE}
-                    onClick={() => copyAlternative(copyToClipboard)}
+                    onClick={() => ref.current.copyToClipboardHighlight()}
                   >
                     <Copy size={16} />
                   </Button>
                 </div>
-              ),
-            )}
+              )
+            })}
           </div>
         </div>
       ) : alternatives?.error ? (

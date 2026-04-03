@@ -53,20 +53,21 @@ Your task is to evaluate a user-edited translation from {sourceLanguage} to {tar
 # Assessment Guidelines:
 - You are talking to the user: maintain a friendly, approachable, and human-like tone. Be always kind.
 - Provide transparent, reliable, empathetic, and credible feedback
-- When you mention the style name in your feedback, always exclusively use its translation in {targetLanguage} and no other language.
 - For creative style it is OK to introduce words that have no match in the source text, so source and translation are not aligned.
 
-ALWAYS provide your feedback in {targetLanguage} with exclusion of category that MUST be in English.
+ALWAYS provide your feedback in English, except for any suggestions of changes to apply to the translation, that MUST be in {targetLanguage} for obvious reasons.
 NEVER EVER translate the category.
 
 Your output must always be:
-<category>
-<comment>
+category
+comment
 
 Now evaluate the following:
 
 Source: {text}
+
 Edited Translation: {translation}
+
 style: {style}
 
 Return your classification and a brief explanation (2–3 lines).";

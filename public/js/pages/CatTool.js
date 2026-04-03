@@ -50,6 +50,7 @@ import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import ContextReviewChannel from '../utils/contextReviewChannel'
+import {extractSegmentContextFields} from '../utils/contextReviewUtils'
 import useResizable from '../hooks/useResizable'
 import IconRedirect from '../components/icons/IconRedirect'
 import IconDown from '../components/icons/IconDown'
@@ -138,6 +139,7 @@ function CatTool() {
               sid: seg.sid,
               source: seg.segment,
               target: seg.translation,
+              ...extractSegmentContextFields(seg),
             })
           }
           ContextReviewChannel.sendMessage({
@@ -467,6 +469,7 @@ function CatTool() {
         sid: seg.sid,
         source: seg.segment,
         target: seg.translation,
+        ...extractSegmentContextFields(seg),
       })
     }
     ContextReviewChannel.sendMessage({type: 'segments', segments: segmentsList})
@@ -537,9 +540,9 @@ function CatTool() {
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        tmPrioritization: jobMetadata?.job?.tm_prioritization === 1,
+        tmPrioritization: jobMetadata?.job?.tm_prioritization ?? false,
         characterCounterCountTags:
-          jobMetadata?.job?.character_counter_count_tags === 1,
+          jobMetadata?.job?.character_counter_count_tags ?? false,
         characterCounterMode:
           typeof jobMetadata?.job?.character_counter_mode === 'string'
             ? jobMetadata?.job?.character_counter_mode
