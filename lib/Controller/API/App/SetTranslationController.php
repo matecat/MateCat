@@ -981,6 +981,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             );
             Set::contributionMT($newContributionStruct);
         }
+
     }
 
     /**
