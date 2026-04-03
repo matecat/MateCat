@@ -9,7 +9,6 @@
 
 namespace Utils\Contribution;
 
-use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
@@ -24,8 +23,6 @@ use Utils\TaskRunner\Commons\Params;
  */
 class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStruct, Stringable
 {
-
-    public ?string $filter = null;
 
     protected array $cached_results = [];
 

@@ -70,7 +70,6 @@ class SetContributionMTWorker extends SetContributionWorker
      */
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 0): void
     {
-        $config['filter'] = $contributionStruct->filter;
         $config['segment'] = $contributionStruct->segment;
         $config['translation'] = $contributionStruct->translation;
         $config['tuid'] = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
