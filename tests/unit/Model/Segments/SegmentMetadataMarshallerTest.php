@@ -31,6 +31,7 @@ class SegmentMetadataMarshallerTest extends TestCase
             'resname'         => ['resname'],
             'restype'         => ['restype'],
             'context-url'     => ['context-url'],
+            'x-client-name'   => ['x-client-name'],
         ];
     }
 
@@ -116,6 +117,7 @@ class SegmentMetadataMarshallerTest extends TestCase
             'resname',
             'restype',
             'context-url',
+            'x-client-name',
         ];
 
         $actual = array_map(fn(SegmentMetadataMarshaller $case) => $case->value, SegmentMetadataMarshaller::cases());
@@ -248,5 +250,32 @@ class SegmentMetadataMarshallerTest extends TestCase
         $struct->meta_value = 'https://example.com/review';
 
         self::assertSame('https://example.com/review', SegmentMetadataMarshaller::unMarshall($struct));
+    }
+
+    // ── x-client-name ──
+
+    #[Test]
+    public function testMarshallXClientNameReturnsString(): void
+    {
+        self::assertSame(
+            'dot-notation',
+            SegmentMetadataMarshaller::X_CLIENT_NAME->marshall('dot-notation')
+        );
+    }
+
+    #[Test]
+    public function testMarshallXClientNameReturnsEmptyStringAsIs(): void
+    {
+        self::assertSame('', SegmentMetadataMarshaller::X_CLIENT_NAME->marshall(''));
+    }
+
+    #[Test]
+    public function testUnmarshallXClientNameReturnsString(): void
+    {
+        $struct = new SegmentMetadataStruct();
+        $struct->meta_key = SegmentMetadataMarshaller::X_CLIENT_NAME->value;
+        $struct->meta_value = 'acme-crm';
+
+        self::assertSame('acme-crm', SegmentMetadataMarshaller::unMarshall($struct));
     }
 }

@@ -13,6 +13,7 @@ enum SegmentMetadataMarshaller: string
     case RESNAME        = 'resname';
     case RESTYPE        = 'restype';
     case CONTEXT_URL    = 'context-url';
+    case X_CLIENT_NAME  = 'x-client-name';
 
     public static function isAllowed(string $key): bool
     {
