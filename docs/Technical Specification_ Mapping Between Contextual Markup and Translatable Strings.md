@@ -1,5 +1,22 @@
 # **Technical Specification: Mapping Between Contextual Markup and Translatable Strings**
 
+## Table of Contents
+
+1. [Terms and Definitions](#terms-and-definitions)
+2. [Key Principles](#key-principles)
+   - [Requirements for `nodePath`](#requirements-for-nodepath)
+   - [Resource Type (`restype`) Reference](#resource-type-restype-reference)
+3. [File Formats](#file-formats)
+   - [XLIFF Format (Recommended)](#xliff-format-recommended)
+   - [JSON Format](#json-format)
+4. [Context File (HTML/XHTML)](#context-file-htmlxhtml)
+   - [HTML Correspondence Example](#html-correspondence-example)
+   - [Selecting an Attribute with XPath](#selecting-an-attribute-with-xpath)
+5. [Connector/Filter Behavior](#connectorfilter-behavior)
+6. [Operational Checklist](#operational-checklist)
+
+---
+
 This document defines the technical requirements to ensure a functional and reversible mapping between a context DOM/markup and the strings submitted for translation. The goal is to ensure that every translatable segment can be unambiguously traced back to its origin in the context document.
 
 ## **Terms and Definitions**
