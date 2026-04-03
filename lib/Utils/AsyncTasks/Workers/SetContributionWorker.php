@@ -175,6 +175,7 @@ class SetContributionWorker extends AbstractWorker
     protected function _update(array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 1): void
     {
         // update the contribution for every key in the job belonging to the user
+        $config['filter'] = $contributionStruct->filter;
         $config['uid'] = $contributionStruct->uid;
         $config['segment'] = $contributionStruct->oldSegment;
         $config['translation'] = $contributionStruct->oldTranslation;

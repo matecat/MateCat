@@ -87,7 +87,7 @@ const TAB_ITEMS = {
     isEnableCloseButton: true,
   },
   [TAB.AI_FEEDBACK]: {
-    label: 'Ai feedback',
+    label: 'Lara feedback',
     code: 'aifeedback',
     tabClass: 'ai-feedback',
     isLoading: false,
@@ -101,7 +101,7 @@ const TAB_ITEMS = {
     isEnableCloseButton: true,
   },
   [TAB.AI_ALTERNATIVES]: {
-    label: 'Ai alternatives',
+    label: 'Lara alternative translations',
     code: 'aialternatives',
     tabClass: 'ai-alternatives',
     isLoading: false,
