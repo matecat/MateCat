@@ -11,7 +11,6 @@ use Lara\LaraApiException;
 use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao;
@@ -494,15 +493,6 @@ class Lara extends AbstractEngine
         $laraClient->setExtraHeader(Headers::LARA_MEMORIES_IDS, implode(',', $_keys));
 
         try {
-            // Lara expects the translation in layer 0
-            if(isset($_config['filter'])){
-                $_config['filter'] = unserialize($_config['filter']);
-
-                if($_config['filter'] instanceof MateCatFilter){
-                    $_config['translation'] = $_config['filter']->fromLayer1ToLayer0($_config['translation']);
-                }
-            }
-
             $time_start = microtime(true);
             $headers = new Headers($_config['tuid'], $_config['translation_origin']);
             // call lara

@@ -74,7 +74,7 @@ class NewController extends KleinController
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
 
-    const int MAX_NUM_KEYS = 13;
+    const int MAX_NUM_KEYS = 15;
 
     protected function afterConstruct(): void
     {

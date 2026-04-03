@@ -23,7 +23,6 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
@@ -320,8 +319,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 'translation' => $new_translation,
                 'old_translation' => $old_translation,
                 'propagation' => $propagationTotal,
-                'chunk' => $this->data['chunk'],
-                'segment' => $this->data['segment'],
+                'chunk' => $this->chunk,
                 'user' => $this->user,
                 'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber']),
                 'features' => $this->featureSet,
@@ -925,7 +923,6 @@ class SetTranslationController extends AbstractStatefulKleinController
          * Set the new contribution in the queue
          */
         $contributionStruct = new SetContributionRequest();
-        $contributionStruct->filter = serialize($this->filter);
         $contributionStruct->jobStruct = $this->chunk;
         $contributionStruct->fromRevision = $this->isRevision();
         $contributionStruct->id_file = $filesParts->id_file ?? null;
@@ -973,8 +970,19 @@ class SetTranslationController extends AbstractStatefulKleinController
         Set::contribution($contributionStruct);
 
         if ($contributionStruct->id_mt > 1) {
-            Set::contributionMT($contributionStruct);
+            /**
+             * @see Airbnb::filterContributionStructOnMTSet
+             */
+            $newContributionStruct = $this->featureSet->filter(
+                'filterContributionStructOnMTSet',
+                $contributionStruct,
+                $_Translation,
+                $this->data['segment'],
+                $this->filter
+            );
+            Set::contributionMT($newContributionStruct);
         }
+
     }
 
     /**
