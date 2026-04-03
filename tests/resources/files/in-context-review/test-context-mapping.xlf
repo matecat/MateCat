@@ -196,5 +196,105 @@
 
         </body>
     </file>
+
+    <!-- ================================================================ -->
+    <!-- SECOND FILE — Product page with file-level context-url           -->
+    <!-- Prepares for future XLIFF parser extraction of <file> attributes -->
+    <!-- (see spec §11.3 — Dual Ingestion Paths)                         -->
+    <!-- ================================================================ -->
+    <file original="product-page.html"
+          source-language="en"
+          target-language="it"
+          datatype="html"
+          context-url="https://example.com/products/widget-pro.html">
+        <header>
+            <note>
+                This second file demonstrates file-level context-url, which the
+                XLIFF parser does not yet extract from &lt;file&gt; attributes.
+                FilesMetadataMarshaller is designed ready for it. Adding this
+                file section prepares test data for when that parser work lands.
+
+                Context HTML for this file: test-context-mapping-product-page.html
+            </note>
+        </header>
+        <body>
+
+            <!-- ============================================================ -->
+            <!-- 1. restype="x-path" — XPath targets in the product page      -->
+            <!-- ============================================================ -->
+
+            <!-- Points to: <li>Widget Pro</li> (breadcrumb, 3rd item) -->
+            <trans-unit id="t13" resname="/html/body/nav/ol/li[3]" restype="x-path">
+                <source xml:lang="en">Widget Pro</source>
+                <target xml:lang="it">Widget Pro</target>
+                <note>XPath to the last breadcrumb item (product name, not translated).</note>
+            </trans-unit>
+
+            <!-- Points to: <p class="product-description">...</p> -->
+            <trans-unit id="t14" resname="/html/body/main/p[1]" restype="x-path">
+                <source xml:lang="en">The ultimate widget for professionals.</source>
+                <target xml:lang="it">Il widget definitivo per i professionisti.</target>
+                <note>XPath to the product description paragraph.</note>
+            </trans-unit>
+
+            <!-- ============================================================ -->
+            <!-- 2. restype="x-tag-id" — HTML element id attribute            -->
+            <!-- ============================================================ -->
+
+            <!-- Points to: <h1 id="product-title">Widget Pro</h1> -->
+            <trans-unit id="t15" resname="product-title" restype="x-tag-id">
+                <source xml:lang="en">Widget Pro</source>
+                <target xml:lang="it">Widget Pro</target>
+                <note>
+                    Identifies the product title via its 'id' attribute.
+                    Corresponds to &lt;h1 id="product-title"&gt; in the HTML.
+                </note>
+            </trans-unit>
+
+            <!-- Points to: <button id="cta-buy">Buy Now</button> -->
+            <trans-unit id="t16" resname="cta-buy" restype="x-tag-id">
+                <source xml:lang="en">Buy Now</source>
+                <target xml:lang="it">Acquista Ora</target>
+                <note>
+                    CTA button identified by its 'id' attribute.
+                    Corresponds to &lt;button id="cta-buy"&gt; in the HTML.
+                </note>
+            </trans-unit>
+
+            <!-- ============================================================ -->
+            <!-- 3. restype="x-css_class" — Unique CSS class                  -->
+            <!-- ============================================================ -->
+
+            <!-- Points to: <span class="price">$49.99</span> -->
+            <trans-unit id="t17" resname="price" restype="x-css_class">
+                <source xml:lang="en">$49.99</source>
+                <target xml:lang="it">49,99 &#x20AC;</target>
+                <note>
+                    Price element identified by CSS class.
+                    Corresponds to &lt;span class="price"&gt; in the HTML.
+                </note>
+            </trans-unit>
+
+            <!-- ============================================================ -->
+            <!-- 4. screenshot attribute — exercises segment-level metadata   -->
+            <!--    that the backend stores but frontend does not consume yet -->
+            <!-- ============================================================ -->
+
+            <!-- Points to: <footer><p>...</p></footer> -->
+            <trans-unit id="t18"
+                        resname="/html/body/footer/p"
+                        restype="x-path"
+                        screenshot="https://example.com/screenshots/footer-legal.png">
+                <source xml:lang="en">&#x00A9; 2026 Acme Corp. All rights reserved.</source>
+                <target xml:lang="it">&#x00A9; 2026 Acme Corp. Tutti i diritti riservati.</target>
+                <note>
+                    Footer text with a screenshot attribute. The backend stores this
+                    via SegmentMetadataMarshaller (SCREENSHOT case) but no frontend
+                    consumer exists yet.
+                </note>
+            </trans-unit>
+
+        </body>
+    </file>
 </xliff>
 

@@ -239,5 +239,124 @@
         </unit>
 
     </file>
+
+    <!-- ================================================================ -->
+    <!-- SECOND FILE — Product page with file-level context-url           -->
+    <!-- Prepares for future XLIFF parser extraction of <file> attributes -->
+    <!-- (see spec §11.3 — Dual Ingestion Paths)                         -->
+    <!-- ================================================================ -->
+    <file id="f2" original="product-page.html"
+          matecat:context-url="https://example.com/products/widget-pro.html">
+        <notes>
+            <note>
+                This second file demonstrates file-level context-url, which the
+                XLIFF parser does not yet extract from &lt;file&gt; attributes.
+                FilesMetadataMarshaller is designed ready for it. Adding this
+                file section prepares test data for when that parser work lands.
+
+                Context HTML for this file: test-context-mapping-product-page.html
+            </note>
+        </notes>
+
+        <!-- ============================================================ -->
+        <!-- 1. matecat:restype="x-path" — XPath targets in product page -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <li>Widget Pro</li> (breadcrumb, 3rd item) -->
+        <unit id="t13" matecat:resname="/html/body/nav/ol/li[3]" matecat:restype="x-path">
+            <notes>
+                <note>XPath to the last breadcrumb item (product name, not translated).</note>
+            </notes>
+            <segment>
+                <source>Widget Pro</source>
+                <target>Widget Pro</target>
+            </segment>
+        </unit>
+
+        <!-- Points to: <p class="product-description">...</p> -->
+        <unit id="t14" matecat:resname="/html/body/main/p[1]" matecat:restype="x-path">
+            <notes>
+                <note>XPath to the product description paragraph.</note>
+            </notes>
+            <segment>
+                <source>The ultimate widget for professionals.</source>
+                <target>Il widget definitivo per i professionisti.</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 2. matecat:restype="x-tag-id" — HTML element id attribute    -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <h1 id="product-title">Widget Pro</h1> -->
+        <unit id="t15" matecat:resname="product-title" matecat:restype="x-tag-id">
+            <notes>
+                <note>
+                    Identifies the product title via its 'id' attribute.
+                    Corresponds to &lt;h1 id="product-title"&gt; in the HTML.
+                </note>
+            </notes>
+            <segment>
+                <source>Widget Pro</source>
+                <target>Widget Pro</target>
+            </segment>
+        </unit>
+
+        <!-- Points to: <button id="cta-buy">Buy Now</button> -->
+        <unit id="t16" matecat:resname="cta-buy" matecat:restype="x-tag-id">
+            <notes>
+                <note>
+                    CTA button identified by its 'id' attribute.
+                    Corresponds to &lt;button id="cta-buy"&gt; in the HTML.
+                </note>
+            </notes>
+            <segment>
+                <source>Buy Now</source>
+                <target>Acquista Ora</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 3. matecat:restype="x-css_class" — Unique CSS class          -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <span class="price">$49.99</span> -->
+        <unit id="t17" matecat:resname="price" matecat:restype="x-css_class">
+            <notes>
+                <note>
+                    Price element identified by CSS class.
+                    Corresponds to &lt;span class="price"&gt; in the HTML.
+                </note>
+            </notes>
+            <segment>
+                <source>$49.99</source>
+                <target>49,99 &#x20AC;</target>
+            </segment>
+        </unit>
+
+        <!-- ============================================================ -->
+        <!-- 4. screenshot attribute — exercises segment-level metadata   -->
+        <!--    that the backend stores but frontend does not consume yet -->
+        <!-- ============================================================ -->
+
+        <!-- Points to: <footer><p>...</p></footer> -->
+        <unit id="t18"
+              matecat:resname="/html/body/footer/p"
+              matecat:restype="x-path"
+              matecat:screenshot="https://example.com/screenshots/footer-legal.png">
+            <notes>
+                <note>
+                    Footer text with a screenshot attribute. The backend stores this
+                    via SegmentMetadataMarshaller (SCREENSHOT case) but no frontend
+                    consumer exists yet.
+                </note>
+            </notes>
+            <segment>
+                <source>&#x00A9; 2026 Acme Corp. All rights reserved.</source>
+                <target>&#x00A9; 2026 Acme Corp. Tutti i diritti riservati.</target>
+            </segment>
+        </unit>
+
+    </file>
 </xliff>
 
