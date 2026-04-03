@@ -439,7 +439,6 @@ class GetSearchController extends AbstractStatefulKleinController
                 'old_translation' => $old_translation,
                 'propagation' => $propagationTotal,
                 'chunk' => $chunk,
-                'segment' => $segment,
                 'user' => $this->user,
                 'source_page_code' => ReviewUtils::revisionNumberToSourcePage($revisionNumber),
                 'features' => $this->featureSet,
