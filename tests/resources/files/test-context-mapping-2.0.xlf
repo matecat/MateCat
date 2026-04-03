@@ -42,6 +42,9 @@
                 translatable strings as defined in the Technical Specification.
                 All matecat:restype values are prefixed with 'x-' per the original XLIFF 2.0
                 convention (values not in the standard enumeration must use the 'x-' prefix).
+                When matecat:restype="x-client_nodepath" is used, the attribute
+                matecat:x-client-name MUST also be present on the same unit to identify
+                the path algorithm factory key previously agreed upon with Matecat.
             </note>
         </notes>
 
@@ -98,12 +101,17 @@
         <!-- ============================================================ -->
 
         <!-- Same node as t4, but using a custom dot-notation path -->
-        <unit id="t5" matecat:resname="html.body.div_3.p_1" matecat:restype="x-client_nodepath">
+        <!-- matecat:x-client-name is REQUIRED when matecat:restype="x-client_nodepath" -->
+        <unit id="t5"
+              matecat:resname="html.body.div_3.p_1"
+              matecat:restype="x-client_nodepath"
+              matecat:x-client-name="dot-notation">
             <notes>
                 <note>
                     Custom path algorithm (dot-notation with underscored indices).
                     'html.body.div_3.p_1' maps to /html/body/div[3]/p[1].
-                    This algorithm must be previously agreed upon with Matecat.
+                    matecat:x-client-name="dot-notation" is the factory key Matecat uses to
+                    load the correct path interpreter. Must be previously agreed upon with Matecat.
                 </note>
             </notes>
             <segment>
@@ -113,10 +121,14 @@
         </unit>
 
         <!-- Another custom path example -->
-        <unit id="t6" matecat:resname="html.body.div_1.p_1" matecat:restype="x-client_nodepath">
+        <unit id="t6"
+              matecat:resname="html.body.div_1.p_1"
+              matecat:restype="x-client_nodepath"
+              matecat:x-client-name="dot-notation">
             <notes>
                 <note>
                     Custom path 'html.body.div_1.p_1' maps to /html/body/div[1]/p[1].
+                    matecat:x-client-name="dot-notation" is the factory key for the path interpreter.
                 </note>
             </notes>
             <segment>
@@ -163,14 +175,14 @@
         </unit>
 
         <!-- ============================================================ -->
-        <!-- 5. matecat:restype="x-attribute_matecat:resname_value" — Custom attribute pair -->
+        <!-- 5. matecat:restype="x-attribute_name_value" — Custom attribute pair -->
         <!-- ============================================================ -->
 
         <!-- Points to: <div data-custom-id="xyz-123">Content identified by a custom attribute.</div> -->
-        <unit id="t9" matecat:resname="data-custom-id=xyz-123" matecat:restype="x-attribute_matecat:resname_value">
+        <unit id="t9" matecat:resname="data-custom-id=xyz-123" matecat:restype="x-attribute_name_value">
             <notes>
                 <note>
-                    Identifies the element via a matecat:resname=value attribute pair.
+                    Identifies the element via a name=value attribute pair.
                     Corresponds to &lt;div data-custom-id="xyz-123"&gt; in the HTML.
                     Useful for data-* attributes that guarantee uniqueness.
                 </note>
