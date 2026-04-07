@@ -53,6 +53,52 @@ describe('findElementByMetadata', () => {
       container.innerHTML = '<p>Hello</p>'
       expect(findElementByMetadata(container, 'div/span', 'x-path')).toBeNull()
     })
+
+    it('finds an element via absolute /html/body/... XPath relative to container', () => {
+      // The container holds the loaded context HTML — its content is the <body>.
+      // /html/body/div[2]/p[1] should resolve to the <p> inside the second <div>.
+      container.innerHTML =
+        '<h1>Title</h1>' +
+        '<div><p>First div paragraph.</p></div>' +
+        '<div><p>Second div paragraph.</p></div>'
+      const el = findElementByMetadata(
+        container,
+        '/html/body/div[2]/p[1]',
+        'x-path',
+      )
+      expect(el).not.toBeNull()
+      expect(el.textContent).toBe('Second div paragraph.')
+    })
+
+    it('finds an element via absolute /html/body/h1 XPath', () => {
+      container.innerHTML = '<h1>Title</h1><div><p>Para.</p></div>'
+      const el = findElementByMetadata(container, '/html/body/h1', 'x-path')
+      expect(el).not.toBeNull()
+      expect(el.tagName).toBe('H1')
+    })
+
+    it('finds an element via //element[...] XPath (document-wide search)', () => {
+      container.innerHTML =
+        '<img id="logo" alt="Company Logo" src="logo.png" />'
+      const el = findElementByMetadata(container, "//img[@id='logo']", 'x-path')
+      expect(el).not.toBeNull()
+      expect(el.getAttribute('id')).toBe('logo')
+    })
+
+    it('returns the owning element when XPath targets an attribute node', () => {
+      // XPaths like //img/@alt resolve to an Attr node, but the function must
+      // return the owner element so callers can call setAttribute/getAttribute on it.
+      container.innerHTML =
+        '<img id="logo" alt="Company Logo" src="logo.png" />'
+      const result = findElementByMetadata(
+        container,
+        "//img[@id='logo']/@alt",
+        'x-path',
+      )
+      expect(result).not.toBeNull()
+      expect(result.tagName).toBe('IMG')
+      expect(result.getAttribute('alt')).toBe('Company Logo')
+    })
   })
 
   describe('x-attribute_name_value', () => {

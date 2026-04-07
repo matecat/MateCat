@@ -31,21 +31,35 @@ export const findElementByMetadata = (container, resname, restype) => {
         return container.querySelector('.' + CSS.escape(resname))
 
       case 'x-path': {
-        // Absolute XPath (starts with '/') must be evaluated against document,
-        // then verified to be a descendant of container.
-        const isAbsolute = resname.startsWith('/')
-        const contextNode = isAbsolute ? document : container
+        // XPaths are authored against the context HTML document structure,
+        // but `container` holds only the body content — not a full document.
+        // Absolute paths must be made relative to `container`:
+        //   /html/body/X  →  ./X   (strip the /html/body root prefix)
+        //   //X           →  .//X  (prepend . for container-relative search)
+        //   other /X      →  .X    (strip leading /)
+        let xpath = resname
+        if (resname.startsWith('/html/body/')) {
+          xpath = '.' + resname.slice('/html/body'.length)
+        } else if (resname.startsWith('/html/body')) {
+          // Exact match of /html/body (no trailing path) — map to container itself
+          xpath = '.'
+        } else if (resname.startsWith('//')) {
+          xpath = '.' + resname
+        } else if (resname.startsWith('/')) {
+          xpath = '.' + resname
+        }
         const result = document.evaluate(
-          resname,
-          contextNode,
+          xpath,
+          container,
           null,
           XPathResult.FIRST_ORDERED_NODE_TYPE,
           null,
         )
-        const el = result.singleNodeValue
-        if (!el) return null
-        if (isAbsolute && !container.contains(el)) return null
-        return el
+        const node = result.singleNodeValue
+        if (!node) return null
+        // XPaths may target attribute nodes (e.g. //img/@alt). Attr nodes have
+        // no getAttribute/setAttribute, so return the owning element instead.
+        return node.nodeType === Node.ATTRIBUTE_NODE ? node.ownerElement : node
       }
 
       case 'x-attribute_name_value': {
