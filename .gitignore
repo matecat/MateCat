@@ -12,6 +12,7 @@ _dic_cache
 /docs/*
 !/docs/*.md
 !/docs/*.png
+!/docs/reviews/
 
 # Configuration files
 .num_processes
