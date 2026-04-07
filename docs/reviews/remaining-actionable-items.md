@@ -26,7 +26,7 @@
 | ---- | ------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
 | TF-1 | Fix `Database.php` bug line 319                               | 1 file, 2 callers        | ON DUPLICATE KEY bind values lost — **data corruption risk**                                                                                                                                                                                                                                     | ✅ Done |
 | TF-2 | Fix `$_POST/$_GET/$_REQUEST/$_SERVER` in moderate controllers | 6 files, 11 replacements | Replaced superglobals in diagnostic/logging code across `DownloadOriginalController`, `DownloadController`, `GetTagProjectionController`, `SetTranslationController`, `ChangeJobsStatusController`, `OutsourceTo/AbstractController` — TDD regression guard added (`SuperglobalEliminationTest`) | ✅ Done |
-| TF-3 | Extract `SetTranslationController::translate()`               | 314-line method          | Worst single method in codebase                                                                                                                                                                                                                                                                  | ⬜      |
+| TF-3 | Extract `SetTranslationController::translate()`               | 314-line method          | Decomposed into 5 private methods (`prepareTranslation`, `buildNewTranslation`, `persistTranslation`, `buildResult`, `finalizeTranslation`) — translate() now a ~25-line orchestrator. Strategy B+C with structural regression guard + TDD. 6 unit tests, 42 assertions.                         | ✅ Done |
 
 ### Tier 3 — Structural Refactors (weeks/months)
 
@@ -64,9 +64,9 @@
 
 ## Priority Matrix
 
-| Priority       | Items                                        | Key risk                                 |
-| -------------- | -------------------------------------------- | ---------------------------------------- |
-| **High**       | ~~TF-1~~ (Database bug)                      | Data corruption on ON DUPLICATE KEY      |
-| **Medium**     | ~~QW-2~~, ~~QW-3~~, ~~QW-4~~, ~~TF-2~~, TF-3 | Tech debt / SQL injection surface        |
-| **Low / Team** | C.1–C.5 (frontend features)                  | Depends on frontend team                 |
-| **Long-term**  | SR-1 through SR-5                            | Architectural debt, needs appetite check |
+| Priority       | Items                                            | Key risk                                 |
+| -------------- | ------------------------------------------------ | ---------------------------------------- |
+| **High**       | ~~TF-1~~ (Database bug)                          | Data corruption on ON DUPLICATE KEY      |
+| **Medium**     | ~~QW-2~~, ~~QW-3~~, ~~QW-4~~, ~~TF-2~~, ~~TF-3~~ | Tech debt / SQL injection surface        |
+| **Low / Team** | C.1–C.5 (frontend features)                      | Depends on frontend team                 |
+| **Long-term**  | SR-1 through SR-5                                | Architectural debt, needs appetite check |
