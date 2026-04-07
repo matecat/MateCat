@@ -52,11 +52,15 @@ interface VersionHandlerInterface
      */
     public function storeTranslationEvent(array $params): void;
 
-    /**
-     * @param SegmentTranslationStruct $translationStruct
-     *
-     * @return array
-     */
-    public function propagateTranslation(SegmentTranslationStruct $translationStruct): array;
+     /**
+      * @param SegmentTranslationStruct $translationStruct
+      *
+      * @return array{
+      *     totals?: array,
+      *     propagated_ids?: int[],
+      *     segments_for_propagation?: array
+      * }
+      */
+     public function propagateTranslation(SegmentTranslationStruct $translationStruct): array;
 
 }

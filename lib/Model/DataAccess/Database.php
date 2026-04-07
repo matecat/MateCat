@@ -363,18 +363,6 @@ class Database implements IDatabase
         return $this->getConnection()->lastInsertId();
     }
 
-
-    /**
-     * TODO this trim should be removed and ALL codebase migrated from $db->escape() to prepared Statements
-     * @deprecated
-     * @Override
-     * {@inheritdoc}
-     */
-    public function escape(string $string): string
-    {
-        return substr($this->getConnection()->quote($string), 1, -1);
-    }
-
     /**
      * @param string $sequence_name
      * @param int $seqIncrement

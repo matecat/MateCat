@@ -13,7 +13,7 @@ Bootstrap::start();
 
 require_once('UploadHandler.php');
 
-$upload_handler = new UploadHandler();
+$upload_handler = new UploadHandler($_FILES);
 
 header('Pragma: no-cache');
 header('Cache-Control: no-store, no-cache, must-revalidate');

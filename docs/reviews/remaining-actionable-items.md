@@ -13,12 +13,12 @@
 
 ### Tier 1 — Quick Wins (hours each)
 
-| #    | Item                           | Scope             | Detail                                                                                     | Status  |
-| ---- | ------------------------------ | ----------------- | ------------------------------------------------------------------------------------------ | ------- |
-| QW-1 | Delete `old_tests/`            | 102 files         | Scenarios extracted to `old-tests-valuable-scenarios.md`                                   | ✅ Done |
-| QW-2 | Fix `->escape()` calls         | 7 calls, 2 files  | `SearchModel.php:209,239,245` + `UserDao.php:407-410` — replace with parameterized queries | ✅ Done |
-| QW-3 | Fix `$_POST/$_GET` easy        | 5 files           | Replace direct superglobal access with request object                                      | ⬜      |
-| QW-4 | Type `VersionHandlerInterface` | 2 implementations | Add array shape docblock / typed return                                                    | ⬜      |
+| #    | Item                           | Scope            | Detail                                                                                                                                                                                                      | Status  |
+| ---- | ------------------------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| QW-1 | Delete `old_tests/`            | 102 files        | Scenarios extracted to `old-tests-valuable-scenarios.md`                                                                                                                                                    | ✅ Done |
+| QW-2 | Fix `->escape()` calls         | 7 calls, 2 files | `SearchModel.php:209,239,245` + `UserDao.php:407-410` — replace with parameterized queries                                                                                                                  | ✅ Done |
+| QW-3 | Fix `$_POST/$_GET/$_FILES`     | 9 files          | Replace `$_POST` with `$this->params` (3 files) + replace `$_FILES` with Klein `$this->request->files()` (6 files) + refactor `TMSService::uploadFile()` and `UploadHandler` to accept injected file arrays | ✅ Done |
+| QW-4 | Type `VersionHandlerInterface` | 1 interface      | Add `@return array{...}` shape docblock to `propagateTranslation()`                                                                                                                                         | ✅ Done |
 
 ### Tier 2 — Targeted Fixes (days each)
 
@@ -64,9 +64,9 @@
 
 ## Priority Matrix
 
-| Priority       | Items                        | Key risk                                 |
-| -------------- | ---------------------------- | ---------------------------------------- |
-| **High**       | TF-1 (Database bug)          | Data corruption on ON DUPLICATE KEY      |
-| **Medium**     | QW-2, QW-3, QW-4, TF-2, TF-3 | Tech debt / SQL injection surface        |
-| **Low / Team** | C.1–C.5 (frontend features)  | Depends on frontend team                 |
-| **Long-term**  | SR-1 through SR-5            | Architectural debt, needs appetite check |
+| Priority       | Items                                    | Key risk                                 |
+| -------------- | ---------------------------------------- | ---------------------------------------- |
+| **High**       | TF-1 (Database bug)                      | Data corruption on ON DUPLICATE KEY      |
+| **Medium**     | ~~QW-2~~, ~~QW-3~~, ~~QW-4~~, TF-2, TF-3 | Tech debt / SQL injection surface        |
+| **Low / Team** | C.1–C.5 (frontend features)              | Depends on frontend team                 |
+| **Long-term**  | SR-1 through SR-5                        | Architectural debt, needs appetite check |

@@ -66,16 +66,15 @@ class ModernMTController extends KleinController
     {
         $this->validateImportGlossaryParams();
 
-        if (!isset($_POST['memoryId'])) {
+        if (!isset($this->params['memoryId'])) {
             throw new Exception('Missing `memoryId` param', 400);
         }
 
-        $memoryId = filter_var($_POST['memoryId'], FILTER_SANITIZE_NUMBER_INT);
+        $memoryId = filter_var($this->params['memoryId'], FILTER_SANITIZE_NUMBER_INT);
 
         $uploadManager = new Upload();
-        $uploadedFiles = $uploadManager->uploadFiles($_FILES);
+        $uploadedFiles = $uploadManager->uploadFiles($this->request->files()->all());
 
-        /** @noinspection PhpUndefinedFieldInspection */
         $glossary = $this->extractCSV($uploadedFiles->glossary);
 
 
@@ -132,13 +131,13 @@ class ModernMTController extends KleinController
      */
     public function createMemory(): void
     {
-        if (!isset($_POST['name'])) {
+        if (!isset($this->params['name'])) {
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
-        $description = isset($_POST['description']) ? filter_var($_POST['description'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
-        $externalId = isset($_POST['external_id']) ? filter_var($_POST['external_id'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
+        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        $description = isset($this->params['description']) ? filter_var($this->params['description'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
+        $externalId = isset($this->params['external_id']) ? filter_var($this->params['external_id'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW) : null;
 
         $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
@@ -155,11 +154,11 @@ class ModernMTController extends KleinController
     {
         $this->validateImportGlossaryParams();
 
-        if (!isset($_POST['name'])) {
+        if (!isset($this->params['name'])) {
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
 
         $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
@@ -172,7 +171,7 @@ class ModernMTController extends KleinController
 
         // upload glossary
         $uploadManager = new Upload();
-        $uploadedFiles = $uploadManager->uploadFiles($_FILES);
+        $uploadedFiles = $uploadManager->uploadFiles($this->request->files()->all());
 
         $glossary = $this->extractCSV($uploadedFiles->glossary);
 
@@ -198,11 +197,11 @@ class ModernMTController extends KleinController
      */
     public function updateMemory(): void
     {
-        if (!isset($_POST['name'])) {
+        if (!isset($this->params['name'])) {
             throw new Exception('Missing `name` param', 400);
         }
 
-        $name = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
+        $name = filter_var($this->params['name'], FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_ENCODE_LOW);
         $memoryId = filter_var($this->request->param('memoryId'), FILTER_SANITIZE_NUMBER_INT);
         $engineId = filter_var($this->request->param('engineId'), FILTER_SANITIZE_NUMBER_INT);
         $MMTClient = $this->getModernMTClient($engineId);
@@ -231,7 +230,7 @@ class ModernMTController extends KleinController
      */
     private function validateImportGlossaryParams(): void
     {
-        if (!isset($_FILES['glossary'])) {
+        if (!$this->request->files()->exists('glossary')) {
             throw new Exception('Missing `glossary` files', 400);
         }
     }
