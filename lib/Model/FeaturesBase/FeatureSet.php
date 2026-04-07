@@ -4,14 +4,19 @@ namespace Model\FeaturesBase;
 
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
+use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
+use Model\JobSplitMerge\SplitMergeProjectData;
+use Model\LQA\ChunkReviewStruct;
 use Model\OwnerFeatures\OwnerFeatureDao;
-use Model\Projects\MetadataDao;
+use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
@@ -23,10 +28,82 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
- * Created by PhpStorm.
- * User: fregini/ostico
- * Date: 3/11/16
- * Time: 11:00 AM
+ * FeatureSet — WordPress-style plugin hook dispatcher.
+ *
+ * Dispatches hooks via {@see filter()} (data transformation) and {@see run()} (side effects).
+ * Plugins implement handlers by defining methods matching the hook name on their BaseFeature subclass.
+ *
+ * --- Filter hooks (return the filtered value) ---
+ *
+ * @method string  isAnInternalUser(string $email)
+ * @method array<string, mixed>   outsourceAvailableInfo(string $targetLang, string $idCustomer, int $idJob)
+ * @method mixed   projectUrls(mixed $formatted)
+ * @method array<string, BasicFeatureStruct>   filterCreateProjectFeatures(array<string, BasicFeatureStruct> $projectFeatures)
+ * @method mixed   encodeInstructions(mixed $value)
+ * @method mixed   decodeInstructions(mixed $value)
+ * @method array<string, mixed>   filterActivityLogEntry(array<string, mixed> $record)
+ * @method array<string, mixed>   filterCreationStatus(array<string, mixed> $result, ProjectStruct $project)
+ * @method mixed   filterProjectNameModified(int $idProject, string $name, string $password, string $ownerEmail)
+ * @method string  overrideConversionResult(string $content)
+ * @method array<string, mixed>   filterGlobalWarnings(array<string, mixed> $result, array<string, mixed> $context)
+ * @method array<string, mixed>   filterSegmentWarnings(array<string, mixed> $data, array<string, mixed> $context)
+ * @method array<string, mixed>   filterSetTranslationResult(array<string, mixed> $result, array<string, mixed> $context)
+ * @method mixed   filterContributionStructOnSetTranslation(mixed $contributionStruct, ProjectStruct $project, mixed $segment)
+ * @method mixed   filterContributionStructOnMTSet(mixed $contributionStruct, mixed $translation, mixed $segment, mixed $filter)
+ * @method array<string, mixed>   filterGetSegmentsResult(array<string, mixed> $data, JobStruct $chunk)
+ * @method array<int, mixed>   prepareNotesForRendering(array<int, mixed> $notes)
+ * @method bool    prepareAllNotes(bool $default)
+ * @method array<int, mixed>   processExtractedJsonNotes(array<int, mixed> $segmentNotes)
+ * @method bool    filterIsChunkCompletionUndoable(bool $undoable, ProjectStruct $project, JobStruct $chunk)
+ * @method mixed   alter_chunk_review_struct(ChunkCompletionEventStruct $event)
+ * @method string  filter_job_password_to_review_password(string $password, int $idJob)
+ * @method array<int, string>   filterRevisionChangeNotificationList(array<int, string> $emails)
+ * @method array<string, mixed>   filterMyMemoryGetParameters(array<string, mixed> $parameters, array<string, mixed> $config)
+ * @method mixed   characterLengthCount(string $cleanedString)
+ * @method array<int, string>   injectExcludedTagsInQa(array<int, string> $excludedTags)
+ * @method int     checkTagMismatch(int $errorCode, mixed $qaInstance)
+ * @method int     checkTagPositions(int $errorCode, mixed $qaInstance)
+ * @method array<string, mixed>   analysisBeforeMTGetContribution(array<string, mixed> $config, mixed $mtEngine, mixed $queueElement)
+ * @method array<string, mixed>   filterPayableRates(array<string, mixed> $rates, string $sourceLanguage, string $targetLanguage)
+ * @method mixed   wordCount(mixed $wordCount)
+ * @method bool    populatePreTranslations(bool $default)
+ * @method bool    doNotManageAlternativeTranslations(bool $default, array<string, mixed> $xliffTransUnit, array<string, mixed> $xliffFileAttributes)
+ * @method array<string, mixed>   sanitizeOriginalDataMap(array<string, mixed> $originalDataMap)
+ * @method string  correctTagErrors(string $segment, array<string, mixed> $originalDataMap)
+ * @method array<string, mixed>   appendFieldToAnalysisObject(array<string, mixed> $metadata, ProjectStructure $projectStructure)
+ * @method array<string, mixed>   filter_team_for_project_creation(array<string, mixed> $teamData)
+ * @method ProjectStructure handleJsonNotesBeforeInsert(ProjectStructure $projectStructure)
+ * @method mixed   handleTUContextGroups(ProjectStructure $projectStructure)
+ * @method array<int, string>   filterProjectDependencies(array<int, string> $projectDependencies, array<string, mixed> $metadata)
+ * @method BasicFeatureStruct[] filterFeaturesMerged(BasicFeatureStruct[] $features)
+ * @method mixed   rewriteContributionContexts(mixed $segmentsList, array<string, mixed> $contextData)
+ * @method array<int|string, mixed>   appendInitialTemplateVars(array<int|string, mixed> $codes)
+ *
+ * --- Run hooks (void, side effects only) ---
+ *
+ * @method void setTranslationCommitted(array<string, mixed> $context)
+ * @method void postAddSegmentTranslation(array<string, mixed> $context)
+ * @method void chunkReviewUpdated(ChunkReviewStruct $chunkReview, mixed $updateResult, mixed $model, ProjectStruct $project)
+ * @method void job_password_changed(JobStruct $job, string $oldPassword)
+ * @method void review_password_changed(int $jobId, string $oldPassword, string $newPassword, int $revisionNumber)
+ * @method void project_password_changed(ProjectStruct $project, string $oldPassword)
+ * @method void project_completion_event_saved(JobStruct $chunk, CompletionEventStruct $event, int $completionEventId)
+ * @method void processZIPDownloadPreview(mixed $controller, array<int, mixed> $outputContent)
+ * @method void checkSplitAccess(array<int, JobStruct> $jobList)
+ * @method void afterTMAnalysisCloseProject(int $projectId, array<string, mixed> $analyzedReport)
+ * @method void tmAnalysisDisabled(int $projectId)
+ * @method void fastAnalysisComplete(array<int, mixed> $segments, array<string, mixed> $projectRow)
+ * @method void bootstrapCompleted()
+ * @method void postJobSplitted(SplitMergeProjectData $data)
+ * @method void postJobMerged(SplitMergeProjectData $data, JobStruct $chunk)
+ * @method void validateJobCreation(JobStruct $job, ProjectStructure $projectStructure)
+ * @method void validateProjectCreation(ProjectStructure $projectStructure)
+ * @method void beforeProjectCreation(ProjectStructure $projectStructure, array<string, mixed> $context)
+ * @method void postProjectCreate(ProjectStructure $projectStructure)
+ * @method void postProjectCommit(ProjectStructure $projectStructure)
+ *
+ * @see BaseFeature — Plugins implement these hooks as methods
+ * @see \Plugins\Features\AbstractRevisionFeature — Example handler implementations
  */
 class FeatureSet implements FeatureSetInterface
 {
@@ -49,33 +126,29 @@ class FeatureSet implements FeatureSetInterface
      * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
      * Otherwise, it is populated with mandatory features.
      *
-     * @param $features
+     * @param BasicFeatureStruct[]|null $features
      *
      * @throws Exception
      */
-    public function __construct($features = null)
+    public function __construct(?array $features = null)
     {
         if (is_null($features)) {
             $this->loadFromMandatory();
         } else {
             $_features = [];
             foreach ($features as $feature) {
-                if (property_exists($feature, 'feature_code')) {
-                    $_features[$feature->feature_code] = $feature;
-                } else {
-                    throw new Exception('`feature_code` property not found on ' . var_export($feature, true));
-                }
+                $_features[$feature->feature_code] = $feature;
             }
             $this->merge($_features);
         }
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function getCodes(): array
     {
-        return array_values(array_map(function ($feature) {
+        return array_values(array_map(function (BasicFeatureStruct $feature): string {
             return $feature->feature_code;
         }, $this->features));
     }
@@ -227,16 +300,15 @@ class FeatureSet implements FeatureSetInterface
     {
         $features = OwnerFeatureDao::getByIdCustomer($id_customer);
 
-        $objs = array_map(function ($feature) {
-            /* @var $feature BasicFeatureStruct */
+        $objs = array_map(function (BasicFeatureStruct $feature): BaseFeature {
             return $feature->toNewObject();
         }, $features);
 
-        $returnable = array_filter($objs, function (?BaseFeature $obj) {
+        $returnable = array_filter($objs, function (BaseFeature $obj): bool {
             return $obj->isAutoActivableOnProject();
         });
 
-        $this->merge(array_map(function (BaseFeature $feature) {
+        $this->merge(array_map(function (BaseFeature $feature): BasicFeatureStruct {
             return $feature->getFeatureStruct();
         }, $returnable));
     }
@@ -278,9 +350,8 @@ class FeatureSet implements FeatureSetInterface
                      * do whatever they need to based on the behaviour of the other features.
                      *
                      */
-                    $filterable = call_user_func_array([$obj, $method], $args);
-                } /** @noinspection PhpRedundantCatchClauseInspection */
-                catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
+                    $filterable = $obj->$method(...$args);
+                } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
                     throw $e;
                 } catch (Exception $e) {
                     LoggerFactory::getLogger('feature_set')->error("Exception running filter " . $method . ": " . $e->getMessage());
@@ -403,7 +474,7 @@ class FeatureSet implements FeatureSetInterface
      * Updates the PluginsLoader array with new features. Ensures no duplicates are created.
      * Loads dependencies as needed.
      *
-     * @param $new_features BasicFeatureStruct[]
+     * @param array<string, BasicFeatureStruct> $new_features
      *
      * @throws Exception
      */
@@ -452,6 +523,11 @@ class FeatureSet implements FeatureSetInterface
         $this->sortFeatures();
     }
 
+    /**
+     * @param string $string
+     *
+     * @return array<string>
+     */
     public static function splitString(string $string): array
     {
         return array_filter(explode(',', trim($string)));
@@ -471,7 +547,7 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * @return array
+     * @return array<string, BasicFeatureStruct>
      */
     private function getAutoloadPlugins(): array
     {
@@ -487,11 +563,11 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * Runs a command on a single feautre
+     * Runs a command on a single feature
      *
      * @param string $method
      * @param BasicFeatureStruct $feature
-     * @param array $args
+     * @param array<int, mixed> $args
      *
      * @return void
      */
@@ -502,7 +578,7 @@ class FeatureSet implements FeatureSetInterface
             $obj = new $name($feature);
 
             if (method_exists($obj, $method)) {
-                call_user_func_array([$obj, $method], $args);
+                $obj->$method(...$args);
             }
         }
     }

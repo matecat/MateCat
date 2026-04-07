@@ -30,13 +30,13 @@
 
 ### Tier 3 — Structural Refactors (weeks/months)
 
-| #    | Item                           | Scope                             | Detail                                                        | Status |
-| ---- | ------------------------------ | --------------------------------- | ------------------------------------------------------------- | ------ |
-| SR-1 | `Database::obtain()` singleton | 311 calls in 99 files             | Replace with injected connection                              | ⬜     |
-| SR-2 | Split `ProjectStructure`       | 83 properties, 6 lifecycle groups | God object decomposition                                      | ⬜     |
-| SR-3 | Break up Controllers           | 4,221 total lines, 4 controllers  | `NewController` 1337 LOC, `SetTranslationController` 1030 LOC | ⬜     |
-| SR-4 | Dissolve `CatUtils` + `Utils`  | 1,992 lines, 69 static methods    | Static utility god classes                                    | ⬜     |
-| SR-5 | Type FeatureSet dispatch       | 52 untyped hook names             | Add typed hook signatures                                     | ⬜     |
+| #    | Item                           | Scope                             | Detail                                                                                                            | Status        |
+| ---- | ------------------------------ | --------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------- |
+| SR-1 | `Database::obtain()` singleton | 311 calls in 99 files             | Replace with injected connection                                                                                  | ⬜            |
+| SR-2 | Split `ProjectStructure`       | 83 properties, 6 lifecycle groups | God object decomposition                                                                                          | ⬜            |
+| SR-3 | Break up Controllers           | 4,221 total lines, 4 controllers  | `NewController` 1337 LOC, `SetTranslationController` 1030 LOC                                                     | ⬜            |
+| SR-4 | Dissolve `CatUtils` + `Utils`  | 1,992 lines, 69 static methods    | Static utility god classes                                                                                        | ⬜            |
+| SR-5 | Type FeatureSet dispatch       | 52 untyped hook names             | Phase 1 done: @method annotations on FeatureSet.php. Phase 2-3 roadmap in `sr5-featureset-hook-typing-roadmap.md` | 🟡 Phase 1 ✅ |
 
 ---
 
