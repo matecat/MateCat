@@ -22,11 +22,11 @@
 
 ### Tier 2 — Targeted Fixes (days each)
 
-| #    | Item                                            | Scope             | Detail                                                       | Status |
-| ---- | ----------------------------------------------- | ----------------- | ------------------------------------------------------------ | ------ |
-| TF-1 | Fix `Database.php` bug line 319                 | 1 file, 2 callers | ON DUPLICATE KEY bind values lost — **data corruption risk** | ⬜     |
-| TF-2 | Fix `$_POST/$_GET` in moderate controllers      | 3 files           | More complex controllers requiring careful testing           | ⬜     |
-| TF-3 | Extract `SetTranslationController::translate()` | 314-line method   | Worst single method in codebase                              | ⬜     |
+| #    | Item                                            | Scope             | Detail                                                       | Status  |
+| ---- | ----------------------------------------------- | ----------------- | ------------------------------------------------------------ | ------- |
+| TF-1 | Fix `Database.php` bug line 319                 | 1 file, 2 callers | ON DUPLICATE KEY bind values lost — **data corruption risk** | ✅ Done |
+| TF-2 | Fix `$_POST/$_GET` in moderate controllers      | 3 files           | More complex controllers requiring careful testing           | ⬜      |
+| TF-3 | Extract `SetTranslationController::translate()` | 314-line method   | Worst single method in codebase                              | ⬜      |
 
 ### Tier 3 — Structural Refactors (weeks/months)
 

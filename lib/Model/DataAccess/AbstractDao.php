@@ -262,11 +262,11 @@ abstract class AbstractDao
      *
      * @param array $on_duplicate_fields
      *
-     * @return string
+     * @return array{0: string, 1: array} [sql, dupBindValues]
      * @throws Exception
      * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement(array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): string
+     public static function buildInsertStatement(array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = []): array
     {
         return Database::buildInsertStatement(static::TABLE, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_fields);
     }
@@ -423,11 +423,11 @@ abstract class AbstractDao
         $mask = array_keys($struct->toArray());
         $mask = array_diff($mask, static::$auto_increment_field);
 
-        $sql = self::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields);
+        [$sql, $dupBindValues] = self::buildInsertStatement($struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields);
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
-        $data = $struct->toArray($mask);
+        $data = array_merge($struct->toArray($mask), $dupBindValues);
 
         LoggerFactory::getLogger('dao')->debug(["SQL" => $sql, "values" => $data]);
 
