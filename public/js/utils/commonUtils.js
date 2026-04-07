@@ -17,6 +17,8 @@ import FileTypeXliff from '../../img/icons/FileTypeXliff'
 import FileTypeZip from '../../img/icons/FileTypeZip'
 import FileTypeCode from '../../img/icons/FileTypeCode'
 import FileTypeImage from '../../img/icons/FileTypeImage'
+import FileTypeSub from '../../img/icons/FileTypeSub'
+import FileTypePub from '../../img/icons/FileTypePub'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -236,7 +238,7 @@ const CommonUtils = {
       case 'sbv':
       case 'srt':
       case 'vtt':
-        return <FileTypeFile size={size} /> //TODO add specific icons for these file types
+        return <FileTypeSub size={size} />
       case 'avif':
       case 'bmp':
       case 'png':
@@ -266,7 +268,7 @@ const CommonUtils = {
       case 'idml':
       case 'icml':
       case 'tex':
-        return <FileTypeFile size={size} /> //TODO add specific icons for these file types
+        return <FileTypePub size={size} /> //TODO add specific icons for these file types
       case 'zip':
         return <FileTypeZip size={size} />
       case 'xml':
