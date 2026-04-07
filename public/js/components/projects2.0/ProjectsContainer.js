@@ -9,9 +9,7 @@ import UserConstants from '../../constants/UserConstants'
 import UserStore from '../../stores/UserStore'
 import {DASHBOARD_REQUEST_PROJECTS_STATUS} from '../../constants/Constants'
 import {SPINNER_LOADER_SIZE, SpinnerLoader} from '../common/SpinnerLoader'
-import {set} from 'lodash'
-import {hi} from 'make-plural'
-import {Button, BUTTON_TYPE} from '../common/Button/Button'
+import {Button, BUTTON_TYPE, BUTTON_SIZE} from '../common/Button/Button'
 import ManageActions from '../../actions/ManageActions'
 
 export const ProjectsContainer = ({
@@ -21,7 +19,7 @@ export const ProjectsContainer = ({
   selectedUser,
   requestProjectsStatus,
 }) => {
-  const [projects, setProjects] = useState(fromJS([]))
+  const [projects, setProjects] = useState()
   const [teamState, setTeamState] = useState(team)
   const [teamsState, setTeamsState] = useState(teams)
   const [isFilterApplied, setIsFilterApplied] = useState(false)
@@ -32,7 +30,7 @@ export const ProjectsContainer = ({
       setProjects(projects)
       setTeamState((prevState) => (team ? team : prevState))
       setTeamsState((prevState) => (teams ? teams : prevState))
-      setIsFilterApplied((prevState) => (filtering ? filtering : prevState))
+      setIsFilterApplied(filtering)
       setReachNoMoreProjects((prevState) => (hideSpinner ? prevState : false))
     }
     const updateProjects = (projects) => setProjects(projects)
@@ -76,20 +74,23 @@ export const ProjectsContainer = ({
         teamState.get('pending_invitations').size > 0) ||
       teamState.get('type') === 'personal'
 
-    return (
+    const isProjectsEmpty =
+      typeof projects !== 'undefined' && projects.size === 0
+    
+      return (
       <div className="notify-notfound">
         {isFilterApplied ? (
           <div>
             <div className="message-nofound">No Projects Found</div>
             <div className="no-results-found"></div>
           </div>
-        ) : teamState.get('type') === 'personal' ? (
+        ) : isProjectsEmpty && teamState.get('type') === 'personal' ? (
           <div className="no-results-teams">
             <div className="message-nofound">Welcome to your Personal area</div>
             <div className="welcome-to-matecat"></div>
             <div className="message-create">
-              <p>
                 <Button
+                  size={BUTTON_SIZE.MEDIUM}
                   type={BUTTON_TYPE.PRIMARY}
                   onClick={() =>
                     window.open(`/?idTeam=${teamState.get('id')}`, '_blank')
@@ -97,10 +98,9 @@ export const ProjectsContainer = ({
                 >
                   Create Project
                 </Button>
-              </p>
-              {!thereAreMembers ? (
-                <p>
+              {!thereAreMembers && (
                   <Button
+                    size={BUTTON_SIZE.MEDIUM}
                     type={BUTTON_TYPE.PRIMARY}
                     onClick={() =>
                       ManageActions.openModifyTeamModal(teamState.toJS())
@@ -108,43 +108,40 @@ export const ProjectsContainer = ({
                   >
                     Add member
                   </Button>
-                </p>
-              ) : (
-                ''
-              )}
+               ) }
             </div>
           </div>
         ) : (
-          <div className="no-results-teams">
-            <div className="message-nofound">
-              Welcome to {teamState.get('name')}
-            </div>
-            <div className="no-results-found"></div>
-            <div className="message-create">
-              <p>
-                <Button
-                  type={BUTTON_TYPE.PRIMARY}
-                  onClick={() =>
-                    window.open(`/?idTeam=${teamState.get('id')}`, '_blank')
-                  }
-                >
-                  Create Project
-                </Button>
-                {!thereAreMembers ? (
-                  <Button
+          isProjectsEmpty && (
+            <div className="no-results-teams">
+              <div className="message-nofound">
+                Welcome to {teamState.get('name')}
+              </div>
+              <div className="no-results-found"></div>
+              <div className="message-create">
+              <Button
+                    size={BUTTON_SIZE.MEDIUM}
                     type={BUTTON_TYPE.PRIMARY}
                     onClick={() =>
-                      ManageActions.openModifyTeamModal(teamState.toJS())
+                      window.open(`/?idTeam=${teamState.get('id')}`, '_blank')
                     }
                   >
-                    Add member
+                    Create Project
                   </Button>
-                ) : (
-                  ''
-                )}
-              </p>
+                  {!thereAreMembers && (
+                    <Button
+                      size={BUTTON_SIZE.MEDIUM}
+                      type={BUTTON_TYPE.PRIMARY}
+                      onClick={() =>
+                        ManageActions.openModifyTeamModal(teamState.toJS())
+                      }
+                    >
+                      Add member
+                    </Button>
+                  )}
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
     )
@@ -154,49 +151,52 @@ export const ProjectsContainer = ({
     <div
       className={`layout__container projects-container ${requestProjectsStatus === DASHBOARD_REQUEST_PROJECTS_STATUS.RELOAD_IN_PROGRESS ? 'projects-container--loading' : ''}`}
     >
-      <div className="projects-container-title">
-        <h4>Projects</h4>
-        <div>
-          <span>Legend:</span>
-          <span>
-            <span className="projects-container-legend-unconfirmed-quad" />
-            Unconfirmed
-          </span>
-          <span>
-            <span className="projects-container-legend-translated-quad" />
-            Translated
-          </span>
-          <span>
-            <span className="projects-container-legend-approved-quad" />
-            Revise
-          </span>
-          <span>
-            <span className="projects-container-legend-approved2-quad" />
-            Revise 2
-          </span>
+      {projects?.size > 0 && (
+        <div className="projects-container-title">
+          <h4>Projects</h4>
+          <div>
+            <span>Legend:</span>
+            <span>
+              <span className="projects-container-legend-unconfirmed-quad" />
+              Unconfirmed
+            </span>
+            <span>
+              <span className="projects-container-legend-translated-quad" />
+              Translated
+            </span>
+            <span>
+              <span className="projects-container-legend-approved-quad" />
+              Revise
+            </span>
+            <span>
+              <span className="projects-container-legend-approved2-quad" />
+              Revise 2
+            </span>
+          </div>
         </div>
-      </div>
+      )}
+
       <ProjectsBulkActions
-        projects={projects.toJS()}
+        projects={projects?.toJS() ?? []}
         teams={teamsState.toJS()}
         isSelectedTeamPersonal={teamState.get('type') === 'personal'}
       >
-        {/* {projects.size > 0 ? ( */}
-        <div className="projects-list">
-          {projects.map((project) => (
-            <ProjectContainer
-              key={project.get('id')}
-              project={project}
-              downloadTranslationFn={downloadTranslationFn}
-              team={teamState}
-              teams={teamsState}
-              selectedUser={selectedUser}
-            />
-          ))}
-        </div>
-        {/*  ) : (
+        {projects?.size > 0 ? (
+          <div className="projects-list">
+            {projects.map((project) => (
+              <ProjectContainer
+                key={project.get('id')}
+                project={project}
+                downloadTranslationFn={downloadTranslationFn}
+                team={teamState}
+                teams={teamsState}
+                selectedUser={selectedUser}
+              />
+            ))}
+          </div>
+        ) : (
           getEmptyState()
-        )} */}
+        )}
       </ProjectsBulkActions>
 
       {reachNoMoreProjects ? (

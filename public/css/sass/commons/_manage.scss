@@ -806,24 +806,10 @@ div#manage-container {
   }
 
   .message-create {
-    text-align: center;
-    display: block;
+    display: flex;
     font-size: 25px;
-    margin-top: 0px;
-    line-height: 40px;
-    p {
-      padding: 20px;
-      a {
-        text-align: center;
-        font-family: Calibri, Arial, Helvetica, sans-serif;
-        padding: 16px 25px;
-        vertical-align: top;
-        font-size: 20px;
-        border: 1px solid colors.$grey600;
-        border-radius: 2px;
-        margin: 10px;
-      }
-    }
+    justify-content: center;
+    gap: 15px;
   }
 }
 

@@ -5,7 +5,7 @@
   flex-direction: column;
   padding: 30px;
   gap: 30px;
-  height: 700px;
+  height: 685px;
 
   .team-name-container {
     align-items: center;
@@ -172,6 +172,15 @@
       color: colors.$grey500;
     }
   }
+
+  h5 {
+    margin-bottom: 10px;
+  }
+
+  .submit-team-button {
+    margin-left: auto;
+    width: 80px;
+  }
 }
 
 .team-modal-input {
@@ -190,7 +199,7 @@
 }
 
 .team-modal-create {
-  height: 510px;
+  height: 485px;
 
   > p {
     margin: 0;

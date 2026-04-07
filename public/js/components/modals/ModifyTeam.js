@@ -250,7 +250,7 @@ export const ModifyTeam = ({team}) => {
   return (
     <div className="team-modal" tabIndex={1} onKeyDown={handleEnterKey}>
       <div>
-        <h2>Change Team Name</h2>
+        <h5>Change Team Name</h5>
         <div className="team-name-container">
           {isModifyingName ? (
             <div className="container-input">
@@ -262,11 +262,7 @@ export const ModifyTeam = ({team}) => {
                 autoFocus
                 onKeyDown={handleEnterKeyConfirmName}
               />
-              <Button
-                type={BUTTON_TYPE.PRIMARY}
-                size={BUTTON_SIZE.MEDIUM}
-                onClick={saveTeamName}
-              >
+              <Button type={BUTTON_TYPE.PRIMARY} onClick={saveTeamName}>
                 Confirm
               </Button>
               <Button
@@ -297,7 +293,7 @@ export const ModifyTeam = ({team}) => {
       </div>
       {teamState.get('type') !== 'personal' && (
         <div>
-          <h2>Manage Members</h2>
+          <h5>Manage Members</h5>
           <EmailsBadge
             name="team"
             value={emailsCollection}
@@ -341,14 +337,13 @@ export const ModifyTeam = ({team}) => {
           {userlist}
         </div>
       </div>
-      <div className="modal-buttons">
-        <Button
-          type={BUTTON_TYPE.PRIMARY}
-          onClick={() => ModalsActions.onCloseModal()}
-        >
-          Close
-        </Button>
-      </div>
+      <Button
+        className="submit-team-button"
+        type={BUTTON_TYPE.PRIMARY}
+        onClick={() => ModalsActions.onCloseModal()}
+      >
+        Close
+      </Button>
     </div>
   )
 }

@@ -48,7 +48,7 @@ export const CreateTeam = () => {
         Create a team and invite your colleagues to share and manage projects.
       </p>
       <div>
-        <h2>Assign a name to your team</h2>
+        <h5>Assign a name to your team</h5>
         <div className="team-name-container">
           <input
             className="team-modal-input"
@@ -60,7 +60,7 @@ export const CreateTeam = () => {
         </div>
       </div>
       <div>
-        <h2>Add members</h2>
+        <h5>Add members</h5>
         <EmailsBadge
           name="team"
           value={emailsCollection}
@@ -84,15 +84,14 @@ export const CreateTeam = () => {
           </div>
         </div>
       </div>
-      <div>
-        <Button
-          type={BUTTON_TYPE.PRIMARY}
-          disabled={isDisabledCreation}
-          onClick={sendCreate}
-        >
-          Create
-        </Button>
-      </div>
+      <Button
+        className="submit-team-button"
+        type={BUTTON_TYPE.PRIMARY}
+        disabled={isDisabledCreation}
+        onClick={sendCreate}
+      >
+        Create
+      </Button>
     </div>
   )
 }

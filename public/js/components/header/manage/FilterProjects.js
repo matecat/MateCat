@@ -32,12 +32,17 @@ const FilterProjects = forwardRef((props, ref) => {
 
   const onChangeSearchInput = useCallback(
     (value) => {
-      currentText.current = value
-      ManageActions.filterProjects(
-        typeof currentUser === 'object' ? currentUser.user.uid : currentUser,
-        value,
-        currentStatus,
+      if (
+        typeof currentText.current !== 'undefined' &&
+        currentText.current !== value
       )
+        ManageActions.filterProjects(
+          typeof currentUser === 'object' ? currentUser.user.uid : currentUser,
+          value,
+          currentStatus,
+        )
+
+      currentText.current = value
     },
     [currentStatus, currentUser],
   )
