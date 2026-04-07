@@ -67,7 +67,7 @@
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
-    "babel-loader": "10.0.0",
+    "babel-loader": "10.1.1",
     "baseline-browser-mapping": "^2.9.15",
     "broadcast-channel": "^7.1.0",
     "css-loader": "7.1.4",
@@ -106,5 +106,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.5.36"
+  "version": "3.5.41"
 }
