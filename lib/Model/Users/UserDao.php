@@ -87,7 +87,15 @@ class UserDao extends AbstractDao
         );
 
         $resultSet = [];
+        if (!is_iterable($__resultSet)) {
+            return $resultSet;
+        }
+
         foreach ($__resultSet as $user) {
+            if (!$user instanceof UserStruct) {
+                continue;
+            }
+
             $resultSet[$user->uid] = $user;
         }
 
@@ -216,6 +224,10 @@ class UserDao extends AbstractDao
             ]
         )[0] ?? null;
 
+        if (!$res instanceof UserStruct) {
+            return null;
+        }
+
         return $res;
     }
 
@@ -253,6 +265,10 @@ class UserDao extends AbstractDao
             UserStruct::class,
             ['email' => $email]
         )[0] ?? null;
+
+        if (!$res instanceof UserStruct) {
+            return null;
+        }
 
         return $res;
     }
@@ -352,6 +368,10 @@ class UserDao extends AbstractDao
             ['job_id' => $job_id]
         )[0] ?? null;
 
+        if (!$res instanceof UserStruct) {
+            return null;
+        }
+
         return $res;
     }
 
@@ -368,6 +388,10 @@ class UserDao extends AbstractDao
             UserStruct::class,
             ['id_project' => $project_id]
         )[0] ?? null;
+
+        if (!$res instanceof UserStruct) {
+            return null;
+        }
 
         return $res;
     }
@@ -400,14 +424,9 @@ class UserDao extends AbstractDao
      */
     public function sanitize(IDaoStruct $input): UserStruct
     {
-        $con = Database::obtain();
         parent::_sanitizeInput($input, self::STRUCT_TYPE);
 
         $input->uid = ($input->uid !== null) ? (int)$input->uid : null;
-        $input->email = ($input->email !== null) ? $con->escape($input->email) : null;
-        $input->create_date = ($input->create_date !== null) ? $con->escape($input->create_date) : null;
-        $input->first_name = ($input->first_name !== null) ? $con->escape($input->first_name) : null;
-        $input->last_name = ($input->last_name !== null) ? $con->escape($input->last_name) : null;
 
         return $input;
     }
