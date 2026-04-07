@@ -486,7 +486,7 @@ class DownloadController extends AbstractDownloadController
                 }
             } catch (Exception $e) {
                 $msg = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export($e->getTraceAsString(), true);
-                $msg .= "\n\n Get: " . var_export($_REQUEST, true);
+                $msg .= "\n\n Get: " . var_export($this->request->params(), true);
                 LoggerFactory::getLogger('conversion')->debug($msg);
                 $this->unlockToken(
                     [

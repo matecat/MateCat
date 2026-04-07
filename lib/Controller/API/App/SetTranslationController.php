@@ -397,7 +397,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 try {
                     JobDao::setJobComplete($this->data['chunk']);
                 } catch (Exception) {
-                    $msg = "\n\n Error setJobCompleteness \n\n " . var_export($_POST, true);
+                    $msg = "\n\n Error setJobCompleteness \n\n " . var_export($this->request->paramsPost()->all(), true);
                     $redisHandler->getConnection()->del('job_completeness:' . $this->data['id_job']);
                     $this->logger->debug($msg);
                 }
@@ -588,8 +588,8 @@ class SetTranslationController extends AbstractStatefulKleinController
         [$__translation, $this->data['split_chunk_lengths']] = CatUtils::parseSegmentSplit($this->data['translation'], '', $this->filter);
 
         if (is_null($__translation) || $__translation === '') {
-            $this->logger->debug("Empty Translation \n\n" . var_export($_POST, true));
-            throw new RuntimeException("Empty Translation \n\n" . var_export($_POST, true), 0);
+            $this->logger->debug("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true));
+            throw new RuntimeException("Empty Translation \n\n" . var_export($this->request->paramsPost()->all(), true), 0);
         }
 
         $explodeIdSegment = explode("-", $this->data['id_segment']);
@@ -690,7 +690,7 @@ class SetTranslationController extends AbstractStatefulKleinController
                 break;
 
             default:
-                $msg = "Error Hack Status \n\n " . var_export($_POST, true);
+                $msg = "Error Hack Status \n\n " . var_export($this->request->paramsPost()->all(), true);
                 throw new Exception($msg, -1);
         }
     }
