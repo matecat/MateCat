@@ -78,14 +78,14 @@ export const NumericStepper = ({
       />
       <div className="container-controls">
         <Button
-          size={BUTTON_SIZE.ICON_SMALL}
+          size={BUTTON_SIZE.ICON_XSMALL}
           disabled={disabled}
           onClick={increase}
         >
           <IconDown size={16} />
         </Button>
         <Button
-          size={BUTTON_SIZE.ICON_SMALL}
+          size={BUTTON_SIZE.ICON_XSMALL}
           disabled={disabled}
           onClick={decrease}
         >

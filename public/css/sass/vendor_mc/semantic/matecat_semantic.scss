@@ -17,11 +17,11 @@
 }
 
 a {
-  color: colors.$linkBlue;
+  color: colors.$blue700;
   &:hover {
-    color: colors.$linkBlueHover;
+    color: colors.$blue400;
   }
   &:active {
-    color: colors.$linkBlueActive;
+    color: colors.$blue400;
   }
 }

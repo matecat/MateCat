@@ -15,7 +15,7 @@
   cursor: help;
   font-weight: bold;
   text-decoration: underline;
-  color: #000;
+  color: colors.$black;
   cursor: pointer;
   margin-left: 6px;
 }
@@ -45,6 +45,6 @@
 
   > p {
     font-weight: normal;
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 }

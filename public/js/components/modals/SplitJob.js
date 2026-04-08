@@ -10,6 +10,7 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import Tooltip from '../common/Tooltip'
+import {SpinnerLoader} from '../common/SpinnerLoader'
 
 const SplitJobModal = ({job, project, callback}) => {
   const [numSplit, setNumSplit] = useState(2)
@@ -211,9 +212,7 @@ const SplitJobModal = ({job, project, callback}) => {
     } else if (!wordsArray) {
       return (
         <div className="ui segment" style={{height: '126px'}}>
-          <div className="ui active inverted dimmer">
-            <div className="ui text loader">Loading</div>
-          </div>
+          <SpinnerLoader />
         </div>
       )
     }
@@ -345,19 +344,11 @@ const SplitJobModal = ({job, project, callback}) => {
             </div>
           )}
           {showLoader && <div className="button-loader show" />}
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.MEDIUM}
-            onClick={closeModal}
-          >
+          <Button mode={BUTTON_MODE.OUTLINE} onClick={closeModal}>
             Cancel
           </Button>
           {!showSplitDiffError && splitChecked && (
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
-              onClick={confirmSplitJob}
-            >
+            <Button type={BUTTON_TYPE.PRIMARY} onClick={confirmSplitJob}>
               Confirm
             </Button>
           )}

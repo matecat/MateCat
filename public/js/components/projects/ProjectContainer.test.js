@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react'
+import {act, render, screen} from '@testing-library/react'
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 import ProjectContainer from './ProjectContainer'
@@ -16,7 +16,7 @@ const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 const mountPoint = createRoot(modalElement)
-afterAll(() => mountPoint.unmount())
+afterAll(() => act(() => mountPoint.unmount()))
 
 global.config = {
   enable_outsource: 1,

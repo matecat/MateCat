@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 .machine-translation-tab {
   .add-mt-button,
   .add-mt-container {
@@ -102,18 +103,16 @@
           border-radius: 2px;
           border: 1px solid rgba(34, 36, 38, 0.15);
           height: 37px;
-          box-shadow: inset 0 1px 3px #ddd;
           &:hover {
             border-color: rgba(34, 36, 38, 0.35);
-            box-shadow: none;
           }
         }
         .field-error {
-          color: colors.$redDefault;
+          color: colors.$red500;
           font-size: 12px;
         }
         .mt-error {
-          color: colors.$redDefault;
+          color: colors.$red500;
         }
 
         &.container-actions {
@@ -127,11 +126,11 @@
       width: 50%;
       text-align: left;
       padding: 16px;
-      background: colors.$grey4;
+      background: colors.$grey100;
       display: flex;
       flex-direction: column;
-      border: 1px solid colors.$grey3;
-      border-radius: 8px;
+      border: 1px solid colors.$grey150;
+      border-radius: variables.$border-radius-default;
 
       .button {
         margin-top: 20px;
@@ -155,11 +154,11 @@
   }
 
   .green-button {
-    background-color: #33b079 !important;
+    background-color: colors.$green800 !important;
     color: white !important;
 
     &:hover {
-      background-color: rgba($color: #33b079, $alpha: 0.9) !important;
+      background-color: rgba($color: colors.$green800, $alpha: 0.9) !important;
     }
   }
 }
@@ -197,13 +196,10 @@
     .select {
       font-size: 16px;
       padding: 9px 46px 9px 12px;
-      border-radius: 2px;
       border: 1px solid rgba(34, 36, 38, 0.15);
-      box-shadow: inset 0 1px 3px #ddd;
       color: black;
       &:hover {
         border-color: rgba(34, 36, 38, 0.35);
-        box-shadow: none;
       }
     }
 
@@ -296,7 +292,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #eaebee;
+    background-color: colors.$grey100;
 
     > button {
       background: unset;
@@ -331,6 +327,10 @@
     .settings-panel-row-content {
       grid-template-columns: 8% minmax(0, 1fr) 22% 5%;
       background-color: unset;
+
+      > :first-child {
+        margin-top: 5px;
+      }
     }
     .settings-panel-row-content {
       grid-template-columns: 8% minmax(0, 1fr) 22% 5%;
@@ -370,6 +370,10 @@
     align-items: center;
     justify-content: space-between;
   }
+
+  .glossary-row-name {
+    align-items: center;
+  }
 }
 
 .glossary-row-name {
@@ -390,7 +394,7 @@
   width: 100%;
   padding: 4px;
   background-color: unset;
-  border: 1px solid colors.$grey8;
+  border: 1px solid colors.$grey200;
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -404,11 +408,14 @@
   }
 
   &.error {
-    border: solid 1px colors.$redDefault;
+    border: solid 1px colors.$red500;
   }
 }
 
 .glossary-deepl-row-name-input {
+  padding: 4px 8px;
+  border-radius: variables.$border-radius-default;
+
   &:hover {
     background-color: unset;
   }
@@ -429,8 +436,12 @@
   }
 
   .grey-button {
+    font-size: 14px !important;
+    border-radius: variables.$border-radius-default;
+    height: 32px;
+
     &.error {
-      border: solid 1px colors.$redDefault;
+      border: solid 1px colors.$red500;
     }
   }
 
@@ -468,15 +479,15 @@
   gap: 8px;
   border-radius: 2px;
   font-size: 16px;
-  color: #000;
-  background: #eaebee;
+  color: colors.$black;
+  background: colors.$grey100;
   padding: 0 8px;
   text-align: center;
-  border: 1px solid #9e9e9e;
+  border: 1px solid colors.$grey400;
   cursor: pointer;
 
   &:hover {
-    background-color: colors.$grey5;
+    background-color: colors.$grey50;
   }
 
   &:disabled {
@@ -509,6 +520,11 @@
   .settings-panel-table-rows-container {
     max-height: 400px;
     overflow-y: auto;
+    border: unset;
+  }
+
+  > :first-child {
+    margin-bottom: 10px;
   }
 }
 
@@ -545,10 +561,10 @@
   gap: 15px;
   align-items: center;
   justify-content: space-between;
-  background-color: colors.$grey4;
+  background-color: colors.$grey100;
   padding: 12px;
-  border-radius: 8px;
-  border: solid 1px colors.$grey3;
+  border-radius: variables.$border-radius-default;
+  border: solid 1px colors.$grey150;
   margin-bottom: 16px;
 
   h4 {
@@ -582,7 +598,7 @@
   }
 
   p {
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 }
 
@@ -598,8 +614,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #eaebee;
-    border-radius: 8px;
+    background-color: colors.$grey100;
+    border-radius: variables.$border-radius-default;
 
     > button {
       background: unset;
@@ -623,16 +639,18 @@
 
   &.options-container-expanded {
     .expand-button {
-      border-radius: 8px 8px 0 0;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0;
     }
   }
 
   .options-container-content {
     display: flex;
     flex-direction: column;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 variables.$border-radius-default
+      variables.$border-radius-default;
     padding: 24px;
-    background-color: colors.$grey5;
+    background-color: colors.$grey50;
 
     .mt-params-option {
       display: flex;
@@ -661,7 +679,7 @@
     p {
       display: block;
       text-align: left;
-      color: colors.$grey6;
+      color: colors.$grey700;
       font-size: 16px;
       line-height: 24px;
     }
@@ -674,7 +692,7 @@
 
   .select {
     color: colors.$black;
-    border-color: colors.$grey8;
+    border-color: colors.$grey200;
   }
 
   .select-with-label__wrapper .select {
@@ -683,7 +701,13 @@
   }
 
   .select--is-disabled {
-    background-color: colors.$grey9;
+    background-color: colors.$grey75;
+  }
+
+  input {
+    height: 32px;
+    padding: 4px 8px;
+    border-radius: variables.$border-radius-default;
   }
 }
 
@@ -695,7 +719,7 @@
 
     position: sticky;
     top: -1px;
-    background: colors.$grey5;
+    background: colors.$grey50;
 
     &::after {
       display: block;
@@ -704,9 +728,9 @@
       margin-top: 5px;
       background: linear-gradient(
         90deg,
-        rgba(colors.$grey8, 0.6) 0%,
-        rgba(colors.$grey8, 0.6) 75%,
-        rgba(colors.$grey8, 0) 100%
+        rgba(colors.$grey200, 0.6) 0%,
+        rgba(colors.$grey200, 0.6) 75%,
+        rgba(colors.$grey200, 0) 100%
       );
     }
   }
@@ -716,7 +740,7 @@
   }
 
   .dropdown__search-bar {
-    border-bottom: 1px #d7d8db solid;
+    border-bottom: 1px colors.$grey200 solid;
     margin-bottom: 1px;
   }
 

@@ -1,4 +1,5 @@
 @use '../../commons/colors';
+@use '../../commons/variables';
 
 .segmented-control__wrapper > label {
   display: block;
@@ -10,8 +11,8 @@
   position: relative;
   display: flex;
   user-select: none;
-  border-radius: 4px;
-  background-color: colors.$grey5;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$grey50;
 }
 
 .segmented-control__label {
@@ -23,10 +24,10 @@
   margin: 0;
   font-size: 16px;
   line-height: 48px;
-  color: colors.$grey1;
+  color: colors.$grey500;
   transition: color 0.3s cubic-bezier(0.77, 0, 0.175, 1);
   cursor: pointer;
-
+  gap: 4px;
   .segmented-control--compact & {
     line-height: 40px;
   }
@@ -36,7 +37,7 @@
   }
 
   &:hover {
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 }
 
@@ -60,6 +61,6 @@
   content: '';
   display: block;
   height: 100%;
-  border-radius: 4px;
-  background-color: colors.$translatedBlue;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$blue500;
 }

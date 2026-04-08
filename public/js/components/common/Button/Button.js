@@ -26,19 +26,24 @@ export const BUTTON_TYPE = {
   SUCCESS: 'success',
   WARNING: 'warning',
   CRITICAL: 'critical',
+  PURPLE: 'purple',
+  ICON: 'icon',
 }
 export const BUTTON_MODE = {
   BASIC: 'basic',
   OUTLINE: 'outline',
   GHOST: 'ghost',
   LINK: 'link',
+  OUTLINE_BG: 'outlineBg',
 }
 export const BUTTON_SIZE = {
   SMALL: 'small',
   STANDARD: 'standard',
   MEDIUM: 'medium',
   BIG: 'big',
+  ICON_XSMALL: 'iconXSmall',
   ICON_SMALL: 'iconSmall',
+  ICON_MEDIUM: 'iconMedium',
   ICON_STANDARD: 'iconStandard',
   ICON_BIG: 'iconBig',
   LINK_SMALL: 'linkSmall',
@@ -114,9 +119,9 @@ export const Button = React.forwardRef(
             {/* <Spinner
                         className={styles.spinner}
                         size={
-                            size === BUTTON_SIZE.ICON_SMALL
+                            size === BUTTON_SIZE.ICON_XSMALL
                                 ? 16
-                                : size === BUTTON_SIZE.BIG || size === BUTTON_SIZE.ICON_BIG
+                                : size === BUTTON_SIZE.BIG || size === BUTTON_SIZE.ICON_MEDIUM
                                   ? 24
                                   : 20
                         }

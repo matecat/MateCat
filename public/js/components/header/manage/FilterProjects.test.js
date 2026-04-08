@@ -1225,7 +1225,7 @@ test('Rendering elements', () => {
   render(<FilterProjects {...props} />)
 
   expect(screen.getByTestId('input-search-projects')).toBeInTheDocument()
-  expect(screen.getByTestId('status-filter')).toBeInTheDocument()
+  expect(screen.getByTestId('status-filter-trigger')).toBeInTheDocument()
 })
 
 test('Searching with no result', async () => {

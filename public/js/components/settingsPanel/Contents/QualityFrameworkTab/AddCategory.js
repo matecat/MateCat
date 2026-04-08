@@ -101,7 +101,7 @@ export const AddCategory = () => {
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
-          size: BUTTON_SIZE.MEDIUM,
+          size: BUTTON_SIZE.STANDARD,
           disabled: isDisabled,
           ...(isDisabled && {
             tooltip: `You have reached the limit of ${MAX_ENTRY} categories\nallowed in a quality framework`,
@@ -116,7 +116,6 @@ export const AddCategory = () => {
         confirmButtonProps={{
           ref: confirmRef,
           type: BUTTON_TYPE.PRIMARY,
-          size: BUTTON_SIZE.MEDIUM,
           disabled: !name || typeof error === 'string',
           children: (
             <>
@@ -128,7 +127,6 @@ export const AddCategory = () => {
         }}
         cancelButtonProps={{
           mode: BUTTON_MODE.OUTLINE,
-          size: BUTTON_SIZE.MEDIUM,
           children: 'Cancel',
         }}
         align={POPOVER_ALIGN.RIGHT}

@@ -16,7 +16,6 @@ export const SubTemplateCreateUpdateControl = () => {
     <>
       <Button
         type={BUTTON_TYPE.PRIMARY}
-        size={BUTTON_SIZE.MEDIUM}
         testId="create-update-template"
         onClick={
           templateModifier === SUBTEMPLATE_MODIFIERS.CREATE
@@ -29,7 +28,11 @@ export const SubTemplateCreateUpdateControl = () => {
         Confirm
       </Button>
 
-      <Button type={BUTTON_TYPE.WARNING} onClick={cancel}>
+      <Button
+        size={BUTTON_SIZE.ICON_STANDARD}
+        type={BUTTON_TYPE.WARNING}
+        onClick={cancel}
+      >
         <IconClose size={11} />
       </Button>
     </>

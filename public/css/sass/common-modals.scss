@@ -3,28 +3,6 @@
 @use 'modals/PreferenceModal';
 @use 'commons/colors';
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
-h2 {
-  font-size: 22px;
-}
-
-a {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
-::-webkit-input-placeholder {
-  /* Chrome/Opera/Safari */
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
 /***********************/
 /***** Login Footer ****/
 
@@ -34,11 +12,11 @@ a {
   text-decoration: underline;
   float: left;
   cursor: pointer;
-  color: colors.$linkBlue;
+  color: colors.$blue700;
 
   &:hover {
     text-decoration: none;
-    color: colors.$linkBlueHover;
+    color: colors.$blue400;
   }
 }
 
@@ -69,7 +47,7 @@ a {
 .forgot-password {
   cursor: pointer;
   text-decoration: underline;
-  color: colors.$linkBlue;
+  color: colors.$blue700;
 }
 
 .dqf-modal input[type='text'],
@@ -77,34 +55,32 @@ a {
 .login-container-left input,
 .register-form-container input[type='text'],
 .register-form-container input[type='password'],
-.forgot-password-modal input,
-.reset-password-modal input,
 .user-info-form input {
   margin-top: 5px;
   font-size: 14px;
   width: 100%;
   padding: 0.7em 0.6em;
   display: inline-block;
-  border: 1px solid #ccc;
-  box-shadow: inset 0 1px 3px #ddd;
+  border: 1px solid colors.$grey200;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   border-radius: 4px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   font-size: 15px;
-  color: #333;
+  color: colors.$grey1300;
 }
 
 .dqf-modal input[disabled] {
-  color: #999;
+  color: colors.$grey400;
   cursor: not-allowed;
-  background: colors.$grey2;
+  background: colors.$grey300;
 }
 
 .user-info-form input {
   margin-top: 5px;
   width: 100%;
-  color: #000;
+  color: colors.$black;
 }
 
 .login-button,
@@ -125,35 +101,10 @@ a {
   width: 245px;
 }
 
-.forgot-password-modal,
-.reset-password-modal {
-  width: 100%;
-  margin: 0 auto;
-  padding: 20px 0;
-}
-
-.forgot-password-modal {
-  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px
-    136px;
-  background-size: 23%;
-  /*width: 385px;*/
-  padding: 25px 96px;
-  text-align: right;
-}
-
-.forgot-password-modal p {
-  text-align: left;
-}
-
-.reset-password-modal {
-  padding: 5% 10%;
-  width: 80%;
-}
-
 .preference-modal-message {
-  box-shadow: 0 2px 2px #e2e2e2;
+  box-shadow: 0 2px 2px colors.$grey100;
   border-radius: 2px;
-  border: 1px solid #ccc;
+  border: 1px solid colors.$grey200;
   line-height: 20px;
   padding: 10px 15px;
   background: rgb(195, 224, 195);
@@ -203,19 +154,19 @@ a {
   .matecat-modal-header {
     text-align: left;
     min-height: 50px;
-    border-radius: 4px 4px 0 0;
+    border-radius: 16px 16px 0 0;
     overflow: visible;
     max-height: inherit;
     font-size: 23px;
-    background: #002b5c;
+    background: colors.$blue900;
     padding: 7px 10px 7px 24px;
     background-size: 35px;
-    color: #fff;
+    color: colors.$white;
     margin: 0 !important;
     display: grid;
-    grid-template-columns: 40px 1fr 24px;
+    grid-template-columns: 40px 1fr 40px;
     position: relative;
-    grid-column-gap: 16px;
+    grid-column-gap: 8px;
     align-items: center;
 
     h2 {
@@ -243,8 +194,8 @@ a {
     min-height: 50px;
     height: 100%;
     /*color: #000;*/
-    background-color: colors.$grey5;
-    border-radius: 0 0 4px 4px;
+    background-color: colors.$grey50;
+    border-radius: 0 0 16px 16px;
     margin: 0 auto;
     overflow: hidden;
     text-align: left;
@@ -303,8 +254,8 @@ a {
   left: 6px;
   bottom: 48px;
   top: unset;
-  width: 325px;
-  height: 342px;
+  width: 380px;
+  height: 350px;
   overflow: auto;
   background-color: unset;
 
@@ -313,10 +264,10 @@ a {
   }
 
   .matecat-modal-content {
-    width: 320px;
+    width: 340px;
     min-width: unset;
     box-shadow:
-      0 0 0 #e0e0e0,
+      0 0 0 colors.$grey200,
       0 0 2px rgba(0, 0, 0, 0.12),
       0 2px 4px rgba(0, 0, 0, 0.24) !important;
   }
@@ -327,15 +278,15 @@ a {
     border-radius: 4px 4px 0 0;
     overflow: visible;
     max-height: inherit;
-    background: #002b5c;
+    background: colors.$blue900;
     padding: 6px 10px 3px 24px;
     background-size: 31px;
-    color: #fff;
+    color: colors.$white;
     margin: 0 !important;
     display: grid;
-    grid-template-columns: 35px 1fr 24px;
+    grid-template-columns: 35px 1fr 40px;
     position: relative;
-    grid-column-gap: 16px;
+    grid-column-gap: 8px;
 
     h2 {
       font-size: 21px;
@@ -357,17 +308,10 @@ a {
 
     .matecat-modal-top,
     .matecat-modal-bottom {
-      padding: 15px 17px;
-    }
-
-    .ui.button {
-      font-size: 15px;
-    }
-
-    .ui.button.cancel-button {
-      //margin-right: 45px;
+      padding: 15px 20px;
     }
   }
+
 }
 
 .user-link {
@@ -381,21 +325,6 @@ a {
   gap: 16px;
 }
 
-/* The Close Button */
-.close-matecat-modal {
-  color: #fff;
-  float: right;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.close-matecat-modal:hover,
-.close-matecat-modal:focus {
-  color: red;
-  text-decoration: none;
-  cursor: pointer;
-}
-
 /* buttons */
 
 .matecat-modal-content .disabled,
@@ -405,7 +334,7 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  border: 1px solid #666;
+  border: 1px solid colors.$grey700;
 }
 
 .matecat-modal-content .disabled,
@@ -414,29 +343,7 @@ a {
   cursor: default;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
-  background: #d6d6d6;
-}
-
-.x-popup,
-.x-popup2 {
-  font-family: 'icomoon';
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  &:hover {
-    color: colors.$darkBlueTransparent;
-  }
-}
-
-.x-popup:before,
-.x-popup2:before {
-  content: '\f057';
+  background: colors.$grey200;
 }
 
 .matecat-modal-content,
@@ -483,12 +390,12 @@ a {
       ::-webkit-scrollbar-thumb {
         -webkit-border-radius: 10px;
         border-radius: 10px;
-        background: #a7a5a5;
+        background: colors.$grey400;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
 
       ::-webkit-scrollbar-thumb:window-inactive {
-        background: #a7a5a5;
+        background: colors.$grey400;
       }
 
       &.team {
@@ -509,7 +416,7 @@ a {
             width: 40px !important;
             max-width: 40px;
             height: 40px;
-            background-color: colors.$grey2;
+            background-color: colors.$grey300;
             border-radius: 50%;
             vertical-align: middle;
             text-align: center;
@@ -528,31 +435,31 @@ a {
           .content.email-user-invited {
             font-weight: 100;
             font-size: 14px;
-            color: colors.$grey1;
+            color: colors.$grey500;
           }
 
           .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
-            color: colors.$grey1;
+            color: colors.$grey500;
             white-space: nowrap;
           }
 
           .mini.ui.button.right.floated {
             margin-top: 6px;
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey600;
             display: inherit;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-size: 14px;
             padding: 6px 15px;
-            background-color: #f6f6f6;
+            background-color: colors.$grey50;
             white-space: nowrap;
 
             &:hover {
               box-shadow:
-                0 0 0 #e0e0e0,
+                0 0 0 colors.$grey200,
                 0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             }
@@ -567,7 +474,7 @@ a {
           }
 
           .mini.ui.primary.button {
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey600;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -582,7 +489,7 @@ a {
           }
 
           .ui.primary.button {
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey600;
             border-radius: 2px;
             font-family:
               'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -594,7 +501,7 @@ a {
             line-height: 20px;
             text-align: center;
             vertical-align: bottom;
-            border: 1px solid #797979;
+            border: 1px solid colors.$grey600;
             border-radius: 2px;
           }
         }
@@ -619,6 +526,12 @@ a {
         }
       }
     }
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      gap: 16px;
+    }
   }
 
   .matecat-modal-text {
@@ -640,6 +553,13 @@ a {
   .check-conditions {
     margin-left: 5px;
   }
+  .buttons-container {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 20px;
+  }
 }
 
 .pull-left {
@@ -650,35 +570,15 @@ a {
   float: right !important;
 }
 
-.create-team-modal,
-.modify-team-modal,
-.shortcuts-modal {
-  .create-team {
-    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    padding: 11px 22px;
-    vertical-align: top;
-    font-size: 18px;
-    margin-right: 0px;
-    border-radius: 2px;
-
-    &.primary.button {
-      border-radius: 2px;
-    }
-  }
-}
-
-.modify-team-modal {
-}
-
 .ui.fluid.input > input {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  box-shadow: inset 0 1px 3px #ddd;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   font-size: 15px;
 }
 
 .ui.multiple.search.dropdown {
   width: 100%;
-  box-shadow: inset 0 1px 3px #ddd;
+  box-shadow: inset 0 1px 3px colors.$grey200;
   font-size: 15px;
 }
 
@@ -686,7 +586,7 @@ a {
   height: 16px;
 
   &:hover {
-    color: #333333;
+    color: colors.$grey1300;
   }
 }
 
@@ -708,7 +608,7 @@ a {
   .divider-line {
     height: 2px;
     width: 40%;
-    background-color: #c5c5c5;
+    background-color: colors.$grey200;
     margin-top: 10px;
     display: block;
     float: left;
@@ -717,7 +617,7 @@ a {
   span {
     float: left;
     width: 20%;
-    color: #656565;
+    color: colors.$grey700;
   }
 }
 
@@ -725,12 +625,11 @@ a {
   .message-modal {
     padding: 25px 0;
   }
-  .matecat-modal-buttons {
+  .modal-buttons {
     display: flex;
-    gap: 8px;
     justify-content: flex-end;
-    padding: 20px;
     width: 100%;
+    gap: 16px;
   }
 
   .matecat-modal-middle {
@@ -739,7 +638,7 @@ a {
     .ui.primary.button,
     .ui.red.button {
       font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      border: 1px solid #797979;
+      border: 1px solid colors.$grey600;
       border-radius: 2px;
     }
   }
@@ -793,7 +692,7 @@ a {
 
     .no-result {
       font-size: 14px;
-      color: #666666;
+      color: colors.$grey700;
       padding: 7px;
     }
   }
@@ -803,7 +702,7 @@ a {
 
     .matecat-modal-top {
       .move-ribbon {
-        background: #e8e8e8;
+        background: colors.$grey100;
         padding: 8px 15px;
         border-radius: 4px;
 
@@ -842,16 +741,16 @@ a {
       ::-webkit-scrollbar-thumb {
         -webkit-border-radius: 10px;
         border-radius: 10px;
-        background: #a7a5a5;
+        background: colors.$grey400;
         -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
       }
 
       ::-webkit-scrollbar-thumb:window-inactive {
-        background: #a7a5a5;
+        background: colors.$grey400;
       }
 
       .default.text {
-        color: #000;
+        color: colors.$black;
       }
     }
   }
@@ -879,7 +778,7 @@ a {
       h2 {
         padding-left: 10px;
         padding-bottom: 10px;
-        border-bottom: 1px solid #dee7e8;
+        border-bottom: 1px solid colors.$grey100;
       }
 
       .shortcut-item-list {
@@ -892,7 +791,7 @@ a {
           }
 
           &:hover {
-            background: #f1f1f1;
+            background: colors.$grey75;
           }
 
           .shortcut-title,
@@ -904,7 +803,7 @@ a {
           .shortcut-keys {
             .shortcuts {
               text-align: right;
-              color: #03bdee;
+              color: colors.$blue200;
             }
 
             .mac,
@@ -915,7 +814,7 @@ a {
                 display: inline-block;
                 margin-left: 5px;
                 margin-right: 5px;
-                background: #909798;
+                background: colors.$grey400;
                 padding: 0 5px;
                 line-height: 20px;
                 font-size: 12px;
@@ -1097,7 +996,7 @@ a {
 
   .buttons-popup-container {
     padding: 25px 0 30px;
-    border-bottom: 1px solid #f2f4f7;
+    border-bottom: 1px solid colors.$grey50;
     display: flex;
     gap: 20px;
     align-items: center;

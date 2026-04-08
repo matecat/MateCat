@@ -1,17 +1,10 @@
+@use '../commons/colors';
+@use '../commons/variables';
 .instructions-modal {
   min-height: 230px;
   max-width: 900px;
   h2 {
     padding-top: 16px;
-  }
-
-  span.fileFormat {
-    padding: 4px 5px 4px 47px;
-    background-size: 25px !important;
-    line-height: 25px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
   }
   .ui.accordion {
     max-height: 400px;
@@ -33,15 +26,15 @@
     .title {
       display: flex;
       align-items: center;
-      color: #666;
+      color: colors.$grey700;
       &:hover {
-        color: #000;
+        color: colors.$black;
       }
       &.current {
         //color: #fff;
-        background: #dee4ea;
+        background: colors.$grey150;
         &:hover {
-          background: #d9e0e8;
+          background: colors.$grey150;
           //color: #fff;
         }
         .current-icon {
@@ -62,7 +55,7 @@
     }
   }
   .instructions-container {
-    background-color: #fff;
+    background-color: colors.$white;
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 20px;
@@ -73,7 +66,7 @@
       word-break: break-all;
     }
     blockquote {
-      border-left: 5px solid #ccc;
+      border-left: 5px solid colors.$grey200;
       margin: 1.5em 10px;
       padding: 0.5em 10px;
     }
@@ -91,7 +84,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px #aebdcd;
+      border-top: solid 1px colors.$grey300;
     }
 
     &:has(.accordion-expanded) {
@@ -109,13 +102,15 @@
 
   &:first-child {
     .accordion-component-title {
-      border-radius: 8px 8px 0 0 !important;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0 !important;
     }
   }
 
   &:last-child {
     .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 0 0 8px 8px !important;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default !important;
     }
   }
 
@@ -133,7 +128,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px #aebdcd;
+      border-top: solid 1px colors.$grey300;
     }
 
     &:has(.accordion-expanded) {
@@ -151,13 +146,15 @@
 
   &:first-child {
     .accordion-component-title {
-      border-radius: 8px 8px 0 0 !important;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0 !important;
     }
   }
 
   &:last-child {
     .accordion-component-title {
-      border-radius: 0 0 8px 8px !important;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default !important;
     }
   }
 
@@ -175,7 +172,7 @@
 
   &:not(:first-child) {
     .accordion-component-title {
-      border-top: solid 1px #aebdcd;
+      border-top: solid 1px colors.$grey300;
     }
 
     &:has(.accordion-expanded) {
@@ -193,13 +190,15 @@
 
   &:first-child {
     .accordion-component-title {
-      border-radius: 8px 8px 0 0 !important;
+      border-radius: variables.$border-radius-default
+        variables.$border-radius-default 0 0 !important;
     }
   }
 
   &:last-child {
     .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 0 0 8px 8px !important;
+      border-radius: 0 0 variables.$border-radius-default
+        variables.$border-radius-default !important;
     }
   }
 
@@ -211,7 +210,7 @@
 
   &:first-child:nth-last-child(1) {
     .accordion-component-title:not(.accordion-expanded) {
-      border-radius: 8px !important;
+      border-radius: variables.$border-radius-default !important;
     }
   }
 }

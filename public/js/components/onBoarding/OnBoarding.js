@@ -87,7 +87,7 @@ const OnBoarding = ({
             {isCloseButtonEnabled && (
               <Button
                 className="button-close"
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={closeHandler}
               >
                 <IconClose size={10} />

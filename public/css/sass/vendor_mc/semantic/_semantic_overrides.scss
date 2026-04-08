@@ -15,53 +15,53 @@
 
 .ui.blue.buttons .button,
 .ui.blue.button {
-  background-color: colors.$translatedBlue;
+  background-color: colors.$blue500;
 }
 .ui.blue.buttons .button:hover,
 .ui.blue.button:hover {
-  background-color: colors.$translatedBlueHover;
+  background-color: colors.$blue600;
 }
 /* Basic */
 
 .ui.basic.blue.buttons .button,
 .ui.basic.blue.button {
-  box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset !important;
-  color: colors.$translatedBlue !important;
+  box-shadow: 0px 0px 0px 1px colors.$blue500 inset !important;
+  color: colors.$blue500 !important;
 }
 
 .ui.basic.blue.buttons .button:hover,
 .ui.basic.blue.button:hover {
-  color: colors.$translatedBlueHover !important;
+  color: colors.$blue600 !important;
 }
 
 .ui.basic.blue.buttons .button:focus,
 .ui.basic.blue.button:focus {
-  color: colors.$translatedBlueHover !important;
+  color: colors.$blue600 !important;
 }
 
 /*--- Green ---*/
 
 .ui.green.buttons .button,
 .ui.green.button {
-  background-color: colors.$greenDefault;
+  background-color: colors.$green500;
   transition: 0.3s ease;
 }
 
 .ui.green.buttons .button:hover,
 .ui.green.button:hover {
-  background-color: colors.$greenDefaultHover;
+  background-color: colors.$green700;
   //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.green.buttons .button:focus,
 .ui.green.button:focus {
-  background-color: colors.$greenDefaultHover;
+  background-color: colors.$green700;
   box-shadow: none !important;
 }
 
 .ui.green.buttons .button:active,
 .ui.green.button:active {
-  background-color: colors.$greenDefaultHover;
+  background-color: colors.$green700;
   box-shadow: none !important;
   transition: none !important;
 }
@@ -77,24 +77,24 @@
 
 .ui.red.buttons .button,
 .ui.red.button {
-  background-color: colors.$redDefault;
+  background-color: colors.$red500;
 }
 
 .ui.red.buttons .button:hover,
 .ui.red.button:hover {
-  background-color: colors.$redDefaultHover;
+  background-color: colors.$red600;
   //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.red.buttons .button:focus,
 .ui.red.button:focus {
-  background-color: colors.$redDefaultHover;
+  background-color: colors.$red600;
   box-shadow: none !important;
 }
 
 .ui.red.buttons .button:active,
 .ui.red.button:active {
-  background-color: colors.$redDefaultHover;
+  background-color: colors.$red600;
   box-shadow: none !important;
 }
 
@@ -102,7 +102,7 @@
 .ui.red.buttons .active.button:active,
 .ui.red.active.button,
 .ui.red.button .active.button:active {
-  background-color: colors.$redDefaultHover;
+  background-color: colors.$red600;
   box-shadow: none !important;
 }
 
@@ -119,26 +119,26 @@
 }
 .ui.primary.buttons .button,
 .ui.primary.button {
-  background-color: colors.$translatedBlue;
+  background-color: colors.$blue500;
   transition: 0.3s ease;
   align-items: center;
 }
 
 .ui.primary.buttons .button:hover,
 .ui.primary.button:hover {
-  background-color: colors.$translatedBlueHover;
+  background-color: colors.$blue600;
   //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.primary.buttons .button:focus,
 .ui.primary.button:focus {
-  background-color: colors.$translatedBlueActive;
+  background-color: colors.$blue600;
   box-shadow: none !important;
 }
 
 .ui.primary.buttons .button:active,
 .ui.primary.button:active {
-  background-color: colors.$translatedBlueActive;
+  background-color: colors.$blue600;
   box-shadow: none !important;
   transition: none;
 }
@@ -154,18 +154,18 @@
 
 .ui.basic.primary.buttons .button,
 .ui.basic.primary.button {
-  box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset !important;
-  color: colors.$translatedBlue !important;
+  box-shadow: 0px 0px 0px 1px colors.$blue500 inset !important;
+  color: colors.$blue500 !important;
 }
 
 .ui.basic.primary.buttons .button:hover,
 .ui.basic.primary.button:hover {
-  color: colors.$translatedBlueHover !important;
+  color: colors.$blue600 !important;
 }
 
 .ui.basic.primary.buttons .button:focus,
 .ui.basic.primary.button:focus {
-  color: colors.$translatedBlueActive !important;
+  color: colors.$blue600 !important;
 }
 
 /*---------------
@@ -204,7 +204,7 @@ i.flag.burma:before {
 /* Blue */
 
 i.blue.icon {
-  color: colors.$translatedBlue !important;
+  color: colors.$blue500 !important;
 }
 
 i.inverted.blue.icon {
@@ -213,7 +213,7 @@ i.inverted.blue.icon {
 
 i.inverted.bordered.blue.icon,
 i.inverted.circular.blue.icon {
-  background-color: colors.$translatedBlue !important;
+  background-color: colors.$blue500 !important;
   color: #ffffff !important;
 }
 
@@ -221,16 +221,16 @@ i.inverted.circular.blue.icon {
 
 .ui.blue.labels .label,
 .ui.blue.label {
-  background-color: colors.$translatedBlue !important;
-  border-color: colors.$translatedBlue !important;
+  background-color: colors.$blue500 !important;
+  border-color: colors.$blue500 !important;
 }
 
 /* Link */
 
 .ui.blue.labels .label:hover,
 a.ui.blue.label:hover {
-  background-color: colors.$translatedBlueHover !important;
-  border-color: colors.$translatedBlueHover !important;
+  background-color: colors.$blue600 !important;
+  border-color: colors.$blue600 !important;
 }
 
 /* Ribbon */
@@ -238,14 +238,14 @@ a.ui.blue.label:hover {
 /* Basic */
 
 .ui.basic.blue.label {
-  color: colors.$translatedBlue !important;
-  border-color: colors.$translatedBlue !important;
+  color: colors.$blue500 !important;
+  border-color: colors.$blue500 !important;
 }
 
 .ui.basic.blue.labels a.label:hover,
 a.ui.basic.blue.label:hover {
-  color: colors.$translatedBlueHover !important;
-  border-color: colors.$translatedBlueHover !important;
+  color: colors.$blue600 !important;
+  border-color: colors.$blue600 !important;
 }
 
 /* Colors */
@@ -253,11 +253,11 @@ a.ui.basic.blue.label:hover {
 /* Blue */
 
 .ui.blue.segment:not(.inverted) {
-  border-top: 2px solid colors.$translatedBlue;
+  border-top: 2px solid colors.$blue500;
 }
 
 .ui.inverted.blue.segment {
-  background-color: colors.$translatedBlue !important;
+  background-color: colors.$blue500 !important;
 }
 
 /*----------------------
@@ -267,7 +267,7 @@ a.ui.basic.blue.label:hover {
 .ui.grid > .blue.row,
 .ui.grid > .blue.column,
 .ui.grid > .row > .blue.column {
-  background-color: colors.$translatedBlue !important;
+  background-color: colors.$blue500 !important;
 }
 
 /*--------------
@@ -277,8 +277,8 @@ a.ui.basic.blue.label:hover {
 /*--- Standard Colors  ---*/
 .ui.menu .blue.active.item,
 .ui.blue.menu .active.item {
-  border-color: colors.$translatedBlue !important;
-  color: colors.$translatedBlue !important;
+  border-color: colors.$blue500 !important;
+  color: colors.$blue500 !important;
 }
 /*--------------
     Inverted
@@ -294,14 +294,14 @@ a.ui.basic.blue.label:hover {
 
 .ui.inverted.menu .blue.active.item,
 .ui.inverted.blue.menu {
-  background-color: colors.$translatedBlue;
+  background-color: colors.$blue500;
 }
 
 /* Colors Message */
 
 .ui.blue.message {
-  color: colors.$translatedBlue;
-  box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset,
+  color: colors.$blue500;
+  box-shadow: 0px 0px 0px 1px colors.$blue500 inset,
     0px 0px 0px 0px rgba(0, 0, 0, 0);
 }
 
@@ -314,11 +314,11 @@ a.ui.basic.blue.label:hover {
 /* Blue */
 
 .ui.blue.table {
-  border-top: 0.2em solid colors.$translatedBlue;
+  border-top: 0.2em solid colors.$blue500;
 }
 
 .ui.inverted.blue.table {
-  background-color: colors.$translatedBlue !important;
+  background-color: colors.$blue500 !important;
 }
 
 /* Blue */
@@ -326,19 +326,19 @@ a.ui.basic.blue.label:hover {
 .ui.blue.cards > .card,
 .ui.cards > .blue.card,
 .ui.blue.card {
-  box-shadow: 0px 0px 0px 1px #d4d4d5, 0px 2px 0px 0px colors.$translatedBlue,
+  box-shadow: 0px 0px 0px 1px #d4d4d5, 0px 2px 0px 0px colors.$blue500,
     0px 1px 3px 0px #d4d4d5;
 }
 
 .ui.blue.statistics .statistic > .value,
 .ui.statistics .blue.statistic > .value,
 .ui.blue.statistic > .value {
-  color: colors.$translatedBlue;
+  color: colors.$blue500;
 }
 
 .ui.toggle.checkbox input:checked ~ .box:before,
 .ui.toggle.checkbox input:checked ~ label:before {
-  background-color: colors.$translatedBlue !important;
+  background-color: colors.$blue500 !important;
 }
 
 .ui.scrolling.dropdown .menu .item.item.item,
@@ -358,7 +358,7 @@ a.ui.basic.blue.label:hover {
 /* Blue */
 
 .ui.blue.progress .bar {
-  background-color: colors.$translatedBlue;
+  background-color: colors.$blue500;
 }
 
 /********************************************/

@@ -1,4 +1,5 @@
 import React, {useRef} from 'react'
+import {Badge, BADGE_TYPE} from '../common/Badge'
 const SegmentQRLine = ({
   showSuggestionSource = false,
   segment,
@@ -55,15 +56,15 @@ const SegmentQRLine = ({
         : parseInt(segment.get('suggestion_match'))
     suggestionMatchClass =
       segment.get('suggestion_source') === 'MT'
-        ? 'per-yellow'
+        ? BADGE_TYPE.YELLOW
         : suggestionMatch === 101
-          ? 'per-blu'
+          ? BADGE_TYPE.PRIMARY
           : suggestionMatch === 100
-            ? 'per-green'
+            ? BADGE_TYPE.GREEN
             : suggestionMatch > 0 && suggestionMatch <= 99
-              ? 'per-orange'
+              ? BADGE_TYPE.ORANGE
               : suggestionMatch === 0
-                ? 'per-red'
+                ? BADGE_TYPE.RED
                 : ''
   }
 
@@ -120,16 +121,14 @@ const SegmentQRLine = ({
 
       {showSuggestionSource ? (
         <div className="segment-content qr-spec">
-          <div className={'tm-percent ' + suggestionMatchClass}>
-            {!segment.get('suggestion_source') ? (
-              <b>{suggestionMatch}%</b>
-            ) : segment.get('suggestion_source') !== 'MT' ? (
-              <b>
-                {segment.get('suggestion_source')} - {suggestionMatch}%
-              </b>
-            ) : (
-              <b>{segment.get('suggestion_source')}</b>
-            )}
+          <div className="tm-percent">
+            <Badge type={suggestionMatchClass}>
+              {!segment.get('suggestion_source')
+                ? suggestionMatch + '%'
+                : segment.get('suggestion_source') !== 'MT'
+                  ? `${segment.get('suggestion_source')} - ${suggestionMatch}%`
+                  : segment.get('suggestion_source')}
+            </Badge>
           </div>
         </div>
       ) : null}

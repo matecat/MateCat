@@ -127,28 +127,29 @@ export const ModifyTeam = ({team}) => {
 
               {removeUserId === user.get('uid') ? (
                 <div className="container-confirm-form">
-                  <button
-                    className="ui primary button confirm-button"
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
                     onClick={() => removeUser(user)}
                   >
                     <Checkmark size={12} />
                     Confirm
-                  </button>
+                  </Button>
 
-                  <button
-                    className="ui button orange close-button"
+                  <Button
+                    type={BUTTON_TYPE.WARNING}
                     onClick={() => setRemoveUserId()}
                   >
                     <Close size={18} />
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <div
-                  className="mini ui button button-remove"
+                <Button
+                  size={BUTTON_SIZE.SMALL}
+                  className="remove-user-button"
                   onClick={() => confirmRemoveMember(user.get('uid'))}
                 >
                   Remove
-                </div>
+                </Button>
               )}
             </li>
           )
@@ -185,12 +186,13 @@ export const ModifyTeam = ({team}) => {
                 ) : (
                   <>
                     <span>Pending user</span>
-                    <div
-                      className="mini ui button"
+                    <Button
+                      type={BUTTON_TYPE.DEFAULT}
+                      size={BUTTON_SIZE.SMALL}
                       onClick={() => resendInvite(email)}
                     >
                       Resend Invite
-                    </div>
+                    </Button>
                   </>
                 )}
               </div>
@@ -248,7 +250,7 @@ export const ModifyTeam = ({team}) => {
   return (
     <div className="team-modal" tabIndex={1} onKeyDown={handleEnterKey}>
       <div>
-        <h2>Change Team Name</h2>
+        <h5>Change Team Name</h5>
         <div className="team-name-container">
           {isModifyingName ? (
             <div className="container-input">
@@ -260,11 +262,7 @@ export const ModifyTeam = ({team}) => {
                 autoFocus
                 onKeyDown={handleEnterKeyConfirmName}
               />
-              <Button
-                type={BUTTON_TYPE.PRIMARY}
-                size={BUTTON_SIZE.MEDIUM}
-                onClick={saveTeamName}
-              >
+              <Button type={BUTTON_TYPE.PRIMARY} onClick={saveTeamName}>
                 Confirm
               </Button>
               <Button
@@ -284,7 +282,7 @@ export const ModifyTeam = ({team}) => {
               <Button
                 className="button-edit"
                 mode={BUTTON_MODE.GHOST}
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={() => setIsModifyingName(true)}
               >
                 <IconEdit size={18} />
@@ -295,7 +293,7 @@ export const ModifyTeam = ({team}) => {
       </div>
       {teamState.get('type') !== 'personal' && (
         <div>
-          <h2>Manage Members</h2>
+          <h5>Manage Members</h5>
           <EmailsBadge
             name="team"
             value={emailsCollection}
@@ -303,13 +301,16 @@ export const ModifyTeam = ({team}) => {
             onChange={onChangeAddMembers}
             placeholder="Add new members by entering their email addresses"
           />
-          <button
-            className="create-team ui primary button open button-invite"
-            onClick={inviteMembers}
-            disabled={!isValidEmails}
-          >
-            Invite members
-          </button>
+          <div className="modal-buttons">
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              className="button-invite"
+              onClick={inviteMembers}
+              disabled={!isValidEmails}
+            >
+              Invite members
+            </Button>
+          </div>
         </div>
       )}
 
@@ -336,12 +337,13 @@ export const ModifyTeam = ({team}) => {
           {userlist}
         </div>
       </div>
-      <button
-        className="create-team ui primary button open button-close"
+      <Button
+        className="submit-team-button"
+        type={BUTTON_TYPE.PRIMARY}
         onClick={() => ModalsActions.onCloseModal()}
       >
         Close
-      </button>
+      </Button>
     </div>
   )
 }

@@ -2,21 +2,21 @@
 @use "../commons/colors";
 
 #matecat-modal-languages {
-  $light-blue: colors.$translatedBlue;
-  $medium-blue: colors.$linkBlue;
-  $dark-blue: colors.$darkBlue;
+  $light-blue: colors.$blue500;
+  $medium-blue: colors.$blue700;
+  $dark-blue: colors.$blue900;
 
   $placeholder-gray: #cdd4de;
-  $btn-shadow-gray: colors.$grey1;
-  $btn-hover-blue: colors.$translatedBlueHover;
+  $btn-shadow-gray: colors.$grey500;
+  $btn-hover-blue: colors.$blue600;
 
-  $medium-gray: colors.$grey2;
-  $dark-gray: colors.$grey1;
+  $medium-gray: colors.$grey300;
+  $dark-gray: colors.$grey500;
 
   /* Modal */
   .matecat-modal {
     button:focus {
-      border: 1px solid colors.$translatedBlue;
+      border: 1px solid colors.$blue500;
     }
   }
 
@@ -34,15 +34,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    .close-matecat-modal {
-      padding-bottom: 9px;
-    }
   }
 
   /* Modal Subheader */
   .matecat-modal-subheader {
-    background: #fff;
+    background: colors.$white;
     border-bottom: 1px solid $medium-gray;
     /*height: $subheader-height;*/
     padding: 16px 16px 16px 32px;
@@ -61,7 +57,7 @@
       }
 
       .label {
-        color: colors.$grey6;
+        color: colors.$grey700;
         margin: 0px 8px 0 0;
       }
 
@@ -71,13 +67,13 @@
         gap: 5px;
 
         .list-badge {
-          background-color: colors.$grey1;
+          background-color: colors.$grey500;
           border-radius: 12px;
           padding: 2px 10px;
           cursor: pointer;
 
           &:hover {
-            background-color: colors.$darkBlueHover;
+            background-color: colors.$blue950;
           }
 
           .language-name {
@@ -156,8 +152,8 @@
           text-transform: capitalize;
           border-radius: 2px;
           margin: 0 2px;
-          background: #fff;
-          color: #000;
+          background: colors.$white;
+          color: colors.$black;
           border: 1px solid $medium-gray;
           &:hover {
             cursor: default;
@@ -170,9 +166,9 @@
           }
           &.highlightDelete {
             background: $light-blue;
-            color: #ffffff;
+            color: colors.$white;
             .react-tagsinput-remove {
-              color: #ffffff;
+              color: colors.$white;
             }
           }
         }
@@ -204,7 +200,7 @@
   .matecat-modal-footer {
     overflow: auto;
     height: 72px;
-    background: #fff;
+    background: colors.$white;
     border-top: 1px solid $medium-gray;
     padding: 8px 16px 8px 32px;
 
@@ -228,10 +224,10 @@
       /* Badge */
       .badge {
         padding: 0.35rem 0.58rem;
-        background: colors.$translatedBlue;
+        background: colors.$blue500;
         border-radius: 25px;
         font-size: 0.9rem;
-        color: #fff;
+        color: colors.$white;
         line-height: 1;
       }
 
@@ -272,7 +268,7 @@
 
         &.selected {
           background: $dark-blue;
-          color: #fff;
+          color: colors.$white;
         }
         &:not(.selected) .check {
           display: none;
@@ -296,7 +292,7 @@
 
         &:hover:not(.selected),
         &.hover:not(.selected) {
-          background: colors.$grey3;
+          background: colors.$grey150;
           color: $medium-blue;
           // padding-left: 26px;
 
@@ -308,59 +304,9 @@
         .language-dropdown-item-container {
           .code-badge-selected {
             background-color: colors.$white;
-            color: colors.$darkBlue;
+            color: colors.$blue900;
           }
         }
-      }
-    }
-  }
-
-  /* Buttons */
-
-  .modal-btn {
-    padding: 8px 16px;
-    border-radius: 2px;
-    margin: 4px 8px;
-    cursor: pointer;
-
-    &:focus {
-      outline: none;
-    }
-
-    &.primary {
-      min-width: 128px;
-      //-webkit-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
-      //-moz-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
-      //box-shadow: 0 2px 8px 0 $btn-shadow-gray;
-    }
-
-    &.secondary {
-      min-width: 100px;
-    }
-
-    &.blue {
-      background: $light-blue;
-      border: 1px solid $light-blue;
-      color: #fff;
-      &:hover {
-        background-color: $btn-hover-blue;
-        //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-      }
-      &:focus {
-        box-shadow: none;
-        border: 1px solid $dark-blue;
-      }
-    }
-
-    &.gray {
-      background: #fff;
-      color: #000;
-      border: 1px solid $medium-gray;
-      &:focus {
-        border: 1px solid $light-blue;
-      }
-      &:hover {
-        background-color: colors.$grey3;
       }
     }
   }

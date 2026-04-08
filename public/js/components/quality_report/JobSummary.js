@@ -4,36 +4,38 @@ import ProductionSummary from './ProductionSummary'
 import QualitySummaryTable from './QualitySummaryTable'
 import RevisionFeedback from './RevisionFeedback'
 
-class JobSummary extends React.Component {
-  render() {
-    return (
-      <div className="qr-production-quality">
-        {this.props.jobInfo ? (
-          <ProductionSummary
-            jobInfo={this.props.jobInfo}
-            qualitySummary={this.props.qualitySummary}
-            secondPassReviewEnabled={this.props.secondPassReviewEnabled}
-          />
-        ) : null}
+export const JobSummary = ({
+  jobInfo,
+  qualitySummary,
+  secondPassReviewEnabled,
+}) => {
+  return (
+    <div className="qr-production-quality">
+      {jobInfo ? (
+        <ProductionSummary
+          jobInfo={jobInfo}
+          qualitySummary={qualitySummary}
+          secondPassReviewEnabled={secondPassReviewEnabled}
+        />
+      ) : null}
 
-        {this.props.jobInfo && (
-          <QualitySummaryTable
-            jobInfo={this.props.jobInfo}
-            qualitySummary={this.props.qualitySummary}
-            secondPassReviewEnabled={this.props.secondPassReviewEnabled}
-          />
-        )}
+      {jobInfo && (
+        <QualitySummaryTable
+          jobInfo={jobInfo}
+          qualitySummary={qualitySummary}
+          secondPassReviewEnabled={secondPassReviewEnabled}
+        />
+      )}
 
-        {this.props.qualitySummary.get('feedback') ? (
-          <RevisionFeedback
-            jobInfo={this.props.jobInfo}
-            qualitySummary={this.props.qualitySummary}
-            secondPassReviewEnabled={this.props.secondPassReviewEnabled}
-          />
-        ) : null}
-      </div>
-    )
-  }
+      {qualitySummary.get('feedback') ? (
+        <RevisionFeedback
+          jobInfo={jobInfo}
+          qualitySummary={qualitySummary}
+          secondPassReviewEnabled={secondPassReviewEnabled}
+        />
+      ) : null}
+    </div>
+  )
 }
 
 export default JobSummary

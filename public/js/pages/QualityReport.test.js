@@ -1334,6 +1334,6 @@ test('renders properly', async () => {
   // expect(screen.getByText('Loading')).toBeVisible()
 
   await waitFor(() => {
-    expect(screen.getByText('QR Job summary')).toBeVisible()
+    expect(screen.getByText('Quality report')).toBeVisible()
   })
 })
