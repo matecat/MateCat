@@ -12,6 +12,8 @@ use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\FilterEvent;
+use Model\FeaturesBase\Hook\RunEvent;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\LQA\ChunkReviewStruct;
@@ -28,62 +30,17 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
- * FeatureSet — WordPress-style plugin hook dispatcher.
+ * FeatureSet — Plugin hook dispatcher.
  *
- * Dispatches hooks via {@see filter()} (data transformation) and {@see run()} (side effects).
- * Plugins implement handlers by defining methods matching the hook name on their BaseFeature subclass.
+ * Typed dispatch: use dispatchFilter() with FilterEvent subclasses
+ * and dispatchRun() with RunEvent subclasses.
  *
- * --- Filter hooks (return the filtered value) ---
+ * Legacy string dispatch (filter()/run()) retained only for vendor SubFiltering hooks.
  *
- * @method string  isAnInternalUser(string $email)
- * @method array<string, mixed>   outsourceAvailableInfo(string $targetLang, string $idCustomer, int $idJob)
- * @method mixed   projectUrls(mixed $formatted)
- * @method array<string, BasicFeatureStruct>   filterCreateProjectFeatures(array<string, BasicFeatureStruct> $projectFeatures)
- * @method mixed   encodeInstructions(mixed $value)
- * @method mixed   decodeInstructions(mixed $value)
- * @method array<string, mixed>   filterActivityLogEntry(array<string, mixed> $record)
- * @method mixed   filterContributionStructOnSetTranslation(mixed $contributionStruct, ProjectStruct $project, mixed $segment)
- * @method mixed   filterContributionStructOnMTSet(mixed $contributionStruct, mixed $translation, mixed $segment, mixed $filter)
- * @method array<string, mixed>   filterGetSegmentsResult(array<string, mixed> $data, JobStruct $chunk)
- * @method array<int, mixed>   prepareNotesForRendering(array<int, mixed> $notes)
- * @method string  filterJobPasswordToReviewPassword(string $password, int $idJob)
- * @method array<int, string>   filterRevisionChangeNotificationList(array<int, string> $emails)
- * @method array<string, mixed>   filterMyMemoryGetParameters(array<string, mixed> $parameters, array<string, mixed> $config)
- * @method mixed   characterLengthCount(string $cleanedString)
- * @method array<int, string>   injectExcludedTagsInQa(array<int, string> $excludedTags)
- * @method int     checkTagMismatch(int $errorCode, mixed $qaInstance)
- * @method int     checkTagPositions(int $errorCode, mixed $qaInstance)
- * @method array<string, mixed>   analysisBeforeMTGetContribution(array<string, mixed> $config, mixed $mtEngine, mixed $queueElement)
- * @method array<string, mixed>   filterPayableRates(array<string, mixed> $rates, string $sourceLanguage, string $targetLanguage)
- * @method mixed   wordCount(mixed $wordCount)
- * @method bool    populatePreTranslations(bool $default)
- * @method array<string, mixed>   sanitizeOriginalDataMap(array<string, mixed> $originalDataMap)
- * @method string  correctTagErrors(string $segment, array<string, mixed> $originalDataMap)
- * @method array<string, mixed>   appendFieldToAnalysisObject(array<string, mixed> $metadata, ProjectStructure $projectStructure)
- * @method ProjectStructure handleJsonNotesBeforeInsert(ProjectStructure $projectStructure)
- * @method mixed   rewriteContributionContexts(mixed $segmentsList, array<string, mixed> $requestData)
- * @method array<int|string, mixed>   appendInitialTemplateVars(array<int|string, mixed> $codes)
- *
- * --- Run hooks (void, side effects only) ---
- *
- * @method void setTranslationCommitted(array<string, mixed> $context)
- * @method void postAddSegmentTranslation(array<string, mixed> $context)
- * @method void chunkReviewUpdated(ChunkReviewStruct $chunkReview, mixed $updateResult, mixed $model, ProjectStruct $project)
- * @method void jobPasswordChanged(JobStruct $job, string $oldPassword)
- * @method void reviewPasswordChanged(int $jobId, string $oldPassword, string $newPassword, int $revisionNumber)
- * @method void projectCompletionEventSaved(JobStruct $chunk, CompletionEventStruct $event, int $completionEventId)
- * @method void tmAnalysisDisabled(int $projectId)
- * @method void postJobSplitted(SplitMergeProjectData $data)
- * @method void postJobMerged(SplitMergeProjectData $data, JobStruct $chunk)
- * @method void validateJobCreation(JobStruct $job, ProjectStructure $projectStructure)
- * @method void validateProjectCreation(ProjectStructure $projectStructure)
- * @method void beforeProjectCreation(ProjectStructure $projectStructure, array<string, mixed> $context)
- * @method void postProjectCreate(ProjectStructure $projectStructure)
- * @method void filterProjectNameModified(int $idProject, string $name, string $password, string $ownerEmail)
- * @method void alterChunkReviewStruct(ChunkCompletionEventStruct $event)
- *
- * @see BaseFeature — Plugins implement these hooks as methods
- * @see \Plugins\Features\AbstractRevisionFeature — Example handler implementations
+ * @see \Model\FeaturesBase\Hook\FilterEvent
+ * @see \Model\FeaturesBase\Hook\RunEvent
+ * @see \Model\FeaturesBase\Hook\Event\Filter — Filter event DTOs
+ * @see \Model\FeaturesBase\Hook\Event\Run — Run event DTOs
  */
 class FeatureSet implements FeatureSetInterface
 {
@@ -333,6 +290,38 @@ class FeatureSet implements FeatureSetInterface
         return $filterable;
     }
 
+    /**
+     * @template T of FilterEvent
+     * @param T $event
+     * @return T
+     *
+     * @throws EndQueueException
+     * @throws AuthenticationError
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws NotFoundException
+     */
+    public function dispatchFilter(FilterEvent $event): FilterEvent
+    {
+        $hookName = $event::hookName();
+
+        foreach ($this->features as $feature) {
+            $obj = $feature->toNewObject();
+
+            if (method_exists($obj, $hookName)) {
+                try {
+                    $obj->$hookName($event);
+                } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
+                    throw $e;
+                } catch (Exception $e) {
+                    LoggerFactory::getLogger('feature_set')->error("Exception running filter " . $hookName . ": " . $e->getMessage());
+                }
+            }
+        }
+
+        return $event;
+    }
+
 
     /**
      * @param string $method
@@ -342,6 +331,31 @@ class FeatureSet implements FeatureSetInterface
         $args = array_slice(func_get_args(), 1);
         foreach ($this->features as $feature) {
             $this->runOnFeature($method, $feature, $args);
+        }
+    }
+
+    /**
+     * @template T of RunEvent
+     * @param T $event
+     */
+    public function dispatchRun(RunEvent $event): void
+    {
+        $hookName = $event::hookName();
+
+        foreach ($this->features as $feature) {
+            $obj = $feature->toNewObject();
+
+            if (method_exists($obj, $hookName)) {
+                try {
+                    $obj->$hookName($event);
+                } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
+                    throw $e;
+                } catch (Exception $e) {
+                    LoggerFactory::getLogger('feature_set')->error(
+                        "Exception running hook " . $hookName . ": " . $e->getMessage()
+                    );
+                }
+            }
         }
     }
 

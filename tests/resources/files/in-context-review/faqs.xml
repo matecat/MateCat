@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff
+	xmlns:matecat="http://www.matecat.com" srcLang="en-GB" trgLang="es-ES" version="2.0"
+	xmlns="urn:oasis:names:tc:xliff:document:2.0"
+	xmlns:mda="urn:oasis:names:tc:xliff:metadata:2.0">
+	<file id="e514a654-c466-4e70-80db-564c6414188e">
+		<unit id="1" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content" matecat:x-property-name="jcr:title" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/jcr:title" matecat:segment-id="42859697">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.1.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">1</mda:meta>
+					<mda:meta type="x-matecat-weighted">0.85</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>FAQs</source>
+				<target>Preguntas frecuentes</target>
+			</segment>
+		</unit>
+		<unit id="2" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content" matecat:x-property-name="jcr:description" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/jcr:description" matecat:segment-id="42859698">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.2.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">15</mda:meta>
+					<mda:meta type="x-matecat-weighted">12.75</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Here we answer some of the questions that we hear most often from the community.</source>
+				<target>Aquí respondemos algunas de las preguntas que escuchamos más a menudo de la comunidad.</target>
+			</segment>
+		</unit>
+		<unit id="3" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/text/text" matecat:segment-id="42859699">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.3.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">50</mda:meta>
+					<mda:meta type="x-matecat-weighted">42.5</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;WKND is a collective of outdoors, music, crafts, adventure sports, and travel enthusiasts that want to share our experiences, connections, and expertise with the world. Our objective is create a community to help like-minded adventure seekers find fun, engaging, and responsible ways to to enjoy life and create lasting memories.&lt;/p&gt;
+</source>
+				<target>&lt;p&gt;WKND es un colectivo de entusiastas del aire libre, la música, la artesanía, los deportes de aventura y los viajes que desean compartir nuestras experiencias, conexiones y conocimientos con el mundo. Nuestro objetivo es crear una comunidad para ayudar a los buscadores de aventuras con ideas afines a encontrar formas divertidas, atractivas y responsables de disfrutar de la vida y crear recuerdos duraderos.&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+		<unit id="4" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070731882" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070731882" matecat:x-property-name="cq:panelTitle" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070731882/cq:panelTitle" matecat:segment-id="42859700">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.4.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">5</mda:meta>
+					<mda:meta type="x-matecat-weighted">4.25</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Who is WKND's intended audience?</source>
+				<target>¿Quién es el público objetivo de WKND?</target>
+			</segment>
+		</unit>
+		<unit id="5" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070731882/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070731882/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070731882/text/text" matecat:segment-id="42859701">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.5.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">52</mda:meta>
+					<mda:meta type="x-matecat-weighted">44.2</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;We believe the best adventures and activities are those that are accessible to everyone. WKND is designed to be inclusive of all age ranges, abilities, and budget-levels. We strive to cater to the thrill-seeking adrenaline junkie BASE-jumpers as well as novices that have a spare weekend and interest in trying something new.&amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/p&gt;
+</source>
+				<target>&lt;p&gt;Creemos que las mejores aventuras y actividades son aquellas que son accesibles para todos. WKND está diseñado para incluir todos los rangos de edad, habilidades y niveles de presupuesto. Nos esforzamos por atender a los adictos a la adrenalina que buscan emociones fuertes, así como a los novatos que tienen un fin de semana libre e interés en probar algo nuevo.&amp;nbsp; &amp;nbsp;&amp;nbsp;&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+		<unit id="6" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1" matecat:x-property-name="jcr:title" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1/jcr:title" matecat:segment-id="42859702">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.6.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">2</mda:meta>
+					<mda:meta type="x-matecat-weighted">1.7</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Item 1</source>
+				<target>Elemento 1</target>
+			</segment>
+		</unit>
+		<unit id="7" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1" matecat:x-property-name="cq:panelTitle" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1/cq:panelTitle" matecat:segment-id="42859703">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.7.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">6</mda:meta>
+					<mda:meta type="x-matecat-weighted">5.09</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>How does WKND pay for itself?</source>
+				<target>¿Cómo se amortiza WKND?</target>
+			</segment>
+		</unit>
+		<unit id="8" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1/text/text" matecat:segment-id="42859704">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.8.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">34</mda:meta>
+					<mda:meta type="x-matecat-weighted">28.9</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;WKND charges a small fee for local promoters that want to sponsor their adventures and events on the WKND site.&amp;nbsp; Sponsored Adventures may get sorted to more prominent positions in our Adventures listings pages.&lt;/p&gt;
+&lt;h3&gt;&amp;nbsp;&lt;/h3&gt;
+</source>
+				<target>&lt;p&gt;WKND cobra una pequeña tarifa a los promotores locales que quieran patrocinar sus aventuras y eventos en el sitio de WKND. &amp;nbsp;Las aventuras patrocinadas pueden clasificarse en posiciones más destacadas en nuestras páginas de anuncios de aventuras.&#10;&lt;/p&gt;&lt;h3&gt;&amp;nbsp;&#10;&lt;/h3&gt;</target>
+			</segment>
+		</unit>
+		<unit id="9" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2" matecat:x-property-name="jcr:title" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2/jcr:title" matecat:segment-id="42859705">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.9.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">2</mda:meta>
+					<mda:meta type="x-matecat-weighted">1.2</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Item 2</source>
+				<target>Elemento 2</target>
+			</segment>
+		</unit>
+		<unit id="10" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2" matecat:x-property-name="cq:panelTitle" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2/cq:panelTitle" matecat:segment-id="42859706">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.10.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">5</mda:meta>
+					<mda:meta type="x-matecat-weighted">4.25</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Can I contribute to WKND?</source>
+				<target>¿Puedo contribuir a WKND?</target>
+			</segment>
+		</unit>
+		<unit id="11" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_2/text/text" matecat:segment-id="42859707">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.11.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">41</mda:meta>
+					<mda:meta type="x-matecat-weighted">34.85</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;Yes!&amp;nbsp; If you have the expertise and&amp;nbsp;experiences&amp;nbsp;to share, we’ll provide the platform to spread it.&amp;nbsp; As a Guest Writer, you will play an integral role in helping people find fun and cool things to do in your community.&lt;/p&gt;
+</source>
+				<target>¡&lt;p&gt;Sí! &amp;nbsp; Si tienes la experiencia y las experiencias para compartir, te proporcionaremos la plataforma para difundirlas. &amp;nbsp; Como escritor invitado, desempeñarás un papel integral para ayudar a las personas a encontrar cosas divertidas y geniales que hacer en tu comunidad.&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+		<unit id="12" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070705187" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070705187" matecat:x-property-name="cq:panelTitle" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070705187/cq:panelTitle" matecat:segment-id="42859708">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.12.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">5</mda:meta>
+					<mda:meta type="x-matecat-weighted">4.25</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>How often is WKDN updated?</source>
+				<target>¿Con qué frecuencia se actualiza WKDN?</target>
+			</segment>
+		</unit>
+		<unit id="13" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070705187/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070705187/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070705187/text/text" matecat:segment-id="42859709">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.13.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">43</mda:meta>
+					<mda:meta type="x-matecat-weighted">36.54</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;WKND is updated daily to provide you with the latest in-depth articles on fun activities that we’ve recently exploring and new adventures that are available for you to discover.&amp;nbsp; Come back often to see the latest or subscribe to our social feeds.&lt;/p&gt;
+</source>
+				<target>&lt;p&gt;WKND se actualiza diariamente para proporcionarte los últimos artículos detallados sobre actividades divertidas que hemos explorado recientemente y nuevas aventuras que están disponibles para que descubras. &amp;nbsp; Vuelve a menudo para ver las últimas noticias o suscríbete a nuestras redes sociales.&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+		<unit id="14" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070718887" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070718887" matecat:x-property-name="cq:panelTitle" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070718887/cq:panelTitle" matecat:segment-id="42859710">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.14.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">4</mda:meta>
+					<mda:meta type="x-matecat-weighted">3.4</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>When was WKND founded?</source>
+				<target>¿Cuándo se fundó WKND?</target>
+			</segment>
+		</unit>
+		<unit id="15" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070718887/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070718887/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1571070718887/text/text" matecat:segment-id="42859711">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.15.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">80</mda:meta>
+					<mda:meta type="x-matecat-weighted">68</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;WKND was created in 2015 when our founders, Daniel and Kilian, realized that their friends and family were constantly using them as resources to find fun things to do while they were in Los Angeles. They loved sharing ideas about fun events and activities they knew of, but wanted to be able to do it at larger scale across communities.&amp;nbsp; They decided to start WKND as a way to share their insights and experiences with as many people as possible.&amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/p&gt;
+</source>
+				<target>&lt;p&gt;WKND se creó en 2015 cuando nuestros fundadores, Daniel y Kilian, se dieron cuenta de que sus amigos y familiares los usaban constantemente como recursos para encontrar cosas divertidas que hacer mientras estaban en Los Ángeles. Les encantaba compartir ideas sobre eventos y actividades divertidas que conocían, pero querían poder hacerlo a mayor escala en todas las comunidades.&amp;nbsp; Decidieron comenzar WKND como una forma de compartir sus ideas y experiencias con tantas personas como fuera posible.&amp;nbsp; &amp;nbsp;&amp;nbsp;&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+		<unit id="16" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027287775" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027287775" matecat:x-property-name="cq:panelTitle" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027287775/cq:panelTitle" matecat:segment-id="42859712">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.16.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">6</mda:meta>
+					<mda:meta type="x-matecat-weighted">5.09</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Is a hot dog a sandwich?</source>
+				<target>¿Un perrito caliente es un sándwich?</target>
+			</segment>
+		</unit>
+		<unit id="17" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027287775/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027287775/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027287775/text/text" matecat:segment-id="42859713">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.17.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">42</mda:meta>
+					<mda:meta type="x-matecat-weighted">35.7</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;While it may be described as meat between two pieces of bread, a hot dog is just a sandwich in the same way Michael Jordan was just a basketball player or William Shakespeare was just a playwright.&amp;nbsp; Technically true, but vastly understated.&lt;/p&gt;
+</source>
+				<target>&lt;p&gt;Si bien puede describirse como carne entre dos trozos de pan, un perrito caliente es solo un sándwich de la misma manera que Michael Jordan era solo un jugador de baloncesto o William Shakespeare era solo un dramaturgo.&amp;nbsp; Técnicamente cierto, pero muy subestimado.&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+		<unit id="18" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027298182" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027298182" matecat:x-property-name="cq:panelTitle" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027298182/cq:panelTitle" matecat:segment-id="42859714">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.18.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">5</mda:meta>
+					<mda:meta type="x-matecat-weighted">4.25</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Is WKND a real company?</source>
+				<target>¿WKND es una empresa real?</target>
+			</segment>
+		</unit>
+		<unit id="19" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027298182/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027298182/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container/accordion/item_1572027298182/text/text" matecat:segment-id="42859715">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.19.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">63</mda:meta>
+					<mda:meta type="x-matecat-weighted">53.55</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p&gt;No. The WKND is a fictional online magazine and adventure company that focuses on outdoor activities and trips across the globe. The WKND site is designed to demonstrate functionality for Adobe Experience Manager. There is also a corresponding tutorial that walks a developer through the development.&amp;nbsp; Special thanks to&amp;nbsp;&lt;b&gt;Lorenzo Buosi&amp;nbsp;&lt;/b&gt;and&lt;b&gt;&amp;nbsp;Kilian Amendola&amp;nbsp;&lt;/b&gt;who&amp;nbsp;created the beautiful design for the WKND site.&lt;/p&gt;
+</source>
+				<target>&lt;p&gt;No. La WKND es una revista en línea ficticia y una empresa de aventuras que se centra en actividades al aire libre y viajes por todo el mundo. El sitio WKND está diseñado para demostrar la funcionalidad de Adobe Experience Manager. También hay un tutorial correspondiente que guía a un desarrollador a través del desarrollo.&amp;nbsp; Un agradecimiento especial a&amp;nbsp;&lt;b&gt;Lorenzo Buosi&amp;nbsp;&lt;/b&gt;&lt;b&gt;y&amp;nbsp; Kilian Amendola&amp;nbsp&lt;/b&gt;; quién&amp;nbsp;creó el hermoso diseño para el sitio WKND.&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+		<unit id="20" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container_293505757/title" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container_293505757/title" matecat:x-property-name="jcr:title" matecat:x-restype="x-jcr-property" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container_293505757/title/jcr:title" matecat:segment-id="42859716">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.20.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">3</mda:meta>
+					<mda:meta type="x-matecat-weighted">2.54</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>Need more help?</source>
+				<target>¿Necesitas más ayuda?</target>
+			</segment>
+		</unit>
+		<unit id="21" matecat:resname="data-node-path=/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container_293505757/text" matecat:restype="x-attribute_name_value" matecat:x-is-multi-value="false" matecat:x-node-path="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container_293505757/text" matecat:x-property-name="text" matecat:x-restype="x-jcr-html" name="/content/wknd/language-masters/es-es/faqs/jcr:content/root/container/container_293505757/text/text" matecat:segment-id="42859717">
+			<mda:metadata>
+				<mda:metaGroup id="word_count_tu.21.0" category="row_xml_attribute">
+					<mda:meta type="x-matecat-raw">20</mda:meta>
+					<mda:meta type="x-matecat-weighted">17</mda:meta>
+				</mda:metaGroup>
+			</mda:metadata>
+			<segment state="initial">
+				<source>&lt;p style="text-align: left;"&gt;Give us a call at &lt;a href="#"&gt;1-800-800-0000&lt;/a&gt;.&lt;br&gt;&#13;
+E-mail us at info&lt;a href="#"&gt;@wknd.com&lt;/a&gt;&lt;br&gt;&#13;
+We love to talk adventures!&lt;/p&gt;&#13;
+</source>
+				<target>&lt;p style="text-align: left;"&gt;Llámenos al &lt;a href="#"&gt;1-800-800-0000&lt;/a&gt;.&#13;&#10;&lt;br&gt;Envíenos un correo electrónico a info&lt;a href="#"&gt;@wknd.com&#13;&#10;&lt;/a&gt;&lt;br&gt;¡Nos encanta hablar de aventuras!&#13;&#10;&lt;/p&gt;</target>
+			</segment>
+		</unit>
+	</file>
+</xliff>

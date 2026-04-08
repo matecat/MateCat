@@ -7,6 +7,7 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\Event\Filter\FilterMyMemoryGetParametersEvent;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Users\UserStruct;
 use Utils\Constants\EngineConstants;
@@ -262,7 +263,9 @@ class MyMemory extends AbstractEngine
             $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? null
         ); // null coalescing operator to avoid warnings, we want to propagate null when it is not set.
 
-        $parameters = $this->featureSet->filter('filterMyMemoryGetParameters', $parameters, $_config);
+        $filterMyMemoryGetParametersEvent = new FilterMyMemoryGetParametersEvent($parameters, $_config);
+        $this->featureSet->dispatchFilter($filterMyMemoryGetParametersEvent);
+        $parameters = $filterMyMemoryGetParametersEvent->getParameters();
 
         $this->call("translate_relative_url", $parameters, true);
 

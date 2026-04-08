@@ -17,6 +17,7 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\Jobs\JobStruct;
 
 class CompletionEventController extends KleinController
@@ -75,7 +76,7 @@ class CompletionEventController extends KleinController
         /**
          * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
          */
-        $this->featureSet->run('alterChunkReviewStruct', $this->event);
+        $this->featureSet->dispatchRun(new AlterChunkReviewStructEvent($this->event));
 
         (new ChunkCompletionEventDao())->deleteEvent($this->event);
         Database::obtain()->commit();

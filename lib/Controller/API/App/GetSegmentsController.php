@@ -13,6 +13,8 @@ use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
+use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
 use Model\Files\FilesMetadataMarshaller;
 use Model\Files\MetadataDao as FilesMetadataDao;
 use Model\Jobs\ChunkDao;
@@ -192,7 +194,9 @@ class GetSegmentsController extends KleinController
 
         $result['data']['files'] = $res;
         $result['data']['where'] = $where;
-        $result['data'] = $featureSet->filter('filterGetSegmentsResult', $result['data'], $job);
+        $filterGetSegmentsResultEvent = new FilterGetSegmentsResultEvent($result['data'], $job);
+        $featureSet->dispatchFilter($filterGetSegmentsResultEvent);
+        $result['data'] = $filterGetSegmentsResultEvent->getData();
 
         $this->response->json($result);
     }
@@ -248,7 +252,9 @@ class GetSegmentsController extends KleinController
         $notes = $segment_notes[(int)$segment['sid']] ?? null;
 
         if (is_array($notes)) {
-            $notes = $this->featureSet->filter('prepareNotesForRendering', $notes);
+            $prepareNotesForRenderingEvent = new PrepareNotesForRenderingEvent($notes);
+            $this->featureSet->dispatchFilter($prepareNotesForRenderingEvent);
+            $notes = $prepareNotesForRenderingEvent->getNotes();
         }
 
         $segment['notes'] = $notes;

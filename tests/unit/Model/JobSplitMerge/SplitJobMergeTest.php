@@ -6,6 +6,8 @@ use ArrayObject;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -330,8 +332,8 @@ class SplitJobMergeTest extends AbstractTest
         $ps = $this->makeSplitProjectStructure($chunks);
 
         $this->features->expects($this->once())
-            ->method('run')
-            ->with('postJobSplitted', $this->isInstanceOf(SplitMergeProjectData::class));
+            ->method('dispatchRun')
+            ->with($this->isInstanceOf(PostJobSplittedEvent::class));
 
         $this->service->splitJob($ps);
     }
@@ -574,12 +576,8 @@ class SplitJobMergeTest extends AbstractTest
         $ps = new SplitMergeProjectData(999);
 
         $this->features->expects($this->once())
-            ->method('run')
-            ->with(
-                'postJobMerged',
-                $this->isInstanceOf(SplitMergeProjectData::class),
-                $this->isInstanceOf(JobStruct::class)
-            );
+            ->method('dispatchRun')
+            ->with($this->isInstanceOf(PostJobMergedEvent::class));
 
         $this->service->mergeALL($ps, $chunks);
     }

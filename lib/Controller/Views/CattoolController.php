@@ -19,6 +19,7 @@ use Model\ActivityLog\ActivityLogStruct;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\LexiQaAndTagProjectionLanguages;
 use Model\Jobs\JobStruct;
@@ -266,8 +267,10 @@ class CattoolController extends BaseKleinViewController
 
         // reset the feature set and load only the features for the current project (plus the autoloaded ones)
         $this->featureSet->loadForProject($chunkStruct->getProject());
+        $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
+        $this->featureSet->dispatchFilter($appendInitialTemplateVarsEvent);
         $this->addParamsToView([
-            'project_plugins' => new PHPTalMap($this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes())),
+            'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes()),
         ]);
 
         $this->featureSet->appendDecorators(

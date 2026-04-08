@@ -12,6 +12,7 @@ use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use ReflectionException;
@@ -52,7 +53,7 @@ class EventModel
 
         $featureSet = new FeatureSet();
         $featureSet->loadForProject(ProjectDao::findById($this->chunk->id_project));
-        $featureSet->run('projectCompletionEventSaved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId);
+        $featureSet->dispatchRun(new ProjectCompletionEventSavedEvent($this->chunk, $this->eventStruct, (int)$this->chunkCompletionEventId));
     }
 
     public function getChunkCompletionEventId(): ?int

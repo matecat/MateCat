@@ -17,6 +17,8 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\Hook\Event\Filter\EncodeInstructionsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -397,7 +399,10 @@ class NewController extends KleinController
                     /**
                      * Uber plugin callback
                      */
-                    return $this->featureSet->filter('encodeInstructions', $value);
+                    $encodeInstructionsEvent = new EncodeInstructionsEvent($value);
+                    $this->featureSet->dispatchFilter($encodeInstructionsEvent);
+
+                    return $encodeInstructionsEvent->getValue();
                 }
             ]
         ) ?: null;
@@ -786,12 +791,10 @@ class NewController extends KleinController
             $projectFeatures[$feature->feature_code] = $feature;
         }
 
-        return $this->featureSet->filter(
-            'filterCreateProjectFeatures',
-            $projectFeatures,
-            $this,
-            $mt_engine
-        );
+        $filterCreateProjectFeaturesEvent = new FilterCreateProjectFeaturesEvent($projectFeatures, $this);
+        $this->featureSet->dispatchFilter($filterCreateProjectFeaturesEvent);
+
+        return $filterCreateProjectFeaturesEvent->getProjectFeatures();
     }
 
     /**

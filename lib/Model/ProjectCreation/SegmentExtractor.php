@@ -12,6 +12,8 @@ use Model\Concerns\LogsMessages;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\PopulatePreTranslationsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\WordCountEvent;
 use Model\Files\FilesPartsDao;
 use Model\Files\FilesPartsStruct;
 use Model\Files\MetadataDao;
@@ -323,7 +325,9 @@ class SegmentExtractor
             $show_in_cattool = 1;
 
             $wordCount = CatUtils::segment_raw_word_count($seg_source['raw-content'], $this->sourceLanguage, $this->filter);
-            $wordCount = $this->features->filter('wordCount', $wordCount);
+            $wordCountEvent = new WordCountEvent($wordCount);
+            $this->features->dispatchFilter($wordCountEvent);
+            $wordCount = $wordCountEvent->getWordCount();
 
             $sourceLayer0 = $this->filter->fromRawXliffToLayer0($seg_source['raw-content']);
 
@@ -535,7 +539,9 @@ class SegmentExtractor
         ?int $position,
         ProjectStructure $projectStructure,
     ): ?array {
-        if (!$this->features->filter('populatePreTranslations', true)) {
+        $populatePreTranslationsEvent = new PopulatePreTranslationsEvent(true);
+        $this->features->dispatchFilter($populatePreTranslationsEvent);
+        if (!$populatePreTranslationsEvent->getDefault()) {
             return null;
         }
 
@@ -882,6 +888,10 @@ class SegmentExtractor
     ): ?XliffRuleInterface {
         /** @var XliffRulesModel $configModel */
         $configModel = $projectStructure->xliff_parameters;
+
+        if (is_array($configModel)) {
+            $configModel = new XliffRulesModel($configModel);
+        }
 
         $rule = $configModel->getMatchingRule(
             $projectStructure->current_xliff_info[$file_id]['version'],

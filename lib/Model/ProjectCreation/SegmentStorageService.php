@@ -10,6 +10,9 @@ use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\AppendFieldToAnalysisObjectEvent;
+use Model\FeaturesBase\Hook\Event\Filter\CorrectTagErrorsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\SanitizeOriginalDataMapEvent;
 use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataCollection;
@@ -154,16 +157,19 @@ class SegmentStorageService
         if (!empty($originalDataMap)) {
             // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
             // to allow the correct tag handling by the plugins
-            $map = $this->features->filter('sanitizeOriginalDataMap', $originalDataMap);
+            $sanitizeEvent = new SanitizeOriginalDataMapEvent($originalDataMap);
+            $this->features->dispatchFilter($sanitizeEvent);
+            $map = $sanitizeEvent->getOriginalDataMap();
 
             // persist an original data map if present
             $this->insertOriginalDataRecord($id_segment, $map);
 
-            $projectStructure->segments[$fid][$position]->segment = $this->features->filter(
-                'correctTagErrors',
+            $correctTagErrorsEvent = new CorrectTagErrorsEvent(
                 $projectStructure->segments[$fid][$position]->segment,
                 $map
             );
+            $this->features->dispatchFilter($correctTagErrorsEvent);
+            $projectStructure->segments[$fid][$position]->segment = $correctTagErrorsEvent->getSegment();
         }
 
         /** @var SegmentMetadataCollection $metadataCollection */
@@ -194,7 +200,10 @@ class SegmentStorageService
          * This hook allows plugins to manipulate data analysis content, should be not allowed to change existing data
          * but only to eventually add new fields
          */
-        return $this->features->filter('appendFieldToAnalysisObject', $metadata, $projectStructure);
+        $appendFieldEvent = new AppendFieldToAnalysisObjectEvent($metadata, $projectStructure);
+        $this->features->dispatchFilter($appendFieldEvent);
+
+        return $appendFieldEvent->getMetadata();
     }
 
     /**

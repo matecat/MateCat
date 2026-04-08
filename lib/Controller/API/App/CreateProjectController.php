@@ -14,6 +14,7 @@ use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\HandlersSorter;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
+use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
@@ -733,12 +734,10 @@ class CreateProjectController extends AbstractStatefulKleinController
     {
         $projectFeatures = [];
 
-        return $this->featureSet->filter(
-            'filterCreateProjectFeatures',
-            $projectFeatures,
-            $this,
-            $mt_engine
-        );
+        $filterCreateProjectFeaturesEvent = new FilterCreateProjectFeaturesEvent($projectFeatures, $this);
+        $this->featureSet->dispatchFilter($filterCreateProjectFeaturesEvent);
+
+        return $filterCreateProjectFeaturesEvent->getProjectFeatures();
     }
 
     /**

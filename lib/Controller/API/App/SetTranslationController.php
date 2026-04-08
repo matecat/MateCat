@@ -18,6 +18,11 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\Event\Filter\FilterContributionStructOnMTSetEvent;
+use Model\FeaturesBase\Hook\Event\Filter\FilterContributionStructOnSetTranslationEvent;
+use Model\FeaturesBase\Hook\Event\Filter\RewriteContributionContextsEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
+use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
@@ -345,11 +350,11 @@ class SetTranslationController extends AbstractStatefulKleinController
         /**
          * @see ProjectCompletion
          */
-        $this->getFeatureSet()->run('postAddSegmentTranslation', [
+        $this->getFeatureSet()->dispatchRun(new PostAddSegmentTranslationEvent([
             'chunk' => $this->data['chunk'],
             'is_review' => (bool)$this->isRevision(),
             'logged_user' => $this->user
-        ]);
+        ]));
 
         $propagationTotal = [
             'totals' => [],
@@ -472,7 +477,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             $result['warning']['id'] = 0;
         }
 
-        $this->getFeatureSet()->run('setTranslationCommitted', [
+        $this->getFeatureSet()->dispatchRun(new SetTranslationCommittedEvent([
             'translation' => $newTranslation,
             'old_translation' => $oldTranslation,
             'propagated_ids' => $propagationTotal['segments_for_propagation']['propagated_ids'] ?? null,
@@ -480,7 +485,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'segment' => $this->data['segment'],
             'user' => $this->user,
             'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber'])
-        ]);
+        ]));
 
         return $result;
     }
@@ -841,7 +846,9 @@ class SetTranslationController extends AbstractStatefulKleinController
             ]
         );
 
-        $this->getFeatureSet()->filter('rewriteContributionContexts', $segmentsList, $this->data);
+        $event = new RewriteContributionContextsEvent($segmentsList, $this->data);
+        $this->getFeatureSet()->dispatchFilter($event);
+        $segmentsList = $event->getSegmentsList();
 
         if (isset($segmentsList->id_before->segment)) {
             $this->data['context_before'] = $this->filter->fromLayer0ToLayer1($segmentsList->id_before->segment);
@@ -1103,12 +1110,13 @@ class SetTranslationController extends AbstractStatefulKleinController
         $contributionStruct->context_after = $this->data['context_after'];
         $contributionStruct->context_before = $this->data['context_before'];
 
-        $this->getFeatureSet()->filter(
-            'filterContributionStructOnSetTranslation',
+        $setTranslationEvent = new FilterContributionStructOnSetTranslationEvent(
             $contributionStruct,
             $this->data['project'],
             $this->data['segment']
         );
+        $this->getFeatureSet()->dispatchFilter($setTranslationEvent);
+        $contributionStruct = $setTranslationEvent->getContributionStruct();
 
         //assert there is not an exception by following the flow
         Set::contribution($contributionStruct);
@@ -1117,13 +1125,14 @@ class SetTranslationController extends AbstractStatefulKleinController
             /**
              * @see Airbnb::filterContributionStructOnMTSet
              */
-            $newContributionStruct = $this->getFeatureSet()->filter(
-                'filterContributionStructOnMTSet',
+            $newContributionStructEvent = new FilterContributionStructOnMTSetEvent(
                 $contributionStruct,
                 $_Translation,
                 $this->data['segment'],
                 $this->filter
             );
+            $this->getFeatureSet()->dispatchFilter($newContributionStructEvent);
+            $newContributionStruct = $newContributionStructEvent->getContributionStruct();
             Set::contributionMT($newContributionStruct);
         }
 
