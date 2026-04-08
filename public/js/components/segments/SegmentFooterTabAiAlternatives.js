@@ -9,6 +9,8 @@ import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/a
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {EditorLite} from './EditorLite'
+import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
+import CommonUtils from '../../utils/commonUtils'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
@@ -207,7 +209,9 @@ export const SegmentFooterTabAiAlternatives = ({
 
       const {contextListBefore, contextListAfter} =
         SegmentUtils.getSegmentContext(segment.sid)
-
+      const laraStyle =
+        CatToolStore.getJobMetadata().project.mt_extra.lara_style ??
+        LARA_STYLES.FAITHFUL
       aiAlternartiveTranslations({
         id_job: segment.id_job,
         password: segment.password,
@@ -219,8 +223,7 @@ export const SegmentFooterTabAiAlternatives = ({
         targetSentence: decodedTarget,
         targetContextSentencesString: contextListAfter.map((t) => t).join('\n'),
         excerpt: text,
-        styleInstructions:
-          CatToolStore.getJobMetadata().project.mt_extra.lara_style,
+        styleInstructions: laraStyle,
       })
     }
 
@@ -265,12 +268,19 @@ export const SegmentFooterTabAiAlternatives = ({
         )
       } else {
         setAlternatives({
-          error:
-            typeof data.message === 'string' && data.message !== ''
-              ? data.message
-              : 'Service currently unavailable. Please try again in a moment.',
+          error: 'Something went wrong. Please try again in a moment.',
           retryCallback: () => requestAlternatives({text: selectedText}),
         })
+        //Track Event
+        const message = {
+          sid: segment.sid,
+          segment: segment.decodedSource,
+          request: selectedText,
+          source: config.source_code,
+          target: config.target_code,
+          error: data.message,
+        }
+        CommonUtils.dispatchTrackingEvents('AiAlternativeError', message)
       }
     }
 
