@@ -10,6 +10,8 @@ import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
 import CommonUtils from '../../utils/commonUtils'
+import IconLike from '../icons/IconLike'
+import IconDislike from '../icons/IconDislike'
 
 export const SegmentFooterTabAiFeedback = ({
   code,
@@ -18,10 +20,12 @@ export const SegmentFooterTabAiFeedback = ({
   segment,
 }) => {
   const [feedback, setFeedback] = useState()
+  const [feedbackLeave, setFeedbackLeave] = useState()
 
   useEffect(() => {
     const requestFeedback = () => {
       setFeedback()
+      setFeedbackLeave(undefined)
 
       const decodedSource = DraftMatecatUtils.transformTagsToText(
         DraftMatecatUtils.excludeSomeTagsFromText(
@@ -65,7 +69,7 @@ export const SegmentFooterTabAiFeedback = ({
           target: config.target_code,
           error: data.message,
         }
-        CommonUtils.dispatchTrackingEvents('AiAlternativeError', message)
+        CommonUtils.dispatchTrackingEvents('AiLaraFeedbackError', message)
       }
     }
 
@@ -98,6 +102,54 @@ export const SegmentFooterTabAiFeedback = ({
 
     return _type
   }
+  const sendFeedback = (feedback) => {
+    const message = {
+      sid: segment.sid,
+      segment: segment.decodedSource,
+      source: config.source_code,
+      target: config.target_code,
+      feedback: feedback ? 'Yes' : 'No',
+    }
+    CommonUtils.dispatchTrackingEvents('AiLaraFeedbackUserFeedback', message)
+    setFeedbackLeave(feedback ? 'Yes' : 'No')
+  }
+  const feedbackContent =
+    typeof feedbackLeave === 'undefined' ? (
+      <>
+        <span className="feedback-paragraph">
+          <b>Submit your feedback</b>
+          <br />
+          Was this suggestion useful?
+        </span>
+        <div className="feedback-icons">
+          <span
+            className={`like${feedbackLeave === 'Yes' ? ' active' : ''}`}
+            onClick={() => sendFeedback(true)}
+          >
+            <IconLike />
+          </span>
+          <span
+            className={`dislike${feedbackLeave === 'No' ? ' active' : ''}`}
+            onClick={() => sendFeedback(false)}
+          >
+            <IconDislike />
+          </span>
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="feedback-icons">
+          <span className="submited">
+            {feedbackLeave === 'Yes' ? <IconLike /> : <IconDislike />}
+          </span>
+        </div>
+        <span className="feedback-paragraph">
+          <b>Thank you!</b>
+          <br />
+          We really appreciate your feedback.
+        </span>
+      </>
+    )
 
   return (
     <div
@@ -107,25 +159,38 @@ export const SegmentFooterTabAiFeedback = ({
     >
       {feedback?.content ? (
         <div className="ai-feature-content">
-          <h4>
-            Score:{' '}
-            <Badge type={getBadgeType(feedback.category)}>
-              {feedback.category}
-            </Badge>
-          </h4>
-          <p>{feedback.content}</p>
+          <div className="content">
+            <h4>
+              Score:{' '}
+              <Badge type={getBadgeType(feedback.category)}>
+                {feedback.category}
+              </Badge>
+            </h4>
+            <p>{feedback.content}</p>
+          </div>
+          <div
+            className={`feedback-container${
+              typeof feedbackLeave !== 'undefined'
+                ? ' feedback-container-submited'
+                : ''
+            }`}
+          >
+            {feedbackContent}
+          </div>
         </div>
       ) : feedback?.error ? (
         <div className="ai-feature-content">
-          <p>{feedback.error}</p>
-          <Button
-            className="ai-feature-button-retry"
-            type={BUTTON_TYPE.DEFAULT}
-            mode={BUTTON_MODE.OUTLINE}
-            onClick={feedback.retryCallback}
-          >
-            Retry
-          </Button>
+          <div className="content">
+            <p>{feedback.error}</p>
+            <Button
+              className="ai-feature-button-retry"
+              type={BUTTON_TYPE.DEFAULT}
+              mode={BUTTON_MODE.OUTLINE}
+              onClick={feedback.retryCallback}
+            >
+              Retry
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="loading-container">
