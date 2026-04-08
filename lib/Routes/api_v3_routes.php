@@ -131,6 +131,8 @@ $klein->with('/api/v3/filters-config-template', function () {
     route('/[i:id]', 'GET', ['\Controller\API\V3\FiltersConfigTemplateController', 'get']);
 });
 
+route('/api/v3/cancel-request/[:id_job]/[:id_segment]', 'GET', ['\Controller\API\V3\CancelRequestController', 'rawWords']);
+
 /**
  ***************************************************************************
  * ALIAS FOR V2 ROUTES

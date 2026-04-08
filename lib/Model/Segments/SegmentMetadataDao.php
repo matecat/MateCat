@@ -97,4 +97,21 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $metadataStruct->meta_value,
         ]);
     }
+
+    /**
+     * Disable translation for a specific segment.
+     *
+     * @param int $id_segment The ID of the segment for which translation will be disabled.
+     *
+     * @return void
+     */
+    public static function setTranslationDisabled(int $id_segment): void
+    {
+        $metadata = new SegmentMetadataStruct();
+        $metadata->id_segment = $id_segment;
+        $metadata->meta_key = 'translation_disabled';
+        $metadata->meta_value = 1;
+
+        SegmentMetadataDao::save($metadata);
+    }
 }
