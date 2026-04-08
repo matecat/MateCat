@@ -1,7 +1,7 @@
 # SR-5: Type FeatureSet Hook Dispatch — Roadmap
 
 > **Created:** 2026-04-07
-> **Phase 1:** @method annotations on FeatureSet.php (IMPLEMENTING)
+> **Phase 1:** @method annotations on FeatureSet.php + inconsistency fixes (COMPLETE)
 > **Phase 2:** HookRegistry runtime validation (FUTURE)
 > **Phase 3:** Interface contracts per domain (FUTURE)
 
@@ -134,18 +134,50 @@ Replace `method_exists()` discovery with `instanceof` checks against typed inter
 
 ---
 
-## Inconsistencies to Address
+## Hook Naming Convention
 
-1. **`rewriteContributionContexts`** — receives different arg types at different call sites:
-   - SetTranslationController: `($segmentsList, $this->data)` — data is array
-   - GetContributionController: `($segmentsList, $request)` — request is object
-   - Resolution: Define union type or standardize caller
+### Current State
 
-2. **Hook naming conventions are mixed:**
-   - camelCase: `filterGetSegmentsResult`, `postProjectCreate`
-   - snake_case: `filter_team_for_project_creation`, `job_password_changed`
-   - Resolution: Document but don't rename (BC break)
+Hook names follow two conventions with no clear migration path:
 
-3. **`filterProjectNameModified` ignores return value** — caller doesn't use the filtered result, making it effectively a run hook masquerading as filter
+| Convention     | Count | Examples                                                                                          |
+| -------------- | ----- | ------------------------------------------------------------------------------------------------- |
+| **camelCase**  | ~45   | `filterGetSegmentsResult`, `postProjectCreate`, `handleTUContextGroups`, `outsourceAvailableInfo` |
+| **snake_case** | ~17   | `filter_team_for_project_creation`, `job_password_changed`, `alter_chunk_review_struct`           |
 
-4. **`handleTUContextGroups` ignores return value** — same pattern as above
+### Domain Clustering
+
+Snake_case hooks cluster around specific domains:
+
+- **Password lifecycle:** `job_password_changed`, `review_password_changed`, `project_password_changed`
+- **Team/project creation:** `filter_team_for_project_creation`
+- **Review/completion:** `alter_chunk_review_struct`, `filter_job_password_to_review_password`, `project_completion_event_saved`
+
+### Decision: Document, Don't Rename
+
+Renaming hooks is a **backward-incompatible change** — every plugin implementing the hook by method name would break. Since 51 of 62 hooks are implemented by external/proprietary plugins outside this repository, renaming is not viable without a coordinated migration.
+
+**Policy:**
+
+- **Existing hooks:** Keep current naming as-is (camelCase or snake_case)
+- **New hooks:** Use **camelCase** (aligns with PHP PSR-1 method naming and the 73% majority)
+- **Phase 3 interfaces:** Will normalize naming through typed interface method names, decoupling the string hook name from the PHP method name
+
+---
+
+## Inconsistencies Found & Resolved
+
+1. **`rewriteContributionContexts`** — `@method` annotation param named `$contextData`, handlers use `$postInput`, call sites pass `$this->data`/`$request`. All carry `context_before`/`context_after` keys.
+   - **Resolution:** ✅ Renamed annotation param to `$requestData` (reflects both call sites accurately)
+
+2. **Hook naming conventions are mixed** — ~45 camelCase vs ~17 snake_case.
+   - **Resolution:** ✅ Documented in "Hook Naming Convention" section above. Policy: keep existing, new hooks use camelCase.
+
+3. **`filterProjectNameModified` ignores return value** — caller uses `filter()` but discards result, making it effectively a run hook.
+   - **Resolution:** ✅ Changed call site from `filter()` to `run()`, moved `@method` annotation to run section with `void` return.
+
+4. **`handleTUContextGroups` ignores return value** — same pattern. Object mutation via reference makes filter unnecessary.
+   - **Resolution:** ✅ Changed call site from `filter()` to `run()`, moved `@method` annotation to run section with `void` return.
+
+5. **`alter_chunk_review_struct` ignores return value** — handler in `AbstractRevisionFeature` mutates `CompletionEventStruct` properties directly via reference.
+   - **Resolution:** ✅ Changed call site from `filter()` to `run()`, moved `@method` annotation to run section with `void` return.

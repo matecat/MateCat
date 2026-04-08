@@ -1036,7 +1036,7 @@ class ProjectManager
      */
     private function insertContextsForFile(): void
     {
-        $this->features->filter('handleTUContextGroups', $this->projectStructure);
+        $this->features->run('handleTUContextGroups', $this->projectStructure);
         $this->getProjectManagerModel()->bulkInsertContextsGroups(
             (int)$this->projectStructure->id_project,
             $this->projectStructure->context_group,

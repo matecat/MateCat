@@ -43,7 +43,6 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * @method mixed   decodeInstructions(mixed $value)
  * @method array<string, mixed>   filterActivityLogEntry(array<string, mixed> $record)
  * @method array<string, mixed>   filterCreationStatus(array<string, mixed> $result, ProjectStruct $project)
- * @method mixed   filterProjectNameModified(int $idProject, string $name, string $password, string $ownerEmail)
  * @method string  overrideConversionResult(string $content)
  * @method array<string, mixed>   filterGlobalWarnings(array<string, mixed> $result, array<string, mixed> $context)
  * @method array<string, mixed>   filterSegmentWarnings(array<string, mixed> $data, array<string, mixed> $context)
@@ -55,7 +54,6 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * @method bool    prepareAllNotes(bool $default)
  * @method array<int, mixed>   processExtractedJsonNotes(array<int, mixed> $segmentNotes)
  * @method bool    filterIsChunkCompletionUndoable(bool $undoable, ProjectStruct $project, JobStruct $chunk)
- * @method mixed   alter_chunk_review_struct(ChunkCompletionEventStruct $event)
  * @method string  filter_job_password_to_review_password(string $password, int $idJob)
  * @method array<int, string>   filterRevisionChangeNotificationList(array<int, string> $emails)
  * @method array<string, mixed>   filterMyMemoryGetParameters(array<string, mixed> $parameters, array<string, mixed> $config)
@@ -73,10 +71,9 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * @method array<string, mixed>   appendFieldToAnalysisObject(array<string, mixed> $metadata, ProjectStructure $projectStructure)
  * @method array<string, mixed>   filter_team_for_project_creation(array<string, mixed> $teamData)
  * @method ProjectStructure handleJsonNotesBeforeInsert(ProjectStructure $projectStructure)
- * @method mixed   handleTUContextGroups(ProjectStructure $projectStructure)
  * @method array<int, string>   filterProjectDependencies(array<int, string> $projectDependencies, array<string, mixed> $metadata)
  * @method BasicFeatureStruct[] filterFeaturesMerged(BasicFeatureStruct[] $features)
- * @method mixed   rewriteContributionContexts(mixed $segmentsList, array<string, mixed> $contextData)
+ * @method mixed   rewriteContributionContexts(mixed $segmentsList, array<string, mixed> $requestData)
  * @method array<int|string, mixed>   appendInitialTemplateVars(array<int|string, mixed> $codes)
  *
  * --- Run hooks (void, side effects only) ---
@@ -101,6 +98,9 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * @method void beforeProjectCreation(ProjectStructure $projectStructure, array<string, mixed> $context)
  * @method void postProjectCreate(ProjectStructure $projectStructure)
  * @method void postProjectCommit(ProjectStructure $projectStructure)
+ * @method void filterProjectNameModified(int $idProject, string $name, string $password, string $ownerEmail)
+ * @method void handleTUContextGroups(ProjectStructure $projectStructure)
+ * @method void alter_chunk_review_struct(ChunkCompletionEventStruct $event)
  *
  * @see BaseFeature — Plugins implement these hooks as methods
  * @see \Plugins\Features\AbstractRevisionFeature — Example handler implementations

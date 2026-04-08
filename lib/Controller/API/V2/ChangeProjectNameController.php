@@ -56,7 +56,7 @@ class ChangeProjectNameController extends KleinController
         $ownerEmail = $this->project->id_customer;
 
         $this->changeProjectName($id, $password, $name);
-        $this->featureSet->filter('filterProjectNameModified', $id, $name, $password, $ownerEmail);
+        $this->featureSet->run('filterProjectNameModified', $id, $name, $password, $ownerEmail);
 
         $this->response->status()->setCode(200);
         $this->response->json([
