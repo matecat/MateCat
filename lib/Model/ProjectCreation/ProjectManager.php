@@ -340,9 +340,7 @@ class ProjectManager
             $teamData = $this->projectStructure->team instanceof TeamStruct
                 ? $this->projectStructure->team->getArrayCopy()
                 : (array)$this->projectStructure->team;
-            $this->projectStructure->team = new TeamStruct(
-                $this->features->filter('filter_team_for_project_creation', $teamData)
-            );
+            $this->projectStructure->team = new TeamStruct($teamData);
 
             //clean the cache for the team member list of assigned projects
             $teamDao = $this->getTeamDao();
@@ -763,8 +761,6 @@ class ProjectManager
             $db->rollback();
             throw $e;
         }
-
-        $this->features->run('postProjectCommit', $this->projectStructure);
     }
 
     /**
@@ -1026,17 +1022,8 @@ class ProjectManager
         $this->getProjectManagerModel()->bulkInsertSegmentNotesAndMetadata($this->projectStructure->notes);
     }
 
-    /**
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws Exception
-     */
     private function insertContextsForFile(): void
     {
-        $this->features->run('handleTUContextGroups', $this->projectStructure);
         $this->getProjectManagerModel()->bulkInsertContextsGroups(
             (int)$this->projectStructure->id_project,
             $this->projectStructure->context_group,

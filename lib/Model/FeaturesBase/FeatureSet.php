@@ -42,19 +42,11 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * @method mixed   encodeInstructions(mixed $value)
  * @method mixed   decodeInstructions(mixed $value)
  * @method array<string, mixed>   filterActivityLogEntry(array<string, mixed> $record)
- * @method array<string, mixed>   filterCreationStatus(array<string, mixed> $result, ProjectStruct $project)
- * @method string  overrideConversionResult(string $content)
- * @method array<string, mixed>   filterGlobalWarnings(array<string, mixed> $result, array<string, mixed> $context)
- * @method array<string, mixed>   filterSegmentWarnings(array<string, mixed> $data, array<string, mixed> $context)
- * @method array<string, mixed>   filterSetTranslationResult(array<string, mixed> $result, array<string, mixed> $context)
  * @method mixed   filterContributionStructOnSetTranslation(mixed $contributionStruct, ProjectStruct $project, mixed $segment)
  * @method mixed   filterContributionStructOnMTSet(mixed $contributionStruct, mixed $translation, mixed $segment, mixed $filter)
  * @method array<string, mixed>   filterGetSegmentsResult(array<string, mixed> $data, JobStruct $chunk)
  * @method array<int, mixed>   prepareNotesForRendering(array<int, mixed> $notes)
- * @method bool    prepareAllNotes(bool $default)
- * @method array<int, mixed>   processExtractedJsonNotes(array<int, mixed> $segmentNotes)
- * @method bool    filterIsChunkCompletionUndoable(bool $undoable, ProjectStruct $project, JobStruct $chunk)
- * @method string  filter_job_password_to_review_password(string $password, int $idJob)
+ * @method string  filterJobPasswordToReviewPassword(string $password, int $idJob)
  * @method array<int, string>   filterRevisionChangeNotificationList(array<int, string> $emails)
  * @method array<string, mixed>   filterMyMemoryGetParameters(array<string, mixed> $parameters, array<string, mixed> $config)
  * @method mixed   characterLengthCount(string $cleanedString)
@@ -65,14 +57,10 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * @method array<string, mixed>   filterPayableRates(array<string, mixed> $rates, string $sourceLanguage, string $targetLanguage)
  * @method mixed   wordCount(mixed $wordCount)
  * @method bool    populatePreTranslations(bool $default)
- * @method bool    doNotManageAlternativeTranslations(bool $default, array<string, mixed> $xliffTransUnit, array<string, mixed> $xliffFileAttributes)
  * @method array<string, mixed>   sanitizeOriginalDataMap(array<string, mixed> $originalDataMap)
  * @method string  correctTagErrors(string $segment, array<string, mixed> $originalDataMap)
  * @method array<string, mixed>   appendFieldToAnalysisObject(array<string, mixed> $metadata, ProjectStructure $projectStructure)
- * @method array<string, mixed>   filter_team_for_project_creation(array<string, mixed> $teamData)
  * @method ProjectStructure handleJsonNotesBeforeInsert(ProjectStructure $projectStructure)
- * @method array<int, string>   filterProjectDependencies(array<int, string> $projectDependencies, array<string, mixed> $metadata)
- * @method BasicFeatureStruct[] filterFeaturesMerged(BasicFeatureStruct[] $features)
  * @method mixed   rewriteContributionContexts(mixed $segmentsList, array<string, mixed> $requestData)
  * @method array<int|string, mixed>   appendInitialTemplateVars(array<int|string, mixed> $codes)
  *
@@ -81,26 +69,18 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * @method void setTranslationCommitted(array<string, mixed> $context)
  * @method void postAddSegmentTranslation(array<string, mixed> $context)
  * @method void chunkReviewUpdated(ChunkReviewStruct $chunkReview, mixed $updateResult, mixed $model, ProjectStruct $project)
- * @method void job_password_changed(JobStruct $job, string $oldPassword)
- * @method void review_password_changed(int $jobId, string $oldPassword, string $newPassword, int $revisionNumber)
- * @method void project_password_changed(ProjectStruct $project, string $oldPassword)
- * @method void project_completion_event_saved(JobStruct $chunk, CompletionEventStruct $event, int $completionEventId)
- * @method void processZIPDownloadPreview(mixed $controller, array<int, mixed> $outputContent)
- * @method void checkSplitAccess(array<int, JobStruct> $jobList)
- * @method void afterTMAnalysisCloseProject(int $projectId, array<string, mixed> $analyzedReport)
+ * @method void jobPasswordChanged(JobStruct $job, string $oldPassword)
+ * @method void reviewPasswordChanged(int $jobId, string $oldPassword, string $newPassword, int $revisionNumber)
+ * @method void projectCompletionEventSaved(JobStruct $chunk, CompletionEventStruct $event, int $completionEventId)
  * @method void tmAnalysisDisabled(int $projectId)
- * @method void fastAnalysisComplete(array<int, mixed> $segments, array<string, mixed> $projectRow)
- * @method void bootstrapCompleted()
  * @method void postJobSplitted(SplitMergeProjectData $data)
  * @method void postJobMerged(SplitMergeProjectData $data, JobStruct $chunk)
  * @method void validateJobCreation(JobStruct $job, ProjectStructure $projectStructure)
  * @method void validateProjectCreation(ProjectStructure $projectStructure)
  * @method void beforeProjectCreation(ProjectStructure $projectStructure, array<string, mixed> $context)
  * @method void postProjectCreate(ProjectStructure $projectStructure)
- * @method void postProjectCommit(ProjectStructure $projectStructure)
  * @method void filterProjectNameModified(int $idProject, string $name, string $password, string $ownerEmail)
- * @method void handleTUContextGroups(ProjectStructure $projectStructure)
- * @method void alter_chunk_review_struct(ChunkCompletionEventStruct $event)
+ * @method void alterChunkReviewStruct(ChunkCompletionEventStruct $event)
  *
  * @see BaseFeature — Plugins implement these hooks as methods
  * @see \Plugins\Features\AbstractRevisionFeature — Example handler implementations
@@ -218,25 +198,16 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * @param array<string, mixed> $metadata
+     * Load additional feature dependencies from project metadata.
      *
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws Exception
+     * Note: The filterProjectDependencies hook was removed (no handler existed).
+     * This method is kept as a public extension point — override in subclasses if needed.
+     *
+     * @param array<string, mixed> $metadata
      */
     public function loadProjectDependenciesFromProjectMetadata(array $metadata): void
     {
-        $project_dependencies = [];
-        $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata);
-        $features = [];
-        foreach ($project_dependencies as $dependency) {
-            $features [$dependency] = new BasicFeatureStruct(['feature_code' => $dependency]);
-        }
-
-        $this->merge($features);
+        // no-op: filterProjectDependencies hook removed (zero handlers in all plugins)
     }
 
     /**
@@ -519,7 +490,6 @@ class FeatureSet implements FeatureSetInterface
             }
         }
 
-        $this->features = $this->filter('filterFeaturesMerged', $this->features);
         $this->sortFeatures();
     }
 

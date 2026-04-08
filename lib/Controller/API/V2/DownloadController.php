@@ -380,20 +380,6 @@ class DownloadController extends AbstractDownloadController
                     $files_to_be_converted[$fileID]['output_filename']
                 );
 
-                /**
-                 * Because of a bug in the filters for the cjk languages ( Exception when downloading translations )
-                 * we add an hook to allow some plugins to force the conversion parameters ( languages for example )
-                 *
-                 * We restore the right language here
-                 *
-                 * TODO: ( 25/05/2018 ) Remove when the issue will be fixed
-                 */
-                $output_content[$fileID]['document_content'] = $this->featureSet->filter(
-                    'overrideConversionResult',
-                    $output_content[$fileID]['document_content'],
-                    Languages::getInstance()->getLangRegionCode($jobData['target'])
-                );
-
                 //in the case of .strings, they are required to be in UTF-16
                 //get extension to perform file detection
                 $extension = AbstractFilesStorage::pathinfo_fix($output_content[$fileID]['output_filename'], PATHINFO_EXTENSION);
@@ -447,8 +433,6 @@ class DownloadController extends AbstractDownloadController
                     }
                 } else {
                     $output_content = $this->getOutputContentsWithZipFiles($output_content);
-
-                    $this->featureSet->run('processZIPDownloadPreview', $this, $output_content);
 
                     if (count($output_content) > 1) {
                         // cast $output_content elements to ZipContentObject

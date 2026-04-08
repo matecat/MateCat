@@ -267,11 +267,6 @@ class GetSegmentsController extends KleinController
      * @param $segments
      *
      * @return array
-     * @throws AuthenticationError
-     * @throws \Model\Exceptions\NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
      */
     private function prepareNotes($segments): array
     {
@@ -279,15 +274,6 @@ class GetSegmentsController extends KleinController
             $start = $segments[0]['sid'];
             $last = end($segments);
             $stop = $last['sid'];
-
-            if ($this->featureSet->filter('prepareAllNotes', false)) {
-                $segment_notes = SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
-                foreach ($segment_notes as $k => $noteObj) {
-                    $segment_notes[$k][0]['json'] = json_decode($noteObj[0]['json'], true);
-                }
-
-                return $this->featureSet->filter('processExtractedJsonNotes', $segment_notes);
-            }
 
             return SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
         }

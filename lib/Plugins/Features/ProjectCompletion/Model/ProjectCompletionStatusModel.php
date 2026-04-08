@@ -78,7 +78,7 @@ class ProjectCompletionStatusModel
             $featureSet->loadForProject($this->project);
 
             $revise['password'] = $featureSet->filter(
-                'filter_job_password_to_review_password',
+                'filterJobPasswordToReviewPassword',
                 $chunk->password,
                 $chunk->id
             );

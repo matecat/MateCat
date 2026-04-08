@@ -282,8 +282,6 @@ class FastAnalysis extends AbstractDaemon
                     continue;
                 }
 
-                $featureSet->run('fastAnalysisComplete', $this->segments, $this->actual_project_row);
-
                 $this->logger->debug("done");
                 // INSERT DATA
 

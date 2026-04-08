@@ -1010,13 +1010,6 @@ class TMAnalysisWorker extends AbstractWorker
 
             $database->commit();
 
-            try {
-                $this->featureSet->run('afterTMAnalysisCloseProject', $_project_id, $_analyzed_report);
-            } catch (Exception $e) {
-                //ignore Exception the analysis is finished anyway
-                $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
-            }
-
             (new JobDao())->destroyCacheByProjectId($_project_id);
             ProjectDao::destroyCacheById($_project_id);
             ProjectDao::destroyCacheByIdAndPassword($_project_id, $_params->ppassword);

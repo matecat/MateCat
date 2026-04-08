@@ -482,13 +482,7 @@ class SetTranslationController extends AbstractStatefulKleinController
             'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->data['revisionNumber'])
         ]);
 
-        return $this->getFeatureSet()->filter('filterSetTranslationResult', $result, [
-            'translation' => $newTranslation,
-            'old_translation' => $oldTranslation,
-            'propagated_ids' => $propagationTotal['segments_for_propagation']['propagated_ids'] ?? null,
-            'chunk' => $this->data['chunk'],
-            'segment' => $this->data['segment']
-        ]);
+        return $result;
     }
 
     /**

@@ -52,7 +52,7 @@ class ProjectCompletion extends BaseFeature
         }
     }
 
-    public function job_password_changed(JobStruct $job, $old_password): void
+    public function jobPasswordChanged(JobStruct $job, $old_password): void
     {
         $dao = new ChunkCompletionUpdateDao();
         $dao->updatePassword($job->id, $job->password, $old_password);

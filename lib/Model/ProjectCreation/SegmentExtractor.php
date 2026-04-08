@@ -915,8 +915,7 @@ class SegmentExtractor
             !isset($xliff_trans_unit['alt-trans']) ||
             empty($xliff_file_attributes['source-language']) ||
             empty($xliff_file_attributes['target-language']) ||
-            empty($privateTmKeys) ||
-            $this->features->filter('doNotManageAlternativeTranslations', true, $xliff_trans_unit, $xliff_file_attributes)
+            empty($privateTmKeys)
         ) {
             return;
         }

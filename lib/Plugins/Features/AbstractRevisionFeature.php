@@ -117,7 +117,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * @throws NotFoundException
      * @throws ReflectionException
      */
-    public function filter_job_password_to_review_password(string $password, int $id_job): string
+    public function filterJobPasswordToReviewPassword(string $password, int $id_job): string
     {
         $chunk_review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $id_job, 'password' => $password]))[0];
 
@@ -326,7 +326,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      *
      * @throws Exception
      */
-    public function project_completion_event_saved(JobStruct $chunk, CompletionEventStruct $event, $completion_event_id): void
+    public function projectCompletionEventSaved(JobStruct $chunk, CompletionEventStruct $event, $completion_event_id): void
     {
         $model = new QualityReportModel($chunk);
         $model->resetScore($completion_event_id);
@@ -340,7 +340,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * @throws ValidationError
      * @throws Exception
      */
-    public function alter_chunk_review_struct(ChunkCompletionEventStruct $event): void
+    public function alterChunkReviewStruct(ChunkCompletionEventStruct $event): void
     {
         $review = (new ChunkReviewDao())->findChunkReviews(new JobStruct(['id' => $event->id_job, 'password' => $event->password]))[0];
 
@@ -399,7 +399,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * @param string $new_password
      * @param int $revision_number
      */
-    public function review_password_changed(int $job_id, string $old_password, string $new_password, int $revision_number): void
+    public function reviewPasswordChanged(int $job_id, string $old_password, string $new_password, int $revision_number): void
     {
         $feedbackDao = new FeedbackDAO();
         $feedbackDao->updateFeedbackPassword($job_id, $old_password, $new_password, $revision_number);
@@ -409,7 +409,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
      * @param JobStruct $job
      * @param string $old_password
      */
-    public function job_password_changed(JobStruct $job, string $old_password): void
+    public function jobPasswordChanged(JobStruct $job, string $old_password): void
     {
         $dao = new ChunkReviewDao();
         $dao->updatePassword($job->id, $old_password, $job->password);

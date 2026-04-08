@@ -67,10 +67,6 @@ class GetWarningController extends KleinController
                 $qa->render()
             );
 
-            $result = $this->featureSet->filter('filterGlobalWarnings', $result, [
-                'chunk' => $chunk,
-            ]);
-
             $this->response->json($result);
         } catch (Exception) {
             $this->response->json([
@@ -168,7 +164,7 @@ class GetWarningController extends KleinController
                 'data' => [],
                 'errors' => []
             ],
-            $this->invokeLocalWarningsOnFeatures($chunk, $src_content, $trg_content),
+            $this->invokeLocalWarningsOnFeatures(),
             (new QALocalWarning(
                 $QA,
                 $id,
@@ -244,26 +240,10 @@ class GetWarningController extends KleinController
         return $chunk;
     }
 
-    /**
-     * @param JobStruct $chunk
-     * @param                $src_content
-     * @param                $trg_content
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function invokeLocalWarningsOnFeatures(JobStruct $chunk, $src_content, $trg_content): array
+    private function invokeLocalWarningsOnFeatures(): array
     {
-        $data = [];
-        $data = $this->featureSet->filter('filterSegmentWarnings', $data, [
-            'src_content' => $src_content,
-            'trg_content' => $trg_content,
-            'project' => $chunk->getProject(),
-            'chunk' => $chunk
-        ]);
-
         return [
-            'data' => $data
+            'data' => []
         ];
     }
 }

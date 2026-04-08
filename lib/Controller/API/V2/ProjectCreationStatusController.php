@@ -41,15 +41,12 @@ class ProjectCreationStatusController extends KleinController
                 throw new Exception($error['message'], (int)$error['code']);
             }
         } else {
-            // project is created, find it with password
+            // project is created, verify password authorization
             try {
-                $project = ProjectDao::findByIdAndPassword($this->request->param('id_project'), $this->request->param('password'));
+                ProjectDao::findByIdAndPassword($this->request->param('id_project'), $this->request->param('password'));
             } catch (NotFoundException) {
                 throw new AuthorizationError('Not Authorized.');
             }
-
-            $featureSet = $project->getFeaturesSet();
-            $result = $featureSet->filter('filterCreationStatus', $result, $project);
 
             if (empty($result['id_project'])) {
                 $this->_letsWait();
