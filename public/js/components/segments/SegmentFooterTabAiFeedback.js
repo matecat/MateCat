@@ -8,6 +8,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
+import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
 
 export const SegmentFooterTabAiFeedback = ({
   code,
@@ -38,7 +39,9 @@ export const SegmentFooterTabAiFeedback = ({
         idSegment: segment.sid,
         source: decodedSource,
         target: decodedTarget,
-        style: CatToolStore.getJobMetadata().project.mt_extra.lara_style,
+        style:
+          CatToolStore.getJobMetadata().project.mt_extra.lara_style ??
+          LARA_STYLES.FAITHFUL,
       })
     }
 
@@ -50,12 +53,19 @@ export const SegmentFooterTabAiFeedback = ({
         })
       } else {
         setFeedback({
-          error:
-            typeof data.message === 'string' && data.message !== ''
-              ? data.message
-              : 'Service currently unavailable. Please try again in a moment.',
+          error: 'Something went wrong. Please try again in a moment.',
           retryCallback: () => requestFeedback(),
         })
+        //Track Event
+        const message = {
+          sid: segment.sid,
+          segment: segment.decodedSource,
+          request: selectedText,
+          source: config.source_code,
+          target: config.target_code,
+          error: data.message,
+        }
+        CommonUtils.dispatchTrackingEvents('AiAlternativeError', message)
       }
     }
 
