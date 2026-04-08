@@ -317,54 +317,60 @@ export const SegmentFooterTabAiAlternatives = ({
     >
       {alternatives?.length ? (
         <div className="ai-feature-content">
-          <div className="ai-feature-alternatives-for">
-            <h4>Alternatives for:</h4>
-            <p
-              dangerouslySetInnerHTML={allowHTML(alternatives[0].selectedText)}
-            ></p>
-          </div>
-          <div className="ai-alternative-options">
-            {alternatives.map(({before, after, changed, context}, index) => {
-              const ref = getEditorLiteRef(index)
+          <div className="content">
+            <div className="ai-feature-alternatives-for">
+              <h4>Alternatives for:</h4>
+              <p
+                dangerouslySetInnerHTML={allowHTML(
+                  alternatives[0].selectedText,
+                )}
+              ></p>
+            </div>
+            <div className="ai-alternative-options">
+              {alternatives.map(({before, after, changed, context}, index) => {
+                const ref = getEditorLiteRef(index)
 
-              return (
-                <div key={index}>
-                  <div>
-                    <EditorLite
-                      ref={ref}
-                      highlightSnippet={{text: changed, style: 'BOLD'}}
-                      content={`${before}${changed}${after}`}
-                    />
-                    <p className="ai-feature-option-alternative-description">
-                      {context}{' '}
-                    </p>
+                return (
+                  <div key={index}>
+                    <div>
+                      <EditorLite
+                        ref={ref}
+                        highlightSnippet={{text: changed, style: 'BOLD'}}
+                        content={`${before}${changed}${after}`}
+                      />
+                      <p className="ai-feature-option-alternative-description">
+                        {context}{' '}
+                      </p>
+                    </div>
+                    <Button
+                      className="ai-feature-button"
+                      mode={BUTTON_MODE.OUTLINE}
+                      tooltip="Copy edited part"
+                      onClick={() => ref.current.copyToClipboardHighlight()}
+                    >
+                      <Copy size={16} />
+                    </Button>
                   </div>
-                  <Button
-                    className="ai-feature-button"
-                    mode={BUTTON_MODE.OUTLINE}
-                    tooltip="Copy edited part"
-                    onClick={() => ref.current.copyToClipboardHighlight()}
-                  >
-                    <Copy size={16} />
-                  </Button>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
       ) : alternatives?.error ? (
         <div className="ai-feature-content">
-          <p>{alternatives.error}</p>
-          {alternatives.error !== 'No alternative translations found.' && (
-            <Button
-              className="ai-feature-button-retry"
-              type={BUTTON_TYPE.DEFAULT}
-              mode={BUTTON_MODE.OUTLINE}
-              onClick={alternatives.retryCallback}
-            >
-              Retry
-            </Button>
-          )}
+          <div className="content">
+            <p>{alternatives.error}</p>
+            {alternatives.error !== 'No alternative translations found.' && (
+              <Button
+                className="ai-feature-button-retry"
+                type={BUTTON_TYPE.DEFAULT}
+                mode={BUTTON_MODE.OUTLINE}
+                onClick={alternatives.retryCallback}
+              >
+                Retry
+              </Button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="loading-container">
