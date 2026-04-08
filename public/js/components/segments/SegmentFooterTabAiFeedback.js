@@ -9,6 +9,7 @@ import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
+import CommonUtils from '../../utils/commonUtils'
 
 export const SegmentFooterTabAiFeedback = ({
   code,
@@ -60,7 +61,6 @@ export const SegmentFooterTabAiFeedback = ({
         const message = {
           sid: segment.sid,
           segment: segment.decodedSource,
-          request: selectedText,
           source: config.source_code,
           target: config.target_code,
           error: data.message,
