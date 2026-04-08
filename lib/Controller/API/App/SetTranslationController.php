@@ -970,8 +970,19 @@ class SetTranslationController extends AbstractStatefulKleinController
         Set::contribution($contributionStruct);
 
         if ($contributionStruct->id_mt > 1) {
-            Set::contributionMT($contributionStruct);
+            /**
+             * @see Airbnb::filterContributionStructOnMTSet
+             */
+            $newContributionStruct = $this->featureSet->filter(
+                'filterContributionStructOnMTSet',
+                $contributionStruct,
+                $_Translation,
+                $this->data['segment'],
+                $this->filter
+            );
+            Set::contributionMT($newContributionStruct);
         }
+
     }
 
     /**
