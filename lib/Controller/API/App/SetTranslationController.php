@@ -6,6 +6,7 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
+use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\ICU\MessagePatternComparator;
@@ -13,6 +14,7 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\DaoCacheTrait;
 use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
@@ -57,7 +59,7 @@ use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController
 {
-
+    use SegmentDisabledTrait;
     use APISourcePageGuesserTrait;
     use ICUSourceSegmentChecker;
 
@@ -137,6 +139,7 @@ class SetTranslationController extends AbstractStatefulKleinController
 
         try {
             $this->data = $this->validateTheRequest();
+            $this->checkIfSegmentIsNotDisabled();
             $this->setSubFilteringBehavior();
             $this->checkSegmentSplitData();
             $this->initVersionHandler();
@@ -552,6 +555,26 @@ class SetTranslationController extends AbstractStatefulKleinController
         $this->logger->debug($data);
 
         return $data;
+    }
+
+    /**
+     * checkIfIsNotDisabled
+     *
+     * Determines whether the segment associated with a specific job and segment ID
+     * is disabled by checking cached information. If the segment is found to be disabled,
+     * an exception is thrown.
+     *
+     * @return void
+     * @throws Exception If the segment is disabled.
+     */
+    private function checkIfSegmentIsNotDisabled(): void
+    {
+        $id_job= $this->data->id_job;
+        $id_segment = $this->data->id_segment;
+
+        if ($this->isSegmentDisabled($id_job, $id_segment)) {
+            throw new Exception("Segment is disabled", -5);
+        }
     }
 
     /**

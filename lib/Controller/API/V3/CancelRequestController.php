@@ -13,6 +13,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Controller\Traits\RateLimiterTrait;
+use Controller\Traits\SegmentDisabledTrait;
 use Exception;
 use Klein\Response;
 use Model\DataAccess\DaoCacheTrait;
@@ -30,7 +31,7 @@ use View\API\V3\Json\Chunk;
 class CancelRequestController extends KleinController
 {
     use RateLimiterTrait;
-    use DaoCacheTrait;
+    use SegmentDisabledTrait;
 
     /**
      * @throws Exception
@@ -63,16 +64,11 @@ class CancelRequestController extends KleinController
             throw new Exception('Segment is not in "new" status and cannot be disabled');
         }
 
-        $cacheKey = 'segment_is_disabled_' . $id_job . '_' . $id_segment;
-        $cachedQuery = "__SEGMENT_IS_DISABLED__" . $id_job . "_" . $id_segment . "";
-        $cachedValue = $this->_getFromCacheMap($cacheKey, $cachedQuery);
-
         // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
         // setting the cache to avoid multiple disable requests for the same segment in a short time frame
-        if (empty($cachedValue)) {
-            SegmentMetadataDao::setTranslationDisabled($id_segment);
-            $this->_cacheSetConnection();
-            $this->_setInCacheMap($cacheKey, $cachedQuery, [1]);
+        if (!$this->isSegmentDisabled($id_job, $id_segment)) {
+            SegmentMetadataDao::setTranslationDisabled($id_job, $id_segment);
+            SegmentMetadataDao::destroyGetAllCache($id_segment);
         }
 
         $this->response->json([
