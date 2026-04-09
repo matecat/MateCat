@@ -275,10 +275,21 @@ public function filterPayableRates(FilterPayableRatesEvent $event): void { ... }
 - [ ] Handler accepts the event object as sole parameter, returns `void`
 - [ ] PHPStan passes at level 8
 
-### Why `filter()` / `run()` still exist
+### Legacy `filter()` / `run()` — Removed
 
-The old string-based methods cannot be removed because `vendor/matecat/subfiltering` depends on them. That package declares `FeatureSetInterface::filter(string $method, mixed $filterable): mixed` and dispatches 5 pipeline hooks through it:
+The string-based `filter('hookName', $arg)` and `run('hookName', $arg)` methods have been removed from FeatureSet.
 
-`fromLayer0ToLayer1`, `fromLayer1ToLayer2`, `fromLayer2ToLayer1`, `fromRawXliffToLayer0`, `fromLayer0ToRawXliff`
+The `matecat/subfiltering` package (v4.0+) now uses 6 typed pipeline customization methods:
 
-These live in vendor code we don't modify directly. Once the subfiltering package is updated to use typed dispatch, `filter()` and `run()` can be removed. Until then, they stay — but **do not use them for new hooks**.
+```
+customizeFromLayer0ToLayer1(Pipeline): Pipeline
+customizeFromLayer1ToLayer2(Pipeline): Pipeline
+customizeFromLayer2ToLayer1(Pipeline): Pipeline
+customizeFromRawXliffToLayer0(Pipeline): Pipeline
+customizeFromLayer0ToRawXliff(Pipeline): Pipeline
+customizeFromLayer1ToLayer0(Pipeline): Pipeline
+```
+
+These are implemented on FeatureSet by wrapping the internal event dispatch. Subfiltering is now a pure library — zero knowledge of the event system.
+
+MyMemory uses `matecat/subfiltering` v2.4+ (PHP 7.4 backport) with the same typed interface.
