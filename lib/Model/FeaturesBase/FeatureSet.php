@@ -4,21 +4,17 @@ namespace Model\FeaturesBase;
 
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
+use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
-use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\Event\Filter\FromLayer0ToLayer1Event;
 use Model\FeaturesBase\Hook\FilterEvent;
 use Model\FeaturesBase\Hook\RunEvent;
-use Model\Jobs\JobStruct;
-use Model\JobSplitMerge\SplitMergeProjectData;
-use Model\LQA\ChunkReviewStruct;
 use Model\OwnerFeatures\OwnerFeatureDao;
-use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
@@ -30,17 +26,13 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
- * FeatureSet — Plugin hook dispatcher.
+ * Class FeatureSet
  *
- * Typed dispatch: use dispatchFilter() with FilterEvent subclasses
- * and dispatchRun() with RunEvent subclasses.
+ * Represents a set of features provided in the system. This class allows the
+ * management of features, including loading, merging, filtering, and various
+ * dependency-related operations for projects and users.
  *
- * Legacy string dispatch (filter()/run()) retained only for vendor SubFiltering hooks.
- *
- * @see \Model\FeaturesBase\Hook\FilterEvent
- * @see \Model\FeaturesBase\Hook\RunEvent
- * @see \Model\FeaturesBase\Hook\Event\Filter — Filter event DTOs
- * @see \Model\FeaturesBase\Hook\Event\Run — Run event DTOs
+ * Implements FeatureSetInterface.
  */
 class FeatureSet implements FeatureSetInterface
 {
@@ -241,53 +233,37 @@ class FeatureSet implements FeatureSetInterface
         }, $returnable));
     }
 
-    /**
-     * Returns the filtered subject variable passed to all enabled features.
-     *
-     * @param string $method
-     * @param mixed $filterable
-     *
-     * @return mixed
-     *
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws AuthenticationError
-     * @throws ReQueueException
-     * @throws EndQueueException
-     */
-    public function filter(string $method, mixed $filterable): mixed
+    public function customizeFromLayer0ToLayer1(Pipeline $pipeline): Pipeline
     {
-        $args = array_slice(func_get_args(), 1);
+        $event = $this->dispatchFilter(new FromLayer0ToLayer1Event($pipeline));
 
-        foreach ($this->features as $feature) {
-            $obj = $feature->toNewObject();
+        /** @var FromLayer0ToLayer1Event $event */
+        return $event->getChannel();
+    }
 
-            if (method_exists($obj, $method)) {
-                array_shift($args);
-                array_unshift($args, $filterable);
+    public function customizeFromLayer1ToLayer2(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
 
-                try {
-                    /**
-                     * There may be the need to avoid a filter to be executed before or after other ones.
-                     * To solve this problem, we could always pass the last argument to call_user_func_array which
-                     * contains a list of executed feature codes.
-                     *
-                     * Example: $args + [ $executed_features ]
-                     *
-                     * This way plugins have the chance to decide whether to change the value, throw an exception or
-                     * do whatever they need to based on the behaviour of the other features.
-                     *
-                     */
-                    $filterable = $obj->$method(...$args);
-                } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
-                    throw $e;
-                } catch (Exception $e) {
-                    LoggerFactory::getLogger('feature_set')->error("Exception running filter " . $method . ": " . $e->getMessage());
-                }
-            }
-        }
+    public function customizeFromLayer2ToLayer1(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
 
-        return $filterable;
+    public function customizeFromRawXliffToLayer0(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
+
+    public function customizeFromLayer0ToRawXliff(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
+    }
+
+    public function customizeFromLayer1ToLayer0(Pipeline $pipeline): Pipeline
+    {
+        return $pipeline;
     }
 
     /**
@@ -322,21 +298,14 @@ class FeatureSet implements FeatureSetInterface
         return $event;
     }
 
-
-    /**
-     * @param string $method
-     */
-    public function run(string $method): void
-    {
-        $args = array_slice(func_get_args(), 1);
-        foreach ($this->features as $feature) {
-            $this->runOnFeature($method, $feature, $args);
-        }
-    }
-
     /**
      * @template T of RunEvent
-     * @param T $event
+     * @param RunEvent $event
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      */
     public function dispatchRun(RunEvent $event): void
     {
@@ -544,27 +513,6 @@ class FeatureSet implements FeatureSetInterface
         }
 
         return $features;
-    }
-
-    /**
-     * Runs a command on a single feature
-     *
-     * @param string $method
-     * @param BasicFeatureStruct $feature
-     * @param array<int, mixed> $args
-     *
-     * @return void
-     */
-    private function runOnFeature(string $method, BasicFeatureStruct $feature, array $args): void
-    {
-        $name = PluginsLoader::getPluginClass($feature->feature_code);
-        if ($name) {
-            $obj = new $name($feature);
-
-            if (method_exists($obj, $method)) {
-                $obj->$method(...$args);
-            }
-        }
     }
 
 }
