@@ -233,6 +233,13 @@ class FeatureSet implements FeatureSetInterface
         }, $returnable));
     }
 
+    /**
+     * @throws EndQueueException
+     * @throws AuthenticationError
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws NotFoundException
+     */
     public function customizeFromLayer0ToLayer1(Pipeline $pipeline): Pipeline
     {
         $event = $this->dispatchFilter(new FromLayer0ToLayer1Event($pipeline));
