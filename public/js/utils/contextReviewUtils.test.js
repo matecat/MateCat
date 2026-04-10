@@ -669,6 +669,7 @@ describe('extractSegmentContextFields', () => {
       context_url: 'https://example.com/page.html',
       resname: 'hero-title',
       restype: 'x-tag-id',
+      screenshot: null,
     })
   })
 
@@ -678,6 +679,7 @@ describe('extractSegmentContextFields', () => {
       context_url: null,
       resname: null,
       restype: null,
+      screenshot: null,
     })
   })
 
@@ -687,6 +689,7 @@ describe('extractSegmentContextFields', () => {
       context_url: null,
       resname: null,
       restype: null,
+      screenshot: null,
     })
   })
 
@@ -698,6 +701,35 @@ describe('extractSegmentContextFields', () => {
     const result = extractSegmentContextFields(seg)
     expect(result.resname).toBe('my-id')
     expect(result.restype).toBeNull()
+  })
+
+  it('extracts screenshot URL from metadata', () => {
+    const seg = {
+      context_url: 'https://example.com/page.html',
+      metadata: [
+        {meta_key: 'resname', meta_value: 'hero-title'},
+        {meta_key: 'restype', meta_value: 'x-tag-id'},
+        {
+          meta_key: 'screenshot',
+          meta_value: 'https://example.com/screenshot.png',
+        },
+      ],
+    }
+    expect(extractSegmentContextFields(seg)).toEqual({
+      context_url: 'https://example.com/page.html',
+      resname: 'hero-title',
+      restype: 'x-tag-id',
+      screenshot: 'https://example.com/screenshot.png',
+    })
+  })
+
+  it('returns null for screenshot when not in metadata', () => {
+    const seg = {
+      context_url: null,
+      metadata: [{meta_key: 'resname', meta_value: 'my-id'}],
+    }
+    const result = extractSegmentContextFields(seg)
+    expect(result.screenshot).toBeNull()
   })
 })
 

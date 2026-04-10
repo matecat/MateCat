@@ -7,6 +7,10 @@ import IconDown from '../components/icons/IconDown'
 import useContextDocument from '../hooks/useContextDocument'
 import useContextHighlight from '../hooks/useContextHighlight'
 import useContextReviewMessages from '../hooks/useContextReviewMessages'
+import {
+  HtmlContextPanel,
+  ScreenshotContextPanel,
+} from '../components/contextReview'
 
 const VIEW_MODES = {
   BOTH: 'both',
@@ -20,9 +24,35 @@ const VIEW_OPTIONS = [
   {id: VIEW_MODES.BOTH, name: 'Source&Target'},
 ]
 
+const CONTENT_VIEW_OPTIONS = [
+  {id: 'html', name: 'HTML'},
+  {id: 'screenshot', name: 'Screenshot'},
+]
+
 const ContextReview = () => {
   const [viewMode, setViewMode] = useState(VIEW_MODES.BOTH)
+  const [contentView, setContentView] = useState('html')
   const [htmlReady, setHtmlReady] = useState(0)
+  const [zoomLevel, setZoomLevel] = useState(100)
+
+  const handleContentViewChange = useCallback((newView) => {
+    setContentView(newView)
+    if (newView === 'screenshot') {
+      setViewMode(VIEW_MODES.SOURCE)
+    }
+  }, [])
+
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel((prev) => Math.min(prev + 25, 200))
+  }, [])
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel((prev) => Math.max(prev - 25, 50))
+  }, [])
+
+  const handleZoomReset = useCallback(() => {
+    setZoomLevel(100)
+  }, [])
 
   const sourceRef = useRef(null)
   const targetRef = useRef(null)
@@ -97,6 +127,24 @@ const ContextReview = () => {
     [segments],
   )
 
+  const screenshotMap = useMemo(
+    () =>
+      Object.fromEntries(
+        segments
+          .filter((s) => s.screenshot)
+          .map((s) => [Number(s.sid), s.screenshot]),
+      ),
+    [segments],
+  )
+
+  const hasScreenshots = Object.keys(screenshotMap).length > 0
+
+  const screenshotUrl = useMemo(() => {
+    if (highlight?.sid) return screenshotMap[highlight.sid] ?? null
+    const firstWithScreenshot = segments.find((s) => s.screenshot)
+    return firstWithScreenshot?.screenshot ?? null
+  }, [highlight, screenshotMap, segments])
+
   const segmentsRef = useRef([])
   useEffect(() => {
     segmentsRef.current = segments
@@ -107,6 +155,15 @@ const ContextReview = () => {
 
   useEffect(() => {
     if (!htmlContent) return
+
+    // When switching to screenshot mode, clear HTML content from refs
+    if (contentView !== 'html') {
+      if (sourceRef.current) sourceRef.current.innerHTML = ''
+      if (targetRef.current) targetRef.current.innerHTML = ''
+      htmlRenderedRef.current = {source: '', target: ''}
+      return
+    }
+
     let injected = false
     if (
       sourceRef.current &&
@@ -125,11 +182,11 @@ const ContextReview = () => {
       injected = true
     }
     if (injected) setHtmlReady((prev) => prev + 1)
-  }, [htmlContent, viewMode])
+  }, [htmlContent, viewMode, contentView])
 
   // Tag segments in panels when segments or HTML changes
   useEffect(() => {
-    if (!segments.length || !htmlReady) return
+    if (!segments.length || !htmlReady || contentView !== 'html') return
     if (targetRef.current) {
       tagSegments(targetRef.current, segments, {
         replaceWithTarget: true,
@@ -139,7 +196,7 @@ const ContextReview = () => {
     if (sourceRef.current) {
       tagSegments(sourceRef.current, segments, {metadataMap})
     }
-  }, [segments, htmlReady, viewMode, metadataMap])
+  }, [segments, htmlReady, viewMode, metadataMap, contentView])
 
   // Scroll listener — detect untagged nodes and request more segments
   useEffect(() => {
@@ -205,7 +262,7 @@ const ContextReview = () => {
   useEffect(() => {
     const sourceContainer = sourceRef.current
     const targetContainer = targetRef.current
-    if (!htmlContent) return
+    if (!htmlContent || contentView !== 'html') return
 
     const handleSourceClick = (event) => {
       event.preventDefault()
@@ -248,7 +305,7 @@ const ContextReview = () => {
       if (targetContainer)
         targetContainer.removeEventListener('click', handleTargetClick)
     }
-  }, [htmlContent, viewMode, applyHighlightsForNode, setHighlight])
+  }, [htmlContent, viewMode, applyHighlightsForNode, setHighlight, contentView])
 
   if (loading) {
     return (
@@ -272,13 +329,53 @@ const ContextReview = () => {
   return (
     <div className="context-review-container">
       <div className="context-review-toolbar">
-        <SegmentedControl
-          name="context-review-view-mode"
-          options={VIEW_OPTIONS}
-          selectedId={viewMode}
-          onChange={setViewMode}
-          compact
-        />
+        {hasScreenshots && (
+          <SegmentedControl
+            name="context-review-content-view"
+            options={CONTENT_VIEW_OPTIONS}
+            selectedId={contentView}
+            onChange={handleContentViewChange}
+            compact
+          />
+        )}
+        {contentView === 'html' && (
+          <SegmentedControl
+            name="context-review-view-mode"
+            options={VIEW_OPTIONS}
+            selectedId={viewMode}
+            onChange={setViewMode}
+            compact
+          />
+        )}
+        {hasScreenshots && (
+          <div className="context-review-zoom">
+            <button
+              className="context-review-zoom__button"
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 50}
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <span className="context-review-zoom__level">{zoomLevel}%</span>
+            <button
+              className="context-review-zoom__button"
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 200}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+            <button
+              className="context-review-zoom__reset"
+              onClick={handleZoomReset}
+              disabled={zoomLevel === 100}
+              aria-label="Reset zoom"
+            >
+              Reset
+            </button>
+          </div>
+        )}
         {highlight &&
           ((highlight.mode === 'segment' && highlight.total > 1) ||
             (highlight.mode === 'node' && highlight.sids.length > 1)) && (
@@ -306,21 +403,41 @@ const ContextReview = () => {
           )}
       </div>
       <div className="context-review-panels">
-        {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) && (
-          <div className="context-review-panel">
-            <div className="context-review-panel-header">Source</div>
-            <div ref={sourceRef} className="context-review-content" />
-          </div>
-        )}
+        {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.SOURCE) &&
+          (contentView === 'html' ? (
+            <HtmlContextPanel
+              key={`source-${contentView}`}
+              panelRef={sourceRef}
+              title="Source"
+              zoomLevel={zoomLevel}
+            />
+          ) : (
+            <ScreenshotContextPanel
+              key={`source-${contentView}`}
+              screenshotUrl={screenshotUrl}
+              zoomLevel={zoomLevel}
+              title="Source"
+            />
+          ))}
         {viewMode === VIEW_MODES.BOTH && (
           <div className="context-review-divider" />
         )}
-        {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.TARGET) && (
-          <div className="context-review-panel">
-            <div className="context-review-panel-header">Translation</div>
-            <div ref={targetRef} className="context-review-content" />
-          </div>
-        )}
+        {(viewMode === VIEW_MODES.BOTH || viewMode === VIEW_MODES.TARGET) &&
+          (contentView === 'html' ? (
+            <HtmlContextPanel
+              key={`target-${contentView}`}
+              panelRef={targetRef}
+              title="Translation"
+              zoomLevel={zoomLevel}
+            />
+          ) : (
+            <ScreenshotContextPanel
+              key={`target-${contentView}`}
+              screenshotUrl={screenshotUrl}
+              zoomLevel={zoomLevel}
+              title="Translation"
+            />
+          ))}
       </div>
     </div>
   )

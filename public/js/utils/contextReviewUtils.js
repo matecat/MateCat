@@ -585,13 +585,13 @@ export const tagSegments = (
 }
 
 /**
- * Extracts the four new BroadcastChannel payload fields from a raw segment object.
+ * Extracts the context review payload fields from a raw segment object.
  *
  * Works with both plain JS objects (dot notation) and any shape where
  * `metadata` is an Array<{meta_key: string, meta_value: string}>.
  *
  * @param {{metadata?: Array<{meta_key: string, meta_value: string}>, context_url?: string|null}} segment
- * @returns {{context_url: string|null, resname: string|null, restype: string|null}}
+ * @returns {{context_url: string|null, resname: string|null, restype: string|null, screenshot: string|null}}
  */
 export const extractSegmentContextFields = (segment) => {
   const meta = segment.metadata ?? []
@@ -600,5 +600,6 @@ export const extractSegmentContextFields = (segment) => {
     context_url: segment.context_url ?? null,
     resname: find('resname'),
     restype: find('restype'),
+    screenshot: find('screenshot'),
   }
 }
