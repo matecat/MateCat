@@ -6,6 +6,7 @@ use DOMDocument;
 use DOMException;
 use Exception;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\InjectExcludedTagsInQaEvent;
 use PHPUnit\Framework\Attributes\Test;
 use TestHelpers\AbstractTest;
 use Utils\LQA\QA\DomHandler;
@@ -669,8 +670,7 @@ class DomHandlerTest extends AbstractTest
 
         $this->domHandler->loadDoms($source, $target);
 
-        // getTagDiff should have been called due to error
-        $diff = $this->domHandler->getMalformedXmlStructs();
+        $this->domHandler->getMalformedXmlStructs();
 
         // Source has tags that target doesn't (since target is malformed)
         $this->assertTrue($this->errorManager->thereAreErrors());
@@ -1006,10 +1006,12 @@ class DomHandlerTest extends AbstractTest
     public function setFeatureSetWithMockFeatureSet(): void
     {
         // Create a mock FeatureSet that returns exclusion tags
-        $mockFeatureSet = $this->createMock(FeatureSet::class);
-        $mockFeatureSet->method('filter')
-            ->with('injectExcludedTagsInQa', [])
-            ->willReturn(['<br>', '<hr>']);
+        $mockFeatureSet = $this->createStub(FeatureSet::class);
+        $mockFeatureSet->method('dispatchFilter')
+            ->willReturnCallback(function (InjectExcludedTagsInQaEvent $event) {
+                $event->setExcludedTags(['<br>', '<hr>']);
+                return $event;
+            });
 
         $this->domHandler->setFeatureSet($mockFeatureSet);
 
@@ -1034,10 +1036,12 @@ class DomHandlerTest extends AbstractTest
     #[Test]
     public function elementNotExcludedWhenDataRefMissing(): void
     {
-        $mockFeatureSet = $this->createMock(FeatureSet::class);
-        $mockFeatureSet->method('filter')
-            ->with('injectExcludedTagsInQa', [])
-            ->willReturn(['<br>']);
+        $mockFeatureSet = $this->createStub(FeatureSet::class);
+        $mockFeatureSet->method('dispatchFilter')
+            ->willReturnCallback(function (InjectExcludedTagsInQaEvent $event) {
+                $event->setExcludedTags(['<br>']);
+                return $event;
+            });
 
         $this->domHandler->setFeatureSet($mockFeatureSet);
 
@@ -1062,10 +1066,12 @@ class DomHandlerTest extends AbstractTest
     #[Test]
     public function elementNotExcludedWhenEquivTextNotInExclusionList(): void
     {
-        $mockFeatureSet = $this->createMock(FeatureSet::class);
-        $mockFeatureSet->method('filter')
-            ->with('injectExcludedTagsInQa', [])
-            ->willReturn(['<br>']);
+        $mockFeatureSet = $this->createStub(FeatureSet::class);
+        $mockFeatureSet->method('dispatchFilter')
+            ->willReturnCallback(function (InjectExcludedTagsInQaEvent $event) {
+                $event->setExcludedTags(['<br>']);
+                return $event;
+            });
 
         $this->domHandler->setFeatureSet($mockFeatureSet);
 
@@ -1090,10 +1096,12 @@ class DomHandlerTest extends AbstractTest
     #[Test]
     public function elementWithoutEquivTextIncluded(): void
     {
-        $mockFeatureSet = $this->createMock(FeatureSet::class);
-        $mockFeatureSet->method('filter')
-            ->with('injectExcludedTagsInQa', [])
-            ->willReturn(['<br>']);
+        $mockFeatureSet = $this->createStub(FeatureSet::class);
+        $mockFeatureSet->method('dispatchFilter')
+            ->willReturnCallback(function (InjectExcludedTagsInQaEvent $event) {
+                $event->setExcludedTags(['<br>']);
+                return $event;
+            });
 
         $this->domHandler->setFeatureSet($mockFeatureSet);
 
@@ -1118,10 +1126,12 @@ class DomHandlerTest extends AbstractTest
     #[Test]
     public function emptyExclusionListIncludesAllElements(): void
     {
-        $mockFeatureSet = $this->createMock(FeatureSet::class);
-        $mockFeatureSet->method('filter')
-            ->with('injectExcludedTagsInQa', [])
-            ->willReturn([]);  // Empty exclusion list
+        $mockFeatureSet = $this->createStub(FeatureSet::class);
+        $mockFeatureSet->method('dispatchFilter')
+            ->willReturnCallback(function (InjectExcludedTagsInQaEvent $event) {
+                $event->setExcludedTags([]);
+                return $event;
+            });  // Empty exclusion list
 
         $this->domHandler->setFeatureSet($mockFeatureSet);
 
@@ -1145,10 +1155,12 @@ class DomHandlerTest extends AbstractTest
     #[Test]
     public function mixedElementsWithSomeExcluded(): void
     {
-        $mockFeatureSet = $this->createMock(FeatureSet::class);
-        $mockFeatureSet->method('filter')
-            ->with('injectExcludedTagsInQa', [])
-            ->willReturn(['<br>']);
+        $mockFeatureSet = $this->createStub(FeatureSet::class);
+        $mockFeatureSet->method('dispatchFilter')
+            ->willReturnCallback(function (InjectExcludedTagsInQaEvent $event) {
+                $event->setExcludedTags(['<br>']);
+                return $event;
+            });
 
         $this->domHandler->setFeatureSet($mockFeatureSet);
 
@@ -1166,4 +1178,3 @@ class DomHandlerTest extends AbstractTest
         $this->assertEquals('2', $srcMap['ph'][0]);
     }
 }
-

@@ -36,7 +36,6 @@ class InsertFileInstructionsTest extends AbstractTest
     {
         parent::setUp();
         $features = $this->createStub(FeatureSet::class);
-        $features->method('filter')->willReturnArgument(1);
 
         $dao = $this->createMock(MetadataDao::class);
         $dao->method('insert')

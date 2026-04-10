@@ -4,6 +4,7 @@ namespace Utils\LQA\SizeRestriction;
 
 use Exception;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\CharacterLengthCountEvent;
 
 class SizeRestriction
 {
@@ -103,7 +104,9 @@ class SizeRestriction
     public function getCleanedStringLength(): int
     {
         try {
-            $featureCounts = $this->featureSet->filter('characterLengthCount', $this->cleanedString);
+            $characterLengthCountEvent = new CharacterLengthCountEvent($this->cleanedString);
+            $this->featureSet->dispatchFilter($characterLengthCountEvent);
+            $featureCounts = $characterLengthCountEvent->getFilterable();
 
             if (is_array($featureCounts)) {
                 return array_sum($featureCounts);

@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\FeaturesBase\Hook\Event\Run\FilterProjectNameModifiedEvent;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
@@ -56,7 +57,7 @@ class ChangeProjectNameController extends KleinController
         $ownerEmail = $this->project->id_customer;
 
         $this->changeProjectName($id, $password, $name);
-        $this->featureSet->filter('filterProjectNameModified', $id, $name, $password, $ownerEmail);
+        $this->featureSet->dispatchRun(new FilterProjectNameModifiedEvent((int)$id, $name, $password, $ownerEmail));
 
         $this->response->status()->setCode(200);
         $this->response->json([

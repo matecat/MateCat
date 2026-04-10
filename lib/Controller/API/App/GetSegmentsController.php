@@ -13,11 +13,16 @@ use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
+use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
+use Model\Files\FilesMetadataMarshaller;
+use Model\Files\MetadataDao as FilesMetadataDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Segments\ContextGroupDao;
+use Model\Segments\ContextUrlResolver;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
@@ -91,6 +96,14 @@ class GetSegmentsController extends KleinController
         $projectMetadata = new ProjectMetadataDao();
         $icu_enabled = $projectMetadata->setCacheTTL(60 * 60 * 24)->get($project->id, ProjectsMetadataMarshaller::ICU_ENABLED->value)?->value ?? false;
 
+        $projectContextUrl = $projectMetadata->setCacheTTL(60 * 60 * 24)->get(
+            $project->id,
+            ProjectsMetadataMarshaller::CONTEXT_URL->value
+        )?->value;
+
+        $filesMetadataDao = new FilesMetadataDao();
+        $fileContextUrls = [];
+
         foreach ($data as $seg) {
             $id_file = $seg['id_file'];
 
@@ -102,6 +115,12 @@ class GetSegmentsController extends KleinController
                 $res[$id_file]['source_code'] = $job->source;
                 $res[$id_file]['target_code'] = $job->target;
                 $res[$id_file]['segments'] = [];
+
+                $fileContextUrls[$id_file] = $filesMetadataDao->setCacheTTL(60 * 60 * 24)->get(
+                    $project->id,
+                    $id_file,
+                    FilesMetadataMarshaller::CONTEXT_URL->value
+                )?->value;
             }
 
             if (isset($seg['edit_distance'])) {
@@ -155,7 +174,13 @@ class GetSegmentsController extends KleinController
             $seg['translation'] = $Filter->fromLayer1ToLayer2($Filter->realignIDInLayer1($seg['segment'], $seg['translation']));
             $seg['segment'] = $Filter->fromLayer1ToLayer2($seg['segment']);
 
-            $seg['metadata'] = SegmentMetadataDao::getAll($seg['sid']);
+            $segmentMetadata = SegmentMetadataDao::getAll($seg['sid']);
+            $seg['metadata'] = $segmentMetadata->jsonSerialize();
+            $seg['context_url'] = ContextUrlResolver::resolve(
+                $segmentMetadata,
+                $fileContextUrls[$id_file] ?? null,
+                $projectContextUrl
+            );
 
             $this->attachNotes($seg, $segment_notes);
             $this->attachContexts($seg, $contexts);
@@ -169,7 +194,9 @@ class GetSegmentsController extends KleinController
 
         $result['data']['files'] = $res;
         $result['data']['where'] = $where;
-        $result['data'] = $featureSet->filter('filterGetSegmentsResult', $result['data'], $job);
+        $filterGetSegmentsResultEvent = new FilterGetSegmentsResultEvent($result['data'], $job);
+        $featureSet->dispatchFilter($filterGetSegmentsResultEvent);
+        $result['data'] = $filterGetSegmentsResultEvent->getData();
 
         $this->response->json($result);
     }
@@ -225,7 +252,9 @@ class GetSegmentsController extends KleinController
         $notes = $segment_notes[(int)$segment['sid']] ?? null;
 
         if (is_array($notes)) {
-            $notes = $this->featureSet->filter('prepareNotesForRendering', $notes);
+            $prepareNotesForRenderingEvent = new PrepareNotesForRenderingEvent($notes);
+            $this->featureSet->dispatchFilter($prepareNotesForRenderingEvent);
+            $notes = $prepareNotesForRenderingEvent->getNotes();
         }
 
         $segment['notes'] = $notes;
@@ -244,11 +273,6 @@ class GetSegmentsController extends KleinController
      * @param $segments
      *
      * @return array
-     * @throws AuthenticationError
-     * @throws \Model\Exceptions\NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
      */
     private function prepareNotes($segments): array
     {
@@ -256,15 +280,6 @@ class GetSegmentsController extends KleinController
             $start = $segments[0]['sid'];
             $last = end($segments);
             $stop = $last['sid'];
-
-            if ($this->featureSet->filter('prepareAllNotes', false)) {
-                $segment_notes = SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
-                foreach ($segment_notes as $k => $noteObj) {
-                    $segment_notes[$k][0]['json'] = json_decode($noteObj[0]['json'], true);
-                }
-
-                return $this->featureSet->filter('processExtractedJsonNotes', $segment_notes);
-            }
 
             return SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
         }

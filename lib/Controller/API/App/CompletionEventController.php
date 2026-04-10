@@ -17,8 +17,8 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
 use Model\Jobs\JobStruct;
-use Model\Projects\ProjectStruct;
 
 class CompletionEventController extends KleinController
 {
@@ -27,11 +27,6 @@ class CompletionEventController extends KleinController
      * @var JobStruct
      */
     protected JobStruct $chunk;
-
-    /**
-     * @var ProjectStruct
-     */
-    protected ProjectStruct $project;
 
     /**
      * @var ChunkCompletionEventStruct
@@ -54,11 +49,8 @@ class CompletionEventController extends KleinController
             }
 
             $this->chunk = $Validator->getChunk();
-
-            $project = $this->chunk->getProject(60 * 60);
-            $this->project = $project;
             $this->event = $event;
-            $this->featureSet->loadForProject($project);
+            $this->featureSet->loadForProject($this->chunk->getProject(60 * 60));
         });
 
         $this->appendValidator($Validator);
@@ -69,15 +61,9 @@ class CompletionEventController extends KleinController
      */
     public function delete(): void
     {
-        $undoable = $this->featureSet->filter('filterIsChunkCompletionUndoable', true, $this->project, $this->chunk);
-
-        if ($undoable) {
-            $this->__performUndo();
-            $this->response->code(200);
-            $this->response->send();
-        } else {
-            $this->response->code(400);
-        }
+        $this->__performUndo();
+        $this->response->code(200);
+        $this->response->send();
     }
 
     /**
@@ -90,7 +76,7 @@ class CompletionEventController extends KleinController
         /**
          * This method means to allow project_completion to work alone, the undo feature belongs to AbstractRevisionFeature
          */
-        $this->featureSet->filter('alter_chunk_review_struct', $this->event);
+        $this->featureSet->dispatchRun(new AlterChunkReviewStructEvent($this->event));
 
         (new ChunkCompletionEventDao())->deleteEvent($this->event);
         Database::obtain()->commit();

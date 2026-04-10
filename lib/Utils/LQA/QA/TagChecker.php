@@ -4,6 +4,8 @@ namespace Utils\LQA\QA;
 
 use Exception;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\CheckTagMismatchEvent;
+use Model\FeaturesBase\Hook\Event\Filter\CheckTagPositionsEvent;
 use Utils\LQA\QA;
 use Utils\Tools\CatUtils;
 
@@ -175,13 +177,19 @@ class TagChecker
     protected function checkTagCountMismatch(int $srcNodeCount, int $trgNodeCount): int
     {
         if ($this->featureSet && $this->qaInstance) {
-            $this->errorManager->addError($this->featureSet->filter('checkTagMismatch', ErrorManager::ERR_NONE, $this->qaInstance));
+            $checkTagMismatchEvent = new CheckTagMismatchEvent(ErrorManager::ERR_NONE, $this->qaInstance);
+            $this->featureSet->dispatchFilter($checkTagMismatchEvent);
+            $this->errorManager->addError($checkTagMismatchEvent->getErrorCode());
         }
 
         if ($srcNodeCount != $trgNodeCount) {
-            $errorCode = ($this->featureSet && $this->qaInstance)
-                ? $this->featureSet->filter('checkTagMismatch', ErrorManager::ERR_COUNT, $this->qaInstance)
-                : ErrorManager::ERR_COUNT;
+            if ($this->featureSet && $this->qaInstance) {
+                $checkTagMismatchEvent = new CheckTagMismatchEvent(ErrorManager::ERR_COUNT, $this->qaInstance);
+                $this->featureSet->dispatchFilter($checkTagMismatchEvent);
+                $errorCode = $checkTagMismatchEvent->getErrorCode();
+            } else {
+                $errorCode = ErrorManager::ERR_COUNT;
+            }
             $this->errorManager->addError($errorCode);
         }
 
@@ -195,9 +203,13 @@ class TagChecker
      */
     public function checkTagPositions(): void
     {
-        $customCheckTagPositions = ($this->featureSet && $this->qaInstance)
-            ? $this->featureSet->filter('checkTagPositions', ErrorManager::ERR_NONE, $this->qaInstance)
-            : ErrorManager::ERR_NONE;
+        if ($this->featureSet && $this->qaInstance) {
+            $checkTagPositionsEvent = new CheckTagPositionsEvent(ErrorManager::ERR_NONE, $this->qaInstance);
+            $this->featureSet->dispatchFilter($checkTagPositionsEvent);
+            $customCheckTagPositions = $checkTagPositionsEvent->getErrorCode();
+        } else {
+            $customCheckTagPositions = ErrorManager::ERR_NONE;
+        }
 
         if ($customCheckTagPositions !== true) {
             $this->performTagPositionCheck($this->sourceSeg, $this->targetSeg);
@@ -417,4 +429,3 @@ class TagChecker
         }
     }
 }
-

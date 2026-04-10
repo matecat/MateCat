@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en">
+  <file id="f1" original="sample-context-review.html">
+
+    <unit id="u1">
+      <segment>
+        <source>CloudSync Pro — User Guide</source>
+      </segment>
+    </unit>
+
+    <unit id="u2">
+      <segment>
+        <source>Version 3.2 — Last updated: January 2026</source>
+      </segment>
+    </unit>
+
+    <unit id="u3">
+      <segment>
+        <source>1. Introduction</source>
+      </segment>
+    </unit>
+
+    <unit id="u4">
+      <segment>
+        <source>CloudSync Pro is a file synchronization and backup service designed for teams and individual professionals. It provides real-time synchronization across all your devices, ensuring that your files are always up to date and securely stored in the cloud.</source>
+      </segment>
+    </unit>
+
+    <unit id="u5">
+      <segment>
+        <source>This guide covers the essential features of CloudSync Pro, including installation, configuration, file management, and troubleshooting. For advanced topics such as API integration and enterprise deployment, please refer to the Developer Reference Manual.</source>
+      </segment>
+    </unit>
+
+    <unit id="u6">
+      <segment>
+        <source>2. System Requirements</source>
+      </segment>
+    </unit>
+
+    <unit id="u7">
+      <segment>
+        <source>Before installing CloudSync Pro, please ensure that your system meets the following minimum requirements:</source>
+      </segment>
+    </unit>
+
+    <unit id="u8">
+      <segment>
+        <source>Operating System: Windows 10 or later, macOS 12 or later, or Ubuntu 20.04 or later</source>
+      </segment>
+    </unit>
+
+    <unit id="u9">
+      <segment>
+        <source>Processor: 64-bit processor with at least 2 cores</source>
+      </segment>
+    </unit>
+
+    <unit id="u10">
+      <segment>
+        <source>Memory: 4 GB RAM minimum (8 GB recommended for large file sets)</source>
+      </segment>
+    </unit>
+
+    <unit id="u11">
+      <segment>
+        <source>Storage: 500 MB of available disk space for the application, plus sufficient space for synchronized files</source>
+      </segment>
+    </unit>
+
+    <unit id="u12">
+      <segment>
+        <source>Network: Broadband internet connection with a minimum upload speed of 5 Mbps</source>
+      </segment>
+    </unit>
+
+    <unit id="u13">
+      <segment>
+        <source>Note: CloudSync Pro requires an active internet connection for initial setup and synchronization. Offline editing is supported after the first sync is complete.</source>
+      </segment>
+    </unit>
+
+    <unit id="u14">
+      <segment>
+        <source>3. Installation</source>
+      </segment>
+    </unit>
+
+    <unit id="u15">
+      <segment>
+        <source>3.1 Downloading the Installer</source>
+      </segment>
+    </unit>
+
+    <unit id="u16">
+      <segment>
+        <source>Visit the official CloudSync Pro website and navigate to the Downloads section. Select the installer that matches your operating system. The download should begin automatically within a few seconds.</source>
+      </segment>
+    </unit>
+
+    <unit id="u17">
+      <segment>
+        <source>3.2 Running the Installation Wizard</source>
+      </segment>
+    </unit>
+
+    <unit id="u18">
+      <segment>
+        <source>Locate the downloaded installer file in your Downloads folder.</source>
+      </segment>
+    </unit>
+
+    <unit id="u19">
+      <segment>
+        <source>Double-click the installer to launch the setup wizard.</source>
+      </segment>
+    </unit>
+
+    <unit id="u20">
+      <segment>
+        <source>Accept the End User License Agreement to proceed.</source>
+      </segment>
+    </unit>
+
+    <unit id="u21">
+      <segment>
+        <source>Choose the installation directory. The default location is recommended for most users.</source>
+      </segment>
+    </unit>
+
+    <unit id="u22">
+      <segment>
+        <source>Select whether to create a desktop shortcut and enable automatic startup on login.</source>
+      </segment>
+    </unit>
+
+    <unit id="u23">
+      <segment>
+        <source>Click Install and wait for the process to complete.</source>
+      </segment>
+    </unit>
+
+    <unit id="u24">
+      <segment>
+        <source>Click Finish to close the wizard and launch CloudSync Pro.</source>
+      </segment>
+    </unit>
+
+    <unit id="u25">
+      <segment>
+        <source>3.3 Initial Configuration</source>
+      </segment>
+    </unit>
+
+    <unit id="u26">
+      <segment>
+        <source>When you launch CloudSync Pro for the first time, you will be prompted to sign in with your account credentials. If you do not have an account, you can create one directly from the login screen.</source>
+      </segment>
+    </unit>
+
+    <unit id="u27">
+      <segment>
+        <source>After signing in, you will be asked to select a local folder to use as your synchronization root. All files placed in this folder will be automatically uploaded to the cloud and synchronized across your connected devices.</source>
+      </segment>
+    </unit>
+
+    <unit id="u28">
+      <segment>
+        <source>4. File Management</source>
+      </segment>
+    </unit>
+
+    <unit id="u29">
+      <segment>
+        <source>4.1 Synchronizing Files</source>
+      </segment>
+    </unit>
+
+    <unit id="u30">
+      <segment>
+        <source>CloudSync Pro monitors your synchronization folder in real time. Any file added, modified, or deleted within this folder will be automatically reflected in the cloud and on all other connected devices. The synchronization process runs in the background and requires no manual intervention.</source>
+      </segment>
+    </unit>
+
+    <unit id="u31">
+      <segment>
+        <source>Warning: Renaming or moving files outside the synchronization folder will remove them from the cloud. Always manage your files within the designated sync folder to avoid accidental data loss.</source>
+      </segment>
+    </unit>
+
+    <unit id="u32">
+      <segment>
+        <source>4.2 Sharing Files and Folders</source>
+      </segment>
+    </unit>
+
+    <unit id="u33">
+      <segment>
+        <source>You can share files and folders with other CloudSync Pro users by right-clicking the item and selecting Share. You may grant read-only or read-write access to specific users or generate a public link that can be shared with anyone.</source>
+      </segment>
+    </unit>
+
+    <unit id="u34">
+      <segment>
+        <source>Shared folders appear in the recipient's synchronization root under a Shared with Me section. Changes made by any collaborator are synchronized in real time.</source>
+      </segment>
+    </unit>
+
+    <unit id="u35">
+      <segment>
+        <source>4.3 Version History</source>
+      </segment>
+    </unit>
+
+    <unit id="u36">
+      <segment>
+        <source>CloudSync Pro automatically retains previous versions of your files for up to 90 days. To restore an earlier version, right-click the file, select Version History, and choose the version you wish to recover. The restored version will replace the current file and trigger a new synchronization event.</source>
+      </segment>
+    </unit>
+
+    <unit id="u37">
+      <segment>
+        <source>5. Security and Privacy</source>
+      </segment>
+    </unit>
+
+    <unit id="u38">
+      <segment>
+        <source>All files stored in CloudSync Pro are encrypted using AES-256 encryption both at rest and in transit. Your encryption keys are managed by our secure key management infrastructure, and no CloudSync Pro employee has access to your unencrypted data.</source>
+      </segment>
+    </unit>
+
+    <unit id="u39">
+      <segment>
+        <source>Two-factor authentication is available and strongly recommended for all accounts. You can enable it from the Security section of your account settings. Supported methods include authenticator applications and hardware security keys.</source>
+      </segment>
+    </unit>
+
+    <unit id="u40">
+      <segment>
+        <source>6. Subscription Plans</source>
+      </segment>
+    </unit>
+
+    <unit id="u41">
+      <segment>
+        <source>CloudSync Pro offers several subscription plans to meet different needs. The following table summarizes the available options:</source>
+      </segment>
+    </unit>
+
+    <unit id="u42">
+      <segment>
+        <source>Plan</source>
+      </segment>
+    </unit>
+
+    <unit id="u43">
+      <segment>
+        <source>Storage</source>
+      </segment>
+    </unit>
+
+    <unit id="u44">
+      <segment>
+        <source>Users</source>
+      </segment>
+    </unit>
+
+    <unit id="u45">
+      <segment>
+        <source>Price (Monthly)</source>
+      </segment>
+    </unit>
+
+    <unit id="u46">
+      <segment>
+        <source>Key Features</source>
+      </segment>
+    </unit>
+
+    <unit id="u47">
+      <segment>
+        <source>Personal</source>
+      </segment>
+    </unit>
+
+    <unit id="u48">
+      <segment>
+        <source>100 GB</source>
+      </segment>
+    </unit>
+
+    <unit id="u49">
+      <segment>
+        <source>$4.99</source>
+      </segment>
+    </unit>
+
+    <unit id="u50">
+      <segment>
+        <source>Basic sync, version history, mobile access</source>
+      </segment>
+    </unit>
+
+    <unit id="u51">
+      <segment>
+        <source>Professional</source>
+      </segment>
+    </unit>
+
+    <unit id="u52">
+      <segment>
+        <source>1 TB</source>
+      </segment>
+    </unit>
+
+    <unit id="u53">
+      <segment>
+        <source>$12.99</source>
+      </segment>
+    </unit>
+
+    <unit id="u54">
+      <segment>
+        <source>Priority support, advanced sharing, API access</source>
+      </segment>
+    </unit>
+
+    <unit id="u55">
+      <segment>
+        <source>Team</source>
+      </segment>
+    </unit>
+
+    <unit id="u56">
+      <segment>
+        <source>5 TB</source>
+      </segment>
+    </unit>
+
+    <unit id="u57">
+      <segment>
+        <source>Up to 10</source>
+      </segment>
+    </unit>
+
+    <unit id="u58">
+      <segment>
+        <source>$29.99</source>
+      </segment>
+    </unit>
+
+    <unit id="u59">
+      <segment>
+        <source>Admin console, team folders, audit logs</source>
+      </segment>
+    </unit>
+
+    <unit id="u60">
+      <segment>
+        <source>Enterprise</source>
+      </segment>
+    </unit>
+
+    <unit id="u61">
+      <segment>
+        <source>Unlimited</source>
+      </segment>
+    </unit>
+
+    <unit id="u62">
+      <segment>
+        <source>Contact Sales</source>
+      </segment>
+    </unit>
+
+    <unit id="u63">
+      <segment>
+        <source>SSO integration, dedicated support, custom SLA</source>
+      </segment>
+    </unit>
+
+    <unit id="u64">
+      <segment>
+        <source>7. Troubleshooting</source>
+      </segment>
+    </unit>
+
+    <unit id="u65">
+      <segment>
+        <source>7.1 Sync Not Starting</source>
+      </segment>
+    </unit>
+
+    <unit id="u66">
+      <segment>
+        <source>If synchronization does not begin after placing files in the sync folder, verify that the CloudSync Pro application is running in the system tray. Check your internet connection and ensure that your firewall is not blocking the application. Restarting the application often resolves temporary synchronization issues.</source>
+      </segment>
+    </unit>
+
+    <unit id="u67">
+      <segment>
+        <source>7.2 Conflicting File Versions</source>
+      </segment>
+    </unit>
+
+    <unit id="u68">
+      <segment>
+        <source>When two users edit the same file simultaneously, CloudSync Pro may detect a conflict. In this case, the application saves both versions and appends a conflict marker to the filename of the secondary copy. You can review both files and merge the changes manually.</source>
+      </segment>
+    </unit>
+
+    <unit id="u69">
+      <segment>
+        <source>7.3 Insufficient Storage</source>
+      </segment>
+    </unit>
+
+    <unit id="u70">
+      <segment>
+        <source>If you receive a notification that your cloud storage is full, consider upgrading your subscription plan or removing unnecessary files. You can review your storage usage from the Settings panel under the Storage tab.</source>
+      </segment>
+    </unit>
+
+    <unit id="u71">
+      <segment>
+        <source>8. Contact and Support</source>
+      </segment>
+    </unit>
+
+    <unit id="u72">
+      <segment>
+        <source>For technical support, please visit our Help Center or contact our support team by email. Our standard response time is within 24 hours for all paid plans. Enterprise customers have access to a dedicated support line with guaranteed response within 4 hours.</source>
+      </segment>
+    </unit>
+
+    <unit id="u73">
+      <segment>
+        <source>We value your feedback and continuously work to improve CloudSync Pro. If you have suggestions or feature requests, please submit them through the Feedback section of the application.</source>
+      </segment>
+    </unit>
+
+  </file>
+</xliff>

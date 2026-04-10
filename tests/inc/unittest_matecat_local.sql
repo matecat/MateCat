@@ -1569,7 +1569,7 @@ CREATE TABLE `segment_metadata`
     `id_segment` bigint(20)   NOT NULL,
     `meta_key`   varchar(45)  NOT NULL,
     `meta_value` varchar(255) NOT NULL,
-    KEY `idx_id_segment_meta_key` (`id_segment`, `meta_key`)
+    UNIQUE KEY `idx_id_segment_meta_key` (`id_segment`, `meta_key`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;

@@ -15,6 +15,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\DataAccess\TransactionalTrait;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
@@ -283,7 +284,7 @@ class TranslatorsModel
         $jobDao = new JobDao();
         $jobDao->changePassword($this->jStruct, $newPassword);
         $jobDao->destroyCache($this->jStruct);
-        $this->featureSet->run('job_password_changed', $this->jStruct, $oldPassword);
+        $this->featureSet->dispatchRun(new JobPasswordChangedEvent($this->jStruct, $oldPassword));
         $this->commitTransaction();
     }
 

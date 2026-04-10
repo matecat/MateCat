@@ -15,6 +15,11 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\HandleJsonNotesBeforeInsertEvent;
+use Model\FeaturesBase\Hook\Event\Run\BeforeProjectCreationEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostProjectCreateEvent;
+use Model\FeaturesBase\Hook\Event\Run\ValidateProjectCreationEvent;
 use Model\Files\FileDao;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -28,6 +33,7 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use Model\Segments\SegmentMetadataMapper;
 use Model\Xliff\DTO\XliffRulesModel;
 use Plugins\Features\SecondPassReview;
 use ReflectionException;
@@ -156,6 +162,7 @@ class ProjectManager
             $this->filter,
             $this->features,
             $this->filesMetadataDao,
+            new SegmentMetadataMapper(),
             $this->logger,
         );
     }
@@ -338,9 +345,7 @@ class ProjectManager
             $teamData = $this->projectStructure->team instanceof TeamStruct
                 ? $this->projectStructure->team->getArrayCopy()
                 : (array)$this->projectStructure->team;
-            $this->projectStructure->team = new TeamStruct(
-                $this->features->filter('filter_team_for_project_creation', $teamData)
-            );
+            $this->projectStructure->team = new TeamStruct($teamData);
 
             //clean the cache for the team member list of assigned projects
             $teamDao = $this->getTeamDao();
@@ -441,7 +446,7 @@ class ProjectManager
         $this->checkForProjectAssignment();
 
         SecondPassReview::loadAndValidateQualityFramework($this->projectStructure);
-        $this->features->run('validateProjectCreation', $this->projectStructure);
+        $this->features->dispatchRun(new ValidateProjectCreationEvent($this->projectStructure));
 
         if (count($this->projectStructure->result['errors']) > 0) {
             $this->log($this->projectStructure->result['errors']);
@@ -584,11 +589,13 @@ class ProjectManager
                 );
             }
 
-            $this->features->run("beforeProjectCreation", $this->projectStructure, [
+            $this->features->dispatchRun(new BeforeProjectCreationEvent(
+                $this->projectStructure,
+                [
                     'total_project_segments' => $this->total_segments,
-                    'files_raw_wc' => $this->files_word_count
+                    'files_raw_wc' => $this->files_word_count,
                 ]
-            );
+            ));
 
             $this->createProjectRecord();
             $this->saveFeaturesInMetadata();
@@ -746,7 +753,7 @@ class ProjectManager
             (new ProjectDao())->destroyCacheForProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
             (new ProjectDao())->setCacheTTL(60 * 60 * 24)->getProjectData((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
-            $this->features->run('postProjectCreate', $this->projectStructure);
+            $this->features->dispatchRun(new PostProjectCreateEvent($this->projectStructure));
 
             ProjectDao::updateAnalysisStatus(
                 $this->projectStructure->id_project,
@@ -761,8 +768,6 @@ class ProjectManager
             $db->rollback();
             throw $e;
         }
-
-        $this->features->run('postProjectCommit', $this->projectStructure);
     }
 
     /**
@@ -1000,7 +1005,9 @@ class ProjectManager
      */
     protected function insertInstructions(int $fid, array|string $value): void
     {
-        $value = $this->features->filter('decodeInstructions', $value);
+        $event = new DecodeInstructionsEvent($value);
+        $this->features->dispatchFilter($event);
+        $value = $event->getValue();
 
         $this->filesMetadataDao->insert((int)$this->projectStructure->id_project, $fid, 'instructions', (string)$value);
     }
@@ -1020,21 +1027,14 @@ class ProjectManager
      */
     private function insertSegmentNotesForFile(): void
     {
-        $this->projectStructure = $this->features->filter('handleJsonNotesBeforeInsert', $this->projectStructure);
+        $event = new HandleJsonNotesBeforeInsertEvent($this->projectStructure);
+        $this->features->dispatchFilter($event);
+        $this->projectStructure = $event->getProjectStructure();
         $this->getProjectManagerModel()->bulkInsertSegmentNotesAndMetadata($this->projectStructure->notes);
     }
 
-    /**
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws Exception
-     */
     private function insertContextsForFile(): void
     {
-        $this->features->filter('handleTUContextGroups', $this->projectStructure);
         $this->getProjectManagerModel()->bulkInsertContextsGroups(
             (int)$this->projectStructure->id_project,
             $this->projectStructure->context_group,

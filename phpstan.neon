@@ -1,0 +1,15 @@
+parameters:
+    level: 8
+    paths:
+        - lib
+        - plugins
+    excludePaths:
+        - mm_bkp
+        - vendor
+    scanDirectories:
+        - lib
+        - tests
+        - plugins
+    bootstrapFiles:
+        - vendor/autoload.php
+    treatPhpDocTypesAsCertain: false

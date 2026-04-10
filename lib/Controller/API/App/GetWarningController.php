@@ -18,6 +18,7 @@ use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Translations\WarningDao;
 use Utils\LQA\ICUSourceSegmentChecker;
@@ -65,10 +66,6 @@ class GetWarningController extends KleinController
                 ],
                 $qa->render()
             );
-
-            $result = $this->featureSet->filter('filterGlobalWarnings', $result, [
-                'chunk' => $chunk,
-            ]);
 
             $this->response->json($result);
         } catch (Exception) {
@@ -157,7 +154,7 @@ class GetWarningController extends KleinController
         $QA->setTargetSegLang($chunk->target);
 
         if (!$this->sourceContainsIcu && isset($characters_counter)) {
-            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, QA::SIZE_RESTRICTION)[0] ?? null);
+            $QA->setCharactersCount($characters_counter, SegmentMetadataDao::get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value));
         }
 
         $QA->performConsistencyCheck();
@@ -167,7 +164,7 @@ class GetWarningController extends KleinController
                 'data' => [],
                 'errors' => []
             ],
-            $this->invokeLocalWarningsOnFeatures($chunk, $src_content, $trg_content),
+            $this->invokeLocalWarningsOnFeatures(),
             (new QALocalWarning(
                 $QA,
                 $id,
@@ -243,26 +240,10 @@ class GetWarningController extends KleinController
         return $chunk;
     }
 
-    /**
-     * @param JobStruct $chunk
-     * @param                $src_content
-     * @param                $trg_content
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function invokeLocalWarningsOnFeatures(JobStruct $chunk, $src_content, $trg_content): array
+    private function invokeLocalWarningsOnFeatures(): array
     {
-        $data = [];
-        $data = $this->featureSet->filter('filterSegmentWarnings', $data, [
-            'src_content' => $src_content,
-            'trg_content' => $trg_content,
-            'project' => $chunk->getProject(),
-            'chunk' => $chunk
-        ]);
-
         return [
-            'data' => $data
+            'data' => []
         ];
     }
 }

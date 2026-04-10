@@ -111,9 +111,7 @@ class JobCreationServiceTest extends AbstractTest
     public function testResolvePayableRatesDefaultBranch(): void
     {
         // When nothing is set, falls through to PayableRates::getPayableRates
-        // and applies features->filter()
-        $this->featureSet->method('filter')
-            ->willReturnCallback(fn($name, $rates) => $rates);
+        // and applies default FeatureSet no-op customization methods
 
         $ps = $this->makeProjectStructure([
             'mt_qe_workflow_payable_rate' => null,

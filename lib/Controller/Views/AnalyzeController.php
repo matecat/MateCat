@@ -16,6 +16,7 @@ use Exception;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
+use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
@@ -121,12 +122,15 @@ class AnalyzeController extends BaseKleinViewController implements IController
 
         $model = $analysisStatus->fetchData()->getResult();
 
+        $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
+        $this->featureSet->dispatchFilter($appendInitialTemplateVarsEvent);
+
         $this->addParamsToView([
             'pid' => $projectStruct->id,
             'project_status' => $projectStruct->status_analysis,
             'outsource_service_login' => $this->_outsource_login_API,
             'showModalBoxLogin' => new PHPTalBoolean(!$this->isLoggedIn()),
-            'project_plugins' => new PHPTalMap($this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes()) ?? []),
+            'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes() ?? []),
             'num_segments' => $model->getSummary()->getTotalSegments(),
             'num_segments_analyzed' => $model->getSummary()->getSegmentsAnalyzed(),
             'daemon_misconfiguration' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),

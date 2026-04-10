@@ -7,6 +7,8 @@ use Model\Analysis\PayableRates;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\FilterPayableRatesEvent;
+use Model\FeaturesBase\Hook\Event\Run\ValidateJobCreationEvent;
 use Model\Files\FileDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
@@ -71,8 +73,11 @@ class JobCreationService
         // Branch 4: default — use static PayableRates with feature filtering
         $rates = PayableRates::getPayableRates((string)$projectStructure->source_language, $target);
 
+        $filterPayableRatesEvent = new FilterPayableRatesEvent($rates, (string)$projectStructure->source_language, $target);
+        $this->features->dispatchFilter($filterPayableRatesEvent);
+
         return [
-            (string)json_encode($this->features->filter('filterPayableRates', $rates, $projectStructure->source_language, $target)),
+            (string)json_encode($filterPayableRatesEvent->getRates()),
             null,
         ];
     }
@@ -261,7 +266,7 @@ class JobCreationService
             $tmKeysJson = $this->buildTmKeysJson($projectStructure);
             $job = $this->buildJobStruct($projectStructure, $target, $payableRates, $tmKeysJson, $minMaxSegmentsId, $filesWordCount);
 
-            $this->features->run('validateJobCreation', $job, $projectStructure);
+            $this->features->dispatchRun(new ValidateJobCreationEvent($job, $projectStructure));
             $job = $this->insertJob($job);
 
             $this->updateJobTracking($projectStructure, $job, $payableRates, $minMaxSegmentsId);

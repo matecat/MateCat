@@ -6,6 +6,8 @@ use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
+use Model\FeaturesBase\Hook\Event\Run\JobPasswordChangedEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\Jobs\JobStruct;
 use Utils\Tools\Utils;
 
@@ -17,8 +19,9 @@ class ProjectCompletion extends BaseFeature
     /**
      * @throws Exception
      */
-    public function postAddSegmentTranslation(array $params): void
+    public function postAddSegmentTranslation(PostAddSegmentTranslationEvent $event): void
     {
+        $params = $event->context;
         $params = Utils::ensure_keys($params, ['is_review', 'chunk']);
 
         // Here we need to find or update the corresponding record,
@@ -52,13 +55,13 @@ class ProjectCompletion extends BaseFeature
         }
     }
 
-    public function job_password_changed(JobStruct $job, $old_password): void
+        public function jobPasswordChanged(JobPasswordChangedEvent $event): void
     {
         $dao = new ChunkCompletionUpdateDao();
-        $dao->updatePassword($job->id, $job->password, $old_password);
+        $dao->updatePassword($event->job->id, $event->job->password, $event->oldPassword);
 
         $dao = new ChunkCompletionEventDao();
-        $dao->updatePassword($job->id, $job->password, $old_password);
+        $dao->updatePassword($event->job->id, $event->job->password, $event->oldPassword);
     }
 
 }

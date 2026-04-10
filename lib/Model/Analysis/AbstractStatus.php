@@ -10,6 +10,7 @@ use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\OutsourceAvailableInfoEvent;
 use Model\Files\MetadataDao as FileMetadataDao;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
@@ -151,7 +152,9 @@ abstract class AbstractStatus
      */
     protected function isOutsourceEnabled($targetLang, $id_customer, $idJob): bool
     {
-        $outsourceAvailableInfo = $this->featureSet->filter('outsourceAvailableInfo', $targetLang, $id_customer, $idJob);
+        $outsourceAvailableInfoEvent = new OutsourceAvailableInfoEvent($targetLang, (string)$id_customer, (int)$idJob);
+        $this->featureSet->dispatchFilter($outsourceAvailableInfoEvent);
+        $outsourceAvailableInfo = $outsourceAvailableInfoEvent->getFilterable();
 
         // if any plugin does not trigger the hook
         if (!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)) {

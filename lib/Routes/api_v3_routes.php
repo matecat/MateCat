@@ -131,6 +131,13 @@ $klein->with('/api/v3/filters-config-template', function () {
     route('/[i:id]', 'GET', ['\Controller\API\V3\FiltersConfigTemplateController', 'get']);
 });
 
+// CONTEXT URL
+$klein->with('/api/v3/context-url', function () {
+    route('/project', 'POST', ['Controller\API\App\ContextUrlController', 'setForProject']);
+    route('/file', 'POST', ['Controller\API\App\ContextUrlController', 'setForFile']);
+    route('/segment', 'POST', ['Controller\API\App\ContextUrlController', 'setForSegment']);
+});
+
 /**
  ***************************************************************************
  * ALIAS FOR V2 ROUTES

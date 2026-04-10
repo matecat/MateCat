@@ -68,7 +68,6 @@ class Bootstrap
 
 
         $this->initMandatoryPlugins();
-        $this->notifyBootCompleted();
         $this->unsetVariables();
     }
 
@@ -156,11 +155,6 @@ class Bootstrap
     private function initMandatoryPlugins(): void
     {
         $this->autoLoadedFeatureSet = new FeatureSet();
-    }
-
-    private function notifyBootCompleted(): void
-    {
-        $this->autoLoadedFeatureSet->run('bootstrapCompleted');
     }
 
     /**

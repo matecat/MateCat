@@ -87,17 +87,6 @@ interface IDatabase
 
 
     /**
-     * Sanitize a input string
-     * This function is not required with the PDO extension. However, it's added for legacy support.
-     * and it may not work as expected.
-     *
-     * @param string $string String to clean
-     *
-     * @return string Sanitized string
-     */
-    public function escape(string $string): string;
-
-    /**
      * Get the number of rows affected by the last update/insert query
      */
     public function rowCount(): int;

@@ -18,6 +18,7 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
@@ -733,12 +734,13 @@ class TMAnalysisWorker extends AbstractWorker
             }
 
             // if a callback is not set, only the first argument is returned, get the config params from the callback
-            $config = $this->featureSet->filter(
-                'analysisBeforeMTGetContribution',
+            $analysisBeforeMTGetContributionEvent = new AnalysisBeforeMTGetContributionEvent(
                 $config,
                 $mtEngine,
                 $queueElement
-            ); //YYY verify airbnb plugin and MMT engine, such plugin force to use MMT, but MMT now is enabled by default
+            );
+            $this->featureSet->dispatchFilter($analysisBeforeMTGetContributionEvent);
+            $config = $analysisBeforeMTGetContributionEvent->getConfig();
 
             $mt_result = $mtEngine->get($config);
 
@@ -1009,13 +1011,6 @@ class TMAnalysisWorker extends AbstractWorker
             }
 
             $database->commit();
-
-            try {
-                $this->featureSet->run('afterTMAnalysisCloseProject', $_project_id, $_analyzed_report);
-            } catch (Exception $e) {
-                //ignore Exception the analysis is finished anyway
-                $this->_doLog("Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED.");
-            }
 
             (new JobDao())->destroyCacheByProjectId($_project_id);
             ProjectDao::destroyCacheById($_project_id);

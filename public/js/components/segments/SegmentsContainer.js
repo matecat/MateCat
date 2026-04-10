@@ -27,6 +27,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import ContextReviewChannel from '../../utils/contextReviewChannel'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -177,7 +178,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const rowsRenderedHeight = useRef(new Map())
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
-
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
 
@@ -414,20 +414,60 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
   // set width and height of area
   useEffect(() => {
-    const onWindowResize = () => {
+    const recalcHeight = () => {
       const headerHeight =
         document.getElementsByTagName('header')[0].offsetHeight
       const footerHeight =
         document.getElementsByTagName('footer')[0].offsetHeight
+      const wrapperEl = document.getElementById('context-review-wrapper')
+      const wrapperHeight = wrapperEl ? wrapperEl.offsetHeight : 0
 
-      setHeightArea(window.innerHeight - (headerHeight + footerHeight))
+      setHeightArea(
+        window.innerHeight - (headerHeight + footerHeight + wrapperHeight),
+      )
     }
 
-    onWindowResize()
-    window.addEventListener('resize', onWindowResize)
+    recalcHeight()
+    window.addEventListener('resize', recalcHeight)
 
-    return () => window.removeEventListener('resize', onWindowResize)
+    const wrapperEl = document.getElementById('context-review-wrapper')
+    let observer
+    if (wrapperEl) {
+      observer = new ResizeObserver(recalcHeight)
+      observer.observe(wrapperEl)
+    }
+
+    return () => {
+      window.removeEventListener('resize', recalcHeight)
+      if (observer) observer.disconnect()
+    }
   }, [])
+
+  // Send segment mappings to ContextReview when segments change
+  // useEffect(() => {
+  //   if (!segments.size) return
+  //   const segmentsList = []
+  //   for (let i = 0; i < segments.size; i++) {
+  //     const seg = segments.get(i)
+  //     const rawMetadata = seg.get('metadata')
+  //     const metadataArr = rawMetadata
+  //       ? typeof rawMetadata.toJS === 'function'
+  //         ? rawMetadata.toJS()
+  //         : rawMetadata
+  //       : []
+  //     const findMeta = (key) =>
+  //       metadataArr.find((m) => m.meta_key === key)?.meta_value ?? null
+  //     segmentsList.push({
+  //       sid: seg.get('sid'),
+  //       source: seg.get('segment'),
+  //       target: seg.get('translation'),
+  //       context_url: seg.get('context_url') ?? null,
+  //       resname: findMeta('resname'),
+  //       restype: findMeta('restype'),
+  //     })
+  //   }
+  //   ContextReviewChannel.sendMessage({type: 'segments', segments: segmentsList})
+  // }, [segments])
 
   // add actions listener
   useEffect(() => {
@@ -447,6 +487,10 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       persistenceVariables.current.lastScrolled = sid
       setScrollToSid(sid)
       setScrollToSelected(false)
+      ContextReviewChannel.sendMessage({
+        type: 'highlight',
+        sid,
+      })
     }
     const scrollToSelectedSegment = (sid) => {
       setScrollToSid(sid)

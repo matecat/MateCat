@@ -18,6 +18,7 @@ use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
+use Model\FeaturesBase\Hook\Event\Filter\FilterRevisionChangeNotificationListEvent;
 use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
@@ -341,7 +342,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
             ];
         }
 
-        $emails = $this->_chunk->getProject()->getFeaturesSet()->filter('filterRevisionChangeNotificationList', $emails);
+        $filterRevisionChangeNotificationListEvent = new FilterRevisionChangeNotificationListEvent($emails);
+        $this->_chunk->getProject()->getFeaturesSet()->dispatchFilter($filterRevisionChangeNotificationListEvent);
+        $emails = $filterRevisionChangeNotificationListEvent->getEmails();
 
         if (!empty($revision)) {
             $url = CanonicalRoutes::revise(

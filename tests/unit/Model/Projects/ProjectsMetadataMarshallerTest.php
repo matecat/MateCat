@@ -26,7 +26,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(30, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(31, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -69,6 +69,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'DEEPL_ENGINE_TYPE'             => [ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE, 'deepl_engine_type'],
             'SEGMENTATION_RULE'             => [ProjectsMetadataMarshaller::SEGMENTATION_RULE, 'segmentation_rule'],
             'WPML'                          => [ProjectsMetadataMarshaller::WPML, 'WPML'],
+            'CONTEXT_URL'                   => [ProjectsMetadataMarshaller::CONTEXT_URL, 'context-url'],
         ];
     }
 
@@ -423,6 +424,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'deepl_id_glossary' => ['deepl_id_glossary'],
             'deepl_engine_type' => ['deepl_engine_type'],
             'segmentation_rule' => ['segmentation_rule'],
+            'context-url'       => ['context-url'],
         ];
     }
 

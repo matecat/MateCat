@@ -7,6 +7,7 @@ use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Run\TmAnalysisDisabledEvent;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
@@ -188,7 +189,7 @@ class FastAnalysis extends AbstractDaemon
                     $perform_Tms_Analysis = false;
                     $status = ProjectStatus::STATUS_DONE;
 
-                    $featureSet->run('tmAnalysisDisabled', $pid);
+                    $featureSet->dispatchRun(new TmAnalysisDisabledEvent((int)$pid));
 
                     $this->logger->debug('Perform Analysis FALSE');
                 }
@@ -281,8 +282,6 @@ class FastAnalysis extends AbstractDaemon
                     $this->logger->debug("Try next cycle....");
                     continue;
                 }
-
-                $featureSet->run('fastAnalysisComplete', $this->segments, $this->actual_project_row);
 
                 $this->logger->debug("done");
                 // INSERT DATA
