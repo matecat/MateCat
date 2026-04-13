@@ -9,7 +9,7 @@
   display: grid;
   grid-template-columns:
     20px 180px minmax(auto, 240px)
-    140px 100px 1fr auto auto auto;
+    140px 100px minmax(0, 1fr) auto auto auto;
   align-items: center;
   padding: 16px 24px;
   gap: 16px;
@@ -36,6 +36,12 @@
   .chunks-job-container-line {
     display: flex;
     justify-content: space-between;
+
+    .chunks-job-container-line-sx {
+      > :last-child {
+        display: flex;
+      }
+    }
 
     .chunks-job-container-line-sx,
     .chunks-job-container-line-dx {
@@ -74,6 +80,8 @@
 .job-container-outsource {
   display: flex;
   justify-content: end;
+  align-items: center;
+  gap: 10px;
 }
 
 .job-progress-bar-tooltip {
@@ -135,4 +143,30 @@
 
 .job-container-outsource-container {
   display: flex;
+}
+
+.job-container-outsource {
+  > div {
+    min-width: 0;
+  }
+}
+
+.job-container-outsource-logo {
+  display: flex;
+  width: 100px;
+
+  img {
+    width: 100px;
+  }
+}
+
+.job-delivery-date {
+  min-width: 0;
+
+  > span {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }

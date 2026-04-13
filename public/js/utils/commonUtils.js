@@ -518,7 +518,7 @@ const CommonUtils = {
     // Format the Date object using toLocaleString.
     return {
       day: dd.getDate().toString(),
-      month: dd.toLocaleString('default', {month: 'long'}),
+      month: dd.toLocaleString('default', {month: 'short'}),
       time: dd.toLocaleTimeString('en-US', {
         hour12: true,
         hour: '2-digit',

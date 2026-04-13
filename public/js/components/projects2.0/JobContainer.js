@@ -10,7 +10,12 @@ import {changeJobPassword} from '../../api/changeJobPassword'
 import CatToolActions from '../../actions/CatToolActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import IconDown from '../icons/IconDown'
-import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 import TranslatedIconSmall from '../../../img/icons/TranslatedIconSmall'
 import JobProgressBar from '../common/JobProgressBar'
 import Tooltip from '../common/Tooltip'
@@ -20,6 +25,7 @@ import CommentsIcon from '../../../img/icons/CommentsIcon'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import OutsourceContainer from '../outsource/OutsourceContainer'
+import {fromJS} from 'immutable'
 
 export const JobContainer = ({
   job,
@@ -38,6 +44,7 @@ export const JobContainer = ({
   const warningsIconRef = useRef()
   const commentsIconRef = useRef()
   const sourceTargetTextRef = useRef()
+  const deliveryDateRef = useRef()
 
   useEffect(() => {
     const disableDownloadMenu = (idJob) => {
@@ -320,6 +327,8 @@ export const JobContainer = ({
     )
   }
 
+  const removeTranslator = () => {}
+
   const getTranslateUrl = () => {
     const use_prefix = project.get('jobs').size > 1 && isChunk
     const chunk_id = job.get('id') + (use_prefix ? '-' + index : '')
@@ -495,19 +504,43 @@ export const JobContainer = ({
     )
   }
 
+  const getJobOutsourceMock = () => {
+    if (job.get('id') === 93)
+      return fromJS({
+        outsource: {
+          vendor_name: 'Translated',
+          quote_pid: 1005529538,
+          price: 8.8,
+          delivery_timestamp: 1774967400,
+          id_vendor: 1,
+          currency: 'EUR',
+          create_date: '2026-03-31 11:10:22',
+          create_timestamp: 1774948222,
+          delivery_date: '2026-03-31 16:30:00',
+          id_job: 12202606,
+          password: '93fc11c85000',
+          quote_review_link:
+            'https://www.translated.net/int/ots.php?pid=1005529538',
+        },
+        translator: null,
+      })
+    else return job
+  }
+
   const getOutsourceJobSent = () => {
+    const job = getJobOutsourceMock()
+
     let outsourceJobElement = ''
     if (job.get('outsource')) {
       if (job.get('outsource').get('id_vendor') == '1') {
         outsourceJobElement = (
           <a
-            className="outsource-logo-box"
+            className="job-container-outsource-logo"
             href={job.get('outsource').get('quote_review_link')}
             target="_blank"
             rel="noreferrer"
           >
             <img
-              className="outsource-logo"
               src="/public/img/matecat-logo-translated.svg"
               title="Outsourced to translated.net"
               alt="Translated logo"
@@ -521,13 +554,112 @@ export const JobContainer = ({
       outsourceJobElement = (
         <Button
           className="job-container-button-weight-normal"
-          onClick={openOutsourceModal.bind(this, true, false)}
+          onClick={() => openOutsourceModal(true, false)}
         >
           Assign
         </Button>
       )
     }
     return outsourceJobElement
+  }
+
+  const getOutsourceDelivery = () => {
+    const job = getJobOutsourceMock()
+
+    const gmtDate =
+      job.get('outsource') && job.get('outsource').get('id_vendor') == '1'
+        ? CommonUtils.getGMTDate(
+            job.get('outsource').get('delivery_timestamp') * 1000,
+          )
+        : job.get('translator') &&
+          CommonUtils.getGMTDate(
+            job.get('translator').get('delivery_timestamp') * 1000,
+          )
+
+    return (
+      gmtDate && (
+        <div className="outsource-delivery-container">
+          <div className="job-delivery-date">
+            {job.get('translator') && (
+              <div
+                className="job-delivery-email"
+                onClick={() => openOutsourceModal(true, false)}
+              >
+                {job.get('translator').get('email')}
+              </div>
+            )}{' '}
+            <Tooltip
+                content={`${gmtDate.day} ${gmtDate.month} ${gmtDate.year} - ${gmtDate.time} ${gmtDate.gmt}`}
+              >
+            <span ref={deliveryDateRef}>
+              {gmtDate.day} {gmtDate.month} - {gmtDate.time}
+            </span>
+            </Tooltip>
+          </div>
+        </div>
+      )
+    )
+  }
+
+  const getOutsourceButton = () => {
+    const job = getJobOutsourceMock()
+
+    if (!config.enable_outsource) return
+
+    const outsourceInfo = job.get('outsource_info')
+      ? job.get('outsource_info').toJS()
+      : undefined
+    let label =
+      !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
+        <div>
+          <Button
+            size={BUTTON_SIZE.SMALL}
+            className="job-container-button-weight-normal"
+            id="open-quote-request"
+            data-testid="buy-translation-button"
+            disabled={true}
+            tooltip={
+              "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
+            }
+          >
+            Buy Translation from
+            <TranslatedIconSmall size={20} />
+          </Button>
+        </div>
+      ) : (
+        <div>
+          <Button
+            size={BUTTON_SIZE.SMALL}
+            className="job-container-button-weight-normal"
+            id="open-quote-request"
+            onClick={() => openOutsourceModal(false, true)}
+            data-testid="buy-translation-button"
+            disabled={
+              !job.get('outsource_available') &&
+              job.get('outsource_info')?.toJS()?.custom_payable_rate
+            }
+          >
+            Buy Translation from
+            <TranslatedIconSmall size={20} />
+          </Button>
+        </div>
+      )
+    if (job.get('outsource')) {
+      if (job.get('outsource').get('id_vendor') == '1') {
+        label = (
+          <Button
+            type={BUTTON_TYPE.DEFAULT}
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.SMALL}
+            id="open-quote-request"
+            onClick={() => openOutsourceModal(false, true)}
+          >
+            View status
+          </Button>
+        )
+      }
+    }
+    return label
   }
 
   const stats = job.get('stats').toJS()
@@ -576,22 +708,22 @@ export const JobContainer = ({
           </Button>
         </div>
         <div>{getWarningsGroup()}</div>
-        <div className="job-container-outsource">{getOutsourceJobSent()}</div>
-        <div>
-          <Button
-            className="job-container-button-weight-normal"
-            id="open-quote-request"
-            onClick={openOutsourceModal.bind(this, false, true)}
-            data-testid="buy-translation-button"
-            disabled={
-              !job.get('outsource_available') &&
-              job.get('outsource_info')?.toJS()?.custom_payable_rate
-            }
-          >
-            <TranslatedIconSmall size={20} />
-            Buy Translation from
-          </Button>
+        <div className="job-container-outsource">
+          {getOutsourceJobSent()}
+          {getOutsourceDelivery()}
+          {job.get('translator') && (
+            <div
+              className="item"
+              onClick={removeTranslator}
+              data-testid="remove-translator-button"
+            >
+              <div className="ui cancel label">
+                <i className="icon-cancel3" />
+              </div>
+            </div>
+          )}
         </div>
+        <div>{getOutsourceButton()}</div>
         <div>
           <Button
             type={BUTTON_TYPE.PRIMARY}
