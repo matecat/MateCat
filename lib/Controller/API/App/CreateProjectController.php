@@ -10,13 +10,10 @@ use Controller\Traits\ValidatesDialectStrictTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\Locales\Languages;
-use Matecat\SubFiltering\Enum\InjectableFiltersTags;
-use Matecat\SubFiltering\HandlersSorter;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
@@ -24,7 +21,6 @@ use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectStructure;
-use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
@@ -167,7 +163,9 @@ class CreateProjectController extends AbstractStatefulKleinController
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $job_subject = filter_var($this->request->param('job_subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $due_date = filter_var($this->request->param('due_date'), FILTER_SANITIZE_NUMBER_INT);
-        $mt_engine = filter_var($this->request->param('mt_engine'), FILTER_SANITIZE_NUMBER_INT);
+        $mt_engine = filter_var($this->request->param('mt_engine'), FILTER_CALLBACK, [
+            'options' => fn($v) => $v !== '' ? (int)filter_var($v, FILTER_SANITIZE_NUMBER_INT) : null,
+        ]);
         $disable_tms_engine_flag = filter_var($this->request->param('disable_tms_engine'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_SANITIZE_NUMBER_INT);
