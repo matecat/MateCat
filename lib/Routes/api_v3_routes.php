@@ -34,6 +34,8 @@ $klein->with('/api/v3/jobs/[i:id_job]/[:password]', function () {
     route('/cancel', 'POST', ['Controller\API\V2\JobsController', 'cancel']);
     route('/archive', 'POST', ['Controller\API\V2\JobsController', 'archive']);
     route('/active', 'POST', ['Controller\API\V2\JobsController', 'active']);
+
+    route('/segment/disable/[i:segment_id]', 'GET', ['\Controller\API\V3\CancelRequestController', 'cancelRequest']);
 });
 
 $klein->with('/api/v3/teams', function () {
@@ -130,8 +132,6 @@ $klein->with('/api/v3/filters-config-template', function () {
     route('/[i:id]', 'PUT', ['\Controller\API\V3\FiltersConfigTemplateController', 'update']);
     route('/[i:id]', 'GET', ['\Controller\API\V3\FiltersConfigTemplateController', 'get']);
 });
-
-route('/api/v3/cancel-request/[:id_job]/[:id_segment]', 'GET', ['\Controller\API\V3\CancelRequestController', 'rawWords']);
 
 /**
  ***************************************************************************

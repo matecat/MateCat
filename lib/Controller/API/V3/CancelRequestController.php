@@ -32,15 +32,31 @@ class CancelRequestController extends KleinController
 {
     use RateLimiterTrait;
     use SegmentDisabledTrait;
+    use ChunkNotFoundHandlerTrait;
+
+    private string $route;
+    private string $userEmail;
+    private string $userIp;
+
+
+
+    protected function afterConstruct(): void
+    {
+        $this->appendValidator(new LoginValidator($this));
+    }
 
     /**
      * @throws Exception
      */
-    public function cancelRequest(int $id_job, int $id_segment): void
+    public function cancelRequest(int $id_job, string $password, int $id_segment): void
     {
-        $route = '/api/v3/cancel-request/'.$id_job.'/'.$id_segment;
-        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $this->user->email ?? "BLANK_EMAIL", $route, 5);
-        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, Utils::getRealIpAddr() ?? "127.0.0.1", $route, 5);
+        $route = '/api/v3/jobs/'.$id_job.'/'.$password.'/segment/disable/'.$id_segment;
+        $userEmail = $this->user->email ?? "BLANK_EMAIL";
+        $userIp = Utils::getRealIpAddr() ?? "127.0.0.1";
+
+        // 1. check rate limit
+        $checkRateLimitEmail = $this->checkRateLimitResponse($this->response, $userEmail, $route, 5);
+        $checkRateLimitIp = $this->checkRateLimitResponse($this->response, $userIp, $route, 5);
 
         if ($checkRateLimitIp instanceof Response) {
             $this->response = $checkRateLimitIp;
@@ -54,15 +70,44 @@ class CancelRequestController extends KleinController
             return;
         }
 
+        // 2. check job id and password
+        $job = $this->getJob($id_job, $password);
+
+        if (null === $job) {
+            $this->incrementRateLimitCounter($userEmail, $route);
+            $this->incrementRateLimitCounter($userIp, $route);
+
+            throw new NotFoundException('Job not found.');
+        }
+
+        // 3. check segment translation
         $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
 
         if (empty($segmentTranslation)) {
+            $this->incrementRateLimitCounter($userEmail, $route);
+            $this->incrementRateLimitCounter($userIp, $route);
+
             throw new NotFoundException('Segment not found');
         }
 
+        // 4. check is user is the owner of the segment
+        if(!$job->getProject()->getTeam()->hasUser( $this->user->uid)){
+            $this->incrementRateLimitCounter($userEmail, $route);
+            $this->incrementRateLimitCounter($userIp, $route);
+
+            throw new Exception('User is not the owner of the segment');
+        }
+
+        // 5. check segment status
         if ($segmentTranslation->status !== TranslationStatus::STATUS_NEW) {
+            $this->incrementRateLimitCounter($userEmail, $route);
+            $this->incrementRateLimitCounter($userIp, $route);
+
             throw new Exception('Segment is not in "new" status and cannot be disabled');
         }
+
+        $this->incrementRateLimitCounter($userEmail, $route);
+        $this->incrementRateLimitCounter($userIp, $route);
 
         // If the cache is empty, it means that the segment is not already disabled, so we can proceed with disabling it and
         // setting the cache to avoid multiple disable requests for the same segment in a short time frame
