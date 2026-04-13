@@ -59,7 +59,7 @@ const Header = ({
 
   return (
     <section className="header-container">
-      <a href="/" className="logo" />
+      <a data-testid="logo" href="/" className="logo" />
       <div className="header-elements">
         {showFilterProjects && <FilterProjects ref={filterProjectsRef} />}
         <div>

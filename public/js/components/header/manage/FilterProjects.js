@@ -33,7 +33,6 @@ const FilterProjects = forwardRef((props, ref) => {
   const onChangeSearchInput = useCallback(
     (value) => {
       if (
-        typeof currentText.current !== 'undefined' &&
         currentText.current !== value
       )
         ManageActions.filterProjects(

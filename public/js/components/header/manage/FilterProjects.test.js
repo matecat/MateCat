@@ -1233,7 +1233,6 @@ test('Searching with no result', async () => {
 
   const {props} = getFakeProperties(fakeFilterData.teamWithId_1)
   render(<FilterProjects {...props} />)
-
   const searchTerm = 'my project'
 
   addOnceListenerStoreFilterProjects(() => getProjectsRequest({searchTerm}))
