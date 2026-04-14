@@ -692,7 +692,7 @@ class SegmentSource extends React.Component {
             </li>
           )}
         <li
-          title="Click to add the highlighted text to the glossary"
+          title="Click to add the highlighted text to the termbase"
           onMouseDown={() => {
             SegmentActions.openGlossaryFormPrefill({
               sid: segment.sid,
